@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-07-24 00:08+0000\n"
+"POT-Creation-Date: 2025-07-29 00:09+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -389,6 +389,7 @@ msgstr "Amélioration de la documentation"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:39
 #: ../../source/contributor-how-to-build-docker-images.rst:105
+#: ../../source/how-to-configure-audit-logging.rst:57
 #: ../../source/ref-exit-codes/000.rst:5 ../../source/ref-exit-codes/001.rst:5
 #: ../../source/ref-exit-codes/002.rst:5 ../../source/ref-exit-codes/003.rst:5
 #: ../../source/ref-exit-codes/100.rst:5 ../../source/ref-exit-codes/101.rst:5
@@ -2487,6 +2488,8 @@ msgstr "Devenez un·e contributeur·ice"
 #: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:22
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:17
 #: ../../source/docker/tutorial-quickstart-docker.rst:15
+#: ../../source/how-to-authenticate-users.rst:26
+#: ../../source/how-to-configure-audit-logging.rst:78
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:22
 msgid "Prerequisites"
 msgstr "Prérequis"
@@ -3238,7 +3241,7 @@ msgstr ""
 msgid "Getting Started"
 msgstr "Pour commencer"
 
-#: ../../source/docker/index.rst:23
+#: ../../source/docker/index.rst:23 ../../source/helm/index.rst:37
 msgid "Running in Production"
 msgstr ""
 
@@ -5578,6 +5581,559 @@ msgid ""
 "update this explainer document. Feel free to share any feedback with us."
 msgstr ""
 
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:-1
+msgid ""
+"Deploy Flower's SuperLink Helm chart to set up federated learning "
+"servers. Default config mirrors official releases, enabling seamless "
+"deployment, evaluation."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:6
+msgid "Deploy SuperLink using Helm"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:10
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:10
+#: ../../source/helm/index.rst:10
+msgid ""
+"Flower Helm charts are a Flower Enterprise feature. See `Flower "
+"Enterprise <https://flower.ai/enterprise>`_ for details."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:13
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:13
+msgid ""
+"The Flower Framework offers a unified approach to federated learning, "
+"analytics, and evaluation, allowing you to federate any workload, machine"
+" learning framework, or programming language."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:17
+msgid ""
+"This Helm chart installs the server-side components of the Flower "
+"Framework, specifically setting up the SuperLink."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:20
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:20
+msgid ""
+"The default installation configuration aims to replicate the "
+"functionality and setup of the provided Flower Framework releases."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:24
+#, fuzzy
+msgid "Disable the SuperLink component"
+msgstr "Démarrer le serveur"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:33
+#, fuzzy
+msgid "Enable the ServerApp component"
+msgstr "serveur"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:42
+#, fuzzy
+msgid "Run simulations in Kubernetes using the Simulation Plugin"
+msgstr "Simulation de moniteur"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:44
+msgid ""
+"For more details, visit: `Run simulations "
+"<https://flower.ai/docs/framework/how-to-run-simulations.html#run-"
+"simulations>`__ guide"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:58
+msgid "Change Log Verbosity Level"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:60
+msgid ""
+"The log verbosity level in Flower can be adjusted using the "
+"``FLWR_LOG_LEVEL`` environment variable. This helps control the level of "
+"detail included in logs, making debugging and monitoring easier."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:64
+#, fuzzy
+msgid "**Setting Global Log Level**"
+msgstr "Envoyer le modèle global"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:66
+msgid ""
+"To enable detailed logging (e.g., ``DEBUG`` level) for all services, add "
+"``FLWR_LOG_LEVEL`` to the ``env`` parameter under the ``global`` section "
+"in your ``values.yml`` file:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:77
+msgid "**Setting Log Level for a Specific Service**"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:79
+msgid ""
+"If you want to enable logging only for a specific service (e.g., "
+"``superlink``), you can specify it under the respective service section:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:89
+msgid ""
+"For more details on logging configuration, visit: `Flower Logging "
+"Documentation <https://flower.ai/docs/framework/how-to-configure-"
+"logging.html>`__"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:93
+#, fuzzy
+msgid "Enable User Authentication"
+msgstr "Vérifie l'installation"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:95
+msgid ""
+"User authentication can be enabled if you’re using the Flower Enterprise "
+"Edition (EE) Docker images. This is configured in the ``global.userAuth``"
+" section of your ``values.yml`` file."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:99
+msgid "**Example: Enabling OpenID Connect (OIDC) Authentication**"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:115
+#, fuzzy
+msgid "Explanation of Parameters:"
+msgstr "Mise à jour des paramètres du modèle"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:117
+msgid "``auth_type``: The authentication mechanism being used (e.g., OIDC)."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:118
+msgid ""
+"``auth_url``: The OpenID Connect authentication endpoint where users "
+"authenticate."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:119
+msgid "``token_url``: The URL for retrieving access tokens."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:120
+msgid "``validate_url``: The endpoint for validating user authentication."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:121
+msgid "``oidc_client_id``: The client ID issued by the authentication provider."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:122
+msgid "``oidc_client_secret``: The secret key associated with the client ID."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:124
+#, fuzzy
+msgid "**Use an Existing Secret**"
+msgstr "Utilise une stratégie existante"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:126
+msgid ""
+"To use an existing secret that contains the user authentication "
+"configuration, set ``existingSecret`` to the name of the existing secret:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:137
+msgid ""
+"Note that the existing secret must contain the key ``user-auth-"
+"config.yml``:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:152
+msgid "**Configuring OpenFGA**"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:154
+msgid ""
+"The chart component supports OpenFGA as a fine-grained authorization "
+"service, but it is disabled by default."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:157
+msgid "To enable OpenFGA change the following value in your ``values.yml`` file:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:164
+msgid ""
+"By default, OpenFGA will run with an in-memory store, which is non-"
+"persistent and suitable only for testing or development."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:167
+msgid "OpenFGA supports persistent storage using PostgreSQL or MySQL:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:169
+msgid ""
+"To deploy OpenFGA with a new PostgreSQL/MySQL instance, enable the "
+"bundled chart configuration."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:171
+msgid ""
+"To connect to an existing database, provide the appropriate connection "
+"details via Helm values (e.g., ``openfga.datastore.uri``)."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:174
+msgid ""
+"For more information visit the official `OpenFGA Helm Chart Documentation"
+" <https://artifacthub.io/packages/helm/openfga/openfga/0.2.30>`__."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:177
+msgid ""
+"The following commands set up a store, authorization model, and inserts "
+"users (using tuples) into OpenFGA. Run these once the OpenFGA instance is"
+" deployed."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:180
+msgid "Setup the authorization model and tuples:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst
+msgid "Authorization model file ``model.fga``"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst
+msgid "User permissions file ``tuples.fga``"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:210
+#, fuzzy
+msgid "Create store:"
+msgstr "stratégie.du.serveur"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:220
+msgid ""
+"The response will include an ``id`` field, which is the OpenFGA store ID "
+"associated with the ``OPENFGA_STORE_NAME`` that was created."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:223
+msgid "Get store ID (alternative way):"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:230
+msgid "Set OpenFGA store ID from previous step and write model:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:240
+msgid "Set OpenFGA model ID from previous step and write tuples:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:251
+msgid ""
+"Add a new ``authorization`` section under your existing "
+"``global.userAuth`` configuration or directly within your existing "
+"secret, depending on your setup. Set the ``OPENFGA_STORE_ID`` and "
+"``OPENFGA_MODEL_ID`` from the previous steps in the file:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:266
+#, fuzzy
+msgid "Change Isolation Mode"
+msgstr "Solution"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:268
+msgid ""
+"The isolation mode determines how the SuperLink manages the ServerApp "
+"process execution. This setting can be adjusted using the "
+"``superlink.isolationMode`` parameter:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:271
+msgid "**Example: Changing Isolation Mode**"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:284
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:83
+#, fuzzy
+msgid "Deploy Flower Framework with TLS"
+msgstr "Flower Framework"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:286
+msgid ""
+"To ensure TLS communication within the Flower Framework, you need to "
+"configure your deployment with proper TLS certificates."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:297
+#, fuzzy
+msgid "Override certificate paths"
+msgstr "Certificats"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:299
+msgid ""
+"By default, the TLS-related flags use the following paths when TLS is "
+"enabled:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:301
+msgid ""
+"``--ssl-ca-certfile``: ``/app/cert/ca.crt``, ``--ssl-certfile``: "
+"``/app/cert/tls.crt``, ``--ssl-keyfile``: ``/app/cert/tls.key``."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:304
+msgid ""
+"These paths can be overridden by specifying the flags in the extraArgs, "
+"as shown below."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:321
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:99
+#, fuzzy
+msgid "Deploy Flower Framework without TLS"
+msgstr "Rédiger de la documentation"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:323
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:101
+msgid ""
+"For testing or internal use, you might want to deploy Flower without TLS."
+" Be cautious as this exposes your deployment to potential security risks."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:326
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:104
+msgid "Example configuration for insecure deployment:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:336
+msgid "Pre-provide TLS Certificate"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:338
+msgid ""
+"If certificate creation is disabled, you must provide a pre-existing "
+"secret of type ``kubernetes.io/tls`` named ``<flower-server.fullname"
+">-server-tls``."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:347
+#, fuzzy
+msgid "Ingress Configuration"
+msgstr "Valeurs de configuration"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:350
+msgid "SSL-Passthrough"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:352
+msgid ""
+"When the ``tls`` option is set to ``true``, it expects the existence of "
+"the ``<flower-server.fullname>-server-tls`` secret. Flower Framework "
+"components will load TLS certificates on startup."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:389
+msgid "**Pre-Provide TLS Certificate with Additional Hosts**"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:391
+msgid ""
+"In this example, we use ``cert-manager`` to create a certificate. By "
+"default, the certificate will only include the DNS name specified in "
+"``common-name``."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:394
+msgid ""
+"In some cases, the server and client charts are deployed in the same "
+"cluster, while the exec API is accessible via the internet."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:397
+msgid ""
+"To allow SuperNodes to connect to the SuperLink via the internal service "
+"URL, you need to add an additional host, as shown below:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:425
+#, fuzzy
+msgid "Enable Node Authentication"
+msgstr "Vérifie l'installation"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:444
+msgid "Public keys can include comments at the end of the key data:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:-1
+msgid ""
+"Deploy Flower's SuperNode Helm chart to install client federated learning"
+" components. Default config mirrors official releases for seamless "
+"integration."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:6
+msgid "Deploy SuperNode using Helm"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:17
+msgid ""
+"This Helm chart installs the client-side components of the Flower "
+"Framework, specifically setting up the SuperNode."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:24
+#, fuzzy
+msgid "Multi Project Setup"
+msgstr "Exemples de PyTorch"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:26
+msgid ""
+"To install multiple types of SuperNodes, such as a federation for running"
+" PyTorch and another for TensorFlow, you need to install the Helm Chart "
+"multiple times with different names. This allows each deployment to have "
+"its own configurations and dependencies."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:30
+msgid ""
+"For instance, you can install the Chart for the PyTorch setup by "
+"adjusting the values.yaml file as shown below:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:48
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:74
+#, fuzzy
+msgid "Install this configuration using the following command:"
+msgstr "Active la virtualenv en exécutant la commande suivante :"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:54
+msgid ""
+"This will deploy 10 SuperNodes named ``pytorch-flower-client-"
+"supernode-<random>``."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:56
+msgid "For a TensorFlow setup, modify the values.yaml file as follows:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:80
+msgid ""
+"This will deploy 3 SuperNodes named ``tensorflow-flower-client-"
+"supernode-<random>``."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:85
+msgid ""
+"To ensure TLS communication within the Flower framework, you need to "
+"configure your deployment with proper TLS certificates."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:88
+msgid ""
+"**Note:** If ``global.insecure`` is set to ``False``, you must pre-"
+"provide a secret of type ``kubernetes.io/tls`` named ``flower-client-"
+"tls``."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:91
+msgid "Example configuration for TLS deployment:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:112
+#, fuzzy
+msgid "Node Authentication"
+msgstr "Vérifie l'installation"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:114
+msgid ""
+"To enable Node Authentication, you need to specify a private key in "
+"either PKCS8 or OpenSSH (PEM-like) format. This example assumes that the "
+"SuperLink is also configured for Node Authentication and recognizes the "
+"``ecdsa-sha2-nistp384 [...]`` public key of this SuperNode."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:143
+msgid "Isolated Setup"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:146
+#, fuzzy
+msgid "Isolation All-in-One"
+msgstr "Solution"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:148
+msgid ""
+"To install SuperNode in isolation mode using the “process” configuration,"
+" both the ClientApp and SuperNode need to be enabled. By default, the "
+"ClientApp connects to the SuperNode internally within the cluster, so "
+"there is no need to set ``supernode.address`` and ``supernode.port`` "
+"unless the connection is external. This setup assumes that both "
+"components are running within the same cluster."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:167
+#, fuzzy
+msgid "Isolation Distributed"
+msgstr "Solution"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:169
+msgid ""
+"You can also deploy the SuperNode and ClientApp separately. To do this, "
+"you need to deploy the chart twice: once with ``supernode.enabled=true`` "
+"and once with ``clientapp.enabled=true``. To allow the ClientApp to "
+"connect to the SuperNode in this configuration, enable the SuperNode "
+"ingress by setting ``supernode.ingress.enabled=true``. This setup is "
+"intended for scenarios where the components run on different clusters or "
+"a hybrid environment involving Kubernetes and ClientApp native "
+"installations."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:194
+#, fuzzy
+msgid "Node Configuration"
+msgstr "Valeurs de configuration"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:196
+msgid ""
+"You can add a node configuration to configure a SuperNode. The YAML "
+"datatype is preserved when passing it in the Python application:"
+msgstr ""
+
+#: ../../source/helm/index.rst:39
+#, fuzzy
+msgid "Deploy SuperLink"
+msgstr "flower-superlink"
+
+#: ../../source/helm/index.rst:39
+#, fuzzy
+msgid "Deploy SuperNode"
+msgstr "flower-superlink"
+
+#: ../../source/helm/index.rst:-1
+msgid "Learn how to run Flower for federated learning using Helm charts."
+msgstr ""
+
+#: ../../source/helm/index.rst:6
+#, fuzzy
+msgid "Run Flower using Helm"
+msgstr "Serveur de Flower"
+
+#: ../../source/helm/index.rst:13
+msgid ""
+"This guide provides the step-by-step instructions to deploy Flower using "
+"Helm, which simplifies the deployment and management of the Flower "
+"framework on Kubernetes. For instance, to deploy SuperLink and SuperNode "
+"services via command line, simply run the |helm_install_link|_ command "
+"like so:"
+msgstr ""
+
+#: ../../source/helm/index.rst:26
+msgid "Then to tear down the deployment, run the |helm_uninstall_link|_ command:"
+msgstr ""
+
 #: ../../source/how-to-aggregate-evaluation-results.rst:-1
 msgid ""
 "Aggregate custom evaluation results from federated clients in Flower "
@@ -5825,6 +6381,300 @@ msgid ""
 "federation where each component runs in its own Docker container. You can"
 " make use of TLS and other security features in Flower such as implement "
 "a SuperNode authentication mechanism."
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:-1
+msgid ""
+"Configure SuperLink for user authentication and authorization. Private-"
+"by-default runs securely with OpenID Connect and OpenFGA."
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:6
+msgid "Authenticate Users via OpenID Connect"
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:10
+msgid ""
+"OpenID Connect Authentication is a Flower Enterprise feature. See `Flower"
+" Enterprise <https://flower.ai/enterprise>`_ for details."
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:13
+msgid ""
+"In this guide, you'll learn how to configure SuperLink with user-level "
+"authentication and authorization, and how to log in using the ``flwr`` "
+"CLI. Once logged in, any users that are authorized on the SuperLink can "
+"run Flower CLI commands that interact with the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:20
+msgid ""
+"With user authentication and authorization enabled, only users that have "
+"submitted the ``flwr run`` command can view and interact with their runs."
+" This means that your runs are **private by default**, ensuring that only"
+" authorized users can access them."
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:28
+msgid ""
+"To enable user authentication and authorization, the SuperLink must be "
+"deployed with an `OpenID Connect (OIDC) <https://openid.net/developers"
+"/how-connect-works/>`_ provider and an `OpenFGA <https://openfga.dev/>`_ "
+"server. The OIDC provider is used for user authentication, while OpenFGA "
+"is used for fine-grained access control. This means an authenticated user"
+" can only run ``flwr`` CLI commands on the SuperLink if they have been "
+"granted the necessary permissions by the SuperLink administrator. When "
+"enabled, both user authentication and authorization must be configured on"
+" the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:37
+msgid "Enable User Authentication and Authorization on the SuperLink"
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:39
+#, fuzzy
+msgid "Create a YAML configuration file with the following content:"
+msgstr "Crée une demande de pull qui contient les modifications suivantes :"
+
+#: ../../source/how-to-authenticate-users.rst:63
+msgid ""
+"Save this file as ``user-auth-config.yaml``. Then pass it to the "
+"SuperLink via the ``--user-auth-config`` flag when deploying the "
+"SuperLink:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:74
+msgid ""
+"To authorize a user, the SuperLink administrator must add the user's OIDC"
+" ``sub`` claim to the OpenFGA store with the appropriate relation."
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:78
+#, fuzzy
+msgid "Login to the SuperLink"
+msgstr "flower-superlink"
+
+#: ../../source/how-to-authenticate-users.rst:80
+msgid ""
+"Once a SuperLink with user authentication and authorization is up and "
+"running, a user can interface with it after installing the ``flwr`` PyPI "
+"package via the Flower CLI. Then, ensure that the ``enable-user-auth`` "
+"field is set to ``true`` in the federation section in the "
+"``pyproject.toml`` of the Flower app you want to run:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:97
+msgid ""
+"User authentication and authorization is only supported with TLS "
+"connections."
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:99
+msgid ""
+"Now, you need to login first before other CLI commands can be executed. "
+"Upon executing ``flwr login``, a URL will be returned by the "
+"authentication plugin in the SuperLink. Click on it and authenticate "
+"directly against the OIDC provider."
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:113
+msgid ""
+"Once the login is successful, the credentials returned by the OIDC "
+"provider via the SuperLink will be saved to the app's directory under "
+"``.flwr/.credentials/<federation-name>.json``. The tokens stored in this "
+"file will be sent transparently with each subsequent ``flwr`` CLI request"
+" to the SuperLink, and it will relay them to OIDC provider to perform the"
+" authentication checks."
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:120
+msgid "Run authorized ``flwr`` CLI commands"
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:122
+msgid ""
+"With the above steps completed, you can now run ``flwr`` CLI commands "
+"against a SuperLink setup with user authentication and authorization. For"
+" example, as an authorized user, you can run the ``flwr run`` command to "
+"start a Flower app:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-users.rst:134
+msgid ""
+"If the user does not have the necessary permissions to run the command, "
+"an error will be returned:"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:-1
+msgid ""
+"Configure SuperLink for audit logging to capture or store events such as "
+"user interactions and application behavior."
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:6
+#, fuzzy
+msgid "Configure Audit Logging"
+msgstr "Configurer les clients"
+
+#: ../../source/how-to-configure-audit-logging.rst:10
+msgid ""
+"Audit logging is a Flower Enterprise feature. See `Flower Enterprise "
+"<https://flower.ai/enterprise>`_ for details."
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:13
+msgid ""
+"In this guide, you'll learn how to configure SuperLink with audit "
+"logging. Audit logging allows you to capture and store events that occur "
+"in the SuperLink, such as valuable insights into the application's "
+"behavior and performance, and when a user interfaces with the system."
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:18
+msgid ""
+"The audit logging feature brings JSON-formatted log outputs to Flower. It"
+" can be activated for the SuperLink to record events when users or "
+"SuperNodes interact with the SuperLink. System administrators can then "
+"configure a logging backend to systematically capture these events in a "
+"database."
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:23
+msgid ""
+"User events occur when a Flower user interacts with SuperLink, such as "
+"logging in, starting a run, or querying the list of runs on the "
+"SuperLink. These events capture the interaction of the user via the "
+"``flwr`` CLI and the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:27
+msgid ""
+"Application events occur when the Flower components interact with one "
+"another, specifically, between the SuperLink and SuperNodes. These events"
+" will show, for example, when messages are pushed and pulled from/to the "
+"SuperLink and when a SuperNode establishes a connection with the "
+"SuperLink."
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:32
+msgid "By default, the output schema is as follows:"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:51
+msgid "where,"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:56
+#, fuzzy
+msgid "Field"
+msgstr "DP-FedAvg"
+
+#: ../../source/how-to-configure-audit-logging.rst:58
+#, fuzzy
+msgid "``timestamp``"
+msgstr "Configurer les clients"
+
+#: ../../source/how-to-configure-audit-logging.rst:59
+msgid "Timestamp of the event in UTC format and RFC-3339 compliant"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:60
+msgid "``actor.id``"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:61
+msgid ""
+"Flower account ID (when called by a ``flwr`` CLI user) or SuperNode ID "
+"(when called by a SuperNode)"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:63
+#, fuzzy
+msgid "``actor.description``"
+msgstr "Dépréciations"
+
+#: ../../source/how-to-configure-audit-logging.rst:64
+msgid "Username registered on the OIDC provider or ``SuperNode``"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:65
+msgid "``actor.ip_address``"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:66
+#, fuzzy
+msgid "IPv4 or IPv6 address of the actor"
+msgstr "Les adresses IPv4 et IPv6 sont toutes deux prises en charge."
+
+#: ../../source/how-to-configure-audit-logging.rst:67
+msgid "``event.action``"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:68
+msgid ""
+"Name of the servicer method, e.g. "
+"``ExecServicer.StartRun``/``FleetServicer.PullMessages``"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:70
+msgid "``event.run_id``"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:71
+#, fuzzy
+msgid "The run ID of the Flower workflow"
+msgstr "Chargement des données"
+
+#: ../../source/how-to-configure-audit-logging.rst:72
+msgid "``event.fab_hash``"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:73
+#, fuzzy
+msgid "The FAB hash of the Flower app"
+msgstr "Chargement des données"
+
+#: ../../source/how-to-configure-audit-logging.rst:74
+#, fuzzy
+msgid "``status``"
+msgstr "Statut du client."
+
+#: ../../source/how-to-configure-audit-logging.rst:75
+msgid "A string describing whether the action is started, completed or failed"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:80
+msgid ""
+"To enable audit logging, start the SuperLink with the argument "
+"``--enable-event-log`` as follows:"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:87
+msgid ""
+"Note that the audit logging feature can only be activated with the "
+":doc:`user authentication feature <how-to-authenticate-users>`."
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:91
+#, fuzzy
+msgid "Example Outputs"
+msgstr "Exemples de PyTorch"
+
+#: ../../source/how-to-configure-audit-logging.rst:93
+msgid ""
+"Here is an example output when a user runs ``flwr run`` (note the "
+"``\"action\": \"ExecServicer.StartRun\"``):"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:102
+msgid "Here is another example output when a user runs ``flwr ls``:"
+msgstr ""
+
+#: ../../source/how-to-configure-audit-logging.rst:110
+msgid ""
+"And here is an example when a SuperNode pulls a message from the "
+"SuperLink:"
 msgstr ""
 
 #: ../../source/how-to-configure-clients.rst:-1
@@ -6098,6 +6948,228 @@ msgid ""
 "component (see :doc:`ref-flower-network-communication`). You can set the "
 "verbosity level of ``gRPC`` logs using `gRPC environment variables "
 "<https://github.com/grpc/grpc/blob/master/doc/environment_variables.md>`_."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:-1
+msgid ""
+"Learn how to configure your Flower app using the pyproject.toml file, "
+"including dependencies, components, runtime settings, and federation "
+"setup."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:6
+msgid "Configure ``pyproject.toml``"
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:8
+msgid ""
+"All Flower Apps need a ``pyproject.toml``. When you create a new Flower "
+"App using ``flwr new``, a ``pyproject.toml`` file is generated. This file"
+" defines your app's dependencies, configuration, and federation setup."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:12
+msgid "A complete ``pyproject.toml`` file, for example, looks like this:"
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst
+#, fuzzy
+msgid "Example ``pyproject.toml``"
+msgstr "Exemples de PyTorch"
+
+#: ../../source/how-to-configure-pyproject-toml.rst:52
+msgid "Here are a few key sections to look out for:"
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:55
+#, fuzzy
+msgid "App Metadata and Dependencies"
+msgstr "Installation des dépendances"
+
+#: ../../source/how-to-configure-pyproject-toml.rst
+#, fuzzy
+msgid "Understanding each field"
+msgstr "Entraîne le modèle"
+
+#: ../../source/how-to-configure-pyproject-toml.rst:76
+#: ../../source/how-to-configure-pyproject-toml.rst:108
+#: ../../source/how-to-configure-pyproject-toml.rst:151
+#: ../../source/how-to-configure-pyproject-toml.rst:190
+#, fuzzy
+msgid "\\* Required fields"
+msgstr "Changements nécessaires"
+
+#: ../../source/how-to-configure-pyproject-toml.rst:78
+msgid ""
+"These fields follow the standard ``pyproject.toml`` metadata format, "
+"commonly used by tools like ``uv``, ``poetry``, and others. Flower reuses"
+" these for configuration and packaging."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:80
+#, fuzzy
+msgid "``name``\\*: The name of your Flower app."
+msgstr "Chargement des données"
+
+#: ../../source/how-to-configure-pyproject-toml.rst:81
+msgid ""
+"``version``\\*: The current version of your app, used for packaging and "
+"distribution. Must follow Semantic Versioning (e.g., \"1.0.0\")."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:82
+msgid "``description``: A short summary of what your app does."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:83
+msgid "``license``: The license your app is distributed under (e.g., Apache-2.0)."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:84
+msgid "``dependencies``\\*: A list of Python packages required to run your app."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:85
+msgid ""
+"``publisher``\\*: The name of the person or organization publishing the "
+"app."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:87
+msgid ""
+"Specify the metadata, including the app name, version, etc., in these "
+"sections. Add any Python packages your app needs under ``dependencies``. "
+"These will be installed when you run:"
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:96
+#, fuzzy
+msgid "App Components"
+msgstr "serveur"
+
+#: ../../source/how-to-configure-pyproject-toml.rst:110
+msgid "``serverapp``\\*: The import path to your ``ServerApp`` object."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:111
+msgid "``clientapp``\\*: The import path to your ``ClientApp`` object."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:113
+msgid ""
+"These entries point to your ``ServerApp`` and ``ClientApp`` definitions, "
+"using the format ``<module>:<object>``. Only update these import paths if"
+" you rename your modules or the variables that reference your "
+"``ServerApp`` or ``ClientApp``."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:118
+#, fuzzy
+msgid "App Configuration"
+msgstr "Valeurs de configuration"
+
+#: ../../source/how-to-configure-pyproject-toml.rst:126
+msgid ""
+"Define configuration values that should be available to your app at "
+"runtime. You can specify any number of key-value pairs in this section. "
+"All the configuration values in this section are optional."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:130
+msgid ""
+"Access these values in your code using ``context.run_config``. For "
+"example:"
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:137
+#, fuzzy
+msgid "Federation Configuration"
+msgstr "Valeurs de configuration"
+
+#: ../../source/how-to-configure-pyproject-toml.rst:153
+msgid ""
+"``default``\\*: The name of the federation to use when running your app "
+"with ``flwr run`` without explicitly specifying a federation."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:155
+msgid ""
+"Federations allow you to define how your app will run in different "
+"environments. You can configure multiple federations, such as local "
+"simulations or remote deployments, within the ``[tool.flwr.federations]``"
+" section."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:160
+#, fuzzy
+msgid "Local Simulation Example"
+msgstr "Exemples de PyTorch"
+
+#: ../../source/how-to-configure-pyproject-toml.rst:167
+msgid ""
+"When using ``flwr new``, a federation named ``\"local-simulation\"`` is "
+"included and set as the default. The example above sets up a local "
+"simulation federation with 10 virtual SuperNodes using ``options.num-"
+"supernodes = 10``."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:171
+msgid ""
+"Learn more in the `How to Run Simulations "
+"<https://flower.ai/docs/framework/how-to-run-simulations.html>`_ guide."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:175
+#, fuzzy
+msgid "Remote Deployment Example"
+msgstr "serveur"
+
+#: ../../source/how-to-configure-pyproject-toml.rst:177
+msgid "You can also configure federations for remote deployment. For example:"
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:192
+msgid "``address``\\*: The address of the SuperLink Exec API to connect to."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:193
+msgid ""
+"``root-certificate``: Path to the root certificate file for TLS. Ignored "
+"if ``insecure`` is ``true``. If omitted, Flower uses the default gRPC "
+"root certificate."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:194
+msgid ""
+"``insecure``: Set to ``true`` to disable TLS (not recommended for "
+"production). Defaults to ``false``, if omitted."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:196
+msgid ""
+"Refer to the `deployment documentation "
+"<https://flower.ai/docs/framework/deploy.html>`_ for TLS setup and "
+"advanced configurations."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:200
+#, fuzzy
+msgid "Running a Federation"
+msgstr "Simulation de moniteur"
+
+#: ../../source/how-to-configure-pyproject-toml.rst:202
+msgid "To run a specific federation, use the following command:"
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:208
+msgid ""
+"Both positional arguments—the app path and the federation name—are "
+"optional. If omitted, the current directory is used as the app path, and "
+"the default federation specified in the ``pyproject.toml`` file is used."
+msgstr ""
+
+#: ../../source/how-to-configure-pyproject-toml.rst:212
+msgid "You can run ``flwr run --help`` for more details."
 msgstr ""
 
 #: ../../source/how-to-design-stateful-clients.rst:-1
@@ -8212,6 +9284,17 @@ msgstr ""
 
 #: ../../source/how-to-run-simulations.rst:39
 msgid ""
+"Flower's ``Simulation Engine`` is built on top of `Ray "
+"<https://www.ray.io/>`_, an open-source framework for scalable Python "
+"workloads. Flower fully supports Linux and macOS. On Windows, Ray support"
+" remains experimental, and while you can run simulations directly from "
+"the `PowerShell <https://learn.microsoft.com/en-"
+"us/powershell/scripting/overview?view=powershell-7.5>`_, we recommend "
+"using `WSL2 <https://learn.microsoft.com/en-us/windows/wsl/about>`_."
+msgstr ""
+
+#: ../../source/how-to-run-simulations.rst:48
+msgid ""
 "The ``Flower AI Simulation 2025`` tutorial series is available on "
 "YouTube. You can find all the videos `here "
 "<https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb>`_"
@@ -8221,7 +9304,7 @@ msgid ""
 "step-by-step-pytorch>`_"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:96
+#: ../../source/how-to-run-simulations.rst:105
 msgid ""
 "Flower's ``Simulation Engine`` schedules, launches, and manages "
 "|clientapp_link|_ instances. It does so through a ``Backend``, which "
@@ -8234,7 +9317,7 @@ msgid ""
 "Engine`` is:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:104
+#: ../../source/how-to-run-simulations.rst:113
 msgid ""
 "**Resource-aware**: Each backend worker executing ``ClientApp``\\s gets "
 "assigned a portion of the compute and memory on your system. You can "
@@ -8244,7 +9327,7 @@ msgid ""
 "``ClientApps`` can run concurrently on the same hardware."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:109
+#: ../../source/how-to-run-simulations.rst:118
 msgid ""
 "**Batchable**: When there are more ``ClientApps`` to execute than backend"
 " workers, ``ClientApps`` are queued and executed as soon as resources are"
@@ -8252,14 +9335,14 @@ msgid ""
 "of N, where N is the number of backend workers."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:113
+#: ../../source/how-to-run-simulations.rst:122
 msgid ""
 "**Self-managed**: This means that you, as a user, do not need to launch "
 "``ClientApps`` manually; instead, the ``Simulation Engine``'s internals "
 "orchestrates the execution of all ``ClientApp``\\s."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:116
+#: ../../source/how-to-run-simulations.rst:125
 msgid ""
 "**Ephemeral**: This means that a ``ClientApp`` is only materialized when "
 "it is required by the application (e.g., to do `fit() <ref-api-"
@@ -8268,7 +9351,7 @@ msgid ""
 "participate."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:123
+#: ../../source/how-to-run-simulations.rst:132
 msgid ""
 "You can preserve the state (e.g., internal variables, parts of an ML "
 "model, intermediate results) of a ``ClientApp`` by saving it to its "
@@ -8276,7 +9359,7 @@ msgid ""
 "stateful-clients.rst>`_ guide for a complete walkthrough."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:128
+#: ../../source/how-to-run-simulations.rst:137
 msgid ""
 "The ``Simulation Engine`` delegates to a ``Backend`` the role of spawning"
 " and managing ``ClientApps``. The default backend is the ``RayBackend``, "
@@ -8287,11 +9370,11 @@ msgid ""
 "process."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:136
+#: ../../source/how-to-run-simulations.rst:145
 msgid "Launch your Flower simulation"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:138
+#: ../../source/how-to-run-simulations.rst:147
 msgid ""
 "Running a simulation is straightforward; in fact, it is the default mode "
 "of operation for |flwr_run_link|_. Therefore, running Flower simulations "
@@ -8302,20 +9385,20 @@ msgid ""
 "``PyTorch`` template."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:146
+#: ../../source/how-to-run-simulations.rst:155
 msgid ""
 "If you haven't already, install Flower via ``pip install -U flwr`` in a "
 "Python environment."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:154
+#: ../../source/how-to-run-simulations.rst:163
 msgid ""
 "Then, follow the instructions shown after completing the |flwr_new_link|_"
 " command. When you execute |flwr_run_link|_, you'll be using the "
 "``Simulation Engine``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:157
+#: ../../source/how-to-run-simulations.rst:166
 msgid ""
 "If we take a look at the ``pyproject.toml`` that was generated from the "
 "|flwr_new_link|_ command (and loaded upon |flwr_run_link|_ execution), we"
@@ -8323,18 +9406,18 @@ msgid ""
 "supernodes to 10."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:169
+#: ../../source/how-to-run-simulations.rst:178
 msgid ""
 "You can modify the size of your simulations by adjusting ``options.num-"
 "supernodes``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:172
+#: ../../source/how-to-run-simulations.rst:181
 #, fuzzy
 msgid "Simulation examples"
 msgstr "Exemples de PyTorch"
 
-#: ../../source/how-to-run-simulations.rst:174
+#: ../../source/how-to-run-simulations.rst:183
 msgid ""
 "In addition to the quickstart tutorials in the documentation (e.g., "
 "`quickstart PyTorch Tutorial <tutorial-quickstart-pytorch.html>`_, "
@@ -8342,7 +9425,7 @@ msgid ""
 " in the Flower repository are simulation-ready."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:179
+#: ../../source/how-to-run-simulations.rst:188
 #, fuzzy
 msgid ""
 "`Quickstart TensorFlow/Keras "
@@ -8353,7 +9436,7 @@ msgstr ""
 "<https://github.com/adap/flower/tree/main/examples/quickstart-"
 "tensorflow>`_"
 
-#: ../../source/how-to-run-simulations.rst:181
+#: ../../source/how-to-run-simulations.rst:190
 #, fuzzy
 msgid ""
 "`Quickstart PyTorch <https://github.com/adap/flower/tree/main/examples"
@@ -8362,7 +9445,7 @@ msgstr ""
 "`Quickstart PyTorch (Code) "
 "<https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_"
 
-#: ../../source/how-to-run-simulations.rst:183
+#: ../../source/how-to-run-simulations.rst:192
 #, fuzzy
 msgid ""
 "`Advanced PyTorch <https://github.com/adap/flower/tree/main/examples"
@@ -8371,7 +9454,7 @@ msgstr ""
 "`Quickstart PyTorch (Code) "
 "<https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_"
 
-#: ../../source/how-to-run-simulations.rst:185
+#: ../../source/how-to-run-simulations.rst:194
 #, fuzzy
 msgid ""
 "`Quickstart MLX <https://github.com/adap/flower/tree/main/examples"
@@ -8380,7 +9463,7 @@ msgstr ""
 "`Quickstart PyTorch (Code) "
 "<https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_"
 
-#: ../../source/how-to-run-simulations.rst:186
+#: ../../source/how-to-run-simulations.rst:195
 #, fuzzy
 msgid ""
 "`ViT fine-tuning <https://github.com/adap/flower/tree/main/examples"
@@ -8389,7 +9472,7 @@ msgstr ""
 "`Quickstart PyTorch (Code) "
 "<https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_"
 
-#: ../../source/how-to-run-simulations.rst:188
+#: ../../source/how-to-run-simulations.rst:197
 #, fuzzy
 msgid ""
 "The complete list of examples can be found in `the Flower GitHub "
@@ -8399,11 +9482,11 @@ msgstr ""
 "trouvé ici <https://github.com/adap/flower/tree/main/examples/advanced-"
 "tensorflow>`_."
 
-#: ../../source/how-to-run-simulations.rst:194
+#: ../../source/how-to-run-simulations.rst:203
 msgid "Defining ``ClientApp`` resources"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:196
+#: ../../source/how-to-run-simulations.rst:205
 msgid ""
 "By default, the ``Simulation Engine`` assigns two CPU cores to each "
 "backend worker. This means that if your system has 10 CPU cores, five "
@@ -8411,7 +9494,7 @@ msgid ""
 "``ClientApp`` instance."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:200
+#: ../../source/how-to-run-simulations.rst:209
 msgid ""
 "More often than not, you would probably like to adjust the resources your"
 " ``ClientApp`` gets assigned based on the complexity (i.e., compute and "
@@ -8419,7 +9502,7 @@ msgid ""
 "backend resources for your federation."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:206
+#: ../../source/how-to-run-simulations.rst:215
 #, python-format
 msgid ""
 "Note that the resources the backend assigns to each worker (and hence to "
@@ -8432,13 +9515,13 @@ msgid ""
 "``ClientApp`` instances to crash throwing an out-of-memory (OOM) error."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:214
+#: ../../source/how-to-run-simulations.rst:223
 msgid ""
 "Customizing resources can be done directly in the ``pyproject.toml`` of "
 "your app."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:223
+#: ../../source/how-to-run-simulations.rst:232
 msgid ""
 "With the above backend settings, your simulation will run as many "
 "``ClientApps`` in parallel as CPUs you have in your system. GPU resources"
@@ -8446,7 +9529,7 @@ msgid ""
 "VRAM each should make use of."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:236
+#: ../../source/how-to-run-simulations.rst:245
 msgid ""
 "If you are using TensorFlow, you need to `enable memory growth "
 "<https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth>`_ so "
@@ -8455,53 +9538,53 @@ msgid ""
 "``TF_FORCE_GPU_ALLOW_GROWTH=\"1\"``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:242
+#: ../../source/how-to-run-simulations.rst:251
 msgid ""
 "Let's see how the above configuration results in a different number of "
 "``ClientApps`` running in parallel depending on the resources available "
 "in your system. If your system has:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:246
+#: ../../source/how-to-run-simulations.rst:255
 #, python-format
 msgid ""
 "10x CPUs and 1x GPU: at most 4 ``ClientApps`` will run in parallel since "
 "each requires 25% of the available VRAM."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:248
+#: ../../source/how-to-run-simulations.rst:257
 msgid ""
 "10x CPUs and 2x GPUs: at most 8 ``ClientApps`` will run in parallel "
 "(VRAM-limited)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:249
+#: ../../source/how-to-run-simulations.rst:258
 msgid ""
 "6x CPUs and 4x GPUs: at most 6 ``ClientApps`` will run in parallel (CPU-"
 "limited)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:250
+#: ../../source/how-to-run-simulations.rst:259
 msgid ""
 "10x CPUs but 0x GPUs: you won't be able to run the simulation since not "
 "even the resources for a single ``ClientApp`` can be met."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:253
+#: ../../source/how-to-run-simulations.rst:262
 msgid ""
 "A generalization of this is given by the following equation. It gives the"
 " maximum number of ``ClientApps`` that can be executed in parallel on "
 "available CPU cores (SYS_CPUS) and VRAM (SYS_GPUS)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:257
+#: ../../source/how-to-run-simulations.rst:266
 msgid ""
 "N = \\min\\left(\\left\\lfloor \\frac{\\text{SYS_CPUS}}{\\text{num_cpus}}"
 " \\right\\rfloor, \\left\\lfloor "
 "\\frac{\\text{SYS_GPUS}}{\\text{num_gpus}} \\right\\rfloor\\right)"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:261
+#: ../../source/how-to-run-simulations.rst:270
 msgid ""
 "Both ``num_cpus`` (an integer higher than 1) and ``num_gpus`` (a non-"
 "negative real number) should be set on a per ``ClientApp`` basis. If, for"
@@ -8510,7 +9593,7 @@ msgid ""
 " two whole GPUs, you'd set ``num_gpus=2``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:266
+#: ../../source/how-to-run-simulations.rst:275
 msgid ""
 "While the ``options.backend.client-resources`` can be used to control the"
 " degree of concurrency in your simulations, this does not stop you from "
@@ -8522,12 +9605,12 @@ msgid ""
 "them in a resource-aware manner in batches of 8."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:275
+#: ../../source/how-to-run-simulations.rst:284
 #, fuzzy
 msgid "Simulation Engine resources"
 msgstr "Moteur de client virtuel"
 
-#: ../../source/how-to-run-simulations.rst:277
+#: ../../source/how-to-run-simulations.rst:286
 msgid ""
 "By default, the ``Simulation Engine`` has **access to all system "
 "resources** (i.e., all CPUs, all GPUs). However, in some settings, you "
@@ -8536,7 +9619,7 @@ msgid ""
 "setting the ``options.backend.init_args`` variable."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:291
+#: ../../source/how-to-run-simulations.rst:300
 msgid ""
 "With the above setup, the Backend will be initialized with a single CPU "
 "and GPU. Therefore, even if more CPUs and GPUs are available in your "
@@ -8544,23 +9627,23 @@ msgid ""
 "results in a single ``ClientApp`` running at any given point."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:296
+#: ../../source/how-to-run-simulations.rst:305
 msgid ""
 "For a complete list of settings you can configure, check the `ray.init "
 "<https://docs.ray.io/en/latest/ray-core/api/doc/ray.init.html#ray-init>`_"
 " documentation."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:299
+#: ../../source/how-to-run-simulations.rst:308
 msgid "For the highest performance, do not set ``options.backend.init_args``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:302
+#: ../../source/how-to-run-simulations.rst:311
 #, fuzzy
 msgid "Simulation in Colab/Jupyter"
 msgstr "Simulation de moniteur"
 
-#: ../../source/how-to-run-simulations.rst:304
+#: ../../source/how-to-run-simulations.rst:313
 msgid ""
 "The preferred way of running simulations should always be "
 "|flwr_run_link|_. However, the core functionality of the ``Simulation "
@@ -8569,7 +9652,7 @@ msgid ""
 "flwr.html#flwr.simulation.run_simulation>`_."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:325
+#: ../../source/how-to-run-simulations.rst:334
 msgid ""
 "With ``run_simulation``, you can also control the amount of resources for"
 " your ``ClientApp`` instances. Do so by setting ``backend_config``. If "
@@ -8577,7 +9660,7 @@ msgid ""
 " and no GPU)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:336
+#: ../../source/how-to-run-simulations.rst:345
 msgid ""
 "Refer to the `30 minutes Federated AI Tutorial "
 "<https://colab.research.google.com/github/adap/flower/blob/main/examples"
@@ -8585,12 +9668,12 @@ msgid ""
 "run Flower Simulations in Colab."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:343
+#: ../../source/how-to-run-simulations.rst:352
 #, fuzzy
 msgid "Multi-node Flower simulations"
 msgstr "Simulation de moniteur"
 
-#: ../../source/how-to-run-simulations.rst:345
+#: ../../source/how-to-run-simulations.rst:354
 msgid ""
 "Flower's ``Simulation Engine`` allows you to run FL simulations across "
 "multiple compute nodes so that you're not restricted to running "
@@ -8598,15 +9681,15 @@ msgid ""
 "simulation, ensure that you:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:349
+#: ../../source/how-to-run-simulations.rst:358
 msgid "Have the same Python environment on all nodes."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:350
+#: ../../source/how-to-run-simulations.rst:359
 msgid "Have a copy of your code on all nodes."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:351
+#: ../../source/how-to-run-simulations.rst:360
 msgid ""
 "Have a copy of your dataset on all nodes. If you are using partitions "
 "from `Flower Datasets <https://flower.ai/docs/datasets>`_, ensure the "
@@ -8614,14 +9697,14 @@ msgid ""
 "is that the i-th dataset partition is identical in all nodes."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:355
+#: ../../source/how-to-run-simulations.rst:364
 msgid ""
 "Start Ray on your head node: on the terminal, type ``ray start --head``. "
 "This command will print a few lines, one of which indicates how to attach"
 " other nodes to the head node."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:358
+#: ../../source/how-to-run-simulations.rst:367
 msgid ""
 "Attach other nodes to the head node: copy the command shown after "
 "starting the head and execute it on the terminal of a new node (before "
@@ -8630,20 +9713,20 @@ msgid ""
 " the head node they should be discoverable by each other."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:363
+#: ../../source/how-to-run-simulations.rst:372
 msgid ""
 "With all the above done, you can run your code from the head node as you "
 "would if the simulation were running on a single node. In other words:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:371
+#: ../../source/how-to-run-simulations.rst:380
 msgid ""
 "Once your simulation is finished, if you'd like to dismantle your "
 "cluster, you simply need to run the command ``ray stop`` in each node's "
 "terminal (including the head node)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:376
+#: ../../source/how-to-run-simulations.rst:385
 msgid ""
 "When attaching a new node to the head, all its resources (i.e., all CPUs,"
 " all GPUs) will be visible by the head node. This means that the "
@@ -8655,7 +9738,7 @@ msgid ""
 "starting the head)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:385
+#: ../../source/how-to-run-simulations.rst:394
 #, fuzzy
 msgid "FAQ for Simulations"
 msgstr "Simulation de moniteur"
@@ -8664,7 +9747,7 @@ msgstr "Simulation de moniteur"
 msgid "Can I make my ``ClientApp`` instances stateful?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:389
+#: ../../source/how-to-run-simulations.rst:398
 msgid ""
 "Yes. Use the ``state`` attribute of the |context_link|_ object that is "
 "passed to the ``ClientApp`` to save variables, parameters, or results to "
@@ -8676,7 +9759,7 @@ msgstr ""
 msgid "Can I run multiple simulations on the same machine?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:393
+#: ../../source/how-to-run-simulations.rst:402
 msgid ""
 "Yes, but bear in mind that each simulation isn't aware of the resource "
 "usage of the other. If your simulations make use of GPUs, consider "
@@ -8691,7 +9774,7 @@ msgid ""
 "compute/memory these make use of?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:397
+#: ../../source/how-to-run-simulations.rst:406
 msgid ""
 "No. These resources are exclusively used by the simulation backend to "
 "control how many workers can be created on startup. Let's say N backend "
@@ -8705,35 +9788,35 @@ msgstr ""
 msgid "My ``ClientApp`` is triggering OOM on my GPU. What should I do?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:401
+#: ../../source/how-to-run-simulations.rst:410
 msgid ""
 "It is likely that your `num_gpus` setting, which controls the number of "
 "``ClientApp`` instances that can share a GPU, is too low (meaning too "
 "many ``ClientApps`` share the same GPU). Try the following:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:403
+#: ../../source/how-to-run-simulations.rst:412
 msgid ""
 "Set your ``num_gpus=1``. This will make a single ``ClientApp`` run on a "
 "GPU."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:404
+#: ../../source/how-to-run-simulations.rst:413
 msgid "Inspect how much VRAM is being used (use ``nvidia-smi`` for this)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:405
+#: ../../source/how-to-run-simulations.rst:414
 msgid ""
 "Based on the VRAM you see your single ``ClientApp`` using, calculate how "
 "many more would fit within the remaining VRAM. One divided by the total "
 "number of ``ClientApps`` is the ``num_gpus`` value you should set."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:407
+#: ../../source/how-to-run-simulations.rst:416
 msgid "Refer to :ref:`clientappresources` for more details."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:409
+#: ../../source/how-to-run-simulations.rst:418
 msgid ""
 "If your ``ClientApp`` is using TensorFlow, make sure you are exporting "
 "``TF_FORCE_GPU_ALLOW_GROWTH=\"1\"`` before starting your simulation. For "
@@ -8746,7 +9829,7 @@ msgid ""
 "``ClientApp``?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:413
+#: ../../source/how-to-run-simulations.rst:422
 msgid ""
 "A good practice is to start by running the simulation for a few rounds "
 "with higher ``num_cpus`` and ``num_gpus`` than what is really needed "
@@ -8758,7 +9841,7 @@ msgid ""
 "until you see a satisfactory system resource utilization."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:415
+#: ../../source/how-to-run-simulations.rst:424
 msgid ""
 "Note that if the workload on your ``ClientApp`` instances is not "
 "homogeneous (i.e., some come with a larger compute or memory footprint), "
@@ -8770,7 +9853,7 @@ msgstr ""
 msgid "Can I assign different resources to each ``ClientApp`` instance?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:419
+#: ../../source/how-to-run-simulations.rst:428
 msgid ""
 "No. All ``ClientApp`` objects are assumed to make use of the same "
 "``num_cpus`` and ``num_gpus``. When setting these values (refer to "
@@ -8785,7 +9868,7 @@ msgid ""
 "servers)?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:423
+#: ../../source/how-to-run-simulations.rst:432
 msgid ""
 "Yes. If you are using the ``RayBackend`` (the *default* backend) you can "
 "first interconnect your nodes through Ray's cli and then launch the "
@@ -8800,7 +9883,7 @@ msgid ""
 "taken into account by the ``Simulation Engine``?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:427
+#: ../../source/how-to-run-simulations.rst:436
 msgid ""
 "No. The ``Simulation Engine`` only manages ``ClientApps`` and therefore "
 "is only aware of the system resources they require. If your ``ServerApp``"
@@ -8814,7 +9897,7 @@ msgid ""
 "should run? Can I do resource placement?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:431
+#: ../../source/how-to-run-simulations.rst:440
 msgid ""
 "Currently, the placement of ``ClientApp`` instances is managed by the "
 "``RayBackend`` (the only backend available as of ``flwr==1.13.0``) and "
@@ -35522,7 +36605,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|abf214ea9e0f4b50a1640e6e6417bd8d|"
+msgid "|f1e4621e79bd4f7b9ca6b2c75224c9e6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -35541,7 +36624,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|14bef6e6736844bebc680805406a79c6|"
+msgid "|1c1cdca5051440a4af27cb06832ac172|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -35573,7 +36656,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|23f8cc0b06b440bb901f94afac26b3e7|"
+msgid "|51e581baa4584cd1bea7f1d9d7910f75|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -35594,7 +36677,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|3980fe2dcb974cdbbefa7ec199dadcda|"
+msgid "|a9274dd22b1649f2bcb645ddbc4c02ca|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -35616,7 +36699,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|cd7304d9aff64e5d93c2afb644f49006|"
+msgid "|9a5789cc5e964312be973e040de1697b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -35637,7 +36720,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|c97e4782ef9f4a03ad2033469fed7335|"
+msgid "|fcb9e4f1ac604cfaa5564213f99c7ee7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -35663,7 +36746,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|fb20379f55f14e3dbec2be42bfe50a2d|"
+msgid "|6980cc3853294734b4d3e5a81663d6f0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -35682,7 +36765,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|35cc8dd5e27d47ffa5902fd89cef0c09|"
+msgid "|40ddd46273cb4c64ae887559901e095c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -35913,7 +36996,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|69c282cf6ddc491283db5cb6ee1338e1|"
+msgid "|666113235f8b4a9aaf311623610d0677|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -35948,7 +37031,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|1c83c06845364ef0aec9e9086e082ceb|"
+msgid "|20a78eced7e644b09e14e21345f75824|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -35981,7 +37064,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|d8b480068a224fec892766329137f7ba|"
+msgid "|048172da9aa442698bca1d1b09510561|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -36012,7 +37095,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|6c438616cf2f459987c9e7d3190af659|"
+msgid "|87c5c604063f4459a5982f5e3b78b41c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -36072,7 +37155,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|8fdbc3ecaece46caac7718b04735bc37|"
+msgid "|3b89f9d679b24a7892283c7245004c77|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -36216,7 +37299,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|372a348111ed4a5eb69894e2df3670a7|"
+msgid "|454d3d15f4b54d7287ee0eb15153c65d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -54165,5 +55248,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|155f796db77342c0a7bd5209eb448982|"
+#~ msgstr ""
+
+#~ msgid "|abf214ea9e0f4b50a1640e6e6417bd8d|"
+#~ msgstr ""
+
+#~ msgid "|14bef6e6736844bebc680805406a79c6|"
+#~ msgstr ""
+
+#~ msgid "|23f8cc0b06b440bb901f94afac26b3e7|"
+#~ msgstr ""
+
+#~ msgid "|3980fe2dcb974cdbbefa7ec199dadcda|"
+#~ msgstr ""
+
+#~ msgid "|cd7304d9aff64e5d93c2afb644f49006|"
+#~ msgstr ""
+
+#~ msgid "|c97e4782ef9f4a03ad2033469fed7335|"
+#~ msgstr ""
+
+#~ msgid "|fb20379f55f14e3dbec2be42bfe50a2d|"
+#~ msgstr ""
+
+#~ msgid "|35cc8dd5e27d47ffa5902fd89cef0c09|"
+#~ msgstr ""
+
+#~ msgid "|69c282cf6ddc491283db5cb6ee1338e1|"
+#~ msgstr ""
+
+#~ msgid "|1c83c06845364ef0aec9e9086e082ceb|"
+#~ msgstr ""
+
+#~ msgid "|d8b480068a224fec892766329137f7ba|"
+#~ msgstr ""
+
+#~ msgid "|6c438616cf2f459987c9e7d3190af659|"
+#~ msgstr ""
+
+#~ msgid "|8fdbc3ecaece46caac7718b04735bc37|"
+#~ msgstr ""
+
+#~ msgid "|372a348111ed4a5eb69894e2df3670a7|"
 #~ msgstr ""
 

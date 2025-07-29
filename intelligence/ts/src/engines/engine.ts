@@ -15,6 +15,8 @@
 
 import {
   ChatResponseResult,
+  Embedding,
+  EmbeddingInput,
   FailureCode,
   Message,
   Progress,
@@ -38,6 +40,7 @@ export interface Engine {
     encrypt?: boolean,
     signal?: AbortSignal
   ): Promise<ChatResponseResult>;
+  embed(model: string, input: EmbeddingInput): Promise<Result<Embedding[]>>;
   fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>>;
   isSupported(model: string): Promise<Result<void>>;
 }
@@ -56,6 +59,14 @@ export abstract class BaseEngine implements Engine {
     _encrypt?: boolean,
     _signal?: AbortSignal
   ): Promise<ChatResponseResult> {
+    await Promise.resolve();
+    return {
+      ok: false,
+      failure: { code: FailureCode.NotImplementedError, description: 'Method not implemented.' },
+    };
+  }
+
+  async embed(_model: string, _input: EmbeddingInput): Promise<Result<Embedding[]>> {
     await Promise.resolve();
     return {
       ok: false,

@@ -73,6 +73,10 @@ export interface ToolParameterProperty {
   enum?: string[];
 }
 
+export type Embedding = number[];
+
+export type EmbeddingInput = string | string[] | number[] | number[][];
+
 /**
  * Represents the parameters required for a tool's function.
  */
