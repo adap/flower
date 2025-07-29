@@ -182,7 +182,7 @@ Never invent information unless the user explicitly requests creative fiction.`,
   });
 
   if (!response.ok) {
-    console.error(`${String(response.failure.code)}: ${response.failure.description}`);
+    console.error(response.failure.description);
     process.exit(1);
   } else {
     console.log(response.message.content);
