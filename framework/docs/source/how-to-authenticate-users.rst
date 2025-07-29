@@ -49,7 +49,7 @@ Create a YAML configuration file with the following content:
       oidc_client_secret: # The corresponding Client Secret
 
     authorization:
-      auth_type: openfga
+      authz_type: openfga
       authz_url:          # The base OpenFGA API URL
       store_id:           # The store ID containing the model store
       model_id:           # The model ID containing the latest authorization model for the SuperLink
