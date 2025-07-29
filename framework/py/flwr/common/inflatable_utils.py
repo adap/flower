@@ -185,10 +185,11 @@ def push_object_contents_from_iterable(
         The maximum number of concurrent pushes to perform.
     """
 
-    def push(_obj_id: str, _obj_content: bytes) -> None:
+    def push(args: tuple[str, bytes]) -> None:
         """Push a single object."""
+        obj_id, obj_content = args
         # Push the object using the provided function
-        push_object_fn(_obj_id, _obj_content)
+        push_object_fn(obj_id, obj_content)
 
     # Push all object contents concurrently
     num_workers = get_num_workers(max_concurrent_pushes)
@@ -197,9 +198,9 @@ def push_object_contents_from_iterable(
         _track_executor(executor)
 
         # Submit push tasks for each object content
-        for obj_id, obj_content in object_contents:
-            executor.submit(push, obj_id, obj_content)
-            del obj_content  # Delete the reference after submission
+        executor.map(push, object_contents)  # Non-blocking map
+
+        # The context manager will block until all submitted tasks have completed
 
     # Remove the executor from the list of tracked executors
     _untrack_executor(executor)
@@ -303,8 +304,7 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
         _track_executor(executor)
 
         # Submit pull tasks for each object ID
-        for obj_id in object_ids:
-            executor.submit(pull_with_retries, obj_id)  # Non-blocking submit
+        executor.map(pull_with_retries, object_ids)  # Non-blocking map
 
         # The context manager will block until all submitted tasks have completed
 
