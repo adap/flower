@@ -15,6 +15,6 @@
 
 export const DEFAULT_MODEL = 'meta/llama3.2-1b/instruct-fp16';
 export const REMOTE_URL = 'https://api.flower.ai';
-export const VERSION = '0.1.13';
+export const VERSION = '0.2.0';
 export const SDK = 'TS';
 export const ALLOWED_ROLES = ['user', 'system', 'assistant'] as const;
