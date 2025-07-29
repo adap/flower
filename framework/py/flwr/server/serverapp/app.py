@@ -16,6 +16,7 @@
 
 
 import argparse
+import gc
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
@@ -247,6 +248,10 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             # Close the Grpc connection
             if grid:
                 grid.close()
+
+            # Clean up the Context
+            context = None
+            gc.collect()
 
             event(
                 EventType.FLWR_SERVERAPP_RUN_LEAVE,
