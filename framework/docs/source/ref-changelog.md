@@ -50,7 +50,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   The documentation now includes a comprehensive guide for deploying Flower SuperLink and SuperNode using Helm charts. For full instructions, refer to the [Helm Guide](https://flower.ai/docs/framework/helm/index.html).
 
-- **Add docs for user authentication and audit logging** ([#5630](https://github.com/adap/flower/pull/5630), [#5643](https://github.com/adap/flower/pull/5643))
+- **Add docs for user authentication and audit logging** ([#5630](https://github.com/adap/flower/pull/5630), [#5643](https://github.com/adap/flower/pull/5643), [#5649](https://github.com/adap/flower/pull/5649))
 
   Introduces documentation for configuring user authentication ([User Authentication Guide](https://flower.ai/docs/framework/how-to-authenticate-users.html)) and audit logging ([Audit Logging Guide](https://flower.ai/docs/framework/how-to-configure-audit-logging.html)) in Flower.
 
