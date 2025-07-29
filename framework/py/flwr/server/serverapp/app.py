@@ -116,6 +116,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     run_status = None
     heartbeat_sender = None
     grid = None
+    context = None
     while True:
 
         try:
