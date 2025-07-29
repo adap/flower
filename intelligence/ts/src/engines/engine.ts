@@ -18,6 +18,7 @@ import {
   FailureCode,
   Message,
   Progress,
+  ResponseFormat,
   Result,
   StreamEvent,
   Tool,
@@ -28,11 +29,14 @@ export interface Engine {
     messages: Message[],
     model: string,
     temperature?: number,
+    topP?: number,
     maxCompletionToken?: number,
+    responseFormat?: ResponseFormat,
     stream?: boolean,
     onStreamEvent?: (event: StreamEvent) => void,
     tools?: Tool[],
-    encrypt?: boolean
+    encrypt?: boolean,
+    signal?: AbortSignal
   ): Promise<ChatResponseResult>;
   fetchModel(model: string, callback: (progress: Progress) => void): Promise<Result<void>>;
   isSupported(model: string): Promise<Result<void>>;
@@ -43,11 +47,14 @@ export abstract class BaseEngine implements Engine {
     _messages: Message[],
     _model: string,
     _temperature?: number,
+    _topP?: number,
     _maxCompletionTokens?: number,
+    _responseFormat?: ResponseFormat,
     _stream?: boolean,
     _onStreamEvent?: (event: StreamEvent) => void,
     _tools?: Tool[],
-    _encrypt?: boolean
+    _encrypt?: boolean,
+    _signal?: AbortSignal
   ): Promise<ChatResponseResult> {
     await Promise.resolve();
     return {

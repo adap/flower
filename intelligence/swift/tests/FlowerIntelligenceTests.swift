@@ -20,7 +20,7 @@ class MockMlxEngine: Engine {
     tools: [Tool]?
   ) async throws -> Message {
     lastMessages = messages
-    return Message(role: "assistant", content: "Mock Local Engine Response")
+    return try Message(role: "assistant", content: "Mock Local Engine Response")
   }
 }
 
@@ -43,7 +43,7 @@ class MockRemoteEngine: RemoteEngineProtocol {
     tools: [Tool]?
   ) async throws -> Message {
     lastMessages = messages
-    return Message(role: "assistant", content: "Mock Remote Engine Response")
+    return try Message(role: "assistant", content: "Mock Remote Engine Response")
   }
 }
 
@@ -120,8 +120,8 @@ class FlowerIntelligenceTests {
   @Test
   func testChatFunctionWithArrayOfMessages() async throws {
     let messages = [
-      Message(role: "system", content: "You are an AI"),
-      Message(role: "user", content: "What is Swift?"),
+      try Message(role: "system", content: "You are an AI"),
+      try Message(role: "user", content: "What is Swift?"),
     ]
     let options = ChatOptions(model: "meta/llama3.2-1b")
     let result = await flowerIntelligence.chat(options: (messages, options))

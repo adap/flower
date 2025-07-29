@@ -81,12 +81,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         metadata sent by the node. Continue RPC call if node is authenticated, else,
         terminate RPC call by setting context to abort.
         """
-        # Filter out non-Fleet service calls
+        # Only apply to Fleet service
         if not handler_call_details.method.startswith("/flwr.proto.Fleet/"):
-            return _unary_unary_rpc_terminator(
-                "This request should be sent to a different service.",
-                grpc.StatusCode.FAILED_PRECONDITION,
-            )
+            return continuation(handler_call_details)
 
         state = self.state_factory.state()
         metadata_dict = dict(handler_call_details.invocation_metadata)

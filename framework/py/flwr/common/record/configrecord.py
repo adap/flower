@@ -15,12 +15,21 @@
 """ConfigRecord."""
 
 
+from __future__ import annotations
+
 from logging import WARN
-from typing import Optional, get_args
+from typing import cast, get_args
 
 from flwr.common.typing import ConfigRecordValues, ConfigScalar
 
+# pylint: disable=E0611
+from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
+from flwr.proto.recorddict_pb2 import ConfigRecordValue as ProtoConfigRecordValue
+
+# pylint: enable=E0611
+from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..logger import log
+from ..serde_utils import record_value_dict_from_proto, record_value_dict_to_proto
 from .typeddict import TypedDict
 
 
@@ -59,7 +68,7 @@ def _check_value(value: ConfigRecordValues) -> None:
         is_valid(value)
 
 
-class ConfigRecord(TypedDict[str, ConfigRecordValues]):
+class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
     """Config record.
 
     A :code:`ConfigRecord` is a Python dictionary designed to ensure that
@@ -111,7 +120,7 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues]):
 
     def __init__(
         self,
-        config_dict: Optional[dict[str, ConfigRecordValues]] = None,
+        config_dict: dict[str, ConfigRecordValues] | None = None,
         keep_input: bool = True,
     ) -> None:
 
@@ -164,6 +173,52 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues]):
 
         return num_bytes
 
+    def deflate(self) -> bytes:
+        """Deflate object."""
+        protos = record_value_dict_to_proto(
+            self,
+            [bool, int, float, str, bytes],
+            ProtoConfigRecordValue,
+        )
+        obj_body = ProtoConfigRecord(
+            items=[ProtoConfigRecord.Item(key=k, value=v) for k, v in protos.items()]
+        ).SerializeToString()
+        return add_header_to_object_body(object_body=obj_body, obj=self)
+
+    @classmethod
+    def inflate(
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
+    ) -> ConfigRecord:
+        """Inflate a ConfigRecord from bytes.
+
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content of the ConfigRecord.
+
+        children : Optional[dict[str, InflatableObject]] (default: None)
+            Must be ``None``. ``ConfigRecord`` does not support child objects.
+            Providing any children will raise a ``ValueError``.
+
+        Returns
+        -------
+        ConfigRecord
+            The inflated ConfigRecord.
+        """
+        if children:
+            raise ValueError("`ConfigRecord` objects do not have children.")
+
+        obj_body = get_object_body(object_content, cls)
+        config_record_proto = ProtoConfigRecord.FromString(obj_body)
+        protos = {item.key: item.value for item in config_record_proto.items}
+        return ConfigRecord(
+            config_dict=cast(
+                dict[str, ConfigRecordValues],
+                record_value_dict_from_proto(protos),
+            ),
+            keep_input=False,
+        )
+
 
 class ConfigsRecord(ConfigRecord):
     """Deprecated class ``ConfigsRecord``, use ``ConfigRecord`` instead.
@@ -195,7 +250,7 @@ class ConfigsRecord(ConfigRecord):
 
     def __init__(
         self,
-        config_dict: Optional[dict[str, ConfigRecordValues]] = None,
+        config_dict: dict[str, ConfigRecordValues] | None = None,
         keep_input: bool = True,
     ):
         if not ConfigsRecord._warning_logged:

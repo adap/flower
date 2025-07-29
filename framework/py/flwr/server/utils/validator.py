@@ -27,8 +27,8 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
     validation_errors = []
     metadata = message.metadata
 
-    if metadata.message_id != "":
-        validation_errors.append("non-empty `metadata.message_id`")
+    if metadata.message_id == "":
+        validation_errors.append("empty `metadata.message_id`")
 
     # Created/delivered/TTL/Pushed
     if (

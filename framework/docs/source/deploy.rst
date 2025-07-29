@@ -17,5 +17,9 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-enable-tls-connections
     how-to-authenticate-supernodes
     how-to-configure-logging
+    how-to-run-flower-on-gcp
     how-to-run-flower-on-azure
+    how-to-authenticate-users
+    how-to-configure-audit-logging
     docker/index
+    helm/index

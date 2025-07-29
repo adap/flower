@@ -25,19 +25,20 @@ from pathlib import Path
 from queue import Empty, Queue
 from time import sleep
 from typing import Callable, Optional
+from uuid import uuid4
 
+from flwr.app.error import Error
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.clientapp.utils import get_load_client_app_fn
 from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import Message
 from flwr.common.constant import (
+    HEARTBEAT_MAX_INTERVAL,
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
-    PING_MAX_INTERVAL,
     ErrorCode,
 )
 from flwr.common.logger import log
-from flwr.common.message import Error
 from flwr.common.typing import Run
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
@@ -53,7 +54,7 @@ def _register_nodes(
     nodes_mapping: NodeToPartitionMapping = {}
     state = state_factory.state()
     for i in range(num_nodes):
-        node_id = state.create_node(ping_interval=PING_MAX_INTERVAL)
+        node_id = state.create_node(heartbeat_interval=HEARTBEAT_MAX_INTERVAL)
         nodes_mapping[node_id] = i
     log(DEBUG, "Registered %i nodes", len(nodes_mapping))
     return nodes_mapping
@@ -134,6 +135,8 @@ def worker(
 
         finally:
             if out_mssg:
+                # Assign a message_id
+                out_mssg.metadata.__dict__["_message_id"] = str(uuid4())
                 # Store reply Messages in state
                 messageres_queue.put(out_mssg)
 

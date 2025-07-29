@@ -18,14 +18,32 @@
 from __future__ import annotations
 
 from logging import WARNING
-from typing import Any, Optional, cast, overload
+from typing import Any, cast, overload
 
 from flwr.common.date import now
 from flwr.common.logger import warn_deprecated_feature
+from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
+from flwr.proto.message_pb2 import Metadata as ProtoMetadata  # pylint: disable=E0611
+from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
 
-from .constant import MESSAGE_TTL_TOLERANCE, MessageType, MessageTypeLegacy
+from ..app.error import Error
+from ..app.metadata import Metadata
+from .constant import MESSAGE_TTL_TOLERANCE
+from .inflatable import (
+    InflatableObject,
+    add_header_to_object_body,
+    get_descendant_object_ids,
+    get_object_body,
+    get_object_children_ids_from_object_content,
+)
 from .logger import log
 from .record import RecordDict
+from .serde_utils import (
+    error_from_proto,
+    error_to_proto,
+    metadata_from_proto,
+    metadata_to_proto,
+)
 
 DEFAULT_TTL = 43200  # This is 12 hours
 MESSAGE_INIT_ERROR_MESSAGE = (
@@ -56,203 +74,7 @@ class MessageInitializationError(TypeError):
         super().__init__(message or MESSAGE_INIT_ERROR_MESSAGE)
 
 
-class Metadata:  # pylint: disable=too-many-instance-attributes
-    """The class representing metadata associated with the current message.
-
-    Parameters
-    ----------
-    run_id : int
-        An identifier for the current run.
-    message_id : str
-        An identifier for the current message.
-    src_node_id : int
-        An identifier for the node sending this message.
-    dst_node_id : int
-        An identifier for the node receiving this message.
-    reply_to_message_id : str
-        An identifier for the message to which this message is a reply.
-    group_id : str
-        An identifier for grouping messages. In some settings,
-        this is used as the FL round.
-    created_at : float
-        Unix timestamp when the message was created.
-    ttl : float
-        Time-to-live for this message in seconds.
-    message_type : str
-        A string that encodes the action to be executed on
-        the receiving end.
-    """
-
-    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
-        self,
-        run_id: int,
-        message_id: str,
-        src_node_id: int,
-        dst_node_id: int,
-        reply_to_message_id: str,
-        group_id: str,
-        created_at: float,
-        ttl: float,
-        message_type: str,
-    ) -> None:
-        var_dict = {
-            "_run_id": run_id,
-            "_message_id": message_id,
-            "_src_node_id": src_node_id,
-            "_dst_node_id": dst_node_id,
-            "_reply_to_message_id": reply_to_message_id,
-            "_group_id": group_id,
-            "_created_at": created_at,
-            "_ttl": ttl,
-            "_message_type": message_type,
-        }
-        self.__dict__.update(var_dict)
-        self.message_type = message_type  # Trigger validation
-
-    @property
-    def run_id(self) -> int:
-        """An identifier for the current run."""
-        return cast(int, self.__dict__["_run_id"])
-
-    @property
-    def message_id(self) -> str:
-        """An identifier for the current message."""
-        return cast(str, self.__dict__["_message_id"])
-
-    @property
-    def src_node_id(self) -> int:
-        """An identifier for the node sending this message."""
-        return cast(int, self.__dict__["_src_node_id"])
-
-    @property
-    def reply_to_message_id(self) -> str:
-        """An identifier for the message to which this message is a reply."""
-        return cast(str, self.__dict__["_reply_to_message_id"])
-
-    @property
-    def dst_node_id(self) -> int:
-        """An identifier for the node receiving this message."""
-        return cast(int, self.__dict__["_dst_node_id"])
-
-    @dst_node_id.setter
-    def dst_node_id(self, value: int) -> None:
-        """Set dst_node_id."""
-        self.__dict__["_dst_node_id"] = value
-
-    @property
-    def group_id(self) -> str:
-        """An identifier for grouping messages."""
-        return cast(str, self.__dict__["_group_id"])
-
-    @group_id.setter
-    def group_id(self, value: str) -> None:
-        """Set group_id."""
-        self.__dict__["_group_id"] = value
-
-    @property
-    def created_at(self) -> float:
-        """Unix timestamp when the message was created."""
-        return cast(float, self.__dict__["_created_at"])
-
-    @created_at.setter
-    def created_at(self, value: float) -> None:
-        """Set creation timestamp of this message."""
-        self.__dict__["_created_at"] = value
-
-    @property
-    def delivered_at(self) -> str:
-        """Unix timestamp when the message was delivered."""
-        return cast(str, self.__dict__["_delivered_at"])
-
-    @delivered_at.setter
-    def delivered_at(self, value: str) -> None:
-        """Set delivery timestamp of this message."""
-        self.__dict__["_delivered_at"] = value
-
-    @property
-    def ttl(self) -> float:
-        """Time-to-live for this message."""
-        return cast(float, self.__dict__["_ttl"])
-
-    @ttl.setter
-    def ttl(self, value: float) -> None:
-        """Set ttl."""
-        self.__dict__["_ttl"] = value
-
-    @property
-    def message_type(self) -> str:
-        """A string that encodes the action to be executed on the receiving end."""
-        return cast(str, self.__dict__["_message_type"])
-
-    @message_type.setter
-    def message_type(self, value: str) -> None:
-        """Set message_type."""
-        # Validate message type
-        if validate_legacy_message_type(value):
-            pass  # Backward compatibility for legacy message types
-        elif not validate_message_type(value):
-            raise ValueError(
-                f"Invalid message type: '{value}'. "
-                "Expected format: '<category>' or '<category>.<action>', "
-                "where <category> must be 'train', 'evaluate', or 'query', "
-                "and <action> must be a valid Python identifier."
-            )
-
-        self.__dict__["_message_type"] = value
-
-    def __repr__(self) -> str:
-        """Return a string representation of this instance."""
-        view = ", ".join([f"{k.lstrip('_')}={v!r}" for k, v in self.__dict__.items()])
-        return f"{self.__class__.__qualname__}({view})"
-
-    def __eq__(self, other: object) -> bool:
-        """Compare two instances of the class."""
-        if not isinstance(other, self.__class__):
-            raise NotImplementedError
-        return self.__dict__ == other.__dict__
-
-
-class Error:
-    """The class storing information about an error that occurred.
-
-    Parameters
-    ----------
-    code : int
-        An identifier for the error.
-    reason : Optional[str]
-        A reason for why the error arose (e.g. an exception stack-trace)
-    """
-
-    def __init__(self, code: int, reason: str | None = None) -> None:
-        var_dict = {
-            "_code": code,
-            "_reason": reason,
-        }
-        self.__dict__.update(var_dict)
-
-    @property
-    def code(self) -> int:
-        """Error code."""
-        return cast(int, self.__dict__["_code"])
-
-    @property
-    def reason(self) -> str | None:
-        """Reason reported about the error."""
-        return cast(Optional[str], self.__dict__["_reason"])
-
-    def __repr__(self) -> str:
-        """Return a string representation of this instance."""
-        view = ", ".join([f"{k.lstrip('_')}={v!r}" for k, v in self.__dict__.items()])
-        return f"{self.__class__.__qualname__}({view})"
-
-    def __eq__(self, other: object) -> bool:
-        """Compare two instances of the class."""
-        if not isinstance(other, self.__class__):
-            raise NotImplementedError
-        return self.__dict__ == other.__dict__
-
-
-class Message:
+class Message(InflatableObject):
     """Represents a message exchanged between ClientApp and ServerApp.
 
     This class encapsulates the payload and metadata necessary for communication
@@ -525,12 +347,94 @@ class Message:
         )
         return f"{self.__class__.__qualname__}({view})"
 
+    @property
+    def children(self) -> dict[str, InflatableObject] | None:
+        """Return a dictionary of a single RecordDict with its Object IDs as key."""
+        return {self.content.object_id: self.content} if self.has_content() else None
+
+    def deflate(self) -> bytes:
+        """Deflate message."""
+        # Exclude message_id from serialization
+        proto_metadata: ProtoMetadata = metadata_to_proto(self.metadata)
+        proto_metadata.message_id = ""
+        # Store message metadata and error in object body
+        obj_body = ProtoMessage(
+            metadata=proto_metadata,
+            content=None,
+            error=error_to_proto(self.error) if self.has_error() else None,
+        ).SerializeToString(deterministic=True)
+
+        return add_header_to_object_body(object_body=obj_body, obj=self)
+
+    @classmethod
+    def inflate(
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
+    ) -> Message:
+        """Inflate an Message from bytes.
+
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content of the Message.
+        children : Optional[dict[str, InflatableObject]] (default: None)
+            Dictionary of children InflatableObjects mapped to their Object IDs.
+            These children enable the full inflation of the Message.
+
+        Returns
+        -------
+        Message
+            The inflated Message.
+        """
+        if children is None:
+            children = {}
+
+        # Get the children id from the deflated message
+        children_ids = get_object_children_ids_from_object_content(object_content)
+
+        # If the message had content, only one children is possible
+        # If the message carried an error, the returned listed should be empty
+        if children_ids != list(children.keys()):
+            raise ValueError(
+                f"Mismatch in children object IDs: expected {children_ids}, but "
+                f"received {list(children.keys())}. The provided children must exactly "
+                "match the IDs specified in the object head."
+            )
+
+        # Inflate content
+        obj_body = get_object_body(object_content, cls)
+        proto_message = ProtoMessage.FromString(obj_body)
+
+        # Prepare content if error wasn't set in protobuf message
+        if proto_message.HasField("error"):
+            content = None
+            error = error_from_proto(proto_message.error)
+        else:
+            content = cast(RecordDict, children[children_ids[0]])
+            error = None
+        # Return message
+        return make_message(
+            metadata=metadata_from_proto(proto_message.metadata),
+            content=content,
+            error=error,
+        )
+
 
 def make_message(
     metadata: Metadata, content: RecordDict | None = None, error: Error | None = None
 ) -> Message:
     """Create a message with the provided metadata, content, and error."""
     return Message(metadata=metadata, content=content, error=error)  # type: ignore
+
+
+def remove_content_from_message(message: Message) -> Message:
+    """Return a copy of the Message but with an empty RecordDict as content.
+
+    If message has no content, it returns itself.
+    """
+    if message.has_error():
+        return message
+
+    return make_message(metadata=message.metadata, content=RecordDict())
 
 
 def _limit_reply_ttl(
@@ -616,46 +520,10 @@ def _check_arg_types(  # pylint: disable=too-many-arguments, R0917
     raise MessageInitializationError()
 
 
-def validate_message_type(message_type: str) -> bool:
-    """Validate if the message type is valid.
-
-    A valid message type format must be one of the following:
-
-    - "<category>"
-    - "<category>.<action>"
-
-    where `category` must be one of "train", "evaluate", or "query",
-    and `action` must be a valid Python identifier.
-    """
-    # Check if conforming to the format "<category>"
-    valid_types = {
-        MessageType.TRAIN,
-        MessageType.EVALUATE,
-        MessageType.QUERY,
-        MessageType.SYSTEM,
+def get_message_to_descendant_id_mapping(message: Message) -> dict[str, ObjectIDs]:
+    """Construct a mapping between message object_id and that of its descendants."""
+    return {
+        message.object_id: ObjectIDs(
+            object_ids=list(get_descendant_object_ids(message))
+        )
     }
-    if message_type in valid_types:
-        return True
-
-    # Check if conforming to the format "<category>.<action>"
-    if message_type.count(".") != 1:
-        return False
-
-    category, action = message_type.split(".")
-    if category in valid_types and action.isidentifier():
-        return True
-
-    return False
-
-
-def validate_legacy_message_type(message_type: str) -> bool:
-    """Validate if the legacy message type is valid."""
-    # Backward compatibility for legacy message types
-    if message_type in (
-        MessageTypeLegacy.GET_PARAMETERS,
-        MessageTypeLegacy.GET_PROPERTIES,
-        "reconnect",
-    ):
-        return True
-
-    return False

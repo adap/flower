@@ -32,14 +32,17 @@ def message_size_mod(
 
     This mod logs the size in bytes of the message being transmited.
     """
-    message_size_in_bytes = 0
+    # Log the size of the incoming message in bytes
+    total_bytes = sum(record.count_bytes() for record in msg.content.values())
+    log(INFO, "Incoming message size: %i bytes", total_bytes)
 
-    for record in msg.content.values():
-        message_size_in_bytes += record.count_bytes()
+    # Call the next layer
+    msg = call_next(msg, ctxt)
 
-    log(INFO, "Message size: %i bytes", message_size_in_bytes)
-
-    return call_next(msg, ctxt)
+    # Log the size of the outgoing message in bytes
+    total_bytes = sum(record.count_bytes() for record in msg.content.values())
+    log(INFO, "Outgoing message size: %i bytes", total_bytes)
+    return msg
 
 
 def arrays_size_mod(
@@ -50,25 +53,41 @@ def arrays_size_mod(
     This mod logs the number of array elements transmitted in ``ArrayRecord`` objects
     of the message as well as their sizes in bytes.
     """
-    model_size_stats = {}
-    arrays_size_in_bytes = 0
+    # Log the ArrayRecord size statistics and the total size in the incoming message
+    array_record_size_stats = _get_array_record_size_stats(msg)
+    total_bytes = sum(stat["bytes"] for stat in array_record_size_stats.values())
+    if array_record_size_stats:
+        log(INFO, "Incoming `ArrayRecord` size statistics:")
+        log(INFO, array_record_size_stats)
+    log(INFO, "Total array elements received: %i bytes", total_bytes)
+
+    msg = call_next(msg, ctxt)
+
+    # Log the ArrayRecord size statistics and the total size in the outgoing message
+    array_record_size_stats = _get_array_record_size_stats(msg)
+    total_bytes = sum(stat["bytes"] for stat in array_record_size_stats.values())
+    if array_record_size_stats:
+        log(INFO, "Outgoing `ArrayRecord` size statistics:")
+        log(INFO, array_record_size_stats)
+    log(INFO, "Total array elements sent: %i bytes", total_bytes)
+    return msg
+
+
+def _get_array_record_size_stats(
+    msg: Message,
+) -> dict[str, dict[str, int]]:
+    """Get `ArrayRecord` size statistics from the message."""
+    array_record_size_stats = {}
     for record_name, arr_record in msg.content.array_records.items():
         arr_record_bytes = arr_record.count_bytes()
-        arrays_size_in_bytes += arr_record_bytes
         element_count = 0
         for array in arr_record.values():
             element_count += (
                 int(np.prod(array.shape)) if array.shape else array.numpy().size
             )
 
-        model_size_stats[f"{record_name}"] = {
+        array_record_size_stats[record_name] = {
             "elements": element_count,
             "bytes": arr_record_bytes,
         }
-
-    if model_size_stats:
-        log(INFO, model_size_stats)
-
-    log(INFO, "Total array elements transmitted: %i bytes", arrays_size_in_bytes)
-
-    return call_next(msg, ctxt)
+    return array_record_size_stats

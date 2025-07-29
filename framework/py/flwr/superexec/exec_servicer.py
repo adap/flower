@@ -18,21 +18,26 @@
 import time
 from collections.abc import Generator
 from logging import ERROR, INFO
-from typing import Any, Optional
-from uuid import UUID
+from typing import Any, Optional, cast
 
 import grpc
 
 from flwr.common import now
 from flwr.common.auth_plugin import ExecAuthPlugin
-from flwr.common.constant import LOG_STREAM_INTERVAL, Status, SubStatus
+from flwr.common.constant import (
+    FAB_MAX_SIZE,
+    LOG_STREAM_INTERVAL,
+    RUN_ID_NOT_FOUND_MESSAGE,
+    Status,
+    SubStatus,
+)
 from flwr.common.logger import log
 from flwr.common.serde import (
     config_record_from_proto,
     run_to_proto,
     user_config_from_proto,
 )
-from flwr.common.typing import RunStatus
+from flwr.common.typing import Run, RunStatus
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
@@ -48,24 +53,28 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsRequest,
     StreamLogsResponse,
 )
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 
+from .exec_user_auth_interceptor import shared_account_info
 from .executor import Executor
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """SuperExec API servicer."""
 
-    def __init__(
+    def __init__(  # pylint: disable=R0913, R0917
         self,
         linkstate_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
+        objectstore_factory: ObjectStoreFactory,
         executor: Executor,
         auth_plugin: Optional[ExecAuthPlugin] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
+        self.objectstore_factory = objectstore_factory
         self.executor = executor
         self.executor.initialize(linkstate_factory, ffs_factory)
         self.auth_plugin = auth_plugin
@@ -76,10 +85,20 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
 
+        if len(request.fab.content) > FAB_MAX_SIZE:
+            log(
+                ERROR,
+                "FAB size exceeds maximum allowed size of %d bytes.",
+                FAB_MAX_SIZE,
+            )
+            return StartRunResponse()
+
+        flwr_aid = shared_account_info.get().flwr_aid if self.auth_plugin else None
         run_id = self.executor.start_run(
             request.fab.content,
             user_config_from_proto(request.override_config),
             config_record_from_proto(request.federation_options),
+            flwr_aid,
         )
 
         if run_id is None:
@@ -95,12 +114,20 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         log(INFO, "ExecServicer.StreamLogs")
         state = self.linkstate_factory.state()
 
-        # Retrieve run ID
+        # Retrieve run ID and run
         run_id = request.run_id
+        run = state.get_run(run_id)
 
         # Exit if `run_id` not found
-        if not state.get_run(run_id):
-            context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+        if not run:
+            context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+
+        # If user auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
+        if self.auth_plugin:
+            flwr_aid = shared_account_info.get().flwr_aid
+            _check_flwr_aid_in_run(
+                flwr_aid=flwr_aid, run=cast(Run, run), context=context
+            )
 
         after_timestamp = request.after_timestamp + 1e-6
         while context.is_active():
@@ -119,7 +146,10 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             # is returned at this point and the server ends the stream.
             run_status = state.get_run_status({run_id})[run_id]
             if run_status.status == Status.FINISHED:
-                log(INFO, "All logs for run ID `%s` returned", request.run_id)
+                log(INFO, "All logs for run ID `%s` returned", run_id)
+
+                # Delete objects of the run from the object store
+                self.objectstore_factory.store().delete_objects_in_run(run_id)
                 break
 
             time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
@@ -131,11 +161,44 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         log(INFO, "ExecServicer.List")
         state = self.linkstate_factory.state()
 
-        # Handle `flwr ls --runs`
+        # Build a set of run IDs for `flwr ls --runs`
         if not request.HasField("run_id"):
-            return _create_list_runs_response(state.get_run_ids(), state)
-        # Handle `flwr ls --run-id <run_id>`
-        return _create_list_runs_response({request.run_id}, state)
+            if self.auth_plugin:
+                # If no `run_id` is specified and user auth is enabled,
+                # return run IDs for the authenticated user
+                flwr_aid = shared_account_info.get().flwr_aid
+                if flwr_aid is None:
+                    context.abort(
+                        grpc.StatusCode.PERMISSION_DENIED,
+                        "️⛔️ User authentication is enabled, but `flwr_aid` is None",
+                    )
+                run_ids = state.get_run_ids(flwr_aid=flwr_aid)
+            else:
+                # If no `run_id` is specified and no user auth is enabled,
+                # return all run IDs
+                run_ids = state.get_run_ids(None)
+        # Build a set of run IDs for `flwr ls --run-id <run_id>`
+        else:
+            # Retrieve run ID and run
+            run_id = request.run_id
+            run = state.get_run(run_id)
+
+            # Exit if `run_id` not found
+            if not run:
+                context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+
+            # If user auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
+            if self.auth_plugin:
+                flwr_aid = shared_account_info.get().flwr_aid
+                _check_flwr_aid_in_run(
+                    flwr_aid=flwr_aid, run=cast(Run, run), context=context
+                )
+
+            run_ids = {run_id}
+
+        # Init the object store
+        store = self.objectstore_factory.store()
+        return _create_list_runs_response(run_ids, state, store)
 
     def StopRun(
         self, request: StopRunRequest, context: grpc.ServicerContext
@@ -144,29 +207,41 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         log(INFO, "ExecServicer.StopRun")
         state = self.linkstate_factory.state()
 
+        # Retrieve run ID and run
+        run_id = request.run_id
+        run = state.get_run(run_id)
+
         # Exit if `run_id` not found
-        if not state.get_run(request.run_id):
-            context.abort(
-                grpc.StatusCode.NOT_FOUND, f"Run ID {request.run_id} not found"
+        if not run:
+            context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+
+        # If user auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
+        if self.auth_plugin:
+            flwr_aid = shared_account_info.get().flwr_aid
+            _check_flwr_aid_in_run(
+                flwr_aid=flwr_aid, run=cast(Run, run), context=context
             )
 
-        run_status = state.get_run_status({request.run_id})[request.run_id]
+        run_status = state.get_run_status({run_id})[run_id]
         if run_status.status == Status.FINISHED:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
-                f"Run ID {request.run_id} is already finished",
+                f"Run ID {run_id} is already finished",
             )
 
         update_success = state.update_run_status(
-            run_id=request.run_id,
+            run_id=run_id,
             new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
         )
 
         if update_success:
-            message_ids: set[UUID] = state.get_message_ids_from_run_id(request.run_id)
+            message_ids: set[str] = state.get_message_ids_from_run_id(run_id)
 
             # Delete Messages and their replies for the `run_id`
             state.delete_messages(message_ids)
+
+            # Delete objects of the run from the object store
+            self.objectstore_factory.store().delete_objects_in_run(run_id)
 
         return StopRunResponse(success=update_success)
 
@@ -222,10 +297,46 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         )
 
 
-def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:
+def _create_list_runs_response(
+    run_ids: set[int], state: LinkState, store: ObjectStore
+) -> ListRunsResponse:
     """Create response for `flwr ls --runs` and `flwr ls --run-id <run_id>`."""
-    run_dict = {run_id: state.get_run(run_id) for run_id in run_ids}
+    run_dict = {run_id: run for run_id in run_ids if (run := state.get_run(run_id))}
+
+    # Delete objects of finished runs from the object store
+    for run_id, run in run_dict.items():
+        if run.status.status == Status.FINISHED:
+            store.delete_objects_in_run(run_id)
+
     return ListRunsResponse(
-        run_dict={run_id: run_to_proto(run) for run_id, run in run_dict.items() if run},
+        run_dict={run_id: run_to_proto(run) for run_id, run in run_dict.items()},
         now=now().isoformat(),
     )
+
+
+def _check_flwr_aid_in_run(
+    flwr_aid: Optional[str], run: Run, context: grpc.ServicerContext
+) -> None:
+    """Guard clause to check if `flwr_aid` matches the run's `flwr_aid`."""
+    # `flwr_aid` must not be None. Abort if it is None.
+    if flwr_aid is None:
+        context.abort(
+            grpc.StatusCode.PERMISSION_DENIED,
+            "️⛔️ User authentication is enabled, but `flwr_aid` is None",
+        )
+
+    # `run.flwr_aid` must not be an empty string. Abort if it is empty.
+    run_flwr_aid = run.flwr_aid
+    if not run_flwr_aid:
+        context.abort(
+            grpc.StatusCode.PERMISSION_DENIED,
+            "⛔️ User authentication is enabled, but the run is not associated "
+            "with a `flwr_aid`.",
+        )
+
+    # Exit if `flwr_aid` does not match the run's `flwr_aid`
+    if run_flwr_aid != flwr_aid:
+        context.abort(
+            grpc.StatusCode.PERMISSION_DENIED,
+            "⛔️ Run ID does not belong to the user",
+        )

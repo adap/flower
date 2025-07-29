@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Unit tests for ArrayRecord and Array."""
+"""Unit tests for ArrayRecord."""
 
 
+import json
 import sys
 import unittest
 from collections import OrderedDict
@@ -30,8 +31,10 @@ from parameterized import parameterized
 from flwr.common import ndarray_to_bytes
 
 from ..constant import SType
+from ..inflatable import get_object_body, get_object_type_from_object_content
 from ..typing import NDArray
-from .arrayrecord import Array, ArrayRecord
+from .array import Array
+from .arrayrecord import ArrayRecord
 
 
 def _get_buffer_from_ndarray(array: NDArray) -> bytes:
@@ -48,128 +51,6 @@ class TorchTensor(Mock):
 MOCK_TORCH_TENSOR = TorchTensor(numpy=lambda: np.array([[1, 2, 3]]))
 MOCK_TORCH_TENSOR.detach.return_value = MOCK_TORCH_TENSOR
 MOCK_TORCH_TENSOR.cpu.return_value = MOCK_TORCH_TENSOR
-
-
-class TestArray(unittest.TestCase):
-    """Unit tests for Array."""
-
-    def setUp(self) -> None:
-        """Set up the test case."""
-        # Patch torch
-        self.torch_mock = Mock(spec=ModuleType, Tensor=TorchTensor)
-        self._original_torch = sys.modules.get("torch")
-        sys.modules["torch"] = self.torch_mock
-
-    def tearDown(self) -> None:
-        """Tear down the test case."""
-        # Unpatch torch
-        del sys.modules["torch"]
-        if self._original_torch is not None:
-            sys.modules["torch"] = self._original_torch
-
-    def test_numpy_conversion_valid(self) -> None:
-        """Test the numpy method with valid Array instance."""
-        # Prepare
-        original_array = np.array([1, 2, 3], dtype=np.float32)
-
-        buffer = _get_buffer_from_ndarray(original_array)
-
-        # Execute
-        array_instance = Array(
-            dtype=str(original_array.dtype),
-            shape=list(original_array.shape),
-            stype=SType.NUMPY,
-            data=buffer,
-        )
-        converted_array = array_instance.numpy()
-
-        # Assert
-        np.testing.assert_array_equal(converted_array, original_array)
-
-    def test_numpy_conversion_invalid(self) -> None:
-        """Test the numpy method with invalid Array instance."""
-        # Prepare
-        array_instance = Array(
-            dtype="float32",
-            shape=[3],
-            stype="invalid_stype",  # Non-numpy stype
-            data=b"",
-        )
-
-        # Execute and assert
-        with self.assertRaises(TypeError):
-            array_instance.numpy()
-
-    def test_array_from_numpy(self) -> None:
-        """Test the array_from_numpy function."""
-        # Prepare
-        original_array = np.array([1, 2, 3], dtype=np.float32)
-
-        # Execute
-        array_instance = Array.from_numpy_ndarray(original_array)
-        buffer = BytesIO(array_instance.data)
-        deserialized_array = np.load(buffer, allow_pickle=False)
-
-        # Assert
-        self.assertEqual(array_instance.dtype, str(original_array.dtype))
-        self.assertEqual(array_instance.shape, list(original_array.shape))
-        self.assertEqual(array_instance.stype, SType.NUMPY)
-        np.testing.assert_array_equal(deserialized_array, original_array)
-
-    def test_from_torch_tensor_with_torch(self) -> None:
-        """Test creating an Array from a PyTorch tensor (mocked torch)."""
-        # Prepare
-        mock_tensor = TorchTensor()
-
-        # Mock .detach().cpu().numpy() to return a NumPy array
-        mock_tensor.detach.return_value = mock_tensor
-        mock_tensor.cpu.return_value = mock_tensor
-        mock_tensor.numpy.return_value = np.array([[5, 6], [7, 8]], dtype=np.float32)
-
-        # Execute
-        arr = Array.from_torch_tensor(mock_tensor)
-
-        # Assert
-        self.assertEqual(arr.dtype, "float32")
-        self.assertEqual(arr.shape, [2, 2])
-        self.assertEqual(arr.stype, SType.NUMPY)
-
-    @parameterized.expand(  # type: ignore
-        [
-            ({"torch_tensor": MOCK_TORCH_TENSOR},),
-            ({"ndarray": np.array([1, 2, 3])},),
-            ({"dtype": "float32", "shape": [2, 2], "stype": "dense", "data": b"data"},),
-        ]
-    )
-    def test_valid_init_overloads_kwargs(self, kwargs: dict[str, Any]) -> None:
-        """Ensure valid overloads initialize correctly."""
-        array = Array(**kwargs)
-        self.assertIsInstance(array, Array)
-
-    @parameterized.expand(  # type: ignore
-        [
-            (MOCK_TORCH_TENSOR,),
-            (np.array([1, 2, 3]),),
-            ("float32", [2, 2], "dense", b"data"),
-        ]
-    )
-    def test_valid_init_overloads_args(self, *args: Any) -> None:
-        """Ensure valid overloads initialize correctly."""
-        array = Array(*args)
-        self.assertIsInstance(array, Array)
-
-    @parameterized.expand(  # type: ignore
-        [
-            (MOCK_TORCH_TENSOR, np.array([1])),
-            ("float32", [2, 2], "dense", 213),
-            ([2, 2], "dense", b"data"),
-            (123, "invalid"),
-        ]
-    )
-    def test_invalid_init_combinations(self, *args: Any) -> None:
-        """Ensure invalid combinations raise TypeError."""
-        with self.assertRaises(TypeError):
-            Array(*args)
 
 
 class TestArrayRecord(unittest.TestCase):
@@ -339,7 +220,7 @@ class TestArrayRecord(unittest.TestCase):
     def test_init_array_dict_keep_input_false(self, use_keyword: bool) -> None:
         """Test initializing with an array_dict and keep_input=False."""
         # Prepare
-        arr = Array(dtype="float32", shape=[2, 2], stype=SType.NUMPY, data=b"data")
+        arr = Array(dtype="float32", shape=(2, 2), stype=SType.NUMPY, data=b"data")
         arr_dict: OrderedDict[str, Array] = OrderedDict({"x": arr})
 
         # Execute
@@ -354,8 +235,8 @@ class TestArrayRecord(unittest.TestCase):
 
     @parameterized.expand(  # type: ignore
         [
-            ("array_dict", OrderedDict({"x": Array("mock", [1], "np", b"data")})),
-            (None, OrderedDict({"x": Array("mock", [1], "np", b"data")})),
+            ("array_dict", OrderedDict({"x": Array("mock", (1,), "np", b"data")})),
+            (None, OrderedDict({"x": Array("mock", (1,), "np", b"data")})),
             ("torch_state_dict", OrderedDict({"x": MOCK_TORCH_TENSOR})),
             (None, OrderedDict({"x": MOCK_TORCH_TENSOR})),
             ("numpy_ndarrays", [np.array([1, 2, 3])]),
@@ -391,7 +272,7 @@ class TestArrayRecord(unittest.TestCase):
     def test_init_array_dict_keep_input_true(self, use_keyword: bool) -> None:
         """Test initializing with an array_dict and keep_input=True."""
         # Prepare
-        arr = Array(dtype="float32", shape=[2, 2], stype=SType.NUMPY, data=b"data")
+        arr = Array(dtype="float32", shape=(2, 2), stype=SType.NUMPY, data=b"data")
         arr_dict: OrderedDict[str, Array] = OrderedDict({"x": arr})
 
         # Execute
@@ -449,16 +330,83 @@ class TestArrayRecord(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, "Invalid arguments for ArrayRecord.*"):
             ArrayRecord(*args, **kwargs)
 
+    @parameterized.expand(  # type: ignore
+        [
+            ([np.array([1, 2]), np.array([3, 4])],),  # Two arrays
+            ([np.array(5)],),  # Single array
+            ([],),  # Empty list
+            ([np.array(5), np.array(5)],),  # Same array twice
+        ]
+    )
+    def test_inflation_deflation(self, array_content) -> None:
+        """Test inflation and deflation of ArrayRecord."""
+        arr_rec = ArrayRecord(array_content)
+
+        # Assert
+        # Expected children
+        assert arr_rec.children == {arr.object_id: arr for arr in arr_rec.values()}
+
+        arr_rec_b = arr_rec.deflate()
+
+        # Assert
+        # Class name matches
+        assert (
+            get_object_type_from_object_content(arr_rec_b)
+            == arr_rec.__class__.__qualname__
+        )
+        # Body of deflfated ArrayRecord matches its direct protobuf serialization
+        array_refs = {name: arr.object_id for name, arr in arr_rec.items()}
+        array_refs_enc = json.dumps(array_refs).encode("utf-8")
+        assert get_object_body(arr_rec_b, ArrayRecord) == array_refs_enc
+
+        # Inflate
+        # Assert if children needed but not passed:
+        if len(array_content) > 0:
+            with pytest.raises(ValueError):
+                ArrayRecord.inflate(arr_rec_b)
+
+        # Check children
+        # Assert if children not computed correctly
+        assert set(arr_rec.children.keys()) == {
+            arr.object_id for arr in arr_rec.values()
+        }
+
+        # Inflate passing children (if any)
+        arr_rec_ = ArrayRecord.inflate(arr_rec_b, children=arr_rec.children)
+
+        # Assert
+        # Both objects are identical
+        assert arr_rec.object_id == arr_rec_.object_id
+
+    def test_inflation_with_unsupported_children(self) -> None:
+        """Test inflation of an ArrayRecord when children are not Arrays."""
+        arr = np.array(5)
+        arr_rec = ArrayRecord([arr])
+
+        # Deflate
+        arr_rec_b = arr_rec.deflate()
+
+        # Assert
+        # Inflate but passing no children
+        with pytest.raises(ValueError):
+            ArrayRecord.inflate(arr_rec_b)
+        # Inflate but passing wrong Children type
+        with pytest.raises(ValueError):
+            ArrayRecord.inflate(arr_rec_b, children={"123": np.array(5)})  # type: ignore
+        # Inflate but passing children with wrong Object ID
+        with pytest.raises(ValueError):
+            ArrayRecord.inflate(arr_rec_b, children={"123": Array(arr)})
+
 
 @pytest.mark.parametrize(
     "shape, dtype",
     [
-        ([100], "float32"),
-        ([31, 31], "int8"),
-        ([31, 153], "bool_"),  # bool_ is represented as a whole Byte in NumPy
+        ((100,), "float32"),
+        ((31, 31), "int8"),
+        ((31, 153), "bool_"),  # bool_ is represented as a whole Byte in NumPy
     ],
 )
-def test_count_bytes(shape: list[int], dtype: str) -> None:
+def test_count_bytes(shape: tuple[int, ...], dtype: str) -> None:
     """Test bytes in a ArrayRecord are computed correctly."""
     original_array = np.random.randn(*shape).astype(np.dtype(dtype))
 
@@ -468,7 +416,7 @@ def test_count_bytes(shape: list[int], dtype: str) -> None:
 
     array_instance = Array(
         dtype=str(original_array.dtype),
-        shape=list(original_array.shape),
+        shape=tuple(original_array.shape),
         stype=SType.NUMPY,
         data=buffer,
     )
