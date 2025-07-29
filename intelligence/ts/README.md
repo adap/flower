@@ -44,7 +44,7 @@ async function main() {
 await main().then().catch();
 ```
 
-## Embed
+## Embedding
 
 ```javascript
 import { FlowerIntelligence } from '@flwr/flwr';
