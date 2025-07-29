@@ -95,6 +95,13 @@ def run(
             help="Format output using 'default' view or 'json'",
         ),
     ] = CliOutputFormat.DEFAULT,
+    debug: Annotated[
+        bool,
+        typer.Option(
+            "--debug",
+            help="Enable debug mode for IDEs (e.g., VSCode breakpoints in user code).",
+        ),
+    ] = False,
 ) -> None:
     """Run Flower App."""
     suppress_output = output_format == CliOutputFormat.JSON
@@ -122,7 +129,7 @@ def run(
             )
         else:
             _run_without_exec_api(
-                app, federation_config, run_config_overrides, federation
+                app, federation_config, run_config_overrides, federation, debug
             )
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
         if suppress_output:
@@ -208,6 +215,7 @@ def _run_without_exec_api(
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
     federation: str,
+    debug: bool = False,
 ) -> None:
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]
@@ -216,8 +224,7 @@ def _run_without_exec_api(
     except KeyError as err:
         typer.secho(
             "❌ The project's `pyproject.toml` needs to declare the number of"
-            " SuperNodes in the simulation. To simulate 10 SuperNodes,"
-            " use the following notation:\n\n"
+            " SuperNodes in the simulation. To simulate 10 SuperNodes," " use the following notation:\n\n"
             f"[tool.flwr.federations.{federation}]\n"
             "options.num-supernodes = 10\n",
             fg=typer.colors.RED,
@@ -242,6 +249,9 @@ def _run_without_exec_api(
 
     if config_overrides:
         command.extend(["--run-config", f"{' '.join(config_overrides)}"])
+
+    if debug:
+        command.append("--debug")
 
     # Run the simulation
     subprocess.run(
