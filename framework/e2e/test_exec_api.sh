@@ -108,14 +108,14 @@ engine="$3"
 
 # Define a cleanup function
 cleanup_and_exit() {
-  if [ "$engine" = "deployment-engine" ]; then
-    kill $cl1_pid; kill $cl2_pid;
-  fi
-  sleep 1; kill $sl_pid;
-  exit $1
+    if [ "$engine" = "deployment-engine" ]; then
+      kill $cl1_pid; kill $cl2_pid;
+    fi
+    sleep 1; kill $sl_pid;
+    exit $1
 }
 
-# Check for "Success" in a loop with a timeout
+# Check for "Run finished" in a loop with a timeout
 while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     if grep -q "ERROR" flwr_output.log; then
         echo "An ERROR occurred during training. Exiting."
