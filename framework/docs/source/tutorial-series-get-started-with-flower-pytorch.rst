@@ -143,8 +143,7 @@ recommend `this introductory tutorial
 The model
 ~~~~~~~~~
 
-We will use the simple CNN described in the `PyTorch tutorial
-<https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html#define-a-convolutional-neural-network>`__
+We will use the simple CNN described in the aforementioned PyTorch tutorial
 (The following code is already defined in ``task.py``):
 
 .. code-block:: python
