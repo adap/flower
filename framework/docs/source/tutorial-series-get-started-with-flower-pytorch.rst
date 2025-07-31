@@ -17,8 +17,8 @@ and data loading. In part 2, we federate the PyTorch project using Flower.
 
 Let’s get started! 🌼
 
-Step 0: Preparation
--------------------
+Preparation
+-----------
 
 Before we begin with any actual code, let’s make sure that we have everything we need.
 
@@ -131,13 +131,13 @@ test set). Again, this is only necessary for building research or educational sy
 actual federated learning systems have their data naturally distributed across multiple
 partitions.
 
-Defining the model and training and evaluate functions
-------------------------------------------------------
+The model and train and evaluate functions
+------------------------------------------
 
 Next, we’re going to use PyTorch to define a simple convolutional neural network. This
 introduction assumes basic familiarity with PyTorch, so it doesn’t cover the
 PyTorch-related aspects in full detail. If you want to dive deeper into PyTorch, we
-recommend `DEEP LEARNING WITH PYTORCH: A 60 MINUTE BLITZ
+recommend `this introductory tutorial
 <https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html>`_.
 
 The model
@@ -213,19 +213,14 @@ The PyTorch template has also provided us with the usual training and test funct
 Federated Learning with Flower
 ------------------------------
 
-Step 1 demonstrated a simple centralized training pipeline. All data was in one place
-(i.e., a single ``trainloader`` and a single ``testloader``). Next, we’ll simulate a
-situation where we have multiple datasets in multiple organizations and where we train a
-model over these organizations using federated learning.
-
-Update model parameters
-~~~~~~~~~~~~~~~~~~~~~~~
-
 In federated learning, the server sends global model parameters to the client, and the
 client updates the local model with parameters received from the server. It then trains
 the model on the local data (which changes the model parameters locally) and sends the
 updated/changed model parameters back to the server (or, alternatively, it sends just
 the gradients back to the server, not the full model parameters).
+
+Update model parameters
+~~~~~~~~~~~~~~~~~~~~~~~
 
 We need two helper functions to get the updated model parameters from the local model
 and to update the local model with parameters received from the server: ``get_weights``
@@ -425,7 +420,7 @@ Run the training
 ~~~~~~~~~~~~~~~~
 
 With all of these components in place, we can now run the federated learning simulation
-with Flower! The last step is to run our simulation in command line, as follows:
+with Flower! The last step is to run our simulation in the command line, as follows:
 
 .. code-block:: shell
 
