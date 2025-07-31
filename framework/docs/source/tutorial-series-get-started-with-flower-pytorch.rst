@@ -436,6 +436,11 @@ defined in the ``[tool.flwr.federations.local-simulation]`` section in the
     # Run the simulation with 5 server rounds and 3 local epochs
     $ flwr run . --run-config "num-server-rounds=5 local-epochs=3"
 
+.. tip::
+
+    Learn more about how to configure the execution of your Flower App by checking the
+    `pyproject.toml <how-to-configure-pyproject-toml.html>`_ guide.
+
 Behind the scenes
 ~~~~~~~~~~~~~~~~~
 
@@ -443,14 +448,15 @@ So how does this work? How does Flower execute this simulation?
 
 When we execute ``flwr run``, we tell Flower that there are 10 clients
 (``options.num-supernodes = 10``, where 1 ``SuperNode`` launches 1 ``ClientApp``).
-Flower then goes ahead an asks the ``ServerApp`` to issue an instructions to those nodes
+
+Flower then goes ahead and asks the ``ServerApp`` to issue instructions to those nodes
 using the ``FedAvg`` strategy. ``FedAvg`` knows that it should select 50% of the
 available clients (``fraction-fit=0.5``), so it goes ahead and selects 5 random clients
 (i.e., 50% of 10).
 
 Flower then asks the selected 5 clients to train the model. Each of the 5 ``ClientApp``
 instances receives a message, which causes it to call ``client_fn`` to create an
-instance of ``FlowerClient``. It then calls ``.fit()`` on each the ``FlowerClient``
+instance of ``FlowerClient``. It then calls ``.fit()`` on each of the ``FlowerClient``
 instances and returns the resulting model parameter updates to the ``ServerApp``. When
 the ``ServerApp`` receives the model parameter updates from the clients, it hands those
 updates over to the strategy (*FedAvg*) for aggregation. The strategy aggregates those

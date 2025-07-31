@@ -6,7 +6,7 @@ tutorial, we introduced federated learning with PyTorch and Flower (:doc:`part 1
 <tutorial-series-get-started-with-flower-pytorch>`).
 
 In part 2, we’ll begin to customize the federated learning system we built in part 1
-again, using the Flower framework, Flower Datasets, and PyTorch.
+using the Flower framework, Flower Datasets, and PyTorch.
 
     `Star Flower on GitHub <https://github.com/adap/flower>`_ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
@@ -77,7 +77,7 @@ Starting with a customized strategy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In part 1, we created a ``ServerApp`` (in ``server_app.py``) using the ``server_fn``. In
-it, we defined the srategy and number of training rounds.
+it, we defined the strategy and number of training rounds.
 
 The strategy encapsulates the federated learning approach/algorithm, for example,
 ``FedAvg`` or ``FedAdagrad``. Let’s try to use a different strategy this time. Add this

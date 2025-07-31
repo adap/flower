@@ -14,7 +14,7 @@ building clients, simply named ``Client``. In previous parts of this tutorial, w
 based our client on ``NumPyClient``, a convenience class which makes it easy to work
 with machine learning libraries that have good NumPy interoperability. With ``Client``,
 we gain a lot of flexibility that we didn’t have before, but we’ll also have to do a few
-things the we didn’t have to do before.
+things that we didn’t have to do before.
 
     `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
@@ -352,7 +352,7 @@ Here we will explore how to implement custom serialization with a simple example
 But first what is serialization? Serialization is just the process of converting an
 object into raw bytes, and equally as important, deserialization is the process of
 converting raw bytes back into an object. This is very useful for network communication.
-Indeed, without serialization, you could not just a Python object through the internet.
+Indeed, without serialization, you could not just send a Python object through the internet.
 
 Federated Learning relies heavily on internet communication for training by sending
 Python objects back and forth between the clients and the server. This means that
