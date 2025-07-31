@@ -32,12 +32,12 @@ from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.license_plugin import LicensePlugin
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
-from flwr.superexec.exec_license_interceptor import ExecLicenseInterceptor
-from flwr.superexec.exec_user_auth_interceptor import ExecUserAuthInterceptor
+from flwr.superlink.servicer.exec.exec_event_log_interceptor import ExecEventLogInterceptor
+from flwr.superlink.servicer.exec.exec_license_interceptor import ExecLicenseInterceptor
+from flwr.superlink.servicer.exec.exec_user_auth_interceptor import ExecUserAuthInterceptor
 
 from .exec_servicer import ExecServicer
-from .executor import Executor
+from ...executor.executor import Executor
 
 try:
     from flwr.ee import get_license_plugin

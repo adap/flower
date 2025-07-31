@@ -58,7 +58,7 @@ from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 
 from .exec_user_auth_interceptor import shared_account_info
-from .executor import Executor
+from ...executor.executor import Executor
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):

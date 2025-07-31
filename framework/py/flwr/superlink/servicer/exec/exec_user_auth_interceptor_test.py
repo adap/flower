@@ -38,7 +38,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StopRunRequest,
     StreamLogsRequest,
 )
-from flwr.superexec.exec_user_auth_interceptor import (
+from flwr.superlink.servicer.exec.exec_user_auth_interceptor import (
     ExecUserAuthInterceptor,
     shared_account_info,
 )
