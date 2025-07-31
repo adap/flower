@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""SuperExec API servicer."""
+"""Exec API servicer."""
 
 
 import time
@@ -62,7 +62,7 @@ from .exec_user_auth_interceptor import shared_account_info
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
-    """SuperExec API servicer."""
+    """Exec API servicer."""
 
     def __init__(  # pylint: disable=R0913, R0917
         self,

@@ -34,9 +34,9 @@ def add_e2e_federation() -> None:
 
 def run_superlink(is_simulation: bool) -> subprocess.Popen:
     """Run the SuperLink."""
-    executor_arg = "flwr.superexec.deployment:executor"
+    executor_arg = "flwr.superlink.executor.deployment:executor"
     if is_simulation:
-        executor_arg = "flwr.superexec.simulation:executor"
+        executor_arg = "flwr.superlink.executor.simulation:executor"
     return subprocess.Popen(
         [
             "flower-superlink",

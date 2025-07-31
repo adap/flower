@@ -786,8 +786,8 @@ def _add_args_exec_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--executor",
         help="For example: `deployment:exec` or `project.package.module:wrapper.exec`. "
-        "The default is `flwr.superexec.deployment:executor`",
-        default="flwr.superexec.deployment:executor",
+        "The default is `flwr.superlink.executor.deployment:executor`",
+        default="flwr.superlink.executor.deployment:executor",
     )
     parser.add_argument(
         "--executor-dir",
