@@ -428,15 +428,6 @@ The other two categories of metrics (``losses_centralized`` and ``metrics_centra
 are still empty because they only apply when centralized evaluation is being used. Part
 two of the Flower tutorial will cover centralized evaluation.
 
-Running Flower from notebooks
------------------------------
-
-If you prefer running this tutorial from a Jupyter notebook or Collab you can find a
-reduced version of this tutorial `here
-<https://github.com/adap/flower/tree/main/examples/flower-in-30-minutes>`_. Please note
-that only a subset of the features of Flower are available in notebook environments. We
-recommend using the Flower CLI commands instead as shown in this tutorial series.
-
 Final remarks
 -------------
 
