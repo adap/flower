@@ -57,8 +57,8 @@ from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 
-from .exec_user_auth_interceptor import shared_account_info
 from ...executor.executor import Executor
+from .exec_user_auth_interceptor import shared_account_info
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
