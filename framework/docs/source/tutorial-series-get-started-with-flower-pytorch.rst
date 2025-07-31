@@ -4,7 +4,8 @@ Get started with Flower
 Welcome to the Flower federated learning tutorial!
 
 In this tutorial, we’ll build a federated learning system using the Flower framework,
-Flower Datasets and PyTorch.
+Flower Datasets and PyTorch. In part 1, we use PyTorch for the model training pipeline
+and data loading. In part 2, we federate the PyTorch project using Flower.
 
     `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
@@ -16,12 +17,15 @@ Flower Datasets and PyTorch.
 
 Let’s get started! 🌼
 
-Preparation
------------
+Step 0: Preparation
+-------------------
 
 Before we begin with any actual code, let’s make sure that we have everything we need.
 
-First, in a new Python environmentwe install the Flower package ``flwr``:
+Install dependencies
+~~~~~~~~~~~~~~~~~~~~
+
+First, we install the Flower package ``flwr``:
 
 .. code-block:: shell
 
@@ -29,12 +33,11 @@ First, in a new Python environmentwe install the Flower package ``flwr``:
     $ pip install -U "flwr[simulation]"
 
 Then, we create a new Flower app called ``flower-tutorial`` using the PyTorch template.
-We also specify a username (``flwrlabs``) for the project or pass your username after
-registering at `flower.ai <https://flower.ai/>`_.
+We also specify a username (``flwrlabs``) for the project:
 
 .. code-block:: shell
 
-    $ flwr new flower-tutorial --framework pytorch --username <your-username>
+    $ flwr new flower-tutorial --framework pytorch --username flwrlabs
 
 After running the command, a new directory called ``flower-tutorial`` will be created.
 It should have the following structure:
@@ -51,33 +54,36 @@ It should have the following structure:
     ├── pyproject.toml      # Project metadata like dependencies and configs
     └── README.md
 
-Next, we follow the instructions displayed and proceed to install the project and its
-dependencies, which are specified in the ``pyproject.toml`` file.
+Next, we install the project and its dependencies, which are specified in the
+``pyproject.toml`` file. For this tutorial, we'll also need ``matplotlib``, so we'll
+also install it:
 
 .. code-block:: shell
 
     $ cd flower-tutorial
-    $ pip install -e .
+    $ pip install -e . matplotlib
 
-.. tip::
+Before we dive into federated learning, we'll take a look at the dataset that we'll be
+using for this tutorial, which is the `CIFAR-10
+<https://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset, and run a simple centralized
+training pipeline using PyTorch.
 
-    The `flower-tutorial` project is a Flower app, which means that it can be run using
-    the ``flwr run`` command. Flower apps created via ``flwr new`` always contain a
-    ``README.md`` providing instructions on how to run and customize the app.
+The ``CIFAR-10`` dataset
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Flower App we just created via ``flwr new`` shows how to federate a small
-Convolutional Neural Network (CNN) for the `CIFAR-10
-<https://huggingface.co/datasets/uoft-cs/cifar10>`_ dataset using PyTorch. By default,
-it will run using Flower's `Simulation Runtime
-<https://flower.ai/docs/runtimes/simulation/>`_ involving 10 clients (or SuperNodes),
-each with it's own dataset partition, and will run for just three rounds.
+Federated learning can be applied to many different types of tasks across different
+domains. In this tutorial, we introduce federated learning by training a simple
+convolutional neural network (CNN) on the popular CIFAR-10 dataset. CIFAR-10 can be used
+to train image classifiers that distinguish between images from ten different classes:
+‘airplane’, ‘automobile’, ‘bird’, ‘cat’, ‘deer’, ‘dog’, ‘frog’, ‘horse’, ‘ship’, and
+‘truck’.
 
-Dataset partitioning
-~~~~~~~~~~~~~~~~~~~~
-
-We simulate having multiple datasets from multiple organizations (or clients) by
-splitting the original CIFAR-10 dataset into multiple partitions. Each partition will
-represent the data from a single organization.
+We simulate having multiple datasets from multiple organizations (also called the
+“cross-silo” setting in federated learning) by splitting the original CIFAR-10 dataset
+into multiple partitions. Each partition will represent the data from a single
+organization. We’re doing this purely for experimentation purposes, in the real world
+there’s no need for data splitting because each organization already has their own data
+(the data is naturally partitioned).
 
 Each organization will act as a client in the federated learning system. Having ten
 organizations participate in a federation means having ten clients connected to the
@@ -85,15 +91,11 @@ federated learning server.
 
 We use the `Flower Datasets <https://flower.ai/docs/datasets/>`_ library
 (``flwr-datasets``) to partition CIFAR-10 into ten partitions using
-``FederatedDataset``. Flower Dataset build on top of HuggingFace Dataset abstraction
-allowing for seamless integration with existing datasets and data loaders. See for
-instance the highlighted lines, the `dataset` name is the HF identifier for the CIFAR-10
-dataset. In this case we are creating 10 IID partitions. Using the ``load_data()``
-function defined in ``task.py``, we will create a small training and test set for each
-of the ten organizations and wrap each of these into a PyTorch ``DataLoader``:
+``FederatedDataset``. Using the ``load_data()`` function defined in ``task.py``, we will
+create a small training and test set for each of the ten organizations and wrap each of
+these into a PyTorch ``DataLoader``:
 
 .. code-block:: python
-    :emphasize-lines: 6-11
 
     def load_data(partition_id: int, num_partitions: int):
         """Load partition CIFAR10 data."""
@@ -122,23 +124,207 @@ of the ten organizations and wrap each of these into a PyTorch ``DataLoader``:
         testloader = DataLoader(partition_train_test["test"], batch_size=32)
         return trainloader, testloader
 
-.. note::
-
-    This is a simulation of a federated learning system. In real-world federated
-    learning systems, each organization has its own data and trains/evaluates models
-    only on this internal data. In this tutorial, we simulate this by splitting the
-    dataset into multiple partitions using Flower Datasets. There are over a dozen
-    `partitioners
-    <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html>`_ available
-    in Flower Datasets, that allow you to control the degree of heterogeneity in the
-    data splits and how these are generated.
-
 We now have a function that can return a training set and validation set
 (``trainloader`` and ``valloader``) representing one dataset from one of ten different
-organizations.
+organizations. Each ``trainloader``/``valloader`` pair contains 4000 training examples
+and 1000 validation examples. There’s also a single ``testloader`` (we did not split the
+test set). Again, this is only necessary for building research or educational systems,
+actual federated learning systems have their data naturally distributed across multiple
+partitions.
+
+Let’s take a look at the first batch of images and labels in the first training set
+(i.e., ``trainloader`` from ``partition_id=0``) before we move on. Copy this code block
+into a new Python script ``plot.py`` and execute it with ``python plot.py``:
+
+.. code-block:: python
+
+    from matplotlib import pyplot as plt
+
+    from flower_tutorial.task import load_data
+
+    trainloader, _ = load_data(partition_id=0, num_partitions=10)
+    batch = next(iter(trainloader))
+    images, labels = batch["img"], batch["label"]
+
+    # Reshape and convert images to a NumPy array
+    # matplotlib requires images with the shape (height, width, 3)
+    images = images.permute(0, 2, 3, 1).numpy()
+
+    # Denormalize
+    images = images / 2 + 0.5
+
+    # Create a figure and a grid of subplots
+    fig, axs = plt.subplots(4, 8, figsize=(12, 6))
+
+    # Loop over the images and plot them
+    for i, ax in enumerate(axs.flat):
+        ax.imshow(images[i])
+        ax.set_title(trainloader.dataset.features["label"].int2str([labels[i]])[0])
+        ax.axis("off")
+
+    # Show the plot
+    fig.tight_layout()
+    plt.show()
+
+The output from running the script above shows a random batch of images from the
+``trainloader`` from the first of ten partitions. It also prints the labels associated
+with each image (i.e., one of the ten possible labels we’ve seen above). If you run the
+script again, you should see another batch of images.
+
+Step 1: Centralized Training with PyTorch
+-----------------------------------------
+
+Next, we’re going to use PyTorch to define a simple convolutional neural network. This
+introduction assumes basic familiarity with PyTorch, so it doesn’t cover the
+PyTorch-related aspects in full detail. If you want to dive deeper into PyTorch, we
+recommend `DEEP LEARNING WITH PYTORCH: A 60 MINUTE BLITZ
+<https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html>`_.
+
+The model
+~~~~~~~~~
+
+We will use the simple CNN described in the `PyTorch tutorial
+<https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html#define-a-convolutional-neural-network>`__
+(The following code is already defined in ``task.py``):
+
+.. code-block:: python
+
+    class Net(nn.Module):
+        """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
+
+        def __init__(self):
+            super(Net, self).__init__()
+            self.conv1 = nn.Conv2d(3, 6, 5)
+            self.pool = nn.MaxPool2d(2, 2)
+            self.conv2 = nn.Conv2d(6, 16, 5)
+            self.fc1 = nn.Linear(16 * 5 * 5, 120)
+            self.fc2 = nn.Linear(120, 84)
+            self.fc3 = nn.Linear(84, 10)
+
+        def forward(self, x):
+            x = self.pool(F.relu(self.conv1(x)))
+            x = self.pool(F.relu(self.conv2(x)))
+            x = x.view(-1, 16 * 5 * 5)
+            x = F.relu(self.fc1(x))
+            x = F.relu(self.fc2(x))
+            return self.fc3(x)
+
+The PyTorch template has also provided us with the usual training and test functions:
+
+.. code-block:: python
+
+    def train(net, trainloader, epochs, device):
+        """Train the model on the training set."""
+        net.to(device)  # move model to GPU if available
+        criterion = torch.nn.CrossEntropyLoss().to(device)
+        optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
+        net.train()
+        running_loss = 0.0
+        for _ in range(epochs):
+            for batch in trainloader:
+                images = batch["img"]
+                labels = batch["label"]
+                optimizer.zero_grad()
+                loss = criterion(net(images.to(device)), labels.to(device))
+                loss.backward()
+                optimizer.step()
+                running_loss += loss.item()
+
+        avg_trainloss = running_loss / len(trainloader)
+        return avg_trainloss
+
+
+    def test(net, testloader, device):
+        """Validate the model on the test set."""
+        net.to(device)
+        criterion = torch.nn.CrossEntropyLoss()
+        correct, loss = 0, 0.0
+        with torch.no_grad():
+            for batch in testloader:
+                images = batch["img"].to(device)
+                labels = batch["label"].to(device)
+                outputs = net(images)
+                loss += criterion(outputs, labels).item()
+                correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+        accuracy = correct / len(testloader.dataset)
+        loss = loss / len(testloader)
+        return loss, accuracy
+
+Train the model
+~~~~~~~~~~~~~~~
+
+We now have all the basic building blocks we need: a dataset, a model, a training
+function, and a test function. Let’s put them together to train the model on the dataset
+of one of our organizations (``partition_id=0``). This simulates the reality of most
+machine learning projects today: each organization has their own data and trains models
+only on this internal data.
+
+First, we'll create a new script called ``centralized.py`` and copy the following code
+into it:
+
+.. code-block:: python
+
+    import torch
+
+    from flower_tutorial.task import Net, load_data, test, train
+
+    DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    trainloader, testloader = load_data(partition_id=0, num_partitions=10)
+    net = Net().to(DEVICE)
+
+    for epoch in range(5):
+        train(net, trainloader, 1, DEVICE)
+        loss, accuracy = test(net, testloader, DEVICE)
+        print(f"Epoch {epoch+1}: validation loss {loss}, accuracy {accuracy}")
+
+Training the simple CNN on our CIFAR-10 split for 5 epochs should result in a validation
+set accuracy of about 41%, which is not good, but at the same time, it doesn’t really
+matter for the purposes of this tutorial. The intent was just to show a simple
+centralized training pipeline that sets the stage for what comes next - federated
+learning!
+
+Step 2: Federated Learning with Flower
+--------------------------------------
+
+Step 1 demonstrated a simple centralized training pipeline. All data was in one place
+(i.e., a single ``trainloader`` and a single ``testloader``). Next, we’ll simulate a
+situation where we have multiple datasets in multiple organizations and where we train a
+model over these organizations using federated learning.
+
+Update model parameters
+~~~~~~~~~~~~~~~~~~~~~~~
+
+In federated learning, the server sends global model parameters to the client, and the
+client updates the local model with parameters received from the server. It then trains
+the model on the local data (which changes the model parameters locally) and sends the
+updated/changed model parameters back to the server (or, alternatively, it sends just
+the gradients back to the server, not the full model parameters).
+
+We need two helper functions to get the updated model parameters from the local model
+and to update the local model with parameters received from the server: ``get_weights``
+and ``set_weights``. The following two functions do just that for the PyTorch model
+above and are predefined in ``task.py``.
+
+The details of how this works are not really important here (feel free to consult the
+PyTorch documentation if you want to learn more). In essence, we use ``state_dict`` to
+access PyTorch model parameter tensors. The parameter tensors are then converted to/from
+a list of NumPy ``ndarray``\s (which the Flower ``NumPyClient`` knows how to
+serialize/deserialize):
+
+.. code-block:: python
+
+    def get_weights(net):
+        return [val.cpu().numpy() for _, val in net.state_dict().items()]
+
+
+    def set_weights(net, parameters):
+        params_dict = zip(net.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        net.load_state_dict(state_dict, strict=True)
 
 Define the Flower ClientApp
----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 With that out of the way, let’s move on to the interesting part. Federated learning
 systems consist of a server and multiple clients. In Flower, we create a ``ServerApp``
@@ -162,25 +348,24 @@ brings everything together. Note that all of this boilerplate implementation has
 been done for us in our Flower project:
 
 .. code-block:: python
-    :emphasize-lines: 11, 29
 
     class FlowerClient(NumPyClient):
         def __init__(self, net, trainloader, valloader, local_epochs):
-            self.net = net  # The model to train
-            ...
+            self.net = net
+            self.trainloader = trainloader
+            self.valloader = valloader
+            self.local_epochs = local_epochs
+            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            self.net.to(self.device)
 
         def fit(self, parameters, config):
-            """Train the model on the local data."""
-            # Set the model parameters to the received ones
             set_weights(self.net, parameters)
-            # Train the model on the local data
             train_loss = train(
                 self.net,
                 self.trainloader,
                 self.local_epochs,
                 self.device,
             )
-            # Return the updated model parameters and metrics
             return (
                 get_weights(self.net),
                 len(self.trainloader.dataset),
@@ -188,12 +373,8 @@ been done for us in our Flower project:
             )
 
         def evaluate(self, parameters, config):
-            """Evaluate the model on the local data."""
-            # Set the model parameters to the received ones
             set_weights(self.net, parameters)
-            # Evaluate the model on the local data
             loss, accuracy = test(self.net, self.valloader, self.device)
-            # Return the evaluation result
             return loss, len(self.valloader.dataset), {"accuracy": accuracy}
 
 Our class ``FlowerClient`` defines how local training/evaluation will be performed and
