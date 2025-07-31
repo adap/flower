@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""SuperExec gRPC API."""
+"""Exec API server."""
 
 
 from logging import INFO
@@ -32,12 +32,12 @@ from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.license_plugin import LicensePlugin
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.superexec.exec_event_log_interceptor import ExecEventLogInterceptor
-from flwr.superexec.exec_license_interceptor import ExecLicenseInterceptor
-from flwr.superexec.exec_user_auth_interceptor import ExecUserAuthInterceptor
 
+from ...executor import Executor
+from .exec_event_log_interceptor import ExecEventLogInterceptor
+from .exec_license_interceptor import ExecLicenseInterceptor
 from .exec_servicer import ExecServicer
-from .executor import Executor
+from .exec_user_auth_interceptor import ExecUserAuthInterceptor
 
 try:
     from flwr.ee import get_license_plugin

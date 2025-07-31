@@ -49,7 +49,7 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             return continuation(handler_call_details)
 
         # One of the method handlers in
-        # `flwr.superexec.exec_servicer.ExecServicer`
+        # `flwr.superlink.servicer.exec.ExecServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
         method_name: str = handler_call_details.method
         return self._generic_event_log_unary_method_handler(method_handler, method_name)
