@@ -140,27 +140,26 @@ organizations.
 Define the Flower ClientApp
 ---------------------------
 
-Federated learning systems consist of a server and multiple clients. In Flower, we
-create a ``ServerApp`` and a ``ClientApp`` to run the server-side and client-side code,
-respectively.
+With that out of the way, let’s move on to the interesting part. Federated learning
+systems consist of a server and multiple clients. In Flower, we create a ``ServerApp``
+and a ``ClientApp`` to run the server-side and client-side code, respectively.
 
-The first step towards defining a ``ClientApp`` object is to subclass
-`flwr.client.Client <ref-api/flwr.client.Client.html>`_ or `flwr.client.NumPyClient
-<ref-api/flwr.client.NumPyClient.html>`_. These are abstract classes and therefore each
-method that we want to make use of in our ClientApp needs to be implemented. We use
-``NumPyClient`` in this tutorial because it is easier to implement and requires us to
-write less boilerplate. We create a new class inheriting from ``NumPyClient`` and
-implement the ``fit`` and ``evaluate`` methods. These methods are envisioned to operate
-as described below but you can modify them for your usecase:
+The first step toward creating a ``ClientApp`` is to implement a subclasses of
+``flwr.client.Client`` or ``flwr.client.NumPyClient``. We use ``NumPyClient`` in this
+tutorial because it is easier to implement and requires us to write less boilerplate. To
+implement ``NumPyClient``, we create a subclass that implements the three methods
+``get_weights``, ``fit``, and ``evaluate``:
 
-- ``fit``: It receives model parameters from the server, train the model on the local
-  data, and return the updated model parameters to the server
-- ``evaluate``: It receives model parameters from the server, evaluate the model on the
+- ``get_weights``: Return the current local model parameters
+- ``fit``: Receive model parameters from the server, train the model on the local data,
+  and return the updated model parameters to the server
+- ``evaluate``: Receive model parameters from the server, evaluate the model on the
   local data, and return the evaluation result to the server
 
-Let’s see a simple Flower client implementation that brings everything together. Note
-that all of this boilerplate implementation has already been done for us in our Flower
-project.
+We mentioned that our clients will use the previously defined PyTorch components for
+model training and evaluation. Let’s see a simple Flower client implementation that
+brings everything together. Note that all of this boilerplate implementation has already
+been done for us in our Flower project:
 
 .. code-block:: python
     :emphasize-lines: 11, 29
@@ -197,87 +196,105 @@ project.
             # Return the evaluation result
             return loss, len(self.valloader.dataset), {"accuracy": accuracy}
 
-Note the highlighted lines. In ``fit``, the ``train`` function trains the model on the
-local data making use of the standard mechanisms for doing so with PyTorch. Similarly,
-in the ``evaluate`` method, the ``test`` function evaluates the model on the local data.
-Both functions are defined in ``task.py`` in your Flower App project. How these
-functions are implemented is up to you and there is no strict assumption made by Flower.
-Often you can directly make use of your existing training and evaluation functions from
-other non-FL projects. Typically, these functions would be framework specific (in this
-case PyTorch) and usecase specific (in this case CIFAR-10 classification with a small
-CNN), and you can modify them to suit your project needs.
+Our class ``FlowerClient`` defines how local training/evaluation will be performed and
+allows Flower to call the local training/evaluation through ``fit`` and ``evaluate``.
+Each instance of ``FlowerClient`` represents a *single client* in our federated learning
+system. Federated learning systems have multiple clients (otherwise, there’s not much to
+federate), so each client will be represented by its own instance of ``FlowerClient``.
+If we have, for example, three clients in our workload, then we’d have three instances
+of ``FlowerClient`` (one on each of the machines we’d start the client on). Flower calls
+``FlowerClient.fit`` on the respective instance when the server selects a particular
+client for training (and ``FlowerClient.evaluate`` for evaluation).
 
-While the specific logic inside these methods can be customized, the return types are
-fixed. Flower expects the ``fit`` method to return a tuple of the updated model
-parameters, the number of examples used for training (or any other scalar that will be
-used to weigh each client contribution during aggregation), and a dictionary of metrics.
-Similarly, the ``evaluate`` method should return a tuple of the loss, the number of
-examples used for evaluation, and a dictionary of metrics. Flower doesn't enforce a
-specific set of metrics since, again, this is usecase specific. In this example, we
-return the ``train_loss`` metric from ``fit`` and the ``accuracy`` metric from
-``evaluate``.
+In this project, we want to simulate a federated learning system with 10 clients *on a
+single machine*. This means that the server and all 10 clients will live on a single
+machine and share resources such as CPU, GPU, and memory. Having 10 clients would mean
+having 10 instances of ``FlowerClient`` in memory. Doing this on a single machine can
+quickly exhaust the available memory resources, even if only a subset of these clients
+participates in a single round of federated learning.
 
-Finally, we need to define a function that creates an instance of our ``FlowerClient``.
-This function does three main things: (1) reads from the context the node config and run
-config, which provide specific information about the ClientApp being instantiated and
-the run or workload being executed; (2) loads the data for the current client instance;
-and (3) instantiates the ``FlowerClient`` and resturns it.
+In addition to the regular capabilities where server and clients run on multiple
+machines, Flower, therefore, provides special simulation capabilities that create
+``FlowerClient`` instances only when they are actually necessary for training or
+evaluation. To enable the Flower framework to create clients when necessary, we need to
+implement a function that creates a ``FlowerClient`` instance on demand. We typically
+call this function ``client_fn``. Flower calls ``client_fn`` whenever it needs an
+instance of one particular client to call ``fit`` or ``evaluate`` (those instances are
+usually discarded after use, so they should not keep any local state). In federated
+learning experiments using Flower, clients are identified by a partition ID, or
+``partition_id``. This ``partition_id`` is used to load different local data partitions
+for different clients, as can be seen below. The value of ``partition_id`` is retrieved
+from the ``node_config`` dictionary in the ``Context`` object, which holds the
+information that persists throughout each training round.
+
+With this, we have the class ``FlowerClient`` which defines client-side
+training/evaluation and ``client_fn`` which allows Flower to create ``FlowerClient``
+instances whenever it needs to call ``fit`` or ``evaluate`` on one particular client.
+Last, but definitely not least, we create an instance of ``ClientApp`` and pass it the
+``client_fn``. ``ClientApp`` is the entrypoint that a running Flower client uses to call
+your code (as defined in, for example, ``FlowerClient.fit``). The following code is
+reproduced from ``client_app.py`` with additional comments:
 
 .. code-block:: python
-    :emphasize-lines: 5,6,7,12,15
 
     def client_fn(context: Context):
         # Load model and data
         net = Net()
-        # Read the node_config to fetch data partition associated to this node
         partition_id = context.node_config["partition-id"]
         num_partitions = context.node_config["num-partitions"]
-        local_epochs = context.run_config["local-epochs"]
-
         # Load data (CIFAR-10)
         # Note: each client gets a different trainloader/valloader, so each client
         # will train and evaluate on their own unique data partition
+        # Read the node_config to fetch data partition associated to this node
         trainloader, valloader = load_data(partition_id, num_partitions)
+        local_epochs = context.run_config["local-epochs"]
 
         # Create a single Flower client representing a single organization
+        # FlowerClient is a subclass of NumPyClient, so we need to call .to_client()
+        # to convert it to a subclass of `flwr.client.Client`
         return FlowerClient(net, trainloader, valloader, local_epochs).to_client()
 
 
     # Create the Flower ClientApp
     app = ClientApp(client_fn=client_fn)
 
-.. note::
-
-    With Flower Simulations, the ``partition-id`` and ``num-partitions`` are set into
-    the context transparently to you based on the configuration set in the
-    ``pyproject.toml``. However, in a real world distributed deployment, there is not
-    such a thing as a ``partition-id`` or ``num-partitions``. In such cases, you would
-    typically use the ``node_config`` to pass, for example, the path in the filesystem
-    where the data is stored and load the data from there.
-
 Define the Flower ServerApp
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 On the server side, we need to configure a strategy which encapsulates the federated
-learning algorithm, for example, *Federated Averaging* (FedAvg). Flower has a number of
-`built-in strategies <ref-api/flwr.server.strategy.html>`_, but we can also use our own
-strategy implementations to customize nearly all aspects of the federated learning
-approach. For this example, we use the built-in ``FedAvg`` implementation and customize
-it using a few basic parameters:
-
-Similar to ``ClientApp``, we create a ``ServerApp`` using a utility function
-``server_fn``. Here you can also use the context to read the run config to customize at
-runtime the behaviour of the ``ServerApp``. In ``server_fn``, we pass an instance of
-``ServerConfig`` for defining the number of federated learning rounds (``num_rounds``)
-and we also pass the previously created ``strategy``. The ``server_fn`` returns a
-``ServerAppComponents`` object containing the settings that define the ``ServerApp``
-behaviour.
+learning approach/algorithm, for example, *Federated Averaging* (FedAvg). Flower has a
+number of built-in strategies, but we can also use our own strategy implementations to
+customize nearly all aspects of the federated learning approach. For this example, we
+use the built-in ``FedAvg`` implementation and customize it using a few basic
+parameters:
 
 .. code-block:: python
-    :emphasize-lines: 4,5,8,12
+
+    # Create FedAvg strategy
+    strategy = FedAvg(
+        fraction_fit=fraction_fit,  # Sample this value of available client for training
+        fraction_evaluate=1.0,  # Sample 100% of available clients for evaluation
+        min_available_clients=2,  # Wait until 2 clients are available
+        initial_parameters=parameters,  # Use these initial model parameters
+    )
+
+Similar to ``ClientApp``, we create a ``ServerApp`` using a utility function
+``server_fn``. This function is predefined for us in ``server_app.py``. In
+``server_fn``, we pass an instance of ``ServerConfig`` for defining the number of
+federated learning rounds (``num_rounds``) and we also pass the previously created
+``strategy``. The ``server_fn`` returns a ``ServerAppComponents`` object containing the
+settings that define the ``ServerApp`` behaviour. ``ServerApp`` is the entrypoint that
+Flower uses to call all your server-side code (for example, the strategy).
+
+.. code-block:: python
 
     def server_fn(context: Context):
-        """Construct components that set the ServerApp."""
+        """Construct components that set the ServerApp behaviour.
+
+        You can use the settings in `context.run_config` to parameterize the
+        construction of all elements (e.g the strategy or the number of rounds)
+        wrapped in the returned ServerAppComponents object.
+        """
         # Read from config
         num_rounds = context.run_config["num-server-rounds"]
         fraction_fit = context.run_config["fraction-fit"]
@@ -288,10 +305,10 @@ behaviour.
 
         # Define strategy
         strategy = FedAvg(
-            fraction_fit=fraction_fit,  # Sample this value of available client for training
-            fraction_evaluate=1.0,  # Sample 100% of available clients for evaluation
-            min_available_clients=2,  # Wait until 2 clients are available
-            initial_parameters=parameters,  # Use these initial model parameters
+            fraction_fit=fraction_fit,
+            fraction_evaluate=1.0,
+            min_available_clients=2,
+            initial_parameters=parameters,
         )
         config = ServerConfig(num_rounds=num_rounds)
 
@@ -317,21 +334,17 @@ defined in the ``[tool.flwr.federations.local-simulation]`` section in the
     # Run the simulation with 5 server rounds and 3 local epochs
     $ flwr run . --run-config "num-server-rounds=5 local-epochs=3"
 
-.. tip::
-
-    Learn more about how to configure the execution of your Flower App by checking the
-    `pyproject.toml <how-to-configure-pyproject-toml.html>`_ guide.
-
 Behind the scenes
 ~~~~~~~~~~~~~~~~~
 
 So how does this work? How does Flower execute this simulation?
 
 When we execute ``flwr run``, we tell Flower that there are 10 clients
-(``options.num-supernodes = 10`` -- as defined in the ``pyproject.toml``). Flower then
-goes ahead an asks the ``ServerApp`` to issue an instructions to those nodes using the
-``FedAvg`` strategy. ``FedAvg`` knows that it should select 50% of the available clients
-(``fraction-fit=0.5``), so it goes ahead and selects 5 random clients (i.e., 50% of 10).
+(``options.num-supernodes = 10``, where 1 ``SuperNode`` launches 1 ``ClientApp``).
+Flower then goes ahead an asks the ``ServerApp`` to issue an instructions to those nodes
+using the ``FedAvg`` strategy. ``FedAvg`` knows that it should select 50% of the
+available clients (``fraction-fit=0.5``), so it goes ahead and selects 5 random clients
+(i.e., 50% of 10).
 
 Flower then asks the selected 5 clients to train the model. Each of the 5 ``ClientApp``
 instances receives a message, which causes it to call ``client_fn`` to create an
@@ -366,10 +379,7 @@ we return from ``evaluate``. Copy the following ``weighted_average()`` function 
 
 .. code-block:: python
 
-    from flwr.common import Metrics
-
-
-    def weighted_average(metrics: list[tuple[int, Metrics]]) -> Metrics:
+    def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
         # Multiply accuracy of each client by number of examples used
         accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
         examples = [num_examples for num_examples, _ in metrics]
@@ -377,22 +387,55 @@ we return from ``evaluate``. Copy the following ``weighted_average()`` function 
         # Aggregate and return custom metric (weighted average)
         return {"accuracy": sum(accuracies) / sum(examples)}
 
-We can pass this function as a callback to the ``FedAvg`` strategy when we create it in
-``server_fn``. This way, Flower will use this function to aggregate the ``accuracy``
-metric returned by the clients during evaluation round.
+Now, in ``server_app.py``, we import the function and pass it to the ``FedAvg``
+strategy:
 
 .. code-block:: python
-    :emphasize-lines: 4
 
-    # Define strategy
-    strategy = FedAvg(
-        # ...
-        evaluate_metrics_aggregation_fn=weighted_average,
-    )
+    from flower_tutorial.task import weighted_average
+
+
+    def server_fn(context: Context):
+        # Read from config
+        num_rounds = context.run_config["num-server-rounds"]
+        fraction_fit = context.run_config["fraction-fit"]
+
+        # Initialize model parameters
+        ndarrays = get_weights(Net())
+        parameters = ndarrays_to_parameters(ndarrays)
+
+        # Define strategy
+        strategy = FedAvg(
+            fraction_fit=fraction_fit,
+            fraction_evaluate=1.0,
+            min_available_clients=2,
+            initial_parameters=parameters,
+            evaluate_metrics_aggregation_fn=weighted_average,
+        )
+        config = ServerConfig(num_rounds=num_rounds)
+
+        return ServerAppComponents(strategy=strategy, config=config)
+
+
+    # Create ServerApp
+    app = ServerApp(server_fn=server_fn)
 
 We now have a full system that performs federated training and federated evaluation. It
 uses the ``weighted_average`` function to aggregate custom evaluation metrics and
 calculates a single ``accuracy`` metric across all clients on the server side.
+
+The other two categories of metrics (``losses_centralized`` and ``metrics_centralized``)
+are still empty because they only apply when centralized evaluation is being used. Part
+two of the Flower tutorial will cover centralized evaluation.
+
+Running Flower from notebooks
+-----------------------------
+
+If you prefer running this tutorial from a Jupyter notebook or Collab you can find a
+reduced version of this tutorial `here
+<https://github.com/adap/flower/tree/main/examples/flower-in-30-minutes>`_. Please note
+that only a subset of the features of Flower are available in notebook environments. We
+recommend using the Flower CLI commands instead as shown in this tutorial series.
 
 Final remarks
 -------------
@@ -407,23 +450,16 @@ In the next tutorial, we’re going to cover some more advanced concepts. Want t
 customize your strategy? Initialize parameters on the server side? Or evaluate the
 aggregated model on the server side? We’ll cover all this and more in the next tutorial.
 
-.. note::
+Next steps
+----------
 
-    If these step-by-step tutorials are too slow for you, you can also check out the
-    `Advanced PyTorch example
-    <https://github.com/adap/flower/tree/main/examples/advanced-pytorch>`_ or how to
-    take a Flower App and run it with in the real world using the `Flower Deployment
-    Runtime <deploy.html>`_.
+Before you continue, make sure to join the Flower community on Flower Discuss (`Join
+Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack
+<https://flower.ai/join-slack/>`__).
+
+There’s a dedicated ``#questions`` channel if you need help, but we’d also love to hear
+who you are in ``#introductions``!
 
 The :doc:`Flower Federated Learning Tutorial - Part 2
 <tutorial-series-use-a-federated-learning-strategy-pytorch>` goes into more depth about
 strategies and all the advanced things you can build with them.
-
-Running Flower from notebooks
------------------------------
-
-If you prefer running Flower from a Jupyter notebook or from Colab, you can find a
-reduced version of this tutorial `here
-<https://github.com/adap/flower/tree/main/examples/flower-in-30-minutes>`_. Note that
-only a subset of the Flower features are available for these environments. We recommend
-using the Flower CLI commands instead as shown in this tutorial series.
