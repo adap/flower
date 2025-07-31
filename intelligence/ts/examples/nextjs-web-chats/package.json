@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@flwr/flwr": "^0.1.12",
+    "@flwr/flwr": "^0.1.13",
     "@tailwindcss/typography": "^0.5.16",
     "next": "15.2.4",
     "react": "^19.1.0",
