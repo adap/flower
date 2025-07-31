@@ -26,8 +26,8 @@ things the we didn’t have to do before.
 
 Let’s go deeper and see what it takes to move from ``NumPyClient`` to ``Client``! 🌼
 
-Step 0: Preparation
--------------------
+Preparation
+-----------
 
 Before we begin with the actual code, let’s make sure that we have everything we need.
 
@@ -75,8 +75,8 @@ Next, we install the project and its dependencies, which are specified in the
     $ cd flower-tutorial
     $ pip install -e .
 
-Step 1: Revisiting NumPyClient
-------------------------------
+Revisiting NumPyClient
+----------------------
 
 So far, we’ve implemented our client by subclassing ``flwr.client.NumPyClient``. The two
 methods that were implemented in ``client_app.py`` are ``fit`` and ``evaluate``.
@@ -187,8 +187,8 @@ framework doesn’t know how to handle ``NumPyClient``\ ’s, it only knows how 
 Instead of building on top of ``NumPyClient``, we can directly build on top of
 ``Client``.
 
-Step 2: Moving from ``NumPyClient`` to ``Client``
--------------------------------------------------
+Moving from ``NumPyClient`` to ``Client``
+-----------------------------------------
 
 Let’s try to do the same thing using ``Client`` instead of ``NumPyClient``. Create a new
 file called ``custom_client_app.py`` and copy the following code into it:
@@ -344,8 +344,8 @@ multiple return values (e.g., ``parameters``, ``num_example``, and ``metrics`` i
 objects in ``Client`` wrap all the individual values you’re used to from
 ``NumPyClient``.
 
-Step 3: Custom serialization
-----------------------------
+Custom serialization
+--------------------
 
 Here we will explore how to implement custom serialization with a simple example.
 
@@ -809,4 +809,5 @@ didn’t cover in the tutorial, we recommend the following resources:
 - `Read Flower Docs <https://flower.ai/docs/>`__
 - `Check out Flower Code Examples <https://flower.ai/docs/examples/>`__
 - `Use Flower Baselines for your research <https://flower.ai/docs/baselines/>`__
-- `Watch Flower AI Summit 2024 videos <https://flower.ai/conf/flower-ai-summit-2024/>`__
+- `Watch Flower AI Summit 2025 videos
+  <https://flower.ai/events/flower-ai-summit-2025/>`__

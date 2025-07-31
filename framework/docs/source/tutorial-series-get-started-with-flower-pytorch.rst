@@ -55,13 +55,12 @@ It should have the following structure:
     └── README.md
 
 Next, we install the project and its dependencies, which are specified in the
-``pyproject.toml`` file. For this tutorial, we'll also need ``matplotlib``, so we'll
-also install it:
+``pyproject.toml`` file.
 
 .. code-block:: shell
 
     $ cd flower-tutorial
-    $ pip install -e . matplotlib
+    $ pip install -e .
 
 Before we dive into federated learning, we'll take a look at the dataset that we'll be
 using for this tutorial, which is the `CIFAR-10
@@ -132,47 +131,8 @@ test set). Again, this is only necessary for building research or educational sy
 actual federated learning systems have their data naturally distributed across multiple
 partitions.
 
-Let’s take a look at the first batch of images and labels in the first training set
-(i.e., ``trainloader`` from ``partition_id=0``) before we move on. Copy this code block
-into a new Python script ``plot.py`` and execute it with ``python plot.py``:
-
-.. code-block:: python
-
-    from matplotlib import pyplot as plt
-
-    from flower_tutorial.task import load_data
-
-    trainloader, _ = load_data(partition_id=0, num_partitions=10)
-    batch = next(iter(trainloader))
-    images, labels = batch["img"], batch["label"]
-
-    # Reshape and convert images to a NumPy array
-    # matplotlib requires images with the shape (height, width, 3)
-    images = images.permute(0, 2, 3, 1).numpy()
-
-    # Denormalize
-    images = images / 2 + 0.5
-
-    # Create a figure and a grid of subplots
-    fig, axs = plt.subplots(4, 8, figsize=(12, 6))
-
-    # Loop over the images and plot them
-    for i, ax in enumerate(axs.flat):
-        ax.imshow(images[i])
-        ax.set_title(trainloader.dataset.features["label"].int2str([labels[i]])[0])
-        ax.axis("off")
-
-    # Show the plot
-    fig.tight_layout()
-    plt.show()
-
-The output from running the script above shows a random batch of images from the
-``trainloader`` from the first of ten partitions. It also prints the labels associated
-with each image (i.e., one of the ten possible labels we’ve seen above). If you run the
-script again, you should see another batch of images.
-
-Step 1: Centralized Training with PyTorch
------------------------------------------
+Defining the model and training and evaluate functions
+------------------------------------------------------
 
 Next, we’re going to use PyTorch to define a simple convolutional neural network. This
 introduction assumes basic familiarity with PyTorch, so it doesn’t cover the
@@ -250,42 +210,8 @@ The PyTorch template has also provided us with the usual training and test funct
         loss = loss / len(testloader)
         return loss, accuracy
 
-Train the model
-~~~~~~~~~~~~~~~
-
-We now have all the basic building blocks we need: a dataset, a model, a training
-function, and a test function. Let’s put them together to train the model on the dataset
-of one of our organizations (``partition_id=0``). This simulates the reality of most
-machine learning projects today: each organization has their own data and trains models
-only on this internal data.
-
-First, we'll create a new script called ``centralized.py`` and copy the following code
-into it:
-
-.. code-block:: python
-
-    import torch
-
-    from flower_tutorial.task import Net, load_data, test, train
-
-    DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-    trainloader, testloader = load_data(partition_id=0, num_partitions=10)
-    net = Net().to(DEVICE)
-
-    for epoch in range(5):
-        train(net, trainloader, 1, DEVICE)
-        loss, accuracy = test(net, testloader, DEVICE)
-        print(f"Epoch {epoch+1}: validation loss {loss}, accuracy {accuracy}")
-
-Training the simple CNN on our CIFAR-10 split for 5 epochs should result in a validation
-set accuracy of about 41%, which is not good, but at the same time, it doesn’t really
-matter for the purposes of this tutorial. The intent was just to show a simple
-centralized training pipeline that sets the stage for what comes next - federated
-learning!
-
-Step 2: Federated Learning with Flower
---------------------------------------
+Federated Learning with Flower
+------------------------------
 
 Step 1 demonstrated a simple centralized training pipeline. All data was in one place
 (i.e., a single ``trainloader`` and a single ``testloader``). Next, we’ll simulate a
