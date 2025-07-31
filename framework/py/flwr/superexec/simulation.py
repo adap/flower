@@ -12,17 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Executor for Exec API."""
+"""Simulation engine executor for backward compatibility."""
 
 
-from .app import load_executor
-from .deployment import DeploymentEngine
-from .executor import Executor
-from .simulation import SimulationEngine
+from flwr.superlink.executor import SimulationEngine
 
-__all__ = [
-    "DeploymentEngine",
-    "Executor",
-    "SimulationEngine",
-    "load_executor",
-]
+executor = SimulationEngine()
