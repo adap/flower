@@ -73,7 +73,7 @@ from flwr.server.serverapp.app import flwr_serverapp
 from flwr.simulation.app import flwr_simulation
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.superexec import load_executor
+from flwr.superlink.executor import load_executor
 from flwr.superlink.servicer.exec import run_exec_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer

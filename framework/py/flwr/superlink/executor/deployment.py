@@ -186,6 +186,3 @@ class DeploymentEngine(Executor):
                 run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(e))
                 self.linkstate.update_run_status(run_id, new_status=run_status)
             return None
-
-
-executor = DeploymentEngine()

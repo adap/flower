@@ -124,6 +124,3 @@ class SimulationEngine(Executor):
         except Exception as e:
             log(ERROR, "Could not start run: %s", str(e))
             return None
-
-
-executor = SimulationEngine()
