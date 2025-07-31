@@ -212,6 +212,7 @@ def _run_without_exec_api(
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]
         verbose: Optional[bool] = federation_config["options"].get("verbose")
+        backend_type = federation_config["options"].get("backend-type", None)
         backend_cfg = federation_config["options"].get("backend", {})
     except KeyError as err:
         typer.secho(
@@ -232,6 +233,8 @@ def _run_without_exec_api(
         "--num-supernodes",
         f"{num_supernodes}",
     ]
+    if backend_type:
+        command.extend(["--backend", backend_type])
 
     if backend_cfg:
         # Stringify as JSON
