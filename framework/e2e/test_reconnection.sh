@@ -106,16 +106,24 @@ found_success=false
 timeout=120  # Timeout after 120 seconds
 elapsed=0
 
-# Check for "Success" in a loop with a timeout
+# Define a cleanup function
+cleanup_and_exit() {
+    kill $cl1_pid; kill $cl2_pid
+    sleep 2  # Allow some time for SuperNodes to terminate
+    check_and_kill "$sl_pids"
+    sleep 2  # Allow some time for SuperLink to terminate
+    exit $1
+}
+
+# Check for "Run finished" in a loop with a timeout
 while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
-    if grep -q "Run finished" flwr_output.log; then
+    if grep -q "ERROR" flwr_output.log; then
+        echo "An ERROR occurred during training. Exiting."
+        cleanup_and_exit 1
+    elif grep -q "Run finished" flwr_output.log; then
         echo "Training worked correctly!"
         found_success=true
-        kill $cl1_pid; kill $cl2_pid
-        sleep 2  # Allow some time for SuperNodes to terminate
-        check_and_kill "$sl_pids"
-        sleep 2  # Allow some time for SuperLink to terminate
-        exit 0
+        cleanup_and_exit 0
     else
         echo "Waiting for training ... ($elapsed seconds elapsed)"
     fi
@@ -126,9 +134,5 @@ done
 
 if [ "$found_success" = false ]; then
     echo "Training had an issue and timed out."
-    kill $cl1_pid; kill $cl2_pid
-    sleep 2  # Allow some time for SuperNodes to terminate
-    check_and_kill "$sl_pids"
-    sleep 2  # Allow some time for SuperLink to terminate
-    exit 1
+    cleanup_and_exit 1
 fi
