@@ -54,7 +54,11 @@ from flwr.common.serde import (
     run_from_proto,
 )
 from flwr.common.typing import Fab, Run
+
+# pylint: disable=E0611
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    ListRunsToLaunchRequest,
+    ListRunsToLaunchResponse,
     PullAppInputsRequest,
     PullAppInputsResponse,
     PullAppMessagesRequest,
@@ -62,12 +66,6 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PushAppMessagesRequest,
     PushAppOutputsRequest,
     PushAppOutputsResponse,
-)
-
-# pylint: disable=E0611
-from flwr.proto.clientappio_pb2 import (
-    GetRunIdsWithPendingMessagesRequest,
-    GetRunIdsWithPendingMessagesResponse,
     RequestTokenRequest,
     RequestTokenResponse,
 )
@@ -195,9 +193,7 @@ def get_token(stub: ClientAppIoStub) -> str:
     """Get a token from SuperNode."""
     log(DEBUG, "[flwr-clientapp] Request token")
     while True:
-        res: GetRunIdsWithPendingMessagesResponse = stub.GetRunIdsWithPendingMessages(
-            GetRunIdsWithPendingMessagesRequest()
-        )
+        res: ListRunsToLaunchResponse = stub.ListRunsToLaunch(ListRunsToLaunchRequest())
 
         for run_id in res.run_ids:
             tk_res: RequestTokenResponse = stub.RequestToken(
