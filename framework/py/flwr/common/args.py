@@ -74,7 +74,7 @@ def try_obtain_root_certificates(
         if root_cert_path is None:
             log(
                 INFO,
-                "Using system certificates.",
+                "Using system certificates",
             )
             root_certificates = None
         elif not isfile(root_cert_path):
