@@ -29,8 +29,10 @@ error_messages_backends: dict[str, str] = {}
 
 if is_ray_installed:
     from .raybackend import RayBackend
+    from .lithops_backend import LithopsBackend
 
     supported_backends["ray"] = RayBackend
+    supported_backends["lithops"] = LithopsBackend
 else:
     error_messages_backends[
         "ray"
