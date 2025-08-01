@@ -12,9 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simulation engine executor for backward compatibility."""
-
-
-from flwr.superlink.executor import SimulationEngine
-
-executor = SimulationEngine()
+"""Flower SuperLink servicers."""

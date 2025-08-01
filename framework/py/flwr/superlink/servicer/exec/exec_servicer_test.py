@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Test the SuperExec API servicer."""
+"""Test the Exec API servicer."""
 
 
 import subprocess
@@ -193,7 +193,7 @@ class TestExecServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superexec.exec_servicer.shared_account_info",
+            "flwr.superlink.servicer.exec.exec_servicer.shared_account_info",
             new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
         ):
             gen = self.servicer.StreamLogs(request, ctx)
@@ -224,7 +224,7 @@ class TestExecServicerAuth(unittest.TestCase):
                 },
             ),
             patch(
-                "flwr.superexec.exec_servicer.shared_account_info",
+                "flwr.superlink.servicer.exec.exec_servicer.shared_account_info",
                 new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
             ),
         ):
@@ -251,7 +251,7 @@ class TestExecServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superexec.exec_servicer.shared_account_info",
+            "flwr.superlink.servicer.exec.exec_servicer.shared_account_info",
             new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
         ):
             with self.assertRaises(RuntimeError) as cm:
@@ -269,7 +269,7 @@ class TestExecServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superexec.exec_servicer.shared_account_info",
+            "flwr.superlink.servicer.exec.exec_servicer.shared_account_info",
             new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
         ):
             response = self.servicer.StopRun(request, ctx)
@@ -293,7 +293,7 @@ class TestExecServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superexec.exec_servicer.shared_account_info",
+            "flwr.superlink.servicer.exec.exec_servicer.shared_account_info",
             new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
         ):
             with self.assertRaises(RuntimeError) as cm:
@@ -311,7 +311,7 @@ class TestExecServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superexec.exec_servicer.shared_account_info",
+            "flwr.superlink.servicer.exec.exec_servicer.shared_account_info",
             new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
         ):
             response = self.servicer.ListRuns(request, ctx)

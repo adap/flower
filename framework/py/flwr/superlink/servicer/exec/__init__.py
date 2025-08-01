@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simulation engine executor for backward compatibility."""
+"""Exec API Servicer."""
 
 
-from flwr.superlink.executor import SimulationEngine
+from .exec_grpc import run_exec_api_grpc
 
-executor = SimulationEngine()
+__all__ = [
+    "run_exec_api_grpc",
+]
