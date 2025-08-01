@@ -352,7 +352,8 @@ Here we will explore how to implement custom serialization with a simple example
 But first what is serialization? Serialization is just the process of converting an
 object into raw bytes, and equally as important, deserialization is the process of
 converting raw bytes back into an object. This is very useful for network communication.
-Indeed, without serialization, you could not just send a Python object through the internet.
+Indeed, without serialization, you could not just send a Python object through the
+internet.
 
 Federated Learning relies heavily on internet communication for training by sending
 Python objects back and forth between the clients and the server. This means that
