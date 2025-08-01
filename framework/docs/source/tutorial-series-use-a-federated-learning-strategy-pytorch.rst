@@ -5,23 +5,26 @@ Welcome to the next part of the federated learning tutorial. In previous parts o
 tutorial, we introduced federated learning with PyTorch and Flower (:doc:`part 1
 <tutorial-series-get-started-with-flower-pytorch>`).
 
-In part 2, we’ll begin to customize the federated learning system we built in part 1
+In part 2, we'll begin to customize the federated learning system we built in part 1
 using the Flower framework, Flower Datasets, and PyTorch.
 
-    `Star Flower on GitHub <https://github.com/adap/flower>`_ ⭐️ and join the Flower
+    `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
-    help: - `Join Flower Discuss <https://discuss.flower.ai/>`_ We’d love to hear from
-    you in the ``Introduction`` topic! If anything is unclear, post in ``Flower Help -
-    Beginners``. - `Join Flower Slack <https://flower.ai/join-slack>`_ We’d love to hear
-    from you in the ``#introductions`` channel! If anything is unclear, head over to the
-    ``#questions`` channel.
+    help:
 
-Let’s move beyond FedAvg with Flower strategies! 🌼
+    - `Join Flower Discuss <https://discuss.flower.ai/>`__ We'd love to hear from you in
+      the ``Introduction`` topic! If anything is unclear, post in ``Flower Help -
+      Beginners``.
+    - `Join Flower Slack <https://flower.ai/join-slack>`__ We'd love to hear from you in
+      the ``#introductions`` channel! If anything is unclear, head over to the
+      ``#questions`` channel.
+
+Let's move beyond FedAvg with Flower strategies! 🌼
 
 Preparation
 -----------
 
-Before we begin with the actual code, let’s make sure that we have everything we need.
+Before we begin with the actual code, let's make sure that we have everything we need.
 
 Installing dependencies
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,8 +73,8 @@ Next, we install the project and its dependencies, which are specified in the
 Strategy customization
 ----------------------
 
-So far, everything should look familiar if you’ve worked through the introductory
-tutorial. With that, we’re ready to introduce a number of new features.
+So far, everything should look familiar if you've worked through the introductory
+tutorial. With that, we're ready to introduce a number of new features.
 
 Starting with a customized strategy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,7 +83,7 @@ In part 1, we created a ``ServerApp`` (in ``server_app.py``) using the ``server_
 it, we defined the strategy and number of training rounds.
 
 The strategy encapsulates the federated learning approach/algorithm, for example,
-``FedAvg`` or ``FedAdagrad``. Let’s try to use a different strategy this time. Add this
+``FedAvg`` or ``FedAdagrad``. Let's try to use a different strategy this time. Add this
 line to the top of your ``server_app.py``: ``from flwr.server.strategy import
 FedAdagrad`` and replace the ``server_fn()`` with the following code:
 
@@ -121,13 +124,13 @@ others.
 
 **Centralized Evaluation** (or *server-side evaluation*) is conceptually simple: it
 works the same way that evaluation in centralized machine learning does. If there is a
-server-side dataset that can be used for evaluation purposes, then that’s great. We can
+server-side dataset that can be used for evaluation purposes, then that's great. We can
 evaluate the newly aggregated model after each round of training without having to send
-the model to clients. We’re also fortunate in the sense that our entire evaluation
+the model to clients. We're also fortunate in the sense that our entire evaluation
 dataset is available at all times.
 
 **Federated Evaluation** (or *client-side evaluation*) is more complex, but also more
-powerful: it doesn’t require a centralized dataset and allows us to evaluate models over
+powerful: it doesn't require a centralized dataset and allows us to evaluate models over
 a larger set of data, which often yields more realistic evaluation results. In fact,
 many scenarios require us to use **Federated Evaluation** if we want to get
 representative evaluation results at all. But this power comes at a cost: once we start
@@ -135,10 +138,10 @@ to evaluate on the client side, we should be aware that our evaluation dataset c
 change over consecutive rounds of learning if those clients are not always available.
 Moreover, the dataset held by each client can also change over consecutive rounds. This
 can lead to evaluation results that are not stable, so even if we would not change the
-model, we’d see our evaluation results fluctuate over consecutive rounds.
+model, we'd see our evaluation results fluctuate over consecutive rounds.
 
-We’ve seen how federated evaluation works on the client side (i.e., by implementing the
-``evaluate`` method in ``FlowerClient``). Now let’s see how we can evaluate aggregated
+We've seen how federated evaluation works on the client side (i.e., by implementing the
+``evaluate`` method in ``FlowerClient``). Now let's see how we can evaluate aggregated
 model parameters on the server-side. First we define a new function ``evaluate`` in
 ``task.py``:
 
@@ -199,7 +202,7 @@ Sending configurations to clients from strategies
 In some situations, we want to configure client-side execution (training, evaluation)
 from the server-side. One example for that is the server asking the clients to train for
 a certain number of local epochs. Flower provides a way to send configuration values
-from the server to the clients using a dictionary. Let’s look at an example where the
+from the server to the clients using a dictionary. Let's look at an example where the
 clients receive values from the server through the ``config`` parameter in ``fit``
 (``config`` is also available in ``evaluate``). The ``fit`` method receives the
 configuration dictionary through the ``config`` parameter and can then read values from
@@ -273,7 +276,7 @@ callback for every round of federated learning. Add the following to your
         }
         return config
 
-Next, we’ll pass this function to the FedAvg strategy before starting the simulation.
+Next, we'll pass this function to the FedAvg strategy before starting the simulation.
 Change the ``server_fn()`` function in ``server_app.py`` to the following:
 
 .. code-block:: python
@@ -319,7 +322,7 @@ a dictionary containing a custom key/value pair as the third return value in
 Scaling federated learning
 --------------------------
 
-As a last step in this tutorial, let’s see how we can use Flower to experiment with a
+As a last step in this tutorial, let's see how we can use Flower to experiment with a
 large number of clients. In the ``pyproject.toml``, increase the number of SuperNodes to
 1000:
 
@@ -336,7 +339,7 @@ We now have 1000 partitions, each holding 45 training and 5 validation examples.
 that the number of training examples on each client is quite small, we should probably
 train the model a bit longer, so we configure the clients to perform 3 local training
 epochs. We should also adjust the fraction of clients selected for training during each
-round (we don’t want all 1000 clients participating in every round), so we adjust
+round (we don't want all 1000 clients participating in every round), so we adjust
 ``fraction_fit`` to ``0.025``, which means that only 2.5% of available clients (so 25
 clients) will be selected for training each round. We update the ``fraction-fit`` value
 in the ``pyproject.toml``:
@@ -395,12 +398,12 @@ Finally, run the simulation with the following command:
 Recap
 -----
 
-In this tutorial, we’ve seen how we can gradually enhance our system by customizing the
+In this tutorial, we've seen how we can gradually enhance our system by customizing the
 strategy, initializing parameters on the server side, choosing a different strategy, and
-evaluating models on the server-side. That’s quite a bit of flexibility with so little
+evaluating models on the server-side. That's quite a bit of flexibility with so little
 code, right?
 
-In the later sections, we’ve seen how we can communicate arbitrary values between server
+In the later sections, we've seen how we can communicate arbitrary values between server
 and clients to fully customize client-side execution. With that capability, we built a
 large-scale Federated Learning simulation using the Flower Virtual Client Engine and ran
 an experiment involving 1000 clients in the same workload - all in the same Flower
@@ -413,8 +416,8 @@ Before you continue, make sure to join the Flower community on Flower Discuss (`
 Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack
 <https://flower.ai/join-slack/>`__).
 
-There’s a dedicated ``#questions`` channel if you need help, but we’d also love to hear
-who you are in ``#introductions``!
+There's a dedicated ``#questions`` Slack channel if you need help, but we'd also love to
+hear who you are in ``#introductions``!
 
 The :doc:`Flower Federated Learning Tutorial - Part 3
 <tutorial-series-build-a-strategy-from-scratch-pytorch>` shows how to build a fully

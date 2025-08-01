@@ -10,26 +10,29 @@ our own custom strategy from scratch (:doc:`part 3
 <tutorial-series-build-a-strategy-from-scratch-pytorch>`).
 
 In this final tutorial, we revisit ``NumPyClient`` and introduce a new baseclass for
-building clients, simply named ``Client``. In previous parts of this tutorial, we’ve
+building clients, simply named ``Client``. In previous parts of this tutorial, we've
 based our client on ``NumPyClient``, a convenience class which makes it easy to work
 with machine learning libraries that have good NumPy interoperability. With ``Client``,
-we gain a lot of flexibility that we didn’t have before, but we’ll also have to do a few
-things that we didn’t have to do before.
+we gain a lot of flexibility that we didn't have before, but we'll also have to do a few
+things that we didn't have to do before.
 
     `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
-    help: - `Join Flower Discuss <https://discuss.flower.ai/>`__ We’d love to hear from
-    you in the ``Introduction`` topic! If anything is unclear, post in ``Flower Help -
-    Beginners``. - `Join Flower Slack <https://flower.ai/join-slack>`__ We’d love to
-    hear from you in the ``#introductions`` channel! If anything is unclear, head over
-    to the ``#questions`` channel.
+    help:
 
-Let’s go deeper and see what it takes to move from ``NumPyClient`` to ``Client``! 🌼
+    - `Join Flower Discuss <https://discuss.flower.ai/>`__ We'd love to hear from you in
+      the ``Introduction`` topic! If anything is unclear, post in ``Flower Help -
+      Beginners``.
+    - `Join Flower Slack <https://flower.ai/join-slack>`__ We'd love to hear from you in
+      the ``#introductions`` channel! If anything is unclear, head over to the
+      ``#questions`` channel.
+
+Let's go deeper and see what it takes to move from ``NumPyClient`` to ``Client``! 🌼
 
 Preparation
 -----------
 
-Before we begin with the actual code, let’s make sure that we have everything we need.
+Before we begin with the actual code, let's make sure that we have everything we need.
 
 Installing dependencies
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -78,7 +81,7 @@ Next, we install the project and its dependencies, which are specified in the
 Revisiting NumPyClient
 ----------------------
 
-So far, we’ve implemented our client by subclassing ``flwr.client.NumPyClient``. The two
+So far, we've implemented our client by subclassing ``flwr.client.NumPyClient``. The two
 methods that were implemented in ``client_app.py`` are ``fit`` and ``evaluate``.
 
 .. code-block:: python
@@ -134,7 +137,7 @@ Then, we have the function ``client_fn`` that is used by Flower to create the
         client_fn,
     )
 
-We’ve seen this before, there’s nothing new so far. Next, in ``server_app.py``, the
+We've seen this before, there's nothing new so far. Next, in ``server_app.py``, the
 number of federated learning rounds are preconfigured in the ``ServerConfig`` and in the
 same module, the ``ServerApp`` is created with this config:
 
@@ -172,16 +175,16 @@ Finally, we run the simulation to see the output we get:
 
 This works as expected, ten clients are training for three rounds of federated learning.
 
-Let’s dive a little bit deeper and discuss how Flower executes this simulation. Whenever
+Let's dive a little bit deeper and discuss how Flower executes this simulation. Whenever
 a client is selected to do some work, under the hood, Flower launches the ``ClientApp``
 object which in turn calls the function ``client_fn`` to create an instance of our
 ``FlowerClient`` (along with loading the model and the data).
 
-But here’s the perhaps surprising part: Flower doesn’t actually use the ``FlowerClient``
+But here's the perhaps surprising part: Flower doesn't actually use the ``FlowerClient``
 object directly. Instead, it wraps the object to makes it look like a subclass of
 ``flwr.client.Client``, not ``flwr.client.NumPyClient``. In fact, the Flower core
-framework doesn’t know how to handle ``NumPyClient``\ ’s, it only knows how to handle
-``Client``\ ’s. ``NumPyClient`` is just a convenience abstraction built on top of
+framework doesn't know how to handle ``NumPyClient``'s, it only knows how to handle
+``Client``'s. ``NumPyClient`` is just a convenience abstraction built on top of
 ``Client``.
 
 Instead of building on top of ``NumPyClient``, we can directly build on top of
@@ -190,7 +193,7 @@ Instead of building on top of ``NumPyClient``, we can directly build on top of
 Moving from ``NumPyClient`` to ``Client``
 -----------------------------------------
 
-Let’s try to do the same thing using ``Client`` instead of ``NumPyClient``. Create a new
+Let's try to do the same thing using ``Client`` instead of ``NumPyClient``. Create a new
 file called ``custom_client_app.py`` and copy the following code into it:
 
 .. code-block:: python
@@ -308,40 +311,40 @@ Next, we update the ``pyproject.toml`` so that Flower uses the new module:
     serverapp = "flower_tutorial.server_app:app"
     clientapp = "flower_tutorial.custom_client_app:app"
 
-Before we discuss the code in more detail, let’s try to run it! Gotta make sure our new
+Before we discuss the code in more detail, let's try to run it! Gotta make sure our new
 ``Client``-based client works, right? We run the simulation as follows:
 
 .. code-block:: shell
 
     $ flwr run .
 
-That’s it, we’re now using ``Client``. It probably looks similar to what we’ve done with
-``NumPyClient``. So what’s the difference?
+That's it, we're now using ``Client``. It probably looks similar to what we've done with
+``NumPyClient``. So what's the difference?
 
-First of all, it’s more code. But why? The difference comes from the fact that
+First of all, it's more code. But why? The difference comes from the fact that
 ``Client`` expects us to take care of parameter serialization and deserialization. For
 Flower to be able to send parameters over the network, it eventually needs to turn these
-parameters into ``bytes``. Turning parameters (e.g., NumPy ``ndarray``\ ’s) into raw
-bytes is called serialization. Turning raw bytes into something more useful (like NumPy
-``ndarray``\ ’s) is called deserialization. Flower needs to do both: it needs to
-serialize parameters on the server-side and send them to the client, the client needs to
+parameters into ``bytes``. Turning parameters (e.g., NumPy ``ndarray``'s) into raw bytes
+is called serialization. Turning raw bytes into something more useful (like NumPy
+``ndarray``'s) is called deserialization. Flower needs to do both: it needs to serialize
+parameters on the server-side and send them to the client, the client needs to
 deserialize them to use them for local training, and then serialize the updated
 parameters again to send them back to the server, which (finally!) deserializes them
 again in order to aggregate them with the updates received from other clients.
 
 The only *real* difference between Client and NumPyClient is that NumPyClient takes care
 of serialization and deserialization for you. It can do so because it expects you to
-return parameters as NumPy ndarray’s, and it knows how to handle these. This makes
+return parameters as NumPy ndarray's, and it knows how to handle these. This makes
 working with machine learning libraries that have good NumPy support (most of them) a
 breeze.
 
-In terms of API, there’s one major difference: all methods in Client take exactly one
+In terms of API, there's one major difference: all methods in Client take exactly one
 argument (e.g., ``FitIns`` in ``Client.fit``) and return exactly one value (e.g.,
 ``FitRes`` in ``Client.fit``). The methods in ``NumPyClient`` on the other hand have
 multiple arguments (e.g., ``parameters`` and ``config`` in ``NumPyClient.fit``) and
 multiple return values (e.g., ``parameters``, ``num_example``, and ``metrics`` in
 ``NumPyClient.fit``) if there are multiple things to handle. These ``*Ins`` and ``*Res``
-objects in ``Client`` wrap all the individual values you’re used to from
+objects in ``Client`` wrap all the individual values you're used to from
 ``NumPyClient``.
 
 Custom serialization
@@ -779,7 +782,7 @@ Finally, we run the simulation.
 Recap
 -----
 
-In this part of the tutorial, we’ve seen how we can build clients by subclassing either
+In this part of the tutorial, we've seen how we can build clients by subclassing either
 ``NumPyClient`` or ``Client``. ``NumPyClient`` is a convenience abstraction that makes
 it easier to work with machine learning libraries that have good NumPy interoperability.
 ``Client`` is a more flexible abstraction that allows us to do things that are not
@@ -800,12 +803,12 @@ Before you continue, make sure to join the Flower community on Flower Discuss (`
 Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack
 <https://flower.ai/join-slack/>`__).
 
-There’s a dedicated ``#questions`` channel if you need help, but we’d also love to hear
-who you are in ``#introductions``!
+There's a dedicated ``#questions`` Slack channel if you need help, but we'd also love to
+hear who you are in ``#introductions``!
 
-This is the final part of the Flower tutorial (for now!), congratulations! You’re now
+This is the final part of the Flower tutorial (for now!), congratulations! You're now
 well equipped to understand the rest of the documentation. There are many topics we
-didn’t cover in the tutorial, we recommend the following resources:
+didn't cover in the tutorial, we recommend the following resources:
 
 - `Read Flower Docs <https://flower.ai/docs/>`__
 - `Check out Flower Code Examples <https://flower.ai/docs/examples/>`__

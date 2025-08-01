@@ -3,24 +3,27 @@ Get started with Flower
 
 Welcome to the Flower federated learning tutorial!
 
-In this tutorial, we’ll build a federated learning system using the Flower framework,
+In this tutorial, we'll build a federated learning system using the Flower framework,
 Flower Datasets and PyTorch. In part 1, we use PyTorch for the model training pipeline
 and data loading. In part 2, we federate the PyTorch project using Flower.
 
     `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
-    help: - `Join Flower Discuss <https://discuss.flower.ai/>`__ We’d love to hear from
-    you in the ``Introduction`` topic! If anything is unclear, post in ``Flower Help -
-    Beginners``. - `Join Flower Slack <https://flower.ai/join-slack>`__ We’d love to
-    hear from you in the ``#introductions`` channel! If anything is unclear, head over
-    to the ``#questions`` channel.
+    help:
 
-Let’s get started! 🌼
+    - `Join Flower Discuss <https://discuss.flower.ai/>`__ We'd love to hear from you in
+      the ``Introduction`` topic! If anything is unclear, post in ``Flower Help -
+      Beginners``.
+    - `Join Flower Slack <https://flower.ai/join-slack>`__ We'd love to hear from you in
+      the ``#introductions`` channel! If anything is unclear, head over to the
+      ``#questions`` channel.
+
+Let's get started! 🌼
 
 Preparation
 -----------
 
-Before we begin with any actual code, let’s make sure that we have everything we need.
+Before we begin with any actual code, let's make sure that we have everything we need.
 
 Install dependencies
 ~~~~~~~~~~~~~~~~~~~~
@@ -74,14 +77,14 @@ Federated learning can be applied to many different types of tasks across differ
 domains. In this tutorial, we introduce federated learning by training a simple
 convolutional neural network (CNN) on the popular CIFAR-10 dataset. CIFAR-10 can be used
 to train image classifiers that distinguish between images from ten different classes:
-‘airplane’, ‘automobile’, ‘bird’, ‘cat’, ‘deer’, ‘dog’, ‘frog’, ‘horse’, ‘ship’, and
-‘truck’.
+'airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', and
+'truck'.
 
 We simulate having multiple datasets from multiple organizations (also called the
 “cross-silo” setting in federated learning) by splitting the original CIFAR-10 dataset
 into multiple partitions. Each partition will represent the data from a single
-organization. We’re doing this purely for experimentation purposes, in the real world
-there’s no need for data splitting because each organization already has their own data
+organization. We're doing this purely for experimentation purposes, in the real world
+there's no need for data splitting because each organization already has their own data
 (the data is naturally partitioned).
 
 Each organization will act as a client in the federated learning system. Having ten
@@ -126,7 +129,7 @@ these into a PyTorch ``DataLoader``:
 We now have a function that can return a training set and validation set
 (``trainloader`` and ``valloader``) representing one dataset from one of ten different
 organizations. Each ``trainloader``/``valloader`` pair contains 4000 training examples
-and 1000 validation examples. There’s also a single ``testloader`` (we did not split the
+and 1000 validation examples. There's also a single ``testloader`` (we did not split the
 test set). Again, this is only necessary for building research or educational systems,
 actual federated learning systems have their data naturally distributed across multiple
 partitions.
@@ -134,8 +137,8 @@ partitions.
 The model and train and evaluate functions
 ------------------------------------------
 
-Next, we’re going to use PyTorch to define a simple convolutional neural network. This
-introduction assumes basic familiarity with PyTorch, so it doesn’t cover the
+Next, we're going to use PyTorch to define a simple convolutional neural network. This
+introduction assumes basic familiarity with PyTorch, so it doesn't cover the
 PyTorch-related aspects in full detail. If you want to dive deeper into PyTorch, we
 recommend `this introductory tutorial
 <https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html>`_.
@@ -246,7 +249,7 @@ serialize/deserialize):
 Define the Flower ClientApp
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-With that out of the way, let’s move on to the interesting part. Federated learning
+With that out of the way, let's move on to the interesting part. Federated learning
 systems consist of a server and multiple clients. In Flower, we create a ``ServerApp``
 and a ``ClientApp`` to run the server-side and client-side code, respectively.
 
@@ -263,7 +266,7 @@ implement ``NumPyClient``, we create a subclass that implements the three method
   local data, and return the evaluation result to the server
 
 We mentioned that our clients will use the previously defined PyTorch components for
-model training and evaluation. Let’s see a simple Flower client implementation that
+model training and evaluation. Let's see a simple Flower client implementation that
 brings everything together. Note that all of this boilerplate implementation has already
 been done for us in our Flower project:
 
@@ -300,10 +303,10 @@ been done for us in our Flower project:
 Our class ``FlowerClient`` defines how local training/evaluation will be performed and
 allows Flower to call the local training/evaluation through ``fit`` and ``evaluate``.
 Each instance of ``FlowerClient`` represents a *single client* in our federated learning
-system. Federated learning systems have multiple clients (otherwise, there’s not much to
+system. Federated learning systems have multiple clients (otherwise, there's not much to
 federate), so each client will be represented by its own instance of ``FlowerClient``.
-If we have, for example, three clients in our workload, then we’d have three instances
-of ``FlowerClient`` (one on each of the machines we’d start the client on). Flower calls
+If we have, for example, three clients in our workload, then we'd have three instances
+of ``FlowerClient`` (one on each of the machines we'd start the client on). Flower calls
 ``FlowerClient.fit`` on the respective instance when the server selects a particular
 client for training (and ``FlowerClient.evaluate`` for evaluation).
 
@@ -462,7 +465,7 @@ updates over to the strategy (*FedAvg*) for aggregation. The strategy aggregates
 updates and returns the new global model, which then gets used in the next round of
 federated learning.
 
-Where’s the accuracy?
+Where's the accuracy?
 ~~~~~~~~~~~~~~~~~~~~~
 
 You may have noticed that all metrics except for ``losses_distributed`` are empty. Where
@@ -480,7 +483,7 @@ then call these functions whenever it receives fit or evaluate metrics from clie
 two possible functions are ``fit_metrics_aggregation_fn`` and
 ``evaluate_metrics_aggregation_fn``.
 
-Let’s create a simple weighted averaging function to aggregate the ``accuracy`` metric
+Let's create a simple weighted averaging function to aggregate the ``accuracy`` metric
 we return from ``evaluate``. Copy the following ``weighted_average()`` function to
 ``task.py``:
 
@@ -540,13 +543,13 @@ Final remarks
 
 Congratulations, you just trained a convolutional neural network, federated over 10
 clients! With that, you understand the basics of federated learning with Flower. The
-same approach you’ve seen can be used with other machine learning frameworks (not just
+same approach you've seen can be used with other machine learning frameworks (not just
 PyTorch) and tasks (not just CIFAR-10 images classification), for example NLP with
 Hugging Face Transformers or speech with SpeechBrain.
 
-In the next tutorial, we’re going to cover some more advanced concepts. Want to
+In the next tutorial, we're going to cover some more advanced concepts. Want to
 customize your strategy? Initialize parameters on the server side? Or evaluate the
-aggregated model on the server side? We’ll cover all this and more in the next tutorial.
+aggregated model on the server side? We'll cover all this and more in the next tutorial.
 
 Next steps
 ----------
@@ -555,8 +558,8 @@ Before you continue, make sure to join the Flower community on Flower Discuss (`
 Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack
 <https://flower.ai/join-slack/>`__).
 
-There’s a dedicated ``#questions`` channel if you need help, but we’d also love to hear
-who you are in ``#introductions``!
+There's a dedicated ``#questions`` Slack channel if you need help, but we'd also love to
+hear who you are in ``#introductions``!
 
 The :doc:`Flower Federated Learning Tutorial - Part 2
 <tutorial-series-use-a-federated-learning-strategy-pytorch>` goes into more depth about
