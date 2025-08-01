@@ -8,11 +8,19 @@ import torch
 import torch.nn as nn
 import torch.utils.data as data_utils
 
-from dasha.client import DashaClient
+from dasha.client_app import DashaClient
 from dasha.compressors import decompress
-from dasha.models import ClassificationModel
+from dasha.model import ClassificationModel
+from dasha.utils import get_parameters
 
 _CPU_DEVICE = "cpu"
+
+
+class DummyClientState:
+    """Dummy Client State."""
+
+    def __init__(self):
+        self.array_records = {}
 
 
 class DummyNet(ClassificationModel):
@@ -22,9 +30,13 @@ class DummyNet(ClassificationModel):
         super().__init__(input_shape)
         self._weight = nn.Parameter(torch.Tensor([2]))
 
-    def forward(self, features: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, features: torch.Tensor, targets: torch.Tensor
+    ) -> torch.Tensor:
         """Forward pass."""
-        return 0.5 * torch.mean((self._weight.view(-1, 1) * features - targets) ** 2)
+        return 0.5 * torch.mean(
+            (self._weight.view(-1, 1) * features - targets) ** 2
+        )
 
 
 class TestDashaClient(unittest.TestCase):
@@ -38,13 +50,17 @@ class TestDashaClient(unittest.TestCase):
         dataset = data_utils.TensorDataset(
             torch.Tensor(self._features), torch.Tensor(self._targets)
         )
+
         self._client = DashaClient(
-            function=self._function, dataset=dataset, device=_CPU_DEVICE
+            function=self._function,
+            dataset=dataset,
+            device=_CPU_DEVICE,
+            client_state=DummyClientState(),
         )
 
     def testGetParameters(self) -> None:
         """Test."""
-        parameters = self._client.get_parameters(config={})
+        parameters = get_parameters(self._client._function)
         self.assertEqual(len(parameters), 1)
         self.assertAlmostEqual(float(parameters[0]), 2)
 
@@ -61,11 +77,14 @@ class TestDashaClient(unittest.TestCase):
         """Test."""
         parameter = 3.0
         parameters_list = [np.array([parameter])]
-        loss, num_samples, _ = self._client.evaluate(parameters_list, config={})
+        loss, num_samples, _ = self._client.evaluate(
+            parameters_list, config={}
+        )
         self.assertEqual(num_samples, 2)
         loss_actual = sum(
             [
-                0.5 * (parameter * self._features[i][0] - self._targets[i][0]) ** 2
+                0.5
+                * (parameter * self._features[i][0] - self._targets[i][0]) ** 2
                 for i in range(len(self._targets))
             ]
         ) / len(self._targets)
@@ -98,7 +117,9 @@ class DummyNetTwoParameters(ClassificationModel):
         self._weight_one = nn.Parameter(torch.Tensor([1]))
         self._weight_two = nn.Parameter(torch.Tensor([3]))
 
-    def forward(self, features: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, features: torch.Tensor, targets: torch.Tensor
+    ) -> torch.Tensor:
         """Forward pass."""
         return (
             0.5
@@ -132,7 +153,7 @@ class TestDashaClientWithTwoParameters(unittest.TestCase):
 
     def testGetParameters(self) -> None:
         """Test."""
-        parameters = self._client.get_parameters(config={})
+        parameters = get_parameters(self._client._function)
         self.assertEqual(len(parameters), 1)
         self.assertAlmostEqual(float(parameters[0][0]), 1)
         self.assertAlmostEqual(float(parameters[0][1]), 3)
