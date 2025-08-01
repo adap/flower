@@ -334,7 +334,7 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
                 retry_state.tries,
             )
 
-    def _on_backoff(retry_state: RetryState) -> None:
+    def _on_backoff(_: RetryState) -> None:
         system_healthy.clear()
 
     def _on_giveup(retry_state: RetryState) -> None:
