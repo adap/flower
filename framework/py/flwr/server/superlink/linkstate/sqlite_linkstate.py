@@ -19,6 +19,7 @@
 
 import json
 import re
+import secrets
 import sqlite3
 import time
 from collections.abc import Sequence
@@ -27,6 +28,7 @@ from typing import Any, Optional, Union, cast
 
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
+    FLWR_APP_TOKEN_LENGTH,
     HEARTBEAT_MAX_INTERVAL,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
@@ -163,6 +165,13 @@ CREATE TABLE IF NOT EXISTS message_res(
 );
 """
 
+SQL_CREATE_TABLE_TOKEN_STORE = """
+CREATE TABLE IF NOT EXISTS token_store (
+    run_id                  INTEGER PRIMARY KEY,
+    token                   TEXT UNIQUE NOT NULL
+);
+"""
+
 DictOrTuple = Union[tuple[Any, ...], dict[str, Any]]
 
 
@@ -212,6 +221,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_MESSAGE_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
+        cur.execute(SQL_CREATE_TABLE_TOKEN_STORE)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
         return res.fetchall()
@@ -1137,6 +1147,41 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
 
         return message_ins
+
+    def create_token(self, run_id: int) -> str:
+        """Create a token for the given run ID."""
+        token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
+        query = "INSERT INTO token_store (run_id, token) VALUES (:run_id, :token);"
+        data = {"run_id": convert_uint64_to_sint64(run_id), "token": token}
+        try:
+            self.query(query, data)
+        except sqlite3.IntegrityError:
+            raise ValueError("Token already created for this run ID") from None
+        return token
+
+    def verify_token(self, run_id: int, token: str) -> bool:
+        """Verify a token for the given run ID."""
+        query = "SELECT token FROM token_store WHERE run_id = :run_id;"
+        data = {"run_id": convert_uint64_to_sint64(run_id)}
+        rows = self.query(query, data)
+        if not rows:
+            return False
+        return cast(str, rows[0]["token"]) == token
+
+    def delete_token(self, run_id: int) -> None:
+        """Delete the token for the given run ID."""
+        query = "DELETE FROM token_store WHERE run_id = :run_id;"
+        data = {"run_id": convert_uint64_to_sint64(run_id)}
+        self.query(query, data)
+
+    def get_run_id_by_token(self, token: str) -> Optional[int]:
+        """Get the run ID associated with a given token."""
+        query = "SELECT run_id FROM token_store WHERE token = :token;"
+        data = {"token": token}
+        rows = self.query(query, data)
+        if not rows:
+            return None
+        return convert_sint64_to_uint64(rows[0]["run_id"])
 
 
 def dict_factory(

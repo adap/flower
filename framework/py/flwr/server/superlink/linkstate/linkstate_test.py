@@ -75,6 +75,10 @@ class StateTest(unittest.TestCase):
         """Provide state implementation to test."""
         raise NotImplementedError()
 
+    def setUp(self) -> None:
+        """Set up the test case."""
+        self.state: LinkState = self.state_factory()
+
     def test_create_and_get_run(self) -> None:
         """Test if create_run and get_run work correctly."""
         # Prepare
@@ -1394,6 +1398,50 @@ class StateTest(unittest.TestCase):
         unique_int = next(num for num in range(0, 1) if num not in {run_id})
         assert state.get_federation_options(run_id=unique_int) is None
 
+    def test_create_verify_and_delete_token(self) -> None:
+        """Test creating, verifying, and deleting tokens."""
+        # Copied from `nodestate_test.py`
+        # Prepare
+        run_id = 42
+
+        # Execute: create a token
+        token = self.state.create_token(run_id)
+
+        # Assert: token should be valid
+        self.assertTrue(self.state.verify_token(run_id, token))
+
+        # Execute: delete the token
+        self.state.delete_token(run_id)
+
+        # Assert: token should no longer be valid
+        self.assertFalse(self.state.verify_token(run_id, token))
+
+    def test_create_token_already_exists(self) -> None:
+        """Test creating a token that already exists."""
+        # Copied from `nodestate_test.py`
+        # Prepare
+        run_id = 42
+        self.state.create_token(run_id)
+
+        # Execute and assert: should raise ValueError
+        with self.assertRaises(ValueError):
+            self.state.create_token(run_id)
+
+    def test_get_run_id_by_token(self) -> None:
+        """Test retrieving run ID by token."""
+        # Copied from `nodestate_test.py`
+        # Prepare
+        run_id = 42
+        token = self.state.create_token(run_id)
+
+        # Execute: get run ID by token
+        retrieved_run_id1 = self.state.get_run_id_by_token(token)
+        retrieved_run_id2 = self.state.get_run_id_by_token("nonexistent_token")
+
+        # Assert: should return the correct run ID
+        self.assertEqual(retrieved_run_id1, run_id)
+        self.assertIsNone(retrieved_run_id2)
+
 
 def create_ins_message(
     src_node_id: int,
@@ -1480,7 +1528,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 15
+        assert len(result) == 17
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1505,7 +1553,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 15
+        assert len(result) == 17
 
 
 if __name__ == "__main__":
