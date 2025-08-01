@@ -36,7 +36,8 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsRequest,
 )
 from flwr.supercore.license_plugin import LicensePlugin
-from flwr.superexec.exec_license_interceptor import ExecLicenseInterceptor
+
+from .exec_license_interceptor import ExecLicenseInterceptor
 
 HandlerContinuation = Callable[[grpc.HandlerCallDetails], grpc.RpcMethodHandler]
 

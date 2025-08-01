@@ -274,8 +274,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         response: PushMessagesResponse = stub.PushMessages(request=request)
 
         # Get and return the object IDs to push
-        object_ids_to_push = response.objects_to_push[object_tree.object_id]
-        return set(object_ids_to_push.object_ids)
+        return set(response.objects_to_push)
 
     def get_run(run_id: int) -> Run:
         # Call FleetAPI

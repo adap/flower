@@ -73,6 +73,10 @@ export interface ToolParameterProperty {
   enum?: string[];
 }
 
+export type Embedding = number[];
+
+export type EmbeddingInput = string | string[] | number[] | number[][];
+
 /**
  * Represents the parameters required for a tool's function.
  */
@@ -135,7 +139,13 @@ export interface StreamEvent {
   /**
    * The chunk of text data received in the stream event.
    */
-  chunk: string;
+  chunk?: string;
+  toolCall?: {
+    index: string;
+    name: string;
+    arguments: string | Record<string, string>;
+    complete: boolean;
+  };
 }
 
 /**
