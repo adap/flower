@@ -11,13 +11,18 @@ the art in the field.
 🧑‍🏫 This tutorial starts from zero and expects no familiarity with federated learning.
 Only a basic understanding of data science and Python programming is assumed.
 
-    `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the
-    open-source Flower community on Slack to connect, ask questions, and get help: `Join
-    Slack <https://flower.ai/join-slack>`__ 🌼 We’d love to hear from you in the
-    ``#introductions`` channel! And if anything is unclear, head over to the
-    ``#questions`` channel.
+    `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
+    community on Flower Discuss and the Flower Slack to connect, ask questions, and get
+    help:
 
-Let’s get started!
+    - `Join Flower Discuss <https://discuss.flower.ai/>`__ We'd love to hear from you in
+      the ``Introduction`` topic! If anything is unclear, post in ``Flower Help -
+      Beginners``.
+    - `Join Flower Slack <https://flower.ai/join-slack>`__ We'd love to hear from you in
+      the ``#introductions`` channel! If anything is unclear, head over to the
+      ``#questions`` channel.
+
+Let's get started!
 
 Classical Machine Learning
 --------------------------
@@ -43,7 +48,7 @@ objects in images, transcribe an audio recording, or play a game like Go.
       <img src="_static/tutorial/train-model.png" alt="Train model using data"/>
     </div>
 
-In practice, the training data we work with doesn’t originate on the machine we train
+In practice, the training data we work with doesn't originate on the machine we train
 the model on.
 
 This data gets created “somewhere else”. For instance, the data can originate on a
@@ -57,8 +62,8 @@ a song.
       <img src="_static/tutorial/data-on-phone.png" alt="Data on a phone"/>
     </div>
 
-What’s also important to mention, this “somewhere else” is usually not just one place,
-it’s many places. It could be several devices all running the same app. But it could
+What's also important to mention, this “somewhere else” is usually not just one place,
+it's many places. It could be several devices all running the same app. But it could
 also be several organizations, all generating data for the same task.
 
 .. raw:: html
@@ -81,7 +86,7 @@ located somewhere in a data center, or somewhere in the cloud.
 
 Once all the data is collected in one place, we can finally use machine learning
 algorithms to train our model on the data. This is the machine learning approach that
-we’ve basically always relied on.
+we've basically always relied on.
 
 .. raw:: html
 
@@ -94,7 +99,7 @@ we’ve basically always relied on.
 Challenges of classical machine learning
 ----------------------------------------
 
-This classical machine learning approach we’ve just seen can be used in some cases.
+This classical machine learning approach we've just seen can be used in some cases.
 Great examples include categorizing holiday photos, or analyzing web traffic. Cases,
 where all the data is naturally available on a centralized server.
 
@@ -124,11 +129,11 @@ work for a large number of highly important real-world use cases. Those reasons 
   (India), PIPA (Korea), APPI (Japan), PDP (Indonesia), PDPA (Singapore), APP
   (Australia), and other regulations protect sensitive data from being moved. In fact,
   those regulations sometimes even prevent single organizations from combining their own
-  users’ data for machine learning training because those users live in different parts
+  users' data for machine learning training because those users live in different parts
   of the world, and their data is governed by different data protection regulations.
 - **User preference**: In addition to regulation, there are use cases where users just
   expect that no data leaves their device, ever. If you type your passwords and credit
-  card info into the digital keyboard of your phone, you don’t expect those passwords to
+  card info into the digital keyboard of your phone, you don't expect those passwords to
   end up on the server of the company that developed that keyboard, do you? In fact,
   that use case was the reason federated learning was invented in the first place.
 - **Data volume**: Some sensors, like cameras, produce such a high data volume that it
@@ -137,7 +142,7 @@ work for a large number of highly important real-world use cases. Those reasons 
   hundreds of train stations across the country. If each of these train stations is
   outfitted with a number of security cameras, the volume of raw on-device data they
   produce requires incredibly powerful and exceedingly expensive infrastructure to
-  process and store. And most of the data isn’t even useful.
+  process and store. And most of the data isn't even useful.
 
 Examples where centralized machine learning does not work include:
 
@@ -158,13 +163,13 @@ Federated Learning
 
 Federated Learning simply reverses this approach. It enables machine learning on
 distributed data by moving the training to the data, instead of moving the data to the
-training. Here’s a one-liner explanation:
+training. Here's a one-liner explanation:
 
 - Centralized machine learning: move the data to the computation
 - Federated (machine) Learning: move the computation to the data
 
 By doing so, Federated Learning enables us to use machine learning (and other data
-science approaches) in areas where it wasn’t possible before. We can now train excellent
+science approaches) in areas where it wasn't possible before. We can now train excellent
 medical AI models by enabling different hospitals to work together. We can solve
 financial fraud by training AI models on the data of different financial institutions.
 We can build novel privacy-enhancing applications (such as secure messaging) that have
@@ -173,7 +178,7 @@ few of the examples that come to mind. As we deploy Federated Learning, we disco
 and more areas that can suddenly be reinvented because they now have access to vast
 amounts of previously inaccessible data.
 
-So how does Federated Learning work, exactly? Let’s start with an intuitive explanation.
+So how does Federated Learning work, exactly? Let's start with an intuitive explanation.
 
 Federated learning in five steps
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -213,7 +218,7 @@ Step 2: Train model locally on the data of each organization/device (client node
 
 Now that all (selected) client nodes have the latest version of the global model
 parameters, they start the local training. They use their own local dataset to train
-their own local model. They don’t train the model until full convergence, but they only
+their own local model. They don't train the model until full convergence, but they only
 train for a little while. This could be as little as one epoch on the local data, or
 even just a few steps (mini-batches).
 
@@ -243,7 +248,7 @@ Step 4: Aggregate model updates into a new global model
 
 The server receives model updates from the selected client nodes. If it selected 100
 client nodes, it now has 100 slightly different versions of the original global model,
-each trained on the local data of one client. But didn’t we want to have one model that
+each trained on the local data of one client. But didn't we want to have one model that
 contains the learnings from the data of all 100 client nodes?
 
 In order to get one single model, we have to combine all the model updates we received
@@ -285,10 +290,10 @@ client nodes.
 Conclusion
 ~~~~~~~~~~
 
-Congratulations, you now understand the basics of federated learning. There’s a lot more
+Congratulations, you now understand the basics of federated learning. There's a lot more
 to discuss, of course, but that was federated learning in a nutshell. In later parts of
 this tutorial, we will go into more detail. Interesting questions include: How can we
-select the best client nodes that should participate in the next round? What’s the best
+select the best client nodes that should participate in the next round? What's the best
 way to aggregate model updates? How can we handle failing client nodes (stragglers)?
 
 Federated Evaluation
@@ -302,9 +307,9 @@ integral part of most federated learning systems.
 Federated Analytics
 ~~~~~~~~~~~~~~~~~~~
 
-In many cases, machine learning isn’t necessary to derive value from data. Data analysis
-can yield valuable insights, but again, there’s often not enough data to get a clear
-answer. What’s the average age at which people develop a certain type of health
+In many cases, machine learning isn't necessary to derive value from data. Data analysis
+can yield valuable insights, but again, there's often not enough data to get a clear
+answer. What's the average age at which people develop a certain type of health
 condition? Federated analytics enables such queries over multiple client nodes. It is
 usually used in conjunction with other privacy-enhancing technologies like secure
 aggregation to prevent the server from seeing the results submitted by individual client
@@ -316,7 +321,7 @@ Differential Privacy
 Differential privacy (DP) is often mentioned in the context of Federated Learning. It is
 a privacy-preserving method used when analyzing and sharing statistical data, ensuring
 the privacy of individual participants. DP achieves this by adding statistical noise to
-the model updates, ensuring any individual participants’ information cannot be
+the model updates, ensuring any individual participants' information cannot be
 distinguished or re-identified. This technique can be considered an optimization that
 provides a quantifiable privacy protection measure.
 
@@ -352,11 +357,12 @@ system with Flower.
 Next steps
 ----------
 
-Before you continue, make sure to join the Flower community on Slack: `Join Slack
-<https://flower.ai/join-slack/>`__
+Before you continue, make sure to join the Flower community on Flower Discuss (`Join
+Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack
+<https://flower.ai/join-slack/>`__).
 
-There’s a dedicated ``#questions`` channel if you need help, but we’d also love to hear
-who you are in ``#introductions``!
+There's a dedicated ``#questions`` Slack channel if you need help, but we'd also love to
+hear who you are in ``#introductions``!
 
 The `Flower Federated Learning Tutorial - Part 1
 <https://flower.ai/docs/framework/tutorial-get-started-with-flower-pytorch.html>`__

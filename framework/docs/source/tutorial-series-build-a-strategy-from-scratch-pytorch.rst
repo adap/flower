@@ -281,8 +281,8 @@ Before you continue, make sure to join the Flower community on Flower Discuss (`
 Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack
 <https://flower.ai/join-slack/>`__).
 
-There's a dedicated ``#questions`` channel if you need help, but we'd also love to hear
-who you are in ``#introductions``!
+There's a dedicated ``#questions`` Slack channel if you need help, but we'd also love to
+hear who you are in ``#introductions``!
 
 The :doc:`Flower Federated Learning Tutorial - Part 4
 <tutorial-series-customize-the-client-pytorch>` introduces ``Client``, the flexible API
