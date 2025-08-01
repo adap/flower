@@ -176,6 +176,9 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     # Shared variables for inner functions
     node: Optional[Node] = None
 
+    # Remove should_giveup from RetryInvoker as REST does not support gRPC status codes
+    retry_invoker.should_giveup = None
+
     ###########################################################################
     # heartbeat/create_node/delete_node/receive/send/get_run functions
     ###########################################################################

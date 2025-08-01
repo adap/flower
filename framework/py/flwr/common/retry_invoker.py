@@ -336,14 +336,6 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
 
     def _on_backoff(retry_state: RetryState) -> None:
         system_healthy.clear()
-        if retry_state.tries == 1:
-            log(WARN, "Connection attempt failed, retrying...")
-        else:
-            log(
-                WARN,
-                "Connection attempt failed, retrying in %.2f seconds",
-                retry_state.actual_wait,
-            )
 
     def _on_giveup(retry_state: RetryState) -> None:
         system_healthy.clear()
@@ -366,6 +358,13 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
         # Use a lock to prevent multiple gRPC calls from retrying concurrently,
         # which is unnecessary since they are all likely to fail.
         with lock:
+            # Log the wait time
+            log(
+                WARN,
+                "Connection attempt failed, retrying in %.2f seconds",
+                wait_time,
+            )
+
             start = time.monotonic()
             # Avoid sequential waits if the system is healthy
             system_healthy.wait(wait_time)

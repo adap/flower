@@ -21,7 +21,7 @@ import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from functools import partial
-from logging import INFO, WARN
+from logging import INFO
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -38,7 +38,6 @@ from flwr.common.constant import (
     CLIENT_OCTET,
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_SUBPROCESS,
-    MAX_RETRY_DELAY,
     SERVER_OCTET,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -54,7 +53,7 @@ from flwr.common.inflatable_utils import (
     push_object_contents_from_iterable,
 )
 from flwr.common.logger import log
-from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
+from flwr.common.retry_invoker import RetryInvoker, _make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
@@ -516,44 +515,14 @@ def _make_fleet_connection_retry_invoker(
     connection_error_type: type[Exception] = RpcError,
 ) -> RetryInvoker:
     """Create a retry invoker for fleet connection."""
+    retry_invoker = _make_simple_grpc_retry_invoker()
+    retry_invoker.recoverable_exceptions = connection_error_type
+    if max_retries is not None:
+        retry_invoker.max_tries = max_retries + 1
+    if max_wait_time is not None:
+        retry_invoker.max_time = max_wait_time
 
-    def _on_success(retry_state: RetryState) -> None:
-        if retry_state.tries > 1:
-            log(
-                INFO,
-                "Connection successful after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-
-    def _on_backoff(retry_state: RetryState) -> None:
-        if retry_state.tries == 1:
-            log(WARN, "Connection attempt failed, retrying...")
-        else:
-            log(
-                WARN,
-                "Connection attempt failed, retrying in %.2f seconds",
-                retry_state.actual_wait,
-            )
-
-    return RetryInvoker(
-        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
-        recoverable_exceptions=connection_error_type,
-        max_tries=max_retries + 1 if max_retries is not None else None,
-        max_time=max_wait_time,
-        on_giveup=lambda retry_state: (
-            log(
-                WARN,
-                "Giving up reconnection after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-            if retry_state.tries > 1
-            else None
-        ),
-        on_success=_on_success,
-        on_backoff=_on_backoff,
-    )
+    return retry_invoker
 
 
 def run_clientappio_api_grpc(
