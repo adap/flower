@@ -17,7 +17,7 @@
 
 import argparse
 import sys
-from logging import DEBUG, ERROR, WARN
+from logging import DEBUG, ERROR, WARN, INFO
 from os.path import isfile
 from pathlib import Path
 from typing import Optional, Union
@@ -73,8 +73,7 @@ def try_obtain_root_certificates(
         # Load the certificates if provided, or load the system certificates
         if root_cert_path is None:
             log(
-                WARN,
-                "Both `--insecure` and `--root-certificates` were not set. "
+                INFO,
                 "Using system certificates.",
             )
             root_certificates = None
