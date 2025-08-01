@@ -122,6 +122,10 @@ configuration dictionary (one of the ``FitIns`` attributes). Create a new module
             self.min_evaluate_clients = min_evaluate_clients
             self.min_available_clients = min_available_clients
 
+            # Initialize model parameters
+            ndarrays = get_weights(Net())
+            self.initial_parameters = ndarrays_to_parameters(ndarrays)
+
         def __repr__(self) -> str:
             return "FedCustom"
 
@@ -129,9 +133,9 @@ configuration dictionary (one of the ``FitIns`` attributes). Create a new module
             self, client_manager: ClientManager
         ) -> Optional[Parameters]:
             """Initialize global model parameters."""
-            net = Net()
-            ndarrays = get_weights(net)
-            return ndarrays_to_parameters(ndarrays)
+            initial_parameters = self.initial_parameters
+            self.initial_parameters = None  # Don't keep initial parameters in memory
+            return initial_parameters
 
         def configure_fit(
             self, server_round: int, parameters: Parameters, client_manager: ClientManager

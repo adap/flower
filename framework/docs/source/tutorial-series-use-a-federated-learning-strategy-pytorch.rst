@@ -147,7 +147,9 @@ model parameters on the server-side. First we define a new function ``evaluate``
 
 .. code-block:: python
 
-    # The `evaluate` function will be called by Flower after every round
+    from datasets import load_dataset
+
+
     def evaluate(
         server_round: int,
         parameters,
@@ -155,10 +157,23 @@ model parameters on the server-side. First we define a new function ``evaluate``
     ):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = Net().to(device)
-        _, testloader = load_data(0, 10)
+
+        # Load the entire CIFAR10 test dataset
+        # It's a huggingface dataset, so we can load it directly and apply transforms
+        cifar10_test = load_dataset("cifar10", split="test")
+        pytorch_transforms = Compose(
+            [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        )
+
+        def apply_transforms(batch):
+            batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
+            return batch
+
+        testset = cifar10_test.with_transform(apply_transforms)
+        testloader = DataLoader(testset, batch_size=64)
+
         set_weights(net, parameters)  # Update model with the latest parameters
         loss, accuracy = test(net, testloader, device)
-        print(f"Server-side evaluation loss {loss} / accuracy {accuracy}")
         return loss, {"accuracy": accuracy}
 
 Next, in ``server_app.py``, we pass the ``evaluate`` function to the ``evaluate_fn``
@@ -234,13 +249,13 @@ epochs. In our ``client_app.py``, replace the ``FlowerClient()`` class and
             # Use values provided by the config
             print(f"[Client {self.pid}, round {server_round}] fit, config: {config}")
             set_weights(self.net, parameters)
-            train(self.net, self.trainloader, epochs=local_epochs)
+            train(self.net, self.trainloader, epochs=local_epochs, device=self.device)
             return get_weights(self.net), len(self.trainloader), {}
 
         def evaluate(self, parameters, config):
             print(f"[Client {self.pid}] evaluate, config: {config}")
             set_weights(self.net, parameters)
-            loss, accuracy = test(self.net, self.valloader)
+            loss, accuracy = test(self.net, self.valloader, device=self.device)
             return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
 
@@ -251,10 +266,6 @@ epochs. In our ``client_app.py``, replace the ``FlowerClient()`` class and
         trainloader, valloader = load_data(partition_id, num_partitions)
 
         return FlowerClient(partition_id, net, trainloader, valloader).to_client()
-
-
-    # Create the ClientApp
-    client = ClientApp(client_fn=client_fn)
 
 So how can we send this config dictionary from server to clients? The built-in Flower
 Strategies provide way to do this, and it works similarly to the way server-side
