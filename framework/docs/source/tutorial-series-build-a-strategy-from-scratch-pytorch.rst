@@ -7,24 +7,27 @@ of this tutorial, we introduced federated learning with PyTorch and the Flower f
 strategies can be used to customize the execution on both the server and the clients
 (:doc:`part 2 <tutorial-series-use-a-federated-learning-strategy-pytorch>`).
 
-In this tutorial, we’ll continue to customize the federated learning system we built
+In this tutorial, we'll continue to customize the federated learning system we built
 previously by creating a custom version of FedAvg using the Flower framework, Flower
 Datasets, and PyTorch.
 
     `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
-    help: - `Join Flower Discuss <https://discuss.flower.ai/>`__ We’d love to hear from
-    you in the ``Introduction`` topic! If anything is unclear, post in ``Flower Help -
-    Beginners``. - `Join Flower Slack <https://flower.ai/join-slack>`__ We’d love to
-    hear from you in the ``#introductions`` channel! If anything is unclear, head over
-    to the ``#questions`` channel.
+    help:
 
-Let’s build a new ``Strategy`` from scratch! 🌼
+    - `Join Flower Discuss <https://discuss.flower.ai/>`__ We'd love to hear from you in
+      the ``Introduction`` topic! If anything is unclear, post in ``Flower Help -
+      Beginners``.
+    - `Join Flower Slack <https://flower.ai/join-slack>`__ We'd love to hear from you in
+      the ``#introductions`` channel! If anything is unclear, head over to the
+      ``#questions`` channel.
+
+Let's build a new ``Strategy`` from scratch! 🌼
 
 Preparation
 -----------
 
-Before we begin with the actual code, let’s make sure that we have everything we need.
+Before we begin with the actual code, let's make sure that we have everything we need.
 
 Installing dependencies
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,7 +76,7 @@ Next, we install the project and its dependencies, which are specified in the
 Build a Strategy from scratch
 -----------------------------
 
-Let’s overwrite the ``configure_fit`` method such that it passes a higher learning rate
+Let's overwrite the ``configure_fit`` method such that it passes a higher learning rate
 (potentially also other hyperparameters) to the optimizer of a fraction of the clients.
 We will keep the sampling of the clients as it is in ``FedAvg`` and then change the
 configuration dictionary (one of the ``FitIns`` attributes). Create a new module called
@@ -264,7 +267,7 @@ Finally, we run the simulation.
 Recap
 -----
 
-In this tutorial, we’ve seen how to implement a custom strategy. A custom strategy
+In this tutorial, we've seen how to implement a custom strategy. A custom strategy
 enables granular control over client node configuration, result aggregation, and more.
 To define a custom strategy, you only have to overwrite the abstract methods of the
 (abstract) base class ``Strategy``. To make custom strategies even more powerful, you
@@ -278,7 +281,7 @@ Before you continue, make sure to join the Flower community on Flower Discuss (`
 Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack
 <https://flower.ai/join-slack/>`__).
 
-There’s a dedicated ``#questions`` channel if you need help, but we’d also love to hear
+There's a dedicated ``#questions`` channel if you need help, but we'd also love to hear
 who you are in ``#introductions``!
 
 The :doc:`Flower Federated Learning Tutorial - Part 4
