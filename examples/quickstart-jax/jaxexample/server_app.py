@@ -5,9 +5,9 @@ from typing import List, Tuple
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
-from jax import random
 
-from jaxexample.task import create_model, get_params
+from flax import nnx
+from jaxexample.task import get_params, CNN
 
 
 # Define metric aggregation function
@@ -25,10 +25,10 @@ def server_fn(context: Context):
     num_rounds = context.run_config["num-server-rounds"]
 
     # Initialize global model
-    rng = random.PRNGKey(0)
-    rng, _ = random.split(rng)
-    _, model_params = create_model(rng)
-    params = get_params(model_params)
+    rng = nnx.Rngs(0)
+    model = CNN(rngs=rng)
+    graphdef, params, _ = nnx.split(model, nnx.Param, ...)
+    params = get_params(params)
     initial_parameters = ndarrays_to_parameters(params)
 
     # Define strategy
