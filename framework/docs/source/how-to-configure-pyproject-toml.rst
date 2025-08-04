@@ -189,7 +189,7 @@ You can also configure federations for remote deployment. For example:
 
         \* Required fields
 
-    - ``address``\*: The address of the SuperLink Exec API to connect to.
+    - ``address``\*: The address of the SuperLink Control API to connect to.
     - ``root-certificate``: Path to the root certificate file for TLS. Ignored if ``insecure`` is ``true``. If omitted, Flower uses the default gRPC root certificate.
     - ``insecure``: Set to ``true`` to disable TLS (not recommended for production). Defaults to ``false``, if omitted.
 

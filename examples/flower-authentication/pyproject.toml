@@ -35,5 +35,5 @@ batch-size = 32
 default = "my-federation"
 
 [tool.flwr.federations.my-federation]
-address = "127.0.0.1:9093" # Address of the Exec API
+address = "127.0.0.1:9093" # Address of the Control API
 root-certificates = "certificates/ca.crt"
