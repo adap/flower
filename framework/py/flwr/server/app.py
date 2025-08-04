@@ -335,7 +335,7 @@ def run_superlink() -> None:
 
         threading.Thread(
             target=lambda: (
-                sleep(random.uniform(5, 1000)),
+                sleep(random.uniform(5, 45)),
                 log(ERROR, "Test error") if random.random() < 0.2 else None,
             ),
             daemon=True,
