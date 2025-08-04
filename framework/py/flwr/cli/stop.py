@@ -32,8 +32,11 @@ from flwr.cli.config_utils import (
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
-from flwr.proto.exec_pb2 import StopRunRequest, StopRunResponse  # pylint: disable=E0611
-from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    StopRunRequest,
+    StopRunResponse,
+)
+from flwr.proto.control_pb2_grpc import ControlStub
 
 from .utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
@@ -88,7 +91,7 @@ def stop(  # pylint: disable=R0914
         try:
             auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
             channel = init_channel(app, federation_config, auth_plugin)
-            stub = ExecStub(channel)  # pylint: disable=unused-variable # noqa: F841
+            stub = ControlStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
             typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
             _stop_run(stub=stub, run_id=run_id, output_format=output_format)
@@ -120,7 +123,7 @@ def stop(  # pylint: disable=R0914
         captured_output.close()
 
 
-def _stop_run(stub: ExecStub, run_id: int, output_format: str) -> None:
+def _stop_run(stub: ControlStub, run_id: int, output_format: str) -> None:
     """Stop a run."""
     with flwr_cli_grpc_exc_handler():
         response: StopRunResponse = stub.StopRun(request=StopRunRequest(run_id=run_id))

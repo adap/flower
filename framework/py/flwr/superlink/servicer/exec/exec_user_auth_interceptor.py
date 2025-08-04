@@ -22,7 +22,7 @@ import grpc
 
 from flwr.common.auth_plugin import ExecAuthPlugin, ExecAuthzPlugin
 from flwr.common.typing import AccountInfo
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,

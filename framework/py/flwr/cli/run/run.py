@@ -41,8 +41,8 @@ from flwr.common.constant import CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab
-from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
-from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
+from flwr.proto.control_pb2_grpc import ControlStub
 
 from ..log import start_stream
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
@@ -154,7 +154,7 @@ def _run_with_exec_api(
     try:
         auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
         channel = init_channel(app, federation_config, auth_plugin)
-        stub = ExecStub(channel)
+        stub = ControlStub(channel)
 
         fab_bytes, fab_hash, config = build_fab(app)
         fab_id, fab_version = get_metadata_from_config(config)

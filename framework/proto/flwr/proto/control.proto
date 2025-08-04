@@ -22,7 +22,7 @@ import "flwr/proto/transport.proto";
 import "flwr/proto/recorddict.proto";
 import "flwr/proto/run.proto";
 
-service Exec {
+service Control {
   // Start run upon request
   rpc StartRun(StartRunRequest) returns (StartRunResponse) {}
 
