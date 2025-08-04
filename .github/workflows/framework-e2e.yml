@@ -130,7 +130,7 @@ jobs:
           ${{ matrix.engine }} 
         if: ${{ needs.changes.outputs.framework == 'true' }}
         working-directory: framework/e2e/${{ matrix.directory }}
-        run: ./../test_exec_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
+        run: ./../test_control_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
 
   frameworks:
     runs-on: ubuntu-22.04
@@ -439,7 +439,7 @@ jobs:
           ${{ matrix.engine }} 
         if: ${{ needs.changes.outputs.framework == 'true' }}
         working-directory: framework/e2e/${{ matrix.directory }}
-        run: ./../test_exec_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
+        run: ./../test_control_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
 
   windows-compatibility:
     runs-on: windows-latest
