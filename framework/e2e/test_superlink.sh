@@ -106,6 +106,10 @@ cleanup_and_exit() {
     exit $1
 }
 
+if "$1" == "e2e-pytorch"; then
+    echo "ERROR: this is a test error"
+fi
+
 # Check for "Run finished" in a loop with a timeout
 while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     if grep -q "ERROR" flwr_output.log; then

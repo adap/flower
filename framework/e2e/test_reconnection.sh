@@ -106,6 +106,10 @@ found_success=false
 timeout=120  # Timeout after 120 seconds
 elapsed=0
 
+if "$1" == "sqlite"; then
+    echo "ERROR: this is a test error"
+fi
+
 # Define a cleanup function
 cleanup_and_exit() {
     kill $cl1_pid; kill $cl2_pid
