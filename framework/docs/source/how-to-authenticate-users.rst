@@ -88,7 +88,7 @@ section in the ``pyproject.toml`` of the Flower app you want to run:
     default = "my-federation"
 
     [tool.flwr.federations.my-federation]
-    address = "<SUPERLINK-ADDRESS>:9093"   # Address of the SuperLink Exec API
+    address = "<SUPERLINK-ADDRESS>:9093"   # Address of the SuperLink Control API
     root-certificates = "<PATH/TO/ca.crt>" # TLS certificate set for the SuperLink. Required for self-signed certificates.
     enable-user-auth = true                # Enables the user auth mechanism on the `flwr` CLI side
 

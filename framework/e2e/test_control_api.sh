@@ -76,7 +76,7 @@ if [ "$3" = "simulation-engine" ]; then
 fi
 
 # Combine the arguments into a single command for flower-superlink
-combined_args="$server_arg $server_auth $exec_api_arg $executor_arg"
+combined_args="$server_arg $server_auth $executor_arg"
 
 timeout 2m flower-superlink $combined_args --executor-config "$executor_config" 2>&1 | tee flwr_output.log &
 sl_pid=$(pgrep -f "flower-superlink")
