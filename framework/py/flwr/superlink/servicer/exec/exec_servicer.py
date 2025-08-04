@@ -38,8 +38,8 @@ from flwr.common.serde import (
     user_config_from_proto,
 )
 from flwr.common.typing import Run, RunStatus
-from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
@@ -61,7 +61,7 @@ from ...executor.executor import Executor
 from .exec_user_auth_interceptor import shared_account_info
 
 
-class ExecServicer(exec_pb2_grpc.ExecServicer):
+class ExecServicer(control_pb2_grpc.ControlServicer):
     """Exec API servicer."""
 
     def __init__(  # pylint: disable=R0913, R0917

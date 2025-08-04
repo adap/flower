@@ -27,7 +27,7 @@ from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
-from flwr.proto.exec_pb2_grpc import add_ExecServicer_to_server
+from flwr.proto.control_pb2_grpc import add_ExecServicer_to_server
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.license_plugin import LicensePlugin

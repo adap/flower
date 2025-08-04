@@ -27,7 +27,7 @@ from flwr.common.dummy_grpc_handlers_test import (
     get_noop_unary_stream_handler,
     get_noop_unary_unary_handler,
 )
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetLoginDetailsRequest,
     ListRunsRequest,

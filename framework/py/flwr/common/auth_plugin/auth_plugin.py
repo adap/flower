@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 from flwr.common.typing import AccountInfo
-from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.proto.control_pb2_grpc import ControlStub
 
 from ..typing import UserAuthCredentials, UserAuthLoginDetails
 
@@ -103,7 +103,7 @@ class CliAuthPlugin(ABC):
     @abstractmethod
     def login(
         login_details: UserAuthLoginDetails,
-        exec_stub: ExecStub,
+        exec_stub: ControlStub,
     ) -> UserAuthCredentials:
         """Authenticate the user and retrieve authentication credentials.
 
@@ -111,7 +111,7 @@ class CliAuthPlugin(ABC):
         ----------
         login_details : UserAuthLoginDetails
             An object containing the user's login details.
-        exec_stub : ExecStub
+        exec_stub : ControlStub
             A stub for executing RPC calls to the server.
 
         Returns

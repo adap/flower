@@ -28,7 +28,7 @@ from parameterized import parameterized
 from flwr.common import ConfigRecord, now
 from flwr.common.constant import Status, SubStatus
 from flwr.common.typing import Run, RunStatus
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListRunsRequest,
     StartRunRequest,
     StopRunRequest,
