@@ -140,7 +140,7 @@ def run_superlink() -> None:
 
     # Parse IP addresses
     serverappio_address, _, _ = _format_address(args.serverappio_api_address)
-    control_address, _, _ = _format_address(args.exec_api_address)
+    control_address, _, _ = _format_address(args.control_api_address)
     simulationio_address, _, _ = _format_address(args.simulationio_api_address)
 
     # Obtain certificates
@@ -778,7 +778,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
 def _add_args_control_api(parser: argparse.ArgumentParser) -> None:
     """Add command line arguments for Control API."""
     parser.add_argument(
-        "--exec-api-address",
+        "--control-api-address",
         help="Control API server address (IPv4, IPv6, or a domain name) "
         f"By default, it is set to {CONTROL_API_DEFAULT_SERVER_ADDRESS}.",
         default=CONTROL_API_DEFAULT_SERVER_ADDRESS,
