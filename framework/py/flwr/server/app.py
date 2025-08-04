@@ -21,10 +21,11 @@ import importlib.util
 import multiprocessing
 import multiprocessing.context
 import os
+import random
 import sys
 import threading
 from collections.abc import Sequence
-from logging import DEBUG, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from time import sleep
 from typing import Any, Callable, Optional, TypeVar
@@ -331,6 +332,14 @@ def run_superlink() -> None:
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
+
+        threading.Thread(
+            target=lambda: (
+                sleep(random.uniform(5, 1000)),
+                log(ERROR, "Test error") if random.random() < 0.2 else None,
+            ),
+            daemon=True,
+        )
 
     # Graceful shutdown
     register_exit_handlers(
