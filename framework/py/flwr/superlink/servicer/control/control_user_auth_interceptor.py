@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Exec API interceptor."""
+"""Flower Control API interceptor."""
 
 
 import contextvars
@@ -20,7 +20,7 @@ from typing import Any, Callable, Union
 
 import grpc
 
-from flwr.common.auth_plugin import ExecAuthPlugin, ExecAuthzPlugin
+from flwr.common.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
 from flwr.common.typing import AccountInfo
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
@@ -50,13 +50,13 @@ shared_account_info: contextvars.ContextVar[AccountInfo] = contextvars.ContextVa
 )
 
 
-class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
-    """Exec API interceptor for user authentication."""
+class ControlUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
+    """Control API interceptor for user authentication."""
 
     def __init__(
         self,
-        auth_plugin: ExecAuthPlugin,
-        authz_plugin: ExecAuthzPlugin,
+        auth_plugin: ControlAuthPlugin,
+        authz_plugin: ControlAuthzPlugin,
     ):
         self.auth_plugin = auth_plugin
         self.authz_plugin = authz_plugin
@@ -72,12 +72,12 @@ class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
         by validating auth metadata sent by the user. Continue RPC call if user is
         authenticated, else, terminate RPC call by setting context to abort.
         """
-        # Only apply to Exec service
-        if not handler_call_details.method.startswith("/flwr.proto.Exec/"):
+        # Only apply to Control service
+        if not handler_call_details.method.startswith("/flwr.proto.Control/"):
             return continuation(handler_call_details)
 
         # One of the method handlers in
-        # `flwr.superlink.servicer.exec.ExecServicer`
+        # `flwr.superlink.servicer.control.ControlServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
         return self._generic_auth_unary_method_handler(method_handler)
 

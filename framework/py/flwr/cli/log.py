@@ -78,7 +78,7 @@ def stream_logs(
     run_id : int
         The identifier of the run.
     stub : ControlStub
-        The gRPC stub to interact with the Exec service.
+        The gRPC stub to interact with the Control service.
     duration : int
         The timeout duration for each stream connection in seconds.
     after_timestamp : float
@@ -173,13 +173,13 @@ def log(
     exit_if_no_address(federation_config, "log")
 
     try:
-        _log_with_exec_api(app, federation, federation_config, run_id, stream)
+        _log_with_control_api(app, federation, federation_config, run_id, stream)
     except Exception as err:  # pylint: disable=broad-except
         typer.secho(str(err), fg=typer.colors.RED, bold=True)
         raise typer.Exit(code=1) from None
 
 
-def _log_with_exec_api(
+def _log_with_control_api(
     app: Path,
     federation: str,
     federation_config: dict[str, Any],

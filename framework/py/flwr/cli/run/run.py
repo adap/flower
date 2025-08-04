@@ -112,7 +112,7 @@ def run(
         )
 
         if "address" in federation_config:
-            _run_with_exec_api(
+            _run_with_control_api(
                 app,
                 federation,
                 federation_config,
@@ -121,7 +121,7 @@ def run(
                 output_format,
             )
         else:
-            _run_without_exec_api(
+            _run_without_control_api(
                 app, federation_config, run_config_overrides, federation
             )
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
@@ -142,7 +142,7 @@ def run(
 
 
 # pylint: disable-next=R0913, R0914, R0917
-def _run_with_exec_api(
+def _run_with_control_api(
     app: Path,
     federation: str,
     federation_config: dict[str, Any],
@@ -203,7 +203,7 @@ def _run_with_exec_api(
             channel.close()
 
 
-def _run_without_exec_api(
+def _run_without_control_api(
     app: Optional[Path],
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],

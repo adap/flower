@@ -25,7 +25,7 @@ from flwr.common.typing import AccountInfo, LogEntry
 
 
 class EventLogWriterPlugin(ABC):
-    """Abstract Flower Event Log Writer Plugin class for ExecServicer."""
+    """Abstract Flower Event Log Writer Plugin class for ControlServicer."""
 
     @abstractmethod
     def __init__(self) -> None:
