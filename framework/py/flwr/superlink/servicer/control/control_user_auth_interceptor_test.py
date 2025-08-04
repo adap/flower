@@ -46,7 +46,7 @@ from .control_user_auth_interceptor import (
 
 
 class TestControlUserAuthInterceptor(unittest.TestCase):
-    """Test the ExecUserAuthInterceptor authentication logic."""
+    """Test the ControlUserAuthInterceptor authentication logic."""
 
     def setUp(self) -> None:
         """Set up test fixtures."""
