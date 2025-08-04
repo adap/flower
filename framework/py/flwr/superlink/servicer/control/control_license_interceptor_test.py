@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Exec API license interceptor tests."""
+"""Flower Control API license interceptor tests."""
 
 
 import unittest
@@ -37,7 +37,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.supercore.license_plugin import LicensePlugin
 
-from .exec_license_interceptor import ExecLicenseInterceptor
+from .control_license_interceptor import ExecLicenseInterceptor
 
 HandlerContinuation = Callable[[grpc.HandlerCallDetails], grpc.RpcMethodHandler]
 

@@ -74,7 +74,7 @@ from flwr.simulation.app import flwr_simulation
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.executor import load_executor
-from flwr.superlink.servicer.exec import run_exec_api_grpc
+from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
@@ -103,15 +103,15 @@ except ImportError:
         """Add EE-specific arguments to the parser."""
 
     def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
-        """Return all Exec API authentication plugins."""
+        """Return all Control API authentication plugins."""
         raise NotImplementedError("No authentication plugins are currently supported.")
 
     def get_exec_authz_plugins() -> dict[str, type[ExecAuthzPlugin]]:
-        """Return all Exec API authorization plugins."""
+        """Return all Control API authorization plugins."""
         raise NotImplementedError("No authorization plugins are currently supported.")
 
     def get_exec_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
-        """Return all Exec API event log writer plugins."""
+        """Return all Control API event log writer plugins."""
         raise NotImplementedError(
             "No event log writer plugins are currently supported."
         )
@@ -171,9 +171,9 @@ def run_superlink() -> None:
     # Initialize ObjectStoreFactory
     objectstore_factory = ObjectStoreFactory()
 
-    # Start Exec API
+    # Start Control API
     executor = load_executor(args)
-    exec_server: grpc.Server = run_exec_api_grpc(
+    exec_server: grpc.Server = run_control_api_grpc(
         address=exec_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
@@ -473,7 +473,7 @@ def _try_load_public_keys_node_authentication(
 def _try_obtain_exec_auth_plugins(
     config_path: Path, verify_tls_cert: bool
 ) -> tuple[ExecAuthPlugin, ExecAuthzPlugin]:
-    """Obtain Exec API authentication and authorization plugins."""
+    """Obtain Control API authentication and authorization plugins."""
     # Load YAML file
     with config_path.open("r", encoding="utf-8") as file:
         config: dict[str, Any] = yaml.safe_load(file)
@@ -776,10 +776,10 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
 
 
 def _add_args_exec_api(parser: argparse.ArgumentParser) -> None:
-    """Add command line arguments for Exec API."""
+    """Add command line arguments for Control API."""
     parser.add_argument(
         "--exec-api-address",
-        help="Exec API server address (IPv4, IPv6, or a domain name) "
+        help="Control API server address (IPv4, IPv6, or a domain name) "
         f"By default, it is set to {EXEC_API_DEFAULT_SERVER_ADDRESS}.",
         default=EXEC_API_DEFAULT_SERVER_ADDRESS,
     )

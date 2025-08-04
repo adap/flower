@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Exec API auth interceptor tests."""
+"""Flower Control API auth interceptor tests."""
 
 
 import unittest
@@ -39,7 +39,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StreamLogsRequest,
 )
 
-from .exec_user_auth_interceptor import ExecUserAuthInterceptor, shared_account_info
+from .control_user_auth_interceptor import ExecUserAuthInterceptor, shared_account_info
 
 
 class TestExecUserAuthInterceptor(unittest.TestCase):

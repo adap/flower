@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Exec API event log interceptor."""
+"""Flower Control API event log interceptor."""
 
 
 from collections.abc import Iterator
@@ -24,11 +24,11 @@ from google.protobuf.message import Message as GrpcMessage
 from flwr.common.event_log_plugin.event_log_plugin import EventLogWriterPlugin
 from flwr.common.typing import LogEntry
 
-from .exec_user_auth_interceptor import shared_account_info
+from .control_user_auth_interceptor import shared_account_info
 
 
 class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
-    """Exec API interceptor for logging events."""
+    """Control API interceptor for logging events."""
 
     def __init__(self, log_plugin: EventLogWriterPlugin) -> None:
         self.log_plugin = log_plugin

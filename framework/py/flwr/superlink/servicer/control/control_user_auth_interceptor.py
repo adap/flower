@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Exec API interceptor."""
+"""Flower Control API interceptor."""
 
 
 import contextvars
@@ -51,7 +51,7 @@ shared_account_info: contextvars.ContextVar[AccountInfo] = contextvars.ContextVa
 
 
 class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
-    """Exec API interceptor for user authentication."""
+    """Control API interceptor for user authentication."""
 
     def __init__(
         self,

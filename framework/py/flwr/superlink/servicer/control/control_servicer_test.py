@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Test the Exec API servicer."""
+"""Test the Control API servicer."""
 
 
 import subprocess
@@ -38,7 +38,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 
-from .exec_servicer import ExecServicer
+from .control_servicer import ExecServicer
 
 FLWR_AID_MISMATCH_CASES = (
     # (context_flwr_aid, run_flwr_aid)
@@ -83,7 +83,7 @@ def test_start_run() -> None:
 
 
 class TestExecServicer(unittest.TestCase):
-    """Test the Exec API servicer."""
+    """Test the Control API servicer."""
 
     def setUp(self) -> None:
         """Set up test fixtures."""

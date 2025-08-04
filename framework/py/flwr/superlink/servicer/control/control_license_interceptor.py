@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Exec API license interceptor."""
+"""Flower Control API license interceptor."""
 
 
 from collections.abc import Iterator
@@ -25,7 +25,7 @@ from flwr.supercore.license_plugin import LicensePlugin
 
 
 class ExecLicenseInterceptor(grpc.ServerInterceptor):  # type: ignore
-    """Exec API interceptor for license checking."""
+    """Control API interceptor for license checking."""
 
     def __init__(self, license_plugin: LicensePlugin) -> None:
         """Initialize the interceptor with a license plugin."""

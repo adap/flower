@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Exec API servicer."""
+"""Control API servicer."""
 
 
 import time
@@ -58,11 +58,11 @@ from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 
 from ...executor.executor import Executor
-from .exec_user_auth_interceptor import shared_account_info
+from .control_user_auth_interceptor import shared_account_info
 
 
 class ExecServicer(control_pb2_grpc.ControlServicer):
-    """Exec API servicer."""
+    """Control API servicer."""
 
     def __init__(  # pylint: disable=R0913, R0917
         self,

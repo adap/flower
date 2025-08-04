@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Exec API server."""
+"""Control API server."""
 
 
 from logging import INFO
@@ -34,10 +34,10 @@ from flwr.supercore.license_plugin import LicensePlugin
 from flwr.supercore.object_store import ObjectStoreFactory
 
 from ...executor import Executor
-from .exec_event_log_interceptor import ExecEventLogInterceptor
-from .exec_license_interceptor import ExecLicenseInterceptor
-from .exec_servicer import ExecServicer
-from .exec_user_auth_interceptor import ExecUserAuthInterceptor
+from .control_event_log_interceptor import ExecEventLogInterceptor
+from .control_license_interceptor import ExecLicenseInterceptor
+from .control_servicer import ExecServicer
+from .control_user_auth_interceptor import ExecUserAuthInterceptor
 
 try:
     from flwr.ee import get_license_plugin
@@ -48,7 +48,7 @@ except ImportError:
 
 
 # pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
-def run_exec_api_grpc(
+def run_control_api_grpc(
     address: str,
     executor: Executor,
     state_factory: LinkStateFactory,
@@ -60,7 +60,7 @@ def run_exec_api_grpc(
     authz_plugin: Optional[ExecAuthzPlugin] = None,
     event_log_plugin: Optional[EventLogWriterPlugin] = None,
 ) -> grpc.Server:
-    """Run Exec API (gRPC, request-response)."""
+    """Run Control API (gRPC, request-response)."""
     executor.set_config(config)
 
     license_plugin: Optional[LicensePlugin] = get_license_plugin()
@@ -93,11 +93,11 @@ def run_exec_api_grpc(
     )
 
     if auth_plugin is None:
-        log(INFO, "Flower Deployment Engine: Starting Exec API on %s", address)
+        log(INFO, "Flower Deployment Engine: Starting Control API on %s", address)
     else:
         log(
             INFO,
-            "Flower Deployment Engine: Starting Exec API with user "
+            "Flower Deployment Engine: Starting Control API with user "
             "authentication on %s",
             address,
         )
