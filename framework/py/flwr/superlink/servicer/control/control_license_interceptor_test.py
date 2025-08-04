@@ -37,13 +37,13 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.supercore.license_plugin import LicensePlugin
 
-from .control_license_interceptor import ExecLicenseInterceptor
+from .control_license_interceptor import ControlLicenseInterceptor
 
 HandlerContinuation = Callable[[grpc.HandlerCallDetails], grpc.RpcMethodHandler]
 
 
-class TestExecLicenseInterceptor(unittest.TestCase):
-    """Test the ExecLicenseInterceptor license-check logic."""
+class TestControlLicenseInterceptor(unittest.TestCase):
+    """Test the ControlLicenseInterceptor license-check logic."""
 
     def setUp(self) -> None:
         """Initialize."""
@@ -63,7 +63,7 @@ class TestExecLicenseInterceptor(unittest.TestCase):
         """Test all RPC calls are successful when check_license() is successful."""
         # Prepare
         self.license_plugin.check_license.return_value = True
-        interceptor = ExecLicenseInterceptor(self.license_plugin)
+        interceptor = ControlLicenseInterceptor(self.license_plugin)
         dummy_ctx = MagicMock()
         handler_call_details = MagicMock()
 
@@ -103,7 +103,7 @@ class TestExecLicenseInterceptor(unittest.TestCase):
         """Test all RPC calls are unsuccessful when check_license() fails."""
         # Prepare
         self.license_plugin.check_license.return_value = False
-        interceptor = ExecLicenseInterceptor(self.license_plugin)
+        interceptor = ControlLicenseInterceptor(self.license_plugin)
         dummy_ctx = MagicMock()
         handler_call_details = MagicMock()
 

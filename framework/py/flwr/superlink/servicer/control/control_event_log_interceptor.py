@@ -27,7 +27,7 @@ from flwr.common.typing import LogEntry
 from .control_user_auth_interceptor import shared_account_info
 
 
-class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
+class ControlEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Control API interceptor for logging events."""
 
     def __init__(self, log_plugin: EventLogWriterPlugin) -> None:
@@ -44,12 +44,12 @@ class ExecEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         Continue RPC call if event logger is enabled on the SuperLink, else, terminate
         RPC call by setting context to abort.
         """
-        # Only apply to Exec service
-        if not handler_call_details.method.startswith("/flwr.proto.Exec/"):
+        # Only apply to Control service
+        if not handler_call_details.method.startswith("/flwr.proto.Control/"):
             return continuation(handler_call_details)
 
         # One of the method handlers in
-        # `flwr.superlink.servicer.exec.ExecServicer`
+        # `flwr.superlink.servicer.control.ControlServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
         method_name: str = handler_call_details.method
         return self._generic_event_log_unary_method_handler(method_handler, method_name)

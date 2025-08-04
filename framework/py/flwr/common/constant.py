@@ -35,7 +35,7 @@ CLIENTAPPIO_PORT = "9094"
 SERVERAPPIO_PORT = "9091"
 FLEETAPI_GRPC_RERE_PORT = "9092"
 FLEETAPI_PORT = "9095"
-EXEC_API_PORT = "9093"
+CONTROL_API_PORT = "9093"
 SIMULATIONIO_PORT = "9096"
 # Octets
 SERVER_OCTET = "0.0.0.0"
@@ -51,7 +51,7 @@ FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS = (
     "[::]:8080"  # IPv6 to keep start_server compatible
 )
 FLEET_API_REST_DEFAULT_ADDRESS = f"{SERVER_OCTET}:{FLEETAPI_PORT}"
-EXEC_API_DEFAULT_SERVER_ADDRESS = f"{SERVER_OCTET}:{EXEC_API_PORT}"
+CONTROL_API_DEFAULT_SERVER_ADDRESS = f"{SERVER_OCTET}:{CONTROL_API_PORT}"
 SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS = f"{SERVER_OCTET}:{SIMULATIONIO_PORT}"
 SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS = f"{CLIENT_OCTET}:{SIMULATIONIO_PORT}"
 
@@ -103,7 +103,7 @@ ISOLATION_MODE_PROCESS = "process"
 # Log streaming configurations
 CONN_REFRESH_PERIOD = 60  # Stream connection refresh period
 CONN_RECONNECT_INTERVAL = 0.5  # Reconnect interval between two stream connections
-LOG_STREAM_INTERVAL = 0.5  # Log stream interval for `ExecServicer.StreamLogs`
+LOG_STREAM_INTERVAL = 0.5  # Log stream interval for `ControlServicer.StreamLogs`
 LOG_UPLOAD_INTERVAL = 0.2  # Minimum interval between two log uploads
 
 # Retry configurations
@@ -152,7 +152,7 @@ PULL_INITIAL_BACKOFF = 1  # Initial backoff time for pulling objects
 PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
 
 
-# ExecServicer constants
+# ControlServicer constants
 RUN_ID_NOT_FOUND_MESSAGE = "Run ID not found"
 
 

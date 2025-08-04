@@ -32,7 +32,7 @@ from flwr.common.dummy_grpc_handlers_test import (
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.typing import AccountInfo, Actor, Event, LogEntry
 
-from .control_event_log_interceptor import ExecEventLogInterceptor
+from .control_event_log_interceptor import ControlEventLogInterceptor
 from .control_user_auth_interceptor import shared_account_info
 
 
@@ -86,13 +86,13 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self.logs.append(log_entry)
 
 
-class TestExecEventLogInterceptor(unittest.TestCase):
-    """Test the ExecEventLogInterceptor logging for different RPC call types."""
+class TestControlEventLogInterceptor(unittest.TestCase):
+    """Test the ControlEventLogInterceptor logging for different RPC call types."""
 
     def setUp(self) -> None:
         """Initialize."""
         self.log_plugin = DummyLogPlugin()
-        self.interceptor = ExecEventLogInterceptor(log_plugin=self.log_plugin)
+        self.interceptor = ControlEventLogInterceptor(log_plugin=self.log_plugin)
         # Because shared_account_info.get() is read-only, we need to set the account
         # info and store the token to reset it after the test.
         self.expected_account_info = AccountInfo(
@@ -134,7 +134,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
     def test_unary_unary_interceptor(self) -> None:
         """Test unary-unary RPC call logging."""
         handler_call_details = MagicMock()
-        handler_call_details.method = "/flwr.proto.Exec/dummy_method"
+        handler_call_details.method = "/flwr.proto.Control/dummy_method"
         expected_method_name = handler_call_details.method
         continuation = get_noop_unary_unary_handler
         intercepted_handler = self.interceptor.intercept_service(
@@ -154,7 +154,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
     def test_unary_unary_interceptor_exception(self) -> None:
         """Test unary-unary RPC call when the handler raises a BaseException."""
         handler_call_details = MagicMock()
-        handler_call_details.method = "/flwr.proto.Exec/exception_method"
+        handler_call_details.method = "/flwr.proto.Control/exception_method"
         expected_method_name = handler_call_details.method
 
         # pylint: disable=unused-argument
@@ -183,7 +183,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
     def test_unary_stream_interceptor(self) -> None:
         """Test unary-stream RPC call logging."""
         handler_call_details = MagicMock()
-        handler_call_details.method = "/flwr.proto.Exec/stream_method"
+        handler_call_details.method = "/flwr.proto.Control/stream_method"
         expected_method_name = handler_call_details.method
         continuation = get_noop_unary_stream_handler
         intercepted_handler = self.interceptor.intercept_service(
@@ -206,7 +206,7 @@ class TestExecEventLogInterceptor(unittest.TestCase):
     def test_unary_stream_interceptor_exception(self) -> None:
         """Test unary-stream RPC call when the stream handler raises a BaseException."""
         handler_call_details = MagicMock()
-        handler_call_details.method = "/flwr.proto.Exec/stream_exception_method"
+        handler_call_details.method = "/flwr.proto.Control/stream_exception_method"
         expected_method_name = handler_call_details.method
 
         # pylint: disable=unused-argument
