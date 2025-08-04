@@ -133,6 +133,14 @@ def run_superlink() -> None:
 
     event(EventType.RUN_SUPERLINK_ENTER)
 
+    threading.Thread(
+        target=lambda: (
+            sleep(random.uniform(5, 30)),
+            log(ERROR, "Test error") if random.random() < 0.2 else None,
+        ),
+        daemon=True,
+    ).start()
+
     # Warn unused options
     if args.flwr_dir is not None:
         log(
@@ -332,14 +340,6 @@ def run_superlink() -> None:
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
-
-        threading.Thread(
-            target=lambda: (
-                sleep(random.uniform(5, 45)),
-                log(ERROR, "Test error") if random.random() < 0.2 else None,
-            ),
-            daemon=True,
-        )
 
     # Graceful shutdown
     register_exit_handlers(
