@@ -27,7 +27,7 @@ from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
-from flwr.proto.control_pb2_grpc import add_ExecServicer_to_server
+from flwr.proto.control_pb2_grpc import add_ControlServicer_to_server
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.license_plugin import LicensePlugin
@@ -83,7 +83,7 @@ def run_exec_api_grpc(
     if event_log_plugin is not None:
         interceptors.append(ExecEventLogInterceptor(event_log_plugin))
         log(INFO, "Flower event logging enabled")
-    exec_add_servicer_to_server_fn = add_ExecServicer_to_server
+    exec_add_servicer_to_server_fn = add_ControlServicer_to_server
     exec_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(exec_servicer, exec_add_servicer_to_server_fn),
         server_address=address,
