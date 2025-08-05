@@ -138,6 +138,15 @@ def run_superlink() -> None:
             WARN, "The `--flwr-dir` option is currently not in use and will be ignored."
         )
 
+    # Warn deprecated `--exec-api-address` argument
+    if args.exec_api_address is not None:
+        log(
+            WARN,
+            "The `--exec-api-address` argument is deprecated and will be removed in a "
+            "future release. Use `--control-api-address` instead.",
+        )
+        args.control_api_address = args.exec_api_address
+
     # Parse IP addresses
     serverappio_address, _, _ = _format_address(args.serverappio_api_address)
     control_address, _, _ = _format_address(args.control_api_address)
@@ -782,6 +791,12 @@ def _add_args_control_api(parser: argparse.ArgumentParser) -> None:
         help="Control API server address (IPv4, IPv6, or a domain name) "
         f"By default, it is set to {CONTROL_API_DEFAULT_SERVER_ADDRESS}.",
         default=CONTROL_API_DEFAULT_SERVER_ADDRESS,
+    )
+    parser.add_argument(
+        "--exec-api-address",
+        help="This argument is deprecated and will be removed in a future release. "
+        "Use `--control-api-address` instead.",
+        default=None,
     )
     parser.add_argument(
         "--executor",
