@@ -138,13 +138,31 @@ def run_superlink() -> None:
             WARN, "The `--flwr-dir` option is currently not in use and will be ignored."
         )
 
+    # Detect if both Control API and Exec API addresses were set explicitly
+    explicit_args = set()
+    for arg in sys.argv[1:]:
+        if arg.startswith("--"):
+            explicit_args.add(
+                arg.split("=")[0]
+            )  # handles both `--arg val` and `--arg=val`
+
+    control_api_set = "--control-api-address" in explicit_args
+    exec_api_set = "--exec-api-address" in explicit_args
+
+    if control_api_set and exec_api_set:
+        flwr_exit(
+            ExitCode.SUPERLINK_INVALID_ARGS,
+            "Both `--control-api-address` and `--exec-api-address` are set. "
+            "Please use only `--control-api-address` as `--exec-api-address` is "
+            "deprecated.",
+        )
+
     # Warn deprecated `--exec-api-address` argument
     if args.exec_api_address is not None:
         log(
             WARN,
             "The `--exec-api-address` argument is deprecated and will be removed in a "
-            "future release. Use `--control-api-address` instead. "
-            "`--control-api-address` will be ignored if `--exec-api-address` is set.",
+            "future release. Use `--control-api-address` instead.",
         )
         args.control_api_address = args.exec_api_address
 
