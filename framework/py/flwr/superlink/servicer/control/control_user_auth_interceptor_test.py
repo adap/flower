@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Exec API auth interceptor tests."""
+"""Flower Control API auth interceptor tests."""
 
 
 import unittest
@@ -30,7 +30,7 @@ from flwr.common.dummy_grpc_handlers_test import (
     get_noop_unary_unary_handler,
 )
 from flwr.common.typing import AccountInfo
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetLoginDetailsRequest,
     ListRunsRequest,
@@ -39,11 +39,14 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsRequest,
 )
 
-from .exec_user_auth_interceptor import ExecUserAuthInterceptor, shared_account_info
+from .control_user_auth_interceptor import (
+    ControlUserAuthInterceptor,
+    shared_account_info,
+)
 
 
-class TestExecUserAuthInterceptor(unittest.TestCase):
-    """Test the ExecUserAuthInterceptor authentication logic."""
+class TestControlUserAuthInterceptor(unittest.TestCase):
+    """Test the ControlUserAuthInterceptor authentication logic."""
 
     def setUp(self) -> None:
         """Set up test fixtures."""
@@ -82,7 +85,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         # irrelevant because no user authentication is required for requests of type
         # GetLoginDetailsRequest and GetAuthTokensRequest.
         dummy_authz_plugin.verify_user_authorization.return_value = True
-        interceptor = ExecUserAuthInterceptor(
+        interceptor = ControlUserAuthInterceptor(
             auth_plugin=dummy_auth_plugin, authz_plugin=dummy_authz_plugin
         )
         intercepted_handler = interceptor.intercept_service(
@@ -126,7 +129,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         # irrelevant because the authentication will fail and the authorization
         # plugin will not be called.
         dummy_authz_plugin.verify_user_authorization.return_value = True
-        interceptor = ExecUserAuthInterceptor(
+        interceptor = ControlUserAuthInterceptor(
             auth_plugin=dummy_auth_plugin, authz_plugin=dummy_authz_plugin
         )
         continuation: Union[
@@ -177,7 +180,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         # because the authorization plugin is expected to be called after a successful
         # token validation.
         dummy_authz_plugin.verify_user_authorization.return_value = True
-        interceptor = ExecUserAuthInterceptor(
+        interceptor = ControlUserAuthInterceptor(
             auth_plugin=dummy_auth_plugin, authz_plugin=dummy_authz_plugin
         )
         continuation: Union[
@@ -244,7 +247,7 @@ class TestExecUserAuthInterceptor(unittest.TestCase):
         # token refresh.
         dummy_authz_plugin.verify_user_authorization.return_value = True
 
-        interceptor = ExecUserAuthInterceptor(
+        interceptor = ControlUserAuthInterceptor(
             auth_plugin=dummy_auth_plugin, authz_plugin=dummy_authz_plugin
         )
         continuation: Union[
@@ -322,7 +325,7 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
         # Authorization approves
         self.authz_plugin.verify_user_authorization.return_value = True
 
-        interceptor = ExecUserAuthInterceptor(
+        interceptor = ControlUserAuthInterceptor(
             auth_plugin=self.auth_plugin, authz_plugin=self.authz_plugin
         )
 
@@ -367,7 +370,7 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
         # Authorization denies
         self.authz_plugin.verify_user_authorization.return_value = False
 
-        interceptor = ExecUserAuthInterceptor(
+        interceptor = ControlUserAuthInterceptor(
             auth_plugin=self.auth_plugin, authz_plugin=self.authz_plugin
         )
 

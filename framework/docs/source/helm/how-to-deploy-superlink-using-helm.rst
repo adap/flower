@@ -367,7 +367,7 @@ TLS certificates on startup.
         tls: true
         api:
           enabled: true
-          hostname: exec-api.example.com
+          hostname: control-api.example.com
           path: /
           pathType: ImplementationSpecific
         fleet:
@@ -392,7 +392,7 @@ In this example, we use ``cert-manager`` to create a certificate. By default, th
 certificate will only include the DNS name specified in ``common-name``.
 
 In some cases, the server and client charts are deployed in the same cluster, while the
-exec API is accessible via the internet.
+Control API is accessible via the internet.
 
 To allow SuperNodes to connect to the SuperLink via the internal service URL, you need
 to add an additional host, as shown below:

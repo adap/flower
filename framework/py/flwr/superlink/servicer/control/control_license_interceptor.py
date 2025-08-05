@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Exec API license interceptor."""
+"""Flower Control API license interceptor."""
 
 
 from collections.abc import Iterator
@@ -24,8 +24,8 @@ from google.protobuf.message import Message as GrpcMessage
 from flwr.supercore.license_plugin import LicensePlugin
 
 
-class ExecLicenseInterceptor(grpc.ServerInterceptor):  # type: ignore
-    """Exec API interceptor for license checking."""
+class ControlLicenseInterceptor(grpc.ServerInterceptor):  # type: ignore
+    """Control API interceptor for license checking."""
 
     def __init__(self, license_plugin: LicensePlugin) -> None:
         """Initialize the interceptor with a license plugin."""
@@ -42,12 +42,12 @@ class ExecLicenseInterceptor(grpc.ServerInterceptor):  # type: ignore
         Continue RPC call if license check is enabled and passes, else, terminate RPC
         call by setting context to abort.
         """
-        # Only apply to Exec service
-        if not handler_call_details.method.startswith("/flwr.proto.Exec/"):
+        # Only apply to Control service
+        if not handler_call_details.method.startswith("/flwr.proto.Control/"):
             return continuation(handler_call_details)
 
         # One of the method handlers in
-        # `flwr.superlink.servicer.exec.ExecServicer`
+        # `flwr.superlink.servicer.control.ControlServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
         return self._generic_license_unary_method_handler(method_handler)
 

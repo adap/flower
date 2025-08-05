@@ -40,7 +40,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
 )
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
-from flwr.common.typing import Fab, Run, RunNotRunningException
+from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -156,17 +156,6 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         adapter_cls = FleetStub
     stub = adapter_cls(channel)
     node: Optional[Node] = None
-
-    def _should_giveup_fn(e: Exception) -> bool:
-        if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
-            raise RunNotRunningException
-        if e.code() == grpc.StatusCode.UNAVAILABLE:  # type: ignore
-            return False
-        return True
-
-    # Restrict retries to cases where the status code is UNAVAILABLE
-    # If the status code is PERMISSION_DENIED, additionally raise RunNotRunningException
-    retry_invoker.should_giveup = _should_giveup_fn
 
     # Wrap stub
     _wrap_stub(stub, retry_invoker)

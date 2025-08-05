@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Exec API servicer."""
+"""Control API servicer."""
 
 
 import time
@@ -23,7 +23,7 @@ from typing import Any, Optional, cast
 import grpc
 
 from flwr.common import now
-from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.common.auth_plugin import ControlAuthPlugin
 from flwr.common.constant import (
     FAB_MAX_SIZE,
     LOG_STREAM_INTERVAL,
@@ -38,8 +38,8 @@ from flwr.common.serde import (
     user_config_from_proto,
 )
 from flwr.common.typing import Run, RunStatus
-from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
@@ -58,11 +58,11 @@ from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 
 from ...executor.executor import Executor
-from .exec_user_auth_interceptor import shared_account_info
+from .control_user_auth_interceptor import shared_account_info
 
 
-class ExecServicer(exec_pb2_grpc.ExecServicer):
-    """Exec API servicer."""
+class ControlServicer(control_pb2_grpc.ControlServicer):
+    """Control API servicer."""
 
     def __init__(  # pylint: disable=R0913, R0917
         self,
@@ -70,7 +70,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
         executor: Executor,
-        auth_plugin: Optional[ExecAuthPlugin] = None,
+        auth_plugin: Optional[ControlAuthPlugin] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
@@ -83,7 +83,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self, request: StartRunRequest, context: grpc.ServicerContext
     ) -> StartRunResponse:
         """Create run ID."""
-        log(INFO, "ExecServicer.StartRun")
+        log(INFO, "ControlServicer.StartRun")
 
         if len(request.fab.content) > FAB_MAX_SIZE:
             log(
@@ -111,7 +111,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self, request: StreamLogsRequest, context: grpc.ServicerContext
     ) -> Generator[StreamLogsResponse, Any, None]:
         """Get logs."""
-        log(INFO, "ExecServicer.StreamLogs")
+        log(INFO, "ControlServicer.StreamLogs")
         state = self.linkstate_factory.state()
 
         # Retrieve run ID and run
@@ -158,7 +158,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self, request: ListRunsRequest, context: grpc.ServicerContext
     ) -> ListRunsResponse:
         """Handle `flwr ls` command."""
-        log(INFO, "ExecServicer.List")
+        log(INFO, "ControlServicer.List")
         state = self.linkstate_factory.state()
 
         # Build a set of run IDs for `flwr ls --runs`
@@ -204,7 +204,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self, request: StopRunRequest, context: grpc.ServicerContext
     ) -> StopRunResponse:
         """Stop a given run ID."""
-        log(INFO, "ExecServicer.StopRun")
+        log(INFO, "ControlServicer.StopRun")
         state = self.linkstate_factory.state()
 
         # Retrieve run ID and run
@@ -249,11 +249,11 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self, request: GetLoginDetailsRequest, context: grpc.ServicerContext
     ) -> GetLoginDetailsResponse:
         """Start login."""
-        log(INFO, "ExecServicer.GetLoginDetails")
+        log(INFO, "ControlServicer.GetLoginDetails")
         if self.auth_plugin is None:
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
-                "ExecServicer initialized without user authentication",
+                "ControlServicer initialized without user authentication",
             )
             raise grpc.RpcError()  # This line is unreachable
 
@@ -276,11 +276,11 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self, request: GetAuthTokensRequest, context: grpc.ServicerContext
     ) -> GetAuthTokensResponse:
         """Get auth token."""
-        log(INFO, "ExecServicer.GetAuthTokens")
+        log(INFO, "ControlServicer.GetAuthTokens")
         if self.auth_plugin is None:
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
-                "ExecServicer initialized without user authentication",
+                "ControlServicer initialized without user authentication",
             )
             raise grpc.RpcError()  # This line is unreachable
 

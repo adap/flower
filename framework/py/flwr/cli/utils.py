@@ -259,7 +259,7 @@ def try_obtain_cli_auth_plugin(
 def init_channel(
     app: Path, federation_config: dict[str, Any], auth_plugin: Optional[CliAuthPlugin]
 ) -> grpc.Channel:
-    """Initialize gRPC channel to the Exec API."""
+    """Initialize gRPC channel to the Control API."""
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
         app, federation_config
     )

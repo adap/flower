@@ -29,11 +29,11 @@ from flwr.cli.config_utils import (
 )
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.common.typing import UserAuthLoginDetails
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
 )
-from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.proto.control_pb2_grpc import ControlStub
 
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
@@ -89,7 +89,7 @@ def login(  # pylint: disable=R0914
         raise typer.Exit(code=1)
 
     channel = init_channel(app, federation_config, None)
-    stub = ExecStub(channel)
+    stub = ControlStub(channel)
 
     login_request = GetLoginDetailsRequest()
     with flwr_cli_grpc_exc_handler():
