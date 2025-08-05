@@ -54,8 +54,6 @@ from flwr.common.serde import (
     run_from_proto,
 )
 from flwr.common.typing import Fab, Run
-
-# pylint: disable=E0611
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     ListRunsToLaunchRequest,
     ListRunsToLaunchResponse,
