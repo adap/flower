@@ -38,11 +38,11 @@ from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import run_from_proto
 from flwr.common.typing import Run
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListRunsRequest,
     ListRunsResponse,
 )
-from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.proto.control_pb2_grpc import ControlStub
 
 from .utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
@@ -125,7 +125,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
                 )
             auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
             channel = init_channel(app, federation_config, auth_plugin)
-            stub = ExecStub(channel)
+            stub = ControlStub(channel)
 
             # Display information about a specific run ID
             if run_id is not None:
@@ -293,7 +293,7 @@ def _to_json(run_list: list[_RunListType]) -> str:
     return json.dumps({"success": True, "runs": runs_list})
 
 
-def _list_runs(stub: ExecStub) -> list[_RunListType]:
+def _list_runs(stub: ControlStub) -> list[_RunListType]:
     """List all runs."""
     with flwr_cli_grpc_exc_handler():
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
@@ -302,7 +302,7 @@ def _list_runs(stub: ExecStub) -> list[_RunListType]:
     return _format_runs(run_dict, res.now)
 
 
-def _display_one_run(stub: ExecStub, run_id: int) -> list[_RunListType]:
+def _display_one_run(stub: ControlStub, run_id: int) -> list[_RunListType]:
     """Display information about a specific run."""
     with flwr_cli_grpc_exc_handler():
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))

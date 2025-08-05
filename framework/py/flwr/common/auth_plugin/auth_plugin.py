@@ -21,13 +21,13 @@ from pathlib import Path
 from typing import Optional, Union
 
 from flwr.common.typing import AccountInfo
-from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.proto.control_pb2_grpc import ControlStub
 
 from ..typing import UserAuthCredentials, UserAuthLoginDetails
 
 
-class ExecAuthPlugin(ABC):
-    """Abstract Flower Auth Plugin class for ExecServicer.
+class ControlAuthPlugin(ABC):
+    """Abstract Flower Auth Plugin class for ControlServicer.
 
     Parameters
     ----------
@@ -69,8 +69,8 @@ class ExecAuthPlugin(ABC):
         """Refresh authentication tokens in the provided metadata."""
 
 
-class ExecAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
-    """Abstract Flower Authorization Plugin class for ExecServicer.
+class ControlAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
+    """Abstract Flower Authorization Plugin class for ControlServicer.
 
     Parameters
     ----------
@@ -103,7 +103,7 @@ class CliAuthPlugin(ABC):
     @abstractmethod
     def login(
         login_details: UserAuthLoginDetails,
-        exec_stub: ExecStub,
+        control_stub: ControlStub,
     ) -> UserAuthCredentials:
         """Authenticate the user and retrieve authentication credentials.
 
@@ -111,7 +111,7 @@ class CliAuthPlugin(ABC):
         ----------
         login_details : UserAuthLoginDetails
             An object containing the user's login details.
-        exec_stub : ExecStub
+        control_stub : ControlStub
             A stub for executing RPC calls to the server.
 
         Returns

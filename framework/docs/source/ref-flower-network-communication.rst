@@ -39,7 +39,7 @@ Mandatory Network Connections
 
 Deployed Flower systems have at least two types of network connections:
 
-- **CLI to SuperLink (Exec API)**: The ``flwr`` `CLI command <ref-api-cli.html>`_,
+- **CLI to SuperLink (Control API)**: The ``flwr`` `CLI command <ref-api-cli.html>`_,
   typically run on the users workstation, is used to interface with a deployed Flower
   federation consisting of SuperLink and SuperNodes. From a networking perspective, the
   ``flwr`` CLI acts as a gRPC client and the SuperLink acts as a gRPC server. The
@@ -68,8 +68,8 @@ Flower Components APIs
 All Flower components — SuperLink, ServerApp process (``flwr-serverapp``), SuperNode,
 and ClientApp process (``flwr-clientapp``) — expose APIs to interact with other Flower
 components. The SuperLink component includes three such APIs: the ServerAppIo API, Fleet
-API, and the Exec API. Similarly, the SuperNode component includes the ClientAppIo API.
-Each of these APIs serves a distinct purpose when running a Flower app using the
+API, and the Control API. Similarly, the SuperNode component includes the ClientAppIo
+API. Each of these APIs serves a distinct purpose when running a Flower app using the
 deployment runtime, as summarized in the table below.
 
 .. list-table::
@@ -90,7 +90,7 @@ deployment runtime, as summarized in the table below.
       - Used by the SuperNodes to communicate with the SuperLink
     - -
       - 9093
-      - Exec API
+      - Control API
       - Users interface with the SuperLink via this API using the `FlowerCLI
         <ref-api-cli.html>`_.
     - - SuperNode

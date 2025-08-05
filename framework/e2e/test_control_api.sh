@@ -76,7 +76,7 @@ if [ "$3" = "simulation-engine" ]; then
 fi
 
 # Combine the arguments into a single command for flower-superlink
-combined_args="$server_arg $server_auth $exec_api_arg $executor_arg"
+combined_args="$server_arg $server_auth $executor_arg"
 
 timeout 2m flower-superlink $combined_args --executor-config "$executor_config" 2>&1 | tee flwr_output.log &
 sl_pid=$(pgrep -f "flower-superlink")
@@ -104,17 +104,26 @@ timeout 1m flwr run --run-config num-server-rounds=1 ../e2e-tmp-test e2e
 found_success=false
 timeout=120  # Timeout after 120 seconds
 elapsed=0
+engine="$3"
 
-# Check for "Success" in a loop with a timeout
+# Define a cleanup function
+cleanup_and_exit() {
+    if [ "$engine" = "deployment-engine" ]; then
+      kill $cl1_pid; kill $cl2_pid;
+    fi
+    sleep 1; kill $sl_pid;
+    exit $1
+}
+
+# Check for "Run finished" in a loop with a timeout
 while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
-    if grep -q "Run finished" flwr_output.log; then
+    if grep -q "ERROR" flwr_output.log; then
+        echo "An ERROR occurred during training. Exiting."
+        cleanup_and_exit 1
+    elif grep -q "Run finished" flwr_output.log; then
         echo "Training worked correctly!"
         found_success=true
-        if [ "$3" = "deployment-engine" ]; then
-          kill $cl1_pid; kill $cl2_pid;
-        fi
-        sleep 1; kill $sl_pid;
-        exit 0;
+        cleanup_and_exit 0
     else
         echo "Waiting for training ... ($elapsed seconds elapsed)"
     fi
@@ -125,9 +134,5 @@ done
 
 if [ "$found_success" = false ]; then
     echo "Training had an issue and timed out."
-    if [ "$3" = "deployment-engine" ]; then
-      kill $cl1_pid; kill $cl2_pid;
-    fi
-    kill $sl_pid;
-    exit 1;
+    cleanup_and_exit 1
 fi

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Test the Exec API servicer."""
+"""Test the Control API servicer."""
 
 
 import subprocess
@@ -28,7 +28,7 @@ from parameterized import parameterized
 from flwr.common import ConfigRecord, now
 from flwr.common.constant import Status, SubStatus
 from flwr.common.typing import Run, RunStatus
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListRunsRequest,
     StartRunRequest,
     StopRunRequest,
@@ -38,7 +38,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 
-from .exec_servicer import ExecServicer
+from .control_servicer import ControlServicer
 
 FLWR_AID_MISMATCH_CASES = (
     # (context_flwr_aid, run_flwr_aid)
@@ -55,7 +55,7 @@ FLWR_AID_MISMATCH_CASES = (
 
 
 def test_start_run() -> None:
-    """Test StartRun method of ExecServicer."""
+    """Test StartRun method of ControlServicer."""
     run_res = MagicMock()
     run_res.run_id = 10
     with subprocess.Popen(
@@ -75,20 +75,20 @@ def test_start_run() -> None:
     request.fab.content = b"test"
 
     # Create a instance of FlowerServiceServicer
-    servicer = ExecServicer(Mock(), Mock(), Mock(), executor=executor)
+    servicer = ControlServicer(Mock(), Mock(), Mock(), executor=executor)
 
     # Execute
     response = servicer.StartRun(request, context_mock)
     assert response.run_id == 10
 
 
-class TestExecServicer(unittest.TestCase):
-    """Test the Exec API servicer."""
+class TestControlServicer(unittest.TestCase):
+    """Test the Control API servicer."""
 
     def setUp(self) -> None:
         """Set up test fixtures."""
         self.store = Mock()
-        self.servicer = ExecServicer(
+        self.servicer = ControlServicer(
             linkstate_factory=LinkStateFactory(":flwr-in-memory-state:"),
             ffs_factory=FfsFactory("./tmp"),
             objectstore_factory=Mock(store=Mock(return_value=self.store)),
@@ -97,7 +97,7 @@ class TestExecServicer(unittest.TestCase):
         self.state = self.servicer.linkstate_factory.state()
 
     def test_list_runs(self) -> None:
-        """Test List method of ExecServicer with --runs option."""
+        """Test List method of ControlServicer with --runs option."""
         # Prepare
         run_ids = set()
         for _ in range(3):
@@ -115,7 +115,7 @@ class TestExecServicer(unittest.TestCase):
         self.assertEqual(set(response.run_dict.keys()), run_ids)
 
     def test_list_run_id(self) -> None:
-        """Test List method of ExecServicer with --run-id option."""
+        """Test List method of ControlServicer with --run-id option."""
         # Prepare
         for _ in range(3):
             run_id = self.state.create_run(
@@ -131,7 +131,7 @@ class TestExecServicer(unittest.TestCase):
         self.assertEqual(set(response.run_dict.keys()), {run_id})
 
     def test_stop_run(self) -> None:
-        """Test StopRun method of ExecServicer."""
+        """Test StopRun method of ControlServicer."""
         # Prepare
         run_id = self.state.create_run(
             "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigRecord(), "user123"
@@ -154,12 +154,12 @@ class TestExecServicer(unittest.TestCase):
         self.store.delete_objects_in_run.assert_called_once_with(run_id)
 
 
-class TestExecServicerAuth(unittest.TestCase):
-    """Test ExecServicer methods with authentication plugin and flwr_aid checking."""
+class TestControlServicerAuth(unittest.TestCase):
+    """Test ControlServicer methods with authentication plugin and flwr_aid checking."""
 
     def setUp(self) -> None:
         """Set up test fixtures."""
-        self.servicer = ExecServicer(
+        self.servicer = ControlServicer(
             linkstate_factory=LinkStateFactory(":flwr-in-memory-state:"),
             ffs_factory=FfsFactory("./tmp"),
             objectstore_factory=Mock(),
@@ -193,7 +193,7 @@ class TestExecServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.exec.exec_servicer.shared_account_info",
+            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
             new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
         ):
             gen = self.servicer.StreamLogs(request, ctx)
@@ -224,7 +224,7 @@ class TestExecServicerAuth(unittest.TestCase):
                 },
             ),
             patch(
-                "flwr.superlink.servicer.exec.exec_servicer.shared_account_info",
+                "flwr.superlink.servicer.control.control_servicer.shared_account_info",
                 new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
             ),
         ):
@@ -251,7 +251,7 @@ class TestExecServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.exec.exec_servicer.shared_account_info",
+            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
             new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
         ):
             with self.assertRaises(RuntimeError) as cm:
@@ -269,7 +269,7 @@ class TestExecServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.exec.exec_servicer.shared_account_info",
+            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
             new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
         ):
             response = self.servicer.StopRun(request, ctx)
@@ -293,7 +293,7 @@ class TestExecServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.exec.exec_servicer.shared_account_info",
+            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
             new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
         ):
             with self.assertRaises(RuntimeError) as cm:
@@ -311,7 +311,7 @@ class TestExecServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.exec.exec_servicer.shared_account_info",
+            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
             new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
         ):
             response = self.servicer.ListRuns(request, ctx)

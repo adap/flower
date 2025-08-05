@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Executor for Exec API."""
+"""Executor for Control API."""
 
 
 from .app import load_executor

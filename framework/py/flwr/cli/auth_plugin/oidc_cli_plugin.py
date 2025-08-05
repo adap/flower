@@ -31,11 +31,11 @@ from flwr.common.constant import (
     AuthType,
 )
 from flwr.common.typing import UserAuthCredentials, UserAuthLoginDetails
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetAuthTokensResponse,
 )
-from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.proto.control_pb2_grpc import ControlStub
 
 
 class OidcCliPlugin(CliAuthPlugin):
@@ -49,7 +49,7 @@ class OidcCliPlugin(CliAuthPlugin):
     @staticmethod
     def login(
         login_details: UserAuthLoginDetails,
-        exec_stub: ExecStub,
+        control_stub: ControlStub,
     ) -> UserAuthCredentials:
         """Authenticate the user and retrieve authentication credentials."""
         typer.secho(
@@ -61,7 +61,7 @@ class OidcCliPlugin(CliAuthPlugin):
         time.sleep(login_details.interval)
 
         while (time.time() - start_time) < login_details.expires_in:
-            res: GetAuthTokensResponse = exec_stub.GetAuthTokens(
+            res: GetAuthTokensResponse = control_stub.GetAuthTokens(
                 GetAuthTokensRequest(device_code=login_details.device_code)
             )
 

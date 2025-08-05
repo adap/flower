@@ -88,7 +88,7 @@ jobs:
           - connection: insecure
             authentication: client-auth
     name: |
-      Exec API / 
+      Control API / 
       Python ${{ matrix.python-version }} /
       ${{ matrix.connection }} / 
       ${{ matrix.authentication }} / 
@@ -124,13 +124,13 @@ jobs:
             python -m pip install "${WHEEL_URL}"
           fi
       - name: >
-          Run Exec API test / 
+          Run Control API test / 
           ${{ matrix.connection }} / 
           ${{ matrix.authentication }} / 
           ${{ matrix.engine }} 
         if: ${{ needs.changes.outputs.framework == 'true' }}
         working-directory: framework/e2e/${{ matrix.directory }}
-        run: ./../test_exec_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
+        run: ./../test_control_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
 
   frameworks:
     runs-on: ubuntu-22.04
@@ -439,7 +439,7 @@ jobs:
           ${{ matrix.engine }} 
         if: ${{ needs.changes.outputs.framework == 'true' }}
         working-directory: framework/e2e/${{ matrix.directory }}
-        run: ./../test_exec_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
+        run: ./../test_control_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
 
   windows-compatibility:
     runs-on: windows-latest
