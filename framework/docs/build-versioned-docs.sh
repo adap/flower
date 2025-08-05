@@ -169,6 +169,5 @@ for current_language in ${languages}; do
 done
 rm source/ref-api/*.rst
 
-# Copy the latest stable version to the root of the built docs
-latest_version=$(echo "$versions" | sort -V | tail -n 1)
-cp -r build/html/${latest_version}/en/* build/html/
+# Copy main version to the root of the built docs
+cp -r build/html/main/en/* build/html/
