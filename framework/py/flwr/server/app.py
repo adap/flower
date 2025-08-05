@@ -143,7 +143,8 @@ def run_superlink() -> None:
         log(
             WARN,
             "The `--exec-api-address` argument is deprecated and will be removed in a "
-            "future release. Use `--control-api-address` instead.",
+            "future release. Use `--control-api-address` instead. "
+            "`--control-api-address` will be ignored if `--exec-api-address` is set.",
         )
         args.control_api_address = args.exec_api_address
 
