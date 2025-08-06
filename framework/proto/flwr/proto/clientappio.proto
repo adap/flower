@@ -25,8 +25,8 @@ import "flwr/proto/appio.proto";
 service ClientAppIo {
 
   // Get run IDs with pending messages
-  rpc GetRunIdsWithPendingMessages(GetRunIdsWithPendingMessagesRequest)
-      returns (GetRunIdsWithPendingMessagesResponse) {}
+  rpc ListAppsToLaunch(ListAppsToLaunchRequest)
+      returns (ListAppsToLaunchResponse) {}
 
   // Request token
   rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
@@ -58,11 +58,3 @@ service ClientAppIo {
   rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
       returns (ConfirmMessageReceivedResponse) {}
 }
-
-message GetRunIdsWithPendingMessagesRequest {}
-message GetRunIdsWithPendingMessagesResponse {
-  repeated uint64 run_ids = 1; // List of run IDs
-}
-
-message RequestTokenRequest { uint64 run_id = 1; }
-message RequestTokenResponse { string token = 1; }

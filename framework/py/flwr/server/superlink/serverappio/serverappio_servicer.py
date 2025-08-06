@@ -43,6 +43,8 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    ListAppsToLaunchRequest,
+    ListAppsToLaunchResponse,
     PullAppInputsRequest,
     PullAppInputsResponse,
     PullAppMessagesRequest,
@@ -51,6 +53,8 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PushAppMessagesResponse,
     PushAppOutputsRequest,
     PushAppOutputsResponse,
+    RequestTokenRequest,
+    RequestTokenResponse,
 )
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
@@ -103,6 +107,28 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
         self.lock = threading.RLock()
+
+    def ListAppsToLaunch(
+        self,
+        request: ListAppsToLaunchRequest,
+        context: grpc.ServicerContext,
+    ) -> ListAppsToLaunchResponse:
+        """Get run IDs with pending messages."""
+        log(DEBUG, "ClientAppIo.ListAppsToLaunch")
+
+        context.abort(
+            grpc.StatusCode.UNIMPLEMENTED, "ListAppsToLaunch is not implemented"
+        )
+        raise NotImplementedError
+
+    def RequestToken(
+        self, request: RequestTokenRequest, context: grpc.ServicerContext
+    ) -> RequestTokenResponse:
+        """Request token."""
+        log(DEBUG, "ClientAppIo.RequestToken")
+
+        context.abort(grpc.StatusCode.UNIMPLEMENTED, "RequestToken is not implemented")
+        raise NotImplementedError
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
