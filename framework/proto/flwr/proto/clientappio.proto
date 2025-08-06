@@ -25,8 +25,8 @@ import "flwr/proto/appio.proto";
 service ClientAppIo {
 
   // Get run IDs with pending messages
-  rpc ListRunsToLaunch(ListRunsToLaunchRequest)
-      returns (ListRunsToLaunchResponse) {}
+  rpc ListAppsToLaunch(ListAppsToLaunchRequest)
+      returns (ListAppsToLaunchResponse) {}
 
   // Request token
   rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}

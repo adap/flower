@@ -23,10 +23,10 @@ import "flwr/proto/run.proto";
 
 // These messages are used by both ServerAppIo and ClientAppIo services
 
-// ListRunsToLaunch messages
-message ListRunsToLaunchRequest {}
-message ListRunsToLaunchResponse {
-  repeated uint64 run_ids = 1; // List of run IDs
+// ListAppsToLaunch messages
+message ListAppsToLaunchRequest {}
+message ListAppsToLaunchResponse {
+  repeated uint64 run_ids = 1; // List of run IDs of the apps to launch
 }
 
 // RequestToken messages

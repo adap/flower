@@ -55,8 +55,8 @@ from flwr.common.serde import (
 )
 from flwr.common.typing import Fab, Run
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
-    ListRunsToLaunchRequest,
-    ListRunsToLaunchResponse,
+    ListAppsToLaunchRequest,
+    ListAppsToLaunchResponse,
     PullAppInputsRequest,
     PullAppInputsResponse,
     PullAppMessagesRequest,
@@ -191,7 +191,7 @@ def get_token(stub: ClientAppIoStub) -> str:
     """Get a token from SuperNode."""
     log(DEBUG, "[flwr-clientapp] Request token")
     while True:
-        res: ListRunsToLaunchResponse = stub.ListRunsToLaunch(ListRunsToLaunchRequest())
+        res: ListAppsToLaunchResponse = stub.ListAppsToLaunch(ListAppsToLaunchRequest())
 
         for run_id in res.run_ids:
             tk_res: RequestTokenResponse = stub.RequestToken(

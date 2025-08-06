@@ -28,8 +28,8 @@ import "flwr/proto/appio.proto";
 service ServerAppIo {
 
   // List runs to launch
-  rpc ListRunsToLaunch(ListRunsToLaunchRequest)
-      returns (ListRunsToLaunchResponse) {}
+  rpc ListAppsToLaunch(ListAppsToLaunchRequest)
+      returns (ListAppsToLaunchResponse) {}
 
   // Request token for a run
   rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}

@@ -10,9 +10,9 @@ import grpc
 
 class ClientAppIoStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
-    ListRunsToLaunch: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.appio_pb2.ListRunsToLaunchRequest,
-        flwr.proto.appio_pb2.ListRunsToLaunchResponse]
+    ListAppsToLaunch: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.ListAppsToLaunchRequest,
+        flwr.proto.appio_pb2.ListAppsToLaunchResponse]
     """Get run IDs with pending messages"""
 
     RequestToken: grpc.UnaryUnaryMultiCallable[
@@ -63,10 +63,10 @@ class ClientAppIoStub:
 
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def ListRunsToLaunch(self,
-        request: flwr.proto.appio_pb2.ListRunsToLaunchRequest,
+    def ListAppsToLaunch(self,
+        request: flwr.proto.appio_pb2.ListAppsToLaunchRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.appio_pb2.ListRunsToLaunchResponse:
+    ) -> flwr.proto.appio_pb2.ListAppsToLaunchResponse:
         """Get run IDs with pending messages"""
         pass
 

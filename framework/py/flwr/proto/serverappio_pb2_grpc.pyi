@@ -14,9 +14,9 @@ import grpc
 
 class ServerAppIoStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
-    ListRunsToLaunch: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.appio_pb2.ListRunsToLaunchRequest,
-        flwr.proto.appio_pb2.ListRunsToLaunchResponse]
+    ListAppsToLaunch: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.ListAppsToLaunchRequest,
+        flwr.proto.appio_pb2.ListAppsToLaunchResponse]
     """List runs to launch"""
 
     RequestToken: grpc.UnaryUnaryMultiCallable[
@@ -97,10 +97,10 @@ class ServerAppIoStub:
 
 class ServerAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def ListRunsToLaunch(self,
-        request: flwr.proto.appio_pb2.ListRunsToLaunchRequest,
+    def ListAppsToLaunch(self,
+        request: flwr.proto.appio_pb2.ListAppsToLaunchRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.appio_pb2.ListRunsToLaunchResponse:
+    ) -> flwr.proto.appio_pb2.ListAppsToLaunchResponse:
         """List runs to launch"""
         pass
 

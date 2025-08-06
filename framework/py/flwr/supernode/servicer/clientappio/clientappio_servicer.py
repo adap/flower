@@ -36,8 +36,8 @@ from flwr.common.typing import Fab, Run
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2_grpc
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0401
-    ListRunsToLaunchRequest,
-    ListRunsToLaunchResponse,
+    ListAppsToLaunchRequest,
+    ListAppsToLaunchResponse,
     PullAppInputsRequest,
     PullAppInputsResponse,
     PullAppMessagesRequest,
@@ -80,13 +80,13 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
 
-    def ListRunsToLaunch(
+    def ListAppsToLaunch(
         self,
-        request: ListRunsToLaunchRequest,
+        request: ListAppsToLaunchRequest,
         context: grpc.ServicerContext,
-    ) -> ListRunsToLaunchResponse:
-        """Get run IDs with pending messages."""
-        log(DEBUG, "ClientAppIo.ListRunsToLaunch")
+    ) -> ListAppsToLaunchResponse:
+        """Get run IDs with apps to launch."""
+        log(DEBUG, "ClientAppIo.ListAppsToLaunch")
 
         # Initialize state connection
         state = self.state_factory.state()
@@ -95,7 +95,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         run_ids = state.get_run_ids_with_pending_messages()
 
         # Return run IDs
-        return ListRunsToLaunchResponse(run_ids=run_ids)
+        return ListAppsToLaunchResponse(run_ids=run_ids)
 
     def RequestToken(
         self, request: RequestTokenRequest, context: grpc.ServicerContext

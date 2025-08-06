@@ -43,8 +43,8 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
-    ListRunsToLaunchRequest,
-    ListRunsToLaunchResponse,
+    ListAppsToLaunchRequest,
+    ListAppsToLaunchResponse,
     PullAppInputsRequest,
     PullAppInputsResponse,
     PullAppMessagesRequest,
@@ -108,16 +108,16 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         self.objectstore_factory = objectstore_factory
         self.lock = threading.RLock()
 
-    def ListRunsToLaunch(
+    def ListAppsToLaunch(
         self,
-        request: ListRunsToLaunchRequest,
+        request: ListAppsToLaunchRequest,
         context: grpc.ServicerContext,
-    ) -> ListRunsToLaunchResponse:
+    ) -> ListAppsToLaunchResponse:
         """Get run IDs with pending messages."""
-        log(DEBUG, "ClientAppIo.ListRunsToLaunch")
+        log(DEBUG, "ClientAppIo.ListAppsToLaunch")
 
         context.abort(
-            grpc.StatusCode.UNIMPLEMENTED, "ListRunsToLaunch is not implemented"
+            grpc.StatusCode.UNIMPLEMENTED, "ListAppsToLaunch is not implemented"
         )
         raise NotImplementedError
 

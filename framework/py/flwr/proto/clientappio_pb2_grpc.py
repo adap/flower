@@ -16,10 +16,10 @@ class ClientAppIoStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.ListRunsToLaunch = channel.unary_unary(
-                '/flwr.proto.ClientAppIo/ListRunsToLaunch',
-                request_serializer=flwr_dot_proto_dot_appio__pb2.ListRunsToLaunchRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_appio__pb2.ListRunsToLaunchResponse.FromString,
+        self.ListAppsToLaunch = channel.unary_unary(
+                '/flwr.proto.ClientAppIo/ListAppsToLaunch',
+                request_serializer=flwr_dot_proto_dot_appio__pb2.ListAppsToLaunchRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_appio__pb2.ListAppsToLaunchResponse.FromString,
                 )
         self.RequestToken = channel.unary_unary(
                 '/flwr.proto.ClientAppIo/RequestToken',
@@ -71,7 +71,7 @@ class ClientAppIoStub(object):
 class ClientAppIoServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def ListRunsToLaunch(self, request, context):
+    def ListAppsToLaunch(self, request, context):
         """Get run IDs with pending messages
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -144,10 +144,10 @@ class ClientAppIoServicer(object):
 
 def add_ClientAppIoServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'ListRunsToLaunch': grpc.unary_unary_rpc_method_handler(
-                    servicer.ListRunsToLaunch,
-                    request_deserializer=flwr_dot_proto_dot_appio__pb2.ListRunsToLaunchRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_appio__pb2.ListRunsToLaunchResponse.SerializeToString,
+            'ListAppsToLaunch': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListAppsToLaunch,
+                    request_deserializer=flwr_dot_proto_dot_appio__pb2.ListAppsToLaunchRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_appio__pb2.ListAppsToLaunchResponse.SerializeToString,
             ),
             'RequestToken': grpc.unary_unary_rpc_method_handler(
                     servicer.RequestToken,
@@ -205,7 +205,7 @@ class ClientAppIo(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def ListRunsToLaunch(request,
+    def ListAppsToLaunch(request,
             target,
             options=(),
             channel_credentials=None,
@@ -215,9 +215,9 @@ class ClientAppIo(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ClientAppIo/ListRunsToLaunch',
-            flwr_dot_proto_dot_appio__pb2.ListRunsToLaunchRequest.SerializeToString,
-            flwr_dot_proto_dot_appio__pb2.ListRunsToLaunchResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.ClientAppIo/ListAppsToLaunch',
+            flwr_dot_proto_dot_appio__pb2.ListAppsToLaunchRequest.SerializeToString,
+            flwr_dot_proto_dot_appio__pb2.ListAppsToLaunchResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
