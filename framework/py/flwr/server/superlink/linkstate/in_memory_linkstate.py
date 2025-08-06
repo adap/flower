@@ -688,7 +688,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def create_token(self, run_id: int) -> str:
         """Create a token for the given run ID."""
-        # Copied from `nodestate_test.py`
         token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
         with self.lock_token_store:
             if run_id in self.token_store:
@@ -699,13 +698,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def verify_token(self, run_id: int, token: str) -> bool:
         """Verify a token for the given run ID."""
-        # Copied from `nodestate_test.py`
         with self.lock_token_store:
             return self.token_store.get(run_id) == token
 
     def delete_token(self, run_id: int) -> None:
         """Delete the token for the given run ID."""
-        # Copied from `nodestate_test.py`
         with self.lock_token_store:
             token = self.token_store.pop(run_id, None)
             if token is not None:
@@ -713,6 +710,5 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def get_run_id_by_token(self, token: str) -> Optional[int]:
         """Get the run ID associated with a given token."""
-        # Copied from `nodestate_test.py`
         with self.lock_token_store:
             return self.token_to_run_id.get(token)
