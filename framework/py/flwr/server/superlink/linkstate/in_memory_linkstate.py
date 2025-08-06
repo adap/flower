@@ -15,6 +15,7 @@
 """In-memory LinkState implementation."""
 
 
+import secrets
 import threading
 import time
 from bisect import bisect_right
@@ -25,6 +26,7 @@ from typing import Optional
 
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
+    FLWR_APP_TOKEN_LENGTH,
     HEARTBEAT_MAX_INTERVAL,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
@@ -79,6 +81,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.message_ins_store: dict[str, Message] = {}
         self.message_res_store: dict[str, Message] = {}
         self.message_ins_id_to_message_res_id: dict[str, str] = {}
+
+        # Store run ID to token mapping and token to run ID mapping
+        self.token_store: dict[int, str] = {}
+        self.token_to_run_id: dict[str, int] = {}
+        self.lock_token_store = threading.Lock()
 
         # Map flwr_aid to run_ids for O(1) reverse index lookup
         self.flwr_aid_to_run_ids: dict[str, set[int]] = defaultdict(set)
@@ -678,3 +685,30 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             index = bisect_right(run.logs, (after_timestamp, ""))
             latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
             return "".join(log for _, log in run.logs[index:]), latest_timestamp
+
+    def create_token(self, run_id: int) -> str:
+        """Create a token for the given run ID."""
+        token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
+        with self.lock_token_store:
+            if run_id in self.token_store:
+                raise ValueError("Token already created for this run ID")
+            self.token_store[run_id] = token
+            self.token_to_run_id[token] = run_id
+        return token
+
+    def verify_token(self, run_id: int, token: str) -> bool:
+        """Verify a token for the given run ID."""
+        with self.lock_token_store:
+            return self.token_store.get(run_id) == token
+
+    def delete_token(self, run_id: int) -> None:
+        """Delete the token for the given run ID."""
+        with self.lock_token_store:
+            token = self.token_store.pop(run_id, None)
+            if token is not None:
+                self.token_to_run_id.pop(token, None)
+
+    def get_run_id_by_token(self, token: str) -> Optional[int]:
+        """Get the run ID associated with a given token."""
+        with self.lock_token_store:
+            return self.token_to_run_id.get(token)
