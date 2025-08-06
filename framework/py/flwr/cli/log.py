@@ -32,8 +32,8 @@ from flwr.cli.config_utils import (
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.common.constant import CONN_RECONNECT_INTERVAL, CONN_REFRESH_PERIOD
 from flwr.common.logger import log as logger
-from flwr.proto.exec_pb2 import StreamLogsRequest  # pylint: disable=E0611
-from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.proto.control_pb2 import StreamLogsRequest  # pylint: disable=E0611
+from flwr.proto.control_pb2_grpc import ControlStub
 
 from .utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
@@ -46,7 +46,7 @@ def start_stream(
     run_id: int, channel: grpc.Channel, refresh_period: int = CONN_REFRESH_PERIOD
 ) -> None:
     """Start log streaming for a given run ID."""
-    stub = ExecStub(channel)
+    stub = ControlStub(channel)
     after_timestamp = 0.0
     try:
         logger(INFO, "Starting logstream for run_id `%s`", run_id)
@@ -69,7 +69,7 @@ def start_stream(
 
 
 def stream_logs(
-    run_id: int, stub: ExecStub, duration: int, after_timestamp: float
+    run_id: int, stub: ControlStub, duration: int, after_timestamp: float
 ) -> float:
     """Stream logs from the beginning of a run with connection refresh.
 
@@ -77,8 +77,8 @@ def stream_logs(
     ----------
     run_id : int
         The identifier of the run.
-    stub : ExecStub
-        The gRPC stub to interact with the Exec service.
+    stub : ControlStub
+        The gRPC stub to interact with the Control service.
     duration : int
         The timeout duration for each stream connection in seconds.
     after_timestamp : float
@@ -112,7 +112,7 @@ def stream_logs(
 
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     """Print logs from the beginning of a run."""
-    stub = ExecStub(channel)
+    stub = ControlStub(channel)
     req = StreamLogsRequest(run_id=run_id, after_timestamp=0.0)
 
     try:
@@ -173,13 +173,13 @@ def log(
     exit_if_no_address(federation_config, "log")
 
     try:
-        _log_with_exec_api(app, federation, federation_config, run_id, stream)
+        _log_with_control_api(app, federation, federation_config, run_id, stream)
     except Exception as err:  # pylint: disable=broad-except
         typer.secho(str(err), fg=typer.colors.RED, bold=True)
         raise typer.Exit(code=1) from None
 
 
-def _log_with_exec_api(
+def _log_with_control_api(
     app: Path,
     federation: str,
     federation_config: dict[str, Any],

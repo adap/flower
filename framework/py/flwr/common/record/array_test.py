@@ -15,22 +15,22 @@
 """Unit tests for Array."""
 
 
+import json
 import sys
 import unittest
 from io import BytesIO
 from types import ModuleType
-from typing import Any
+from typing import Any, cast
 from unittest.mock import Mock
 
 import numpy as np
 from parameterized import parameterized
 
-from flwr.common.serde import array_to_proto
-
-from ..constant import SType
+from ..constant import MAX_ARRAY_CHUNK_SIZE, SType
 from ..inflatable import get_object_body, get_object_type_from_object_content
 from ..typing import NDArray
 from .array import Array
+from .arraychunk import ArrayChunk
 
 
 def _get_buffer_from_ndarray(array: NDArray) -> bytes:
@@ -76,7 +76,7 @@ class TestArray(unittest.TestCase):
         # Execute
         array_instance = Array(
             dtype=str(original_array.dtype),
-            shape=list(original_array.shape),
+            shape=tuple(original_array.shape),
             stype=SType.NUMPY,
             data=buffer,
         )
@@ -90,7 +90,7 @@ class TestArray(unittest.TestCase):
         # Prepare
         array_instance = Array(
             dtype="float32",
-            shape=[3],
+            shape=(3,),
             stype="invalid_stype",  # Non-numpy stype
             data=b"",
         )
@@ -111,7 +111,7 @@ class TestArray(unittest.TestCase):
 
         # Assert
         self.assertEqual(array_instance.dtype, str(original_array.dtype))
-        self.assertEqual(array_instance.shape, list(original_array.shape))
+        self.assertEqual(array_instance.shape, tuple(original_array.shape))
         self.assertEqual(array_instance.stype, SType.NUMPY)
         np.testing.assert_array_equal(deserialized_array, original_array)
 
@@ -130,14 +130,14 @@ class TestArray(unittest.TestCase):
 
         # Assert
         self.assertEqual(arr.dtype, "float32")
-        self.assertEqual(arr.shape, [2, 2])
+        self.assertEqual(arr.shape, (2, 2))
         self.assertEqual(arr.stype, SType.NUMPY)
 
     @parameterized.expand(  # type: ignore
         [
             ({"torch_tensor": MOCK_TORCH_TENSOR},),
             ({"ndarray": np.array([1, 2, 3])},),
-            ({"dtype": "float32", "shape": [2, 2], "stype": "dense", "data": b"data"},),
+            ({"dtype": "float32", "shape": (2, 2), "stype": "dense", "data": b"data"},),
         ]
     )
     def test_valid_init_overloads_kwargs(self, kwargs: dict[str, Any]) -> None:
@@ -149,7 +149,7 @@ class TestArray(unittest.TestCase):
         [
             (MOCK_TORCH_TENSOR,),
             (np.array([1, 2, 3]),),
-            ("float32", [2, 2], "dense", b"data"),
+            ("float32", (2, 2), "dense", b"data"),
         ]
     )
     def test_valid_init_overloads_args(self, *args: Any) -> None:
@@ -160,8 +160,8 @@ class TestArray(unittest.TestCase):
     @parameterized.expand(  # type: ignore
         [
             (MOCK_TORCH_TENSOR, np.array([1])),
-            ("float32", [2, 2], "dense", 213),
-            ([2, 2], "dense", b"data"),
+            ("float32", (2, 2), "dense", 213),
+            ((2, 2), "dense", b"data"),
             (123, "invalid"),
         ]
     )
@@ -170,29 +170,87 @@ class TestArray(unittest.TestCase):
         with self.assertRaises(TypeError):
             Array(*args)
 
-    def test_deflate_and_inflate(self) -> None:
+    @parameterized.expand(  # type: ignore
+        [
+            (np.random.randn(5, 5),),  # single ArrayChunk
+            (
+                np.random.randn(3000, 3000),
+            ),  # 4 ArrayChunks (if MAX_ARRAY_CHUNK_SIZE = 20 MB )
+        ]
+    )
+    def test_deflate_and_inflate(self, ndarray) -> None:
         """Ensure an Array can be (de)inflated correctly."""
-        arr = Array(np.random.randn(5, 5))
+        arr = Array(ndarray)
 
         # Assert
-        # Array has no children
-        assert arr.children is None
+        # Array has at least one children
+        children_list = arr.slice_array()
+        assert arr.children == dict(children_list)
+
+        # Ensure the number of children is the expected one
+        expected_num_children = np.ceil(len(arr.data) / MAX_ARRAY_CHUNK_SIZE)
+        assert len(arr.children) == expected_num_children
 
         arr_b = arr.deflate()
 
         # Assert
         # Class name matches
         assert get_object_type_from_object_content(arr_b) == arr.__class__.__qualname__
-        # Body of deflfated Array matches its direct protobuf serialization
-        assert get_object_body(arr_b, Array) == array_to_proto(arr).SerializeToString()
+        # Body of deflfated Array contains array metadata and ids or its chunks
+        unique_children = list(arr.children.keys())
+        arraychunk_ids = [unique_children.index(ch_id) for ch_id, _ in children_list]
+        body = {
+            "dtype": arr.dtype,
+            "shape": arr.shape,
+            "stype": arr.stype,
+            "arraychunk_ids": arraychunk_ids,
+        }
+        body_end = json.dumps(body).encode("utf-8")
+        assert get_object_body(arr_b, Array) == body_end
 
         # Inflate
-        arr_ = Array.inflate(arr_b)
+        arr_ = Array.inflate(arr_b, children=arr.children)
 
         # Assert
         # Both objects are identical
         assert arr.object_id == arr_.object_id
 
         # Assert
-        # Inflate passing children raises ValueError
-        self.assertRaises(ValueError, Array.inflate, arr_b, children={"123": arr})
+        # Not passing children raises ValueError (Array must have children)
+        self.assertRaises(ValueError, Array.inflate, arr_b)
+        # Inflate passing non-existant children raises ValueError
+        self.assertRaises(
+            ValueError,
+            Array.inflate,
+            arr_b,
+            children={"123": ArrayChunk(memoryview(b""))},
+        )
+
+    def test_deflate_and_inflate_empty_array(self) -> None:
+        """Ensure an empty Array can be (de)inflated correctly."""
+        # Prepare: Create an empty Array
+        arr = Array(dtype="", shape=(), stype="", data=b"")
+
+        # Execute: Deflate, and then inflate
+        arr_ = Array.inflate(arr.deflate(), children=arr.children)
+
+        # Assert: Array has no children
+        assert not arr.children
+        # Assert: Both objects are identical
+        assert arr.object_id == arr_.object_id
+
+    def test_slicing_and_concatenation(self) -> None:
+        """Test Array slicing."""
+        arr = Array(np.random.randn(3000, 3000))
+
+        # Ensure the number of children is the expected one
+        expected_num_children = np.ceil(len(arr.data) / MAX_ARRAY_CHUNK_SIZE)
+        assert len(arr.children) == expected_num_children
+
+        # Concatenate all slices
+        buff = bytearray()
+        for _, chunk in arr.slice_array():
+            buff += cast(ArrayChunk, chunk).data
+
+        # Ensure the data is identical after concatenation
+        assert arr.data == buff

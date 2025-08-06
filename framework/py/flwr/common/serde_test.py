@@ -27,7 +27,6 @@ from flwr.common.date import now
 from flwr.common.message import make_message
 
 # pylint: disable=E0611
-from flwr.proto import clientappio_pb2
 from flwr.proto import transport_pb2 as pb2
 from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.message_pb2 import Context as ProtoContext
@@ -57,8 +56,6 @@ from .serde import (
     array_record_from_proto,
     array_record_to_proto,
     array_to_proto,
-    clientappstatus_from_proto,
-    clientappstatus_to_proto,
     config_record_from_proto,
     config_record_to_proto,
     context_from_proto,
@@ -212,10 +209,10 @@ class RecordMaker:
         min_max_bytes_size = (10, 1000)
 
         dtype = self.rng.choice(dtypes)
-        shape = [
+        shape = tuple(
             self.rng.randint(1, max_shape_size)
             for _ in range(self.rng.randint(1, max_shape_dim))
-        ]
+        )
         stype = self.rng.choice(stypes)
         data = self.randbytes(self.rng.randint(*min_max_bytes_size))
         return Array(dtype=dtype, shape=shape, stype=stype, data=data)
@@ -371,6 +368,24 @@ def test_recorddict_serialization_deserialization() -> None:
     assert original == deserialized
 
 
+def test_recorddict_key_order_stability() -> None:
+    """Test that RecordDict preserves key order."""
+    # Prepare
+    maker = RecordMaker(state=1)
+    original = maker.recorddict(10, 5, 5)
+
+    # Execute
+    proto = recorddict_to_proto(original)
+    deserialized = recorddict_from_proto(proto)
+
+    # Assert
+    assert isinstance(proto, ProtoRecordDict)
+    assert original == deserialized
+
+    # Check that keys are in the same order
+    assert list(original.keys()) == list(deserialized.keys())
+
+
 @pytest.mark.parametrize(
     "content_fn, error_fn",
     [
@@ -453,6 +468,7 @@ def test_run_serialization_deserialization() -> None:
         running_at="2021-01-03T12:00:50Z",
         finished_at="",
         status=typing.RunStatus(status="running", sub_status="", details="OK"),
+        flwr_aid="user123",
     )
 
     # Execute
@@ -462,37 +478,3 @@ def test_run_serialization_deserialization() -> None:
     # Assert
     assert isinstance(proto, ProtoRun)
     assert original == deserialized
-
-
-def test_clientappstatus_to_proto() -> None:
-    """Test ClientApp status message (de-)serialization."""
-    # Prepare
-    # pylint: disable=E1101
-    code_msg = clientappio_pb2.ClientAppOutputCode.SUCCESS
-    status_msg = clientappio_pb2.ClientAppOutputStatus(code=code_msg, message="Success")
-
-    code = typing.ClientAppOutputCode.SUCCESS
-    status = typing.ClientAppOutputStatus(code=code, message="Success")
-
-    # Execute
-    actual_status_msg = clientappstatus_to_proto(status=status)
-
-    # Assert
-    assert actual_status_msg == status_msg
-
-
-def test_clientappstatus_from_proto() -> None:
-    """Test ClientApp status message (de-)serialization."""
-    # Prepare
-    # pylint: disable=E1101
-    code_msg = clientappio_pb2.ClientAppOutputCode.SUCCESS
-    status_msg = clientappio_pb2.ClientAppOutputStatus(code=code_msg, message="Success")
-
-    code = typing.ClientAppOutputCode.SUCCESS
-    status = typing.ClientAppOutputStatus(code=code, message="Success")
-
-    # Execute
-    actual_status = clientappstatus_from_proto(msg=status_msg)
-
-    # Assert
-    assert actual_status == status

@@ -20,19 +20,22 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
-from flwr.common.typing import UserInfo
-from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.common.typing import AccountInfo
+from flwr.proto.control_pb2_grpc import ControlStub
 
 from ..typing import UserAuthCredentials, UserAuthLoginDetails
 
 
-class ExecAuthPlugin(ABC):
-    """Abstract Flower Auth Plugin class for ExecServicer.
+class ControlAuthPlugin(ABC):
+    """Abstract Flower Auth Plugin class for ControlServicer.
 
     Parameters
     ----------
     user_auth_config_path : Path
         Path to the YAML file containing the authentication configuration.
+    verify_tls_cert : bool
+        Boolean indicating whether to verify the TLS certificate
+        when making requests to the server.
     """
 
     @abstractmethod
@@ -50,7 +53,7 @@ class ExecAuthPlugin(ABC):
     @abstractmethod
     def validate_tokens_in_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> tuple[bool, Optional[UserInfo]]:
+    ) -> tuple[bool, Optional[AccountInfo]]:
         """Validate authentication tokens in the provided metadata."""
 
     @abstractmethod
@@ -60,25 +63,30 @@ class ExecAuthPlugin(ABC):
     @abstractmethod
     def refresh_tokens(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Optional[Sequence[tuple[str, Union[str, bytes]]]]:
+    ) -> tuple[
+        Optional[Sequence[tuple[str, Union[str, bytes]]]], Optional[AccountInfo]
+    ]:
         """Refresh authentication tokens in the provided metadata."""
 
 
-class ExecAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
-    """Abstract Flower Authorization Plugin class for ExecServicer.
+class ControlAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
+    """Abstract Flower Authorization Plugin class for ControlServicer.
 
     Parameters
     ----------
-    user_authz_config_path : Path
+    user_auth_config_path : Path
         Path to the YAML file containing the authorization configuration.
+    verify_tls_cert : bool
+        Boolean indicating whether to verify the TLS certificate
+        when making requests to the server.
     """
 
     @abstractmethod
-    def __init__(self, user_authz_config_path: Path, verify_tls_cert: bool):
+    def __init__(self, user_auth_config_path: Path, verify_tls_cert: bool):
         """Abstract constructor."""
 
     @abstractmethod
-    def verify_user_authorization(self, user_info: UserInfo) -> bool:
+    def verify_user_authorization(self, account_info: AccountInfo) -> bool:
         """Verify user authorization request."""
 
 
@@ -95,7 +103,7 @@ class CliAuthPlugin(ABC):
     @abstractmethod
     def login(
         login_details: UserAuthLoginDetails,
-        exec_stub: ExecStub,
+        control_stub: ControlStub,
     ) -> UserAuthCredentials:
         """Authenticate the user and retrieve authentication credentials.
 
@@ -103,7 +111,7 @@ class CliAuthPlugin(ABC):
         ----------
         login_details : UserAuthLoginDetails
             An object containing the user's login details.
-        exec_stub : ExecStub
+        control_stub : ControlStub
             A stub for executing RPC calls to the server.
 
         Returns

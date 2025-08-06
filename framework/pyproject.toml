@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.19.0"
+version = "1.21.0"
 description = "Flower: A Friendly Federated AI Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -58,13 +58,14 @@ flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
 flower-superlink = "flwr.server.app:run_superlink"
 flower-supernode = "flwr.supernode.cli:flower_supernode"
 flwr-serverapp = "flwr.server.serverapp:flwr_serverapp"
-flwr-clientapp = "flwr.client.clientapp:flwr_clientapp"
+flwr-clientapp = "flwr.supernode.cli:flwr_clientapp"
 
 [tool.poetry.dependencies]
 python = "^3.9.2"
 # Mandatory dependencies
 numpy = ">=1.26.0,<3.0.0"
 grpcio = "^1.62.3,!=1.65.0"
+grpcio-health-checking = "^1.62.3"
 protobuf = "^4.21.6"
 cryptography = "^44.0.1"
 pycryptodome = "^3.18.0"

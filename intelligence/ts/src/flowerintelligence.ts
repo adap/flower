@@ -19,6 +19,8 @@ import { TransformersEngine } from './engines/transformersEngine';
 import {
   ChatOptions,
   ChatResponseResult,
+  Embedding,
+  EmbeddingInput,
   Failure,
   FailureCode,
   Message,
@@ -26,7 +28,7 @@ import {
   Result,
 } from './typing';
 import { WebllmEngine } from './engines/webllmEngine';
-import { DEFAULT_MODEL } from './constants';
+import { ALLOWED_ROLES, DEFAULT_MODEL } from './constants';
 import { isNode } from './env';
 
 /**
@@ -79,7 +81,7 @@ export class FlowerIntelligence {
 
   /**
    * Downloads and loads a model into memory.
-   * @param model Model name to use for the chat.
+   * @param model Model name of the model to download.
    * @param callback A callback function taking a {@link Progress} object to handle the loading event.
    * @returns A {@link Result} containing either a {@link Failure} (containing `code: number` and `description: string`) if `ok` is false or a value of `void`, if `ok` is true (meaning the loading was successful).
    */
@@ -89,6 +91,21 @@ export class FlowerIntelligence {
       return engineResult;
     } else {
       return await engineResult.value.fetchModel(model, callback);
+    }
+  }
+
+  /**
+   * Creates an embedding vector representing the input text.
+   * @param model Model name to use for the chat.
+   * @param input, text to embed, encoded as a string or array of tokens. To embed multiple inputs in a single request, pass an array of strings or array of token arrays. The input must not exceed the max input tokens for the model (8192 tokens for all embedding models), cannot be an empty string, and any array must be 2048 dimensions or less.
+   * @returns A {@link Result} containing either a {@link Failure} (containing `code: number` and `description: string`) if `ok` is false or, if `ok` is true (meaning the loading was successful), a value which is a list of embedding vectors, which are lists of floats. The length of vector depends on the model.
+   */
+  async embed(options: { model: string; input: EmbeddingInput }): Promise<Result<Embedding[]>> {
+    const engineResult = this.getOrCreateRemoteEngine();
+    if (!engineResult.ok) {
+      return engineResult;
+    } else {
+      return await engineResult.value.embed(options.model, options.input);
     }
   }
 
@@ -155,6 +172,19 @@ export class FlowerIntelligence {
       messages = [{ role: 'user', content: inputOrOptions }];
     } else {
       ({ messages, ...options } = inputOrOptions);
+
+      if (messages.some((msg) => !ALLOWED_ROLES.includes(msg.role))) {
+        return {
+          ok: false,
+          failure: {
+            code: FailureCode.InvalidArgumentsError,
+            description: `Invalid message role${messages.length > 1 ? 's' : ''}: ${messages
+              .filter((msg) => !ALLOWED_ROLES.includes(msg.role))
+              .map((msg) => msg.role)
+              .join(', ')}`,
+          },
+        };
+      }
     }
 
     const model = options.model ?? DEFAULT_MODEL;
@@ -172,11 +202,14 @@ export class FlowerIntelligence {
       messages,
       model,
       options.temperature,
+      options.topP,
       options.maxCompletionTokens,
+      options.responseFormat,
       options.stream,
       options.onStreamEvent,
       options.tools,
-      options.encrypt
+      options.encrypt,
+      options.signal
     );
   }
 

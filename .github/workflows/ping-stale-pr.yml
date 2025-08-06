@@ -12,7 +12,7 @@ jobs:
       pull-requests: read
     env:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_SUPPORT_GITHUB_ISSUES }}
 
     steps:
       - name: Ping stale Contributor PRs via Slack

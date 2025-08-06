@@ -29,6 +29,10 @@ class ExitCode:
 
     # SuperLink-specific exit codes (100-199)
     SUPERLINK_THREAD_CRASH = 100
+    SUPERLINK_LICENSE_INVALID = 101
+    SUPERLINK_LICENSE_MISSING = 102
+    SUPERLINK_LICENSE_URL_INVALID = 103
+    SUPERLINK_INVALID_ARGS = 104
 
     # ServerApp-specific exit codes (200-299)
 
@@ -60,6 +64,22 @@ EXIT_CODE_HELP = {
     ExitCode.GRACEFUL_EXIT_SIGTERM: "",
     # SuperLink-specific exit codes (100-199)
     ExitCode.SUPERLINK_THREAD_CRASH: "An important background thread has crashed.",
+    ExitCode.SUPERLINK_LICENSE_INVALID: (
+        "The license is invalid or has expired. "
+        "Please contact `hello@flower.ai` for assistance."
+    ),
+    ExitCode.SUPERLINK_LICENSE_MISSING: (
+        "The license is missing. Please specify the license key by setting the "
+        "environment variable `FLWR_LICENSE_KEY`."
+    ),
+    ExitCode.SUPERLINK_LICENSE_URL_INVALID: (
+        "The license URL is invalid. Please ensure that the `FLWR_LICENSE_URL` "
+        "environment variable is set to a valid URL."
+    ),
+    ExitCode.SUPERLINK_INVALID_ARGS: (
+        "Invalid arguments provided to SuperLink. Use `--help` check for the correct "
+        "usage. Alternatively, check the documentation."
+    ),
     # ServerApp-specific exit codes (200-299)
     # SuperNode-specific exit codes (300-399)
     ExitCode.SUPERNODE_REST_ADDRESS_INVALID: (
@@ -72,7 +92,7 @@ EXIT_CODE_HELP = {
         "to be provided (providing only one of them is not sufficient)."
     ),
     ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID: (
-        "Node uthentication requires elliptic curve private and public key pair. "
+        "Node authentication requires elliptic curve private and public key pair. "
         "Please ensure that the file path points to a valid private/public key "
         "file and try again."
     ),

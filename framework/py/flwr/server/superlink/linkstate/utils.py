@@ -17,7 +17,6 @@
 
 from os import urandom
 from typing import Optional
-from uuid import uuid4
 
 from flwr.common import ConfigRecord, Context, Error, Message, Metadata, now, serde
 from flwr.common.constant import (
@@ -246,7 +245,7 @@ def create_message_error_unavailable_res_message(
     ttl = max(ins_metadata.ttl - (current_time - ins_metadata.created_at), 0)
     metadata = Metadata(
         run_id=ins_metadata.run_id,
-        message_id=str(uuid4()),
+        message_id="",
         src_node_id=SUPERLINK_NODE_ID,
         dst_node_id=SUPERLINK_NODE_ID,
         reply_to_message_id=ins_metadata.message_id,
@@ -256,7 +255,7 @@ def create_message_error_unavailable_res_message(
         ttl=ttl,
     )
 
-    return make_message(
+    msg = make_message(
         metadata=metadata,
         error=Error(
             code=(
@@ -271,6 +270,8 @@ def create_message_error_unavailable_res_message(
             ),
         ),
     )
+    msg.metadata.__dict__["_message_id"] = msg.object_id
+    return msg
 
 
 def create_message_error_unavailable_ins_message(reply_to_message_id: str) -> Message:
@@ -278,7 +279,7 @@ def create_message_error_unavailable_ins_message(reply_to_message_id: str) -> Me
     that it isn't found."""
     metadata = Metadata(
         run_id=0,  # Unknown
-        message_id=str(uuid4()),
+        message_id="",
         src_node_id=SUPERLINK_NODE_ID,
         dst_node_id=SUPERLINK_NODE_ID,
         reply_to_message_id=reply_to_message_id,
@@ -288,13 +289,15 @@ def create_message_error_unavailable_ins_message(reply_to_message_id: str) -> Me
         ttl=0,
     )
 
-    return make_message(
+    msg = make_message(
         metadata=metadata,
         error=Error(
             code=ErrorCode.MESSAGE_UNAVAILABLE,
             reason=MESSAGE_UNAVAILABLE_ERROR_REASON,
         ),
     )
+    msg.metadata.__dict__["_message_id"] = msg.object_id
+    return msg
 
 
 def message_ttl_has_expired(message_metadata: Metadata, current_time: float) -> bool:

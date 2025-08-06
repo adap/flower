@@ -16,5 +16,9 @@
 
 
 from .flower_supernode import flower_supernode
+from .flwr_clientapp import flwr_clientapp
 
-__all__ = ["flower_supernode"]
+__all__ = [
+    "flower_supernode",
+    "flwr_clientapp",
+]

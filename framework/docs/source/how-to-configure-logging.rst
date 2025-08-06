@@ -8,7 +8,7 @@ Configure logging
 By default, the Flower logger uses logging level ``INFO``. This can be changed via the
 ``FLWR_LOG_LEVEL`` environment variable to any other levels that Python's `logging
 module <https://docs.python.org/3/library/logging.html#logging-levels>`_ supports. For
-example, to launch your ``SuperLink`` showing ``DEBUG`` logs do:
+example, to launch your ``SuperLink`` with ``DEBUG`` logs, use:
 
 .. code-block:: shell
     :emphasize-lines: 2,11,12
@@ -20,7 +20,7 @@ example, to launch your ``SuperLink`` showing ``DEBUG`` logs do:
         --ssl-keyfile certificates/server.key
 
     INFO 2025-01-27 11:46:41,690:      Starting Flower SuperLink
-    INFO 2025-01-27 11:46:41,697:      Flower Deployment Engine: Starting Exec API on 0.0.0.0:9093
+    INFO 2025-01-27 11:46:41,697:      Flower Deployment Engine: Starting Control API on 0.0.0.0:9093
     INFO 2025-01-27 11:46:41,724:      Flower ECE: Starting ServerAppIo API (gRPC-rere) on 0.0.0.0:9091
     INFO 2025-01-27 11:46:41,728:      Flower ECE: Starting Fleet API (gRPC-rere) on 0.0.0.0:9092
     DEBUG 2025-01-27 11:46:41,730:     Started flwr-serverapp scheduler thread.

@@ -43,7 +43,17 @@ data class Progress(
  * @property toolCalls An optional list of tool calls associated with the message.
  */
 @Serializable
-data class Message(val role: String, val content: String, val toolCalls: List<ToolCall>? = null)
+data class Message(val role: String, val content: String, val toolCalls: List<ToolCall>? = null) {
+  init {
+    if (role !in Constants.ALLOWED_ROLES) {
+      throw Failure(
+        FailureCode.InvalidArgumentsError,
+        "Invalid message role: $role. " +
+          "Available roles are: ${Constants.ALLOWED_ROLES.joinToString(", ")}.",
+      )
+    }
+  }
+}
 
 /** Represents a call to a specific tool with its name and arguments. */
 typealias ToolCall = Map<String, ToolCallDetails>

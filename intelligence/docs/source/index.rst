@@ -1040,6 +1040,84 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
                 }
             }
 
+Embedding
+---------
+
+.. warning::
+
+    This feature currently only works with Flower Confidential Remote Compute on the
+    TypeScript SDK. If you are interested in using Confidential Remote Compute, please
+    apply for Early Access via the `Flower Intelligence Pilot Program
+    <https://forms.gle/J8pFpMrsmek2VFKq8>`_.
+
+You can embed some text or an array of texts using the ``embed`` method of the
+``FlowerIntelligence`` obeject (currently this only works with the
+``qwen/qwen3-embedding`` model).
+
+You will need to enable ``remoteHandoff`` and to provide a valid API key via the
+``apiKey`` attribute.
+
+.. tab-set::
+    :sync-group: category
+
+    .. tab-item:: TypeScript
+        :sync: ts
+
+        .. code-block:: ts
+
+            import { Embedding, Result, FlowerIntelligence } from '@flwr/flwr';
+
+            // Access the singleton instance
+            const fi: FlowerIntelligence = FlowerIntelligence.instance;
+
+            // Enable remote processing and provide your API key
+            fi.remoteHandoff = true;
+            fi.apiKey = "YOUR_API_KEY";
+
+            async function main() {
+              const response: Result<Embedding> = await fi.embed({
+                model: 'qwen/qwen3-embedding',
+                input: 'Hello world!'
+              });
+
+              if (!response.ok) {
+                console.error(`${response.failure.code}: ${response.failure.description}`);
+              } else {
+                console.log('Full response:', response.value);
+              }
+            }
+
+            await main().then().catch();
+
+    .. tab-item:: JavaScript
+        :sync: js
+
+        .. code-block:: js
+
+            import { FlowerIntelligence } from '@flwr/flwr';
+
+            // Access the singleton instance
+            const fi = FlowerIntelligence.instance;
+
+            // Enable remote processing and provide your API key
+            fi.remoteHandoff = true;
+            fi.apiKey = "YOUR_API_KEY";
+
+            async function main() {
+              const response = await fi.embed({
+                model: 'qwen/qwen3-embedding',
+                input: 'Hello world!'
+              });
+
+              if (!response.ok) {
+                console.error(`${response.failure.code}: ${response.failure.description}`);
+              } else {
+                console.log(response.value);
+              }
+            }
+
+            await main().then().catch();
+
 References
 ----------
 

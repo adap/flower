@@ -16,14 +16,19 @@
 
 
 import threading
-from logging import DEBUG, INFO
+from logging import DEBUG, ERROR, INFO
 from typing import Optional
 
 import grpc
 
 from flwr.common import Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
-from flwr.common.inflatable import check_body_len_consistency
+from flwr.common.inflatable import (
+    UnexpectedObjectContentError,
+    get_all_nested_objects,
+    get_object_tree,
+    no_object_id_recompute,
+)
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -37,6 +42,16 @@ from flwr.common.serde import (
 )
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    PullAppInputsRequest,
+    PullAppInputsResponse,
+    PullAppMessagesRequest,
+    PullAppMessagesResponse,
+    PushAppMessagesRequest,
+    PushAppMessagesResponse,
+    PushAppOutputsRequest,
+    PushAppOutputsResponse,
+)
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
@@ -47,6 +62,8 @@ from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -64,21 +81,13 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullResMessagesRequest,
-    PullResMessagesResponse,
-    PullServerAppInputsRequest,
-    PullServerAppInputsResponse,
-    PushInsMessagesRequest,
-    PushInsMessagesResponse,
-    PushServerAppOutputsRequest,
-    PushServerAppOutputsResponse,
 )
-from flwr.server.superlink.ffs.ffs import Ffs
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
-from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.ffs import Ffs, FfsFactory
+from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
+from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
@@ -101,14 +110,16 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Get available nodes."""
         log(DEBUG, "ServerAppIoServicer.GetNodes")
 
-        # Init state
-        state: LinkState = self.state_factory.state()
+        # Init state and store
+        state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Abort if the run is not running
         abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            store,
             context,
         )
 
@@ -117,19 +128,21 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         return GetNodesResponse(nodes=nodes)
 
     def PushMessages(
-        self, request: PushInsMessagesRequest, context: grpc.ServicerContext
-    ) -> PushInsMessagesResponse:
+        self, request: PushAppMessagesRequest, context: grpc.ServicerContext
+    ) -> PushAppMessagesResponse:
         """Push a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PushMessages")
 
-        # Init state
-        state: LinkState = self.state_factory.state()
+        # Init state and store
+        state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Abort if the run is not running
         abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            store,
             context,
         )
 
@@ -140,8 +153,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             detail="`messages_list` must not be empty",
         )
         message_ids: list[Optional[str]] = []
-        while request.messages_list:
-            message_proto = request.messages_list.pop(0)
+        for message_proto in request.messages_list:
             message = message_from_proto(message_proto=message_proto)
             validation_errors = validate_message(message, is_reply_message=False)
             _raise_if(
@@ -158,26 +170,32 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             message_id: Optional[str] = state.store_message_ins(message=message)
             message_ids.append(message_id)
 
-        return PushInsMessagesResponse(
+        # Store Message object to descendants mapping and preregister objects
+        objects_to_push = store_mapping_and_register_objects(store, request=request)
+
+        return PushAppMessagesResponse(
             message_ids=[
                 str(message_id) if message_id else "" for message_id in message_ids
-            ]
+            ],
+            objects_to_push=objects_to_push,
         )
 
-    def PullMessages(
-        self, request: PullResMessagesRequest, context: grpc.ServicerContext
-    ) -> PullResMessagesResponse:
+    def PullMessages(  # pylint: disable=R0914
+        self, request: PullAppMessagesRequest, context: grpc.ServicerContext
+    ) -> PullAppMessagesResponse:
         """Pull a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PullMessages")
 
-        # Init state
-        state: LinkState = self.state_factory.state()
+        # Init state and store
+        state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Abort if the run is not running
         abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            store,
             context,
         )
 
@@ -185,6 +203,17 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         messages_res: list[Message] = state.get_message_res(
             message_ids=set(request.message_ids)
         )
+
+        # Register messages generated by LinkState in the Store for consistency
+        for msg_res in messages_res:
+            if msg_res.metadata.src_node_id == SUPERLINK_NODE_ID:
+                with no_object_id_recompute():
+                    all_objects = get_all_nested_objects(msg_res)
+                    # Preregister
+                    store.preregister(request.run_id, get_object_tree(msg_res))
+                    # Store objects
+                    for obj_id, obj in all_objects.items():
+                        store.put(obj_id, obj.deflate())
 
         # Delete the instruction Messages and their replies if found
         message_ins_ids_to_delete = {
@@ -195,6 +224,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Convert Messages to proto
         messages_list = []
+        trees = []
         while messages_res:
             msg = messages_res.pop(0)
 
@@ -205,9 +235,21 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                     request_name="PullMessages",
                     detail="`message.metadata` has mismatched `run_id`",
                 )
-            messages_list.append(message_to_proto(msg))
 
-        return PullResMessagesResponse(messages_list=messages_list)
+            try:
+                msg_object_id = msg.metadata.message_id
+                obj_tree = store.get_object_tree(msg_object_id)
+                # Add message and object tree to the response
+                messages_list.append(message_to_proto(msg))
+                trees.append(obj_tree)
+            except NoObjectInStoreError as e:
+                log(ERROR, e.message)
+                # Delete message ins from state
+                state.delete_messages(message_ins_ids={msg_object_id})
+
+        return PullAppMessagesResponse(
+            messages_list=messages_list, message_object_trees=trees
+        )
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext
@@ -239,11 +281,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         raise ValueError(f"Found no FAB with hash: {request.hash_str}")
 
-    def PullServerAppInputs(
-        self, request: PullServerAppInputsRequest, context: grpc.ServicerContext
-    ) -> PullServerAppInputsResponse:
+    def PullAppInputs(
+        self, request: PullAppInputsRequest, context: grpc.ServicerContext
+    ) -> PullAppInputsResponse:
         """Pull ServerApp process inputs."""
-        log(DEBUG, "ServerAppIoServicer.PullServerAppInputs")
+        log(DEBUG, "ServerAppIoServicer.PullAppInputs")
         # Init access to LinkState
         state = self.state_factory.state()
 
@@ -253,7 +295,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             run_id = state.get_pending_run_id()
             # If there's no pending run, return an empty response
             if run_id is None:
-                return PullServerAppInputsResponse()
+                return PullAppInputsResponse()
 
             # Init access to Ffs
             ffs = self.ffs_factory.ffs()
@@ -269,7 +311,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 # Update run status to STARTING
                 if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
                     log(INFO, "Starting run %d", run_id)
-                    return PullServerAppInputsResponse(
+                    return PullAppInputsResponse(
                         context=context_to_proto(serverapp_ctxt),
                         run=run_to_proto(run),
                         fab=fab_to_proto(fab),
@@ -279,25 +321,27 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # or if the status cannot be updated to STARTING
         raise RuntimeError(f"Failed to start run {run_id}")
 
-    def PushServerAppOutputs(
-        self, request: PushServerAppOutputsRequest, context: grpc.ServicerContext
-    ) -> PushServerAppOutputsResponse:
+    def PushAppOutputs(
+        self, request: PushAppOutputsRequest, context: grpc.ServicerContext
+    ) -> PushAppOutputsResponse:
         """Push ServerApp process outputs."""
-        log(DEBUG, "ServerAppIoServicer.PushServerAppOutputs")
+        log(DEBUG, "ServerAppIoServicer.PushAppOutputs")
 
-        # Init state
+        # Init state and store
         state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Abort if the run is not running
         abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            store,
             context,
         )
 
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
-        return PushServerAppOutputsResponse()
+        return PushAppOutputsResponse()
 
     def UpdateRunStatus(
         self, request: UpdateRunStatusRequest, context: grpc.ServicerContext
@@ -305,16 +349,23 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Update the status of a run."""
         log(DEBUG, "ServerAppIoServicer.UpdateRunStatus")
 
-        # Init state
+        # Init state and store
         state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
         # Abort if the run is finished
-        abort_if(request.run_id, [Status.FINISHED], state, context)
+        abort_if(request.run_id, [Status.FINISHED], state, store, context)
 
         # Update the run status
         state.update_run_status(
             run_id=request.run_id, new_status=run_status_from_proto(request.run_status)
         )
+
+        # If the run is finished, delete the run from ObjectStore
+        if request.run_status.status == Status.FINISHED:
+            # Delete all objects related to the run
+            store.delete_objects_in_run(request.run_id)
+
         return UpdateRunStatusResponse()
 
     def PushLogs(
@@ -369,11 +420,35 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Push an object to the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PushObject")
 
-        if not check_body_len_consistency(request.object_content):
-            # Cancel insertion in ObjectStore
-            context.abort(grpc.StatusCode.PERMISSION_DENIED, "Unexpected object length")
+        # Init state and store
+        state = self.state_factory.state()
+        store = self.objectstore_factory.store()
 
-        return PushObjectResponse()
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            store,
+            context,
+        )
+
+        if request.node.node_id != SUPERLINK_NODE_ID:
+            # Cancel insertion in ObjectStore
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
+
+        # Insert in store
+        stored = False
+        try:
+            store.put(request.object_id, request.object_content)
+            stored = True
+        except (NoObjectInStoreError, ValueError) as e:
+            log(ERROR, str(e))
+        except UnexpectedObjectContentError as e:
+            # Object content is not valid
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+
+        return PushObjectResponse(stored=stored)
 
     def PullObject(
         self, request: PullObjectRequest, context: grpc.ServicerContext
@@ -381,7 +456,57 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PullObject")
 
-        return PullObjectResponse()
+        # Init state and store
+        state = self.state_factory.state()
+        store = self.objectstore_factory.store()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            store,
+            context,
+        )
+
+        if request.node.node_id != SUPERLINK_NODE_ID:
+            # Cancel insertion in ObjectStore
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, "Unexpected node ID.")
+
+        # Fetch from store
+        content = store.get(request.object_id)
+        if content is not None:
+            object_available = content != b""
+            return PullObjectResponse(
+                object_found=True,
+                object_available=object_available,
+                object_content=content,
+            )
+        return PullObjectResponse(object_found=False, object_available=False)
+
+    def ConfirmMessageReceived(
+        self, request: ConfirmMessageReceivedRequest, context: grpc.ServicerContext
+    ) -> ConfirmMessageReceivedResponse:
+        """Confirm message received."""
+        log(DEBUG, "ServerAppIoServicer.ConfirmMessageReceived")
+
+        # Init state and store
+        state = self.state_factory.state()
+        store = self.objectstore_factory.store()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            store,
+            context,
+        )
+
+        # Delete the message object
+        store.delete(request.message_object_id)
+
+        return ConfirmMessageReceivedResponse()
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:

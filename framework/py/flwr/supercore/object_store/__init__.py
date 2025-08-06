@@ -14,10 +14,11 @@
 # ==============================================================================
 """Flower ObjectStore."""
 
-from .object_store import ObjectStore
+from .object_store import NoObjectInStoreError, ObjectStore
 from .object_store_factory import ObjectStoreFactory
 
 __all__ = [
+    "NoObjectInStoreError",
     "ObjectStore",
     "ObjectStoreFactory",
 ]

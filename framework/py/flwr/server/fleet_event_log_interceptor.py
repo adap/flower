@@ -41,6 +41,10 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         if event logger is enabled on the SuperLink, else, terminate RPC call by setting
         context to abort.
         """
+        # Only apply to Fleet service
+        if not handler_call_details.method.startswith("/flwr.proto.Fleet/"):
+            return continuation(handler_call_details)
+
         # One of the method handlers in
         # `flwr.server.superlink.fleet.grpc_rere.fleet_servicer.FleetServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
@@ -59,7 +63,7 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
             log_entry = self.log_plugin.compose_log_before_event(
                 request=request,
                 context=context,
-                user_info=None,
+                account_info=None,
                 method_name=method_name,
             )
             self.log_plugin.write_log(log_entry)
@@ -75,7 +79,7 @@ class FleetEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                 log_entry = self.log_plugin.compose_log_after_event(
                     request=request,
                     context=context,
-                    user_info=None,
+                    account_info=None,
                     method_name=method_name,
                     response=unary_response or error,
                 )

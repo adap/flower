@@ -15,9 +15,9 @@ async function main() {
   });
 
   if (!response.ok) {
-    console.error(`${response.failure.code}: ${response.failure.description}`);
+    console.error(response.failure.description);
   } else {
-    console.log(`\n\nComplete reply: ${response.message.content ?? 'None'}`);
+    console.log(`\n\nComplete reply: ${response.message.content}`);
   }
 }
 

@@ -13,5 +13,5 @@ package-mode = false
 python = ">=3.9.2,<3.11"
 flwr = ">=1.0,<2.0"
 flwr-datasets = { extras = ["vision"], version = ">=0.0.2,<1.0.0" }
-torch = "2.4.0"
-torchvision = "0.19.0"
+torch = "2.6.0"
+torchvision = "0.21.0"

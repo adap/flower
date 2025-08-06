@@ -207,7 +207,7 @@ project structure from one of them. Once we have the project locally, we can ope
     default = "my-federation"  # replaced the default value with "my-federation"
 
     [tool.flwr.federations.my-federation]  # replaced name with "my-federation"
-    address = "SUPERLINK_PUBLIC_IP:9093"  # Address of the SuperLink Exec API
+    address = "SUPERLINK_PUBLIC_IP:9093"  # Address of the SuperLink Control API
     insecure = true
 
 Then from our local machine we need to run ``flwr run . my-federation``.

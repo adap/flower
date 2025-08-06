@@ -16,6 +16,7 @@
 
 
 import argparse
+import gc
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
@@ -55,12 +56,12 @@ from flwr.common.serde import (
 )
 from flwr.common.telemetry import EventType, event
 from flwr.common.typing import RunNotRunningException, RunStatus
-from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
-from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
-    PullServerAppInputsRequest,
-    PullServerAppInputsResponse,
-    PushServerAppOutputsRequest,
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    PullAppInputsRequest,
+    PullAppInputsResponse,
+    PushAppOutputsRequest,
 )
+from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.server.grid.grpc_grid import GrpcGrid
 from flwr.server.run_serverapp import run as run_
 
@@ -107,11 +108,6 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ServerApp process."""
-    grid = GrpcGrid(
-        serverappio_service_address=serverappio_api_address,
-        root_certificates=certificates,
-    )
-
     # Resolve directory where FABs are installed
     flwr_dir_ = get_flwr_dir(flwr_dir)
     log_uploader = None
@@ -119,13 +115,21 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     hash_run_id = None
     run_status = None
     heartbeat_sender = None
+    grid = None
+    context = None
     while True:
 
         try:
+            # Initialize the GrpcGrid
+            grid = GrpcGrid(
+                serverappio_service_address=serverappio_api_address,
+                root_certificates=certificates,
+            )
+
             # Pull ServerAppInputs from LinkState
-            req = PullServerAppInputsRequest()
+            req = PullAppInputsRequest()
             log(DEBUG, "[flwr-serverapp] Pull ServerAppInputs")
-            res: PullServerAppInputsResponse = grid._stub.PullServerAppInputs(req)
+            res: PullAppInputsResponse = grid._stub.PullAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)
                 run_status = None
@@ -205,10 +209,8 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             # Send resulting context
             context_proto = context_to_proto(updated_context)
             log(DEBUG, "[flwr-serverapp] Will push ServerAppOutputs")
-            out_req = PushServerAppOutputsRequest(
-                run_id=run.run_id, context=context_proto
-            )
-            _ = grid._stub.PushServerAppOutputs(out_req)
+            out_req = PushAppOutputsRequest(run_id=run.run_id, context=context_proto)
+            _ = grid._stub.PushAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
         except RunNotRunningException:
@@ -236,13 +238,21 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                 log_uploader = None
 
             # Update run status
-            if run_status:
+            if run_status and grid:
                 run_status_proto = run_status_to_proto(run_status)
                 grid._stub.UpdateRunStatus(
                     UpdateRunStatusRequest(
                         run_id=run.run_id, run_status=run_status_proto
                     )
                 )
+
+            # Close the Grpc connection
+            if grid:
+                grid.close()
+
+            # Clean up the Context
+            context = None
+            gc.collect()
 
             event(
                 EventType.FLWR_SERVERAPP_RUN_LEAVE,
