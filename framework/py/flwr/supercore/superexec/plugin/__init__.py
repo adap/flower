@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower App Scheduler."""
+"""Flower SuperExec plugins."""
 
 
-from .plugin import SchedulerPlugin
+from .exec_plugin import ExecPlugin
+from .simple_clientapp_exec_plugin import SimpleClientAppExecPlugin
 
 __all__ = [
-    "SchedulerPlugin",
+    "ExecPlugin",
+    "SimpleClientAppExecPlugin",
 ]
