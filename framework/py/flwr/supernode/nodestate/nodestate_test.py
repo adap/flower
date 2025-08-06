@@ -15,7 +15,6 @@
 """Tests all NodeState implementations have to conform to."""
 
 
-import unittest
 from typing import Any
 
 from parameterized import parameterized
@@ -23,11 +22,12 @@ from parameterized import parameterized
 from flwr.common import ConfigRecord, Context, Message, Metadata, RecordDict
 from flwr.common.message import make_message
 from flwr.common.typing import Run
+from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 
 from . import InMemoryNodeState, NodeState
 
 
-class StateTest(unittest.TestCase):
+class StateTest(CoreStateTest):
     """Test all state implementations."""
 
     # This is to True in each child class
@@ -181,47 +181,6 @@ class StateTest(unittest.TestCase):
 
         # Assert: run 1 and run 5 should be returned
         self.assertEqual(set(run_ids), {1, 5})
-
-    def test_create_verify_and_delete_token(self) -> None:
-        """Test creating, verifying, and deleting tokens."""
-        # Prepare
-        run_id = 42
-
-        # Execute: create a token
-        token = self.state.create_token(run_id)
-
-        # Assert: token should be valid
-        self.assertTrue(self.state.verify_token(run_id, token))
-
-        # Execute: delete the token
-        self.state.delete_token(run_id)
-
-        # Assert: token should no longer be valid
-        self.assertFalse(self.state.verify_token(run_id, token))
-
-    def test_create_token_already_exists(self) -> None:
-        """Test creating a token that already exists."""
-        # Prepare
-        run_id = 42
-        self.state.create_token(run_id)
-
-        # Execute and assert: should raise ValueError
-        with self.assertRaises(ValueError):
-            self.state.create_token(run_id)
-
-    def test_get_run_id_by_token(self) -> None:
-        """Test retrieving run ID by token."""
-        # Prepare
-        run_id = 42
-        token = self.state.create_token(run_id)
-
-        # Execute: get run ID by token
-        retrieved_run_id1 = self.state.get_run_id_by_token(token)
-        retrieved_run_id2 = self.state.get_run_id_by_token("nonexistent_token")
-
-        # Assert: should return the correct run ID
-        self.assertEqual(retrieved_run_id1, run_id)
-        self.assertIsNone(retrieved_run_id2)
 
 
 def make_dummy_message(
