@@ -14,6 +14,16 @@ import grpc
 
 class ServerAppIoStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
+    ListAppsToLaunch: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.ListAppsToLaunchRequest,
+        flwr.proto.appio_pb2.ListAppsToLaunchResponse]
+    """List runs to launch"""
+
+    RequestToken: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.RequestTokenRequest,
+        flwr.proto.appio_pb2.RequestTokenResponse]
+    """Request token for a run"""
+
     GetNodes: grpc.UnaryUnaryMultiCallable[
         flwr.proto.serverappio_pb2.GetNodesRequest,
         flwr.proto.serverappio_pb2.GetNodesResponse]
@@ -86,6 +96,22 @@ class ServerAppIoStub:
 
 
 class ServerAppIoServicer(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def ListAppsToLaunch(self,
+        request: flwr.proto.appio_pb2.ListAppsToLaunchRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.appio_pb2.ListAppsToLaunchResponse:
+        """List runs to launch"""
+        pass
+
+    @abc.abstractmethod
+    def RequestToken(self,
+        request: flwr.proto.appio_pb2.RequestTokenRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.appio_pb2.RequestTokenResponse:
+        """Request token for a run"""
+        pass
+
     @abc.abstractmethod
     def GetNodes(self,
         request: flwr.proto.serverappio_pb2.GetNodesRequest,

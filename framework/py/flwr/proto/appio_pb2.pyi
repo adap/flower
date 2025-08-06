@@ -14,11 +14,55 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-class PushAppMessagesRequest(google.protobuf.message.Message):
+class ListAppsToLaunchRequest(google.protobuf.message.Message):
     """These messages are used by both ServerAppIo and ClientAppIo services
 
-    PushAppMessages messages
+    ListAppsToLaunch messages
     """
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___ListAppsToLaunchRequest = ListAppsToLaunchRequest
+
+class ListAppsToLaunchResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_IDS_FIELD_NUMBER: builtins.int
+    @property
+    def run_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]:
+        """List of run IDs of the apps to launch"""
+        pass
+    def __init__(self,
+        *,
+        run_ids: typing.Optional[typing.Iterable[builtins.int]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_ids",b"run_ids"]) -> None: ...
+global___ListAppsToLaunchResponse = ListAppsToLaunchResponse
+
+class RequestTokenRequest(google.protobuf.message.Message):
+    """RequestToken messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+global___RequestTokenRequest = RequestTokenRequest
+
+class RequestTokenResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    TOKEN_FIELD_NUMBER: builtins.int
+    token: typing.Text
+    def __init__(self,
+        *,
+        token: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["token",b"token"]) -> None: ...
+global___RequestTokenResponse = RequestTokenResponse
+
+class PushAppMessagesRequest(google.protobuf.message.Message):
+    """PushAppMessages messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TOKEN_FIELD_NUMBER: builtins.int
     MESSAGES_LIST_FIELD_NUMBER: builtins.int

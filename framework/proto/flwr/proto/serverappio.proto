@@ -26,6 +26,14 @@ import "flwr/proto/fab.proto";
 import "flwr/proto/appio.proto";
 
 service ServerAppIo {
+
+  // List runs to launch
+  rpc ListAppsToLaunch(ListAppsToLaunchRequest)
+      returns (ListAppsToLaunchResponse) {}
+
+  // Request token for a run
+  rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
+
   // Return a set of nodes
   rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
 
