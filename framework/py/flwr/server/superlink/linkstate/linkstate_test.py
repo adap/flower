@@ -62,9 +62,10 @@ from flwr.server.superlink.linkstate import (
     LinkState,
     SqliteLinkState,
 )
+from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 
 
-class StateTest(unittest.TestCase):
+class StateTest(CoreStateTest):
     """Test all state implementations."""
 
     # This is to True in each child class
@@ -1480,7 +1481,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 15
+        assert len(result) == 17
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1505,7 +1506,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 15
+        assert len(result) == 17
 
 
 if __name__ == "__main__":
