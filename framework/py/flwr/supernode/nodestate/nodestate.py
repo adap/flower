@@ -15,15 +15,16 @@
 """Abstract base class NodeState."""
 
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from collections.abc import Sequence
 from typing import Optional
 
 from flwr.common import Context, Message
 from flwr.common.typing import Run
+from flwr.supercore.corestate import CoreState
 
 
-class NodeState(ABC):
+class NodeState(CoreState):
     """Abstract base class for node state."""
 
     @abstractmethod
@@ -167,61 +168,4 @@ class NodeState(ABC):
         -------
         Sequence[int]
             Sequence of run IDs with pending messages.
-        """
-
-    @abstractmethod
-    def create_token(self, run_id: int) -> str:
-        """Create a token for the given run ID.
-
-        Parameters
-        ----------
-        run_id : int
-            The ID of the run for which to create a token.
-
-        Returns
-        -------
-        str
-            A unique token associated with the run ID.
-        """
-
-    @abstractmethod
-    def verify_token(self, run_id: int, token: str) -> bool:
-        """Verify a token for the given run ID.
-
-        Parameters
-        ----------
-        run_id : int
-            The ID of the run for which to verify the token.
-        token : str
-            The token to verify.
-
-        Returns
-        -------
-        bool
-            True if the token is valid for the run ID, False otherwise.
-        """
-
-    @abstractmethod
-    def delete_token(self, run_id: int) -> None:
-        """Delete the token for the given run ID.
-
-        Parameters
-        ----------
-        run_id : int
-            The ID of the run for which to delete the token.
-        """
-
-    @abstractmethod
-    def get_run_id_by_token(self, token: str) -> Optional[int]:
-        """Get the run ID associated with a given token.
-
-        Parameters
-        ----------
-        token : str
-            The token to look up.
-
-        Returns
-        -------
-        Optional[int]
-            The run ID if the token is valid, otherwise None.
         """
