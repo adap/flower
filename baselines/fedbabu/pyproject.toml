@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[project]
+name = "fedbabu"
+version = "1.0.0"
+description = ""
+license = "Apache-2.0"
+dependencies = [
+    "numpy<2.0.0",
+    "flwr[simulation]>=1.10.0",
+    "flwr-datasets[vision]>=0.3.0",
+    "torch==2.2.1",
+    "torchvision==0.17.1",
+    "matplotlib==3.10.3"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "Jiahao Tan"
+
+[tool.flwr.app.components]
+serverapp = "fedbabu.server_app:app"
+clientapp = "fedbabu.client_app:app"
+
+[tool.flwr.app.config]
+algorithm = "fedbabu" # ["fedbabu", "fedavg"]
+num-server-rounds = 80
+fraction-fit = 0.1
+train_test_split_ratio = 0.2
+local-epochs = 4
+finetune-epochs = 5
+num_classes_per_client = 2
+lr = 0.1
+momentum = 0.9
+batch-size = 50
+seed = 42
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 100
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.5  # GPU fraction allocated to each client
+
