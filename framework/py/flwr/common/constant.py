@@ -259,3 +259,18 @@ class EventLogWriterType:
     def __new__(cls) -> EventLogWriterType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class SchedulerPluginType:
+    """Scheduler plugin types."""
+
+    CLIENT_APP = "clientapp"
+
+    def __new__(cls) -> SchedulerPluginType:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+    @staticmethod
+    def all() -> list[str]:
+        """Return all scheduler plugin types."""
+        return [SchedulerPluginType.CLIENT_APP]
