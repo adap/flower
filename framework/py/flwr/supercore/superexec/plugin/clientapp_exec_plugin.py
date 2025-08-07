@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simple Flower ClientApp Scheduler plugin."""
+"""Simple Flower SuperExec plugin for ClientApp."""
 
 
 import os
@@ -20,11 +20,11 @@ import subprocess
 from collections.abc import Sequence
 from typing import Optional
 
-from flwr.supercore.scheduler import SchedulerPlugin
+from .exec_plugin import ExecPlugin
 
 
-class SimpleClientAppSchedulerPlugin(SchedulerPlugin):
-    """Simple Flower ClientApp Scheduler plugin.
+class ClientAppExecPlugin(ExecPlugin):
+    """Simple Flower SuperExec plugin for ClientApp.
 
     The plugin always selects the first candidate run ID.
     """
