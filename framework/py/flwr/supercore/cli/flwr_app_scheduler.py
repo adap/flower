@@ -33,7 +33,7 @@ def flwr_app_scheduler() -> None:
     log(INFO, "Starting Flower App Scheduler")
 
     # Trigger telemetry event
-    event(EventType.FLWR_APP_SCHEDULER_RUN_ENTER)
+    event(EventType.FLWR_APP_SCHEDULER_RUN_ENTER, {'plugin_type': args.plugin_type})
 
     run_app_scheduler(
         plugin_class=_get_plugin_class(args.plugin_type),
