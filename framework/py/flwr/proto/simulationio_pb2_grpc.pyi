@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import abc
+import flwr.proto.appio_pb2
 import flwr.proto.heartbeat_pb2
 import flwr.proto.log_pb2
 import flwr.proto.run_pb2
@@ -11,6 +12,16 @@ import grpc
 
 class SimulationIoStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
+    ListAppsToLaunch: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.ListAppsToLaunchRequest,
+        flwr.proto.appio_pb2.ListAppsToLaunchResponse]
+    """List runs to launch"""
+
+    RequestToken: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.RequestTokenRequest,
+        flwr.proto.appio_pb2.RequestTokenResponse]
+    """Request token for a run"""
+
     PullSimulationInputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.simulationio_pb2.PullSimulationInputsRequest,
         flwr.proto.simulationio_pb2.PullSimulationInputsResponse]
@@ -48,6 +59,22 @@ class SimulationIoStub:
 
 
 class SimulationIoServicer(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def ListAppsToLaunch(self,
+        request: flwr.proto.appio_pb2.ListAppsToLaunchRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.appio_pb2.ListAppsToLaunchResponse:
+        """List runs to launch"""
+        pass
+
+    @abc.abstractmethod
+    def RequestToken(self,
+        request: flwr.proto.appio_pb2.RequestTokenRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.appio_pb2.RequestTokenResponse:
+        """Request token for a run"""
+        pass
+
     @abc.abstractmethod
     def PullSimulationInputs(self,
         request: flwr.proto.simulationio_pb2.PullSimulationInputsRequest,
