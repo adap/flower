@@ -16,9 +16,9 @@
 
 
 from .exec_plugin import ExecPlugin
-from .simple_clientapp_exec_plugin import SimpleClientAppExecPlugin
+from .clientapp_exec_plugin import ClientAppExecPlugin
 
 __all__ = [
     "ExecPlugin",
-    "SimpleClientAppExecPlugin",
+    "ClientAppExecPlugin",
 ]

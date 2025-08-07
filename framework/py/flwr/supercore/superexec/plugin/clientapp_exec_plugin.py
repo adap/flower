@@ -23,7 +23,7 @@ from typing import Optional
 from .exec_plugin import ExecPlugin
 
 
-class SimpleClientAppExecPlugin(ExecPlugin):
+class ClientAppExecPlugin(ExecPlugin):
     """Simple Flower SuperExec plugin for ClientApp.
 
     The plugin always selects the first candidate run ID.
