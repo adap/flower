@@ -120,7 +120,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state = self.state_factory.state()
 
         # Get IDs of runs in pending status
-        run_ids = state.get_run_ids()
+        run_ids = state.get_run_ids(flwr_aid=None)
         pending_run_ids = []
         for run_id, status in state.get_run_status(run_ids).items():
             if status.status == Status.PENDING:
