@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract base class SchedulerPlugin."""
+"""Abstract base class ExecPlugin."""
 
 
 from abc import ABC, abstractmethod
@@ -22,8 +22,8 @@ from typing import Callable, Optional
 from flwr.common.typing import Run
 
 
-class SchedulerPlugin(ABC):
-    """Abstract base class for Scheduler plugins."""
+class ExecPlugin(ABC):
+    """Abstract base class for SuperExec plugins."""
 
     def __init__(
         self,
@@ -59,7 +59,7 @@ class SchedulerPlugin(ABC):
 
         This method starts the application process using the given `token`.
         The `run_id` is used solely for bookkeeping purposes, allowing any
-        scheduler implementation to associate this launch with a specific run.
+        plugin implementation to associate this launch with a specific run.
 
         Parameters
         ----------
