@@ -2,6 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
+from flwr.proto import appio_pb2 as flwr_dot_proto_dot_appio__pb2
 from flwr.proto import heartbeat_pb2 as flwr_dot_proto_dot_heartbeat__pb2
 from flwr.proto import log_pb2 as flwr_dot_proto_dot_log__pb2
 from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
@@ -17,6 +18,16 @@ class SimulationIoStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.ListAppsToLaunch = channel.unary_unary(
+                '/flwr.proto.SimulationIo/ListAppsToLaunch',
+                request_serializer=flwr_dot_proto_dot_appio__pb2.ListAppsToLaunchRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_appio__pb2.ListAppsToLaunchResponse.FromString,
+                )
+        self.RequestToken = channel.unary_unary(
+                '/flwr.proto.SimulationIo/RequestToken',
+                request_serializer=flwr_dot_proto_dot_appio__pb2.RequestTokenRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_appio__pb2.RequestTokenResponse.FromString,
+                )
         self.PullSimulationInputs = channel.unary_unary(
                 '/flwr.proto.SimulationIo/PullSimulationInputs',
                 request_serializer=flwr_dot_proto_dot_simulationio__pb2.PullSimulationInputsRequest.SerializeToString,
@@ -56,6 +67,20 @@ class SimulationIoStub(object):
 
 class SimulationIoServicer(object):
     """Missing associated documentation comment in .proto file."""
+
+    def ListAppsToLaunch(self, request, context):
+        """List runs to launch
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RequestToken(self, request, context):
+        """Request token for a run
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def PullSimulationInputs(self, request, context):
         """Pull Simulation inputs
@@ -109,6 +134,16 @@ class SimulationIoServicer(object):
 
 def add_SimulationIoServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'ListAppsToLaunch': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListAppsToLaunch,
+                    request_deserializer=flwr_dot_proto_dot_appio__pb2.ListAppsToLaunchRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_appio__pb2.ListAppsToLaunchResponse.SerializeToString,
+            ),
+            'RequestToken': grpc.unary_unary_rpc_method_handler(
+                    servicer.RequestToken,
+                    request_deserializer=flwr_dot_proto_dot_appio__pb2.RequestTokenRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_appio__pb2.RequestTokenResponse.SerializeToString,
+            ),
             'PullSimulationInputs': grpc.unary_unary_rpc_method_handler(
                     servicer.PullSimulationInputs,
                     request_deserializer=flwr_dot_proto_dot_simulationio__pb2.PullSimulationInputsRequest.FromString,
@@ -153,6 +188,40 @@ def add_SimulationIoServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class SimulationIo(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def ListAppsToLaunch(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.SimulationIo/ListAppsToLaunch',
+            flwr_dot_proto_dot_appio__pb2.ListAppsToLaunchRequest.SerializeToString,
+            flwr_dot_proto_dot_appio__pb2.ListAppsToLaunchResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RequestToken(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.SimulationIo/RequestToken',
+            flwr_dot_proto_dot_appio__pb2.RequestTokenRequest.SerializeToString,
+            flwr_dot_proto_dot_appio__pb2.RequestTokenResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def PullSimulationInputs(request,
