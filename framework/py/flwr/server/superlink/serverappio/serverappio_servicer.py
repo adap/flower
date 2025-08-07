@@ -114,21 +114,40 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         context: grpc.ServicerContext,
     ) -> ListAppsToLaunchResponse:
         """Get run IDs with pending messages."""
-        log(DEBUG, "ClientAppIo.ListAppsToLaunch")
+        log(DEBUG, "ServerAppIoServicer.ListAppsToLaunch")
 
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED, "ListAppsToLaunch is not implemented"
-        )
-        raise NotImplementedError
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Get IDs of runs in pending status
+        run_ids = state.get_run_ids()
+        pending_run_ids = []
+        for run_id, status in state.get_run_status(run_ids).items():
+            if status.status == Status.PENDING:
+                pending_run_ids.append(run_id)
+
+        # Return run IDs
+        return ListAppsToLaunchResponse(run_ids=pending_run_ids)
 
     def RequestToken(
         self, request: RequestTokenRequest, context: grpc.ServicerContext
     ) -> RequestTokenResponse:
         """Request token."""
-        log(DEBUG, "ClientAppIo.RequestToken")
+        log(DEBUG, "ServerAppIoServicer.RequestToken")
 
-        context.abort(grpc.StatusCode.UNIMPLEMENTED, "RequestToken is not implemented")
-        raise NotImplementedError
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Attempt to create a token for the provided run ID
+        try:
+            token = state.create_token(request.run_id)
+        except ValueError:
+            # Return an empty token if A token already exists for this run ID,
+            # indicating the run is in progress
+            return RequestTokenResponse(token="")
+
+        # Return the token
+        return RequestTokenResponse(token=token)
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
