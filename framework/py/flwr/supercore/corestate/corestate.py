@@ -23,7 +23,7 @@ class CoreState(ABC):
     """Abstract base class for core state."""
 
     @abstractmethod
-    def create_token(self, run_id: int) -> str:
+    def create_token(self, run_id: int) -> Optional[str]:
         """Create a token for the given run ID.
 
         Parameters
@@ -34,7 +34,8 @@ class CoreState(ABC):
         Returns
         -------
         str
-            A unique token associated with the run ID.
+            The newly generated token if one does not already exist
+            for the given run ID, otherwise None.
         """
 
     @abstractmethod

@@ -139,15 +139,10 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state = self.state_factory.state()
 
         # Attempt to create a token for the provided run ID
-        try:
-            token = state.create_token(request.run_id)
-        except ValueError:
-            # Return an empty token if A token already exists for this run ID,
-            # indicating the run is in progress
-            return RequestTokenResponse(token="")
+        token = state.create_token(request.run_id)
 
         # Return the token
-        return RequestTokenResponse(token=token)
+        return RequestTokenResponse(token=token or "")
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
