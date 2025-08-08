@@ -17,8 +17,10 @@
 
 from .clientapp_exec_plugin import ClientAppExecPlugin
 from .exec_plugin import ExecPlugin
+from .serverapp_exec_plugin import ServerAppExecPlugin
 
 __all__ = [
     "ClientAppExecPlugin",
     "ExecPlugin",
+    "ServerAppExecPlugin",
 ]

@@ -15,35 +15,14 @@
 """Simple Flower SuperExec plugin for ClientApp."""
 
 
-import os
-import subprocess
-from collections.abc import Sequence
-from typing import Optional
-
-from .exec_plugin import ExecPlugin
+from .base_exec_plugin import BaseExecPlugin
 
 
-class ClientAppExecPlugin(ExecPlugin):
+class ClientAppExecPlugin(BaseExecPlugin):
     """Simple Flower SuperExec plugin for ClientApp.
 
     The plugin always selects the first candidate run ID.
     """
 
-    def select_run_id(self, candidate_run_ids: Sequence[int]) -> Optional[int]:
-        """Select a run ID to execute from a sequence of candidates."""
-        if not candidate_run_ids:
-            return None
-        return candidate_run_ids[0]
-
-    def launch_app(self, token: str, run_id: int) -> None:
-        """Launch the application associated with a given run ID and token."""
-        cmds = ["flwr-clientapp", "--insecure"]
-        cmds += ["--clientappio-api-address", self.appio_api_address]
-        cmds += ["--token", token]
-        cmds += ["--parent-pid", str(os.getpid())]
-        cmds += ["--flwr-dir", self.flwr_dir]
-        # Launch the client app without waiting for it to complete.
-        # Since we don't need to manage the process, we intentionally avoid using
-        # a `with` statement. Suppress the pylint warning for it in this case.
-        # pylint: disable-next=consider-using-with
-        subprocess.Popen(cmds)
+    command = "flwr-clientapp"
+    appio_api_address_arg = "--clientappio-api-address"
