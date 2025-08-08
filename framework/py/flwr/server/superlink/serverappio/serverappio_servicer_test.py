@@ -546,6 +546,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         """Test `PushServerAppOutputs` success."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        token = self.state.create_token(run_id)
 
         maker = RecordMaker()
         context = Context(
@@ -560,7 +561,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # allowed in running status.
         self._transition_run_status(run_id, 2)
         request = PushAppOutputsRequest(
-            run_id=run_id, context=context_to_proto(context)
+            token=token, run_id=run_id, context=context_to_proto(context)
         )
 
         # Execute
@@ -571,12 +572,14 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         assert grpc.StatusCode.OK == call.code()
 
     def _assert_push_serverapp_outputs_not_allowed(
-        self, run_id: int, context: Context
+        self, token: str, context: Context
     ) -> None:
         """Assert `PushServerAppOutputs` not allowed."""
+        run_id = self.state.get_run_id_by_token(token)
+        assert run_id is not None, "Invalid token is provided."
         run_status = self.state.get_run_status({run_id})[run_id]
         request = PushAppOutputsRequest(
-            run_id=run_id, context=context_to_proto(context)
+            token=token, run_id=run_id, context=context_to_proto(context)
         )
 
         with self.assertRaises(grpc.RpcError) as e:
@@ -597,6 +600,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         """Test `PushServerAppOutputs` not successful if RunStatus is not running."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        token = self.state.create_token(run_id)
 
         maker = RecordMaker()
         context = Context(
@@ -610,7 +614,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
-        self._assert_push_serverapp_outputs_not_allowed(run_id, context)
+        self._assert_push_serverapp_outputs_not_allowed(token, context)
 
     @parameterized.expand(
         [
