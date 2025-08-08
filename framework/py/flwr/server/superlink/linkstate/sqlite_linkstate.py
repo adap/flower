@@ -1148,7 +1148,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return message_ins
 
-    def create_token(self, run_id: int) -> str:
+    def create_token(self, run_id: int) -> Optional[str]:
         """Create a token for the given run ID."""
         token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
         query = "INSERT INTO token_store (run_id, token) VALUES (:run_id, :token);"
@@ -1156,7 +1156,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         try:
             self.query(query, data)
         except sqlite3.IntegrityError:
-            raise ValueError("Token already created for this run ID") from None
+            return None  # Token already created for this run ID
         return token
 
     def verify_token(self, run_id: int, token: str) -> bool:

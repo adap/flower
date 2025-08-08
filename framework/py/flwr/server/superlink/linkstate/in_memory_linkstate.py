@@ -686,12 +686,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
             return "".join(log for _, log in run.logs[index:]), latest_timestamp
 
-    def create_token(self, run_id: int) -> str:
+    def create_token(self, run_id: int) -> Optional[str]:
         """Create a token for the given run ID."""
         token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
         with self.lock_token_store:
             if run_id in self.token_store:
-                raise ValueError("Token already created for this run ID")
+                return None  # Token already created for this run ID
             self.token_store[run_id] = token
             self.token_to_run_id[token] = run_id
         return token
