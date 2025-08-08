@@ -38,6 +38,7 @@ class StateTest(unittest.TestCase):
 
         # Execute: create a token
         token = state.create_token(run_id)
+        assert token is not None
 
         # Assert: token should be valid
         self.assertTrue(state.verify_token(run_id, token))
@@ -55,9 +56,11 @@ class StateTest(unittest.TestCase):
         run_id = 42
         state.create_token(run_id)
 
-        # Execute and assert: should raise ValueError
-        with self.assertRaises(ValueError):
-            state.create_token(run_id)
+        # Execute
+        ret = state.create_token(run_id)
+
+        # Assert: The return is None
+        self.assertIsNone(ret)
 
     def test_get_run_id_by_token(self) -> None:
         """Test retrieving run ID by token."""
@@ -65,6 +68,7 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         run_id = 42
         token = state.create_token(run_id)
+        assert token is not None
 
         # Execute: get run ID by token
         retrieved_run_id1 = state.get_run_id_by_token(token)
