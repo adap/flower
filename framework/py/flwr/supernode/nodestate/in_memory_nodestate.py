@@ -171,12 +171,12 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
             ret -= set(self.token_store.keys())
             return list(ret)
 
-    def create_token(self, run_id: int) -> str:
+    def create_token(self, run_id: int) -> Optional[str]:
         """Create a token for the given run ID."""
         token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
         with self.lock_token_store:
             if run_id in self.token_store:
-                raise ValueError("Token already created for this run ID")
+                return None  # Token already created for this run ID
             self.token_store[run_id] = token
             self.token_to_run_id[token] = run_id
         return token
