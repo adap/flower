@@ -547,6 +547,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         token = self.state.create_token(run_id)
+        assert token is not None
 
         maker = RecordMaker()
         context = Context(
@@ -601,6 +602,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         token = self.state.create_token(run_id)
+        assert token is not None
 
         maker = RecordMaker()
         context = Context(
