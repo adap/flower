@@ -69,7 +69,7 @@ setup helps you integrate powerful AI capabilities with minimal overhead.
 
             async function main() {
               // Perform the inference
-              const response: ChatResponseResult = await fi.chat("Why is the sky blue?");
+              const response: ChatResponseResult = await fi.chat({messages: [{role: 'user', content: 'Why is the sky blue?'}]);
 
               if (response.ok) {
                 console.log(response.message.content);
@@ -90,7 +90,7 @@ setup helps you integrate powerful AI capabilities with minimal overhead.
 
             async function main() {
               // Perform the inference
-              const response = await fi.chat("Why is the sky blue?");
+              const response = await fi.chat({messages: [{role: 'user', content: 'Why is the sky blue?'}]);
 
               console.log(response.message.content);
             }
@@ -153,7 +153,8 @@ the :doc:`available models list <ref-models>`.
 
             async function main() {
               // Perform the inference
-              const response: ChatResponseResult = await fi.chat('Why is the sky blue?', {
+              const response: ChatResponseResult = await fi.chat({
+                messages: [{role: 'user', content: 'Why is the sky blue?'}],
                 model: 'meta/llama3.2-1b/instruct-fp16',
               });
 
@@ -176,7 +177,8 @@ the :doc:`available models list <ref-models>`.
 
             async function main() {
               // Perform the inference
-              const response = await fi.chat('Why is the sky blue?', {
+              const response = await fi.chat({
+                messages: [{role:'user', content: 'Why is the sky blue?'}],
                 model: 'meta/llama3.2-1b/instruct-fp16',
               });
 
@@ -246,12 +248,13 @@ application stability.
 
             async function main() {
               // Perform the inference
-              const response: ChatResponseResult = await fi.chat('Why is the sky blue?', {
+              const response: ChatResponseResult = await fi.chat({
+                messages: [{role:'user', content: 'Why is the sky blue?'}],
                 model: 'meta/llama3.2-1b/instruct-fp16',
               });
 
               if (!response.ok) {
-                console.error(`${response.failure.code}: ${response.failure.description}`);
+                console.error(response.failure.description);
               } else {
                 console.log(response.message.content);
               }
@@ -271,12 +274,13 @@ application stability.
 
             async function main() {
               // Perform the inference
-              const response = await fi.chat('Why is the sky blue?', {
+              const response = await fi.chat({
+                messages: [{role:'user', content: 'Why is the sky blue?'}],
                 model: 'meta/llama3.2-1b/instruct-fp16',
               });
 
               if (!response.ok) {
-                console.error(`${response.failure.code}: ${response.failure.description}`);
+                console.error(response.failure.description);
               } else {
                 console.log(response.message.content);
               }
@@ -348,14 +352,15 @@ available. The callback function must accept an argument of type :doc:`StreamEve
 
             async function main() {
               // Perform the inference
-              const response: ChatResponseResult = await fi.chat('Why is the sky blue?', {
+              const response: ChatResponseResult = await fi.chat({
+                messages: [{role:'user', content: 'Why is the sky blue?'}],
                 model: 'meta/llama3.2-1b/instruct-fp16',
                 stream: true,
                 onStreamEvent: (event: StreamEvent) => console.log(event.chunk)
               });
 
               if (!response.ok) {
-                console.error(`${response.failure.code}: ${response.failure.description}`);
+                console.error(response.failure.description);
               } else {
                 console.log('Full response:', response.message.content);
               }
@@ -375,14 +380,15 @@ available. The callback function must accept an argument of type :doc:`StreamEve
 
             async function main() {
               // Perform the inference
-              const response = await fi.chat('Why is the sky blue?', {
+              const response = await fi.chat({
+                messages: [{role:'user', content: 'Why is the sky blue?'}],
                 model: 'meta/llama3.2-1b/instruct-fp16',
                 stream: true,
                 onStreamEvent: (event) => console.log(event.chunk)
               });
 
               if (!response.ok) {
-                console.error(`${response.failure.code}: ${response.failure.description}`);
+                console.error(response.failure.description);
               } else {
                 console.log(response.message.content);
               }
@@ -442,10 +448,10 @@ available. The callback function must accept an argument of type :doc:`StreamEve
 Use Roles
 ---------
 
-Instead of simply sending a single string, you can provide an array of :doc:`messages
-<ts-api-ref/interfaces/Message>` with designated roles such as ``system`` and ``user``.
-This allows you to define the behavior and context of the conversation more clearly,
-ensuring that the assistant responds in a way that’s tailored to the scenario.
+You can provide an array of :doc:`messages <ts-api-ref/interfaces/Message>` with
+designated roles such as ``system`` and ``user``. This allows you to define the behavior
+and context of the conversation more clearly, ensuring that the assistant responds in a
+way that’s tailored to the scenario.
 
 .. tab-set::
     :sync-group: category
@@ -473,7 +479,7 @@ ensuring that the assistant responds in a way that’s tailored to the scenario.
               });
 
               if (!response.ok) {
-                console.error(`${response.failure.code}: ${response.failure.description}`);
+                console.error(response.failure.description);
               } else {
                 console.log('Full response:', response.message.content);
               }
@@ -504,7 +510,7 @@ ensuring that the assistant responds in a way that’s tailored to the scenario.
               });
 
               if (!response.ok) {
-                console.error(`${response.failure.code}: ${response.failure.description}`);
+                console.error(response.failure.description);
               } else {
                 console.log(response.message.content);
               }
@@ -932,7 +938,7 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
               });
 
               if (!response.ok) {
-                console.error(`${response.failure.code}: ${response.failure.description}`);
+                console.error(response.failure.description);
               } else {
                 console.log('Full response:', response.message.content);
               }
@@ -966,7 +972,7 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
               });
 
               if (!response.ok) {
-                console.error(`${response.failure.code}: ${response.failure.description}`);
+                console.error(response.failure.description);
               } else {
                 console.log(response.message.content);
               }
@@ -1081,7 +1087,7 @@ You will need to enable ``remoteHandoff`` and to provide a valid API key via the
               });
 
               if (!response.ok) {
-                console.error(`${response.failure.code}: ${response.failure.description}`);
+                console.error(response.failure.description);
               } else {
                 console.log('Full response:', response.value);
               }
@@ -1110,7 +1116,7 @@ You will need to enable ``remoteHandoff`` and to provide a valid API key via the
               });
 
               if (!response.ok) {
-                console.error(`${response.failure.code}: ${response.failure.description}`);
+                console.error(response.failure.description);
               } else {
                 console.log(response.value);
               }
