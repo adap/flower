@@ -259,3 +259,19 @@ class EventLogWriterType:
     def __new__(cls) -> EventLogWriterType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class ExecPluginType:
+    """SuperExec plugin types."""
+
+    CLIENT_APP = "clientapp"
+
+    def __new__(cls) -> ExecPluginType:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+    @staticmethod
+    def all() -> list[str]:
+        """Return all SuperExec plugin types."""
+        # Filter all constants (uppercase) of the class
+        return [v for k, v in vars(ExecPluginType).items() if k.isupper()]
