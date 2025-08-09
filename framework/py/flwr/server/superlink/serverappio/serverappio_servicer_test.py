@@ -40,12 +40,16 @@ from flwr.common.serde import context_to_proto, message_from_proto, run_status_t
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    ListAppsToLaunchRequest,
+    ListAppsToLaunchResponse,
     PullAppMessagesRequest,
     PullAppMessagesResponse,
     PushAppMessagesRequest,
     PushAppMessagesResponse,
     PushAppOutputsRequest,
     PushAppOutputsResponse,
+    RequestTokenRequest,
+    RequestTokenResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
@@ -198,6 +202,16 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             "/flwr.proto.ServerAppIo/ConfirmMessageReceived",
             request_serializer=ConfirmMessageReceivedRequest.SerializeToString,
             response_deserializer=ConfirmMessageReceivedResponse.FromString,
+        )
+        self._list_apps_to_launch = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/ListAppsToLaunch",
+            request_serializer=ListAppsToLaunchRequest.SerializeToString,
+            response_deserializer=ListAppsToLaunchResponse.FromString,
+        )
+        self._request_token = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/RequestToken",
+            request_serializer=RequestTokenRequest.SerializeToString,
+            response_deserializer=RequestTokenResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -532,6 +546,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         """Test `PushServerAppOutputs` success."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        token = self.state.create_token(run_id)
+        assert token is not None
 
         maker = RecordMaker()
         context = Context(
@@ -546,7 +562,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # allowed in running status.
         self._transition_run_status(run_id, 2)
         request = PushAppOutputsRequest(
-            run_id=run_id, context=context_to_proto(context)
+            token=token, run_id=run_id, context=context_to_proto(context)
         )
 
         # Execute
@@ -557,12 +573,14 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         assert grpc.StatusCode.OK == call.code()
 
     def _assert_push_serverapp_outputs_not_allowed(
-        self, run_id: int, context: Context
+        self, token: str, context: Context
     ) -> None:
         """Assert `PushServerAppOutputs` not allowed."""
+        run_id = self.state.get_run_id_by_token(token)
+        assert run_id is not None, "Invalid token is provided."
         run_status = self.state.get_run_status({run_id})[run_id]
         request = PushAppOutputsRequest(
-            run_id=run_id, context=context_to_proto(context)
+            token=token, run_id=run_id, context=context_to_proto(context)
         )
 
         with self.assertRaises(grpc.RpcError) as e:
@@ -583,6 +601,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         """Test `PushServerAppOutputs` not successful if RunStatus is not running."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        token = self.state.create_token(run_id)
+        assert token is not None
 
         maker = RecordMaker()
         context = Context(
@@ -596,7 +616,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
-        self._assert_push_serverapp_outputs_not_allowed(run_id, context)
+        self._assert_push_serverapp_outputs_not_allowed(token, context)
 
     @parameterized.expand(
         [
@@ -849,3 +869,41 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
 
         # Assert: Message is removed from LinkState
         assert len(self.store) == 0
+
+    def test_list_apps_to_launch(self) -> None:
+        """Test `ListAppsToLaunch`."""
+        # Prepare
+        run_id1 = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        run_id2 = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        self._transition_run_status(run_id1, 2)  # Run ID 1 is running
+
+        # Execute
+        request = ListAppsToLaunchRequest()
+        response, call = self._list_apps_to_launch.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, ListAppsToLaunchResponse)
+        assert grpc.StatusCode.OK == call.code()
+
+        # Assert: Run ID 2 is returned
+        assert response.run_ids == [run_id2]
+
+    def test_request_token(self) -> None:
+        """Test `RequestToken`."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+
+        # Execute
+        request = RequestTokenRequest(run_id=run_id)
+        response1, call1 = self._request_token.with_call(request=request)
+        response2, call2 = self._request_token.with_call(request=request)
+
+        # Assert
+        assert isinstance(response1, RequestTokenResponse)
+        assert isinstance(response2, RequestTokenResponse)
+        assert grpc.StatusCode.OK == call1.code()
+        assert grpc.StatusCode.OK == call2.code()
+
+        # Assert: Only one token is issued
+        assert response1.token != ""
+        assert response2.token == ""
