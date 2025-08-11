@@ -16,6 +16,7 @@
 
 
 import os
+import signal
 import threading
 import time
 from typing import Union
@@ -29,6 +30,29 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 
+if os.name == "nt":
+    from ctypes import windll  # type: ignore
+
+
+def _pid_exists(pid: int) -> bool:
+    """Check if a process with the given PID exists.
+
+    This works on Unix-like systems and Windows.
+    """
+    # Use `ctypes` to check if the process exists on Windows
+    if os.name == "nt":
+        handle = windll.kernel32.OpenProcess(0x1000, False, pid)
+        if handle:
+            windll.kernel32.CloseHandle(handle)
+            return True
+        return False
+    # Use `os.kill` on Unix-like systems
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    return True
+
 
 def start_parent_process_monitor(
     parent_pid: int,
@@ -38,8 +62,10 @@ def start_parent_process_monitor(
     def monitor() -> None:
         while True:
             time.sleep(0.2)
-            if os.getppid() != parent_pid:
-                os.kill(os.getpid(), 9)
+            if not _pid_exists(parent_pid):
+                # This works on Unix-like systems and Windows
+                # Avoid `os.kill` on Windows
+                signal.raise_signal(signal.SIGTERM)
 
     threading.Thread(target=monitor, daemon=True).start()
 
