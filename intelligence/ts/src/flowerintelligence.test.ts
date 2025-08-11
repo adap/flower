@@ -99,6 +99,7 @@ describe('FlowerIntelligence', () => {
 
   describe('Chat', () => {
     it('generates some text', { timeout: 10_000 }, async () => {
+      console.log(fi.apiKey)
       const data = await fi.chat({
         messages: [
           { role: 'system', content: 'You are a helpful assistant' },
