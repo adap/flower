@@ -69,7 +69,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
-from flwr.supercore.app_utils import simple_get_token
+from flwr.supercore.app_utils import simple_get_token, start_parent_process_monitor
 
 
 def flwr_simulation() -> None:
@@ -97,23 +97,31 @@ def flwr_simulation() -> None:
     run_simulation_process(
         simulationio_api_address=args.simulationio_api_address,
         log_queue=log_queue,
-        run_once=args.run_once,
+        run_once=(args.token is not None) or args.run_once,
+        token=args.token,
         flwr_dir_=args.flwr_dir,
         certificates=None,
+        parent_pid=args.parent_pid,
     )
 
     # Restore stdout/stderr
     restore_output()
 
 
-def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R0915
+def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     simulationio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
+    token: Optional[str] = None,
     flwr_dir_: Optional[str] = None,
     certificates: Optional[bytes] = None,
+    parent_pid: Optional[int] = None,
 ) -> None:
     """Run Flower Simulation process."""
+    # Start monitoring the parent process if a PID is provided
+    if parent_pid is not None:
+        start_parent_process_monitor(parent_pid)
+
     conn = SimulationIoConnection(
         simulationio_service_address=simulationio_api_address,
         root_certificates=certificates,
@@ -123,7 +131,6 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
     flwr_dir = get_flwr_dir(flwr_dir_)
     log_uploader = None
     heartbeat_sender = None
-    token = None
 
     while True:
 
