@@ -248,7 +248,9 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
 
             # Send resulting context
             context_proto = context_to_proto(updated_context)
-            out_req = PushAppOutputsRequest(run_id=run.run_id, context=context_proto)
+            out_req = PushAppOutputsRequest(
+                token=token, run_id=run.run_id, context=context_proto
+            )
             _ = conn._stub.PushAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
