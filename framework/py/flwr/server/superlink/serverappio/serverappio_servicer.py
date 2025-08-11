@@ -139,15 +139,10 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state = self.state_factory.state()
 
         # Attempt to create a token for the provided run ID
-        try:
-            token = state.create_token(request.run_id)
-        except ValueError:
-            # Return an empty token if A token already exists for this run ID,
-            # indicating the run is in progress
-            return RequestTokenResponse(token="")
+        token = state.create_token(request.run_id)
 
         # Return the token
-        return RequestTokenResponse(token=token)
+        return RequestTokenResponse(token=token or "")
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
@@ -334,14 +329,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Init access to LinkState
         state = self.state_factory.state()
 
+        # Validate the token
+        run_id = self._verify_token(request.token, context)
+
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
-            # Attempt getting the run_id of a pending run
-            run_id = state.get_pending_run_id()
-            # If there's no pending run, return an empty response
-            if run_id is None:
-                return PullAppInputsResponse()
-
             # Init access to Ffs
             ffs = self.ffs_factory.ffs()
 
@@ -372,6 +364,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Push ServerApp process outputs."""
         log(DEBUG, "ServerAppIoServicer.PushAppOutputs")
 
+        # Validate the token
+        run_id = self._verify_token(request.token, context)
+
         # Init state and store
         state = self.state_factory.state()
         store = self.objectstore_factory.store()
@@ -386,6 +381,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
+
+        # Remove the token
+        state.delete_token(run_id)
         return PushAppOutputsResponse()
 
     def UpdateRunStatus(
@@ -552,6 +550,18 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         store.delete(request.message_object_id)
 
         return ConfirmMessageReceivedResponse()
+
+    def _verify_token(self, token: str, context: grpc.ServicerContext) -> int:
+        """Verify the token and return the associated run ID."""
+        state = self.state_factory.state()
+        run_id = state.get_run_id_by_token(token)
+        if run_id is None or not state.verify_token(run_id, token):
+            context.abort(
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token.",
+            )
+            raise RuntimeError("This line should never be reached.")
+        return run_id
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
