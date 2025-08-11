@@ -79,6 +79,13 @@ def _parse_args() -> argparse.ArgumentParser:
             - `$HOME/.flwr/` in all other cases
         """,
     )
+    parser.add_argument(
+        "--parent-pid",
+        type=int,
+        default=None,
+        help="The PID of the parent process. When set, the process will terminate "
+        "when the parent process exits.",
+    )
     return parser
 
 

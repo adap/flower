@@ -31,6 +31,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
+from flwr.supercore.app_utils import start_parent_process_monitor
 
 from .plugin import ExecPlugin
 
@@ -40,6 +41,7 @@ def run_superexec(
     stub_class: type[ClientAppIoStub],
     appio_api_address: str,
     flwr_dir: Optional[str] = None,
+    parent_pid: Optional[int] = None,
 ) -> None:
     """Run Flower SuperExec.
 
@@ -54,6 +56,10 @@ def run_superexec(
     flwr_dir : Optional[str] (default: None)
         The Flower directory.
     """
+    # Start monitoring the parent process if a PID is provided
+    if parent_pid is not None:
+        start_parent_process_monitor(parent_pid)
+
     # Create the channel to the AppIO API
     # No TLS support for now, so insecure connection
     channel = create_channel(
