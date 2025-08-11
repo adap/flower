@@ -40,8 +40,7 @@ def _pid_exists(pid: int) -> bool:
         os.kill(pid, 0)
     except OSError:
         return False
-    else:
-        return True
+    return True
 
 
 def start_parent_process_monitor(
