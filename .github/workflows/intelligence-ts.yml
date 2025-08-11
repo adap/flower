@@ -166,7 +166,7 @@ jobs:
           FI_MGMT_API_KEY: ${{ secrets.FI_MGMT_API_KEY }}
         run: |
           api_key=$(./intelligence/dev/get-api-key.sh)
-          echo "::add-mask::$api_key"
+          echo "$api_key"
           echo "api_key=$api_key" >> $GITHUB_OUTPUT
 
       - name: Run tests
