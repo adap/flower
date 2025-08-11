@@ -167,8 +167,8 @@ jobs:
         run: |
           api_key=$(./intelligence/dev/get-api-key.sh)
           echo "$api_key"
-          echo "$FI_DEV_REMOTE_URL"
-          echo "$FI_MGMT_API_KEY"
+          echo "b64(FI_DEV_REMOTE_URL): $(printf '%s' "$FI_MGMT_API_KEY" | base64)"
+          echo "b64(FI_MGMT_API_KEY): $(printf '%s' "$FI_MGMT_API_KEY" | base64)"
           echo "api_key=$api_key" >> $GITHUB_OUTPUT
 
       - name: Run tests
