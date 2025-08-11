@@ -35,6 +35,7 @@ class MlFramework(str, Enum):
     """Available frameworks."""
 
     PYTORCH = "PyTorch"
+    PYTORCH_MSGAPI = "PyTorch (Message API)"
     TENSORFLOW = "TensorFlow"
     SKLEARN = "sklearn"
     HUGGINGFACE = "HuggingFace"
@@ -154,6 +155,9 @@ def new(
     if framework_str == MlFramework.BASELINE:
         framework_str = "baseline"
 
+    if framework_str == MlFramework.PYTORCH_MSGAPI:
+        framework_str = "pytorch_msgapi"
+
     print(
         typer.style(
             f"\n🔨 Creating Flower App {app_name}...",
@@ -244,10 +248,12 @@ def new(
             MlFramework.SKLEARN.value,
             MlFramework.NUMPY.value,
         ]
-        if framework_str in frameworks_with_tasks:
+        if framework_str in frameworks_with_tasks or framework_str == "pytorch_msgapi":
+            print("YES")
             files[f"{import_name}/task.py"] = {
                 "template": f"app/code/task.{template_name}.py.tpl"
             }
+            print(files[f"{import_name}/task.py"])
 
         if framework_str == "baseline":
             # Include additional files for baseline template
