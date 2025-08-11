@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -186,7 +186,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
             _ = divider(self.dataset_dict)
 
     def test_sample_sizes_sum_up_to_more_than_dataset_size_single_split(self) -> None:
-        """Test if resplitting raises when samples size sum up to > len(datset) ."""
+        """Test if resplitting raises when samples size sum up to > len(dataset) ."""
         divide_config = {"train": {"train_1": 20, "train_2": 25}}
         divide_split = None
         drop_remaining_splits = False
@@ -195,7 +195,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
             _ = divider(self.dataset_dict)
 
     def test_sample_sizes_sum_up_to_more_than_dataset_size_multisplit(self) -> None:
-        """Test if resplitting raises when samples size sum up to > len(datset) ."""
+        """Test if resplitting raises when samples size sum up to > len(dataset) ."""
         divide_config = {"train_1": 20, "train_2": 25}
         divide_split = "train"
         drop_remaining_splits = False

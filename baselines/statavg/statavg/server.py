@@ -1,64 +1,44 @@
-"""Flower Server."""
+"""statavg: A Flower Baseline."""
 
 import os
+import pickle
+from logging import INFO
+from pathlib import Path
 
-import joblib
-from omegaconf import DictConfig
-from pandas import DataFrame
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from flwr.common import log
+from flwr.server import Server
 
-from .models import get_model
-
-
-def get_on_fit_config_fn(conf: DictConfig):
-    """Return fit_config_fn used in strategy."""
-
-    def fit_config_fn(server_round: int):
-        """Return the server's config file."""
-        config = {
-            "batch_size": conf.batch_size,
-            "current_round": server_round,
-            "local_epochs": conf.local_epochs,
-            "total_rounds": conf.total_rounds,
-        }
-
-        return config
-
-    return fit_config_fn
+PROJECT_DIR = Path(os.path.abspath(__file__)).parent.parent
 
 
-def get_evaluate_fn(
-    testset: DataFrame, input_shape: int, num_classes: int, scaler_path: str
-):
-    """Return evaluate_fn used in strategy."""
+class ResultsSaverServer(Server):
+    """Server to save history to disk."""
 
-    def evalaute_fn(server_round, parameters, config):
-        """Evaluate the test set (if provided)."""
-        _, _ = server_round, config
+    def __init__(
+        self,
+        *,
+        client_manager,
+        strategy=None,
+        results_saver_fn=None,
+        run_config=None,
+    ):
+        super().__init__(client_manager=client_manager, strategy=strategy)
+        self.results_saver_fn = results_saver_fn
+        self.run_config = run_config
 
-        if testset.empty:
-            # this implies that testset is not used
-            # and thus, included_testset from config file is False
-            return None, {"accuracy": None}
+    def fit(self, num_rounds, timeout):
+        """Run federated averaging for a number of rounds."""
+        history, elapsed = super().fit(num_rounds, timeout)
+        if self.results_saver_fn:
+            log(INFO, "Results saver function provided. Executing")
+            self.results_saver_fn(history, self.run_config)
+        return history, elapsed
 
-        y_test = testset[["type"]]
-        enc_y = LabelEncoder()
-        y_test = enc_y.fit_transform(y_test.to_numpy().reshape(-1))
-        x_test = testset.drop(["type"], axis=1).to_numpy()
 
-        # normalization
-        # Check if the directory of the scaler exists and pick a scaler
-        # of an arbitrary user. It's the same for all users.
-        if not os.path.exists(scaler_path):
-            scaler = StandardScaler()
-            x_test = scaler.fit_transform(x_test)
-        else:
-            scaler = joblib.load(f"{scaler_path}/client_1/scaler.joblib")
-            x_test = scaler.transform(x_test)
-
-        model = get_model(input_shape, num_classes)
-        model.set_weights(parameters)
-        loss, accuracy = model.evaluate(x_test, y_test)
-        return loss, {"accuracy": accuracy}
-
-    return evalaute_fn
+def save_results_and_clean_dir(history, run_config):
+    """Save history and clean scaler dir."""
+    results = {"history": history}
+    results_path = PROJECT_DIR / run_config.results_save_dir / run_config.strategy_name
+    results_path.mkdir(exist_ok=True, parents=True)
+    with open(results_path / "results.pickle", "wb") as file:
+        pickle.dump(results, file)

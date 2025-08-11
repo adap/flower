@@ -27,10 +27,10 @@ ROOT_DIR = Path(".")
 # If no fields are needed, set to an empty dictionary.
 NEW_FIELDS: dict[str, Optional[Union[dict[str, str], str]]] = {
     "announcement": (
-        "<a href='https://flower.ai/events/flower-ai-summit-2025/'>"
+        "<a href='https://flower.ai/events/flower-ai-day-2025/'>"
         "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
-        "for Flower AI Summit 2025!<br />"
-        "March 26-27, 🇬🇧 London & Online"
+        "for Flower AI Day 2025!<br />"
+        "September 25, 🇺🇸 San Francisco"
     ),
     "light_css_variables": {
         "color-announcement-background": "#292f36",
