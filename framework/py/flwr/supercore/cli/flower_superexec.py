@@ -22,7 +22,14 @@ from flwr.common import EventType, event
 from flwr.common.constant import ExecPluginType
 from flwr.common.logger import log
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
-from flwr.supercore.superexec.plugin import ClientAppExecPlugin, ExecPlugin
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
+from flwr.supercore.superexec.plugin import (
+    ClientAppExecPlugin,
+    ExecPlugin,
+    ServerAppExecPlugin,
+    SimulationExecPlugin,
+)
 from flwr.supercore.superexec.run_superexec import run_superexec
 
 
@@ -43,6 +50,7 @@ def flower_superexec() -> None:
         stub_class=stub_class,  # type: ignore
         appio_api_address=args.appio_api_address,
         flwr_dir=args.flwr_dir,
+        parent_pid=args.parent_pid,
     )
 
 
@@ -79,6 +87,13 @@ def _parse_args() -> argparse.ArgumentParser:
             - `$HOME/.flwr/` in all other cases
         """,
     )
+    parser.add_argument(
+        "--parent-pid",
+        type=int,
+        default=None,
+        help="The PID of the parent process. When set, the process will terminate "
+        "when the parent process exits.",
+    )
     return parser
 
 
@@ -88,4 +103,8 @@ def _get_plugin_and_stub_class(
     """Get the plugin class and stub class based on the plugin type."""
     if plugin_type == ExecPluginType.CLIENT_APP:
         return ClientAppExecPlugin, ClientAppIoStub
+    if plugin_type == ExecPluginType.SERVER_APP:
+        return ServerAppExecPlugin, ServerAppIoStub
+    if plugin_type == ExecPluginType.SIMULATION:
+        return SimulationExecPlugin, SimulationIoStub
     raise ValueError(f"Unknown plugin type: {plugin_type}")
