@@ -55,6 +55,9 @@ def run_superexec(
         The address of the AppIO API.
     flwr_dir : Optional[str] (default: None)
         The Flower directory.
+    parent_pid : Optional[int] (default: None)
+        The PID of the parent process. If provided, the SuperExec will terminate
+        when the parent process exits.
     """
     # Start monitoring the parent process if a PID is provided
     if parent_pid is not None:

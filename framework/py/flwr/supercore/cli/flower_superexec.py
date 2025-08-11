@@ -43,6 +43,7 @@ def flower_superexec() -> None:
         stub_class=stub_class,  # type: ignore
         appio_api_address=args.appio_api_address,
         flwr_dir=args.flwr_dir,
+        parent_pid=args.parent_pid,
     )
 
 
