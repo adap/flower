@@ -167,8 +167,10 @@ async function processChunk(
 ): Promise<ChatResponseResult & { toolsUpdated?: boolean }> {
   let parsed: unknown;
   try {
-    if(isServerSentEvent(chunk)) {
-      parsed = JSON.parse(chunk.data)
+    if (isServerSentEvent(chunk)) {
+      parsed = JSON.parse(chunk.data);
+    } else {
+      parsed = JSON.parse(chunk);
     }
   } catch {
     return {
