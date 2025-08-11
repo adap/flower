@@ -7,7 +7,6 @@ import flwr.proto.appio_pb2
 import flwr.proto.heartbeat_pb2
 import flwr.proto.log_pb2
 import flwr.proto.run_pb2
-import flwr.proto.simulationio_pb2
 import grpc
 
 class SimulationIoStub:
@@ -22,14 +21,14 @@ class SimulationIoStub:
         flwr.proto.appio_pb2.RequestTokenResponse]
     """Request token for a run"""
 
-    PullSimulationInputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.simulationio_pb2.PullSimulationInputsRequest,
-        flwr.proto.simulationio_pb2.PullSimulationInputsResponse]
+    PullAppInputs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PullAppInputsRequest,
+        flwr.proto.appio_pb2.PullAppInputsResponse]
     """Pull Simulation inputs"""
 
-    PushSimulationOutputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.simulationio_pb2.PushSimulationOutputsRequest,
-        flwr.proto.simulationio_pb2.PushSimulationOutputsResponse]
+    PushAppOutputs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PushAppOutputsRequest,
+        flwr.proto.appio_pb2.PushAppOutputsResponse]
     """Push Simulation outputs"""
 
     UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
@@ -76,18 +75,18 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def PullSimulationInputs(self,
-        request: flwr.proto.simulationio_pb2.PullSimulationInputsRequest,
+    def PullAppInputs(self,
+        request: flwr.proto.appio_pb2.PullAppInputsRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.simulationio_pb2.PullSimulationInputsResponse:
+    ) -> flwr.proto.appio_pb2.PullAppInputsResponse:
         """Pull Simulation inputs"""
         pass
 
     @abc.abstractmethod
-    def PushSimulationOutputs(self,
-        request: flwr.proto.simulationio_pb2.PushSimulationOutputsRequest,
+    def PushAppOutputs(self,
+        request: flwr.proto.appio_pb2.PushAppOutputsRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.simulationio_pb2.PushSimulationOutputsResponse:
+    ) -> flwr.proto.appio_pb2.PushAppOutputsResponse:
         """Push Simulation outputs"""
         pass
 

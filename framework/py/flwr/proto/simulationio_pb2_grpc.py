@@ -6,7 +6,6 @@ from flwr.proto import appio_pb2 as flwr_dot_proto_dot_appio__pb2
 from flwr.proto import heartbeat_pb2 as flwr_dot_proto_dot_heartbeat__pb2
 from flwr.proto import log_pb2 as flwr_dot_proto_dot_log__pb2
 from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
-from flwr.proto import simulationio_pb2 as flwr_dot_proto_dot_simulationio__pb2
 
 
 class SimulationIoStub(object):
@@ -28,15 +27,15 @@ class SimulationIoStub(object):
                 request_serializer=flwr_dot_proto_dot_appio__pb2.RequestTokenRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_appio__pb2.RequestTokenResponse.FromString,
                 )
-        self.PullSimulationInputs = channel.unary_unary(
-                '/flwr.proto.SimulationIo/PullSimulationInputs',
-                request_serializer=flwr_dot_proto_dot_simulationio__pb2.PullSimulationInputsRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_simulationio__pb2.PullSimulationInputsResponse.FromString,
+        self.PullAppInputs = channel.unary_unary(
+                '/flwr.proto.SimulationIo/PullAppInputs',
+                request_serializer=flwr_dot_proto_dot_appio__pb2.PullAppInputsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_appio__pb2.PullAppInputsResponse.FromString,
                 )
-        self.PushSimulationOutputs = channel.unary_unary(
-                '/flwr.proto.SimulationIo/PushSimulationOutputs',
-                request_serializer=flwr_dot_proto_dot_simulationio__pb2.PushSimulationOutputsRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_simulationio__pb2.PushSimulationOutputsResponse.FromString,
+        self.PushAppOutputs = channel.unary_unary(
+                '/flwr.proto.SimulationIo/PushAppOutputs',
+                request_serializer=flwr_dot_proto_dot_appio__pb2.PushAppOutputsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_appio__pb2.PushAppOutputsResponse.FromString,
                 )
         self.UpdateRunStatus = channel.unary_unary(
                 '/flwr.proto.SimulationIo/UpdateRunStatus',
@@ -82,14 +81,14 @@ class SimulationIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def PullSimulationInputs(self, request, context):
+    def PullAppInputs(self, request, context):
         """Pull Simulation inputs
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def PushSimulationOutputs(self, request, context):
+    def PushAppOutputs(self, request, context):
         """Push Simulation outputs
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -144,15 +143,15 @@ def add_SimulationIoServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_appio__pb2.RequestTokenRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_appio__pb2.RequestTokenResponse.SerializeToString,
             ),
-            'PullSimulationInputs': grpc.unary_unary_rpc_method_handler(
-                    servicer.PullSimulationInputs,
-                    request_deserializer=flwr_dot_proto_dot_simulationio__pb2.PullSimulationInputsRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_simulationio__pb2.PullSimulationInputsResponse.SerializeToString,
+            'PullAppInputs': grpc.unary_unary_rpc_method_handler(
+                    servicer.PullAppInputs,
+                    request_deserializer=flwr_dot_proto_dot_appio__pb2.PullAppInputsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_appio__pb2.PullAppInputsResponse.SerializeToString,
             ),
-            'PushSimulationOutputs': grpc.unary_unary_rpc_method_handler(
-                    servicer.PushSimulationOutputs,
-                    request_deserializer=flwr_dot_proto_dot_simulationio__pb2.PushSimulationOutputsRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_simulationio__pb2.PushSimulationOutputsResponse.SerializeToString,
+            'PushAppOutputs': grpc.unary_unary_rpc_method_handler(
+                    servicer.PushAppOutputs,
+                    request_deserializer=flwr_dot_proto_dot_appio__pb2.PushAppOutputsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_appio__pb2.PushAppOutputsResponse.SerializeToString,
             ),
             'UpdateRunStatus': grpc.unary_unary_rpc_method_handler(
                     servicer.UpdateRunStatus,
@@ -224,7 +223,7 @@ class SimulationIo(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def PullSimulationInputs(request,
+    def PullAppInputs(request,
             target,
             options=(),
             channel_credentials=None,
@@ -234,14 +233,14 @@ class SimulationIo(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.SimulationIo/PullSimulationInputs',
-            flwr_dot_proto_dot_simulationio__pb2.PullSimulationInputsRequest.SerializeToString,
-            flwr_dot_proto_dot_simulationio__pb2.PullSimulationInputsResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.SimulationIo/PullAppInputs',
+            flwr_dot_proto_dot_appio__pb2.PullAppInputsRequest.SerializeToString,
+            flwr_dot_proto_dot_appio__pb2.PullAppInputsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def PushSimulationOutputs(request,
+    def PushAppOutputs(request,
             target,
             options=(),
             channel_credentials=None,
@@ -251,9 +250,9 @@ class SimulationIo(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.SimulationIo/PushSimulationOutputs',
-            flwr_dot_proto_dot_simulationio__pb2.PushSimulationOutputsRequest.SerializeToString,
-            flwr_dot_proto_dot_simulationio__pb2.PushSimulationOutputsResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.SimulationIo/PushAppOutputs',
+            flwr_dot_proto_dot_appio__pb2.PushAppOutputsRequest.SerializeToString,
+            flwr_dot_proto_dot_appio__pb2.PushAppOutputsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

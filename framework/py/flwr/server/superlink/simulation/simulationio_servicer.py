@@ -37,6 +37,10 @@ from flwr.proto import simulationio_pb2_grpc
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     ListAppsToLaunchRequest,
     ListAppsToLaunchResponse,
+    PullAppInputsRequest,
+    PullAppInputsResponse,
+    PushAppOutputsRequest,
+    PushAppOutputsResponse,
     RequestTokenRequest,
     RequestTokenResponse,
 )
@@ -55,12 +59,6 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunStatusResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
-)
-from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
-    PullSimulationInputsRequest,
-    PullSimulationInputsResponse,
-    PushSimulationOutputsRequest,
-    PushSimulationOutputsResponse,
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_if
@@ -113,23 +111,20 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         # Return the token
         return RequestTokenResponse(token=token or "")
 
-    def PullSimulationInputs(
-        self, request: PullSimulationInputsRequest, context: ServicerContext
-    ) -> PullSimulationInputsResponse:
+    def PullAppInputs(
+        self, request: PullAppInputsRequest, context: ServicerContext
+    ) -> PullAppInputsResponse:
         """Pull SimultionIo process inputs."""
         log(DEBUG, "SimultionIoServicer.SimultionIoInputs")
         # Init access to LinkState and Ffs
         state = self.state_factory.state()
         ffs = self.ffs_factory.ffs()
 
+        # Validate the token
+        run_id = self._verify_token(request.token, context)
+
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
-            # Attempt getting the run_id of a pending run
-            run_id = state.get_pending_run_id()
-            # If there's no pending run, return an empty response
-            if run_id is None:
-                return PullSimulationInputsResponse()
-
             # Retrieve Context, Run and Fab for the run_id
             serverapp_ctxt = state.get_serverapp_context(run_id)
             run = state.get_run(run_id)
@@ -141,7 +136,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
                 # Update run status to STARTING
                 if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
                     log(INFO, "Starting run %d", run_id)
-                    return PullSimulationInputsResponse(
+                    return PullAppInputsResponse(
                         context=context_to_proto(serverapp_ctxt),
                         run=run_to_proto(run),
                         fab=fab_to_proto(fab),
@@ -151,11 +146,16 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         # or if the status cannot be updated to STARTING
         raise RuntimeError(f"Failed to start run {run_id}")
 
-    def PushSimulationOutputs(
-        self, request: PushSimulationOutputsRequest, context: ServicerContext
-    ) -> PushSimulationOutputsResponse:
+    def PushAppOutputs(
+        self, request: PushAppOutputsRequest, context: ServicerContext
+    ) -> PushAppOutputsResponse:
         """Push Simulation process outputs."""
-        log(DEBUG, "SimultionIoServicer.PushSimulationOutputs")
+        log(DEBUG, "SimultionIoServicer.PushAppOutputs")
+
+        # Validate the token
+        run_id = self._verify_token(request.token, context)
+
+        # Init access to LinkState
         state = self.state_factory.state()
 
         # Abort if the run is not running
@@ -168,7 +168,10 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         )
 
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
-        return PushSimulationOutputsResponse()
+
+        # Remove the token
+        state.delete_token(run_id)
+        return PushAppOutputsResponse()
 
     def UpdateRunStatus(
         self, request: UpdateRunStatusRequest, context: grpc.ServicerContext
@@ -250,3 +253,15 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         )
 
         return SendAppHeartbeatResponse(success=success)
+
+    def _verify_token(self, token: str, context: grpc.ServicerContext) -> int:
+        """Verify the token and return the associated run ID."""
+        state = self.state_factory.state()
+        run_id = state.get_run_id_by_token(token)
+        if run_id is None or not state.verify_token(run_id, token):
+            context.abort(
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token.",
+            )
+            raise RuntimeError("This line should never be reached.")
+        return run_id
