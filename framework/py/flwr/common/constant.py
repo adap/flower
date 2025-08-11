@@ -265,6 +265,7 @@ class ExecPluginType:
     """SuperExec plugin types."""
 
     CLIENT_APP = "clientapp"
+    SERVER_APP = "serverapp"
 
     def __new__(cls) -> ExecPluginType:
         """Prevent instantiation."""
