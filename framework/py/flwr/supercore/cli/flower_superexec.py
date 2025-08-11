@@ -23,10 +23,12 @@ from flwr.common.constant import ExecPluginType
 from flwr.common.logger import log
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 from flwr.supercore.superexec.plugin import (
     ClientAppExecPlugin,
     ExecPlugin,
     ServerAppExecPlugin,
+    SimulationExecPlugin,
 )
 from flwr.supercore.superexec.run_superexec import run_superexec
 
@@ -95,4 +97,6 @@ def _get_plugin_and_stub_class(
         return ClientAppExecPlugin, ClientAppIoStub
     if plugin_type == ExecPluginType.SERVER_APP:
         return ServerAppExecPlugin, ServerAppIoStub
+    if plugin_type == ExecPluginType.SIMULATION:
+        return SimulationExecPlugin, SimulationIoStub
     raise ValueError(f"Unknown plugin type: {plugin_type}")
