@@ -137,7 +137,11 @@ export function isPlatformHttpError(o: unknown): o is PlatformHttpError {
 }
 
 export function isServerSentEvent(o: unknown): o is ServerSentEvent {
-  return !!o && typeof (o as any).data === 'string';
+  return (
+    typeof o === 'object' &&
+    o !== null &&
+    typeof (o as Record<string, unknown>).data === 'string'
+  );
 }
 
 export function isStreamChunk(o: unknown): o is StreamChunk {
