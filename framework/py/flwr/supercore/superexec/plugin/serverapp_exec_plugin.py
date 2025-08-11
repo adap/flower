@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simple Flower SuperExec plugin for ClientApp."""
+"""Simple Flower SuperExec plugin for ServerApp."""
 
 
 from .base_exec_plugin import BaseExecPlugin
 
 
-class ClientAppExecPlugin(BaseExecPlugin):
-    """Simple Flower SuperExec plugin for ClientApp.
+class ServerAppExecPlugin(BaseExecPlugin):
+    """Simple Flower SuperExec plugin for ServerApp.
 
     The plugin always selects the first candidate run ID.
     """
 
-    command = "flwr-clientapp"
-    appio_api_address_arg = "--clientappio-api-address"
+    command = "flwr-serverapp"
+    appio_api_address_arg = "--serverappio-api-address"

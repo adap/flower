@@ -181,6 +181,10 @@ class EventType(str, Enum):
     RUN_SUPERNODE_ENTER = auto()
     RUN_SUPERNODE_LEAVE = auto()
 
+    # CLI: `flower-superexec`
+    RUN_SUPEREXEC_ENTER = auto()
+    RUN_SUPEREXEC_LEAVE = auto()
+
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.
