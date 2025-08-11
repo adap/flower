@@ -72,11 +72,14 @@ internal class RemoteEngine(
         element = payload,
         authorization = authorization,
         url = url,
-      ) { streamElements: List<StreamChoice> ->
-        for (choice in streamElements) {
-          val deltaContent = choice.delta.content
-          onStreamEvent?.invoke(StreamEvent(deltaContent))
-          accumulatedResponse += deltaContent
+      ) { streamElements: List<ServerSentEvent> ->
+        for (event in streamElements) {
+          val chunk = Json.decodeFromString<StreamChunk>(sse.data)
+          for (choice in chunk.choices) {
+            val deltaContent = choice.delta.content
+            onStreamEvent?.invoke(StreamEvent(deltaContent))
+            accumulatedResponse += deltaContent
+          }
         }
       }
       Message(role = "assistant", content = accumulatedResponse)
