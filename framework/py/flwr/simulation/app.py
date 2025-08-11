@@ -57,15 +57,15 @@ from flwr.common.serde import (
     run_status_to_proto,
 )
 from flwr.common.typing import RunStatus
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    PullAppInputsRequest,
+    PullAppInputsResponse,
+    PushAppOutputsRequest,
+)
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetFederationOptionsRequest,
     GetFederationOptionsResponse,
     UpdateRunStatusRequest,
-)
-from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
-    PullAppInputsRequest,
-    PullAppInputsResponse,
-    PushAppOutputsRequest,
 )
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
