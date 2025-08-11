@@ -249,11 +249,9 @@ def new(
             MlFramework.NUMPY.value,
         ]
         if framework_str in frameworks_with_tasks or framework_str == "pytorch_msgapi":
-            print("YES")
             files[f"{import_name}/task.py"] = {
                 "template": f"app/code/task.{template_name}.py.tpl"
             }
-            print(files[f"{import_name}/task.py"])
 
         if framework_str == "baseline":
             # Include additional files for baseline template
