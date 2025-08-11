@@ -138,9 +138,7 @@ export function isPlatformHttpError(o: unknown): o is PlatformHttpError {
 
 export function isServerSentEvent(o: unknown): o is ServerSentEvent {
   return (
-    typeof o === 'object' &&
-    o !== null &&
-    typeof (o as Record<string, unknown>).data === 'string'
+    typeof o === 'object' && o !== null && typeof (o as Record<string, unknown>).data === 'string'
   );
 }
 
