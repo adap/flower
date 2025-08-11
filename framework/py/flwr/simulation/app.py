@@ -19,7 +19,6 @@ import argparse
 import gc
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
-from time import sleep
 from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
@@ -70,6 +69,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
+from flwr.supercore.app_utils import simple_get_token
 
 
 def flwr_simulation() -> None:
@@ -123,18 +123,19 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
     flwr_dir = get_flwr_dir(flwr_dir_)
     log_uploader = None
     heartbeat_sender = None
+    token = None
 
     while True:
 
         try:
-            # Pull SimulationInputs from LinkState
-            req = PullAppInputsRequest()
-            res: PullAppInputsResponse = conn._stub.PullAppInputs(req)
-            if not res.HasField("run"):
-                sleep(3)
-                run_status = None
-                continue
+            # If token is not set, loop until token is received from SuperNode
+            if token is None:
+                log(DEBUG, "[flwr-simulation] Request token")
+                token = simple_get_token(conn._stub)
 
+            # Pull SimulationInputs from LinkState
+            req = PullAppInputsRequest(token=token)
+            res: PullAppInputsResponse = conn._stub.PullAppInputs(req)
             context = context_from_proto(res.context)
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
@@ -275,6 +276,9 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 del updated_context
             except NameError:
                 pass
+
+            # Remove the token
+            token = None
             gc.collect()
 
         # Stop the loop if `flwr-simulation` is expected to process a single run

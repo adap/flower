@@ -91,6 +91,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushAppOutputs` success."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        token = self.state.create_token(run_id)
 
         maker = RecordMaker()
         context = Context(
@@ -105,7 +106,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # PushAppOutputsRequest is only allowed in running status.
         self._transition_run_status(run_id, 2)
         request = PushAppOutputsRequest(
-            run_id=run_id, context=context_to_proto(context)
+            token=token, run_id=run_id, context=context_to_proto(context)
         )
 
         # Execute
@@ -116,12 +117,14 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
     def _assert_push_simulation_outputs_not_allowed(
-        self, run_id: int, context: Context
+        self, token: str, context: Context
     ) -> None:
         """Assert `PushAppOutputs` not allowed."""
+        run_id = self.state.get_run_id_by_token(token)
+        assert run_id is not None, "Invalid token is provided."
         run_status = self.state.get_run_status({run_id})[run_id]
         request = PushAppOutputsRequest(
-            run_id=run_id, context=context_to_proto(context)
+            token=token, run_id=run_id, context=context_to_proto(context)
         )
 
         with self.assertRaises(grpc.RpcError) as e:
@@ -142,6 +145,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushAppOutputs` not successful if RunStatus is not running."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        token = self.state.create_token(run_id)
 
         maker = RecordMaker()
         context = Context(
@@ -155,7 +159,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
         self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
-        self._assert_push_simulation_outputs_not_allowed(run_id, context)
+        self._assert_push_simulation_outputs_not_allowed(token, context)
 
     @parameterized.expand(
         [
