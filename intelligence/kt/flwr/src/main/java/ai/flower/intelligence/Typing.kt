@@ -165,11 +165,10 @@ internal data class ChoiceMessage(
 internal data class StreamChunk(
   val `object`: String,
   val model: String,
-  val choices: List<StreamChoice> = emptyList()
+  val choices: List<StreamChoice> = emptyList(),
 )
 
-@Serializable
-data class ServerSentEvent(val data: String)
+@Serializable data class ServerSentEvent(val data: String)
 
 @Serializable
 internal data class Usage(
