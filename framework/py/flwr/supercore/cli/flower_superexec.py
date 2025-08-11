@@ -48,6 +48,7 @@ def flower_superexec() -> None:
         stub_class=stub_class,  # type: ignore
         appio_api_address=args.appio_api_address,
         flwr_dir=args.flwr_dir,
+        parent_pid=args.parent_pid,
     )
 
 
@@ -83,6 +84,13 @@ def _parse_args() -> argparse.ArgumentParser:
             - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
             - `$HOME/.flwr/` in all other cases
         """,
+    )
+    parser.add_argument(
+        "--parent-pid",
+        type=int,
+        default=None,
+        help="The PID of the parent process. When set, the process will terminate "
+        "when the parent process exits.",
     )
     return parser
 
