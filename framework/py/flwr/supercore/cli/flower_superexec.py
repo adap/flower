@@ -22,7 +22,12 @@ from flwr.common import EventType, event
 from flwr.common.constant import ExecPluginType
 from flwr.common.logger import log
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
-from flwr.supercore.superexec.plugin import ClientAppExecPlugin, ExecPlugin
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+from flwr.supercore.superexec.plugin import (
+    ClientAppExecPlugin,
+    ExecPlugin,
+    ServerAppExecPlugin,
+)
 from flwr.supercore.superexec.run_superexec import run_superexec
 
 
@@ -96,4 +101,6 @@ def _get_plugin_and_stub_class(
     """Get the plugin class and stub class based on the plugin type."""
     if plugin_type == ExecPluginType.CLIENT_APP:
         return ClientAppExecPlugin, ClientAppIoStub
+    if plugin_type == ExecPluginType.SERVER_APP:
+        return ServerAppExecPlugin, ServerAppIoStub
     raise ValueError(f"Unknown plugin type: {plugin_type}")
