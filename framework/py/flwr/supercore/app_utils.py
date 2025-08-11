@@ -29,6 +29,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 
 if os.name == "nt":
     from ctypes import windll  # type: ignore
@@ -70,7 +71,9 @@ def start_parent_process_monitor(
     threading.Thread(target=monitor, daemon=True).start()
 
 
-def simple_get_token(stub: Union[ClientAppIoStub, ServerAppIoStub]) -> str:
+def simple_get_token(
+    stub: Union[ClientAppIoStub, ServerAppIoStub, SimulationIoStub]
+) -> str:
     """Get a token from SuperLink/SuperNode.
 
     This shall be removed once the SuperExec is fully implemented.
