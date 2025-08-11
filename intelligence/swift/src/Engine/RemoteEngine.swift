@@ -64,7 +64,9 @@ class RemoteEngine: RemoteEngineProtocol {
       try await NetworkService.streamElement(payload, authorization: authorization, on: url) {
         (streamElement: ServerSentEvent) in
         guard let json = streamElement.data.data(using: .utf8) else { return }
-        guard let chunk = try? NetworkService.parseJson(from: json, as: StreamChunk.self) else { return }
+        guard let chunk = try? NetworkService.parseJson(from: json, as: StreamChunk.self) else {
+          return
+        }
         for choice in chunk.choices {
           let deltaContent = choice.delta.content
           onStreamEvent?(StreamEvent(chunk: deltaContent))
