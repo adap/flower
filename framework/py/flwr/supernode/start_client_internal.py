@@ -41,6 +41,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
+    ExecPluginType,
 )
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
@@ -166,7 +167,7 @@ def start_client_internal(
     if isolation == ISOLATION_MODE_SUBPROCESS:
         command = ["flower-superexec", "--insecure"]
         command += ["--appio-api-address", clientappio_api_address]
-        command += ["--plugin-type", "clientapp"]
+        command += ["--plugin-type", ExecPluginType.CLIENT_APP]
         command += ["--parent-pid", str(os.getpid())]
         # pylint: disable-next=consider-using-with
         subprocess.Popen(command)
