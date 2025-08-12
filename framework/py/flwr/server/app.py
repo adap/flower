@@ -21,6 +21,7 @@ import importlib.util
 import multiprocessing
 import multiprocessing.context
 import os
+import subprocess
 import sys
 import threading
 from collections.abc import Sequence
@@ -55,6 +56,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     EventLogWriterType,
+    ExecPluginType,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit
@@ -219,10 +221,10 @@ def run_superlink() -> None:
 
     # Determine Exec plugin
     # If simulation is used, don't start ServerAppIo and Fleet APIs
-    sim_exec = executor.__class__.__qualname__ == "SimulationEngine"
+    is_simulation = executor.__class__.__qualname__ == "SimulationEngine"
     bckg_threads: list[threading.Thread] = []
 
-    if sim_exec:
+    if is_simulation:
         simulationio_server: grpc.Server = run_simulationio_api_grpc(
             address=simulationio_address,
             state_factory=state_factory,
@@ -340,25 +342,18 @@ def run_superlink() -> None:
         io_address = (
             f"{CLIENT_OCTET}:{_port}" if _octet == SERVER_OCTET else serverappio_address
         )
-        address_arg = (
-            "--simulationio-api-address" if sim_exec else "--serverappio-api-address"
-        )
-        address = simulationio_address if sim_exec else io_address
-        cmd = "flwr-simulation" if sim_exec else "flwr-serverapp"
-
-        # Scheduler thread
-        scheduler_th = threading.Thread(
-            target=_flwr_scheduler,
-            args=(
-                state_factory,
-                address_arg,
-                address,
-                cmd,
-            ),
-            daemon=True,
-        )
-        scheduler_th.start()
-        bckg_threads.append(scheduler_th)
+        command = ["flower-superexec", "--insecure"]
+        command += [
+            "--appio-api-address",
+            simulationio_address if is_simulation else io_address,
+        ]
+        command += [
+            "--plugin-type",
+            ExecPluginType.SIMULATION if is_simulation else ExecPluginType.SERVER_APP,
+        ]
+        command += ["--parent-pid", str(os.getpid())]
+        # pylint: disable-next=consider-using-with
+        subprocess.Popen(command)
 
     # Graceful shutdown
     register_exit_handlers(
