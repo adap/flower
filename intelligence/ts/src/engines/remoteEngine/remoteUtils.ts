@@ -13,6 +13,7 @@
 // limitations under the License.
 // =============================================================================
 
+import { SDK, VERSION } from '../../constants';
 import { EmbeddingInput, FailureCode, Message, ResponseFormat, Result, Tool } from '../../typing';
 import { ChatCompletionsRequest, EmbedRequest } from './typing';
 
@@ -122,5 +123,7 @@ export function getHeaders(apiKey: string) {
   return {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${apiKey}`,
+    'FI-SDK-Type': SDK,
+    'FI-SDK-Version': VERSION,
   };
 }

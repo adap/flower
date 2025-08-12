@@ -57,15 +57,15 @@ from flwr.common.serde import (
     run_status_to_proto,
 )
 from flwr.common.typing import RunStatus
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    PullAppInputsRequest,
+    PullAppInputsResponse,
+    PushAppOutputsRequest,
+)
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetFederationOptionsRequest,
     GetFederationOptionsResponse,
     UpdateRunStatusRequest,
-)
-from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
-    PullSimulationInputsRequest,
-    PullSimulationInputsResponse,
-    PushSimulationOutputsRequest,
 )
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
@@ -128,8 +128,8 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
 
         try:
             # Pull SimulationInputs from LinkState
-            req = PullSimulationInputsRequest()
-            res: PullSimulationInputsResponse = conn._stub.PullSimulationInputs(req)
+            req = PullAppInputsRequest()
+            res: PullAppInputsResponse = conn._stub.PullAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)
                 run_status = None
@@ -240,10 +240,8 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
 
             # Send resulting context
             context_proto = context_to_proto(updated_context)
-            out_req = PushSimulationOutputsRequest(
-                run_id=run.run_id, context=context_proto
-            )
-            _ = conn._stub.PushSimulationOutputs(out_req)
+            out_req = PushAppOutputsRequest(run_id=run.run_id, context=context_proto)
+            _ = conn._stub.PushAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
 
