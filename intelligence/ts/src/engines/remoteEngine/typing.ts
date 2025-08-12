@@ -89,6 +89,10 @@ export interface ChatCompletionsResponse {
   usage: Usage;
 }
 
+interface ServerSentEvent {
+  data: string;
+}
+
 interface StreamChunk {
   object: 'chat.completion.chunk';
   choices: StreamChoice[];
@@ -129,6 +133,12 @@ export function isPlatformHttpError(o: unknown): o is PlatformHttpError {
     typeof o.detail.code === 'string' &&
     'message' in o.detail &&
     typeof o.detail.message === 'string'
+  );
+}
+
+export function isServerSentEvent(o: unknown): o is ServerSentEvent {
+  return (
+    typeof o === 'object' && o !== null && typeof (o as Record<string, unknown>).data === 'string'
   );
 }
 
