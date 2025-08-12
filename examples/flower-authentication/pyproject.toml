@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Federated Learning with PyTorch and authenticated Flower "
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.19.0",
+    "flwr[simulation]>=1.20.0",
     "flwr-datasets[vision]>=0.5.0",
     "torch>=2.5.0,<3.0.0",
     "torchvision>=0.20.1,<0.21.0",
@@ -35,5 +35,5 @@ batch-size = 32
 default = "my-federation"
 
 [tool.flwr.federations.my-federation]
-address = "127.0.0.1:9093" # Address of the Exec API
+address = "127.0.0.1:9093" # Address of the Control API
 root-certificates = "certificates/ca.crt"

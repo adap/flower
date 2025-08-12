@@ -259,7 +259,7 @@ def try_obtain_cli_auth_plugin(
 def init_channel(
     app: Path, federation_config: dict[str, Any], auth_plugin: Optional[CliAuthPlugin]
 ) -> grpc.Channel:
-    """Initialize gRPC channel to the Exec API."""
+    """Initialize gRPC channel to the Control API."""
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
         app, federation_config
     )
@@ -296,9 +296,9 @@ def init_channel(
 def flwr_cli_grpc_exc_handler() -> Iterator[None]:
     """Context manager to handle specific gRPC errors.
 
-    It catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED, and
-    PERMISSION_DENIED statuses, informs the user, and exits the application. All other
-    exceptions will be allowed to escape.
+    It catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED,
+    UNAVAILABLE, and PERMISSION_DENIED statuses, informs the user, and exits the
+    application. All other exceptions will be allowed to escape.
     """
     try:
         yield
@@ -326,6 +326,14 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
             )
             # pylint: disable=E1101
             typer.secho(e.details(), fg=typer.colors.RED, bold=True)
+            raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.UNAVAILABLE:
+            typer.secho(
+                "Connection to the SuperLink is unavailable. Please check your network "
+                "connection and 'address' in the federation configuration.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
             raise typer.Exit(code=1) from None
         if (
             e.code() == grpc.StatusCode.NOT_FOUND

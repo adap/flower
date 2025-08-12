@@ -49,7 +49,7 @@ Create a YAML configuration file with the following content:
       oidc_client_secret: # The corresponding Client Secret
 
     authorization:
-      auth_type: openfga
+      authz_type: openfga
       authz_url:          # The base OpenFGA API URL
       store_id:           # The store ID containing the model store
       model_id:           # The model ID containing the latest authorization model for the SuperLink
@@ -88,7 +88,7 @@ section in the ``pyproject.toml`` of the Flower app you want to run:
     default = "my-federation"
 
     [tool.flwr.federations.my-federation]
-    address = "<SUPERLINK-ADDRESS>:9093"   # Address of the SuperLink Exec API
+    address = "<SUPERLINK-ADDRESS>:9093"   # Address of the SuperLink Control API
     root-certificates = "<PATH/TO/ca.crt>" # TLS certificate set for the SuperLink. Required for self-signed certificates.
     enable-user-auth = true                # Enables the user auth mechanism on the `flwr` CLI side
 

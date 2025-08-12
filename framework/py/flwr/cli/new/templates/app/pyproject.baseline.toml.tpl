@@ -1,3 +1,8 @@
+# =====================================================================
+# For a full TOML configuration guide, check the Flower docs:
+# https://flower.ai/docs/framework/how-to-configure-pyproject-toml.html
+# =====================================================================
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -7,11 +12,12 @@ name = "$package_name"
 version = "1.0.0"
 description = ""
 license = "Apache-2.0"
+# Dependencies for your Flower App
 dependencies = [
-    "flwr[simulation]>=1.20.0",
+    "flwr[simulation]>=1.21.0",
     "flwr-datasets[vision]>=0.5.0",
-    "torch==2.6.0",
-    "torchvision==0.21.0",
+    "torch==2.7.1",
+    "torchvision==0.22.1",
 ]
 
 [tool.hatch.metadata]
@@ -117,18 +123,23 @@ packages = ["."]
 [tool.flwr.app]
 publisher = "$username"
 
+# Point to your ServerApp and ClientApp objects
+# Format: "<module>:<object>"
 [tool.flwr.app.components]
 serverapp = "$import_name.server_app:app"
 clientapp = "$import_name.client_app:app"
 
+# Custom config values accessible via `context.run_config`
 [tool.flwr.app.config]
 num-server-rounds = 3
 fraction-fit = 0.5
 local-epochs = 1
 
+# Default federation to use when running the app
 [tool.flwr.federations]
 default = "local-simulation"
 
+# Local simulation federation with 10 virtual SuperNodes
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 2

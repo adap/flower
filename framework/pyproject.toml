@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.20.0"
+version = "1.21.0"
 description = "Flower: A Friendly Federated AI Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -57,6 +57,7 @@ flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
 # Deployment Engine
 flower-superlink = "flwr.server.app:run_superlink"
 flower-supernode = "flwr.supernode.cli:flower_supernode"
+flower-superexec = "flwr.supercore.cli:flower_superexec"
 flwr-serverapp = "flwr.server.serverapp:flwr_serverapp"
 flwr-clientapp = "flwr.supernode.cli:flwr_clientapp"
 

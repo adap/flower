@@ -14,6 +14,10 @@
 // =============================================================================
 
 import { assert, describe, it, expect, beforeEach, vi } from 'vitest';
+import { CryptographyHandler } from './remoteEngine/cryptoHandler';
+import { KeyManager } from './remoteEngine/keyManager';
+import { NetworkService } from './remoteEngine/networkService';
+import { getTimestamp } from './remoteEngine/cryptoUtils';
 
 const API_KEY = process.env.FI_API_KEY ?? '';
 const REMOTE_URL = process.env.FI_DEV_REMOTE_URL ?? '';
@@ -27,8 +31,6 @@ vi.mock('./constants', () => ({
   SDK: 'TS',
   ALLOWED_ROLES: ['system', 'assistant', 'user'],
 }));
-
-import { getTimestamp, CryptographyHandler, KeyManager, NetworkService } from './remoteEngine';
 
 describe('CryptographyHandler', () => {
   let cryptographyHandler: CryptographyHandler;

@@ -16,6 +16,7 @@
 
 
 import argparse
+import gc
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
 from time import sleep
@@ -270,6 +271,13 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                         run_id=run.run_id, run_status=run_status_proto
                     )
                 )
+
+            # Clean up the Context if it exists
+            try:
+                del updated_context
+            except NameError:
+                pass
+            gc.collect()
 
         # Stop the loop if `flwr-simulation` is expected to process a single run
         if run_once:

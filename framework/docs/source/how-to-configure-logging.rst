@@ -20,7 +20,7 @@ example, to launch your ``SuperLink`` with ``DEBUG`` logs, use:
         --ssl-keyfile certificates/server.key
 
     INFO 2025-01-27 11:46:41,690:      Starting Flower SuperLink
-    INFO 2025-01-27 11:46:41,697:      Flower Deployment Engine: Starting Exec API on 0.0.0.0:9093
+    INFO 2025-01-27 11:46:41,697:      Flower Deployment Engine: Starting Control API on 0.0.0.0:9093
     INFO 2025-01-27 11:46:41,724:      Flower ECE: Starting ServerAppIo API (gRPC-rere) on 0.0.0.0:9091
     INFO 2025-01-27 11:46:41,728:      Flower ECE: Starting Fleet API (gRPC-rere) on 0.0.0.0:9092
     DEBUG 2025-01-27 11:46:41,730:     Started flwr-serverapp scheduler thread.

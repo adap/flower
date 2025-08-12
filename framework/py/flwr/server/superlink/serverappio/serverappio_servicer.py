@@ -43,6 +43,8 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    ListAppsToLaunchRequest,
+    ListAppsToLaunchResponse,
     PullAppInputsRequest,
     PullAppInputsResponse,
     PullAppMessagesRequest,
@@ -51,6 +53,8 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PushAppMessagesResponse,
     PushAppOutputsRequest,
     PushAppOutputsResponse,
+    RequestTokenRequest,
+    RequestTokenResponse,
 )
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
@@ -103,6 +107,42 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
         self.lock = threading.RLock()
+
+    def ListAppsToLaunch(
+        self,
+        request: ListAppsToLaunchRequest,
+        context: grpc.ServicerContext,
+    ) -> ListAppsToLaunchResponse:
+        """Get run IDs with pending messages."""
+        log(DEBUG, "ServerAppIoServicer.ListAppsToLaunch")
+
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Get IDs of runs in pending status
+        run_ids = state.get_run_ids(flwr_aid=None)
+        pending_run_ids = []
+        for run_id, status in state.get_run_status(run_ids).items():
+            if status.status == Status.PENDING:
+                pending_run_ids.append(run_id)
+
+        # Return run IDs
+        return ListAppsToLaunchResponse(run_ids=pending_run_ids)
+
+    def RequestToken(
+        self, request: RequestTokenRequest, context: grpc.ServicerContext
+    ) -> RequestTokenResponse:
+        """Request token."""
+        log(DEBUG, "ServerAppIoServicer.RequestToken")
+
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Attempt to create a token for the provided run ID
+        token = state.create_token(request.run_id)
+
+        # Return the token
+        return RequestTokenResponse(token=token or "")
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
@@ -289,14 +329,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Init access to LinkState
         state = self.state_factory.state()
 
+        # Validate the token
+        run_id = self._verify_token(request.token, context)
+
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
-            # Attempt getting the run_id of a pending run
-            run_id = state.get_pending_run_id()
-            # If there's no pending run, return an empty response
-            if run_id is None:
-                return PullAppInputsResponse()
-
             # Init access to Ffs
             ffs = self.ffs_factory.ffs()
 
@@ -327,6 +364,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Push ServerApp process outputs."""
         log(DEBUG, "ServerAppIoServicer.PushAppOutputs")
 
+        # Validate the token
+        run_id = self._verify_token(request.token, context)
+
         # Init state and store
         state = self.state_factory.state()
         store = self.objectstore_factory.store()
@@ -341,6 +381,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
+
+        # Remove the token
+        state.delete_token(run_id)
         return PushAppOutputsResponse()
 
     def UpdateRunStatus(
@@ -507,6 +550,18 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         store.delete(request.message_object_id)
 
         return ConfirmMessageReceivedResponse()
+
+    def _verify_token(self, token: str, context: grpc.ServicerContext) -> int:
+        """Verify the token and return the associated run ID."""
+        state = self.state_factory.state()
+        run_id = state.get_run_id_by_token(token)
+        if run_id is None or not state.verify_token(run_id, token):
+            context.abort(
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token.",
+            )
+            raise RuntimeError("This line should never be reached.")
+        return run_id
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:

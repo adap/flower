@@ -4,21 +4,20 @@ isort:skip_file
 """
 import abc
 import flwr.proto.appio_pb2
-import flwr.proto.clientappio_pb2
 import flwr.proto.message_pb2
 import flwr.proto.run_pb2
 import grpc
 
 class ClientAppIoStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
-    GetRunIdsWithPendingMessages: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.clientappio_pb2.GetRunIdsWithPendingMessagesRequest,
-        flwr.proto.clientappio_pb2.GetRunIdsWithPendingMessagesResponse]
+    ListAppsToLaunch: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.ListAppsToLaunchRequest,
+        flwr.proto.appio_pb2.ListAppsToLaunchResponse]
     """Get run IDs with pending messages"""
 
     RequestToken: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.clientappio_pb2.RequestTokenRequest,
-        flwr.proto.clientappio_pb2.RequestTokenResponse]
+        flwr.proto.appio_pb2.RequestTokenRequest,
+        flwr.proto.appio_pb2.RequestTokenResponse]
     """Request token"""
 
     GetRun: grpc.UnaryUnaryMultiCallable[
@@ -64,18 +63,18 @@ class ClientAppIoStub:
 
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def GetRunIdsWithPendingMessages(self,
-        request: flwr.proto.clientappio_pb2.GetRunIdsWithPendingMessagesRequest,
+    def ListAppsToLaunch(self,
+        request: flwr.proto.appio_pb2.ListAppsToLaunchRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.clientappio_pb2.GetRunIdsWithPendingMessagesResponse:
+    ) -> flwr.proto.appio_pb2.ListAppsToLaunchResponse:
         """Get run IDs with pending messages"""
         pass
 
     @abc.abstractmethod
     def RequestToken(self,
-        request: flwr.proto.clientappio_pb2.RequestTokenRequest,
+        request: flwr.proto.appio_pb2.RequestTokenRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.clientappio_pb2.RequestTokenResponse:
+    ) -> flwr.proto.appio_pb2.RequestTokenResponse:
         """Request token"""
         pass
 

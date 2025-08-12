@@ -66,7 +66,7 @@ where,
       - IPv4 or IPv6 address of the actor
     - - ``event.action``
       - Name of the servicer method, e.g.
-        ``ExecServicer.StartRun``/``FleetServicer.PullMessages``
+        ``ControlServicer.StartRun``/``FleetServicer.PullMessages``
     - - ``event.run_id``
       - The run ID of the Flower workflow
     - - ``event.fab_hash``
@@ -91,21 +91,21 @@ Example Outputs
 ---------------
 
 Here is an example output when a user runs ``flwr run`` (note the ``"action":
-"ExecServicer.StartRun"``):
+"ControlServicer.StartRun"``):
 
 .. code-block:: shell
 
-    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:24:21Z", "actor": {"actor_id": "...", "description": "...", "ip_address": "..."}, "event": {"action": "ExecServicer.StartRun", "run_id": "...", "fab_hash": "..."}, "status": "started"}
-    INFO :      ExecServicer.StartRun
-    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:24:21Z", "actor": {"actor_id": "...", "description": "...", "ip_address": "..."}, "event": {"action": "ExecServicer.StartRun", "run_id": "...", "fab_hash": "..."}, "status": "completed"}
+    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:24:21Z", "actor": {"actor_id": "...", "description": "...", "ip_address": "..."}, "event": {"action": "ControlServicer.StartRun", "run_id": "...", "fab_hash": "..."}, "status": "started"}
+    INFO :      ControlServicer.StartRun
+    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:24:21Z", "actor": {"actor_id": "...", "description": "...", "ip_address": "..."}, "event": {"action": "ControlServicer.StartRun", "run_id": "...", "fab_hash": "..."}, "status": "completed"}
 
 Here is another example output when a user runs ``flwr ls``:
 
 .. code-block:: shell
 
-    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:26:35Z", "actor": {"actor_id": "...", "description": "...", "ip_address": "..."}, "event": {"action": "ExecServicer.ListRuns", "run_id": null, "fab_hash": null}, "status": "started"}
-    INFO :      ExecServicer.List
-    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:26:35Z", "actor": {"actor_id": "...", "description": "...", "ip_address": "..."}, "event": {"action": "ExecServicer.ListRuns", "run_id": null, "fab_hash": null}, "status": "completed"}
+    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:26:35Z", "actor": {"actor_id": "...", "description": "...", "ip_address": "..."}, "event": {"action": "ControlServicer.ListRuns", "run_id": null, "fab_hash": null}, "status": "started"}
+    INFO :      ControlServicer.List
+    INFO :      [AUDIT] {"timestamp": "2025-07-12T10:26:35Z", "actor": {"actor_id": "...", "description": "...", "ip_address": "..."}, "event": {"action": "ControlServicer.ListRuns", "run_id": null, "fab_hash": null}, "status": "completed"}
 
 And here is an example when a SuperNode pulls a message from the SuperLink:
 

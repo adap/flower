@@ -32,6 +32,7 @@ class ExitCode:
     SUPERLINK_LICENSE_INVALID = 101
     SUPERLINK_LICENSE_MISSING = 102
     SUPERLINK_LICENSE_URL_INVALID = 103
+    SUPERLINK_INVALID_ARGS = 104
 
     # ServerApp-specific exit codes (200-299)
 
@@ -74,6 +75,10 @@ EXIT_CODE_HELP = {
     ExitCode.SUPERLINK_LICENSE_URL_INVALID: (
         "The license URL is invalid. Please ensure that the `FLWR_LICENSE_URL` "
         "environment variable is set to a valid URL."
+    ),
+    ExitCode.SUPERLINK_INVALID_ARGS: (
+        "Invalid arguments provided to SuperLink. Use `--help` check for the correct "
+        "usage. Alternatively, check the documentation."
     ),
     # ServerApp-specific exit codes (200-299)
     # SuperNode-specific exit codes (300-399)
