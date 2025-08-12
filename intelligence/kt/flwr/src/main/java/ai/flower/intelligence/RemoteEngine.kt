@@ -36,7 +36,13 @@ internal class RemoteEngine(
 ) : RemoteEngineProtocol {
 
   private val client =
-    HttpClient(CIO) { install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) } }
+    HttpClient(CIO) {
+      install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+      defaultRequest {
+        header("FI-SDK-Type", "KT")
+        header("FI-SDK-Version", Constants.VERSION)
+      }
+    }
 
   private val authorization: String
     get() = "Bearer $apiKey"
