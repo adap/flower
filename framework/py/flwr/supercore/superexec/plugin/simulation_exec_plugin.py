@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower SuperExec plugins."""
+"""Simple Flower SuperExec plugin for simulation processes."""
 
 
-from .clientapp_exec_plugin import ClientAppExecPlugin
-from .exec_plugin import ExecPlugin
-from .serverapp_exec_plugin import ServerAppExecPlugin
-from .simulation_exec_plugin import SimulationExecPlugin
+from .base_exec_plugin import BaseExecPlugin
 
-__all__ = [
-    "ClientAppExecPlugin",
-    "ExecPlugin",
-    "ServerAppExecPlugin",
-    "SimulationExecPlugin",
-]
+
+class SimulationExecPlugin(BaseExecPlugin):
+    """Simple Flower SuperExec plugin for simulation processes.
+
+    The plugin always selects the first candidate run ID.
+    """
+
+    command = "flwr-simulation"
+    appio_api_address_arg = "--simulationio-api-address"
