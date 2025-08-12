@@ -22,15 +22,22 @@ import "flwr/proto/log.proto";
 import "flwr/proto/message.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
+import "flwr/proto/appio.proto";
 
 service SimulationIo {
+
+  // List runs to launch
+  rpc ListAppsToLaunch(ListAppsToLaunchRequest)
+      returns (ListAppsToLaunchResponse) {}
+
+  // Request token for a run
+  rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
+
   // Pull Simulation inputs
-  rpc PullSimulationInputs(PullSimulationInputsRequest)
-      returns (PullSimulationInputsResponse) {}
+  rpc PullAppInputs(PullAppInputsRequest) returns (PullAppInputsResponse) {}
 
   // Push Simulation outputs
-  rpc PushSimulationOutputs(PushSimulationOutputsRequest)
-      returns (PushSimulationOutputsResponse) {}
+  rpc PushAppOutputs(PushAppOutputsRequest) returns (PushAppOutputsResponse) {}
 
   // Update the status of a given run
   rpc UpdateRunStatus(UpdateRunStatusRequest)
@@ -50,18 +57,3 @@ service SimulationIo {
   rpc SendAppHeartbeat(SendAppHeartbeatRequest)
       returns (SendAppHeartbeatResponse) {}
 }
-
-// PullSimulationInputs messages
-message PullSimulationInputsRequest {}
-message PullSimulationInputsResponse {
-  Context context = 1;
-  Run run = 2;
-  Fab fab = 3;
-}
-
-// PushSimulationOutputs messages
-message PushSimulationOutputsRequest {
-  uint64 run_id = 1;
-  Context context = 2;
-}
-message PushSimulationOutputsResponse {}
