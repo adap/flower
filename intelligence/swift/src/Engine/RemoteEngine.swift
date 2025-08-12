@@ -118,6 +118,9 @@ enum NetworkService {
       urlRequest.addValue(authorization, forHTTPHeaderField: "Authorization")
     }
 
+    urlRequest.addValue(sdk, forHTTPHeaderField: "FI-SDK-Type")
+    urlRequest.addValue(version, forHTTPHeaderField: "FI-SDK-Version")
+
     urlRequest.httpBody = body
 
     return urlRequest
