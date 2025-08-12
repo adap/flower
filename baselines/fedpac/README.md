@@ -1,115 +1,127 @@
 ---
-title: Personalized Federated Learning with Feature Alignment and Classifier Collaboration
-url: https://openreview.net/forum?id=SXZr8aDKia
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline
+title: title of the paper # TODO
+url: https://arxiv.org/abs/2007.14390 # TODO: update with the link to your paper
+labels: [label1, label2] # TODO: please add between 4 and 10 single-word (maybe two-words) labels (e.g. system heterogeneity, image classification, asynchronous, weight sharing, cross-silo). Do not use "". Remove this comment once you are done.
+dataset: [dataset1, dataset2] # TODO: list of datasets you include in your baseline. Do not use "". Remove this comment once you are done.
 ---
 
-# Personalized Federated Learning with Feature Alignment and Classifier Collaboration
+> [!IMPORTANT]
+> This is the template for your `README.md`. Please fill-in the information in all areas with a :warning: symbol.
+> Please refer to the [Flower Baselines contribution](https://flower.ai/docs/baselines/how-to-contribute-baselines.html) and [Flower Baselines usage](https://flower.ai/docs/baselines/how-to-use-baselines.html) guides for more details.
+> Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
+> Please remove this [!IMPORTANT] block once you are done with your `README.md` as well as all the `:warning:` symbols and the comments next to them.
 
-> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
+> [!IMPORTANT]
+> To help having all baselines similarly formatted and structured, we have included two scripts in `baselines/dev` that when run will format your code and run some tests checking if it's formatted.
+> These checks use standard packages such as `isort`, `black`, `pylint` and others. You as a baseline creator will need to install additional packages. These are already specified in the `pyproject.toml` of
+> your baseline. Follow these steps:
 
-**Paper:** [openreview.net/forum?id=SXZr8aDKia](https://openreview.net/forum?id=SXZr8aDKia)
+```bash
+# Create a python env
+pyenv virtualenv 3.10.14 fedpac
 
-****Authors:**** Jian Xu, Xinyi Tong, Shao-Lun Huang
+# Activate it
+pyenv activate fedpac
 
-****Abstract:**** Data heterogeneity is one of the most challenging issues in federated learning, which motivates a variety of approaches to learn personalized models for participating clients. One such approach in deep neural networks based tasks is employing a shared feature representation and learning a customized classifier head for each client. However, previous works do not utilize the global knowledge during local representation learning and also neglect the fine-grained collaboration between local classifier heads, which limits the model generalization ability. In this work, we conduct explicit local-global feature alignment by leveraging global semantic knowledge for learning a better representation. Moreover, we quantify the benefit of classifier combination for each client as a function of the combining weights and derive an optimization problem for estimating optimal weights. Finally, extensive evaluation results on benchmark datasets with various heterogeneous data scenarios demonstrate the effectiveness of our proposed method.
+# Install project including developer packages
+# Note the `-e` this means you install it in editable mode 
+# so even if you change the code you don't need to do `pip install`
+# again. However, if you add a new dependency to `pyproject.toml` you
+# will need to re-run the command below
+pip install -e ".[dev]"
+
+# Even without modifying or adding new code, you can run your baseline
+# with the placeholder code generated when you did `flwr new`. If you
+# want to test this to familiarise yourself with how flower apps are
+# executed, execute this from the directory where you `pyproject.toml` is:
+flwr run .
+
+# At anypoint during the process of creating your baseline you can 
+# run the formatting script. For this do:
+cd .. # so you are in the `flower/baselines` directory
+
+# Run the formatting script (it will auto-correct issues if possible)
+./dev/format-baseline.sh fedpac
+
+# Then, if the above is all good, run the tests.
+./dev/test-baseline.sh fedpac
+```
+
+> [!IMPORTANT]
+> When you open a PR to get the baseline merged into the main Flower repository, the `./dev/test-baseline.sh` script will run. Only if test pass, the baseline can be merged. 
+> Some issues highlighted by the tests script are easier than others to fix. Do not hesitate in reaching out for help to us (e.g. as a comment in your PR) if you are stuck with these.
+> Before opening your PR, please remove the code snippet above as well all the [!IMPORTANT] message blocks. Yes, including this one.
+
+# :warning: *_Title of your baseline_* # Also copy this title to the `description` in the `[project]` section of your `pyproject.toml`.
+
+> [!NOTE] 
+> If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
+
+**Paper:** :warning: *_add the URL of the paper page (not to the .pdf). For instance if you link a paper on ArXiv, add here the URL to the abstract page (e.g. [paper](https://arxiv.org/abs/1512.03385)). If your paper is in from a journal or conference proceedings, please follow the same logic._*
+
+**Authors:** :warning: *_list authors of the paper_*
+
+**Abstract:** :warning: *_add here the abstract of the paper you are implementing_*
 
 
 ## About this baseline
 
-****What’s implemented:**** The code in this directory replicates the experiments in *Personalized Federated Learning with Feature Alignment and Classifier Collaboration* (Xu et al., 2023) for EMNIST and CIFAR10, which proposed the FedPAC algorithm. Concretely, it replicates the results for EMNIST and CIFAR10 in Table 1.
+**What’s implemented:** :warning: *_Concisely describe what experiment(s) (e.g. Figure 1, Table 2, etc.) in the publication can be replicated by running the code. Please only use a few sentences. ”_*
 
-****Datasets:**** EMNIST and CIFAR10 from PyTorch's Torchvision
-<!-- 
-****Hardware Setup:**** These experiments were run on a desktop machine with 24 CPU threads. Any machine with 4 CPU cores or more would be able to run it in a reasonable amount of time. Note: we install PyTorch with GPU support but by default, the entire experiment runs on CPU-only mode. -->
+**Datasets:** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset). We highly recommend using [FlowerDatasets](https://flower.ai/docs/datasets/index.html) to download and partition your dataset. If you have other ways to download the data, you can also use `FlowerDatasets` to partition it._*
 
-****Contributors:**** Apsal S Kalathukunnel
+**Hardware Setup:** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Indicate how long it took to run the experiments. Someone out there might not have access to the same resources you have so, could you list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+
+**Contributors:** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
 
 
 ## Experimental Setup
 
-****Task:**** Image classification
+**Task:** :warning: *_what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them_*
 
-****Model:**** This directory implements twp different CNN models
-for EMNIST/Fashion-MNIST and CIFAR-10/CINIC-10, respectively. The first CNN model is constructed by two convolution layers with 16 and 32 channels respectively, each followed by a max pooling layer, and two fully-connected layers with 128 and 10 units before softmax output. LeakyReLU is used as the activation function. The second CNN model is similar to the first one but has one more convolution layer with 64 channels.
+**Model:** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
 
-****Dataset:**** Two datasets used for experiments are EMNIST and CIFAR10. EMNIST (Extended MNIST) is a 62-class image classification dataset, extending the classic MNIST dataset. It contains 62 categories of handwritten characters, including 10 digits, 26
-uppercase letters and 26 lowercase letters. CIFAR-10 with 10 categories of color images. In the experiments, all clients have the same data size, in which s% of data (20% by default) are uniformly sampled from all classes, and the remaining (100 - s)% from a set of dominant classes for each client. Clients are explicitly divided into multiple groups where clients in each group share the same dominant
-classes, and we also intentionally keep the size of local training data small to pose the need for FL. The testing data on each client has the same distribution as the training data.
+**Dataset:** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
 
-
-
-****Training Hyperparameters:**** The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
-
-| Description | Default Value |
-| ----------- | ----- |
-| total clients | 20 |
-| number of rounds | 200 |
-|batch_size | 50 |
-|learning_rate | 0.02 |
-|weight_decay | 5e-4 |
-|momentum | 0.5 |
-| client resources | {'num_cpus': 2.0, 'num_gpus': 0.0 }|
-| optimizer | SGD|
-
+**Training Hyperparameters:** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
 
 
 ## Environment Setup
 
-To construct the Python environment follow these steps:
+:warning: _Specify the steps to create and activate your environment and install the baseline project. Most baselines are expected to require minimal steps as shown below. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+
+:warning: _The dependencies for your baseline are listed in the `pyproject.toml`, extend it with additional packages needed for your baseline._
+
+:warning: _Baselines should use Python 3.10, [pyenv](https://github.com/pyenv/pyenv), and the [virtualenv](https://github.com/pyenv/pyenv-virtualenv) plugging. 
 
 ```bash
-# Set Python 3.10
-pyenv local 3.10.6
-# Tell poetry to use python 3.10
-poetry env use 3.10.6
-# install the base Poetry environment
-poetry install
+# Create the virtual environment
+pyenv virtualenv 3.10.14 <name-of-your-baseline-env>
 
-# activate the environment
-poetry shell
+# Activate it
+pyenv activate <name-of-your-baseline-env>
 
+# Install the baseline
+pip install -e .
 ```
 
+:warning: _If your baseline requires running some script before starting an experiment, please indicate so here_.
 
 ## Running the Experiments
 
-To run this `FedPAC` baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
+:warning: _Make sure you have adjusted the `client-resources` in the federation in `pyproject.toml` so your simulation makes the best use of the system resources available._
 
-To run CIFAR-10 experiments:
+:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
 
+:warning: _You might want to add more hyperparameters and settings for your baseline. You can do so by extending `[tool.flwr.app.config]` in `pyproject.toml`. In addition, you can create a new `.toml` file that can be passed with the `--run-config` command (see below an example) to override several config values **already present** in `pyproject.toml`._
 ```bash
-python -m fedpac.main --config-name cifar10 # this will run using the default settings in the `conf/cifar10.yaml`
+# it is likely that for one experiment you need to override some arguments.
+flwr run . --run-config learning-rate=0.1,coefficient=0.123
 
-# experiment with 100 clients 
-python -m fedpac.main --config-name cifar10 num_clients=100 strategy.fraction_fit=0.3 strategy.fraction_evaluate=0.3 
-
-```
-To run EMNIST experiments:
-
-```bash
-python -m fedpac.main --config-name emnist # this will run using the default settings in the `conf/emnist.yaml`
-# if you run this baseline with a larger model, you might want to use the GPU (not used by default).
-# you can enable this by overriding the `server_device` and `client_resources` config. For example
-# the below will run the server model on the GPU and 4 clients will be allowed to run concurrently on a GPU (assuming you also meet the CPU criteria for clients)
-python -m fedpac.main server_device=cuda client_resources.num_gpus=0.25
-python -m fedpac.main --config-name emnist num_clients=100 strategy.fraction_fit=0.3 strategy.fraction_evaluate=0.3
+# or you might want to load different `.toml` configs all together:
+flwr run . --run-config <my-big-experiment-config>.toml
 ```
 
-To run using FedAvg:
-```bash
-# this will run the same experiments with FedAvg.  
-python -m fedpac.main --config-name config10-fedavg
-python -m fedpac.main --config-name emnist-fedavg
-python -m fedpac.main --config-name cifar10-fedavg num_clients=100 strategy.fraction_fit=0.3 strategy.fraction_evaluate=0.3
-python -m fedpac.main --config-name emnist-fedavg num_clients=100 strategy.fraction_fit=0.3 strategy.fraction_evaluate=0.3
-
-```
-## Expected Results
-
-|Method | CIFAR10 (20 clients) | CIFAR10 (100 clients) | EMNIST (20 clients)| EMNIST (100 clients)|
-|-------|--------------------------|---------------------------|------------------------|-------------------------|
-|FedPAC | 68.85                    | 75.39                     |72.6                    | 77.09                   |
-|FedAvg | 66.9                     | 73.01                     |71.2                    | 76.4                    |
-
+:warning: _It is preferable to show a single command (or multiple commands if they belong to the same experiment) and then a table/plot with the expected results, instead of showing all the commands first and then all the results/plots._
+:warning: _If you present plots or other figures, please include either a Jupyter notebook showing how to create them or include a utility function that can be called after the experiments finish running._
+:warning: If you include plots or figures, save them in `.png` format and place them in a new directory named `_static` at the same level as your `README.md`.

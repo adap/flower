@@ -1,111 +1,147 @@
-[build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.masonry.api"
+# =====================================================================
+# For a full TOML configuration guide, check the Flower docs:
+# https://flower.ai/docs/framework/how-to-configure-pyproject-toml.html
+# =====================================================================
 
-[tool.poetry]
-name = "flwr_baselines"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fedpac"
 version = "1.0.0"
-description = "Flower Baselines"
+description = ""
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.ai>"]
-readme = "README.md"
-homepage = "https://flower.ai"
-repository = "https://github.com/adap/flower"
-documentation = "https://flower.ai"
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: MacOS :: MacOS X",
-    "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Software Development",
-    "Topic :: Software Development :: Libraries",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Typing :: Typed",
+# Dependencies for your Flower App
+dependencies = [
+    "flwr[simulation]>=1.20.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "torch==2.7.1",
+    "torchvision==0.22.1",
+    "cvxpy=="
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.8.15, <=3.11.0"
-# Mandatory dependencies
-flwr = { extras = ["simulation"], version = "^1.3.0" }
-torch = "==2.4.1"
-torchvision = "==0.19.1"
-hydra-core = "^1.2.0"
-numpy = "^1.20.0"
-tqdm = "4.66.3"
-matplotlib = "^3.5.1"
-scikit-image = "^0.18.1"
-scikit-learn = "^1.2.1"
-wget = "^3.2"
-virtualenv = "^20.24.6"
-pandas = "^1.5.3"
-pyhamcrest = "^2.0.4"
-pillow = "==10.2.0"
+[tool.hatch.metadata]
+allow-direct-references = true
 
-[tool.poetry.dev-dependencies]
-isort = "==5.13.2"
-black = "==24.2.0"
-docformatter = "==1.7.5"
-mypy = "==1.8.0"
-pylint = "==2.8.2"
-flake8 = "==3.9.2"
-pytest = "==6.2.4"
-pytest-watch = "==4.2.0"
-types-requests = "==2.27.7"
-pydantic = "==2.4.2"
+[project.optional-dependencies]
+dev = [
+    "isort==5.13.2",
+    "black==24.2.0",
+    "docformatter==1.7.5",
+    "mypy==1.8.0",
+    "pylint==3.3.1",
+    "pytest==7.4.4",
+    "pytest-watch==4.2.0",
+    "ruff==0.4.5",
+    "types-requests==2.31.0.20240125",
+]
 
 [tool.isort]
-line_length = 88
-indent = "    "
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-known_first_party = ["flwr_baselines"]
+profile = "black"
 
 [tool.black]
 line-length = 88
-target-version = ["py38", "py39"]
-
-[tool.pylint."MESSAGES CONTROL"]
-disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
-good-names = "i,j,k,_,x,y,X,Y"
+target-version = ["py310", "py311", "py312"]
 
 [tool.pytest.ini_options]
 minversion = "6.2"
 addopts = "-qq"
-testpaths = [
-    "flwr_baselines",
-]
 
 [tool.mypy]
 ignore_missing_imports = true
 strict = false
 plugins = "numpy.typing.mypy_plugin"
 
+[tool.pylint."MESSAGES CONTROL"]
+disable = "duplicate-code,too-few-public-methods,useless-import-alias"
+good-names = "i,j,k,_,x,y,X,Y,K,N"
+max-args = 10
+max-attributes = 15
+max-locals = 36
+max-branches = 20
+max-statements = 55
+
+[tool.pylint.typecheck]
+generated-members = "numpy.*, torch.*, tensorflow.*"
+
 [[tool.mypy.overrides]]
-module = "flwr_baselines.scripts.*"
-ignore_errors = true
+module = [
+    "importlib.metadata.*",
+    "importlib_metadata.*",
+]
+follow_imports = "skip"
+follow_imports_for_stubs = true
+disallow_untyped_calls = false
 
 [[tool.mypy.overrides]]
 module = "torch.*"
 follow_imports = "skip"
 follow_imports_for_stubs = true
 
-[tool.pylint.typecheck]
-generated-members = "numpy.*, torch.*"
+[tool.docformatter]
+wrap-summaries = 88
+wrap-descriptions = 88
 
-[tool.pylint.messages_control]
-disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
-signature-mutators = "hydra.main.main"
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "proto",
+]
+
+[tool.ruff.lint]
+select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
+fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
+ignore = ["B024", "B027", "D205", "D209"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "apsal"
+
+# Point to your ServerApp and ClientApp objects
+# Format: "<module>:<object>"
+[tool.flwr.app.components]
+serverapp = "fedpac.server_app:app"
+clientapp = "fedpac.client_app:app"
+
+# Custom config values accessible via `context.run_config`
+[tool.flwr.app.config]
+num-server-rounds = 3
+fraction-fit = 0.5
+local-epochs = 1
+
+# Default federation to use when running the app
+[tool.flwr.federations]
+default = "local-simulation"
+
+# Local simulation federation with 10 virtual SuperNodes
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.0
