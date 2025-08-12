@@ -20,7 +20,7 @@ internal object Constants {
   const val CHAT_COMPLETION_PATH = "v1/chat/completions"
   const val ENCRYPTION_PUBLIC_KEY_PATH = "encryption/public-key"
   const val ENCRYPTION_SERVER_PUBLIC_KEY_PATH = "encryption/server-public-key"
-  const val SDK = "kt"
-  const val VERSION = "0.1.8"
+  const val SDK = "KT"
+  const val VERSION = "0.2.0"
   val ALLOWED_ROLES = setOf("user", "system", "assistant")
 }
