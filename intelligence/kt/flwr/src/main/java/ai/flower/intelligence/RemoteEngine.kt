@@ -39,7 +39,7 @@ internal class RemoteEngine(
     HttpClient(CIO) {
       install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
       defaultRequest {
-        header("FI-SDK-Type", "KT")
+        header("FI-SDK-Type", Constants.SDK)
         header("FI-SDK-Version", Constants.VERSION)
       }
     }
