@@ -16,11 +16,13 @@
 
 
 import time
-from typing import Optional
+from logging import WARN
+from typing import Optional, Union
 
 from flwr.common.config import get_flwr_dir
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
+from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import run_from_proto
 from flwr.common.telemetry import EventType
@@ -31,6 +33,8 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 from flwr.supercore.app_utils import start_parent_process_monitor
 
 from .plugin import ExecPlugin
@@ -38,7 +42,9 @@ from .plugin import ExecPlugin
 
 def run_superexec(
     plugin_class: type[ExecPlugin],
-    stub_class: type[ClientAppIoStub],
+    stub_class: Union[
+        type[ClientAppIoStub], type[ServerAppIoStub], type[SimulationIoStub]
+    ],
     appio_api_address: str,
     flwr_dir: Optional[str] = None,
     parent_pid: Optional[int] = None,
@@ -120,3 +126,44 @@ def run_superexec(
             time.sleep(1)
     finally:
         channel.close()
+
+
+def run_with_deprecation_warning(  # pylint: disable=R0913, R0917
+    cmd: str,
+    plugin_type: str,
+    plugin_class: type[ExecPlugin],
+    stub_class: Union[
+        type[ClientAppIoStub], type[ServerAppIoStub], type[SimulationIoStub]
+    ],
+    appio_api_address: str,
+    flwr_dir: Optional[str],
+    parent_pid: Optional[int],
+) -> None:
+    """Log a deprecation warning and run the equivalent `flower-superexec` command.
+
+    Used for legacy long-running `flwr-*` commands (i.e., without `--token`) that will
+    be removed in favor of `flower-superexec`.
+    """
+    log(
+        WARN,
+        "Running `%s` as a long-running process without `--token` is "
+        "DEPRECATED and will be prohibited in a future release. "
+        "Please use `flower-superexec` instead.",
+        cmd,
+    )
+    log(WARN, "For now, the following command is being run automatically:")
+    new_cmd = f"flower-superexec --insecure --plugin-type {plugin_type} "
+    new_cmd += f"--appio-api-address {appio_api_address} "
+    if flwr_dir is not None:
+        new_cmd += f"--flwr-dir {flwr_dir} "
+    if parent_pid is not None:
+        new_cmd += f"--parent-pid {parent_pid}"
+    log(WARN, new_cmd)
+
+    run_superexec(
+        plugin_class=plugin_class,
+        stub_class=stub_class,
+        appio_api_address=appio_api_address,
+        flwr_dir=flwr_dir,
+        parent_pid=parent_pid,
+    )
