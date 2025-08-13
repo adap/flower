@@ -86,6 +86,52 @@ superlink:
 For more details on logging configuration, visit:
 [Flower Logging Documentation](../how-to-configure-logging.rst)
 
+## License Key
+
+Starting from `1.20.0`, the SuperLink service must be started with
+a valid license key.
+
+You can configure the license key in the `global.license` section of your `values.yml` file in one
+of two ways:
+
+1.	Directly — by setting `global.license.key` to your license key.
+2.	From an existing Kubernetes Secret — by setting `global.license.existingSecret` to the name of
+    a secret that contains your key.
+
+### Example: Setting the License Key Directly
+
+```yaml
+global:
+  license:
+    enabled: true
+    key: <YOUR_FLWR_LICENSE_KEY>
+    existingSecret: ""
+```
+
+In this configuration, the Helm chart will automatically create a Kubernetes Secret and mount it
+into the SuperLink container.
+
+### Example: Using an Existing Secret
+
+```yaml
+global:
+  license:
+    enabled: true
+    key: ""
+    existingSecret: "existing-license-key-secret"
+```
+
+If both `key` and `existingSecret` are set, `existingSecret` takes precedence and the `key` value
+will be ignored.
+
+Note that the existing secret must contain the key `FLWR_LICENSE_KEY`:
+
+```yaml
+kind: Secret
+stringData:
+  FLWR_LICENSE_KEY: <YOUR_FLWR_LICENSE_KEY>
+```
+
 ## Enable User Authentication
 
 User authentication can be enabled if you're using the Flower Enterprise Edition (EE) Docker images.
