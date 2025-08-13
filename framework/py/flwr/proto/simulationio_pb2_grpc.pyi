@@ -21,6 +21,11 @@ class SimulationIoStub:
         flwr.proto.appio_pb2.RequestTokenResponse]
     """Request token for a run"""
 
+    GetRun: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetRunRequest,
+        flwr.proto.run_pb2.GetRunResponse]
+    """Get run details"""
+
     PullAppInputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PullAppInputsRequest,
         flwr.proto.appio_pb2.PullAppInputsResponse]
@@ -72,6 +77,14 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.appio_pb2.RequestTokenResponse:
         """Request token for a run"""
+        pass
+
+    @abc.abstractmethod
+    def GetRun(self,
+        request: flwr.proto.run_pb2.GetRunRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.GetRunResponse:
+        """Get run details"""
         pass
 
     @abc.abstractmethod
