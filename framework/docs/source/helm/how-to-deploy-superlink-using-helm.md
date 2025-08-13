@@ -172,6 +172,7 @@ The following commands set up a store, authorization model, and inserts users (u
 Setup the authorization model and tuples:
 
 :::{dropdown} Authorization model file `model.fga`
+
 ```text
 model
   # We are using the 1.1 schema with type restrictions
@@ -186,9 +187,11 @@ type service
     # The 'has_access' relation defines users who have access to this service.
     define has_access: [flwr_aid]
 ```
+
 :::
 
 :::{dropdown} User permissions file `tuples.fga`
+
 ```yaml
 - user: flwr_aid:<OIDC_SUB_1>
   relation: has_access
@@ -197,6 +200,7 @@ type service
   relation: has_access
   object: service:<your_grid_name>
 ```
+
 :::
 
 Create store:
