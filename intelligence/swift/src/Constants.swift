@@ -38,4 +38,4 @@ let modelMapping: [String: ModelConfiguration] = [
 ]
 
 let sdk = "Swift"
-let version = "0.2.0"
+let version = "0.2.1"
