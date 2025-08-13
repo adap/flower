@@ -181,6 +181,7 @@ def run_api(
     """Run the VCE."""
     messageins_queue: Queue[Message] = Queue()
     messageres_queue: Queue[Message] = Queue()
+    backend = None
 
     try:
 
@@ -245,7 +246,8 @@ def run_api(
     finally:
 
         # Terminate backend
-        backend.terminate()
+        if backend:
+            backend.terminate()
 
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches
