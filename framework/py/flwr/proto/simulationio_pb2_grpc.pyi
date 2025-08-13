@@ -3,22 +3,32 @@
 isort:skip_file
 """
 import abc
+import flwr.proto.appio_pb2
 import flwr.proto.heartbeat_pb2
 import flwr.proto.log_pb2
 import flwr.proto.run_pb2
-import flwr.proto.simulationio_pb2
 import grpc
 
 class SimulationIoStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
-    PullSimulationInputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.simulationio_pb2.PullSimulationInputsRequest,
-        flwr.proto.simulationio_pb2.PullSimulationInputsResponse]
+    ListAppsToLaunch: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.ListAppsToLaunchRequest,
+        flwr.proto.appio_pb2.ListAppsToLaunchResponse]
+    """List runs to launch"""
+
+    RequestToken: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.RequestTokenRequest,
+        flwr.proto.appio_pb2.RequestTokenResponse]
+    """Request token for a run"""
+
+    PullAppInputs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PullAppInputsRequest,
+        flwr.proto.appio_pb2.PullAppInputsResponse]
     """Pull Simulation inputs"""
 
-    PushSimulationOutputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.simulationio_pb2.PushSimulationOutputsRequest,
-        flwr.proto.simulationio_pb2.PushSimulationOutputsResponse]
+    PushAppOutputs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PushAppOutputsRequest,
+        flwr.proto.appio_pb2.PushAppOutputsResponse]
     """Push Simulation outputs"""
 
     UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
@@ -49,18 +59,34 @@ class SimulationIoStub:
 
 class SimulationIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def PullSimulationInputs(self,
-        request: flwr.proto.simulationio_pb2.PullSimulationInputsRequest,
+    def ListAppsToLaunch(self,
+        request: flwr.proto.appio_pb2.ListAppsToLaunchRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.simulationio_pb2.PullSimulationInputsResponse:
+    ) -> flwr.proto.appio_pb2.ListAppsToLaunchResponse:
+        """List runs to launch"""
+        pass
+
+    @abc.abstractmethod
+    def RequestToken(self,
+        request: flwr.proto.appio_pb2.RequestTokenRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.appio_pb2.RequestTokenResponse:
+        """Request token for a run"""
+        pass
+
+    @abc.abstractmethod
+    def PullAppInputs(self,
+        request: flwr.proto.appio_pb2.PullAppInputsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.appio_pb2.PullAppInputsResponse:
         """Pull Simulation inputs"""
         pass
 
     @abc.abstractmethod
-    def PushSimulationOutputs(self,
-        request: flwr.proto.simulationio_pb2.PushSimulationOutputsRequest,
+    def PushAppOutputs(self,
+        request: flwr.proto.appio_pb2.PushAppOutputsRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.simulationio_pb2.PushSimulationOutputsResponse:
+    ) -> flwr.proto.appio_pb2.PushAppOutputsResponse:
         """Push Simulation outputs"""
         pass
 
