@@ -19,7 +19,6 @@ import argparse
 import gc
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
-from time import sleep
 from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
@@ -70,6 +69,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
+from flwr.supercore.app_utils import simple_get_token, start_parent_process_monitor
 
 
 def flwr_simulation() -> None:
@@ -97,23 +97,31 @@ def flwr_simulation() -> None:
     run_simulation_process(
         simulationio_api_address=args.simulationio_api_address,
         log_queue=log_queue,
-        run_once=args.run_once,
+        run_once=(args.token is not None) or args.run_once,
+        token=args.token,
         flwr_dir_=args.flwr_dir,
         certificates=None,
+        parent_pid=args.parent_pid,
     )
 
     # Restore stdout/stderr
     restore_output()
 
 
-def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R0915
+def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     simulationio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
+    token: Optional[str] = None,
     flwr_dir_: Optional[str] = None,
     certificates: Optional[bytes] = None,
+    parent_pid: Optional[int] = None,
 ) -> None:
     """Run Flower Simulation process."""
+    # Start monitoring the parent process if a PID is provided
+    if parent_pid is not None:
+        start_parent_process_monitor(parent_pid)
+
     conn = SimulationIoConnection(
         simulationio_service_address=simulationio_api_address,
         root_certificates=certificates,
@@ -127,14 +135,14 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
     while True:
 
         try:
-            # Pull SimulationInputs from LinkState
-            req = PullAppInputsRequest()
-            res: PullAppInputsResponse = conn._stub.PullAppInputs(req)
-            if not res.HasField("run"):
-                sleep(3)
-                run_status = None
-                continue
+            # If token is not set, loop until token is received from SuperNode
+            if token is None:
+                log(DEBUG, "[flwr-simulation] Request token")
+                token = simple_get_token(conn._stub)
 
+            # Pull SimulationInputs from LinkState
+            req = PullAppInputsRequest(token=token)
+            res: PullAppInputsResponse = conn._stub.PullAppInputs(req)
             context = context_from_proto(res.context)
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
@@ -240,7 +248,9 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
 
             # Send resulting context
             context_proto = context_to_proto(updated_context)
-            out_req = PushAppOutputsRequest(run_id=run.run_id, context=context_proto)
+            out_req = PushAppOutputsRequest(
+                token=token, run_id=run.run_id, context=context_proto
+            )
             _ = conn._stub.PushAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
@@ -275,6 +285,9 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 del updated_context
             except NameError:
                 pass
+
+            # Remove the token
+            token = None
             gc.collect()
 
         # Stop the loop if `flwr-simulation` is expected to process a single run
