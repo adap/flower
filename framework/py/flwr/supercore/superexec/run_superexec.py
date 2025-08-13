@@ -146,7 +146,7 @@ def run_with_deprecation_warning(  # pylint: disable=R0913, R0917
     """
     log(
         WARN,
-        "Running `%s` as a long-running process without `--token` is "
+        "Directly executing `%s` is "
         "DEPRECATED and will be prohibited in a future release. "
         "Please use `flower-superexec` instead.",
         cmd,
