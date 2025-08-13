@@ -18,9 +18,8 @@
 import argparse
 import csv
 import importlib.util
-import multiprocessing
-import multiprocessing.context
 import os
+import subprocess
 import sys
 import threading
 from collections.abc import Sequence
@@ -55,6 +54,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     EventLogWriterType,
+    ExecPluginType,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit
@@ -69,8 +69,6 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
-from flwr.server.serverapp.app import flwr_serverapp
-from flwr.simulation.app import flwr_simulation
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.executor import load_executor
@@ -219,10 +217,10 @@ def run_superlink() -> None:
 
     # Determine Exec plugin
     # If simulation is used, don't start ServerAppIo and Fleet APIs
-    sim_exec = executor.__class__.__qualname__ == "SimulationEngine"
+    is_simulation = executor.__class__.__qualname__ == "SimulationEngine"
     bckg_threads: list[threading.Thread] = []
 
-    if sim_exec:
+    if is_simulation:
         simulationio_server: grpc.Server = run_simulationio_api_grpc(
             address=simulationio_address,
             state_factory=state_factory,
@@ -340,25 +338,18 @@ def run_superlink() -> None:
         io_address = (
             f"{CLIENT_OCTET}:{_port}" if _octet == SERVER_OCTET else serverappio_address
         )
-        address_arg = (
-            "--simulationio-api-address" if sim_exec else "--serverappio-api-address"
-        )
-        address = simulationio_address if sim_exec else io_address
-        cmd = "flwr-simulation" if sim_exec else "flwr-serverapp"
-
-        # Scheduler thread
-        scheduler_th = threading.Thread(
-            target=_flwr_scheduler,
-            args=(
-                state_factory,
-                address_arg,
-                address,
-                cmd,
-            ),
-            daemon=True,
-        )
-        scheduler_th.start()
-        bckg_threads.append(scheduler_th)
+        command = ["flower-superexec", "--insecure"]
+        command += [
+            "--appio-api-address",
+            simulationio_address if is_simulation else io_address,
+        ]
+        command += [
+            "--plugin-type",
+            ExecPluginType.SIMULATION if is_simulation else ExecPluginType.SERVER_APP,
+        ]
+        command += ["--parent-pid", str(os.getpid())]
+        # pylint: disable-next=consider-using-with
+        subprocess.Popen(command)
 
     # Graceful shutdown
     register_exit_handlers(
@@ -374,75 +365,6 @@ def run_superlink() -> None:
     # Exit if any thread has exited prematurely
     # This code will not be reached if the SuperLink stops gracefully
     flwr_exit(ExitCode.SUPERLINK_THREAD_CRASH)
-
-
-def _run_flwr_command(args: list[str], main_pid: int) -> None:
-    # Monitor the main process in case of SIGKILL
-    def main_process_monitor() -> None:
-        while True:
-            sleep(1)
-            if os.getppid() != main_pid:
-                os.kill(os.getpid(), 9)
-
-    threading.Thread(target=main_process_monitor, daemon=True).start()
-
-    # Run the command
-    sys.argv = args
-    if args[0] == "flwr-serverapp":
-        flwr_serverapp()
-    elif args[0] == "flwr-simulation":
-        flwr_simulation()
-    else:
-        raise ValueError(f"Unknown command: {args[0]}")
-
-
-def _flwr_scheduler(
-    state_factory: LinkStateFactory,
-    io_api_arg: str,
-    io_api_address: str,
-    cmd: str,
-) -> None:
-    log(DEBUG, "Started %s scheduler thread.", cmd)
-    state = state_factory.state()
-    run_id_to_proc: dict[int, multiprocessing.context.SpawnProcess] = {}
-
-    # Use the "spawn" start method for multiprocessing.
-    mp_spawn_context = multiprocessing.get_context("spawn")
-
-    # Periodically check for a pending run in the LinkState
-    while True:
-        sleep(0.1)
-        pending_run_id = state.get_pending_run_id()
-
-        if pending_run_id and pending_run_id not in run_id_to_proc:
-
-            log(
-                INFO,
-                "Launching %s subprocess. Connects to SuperLink on %s",
-                cmd,
-                io_api_address,
-            )
-            # Start subprocess
-            command = [
-                cmd,
-                "--run-once",
-                io_api_arg,
-                io_api_address,
-                "--insecure",
-            ]
-
-            proc = mp_spawn_context.Process(
-                target=_run_flwr_command, args=(command, os.getpid()), daemon=True
-            )
-            proc.start()
-
-            # Store the process
-            run_id_to_proc[pending_run_id] = proc
-
-        # Clean up finished processes
-        for run_id, proc in list(run_id_to_proc.items()):
-            if not proc.is_alive():
-                del run_id_to_proc[run_id]
 
 
 def _format_address(address: str) -> tuple[str, str, int]:
