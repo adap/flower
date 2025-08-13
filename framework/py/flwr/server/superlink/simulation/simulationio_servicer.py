@@ -34,6 +34,16 @@ from flwr.common.serde import (
 )
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import simulationio_pb2_grpc
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    ListAppsToLaunchRequest,
+    ListAppsToLaunchResponse,
+    PullAppInputsRequest,
+    PullAppInputsResponse,
+    PushAppOutputsRequest,
+    PushAppOutputsResponse,
+    RequestTokenRequest,
+    RequestTokenResponse,
+)
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
@@ -50,12 +60,6 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
-from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
-    PullSimulationInputsRequest,
-    PullSimulationInputsResponse,
-    PushSimulationOutputsRequest,
-    PushSimulationOutputsResponse,
-)
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_if
 from flwr.supercore.ffs import FfsFactory
@@ -71,9 +75,45 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         self.ffs_factory = ffs_factory
         self.lock = threading.RLock()
 
-    def PullSimulationInputs(
-        self, request: PullSimulationInputsRequest, context: ServicerContext
-    ) -> PullSimulationInputsResponse:
+    def ListAppsToLaunch(
+        self,
+        request: ListAppsToLaunchRequest,
+        context: grpc.ServicerContext,
+    ) -> ListAppsToLaunchResponse:
+        """Get run IDs with pending messages."""
+        log(DEBUG, "SimulationIoServicer.ListAppsToLaunch")
+
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Get IDs of runs in pending status
+        run_ids = state.get_run_ids(flwr_aid=None)
+        pending_run_ids = []
+        for run_id, status in state.get_run_status(run_ids).items():
+            if status.status == Status.PENDING:
+                pending_run_ids.append(run_id)
+
+        # Return run IDs
+        return ListAppsToLaunchResponse(run_ids=pending_run_ids)
+
+    def RequestToken(
+        self, request: RequestTokenRequest, context: grpc.ServicerContext
+    ) -> RequestTokenResponse:
+        """Request token."""
+        log(DEBUG, "SimulationIoServicer.RequestToken")
+
+        # Initialize state connection
+        state = self.state_factory.state()
+
+        # Attempt to create a token for the provided run ID
+        token = state.create_token(request.run_id)
+
+        # Return the token
+        return RequestTokenResponse(token=token or "")
+
+    def PullAppInputs(
+        self, request: PullAppInputsRequest, context: ServicerContext
+    ) -> PullAppInputsResponse:
         """Pull SimultionIo process inputs."""
         log(DEBUG, "SimultionIoServicer.SimultionIoInputs")
         # Init access to LinkState and Ffs
@@ -86,7 +126,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
             run_id = state.get_pending_run_id()
             # If there's no pending run, return an empty response
             if run_id is None:
-                return PullSimulationInputsResponse()
+                return PullAppInputsResponse()
 
             # Retrieve Context, Run and Fab for the run_id
             serverapp_ctxt = state.get_serverapp_context(run_id)
@@ -99,7 +139,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
                 # Update run status to STARTING
                 if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
                     log(INFO, "Starting run %d", run_id)
-                    return PullSimulationInputsResponse(
+                    return PullAppInputsResponse(
                         context=context_to_proto(serverapp_ctxt),
                         run=run_to_proto(run),
                         fab=fab_to_proto(fab),
@@ -109,11 +149,11 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         # or if the status cannot be updated to STARTING
         raise RuntimeError(f"Failed to start run {run_id}")
 
-    def PushSimulationOutputs(
-        self, request: PushSimulationOutputsRequest, context: ServicerContext
-    ) -> PushSimulationOutputsResponse:
+    def PushAppOutputs(
+        self, request: PushAppOutputsRequest, context: ServicerContext
+    ) -> PushAppOutputsResponse:
         """Push Simulation process outputs."""
-        log(DEBUG, "SimultionIoServicer.PushSimulationOutputs")
+        log(DEBUG, "SimultionIoServicer.PushAppOutputs")
         state = self.state_factory.state()
 
         # Abort if the run is not running
@@ -126,7 +166,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         )
 
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
-        return PushSimulationOutputsResponse()
+        return PushAppOutputsResponse()
 
     def UpdateRunStatus(
         self, request: UpdateRunStatusRequest, context: grpc.ServicerContext
