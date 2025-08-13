@@ -153,9 +153,9 @@ For instance, the returned result would look like follows:
 **Corpus.** The example supports the following corpora for document retrieval:
 
 1. PubMed
-1. Textbooks
-1. StatPearls
-1. Wikipedia
+2. Textbooks
+3. StatPearls
+4. Wikipedia
 
 By default, the example uses the `Textbooks` and `StatPearls` corpora.
 
@@ -176,10 +176,10 @@ library.
 **QA Datasets.** For QA benchmarking, the example supports the following benchmark datasets:
 
 1. PubMedQA
-1. BioASQ
-1. MMLU
-1. MedQA
-1. MedMCQA
+2. BioASQ
+3. MMLU
+4. MedQA
+5. MedMCQA
 
 By default, the example will evaluate the first `10` questions of the `PubMedQA` and `BioASQ` QA datasets.
 To evaluate all the questions from the benchmark dataset, you can disable or comment out the `server-qa-num`
@@ -275,10 +275,10 @@ options.backend.client-resources.num-gpus = 0.1
 
 1. <a id="ref1"></a> Jung, Jincheol, Hongju Jeong, and Eui-Nam Huh. "Federated Learning and RAG Integration: A Scalable Approach for Medical Large Language Models." arXiv preprint arXiv:2412.13720 (2024).
 
-1. <a id="ref2"></a> Addison, Parker, Minh-Tuan H. Nguyen, Tomislav Medan, Jinali Shah, Mohammad T. Manzari, Brendan McElrone, Laksh Lalwani, Aboli More, Smita Sharma, Holger R. Roth, Isaac Yang, Chester Chen, Daguang Xu, Yan Cheng, Andrew Feng, and Ziyue Xu. "C-FedRAG: A Confidential Federated Retrieval-Augmented Generation System." arXiv preprint arXiv:2412.13163 (2024).
+2. <a id="ref2"></a> Addison, Parker, Minh-Tuan H. Nguyen, Tomislav Medan, Jinali Shah, Mohammad T. Manzari, Brendan McElrone, Laksh Lalwani, Aboli More, Smita Sharma, Holger R. Roth, Isaac Yang, Chester Chen, Daguang Xu, Yan Cheng, Andrew Feng, and Ziyue Xu. "C-FedRAG: A Confidential Federated Retrieval-Augmented Generation System." arXiv preprint arXiv:2412.13163 (2024).
 
-1. <a id="ref3"></a> Zhao, Dongfang. "FRAG: Toward Federated Vector Database Management for Collaborative and Secure Retrieval-Augmented Generation." arXiv preprint arXiv:2410.13272 (2024).
+3. <a id="ref3"></a> Zhao, Dongfang. "FRAG: Toward Federated Vector Database Management for Collaborative and Secure Retrieval-Augmented Generation." arXiv preprint arXiv:2410.13272 (2024).
 
-1. <a id="ref4"></a> Xiong, Guangzhi, Qiao Jin, Zhiyong Lu, and Aidong Zhang. "Benchmarking retrieval-augmented generation for medicine." In Findings of the Association for Computational Linguistics ACL 2024, pp. 6233-6251. 2024.
+4. <a id="ref4"></a> Xiong, Guangzhi, Qiao Jin, Zhiyong Lu, and Aidong Zhang. "Benchmarking retrieval-augmented generation for medicine." In Findings of the Association for Computational Linguistics ACL 2024, pp. 6233-6251. 2024.
 
-1. <a id="ref5"></a> Cormack, Gordon V., Charles LA Clarke, and Stefan Buettcher. "Reciprocal rank fusion outperforms condorcet and individual rank learning methods." In Proceedings of the 32nd international ACM SIGIR conference on Research and development in information retrieval, pp. 758-759. 2009.
+5. <a id="ref5"></a> Cormack, Gordon V., Charles LA Clarke, and Stefan Buettcher. "Reciprocal rank fusion outperforms condorcet and individual rank learning methods." In Proceedings of the 32nd international ACM SIGIR conference on Research and development in information retrieval, pp. 758-759. 2009.

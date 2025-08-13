@@ -72,12 +72,12 @@ pip install -e .
    - After selecting your storage, click on `Next`. Then, you'll be asked if you want to edit the settings of the image you are about to flash. This allows you to setup a custom username and password as well as indicate to which WiFi network your device should connect to. In the screenshot you can see some dummy values. This tutorial doesn't make any assumptions on these values, set them according to your needs.
    - Finally, complete the remaining steps to start flashing the chosen OS onto the uSD card.
 
-1. **Preparations for your Flower experiments**
+2. **Preparations for your Flower experiments**
 
    - SSH into your Rapsberry Pi.
    - Follow the steps outlined in [Embedded Devices Setup](device_setup.md) to set it up for develpment. The objetive of this step is to have your Pi ready to join later as a Flower `SuperNode` to an existing federation.
 
-1. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
+3. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
 
 ## Embedded Federated AI
 

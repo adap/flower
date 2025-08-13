@@ -129,9 +129,9 @@ The resulting data partitions are not equal-sized (which is what you'd often fin
 An overview of the FL pipeline built with Flower for this example is illustrated above.
 
 1. At the start of a round, the `ServerApp` communicates the weights of classification head to a fraction of the nodes.
-1. The `ClientApp` in each node, using a frozen pre-trained Whisper encoder, trains the classification head using its own data samples.
-1. Once on-site training is completed, each node sends back the (now updated) classification head to the `ServerApp`.
-1. The Flower `ServerApp` aggregates (via [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html) -- but you can [choose any other strategy](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.html), or implement your own!) the classification heads in order to obtain a new _global_ classification head. This head will be shared with nodes in the next round.
+2. The `ClientApp` in each node, using a frozen pre-trained Whisper encoder, trains the classification head using its own data samples.
+3. Once on-site training is completed, each node sends back the (now updated) classification head to the `ServerApp`.
+4. The Flower `ServerApp` aggregates (via [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html) -- but you can [choose any other strategy](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.html), or implement your own!) the classification heads in order to obtain a new _global_ classification head. This head will be shared with nodes in the next round.
 
 You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
@@ -200,8 +200,8 @@ Running the exact same FL pipeline as in the simulation setting can be done with
 An obvious first step would be to generate N data partitions and assing each to a different `SuperNode`. Let's start with this step by means of the `preprocess.py` script. These are the steps we'll follow:
 
 1. Extract and save two partitions from the dataset. Each will be assigned to a different `SuperNode`.
-1. Modify the `client_fn` in `client_app.py` so it directly loads the partition specified when launching the `SuperNode`.
-1. Copy the generate partition to the machine where the `SuperNode` is going to be executed.
+2. Modify the `client_fn` in `client_app.py` so it directly loads the partition specified when launching the `SuperNode`.
+3. Copy the generate partition to the machine where the `SuperNode` is going to be executed.
 
 **1. Save a data partition**
 
