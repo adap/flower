@@ -120,14 +120,11 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         state = self.state_factory.state()
         ffs = self.ffs_factory.ffs()
 
+        # Validate the token
+        run_id = self._verify_token(request.token, context)
+
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
-            # Attempt getting the run_id of a pending run
-            run_id = state.get_pending_run_id()
-            # If there's no pending run, return an empty response
-            if run_id is None:
-                return PullAppInputsResponse()
-
             # Retrieve Context, Run and Fab for the run_id
             serverapp_ctxt = state.get_serverapp_context(run_id)
             run = state.get_run(run_id)
@@ -154,6 +151,11 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
     ) -> PushAppOutputsResponse:
         """Push Simulation process outputs."""
         log(DEBUG, "SimultionIoServicer.PushAppOutputs")
+
+        # Validate the token
+        run_id = self._verify_token(request.token, context)
+
+        # Init access to LinkState
         state = self.state_factory.state()
 
         # Abort if the run is not running
@@ -166,6 +168,9 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         )
 
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
+
+        # Remove the token
+        state.delete_token(run_id)
         return PushAppOutputsResponse()
 
     def UpdateRunStatus(
@@ -248,3 +253,15 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         )
 
         return SendAppHeartbeatResponse(success=success)
+
+    def _verify_token(self, token: str, context: grpc.ServicerContext) -> int:
+        """Verify the token and return the associated run ID."""
+        state = self.state_factory.state()
+        run_id = state.get_run_id_by_token(token)
+        if run_id is None or not state.verify_token(run_id, token):
+            context.abort(
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token.",
+            )
+            raise RuntimeError("This line should never be reached.")
+        return run_id
