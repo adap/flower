@@ -1,20 +1,20 @@
 # Introduction
 
 This folder holds the necessary scripts to download the necessary corpora and
-create indices for more efficient document retrieval for the FedRAG workflow. All four corpora listed below were derived from the [MedRAG Toolkit](https://github.com/Teddy-XiongGZ/MedRAG) [\[1\]](#ref1).
+create indices for more efficient document retrieval for the FedRAG workflow. All four corpora listed below were derived from the [MedRAG Toolkit](https://github.com/Teddy-XiongGZ/MedRAG) [[1]](#ref1).
 
 The currently supported corpora are:
 
-| **Corpus**                | **Size** | **#Doc.** | **#Snippets** | **Domain** |
-| ------------------------- | -------- | --------- | ------------- | ---------- |
-| PubMed [\[2\]](#ref2)     | ~70GBs   | 23.9M     | 23.9M         | Biomedical |
-| StatPearls [\[3\]](#ref3) | ~2GBs    | 9.3k      | 301.2k        | Clinics    |
-| Textbooks [\[4\]](#ref4)  | ~209MBs  | 18        | 125.8k        | Medicine   |
-| Wikipedia [\[5\]](#ref5)  | ~44GBs   | 6.5M      | 29.9M         | General    |
+| **Corpus**              | **Size** | **#Doc.** | **#Snippets** | **Domain** |
+| ----------------------- | -------- | --------- | ------------- | ---------- |
+| PubMed [[2]](#ref2)     | ~70GBs   | 23.9M     | 23.9M         | Biomedical |
+| StatPearls [[3]](#ref3) | ~2GBs    | 9.3k      | 301.2k        | Clinics    |
+| Textbooks [[4]](#ref4)  | ~209MBs  | 18        | 125.8k        | Medicine   |
+| Wikipedia [[5]](#ref5)  | ~44GBs   | 6.5M      | 29.9M         | General    |
 
 For index generation we use the [FAISS](https://github.com/facebookresearch/faiss) library.
 
-> \[!NOTE\]
+> [!NOTE]
 > Please note that for each corpus, its corresponding index might need exactly the same disk space as the documents being indexed.
 
 # How-To-Run
@@ -39,7 +39,7 @@ as follows:
 To download the data we use the [MedRAG Toolkit](https://github.com/Teddy-XiongGZ/MedRAG) and the associated MedRAG
 dataset repository in [Hugging Face](https://huggingface.co/MedRAG), which holds all the curated corpus.
 
-> \[!NOTE\]
+> [!NOTE]
 > According to the [privacy policy](https://www.statpearls.com/home/privacypolicy/) of StatPearls, the StatPearls content is not allowed to be distributed.\
 > The StatPearls data are downloading directly from the [NCBI Bookshelf](https://www.ncbi.nlm.nih.gov/books/NBK430685/)
 > and the `statpearls.py` script provided by [MedRAG toolkit](https://github.com/Teddy-XiongGZ/MedRAG/blob/main/src/data/statpearls.py) is used to chunk the data.
@@ -78,7 +78,7 @@ embedding_dimension: 384
 
 ## QA Benchmark Datasets
 
-All the QA benchmark datasets are downloaded from the [MIRAGE](https://github.com/Teddy-XiongGZ/MIRAGE) benchmark [\[1\]](#ref1).
+All the QA benchmark datasets are downloaded from the [MIRAGE](https://github.com/Teddy-XiongGZ/MIRAGE) benchmark [[1]](#ref1).
 The `prepare.py` script is responsible for downloading the QA datasets. The script downloads the datasets after all the
 corpora are downloaded and the related FAISS indices are built.
 
@@ -86,11 +86,11 @@ corpora are downloaded and the related FAISS indices are built.
 
 1. <a id="ref1"></a> Xiong, Guangzhi, Qiao Jin, Zhiyong Lu, and Aidong Zhang. "Benchmarking retrieval-augmented generation for medicine." In Findings of the Association for Computational Linguistics ACL 2024, pp. 6233-6251. 2024.
 
-2. <a id="ref2"></a> PubMed corpus was created from articles located at: https://pubmed.ncbi.nlm.nih.gov/
+1. <a id="ref2"></a> PubMed corpus was created from articles located at: https://pubmed.ncbi.nlm.nih.gov/
 
-3. <a id="ref3"></a> StatPearls corpus was created by using 9,330 publicly available StatPearls articles through the NCBI Bookshelf: https://www.ncbi.nlm.nih.gov/books/NBK430685/
+1. <a id="ref3"></a> StatPearls corpus was created by using 9,330 publicly available StatPearls articles through the NCBI Bookshelf: https://www.ncbi.nlm.nih.gov/books/NBK430685/
 
-4. <a id="ref4"></a> Textbooks corpus was used in the work of: Jin, Di, Eileen Pan, Nassim Oufattole, Wei-Hung Weng, Hanyi Fang, and Peter Szolovits. "What disease does this patient have? a large-scale open domain question answering dataset from medical exams." Applied Sciences 11, no. 14 (2021): 6421.
+1. <a id="ref4"></a> Textbooks corpus was used in the work of: Jin, Di, Eileen Pan, Nassim Oufattole, Wei-Hung Weng, Hanyi Fang, and Peter Szolovits. "What disease does this patient have? a large-scale open domain question answering dataset from medical exams." Applied Sciences 11, no. 14 (2021): 6421.
    The corpus is also available at: https://github.com/jind11/MedQA
 
-5. <a id="ref5"></a> Wikipedia corpus was used in the work of: Thakur, Nandan, Nils Reimers, Andreas Rücklé, Abhishek Srivastava, and Iryna Gurevych. "BEIR: A heterogenous benchmark for zero-shot evaluation of information retrieval models." In Thirty-fifth Conference on Neural Information Processing Systems Datasets and Benchmarks Track (2021). The corpus is also available at: https://huggingface.co/datasets/wikipedia
+1. <a id="ref5"></a> Wikipedia corpus was used in the work of: Thakur, Nandan, Nils Reimers, Andreas Rücklé, Abhishek Srivastava, and Iryna Gurevych. "BEIR: A heterogenous benchmark for zero-shot evaluation of information retrieval models." In Thirty-fifth Conference on Neural Information Processing Systems Datasets and Benchmarks Track (2021). The corpus is also available at: https://huggingface.co/datasets/wikipedia

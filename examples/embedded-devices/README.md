@@ -6,13 +6,13 @@ framework: [torch]
 
 # Federated AI with Embedded Devices using Flower
 
-This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use Raspberry Pi as Flower clients, or better said, `SuperNodes`.  The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) example, but you could adjust it to follow [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) if you prefere using TensorFlow. The main difference compare to those examples is that here you'll learn how to use Flower's Deployment Engine to run FL across multiple embedded devices.
+This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use Raspberry Pi as Flower clients, or better said, `SuperNodes`. The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) example, but you could adjust it to follow [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) if you prefere using TensorFlow. The main difference compare to those examples is that here you'll learn how to use Flower's Deployment Engine to run FL across multiple embedded devices.
 
 ![Different was of running Flower FL on embedded devices](_static/diagram.png)
 
 ## Getting things ready
 
-> \[!NOTE\]
+> [!NOTE]
 > This example is designed for beginners that know a bit about Flower and/or ML but that are less familiar with embedded devices. If you already have a couple of devices up and running, clone this example and start the Flower clients after launching the Flower server.
 
 This tutorial allows for a variety of settings (some shown in the diagrams above). As long as you have access to one embedded device, you can follow along. This is a list of components that you'll need:
@@ -28,7 +28,7 @@ What follows is a step-by-step guide on how to setup your client/s and the serve
 
 ## Clone this example
 
-> \[!NOTE\]
+> [!NOTE]
 > Cloning the example and installing the project is only needed for the machine that's going to start the run. The embedded devices would typically run a Flower `SuperNode` for which only `flwr` and relevant libraries needed to run the `ClientApp` (more on this later) are needed.
 
 Start with cloning this example on your laptop or desktop machine. We have prepared a single line which you can copy and execute:
@@ -60,7 +60,7 @@ pip install -e .
 
 ## Setting up a Raspberry Pi
 
-> \[!TIP\]
+> [!TIP]
 > This steps walk you through the process of setting up a Rapsberry Pi. If you have one already running and you have a Python environment with `flwr` installed already, you can skip this section entirely. Taking a quick look at the [Embedded Devices Setup](device_setup.md) page might be useful.
 
 ![alt text](_static/rpi_imager.png)
@@ -72,21 +72,21 @@ pip install -e .
    - After selecting your storage, click on `Next`. Then, you'll be asked if you want to edit the settings of the image you are about to flash. This allows you to setup a custom username and password as well as indicate to which WiFi network your device should connect to. In the screenshot you can see some dummy values. This tutorial doesn't make any assumptions on these values, set them according to your needs.
    - Finally, complete the remaining steps to start flashing the chosen OS onto the uSD card.
 
-2. **Preparations for your Flower experiments**
+1. **Preparations for your Flower experiments**
 
    - SSH into your Rapsberry Pi.
    - Follow the steps outlined in [Embedded Devices Setup](device_setup.md) to set it up for develpment. The objetive of this step is to have your Pi ready to join later as a Flower `SuperNode` to an existing federation.
 
-3. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
+1. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
 
 ## Embedded Federated AI
 
-> \[!TIP\]
+> [!TIP]
 > Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to learn more about Flower's Deployment Engine, how setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) works. If you are already familiar with how the Deployment Engine works, you may want to learn how to run this same example using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.
 
 For this demo, we'll be using [Fashion-MNIST](https://huggingface.co/datasets/zalando-datasets/fashion_mnist), a popular dataset for image classification comprised of 10 classes (e.g. boot, dress, trouser) and a total of 70K `28x28` greyscale images. The training set contains 60K images.
 
-> \[!TIP\]
+> [!TIP]
 > Refer to the [Flower Architecture](https://flower.ai/docs/framework/explanation-flower-architecture.html) page for an overview of the different components involved in a federation.
 
 ### Ensure your embedded devices have some data
@@ -109,7 +109,7 @@ scp -r datasets/fashionmnist_part_1 <user>@<device-ip>:/path/to/home
 
 On your development machine, launch the `SuperLink`. You will connnect Flower `SuperNodes` to it in the next step.
 
-> \[!NOTE\]
+> [!NOTE]
 > If you decide to run the `SuperLink` in a different machine, you'll need to adjust the `address` under the `[tool.flwr.federations.embedded-federation]` tag in the `pyproject.toml`.
 
 ```shell
@@ -120,7 +120,7 @@ flower-superlink --insecure
 
 With the `SuperLink` up and running, now let's launch a `SuperNode` on each embedded device. In order to do this ensure you know what the IP of the machine running the `SuperLink` is and that you have copied the data to the device. Note with `--node-config` we set a key named `dataset-path`. That's the one expected by the `client_fn()` in [client_app.py](embeddedexample/client_app.py). This file will be automatically delivered to the `SuperNode` so it knows how to execute the `ClientApp` logic.
 
-> \[!NOTE\]
+> [!NOTE]
 > You don't need to clone this example to your embedded devices running as Flower `SuperNodes`. The code they will execute (in [embeddedexamples/client_app.py](embeddedexamples/client_app.py)) will automatically be delivered.
 
 Ensure the Python environment you created earlier when setting up your device has all dependencies installed. For this example you'll need the following:

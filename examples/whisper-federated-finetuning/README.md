@@ -46,7 +46,7 @@ whisper-federated-finetuning
 └── README.md
 ```
 
-> \[!NOTE\]
+> [!NOTE]
 > This example can be run in different ways, please refer to the corresponding section for further instructions.
 
 ### Install dependencies and project
@@ -59,7 +59,7 @@ pip install -e .
 
 ## Centralized Training
 
-> \[!TIP\]
+> [!TIP]
 > This section describes how to finetune `Whisper-tiny` for keyword spotting without making use of Federated Learning. This means that the whole training set is available at any point and therefore it is in its entirety to finetune the model each epoch. Skip to the next section if you want to jump straight into how to run `Whisper-tiny` with Flower!
 
 Then run centralized training as follows. Please note that the first time you run the code, the `SpeechCommnads` dataset will be downloaded and pre-processed using 🤗 API (which takes a little while -- approx 40min -- and is cached in `~/.cache/huggingface/datasets/speechcommands` wiht a footprint of ~83GB). Subsequent runs shouldn't require this preprocessing.
@@ -123,15 +123,15 @@ The resulting data partitions are not equal-sized (which is what you'd often fin
 
 ![Amount of data per client](_static/whisper_flower_data.png)
 
-> \[!NOTE\]
+> [!NOTE]
 > You can make create this plot or adjust it by running the [visualize_labels](visualize_labels.ipynb) notebook. It makes use of Flower Dataset's [visualization tools](https://flower.ai/docs/datasets/tutorial-visualize-label-distribution.html).
 
 An overview of the FL pipeline built with Flower for this example is illustrated above.
 
 1. At the start of a round, the `ServerApp` communicates the weights of classification head to a fraction of the nodes.
-2. The `ClientApp` in each node, using a frozen pre-trained Whisper encoder, trains the classification head using its own data samples.
-3. Once on-site training is completed, each node sends back the (now updated) classification head to the `ServerApp`.
-4. The Flower `ServerApp` aggregates (via [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html) -- but you can [choose any other strategy](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.html), or implement your own!) the classification heads in order to obtain a new _global_ classification head. This head will be shared with nodes in the next round.
+1. The `ClientApp` in each node, using a frozen pre-trained Whisper encoder, trains the classification head using its own data samples.
+1. Once on-site training is completed, each node sends back the (now updated) classification head to the `ServerApp`.
+1. The Flower `ServerApp` aggregates (via [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html) -- but you can [choose any other strategy](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.html), or implement your own!) the classification heads in order to obtain a new _global_ classification head. This head will be shared with nodes in the next round.
 
 You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
@@ -139,7 +139,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 The run is defined in the `pyproject.toml` which: specifies the paths to `ClientApp` and `ServerApp` as well as their parameterization with configs in the `[tool.flwr.app.config]` block.
 
-> \[!NOTE\]
+> [!NOTE]
 > By default, it will run on CPU only. On a MacBook Pro M2, running 3 rounds of Flower FL should take ~10 min. Assuming the dataset has already been downloaded. Running on GPU is recommended (for this use the `local-sim-gpu` federation, or continue reading). Also note that the logs from the `ClientApps` are been silenced. You can disable this by setting to `true` the entry `options.backend.init-args.log-to-driver` in the federation in `pyproject.toml` you are using. Read more about how Flower Simulations work in [the documentation](https://flower.ai/docs/framework/how-to-run-simulations.html).
 
 ```shell
@@ -187,12 +187,12 @@ flwr run . local-sim-gpu --run-config "central-eval=true num-server-rounds=10"
 
 ![Global validation accuracy FL with Whisper model](_static/whisper_flower_acc.png)
 
-> \[!TIP\]
+> [!TIP]
 > If you find this federated setup not that challenging, try reducing the sizes of the groups created by the `GroupedNaturalIdPartitioner`. That will increase the number of individual clients/nodes in the federation.
 
 ### Run with the Deployment Engine
 
-> \[!NOTE\]
+> [!NOTE]
 > The steps here outline the very few changes you need to make to the code provided in this example to run with the Deployment Engine instead of with the Simulation Engine. For a beginners guide on how the Deployment Engine works, please check the [Run Flower with the Deployment Engine](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) guide. That guide will introduce how to enable secure TLS and node authentication.
 
 Running the exact same FL pipeline as in the simulation setting can be done without requiring any change to the `ServerApp` design. For the `ClientApp` we need to slightly adjust the logic that loads the dataset. While in simulations we want to dynamically make a Python process to _behave_ like a particular client by loading its corresponding partition, in deployment mode we want the same client process (linked to a single `SuperNode`) to always use its own dataset that lives locally in the machine running the `SuperNode`.
@@ -200,8 +200,8 @@ Running the exact same FL pipeline as in the simulation setting can be done with
 An obvious first step would be to generate N data partitions and assing each to a different `SuperNode`. Let's start with this step by means of the `preprocess.py` script. These are the steps we'll follow:
 
 1. Extract and save two partitions from the dataset. Each will be assigned to a different `SuperNode`.
-2. Modify the `client_fn` in `client_app.py` so it directly loads the partition specified when launching the `SuperNode`.
-3. Copy the generate partition to the machine where the `SuperNode` is going to be executed.
+1. Modify the `client_fn` in `client_app.py` so it directly loads the partition specified when launching the `SuperNode`.
+1. Copy the generate partition to the machine where the `SuperNode` is going to be executed.
 
 **1. Save a data partition**
 
@@ -254,7 +254,7 @@ To launch a Flower `SuperNode` on a Raspberry Pi you'd typically follow the same
 
 First, ensure your Rasberry Pi has been setup correctly. You'll need either a Rasbperry Pi 4 or 5. Using the code as-is, RAM usage on the Raspberry Pi does not exceed 1.5GB. Note that unlike in the previous sections of this example, clients for Raspberry Pi work better when using PyTorch 1.13.1 (or earlier versions to PyTorch 2.0 in general).
 
-> \[!TIP\]
+> [!TIP]
 > Follow the `Setup your Pi` section in the [examples/embedded-devices](https://github.com/adap/flower/tree/main/examples/embedded-devices#setting-up-a-raspberry-pi) example to set it up if you haven't done so already.
 
 Second, generate and copy the a single data partition to your raspbery pi. Do so from your development machine (e.g. your laptop) as shown earlier in the [Run with the Deployment Engine](#run-with-the-deployment-engine) section.

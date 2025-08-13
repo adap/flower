@@ -12,7 +12,7 @@ in external data to improve performance. However, organizations often store data
 classical RAG approaches that rely on centralized data access. By combining Federated Learning with RAG we can query
 data across distributed silos without the need to centrally aggregate data, while respecting data privacy.
 
-> \[!NOTE\]
+> [!NOTE]
 > This example uses Flower's Message API which remains a preview feature and subject to change.
 > Both `ClientApp` and `ServerApp` operate directly on the [Message](https://flower.ai/docs/framework/ref-api/flwr.common.Message.html)
 > and [RecordDict](https://flower.ai/docs/framework/ref-api/flwr.common.RecordDict.html) objects.
@@ -20,9 +20,9 @@ data across distributed silos without the need to centrally aggregate data, whil
 ## Advanced FedRAG Examples
 
 This example provides the building blocks to develop more advanced Federated RAG pipelines, such as enhancing domain-specific
-fine-tuned LLMs [\[1\]](#ref1), using confidential compute environments for secure document re-ranking and LLM inference
-[\[2\]](#ref2), and applying collaborative ANN searches on encrypted data with homomorphic encryption
-and multiplicative caching for improved performance [\[3\]](#ref3).
+fine-tuned LLMs [[1]](#ref1), using confidential compute environments for secure document re-ranking and LLM inference
+[[2]](#ref2), and applying collaborative ANN searches on encrypted data with homomorphic encryption
+and multiplicative caching for improved performance [[3]](#ref3).
 
 ## FedRAG Pipeline Overview
 
@@ -114,7 +114,7 @@ To download all corpora and create an index for all files, please run the follow
 
 The total disk space for the all documents of all four corpora is around `120GBs`.
 
-> \[!NOTE\]
+> [!NOTE]
 > Please note that for each corpus, its corresponding index might need exactly the same disk space as the documents being indexed.
 
 For an individualized breakdown of the disk space, number of documents, number of snippets, and the domain of each
@@ -123,7 +123,7 @@ corpus, please refer to the [README.md](data/README.md) file under the `data` di
 For more details regarding how each corpus is downloaded and how the corresponding index is created,
 please read the section below as well the previously referenced [README.md](data/README.md).
 
-All corpora used in this work were derived from the MedRAG toolkit [\[4\]](#ref4).
+All corpora used in this work were derived from the MedRAG toolkit [[4]](#ref4).
 
 ## Run with Simulation Engine
 
@@ -153,13 +153,13 @@ For instance, the returned result would look like follows:
 **Corpus.** The example supports the following corpora for document retrieval:
 
 1. PubMed
-2. Textbooks
-3. StatPearls
-4. Wikipedia
+1. Textbooks
+1. StatPearls
+1. Wikipedia
 
 By default, the example uses the `Textbooks` and `StatPearls` corpora.
 
-> \[!NOTE\]
+> [!NOTE]
 > The example uses by default the `Textbooks` and `StatPearls` corpora to demonstrate the FedRAG pipeline,
 > because the number of documents for `PubMed` and `Wikipedia` are extremely large and downloading and index creation
 > can take a lot of time. Please see the instructions [README.md](data/README.md) file on how to
@@ -168,7 +168,7 @@ By default, the example uses the `Textbooks` and `StatPearls` corpora.
 **Index.** For document indexing and retrieval, the example uses the [FAISS](https://github.com/facebookresearch/faiss)
 library.
 
-> \[!NOTE\]
+> [!NOTE]
 > The example creates by default an index using the first 100 downloaded chunks (i.e., 100 documents).
 > We do so in order to quickly create an index for each corpus and bootstrap the example.
 > If you want to create an index for all files, please set the `index_num_chunks` flag to `0`.
@@ -176,17 +176,17 @@ library.
 **QA Datasets.** For QA benchmarking, the example supports the following benchmark datasets:
 
 1. PubMedQA
-2. BioASQ
-3. MMLU
-4. MedQA
-5. MedMCQA
+1. BioASQ
+1. MMLU
+1. MedQA
+1. MedMCQA
 
 By default, the example will evaluate the first `10` questions of the `PubMedQA` and `BioASQ` QA datasets.
 To evaluate all the questions from the benchmark dataset, you can disable or comment out the `server-qa-num`
 value in the `pyproject.toml` file.
 
 Please see also the section below on how to enable more QA datasets.
-All the curated QA benchmark datasets are downloaded from the [MIRAGE](https://github.com/Teddy-XiongGZ/MIRAGE) benchmark \[1\].
+All the curated QA benchmark datasets are downloaded from the [MIRAGE](https://github.com/Teddy-XiongGZ/MIRAGE) benchmark [1].
 
 For more details regarding corpus downloading, pre-processing, and indexing steps,
 please read the [README.md](../fedrag/data/README.md) file under the `data` directory.
@@ -202,12 +202,12 @@ the score of a retrieved document the better, since L2 Distance measures dissimi
 **Merge.** Once documents and their associated retrieval scores are received by the server, the server merges the retrieved
 documents into a single ranked list, either by sorting the documents based on the retrieval score; the lower the score the
 more relevant the document is to the query, since we are using the `L2` Euclidean distance. Alternatively, you can use
-the simple yet effective Reciprocal Rank Fusion (RRF) method [\[5\]](#ref5). To smooth ranking differences during merging, using RRF,
+the simple yet effective Reciprocal Rank Fusion (RRF) method [[5]](#ref5). To smooth ranking differences during merging, using RRF,
 you can change the `k-rrf`value defined in the `[tool.flwr.app.config]` section of the `pyproject.yaml` file. Even though
 this is a simple merging technique, you should feel free to extend this and define other merging approaches,
 such as using a Re-Ranker model.
 
-> \[!NOTE\]
+> [!NOTE]
 > If you set `k-rrf=0` then only the retrieval score is considering when merging the retrieved documents,
 > while if you set `k-rrf>0` then the retrieved documents are merged using the RRF method.
 
@@ -245,7 +245,7 @@ k-nn = 8
 server-llm-hfpath = "HuggingFaceTB/SmolLM2-1.7B-Instruct"
 ```
 
-> \[!NOTE\]
+> [!NOTE]
 > The vertical bar in the value of the `server-qa-datasets` is used to pass the name of multiple benchmark
 > datasets. Analogously, the vertical bar in the value of the `clients-corpus-names` is used to assign each corpus
 > to each client in a Round-Robin fashion, e.g., `Textbooks -> Client 1, StatPearls -> Client 2,  Textbooks-> Client 3,  StatPearls -> Client 4, Textbooks -> Client 5, etc ...`
@@ -275,10 +275,10 @@ options.backend.client-resources.num-gpus = 0.1
 
 1. <a id="ref1"></a> Jung, Jincheol, Hongju Jeong, and Eui-Nam Huh. "Federated Learning and RAG Integration: A Scalable Approach for Medical Large Language Models." arXiv preprint arXiv:2412.13720 (2024).
 
-2. <a id="ref2"></a> Addison, Parker, Minh-Tuan H. Nguyen, Tomislav Medan, Jinali Shah, Mohammad T. Manzari, Brendan McElrone, Laksh Lalwani, Aboli More, Smita Sharma, Holger R. Roth, Isaac Yang, Chester Chen, Daguang Xu, Yan Cheng, Andrew Feng, and Ziyue Xu. "C-FedRAG: A Confidential Federated Retrieval-Augmented Generation System." arXiv preprint arXiv:2412.13163 (2024).
+1. <a id="ref2"></a> Addison, Parker, Minh-Tuan H. Nguyen, Tomislav Medan, Jinali Shah, Mohammad T. Manzari, Brendan McElrone, Laksh Lalwani, Aboli More, Smita Sharma, Holger R. Roth, Isaac Yang, Chester Chen, Daguang Xu, Yan Cheng, Andrew Feng, and Ziyue Xu. "C-FedRAG: A Confidential Federated Retrieval-Augmented Generation System." arXiv preprint arXiv:2412.13163 (2024).
 
-3. <a id="ref3"></a> Zhao, Dongfang. "FRAG: Toward Federated Vector Database Management for Collaborative and Secure Retrieval-Augmented Generation." arXiv preprint arXiv:2410.13272 (2024).
+1. <a id="ref3"></a> Zhao, Dongfang. "FRAG: Toward Federated Vector Database Management for Collaborative and Secure Retrieval-Augmented Generation." arXiv preprint arXiv:2410.13272 (2024).
 
-4. <a id="ref4"></a> Xiong, Guangzhi, Qiao Jin, Zhiyong Lu, and Aidong Zhang. "Benchmarking retrieval-augmented generation for medicine." In Findings of the Association for Computational Linguistics ACL 2024, pp. 6233-6251. 2024.
+1. <a id="ref4"></a> Xiong, Guangzhi, Qiao Jin, Zhiyong Lu, and Aidong Zhang. "Benchmarking retrieval-augmented generation for medicine." In Findings of the Association for Computational Linguistics ACL 2024, pp. 6233-6251. 2024.
 
-5. <a id="ref5"></a> Cormack, Gordon V., Charles LA Clarke, and Stefan Buettcher. "Reciprocal rank fusion outperforms condorcet and individual rank learning methods." In Proceedings of the 32nd international ACM SIGIR conference on Research and development in information retrieval, pp. 758-759. 2009.
+1. <a id="ref5"></a> Cormack, Gordon V., Charles LA Clarke, and Stefan Buettcher. "Reciprocal rank fusion outperforms condorcet and individual rank learning methods." In Proceedings of the 32nd international ACM SIGIR conference on Research and development in information retrieval, pp. 758-759. 2009.
