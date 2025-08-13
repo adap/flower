@@ -6,7 +6,7 @@ framework: [torch]
 
 # app-pytorch: A Flower / PyTorch app
 
-> \[!NOTE\]
+> [!NOTE]
 > This example is a playground for upcoming features with Flower's `Message API`.
 
 ## Install dependencies and project

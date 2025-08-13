@@ -6,7 +6,7 @@ framework: [pandas]
 
 # Federated Learning with Pandas and Flower (Quickstart Example)
 
-> \[!CAUTION\]
+> [!CAUTION]
 > This example uses Flower's low-level API which remains a preview feature and subject to change. Both `ClientApp` and `ServerApp` operate directly on [Message](https://flower.ai/docs/framework/ref-api/flwr.common.Message.html) and [RecordDict](https://flower.ai/docs/framework/ref-api/flwr.common.RecordDict.html) objects.
 
 This introductory example to Flower uses [Pandas](https://pandas.pydata.org/), but deep knowledge of Pandas is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to
@@ -53,7 +53,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 ### Run with the Simulation Engine
 
-> \[!NOTE\]
+> [!NOTE]
 > Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
 
 ```bash
@@ -66,7 +66,7 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 flwr run . --run-config num-server-rounds=5
 ```
 
-> \[!TIP\]
+> [!TIP]
 > For a more detailed walk-through check our [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pandas.html)
 
 ### Run with the Deployment Engine

@@ -50,7 +50,7 @@ fewer components to be launched manually. By default, `flwr run` will make use o
 
 ### Run with the Simulation Engine
 
-> \[!NOTE\]
+> [!NOTE]
 > Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
 
 ```bash
