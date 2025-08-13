@@ -12,11 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower ClientApp Scheduler."""
+"""Simple Flower SuperExec plugin for ServerApp."""
 
 
-from .simple_clientapp_scheduler_plugin import SimpleClientAppSchedulerPlugin
+from .base_exec_plugin import BaseExecPlugin
 
-__all__ = [
-    "SimpleClientAppSchedulerPlugin",
-]
+
+class ServerAppExecPlugin(BaseExecPlugin):
+    """Simple Flower SuperExec plugin for ServerApp.
+
+    The plugin always selects the first candidate run ID.
+    """
+
+    command = "flwr-serverapp"
+    appio_api_address_arg = "--serverappio-api-address"

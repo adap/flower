@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simple Flower ClientApp Scheduler plugin."""
+"""Simple base Flower SuperExec plugin for app processes."""
 
 
 import os
@@ -20,14 +20,18 @@ import subprocess
 from collections.abc import Sequence
 from typing import Optional
 
-from flwr.supercore.scheduler import SchedulerPlugin
+from .exec_plugin import ExecPlugin
 
 
-class SimpleClientAppSchedulerPlugin(SchedulerPlugin):
-    """Simple Flower ClientApp Scheduler plugin.
+class BaseExecPlugin(ExecPlugin):
+    """Simple Flower SuperExec plugin for app processes.
 
     The plugin always selects the first candidate run ID.
     """
+
+    # Placeholders to be defined in subclasses
+    command = ""
+    appio_api_address_arg = ""
 
     def select_run_id(self, candidate_run_ids: Sequence[int]) -> Optional[int]:
         """Select a run ID to execute from a sequence of candidates."""
@@ -37,8 +41,8 @@ class SimpleClientAppSchedulerPlugin(SchedulerPlugin):
 
     def launch_app(self, token: str, run_id: int) -> None:
         """Launch the application associated with a given run ID and token."""
-        cmds = ["flwr-clientapp", "--insecure"]
-        cmds += ["--clientappio-api-address", self.appio_api_address]
+        cmds = [self.command, "--insecure"]
+        cmds += [self.appio_api_address_arg, self.appio_api_address]
         cmds += ["--token", token]
         cmds += ["--parent-pid", str(os.getpid())]
         cmds += ["--flwr-dir", self.flwr_dir]

@@ -21,9 +21,10 @@ from typing import Optional
 from flwr.common import Context, Message
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.supercore.corestate import CoreState
 
 
-class LinkState(abc.ABC):  # pylint: disable=R0904
+class LinkState(CoreState):  # pylint: disable=R0904
     """Abstract LinkState."""
 
     @abc.abstractmethod
