@@ -146,9 +146,8 @@ def run_with_deprecation_warning(  # pylint: disable=R0913, R0917
     """
     log(
         WARN,
-        "Directly executing `%s` is "
-        "DEPRECATED and will be prohibited in a future release. "
-        "Please use `flower-superexec` instead.",
+        "Directly executing `%s` is DEPRECATED and will be prohibited "
+        "in a future release. Please use `flower-superexec` instead.",
         cmd,
     )
     log(WARN, "For now, the following command is being run automatically:")
