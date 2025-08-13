@@ -27,11 +27,11 @@ import { CryptographyHandler } from './cryptoHandler';
 import { createChatRequestData, getHeaders, sendRequest } from './remoteUtils';
 import {
   ChatCompletionsResponse,
+  getServerSentEventData,
   isFinalChunk,
   isGenericError,
   isHTTPError,
   isPlatformHttpError,
-  isServerSentEvent,
   isStreamChunk,
 } from './typing';
 
@@ -154,7 +154,7 @@ async function processStream(
 }
 
 function splitJsonChunks(text: string): string[] {
-  return text.split(/(?<=})\s*(?={)/g).filter((s) => s.trim());
+  return text.trim().split(/\n\n+/).filter(Boolean);
 }
 
 async function processChunk(
@@ -167,11 +167,7 @@ async function processChunk(
 ): Promise<ChatResponseResult & { toolsUpdated?: boolean }> {
   let parsed: unknown;
   try {
-    if (isServerSentEvent(chunk)) {
-      parsed = JSON.parse(chunk.data);
-    } else {
-      parsed = JSON.parse(chunk);
-    }
+    parsed = JSON.parse(getServerSentEventData(chunk));
   } catch {
     return {
       ok: false,
