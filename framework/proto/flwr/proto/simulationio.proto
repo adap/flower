@@ -33,6 +33,9 @@ service SimulationIo {
   // Request token for a run
   rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
 
+  // Get run details
+  rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
+
   // Pull Simulation inputs
   rpc PullAppInputs(PullAppInputsRequest) returns (PullAppInputsResponse) {}
 
