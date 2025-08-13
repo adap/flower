@@ -108,7 +108,7 @@ def flwr_serverapp() -> None:
         serverappio_api_address=args.serverappio_api_address,
         log_queue=log_queue,
         token=args.token,
-        run_once=args.run_once,
+        run_once=(args.token is not None) or args.run_once,
         flwr_dir=args.flwr_dir,
         certificates=None,
         parent_pid=args.parent_pid,
