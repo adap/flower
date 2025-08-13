@@ -27,6 +27,11 @@ class SimulationIoStub(object):
                 request_serializer=flwr_dot_proto_dot_appio__pb2.RequestTokenRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_appio__pb2.RequestTokenResponse.FromString,
                 )
+        self.GetRun = channel.unary_unary(
+                '/flwr.proto.SimulationIo/GetRun',
+                request_serializer=flwr_dot_proto_dot_run__pb2.GetRunRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_run__pb2.GetRunResponse.FromString,
+                )
         self.PullAppInputs = channel.unary_unary(
                 '/flwr.proto.SimulationIo/PullAppInputs',
                 request_serializer=flwr_dot_proto_dot_appio__pb2.PullAppInputsRequest.SerializeToString,
@@ -76,6 +81,13 @@ class SimulationIoServicer(object):
 
     def RequestToken(self, request, context):
         """Request token for a run
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetRun(self, request, context):
+        """Get run details
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -142,6 +154,11 @@ def add_SimulationIoServicer_to_server(servicer, server):
                     servicer.RequestToken,
                     request_deserializer=flwr_dot_proto_dot_appio__pb2.RequestTokenRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_appio__pb2.RequestTokenResponse.SerializeToString,
+            ),
+            'GetRun': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetRun,
+                    request_deserializer=flwr_dot_proto_dot_run__pb2.GetRunRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_run__pb2.GetRunResponse.SerializeToString,
             ),
             'PullAppInputs': grpc.unary_unary_rpc_method_handler(
                     servicer.PullAppInputs,
@@ -219,6 +236,23 @@ class SimulationIo(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.SimulationIo/RequestToken',
             flwr_dot_proto_dot_appio__pb2.RequestTokenRequest.SerializeToString,
             flwr_dot_proto_dot_appio__pb2.RequestTokenResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetRun(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.SimulationIo/GetRun',
+            flwr_dot_proto_dot_run__pb2.GetRunRequest.SerializeToString,
+            flwr_dot_proto_dot_run__pb2.GetRunResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
