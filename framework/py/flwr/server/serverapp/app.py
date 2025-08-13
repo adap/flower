@@ -34,6 +34,7 @@ from flwr.common.config import (
 )
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    ExecPluginType,
     Status,
     SubStatus,
 )
@@ -61,9 +62,12 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PushAppOutputsRequest,
 )
 from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.server.grid.grpc_grid import GrpcGrid
 from flwr.server.run_serverapp import run as run_
 from flwr.supercore.app_utils import simple_get_token, start_parent_process_monitor
+from flwr.supercore.superexec.plugin import ServerAppExecPlugin
+from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 
 
 def flwr_serverapp() -> None:
@@ -74,14 +78,26 @@ def flwr_serverapp() -> None:
 
     args = _parse_args_run_flwr_serverapp().parse_args()
 
-    log(INFO, "Start `flwr-serverapp` process")
-
     if not args.insecure:
         flwr_exit(
             ExitCode.COMMON_TLS_NOT_SUPPORTED,
             "`flwr-serverapp` does not support TLS yet.",
         )
 
+    # Disallow long-running `flwr-serverapp` processes
+    if args.token is None:
+        run_with_deprecation_warning(
+            cmd="flwr-serverapp",
+            plugin_type=ExecPluginType.SERVER_APP,
+            plugin_class=ServerAppExecPlugin,
+            stub_class=ServerAppIoStub,
+            appio_api_address=args.serverappio_api_address,
+            flwr_dir=args.flwr_dir,
+            parent_pid=args.parent_pid,
+        )
+        return
+
+    log(INFO, "Start `flwr-serverapp` process")
     log(
         DEBUG,
         "`flwr-serverapp` will attempt to connect to SuperLink's "
