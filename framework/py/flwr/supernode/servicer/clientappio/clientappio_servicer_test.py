@@ -35,6 +35,7 @@ from flwr.proto.appio_pb2 import (  # pylint:disable=E0611
 )
 from flwr.proto.message_pb2 import Context as ProtoContext  # pylint:disable=E0611
 from flwr.proto.message_pb2 import (  # pylint:disable=E0611
+    PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
     PushObjectResponse,
@@ -80,12 +81,18 @@ class TestClientAppIoServicer(unittest.TestCase):
         # Create series of responses for PullObject
         # Adding responses for objects in a post-order traversal of object tree order
         all_objects = get_all_nested_objects(mock_message)
-        self.mock_stub.PullObject.side_effect = [
-            PullObjectResponse(
-                object_found=True, object_available=True, object_content=obj.deflate()
+        all_objects[mock_message.object_id] = mock_message
+
+        # Get the object tree and iterate in the correct order
+        def pull_object_side_effect(request: PullObjectRequest) -> PullObjectResponse:
+            obj_id = request.object_id
+            return PullObjectResponse(
+                object_found=True,
+                object_available=True,
+                object_content=all_objects[obj_id].deflate(),
             )
-            for obj in all_objects.values()
-        ]
+
+        self.mock_stub.PullObject.side_effect = pull_object_side_effect
         self.mock_stub.PullClientAppInputs.return_value = mock_response
 
         # Execute
