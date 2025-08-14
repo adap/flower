@@ -83,19 +83,14 @@ class TestClientAppIoServicer(unittest.TestCase):
         all_objects[mock_message.object_id] = mock_message
 
         # Get the object tree and iterate in the correct order
-        object_tree = get_object_tree(mock_message)
-        ordered_object_ids = [
-            tree.object_id for tree in iterate_object_tree(object_tree)
-        ]
-
-        self.mock_stub.PullObject.side_effect = [
-            PullObjectResponse(
+        def pull_object_side_effect(request):
+            obj_id = request.object_id
+            return PullObjectResponse(
                 object_found=True,
                 object_available=True,
                 object_content=all_objects[obj_id].deflate(),
             )
-            for obj_id in ordered_object_ids
-        ]
+        self.mock_stub.PullObject.side_effect = pull_object_side_effect
         self.mock_stub.PullClientAppInputs.return_value = mock_response
 
         # Execute
