@@ -22,6 +22,7 @@ from logging import ERROR, INFO
 from typing import Any, NoReturn
 
 from flwr.common import EventType, event
+import faulthandler
 
 from ..logger import log
 from .exit_code import EXIT_CODE_HELP
@@ -78,6 +79,7 @@ def flwr_exit(
     log(log_level, exit_message)
 
     # Exit
+    faulthandler.dump_traceback(file=sys.stderr)
     sys.exit(sys_exit_code)
 
 

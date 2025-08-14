@@ -19,18 +19,21 @@ import signal
 from threading import Thread
 from types import FrameType
 from typing import Callable, Optional
+import secrets
 
 from grpc import Server
-
+import sys
 from flwr.common.telemetry import EventType
-
+import faulthandler
 from .exit import ExitCode, flwr_exit
+
+faulthandler.enable()
 
 SIGNAL_TO_EXIT_CODE: dict[int, int] = {
     signal.SIGINT: ExitCode.GRACEFUL_EXIT_SIGINT,
     signal.SIGTERM: ExitCode.GRACEFUL_EXIT_SIGTERM,
 }
-registered_exit_handlers: list[Callable[[], None]] = []
+registered_exit_handlers: dict[str, Callable[[], None]] = {}
 
 # SIGQUIT is not available on Windows
 if hasattr(signal, "SIGQUIT"):
@@ -63,7 +66,8 @@ def register_exit_handlers(
         Additional exit handlers can be added using `add_exit_handler`.
     """
     default_handlers: dict[int, Callable[[int, FrameType], None]] = {}
-    registered_exit_handlers.extend(exit_handlers or [])
+    for handler in exit_handlers or []:
+        add_exit_handler(handler)
 
     def graceful_exit_handler(signalnum: int, _frame: FrameType) -> None:
         """Exit handler to be registered with `signal.signal`.
@@ -71,10 +75,11 @@ def register_exit_handlers(
         When called will reset signal handler to original signal handler from
         default_handlers.
         """
+        print(f"Received signal {signalnum}, exiting gracefully...")
         # Reset to default handler
         signal.signal(signalnum, default_handlers[signalnum])  # type: ignore
 
-        for handler in registered_exit_handlers:
+        for handler in registered_exit_handlers.values():
             handler()
 
         if grpc_servers is not None:
@@ -84,7 +89,6 @@ def register_exit_handlers(
         if bckg_threads is not None:
             for bckg_thread in bckg_threads:
                 bckg_thread.join()
-
         # Setup things for graceful exit
         flwr_exit(
             code=SIGNAL_TO_EXIT_CODE[signalnum],
@@ -111,9 +115,28 @@ def add_exit_handler(exit_handler: Callable[[], None]) -> None:
         A callable that takes no arguments and performs cleanup or
         other actions before the application exits.
 
+    Returns
+    -------
+    str
+        A unique ID for the exit handler, which can be used to remove 
+        it later using `remove_exit_handler`.
+
     Notes
     -----
     This method is not thread-safe, and it allows you to add the
     same exit handler multiple times.
     """
-    registered_exit_handlers.append(exit_handler)
+    handler_id = secrets.token_hex(32)
+    registered_exit_handlers[handler_id] = exit_handler
+    return handler_id
+
+
+def remove_exit_handler(handler_id: str) -> None:
+    """Remove an exit handler by its ID.
+
+    Parameters
+    ----------
+    handler_id : str
+        The ID of the exit handler to remove.
+    """
+    registered_exit_handlers.pop(handler_id, None)

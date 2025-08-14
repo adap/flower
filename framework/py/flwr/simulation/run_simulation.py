@@ -51,6 +51,9 @@ from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
+from flwr.common.exit_handlers import add_exit_handler
+
+
 
 
 def _replace_keys(d: Any, match: str, target: str) -> Any:
@@ -315,6 +318,7 @@ def run_serverapp_th(
             server_app,
             ctx_queue,
         ),
+        daemon=True,
     )
     serverapp_th.start()
     return serverapp_th
@@ -341,8 +345,10 @@ def _main_loop(
     # Initialize StateFactory
     state_factory = LinkStateFactory(":flwr-in-memory-state:")
 
-    f_stop = threading.Event()
     # A Threading event to indicate if an exception was raised in the ServerApp thread
+    f_stop = threading.Event()
+    add_exit_handler(lambda: (f_stop.set(), log(WARNING, "f_stop set")))
+
     server_app_thread_has_exception = threading.Event()
     serverapp_th = None
     success = True
@@ -399,6 +405,10 @@ def _main_loop(
         )
 
         updated_context = output_context_queue.get(timeout=3)
+        print("Waiting for ServerApp thread to finish...")
+        serverapp_th.join()
+        if server_app_thread_has_exception.is_set():
+            raise RuntimeError("Exception in ServerApp thread")
 
     except Empty:
         log(DEBUG, "Queue timeout. No context received.")
@@ -419,10 +429,6 @@ def _main_loop(
                 "success": success,
             },
         )
-        if serverapp_th:
-            serverapp_th.join()
-            if server_app_thread_has_exception.is_set():
-                raise RuntimeError("Exception in ServerApp thread")
 
     log(DEBUG, "Stopping Simulation Engine now.")
     return updated_context
