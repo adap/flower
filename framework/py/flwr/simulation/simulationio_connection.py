@@ -87,4 +87,4 @@ class SimulationIoConnection:
         self._channel = None
         self._grpc_stub = None
         channel.close()
-        log(DEBUG, "[SimulationIO] Disconnected")
+        log(WARNING, "[SimulationIO] Disconnected")

@@ -16,6 +16,8 @@
 
 
 import concurrent.futures
+from flwr.common.exit_handlers import add_exit_handler, remove_exit_handler
+import time
 import io
 import timeit
 from logging import INFO, WARN
@@ -111,6 +113,8 @@ class Server:
         for current_round in range(1, num_rounds + 1):
             log(INFO, "")
             log(INFO, "[ROUND %s]", current_round)
+            print("Please don't start fit round.")
+            time.sleep(9999)
             # Train model and replace previous global model
             res_fit = self.fit_round(
                 server_round=current_round,
@@ -302,6 +306,9 @@ def reconnect_clients(
 ) -> ReconnectResultsAndFailures:
     """Instruct clients to disconnect and never reconnect."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        handler_id = add_exit_handler(
+            lambda: executor.shutdown(wait=False, cancel_futures=True)
+        )
         submitted_fs = {
             executor.submit(reconnect_client, client_proxy, ins, timeout)
             for client_proxy, ins in client_instructions
@@ -310,6 +317,7 @@ def reconnect_clients(
             fs=submitted_fs,
             timeout=None,  # Handled in the respective communication stack
         )
+    remove_exit_handler(handler_id)
 
     # Gather results
     results: list[tuple[ClientProxy, DisconnectRes]] = []
@@ -346,19 +354,19 @@ def fit_clients(
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        handler_id = add_exit_handler(
+            lambda: executor.shutdown(wait=False, cancel_futures=True)
+        )
         submitted_fs = {
             executor.submit(fit_client, client_proxy, ins, timeout, group_id)
             for client_proxy, ins in client_instructions
         }
-        finished_fs, _ = concurrent.futures.wait(
-            fs=submitted_fs,
-            timeout=None,  # Handled in the respective communication stack
-        )
+    remove_exit_handler(handler_id)
 
     # Gather results
     results: list[tuple[ClientProxy, FitRes]] = []
     failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = []
-    for future in finished_fs:
+    for future in submitted_fs:
         _handle_finished_future_after_fit(
             future=future, results=results, failures=failures
         )
@@ -406,19 +414,19 @@ def evaluate_clients(
 ) -> EvaluateResultsAndFailures:
     """Evaluate parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        handler_id = add_exit_handler(
+            lambda: executor.shutdown(wait=False, cancel_futures=True)
+        )
         submitted_fs = {
             executor.submit(evaluate_client, client_proxy, ins, timeout, group_id)
             for client_proxy, ins in client_instructions
         }
-        finished_fs, _ = concurrent.futures.wait(
-            fs=submitted_fs,
-            timeout=None,  # Handled in the respective communication stack
-        )
+    remove_exit_handler(handler_id)
 
     # Gather results
     results: list[tuple[ClientProxy, EvaluateRes]] = []
     failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]] = []
-    for future in finished_fs:
+    for future in submitted_fs:
         _handle_finished_future_after_evaluate(
             future=future, results=results, failures=failures
         )

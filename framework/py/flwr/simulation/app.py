@@ -40,6 +40,8 @@ from flwr.common.constant import (
 )
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.heartbeat import HeartbeatSender, get_grpc_app_heartbeat_fn
+from flwr.common.exit_handlers import register_exit_handlers, add_exit_handler
+from flwr.common.telemetry import EventType
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -88,6 +90,12 @@ def flwr_simulation() -> None:
             "`flwr-simulation` does not support TLS yet. ",
         )
 
+    # Register exit handler
+    register_exit_handlers(
+        event_type=EventType.FLWR_SIMULATION_RUN_LEAVE,
+        exit_message="flwr-simulation process terminated gracefully.",
+    )
+
     log(
         DEBUG,
         "Starting isolated `Simulation` connected to SuperLink SimulationAppIo API "
@@ -126,10 +134,12 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         simulationio_service_address=simulationio_api_address,
         root_certificates=certificates,
     )
+    add_exit_handler(conn._disconnect)
 
     # Resolve directory where FABs are installed
     flwr_dir = get_flwr_dir(flwr_dir_)
     log_uploader = None
+    run_status = None
     heartbeat_sender = None
 
     while True:
@@ -279,6 +289,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
                         run_id=run.run_id, run_status=run_status_proto
                     )
                 )
+                run_status = None
 
             # Clean up the Context if it exists
             try:
@@ -294,6 +305,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         if run_once:
             break
 
+    conn._disconnect()
 
 def _parse_args_run_flwr_simulation() -> argparse.ArgumentParser:
     """Parse flwr-simulation command line arguments."""
