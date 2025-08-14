@@ -123,6 +123,10 @@ async function processStream(
         if (!chunkResult.ok) {
           return chunkResult;
         }
+        if (chunkResult.done) {
+          done = true;
+          break;
+        }
         if (chunkResult.toolsUpdated && chunkResult.message.toolCalls) {
           finalTools = chunkResult.message.toolCalls;
         }
@@ -164,10 +168,15 @@ async function processChunk(
   cryptoHandler: CryptographyHandler,
   encrypt: boolean,
   onStreamEvent?: (event: StreamEvent) => void
-): Promise<ChatResponseResult & { toolsUpdated?: boolean }> {
+): Promise<ChatResponseResult & { toolsUpdated?: boolean, done?: boolean }> {
+  let data = getServerSentEventData(chunk);
+  if (data === '[DONE]') {
+    return { ok: true, message: { role: 'assistant', content: '' }, done: true };
+  }
+
   let parsed: unknown;
   try {
-    parsed = JSON.parse(getServerSentEventData(chunk));
+    parsed = JSON.parse(data);
   } catch {
     return {
       ok: false,
