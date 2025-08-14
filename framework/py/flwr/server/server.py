@@ -113,8 +113,6 @@ class Server:
         for current_round in range(1, num_rounds + 1):
             log(INFO, "")
             log(INFO, "[ROUND %s]", current_round)
-            print("Please don't start fit round.")
-            time.sleep(9999)
             # Train model and replace previous global model
             res_fit = self.fit_round(
                 server_round=current_round,
@@ -355,7 +353,7 @@ def fit_clients(
     """Refine parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         handler_id = add_exit_handler(
-            lambda: executor.shutdown(wait=False, cancel_futures=True)
+            lambda: (print("Shutting down"), executor.shutdown(wait=False, cancel_futures=True), print("Shutdown complete"))
         )
         submitted_fs = {
             executor.submit(fit_client, client_proxy, ins, timeout, group_id)

@@ -117,7 +117,7 @@ def worker(
             )
         except Empty:
             # An exception raised if queue.get times out
-            f_stop.wait(1)
+            f_stop.wait(0.1)
         # Exceptions aren't raised but reported as an error message
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, ex)
@@ -139,6 +139,8 @@ def worker(
                 out_mssg.metadata.__dict__["_message_id"] = str(uuid4())
                 # Store reply Messages in state
                 messageres_queue.put(out_mssg)
+            if f_stop.is_set():
+                print("Worker terminated.")
 
 
 def add_messages_to_queue(
@@ -166,7 +168,7 @@ def put_message_into_state(
             state.store_message_res(message_reply)
         except Empty:
             # queue is empty when timeout was triggered
-            f_stop.wait(1)
+            f_stop.wait(0.1)
 
 
 # pylint: disable=too-many-positional-arguments
@@ -185,11 +187,11 @@ def run_api(
     backend = None
     try:
 
-        # # Instantiate backend
-        # backend = backend_fn()
+        # Instantiate backend
+        backend = backend_fn()
 
-        # # Build backend
-        # backend.build(app_fn)
+        # Build backend
+        backend.build(app_fn)
 
         # Add workers (they submit Messages to Backend)
         state = state_factory.state()
@@ -217,26 +219,26 @@ def run_api(
         )
         injector_th.start()
 
-        # with ThreadPoolExecutor() as executor:
-        #     def exit_fn() -> None:
-        #         """Exit function to stop the executor."""
-        #         print("Stopping executor")
-        #         executor.shutdown(wait=False, cancel_futures=True)
-        #         print("Executor stopped")
-        #     add_exit_handler(exit_fn)
-        #     _ = [
-        #         executor.submit(
-        #             worker,
-        #             messageins_queue,
-        #             messageres_queue,
-        #             node_info_stores,
-        #             backend,
-        #             f_stop,
-        #         )
-        #         for _ in range(backend.num_workers)
-        #     ]
-        print("Ha ha ha, this is a placeholder for ThreadPoolExecutor.")
-        time.sleep(9999)
+        with ThreadPoolExecutor() as executor:
+            def exit_fn() -> None:
+                """Exit function to stop the executor."""
+                print("Stopping executor")
+                executor.shutdown(wait=True, cancel_futures=True)
+                print("Executor stopped")
+            add_exit_handler(exit_fn)
+            _ = [
+                executor.submit(
+                    worker,
+                    messageins_queue,
+                    messageres_queue,
+                    node_info_stores,
+                    backend,
+                    f_stop,
+                )
+                for _ in range(backend.num_workers)
+            ]
+        print("Sleeping for 9999 seconds to keep the main thread alive.")
+        time.sleep(9999)  # Keep the main thread alive
 
         extractor_th.join()
         injector_th.join()
@@ -279,7 +281,6 @@ def start_vce(
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
     """Start Fleet API with the Simulation Engine."""
-
     nodes_mapping = {}
 
     if client_app_attr is not None and client_app is not None:
@@ -324,88 +325,82 @@ def start_vce(
             num_nodes=num_supernodes, state_factory=state_factory
         )
 
-    print("Sleeping for 9999 seconds to keep the main thread alive.")
-    time.sleep(9999)  # Keep the main thread alive
+    # Construct mapping of DeprecatedRunInfoStore
+    node_info_stores = _register_node_info_stores(
+        nodes_mapping=nodes_mapping, run=run, app_dir=app_dir if is_app else None
+    )
 
+    # Load backend config
+    log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
+    backend_config = json.loads(backend_config_json_stream)
 
-    # # Construct mapping of DeprecatedRunInfoStore
-    # node_info_stores = _register_node_info_stores(
-    #     nodes_mapping=nodes_mapping, run=run, app_dir=app_dir if is_app else None
-    # )
+    try:
+        backend_type = supported_backends[backend_name]
+    except KeyError as ex:
+        log(
+            ERROR,
+            "Backend `%s`, is not supported. Use any of %s or add support "
+            "for a new backend.",
+            backend_name,
+            list(supported_backends.keys()),
+        )
+        if backend_name in error_messages_backends:
+            log(ERROR, error_messages_backends[backend_name])
 
-    # # Load backend config
-    # log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
-    # backend_config = json.loads(backend_config_json_stream)
+        raise ex
 
-    # try:
-    #     backend_type = supported_backends[backend_name]
-    # except KeyError as ex:
-    #     log(
-    #         ERROR,
-    #         "Backend `%s`, is not supported. Use any of %s or add support "
-    #         "for a new backend.",
-    #         backend_name,
-    #         list(supported_backends.keys()),
-    #     )
-    #     if backend_name in error_messages_backends:
-    #         log(ERROR, error_messages_backends[backend_name])
+    def backend_fn() -> Backend:
+        """Instantiate a Backend."""
+        return backend_type(backend_config)
 
-    #     raise ex
+    # Load ClientApp if needed
+    def _load() -> ClientApp:
 
-    # def backend_fn() -> Backend:
-    #     """Instantiate a Backend."""
-    #     return backend_type(backend_config)
+        if client_app:
+            return client_app
+        if client_app_attr:
+            return get_load_client_app_fn(
+                default_app_ref=client_app_attr,
+                app_path=app_dir,
+                flwr_dir=flwr_dir,
+                multi_app=False,
+            )(run.fab_id, run.fab_version, run.fab_hash)
 
-    # # Load ClientApp if needed
-    # def _load() -> ClientApp:
+        raise ValueError("Either `client_app_attr` or `client_app` must be provided")
 
-    #     if client_app:
-    #         return client_app
-    #     if client_app_attr:
-    #         return get_load_client_app_fn(
-    #             default_app_ref=client_app_attr,
-    #             app_path=app_dir,
-    #             flwr_dir=flwr_dir,
-    #             multi_app=False,
-    #         )(run.fab_id, run.fab_version, run.fab_hash)
+    app_fn = _load
 
-    #     raise ValueError("Either `client_app_attr` or `client_app` must be provided")
+    try:
+        # Test if ClientApp can be loaded
+        client_app = app_fn()
 
-    # app_fn = _load
-    
+        # Cache `ClientApp`
+        if client_app_attr:
+            # Now wrap the loaded ClientApp in a dummy function
+            # this prevent unnecesary low-level loading of ClientApp
+            def _load_client_app() -> ClientApp:
+                return client_app
 
+            app_fn = _load_client_app
 
-    # try:
-    #     # Test if ClientApp can be loaded
-    #     client_app = app_fn()
-
-    #     # Cache `ClientApp`
-    #     if client_app_attr:
-    #         # Now wrap the loaded ClientApp in a dummy function
-    #         # this prevent unnecesary low-level loading of ClientApp
-    #         def _load_client_app() -> ClientApp:
-    #             return client_app
-
-    #         app_fn = _load_client_app
-
-    #     # Run main simulation loop
-    #     run_api(
-    #         app_fn,
-    #         backend_fn,
-    #         nodes_mapping,
-    #         state_factory,
-    #         node_info_stores,
-    #         f_stop,
-    #     )
-    # except LoadClientAppError as loadapp_ex:
-    #     f_stop_delay = 10
-    #     log(
-    #         ERROR,
-    #         "LoadClientAppError exception encountered. Terminating simulation in %is",
-    #         f_stop_delay,
-    #     )
-    #     time.sleep(f_stop_delay)
-    #     f_stop.set()  # set termination event
-    #     raise loadapp_ex
-    # except Exception as ex:
-    #     raise ex
+        # Run main simulation loop
+        run_api(
+            app_fn,
+            backend_fn,
+            nodes_mapping,
+            state_factory,
+            node_info_stores,
+            f_stop,
+        )
+    except LoadClientAppError as loadapp_ex:
+        f_stop_delay = 10
+        log(
+            ERROR,
+            "LoadClientAppError exception encountered. Terminating simulation in %is",
+            f_stop_delay,
+        )
+        time.sleep(f_stop_delay)
+        f_stop.set()  # set termination event
+        raise loadapp_ex
+    except Exception as ex:
+        raise ex

@@ -25,6 +25,7 @@ from grpc import Server
 import sys
 from flwr.common.telemetry import EventType
 import faulthandler
+import threading
 from .exit import ExitCode, flwr_exit
 
 faulthandler.enable()
@@ -33,6 +34,7 @@ SIGNAL_TO_EXIT_CODE: dict[int, int] = {
     signal.SIGINT: ExitCode.GRACEFUL_EXIT_SIGINT,
     signal.SIGTERM: ExitCode.GRACEFUL_EXIT_SIGTERM,
 }
+_lock_exit_handlers = threading.Lock()
 registered_exit_handlers: dict[str, Callable[[], None]] = {}
 
 # SIGQUIT is not available on Windows
@@ -79,8 +81,9 @@ def register_exit_handlers(
         # Reset to default handler
         signal.signal(signalnum, default_handlers[signalnum])  # type: ignore
 
-        for handler in registered_exit_handlers.values():
-            handler()
+        with _lock_exit_handlers:
+            for handler in registered_exit_handlers.values():
+                handler()
 
         if grpc_servers is not None:
             for grpc_server in grpc_servers:
@@ -126,9 +129,10 @@ def add_exit_handler(exit_handler: Callable[[], None]) -> None:
     This method is not thread-safe, and it allows you to add the
     same exit handler multiple times.
     """
-    handler_id = secrets.token_hex(32)
-    registered_exit_handlers[handler_id] = exit_handler
-    return handler_id
+    with _lock_exit_handlers:
+        handler_id = secrets.token_hex(32)
+        registered_exit_handlers[handler_id] = exit_handler
+        return handler_id
 
 
 def remove_exit_handler(handler_id: str) -> None:
@@ -139,4 +143,5 @@ def remove_exit_handler(handler_id: str) -> None:
     handler_id : str
         The ID of the exit handler to remove.
     """
-    registered_exit_handlers.pop(handler_id, None)
+    with _lock_exit_handlers:
+        registered_exit_handlers.pop(handler_id, None)

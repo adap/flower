@@ -54,8 +54,6 @@ from flwr.simulation.ray_transport.utils import (
 from flwr.common.exit_handlers import add_exit_handler
 
 
-
-
 def _replace_keys(d: Any, match: str, target: str) -> Any:
     if isinstance(d, dict):
         return {
@@ -371,7 +369,7 @@ def _main_loop(
             server_app_run_config = {}
 
         # Initialize Grid
-        grid = InMemoryGrid(state_factory=state_factory)
+        grid = InMemoryGrid(state_factory=state_factory, f_stop=f_stop)
         grid.set_run(run_id=run.run_id)
         output_context_queue: Queue[Context] = Queue()
 

@@ -24,6 +24,7 @@ from flwr.common import Message, RecordDict
 from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.logger import warn_deprecated_feature
 from flwr.common.typing import Run
+import threading
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
 
@@ -46,11 +47,13 @@ class InMemoryGrid(Grid):
     def __init__(
         self,
         state_factory: LinkStateFactory,
+        f_stop: threading.Event,
         pull_interval: float = 0.1,
     ) -> None:
         self._run: Optional[Run] = None
         self.state = state_factory.state()
         self.pull_interval = pull_interval
+        self.f_stop = f_stop
         self.node = Node(node_id=SUPERLINK_NODE_ID)
 
     def _check_message(self, message: Message) -> None:
@@ -155,9 +158,14 @@ class InMemoryGrid(Grid):
         msg_ids = set(self.push_messages(messages))
 
         # Pull messages
-        end_time = time.time() + (timeout if timeout is not None else 0.0)
+        if timeout is None:
+            end_time = float("inf")
+        else:
+            end_time = time.time() + timeout
         ret: list[Message] = []
-        while timeout is None or time.time() < end_time:
+        while not self.f_stop.is_set():
+            if time.time() > end_time:
+                break
             res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)
             msg_ids.difference_update(
@@ -166,5 +174,5 @@ class InMemoryGrid(Grid):
             if len(msg_ids) == 0:
                 break
             # Sleep
-            time.sleep(self.pull_interval)
+            self.f_stop.wait(self.pull_interval)
         return ret

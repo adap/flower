@@ -134,7 +134,6 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         simulationio_service_address=simulationio_api_address,
         root_certificates=certificates,
     )
-    add_exit_handler(conn._disconnect)
 
     # Resolve directory where FABs are installed
     flwr_dir = get_flwr_dir(flwr_dir_)
@@ -305,7 +304,6 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         if run_once:
             break
 
-    conn._disconnect()
 
 def _parse_args_run_flwr_simulation() -> argparse.ArgumentParser:
     """Parse flwr-simulation command line arguments."""
