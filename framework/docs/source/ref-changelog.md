@@ -212,7 +212,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Allow registration of functions for custom message types** ([#5093](https://github.com/adap/flower/pull/5093))
 
-  Enables support for custom message types in `ServerApp` by allowing the `message_type` field to be set as `"<action_type>.<action_name>"`, where `<action_type>` is one of `train`, `evaluate`, or `query`, and `<action_name>` is a valid Python identifier.  Developers can now register handler functions for these custom message types using the decorator `@app.<action_type>("<action_name>")`. For example, the `my_echo_fn` function is called when the `ServerApp` sends a message with `message_type` set to `"query.echo"`, and the `get_mean_value` function is called when it's `"query.mean"`:
+  Enables support for custom message types in `ServerApp` by allowing the `message_type` field to be set as `"<action_type>.<action_name>"`, where `<action_type>` is one of `train`, `evaluate`, or `query`, and `<action_name>` is a valid Python identifier. Developers can now register handler functions for these custom message types using the decorator `@app.<action_type>("<action_name>")`. For example, the `my_echo_fn` function is called when the `ServerApp` sends a message with `message_type` set to `"query.echo"`, and the `get_mean_value` function is called when it's `"query.mean"`:
 
   ```python
   app = ClientApp()
@@ -1845,7 +1845,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
 - **New FedAvgM strategy (Federated Averaging with Server Momentum)** ([#1076](https://github.com/adap/flower/pull/1076))
 
-  The new `FedAvgM` strategy implements Federated Averaging with Server Momentum \[Hsu et al., 2019\].
+  The new `FedAvgM` strategy implements Federated Averaging with Server Momentum [Hsu et al., 2019].
 
 - **New advanced PyTorch code example** ([#1007](https://github.com/adap/flower/pull/1007))
 
@@ -1917,7 +1917,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
   A new code example (`quickstart_mlcube`) demonstrates usage of MLCube with Flower.
 
-- **SSL-enabled server and client** ([#842](https://github.com/adap/flower/pull/842),  [#844](https://github.com/adap/flower/pull/844),  [#845](https://github.com/adap/flower/pull/845), [#847](https://github.com/adap/flower/pull/847), [#993](https://github.com/adap/flower/pull/993), [#994](https://github.com/adap/flower/pull/994))
+- **SSL-enabled server and client** ([#842](https://github.com/adap/flower/pull/842), [#844](https://github.com/adap/flower/pull/844), [#845](https://github.com/adap/flower/pull/845), [#847](https://github.com/adap/flower/pull/847), [#993](https://github.com/adap/flower/pull/993), [#994](https://github.com/adap/flower/pull/994))
 
   SSL enables secure encrypted connections between clients and servers. This release open-sources the Flower secure gRPC implementation to make encrypted communication channels accessible to all Flower users. The `advanced_tensorflow` code example now uses secure gRPC connection.
 

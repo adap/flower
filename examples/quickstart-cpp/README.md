@@ -6,7 +6,7 @@ framework: [C++]
 
 # Flower Clients in C++ (under development)
 
-> \[!WARNING\]\
+> [!WARNING]\
 > This example is compatible with `flwr<1.13.0`. We are currently updating it to the newer `flwr run` way of running Flower Apps.
 
 In this example you will train a linear model on synthetic data using C++ clients.

@@ -146,9 +146,8 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     # Resolve directory where FABs are installed
     flwr_dir = get_flwr_dir(flwr_dir_)
     log_uploader = None
-    run_status = None
     heartbeat_sender = None
-    context = None
+    run_status = None
 
     while True:
 
@@ -297,6 +296,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
                         run_id=run.run_id, run_status=run_status_proto
                     )
                 )
+                run_status = None
 
             # Clean up the Context if it exists
             try:

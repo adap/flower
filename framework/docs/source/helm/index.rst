@@ -39,8 +39,8 @@ Running in Production
 .. toctree::
     :maxdepth: 1
 
-    Deploy SuperLink <how-to-deploy-superlink-using-helm>
-    Deploy SuperNode <how-to-deploy-supernode-using-helm>
+    Deploy SuperLink <how-to-deploy-superlink-using-helm.md>
+    Deploy SuperNode <how-to-deploy-supernode-using-helm.md>
 
 .. |helm_install_link| replace:: ``helm install``
 

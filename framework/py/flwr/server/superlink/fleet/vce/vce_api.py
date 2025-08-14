@@ -23,7 +23,6 @@ from concurrent.futures import ThreadPoolExecutor
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from queue import Empty, Queue
-from time import sleep
 from typing import Callable, Optional
 from uuid import uuid4
 
@@ -153,7 +152,7 @@ def add_messages_to_queue(
             message_ins_list = state.get_message_ins(node_id=node_id, limit=1)
             for msg in message_ins_list:
                 queue.put(msg)
-        sleep(0.1)
+        f_stop.wait(0.1)
 
 
 def put_message_into_state(
@@ -183,6 +182,7 @@ def run_api(
     messageres_queue: Queue[Message] = Queue()
     backend = None
 
+    backend = None
     try:
 
         # Instantiate backend
@@ -237,16 +237,15 @@ def run_api(
         log(ERROR, traceback.format_exc())
         log(WARN, "Stopping Simulation Engine.")
 
-        # Manually trigger stopping event
-        f_stop.set()
-
         # Raise exception
         raise RuntimeError("Simulation Engine crashed.") from ex
 
     finally:
+        # Manually trigger stopping event
+        f_stop.set()
 
         # Terminate backend
-        if backend:
+        if backend is not None:
             backend.terminate()
 
 
