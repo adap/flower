@@ -66,7 +66,7 @@ def start_parent_process_monitor(
             if not _pid_exists(parent_pid):
                 # This works on Unix-like systems and Windows
                 # Avoid `os.kill` on Windows
-                signal.raise_signal(signal.SIGTERM)
+                signal.raise_signal(signal.SIGKILL)
 
     threading.Thread(target=monitor, daemon=True).start()
 
