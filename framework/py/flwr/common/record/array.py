@@ -264,14 +264,22 @@ class Array(InflatableObject):
 
     def slice_array(self) -> list[tuple[str, InflatableObject]]:
         """Slice Array data and construct a list of ArrayChunks."""
-        children: list[tuple[str, InflatableObject]] = []
+        # Return cached chunks if they exist
+        if "_chunks" in self.__dict__:
+            return cast(list[tuple[str, InflatableObject]], self.__dict__["_chunks"])
+
+        # Chunks are not children as some of them may be identical
+        chunks: list[tuple[str, InflatableObject]] = []
         # memoryview allows for zero-copy slicing
         data_view = memoryview(self.data)
         for start in range(0, len(data_view), MAX_ARRAY_CHUNK_SIZE):
             end = min(start + MAX_ARRAY_CHUNK_SIZE, len(data_view))
             ac = ArrayChunk(data_view[start:end])
-            children.append((ac.object_id, ac))
-        return children
+            chunks.append((ac.object_id, ac))
+
+        # Cache the chunks for future use
+        self.__dict__["_chunks"] = chunks
+        return chunks
 
     def deflate(self) -> bytes:
         """Deflate the Array."""
@@ -321,8 +329,8 @@ class Array(InflatableObject):
         Array
             The inflated Array.
         """
-        if not children:
-            raise ValueError("`Array` objects must have children.")
+        if children is None:
+            children = {}
 
         obj_body = get_object_body(object_content, cls)
 
@@ -386,4 +394,9 @@ class Array(InflatableObject):
         if name in ("dtype", "shape", "stype", "data"):
             # Mark as dirty if any of the main attributes are set
             self.is_dirty = True
+            # Clear cached object ID
+            self.__dict__.pop("_object_id", None)
+            # Clear cached chunks if data is set
+            if name == "data":
+                self.__dict__.pop("_chunks", None)
         super().__setattr__(name, value)

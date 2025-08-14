@@ -220,8 +220,24 @@ class TestArray(unittest.TestCase):
         self.assertRaises(ValueError, Array.inflate, arr_b)
         # Inflate passing non-existant children raises ValueError
         self.assertRaises(
-            ValueError, Array.inflate, arr_b, children={"123": ArrayChunk(b"")}
+            ValueError,
+            Array.inflate,
+            arr_b,
+            children={"123": ArrayChunk(memoryview(b""))},
         )
+
+    def test_deflate_and_inflate_empty_array(self) -> None:
+        """Ensure an empty Array can be (de)inflated correctly."""
+        # Prepare: Create an empty Array
+        arr = Array(dtype="", shape=(), stype="", data=b"")
+
+        # Execute: Deflate, and then inflate
+        arr_ = Array.inflate(arr.deflate(), children=arr.children)
+
+        # Assert: Array has no children
+        assert not arr.children
+        # Assert: Both objects are identical
+        assert arr.object_id == arr_.object_id
 
     def test_slicing_and_concatenation(self) -> None:
         """Test Array slicing."""

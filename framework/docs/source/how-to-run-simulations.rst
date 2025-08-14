@@ -34,6 +34,15 @@ scenarios at varying levels of data and system heterogeneity, client availabilit
 privacy budgets, etc. These are among some of the use cases where simulating FL
 workloads makes sense.
 
+.. note::
+
+    Flower's ``Simulation Engine`` is built on top of `Ray <https://www.ray.io/>`_, an
+    open-source framework for scalable Python workloads. Flower fully supports Linux and
+    macOS. On Windows, Ray support remains experimental, and while you can run
+    simulations directly from the `PowerShell
+    <https://learn.microsoft.com/en-us/powershell/scripting/overview?view=powershell-7.5>`_,
+    we recommend using `WSL2 <https://learn.microsoft.com/en-us/windows/wsl/about>`_.
+
 .. tip::
 
     The ``Flower AI Simulation 2025`` tutorial series is available on YouTube. You can

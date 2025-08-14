@@ -73,6 +73,10 @@ export interface ToolParameterProperty {
   enum?: string[];
 }
 
+export type Embedding = number[];
+
+export type EmbeddingInput = string | string[] | number[] | number[][];
+
 /**
  * Represents the parameters required for a tool's function.
  */
@@ -135,7 +139,13 @@ export interface StreamEvent {
   /**
    * The chunk of text data received in the stream event.
    */
-  chunk: string;
+  chunk?: string;
+  toolCall?: {
+    index: string;
+    name: string;
+    arguments: string | Record<string, string>;
+    complete: boolean;
+  };
 }
 
 /**
@@ -231,6 +241,16 @@ export enum FailureCode {
    * Indicates that the requested feature is not implemented.
    */
   NotImplementedError,
+
+  /**
+   * Indicates an error that occurred during inference
+   */
+  RuntimeError = 500,
+
+  /**
+   * Indicates that the user aborted the request.
+   */
+  RequestAborted,
 }
 
 /**
@@ -260,6 +280,38 @@ export interface Progress {
   description?: string;
 }
 
+export interface JsonSchema {
+  $defs?: Record<
+    string,
+    {
+      enum: string[];
+      title: string;
+      type: string;
+    }
+  >;
+  properties: Record<
+    string,
+    {
+      title: string;
+      type: string;
+      $ref?: string;
+    }
+  >;
+  required: string[];
+  title: string;
+  type: string;
+}
+
+export interface JsonSchemaPayload {
+  name: string;
+  schema: JsonSchema;
+}
+
+export interface ResponseFormat {
+  type: 'json_schema';
+  json_schema: JsonSchemaPayload;
+}
+
 /**
  * Options to configure the chat interaction.
  */
@@ -278,6 +330,24 @@ export interface ChatOptions {
    * Maximum number of tokens to generate in the response.
    */
   maxCompletionTokens?: number;
+
+  /**
+   * An alternative to sampling with temperature, called nucleus sampling,
+   * where the model considers the results of the tokens with top_p
+   * probability mass. So 0.1 means only the tokens comprising the top 10%
+   * probability mass are considered.
+   * We generally recommend altering this or temperature but not both.
+   */
+  topP?: number;
+
+  /**
+   * An object specifying the format that the model must output.
+   * Setting to { "type": "json_schema", "json_schema": {...} }
+   * enables Structured Outputs which ensures the model will match
+   * your supplied JSON schema. Learn more in the OpenAI API
+   * [Structured Outputs guide](https://platform.openai.com/docs/guides/structured-outputs).
+   */
+  responseFormat?: ResponseFormat;
 
   /**
    * If true, the response will be streamed.
@@ -309,6 +379,11 @@ export interface ChatOptions {
    * If true, enables end-to-end encryption for processing the request.
    */
   encrypt?: boolean;
+
+  /**
+   * Optional AbortSignal to cancel in-flight generation.
+   */
+  signal?: AbortSignal;
 }
 
 export type Result<T> = { ok: true; value: T } | { ok: false; failure: Failure };

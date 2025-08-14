@@ -46,7 +46,6 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
     ConfirmMessageReceivedResponse,
-    ObjectIDs,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -62,8 +61,7 @@ from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
 from flwr.supercore.ffs import Ffs
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStore
-
-from ...utils import store_mapping_and_register_objects
+from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 
 
 def create_node(
@@ -113,25 +111,22 @@ def pull_messages(
 
     # Convert to Messages
     msg_proto = []
-    objects_to_pull: dict[str, ObjectIDs] = {}
+    trees = []
     for msg in message_list:
         try:
-            msg_proto.append(message_to_proto(msg))
-
+            # Retrieve Message object tree from ObjectStore
             msg_object_id = msg.metadata.message_id
-            descendants = store.get_message_descendant_ids(msg_object_id)
-            # Include the object_id of the message itself
-            objects_to_pull[msg_object_id] = ObjectIDs(
-                object_ids=descendants + [msg_object_id]
-            )
+            obj_tree = store.get_object_tree(msg_object_id)
+
+            # Add Message and its object tree to the response
+            msg_proto.append(message_to_proto(msg))
+            trees.append(obj_tree)
         except NoObjectInStoreError as e:
             log(ERROR, e.message)
             # Delete message ins from state
             state.delete_messages(message_ins_ids={msg_object_id})
 
-    return PullMessagesResponse(
-        messages_list=msg_proto, objects_to_pull=objects_to_pull
-    )
+    return PullMessagesResponse(messages_list=msg_proto, message_object_trees=trees)
 
 
 def push_messages(
@@ -287,6 +282,5 @@ def confirm_message_received(
 
     # Delete the message object
     store.delete(request.message_object_id)
-    store.delete_message_descendant_ids(request.message_object_id)
 
     return ConfirmMessageReceivedResponse()

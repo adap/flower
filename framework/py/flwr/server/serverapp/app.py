@@ -16,10 +16,10 @@
 
 
 import argparse
+import gc
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
-from time import sleep
 from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
@@ -55,14 +55,15 @@ from flwr.common.serde import (
 )
 from flwr.common.telemetry import EventType, event
 from flwr.common.typing import RunNotRunningException, RunStatus
-from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
-from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
-    PullServerAppInputsRequest,
-    PullServerAppInputsResponse,
-    PushServerAppOutputsRequest,
+from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    PullAppInputsRequest,
+    PullAppInputsResponse,
+    PushAppOutputsRequest,
 )
+from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.server.grid.grpc_grid import GrpcGrid
 from flwr.server.run_serverapp import run as run_
+from flwr.supercore.app_utils import simple_get_token, start_parent_process_monitor
 
 
 def flwr_serverapp() -> None:
@@ -90,23 +91,31 @@ def flwr_serverapp() -> None:
     run_serverapp(
         serverappio_api_address=args.serverappio_api_address,
         log_queue=log_queue,
-        run_once=args.run_once,
+        token=args.token,
+        run_once=(args.token is not None) or args.run_once,
         flwr_dir=args.flwr_dir,
         certificates=None,
+        parent_pid=args.parent_pid,
     )
 
     # Restore stdout/stderr
     restore_output()
 
 
-def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
+def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     serverappio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
+    token: Optional[str] = None,
     flwr_dir: Optional[str] = None,
     certificates: Optional[bytes] = None,
+    parent_pid: Optional[int] = None,
 ) -> None:
     """Run Flower ServerApp process."""
+    # Monitor the main process in case of SIGKILL
+    if parent_pid is not None:
+        start_parent_process_monitor(parent_pid)
+
     # Resolve directory where FABs are installed
     flwr_dir_ = get_flwr_dir(flwr_dir)
     log_uploader = None
@@ -115,6 +124,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     run_status = None
     heartbeat_sender = None
     grid = None
+    context = None
     while True:
 
         try:
@@ -124,15 +134,15 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                 root_certificates=certificates,
             )
 
-            # Pull ServerAppInputs from LinkState
-            req = PullServerAppInputsRequest()
-            log(DEBUG, "[flwr-serverapp] Pull ServerAppInputs")
-            res: PullServerAppInputsResponse = grid._stub.PullServerAppInputs(req)
-            if not res.HasField("run"):
-                sleep(3)
-                run_status = None
-                continue
+            # If token is not set, loop until token is received from SuperLink
+            if token is None:
+                log(DEBUG, "[flwr-serverapp] Request token")
+                token = simple_get_token(grid._stub)
 
+            # Pull ServerAppInputs from LinkState
+            req = PullAppInputsRequest(token=token)
+            log(DEBUG, "[flwr-serverapp] Pull ServerAppInputs")
+            res: PullAppInputsResponse = grid._stub.PullAppInputs(req)
             context = context_from_proto(res.context)
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
@@ -207,10 +217,10 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             # Send resulting context
             context_proto = context_to_proto(updated_context)
             log(DEBUG, "[flwr-serverapp] Will push ServerAppOutputs")
-            out_req = PushServerAppOutputsRequest(
-                run_id=run.run_id, context=context_proto
+            out_req = PushAppOutputsRequest(
+                token=token, run_id=run.run_id, context=context_proto
             )
-            _ = grid._stub.PushServerAppOutputs(out_req)
+            _ = grid._stub.PushAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
         except RunNotRunningException:
@@ -249,6 +259,11 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             # Close the Grpc connection
             if grid:
                 grid.close()
+
+            # Clean up the Context and the token
+            context = None
+            token = None
+            gc.collect()
 
             event(
                 EventType.FLWR_SERVERAPP_RUN_LEAVE,

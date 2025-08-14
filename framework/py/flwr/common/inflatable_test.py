@@ -68,7 +68,7 @@ class CustomDataClass(InflatableObject):
             if children is None or len(children_ids) != len(children):
                 raise ValueError("Invalid children for this object.")
             input_children = [children[child_id] for child_id in children_ids]
-        elif children is not None:
+        elif children:
             raise ValueError("This object does not have children.")
 
         return cls(data=object_body, children=input_children)

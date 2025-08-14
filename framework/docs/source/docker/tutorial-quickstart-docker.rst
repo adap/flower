@@ -74,7 +74,7 @@ Open your terminal and run:
     * | ``-p 9091:9091 -p 9092:9092 -p 9093:9093``: Map port ``9091``, ``9092`` and ``9093`` of the
       | container to the same port of the host machine, allowing other services to access the
       | ServerAppIO API on ``http://localhost:9091``, the Fleet API on ``http://localhost:9092`` and
-      | the Exec API on ``http://localhost:9093``.
+      | the Control API on ``http://localhost:9093``.
     * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
     * ``--name superlink``: Assign the name ``superlink`` to the container.
     * ``--detach``: Run the container in the background, freeing up the terminal.

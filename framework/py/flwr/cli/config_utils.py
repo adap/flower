@@ -143,7 +143,7 @@ def validate_federation_in_project_config(
     if federation is None:
         typer.secho(
             "❌ No federation name was provided and the project's `pyproject.toml` "
-            "doesn't declare a default federation (with an Exec API address or an "
+            "doesn't declare a default federation (with an Control API address or an "
             "`options.num-supernodes` value).",
             fg=typer.colors.RED,
             bold=True,
@@ -231,7 +231,7 @@ def exit_if_no_address(federation_config: dict[str, Any], cmd: str) -> None:
     if "address" not in federation_config:
         typer.secho(
             f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the correct"
-            "SuperLink (Exec API) address is provided in `pyproject.toml`.",
+            "SuperLink (Control API) address is provided in `pyproject.toml`.",
             fg=typer.colors.RED,
             bold=True,
         )

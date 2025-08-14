@@ -6,7 +6,7 @@ echo "=== test.sh ==="
 
 
 # Default value (true)
-RUN_FULL_TEST=${1:true}
+RUN_FULL_TEST=${1:-true}
 echo "RUN_FULL_TEST: $RUN_FULL_TEST"
 
 echo "- Start Python checks"

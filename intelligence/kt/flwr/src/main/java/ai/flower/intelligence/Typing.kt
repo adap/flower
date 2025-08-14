@@ -162,6 +162,15 @@ internal data class ChoiceMessage(
 @Serializable internal data class DeltaMessage(val content: String, val role: String)
 
 @Serializable
+internal data class StreamChunk(
+  val `object`: String,
+  val model: String,
+  val choices: List<StreamChoice> = emptyList(),
+)
+
+@Serializable data class ServerSentEvent(val data: String)
+
+@Serializable
 internal data class Usage(
   @SerialName("completion_tokens") val completionTokens: Int,
   @SerialName("prompt_tokens") val promptTokens: Int,

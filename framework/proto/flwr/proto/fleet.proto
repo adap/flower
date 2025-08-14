@@ -71,7 +71,7 @@ message PullMessagesRequest {
 message PullMessagesResponse {
   Reconnect reconnect = 1;
   repeated Message messages_list = 2;
-  map<string, ObjectIDs> objects_to_pull = 3;
+  repeated ObjectTree message_object_trees = 3;
 }
 
 // PushMessages messages
@@ -83,7 +83,7 @@ message PushMessagesRequest {
 message PushMessagesResponse {
   Reconnect reconnect = 1;
   map<string, uint32> results = 2;
-  map<string, ObjectIDs> objects_to_push = 3;
+  repeated string objects_to_push = 3;
 }
 
 message Reconnect { uint64 reconnect = 1; }

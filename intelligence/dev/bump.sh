@@ -53,4 +53,13 @@ cd ..
 sed -i.bak "s/^VERSION_NAME=.*/VERSION_NAME=$new_version/" kt/gradle.properties
 rm kt/gradle.properties.bak
 
+sed -i.bak "s/^\([[:space:]]*const val VERSION = \)\".*\"/\1\"$new_version\"/" \
+  kt/flwr/src/main/java/ai/flower/intelligence/Constants.kt
+rm kt/flwr/src/main/java/ai/flower/intelligence/Constants.kt.bak
+
+# Update version in Swift Constants.swift
+sed -i.bak "s/^\([[:space:]]*let version = \)\".*\"/\1\"$new_version\"/" \
+  swift/src/Constants.swift
+rm swift/src/Constants.swift.bak
+
 echo "Version updated successfully!"

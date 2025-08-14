@@ -390,7 +390,7 @@ deploy the ``Pods``.
           - protocol: TCP
             port: 9093   # Port for Flower app submission
             targetPort: 9093  # the SuperLink container port
-            name: superlink-execapi
+            name: superlink-controlapi
           type: LoadBalancer  # balances workload, makes the service publicly available
 
 .. dropdown:: supernode-1-deployment.yaml

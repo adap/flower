@@ -20,9 +20,10 @@ import subprocess
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
-from logging import INFO, WARN
+from functools import partial
+from logging import INFO
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -34,24 +35,28 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Message, RecordDict
 from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir, get_fused_config_from_fab
 from flwr.common.constant import (
-    CLIENT_OCTET,
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_SUBPROCESS,
-    MAX_RETRY_DELAY,
-    SERVER_OCTET,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
+    ExecPluginType,
 )
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
+from flwr.common.inflatable import iterate_object_tree
+from flwr.common.inflatable_utils import (
+    pull_objects,
+    push_object_contents_from_iterable,
+)
 from flwr.common.logger import log
-from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
+from flwr.common.retry_invoker import RetryInvoker, _make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
@@ -158,6 +163,15 @@ def start_client_internal(
     ffs = ffs_factory.ffs()
     store = object_store_factory.store()
 
+    # Launch the SuperExec if the isolation mode is `subprocess`
+    if isolation == ISOLATION_MODE_SUBPROCESS:
+        command = ["flower-superexec", "--insecure"]
+        command += ["--appio-api-address", clientappio_api_address]
+        command += ["--plugin-type", ExecPluginType.CLIENT_APP]
+        command += ["--parent-pid", str(os.getpid())]
+        # pylint: disable-next=consider-using-with
+        subprocess.Popen(command)
+
     with _init_connection(
         transport=transport,
         server_address=server_address,
@@ -167,7 +181,17 @@ def start_client_internal(
         max_retries=max_retries,
         max_wait_time=max_wait_time,
     ) as conn:
-        receive, send, create_node, _, get_run, get_fab = conn
+        (
+            receive,
+            send,
+            create_node,
+            _,
+            get_run,
+            get_fab,
+            pull_object,
+            push_object,
+            confirm_message_received,
+        ) = conn
 
         # Call create_node fn to register node
         # and store node_id in state
@@ -187,51 +211,34 @@ def start_client_internal(
                 receive=receive,
                 get_run=get_run,
                 get_fab=get_fab,
+                pull_object=pull_object,
+                confirm_message_received=confirm_message_received,
             )
 
-            # Two isolation modes:
-            # 1. `subprocess`: SuperNode is starting the ClientApp
-            #    process as a subprocess.
-            # 2. `process`: ClientApp process gets started separately
-            #    (via `flwr-clientapp`), for example, in a separate
-            #    Docker container.
+            # No message has been pulled therefore we can skip the push stage.
+            if run_id is None:
+                # If no message was received, wait for a while
+                time.sleep(3)
+                continue
 
-            # Mode 1: SuperNode starts ClientApp as subprocess
-            start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
-
-            if start_subprocess and run_id is not None:
-                _octet, _colon, _port = clientappio_api_address.rpartition(":")
-                io_address = (
-                    f"{CLIENT_OCTET}:{_port}"
-                    if _octet == SERVER_OCTET
-                    else clientappio_api_address
-                )
-                # Start ClientApp subprocess
-                command = [
-                    "flwr-clientapp",
-                    "--clientappio-api-address",
-                    io_address,
-                    "--parent-pid",
-                    str(os.getpid()),
-                    "--insecure",
-                    "--run-once",
-                ]
-                subprocess.run(command, check=False)
-
-            _push_messages(state=state, send=send)
-
-            # Sleep for 3 seconds before the next iteration
-            time.sleep(3)
+            _push_messages(
+                state=state,
+                object_store=store,
+                send=send,
+                push_object=push_object,
+            )
 
 
 def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     state: NodeState,
     ffs: Ffs,
-    object_store: ObjectStore,  # pylint: disable=unused-argument
+    object_store: ObjectStore,
     node_config: UserConfig,
-    receive: Callable[[], Optional[Message]],
+    receive: Callable[[], Optional[tuple[Message, ObjectTree]]],
     get_run: Callable[[int], Run],
     get_fab: Callable[[str, int], Fab],
+    pull_object: Callable[[int, str], bytes],
+    confirm_message_received: Callable[[int, str], None],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
@@ -243,8 +250,9 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     message = None
     try:
         # Pull message
-        if (message := receive()) is None:
+        if (recv := receive()) is None:
             return None
+        message, object_tree = recv
 
         # Log message reception
         log(INFO, "")
@@ -288,8 +296,23 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             )
             state.store_context(run_ctx)
 
-        # Store the message in the state
+        # Preregister the object tree of the message
+        obj_ids_to_pull = object_store.preregister(run_id, object_tree)
+
+        # Store the message in the state (note this message has no content)
         state.store_message(message)
+
+        # Pull and store objects of the message in the ObjectStore
+        obj_contents = pull_objects(
+            obj_ids_to_pull,
+            pull_object_fn=lambda obj_id: pull_object(run_id, obj_id),
+        )
+        for obj_id in list(obj_contents.keys()):
+            object_store.put(obj_id, obj_contents.pop(obj_id))
+
+        # Confirm that the message was received
+        confirm_message_received(run_id, message.metadata.message_id)
+
     except RunNotRunningException:
         if message is None:
             log(
@@ -311,11 +334,15 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
 def _push_messages(
     state: NodeState,
-    send: Callable[[Message], None],
+    object_store: ObjectStore,
+    send: Callable[[Message, ObjectTree], set[str]],
+    push_object: Callable[[int, str, bytes], None],
 ) -> None:
     """Push reply messages to the SuperLink."""
-    # Get messages to send
-    reply_messages = state.get_messages(is_reply=True)
+    # This is to ensure that only one message is processed at a time
+    # Wait until a reply message is available
+    while not (reply_messages := state.get_messages(is_reply=True)):
+        time.sleep(0.5)
 
     for message in reply_messages:
         # Log message sending
@@ -335,9 +362,40 @@ def _push_messages(
             message.metadata.message_type,
         )
 
+        # Get the object tree for the message
+        object_tree = object_store.get_object_tree(message.metadata.message_id)
+
+        # Define the iterator for yielding object contents
+        # This will yield (object_id, content) pairs
+        def yield_object_contents(
+            _obj_tree: ObjectTree, obj_id_set: set[str]
+        ) -> Iterator[tuple[str, bytes]]:
+            for tree in iterate_object_tree(_obj_tree):
+                if tree.object_id not in obj_id_set:
+                    continue
+                while (content := object_store.get(tree.object_id)) == b"":
+                    # Wait for the content to be available
+                    time.sleep(0.5)
+                # At this point, content is guaranteed to be available
+                # therefore we can yield it after casting it to bytes
+                yield tree.object_id, cast(bytes, content)
+
         # Send the message
         try:
-            send(message)
+            # Send the reply message with its ObjectTree
+            # Get the IDs of objects to send
+            ids_obj_to_send = send(message, object_tree)
+
+            # Push object contents from the ObjectStore
+            run_id = message.metadata.run_id
+            push_object_contents_from_iterable(
+                yield_object_contents(object_tree, ids_obj_to_send),
+                # Use functools.partial to bind run_id explicitly,
+                # avoiding late binding issues and satisfying flake8 (B023)
+                # Equivalent to:
+                # lambda object_id, content: push_object(run_id, object_id, content)
+                push_object_fn=partial(push_object, run_id),
+            )
             log(INFO, "Sent successfully")
         except RunNotRunningException:
             log(
@@ -355,6 +413,11 @@ def _push_messages(
                 ]
             )
 
+            # Delete all its objects from the ObjectStore
+            # No need to delete objects of the message it replies to, as it is
+            # already deleted when the ClientApp calls `ConfirmMessageReceived`
+            object_store.delete(message.metadata.message_id)
+
 
 @contextmanager
 def _init_connection(  # pylint: disable=too-many-positional-arguments
@@ -369,12 +432,15 @@ def _init_connection(  # pylint: disable=too-many-positional-arguments
     max_wait_time: Optional[float] = None,
 ) -> Iterator[
     tuple[
-        Callable[[], Optional[Message]],
-        Callable[[Message], None],
+        Callable[[], Optional[tuple[Message, ObjectTree]]],
+        Callable[[Message, ObjectTree], set[str]],
         Callable[[], Optional[int]],
         Callable[[], None],
         Callable[[int], Run],
         Callable[[str, int], Fab],
+        Callable[[int, str], bytes],
+        Callable[[int, str, bytes], None],
+        Callable[[int, str], None],
     ]
 ]:
     """Establish a connection to the Fleet API server at SuperLink."""
@@ -433,44 +499,14 @@ def _make_fleet_connection_retry_invoker(
     connection_error_type: type[Exception] = RpcError,
 ) -> RetryInvoker:
     """Create a retry invoker for fleet connection."""
+    retry_invoker = _make_simple_grpc_retry_invoker()
+    retry_invoker.recoverable_exceptions = connection_error_type
+    if max_retries is not None:
+        retry_invoker.max_tries = max_retries + 1
+    if max_wait_time is not None:
+        retry_invoker.max_time = max_wait_time
 
-    def _on_success(retry_state: RetryState) -> None:
-        if retry_state.tries > 1:
-            log(
-                INFO,
-                "Connection successful after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-
-    def _on_backoff(retry_state: RetryState) -> None:
-        if retry_state.tries == 1:
-            log(WARN, "Connection attempt failed, retrying...")
-        else:
-            log(
-                WARN,
-                "Connection attempt failed, retrying in %.2f seconds",
-                retry_state.actual_wait,
-            )
-
-    return RetryInvoker(
-        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
-        recoverable_exceptions=connection_error_type,
-        max_tries=max_retries + 1 if max_retries is not None else None,
-        max_time=max_wait_time,
-        on_giveup=lambda retry_state: (
-            log(
-                WARN,
-                "Giving up reconnection after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-            if retry_state.tries > 1
-            else None
-        ),
-        on_success=_on_success,
-        on_backoff=_on_backoff,
-    )
+    return retry_invoker
 
 
 def run_clientappio_api_grpc(

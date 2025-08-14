@@ -22,13 +22,5 @@ class LicensePlugin(ABC):
     """Abstract Flower License Plugin class."""
 
     @abstractmethod
-    def __init__(self) -> None:
-        """Abstract constructor."""
-
-    @abstractmethod
     def check_license(self) -> bool:
         """Check if the license is valid."""
-
-    @abstractmethod
-    def get_license_info(self) -> None:
-        """Get information about the license."""

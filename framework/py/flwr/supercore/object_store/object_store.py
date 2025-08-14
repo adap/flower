@@ -61,6 +61,22 @@ class ObjectStore(abc.ABC):
         """
 
     @abc.abstractmethod
+    def get_object_tree(self, object_id: str) -> ObjectTree:
+        """Get the object tree for a given object ID.
+
+        Parameters
+        ----------
+        object_id : str
+            The ID of the object for which to retrieve the object tree.
+
+        Returns
+        -------
+        ObjectTree
+            An ObjectTree representing the hierarchical structure of the object with
+            the given ID and its descendants.
+        """
+
+    @abc.abstractmethod
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store.
 
@@ -83,8 +99,10 @@ class ObjectStore(abc.ABC):
 
         Returns
         -------
-        bytes
-            The object stored under the given object_id.
+        Optional[bytes]
+            The object stored under the given object_id if it exists, else None.
+            The returned bytes will be b"" if the object is not yet available,
+            but has been preregistered.
         """
 
     @abc.abstractmethod
@@ -124,46 +142,6 @@ class ObjectStore(abc.ABC):
         """Clear the store.
 
         This method should remove all objects from the store.
-        """
-
-    @abc.abstractmethod
-    def set_message_descendant_ids(
-        self, msg_object_id: str, descendant_ids: list[str]
-    ) -> None:
-        """Store the mapping from a ``Message`` object ID to the object IDs of its
-        descendants.
-
-        Parameters
-        ----------
-        msg_object_id : str
-            The object ID of the ``Message``.
-        descendant_ids : list[str]
-            A list of object IDs representing all descendant objects of the ``Message``.
-        """
-
-    @abc.abstractmethod
-    def get_message_descendant_ids(self, msg_object_id: str) -> list[str]:
-        """Retrieve the object IDs of all descendants of a given ``Message``.
-
-        Parameters
-        ----------
-        msg_object_id : str
-            The object ID of the ``Message``.
-
-        Returns
-        -------
-        list[str]
-            A list of object IDs of all descendant objects of the ``Message``.
-        """
-
-    @abc.abstractmethod
-    def delete_message_descendant_ids(self, msg_object_id: str) -> None:
-        """Delete the mapping from a ``Message`` object ID to its descendants.
-
-        Parameters
-        ----------
-        msg_object_id : str
-            The object ID of the ``Message``.
         """
 
     @abc.abstractmethod
