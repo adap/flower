@@ -169,7 +169,7 @@ async function processChunk(
   encrypt: boolean,
   onStreamEvent?: (event: StreamEvent) => void
 ): Promise<ChatResponseResult & { toolsUpdated?: boolean, done?: boolean }> {
-  let data = getServerSentEventData(chunk);
+  const data = getServerSentEventData(chunk);
   if (data === '[DONE]') {
     return { ok: true, message: { role: 'assistant', content: '' }, done: true };
   }
