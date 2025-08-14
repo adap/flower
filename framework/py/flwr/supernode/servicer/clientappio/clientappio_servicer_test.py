@@ -90,6 +90,7 @@ class TestClientAppIoServicer(unittest.TestCase):
                 object_available=True,
                 object_content=all_objects[obj_id].deflate(),
             )
+
         self.mock_stub.PullObject.side_effect = pull_object_side_effect
         self.mock_stub.PullClientAppInputs.return_value = mock_response
 
