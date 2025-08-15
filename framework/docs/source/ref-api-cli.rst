@@ -36,25 +36,15 @@ Basic Commands
 Advanced Commands
 -----------------
 
-.. _flwr-serverapp-apiref:
+.. _flower-superexec-apiref:
 
-``flwr-serverapp``
-~~~~~~~~~~~~~~~~~~
-
-.. argparse::
-    :module: flwr.server.serverapp.app
-    :func: _parse_args_run_flwr_serverapp
-    :prog: flwr-serverapp
-
-.. _flwr-clientapp-apiref:
-
-``flwr-clientapp``
-~~~~~~~~~~~~~~~~~~
+``flower-superexec``
+~~~~~~~~~~~~~~~~~~~~
 
 .. argparse::
-    :module: flwr.client.clientapp.app
-    :func: _parse_args_run_flwr_clientapp
-    :prog: flwr-clientapp
+    :module: flwr.supercore.cli.flower_superexec
+    :func: _parse_args
+    :prog: flower-superexec
 
 Technical Commands
 ------------------

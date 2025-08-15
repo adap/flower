@@ -17,7 +17,9 @@ Categories
   (ClientApp) errors.
 - **Simulation-specific exit codes (500-599)**: Specific to ``flwr-simulation``
   (Simulation Engine) errors.
-- **Common exit codes (600-)**: Shared across multiple components.
+- **SuperExec-specific exit codes (600-699)**: Specific to ``flower-superexec``
+  (SuperExec) errors.
+- **Common exit codes (700-799)**: Shared across multiple components.
 
 Indices
 -------

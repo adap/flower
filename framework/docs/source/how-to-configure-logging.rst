@@ -11,7 +11,7 @@ module <https://docs.python.org/3/library/logging.html#logging-levels>`_ support
 example, to launch your ``SuperLink`` with ``DEBUG`` logs, use:
 
 .. code-block:: shell
-    :emphasize-lines: 2,11,12
+    :emphasize-lines: 2,11
 
     # Launch the SuperLink with TLS (or use --insecure)
     FLWR_LOG_LEVEL=DEBUG flower-superlink \
@@ -19,12 +19,14 @@ example, to launch your ``SuperLink`` with ``DEBUG`` logs, use:
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key
 
-    INFO 2025-01-27 11:46:41,690:      Starting Flower SuperLink
-    INFO 2025-01-27 11:46:41,697:      Flower Deployment Engine: Starting Control API on 0.0.0.0:9093
-    INFO 2025-01-27 11:46:41,724:      Flower ECE: Starting ServerAppIo API (gRPC-rere) on 0.0.0.0:9091
-    INFO 2025-01-27 11:46:41,728:      Flower ECE: Starting Fleet API (gRPC-rere) on 0.0.0.0:9092
-    DEBUG 2025-01-27 11:46:41,730:     Started flwr-serverapp scheduler thread.
-    DEBUG 2025-01-27 11:46:41,730:     Using InMemoryState
+    WARNING 2025-08-15 17:06:58,037:   DEBUG logs enabled. Do not use this in production, as it may expose sensitive details.
+    INFO 2025-08-15 17:06:58,293:      Starting Flower SuperLink
+    INFO 2025-08-15 17:06:58,305:      Flower Deployment Engine: Starting Control API on 0.0.0.0:9093
+    INFO 2025-08-15 17:06:58,309:      Flower ECE: Starting ServerAppIo API (gRPC-rere) on 0.0.0.0:9091
+    DEBUG 2025-08-15 17:06:58,311:     Automatic node authentication enabled
+    INFO 2025-08-15 17:06:58,314:      Flower ECE: Starting Fleet API (gRPC-rere) on 0.0.0.0:9092
+    WARNING 2025-08-15 17:06:58,514:   DEBUG logs enabled. Do not use this in production, as it may expose sensitive details.
+    INFO 2025-08-15 17:06:58,774:      Starting Flower SuperExec
 
 .. note::
 

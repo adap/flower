@@ -65,8 +65,8 @@ number of additional network connections.
 Flower Components APIs
 ~~~~~~~~~~~~~~~~~~~~~~
 
-All Flower components — SuperLink, ServerApp process (``flwr-serverapp``), SuperNode,
-and ClientApp process (``flwr-clientapp``) — expose APIs to interact with other Flower
+All Flower components — SuperLink, SuperNode,
+and SuperExec — expose APIs to interact with other Flower
 components. The SuperLink component includes three such APIs: the ServerAppIo API, Fleet
 API, and the Control API. Similarly, the SuperNode component includes the ClientAppIo
 API. Each of these APIs serves a distinct purpose when running a Flower app using the

@@ -45,10 +45,12 @@ class ExitCode:
 
     # Simulation-specific exit codes (500-599)
 
-    # Common exit codes (600-)
-    COMMON_ADDRESS_INVALID = 600
-    COMMON_MISSING_EXTRA_REST = 601
-    COMMON_TLS_NOT_SUPPORTED = 602
+    # SuperExec-specific exit codes (600-699)
+
+    # Common exit codes (700-799)
+    COMMON_ADDRESS_INVALID = 700
+    COMMON_MISSING_EXTRA_REST = 701
+    COMMON_TLS_NOT_SUPPORTED = 702
 
     def __new__(cls) -> ExitCode:
         """Prevent instantiation."""
