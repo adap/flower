@@ -120,10 +120,10 @@ def get_pids(command: str) -> list[int]:
         ["pgrep", "-f", command],
         capture_output=True,
         text=True,
-        check=True,
+        check=False,
     )
     pids = result.stdout.strip().split("\n")
-    return [int(pid) for pid in pids]
+    return [int(pid) for pid in pids if pid]
 
 
 def main() -> None:
@@ -148,8 +148,13 @@ def main() -> None:
     # Submit the first run
     print("Starting the first run...")
     run_id1 = flwr_run()
-    time.sleep(2)  # Allow time for the run to start
-    app_pid = get_pids(app_cmd)[0]  # Get the PID of the first app process
+
+    # Get the PID of the first app process
+    while True:
+        if pids := get_pids(app_cmd):
+            app_pid = pids[0]
+            break
+        time.sleep(0.1)
 
     # Submit the second run
     print("Starting the second run...")
