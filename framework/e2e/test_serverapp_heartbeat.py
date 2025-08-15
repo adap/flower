@@ -7,8 +7,24 @@ import time
 
 import tomli
 import tomli_w
+import os
+from flwr.common.constant import (
+    Status,
+    SubStatus,
+    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
+    CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+)
 
-from flwr.common.constant import Status, SubStatus
+
+use_sim = sys.argv[1] == "simulation" if len(sys.argv) > 1 else False
+plugin_type_arg = "simulation" if use_sim else "serverapp"
+address_arg = (
+    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS
+    if use_sim
+    else CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS
+)
+executor_arg = f"flwr.superexec.{'simulation' if use_sim else 'deployment'}:executor"
+app_cmd = "flwr-simulation" if use_sim else "flwr-serverapp"
 
 
 def add_e2e_federation() -> None:
@@ -32,11 +48,8 @@ def add_e2e_federation() -> None:
         tomli_w.dump(pyproject, f)
 
 
-def run_superlink(is_simulation: bool) -> subprocess.Popen:
+def run_superlink() -> subprocess.Popen:
     """Run the SuperLink."""
-    executor_arg = "flwr.superexec.deployment:executor"
-    if is_simulation:
-        executor_arg = "flwr.superexec.simulation:executor"
     return subprocess.Popen(
         [
             "flower-superlink",
@@ -51,12 +64,12 @@ def run_superlink(is_simulation: bool) -> subprocess.Popen:
     )
 
 
-def run_worker_process(is_simulation: bool) -> subprocess.Popen:
-    """Run the flwr-serverapp or flwr-simulation process."""
-    cmd = "flwr-simulation" if is_simulation else "flwr-serverapp"
-    return subprocess.Popen(
-        [cmd, "--insecure"],
-    )
+def run_superexec() -> subprocess.Popen:
+    """Run the SuperExec."""
+    cmd = ["flower-superexec", "--insecure"]
+    cmd += ["--appio-api-address", address_arg]
+    cmd += ["--plugin-type", plugin_type_arg]
+    return subprocess.Popen(cmd)
 
 
 def flwr_run() -> int:
@@ -101,34 +114,46 @@ def flwr_ls() -> dict[int, str]:
     return {entry["run-id"]: entry["status"] for entry in data["runs"]}
 
 
+def get_pids(command: str) -> list[int]:
+    """Get the PIDs of a running command."""
+    result = subprocess.run(
+        ["pgrep", "-f", command],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    pids = result.stdout.strip().split("\n")
+    return [int(pid) for pid in pids]
+
+
 def main() -> None:
     """."""
     # Determine if the test is running in simulation mode
-    is_simulation = sys.argv[1] == "simulation" if len(sys.argv) > 1 else False
-    print(f"Running in {'simulation' if is_simulation else 'deployment'} mode.")
+    print(f"Running in {'simulation' if use_sim else 'deployment'} mode.")
 
     # Add e2e federation to pyproject.toml
     add_e2e_federation()
 
     # Start the SuperLink
     print("Starting SuperLink...")
-    superlink_proc = run_superlink(is_simulation)
+    superlink_proc = run_superlink()
 
     # Allow time for SuperLink to start
     time.sleep(1)
 
-    # Submit the first run and run the first ServerApp process
-    print("Starting the first run and ServerApp process...")
+    # Start the SuperExec
+    print("Starting SuperExec...")
+    superexec_proc = run_superexec()
+
+    # Submit the first run
+    print("Starting the first run...")
     run_id1 = flwr_run()
-    serverapp_proc = run_worker_process(is_simulation)
+    time.sleep(2)  # Allow time for the run to start
+    app_pid = get_pids(app_cmd)[0]  # Get the PID of the first app process
 
-    # Brief pause to allow the ServerApp process to initialize
-    time.sleep(1)
-
-    # Submit the second run and run the second ServerApp process
-    print("Starting the second run and ServerApp process...")
+    # Submit the second run and run the second SuperExec process
+    print("Starting the second run...")
     run_id2 = flwr_run()
-    serverapp_proc2 = run_worker_process(is_simulation)
 
     # Wait up to 6 seconds for both runs to reach RUNNING status
     tic = time.time()
@@ -152,16 +177,13 @@ def main() -> None:
     superlink_proc.wait()
 
     # Kill the first ServerApp process
-    # The ServerApp process cannot be terminated gracefully yet,
-    # so we need to kill it via SIGKILL.
     print("Terminating the first ServerApp process...")
-    serverapp_proc.kill()
-    serverapp_proc.wait()
-    time.sleep(1)  # Allow time for the spawned app process to exit
+    os.kill(app_pid, 9)  # SIGKILL to ensure it stops immediately
+    time.sleep(1)  # Allow time for the process to terminate
 
     # Restart the SuperLink
     print("Restarting SuperLink...")
-    superlink_proc = run_superlink(is_simulation)
+    superlink_proc = run_superlink()
 
     # Allow time for SuperLink to start
     time.sleep(1)
@@ -182,8 +204,8 @@ def main() -> None:
     print("Run statuses are updated correctly.")
 
     # Clean up
-    serverapp_proc2.kill()
-    serverapp_proc2.wait()
+    superexec_proc.terminate()
+    superexec_proc.wait()
     superlink_proc.terminate()
     superlink_proc.wait()
 
