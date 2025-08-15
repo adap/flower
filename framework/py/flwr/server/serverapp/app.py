@@ -16,7 +16,6 @@
 
 
 import argparse
-import gc
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
@@ -63,7 +62,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
 from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.server.grid.grpc_grid import GrpcGrid
 from flwr.server.run_serverapp import run as run_
-from flwr.supercore.app_utils import simple_get_token, start_parent_process_monitor
+from flwr.supercore.app_utils import start_parent_process_monitor
 
 
 def flwr_serverapp() -> None:
@@ -92,7 +91,6 @@ def flwr_serverapp() -> None:
         serverappio_api_address=args.serverappio_api_address,
         log_queue=log_queue,
         token=args.token,
-        run_once=(args.token is not None) or args.run_once,
         flwr_dir=args.flwr_dir,
         certificates=None,
         parent_pid=args.parent_pid,
@@ -105,7 +103,6 @@ def flwr_serverapp() -> None:
 def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     serverappio_api_address: str,
     log_queue: Queue[Optional[str]],
-    run_once: bool,
     token: str,
     flwr_dir: Optional[str] = None,
     certificates: Optional[bytes] = None,
@@ -158,9 +155,7 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
 
         fab_id, fab_version = get_fab_metadata(fab.content)
 
-        app_path = str(
-            get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir_)
-        )
+        app_path = str(get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir_))
         config = get_project_config(app_path)
 
         # Obtain server app reference and the run config
@@ -243,9 +238,7 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         if run_status and grid:
             run_status_proto = run_status_to_proto(run_status)
             grid._stub.UpdateRunStatus(
-                UpdateRunStatusRequest(
-                    run_id=run.run_id, run_status=run_status_proto
-                )
+                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
             )
 
         # Close the Grpc connection
