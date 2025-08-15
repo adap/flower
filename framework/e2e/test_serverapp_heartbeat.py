@@ -151,7 +151,7 @@ def main() -> None:
     time.sleep(2)  # Allow time for the run to start
     app_pid = get_pids(app_cmd)[0]  # Get the PID of the first app process
 
-    # Submit the second run and run the second SuperExec process
+    # Submit the second run
     print("Starting the second run...")
     run_id2 = flwr_run()
 
