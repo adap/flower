@@ -65,6 +65,7 @@ def start_parent_process_monitor(
             time.sleep(0.2)
             if not _pid_exists(parent_pid):
                 os.kill(os.getpid(), signal.SIGKILL)
+
     threading.Thread(target=monitor, daemon=True).start()
 
 
