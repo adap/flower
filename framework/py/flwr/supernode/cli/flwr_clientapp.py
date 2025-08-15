@@ -45,7 +45,6 @@ def flwr_clientapp() -> None:
     )
     run_clientapp(
         clientappio_api_address=args.clientappio_api_address,
-        run_once=(args.token is not None) or args.run_once,
         token=args.token,
         flwr_dir=args.flwr_dir,
         certificates=None,
@@ -64,12 +63,6 @@ def _parse_args_run_flwr_clientapp() -> argparse.ArgumentParser:
         type=str,
         help="Address of SuperNode's ClientAppIo API (IPv4, IPv6, or a domain name)."
         f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS}.",
-    )
-    parser.add_argument(
-        "--run-once",
-        action="store_true",
-        help="When set, this process will start a single ClientApp for a pending "
-        "message. If there is no pending message, the process will exit.",
     )
     add_args_flwr_app_common(parser=parser)
     return parser
