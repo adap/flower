@@ -1,23 +1,16 @@
 """app-pytorch: A Flower / PyTorch app."""
 
-import random
-from logging import INFO, WARN
-from time import sleep
-
-import torch
 from app_pytorch.task import Net
 
 from flwr.common import (
     ArrayRecord,
     Context,
-    Message,
-    MessageType,
     RecordDict,
     ConfigRecord,
 )
 from flwr.common.logger import log
 from flwr.server import Grid, ServerApp
-from .fedavg import FedAvg, run_strategy
+from .fedavg import FedAvgA, run_strategy
 
 # Create ServerApp
 app = ServerApp()
@@ -32,7 +25,7 @@ def main(grid: Grid, context: Context) -> None:
     global_model = Net()
     global_model_key = "model"
 
-    strategy = FedAvg()
+    strategy = FedAvgA()
 
     gmodel_record = ArrayRecord(global_model.state_dict())
     recorddict = RecordDict(
