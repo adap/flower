@@ -11,7 +11,7 @@ myst:
 
 # Deploy SuperLink using Helm
 
-```{note}
+```[NOTE]
 Flower Helm charts are a Flower Enterprise feature. See [Flower Enterprise](https://flower.ai/enterprise) for details.
 ```
 
