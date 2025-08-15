@@ -64,10 +64,5 @@ def _parse_args_run_flwr_clientapp() -> argparse.ArgumentParser:
         help="Address of SuperNode's ClientAppIo API (IPv4, IPv6, or a domain name)."
         f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS}.",
     )
-    parser.add_argument(
-        "--run-once",
-        action="store_true",
-        help="This flag is deprecated and will be removed in a future release.",
-    )
     add_args_flwr_app_common(parser=parser)
     return parser
