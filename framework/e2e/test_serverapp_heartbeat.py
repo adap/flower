@@ -1,20 +1,20 @@
 """Test run heartbeat functionality."""
 
 import json
+import os
 import subprocess
 import sys
 import time
 
 import tomli
 import tomli_w
-import os
+
 from flwr.common.constant import (
+    CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
     Status,
     SubStatus,
-    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
-    CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS,
 )
-
 
 use_sim = sys.argv[1] == "simulation" if len(sys.argv) > 1 else False
 plugin_type_arg = "simulation" if use_sim else "serverapp"
