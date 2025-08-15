@@ -180,7 +180,6 @@ def run_api(
     """Run the VCE."""
     messageins_queue: Queue[Message] = Queue()
     messageres_queue: Queue[Message] = Queue()
-    backend = None
 
     backend = None
     try:
