@@ -1,6 +1,8 @@
-import { FlowerIntelligence } from '@flwr/flwr';
+import { FlowerIntelligence, type StreamEvent } from '@flwr/flwr';
 
 const fi = FlowerIntelligence.instance;
+fi.remoteHandoff = true;
+fi.apiKey = "fk_0_q_-tC_s_cl8WXgwR2FKhQlFknWSvHdN2iGTeY_hGMqM";
 
 async function main() {
   const response = await fi.chat({
@@ -8,6 +10,9 @@ async function main() {
       { role: 'system', content: 'You are a helpful assistant' },
       { role: 'user', content: 'How are you?' },
     ],
+    model: 'meta/llama3.2-1b',
+    stream: true,
+    onStreamEvent: (event: StreamEvent) => console.log(event.chunk)
   });
 
   if (!response.ok) {
