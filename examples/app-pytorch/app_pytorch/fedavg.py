@@ -14,12 +14,12 @@ class FedAvg(Strategy):
         # Initialize global model parameters
         return None
 
-    def configure_fit(
+    def configure_train(
         self, server_round: int, record: RecordDict, grid: Grid
     ) -> list[Message]:
         # Configure the next round of training
 
-        record['fit-config'] = ConfigRecord({"server_round": server_round})
+        record['train-config'] = ConfigRecord({"server_round": server_round})
 
         # Sample nodes
         min_nodes = 2
@@ -45,7 +45,7 @@ class FedAvg(Strategy):
 
         return messages
 
-    def aggregate_fit(
+    def aggregate_train(
         self,
         server_round: int,
         results: list[Message],
