@@ -10,7 +10,7 @@ myst:
 
 # Deploy SuperNode using Helm
 
-```[NOTE]
+```[!NOTE]
 Flower Helm charts are a Flower Enterprise feature. See [Flower Enterprise](https://flower.ai/enterprise) for details.
 ```
 
