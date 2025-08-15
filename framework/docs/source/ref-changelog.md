@@ -1845,7 +1845,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
 - **New FedAvgM strategy (Federated Averaging with Server Momentum)** ([#1076](https://github.com/adap/flower/pull/1076))
 
-  The new `FedAvgM` strategy implements Federated Averaging with Server Momentum [Hsu et al., 2019].
+  The new `FedAvgM` strategy implements Federated Averaging with Server Momentum \[Hsu et al., 2019\].
 
 - **New advanced PyTorch code example** ([#1007](https://github.com/adap/flower/pull/1007))
 
