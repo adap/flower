@@ -10,7 +10,7 @@ import tomli
 import tomli_w
 
 from flwr.common.constant import (
-    CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
     Status,
     SubStatus,
@@ -21,7 +21,7 @@ plugin_type_arg = "simulation" if use_sim else "serverapp"
 address_arg = (
     SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS
     if use_sim
-    else CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS
+    else SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 )
 executor_arg = f"flwr.superexec.{'simulation' if use_sim else 'deployment'}:executor"
 app_cmd = "flwr-simulation" if use_sim else "flwr-serverapp"
