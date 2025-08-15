@@ -157,6 +157,7 @@ def main() -> None:
     print("Terminating the first ServerApp process...")
     serverapp_proc.kill()
     serverapp_proc.wait()
+    time.sleep(1)  # Allow time for the spawned app process to exit
 
     # Restart the SuperLink
     print("Restarting SuperLink...")
