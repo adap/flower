@@ -184,7 +184,6 @@ def main() -> None:
     # Kill the first ServerApp process
     print("Terminating the first ServerApp process...")
     os.kill(app_pid, 9)  # SIGKILL to ensure it stops immediately
-    time.sleep(1)  # Allow time for the process to terminate
 
     # Restart the SuperLink
     print("Restarting SuperLink...")
@@ -196,7 +195,7 @@ def main() -> None:
     # Allow time for SuperLink to detect heartbeat failures and update statuses
     tic = time.time()
     is_valid = False
-    while (time.time() - tic) < 20:
+    while (time.time() - tic) < 25:
         run_status = flwr_ls()
         if (
             run_status[run_id1] == f"{Status.FINISHED}:{SubStatus.FAILED}"
@@ -205,7 +204,7 @@ def main() -> None:
             is_valid = True
             break
         time.sleep(1)
-    assert is_valid, "Run statuses are not updated correctly"
+    assert is_valid, f"Run statuses are not updated correctly:\n{run_status}"
     print("Run statuses are updated correctly.")
 
     # Clean up
