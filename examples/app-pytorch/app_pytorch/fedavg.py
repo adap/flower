@@ -1,6 +1,6 @@
+import random
 from logging import INFO, WARN
-from time import sleep, time
-from typing import Optional
+from time import sleep
 
 import numpy as np
 from flwr.common import (
@@ -89,37 +89,6 @@ def aggregate(records: list[RecordDict], weighting_metric_name: str) -> RecordDi
     return aggregated
 
 
-def sample_nodes(
-    grid: Grid, config: Optional[ConfigRecord], is_train: bool = False
-) -> list[int]:
-
-    # TODO: if we want to decouple the sampling from the strategy, one idea is to control
-    # TODO: the node samling stage via ConfigRecord. Howerver, this requires making some assumptions
-    # TODO: in terms of which keys the users provide in the ConfigRecord. Hence the warning message below.
-    # TODO: this is one idea. If we had a class for sampling, things would be more explicit.
-    if config is None:
-        log(WARN, "No sampling config provided. Sampling all nodes...")
-    #     log(WARN, "No ConfigRecord provided for sampling nodes. Defaulting to sample all nodes." \
-    #     "Pass a {'sampling-config' : ConfigRecord('min-train-nodes': ..., 'fraction-train-nodes': ..." \
-    #     "'min-evaluate-nodes': ..., 'fraction-evaluate-nodes': ...} to customize sampling.")
-
-    min_nodes = 2
-    all_node_ids: list[int] = []
-    while len(all_node_ids) < min_nodes:
-        all_node_ids = list(grid.get_node_ids())
-        if len(all_node_ids) >= min_nodes:
-            break
-        log(INFO, "Waiting for nodes to connect...")
-        sleep(2)
-
-    log(
-        INFO,
-        f"configure_{'train' if is_train else 'evaluate'}: sampled {len(all_node_ids)} clients (out of {len(grid.get_node_ids())})",
-    )
-
-    return all_node_ids
-
-
 class FedAvg:
 
     def __init__(
@@ -150,6 +119,35 @@ class FedAvg:
             )  #! Note i'm not using group_id
             messages.append(message)
         return messages
+
+    def sample_nodes(self, grid: Grid, is_train: bool = False) -> list[int]:
+
+        all_node_ids: list[int] = []
+        min_wait_for = max(
+            self.min_train_clients if is_train else self.min_evaluate_nodes,
+            self.min_available_nodes,
+        )
+        all_node_ids = list(grid.get_node_ids())
+        while len(all_node_ids) < min_wait_for:
+            log(
+                INFO,
+                f"Waiting for nodes to connect. Connected {len(all_node_ids)} but need at least {min_wait_for} nodes.",
+            )
+            sleep(3)
+            all_node_ids = list(grid.get_node_ids())
+
+        # Sample
+        num_to_sample = int(
+            len(all_node_ids)
+            * (self.fraction_train if is_train else self.fraction_evaluate)
+        )
+        node_ids = random.sample(all_node_ids, num_to_sample)
+        log(
+            INFO,
+            f"Node sampling ({'train' if is_train else 'evaluate'}): sampled {len(node_ids)} clients (out of {len(all_node_ids)})",
+        )
+
+        return node_ids
 
     def configure_train(
         self, server_round: int, record: RecordDict, node_ids: list[int]
@@ -234,7 +232,7 @@ class FedAvg:
         self,
         server_round: int,
         replies: list[Message],
-    ) -> RecordDict:
+    ) -> MetricRecord:
         # Aggregate evaluation results
 
         num_errors = 0
@@ -259,7 +257,7 @@ class FedAvg:
             records=[msg.content for msg in replies if msg.has_content()],
             weighting_metric_name="num-examples",
         )
-        return rd
+        return rd.metric_records
 
     def evaluate(self, server_round: int, record: RecordDict) -> RecordDict:
         # Evaluate the current model parameters
@@ -272,13 +270,15 @@ class FedAvg:
         # do central eval with starting global parameters
         res = self.evaluate(server_round=0, record=record_dict)
 
+        metrics_history: dict[int, dict[str, MetricRecord]] = {}
+
         for current_round in range(num_rounds):
             log(INFO, "")
             log(INFO, "Starting round %s/%s", current_round + 1, num_rounds)
+            metrics_history[current_round] = {}
+
             # Configure train
-            node_ids = sample_nodes(
-                grid, record_dict.get("sampling-config", None), is_train=True
-            )
+            node_ids = self.sample_nodes(grid, is_train=True)
             messages = self.configure_train(current_round, record_dict, node_ids)
             # Communicate
             replies = grid.send_and_receive(messages, timeout=timeout)
@@ -287,17 +287,24 @@ class FedAvg:
             # copy the content of the array records in res to those in record_dict
             for key, record in res.array_records.items():
                 record_dict.array_records[key] = record
-            # So logging users are familiar with
+            # Log training metrics and append to history
             log(INFO, "Federated Training results: %s", res.metric_records)
+            metrics_history[current_round]["train"] = res.metric_records
 
             # Configure evaluate
-            node_ids = sample_nodes(grid, record_dict.get("sampling-config", None))
+            node_ids = self.sample_nodes(grid, is_train=False)
             messages = self.configure_evaluate(current_round, record_dict, node_ids)
             # Communicate
             replies = grid.send_and_receive(messages, timeout=timeout)
             # Aggregate evaluate
-            res = self.aggregate_evaluate(current_round, replies)
-            log(INFO, "Federated Evaluation results: %s", res.metric_records)
+            eval_res = self.aggregate_evaluate(current_round, replies)
+            log(INFO, "Federated Evaluation results: %s", eval_res)
+            metrics_history[current_round]["evaluate"] = eval_res
 
             # Centralised eval
             res = self.evaluate(server_round=current_round, record=record_dict)
+
+        log(INFO, "Finished all rounds")
+        log(INFO, "")
+
+        return metrics_history

@@ -19,7 +19,7 @@ def main(grid: Grid, context: Context) -> None:
     # Init global model
     global_model = Net()
     # Init strategy
-    strategy = FedAvg()
+    strategy = FedAvg(fraction_train=context.run_config["fraction-train"])
 
     # Prepare payload to communicate
     #! We could be passing the `clientapp-...-config` when constructing the strategy
@@ -36,3 +36,5 @@ def main(grid: Grid, context: Context) -> None:
     )
 
     metrics = strategy.run(recorddict, grid, num_rounds=num_rounds, timeout=3600)
+
+    print(metrics)
