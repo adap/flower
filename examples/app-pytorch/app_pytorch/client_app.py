@@ -18,14 +18,20 @@ def evaluate(msg: Message, context: Context):
     model, device, data_loader = setup_client(msg, context, is_train=False)
 
     # Local evaluation
-    _, eval_acc = test_fn(
+    eval_loss, eval_acc = test_fn(
         model,
         data_loader,
         device,
     )
 
     # Construct reply
-    metric_record = MetricRecord({"eval_acc": eval_acc})
+    metric_record = MetricRecord(
+        {
+            "eval_loss": eval_loss,
+            "eval_acc": eval_acc,
+            "num-examples": len(data_loader.dataset),
+        }
+    )
     content = RecordDict({"eval_metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
@@ -38,7 +44,7 @@ def train(msg: Message, context: Context):
 
     # Local training
     local_epochs = context.run_config["local-epochs"]
-    lr = msg.content["train-config"]["lr"]
+    lr = msg.content["clientapp-train-config"]["lr"]
     train_loss = train_fn(
         model,
         data_loader,
@@ -49,8 +55,10 @@ def train(msg: Message, context: Context):
 
     # Extract state_dict from model and construct reply message
     model_record = ArrayRecord(model.state_dict())
-    metric_record = MetricRecord({"train_loss": train_loss})
-    content = RecordDict({"model": model_record, "train_metrics": metric_record})
+    metric_record = MetricRecord(
+        {"train_loss": train_loss, "num-examples": len(data_loader.dataset)}
+    )
+    content = RecordDict({"global-model": model_record, "train_metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
 
@@ -61,7 +69,7 @@ def setup_client(msg: Message, context: Context, is_train: bool):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Apply global model weights from message
-    model.load_state_dict(msg.content["model"].to_torch_state_dict())
+    model.load_state_dict(msg.content["global-model"].to_torch_state_dict())
     model.to(device)
 
     # Load partition
