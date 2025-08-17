@@ -100,6 +100,7 @@ def flwr_simulation() -> None:
             appio_api_address=args.simulationio_api_address,
             flwr_dir=args.flwr_dir,
             parent_pid=args.parent_pid,
+            warn_run_once=args.run_once,
         )
         return
 
