@@ -138,6 +138,7 @@ def run_with_deprecation_warning(  # pylint: disable=R0913, R0917
     appio_api_address: str,
     flwr_dir: Optional[str],
     parent_pid: Optional[int],
+    warn_run_once: bool,
 ) -> None:
     """Log a deprecation warning and run the equivalent `flower-superexec` command.
 
@@ -158,6 +159,10 @@ def run_with_deprecation_warning(  # pylint: disable=R0913, R0917
     if parent_pid is not None:
         new_cmd += f"--parent-pid {parent_pid}"
     log(WARN, new_cmd)
+
+    # Warn about unsupported `--run-once` flag
+    if warn_run_once:
+        log(WARN, "`flower-superexec` does not support the `--run-once` flag.")
 
     run_superexec(
         plugin_class=plugin_class,

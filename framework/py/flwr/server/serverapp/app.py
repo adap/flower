@@ -94,6 +94,7 @@ def flwr_serverapp() -> None:
             appio_api_address=args.serverappio_api_address,
             flwr_dir=args.flwr_dir,
             parent_pid=args.parent_pid,
+            warn_run_once=args.run_once,
         )
         return
 
@@ -302,12 +303,6 @@ def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
         type=str,
         help="Address of SuperLink's ServerAppIo API (IPv4, IPv6, or a domain name)."
         f"By default, it is set to {SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS}.",
-    )
-    parser.add_argument(
-        "--run-once",
-        action="store_true",
-        help="When set, this process will start a single ServerApp for a pending Run. "
-        "If there is no pending Run, the process will exit.",
     )
     add_args_flwr_app_common(parser=parser)
     return parser
