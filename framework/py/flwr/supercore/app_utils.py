@@ -20,7 +20,6 @@ import signal
 import threading
 import time
 
-
 if os.name == "nt":
     from ctypes import windll  # type: ignore
 

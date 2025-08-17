@@ -70,7 +70,7 @@ from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
-from flwr.supercore.app_utils import simple_get_token, start_parent_process_monitor
+from flwr.supercore.app_utils import start_parent_process_monitor
 from flwr.supercore.superexec.plugin import SimulationExecPlugin
 from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 
