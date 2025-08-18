@@ -30,6 +30,7 @@ def aggregate(records: list[RecordDict], weighting_metric_name: str) -> RecordDi
                     #! alert user expected key is not found ?
                     # default to homogeneous weighting (i.e. 1.0
                     # for all model contributions)
+                    log(WARN, "not weighting key found")
                 weight = rec.get(weighting_metric_name, 1)
                 total_examples += weight
                 examples_per_record.append(weight)
@@ -124,32 +125,37 @@ class FedAvg:
 
     def sample_nodes(self, grid: Grid, is_train: bool = False) -> list[int]:
 
-        all_node_ids: list[int] = []
-        min_wait_for = max(
-            self.min_train_clients if is_train else self.min_evaluate_nodes,
-            self.min_available_nodes,
+        # Determinie minimum numbers to sample
+        min_sample_nodes = (
+            self.min_train_clients if is_train else self.min_evaluate_nodes
         )
-        all_node_ids = list(grid.get_node_ids())
-        while len(all_node_ids) < min_wait_for:
+        fraction = self.fraction_train if is_train else self.fraction_evaluate
+        sampled_nodes = []
+        while len(sampled_nodes) < min_sample_nodes:
+            all_node_ids = list(grid.get_node_ids())
+            to_sample = int(len(all_node_ids) * fraction)
+            # Are there enough nodes that if sampled the specified fraction
+            # the resulted sample size is equal or larger than the minimum required
+            if to_sample >= min_sample_nodes:
+                # Sample
+                sampled_nodes = random.sample(all_node_ids, to_sample)
+                break
             log(
                 INFO,
-                f"Waiting for nodes to connect. Connected {len(all_node_ids)} but need at least {min_wait_for} nodes.",
+                f"Waiting for nodes to connect. Nodes connected {len(all_node_ids)}.",
+            )
+            log(
+                INFO,
+                f"Configured to sample a minimum of {min_sample_nodes} nodes with sampling fraction set to {fraction} (over all connected nodes).",
             )
             sleep(3)
-            all_node_ids = list(grid.get_node_ids())
 
-        # Sample
-        num_to_sample = int(
-            len(all_node_ids)
-            * (self.fraction_train if is_train else self.fraction_evaluate)
-        )
-        node_ids = random.sample(all_node_ids, num_to_sample)
         log(
             INFO,
-            f"Node sampling ({'train' if is_train else 'evaluate'}): sampled {len(node_ids)} clients (out of {len(all_node_ids)})",
+            f"Node sampling ({'train' if is_train else 'evaluate'}): sampled {len(sampled_nodes)} clients (out of {len(all_node_ids)})",
         )
 
-        return node_ids
+        return sampled_nodes
 
     def configure_train(
         self, server_round: int, record: RecordDict, node_ids: list[int]
@@ -279,7 +285,7 @@ class FedAvg:
 
         for current_round in range(num_rounds):
             log(INFO, "")
-            log(INFO, "Starting round %s/%s", current_round + 1, num_rounds)
+            log(INFO, "[ROUND %s/%s]", current_round + 1, num_rounds)
             metrics_history[current_round] = {}
 
             # Configure train
