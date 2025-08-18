@@ -1,4 +1,4 @@
-# Flower ServerApp
+# Flower SuperExec
 
 <p align="center">
   <a href="https://flower.ai/">
