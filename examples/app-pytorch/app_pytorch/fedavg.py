@@ -99,6 +99,8 @@ class FedAvg:
         min_evaluate_nodes: int = 2,
         min_available_nodes: int = 2,
         weighting_key: str = "num-examples",
+        clientapp_train_config_key: str = "clientapp-train-config",
+        clientapp_evaluate_config_key: str = "clientapp-evaluate-config",
     ):
         self.fraction_train = fraction_train
         self.fraction_evaluate = fraction_evaluate
@@ -106,6 +108,8 @@ class FedAvg:
         self.min_evaluate_nodes = min_evaluate_nodes
         self.min_available_nodes = min_available_nodes
         self.weighting_key = weighting_key
+        self.clientapp_train_config_key = clientapp_train_config_key
+        self.clientapp_evaluate_config_key = clientapp_evaluate_config_key
 
     def _construct_messages(
         self, record: RecordDict, node_ids: list[int], message_type: MessageType
@@ -154,19 +158,22 @@ class FedAvg:
     ) -> list[Message]:
         # Configure the next round of training
 
-        if "clientapp-train-config" not in record:
+        if self.clientapp_train_config_key not in record:
             # warn once the user that no configRecord was found
             # with that specific key. Therefore a new ConfigRecord is going
             # to be created. If it was specified, a new entry to the configrecord
             # would be added simply injecting the server_round.
-            log(WARN, "no ConfigRecord provided with `clientapp-train-config` key ....")
-            record["clientapp-train-config"] = ConfigRecord(
+            log(
+                WARN,
+                f"no ConfigRecord provided with `{self.clientapp_train_config_key}` key ....",
+            )
+            record[self.clientapp_train_config_key] = ConfigRecord(
                 {"server_round": server_round}
             )
         else:
             # The user provided a `ConfigRecord` to send to `ClientApps`
             # when doing TRAIN. Here we append the round number
-            record["clientapp-train-config"]["server-round"] = server_round
+            record[self.clientapp_train_config_key]["server-round"] = server_round
 
         # Construct messages
         return self._construct_messages(record, node_ids, MessageType.TRAIN)
@@ -208,22 +215,22 @@ class FedAvg:
     ) -> list[Message]:
         # Configure the next round of evaluation
 
-        if "clientapp-evaluate-config" not in record:
+        if self.clientapp_evaluate_config_key not in record:
             # warn once the user that no configRecord was found
             # with that specific key. Therefore a new ConfigRecord is going
             # to be created. If it was specified, a new entry to the configrecord
             # would be added simply injecting the server_round.
             log(
                 WARN,
-                "no ConfigRecord provided with `clientapp-evaluate-config` key ....",
+                f"no ConfigRecord provided with `{self.clientapp_evaluate_config_key}` key ....",
             )
-            record["clientapp-evaluate-config"] = ConfigRecord(
+            record[self.clientapp_evaluate_config_key] = ConfigRecord(
                 {"server_round": server_round}
             )
         else:
             # The user provided a `ConfigRecord` to send to `ClientApps`
             # when doing EVALUATE. Here we append the round number
-            record["clientapp-evaluate-config"]["server-round"] = server_round
+            record[self.clientapp_evaluate_config_key]["server-round"] = server_round
 
         # Construct messages
         return self._construct_messages(record, node_ids, MessageType.EVALUATE)

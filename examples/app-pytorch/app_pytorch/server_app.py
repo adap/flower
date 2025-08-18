@@ -14,17 +14,13 @@ app = ServerApp()
 @app.main()
 def main(grid: Grid, context: Context) -> None:
 
-    num_rounds = context.run_config["num-server-rounds"]
-
     # Init global model
     global_model = Net()
+
     # Init strategy
     strategy = FedAvg(fraction_train=context.run_config["fraction-train"])
 
     # Prepare payload to communicate
-    #! We could be passing the `clientapp-...-config` when constructing the strategy
-    #! However, since those will be communicated in a Message, it might be better to
-    #! keep them as part of a single RecordDict along with the model
     recorddict = RecordDict(
         {
             "global-model": ArrayRecord(global_model.state_dict()),
@@ -35,6 +31,8 @@ def main(grid: Grid, context: Context) -> None:
         }
     )
 
+    # Execute strategy loop
+    num_rounds = context.run_config["num-server-rounds"]
     metrics = strategy.run(recorddict, grid, num_rounds=num_rounds, timeout=3600)
 
     print(metrics)

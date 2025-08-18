@@ -42,9 +42,12 @@ def train(msg: Message, context: Context):
     # Prepare
     model, device, data_loader = setup_client(msg, context, is_train=True)
 
-    # Local training
+    # Read from run config
     local_epochs = context.run_config["local-epochs"]
+    # Read ConfigRecord from message
     lr = msg.content["clientapp-train-config"]["lr"]
+
+    # Local training
     train_loss = train_fn(
         model,
         data_loader,
@@ -53,11 +56,13 @@ def train(msg: Message, context: Context):
         device,
     )
 
-    # Extract state_dict from model and construct reply message
+    # Extract state_dict from model
     model_record = ArrayRecord(model.state_dict())
+    # Prepare metrics
     metric_record = MetricRecord(
         {"train_loss": train_loss, "num-examples": len(data_loader.dataset)}
     )
+    # Return reply message
     content = RecordDict({"global-model": model_record, "train_metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
