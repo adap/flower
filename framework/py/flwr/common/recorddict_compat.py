@@ -13,13 +13,14 @@
 # limitations under the License.
 # ==============================================================================
 """RecordDict utilities."""
-
-
+import sys
 from collections import OrderedDict
 from collections.abc import Mapping
 from typing import Union, cast, get_args
 
 from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
+from .crypto.crypto_selector import encrypt,decrypt
+from .crypto.config_critpto import ENCRYPTION_METHOD,ENCRYPTION_ENABLED
 from .typing import (
     Code,
     ConfigRecordValues,
@@ -67,7 +68,11 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
 
     for key in list(record.keys()):
         if key != EMPTY_TENSOR_KEY:
-            parameters.tensors.append(record[key].data)
+            #to-do
+            tensor = record[key].data
+            if ENCRYPTION_ENABLED:
+                tensor = decrypt(tensor, ENCRYPTION_METHOD)
+            parameters.tensors.append(tensor)
 
         if not parameters.tensor_type:
             # Setting from first array in record. Recall the warning in the docstrings
@@ -110,6 +115,11 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
             tensor = parameters.tensors[idx]
         else:
             tensor = parameters.tensors.pop(0)
+        #TO-D0
+        dataR = tensor
+        if ENCRYPTION_ENABLED:
+            encrypted = encrypt(dataR, ENCRYPTION_METHOD)
+            tensor = encrypted
         ordered_dict[str(idx)] = Array(
             data=tensor, dtype="", stype=tensor_type, shape=()
         )
