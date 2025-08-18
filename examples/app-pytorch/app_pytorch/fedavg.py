@@ -1,6 +1,7 @@
 import random
 from logging import INFO, WARN
 from time import sleep
+from typing import Callable
 
 import numpy as np
 from flwr.common import (
@@ -270,22 +271,26 @@ class FedAvg:
         )
         return rd.metric_records
 
-    def evaluate(self, server_round: int, record: RecordDict) -> RecordDict:
-        # Evaluate the current model parameters
-        return {}
-
     def run(
-        self, record_dict: RecordDict, grid: Grid, num_rounds: int, timeout: float
+        self,
+        record_dict: RecordDict,
+        grid: Grid,
+        num_rounds: int,
+        timeout: float,
+        central_eval_fn: Callable[[int, RecordDict], MetricRecord] = None,
     ) -> MetricRecord:
-
-        # do central eval with starting global parameters
-        res = self.evaluate(server_round=0, record=record_dict)
 
         metrics_history: dict[int, dict[str, MetricRecord]] = {}
 
-        for current_round in range(num_rounds):
+        # do central eval with starting global parameters
+        if central_eval_fn:
+            res = central_eval_fn(server_round=0, record=record_dict)
+            log(INFO, "Central evaluation results: %s", res)
+            metrics_history[0] = {"central": res}
+
+        for current_round in range(1, num_rounds + 1):
             log(INFO, "")
-            log(INFO, "[ROUND %s/%s]", current_round + 1, num_rounds)
+            log(INFO, "[ROUND %s/%s]", current_round, num_rounds)
             metrics_history[current_round] = {}
 
             # Configure train
@@ -313,7 +318,10 @@ class FedAvg:
             metrics_history[current_round]["evaluate"] = eval_res
 
             # Centralised eval
-            res = self.evaluate(server_round=current_round, record=record_dict)
+            if central_eval_fn:
+                res = central_eval_fn(server_round=current_round, record=record_dict)
+                log(INFO, "Central evaluation results: %s", res)
+                metrics_history[current_round]["central"] = res
 
         log(INFO, "Finished all rounds")
         log(INFO, "")
