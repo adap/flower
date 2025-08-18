@@ -35,6 +35,7 @@ from flwr.common.config import (
 )
 from flwr.common.constant import (
     SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
+    ExecPluginType,
     Status,
     SubStatus,
 )
@@ -66,10 +67,13 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetFederationOptionsResponse,
     UpdateRunStatusRequest,
 )
+from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 from flwr.supercore.app_utils import simple_get_token, start_parent_process_monitor
+from flwr.supercore.superexec.plugin import SimulationExecPlugin
+from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 
 
 def flwr_simulation() -> None:
@@ -80,14 +84,27 @@ def flwr_simulation() -> None:
 
     args = _parse_args_run_flwr_simulation().parse_args()
 
-    log(INFO, "Starting Flower Simulation")
-
     if not args.insecure:
         flwr_exit(
             ExitCode.COMMON_TLS_NOT_SUPPORTED,
-            "`flwr-simulation` does not support TLS yet. ",
+            "`flwr-simulation` does not support TLS yet.",
         )
 
+    # Disallow long-running `flwr-simulation` processes
+    if args.token is None:
+        run_with_deprecation_warning(
+            cmd="flwr-simulation",
+            plugin_type=ExecPluginType.SIMULATION,
+            plugin_class=SimulationExecPlugin,
+            stub_class=SimulationIoStub,
+            appio_api_address=args.simulationio_api_address,
+            flwr_dir=args.flwr_dir,
+            parent_pid=args.parent_pid,
+            warn_run_once=args.run_once,
+        )
+        return
+
+    log(INFO, "Starting Flower Simulation")
     log(
         DEBUG,
         "Starting isolated `Simulation` connected to SuperLink SimulationAppIo API "
@@ -308,12 +325,6 @@ def _parse_args_run_flwr_simulation() -> argparse.ArgumentParser:
         type=str,
         help="Address of SuperLink's SimulationIO API (IPv4, IPv6, or a domain name)."
         f"By default, it is set to {SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS}.",
-    )
-    parser.add_argument(
-        "--run-once",
-        action="store_true",
-        help="When set, this process will start a single simulation "
-        "for a pending Run. If no pending run the process will exit. ",
     )
     add_args_flwr_app_common(parser=parser)
     return parser
