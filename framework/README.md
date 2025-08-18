@@ -116,8 +116,9 @@ Flower Baselines is a collection of community-contributed projects that reproduc
 - [FedOpt](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
 
 Please refer to the [Flower Baselines Documentation](https://flower.ai/docs/baselines/) for a detailed categorization of baselines and for additional info including:
-* [How to use Flower Baselines](https://flower.ai/docs/baselines/how-to-use-baselines.html)
-* [How to contribute a new Flower Baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html)
+
+- [How to use Flower Baselines](https://flower.ai/docs/baselines/how-to-use-baselines.html)
+- [How to contribute a new Flower Baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html)
 
 ## Flower Usage Examples
 

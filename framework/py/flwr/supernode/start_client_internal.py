@@ -35,14 +35,13 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Message, RecordDict
 from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir, get_fused_config_from_fab
 from flwr.common.constant import (
-    CLIENT_OCTET,
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_SUBPROCESS,
-    SERVER_OCTET,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
+    ExecPluginType,
 )
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
@@ -164,6 +163,15 @@ def start_client_internal(
     ffs = ffs_factory.ffs()
     store = object_store_factory.store()
 
+    # Launch the SuperExec if the isolation mode is `subprocess`
+    if isolation == ISOLATION_MODE_SUBPROCESS:
+        command = ["flower-superexec", "--insecure"]
+        command += ["--appio-api-address", clientappio_api_address]
+        command += ["--plugin-type", ExecPluginType.CLIENT_APP]
+        command += ["--parent-pid", str(os.getpid())]
+        # pylint: disable-next=consider-using-with
+        subprocess.Popen(command)
+
     with _init_connection(
         transport=transport,
         server_address=server_address,
@@ -206,35 +214,6 @@ def start_client_internal(
                 pull_object=pull_object,
                 confirm_message_received=confirm_message_received,
             )
-
-            # Two isolation modes:
-            # 1. `subprocess`: SuperNode is starting the ClientApp
-            #    process as a subprocess.
-            # 2. `process`: ClientApp process gets started separately
-            #    (via `flwr-clientapp`), for example, in a separate
-            #    Docker container.
-
-            # Mode 1: SuperNode starts ClientApp as subprocess
-            start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
-
-            if start_subprocess and run_id is not None:
-                _octet, _colon, _port = clientappio_api_address.rpartition(":")
-                io_address = (
-                    f"{CLIENT_OCTET}:{_port}"
-                    if _octet == SERVER_OCTET
-                    else clientappio_api_address
-                )
-                # Start ClientApp subprocess
-                command = [
-                    "flwr-clientapp",
-                    "--clientappio-api-address",
-                    io_address,
-                    "--parent-pid",
-                    str(os.getpid()),
-                    "--insecure",
-                    "--run-once",
-                ]
-                subprocess.run(command, check=False)
 
             # No message has been pulled therefore we can skip the push stage.
             if run_id is None:

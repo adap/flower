@@ -161,6 +161,7 @@ class RayBackend(Backend):
                 "Call the backend's `build()` method before processing messages."
             )
 
+        future = None
         try:
             # Submit a task to the pool
             future = self.pool.submit(
@@ -183,7 +184,8 @@ class RayBackend(Backend):
                 self.__class__.__name__,
             )
             # add actor back into pool
-            self.pool.add_actor_back_to_pool(future)
+            if future is not None:
+                self.pool.add_actor_back_to_pool(future)
             raise ex
 
     def terminate(self) -> None:
