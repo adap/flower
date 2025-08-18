@@ -372,3 +372,4 @@ mermaid_version = ""
 # -- Options for MyST config  -------------------------------------
 # Enable this option to link to headers (`#`, `##`, or `###`)
 myst_heading_anchors = 3
+myst_enable_extensions = ["colon_fence"]

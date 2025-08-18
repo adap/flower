@@ -60,6 +60,11 @@ def add_args_flwr_app_common(parser: argparse.ArgumentParser) -> None:
         help="The PID of the parent process. When set, the process will terminate "
         "when the parent process exits.",
     )
+    parser.add_argument(
+        "--run-once",
+        action="store_true",
+        help="This flag is deprecated and will be removed in a future release.",
+    )
 
 
 def try_obtain_root_certificates(
