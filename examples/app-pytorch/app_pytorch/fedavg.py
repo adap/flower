@@ -26,15 +26,22 @@ def aggregate(records: list[RecordDict], weighting_metric_name: str) -> RecordDi
     examples_per_record = []
     for record in records:
         for rec in record.values():
+            weight = None
             if isinstance(rec, MetricRecord):
-                if weighting_metric_name not in rec:
-                    #! alert user expected key is not found ?
-                    # default to homogeneous weighting (i.e. 1.0
-                    # for all model contributions)
-                    log(WARN, "not weighting key found")
-                weight = rec.get(weighting_metric_name, 1)
-                total_examples += weight
-                examples_per_record.append(weight)
+                if weighting_metric_name in rec:
+                    weight = rec[weighting_metric_name]
+                    break  # move to next RecordDict
+
+        if weight is None:
+            # Warn user no weighting key is found and that 1.0 will be used
+            log(
+                WARN,
+                "No weighting key '%s' found in MetricRecord, defaulting to 1.0",
+                weighting_metric_name,
+            )
+            weight = 1.0
+        total_examples += weight
+        examples_per_record.append(weight)
 
     if total_examples == 0:
         # it could be that no `MetricRecord` was sent in the replies by ClientApps
