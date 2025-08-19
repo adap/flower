@@ -113,6 +113,34 @@ def aggregate(
     return aggregated_arrays, aggregated_metrics
 
 
+def sample_nodes(
+    grid: Grid, min_sample_nodes: int, fraction_sample: float
+) -> tuple[list[int], list[int]]:
+
+    sampled_nodes = []
+    while len(sampled_nodes) < min_sample_nodes:
+        all_node_ids = list(grid.get_node_ids())
+        to_sample = int(len(all_node_ids) * fraction_sample)
+        # Are there enough nodes that if sampled the specified fraction
+        # the resulted sample size is equal or larger than the minimum required
+        if to_sample >= min_sample_nodes:
+            # Sample
+            sampled_nodes = random.sample(all_node_ids, to_sample)
+            break
+        log(
+            INFO,
+            f"Waiting for nodes to connect. Nodes connected {len(all_node_ids)}.",
+        )
+        log(
+            INFO,
+            f"Configured to sample a minimum of {min_sample_nodes} nodes with sampling "
+            f"fraction set to {fraction_sample} (over all connected nodes).",
+        )
+        sleep(3)
+
+    return sampled_nodes, all_node_ids
+
+
 class FedAvg:
 
     def __init__(
@@ -148,47 +176,20 @@ class FedAvg:
             messages.append(message)
         return messages
 
-    def sample_nodes(self, grid: Grid, is_train: bool = False) -> list[int]:
-
-        # Determine minimum numbers to sample
-        min_sample_nodes = (
-            self.min_train_nodes if is_train else self.min_evaluate_nodes
-        )
-        fraction = self.fraction_train if is_train else self.fraction_evaluate
-        sampled_nodes = []
-        while len(sampled_nodes) < min_sample_nodes:
-            all_node_ids = list(grid.get_node_ids())
-            to_sample = int(len(all_node_ids) * fraction)
-            # Are there enough nodes that if sampled the specified fraction
-            # the resulted sample size is equal or larger than the minimum required
-            if to_sample >= min_sample_nodes:
-                # Sample
-                sampled_nodes = random.sample(all_node_ids, to_sample)
-                break
-            log(
-                INFO,
-                f"Waiting for nodes to connect. Nodes connected {len(all_node_ids)}.",
-            )
-            log(
-                INFO,
-                f"Configured to sample a minimum of {min_sample_nodes} nodes with sampling fraction set to {fraction} (over all connected nodes).",
-            )
-            sleep(3)
-
-        log(
-            INFO,
-            f"Node sampling ({'train' if is_train else 'evaluate'}): sampled {len(sampled_nodes)} clients (out of {len(all_node_ids)})",
-        )
-
-        return sampled_nodes
-
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> list[Message]:
 
         # Sample nodes
-        node_ids = self.sample_nodes(grid, is_train=True)
-
+        node_ids, num_total = sample_nodes(
+            grid, self.min_train_nodes, self.fraction_train
+        )
+        log(
+            INFO,
+            "configure_train: Sampled %s nodes (out of %s)",
+            len(node_ids),
+            len(num_total),
+        )
         # Always inject current server round
         config["server-round"] = server_round
 
@@ -253,7 +254,15 @@ class FedAvg:
         # Configure the next round of evaluation
 
         # Sample nodes
-        node_ids = self.sample_nodes(grid, is_train=False)
+        node_ids, num_total = sample_nodes(
+            grid, self.min_evaluate_nodes, self.fraction_evaluate
+        )
+        log(
+            INFO,
+            "configure_evaluate: Sampled %s nodes (out of %s)",
+            len(node_ids),
+            len(num_total),
+        )
 
         # Always inject current server round
         config["server-round"] = server_round
