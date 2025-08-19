@@ -1,7 +1,8 @@
 import random
-from logging import INFO, WARN, ERROR
+from dataclasses import dataclass
+from logging import ERROR, INFO, WARN
 from time import sleep
-from typing import Callable
+from typing import Callable, Optional
 
 import numpy as np
 from flwr.common import (
@@ -15,6 +16,24 @@ from flwr.common import (
     log,
 )
 from flwr.server import Grid
+
+
+@dataclass
+class ReturnStrategyResults:
+    train_metrics: dict[int, MetricRecord] = None
+    evaluate_metrics: dict[int, MetricRecord] = None
+    central_evaluate_metrics: dict[int, MetricRecord] = None
+    arrays: ArrayRecord = None
+
+    def __post_init__(self):
+        if self.train_metrics is None:
+            self.train_metrics = {}
+        if self.evaluate_metrics is None:
+            self.evaluate_metrics = {}
+        if self.central_evaluate_metrics is None:
+            self.central_evaluate_metrics = {}
+        if self.arrays is None:
+            self.arrays = ArrayRecord()
 
 
 def aggregate(records: list[RecordDict], weighting_metric_name: str) -> RecordDict:
@@ -105,18 +124,18 @@ class FedAvg:
         min_train_clients: int = 2,
         min_evaluate_nodes: int = 2,
         min_available_nodes: int = 2,
-        weighting_key: str = "num-examples",
-        clientapp_train_config_key: str = "clientapp-train-config",
-        clientapp_evaluate_config_key: str = "clientapp-evaluate-config",
+        weighting_factor_key: str = "num-examples",
+        arrayrecord_key: str = "arrays",
+        configrecord_key: str = "config",
     ):
         self.fraction_train = fraction_train
         self.fraction_evaluate = fraction_evaluate
         self.min_train_clients = min_train_clients
         self.min_evaluate_nodes = min_evaluate_nodes
         self.min_available_nodes = min_available_nodes
-        self.weighting_key = weighting_key
-        self.clientapp_train_config_key = clientapp_train_config_key
-        self.clientapp_evaluate_config_key = clientapp_evaluate_config_key
+        self.weighting_factor_key = weighting_factor_key
+        self.arrayrecord_key = arrayrecord_key
+        self.configrecord_key = configrecord_key
 
     def _construct_messages(
         self, record: RecordDict, node_ids: list[int], message_type: MessageType
@@ -166,28 +185,19 @@ class FedAvg:
         return sampled_nodes
 
     def configure_train(
-        self, server_round: int, record: RecordDict, node_ids: list[int]
+        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> list[Message]:
-        # Configure the next round of training
 
-        if self.clientapp_train_config_key not in record:
-            # warn once the user that no configRecord was found
-            # with that specific key. Therefore a new ConfigRecord is going
-            # to be created. If it was specified, a new entry to the configrecord
-            # would be added simply injecting the server_round.
-            log(
-                WARN,
-                f"no ConfigRecord provided with `{self.clientapp_train_config_key}` key ....",
-            )
-            record[self.clientapp_train_config_key] = ConfigRecord(
-                {"server_round": server_round}
-            )
-        else:
-            # The user provided a `ConfigRecord` to send to `ClientApps`
-            # when doing TRAIN. Here we append the round number
-            record[self.clientapp_train_config_key]["server-round"] = server_round
+        # Sample nodes
+        node_ids = self.sample_nodes(grid, is_train=True)
+
+        # Always inject current server round
+        config["server-round"] = server_round
 
         # Construct messages
+        record = RecordDict(
+            {self.arrayrecord_key: arrays, self.configrecord_key: config}
+        )
         return self._construct_messages(record, node_ids, MessageType.TRAIN)
 
     def aggregate_train(
@@ -223,28 +233,20 @@ class FedAvg:
         return rd
 
     def configure_evaluate(
-        self, server_round: int, record: RecordDict, node_ids: list[int]
+        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> list[Message]:
         # Configure the next round of evaluation
 
-        if self.clientapp_evaluate_config_key not in record:
-            # warn once the user that no configRecord was found
-            # with that specific key. Therefore a new ConfigRecord is going
-            # to be created. If it was specified, a new entry to the configrecord
-            # would be added simply injecting the server_round.
-            log(
-                WARN,
-                f"no ConfigRecord provided with `{self.clientapp_evaluate_config_key}` key ....",
-            )
-            record[self.clientapp_evaluate_config_key] = ConfigRecord(
-                {"server_round": server_round}
-            )
-        else:
-            # The user provided a `ConfigRecord` to send to `ClientApps`
-            # when doing EVALUATE. Here we append the round number
-            record[self.clientapp_evaluate_config_key]["server-round"] = server_round
+        # Sample nodes
+        node_ids = self.sample_nodes(grid, is_train=False)
+
+        # Always inject current server round
+        config["server-round"] = server_round
 
         # Construct messages
+        record = RecordDict(
+            {self.arrayrecord_key: arrays, self.configrecord_key: config}
+        )
         return self._construct_messages(record, node_ids, MessageType.EVALUATE)
 
     def aggregate_evaluate(
@@ -278,69 +280,78 @@ class FedAvg:
         )
         return rd.metric_records
 
-    def run(
+    def launch(
         self,
-        record_dict: RecordDict,
+        arrays: ArrayRecord,  #! Now compulsory (those that don't what a mdoel, they can pass empyt ArrayRecord)
         grid: Grid,
         num_rounds: int,
         timeout: float,
+        train_config: Optional[ConfigRecord] = ConfigRecord(),
+        evaluate_config: Optional[ConfigRecord] = ConfigRecord(),
         central_eval_fn: Callable[[int, RecordDict], MetricRecord] = None,
     ) -> MetricRecord:
-        
-        #! Checks
-        # Only one ArrayRecord
-        if len(record_dict.array_records) != 1: 
-            log(ERROR, "Expected exactly one ArrayRecord in record_dict, found %s", len(record_dict.array_records))
-            return MetricRecord()
-        # If no ConfigRecord for client @train is found, warn
-        if self.clientapp_train_config_key not in record_dict:
-            log(WARN, "No ConfigRecord found under key %s", self.clientapp_train_config_key)
-        # If no ConfigRecord for client @eval is found, warn
-        if self.clientapp_evaluate_config_key not in record_dict:
-            log(WARN, "No ConfigRecord found under key %s", self.clientapp_evaluate_config_key)
 
-        metrics_history: dict[int, dict[str, MetricRecord]] = {}
+        # Log brief info about Strategy setup
+
+        # log name of strategy
+        log(INFO, f"Starting {self.__class__.__name__} strategy.")
+        log(INFO, f"\tnum_rounds: {num_rounds}")
+        log(
+            INFO,
+            f"\tarray_record: {len(arrays)} Arrays totalling {sum(np.prod(array.shape) for array in arrays.values())/(1000**2):.2f} M parameters",
+        )
+        log(
+            INFO,
+            f"\tConfig for train round: {train_config if train_config else '⚠️ (empty!)'}",
+        )
+        log(
+            INFO,
+            f"\tConfig for evaluate round: {evaluate_config if evaluate_config else '⚠️ (empty!)'}",
+        )
+        log(INFO, "")
+
+        metrics_history = ReturnStrategyResults()
 
         # do central eval with starting global parameters
         if central_eval_fn:
-            res = central_eval_fn(server_round=0, record=record_dict)
+            res = central_eval_fn(server_round=0, array_record=arrays)
             log(INFO, "Central evaluation results: %s", res)
-            metrics_history[0] = {"central-evaluate": res}
+            metrics_history.central_evaluate_metrics[0] = res
 
         for current_round in range(1, num_rounds + 1):
             log(INFO, "")
             log(INFO, "[ROUND %s/%s]", current_round, num_rounds)
-            metrics_history[current_round] = {}
 
             # Configure train
-            node_ids = self.sample_nodes(grid, is_train=True)
-            messages = self.configure_train(current_round, record_dict, node_ids)
+            messages = self.configure_train(current_round, arrays, train_config, grid)
             # Communicate
             replies = grid.send_and_receive(messages, timeout=timeout)
             # aggregate fit
             res: RecordDict = self.aggregate_train(current_round, replies)
-            # copy the content of the array records in res to those in record_dict
+            # copy the content of the array records in res to those in arrays
+            # ! Change: make aggregate_train return tuple[arrayrecord, metricrecord]
             for key, record in res.array_records.items():
-                record_dict.array_records[key] = record
+                arrays = record
             # Log training metrics and append to history
             log(INFO, "Federated Training results: %s", res.metric_records)
-            metrics_history[current_round]["train"] = res.metric_records
+            metrics_history.train_metrics[current_round] = res.metric_records
 
             # Configure evaluate
-            node_ids = self.sample_nodes(grid, is_train=False)
-            messages = self.configure_evaluate(current_round, record_dict, node_ids)
+            messages = self.configure_evaluate(
+                current_round, arrays, evaluate_config, grid
+            )
             # Communicate
             replies = grid.send_and_receive(messages, timeout=timeout)
             # Aggregate evaluate
             eval_res = self.aggregate_evaluate(current_round, replies)
             log(INFO, "Federated Evaluation results: %s", eval_res)
-            metrics_history[current_round]["evaluate"] = eval_res
+            metrics_history.evaluate_metrics[current_round] = eval_res
 
             # Centralised eval
             if central_eval_fn:
-                res = central_eval_fn(server_round=current_round, record=record_dict)
+                res = central_eval_fn(server_round=current_round, array_record=arrays)
                 log(INFO, "Central evaluation results: %s", res)
-                metrics_history[current_round]["central-evaluate"] = res
+                metrics_history.central_evaluate_metrics[current_round] = res
 
         log(INFO, "Finished all rounds")
         log(INFO, "")

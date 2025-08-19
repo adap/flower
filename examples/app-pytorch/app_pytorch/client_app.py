@@ -45,7 +45,7 @@ def train(msg: Message, context: Context):
     # Read from run config
     local_epochs = context.run_config["local-epochs"]
     # Read ConfigRecord from message
-    lr = msg.content["clientapp-train-config"]["lr"]
+    lr = msg.content["config"]["lr"]
 
     # Local training
     train_loss = train_fn(
@@ -63,7 +63,7 @@ def train(msg: Message, context: Context):
         {"train_loss": train_loss, "num-examples": len(data_loader.dataset)}
     )
     # Return reply message
-    content = RecordDict({"global-model": model_record, "train_metrics": metric_record})
+    content = RecordDict({"arrays": model_record, "train_metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
 
@@ -74,7 +74,7 @@ def setup_client(msg: Message, context: Context, is_train: bool):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Apply global model weights from message
-    model.load_state_dict(msg.content["global-model"].to_torch_state_dict())
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
     model.to(device)
 
     # Load partition
