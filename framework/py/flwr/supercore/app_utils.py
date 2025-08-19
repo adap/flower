@@ -19,17 +19,6 @@ import os
 import signal
 import threading
 import time
-from typing import Union
-
-from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
-    ListAppsToLaunchRequest,
-    ListAppsToLaunchResponse,
-    RequestTokenRequest,
-    RequestTokenResponse,
-)
-from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
-from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
-from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 
 if os.name == "nt":
     from ctypes import windll  # type: ignore
@@ -67,23 +56,3 @@ def start_parent_process_monitor(
                 os.kill(os.getpid(), signal.SIGKILL)
 
     threading.Thread(target=monitor, daemon=True).start()
-
-
-def simple_get_token(
-    stub: Union[ClientAppIoStub, ServerAppIoStub, SimulationIoStub]
-) -> str:
-    """Get a token from SuperLink/SuperNode.
-
-    This shall be removed once the SuperExec is fully implemented.
-    """
-    while True:
-        res: ListAppsToLaunchResponse = stub.ListAppsToLaunch(ListAppsToLaunchRequest())
-
-        for run_id in res.run_ids:
-            tk_res: RequestTokenResponse = stub.RequestToken(
-                RequestTokenRequest(run_id=run_id)
-            )
-            if tk_res.token:
-                return tk_res.token
-
-        time.sleep(1)  # Wait before retrying to get run IDs
