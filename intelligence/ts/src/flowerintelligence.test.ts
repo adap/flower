@@ -174,7 +174,7 @@ describe('FlowerIntelligence', () => {
       };
 
       const data = await fi.chat({
-        model: 'mistral/small-3.1-24b/instruct-q4',
+        model: 'meta/llama3.2-1b/instruct-fp16',
         messages: [
           {
             role: 'user',
