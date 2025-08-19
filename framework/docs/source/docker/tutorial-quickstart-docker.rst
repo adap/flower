@@ -28,14 +28,19 @@ Step 1: Set Up
 
        $ flwr new quickstart-docker --framework PyTorch --username flower
 
-       🔨 Creating Flower project quickstart-docker...
-       🎊 Project creation successful.
+        🔨 Creating Flower App quickstart-docker...
+        🎊 Flower App creation successful.
 
-       Use the following command to run your project:
+        To run your Flower App, first install its dependencies:
 
-             cd quickstart-docker
-             pip install -e .
-             flwr run
+                cd quickstart-docker && pip install -e .
+
+        then, run the app:
+
+                flwr run .
+
+        💡 Check the README in your app directory to learn how to
+        customize it and how to run it using the Deployment Runtime.
 
        $ cd quickstart-docker
 
