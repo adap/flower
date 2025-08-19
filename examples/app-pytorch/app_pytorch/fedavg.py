@@ -323,7 +323,7 @@ class FedAvg:
         train_config: Optional[ConfigRecord] = ConfigRecord(),
         evaluate_config: Optional[ConfigRecord] = ConfigRecord(),
         central_eval_fn: Callable[[int, RecordDict], MetricRecord] = None,
-    ) -> MetricRecord:
+    ) -> ReturnStrategyResults:
 
         # Log brief info about Strategy setup
 
@@ -336,11 +336,11 @@ class FedAvg:
         )
         log(
             INFO,
-            f"\t> ConfigRecord for train round: {train_config if train_config else '⚠️ (empty!)'}",
+            f"\t> ConfigRecord for train round: {train_config if train_config else '(empty!)'}",
         )
         log(
             INFO,
-            f"\t> ConfigRecord for evaluate round: {evaluate_config if evaluate_config else '⚠️ (empty!)'}",
+            f"\t> ConfigRecord for evaluate round: {evaluate_config if evaluate_config else '(empty!)'}",
         )
         log(INFO, "")
 
