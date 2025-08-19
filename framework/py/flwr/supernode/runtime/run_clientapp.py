@@ -62,14 +62,13 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.supercore.app_utils import simple_get_token, start_parent_process_monitor
+from flwr.supercore.app_utils import start_parent_process_monitor
 from flwr.supercore.utils import mask_string
 
 
 def run_clientapp(  # pylint: disable=R0913, R0914, R0917
     clientappio_api_address: str,
-    run_once: bool,
-    token: Optional[str] = None,
+    token: str,
     flwr_dir: Optional[str] = None,
     certificates: Optional[bytes] = None,
     parent_pid: Optional[int] = None,
@@ -92,76 +91,55 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
         stub = ClientAppIoStub(channel)
         _wrap_stub(stub, _make_simple_grpc_retry_invoker())
 
-        while True:
-            # If token is not set, loop until token is received from SuperNode
-            if token is None:
-                log(DEBUG, "[flwr-clientapp] Request token")
-                token = simple_get_token(stub)
+        # Pull Message, Context, Run and (optional) FAB from SuperNode
+        message, context, run, fab = pull_clientappinputs(stub=stub, token=token)
 
-            # Pull Message, Context, Run and (optional) FAB from SuperNode
-            message, context, run, fab = pull_clientappinputs(stub=stub, token=token)
+        # Install FAB, if provided
+        if fab:
+            log(DEBUG, "[flwr-clientapp] Start FAB installation.")
+            install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
 
-            # Install FAB, if provided
-            if fab:
-                log(DEBUG, "[flwr-clientapp] Start FAB installation.")
-                install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
+        load_client_app_fn = get_load_client_app_fn(
+            default_app_ref="",
+            app_path=None,
+            multi_app=True,
+            flwr_dir=str(flwr_dir_),
+        )
 
-            load_client_app_fn = get_load_client_app_fn(
-                default_app_ref="",
-                app_path=None,
-                multi_app=True,
-                flwr_dir=str(flwr_dir_),
+        try:
+            # Load ClientApp
+            log(DEBUG, "[flwr-clientapp] Start `ClientApp` Loading.")
+            client_app: ClientApp = load_client_app_fn(
+                run.fab_id, run.fab_version, fab.hash_str if fab else ""
             )
 
-            try:
-                # Load ClientApp
-                log(DEBUG, "[flwr-clientapp] Start `ClientApp` Loading.")
-                client_app: ClientApp = load_client_app_fn(
-                    run.fab_id, run.fab_version, fab.hash_str if fab else ""
-                )
+            # Execute ClientApp
+            reply_message = client_app(message=message, context=context)
 
-                # Execute ClientApp
-                reply_message = client_app(message=message, context=context)
+        except Exception as ex:  # pylint: disable=broad-exception-caught
+            # Don't update/change NodeState
 
-            except Exception as ex:  # pylint: disable=broad-exception-caught
-                # Don't update/change NodeState
+            e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+            # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
+            reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+            exc_entity = "ClientApp"
+            if isinstance(ex, LoadClientAppError):
+                reason = "An exception was raised when attempting to load `ClientApp`"
+                e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
 
-                e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-                # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
-                reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-                exc_entity = "ClientApp"
-                if isinstance(ex, LoadClientAppError):
-                    reason = (
-                        "An exception was raised when attempting to load `ClientApp`"
-                    )
-                    e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+            log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
 
-                log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+            # Create error message
+            reply_message = Message(Error(code=e_code, reason=reason), reply_to=message)
 
-                # Create error message
-                reply_message = Message(
-                    Error(code=e_code, reason=reason), reply_to=message
-                )
+        # Push Message and Context to SuperNode
+        _ = push_clientappoutputs(
+            stub=stub, token=token, message=reply_message, context=context
+        )
 
-            # Push Message and Context to SuperNode
-            _ = push_clientappoutputs(
-                stub=stub, token=token, message=reply_message, context=context
-            )
+        del client_app, message, context, run, fab, reply_message
+        gc.collect()
 
-            del client_app, message, context, run, fab, reply_message
-            gc.collect()
-
-            # Reset token to `None` to prevent flwr-clientapp from trying to pull the
-            # same inputs again
-            token = None
-
-            # Stop the loop if `flwr-clientapp` is expected to process only a single
-            # message
-            if run_once:
-                break
-
-    except KeyboardInterrupt:
-        log(INFO, "Closing connection")
     except grpc.RpcError as e:
         log(ERROR, "GRPC error occurred: %s", str(e))
     finally:

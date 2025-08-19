@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-11 00:08+0000\n"
+"POT-Creation-Date: 2025-08-15 00:08+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -5449,414 +5449,457 @@ msgstr ""
 "Flower Next는 빠른 속도로 지속적으로 개선되고 있으므로 이 가이드는 주기적으로 업데이트될 예정입니다. 피드백이 있으면 "
 "언제든지 공유해 주세요!"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:-1
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md
 msgid ""
 "Deploy Flower's SuperLink Helm chart to set up federated learning "
 "servers. Default config mirrors official releases, enabling seamless "
 "deployment, evaluation."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:6
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:12
 msgid "Deploy SuperLink using Helm"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:10
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:10
-#: ../../source/helm/index.rst:10
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:15
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:15
 msgid ""
-"Flower Helm charts are a Flower Enterprise feature. See `Flower "
-"Enterprise <https://flower.ai/enterprise>`_ for details."
+"Flower Helm charts are a Flower Enterprise feature. See [Flower "
+"Enterprise](https://flower.ai/enterprise) for details."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:13
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:13
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:18
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:18
 msgid ""
 "The Flower Framework offers a unified approach to federated learning, "
 "analytics, and evaluation, allowing you to federate any workload, machine"
 " learning framework, or programming language."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:17
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:21
 msgid ""
 "This Helm chart installs the server-side components of the Flower "
 "Framework, specifically setting up the SuperLink."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:20
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:20
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:24
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:24
 msgid ""
 "The default installation configuration aims to replicate the "
 "functionality and setup of the provided Flower Framework releases."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:24
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:27
 #, fuzzy
 msgid "Disable the SuperLink component"
 msgstr "서버(SuperLink)"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:33
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:35
 #, fuzzy
 msgid "Enable the ServerApp component"
 msgstr "현재 클라이언트 속성입니다."
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:42
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:43
 #, fuzzy
 msgid "Run simulations in Kubernetes using the Simulation Plugin"
 msgstr "멀티 노드 Flower 시뮬레이션"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:44
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:45
 msgid ""
-"For more details, visit: `Run simulations "
-"<https://flower.ai/docs/framework/how-to-run-simulations.html#run-"
-"simulations>`__ guide"
+"For more details, visit: [Run simulations](../how-to-run-simulations.rst"
+"#run-simulations) guide."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:58
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:57
 msgid "Change Log Verbosity Level"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:60
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:59
 msgid ""
 "The log verbosity level in Flower can be adjusted using the "
-"``FLWR_LOG_LEVEL`` environment variable. This helps control the level of "
+"`FLWR_LOG_LEVEL` environment variable. This helps control the level of "
 "detail included in logs, making debugging and monitoring easier."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:64
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:62
 #, fuzzy
-msgid "**Setting Global Log Level**"
+msgid "Setting Global Log Level"
 msgstr "글로벌 모델 전송"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:66
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:64
 msgid ""
-"To enable detailed logging (e.g., ``DEBUG`` level) for all services, add "
-"``FLWR_LOG_LEVEL`` to the ``env`` parameter under the ``global`` section "
-"in your ``values.yml`` file:"
+"To enable detailed logging (e.g., `DEBUG` level) for all services, add "
+"`FLWR_LOG_LEVEL` to the `env` parameter under the `global` section in "
+"your `values.yml` file:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:77
-msgid "**Setting Log Level for a Specific Service**"
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:74
+msgid "Setting Log Level for a Specific Service"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:79
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:76
 msgid ""
 "If you want to enable logging only for a specific service (e.g., "
-"``superlink``), you can specify it under the respective service section:"
+"`superlink`), you can specify it under the respective service section:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:89
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:86
 msgid ""
-"For more details on logging configuration, visit: `Flower Logging "
-"Documentation <https://flower.ai/docs/framework/how-to-configure-"
-"logging.html>`__"
+"For more details on logging configuration, visit: [Flower Logging "
+"Documentation](../how-to-configure-logging.rst)"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:93
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:89
+msgid "License Key"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:91
+msgid ""
+"Starting from `1.20.0`, the SuperLink service must be started with a "
+"valid license key."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:94
+msgid ""
+"You can configure the license key in the `global.license` section of your"
+" `values.yml` file in one of two ways:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:97
+msgid "Directly — by setting `global.license.key` to your license key."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:98
+msgid ""
+"From an existing Kubernetes Secret — by setting "
+"`global.license.existingSecret` to the name of a secret that contains "
+"your key."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:101
+msgid "Example: Setting the License Key Directly"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:111
+msgid ""
+"In this configuration, the Helm chart will automatically create a "
+"Kubernetes Secret and mount it into the SuperLink container."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:114
+#, fuzzy
+msgid "Example: Using an Existing Secret"
+msgstr "기존 전략 사용"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:124
+msgid ""
+"If both `key` and `existingSecret` are set, `existingSecret` takes "
+"precedence and the `key` value will be ignored."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:127
+msgid "Note that the existing secret must contain the key `FLWR_LICENSE_KEY`:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:135
 #, fuzzy
 msgid "Enable User Authentication"
 msgstr "설치 확인"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:95
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:137
 msgid ""
-"User authentication can be enabled if you’re using the Flower Enterprise "
-"Edition (EE) Docker images. This is configured in the ``global.userAuth``"
-" section of your ``values.yml`` file."
+"User authentication can be enabled if you're using the Flower Enterprise "
+"Edition (EE) Docker images. This is configured in the `global.userAuth` "
+"section of your `values.yml` file."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:99
-msgid "**Example: Enabling OpenID Connect (OIDC) Authentication**"
-msgstr ""
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:140
+#, fuzzy
+msgid "Example: Enabling OpenID Connect (OIDC) Authentication"
+msgstr ":code:`SuperNode`에서 노드 인증을 활성화합니다"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:115
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:156
 #, fuzzy
 msgid "Explanation of Parameters:"
 msgstr "모델 매개변수."
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:117
-msgid "``auth_type``: The authentication mechanism being used (e.g., OIDC)."
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:158
+msgid "`auth_type`: The authentication mechanism being used (e.g., oidc)."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:118
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:159
 msgid ""
-"``auth_url``: The OpenID Connect authentication endpoint where users "
+"`auth_url`: The OpenID Connect authentication endpoint where users "
 "authenticate."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:119
-msgid "``token_url``: The URL for retrieving access tokens."
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:160
+msgid "`token_url`: The URL for retrieving access tokens."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:120
-msgid "``validate_url``: The endpoint for validating user authentication."
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:161
+msgid "`validate_url`: The endpoint for validating user authentication."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:121
-msgid "``oidc_client_id``: The client ID issued by the authentication provider."
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:162
+msgid "`oidc_client_id`: The client ID issued by the authentication provider."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:122
-msgid "``oidc_client_secret``: The secret key associated with the client ID."
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:163
+msgid "`oidc_client_secret`: The secret key associated with the client ID."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:124
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:165
 #, fuzzy
-msgid "**Use an Existing Secret**"
+msgid "Use an Existing Secret"
 msgstr "기존 전략 사용"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:126
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:167
 msgid ""
 "To use an existing secret that contains the user authentication "
-"configuration, set ``existingSecret`` to the name of the existing secret:"
+"configuration, set `existingSecret` to the name of the existing secret:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:137
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:178
+msgid "Note that the existing secret must contain the key `user-auth-config.yml`:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:193
+#, fuzzy
+msgid "Configuring OpenFGA"
+msgstr "구성"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:195
 msgid ""
-"Note that the existing secret must contain the key ``user-auth-"
-"config.yml``:"
+"The flower-server chat component supports OpenFGA as a fine-grained "
+"authorization service, but it is disabled by default."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:152
-msgid "**Configuring OpenFGA**"
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:198
+msgid "To enable OpenFGA change the following value in your `values.yml` file:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:154
-msgid ""
-"The chart component supports OpenFGA as a fine-grained authorization "
-"service, but it is disabled by default."
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:157
-msgid "To enable OpenFGA change the following value in your ``values.yml`` file:"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:164
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:205
 msgid ""
 "By default, OpenFGA will run with an in-memory store, which is non-"
 "persistent and suitable only for testing or development."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:167
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:208
 msgid "OpenFGA supports persistent storage using PostgreSQL or MySQL:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:169
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:210
 msgid ""
 "To deploy OpenFGA with a new PostgreSQL/MySQL instance, enable the "
 "bundled chart configuration."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:171
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:211
 msgid ""
 "To connect to an existing database, provide the appropriate connection "
-"details via Helm values (e.g., ``openfga.datastore.uri``)."
+"details via Helm values (e.g., `openfga.datastore.uri`)."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:174
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:214
 msgid ""
-"For more information visit the official `OpenFGA Helm Chart Documentation"
-" <https://artifacthub.io/packages/helm/openfga/openfga/0.2.30>`__."
+"For more information visit the official [OpenFGA Helm Chart "
+"Documentation](https://artifacthub.io/packages/helm/openfga/openfga/0.2.30)."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:177
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:216
 msgid ""
 "The following commands set up a store, authorization model, and inserts "
 "users (using tuples) into OpenFGA. Run these once the OpenFGA instance is"
 " deployed."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:180
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:218
 msgid "Setup the authorization model and tuples:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst
-msgid "Authorization model file ``model.fga``"
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md
+msgid "Authorization model file `model.fga`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst
-msgid "User permissions file ``tuples.fga``"
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md
+msgid "User permissions file `tuples.fga`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:210
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:252
 #, fuzzy
 msgid "Create store:"
 msgstr "새 페이지 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:220
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:262
 msgid ""
-"The response will include an ``id`` field, which is the OpenFGA store ID "
-"associated with the ``OPENFGA_STORE_NAME`` that was created."
+"The response will include an `id` field, which is the OpenFGA store ID "
+"associated with the `OPENFGA_STORE_NAME` that was created."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:223
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:264
 msgid "Get store ID (alternative way):"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:230
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:271
 msgid "Set OpenFGA store ID from previous step and write model:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:240
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:281
 msgid "Set OpenFGA model ID from previous step and write tuples:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:251
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:292
 msgid ""
-"Add a new ``authorization`` section under your existing "
-"``global.userAuth`` configuration or directly within your existing "
-"secret, depending on your setup. Set the ``OPENFGA_STORE_ID`` and "
-"``OPENFGA_MODEL_ID`` from the previous steps in the file:"
+"Add a new `authorization` section under your existing `global.userAuth` "
+"configuration or directly within your existing secret, depending on your "
+"setup. Set the `OPENFGA_STORE_ID` and `OPENFGA_MODEL_ID` from the "
+"previous steps in the file:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:266
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:304
 #, fuzzy
 msgid "Change Isolation Mode"
 msgstr "해결법"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:268
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:306
 msgid ""
 "The isolation mode determines how the SuperLink manages the ServerApp "
 "process execution. This setting can be adjusted using the "
-"``superlink.isolationMode`` parameter:"
+"`superlink.isolationMode` parameter:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:271
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:309
 msgid "**Example: Changing Isolation Mode**"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:284
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:83
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:321
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:85
 #, fuzzy
 msgid "Deploy Flower Framework with TLS"
 msgstr "Flower 프레임워크"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:286
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:323
 msgid ""
 "To ensure TLS communication within the Flower Framework, you need to "
 "configure your deployment with proper TLS certificates."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:297
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:333
 #, fuzzy
 msgid "Override certificate paths"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:299
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:335
 msgid ""
 "By default, the TLS-related flags use the following paths when TLS is "
 "enabled:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:301
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:337
 msgid ""
-"``--ssl-ca-certfile``: ``/app/cert/ca.crt``, ``--ssl-certfile``: "
-"``/app/cert/tls.crt``, ``--ssl-keyfile``: ``/app/cert/tls.key``."
+"`--ssl-ca-certfile`: `/app/cert/ca.crt`, `--ssl-certfile`: "
+"`/app/cert/tls.crt`, `--ssl-keyfile`: `/app/cert/tls.key`."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:304
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:341
 msgid ""
 "These paths can be overridden by specifying the flags in the extraArgs, "
 "as shown below."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:321
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:99
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:357
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:100
 #, fuzzy
 msgid "Deploy Flower Framework without TLS"
 msgstr "플라워 프레임워크 문서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:323
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:101
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:359
 msgid ""
-"For testing or internal use, you might want to deploy Flower without TLS."
-" Be cautious as this exposes your deployment to potential security risks."
+"To deploy the Flower Framework simply, you need to configure your "
+"deployment as insecure."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:326
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:104
-msgid "Example configuration for insecure deployment:"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:336
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:368
 msgid "Pre-provide TLS Certificate"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:338
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:370
 msgid ""
 "If certificate creation is disabled, you must provide a pre-existing "
-"secret of type ``kubernetes.io/tls`` named ``<flower-server.fullname"
-">-server-tls``."
+"secret of type `kubernetes.io/tls` named `<flower-server.fullname"
+">-server-tls`."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:347
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:378
 #, fuzzy
 msgid "Ingress Configuration"
 msgstr "구성 값"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:350
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:380
 msgid "SSL-Passthrough"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:352
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:382
 msgid ""
-"When the ``tls`` option is set to ``true``, it expects the existence of "
-"the ``<flower-server.fullname>-server-tls`` secret. Flower Framework "
-"components will load TLS certificates on startup."
+"When the `tls` option is set to `true`, it expects the existence of the "
+"`<flower-server.fullname>-server-tls` secret. Flower Framework components"
+" will load TLS certificates on startup."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:389
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:419
 msgid "**Pre-Provide TLS Certificate with Additional Hosts**"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:391
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:421
 msgid ""
-"In this example, we use ``cert-manager`` to create a certificate. By "
+"In this example, we use `cert-manager` to create a certificate. By "
 "default, the certificate will only include the DNS name specified in "
-"``common-name``."
+"`common-name`."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:394
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:424
 msgid ""
 "In some cases, the server and client charts are deployed in the same "
-"cluster, while the Control API is accessible via the internet."
+"cluster, while the exec API is accessible via the internet."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:397
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:427
 msgid ""
 "To allow SuperNodes to connect to the SuperLink via the internal service "
 "URL, you need to add an additional host, as shown below:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:425
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:454
 #, fuzzy
 msgid "Enable Node Authentication"
 msgstr ":code:`SuperNode`에서 노드 인증을 활성화합니다"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.rst:444
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:473
 msgid "Public keys can include comments at the end of the key data:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:-1
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md
 msgid ""
 "Deploy Flower's SuperNode Helm chart to install client federated learning"
 " components. Default config mirrors official releases for seamless "
 "integration."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:6
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:12
 msgid "Deploy SuperNode using Helm"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:17
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:21
 msgid ""
 "This Helm chart installs the client-side components of the Flower "
 "Framework, specifically setting up the SuperNode."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:24
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:27
 msgid "Multi Project Setup"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:26
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:29
 msgid ""
 "To install multiple types of SuperNodes, such as a federation for running"
 " PyTorch and another for TensorFlow, you need to install the Helm Chart "
@@ -5864,106 +5907,115 @@ msgid ""
 "its own configurations and dependencies."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:30
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:33
 msgid ""
 "For instance, you can install the Chart for the PyTorch setup by "
 "adjusting the values.yaml file as shown below:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:48
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:74
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:51
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:77
 #, fuzzy
 msgid "Install this configuration using the following command:"
 msgstr "다음 명령을 실행하여 가상 환경을 활성화합니다:"
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:54
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:57
 msgid ""
-"This will deploy 10 SuperNodes named ``pytorch-flower-client-"
-"supernode-<random>``."
+"This will deploy 10 SuperNodes named `pytorch-flower-client-"
+"supernode-<random>`."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:56
-msgid "For a TensorFlow setup, modify the values.yaml file as follows:"
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:59
+msgid "For a TensorFlow setup, modify the `values.yaml` file as follows:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:80
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:83
 msgid ""
-"This will deploy 3 SuperNodes named ``tensorflow-flower-client-"
-"supernode-<random>``."
+"This will deploy 3 SuperNodes named `tensorflow-flower-client-"
+"supernode-<random>`."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:85
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:87
 msgid ""
 "To ensure TLS communication within the Flower framework, you need to "
 "configure your deployment with proper TLS certificates."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:88
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:90
 msgid ""
-"**Note:** If ``global.insecure`` is set to ``False``, you must pre-"
-"provide a secret of type ``kubernetes.io/tls`` named ``flower-client-"
-"tls``."
+"**Note:** If `global.insecure` is set to `False`, you must pre-provide a "
+"secret of type `kubernetes.io/tls` named `flower-client-tls`."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:91
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:93
 msgid "Example configuration for TLS deployment:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:112
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:102
+msgid ""
+"For testing or internal use, you might want to deploy the Flower "
+"framework without TLS. Be cautious as this exposes your deployment to "
+"potential security risks."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:105
+msgid "Example configuration for insecure deployment:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:112
 #, fuzzy
 msgid "Node Authentication"
 msgstr "설치 확인"
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:114
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:114
 msgid ""
 "To enable Node Authentication, you need to specify a private key in "
 "either PKCS8 or OpenSSH (PEM-like) format. This example assumes that the "
 "SuperLink is also configured for Node Authentication and recognizes the "
-"``ecdsa-sha2-nistp384 [...]`` public key of this SuperNode."
+"`ecdsa-sha2-nistp384 [...]` public key of this SuperNode."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:143
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:141
 msgid "Isolated Setup"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:146
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:143
 #, fuzzy
 msgid "Isolation All-in-One"
 msgstr "해결법"
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:148
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:145
 msgid ""
-"To install SuperNode in isolation mode using the “process” configuration,"
-" both the ClientApp and SuperNode need to be enabled. By default, the "
-"ClientApp connects to the SuperNode internally within the cluster, so "
-"there is no need to set ``supernode.address`` and ``supernode.port`` "
-"unless the connection is external. This setup assumes that both "
-"components are running within the same cluster."
+"To install SuperNode in isolation mode using the \"process\" "
+"configuration, both the ClientApp and SuperNode need to be enabled. By "
+"default, the ClientApp connects to the SuperNode internally within the "
+"cluster, so there is no need to set `supernode.address` and "
+"`supernode.port` unless the connection is external. This setup assumes "
+"that both components are running within the same cluster."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:167
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:162
 #, fuzzy
 msgid "Isolation Distributed"
 msgstr "해결법"
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:169
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:164
 msgid ""
 "You can also deploy the SuperNode and ClientApp separately. To do this, "
-"you need to deploy the chart twice: once with ``supernode.enabled=true`` "
-"and once with ``clientapp.enabled=true``. To allow the ClientApp to "
-"connect to the SuperNode in this configuration, enable the SuperNode "
-"ingress by setting ``supernode.ingress.enabled=true``. This setup is "
-"intended for scenarios where the components run on different clusters or "
-"a hybrid environment involving Kubernetes and ClientApp native "
-"installations."
+"you need to deploy the chart twice: once with `supernode.enabled=true` "
+"and once with `clientapp.enabled=true`. To allow the ClientApp to connect"
+" to the SuperNode in this configuration, enable the SuperNode ingress by "
+"setting `supernode.ingress.enabled=true`. This setup is intended for "
+"scenarios where the components run on different clusters or a hybrid "
+"environment involving Kubernetes and ClientApp native installations."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:194
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:187
 #, fuzzy
 msgid "Node Configuration"
 msgstr "구성 값"
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.rst:196
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:189
 msgid ""
 "You can add a node configuration to configure a SuperNode. The YAML "
 "datatype is preserved when passing it in the Python application:"
@@ -5987,6 +6039,12 @@ msgstr ""
 #, fuzzy
 msgid "Run Flower using Helm"
 msgstr "Docker를 사용하여 Flower 실행"
+
+#: ../../source/helm/index.rst:10
+msgid ""
+"Flower Helm charts are a Flower Enterprise feature. See `Flower "
+"Enterprise <https://flower.ai/enterprise>`_ for details."
+msgstr ""
 
 #: ../../source/helm/index.rst:13
 msgid ""
@@ -22343,8 +22401,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 ":py:obj:`run_simulation_process "
-"<flwr.simulation.run_simulation_process>`\\ \\(...\\[\\, flwr\\_dir\\_\\,"
-" ...\\]\\)"
+"<flwr.simulation.run_simulation_process>`\\ \\(...\\[\\, token\\, "
+"...\\]\\)"
 msgstr ""
 ":py:obj:`start_client <flwr.client.start_client>`\\ \\(\\*\\, "
 "server\\_address\\[\\, client\\_fn\\, ...\\]\\)"
@@ -23439,12 +23497,12 @@ msgid ""
 "Enables support for custom message types in `ServerApp` by allowing the "
 "`message_type` field to be set as `\"<action_type>.<action_name>\"`, "
 "where `<action_type>` is one of `train`, `evaluate`, or `query`, and "
-"`<action_name>` is a valid Python identifier.  Developers can now "
-"register handler functions for these custom message types using the "
-"decorator `@app.<action_type>(\"<action_name>\")`. For example, the "
-"`my_echo_fn` function is called when the `ServerApp` sends a message with"
-" `message_type` set to `\"query.echo\"`, and the `get_mean_value` "
-"function is called when it's `\"query.mean\"`:"
+"`<action_name>` is a valid Python identifier. Developers can now register"
+" handler functions for these custom message types using the decorator "
+"`@app.<action_type>(\"<action_name>\")`. For example, the `my_echo_fn` "
+"function is called when the `ServerApp` sends a message with "
+"`message_type` set to `\"query.echo\"`, and the `get_mean_value` function"
+" is called when it's `\"query.mean\"`:"
 msgstr ""
 
 #: ../../source/ref-changelog.md:237
@@ -29713,7 +29771,7 @@ msgstr ""
 #: ../../source/ref-changelog.md:1848
 msgid ""
 "The new `FedAvgM` strategy implements Federated Averaging with Server "
-"Momentum \\[Hsu et al., 2019\\]."
+"Momentum [Hsu et al., 2019]."
 msgstr ""
 
 #: ../../source/ref-changelog.md:1850
@@ -29941,8 +29999,8 @@ msgstr ""
 #: ../../source/ref-changelog.md:1920
 msgid ""
 "**SSL-enabled server and client** "
-"([#842](https://github.com/adap/flower/pull/842),  "
-"[#844](https://github.com/adap/flower/pull/844),  "
+"([#842](https://github.com/adap/flower/pull/842), "
+"[#844](https://github.com/adap/flower/pull/844), "
 "[#845](https://github.com/adap/flower/pull/845), "
 "[#847](https://github.com/adap/flower/pull/847), "
 "[#993](https://github.com/adap/flower/pull/993), "
@@ -46471,5 +46529,290 @@ msgstr ""
 #~ "Before you continue, make sure to "
 #~ "join the Flower community on Slack: "
 #~ "`Join Slack <https://flower.ai/join-slack/>`__"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For more details, visit: `Run "
+#~ "simulations <https://flower.ai/docs/framework/how-to-"
+#~ "run-simulations.html#run-simulations>`__ guide"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The log verbosity level in Flower "
+#~ "can be adjusted using the "
+#~ "``FLWR_LOG_LEVEL`` environment variable. This "
+#~ "helps control the level of detail "
+#~ "included in logs, making debugging and"
+#~ " monitoring easier."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To enable detailed logging (e.g., "
+#~ "``DEBUG`` level) for all services, add"
+#~ " ``FLWR_LOG_LEVEL`` to the ``env`` "
+#~ "parameter under the ``global`` section "
+#~ "in your ``values.yml`` file:"
+#~ msgstr ""
+
+#~ msgid "**Setting Log Level for a Specific Service**"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you want to enable logging only"
+#~ " for a specific service (e.g., "
+#~ "``superlink``), you can specify it under"
+#~ " the respective service section:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For more details on logging "
+#~ "configuration, visit: `Flower Logging "
+#~ "Documentation <https://flower.ai/docs/framework/how-to-"
+#~ "configure-logging.html>`__"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "User authentication can be enabled if"
+#~ " you’re using the Flower Enterprise "
+#~ "Edition (EE) Docker images. This is "
+#~ "configured in the ``global.userAuth`` section"
+#~ " of your ``values.yml`` file."
+#~ msgstr ""
+
+#~ msgid "**Example: Enabling OpenID Connect (OIDC) Authentication**"
+#~ msgstr ""
+
+#~ msgid "``auth_type``: The authentication mechanism being used (e.g., OIDC)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``auth_url``: The OpenID Connect "
+#~ "authentication endpoint where users "
+#~ "authenticate."
+#~ msgstr ""
+
+#~ msgid "``token_url``: The URL for retrieving access tokens."
+#~ msgstr ""
+
+#~ msgid "``validate_url``: The endpoint for validating user authentication."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``oidc_client_id``: The client ID issued "
+#~ "by the authentication provider."
+#~ msgstr ""
+
+#~ msgid "``oidc_client_secret``: The secret key associated with the client ID."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To use an existing secret that "
+#~ "contains the user authentication "
+#~ "configuration, set ``existingSecret`` to the"
+#~ " name of the existing secret:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note that the existing secret must "
+#~ "contain the key ``user-auth-"
+#~ "config.yml``:"
+#~ msgstr ""
+
+#~ msgid "**Configuring OpenFGA**"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The chart component supports OpenFGA as"
+#~ " a fine-grained authorization service, "
+#~ "but it is disabled by default."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To enable OpenFGA change the following"
+#~ " value in your ``values.yml`` file:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To connect to an existing database, "
+#~ "provide the appropriate connection details "
+#~ "via Helm values (e.g., "
+#~ "``openfga.datastore.uri``)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For more information visit the official"
+#~ " `OpenFGA Helm Chart Documentation "
+#~ "<https://artifacthub.io/packages/helm/openfga/openfga/0.2.30>`__."
+#~ msgstr ""
+
+#~ msgid "Authorization model file ``model.fga``"
+#~ msgstr ""
+
+#~ msgid "User permissions file ``tuples.fga``"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The response will include an ``id`` "
+#~ "field, which is the OpenFGA store "
+#~ "ID associated with the ``OPENFGA_STORE_NAME``"
+#~ " that was created."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Add a new ``authorization`` section "
+#~ "under your existing ``global.userAuth`` "
+#~ "configuration or directly within your "
+#~ "existing secret, depending on your "
+#~ "setup. Set the ``OPENFGA_STORE_ID`` and "
+#~ "``OPENFGA_MODEL_ID`` from the previous steps"
+#~ " in the file:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The isolation mode determines how the"
+#~ " SuperLink manages the ServerApp process"
+#~ " execution. This setting can be "
+#~ "adjusted using the ``superlink.isolationMode`` "
+#~ "parameter:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--ssl-ca-certfile``: ``/app/cert/ca.crt``, "
+#~ "``--ssl-certfile``: ``/app/cert/tls.crt``, ``--ssl-"
+#~ "keyfile``: ``/app/cert/tls.key``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For testing or internal use, you "
+#~ "might want to deploy Flower without "
+#~ "TLS. Be cautious as this exposes "
+#~ "your deployment to potential security "
+#~ "risks."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If certificate creation is disabled, you"
+#~ " must provide a pre-existing secret"
+#~ " of type ``kubernetes.io/tls`` named "
+#~ "``<flower-server.fullname>-server-tls``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "When the ``tls`` option is set to"
+#~ " ``true``, it expects the existence "
+#~ "of the ``<flower-server.fullname>-server-tls``"
+#~ " secret. Flower Framework components will"
+#~ " load TLS certificates on startup."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this example, we use ``cert-"
+#~ "manager`` to create a certificate. By"
+#~ " default, the certificate will only "
+#~ "include the DNS name specified in "
+#~ "``common-name``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In some cases, the server and "
+#~ "client charts are deployed in the "
+#~ "same cluster, while the Control API "
+#~ "is accessible via the internet."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This will deploy 10 SuperNodes named "
+#~ "``pytorch-flower-client-supernode-<random>``."
+#~ msgstr ""
+
+#~ msgid "For a TensorFlow setup, modify the values.yaml file as follows:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This will deploy 3 SuperNodes named "
+#~ "``tensorflow-flower-client-supernode-<random>``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Note:** If ``global.insecure`` is set "
+#~ "to ``False``, you must pre-provide "
+#~ "a secret of type ``kubernetes.io/tls`` "
+#~ "named ``flower-client-tls``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To enable Node Authentication, you need"
+#~ " to specify a private key in "
+#~ "either PKCS8 or OpenSSH (PEM-like) "
+#~ "format. This example assumes that the"
+#~ " SuperLink is also configured for "
+#~ "Node Authentication and recognizes the "
+#~ "``ecdsa-sha2-nistp384 [...]`` public key of"
+#~ " this SuperNode."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To install SuperNode in isolation mode"
+#~ " using the “process” configuration, both"
+#~ " the ClientApp and SuperNode need to"
+#~ " be enabled. By default, the "
+#~ "ClientApp connects to the SuperNode "
+#~ "internally within the cluster, so there"
+#~ " is no need to set "
+#~ "``supernode.address`` and ``supernode.port`` unless"
+#~ " the connection is external. This "
+#~ "setup assumes that both components are"
+#~ " running within the same cluster."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You can also deploy the SuperNode "
+#~ "and ClientApp separately. To do this,"
+#~ " you need to deploy the chart "
+#~ "twice: once with ``supernode.enabled=true`` "
+#~ "and once with ``clientapp.enabled=true``. To"
+#~ " allow the ClientApp to connect to"
+#~ " the SuperNode in this configuration, "
+#~ "enable the SuperNode ingress by setting"
+#~ " ``supernode.ingress.enabled=true``. This setup "
+#~ "is intended for scenarios where the "
+#~ "components run on different clusters or"
+#~ " a hybrid environment involving Kubernetes"
+#~ " and ClientApp native installations."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Enables support for custom message types"
+#~ " in `ServerApp` by allowing the "
+#~ "`message_type` field to be set as "
+#~ "`\"<action_type>.<action_name>\"`, where `<action_type>`"
+#~ " is one of `train`, `evaluate`, or"
+#~ " `query`, and `<action_name>` is a "
+#~ "valid Python identifier.  Developers can "
+#~ "now register handler functions for these"
+#~ " custom message types using the "
+#~ "decorator `@app.<action_type>(\"<action_name>\")`. For "
+#~ "example, the `my_echo_fn` function is "
+#~ "called when the `ServerApp` sends a "
+#~ "message with `message_type` set to "
+#~ "`\"query.echo\"`, and the `get_mean_value` "
+#~ "function is called when it's "
+#~ "`\"query.mean\"`:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The new `FedAvgM` strategy implements "
+#~ "Federated Averaging with Server Momentum "
+#~ "\\[Hsu et al., 2019\\]."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**SSL-enabled server and client** "
+#~ "([#842](https://github.com/adap/flower/pull/842),  "
+#~ "[#844](https://github.com/adap/flower/pull/844),  "
+#~ "[#845](https://github.com/adap/flower/pull/845), "
+#~ "[#847](https://github.com/adap/flower/pull/847), "
+#~ "[#993](https://github.com/adap/flower/pull/993), "
+#~ "[#994](https://github.com/adap/flower/pull/994))"
 #~ msgstr ""
 

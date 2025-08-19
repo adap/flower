@@ -27,11 +27,11 @@ import { CryptographyHandler } from './cryptoHandler';
 import { createChatRequestData, getHeaders, sendRequest } from './remoteUtils';
 import {
   ChatCompletionsResponse,
+  getServerSentEventData,
   isFinalChunk,
   isGenericError,
   isHTTPError,
   isPlatformHttpError,
-  isServerSentEvent,
   isStreamChunk,
 } from './typing';
 
@@ -123,6 +123,10 @@ async function processStream(
         if (!chunkResult.ok) {
           return chunkResult;
         }
+        if (chunkResult.done) {
+          done = true;
+          break;
+        }
         if (chunkResult.toolsUpdated && chunkResult.message.toolCalls) {
           finalTools = chunkResult.message.toolCalls;
         }
@@ -154,7 +158,7 @@ async function processStream(
 }
 
 function splitJsonChunks(text: string): string[] {
-  return text.split(/(?<=})\s*(?={)/g).filter((s) => s.trim());
+  return text.trim().split(/\n\n+/).filter(Boolean);
 }
 
 async function processChunk(
@@ -164,14 +168,15 @@ async function processChunk(
   cryptoHandler: CryptographyHandler,
   encrypt: boolean,
   onStreamEvent?: (event: StreamEvent) => void
-): Promise<ChatResponseResult & { toolsUpdated?: boolean }> {
+): Promise<ChatResponseResult & { toolsUpdated?: boolean; done?: boolean }> {
+  const data = getServerSentEventData(chunk);
+  if (data === '[DONE]') {
+    return { ok: true, message: { role: 'assistant', content: '' }, done: true };
+  }
+
   let parsed: unknown;
   try {
-    if (isServerSentEvent(chunk)) {
-      parsed = JSON.parse(chunk.data);
-    } else {
-      parsed = JSON.parse(chunk);
-    }
+    parsed = JSON.parse(data);
   } catch {
     return {
       ok: false,
