@@ -1,5 +1,5 @@
 import random
-from logging import INFO, WARN
+from logging import INFO, WARN, ERROR
 from time import sleep
 from typing import Callable
 
@@ -286,6 +286,18 @@ class FedAvg:
         timeout: float,
         central_eval_fn: Callable[[int, RecordDict], MetricRecord] = None,
     ) -> MetricRecord:
+        
+        #! Checks
+        # Only one ArrayRecord
+        if len(record_dict.array_records) != 1: 
+            log(ERROR, "Expected exactly one ArrayRecord in record_dict, found %s", len(record_dict.array_records))
+            return MetricRecord()
+        # If no ConfigRecord for client @train is found, warn
+        if self.clientapp_train_config_key not in record_dict:
+            log(WARN, "No ConfigRecord found under key %s", self.clientapp_train_config_key)
+        # If no ConfigRecord for client @eval is found, warn
+        if self.clientapp_evaluate_config_key not in record_dict:
+            log(WARN, "No ConfigRecord found under key %s", self.clientapp_evaluate_config_key)
 
         metrics_history: dict[int, dict[str, MetricRecord]] = {}
 
@@ -293,7 +305,7 @@ class FedAvg:
         if central_eval_fn:
             res = central_eval_fn(server_round=0, record=record_dict)
             log(INFO, "Central evaluation results: %s", res)
-            metrics_history[0] = {"central": res}
+            metrics_history[0] = {"central-evaluate": res}
 
         for current_round in range(1, num_rounds + 1):
             log(INFO, "")
@@ -328,7 +340,7 @@ class FedAvg:
             if central_eval_fn:
                 res = central_eval_fn(server_round=current_round, record=record_dict)
                 log(INFO, "Central evaluation results: %s", res)
-                metrics_history[current_round]["central"] = res
+                metrics_history[current_round]["central-evaluate"] = res
 
         log(INFO, "Finished all rounds")
         log(INFO, "")
