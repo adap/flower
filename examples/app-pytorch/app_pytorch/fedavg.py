@@ -128,7 +128,7 @@ class FedAvg:
     ):
         self.fraction_train = fraction_train
         self.fraction_evaluate = fraction_evaluate
-        self.min_train_clients = min_train_clients
+        self.min_train_nodes = min_train_nodes
         self.min_evaluate_nodes = min_evaluate_nodes
         self.min_available_nodes = min_available_nodes
         self.weighting_factor_key = weighting_factor_key
@@ -150,9 +150,9 @@ class FedAvg:
 
     def sample_nodes(self, grid: Grid, is_train: bool = False) -> list[int]:
 
-        # Determinie minimum numbers to sample
+        # Determine minimum numbers to sample
         min_sample_nodes = (
-            self.min_train_clients if is_train else self.min_evaluate_nodes
+            self.min_train_nodes if is_train else self.min_evaluate_nodes
         )
         fraction = self.fraction_train if is_train else self.fraction_evaluate
         sampled_nodes = []
