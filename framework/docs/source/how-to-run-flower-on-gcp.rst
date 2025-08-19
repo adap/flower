@@ -221,8 +221,6 @@ We create the Flower NumPy app as follows:
 Create Docker Images
 ~~~~~~~~~~~~~~~~~~~~
 
-TODO: Use SuperExec
-
 Once the app is created, we navigate inside the app directory (i.e., where the
 ``pyproject.toml`` file is) and create two ``Dockerfile``\s one for the ``ClientApp``
 component, named ``clientapp.Dockerfile`` and one for the ``ServerApp`` component, named

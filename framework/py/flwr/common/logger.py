@@ -132,13 +132,13 @@ if log_level := os.getenv("FLWR_LOG_LEVEL"):
     log_level = log_level.upper()
     try:
         is_debug = log_level == "DEBUG"
-        update_console_handler(level=log_level, timestamps=is_debug, colored=True)
         if is_debug:
             log(
                 WARN,
                 "DEBUG logs enabled. Do not use this in production, as it may expose "
                 "sensitive details.",
             )
+        update_console_handler(level=log_level, timestamps=is_debug, colored=True)
     except Exception:  # pylint: disable=broad-exception-caught
         # Alert user but don't raise exception
         log(
