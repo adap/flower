@@ -157,14 +157,14 @@ Create a Google Artifact Registry
 
 The Google Cloud Artifact Registry is a fully managed, scalable, and private service for
 storing and managing software build artifacts and dependencies. Consequently, to run our
-Flower app on the GKE cluster, we need to store the app's specific Flower Docker images
-within the registry, i.e., ``ClientApp`` and ``ServerApp``, which we discuss in the next
-section. For typical use-cases, the Flower SuperLink and SuperNode Docker images do not
-need to be built and can be pulled directly from the official `Flower DockerHub
-repository <https://hub.docker.com/u/flwr>`_. This step is crucial as it enables the
-cluster, and subsequently the ``Pods``, to download the built Docker images and deploy
-the necessary Flower components. Please see below the instructions on how to create the
-repository using the ``gcloud`` CLI:
+Flower app on the GKE cluster, we need to store the app's specific Flower Docker image
+within the registry, i.e., the Flower SuperExec, which we discuss in the next section.
+For typical use-cases, the Flower SuperLink and SuperNode Docker images do not need to
+be built and can be pulled directly from the official `Flower DockerHub repository
+<https://hub.docker.com/u/flwr>`_. This step is crucial as it enables the cluster, and
+subsequently the ``Pods``, to download the built Docker images and deploy the necessary
+Flower components. Please see below the instructions on how to create the repository
+using the ``gcloud`` CLI:
 
 .. code-block:: bash
 
@@ -562,13 +562,13 @@ helper script to deploy all the ``Pods``.
         kubectl apply -f supernode-2-deployment.yaml
         sleep 0.1
 
-        kubectl apply -f ./superexec-serverapp-deployment.yaml
+        kubectl apply -f superexec-serverapp-deployment.yaml
         sleep 0.1
 
-        kubectl apply -f ./superexec-clientapp-1-deployment.yaml
+        kubectl apply -f superexec-clientapp-1-deployment.yaml
         sleep 0.1
 
-        kubectl apply -f ./superexec-clientapp-2-deployment.yaml
+        kubectl apply -f superexec-clientapp-2-deployment.yaml
         sleep 0.1
 
 To see that your ``Pods`` are deployed, please go to the ``Navigation Menu`` on the
@@ -698,11 +698,11 @@ shown in the helper script below.
         kubectl delete -f supernode-2-deployment.yaml
         sleep 0.1
 
-        kubectl delete -f ./superexec-serverapp-deployment.yaml
+        kubectl delete -f superexec-serverapp-deployment.yaml
         sleep 0.1
 
-        kubectl delete -f ./superexec-clientapp-1-deployment.yaml
+        kubectl delete -f superexec-clientapp-1-deployment.yaml
         sleep 0.1
 
-        kubectl delete -f ./superexec-clientapp-2-deployment.yaml
+        kubectl delete -f superexec-clientapp-2-deployment.yaml
         sleep 0.1
