@@ -150,22 +150,24 @@ Start two SuperNode containers.
            --clientappio-api-address 0.0.0.0:9095 \
            --isolation process
 
-Step 4: Start a ServerApp
--------------------------
+Step 4: Start the SuperExec for ServerApps
+------------------------------------------
 
-The ServerApp Docker image comes with a pre-installed version of Flower and serves as a
-base for building your own ServerApp image. In order to install the FAB dependencies,
-you will need to create a Dockerfile that extends the ServerApp image and installs the
-required dependencies.
+The **SuperExec** Docker image comes with a pre-installed version of Flower and serves
+as a base for building your own image. Use a **single** image and select the desired
+behavior (ServerApps vs ClientApps) at runtime via the ``--plugin-type`` flag. SuperExec
+spawns the corresponding processes on demand.
 
-1. Create a ServerApp Dockerfile called ``serverapp.Dockerfile`` and paste the following
-   code in:
+When using SuperExec with the *serverapp* plugin, pass ``--appio-api-address`` pointing
+to the SuperLink's **ServerAppIO API** endpoint.
+
+1. Create a Dockerfile called ``superexec.Dockerfile`` and paste the following:
 
    .. code-block:: dockerfile
-       :caption: serverapp.Dockerfile
+       :caption: superexec.Dockerfile
        :substitutions:
 
-       FROM flwr/serverapp:|stable_flwr_version|
+       FROM flwr/superexec:|stable_flwr_version|
 
        WORKDIR /app
 
@@ -173,12 +175,12 @@ required dependencies.
        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
-       ENTRYPOINT ["flwr-serverapp"]
+       ENTRYPOINT ["flower-superexec"]
 
    .. dropdown:: Understand the Dockerfile
 
-       * | :substitution-code:`FROM flwr/serverapp:|stable_flwr_version|`: This line specifies that the Docker image
-         | to be built from is the ``flwr/serverapp`` image, version :substitution-code:`|stable_flwr_version|`.
+       * | :substitution-code:`FROM flwr/superexec:|stable_flwr_version|`: This line specifies that the Docker image
+         | to be built from is the ``flwr/superexec`` image, version :substitution-code:`|stable_flwr_version|`.
        * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
          | Any subsequent commands that reference a directory will be relative to this directory.
        * | ``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file
@@ -190,141 +192,102 @@ required dependencies.
          |
          | The ``-U`` flag indicates that any existing packages should be upgraded, and
          | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
-       * | ``ENTRYPOINT ["flwr-serverapp"]``: Set the command ``flwr-serverapp`` to be
+       * | ``ENTRYPOINT ["flwr-superexec"]``: Set the command ``flwr-superexec`` to be
          | the default command run when the container is started.
 
    .. important::
 
        Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the
-       ``flwr/clientapp`` base image, so only other package dependencies such as
+       ``flwr/superexec`` base image, so only other package dependencies such as
        ``flwr-datasets``, ``torch``, etc., need to be installed. As a result, the
        ``flwr`` dependency is removed from the ``pyproject.toml`` after it has been
        copied into the Docker image (see line 5).
 
 2. Afterward, in the directory that holds the Dockerfile, execute this Docker command to
-   build the ServerApp image:
+   build the SuperExec image:
 
    .. code-block:: bash
 
-       $ docker build -f serverapp.Dockerfile -t flwr_serverapp:0.0.1 .
+       $ docker build -f superexec.Dockerfile -t flwr_superexec:0.0.1 .
 
-3. Start the ServerApp container:
+3. Start the **SuperExec for ServerApps** container:
 
    .. code-block:: bash
 
        $ docker run --rm \
            --network flwr-network \
-           --name serverapp \
+           --name superexec-serverapp \
            --detach \
-           flwr_serverapp:0.0.1 \
+           flwr_superexec:0.0.1 \
            --insecure \
-           --serverappio-api-address superlink:9091
+           --plugin-type serverapp \
+           --appio-api-address superlink:9091
 
    .. dropdown:: Understand the command
 
        * ``docker run``: This tells Docker to run a container from an image.
        * ``--rm``: Remove the container once it is stopped or the command exits.
        * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
-       * ``--name serverapp``: Assign the name ``serverapp`` to the container.
+       * ``--name superexec-serverapp``: Give the container a descriptive name.
        * ``--detach``: Run the container in the background, freeing up the terminal.
-       * | ``flwr_serverapp:0.0.1``: This is the name of the image to be run and the specific tag
+       * | ``flwr_superexec:0.0.1``: This is the name of the image to be run and the specific tag
          | of the image.
        * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
          | unencrypted communication. Secure connections will be added in future releases.
-       * | ``--serverappio-api-address superlink:9091``: Connect to the SuperLink's ServerAppIO API
+       * | ``--plugin-type serverapp``: Load the *serverapp* plugin. SuperExec will spawn
+         | ServerApp processes as needed.
+       * | ``--appio-api-address superlink:9091``: Connect to the SuperLink's ServerAppIO API
          | at the address ``superlink:9091``.
 
-Step 5: Start the ClientApp
----------------------------
+Step 5: Start the SuperExec for ClientApps
+------------------------------------------
 
-The procedure for building and running a ClientApp image is almost identical to the
-ServerApp image.
+For ClientApps, reuse the **same** image and change the plugin and API address. When
+using the *clientapp* plugin, pass ``--appio-api-address`` pointing to the SuperNode's
+**ClientAppIO API** endpoint.
 
-Similar to the ServerApp image, you will need to create a Dockerfile that extends the
-ClientApp image and installs the required FAB dependencies.
-
-1. Create a ClientApp Dockerfile called ``clientapp.Dockerfile`` and paste the following
-   code into it:
-
-   .. code-block:: dockerfile
-       :caption: clientapp.Dockerfile
-       :linenos:
-       :substitutions:
-
-       FROM flwr/clientapp:|stable_flwr_version|
-
-       WORKDIR /app
-       COPY pyproject.toml .
-       RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
-           && python -m pip install -U --no-cache-dir .
-
-       ENTRYPOINT ["flwr-clientapp"]
-
-   .. dropdown:: Understand the Dockerfile
-
-       * | :substitution-code:`FROM flwr/clientapp:|stable_flwr_version|`: This line specifies that the Docker image
-         | to be built from is the ``flwr/clientapp`` image, version :substitution-code:`|stable_flwr_version|`.
-       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
-         | Any subsequent commands that reference a directory will be relative to this directory.
-       * | ``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file
-         | from the current working directory into the container's ``/app`` directory.
-       * | ``RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml``: Remove the ``flwr`` dependency
-         | from the ``pyproject.toml``.
-       * | ``python -m pip install -U --no-cache-dir .``: Run the ``pip`` install command to
-         | install the dependencies defined in the ``pyproject.toml`` file
-         |
-         | The ``-U`` flag indicates that any existing packages should be upgraded, and
-         | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
-       * | ``ENTRYPOINT ["flwr-clientapp"]``: Set the command ``flwr-clientapp`` to be
-         | the default command run when the container is started.
-
-2. Next, build the ClientApp Docker image by running the following command in the
-   directory where the Dockerfile is located:
-
-   .. code-block:: bash
-
-       $ docker build -f clientapp.Dockerfile -t flwr_clientapp:0.0.1 .
-
-   .. note::
-
-       The image name was set as ``flwr_clientapp`` with the tag ``0.0.1``. Remember
-       that these values are merely examples, and you can customize them according to
-       your requirements.
-
-3. Start the first ClientApp container:
+1. (No new Dockerfile is needed; reuse ``flwr_superexec:0.0.1``.)
+2. Start the first **SuperExec for ClientApps** container:
 
    .. code-block:: bash
 
        $ docker run --rm \
            --network flwr-network \
+           --name superexec-clientapp-1 \
            --detach \
-           flwr_clientapp:0.0.1  \
+           flwr_superexec:0.0.1 \
            --insecure \
-           --clientappio-api-address supernode-1:9094
+           --plugin-type clientapp \
+           --appio-api-address supernode-1:9094
 
    .. dropdown:: Understand the command
 
        * ``docker run``: This tells Docker to run a container from an image.
        * ``--rm``: Remove the container once it is stopped or the command exits.
        * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
+       * ``--name superexec-clientapp-1``: Give the container a descriptive name.
        * ``--detach``: Run the container in the background, freeing up the terminal.
+       * | ``flwr_superexec:0.0.1``: This is the name of the image to be run and the specific tag
+         | of the image.
        * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
          | unencrypted communication. Secure connections will be added in future releases.
-       * | ``flwr_clientapp:0.0.1``: This is the name of the image to be run and the specific tag
-         | of the image.
-       * | ``--clientappio-api-address supernode-1:9094``: Connect to the SuperNode's ClientAppIO
-         | API at the address ``supernode-1:9094``.
+       * | ``--plugin-type clientapp``: Load the *clientapp* plugin. SuperExec will spawn
+         | ClientApp processes as needed.
+       * | ``--appio-api-address supernode-1:9094``: Connect to the SuperNode's ClientAppIO API
+         | at the address ``supernode-1:9094``.
 
-4. Start the second ClientApp container:
+3. Start the second **SuperExec for ClientApps** container:
 
    .. code-block:: shell
 
        $ docker run --rm \
            --network flwr-network \
+           --name superexec-clientapp-2 \
            --detach \
-           flwr_clientapp:0.0.1 \
+           flwr_superexec:0.0.1 \
            --insecure \
-           --clientappio-api-address supernode-2:9095
+           --plugin-type clientapp \
+           --appio-api-address supernode-2:9095
 
 Step 6: Run the Quickstart Project
 ----------------------------------
@@ -358,50 +321,53 @@ Step 7: Update the Application
        partition_train_test = partition.train_test_split(test_size=0.2, seed=43)
        # ...
 
-2. Stop the current ServerApp and ClientApp containers:
+2. Stop the running containers:
 
    .. note::
 
        If you have modified the dependencies listed in your ``pyproject.toml`` file, it
        is essential to rebuild images.
 
-       If you haven’t made any changes, you can skip steps 2 through 4.
+       If you haven't made any changes, you can skip steps 2 through 4.
 
    .. code-block:: bash
 
-       $ docker stop $(docker ps -a -q  --filter ancestor=flwr_clientapp:0.0.1) serverapp
+       $ docker stop $(docker ps -a -q --filter ancestor=flwr_superexec:0.0.1)
 
-3. Rebuild ServerApp and ClientApp images:
+3. Rebuild the SuperExec image:
 
    .. code-block:: bash
 
-       $ docker build -f clientapp.Dockerfile -t flwr_clientapp:0.0.1 . && \
-         docker build -f serverapp.Dockerfile -t flwr_serverapp:0.0.1 .
+       $ docker build -f superexec.Dockerfile -t flwr_superexec:0.0.1 .
 
-4. Launch one new ServerApp and two new ClientApp containers based on the newly built
-   image:
+4. Launch one **SuperExec for ServerApps** and two **SuperExec for ClientApps**:
 
    .. code-block:: bash
 
        $ docker run --rm \
            --network flwr-network \
-           --name serverapp \
+           --name superexec-serverapp \
            --detach \
-           flwr_serverapp:0.0.1 \
+           flwr_superexec:0.0.1 \
            --insecure \
-           --serverappio-api-address superlink:9091
+           --plugin-type serverapp \
+           --appio-api-address superlink:9091
        $ docker run --rm \
            --network flwr-network \
+            --name superexec-clientapp-1 \
            --detach \
-           flwr_clientapp:0.0.1  \
+           flwr_superexec:0.0.1 \
            --insecure \
-           --clientappio-api-address supernode-1:9094
+           --plugin-type clientapp \
+           --appio-api-address supernode-1:9094
        $ docker run --rm \
            --network flwr-network \
+           --name superexec-clientapp-2 \
            --detach \
-           flwr_clientapp:0.0.1 \
+           flwr_superexec:0.0.1 \
            --insecure \
-           --clientappio-api-address supernode-2:9095
+           --plugin-type clientapp \
+           --appio-api-address supernode-2:9095
 
 5. Run the updated project:
 
@@ -416,10 +382,9 @@ Remove the containers and the bridge network:
 
 .. code-block:: bash
 
-    $ docker stop $(docker ps -a -q  --filter ancestor=flwr_clientapp:0.0.1) \
+    $ docker stop $(docker ps -a -q --filter ancestor=flwr_superexec:0.0.1) \
        supernode-1 \
        supernode-2 \
-       serverapp \
        superlink
     $ docker network rm flwr-network
 
