@@ -119,7 +119,7 @@ class FedAvg:
         self,
         fraction_train: float = 1.0,
         fraction_evaluate: float = 1.0,
-        min_train_clients: int = 2,
+        min_train_nodes: int = 2,
         min_evaluate_nodes: int = 2,
         min_available_nodes: int = 2,
         weighting_factor_key: str = "num-examples",
