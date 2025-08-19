@@ -387,22 +387,13 @@ def test_recorddict_key_order_stability() -> None:
 
 
 @pytest.mark.parametrize(
-    "content_fn, error_fn",
+    "error_fn",
     [
-        (
-            lambda maker: maker.recorddict(1, 1, 1),
-            None,
-        ),  # check when only content is set
-        (None, lambda code: Error(code=code)),  # check when only error is set
+        (None),  # check when no error is set
+        (lambda code: Error(code=code)),  # check when error is set
     ],
 )
 def test_message_serialization_deserialization(
-    content_fn: Callable[
-        [
-            RecordMaker,
-        ],
-        RecordDict,
-    ],
     error_fn: Callable[[int], Error],
 ) -> None:
     """Test serialization and deserialization of Message."""
@@ -413,7 +404,6 @@ def test_message_serialization_deserialization(
 
     original = make_message(
         metadata=metadata,
-        content=None if content_fn is None else content_fn(maker),
         error=None if error_fn is None else error_fn(0),
     )
 
