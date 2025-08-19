@@ -32,7 +32,7 @@ def evaluate(msg: Message, context: Context):
             "num-examples": len(data_loader.dataset),
         }
     )
-    content = RecordDict({"eval_metrics": metric_record})
+    content = RecordDict({"metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
 
@@ -63,7 +63,7 @@ def train(msg: Message, context: Context):
         {"train_loss": train_loss, "num-examples": len(data_loader.dataset)}
     )
     # Return reply message
-    content = RecordDict({"arrays": model_record, "train_metrics": metric_record})
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
 

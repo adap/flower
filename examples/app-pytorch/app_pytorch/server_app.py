@@ -80,4 +80,6 @@ def main(grid: Grid, context: Context) -> None:
         central_eval_fn=central_evaluation,
     )
 
-    print(strategy_results)
+    print(strategy_results.train_metrics)
+    print(strategy_results.evaluate_metrics)
+    print(strategy_results.central_evaluate_metrics)

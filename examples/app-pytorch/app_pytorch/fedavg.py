@@ -1,6 +1,6 @@
 import random
 from dataclasses import dataclass
-from logging import ERROR, INFO, WARN
+from logging import INFO, WARN
 from time import sleep
 from typing import Callable, Optional
 
@@ -36,83 +36,81 @@ class ReturnStrategyResults:
             self.arrays = ArrayRecord()
 
 
-def aggregate(records: list[RecordDict], weighting_metric_name: str) -> RecordDict:
+def aggregate(
+    records: list[RecordDict], weighting_metric_name: str
+) -> tuple[ArrayRecord, MetricRecord]:
     # Aggregate the given records using the specified weighting metric
-    aggregated = RecordDict()
 
     # Count total examples
     total_examples = 0
     examples_per_record = []
     for record in records:
-        for rec in record.values():
-            weight = None
-            if isinstance(rec, MetricRecord):
-                if weighting_metric_name in rec:
-                    weight = rec[weighting_metric_name]
-                    break  # move to next RecordDict
-
+        weight = None
+        # Check if a MetricRecord under key 'metrics' exist
+        if mrecord := record.metric_records.get("metrics", None):
+            # Check if a metric under key weighting_metric_name exists
+            weight = mrecord.get(weighting_metric_name, None)
         if weight is None:
-            # Warn user no weighting key is found and that 1.0 will be used
             log(
                 WARN,
-                "No weighting key '%s' found in MetricRecord, defaulting to 1.0",
+                "No weighting key '%s' found in MetricRecord, defaulting to 1.0 for all Messages",
                 weighting_metric_name,
             )
-            weight = 1.0
-        total_examples += weight
-        examples_per_record.append(weight)
-
-    if total_examples == 0:
-        # it could be that no `MetricRecord` was sent in the replies by ClientApps
-        #! Warn users ?
-        total_examples = len(records)
-        examples_per_record = [1.0] * len(records)
+            log(
+                WARN,
+                "Ensure your ClientApps include in their replies a {'metrics': MetricRecord({'%s': ...})}",
+                weighting_metric_name,
+            )
+            total_examples = len(records)
+            examples_per_record = [1.0] * len(records)
+            break
+        else:
+            total_examples += weight
+            examples_per_record.append(weight)
 
     # Perform weighted aggregation
+    aggregated_arrays = ArrayRecord()
+    aggregated_metrics = MetricRecord()
     for record, weight in zip(records, examples_per_record):
-        for name, record_item in record.items():
+        for record_item in record.values():
             # For ArrayRecord
             if isinstance(record_item, ArrayRecord):
-                if name not in aggregated:
-                    aggregated[name] = ArrayRecord()
                 # aggregate in-place
                 # TODO: optimize so at least we don't need to serde all the time
                 for key, value in record_item.items():
-                    if key not in aggregated[name]:
-                        aggregated[name][key] = Array(
+                    if key not in aggregated_arrays:
+                        aggregated_arrays[key] = Array(
                             value.numpy() * weight / total_examples
                         )
                     else:
-                        aggregated[name][key] = Array(
-                            aggregated[name][key].numpy()
+                        aggregated_arrays[key] = Array(
+                            aggregated_arrays[key].numpy()
                             + value.numpy() * weight / total_examples
                         )
 
             # For MetricRecord
             elif isinstance(record_item, MetricRecord):
-                if name not in aggregated:
-                    aggregated[name] = MetricRecord()
                 # aggregate in-place
                 for key, value in record_item.items():
                     if key == weighting_metric_name:
                         continue  # ! we don't want to keep this key as part of the aggregated recorddict, do we?
-                    if key not in aggregated[name]:
+                    if key not in aggregated_metrics:
                         if isinstance(value, list):
-                            aggregated[name][key] = (
+                            aggregated_metrics[key] = (
                                 np.array(value) * weight / total_examples
                             ).tolist()
                         else:
-                            aggregated[name][key] = value * weight / total_examples
+                            aggregated_metrics[key] = value * weight / total_examples
                     else:
                         if isinstance(value, list):
-                            aggregated[name][key] = (
-                                np.array(aggregated[name][key])
+                            aggregated_metrics[key] = (
+                                np.array(aggregated_metrics[key])
                                 + np.array(value) * weight / total_examples
                             ).tolist()
                         else:
-                            aggregated[name][key] += value * weight / total_examples
+                            aggregated_metrics[key] += value * weight / total_examples
 
-    return aggregated
+    return aggregated_arrays, aggregated_metrics
 
 
 class FedAvg:
@@ -204,7 +202,7 @@ class FedAvg:
         self,
         server_round: int,
         replies: list[Message],
-    ) -> RecordDict:
+    ) -> tuple[ArrayRecord, MetricRecord]:
         # Aggregate training results
 
         num_errors = 0
@@ -225,12 +223,29 @@ class FedAvg:
             num_errors,
         )
 
-        rd = aggregate(
-            records=[msg.content for msg in replies if msg.has_content()],
-            weighting_metric_name="num-examples",
+        replies_with_content = [msg.content for msg in replies if msg.has_content()]
+        # Check if replies have one `ArrayRecord` and at most one `MetricRecord`
+        if all(len(msg.array_records) != 1 for msg in replies_with_content):
+            log(
+                WARN,
+                "Expected exactly one ArrayRecord in replies, but found: %s",
+                [len(msg.array_records) for msg in replies_with_content],
+            )
+            #! Should return and break for round loop
+        if all(len(msg.metric_records) > 1 for msg in replies_with_content):
+            log(
+                WARN,
+                "Expected at most one MetricRecord in replies, but found: %s",
+                [len(msg.metric_records) for msg in replies_with_content],
+            )
+            #! Should return and break for round loop
+
+        arrays, metrics = aggregate(
+            records=replies_with_content,
+            weighting_metric_name=self.weighting_factor_key,
         )
 
-        return rd
+        return arrays, metrics
 
     def configure_evaluate(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
@@ -274,11 +289,21 @@ class FedAvg:
             num_errors,
         )
 
-        rd = aggregate(
-            records=[msg.content for msg in replies if msg.has_content()],
-            weighting_metric_name="num-examples",
+        replies_with_content = [msg.content for msg in replies if msg.has_content()]
+        # Check if replies have at most one `MetricRecord`
+        if all(len(msg.metric_records) > 1 for msg in replies_with_content):
+            log(
+                WARN,
+                "Expected at most one MetricRecord in replies, but found: %s",
+                [len(msg.metric_records) for msg in replies_with_content],
+            )
+            #! Should return and break for round loop
+
+        _, metrics = aggregate(
+            records=replies_with_content,
+            weighting_metric_name=self.weighting_factor_key,
         )
-        return rd.metric_records
+        return metrics
 
     def launch(
         self,
@@ -295,18 +320,18 @@ class FedAvg:
 
         # log name of strategy
         log(INFO, f"Starting {self.__class__.__name__} strategy.")
-        log(INFO, f"\tnum_rounds: {num_rounds}")
+        log(INFO, f"\t> Number of rounds: {num_rounds}")
         log(
             INFO,
-            f"\tarray_record: {len(arrays)} Arrays totalling {sum(np.prod(array.shape) for array in arrays.values())/(1000**2):.2f} M parameters",
+            f"\t> ArrayRecord: {len(arrays)} Arrays totalling {sum(len(array.data) for array in arrays.values())/(1024**2):.2f} MB",
         )
         log(
             INFO,
-            f"\tConfig for train round: {train_config if train_config else '⚠️ (empty!)'}",
+            f"\t> ConfigRecord for train round: {train_config if train_config else '⚠️ (empty!)'}",
         )
         log(
             INFO,
-            f"\tConfig for evaluate round: {evaluate_config if evaluate_config else '⚠️ (empty!)'}",
+            f"\t> ConfigRecord for evaluate round: {evaluate_config if evaluate_config else '⚠️ (empty!)'}",
         )
         log(INFO, "")
 
@@ -327,14 +352,11 @@ class FedAvg:
             # Communicate
             replies = grid.send_and_receive(messages, timeout=timeout)
             # aggregate fit
-            res: RecordDict = self.aggregate_train(current_round, replies)
-            # copy the content of the array records in res to those in arrays
-            # ! Change: make aggregate_train return tuple[arrayrecord, metricrecord]
-            for key, record in res.array_records.items():
-                arrays = record
+            arrays, agg_metrics = self.aggregate_train(current_round, replies)
             # Log training metrics and append to history
-            log(INFO, "Federated Training results: %s", res.metric_records)
-            metrics_history.train_metrics[current_round] = res.metric_records
+            log(INFO, "Federated Training results: %s", agg_metrics)
+            metrics_history.train_metrics[current_round] = agg_metrics
+            metrics_history.arrays = arrays
 
             # Configure evaluate
             messages = self.configure_evaluate(
