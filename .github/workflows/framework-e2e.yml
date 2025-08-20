@@ -218,7 +218,7 @@ jobs:
           key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
       - name: Install the project
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        run: uv sync --locked --all-extras --dev
+        run: uv sync --all-extras --dev
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
