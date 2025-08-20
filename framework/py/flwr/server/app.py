@@ -206,13 +206,14 @@ def run_superlink() -> None:
     objectstore_factory = ObjectStoreFactory()
 
     # Start Control API
+    is_simulation = args.simulation
     control_server: grpc.Server = run_control_api_grpc(
         address=control_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
         certificates=certificates,
-        is_simulation=args.simulation,
+        is_simulation=is_simulation,
         auth_plugin=auth_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
@@ -220,7 +221,7 @@ def run_superlink() -> None:
     grpc_servers = [control_server]
     bckg_threads: list[threading.Thread] = []
 
-    if args.simulation:
+    if is_simulation:
         simulationio_server: grpc.Server = run_simulationio_api_grpc(
             address=simulationio_address,
             state_factory=state_factory,
@@ -341,11 +342,11 @@ def run_superlink() -> None:
         command = ["flower-superexec", "--insecure"]
         command += [
             "--appio-api-address",
-            simulationio_address if args.simulation else io_address,
+            simulationio_address if is_simulation else io_address,
         ]
         command += [
             "--plugin-type",
-            ExecPluginType.SIMULATION if args.simulation else ExecPluginType.SERVER_APP,
+            ExecPluginType.SIMULATION if is_simulation else ExecPluginType.SERVER_APP,
         ]
         command += ["--parent-pid", str(os.getpid())]
         # pylint: disable-next=consider-using-with
