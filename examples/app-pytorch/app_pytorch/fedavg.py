@@ -409,7 +409,7 @@ class FedAvg:
             return None
 
         # Aggregate MetricRecords
-        metrics = self.train_metrics_aggregation_fn(
+        metrics = self.evaluate_metrics_aggregation_fn(
             records=replies_with_content,
             weighting_metric_name=self.weighting_factor_key,
         )
