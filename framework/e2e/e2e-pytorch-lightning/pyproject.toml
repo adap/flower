@@ -13,6 +13,7 @@ dependencies = [
     "pytorch-lightning==2.4.0",
     "torchvision>=0.20.1,<0.21.0",
 ]
+requires-python = ">=3.9.2"
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]

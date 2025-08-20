@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+source .venv/bin/activate
 
 case "$1" in
   e2e-bare-https | e2e-bare-auth)
@@ -59,10 +60,13 @@ case "$2" in
 esac
 
 # Install Flower app
-pip install -e . --no-deps
+uv pip install -e . --no-deps
 
 # Remove any duplicates
 sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
+
+# Create .gitignore to ignore .venv folder
+echo ".venv" > .gitignore
 
 # Check if the first argument is 'insecure'
 if [ "$server_arg" = "--insecure" ]; then
