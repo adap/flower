@@ -202,7 +202,7 @@ jobs:
       - name: Install uv and set the Python version
         uses: astral-sh/setup-uv@v6
         with:
-          python-version: ${{ (matrix.directory == 'e2e-fastai') && '3.10' || '3.9' }}
+          python-version: ${{ (matrix.directory == 'e2e-fastai') && '3.10' || '>=3.9.2,<3.10' }}
       # Using approach described here for Python location caching:
       # https://blog.allenai.org/python-caching-in-github-actions-e9452698e98d
       # - name: Cache Python location
