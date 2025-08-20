@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+source .venv/bin/activate
 
 case "$1" in
   e2e-bare-https | e2e-bare-auth)
