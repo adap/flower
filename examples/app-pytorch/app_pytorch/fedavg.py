@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from logging import ERROR, INFO
 from time import sleep, time
 from typing import Callable, Optional
+
 import numpy as np
 from flwr.common import (
     Array,
@@ -128,6 +129,45 @@ def sample_nodes(
 
 
 class FedAvg:
+    """Federated Averaging strategy.
+
+    Implementation based on https://arxiv.org/abs/1602.05629
+
+    Parameters
+    ----------
+    fraction_train : float, optional
+        Fraction of nodes used during training. In case `min_train_nodes`
+        is larger than `fraction_train * total_connected_nodes`, `min_train_nodes`
+        will still be sampled. Defaults to 1.0.
+    fraction_evaluate : float, optional
+        Fraction of nodes used during validation. In case `min_evaluate_nodes`
+        is larger than `fraction_evaluate * total_connected_nodes`,
+        `min_evaluate_nodes` will still be sampled. Defaults to 1.0.
+    min_train_nodes : int, optional
+        Minimum number of nodes used during training. Defaults to 2.
+    min_evaluate_nodes : int, optional
+        Minimum number of nodes used during validation. Defaults to 2.
+    min_available_nodes : int, optional
+        Minimum number of total nodes in the system. Defaults to 2.
+    weighting_factor_key : str, optional
+        Key used to extract the weighting factor from received MetricRecords.
+        This value is used to perform weighted averaging of both ArrayRecords and
+        MetricRecords. Defaults to "num-examples".
+    arrayrecord_key : str, optional
+        Key used to store the ArrayRecord when constructing Messages.
+        Defaults to "arrays".
+    configrecord_key : str, optional
+         Key used to store the ConfigRecord when constructing Messages.
+        Defaults to "config".
+    train_metrics_aggregation_fn : Callable[[list[RecordDict], str], MetricRecord], optional
+        Function used to aggregate MetricRecords from training round replies.
+        Takes a list of RecordDict and weighting key as input, returns aggregated
+        MetricRecord.
+    evaluate_metrics_aggregation_fn : Callable[[list[RecordDict], str], MetricRecord], optional
+        Function used to aggregate MetricRecords from evaluation round replies.
+        Takes a list of RecordDict and weighting key as input, returns aggregated
+        MetricRecord.
+    """
 
     def __init__(
         self,
@@ -145,7 +185,7 @@ class FedAvg:
         evaluate_metrics_aggregation_fn: Callable[
             [list[RecordDict], str], MetricRecord
         ] = aggregate_metricrecords,
-    ):
+    ) -> None:
         self.fraction_train = fraction_train
         self.fraction_evaluate = fraction_evaluate
         self.min_train_nodes = min_train_nodes
@@ -385,15 +425,45 @@ class FedAvg:
         evaluate_config: Optional[ConfigRecord] = ConfigRecord(),
         central_eval_fn: Callable[[int, RecordDict], MetricRecord] = None,
     ) -> ReturnStrategyResults:
+        """Execute the federated learning strategy.
 
-        # Log brief info about Strategy setup
+        Runs the complete federated learning workflow for the specified number of rounds,
+        including training, evaluation, and optional centralized evaluation.
 
-        # log name of strategy
+        Parameters
+        ----------
+        arrays : ArrayRecord
+            Initial model parameters (arrays) to be used for federated learning.
+        grid : Grid
+            The Grid instance used to send/receive Messages from nodes executing a ClientApp.
+        num_rounds : int
+            Number of federated learning rounds to execute.
+        timeout : float
+            Timeout in seconds for waiting for node responses.
+        train_config : ConfigRecord, optional
+            Configuration to be sent to nodes during training rounds.
+            Defaults to empty ConfigRecord.
+        evaluate_config : ConfigRecord, optional
+            Configuration to be sent to nodes during evaluation rounds.
+            Defaults to empty ConfigRecord.
+        central_eval_fn : Callable[[int, RecordDict], MetricRecord], optional
+            Optional function for centralized evaluation. Takes server round number
+            and array record, returns a MetricRecord. If provided, will be called
+            before the first round and after each round. Defaults to None.
+
+        Returns
+        -------
+        ReturnStrategyResults
+            Results containing training metrics, evaluation metrics, centralized
+            evaluation metrics (if provided), and final model arrays from all rounds.
+        """
+
         log(INFO, f"Starting {self.__class__.__name__} strategy.")
         log(INFO, f"\t└──> Number of rounds: {num_rounds}")
         log(
             INFO,
-            f"\t└──> ArrayRecord: {len(arrays)} Arrays totalling {sum(len(array.data) for array in arrays.values())/(1024**2):.2f} MB",
+            f"\t└──> ArrayRecord: {len(arrays)} Arrays totalling "
+            f"{sum(len(array.data) for array in arrays.values())/(1024**2):.2f} MB",
         )
         log(
             INFO,
