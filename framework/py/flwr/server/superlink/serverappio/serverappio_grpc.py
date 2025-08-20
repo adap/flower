@@ -58,7 +58,7 @@ def run_serverappio_api_grpc(
         certificates=certificates,
     )
 
-    log(INFO, "Flower ECE: Starting ServerAppIo API (gRPC-rere) on %s", address)
+    log(INFO, "Flower Deployment Runtime: Starting ServerAppIo API on %s", address)
     serverappio_grpc_server.start()
 
     return serverappio_grpc_server

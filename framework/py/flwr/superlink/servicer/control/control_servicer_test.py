@@ -15,7 +15,7 @@
 """Test the Control API servicer."""
 
 
-import subprocess
+import hashlib
 import unittest
 from datetime import datetime
 from types import SimpleNamespace
@@ -54,34 +54,6 @@ FLWR_AID_MISMATCH_CASES = (
 )
 
 
-def test_start_run() -> None:
-    """Test StartRun method of ControlServicer."""
-    run_res = MagicMock()
-    run_res.run_id = 10
-    with subprocess.Popen(
-        ["echo", "success"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    ) as proc:
-        run_res.proc = proc
-
-    executor = MagicMock()
-    executor.start_run.return_value = run_res.run_id
-
-    context_mock = MagicMock()
-
-    request = StartRunRequest()
-    request.fab.content = b"test"
-
-    # Create a instance of FlowerServiceServicer
-    servicer = ControlServicer(Mock(), Mock(), Mock(), executor=executor)
-
-    # Execute
-    response = servicer.StartRun(request, context_mock)
-    assert response.run_id == 10
-
-
 class TestControlServicer(unittest.TestCase):
     """Test the Control API servicer."""
 
@@ -92,9 +64,34 @@ class TestControlServicer(unittest.TestCase):
             linkstate_factory=LinkStateFactory(":flwr-in-memory-state:"),
             ffs_factory=FfsFactory("./tmp"),
             objectstore_factory=Mock(store=Mock(return_value=self.store)),
-            executor=Mock(),
+            is_simulation=False,
         )
         self.state = self.servicer.linkstate_factory.state()
+
+    def test_start_run(self) -> None:
+        """Test StartRun method of ControlServicer."""
+        # Prepare
+        fab_content = b"test FAB content 123456"
+        fab_hash = hashlib.sha256(fab_content).hexdigest()
+        fab_id = b"mock FAB ID"
+        fab_version = b"mock FAB version"
+        request = StartRunRequest()
+        request.fab.hash_str = fab_hash
+        request.fab.content = fab_content
+
+        # Execute
+        with patch(
+            "flwr.superlink.servicer.control.control_servicer.get_fab_metadata"
+        ) as mock_get_fab_metadata:
+            mock_get_fab_metadata.return_value = (fab_id, fab_version)
+            response = self.servicer.StartRun(request, Mock())
+        run_info = self.state.get_run(response.run_id)
+
+        # Assert
+        assert run_info is not None
+        self.assertEqual(run_info.fab_hash, fab_hash)
+        self.assertEqual(run_info.fab_id, fab_id)
+        self.assertEqual(run_info.fab_version, fab_version)
 
     def test_list_runs(self) -> None:
         """Test List method of ControlServicer with --runs option."""
@@ -136,11 +133,7 @@ class TestControlServicer(unittest.TestCase):
         run_id = self.state.create_run(
             "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigRecord(), "user123"
         )
-        self.servicer.executor = MagicMock()
         expected_run_status = RunStatus(Status.FINISHED, SubStatus.STOPPED, "")
-        self.servicer.executor.stop_run = lambda input_run_id: (
-            input_run_id == run_id
-        ) & self.state.update_run_status(input_run_id, new_status=expected_run_status)
 
         # Execute
         response = self.servicer.StopRun(StopRunRequest(run_id=run_id), Mock())
@@ -163,7 +156,7 @@ class TestControlServicerAuth(unittest.TestCase):
             linkstate_factory=LinkStateFactory(":flwr-in-memory-state:"),
             ffs_factory=FfsFactory("./tmp"),
             objectstore_factory=Mock(),
-            executor=Mock(),
+            is_simulation=False,
             auth_plugin=Mock(),
         )
         self.state = self.servicer.linkstate_factory.state()

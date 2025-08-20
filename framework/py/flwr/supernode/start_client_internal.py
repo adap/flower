@@ -532,6 +532,6 @@ def run_clientappio_api_grpc(
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=certificates,
     )
-    log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
+    log(INFO, "Flower Deployment Runtime: Starting ClientAppIo API on %s", address)
     clientappio_grpc_server.start()
     return clientappio_grpc_server
