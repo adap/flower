@@ -518,7 +518,9 @@ def _run_fleet_api_grpc_rere(  # pylint: disable=R0913, R0917
         interceptors=interceptors,
     )
 
-    log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
+    log(
+        INFO, "Flower Deployment Runtime: Starting Fleet API (gRPC-rere) on %s", address
+    )
     fleet_grpc_server.start()
 
     return fleet_grpc_server
@@ -546,7 +548,11 @@ def _run_fleet_api_grpc_adapter(
         certificates=certificates,
     )
 
-    log(INFO, "Flower ECE: Starting Fleet API (GrpcAdapter) on %s", address)
+    log(
+        INFO,
+        "Flower Deployment Runtime: Starting Fleet API (GrpcAdapter) on %s",
+        address,
+    )
     fleet_grpc_server.start()
 
     return fleet_grpc_server

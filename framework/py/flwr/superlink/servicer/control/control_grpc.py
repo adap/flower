@@ -93,11 +93,11 @@ def run_control_api_grpc(
     )
 
     if auth_plugin is None:
-        log(INFO, "Flower Deployment Engine: Starting Control API on %s", address)
+        log(INFO, "Flower Deployment Runtime: Starting Control API on %s", address)
     else:
         log(
             INFO,
-            "Flower Deployment Engine: Starting Control API with user "
+            "Flower Deployment Runtime: Starting Control API with user "
             "authentication on %s",
             address,
         )
