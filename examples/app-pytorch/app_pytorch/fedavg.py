@@ -1,9 +1,8 @@
 import random
-from dataclasses import dataclass
-from logging import INFO, WARN
+from dataclasses import dataclass, field
+from logging import ERROR, INFO
 from time import sleep, time
 from typing import Callable, Optional
-
 import numpy as np
 from flwr.common import (
     Array,
@@ -20,97 +19,86 @@ from flwr.server import Grid
 
 @dataclass
 class ReturnStrategyResults:
-    train_metrics: dict[int, MetricRecord] = None
-    evaluate_metrics: dict[int, MetricRecord] = None
-    central_evaluate_metrics: dict[int, MetricRecord] = None
+    train_metrics: dict[int, MetricRecord] = field(default_factory=dict)
+    evaluate_metrics: dict[int, MetricRecord] = field(default_factory=dict)
+    central_evaluate_metrics: dict[int, MetricRecord] = field(default_factory=dict)
     arrays: ArrayRecord = None
 
-    def __post_init__(self):
-        if self.train_metrics is None:
-            self.train_metrics = {}
-        if self.evaluate_metrics is None:
-            self.evaluate_metrics = {}
-        if self.central_evaluate_metrics is None:
-            self.central_evaluate_metrics = {}
-        if self.arrays is None:
-            self.arrays = ArrayRecord()
 
-
-def aggregate(
+def aggregate_arrayrecords(
     records: list[RecordDict], weighting_metric_name: str
-) -> tuple[ArrayRecord, MetricRecord]:
-    # Aggregate the given records using the specified weighting metric
+) -> ArrayRecord:
 
-    # Count total examples
-    total_examples = 0
-    examples_per_record = []
+    # Retrieve weighting factor from MetricRecord
+    weights: list[float] = []
     for record in records:
-        weight = None
-        # Check if a MetricRecord under key 'metrics' exist
-        if mrecord := record.metric_records.get("metrics", None):
-            # Check if a metric under key weighting_metric_name exists
-            weight = mrecord.get(weighting_metric_name, None)
-        if weight is None:
-            log(
-                WARN,
-                "No weighting key '%s' found in MetricRecord, defaulting to 1.0 for all Messages",
-                weighting_metric_name,
-            )
-            log(
-                WARN,
-                "Ensure your ClientApps include in their replies a {'metrics': MetricRecord({'%s': ...})}",
-                weighting_metric_name,
-            )
-            total_examples = len(records)
-            examples_per_record = [1.0] * len(records)
-            break
-        else:
-            total_examples += weight
-            examples_per_record.append(weight)
+        # Get the first (and only) MetricRecord in the record
+        metricrecord = next(iter(record.metric_records.values()))
+        weights.append(metricrecord[weighting_metric_name])
+
+    # Average
+    total_weight = sum(weights)
+    weight_factors = [w / total_weight for w in weights]
 
     # Perform weighted aggregation
-    aggregated_arrays = ArrayRecord()
-    aggregated_metrics = MetricRecord()
-    for record, weight in zip(records, examples_per_record):
+    aggregated_np_arrays: dict[str, np.NDArray] = {}
+
+    for record, weight in zip(records, weight_factors):
         for record_item in record.values():
             # For ArrayRecord
             if isinstance(record_item, ArrayRecord):
                 # aggregate in-place
-                # TODO: optimize so at least we don't need to serde all the time
                 for key, value in record_item.items():
-                    if key not in aggregated_arrays:
-                        aggregated_arrays[key] = Array(
-                            value.numpy() * weight / total_examples
-                        )
+                    if key not in aggregated_np_arrays:
+                        aggregated_np_arrays[key] = value.numpy() * weight
                     else:
-                        aggregated_arrays[key] = Array(
-                            aggregated_arrays[key].numpy()
-                            + value.numpy() * weight / total_examples
-                        )
+                        aggregated_np_arrays[key] += value.numpy() * weight
 
+    return ArrayRecord({k: Array(v) for k, v in aggregated_np_arrays.items()})
+
+
+def aggregate_metricrecords(
+    records: list[RecordDict], weighting_metric_name: str
+) -> MetricRecord:
+
+    # Retrieve weighting factor from MetricRecord
+    weights: list[float] = []
+    for record in records:
+        # Get the first (and only) MetricRecord in the record
+        metricrecord = next(iter(record.metric_records.values()))
+        weights.append(metricrecord[weighting_metric_name])
+
+    # Average
+    total_weight = sum(weights)
+    weight_factors = [w / total_weight for w in weights]
+
+    aggregated_metrics = MetricRecord()
+    for record, weight in zip(records, weight_factors):
+        for record_item in record.values():
             # For MetricRecord
-            elif isinstance(record_item, MetricRecord):
+            if isinstance(record_item, MetricRecord):
                 # aggregate in-place
                 for key, value in record_item.items():
                     if key == weighting_metric_name:
-                        continue  # ! we don't want to keep this key as part of the aggregated recorddict, do we?
+                        # We exclude the weighting key from the aggregated MetricRecord
+                        continue
                     if key not in aggregated_metrics:
                         if isinstance(value, list):
                             aggregated_metrics[key] = (
-                                np.array(value) * weight / total_examples
+                                np.array(value) * weight
                             ).tolist()
                         else:
-                            aggregated_metrics[key] = value * weight / total_examples
+                            aggregated_metrics[key] = value * weight
                     else:
                         if isinstance(value, list):
                             aggregated_metrics[key] = (
                                 np.array(aggregated_metrics[key])
-                                + np.array(value) * weight / total_examples
+                                + np.array(value) * weight
                             ).tolist()
                         else:
-                            aggregated_metrics[key] += value * weight / total_examples
+                            aggregated_metrics[key] += value * weight
 
-    return aggregated_arrays, aggregated_metrics
+    return aggregated_metrics
 
 
 def sample_nodes(
@@ -119,13 +107,14 @@ def sample_nodes(
 
     sampled_nodes = []
 
-    # Wait for min_available_nodes to be online
+    # wait for min_available_nodes to be online
     nodes_connected = grid.get_node_ids()
     while len(nodes_connected) < min_available_nodes:
         sleep(1)
         log(
             INFO,
-            f"Waiting for nodes to connect. Nodes connected {len(nodes_connected)} (expecting at least {min_available_nodes}).",
+            f"Waiting for nodes to connect. Nodes connected {len(nodes_connected)} "
+            f"(expecting at least {min_available_nodes}).",
         )
         nodes_connected = grid.get_node_ids()
 
@@ -147,6 +136,12 @@ class FedAvg:
         weighting_factor_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
         configrecord_key: str = "config",
+        train_metrics_aggregation_fn: Callable[
+            [list[RecordDict], str], MetricRecord
+        ] = aggregate_metricrecords,
+        evaluate_metrics_aggregation_fn: Callable[
+            [list[RecordDict], str], MetricRecord
+        ] = aggregate_metricrecords,
     ):
         self.fraction_train = fraction_train
         self.fraction_evaluate = fraction_evaluate
@@ -156,6 +151,8 @@ class FedAvg:
         self.weighting_factor_key = weighting_factor_key
         self.arrayrecord_key = arrayrecord_key
         self.configrecord_key = configrecord_key
+        self.train_metrics_aggregation_fn = train_metrics_aggregation_fn
+        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def _construct_messages(
         self, record: RecordDict, node_ids: list[int], message_type: MessageType
@@ -169,6 +166,70 @@ class FedAvg:
             )  #! Note i'm not using group_id
             messages.append(message)
         return messages
+
+    def _check_message_reply_consistency(
+        self, replies: list[RecordDict], check_arrayrecord: bool
+    ) -> bool:
+        """Check that replies contain one ArrayRecord, OneMetricRecord and that
+        the weighting factor key is present."""
+        # Check if replies have one ArrayRecord and one MetricRecord
+        # Furthermore, all keys in both types of records must match
+        # If this is not the case, we log an ERROR and skip aggregation.
+
+        # Checking for ArrayRecord consistency
+        skip_aggregation = False
+        if check_arrayrecord:
+            if all(len(msg.array_records) != 1 for msg in replies):
+                log(
+                    ERROR,
+                    "Expected exactly one ArrayRecord in replies, but found more. "
+                    "Skipping aggregation.",
+                )
+                skip_aggregation = True
+            else:
+                # Ensure all key are present in all ArrayRecords
+                all_key_sets = [
+                    set(next(iter(d.array_records.values())).keys()) for d in replies
+                ]
+                if not all(s == all_key_sets[0] for s in all_key_sets):
+                    log(
+                        ERROR,
+                        "All ArrayRecords must have the same keys for aggregation. "
+                        "This condition wasn't met. Skipping aggregation.",
+                    )
+                    skip_aggregation = True
+
+        # Checking for MetricRecord consistency
+        if all(len(msg.metric_records) != 1 for msg in replies):
+            log(
+                ERROR,
+                "Expected exactly one MetricRecord in replies, but found more. "
+                "Skipping aggregation.",
+            )
+            skip_aggregation = True
+        else:
+            # Ensure all key are present in all MetricRecords
+            all_key_sets = [
+                set(next(iter(d.metric_records.values())).keys()) for d in replies
+            ]
+            if not all(s == all_key_sets[0] for s in all_key_sets):
+                log(
+                    ERROR,
+                    "All MetricRecords must have the same keys for aggregation. "
+                    "This condition wasn't met. Skipping aggregation.",
+                )
+                skip_aggregation = True
+
+            # Check one of the sets for the key to perform weighting averaging
+            if self.weighting_factor_key not in all_key_sets[0]:
+                log(
+                    ERROR,
+                    f"The MetricRecord in the reply messages were expecting key `{self.weighting_factor_key}` "
+                    "to perform averaging of ArrayRecords and MetricRecords. Skipping aggregation.",
+                )
+                skip_aggregation = True
+
+        return skip_aggregation
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
@@ -197,7 +258,7 @@ class FedAvg:
         self,
         server_round: int,
         replies: list[Message],
-    ) -> tuple[ArrayRecord, MetricRecord]:
+    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         # Aggregate training results
 
         num_errors = 0
@@ -218,28 +279,28 @@ class FedAvg:
             num_errors,
         )
 
+        # Filter messages that carry content
         replies_with_content = [msg.content for msg in replies if msg.has_content()]
-        # Check if replies have one `ArrayRecord` and at most one `MetricRecord`
-        if all(len(msg.array_records) != 1 for msg in replies_with_content):
-            log(
-                WARN,
-                "Expected exactly one ArrayRecord in replies, but found: %s",
-                [len(msg.array_records) for msg in replies_with_content],
-            )
-            #! Should return and break for round loop
-        if all(len(msg.metric_records) > 1 for msg in replies_with_content):
-            log(
-                WARN,
-                "Expected at most one MetricRecord in replies, but found: %s",
-                [len(msg.metric_records) for msg in replies_with_content],
-            )
-            #! Should return and break for round loop
 
-        arrays, metrics = aggregate(
+        # Ensure expected ArrayRecords and MetricRecords are received
+        skip_aggregation = self._check_message_reply_consistency(
+            replies=replies_with_content, check_arrayrecord=True
+        )
+
+        if skip_aggregation:
+            return None, None
+
+        # Aggregate ArrayRecords
+        arrays = aggregate_arrayrecords(
             records=replies_with_content,
             weighting_metric_name=self.weighting_factor_key,
         )
 
+        # Aggregate MetricRecords
+        metrics = self.train_metrics_aggregation_fn(
+            records=replies_with_content,
+            weighting_metric_name=self.weighting_factor_key,
+        )
         return arrays, metrics
 
     def configure_evaluate(
@@ -292,25 +353,27 @@ class FedAvg:
             num_errors,
         )
 
+        # Filter messages that carry content
         replies_with_content = [msg.content for msg in replies if msg.has_content()]
-        # Check if replies have at most one `MetricRecord`
-        if all(len(msg.metric_records) > 1 for msg in replies_with_content):
-            log(
-                WARN,
-                "Expected at most one MetricRecord in replies, but found: %s",
-                [len(msg.metric_records) for msg in replies_with_content],
-            )
-            #! Should return and break for round loop
 
-        _, metrics = aggregate(
+        # Ensure expected ArrayRecords and MetricRecords are received
+        skip_aggregation = self._check_message_reply_consistency(
+            replies=replies_with_content, check_arrayrecord=False
+        )
+
+        if skip_aggregation:
+            return None
+
+        # Aggregate MetricRecords
+        metrics = self.train_metrics_aggregation_fn(
             records=replies_with_content,
             weighting_metric_name=self.weighting_factor_key,
         )
         return metrics
 
-    def launch(
+    def start(
         self,
-        arrays: ArrayRecord,  #! Now compulsory (those that don't what a mdoel, they can pass empyt ArrayRecord)
+        arrays: ArrayRecord,
         grid: Grid,
         num_rounds: int,
         timeout: float,
@@ -351,10 +414,13 @@ class FedAvg:
             log(INFO, "")
             log(INFO, "[ROUND %s/%s]", current_round, num_rounds)
 
-            # Configure train
-            messages = self.configure_train(current_round, arrays, train_config, grid)
-            # Send messages and wait for replies
-            replies = grid.send_and_receive(messages, timeout=timeout)
+            # Configure train, send messages and wait for replies
+            replies = grid.send_and_receive(
+                messages=self.configure_train(
+                    current_round, arrays, train_config, grid
+                ),
+                timeout=timeout,
+            )
             # Aggregate train
             arrays, agg_metrics = self.aggregate_train(current_round, replies)
             # Log training metrics and append to history
@@ -362,12 +428,13 @@ class FedAvg:
             metrics_history.train_metrics[current_round] = agg_metrics
             metrics_history.arrays = arrays
 
-            # Configure evaluate
-            messages = self.configure_evaluate(
-                current_round, arrays, evaluate_config, grid
+            # Configure evaluate, send messages and wait for replies
+            replies = grid.send_and_receive(
+                messages=self.configure_evaluate(
+                    current_round, arrays, evaluate_config, grid
+                ),
+                timeout=timeout,
             )
-            # Send messages and wait for replies
-            replies = grid.send_and_receive(messages, timeout=timeout)
             # Aggregate evaluate
             eval_res = self.aggregate_evaluate(current_round, replies)
             log(INFO, "\t└──> Aggregated MetricRecord: %s", eval_res)

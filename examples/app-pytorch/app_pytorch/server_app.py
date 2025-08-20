@@ -66,7 +66,7 @@ def main(grid: Grid, context: Context) -> None:
 
     # Execute strategy loop
     num_rounds = context.run_config["num-server-rounds"]
-    strategy_results = strategy.launch(
+    strategy_results = strategy.start(
         arrays=ArrayRecord(global_model.state_dict()),
         train_config=ConfigRecord({"lr": 0.01}),
         evaluate_config=ConfigRecord(
