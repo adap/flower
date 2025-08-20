@@ -49,17 +49,13 @@ def add_e2e_federation() -> None:
 
 def run_superlink() -> subprocess.Popen:
     """Run the SuperLink."""
-    return subprocess.Popen(
-        [
-            "flower-superlink",
-            "--insecure",
-            "--database",
-            "tmp.db",
-            "--simulation" if use_sim else "",
-            "--isolation",
-            "process",
-        ],
-    )
+    cmd = ["flower-superlink", "--insecure"]
+    cmd += ["--database", "tmp.db"]
+    cmd += ["--isolation", "process"]
+    if use_sim:
+        cmd += ["--simulation"]
+
+    return subprocess.Popen(cmd)
 
 
 def run_superexec() -> subprocess.Popen:
