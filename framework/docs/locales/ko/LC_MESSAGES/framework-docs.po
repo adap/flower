@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-15 00:08+0000\n"
+"POT-Creation-Date: 2025-08-20 00:07+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -363,6 +363,8 @@ msgstr "빌드 전달인자"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:39
 #: ../../source/contributor-how-to-build-docker-images.rst:105
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #: ../../source/how-to-configure-audit-logging.rst:57
 #: ../../source/ref-exit-codes/000.rst:5 ../../source/ref-exit-codes/001.rst:5
 #: ../../source/ref-exit-codes/002.rst:5 ../../source/ref-exit-codes/003.rst:5
@@ -5878,6 +5880,1805 @@ msgstr ":code:`SuperNode`에서 노드 인증을 활성화합니다"
 msgid "Public keys can include comments at the end of the key data:"
 msgstr ""
 
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:482
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:205
+#: ../../source/ref-api/flwr.common.Parameters.rst:2 flwr.app.error.Error
+#: flwr.app.metadata.Metadata flwr.client.client.Client.evaluate
+#: flwr.client.client.Client.fit flwr.client.client.Client.get_parameters
+#: flwr.client.client.Client.get_properties
+#: flwr.client.client_app.ClientApp.evaluate
+#: flwr.client.client_app.ClientApp.query
+#: flwr.client.client_app.ClientApp.train
+#: flwr.client.mod.localdp_mod.LocalDpMod
+#: flwr.client.numpy_client.NumPyClient.evaluate
+#: flwr.client.numpy_client.NumPyClient.fit
+#: flwr.client.numpy_client.NumPyClient.get_parameters
+#: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.common.context.Context flwr.common.message.Message
+#: flwr.common.message.Message.create_error_reply
+#: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
+#: flwr.common.record.array.Array flwr.common.record.array.Array.inflate
+#: flwr.common.record.arrayrecord.ArrayRecord
+#: flwr.common.record.arrayrecord.ArrayRecord.inflate
+#: flwr.common.record.configrecord.ConfigRecord
+#: flwr.common.record.configrecord.ConfigRecord.inflate
+#: flwr.common.record.metricrecord.MetricRecord
+#: flwr.common.record.metricrecord.MetricRecord.inflate
+#: flwr.common.record.recorddict.RecordDict
+#: flwr.common.record.recorddict.RecordDict.inflate
+#: flwr.compat.client.app.start_client
+#: flwr.compat.client.app.start_numpy_client
+#: flwr.compat.server.app.start_server
+#: flwr.server.client_manager.ClientManager.register
+#: flwr.server.client_manager.ClientManager.unregister
+#: flwr.server.client_manager.SimpleClientManager.register
+#: flwr.server.client_manager.SimpleClientManager.unregister
+#: flwr.server.client_manager.SimpleClientManager.wait_for
+#: flwr.server.grid.grid.Grid.create_message
+#: flwr.server.grid.grid.Grid.pull_messages
+#: flwr.server.grid.grid.Grid.push_messages
+#: flwr.server.grid.grid.Grid.send_and_receive
+#: flwr.server.grid.grid.Grid.set_run
+#: flwr.server.serverapp_components.ServerAppComponents
+#: flwr.server.strategy.bulyan.Bulyan
+#: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping
+#: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping
+#: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping
+#: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping
+#: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_evaluate
+#: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_fit
+#: flwr.server.strategy.fedadagrad.FedAdagrad
+#: flwr.server.strategy.fedadam.FedAdam flwr.server.strategy.fedavg.FedAvg
+#: flwr.server.strategy.fedavg_android.FedAvgAndroid
+#: flwr.server.strategy.fedavgm.FedAvgM flwr.server.strategy.fedopt.FedOpt
+#: flwr.server.strategy.fedprox.FedProx
+#: flwr.server.strategy.fedtrimmedavg.FedTrimmedAvg
+#: flwr.server.strategy.fedyogi.FedYogi flwr.server.strategy.krum.Krum
+#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate
+#: flwr.server.strategy.strategy.Strategy.aggregate_fit
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate
+#: flwr.server.strategy.strategy.Strategy.configure_fit
+#: flwr.server.strategy.strategy.Strategy.evaluate
+#: flwr.server.strategy.strategy.Strategy.initialize_parameters
+#: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow
+#: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow
+#: flwr.simulation.run_simulation.run_simulation
+#: flwr.simulation.simulationio_connection.SimulationIoConnection of
+msgid "Parameters"
+msgstr "파라미터"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:484
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:207
+#, fuzzy
+msgid "Helm parameters"
+msgstr "모델 매개변수."
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Name"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Value"
+msgstr "EvaluateRes"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`nameOverride`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Override Replaces the name of the chart in the Chart.yaml"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`flower-server`"
+msgstr "Flower 서버."
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`fullnameOverride`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Override Completely replaces the generated name."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`\"\"`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:491
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:214
+#, fuzzy
+msgid "Global parameters"
+msgstr "모델 매개변수."
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.annotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Default Annotations"
+msgstr "설명"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, python-brace-format
+msgid "`{}`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.labels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Default Labels"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.podLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Default PodLabels"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.domain`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Default Domain"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`example.com`"
+msgstr "예시"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.insecure`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Decide if you deploy the Flower Framework with TLS"
+msgstr "Flower 프레임워크"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`true`"
+msgstr "``DISTRO``"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.ingressClassName`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Default IngressClass"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.nodeSelector`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Default node selector for all components"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.tolerations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Default tolerations for all components"
+msgstr "고객을 위한 맞춤 지침."
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`[]`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.affinity.podAntiAffinity`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Default affinity preset for all components"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`soft`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Default pod anti-affinity rules. Either: `none`, `soft` or `hard`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.affinity.nodeAffinity.type`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Default node affinity rules. Either: `none`, `soft` or `hard`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`hard`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.affinity.nodeAffinity.matchExpressions`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Default match expressions for node affinity"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.certificateAnnotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Default Cert-Manager certificate annotations"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.nodeAuth.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Enables or Disables Node-Authentication SuperLink \\<-> SuperNode"
+msgstr ":code:`SuperNode`에서 노드 인증을 활성화합니다"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`false`"
+msgstr "``flwr/base``"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`global.nodeAuth.authListPublicKeys`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "A list of ecdsa-sha2-nistp384 SuperNode keys"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`global.userAuth.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Enables or disables the user authentication plugin."
+msgstr "설치 확인"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`global.userAuth.config`"
+msgstr ":code:`evaluate`"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Set the user authentication configuration."
+msgstr "구성 값"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`global.userAuth.existingSecret`"
+msgstr "기존 전략 사용"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Existing secret with user authentication configuration."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`global.license.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Enables or disables the configuration of the EE license."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`global.license.key`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "The EE license key."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`global.license.secretKey`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "The name of the key inside the Kubernetes Secret"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`FLWR_LICENSE_KEY`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`global.license.existingSecret`"
+msgstr "기존 전략 사용"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Name of an existing Kubernetes Secret"
+msgstr "기존 전략 사용"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.securityContext.runAsUser`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Set Security Context runAsUser"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`49999`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.securityContext.runAsGroup`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Set Security Context runAsGroup"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.securityContext.fsGroup`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Set Security Context fsGroup"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.podSecurityContext.runAsNonRoot`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Set Security Context runAsNonRoot"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.podSecurityContext.readOnlyRootFilesystem`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Set Security Context readOnlyRootFilesystem"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.podSecurityContext.allowPrivilegeEscalation`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Set Security Context allowPrivilegeEscalation"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.podSecurityContext.seccompProfile.type`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Set Security Context seccompProfile"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`RuntimeDefault`"
+msgstr "``flwr/base``"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.podSecurityContext.capabilities.drop`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Set Security Context capabilities"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`[\"ALL\"]`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.env`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Default environment variables"
+msgstr "환경 변수 설정"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.image.pullPolicy`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Default image pullPolicy"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`IfNotPresent`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:528
+#, fuzzy
+msgid "Flower-TLS-Certificate parameters"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`certificate.enabled`"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Can be disabled if a Secret already exists"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`certificate.annotations`"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Certificate CRD annotations"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`certificate.name`"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Certificate name"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`flower-server-tls`"
+msgstr "Flower 서버."
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`certificate.duration`"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid ""
+"The requested ‘duration’ (i.e. lifetime) of the Certificate. Default is 5"
+" years."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`43800h`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`certificate.renewBefore`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid ""
+"How long before the currently issued certificate’s expiry cert-manager "
+"should renew the certificate. Default is 15 days."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`360h`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`certificate.privateKey`"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid ""
+"Private key options. These include the key algorithm and size, the used "
+"encoding and the rotation policy."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`certificate.usages`"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Requested key usages and extended key usages."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`certificate.additionalHosts`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Additional hosts you want to put into the SAN's of the certificate"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`certificate.issuer.group`"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Defaults to cert-Manager.io"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`cert-manager.io`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`certificate.issuer.kind`"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Defaults to Issuer"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`Issuer`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`certificate.issuer.name`"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Name of the Issuer or Issuer to use"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`certificate.issuer.spec`"
+msgstr "인증서"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "The contents of the `.spec` block for the cert-manager Issuer."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:545
+#, fuzzy
+msgid "Component SuperLink"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.name`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Name of the SuperLink"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.enabled`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Enable or Disable SuperLink"
+msgstr ":code:`SuperLink`에서 노드 인증 활성화"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.resources`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid ""
+"Set container requests and limits for different resources like CPU or "
+"memory (essential for production workloads)"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.volumes`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Specify a list of volumes for the SuperLink pod(s)"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.volumeMounts`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Allows to specify additional VolumeMounts"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.executor.plugin`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "The executer plugin of the SuperLink"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`flwr.superexec.deployment:executor`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.executor.config`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Set executor config arguments"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.isolationMode`"
+msgstr "해결법"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "The isolation mode of the SuperLink"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`subprocess`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.automountServiceAccountToken`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Automount SA-Token into the pod."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.serviceAccount.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Enabled a service account for the application controller"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.serviceAccount.annotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Annotations applied to enabled service account"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.serviceAccount.labels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Labels applied to enabled service account"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.serviceAccount.automountServiceAccountToken`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Automount SA-Token"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.service.servicePortApiName`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Prefix of the SuperLink API port"
+msgstr "서버(SuperLink)"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`api`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.service.servicePortApi`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Port to expose for the SuperLink API"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`9093`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.service.nodePortApi`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Node port for SuperLink API"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.service.type`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Valid are ClusterIP, NodePort or Loadbalancer"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`ClusterIP`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.service.servicePortDriverName`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Prefix of the SuperLink Driver API port"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`driver`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.service.servicePortDriver`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Port to expose for the SuperLink Driver API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`9091`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.service.nodePortDriver`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Node port for SuperLink Driver API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.service.servicePortFleetName`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Prefix of the SuperLink Fleet API port"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`fleet`"
+msgstr "``flwr/base``"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.service.servicePortFleet`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Port to expose for the SuperLink Fleet API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`9092`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.service.nodePortFleet`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Node port for SuperLink Fleet API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.service.servicePortSimulationIoName`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Prefix of the SuperLink SimulationIo API port"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`simulationIo`"
+msgstr "CLI 시뮬레이션"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.service.servicePortSimulationIo`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Port to expose for the SuperLink SimulationIo API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`9096`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.service.nodePortSimulationIo`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Node port for SuperLink SimulationIo API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.containerPorts.api`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Container port for SuperLink Exec API"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.containerPorts.driver`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Container port for SuperLink Driver API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.containerPorts.fleet`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Container port for SuperLink Fleet API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.containerPorts.simulationIo`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Container port for SuperLink SimulationIo API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.replicaCount`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "The number of SuperLink pods to run"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`1`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.labels`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Extra labels for SuperLink pods"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.extraArgs`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Add extra arguments to the default arguments for the SuperLink"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.nodeSelector`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Node labels for SuperLink pods which merges with global.nodeSelector"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.tolerations`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Node tolerations for SuperLink pods which merges with global.tolerations"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.updateStrategy.type`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "SuperLink deployment strategy type"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`RollingUpdate`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.updateStrategy.rollingUpdate`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "SuperLink deployment rolling update configuration parameters"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.affinity`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Node affinity for SuperLink pods which merges with global.affinity"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.env`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid ""
+"Array with extra environment variables to add to SuperLink nodes which "
+"merges with global.env"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.podSecurityContext`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Security settings that for the SuperLink Pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.securityContext`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Security settings that for the SuperLink"
+msgstr "서버(SuperLink)"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Enable the ingress resource"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.annotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Additional annotations for the ingress"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.ingressClassName`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Defines which ingress controller which implement the resource"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.ingress.tls`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Ingress TLS configuration"
+msgstr "구성 값"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.api.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Enable an ingress resource for SuperLink API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.api.hostname`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Ingress hostname for the SuperLink API ingress"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`exec-api.example.com`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.api.path`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "SuperLink API ingress path"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`/`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.api.pathType`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Ingress path type. One of Exact, Prefix or ImplementationSpecific"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`ImplementationSpecific`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.fleet.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Enable an ingress resource for SuperLink Fleet API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.fleet.hostname`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Ingress hostname for the SuperLink Fleet API ingress"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`fleet.example.com`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.fleet.path`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "SuperLink Fleet API ingress path"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.fleet.pathType`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.driver.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Enable an ingress resource for SuperLink Driver API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.driver.hostname`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Ingress hostname for the SuperLink Driver API ingress"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`driver.example.com`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.driver.path`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "SuperLink Driver API ingress path"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.driver.pathType`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.simulationIo.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Enable an ingress resource for SuperLink SimulationIo API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.simulationIo.hostname`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Ingress hostname for the SuperLink SimulationIo API ingress"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`simulation.example.com`"
+msgstr "시뮬레이션 예제"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.simulationIo.path`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "SuperLink SimulationIo API ingress path"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.simulationIo.pathType`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.extraHosts`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "An array with additional hostname(s) to be covered with the ingress record"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.extraTls`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid ""
+"TLS configuration for additional hostname(s) to be covered with this "
+"ingress record"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.ingress.extraRules`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Additional rules to be covered with this ingress record"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.lifecycle`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "SuperLink container(s) to automate configuration before or after startup"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.annotations`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Additional custom annotations for SuperLink"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.selectorLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Extra selectorLabels for SuperLink pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.podAnnotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Annotations for SuperLink pods"
+msgstr "서버(SuperLink)"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.podLabels`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Extra podLabels for SuperLink pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.imagePullSecrets`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "SuperLink image pull secrets which overrides global.imagePullSecrets"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.image.registry`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "SuperLink image registry"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`registry.hub.docker.com`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.image.repository`"
+msgstr "레포지토리 설정하기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "SuperLink image repository"
+msgstr "레포지토리 설정하기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`flwr/superlink-ee`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`superlink.image.tag`"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "SuperLink image tag"
+msgstr "flower 초연결"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`1.20.0-ubuntu`"
+msgstr "``ubuntu``"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.image.digest`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "SuperLink image digest"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.image.pullPolicy`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "SuperLink image pullPolicy which Components image pullPolicy"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Specifies whether a NetworkPolicy should be created"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.allowExternal`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Allow external ingress traffic"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.allowExternalEgress`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Allow unrestricted egress traffic"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.extraIngress`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Add extra ingress rules to the NetworkPolicy"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.extraEgress`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid ""
+"Add extra ingress rules to the NetworkPolicy (ignored if "
+"allowExternalEgress=true)"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.driver.ingressPodMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid ""
+"Labels to match to allow traffic from other pods. Ignored if "
+"`superlink.networkPolicy.allowExternal` is true."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.driver.ingressNSMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid ""
+"Labels to match to allow traffic from other namespaces. Ignored if "
+"`superlink.networkPolicy.allowExternal` is true."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.driver.ingressNSPodMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid ""
+"Pod labels to match to allow traffic from other namespaces. Ignored if "
+"`superlink.networkPolicy.allowExternal` is true."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.fleet.ingressPodMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.fleet.ingressNSMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.fleet.ingressNSPodMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.api.ingressPodMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.api.ingressNSMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.api.ingressNSPodMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.simulationIo.ingressPodMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.simulationIo.ingressNSMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`superlink.networkPolicy.simulationIo.ingressNSPodMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:642
+#, fuzzy
+msgid "Component ServerApp"
+msgstr "Flower 서버앱"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.name`"
+msgstr "flower 서버 프로그램"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Name of the ServerApp"
+msgstr "Flower 서버앱"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp`"
+msgstr "flower 서버 프로그램"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.enabled`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Enable or disable ServerApp"
+msgstr "현재 클라이언트 속성입니다."
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.resources`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.superlink`"
+msgstr "|serverapp_link|_"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Address of the SuperLink the ServerApp should connect to"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.volumes`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Optionally specify list of volumes for the ServerApp pod(s)"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.volumeMounts`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.automountServiceAccountToken`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.serviceAccount.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Enable a service account for this component"
+msgstr "현재 클라이언트 속성입니다."
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.serviceAccount.annotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.serviceAccount.labels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.serviceAccount.automountServiceAccountToken`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.podSecurityContext`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.replicas`"
+msgstr "Flower 서버앱"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "The number of ServerApp pods to run"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.labels`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Extra labels for ServerApp pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.extraArgs`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Add extra arguments to the default arguments for the ServerApp"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.nodeSelector`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Node labels for ServerApp pods which merges with global.nodeSelector"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.tolerations`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Node tolerations for ServerApp pods which merges with global.tolerations"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.updateStrategy.type`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "ServerApp deployment strategy type"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.updateStrategy.rollingUpdate`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "ServerApp deployment rolling update configuration parameters"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.affinity`"
+msgstr "Flower 서버앱"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Node affinity for ServerApp pods which merges with global.affinity"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.env`"
+msgstr "flower 서버 프로그램"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid ""
+"Array with extra environment variables to add to ServerApp nodes which "
+"merges with global.env"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.lifecycle`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "ServerApp container(s) to automate configuration before or after startup"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.annotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Additional custom annotations for ServerApp"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.selectorLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Extra selectorLabels for ServerApp pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.podAnnotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Annotations for ServerApp pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.podLabels`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Extra podLabels for ServerApp pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.imagePullSecrets`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "ServerApp image pull secrets which overrides global.imagePullSecrets"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.image.registry`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "ServerApp image registry"
+msgstr "Flower 서버앱"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.image.repository`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "ServerApp image repository"
+msgstr "레포지토리 설정하기"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`flwr/serverapp`"
+msgstr "flower 서버 프로그램"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.image.tag`"
+msgstr "Flower 서버앱"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Image tag of ServerApp"
+msgstr "Flower 서버앱"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`1.20.0-py3.11-ubuntu24.04`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "`serverapp.image.digest`"
+msgstr "Flower 서버앱"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#, fuzzy
+msgid "Image digest of ServerApp"
+msgstr "Flower 서버앱"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.image.pullPolicy`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Components image pullPolicy"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`Always`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.networkPolicy.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.networkPolicy.allowExternalEgress`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`serverapp.networkPolicy.extraEgress`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:682
+#, fuzzy
+msgid "Component OpenFGA"
+msgstr "공통"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "`openfga.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+msgid "Enable the openfga subchart and deploy OpenFGA"
+msgstr ""
+
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md
 msgid ""
 "Deploy Flower's SuperNode Helm chart to install client federated learning"
@@ -6019,6 +7820,783 @@ msgstr "구성 값"
 msgid ""
 "You can add a node configuration to configure a SuperNode. The YAML "
 "datatype is preserved when passing it in the Python application:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Replaces the name of the chart in the Chart.yaml"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`flower-client`"
+msgstr "Flower 클라이언트."
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Completely replaces the generated name."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.nodeAuth.authSupernodePrivateKey`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Specifies the ecdsa-sha2-nistp384 private key"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`global.nodeAuth.authSupernodePublicKey`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Specifies the ecdsa-sha2-nistp384 public key"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:245
+#, fuzzy
+msgid "Component SuperNode"
+msgstr "run\\_supernode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.name`"
+msgstr "run\\_supernode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Name of the SuperNode"
+msgstr "서버(SuperLink)"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode`"
+msgstr "run\\_supernode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.enabled`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Enable or disable SuperNode"
+msgstr ":code:`SuperNode`에서 노드 인증을 활성화합니다"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.resources`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.node.config`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.isolationMode`"
+msgstr "해결법"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "The isolation mode of the SuperNode"
+msgstr "해결법"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.superlink.address`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Address of the SuperLink the SuperNodes should connect to"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`my-superlink.example.com`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.superlink.port`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Port of the SuperLink the SuperNodes should connect to"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.volumes`"
+msgstr "run\\_supernode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Specify a list of volumes for the SuperNode pod(s)"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.volumeMounts`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.automountServiceAccountToken`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.serviceAccount.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.serviceAccount.annotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.serviceAccount.labels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.serviceAccount.automountServiceAccountToken`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.service.type`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.service.servicePortClientAppIOName`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Prefix of the SuperNode ClientAppIO API port"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientappio`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.service.servicePortClientAppIO`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Port to expose for the SuperNode ClientAppIO API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`9094`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.service.nodePortClientAppIO`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Node port for SuperNode ClientAppIO API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`39094`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.containerPorts.clientappio`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Container port for SuperNode ClientAppIO API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.podSecurityContext`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.replicas`"
+msgstr "run\\_supernode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "The number of SuperNode pods to run"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.labels`"
+msgstr "run\\_supernode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Extra labels for SuperNode pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.extraArgs`"
+msgstr "run\\_supernode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Add extra arguments to the default arguments for the SuperNode"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.nodeSelector`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Node labels for SuperNode pods which merges with global.nodeSelector"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.tolerations`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Node tolerations for SuperNode pods which merges with global.tolerations"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.updateStrategy.type`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "SuperNode deployment strategy type"
+msgstr "배포"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.updateStrategy.rollingUpdate`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "SuperNode deployment rolling update configuration parameters"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.affinity`"
+msgstr "run\\_supernode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Node affinity for SuperNode pods which merges with global.affinity"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.env`"
+msgstr "run\\_supernode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid ""
+"Array with extra environment variables to add to SuperNode nodes which "
+"merges with global.env"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.ingress.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.ingress.annotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.ingress.ingressClassName`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.ingress.tls`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.ingress.clientappio.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Enable an ingress resource for SuperNode ClientAppIO"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.ingress.clientappio.hostname`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Ingress hostname for the SuperNode ClientAppIO ingress"
+msgstr "이미 *서버*를 시작할 수 있습니다:"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientappio.example.com`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.ingress.clientappio.path`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "SuperNode ClientAppIO ingress path"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.ingress.clientappio.pathType`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.lifecycle`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "SuperNode container(s) to automate configuration before or after startup"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.annotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Additional custom annotations for SuperNode"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.selectorLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Extra selectorLabels for SuperNode pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.podAnnotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Annotations for SuperNode pods"
+msgstr "서버(SuperLink)"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.podLabels`"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Extra podLabels for SuperNode pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.imagePullSecrets`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "SuperNode image pull secrets which overrides global.imagePullSecrets"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.image.registry`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "SuperNode image registry"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.image.repository`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "SuperNode image repository"
+msgstr "레포지토리 설정하기"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`flwr/supernode-ee`"
+msgstr "Flower SuperNode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.image.tag`"
+msgstr "run\\_supernode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Image tag of SuperNode"
+msgstr "run\\_supernode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.image.digest`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Image digest of SuperNode"
+msgstr "run\\_supernode"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.image.pullPolicy`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.networkPolicy.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.networkPolicy.allowExternal`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.networkPolicy.allowExternalEgress`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.networkPolicy.extraIngress`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.networkPolicy.extraEgress`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.networkPolicy.ingressPodMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid ""
+"Labels to match to allow traffic from other pods. Ignored if "
+"`supernode.networkPolicy.allowExternal` is true."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.networkPolicy.ingressNSMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid ""
+"Labels to match to allow traffic from other namespaces. Ignored if "
+"`supernode.networkPolicy.allowExternal` is true."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.networkPolicy.ingressNSPodMatchLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid ""
+"Pod labels to match to allow traffic from other namespaces. Ignored if "
+"`supernode.networkPolicy.allowExternal` is true."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:307
+#, fuzzy
+msgid "Component ClientApp"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.name`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Name of the ClientApp"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.enabled`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Enable or disable ClientApp component"
+msgstr "현재 클라이언트 속성입니다."
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.node.config`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.resources`"
+msgstr "클라이언트 리소스 할당"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.supernode`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Address of the supernode the ClientApp should connect to"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.volumes`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Specify a list of volumes for the ClientApp pod(s)"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.volumeMounts`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.automountServiceAccountToken`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.serviceAccount.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.serviceAccount.annotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.serviceAccount.labels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.serviceAccount.automountServiceAccountToken`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.service.type`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.service.servicePortClientAppIOName`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Prefix of the ClientApp ClientAppIO API port"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.service.servicePortClientAppIO`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Ports to expose for the ClientApp ClientAppIO API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.service.nodePortClientAppIO`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Node port for ClientApp ClientAppIO API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.containerPorts.clientappio`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Container port for ClientApp ClientAppIO API"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.podSecurityContext`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.replicas`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "The number of ClientApp pods to run"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.labels`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Extra labels for ClientApp pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.extraArgs`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Add extra arguments to the default arguments for the ClientApp"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.nodeSelector`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Node labels for ClientApp pods which merges with global.nodeSelector"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.tolerations`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Node tolerations for ClientApp pods which merges with global.tolerations"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.updateStrategy.type`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "ClientApp deployment strategy type"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.updateStrategy.rollingUpdate`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "ClientApp deployment rolling update configuration parameters"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.affinity`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Node affinity for ClientApp pods which merges with global.affinity"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.env`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid ""
+"Array with extra environment variables to add to ClientApp nodes which "
+"merges with global.env"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.lifecycle`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "ClientApp container(s) to automate configuration before or after startup"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.annotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Additional custom annotations for ClientApp"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.selectorLabels`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Extra selectorLabels for ClientApp pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.podAnnotations`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Annotations for ClientApp pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.podLabels`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Extra podLabels for ClientApp pods"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.imagePullSecrets`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "ClientApp image pull secrets which overrides global.imagePullSecrets"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.image.registry`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "ClientApp image registry"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.image.repository`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "ClientApp image repository"
+msgstr "레포지토리 설정하기"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`flwr/clientapp`"
+msgstr "Flower ClientApp."
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.image.tag`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Image tag of ClientApp"
+msgstr "Flower 클라이언트 앱을 실행합니다."
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`clientapp.image.digest`"
+msgstr "클라이언트앱"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Image digest of ClientApp"
+msgstr "Flower 클라이언트 앱을 실행합니다."
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.image.pullPolicy`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.networkPolicy.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.networkPolicy.allowExternalEgress`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`clientapp.networkPolicy.extraEgress`"
 msgstr ""
 
 #: ../../source/helm/index.rst:39
@@ -13509,71 +16087,6 @@ msgstr ":py:obj:`to_client <flwr.client.Client.to_client>`\\ \\(\\)"
 #: flwr.client.client.Client.to_client:1 of
 msgid "Return client (itself)."
 msgstr "클라이언트(자체)를 반환합니다."
-
-#: ../../source/ref-api/flwr.common.Parameters.rst:2 flwr.app.error.Error
-#: flwr.app.metadata.Metadata flwr.client.client.Client.evaluate
-#: flwr.client.client.Client.fit flwr.client.client.Client.get_parameters
-#: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
-#: flwr.client.mod.localdp_mod.LocalDpMod
-#: flwr.client.numpy_client.NumPyClient.evaluate
-#: flwr.client.numpy_client.NumPyClient.fit
-#: flwr.client.numpy_client.NumPyClient.get_parameters
-#: flwr.client.numpy_client.NumPyClient.get_properties
-#: flwr.common.context.Context flwr.common.message.Message
-#: flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
-#: flwr.common.record.array.Array flwr.common.record.array.Array.inflate
-#: flwr.common.record.arrayrecord.ArrayRecord
-#: flwr.common.record.arrayrecord.ArrayRecord.inflate
-#: flwr.common.record.configrecord.ConfigRecord
-#: flwr.common.record.configrecord.ConfigRecord.inflate
-#: flwr.common.record.metricrecord.MetricRecord
-#: flwr.common.record.metricrecord.MetricRecord.inflate
-#: flwr.common.record.recorddict.RecordDict
-#: flwr.common.record.recorddict.RecordDict.inflate
-#: flwr.compat.client.app.start_client
-#: flwr.compat.client.app.start_numpy_client
-#: flwr.compat.server.app.start_server
-#: flwr.server.client_manager.ClientManager.register
-#: flwr.server.client_manager.ClientManager.unregister
-#: flwr.server.client_manager.SimpleClientManager.register
-#: flwr.server.client_manager.SimpleClientManager.unregister
-#: flwr.server.client_manager.SimpleClientManager.wait_for
-#: flwr.server.grid.grid.Grid.create_message
-#: flwr.server.grid.grid.Grid.pull_messages
-#: flwr.server.grid.grid.Grid.push_messages
-#: flwr.server.grid.grid.Grid.send_and_receive
-#: flwr.server.grid.grid.Grid.set_run
-#: flwr.server.serverapp_components.ServerAppComponents
-#: flwr.server.strategy.bulyan.Bulyan
-#: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping
-#: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping
-#: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping
-#: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping
-#: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_evaluate
-#: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_fit
-#: flwr.server.strategy.fedadagrad.FedAdagrad
-#: flwr.server.strategy.fedadam.FedAdam flwr.server.strategy.fedavg.FedAvg
-#: flwr.server.strategy.fedavg_android.FedAvgAndroid
-#: flwr.server.strategy.fedavgm.FedAvgM flwr.server.strategy.fedopt.FedOpt
-#: flwr.server.strategy.fedprox.FedProx
-#: flwr.server.strategy.fedtrimmedavg.FedTrimmedAvg
-#: flwr.server.strategy.fedyogi.FedYogi flwr.server.strategy.krum.Krum
-#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate
-#: flwr.server.strategy.strategy.Strategy.aggregate_fit
-#: flwr.server.strategy.strategy.Strategy.configure_evaluate
-#: flwr.server.strategy.strategy.Strategy.configure_fit
-#: flwr.server.strategy.strategy.Strategy.evaluate
-#: flwr.server.strategy.strategy.Strategy.initialize_parameters
-#: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow
-#: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow
-#: flwr.simulation.run_simulation.run_simulation
-#: flwr.simulation.simulationio_connection.SimulationIoConnection of
-msgid "Parameters"
-msgstr "파라미터"
 
 #: flwr.client.client.Client.evaluate:3 of
 msgid ""

@@ -9,7 +9,7 @@ import FlowerIntelligence
 
 let fi = FlowerIntelligence.instance
 fi.remoteHandoff = true
-fi.apiKey = "fk_0_aO1K3V7iFjEvD2vftkiUdWAuiGEdhajjCRFachcnryI"
+fi.apiKey = "ENTER YOUR API_KEY HERE"
 
 let messages = [
   Message(role: "system", content: "You are a helpful assistant."),
