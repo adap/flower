@@ -128,7 +128,7 @@ class GrpcGrid(Grid):
         self._grpc_stub: Optional[ServerAppIoStub] = None
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
-        self.pull_interval = pull_interval
+        self._pull_interval = pull_interval
         self._retry_invoker = _make_simple_grpc_retry_invoker()
         super().__init__()
 
@@ -136,6 +136,11 @@ class GrpcGrid(Grid):
     def _is_connected(self) -> bool:
         """Check if connected to the ServerAppIo API server."""
         return self._channel is not None
+
+    @property
+    def pull_interval(self) -> float:
+        """The interval (in seconds) between consecutive pull attempts."""
+        return self._pull_interval
 
     def _connect(self) -> None:
         """Connect to the ServerAppIo API.
@@ -399,7 +404,7 @@ class GrpcGrid(Grid):
             if len(msg_ids) == 0:
                 break
             # Sleep
-            time.sleep(self.pull_interval)
+            time.sleep(self._pull_interval)
         return ret
 
     def close(self) -> None:

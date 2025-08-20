@@ -45,6 +45,20 @@ class Grid(ABC):
     def run(self) -> Run:
         """Run information."""
 
+    @property
+    @abstractmethod
+    def pull_interval(self) -> float:
+        """The interval (in seconds) between consecutive pull attempts.
+
+        This property defines how frequently the grid should poll for new messages
+        when waiting for replies.
+
+        Returns
+        -------
+        float
+            The pull interval in seconds.
+        """
+
     @abstractmethod
     def create_message(  # pylint: disable=too-many-arguments,R0917
         self,

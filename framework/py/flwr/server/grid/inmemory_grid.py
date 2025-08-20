@@ -50,7 +50,7 @@ class InMemoryGrid(Grid):
     ) -> None:
         self._run: Optional[Run] = None
         self.state = state_factory.state()
-        self.pull_interval = pull_interval
+        self._pull_interval = pull_interval
         self.node = Node(node_id=SUPERLINK_NODE_ID)
 
     def _check_message(self, message: Message) -> None:
@@ -74,6 +74,11 @@ class InMemoryGrid(Grid):
     def run(self) -> Run:
         """Run ID."""
         return Run(**vars(cast(Run, self._run)))
+
+    @property
+    def pull_interval(self) -> float:
+        """The interval (in seconds) between consecutive pull attempts."""
+        return self._pull_interval
 
     def create_message(  # pylint: disable=too-many-arguments,R0917
         self,
@@ -166,5 +171,5 @@ class InMemoryGrid(Grid):
             if len(msg_ids) == 0:
                 break
             # Sleep
-            time.sleep(self.pull_interval)
+            time.sleep(self._pull_interval)
         return ret
