@@ -384,6 +384,7 @@ class GrpcGrid(Grid):
         """
         # Push messages
         msg_ids = set(self.push_messages(messages))
+        del messages
 
         # Pull messages
         end_time = time.time() + (timeout if timeout is not None else 0.0)

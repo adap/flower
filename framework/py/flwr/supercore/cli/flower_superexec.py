@@ -20,6 +20,7 @@ from logging import INFO
 
 from flwr.common import EventType, event
 from flwr.common.constant import ExecPluginType
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import log
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
@@ -36,6 +37,11 @@ from flwr.supercore.superexec.run_superexec import run_superexec
 def flower_superexec() -> None:
     """Run `flower-superexec` command."""
     args = _parse_args().parse_args()
+    if not args.insecure:
+        flwr_exit(
+            ExitCode.COMMON_TLS_NOT_SUPPORTED,
+            "SuperExec does not support TLS yet.",
+        )
 
     # Log the first message after parsing arguments in case of `--help`
     log(INFO, "Starting Flower SuperExec")
