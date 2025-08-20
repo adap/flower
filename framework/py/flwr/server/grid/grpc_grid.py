@@ -120,6 +120,7 @@ class GrpcGrid(Grid):
         self,
         serverappio_service_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: Optional[bytes] = None,
+        pull_interval: float = 3,
     ) -> None:
         self._addr = serverappio_service_address
         self._cert = root_certificates
@@ -127,6 +128,7 @@ class GrpcGrid(Grid):
         self._grpc_stub: Optional[ServerAppIoStub] = None
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
+        self.pull_interval = pull_interval
         self._retry_invoker = _make_simple_grpc_retry_invoker()
         super().__init__()
 
@@ -397,7 +399,7 @@ class GrpcGrid(Grid):
             if len(msg_ids) == 0:
                 break
             # Sleep
-            time.sleep(3)
+            time.sleep(self.pull_interval)
         return ret
 
     def close(self) -> None:
