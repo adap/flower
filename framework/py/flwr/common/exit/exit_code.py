@@ -34,18 +34,14 @@ class ExitCode:
     SUPERLINK_LICENSE_URL_INVALID = 103
     SUPERLINK_INVALID_ARGS = 104
 
-    # ServerApp-specific exit codes (200-299)
-
     # SuperNode-specific exit codes (300-399)
     SUPERNODE_REST_ADDRESS_INVALID = 300
     SUPERNODE_NODE_AUTH_KEYS_REQUIRED = 301
     SUPERNODE_NODE_AUTH_KEYS_INVALID = 302
 
-    # ClientApp-specific exit codes (400-499)
+    # SuperExec-specific exit codes (400-499)
 
-    # Simulation-specific exit codes (500-599)
-
-    # Common exit codes (600-)
+    # Common exit codes (600-699)
     COMMON_ADDRESS_INVALID = 600
     COMMON_MISSING_EXTRA_REST = 601
     COMMON_TLS_NOT_SUPPORTED = 602
@@ -80,7 +76,6 @@ EXIT_CODE_HELP = {
         "Invalid arguments provided to SuperLink. Use `--help` check for the correct "
         "usage. Alternatively, check the documentation."
     ),
-    # ServerApp-specific exit codes (200-299)
     # SuperNode-specific exit codes (300-399)
     ExitCode.SUPERNODE_REST_ADDRESS_INVALID: (
         "When using the REST API, please provide `https://` or "
@@ -96,9 +91,8 @@ EXIT_CODE_HELP = {
         "Please ensure that the file path points to a valid private/public key "
         "file and try again."
     ),
-    # ClientApp-specific exit codes (400-499)
-    # Simulation-specific exit codes (500-599)
-    # Common exit codes (600-)
+    # SuperExec-specific exit codes (400-499)
+    # Common exit codes (600-699)
     ExitCode.COMMON_ADDRESS_INVALID: (
         "Please provide a valid URL, IPv4 or IPv6 address."
     ),
