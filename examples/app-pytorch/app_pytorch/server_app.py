@@ -10,7 +10,7 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 
 from datasets import load_dataset
 
-from .fedavg import FedAvg
+from flwr.serverapp.fedavg import FedAvg
 
 # Create ServerApp
 app = ServerApp()
