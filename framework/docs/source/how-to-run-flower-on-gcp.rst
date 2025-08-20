@@ -9,7 +9,7 @@ A step-by-step guide to learn how to create, deploy and run a Flower app on the 
 Cloud Platform (GCP) <https://console.cloud.google.com>`_ using the `Google Kubernetes
 Engine (GKE) <https://cloud.google.com/kubernetes-engine>`_. The figure below presents
 an overview of the architecture of the Flower components we will deploy on GCP using
-GKE. In this architecture, **ServerApps** and **ClientApps** are launched by the Flower
+GKE. In this architecture, **ServerApps** and **ClientApps** are executed by the Flower
 SuperExec (`flower-superexec`).
 
 .. figure:: ./_static/flower-gke-architecture.png
