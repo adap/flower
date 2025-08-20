@@ -205,13 +205,13 @@ jobs:
           python-version: ${{ (matrix.directory == 'e2e-fastai') && '3.10' || '3.9' }}
       # Using approach described here for Python location caching:
       # https://blog.allenai.org/python-caching-in-github-actions-e9452698e98d
-      - name: Cache Python location
-        if: ${{ needs.changes.outputs.framework == 'true' }}
-        id: cache-restore-python
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.pythonLocation }}
-          key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
+      # - name: Cache Python location
+      #   if: ${{ needs.changes.outputs.framework == 'true' }}
+      #   id: cache-restore-python
+      #   uses: actions/cache/restore@v4
+      #   with:
+      #     path: ${{ env.pythonLocation }}
+      #     key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
       - name: Install the project
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: uv sync --all-extras --dev
@@ -247,13 +247,13 @@ jobs:
       # - name: Run reconnection test with SQLite database (Temporarily disabled due to in-memory ObjectStore)
       #   if: ${{ needs.changes.outputs.framework == 'true' && matrix.directory == 'e2e-bare' }}
       #   run: ./../test_reconnection.sh sqlite
-      - name: Cache save Python location
-        id: cache-save-python
-        uses: actions/cache/save@v4
-        if: ${{ needs.changes.outputs.framework == 'true' && github.ref_name == 'main' &&  !steps.cache-restore-python.outputs.cache-hit }}
-        with:
-          path: ${{ env.pythonLocation }}
-          key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
+      # - name: Cache save Python location
+      #   id: cache-save-python
+      #   uses: actions/cache/save@v4
+      #   if: ${{ needs.changes.outputs.framework == 'true' && github.ref_name == 'main' &&  !steps.cache-restore-python.outputs.cache-hit }}
+      #   with:
+      #     path: ${{ env.pythonLocation }}
+      #     key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
 
   strategies:
     runs-on: ubuntu-22.04
