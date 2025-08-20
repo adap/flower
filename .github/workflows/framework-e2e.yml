@@ -199,13 +199,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        if: ${{ needs.changes.outputs.framework == 'true' }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ (matrix.directory == 'e2e-fastai') && '3.10.18' || '3.9.23' }}
-      - name: Install the latest version of uv
+      - name: Install uv and set the Python version
         uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ (matrix.directory == 'e2e-fastai') && '3.10' || '3.9' }}
       # Using approach described here for Python location caching:
       # https://blog.allenai.org/python-caching-in-github-actions-e9452698e98d
       - name: Cache Python location
