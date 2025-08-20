@@ -221,7 +221,7 @@ jobs:
           uv pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Download dataset
         if: ${{ needs.changes.outputs.framework == 'true' && matrix.dataset }}
-        run: uv run - "${{ matrix.dataset }}"
+        run: uv run python -c "${{ matrix.dataset }}"
       - name: Run edge client test
         if: ${{ needs.changes.outputs.framework == 'true' && matrix.directory != 'e2e-bare-auth' }}
         working-directory: framework/e2e/${{ matrix.directory }}/${{ matrix.e2e }}
