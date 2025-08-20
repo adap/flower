@@ -59,7 +59,7 @@ case "$2" in
 esac
 
 # Install Flower app
-pip install -e . --no-deps
+uv pip install -e . --no-deps
 
 # Remove any duplicates
 sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
