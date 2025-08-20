@@ -1,7 +1,7 @@
 import random
 from dataclasses import dataclass
 from logging import INFO, WARN
-from time import sleep
+from time import sleep, time
 from typing import Callable, Optional
 
 import numpy as np
@@ -133,6 +133,25 @@ def sample_nodes(
     sampled_nodes = random.sample(list(nodes_connected), sample_size)
 
     return sampled_nodes, nodes_connected
+
+
+def wait_for_replies(grid: Grid, msg_ids: list[str], timeout: float) -> list[Message]:
+
+    unique_msg_ids = set(msg_ids)  # Ensure unique message IDs
+    # Pull messages
+    end_time = time() + (timeout if timeout is not None else 0.0)
+    replies: list[Message] = []
+    while timeout is None or time() < end_time:
+        res_msgs = grid.pull_messages(unique_msg_ids)
+        replies.extend(res_msgs)
+        unique_msg_ids.difference_update(
+            {msg.metadata.reply_to_message_id for msg in res_msgs}
+        )
+        if len(unique_msg_ids) == 0:
+            break
+        sleep(3)
+
+    return replies
 
 
 class FedAvg:
@@ -352,9 +371,12 @@ class FedAvg:
 
             # Configure train
             messages = self.configure_train(current_round, arrays, train_config, grid)
-            # Communicate
-            replies = grid.send_and_receive(messages, timeout=timeout)
-            # aggregate fit
+            # Send messages
+            msg_ids = grid.push_messages(messages)
+            del messages
+            # Wait until replies are received
+            replies = wait_for_replies(grid, msg_ids, timeout=timeout)
+            # Aggregate train
             arrays, agg_metrics = self.aggregate_train(current_round, replies)
             # Log training metrics and append to history
             log(INFO, "\tAggregated MetricRecord: %s", agg_metrics)
@@ -365,8 +387,11 @@ class FedAvg:
             messages = self.configure_evaluate(
                 current_round, arrays, evaluate_config, grid
             )
-            # Communicate
-            replies = grid.send_and_receive(messages, timeout=timeout)
+            # Send messages
+            msg_ids = grid.push_messages(messages)
+            del messages
+            # Wait until replies are received
+            replies = wait_for_replies(grid, msg_ids, timeout=timeout)
             # Aggregate evaluate
             eval_res = self.aggregate_evaluate(current_round, replies)
             log(INFO, "\tAggregated MetricRecord: %s", eval_res)
