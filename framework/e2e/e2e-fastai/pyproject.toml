@@ -10,7 +10,7 @@ license = "Apache-2.0"
 dependencies = [
     "flwr[simulation] @ {root:parent:parent:uri}",
     "fastai>=2.7.12,<3.0.0",
-    "torch>=2.0.0,!=2.0.1,<2.1.0 --index-url https://download.pytorch.org/whl/cpu",
+    "torch>=2.0.0,!=2.0.1,<2.1.0",
     "spacy==3.8.7",
 ]
 requires-python = ">=3.9.2"
