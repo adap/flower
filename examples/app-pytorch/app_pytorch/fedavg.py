@@ -135,27 +135,6 @@ def sample_nodes(
     return sampled_nodes, nodes_connected
 
 
-def wait_for_replies(grid: Grid, msg_ids: list[str], timeout: float) -> list[Message]:
-
-    unique_msg_ids = set(msg_ids)  # Ensure unique message IDs
-    # Pull messages
-    end_time = time() + (timeout if timeout is not None else 0.0)
-    replies: list[Message] = []
-    while timeout is None or time() < end_time:
-        res_msgs = grid.pull_messages(unique_msg_ids)
-        replies.extend(res_msgs)
-        unique_msg_ids.difference_update(
-            {msg.metadata.reply_to_message_id for msg in res_msgs}
-        )
-        if len(unique_msg_ids) == 0:
-            break
-
-        # TODO: update with grid.pull_interval
-        sleep(0.1)
-
-    return replies
-
-
 class FedAvg:
 
     def __init__(
@@ -374,11 +353,8 @@ class FedAvg:
 
             # Configure train
             messages = self.configure_train(current_round, arrays, train_config, grid)
-            # Send messages
-            msg_ids = grid.push_messages(messages)
-            del messages
-            # Wait until replies are received
-            replies = wait_for_replies(grid, msg_ids, timeout=timeout)
+            # Send messages and wait for replies
+            replies = grid.send_and_receive(messages, timeout=timeout)
             # Aggregate train
             arrays, agg_metrics = self.aggregate_train(current_round, replies)
             # Log training metrics and append to history
@@ -390,11 +366,8 @@ class FedAvg:
             messages = self.configure_evaluate(
                 current_round, arrays, evaluate_config, grid
             )
-            # Send messages
-            msg_ids = grid.push_messages(messages)
-            del messages
-            # Wait until replies are received
-            replies = wait_for_replies(grid, msg_ids, timeout=timeout)
+            # Send messages and wait for replies
+            replies = grid.send_and_receive(messages, timeout=timeout)
             # Aggregate evaluate
             eval_res = self.aggregate_evaluate(current_round, replies)
             log(INFO, "\t└──> Aggregated MetricRecord: %s", eval_res)
