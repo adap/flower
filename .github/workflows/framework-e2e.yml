@@ -143,45 +143,55 @@ jobs:
         include:
           - directory: e2e-bare
             e2e: e2e_bare
+            pytorch_cpu: false
 
           - directory: e2e-bare-https
             e2e: e2e_bare_https
+            pytorch_cpu: false
 
           - directory: e2e-bare-auth
             e2e: e2e_bare_auth
+            pytorch_cpu: false
 
           - directory: e2e-jax
             e2e: e2e_jax
+            pytorch_cpu: false
 
           - directory: e2e-pytorch
             e2e: e2e_pytorch
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
+            pytorch_cpu: true
 
           - directory: e2e-tensorflow
             e2e: e2e_tensorflow
             dataset: |
               import tensorflow_datasets as tfds
               tfds.load('cifar10', split=['train', 'test'], as_supervised=True)
+            pytorch_cpu: false
 
           - directory: e2e-opacus
             e2e: e2e_opacus
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
+            pytorch_cpu: true
 
           - directory: e2e-pytorch-lightning
             e2e: e2e_pytorch_lightning
+            pytorch_cpu: true
 
           - directory: e2e-scikit-learn
             e2e: e2e_scikit_learn
+            pytorch_cpu: false
 
           - directory: e2e-fastai
             e2e: e2e_fastai
             dataset: |
               from fastai.vision.all import untar_data, URLs
               untar_data(URLs.MNIST)
+            pytorch_cpu: true
 
           - directory: e2e-pandas
             e2e: e2e_pandas
@@ -190,6 +200,7 @@ jobs:
               from sklearn.datasets import load_iris
               Path('data').mkdir(exist_ok=True)
               load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
+            pytorch_cpu: false
 
     name: Framework / ${{ matrix.directory }}
 
@@ -212,11 +223,15 @@ jobs:
       #   with:
       #     path: ${{ env.pythonLocation }}
       #     key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
-      - name: Lock PyTorch to CPU wheels
-        if: ${{ needs.changes.outputs.framework == 'true' && ( matrix.directory == 'e2e-fastai' || matrix.directory == 'e2e-pytorch' || matrix.directory == 'e2e-pytorch-lightning' || matrix.directory == 'e2e-opacus' ) }}
+      - name: Lock dependencies (with optional CPU-only PyTorch)
+        if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          UV_INDEX="pytorch=https://download.pytorch.org/whl/cpu" && \
-          uv lock --upgrade-package torch --upgrade-package torchvision --upgrade-package torchaudio
+          if [[ "${{ matrix.pytorch_cpu }}" == "true" ]]; then
+            UV_INDEX="pytorch=https://download.pytorch.org/whl/cpu" \
+            uv lock --upgrade-package torch --upgrade-package torchvision --upgrade-package torchaudio
+          else
+            uv lock
+          fi
       - name: Install the project from lock
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: uv sync --all-extras --dev --locked
