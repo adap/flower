@@ -232,7 +232,7 @@ jobs:
           if [[ "${{ matrix.pytorch_cpu }}" == "true" ]]; then
             uv lock --index-strategy unsafe-best-match --upgrade-package torch --upgrade-package torchvision --upgrade-package torchaudio
           else
-            uv lock
+            uv lock --index-strategy unsafe-best-match
           fi
       - name: Install the project from lock
         if: ${{ needs.changes.outputs.framework == 'true' }}
