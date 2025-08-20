@@ -132,11 +132,11 @@ Start two SuperNode containers.
        * ``--node-config "partition-id=0 num-partitions=2"``: Set the partition ID to ``0`` and the
          number of partitions to ``2`` for the SuperNode configuration.
        * ``--clientappio-api-address 0.0.0.0:9094``: Set the address and port number that the
-         SuperNode is listening on to communicate with the ClientApp. If
-         two SuperNodes are started on the same machine, set two different port numbers for each SuperNode.
+         SuperNode is listening on to communicate with the ClientApp process. If
+         two SuperNodes are started on the same machine, use two different port numbers for each SuperNode.
          (E.g. In the next step, we set the second SuperNode container to listen on port 9095)
-       * ``--isolation process``: Tells the SuperNode that the ClientApp is created by separate
-         independent process. The SuperNode does not attempt to create it.
+       * ``--isolation process``: Tells the SuperNode that the ClientApp is executed by a separate
+         independent process. The SuperNode does not attempt to execute it.
 
 2. Start the second container:
 
@@ -155,8 +155,8 @@ Start two SuperNode containers.
            --clientappio-api-address 0.0.0.0:9095 \
            --isolation process
 
-Step 4: Start the SuperExec for ServerApps
-------------------------------------------
+Step 4: Start the SuperExec to execute ServerApps
+-------------------------------------------------
 
 The **SuperExec** Docker image comes with a pre-installed version of Flower and serves
 as a base for building your own image. Use a **single** image and select the desired
@@ -244,8 +244,8 @@ to the SuperLink's **ServerAppIO API** endpoint.
        * ``--appio-api-address superlink:9091``: Connect to the SuperLink's ServerAppIO API
          at the address ``superlink:9091``.
 
-Step 5: Start the SuperExec for ClientApps
-------------------------------------------
+Step 5: Start the SuperExec to execute ClientApps
+-------------------------------------------------
 
 For ClientApps, reuse the **same** image and change the plugin and API address. When
 using the *clientapp* plugin, pass ``--appio-api-address`` pointing to the SuperNode's
