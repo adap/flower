@@ -197,6 +197,9 @@ jobs:
       run:
         working-directory: framework/e2e/${{ matrix.directory }}
 
+    env:
+      UV_DEFAULT_INDEX: "https://download.pytorch.org/whl/cpu"
+
     steps:
       - uses: actions/checkout@v4
       - name: Install uv and set the Python version
@@ -215,9 +218,6 @@ jobs:
       - name: Install the project
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: uv sync --all-extras --dev
-      - name: Install CPU PyTorch
-        if: ${{ needs.changes.outputs.framework == 'true' && ( matrix.directory == 'e2e-fastai' || matrix.directory == 'e2e-pytorch' || matrix.directory == 'e2e-pytorch-lightning' || matrix.directory == 'e2e-opacus' ) }}
-        run: uv pip install --upgrade --reinstall torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
