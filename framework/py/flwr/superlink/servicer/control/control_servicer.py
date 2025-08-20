@@ -15,6 +15,7 @@
 """Control API servicer."""
 
 
+import hashlib
 import time
 from collections.abc import Generator
 from logging import ERROR, INFO
@@ -22,7 +23,8 @@ from typing import Any, Optional, cast
 
 import grpc
 
-from flwr.common import now
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.common import Context, RecordDict, now
 from flwr.common.auth_plugin import ControlAuthPlugin
 from flwr.common.constant import (
     FAB_MAX_SIZE,
@@ -37,7 +39,7 @@ from flwr.common.serde import (
     run_to_proto,
     user_config_from_proto,
 )
-from flwr.common.typing import Run, RunStatus
+from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
@@ -57,7 +59,6 @@ from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 
-from ...executor.executor import Executor
 from .control_user_auth_interceptor import shared_account_info
 
 
@@ -69,14 +70,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         linkstate_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
-        executor: Executor,
+        is_simulation: bool,
         auth_plugin: Optional[ControlAuthPlugin] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
-        self.executor = executor
-        self.executor.initialize(linkstate_factory, ffs_factory)
+        self.is_simulation = is_simulation
         self.auth_plugin = auth_plugin
 
     def StartRun(
@@ -84,6 +84,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> StartRunResponse:
         """Create run ID."""
         log(INFO, "ControlServicer.StartRun")
+        state = self.linkstate_factory.state()
+        ffs = self.ffs_factory.ffs()
 
         if len(request.fab.content) > FAB_MAX_SIZE:
             log(
@@ -94,17 +96,53 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             return StartRunResponse()
 
         flwr_aid = shared_account_info.get().flwr_aid if self.auth_plugin else None
-        run_id = self.executor.start_run(
-            request.fab.content,
-            user_config_from_proto(request.override_config),
-            config_record_from_proto(request.federation_options),
-            flwr_aid,
-        )
+        override_config = user_config_from_proto(request.override_config)
+        federation_options = config_record_from_proto(request.federation_options)
+        fab_file = request.fab.content
 
-        if run_id is None:
-            log(ERROR, "Executor failed to start run")
+        try:
+            # Check that num-supernodes is set
+            if self.is_simulation and "num-supernodes" not in federation_options:
+                raise ValueError(
+                    "Federation options doesn't contain key `num-supernodes`."
+                )
+
+            # Create run
+            fab = Fab(hashlib.sha256(fab_file).hexdigest(), fab_file)
+            fab_hash = ffs.put(fab.content, {})
+            if fab_hash != fab.hash_str:
+                raise RuntimeError(
+                    f"FAB ({fab.hash_str}) hash from request doesn't match contents"
+                )
+            fab_id, fab_version = get_fab_metadata(fab.content)
+
+            run_id = state.create_run(
+                fab_id,
+                fab_version,
+                fab_hash,
+                override_config,
+                federation_options,
+                flwr_aid,
+            )
+
+            # Create an empty context for the Run
+            context = Context(
+                run_id=run_id,
+                node_id=0,
+                node_config={},
+                state=RecordDict(),
+                run_config={},
+            )
+
+            # Register the context at the LinkState
+            state.set_serverapp_context(run_id=run_id, context=context)
+
+        # pylint: disable-next=broad-except
+        except Exception as e:
+            log(ERROR, "Could not start run: %s", str(e))
             return StartRunResponse()
 
+        log(INFO, "Created run %s", str(run_id))
         return StartRunResponse(run_id=run_id)
 
     def StreamLogs(  # pylint: disable=C0103
