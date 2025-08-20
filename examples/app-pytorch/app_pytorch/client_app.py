@@ -16,30 +16,6 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 app = ClientApp()
 
 
-@app.evaluate()
-def evaluate(msg: Message, context: Context):
-
-    # Prepare
-    model, device, data_loader = setup_client(msg, context, is_train=False)
-
-    # Local evaluation
-    eval_loss, eval_acc = test_fn(
-        model,
-        data_loader,
-        device,
-    )
-
-    # Construct reply
-    metrics = {
-        "eval_loss": eval_loss,
-        "eval_acc": eval_acc,
-        "num-examples": len(data_loader.dataset),
-    }
-    metric_record = MetricRecord(metrics)
-    content = RecordDict({"metrics": metric_record})
-    return Message(content=content, reply_to=msg)
-
-
 @app.train()
 def train(msg: Message, context: Context):
 
@@ -68,6 +44,30 @@ def train(msg: Message, context: Context):
     )
     # Return reply message
     content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)
+
+
+@app.evaluate()
+def evaluate(msg: Message, context: Context):
+
+    # Prepare
+    model, device, data_loader = setup_client(msg, context, is_train=False)
+
+    # Local evaluation
+    eval_loss, eval_acc = test_fn(
+        model,
+        data_loader,
+        device,
+    )
+
+    # Construct reply
+    metrics = {
+        "eval_loss": eval_loss,
+        "eval_acc": eval_acc,
+        "num-examples": len(data_loader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
 
