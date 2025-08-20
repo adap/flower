@@ -135,6 +135,15 @@ def run_superlink() -> None:
             WARN, "The `--flwr-dir` option is currently not in use and will be ignored."
         )
 
+    # Detect if `--executor*` arguments were set
+    if args.executor or args.executor_dir or args.executor_config:
+        flwr_exit(
+            ExitCode.SUPERLINK_INVALID_ARGS,
+            "The arguments `--executor`, `--executor-dir`, and `--executor-config` are "
+            "deprecated and will be removed in a future release. To run SuperLink with "
+            "the SimulationIo API, please use `--simulation`.",
+        )
+
     # Detect if both Control API and Exec API addresses were set explicitly
     explicit_args = set()
     for arg in sys.argv[1:]:
@@ -197,14 +206,13 @@ def run_superlink() -> None:
     objectstore_factory = ObjectStoreFactory()
 
     # Start Control API
-    is_simulation = args.executor == "flwr.superexec.simulation:executor"
     control_server: grpc.Server = run_control_api_grpc(
         address=control_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
         certificates=certificates,
-        is_simulation=is_simulation,
+        is_simulation=args.simulation,
         auth_plugin=auth_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
@@ -212,7 +220,7 @@ def run_superlink() -> None:
     grpc_servers = [control_server]
     bckg_threads: list[threading.Thread] = []
 
-    if is_simulation:
+    if args.simulation:
         simulationio_server: grpc.Server = run_simulationio_api_grpc(
             address=simulationio_address,
             state_factory=state_factory,
@@ -333,11 +341,11 @@ def run_superlink() -> None:
         command = ["flower-superexec", "--insecure"]
         command += [
             "--appio-api-address",
-            simulationio_address if is_simulation else io_address,
+            simulationio_address if args.simulation else io_address,
         ]
         command += [
             "--plugin-type",
-            ExecPluginType.SIMULATION if is_simulation else ExecPluginType.SERVER_APP,
+            ExecPluginType.SIMULATION if args.simulation else ExecPluginType.SERVER_APP,
         ]
         command += ["--parent-pid", str(os.getpid())]
         # pylint: disable-next=consider-using-with
@@ -733,20 +741,24 @@ def _add_args_control_api(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--executor",
-        help="For example: `deployment:exec` or `project.package.module:wrapper.exec`. "
-        "The default is `flwr.superexec.deployment:executor`",
-        default="flwr.superexec.deployment:executor",
+        help="This argument is deprecated and will be removed in a future release.",
+        default=None,
     )
     parser.add_argument(
         "--executor-dir",
-        help="The directory for the executor.",
-        default=".",
+        help="This argument is deprecated and will be removed in a future release.",
+        default=None,
     )
     parser.add_argument(
         "--executor-config",
-        help="Key-value pairs for the executor config, separated by spaces. "
-        "For example:\n\n`--executor-config 'verbose=true "
-        'root-certificates="certificates/superlink-ca.crt"\'`',
+        help="This argument is deprecated and will be removed in a future release.",
+        default=None,
+    )
+    parser.add_argument(
+        "--simulation",
+        action="store_true",
+        default=False,
+        help="Launch the SimulationIo API server in place of the ServerAppIo server.",
     )
 
 

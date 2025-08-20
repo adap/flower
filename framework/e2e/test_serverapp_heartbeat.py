@@ -23,7 +23,6 @@ address_arg = (
     if use_sim
     else SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 )
-executor_arg = f"flwr.superexec.{'simulation' if use_sim else 'deployment'}:executor"
 app_cmd = "flwr-simulation" if use_sim else "flwr-serverapp"
 
 
@@ -56,8 +55,7 @@ def run_superlink() -> subprocess.Popen:
             "--insecure",
             "--database",
             "tmp.db",
-            "--executor",
-            executor_arg,
+            "--simulation" if use_sim else "",
             "--isolation",
             "process",
         ],
