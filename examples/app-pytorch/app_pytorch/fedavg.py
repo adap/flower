@@ -361,6 +361,7 @@ class FedAvg:
 
         metrics_history = ReturnStrategyResults()
 
+        t_start = time()
         # do central eval with starting global parameters
         if central_eval_fn:
             res = central_eval_fn(server_round=0, array_record=arrays)
@@ -406,7 +407,8 @@ class FedAvg:
                 log(INFO, "\t└──> MetricRecord: %s", res)
                 metrics_history.central_evaluate_metrics[current_round] = res
 
-        log(INFO, "Finished all rounds")
+        log(INFO, "")
+        log(INFO, f"Strategy execution finished in {time() - t_start:.2f}s")
         log(INFO, "")
 
         return metrics_history
