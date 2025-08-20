@@ -13,6 +13,7 @@ dependencies = [
     "torchvision>=0.20.1,<0.21.0",
     "tqdm>=4.63.0,<5.0.0",
 ]
+requires-python = ">=3.9.2"
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]

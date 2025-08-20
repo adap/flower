@@ -143,45 +143,55 @@ jobs:
         include:
           - directory: e2e-bare
             e2e: e2e_bare
+            pytorch_cpu: false
 
           - directory: e2e-bare-https
             e2e: e2e_bare_https
+            pytorch_cpu: false
 
           - directory: e2e-bare-auth
             e2e: e2e_bare_auth
+            pytorch_cpu: false
 
           - directory: e2e-jax
             e2e: e2e_jax
+            pytorch_cpu: false
 
           - directory: e2e-pytorch
             e2e: e2e_pytorch
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
+            pytorch_cpu: true
 
           - directory: e2e-tensorflow
             e2e: e2e_tensorflow
             dataset: |
               import tensorflow_datasets as tfds
               tfds.load('cifar10', split=['train', 'test'], as_supervised=True)
+            pytorch_cpu: false
 
           - directory: e2e-opacus
             e2e: e2e_opacus
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
+            pytorch_cpu: true
 
           - directory: e2e-pytorch-lightning
             e2e: e2e_pytorch_lightning
+            pytorch_cpu: true
 
           - directory: e2e-scikit-learn
             e2e: e2e_scikit_learn
+            pytorch_cpu: false
 
           - directory: e2e-fastai
             e2e: e2e_fastai
             dataset: |
               from fastai.vision.all import untar_data, URLs
               untar_data(URLs.MNIST)
+            pytorch_cpu: true
 
           - directory: e2e-pandas
             e2e: e2e_pandas
@@ -190,52 +200,52 @@ jobs:
               from sklearn.datasets import load_iris
               Path('data').mkdir(exist_ok=True)
               load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
+            pytorch_cpu: false
 
     name: Framework / ${{ matrix.directory }}
 
     defaults:
       run:
         working-directory: framework/e2e/${{ matrix.directory }}
-
+    
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        if: ${{ needs.changes.outputs.framework == 'true' }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ (matrix.directory == 'e2e-fastai') && '3.10' || '3.9' }}
-          python-version-file: ".python-version"
-      - name: Install the latest version of uv
+      - name: Install uv and set the Python version
         uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.10"
       # Using approach described here for Python location caching:
       # https://blog.allenai.org/python-caching-in-github-actions-e9452698e98d
-      - name: Cache Python location
-        if: ${{ needs.changes.outputs.framework == 'true' }}
-        id: cache-restore-python
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.pythonLocation }}
-          key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
+      # - name: Cache Python location
+      #   if: ${{ needs.changes.outputs.framework == 'true' }}
+      #   id: cache-restore-python
+      #   uses: actions/cache/restore@v4
+      #   with:
+      #     path: ${{ env.pythonLocation }}
+      #     key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
       - name: Install the project
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: uv sync --all-extras --dev
+      - name: Install CPU PyTorch
+        if: ${{ needs.changes.outputs.framework == 'true' && matrix.pytorch_cpu }}
+        run: uv pip install --upgrade --reinstall torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
           uv pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Download dataset
         if: ${{ needs.changes.outputs.framework == 'true' && matrix.dataset }}
-        run: uv run - "${{ matrix.dataset }}"
+        run: uv run --no-sync python -c "${{ matrix.dataset }}"
       - name: Run edge client test
         if: ${{ needs.changes.outputs.framework == 'true' && matrix.directory != 'e2e-bare-auth' }}
         working-directory: framework/e2e/${{ matrix.directory }}/${{ matrix.e2e }}
         run: ./../../test_legacy.sh "${{ matrix.directory }}"
       - name: Run virtual client test
         if: ${{ needs.changes.outputs.framework == 'true' && matrix.directory != 'e2e-bare-auth' }}
-        run: uv run simulation.py
+        run: uv run --no-sync simulation.py
       - name: Run simulation engine test
         if: ${{ needs.changes.outputs.framework == 'true' && (matrix.directory == 'e2e-pytorch' || matrix.directory == 'e2e-tensorflow') }}
-        run: uv run simulation_next.py
+        run: uv run --no-sync simulation_next.py
       - name: Run driver test
         if: ${{ needs.changes.outputs.framework == 'true' && matrix.directory != 'e2e-bare-auth' }}
         run: ./../test_superlink.sh "${{ matrix.directory }}"
@@ -251,13 +261,13 @@ jobs:
       # - name: Run reconnection test with SQLite database (Temporarily disabled due to in-memory ObjectStore)
       #   if: ${{ needs.changes.outputs.framework == 'true' && matrix.directory == 'e2e-bare' }}
       #   run: ./../test_reconnection.sh sqlite
-      - name: Cache save Python location
-        id: cache-save-python
-        uses: actions/cache/save@v4
-        if: ${{ needs.changes.outputs.framework == 'true' && github.ref_name == 'main' &&  !steps.cache-restore-python.outputs.cache-hit }}
-        with:
-          path: ${{ env.pythonLocation }}
-          key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
+      # - name: Cache save Python location
+      #   id: cache-save-python
+      #   uses: actions/cache/save@v4
+      #   if: ${{ needs.changes.outputs.framework == 'true' && github.ref_name == 'main' &&  !steps.cache-restore-python.outputs.cache-hit }}
+      #   with:
+      #     path: ${{ env.pythonLocation }}
+      #     key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
 
   strategies:
     runs-on: ubuntu-22.04

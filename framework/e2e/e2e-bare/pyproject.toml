@@ -8,6 +8,7 @@ version = "1.0.0"
 description = "Bare Federated Learning test with Flower"
 license = "Apache-2.0"
 dependencies = ["flwr[simulation,rest] @ {root:parent:parent:uri}"]
+requires-python = ">=3.9.2"
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]

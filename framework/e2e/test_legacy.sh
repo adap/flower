@@ -6,14 +6,14 @@ if [ "$1" = "e2e-bare-https" ]; then
 fi
 
 # run the first command in background and save output to a temporary file:
-timeout 3m python server_app.py &
+timeout 3m uv run --no-sync server_app.py &
 pid=$!
 sleep 3
 
-python client_app.py &
+uv run --no-sync client_app.py &
 sleep 3
 
-python client_app.py &
+uv run --no-sync client_app.py &
 sleep 3
 
 wait $pid
