@@ -55,16 +55,3 @@ Advanced Commands
     :module: flwr.client.clientapp.app
     :func: _parse_args_run_flwr_clientapp
     :prog: flwr-clientapp
-
-Technical Commands
-------------------
-
-.. _flower-simulation-apiref:
-
-``flower-simulation``
-~~~~~~~~~~~~~~~~~~~~~
-
-.. argparse::
-    :module: flwr.simulation.run_simulation
-    :func: _parse_args_run_simulation
-    :prog: flower-simulation
