@@ -197,7 +197,7 @@ to the SuperLink's **ServerAppIO API** endpoint.
 
          The ``-U`` flag indicates that any existing packages should be upgraded, and
          ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
-       * ``ENTRYPOINT ["flwr-superexec"]``: Set the command ``flwr-superexec`` to be
+       * ``ENTRYPOINT ["flower-superexec"]``: Set the command ``flower-superexec`` to be
          the default command run when the container is started.
 
    .. important::
@@ -345,7 +345,7 @@ Step 7: Update the Application
 
        $ docker build -f superexec.Dockerfile -t flwr_superexec:0.0.1 .
 
-4. Launch one **SuperExec for ServerApps** and two **SuperExec for ClientApps**:
+4. Launch **one SuperExec container** for the new ServerApp and **two SuperExec containers** for the new ClientApps:
 
    .. code-block:: console
 
