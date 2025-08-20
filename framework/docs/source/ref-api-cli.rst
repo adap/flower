@@ -45,16 +45,3 @@ Advanced Commands
     :module: flwr.supercore.cli.flower_superexec
     :func: _parse_args
     :prog: flower-superexec
-
-Technical Commands
-------------------
-
-.. _flower-simulation-apiref:
-
-``flower-simulation``
-~~~~~~~~~~~~~~~~~~~~~
-
-.. argparse::
-    :module: flwr.simulation.run_simulation
-    :func: _parse_args_run_simulation
-    :prog: flower-simulation
