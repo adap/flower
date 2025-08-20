@@ -758,7 +758,8 @@ def _add_args_control_api(parser: argparse.ArgumentParser) -> None:
         "--simulation",
         action="store_true",
         default=False,
-        help="Launch the SimulationIo API server in place of the ServerAppIo server.",
+        help="Launch the SimulationIo API server in place of "
+        "the ServerAppIo API server.",
     )
 
 
