@@ -227,7 +227,7 @@ jobs:
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
           if [[ "${{ matrix.pytorch_cpu }}" == "true" ]]; then
-            UV_INDEX="pytorch=https://download.pytorch.org/whl/cpu" \
+            UV_INDEX="pypi=https://pypi.org/simple;pytorch=https://download.pytorch.org/whl/cpu" \
             uv lock --index-strategy unsafe-best-match --upgrade-package torch --upgrade-package torchvision --upgrade-package torchaudio
           else
             uv lock --index-strategy unsafe-best-match
