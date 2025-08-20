@@ -149,7 +149,9 @@ def wait_for_replies(grid: Grid, msg_ids: list[str], timeout: float) -> list[Mes
         )
         if len(unique_msg_ids) == 0:
             break
-        sleep(3)
+
+        # TODO: update with grid.pull_interval
+        sleep(0.1)
 
     return replies
 
@@ -379,7 +381,7 @@ class FedAvg:
             # Aggregate train
             arrays, agg_metrics = self.aggregate_train(current_round, replies)
             # Log training metrics and append to history
-            log(INFO, "\tAggregated MetricRecord: %s", agg_metrics)
+            log(INFO, "\t└──> Aggregated  MetricRecord: %s", agg_metrics)
             metrics_history.train_metrics[current_round] = agg_metrics
             metrics_history.arrays = arrays
 
@@ -394,13 +396,14 @@ class FedAvg:
             replies = wait_for_replies(grid, msg_ids, timeout=timeout)
             # Aggregate evaluate
             eval_res = self.aggregate_evaluate(current_round, replies)
-            log(INFO, "\tAggregated MetricRecord: %s", eval_res)
+            log(INFO, "\t└──> Aggregated MetricRecord: %s", eval_res)
             metrics_history.evaluate_metrics[current_round] = eval_res
 
             # Centralised eval
             if central_eval_fn:
+                log(INFO, "Central evaluation")
                 res = central_eval_fn(server_round=current_round, array_record=arrays)
-                log(INFO, "Central evaluation results: %s", res)
+                log(INFO, "\t└──> MetricRecord: %s", res)
                 metrics_history.central_evaluate_metrics[current_round] = res
 
         log(INFO, "Finished all rounds")
