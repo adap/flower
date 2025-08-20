@@ -28,6 +28,7 @@ class ReturnStrategyResults:
 def aggregate_arrayrecords(
     records: list[RecordDict], weighting_metric_name: str
 ) -> ArrayRecord:
+    """Perform weighted aggregation all ArrayRecords using a specific key."""
 
     # Retrieve weighting factor from MetricRecord
     weights: list[float] = []
@@ -60,6 +61,7 @@ def aggregate_arrayrecords(
 def aggregate_metricrecords(
     records: list[RecordDict], weighting_metric_name: str
 ) -> MetricRecord:
+    """Perform weighted aggregation all MetricRecords using a specific key."""
 
     # Retrieve weighting factor from MetricRecord
     weights: list[float] = []
@@ -104,6 +106,7 @@ def aggregate_metricrecords(
 def sample_nodes(
     grid: Grid, min_available_nodes: int, sample_size: int
 ) -> tuple[list[int], list[int]]:
+    """Sample the specified number of nodes using the Grid."""
 
     sampled_nodes = []
 
@@ -157,6 +160,7 @@ class FedAvg:
     def _construct_messages(
         self, record: RecordDict, node_ids: list[int], message_type: MessageType
     ) -> list[Message]:
+        """Construct N Messages carrying the same RecordDict payload."""
         messages = []
         for node_id in node_ids:  # one message for each node
             message = Message(
@@ -172,9 +176,6 @@ class FedAvg:
     ) -> bool:
         """Check that replies contain one ArrayRecord, OneMetricRecord and that
         the weighting factor key is present."""
-        # Check if replies have one ArrayRecord and one MetricRecord
-        # Furthermore, all keys in both types of records must match
-        # If this is not the case, we log an ERROR and skip aggregation.
 
         # Checking for ArrayRecord consistency
         skip_aggregation = False
@@ -234,6 +235,7 @@ class FedAvg:
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> list[Message]:
+        """Configure the next round of federated training."""
 
         # Sample nodes
         num_nodes = int(len(grid.get_node_ids()) * self.fraction_train)
@@ -259,8 +261,9 @@ class FedAvg:
         server_round: int,
         replies: list[Message],
     ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
-        # Aggregate training results
+        """Aggregate ArrayRecords and MetricRecords in the received Messages."""
 
+        # Log if any Messages carried errors
         num_errors = 0
         for msg in replies:
             if msg.has_error():
@@ -306,7 +309,7 @@ class FedAvg:
     def configure_evaluate(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> list[Message]:
-        # Configure the next round of evaluation
+        """Configure the next round of federated evaluation."""
 
         # Sample nodes
         num_nodes = int(len(grid.get_node_ids()) * self.fraction_evaluate)
@@ -332,9 +335,10 @@ class FedAvg:
         self,
         server_round: int,
         replies: list[Message],
-    ) -> MetricRecord:
-        # Aggregate evaluation results
+    ) -> Optional[MetricRecord]:
+        """Aggregate MetricRecords in the received Messages."""
 
+        # Log if any Messages carried errors
         num_errors = 0
         for msg in replies:
             if msg.has_error():
@@ -386,18 +390,18 @@ class FedAvg:
 
         # log name of strategy
         log(INFO, f"Starting {self.__class__.__name__} strategy.")
-        log(INFO, f"\t> Number of rounds: {num_rounds}")
+        log(INFO, f"\t└──> Number of rounds: {num_rounds}")
         log(
             INFO,
-            f"\t> ArrayRecord: {len(arrays)} Arrays totalling {sum(len(array.data) for array in arrays.values())/(1024**2):.2f} MB",
+            f"\t└──> ArrayRecord: {len(arrays)} Arrays totalling {sum(len(array.data) for array in arrays.values())/(1024**2):.2f} MB",
         )
         log(
             INFO,
-            f"\t> ConfigRecord for train round: {train_config if train_config else '(empty!)'}",
+            f"\t└──> ConfigRecord (train): {train_config if train_config else '(empty!)'}",
         )
         log(
             INFO,
-            f"\t> ConfigRecord for evaluate round: {evaluate_config if evaluate_config else '(empty!)'}",
+            f"\t└──> ConfigRecord (evaluate): {evaluate_config if evaluate_config else '(empty!)'}",
         )
         log(INFO, "")
 
@@ -407,7 +411,7 @@ class FedAvg:
         # Do central eval with starting global parameters
         if central_eval_fn:
             res = central_eval_fn(server_round=0, array_record=arrays)
-            log(INFO, "Central evaluation results: %s", res)
+            log(INFO, "Initial central evaluation results: %s", res)
             metrics_history.central_evaluate_metrics[0] = res
 
         for current_round in range(1, num_rounds + 1):
@@ -424,6 +428,9 @@ class FedAvg:
             # Aggregate train
             arrays, agg_metrics = self.aggregate_train(current_round, replies)
             # Log training metrics and append to history
+            # TODO: this is the most strinct mode of opeartion (if aggregation is skipped due to inconsistent replies)
+            if arrays is None or agg_metrics is None:
+                break
             log(INFO, "\t└──> Aggregated  MetricRecord: %s", agg_metrics)
             metrics_history.train_metrics[current_round] = agg_metrics
             metrics_history.arrays = arrays
@@ -436,9 +443,12 @@ class FedAvg:
                 timeout=timeout,
             )
             # Aggregate evaluate
-            eval_res = self.aggregate_evaluate(current_round, replies)
-            log(INFO, "\t└──> Aggregated MetricRecord: %s", eval_res)
-            metrics_history.evaluate_metrics[current_round] = eval_res
+            agg_metrics = self.aggregate_evaluate(current_round, replies)
+            # TODO: this is the most strinct mode of opeartion (if aggregation is skipped due to inconsistent replies)
+            if arrays is None or agg_metrics is None:
+                break
+            log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_metrics)
+            metrics_history.evaluate_metrics[current_round] = agg_metrics
 
             # Centralised eval
             if central_eval_fn:
