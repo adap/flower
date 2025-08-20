@@ -204,10 +204,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ (matrix.directory == 'e2e-fastai') && '3.10' || '3.9' }}
+          python-version-file: ".python-version"
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
       # Using approach described here for Python location caching:
       # https://blog.allenai.org/python-caching-in-github-actions-e9452698e98d
       - name: Cache Python location
@@ -217,9 +216,9 @@ jobs:
         with:
           path: ${{ env.pythonLocation }}
           key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
-      - name: Install dependencies
+      - name: Install the project
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        run: uv pip install --upgrade .
+        run: uv sync --locked --all-extras --dev
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
