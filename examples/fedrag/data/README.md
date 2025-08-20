@@ -1,20 +1,20 @@
 # Introduction
 
 This folder holds the necessary scripts to download the necessary corpora and
-create indices for more efficient document retrieval for the FedRAG workflow. All four corpora listed below were derived from the [MedRAG Toolkit](https://github.com/Teddy-XiongGZ/MedRAG) [\[1\]](#ref1).
+create indices for more efficient document retrieval for the FedRAG workflow. All four corpora listed below were derived from the [MedRAG Toolkit](https://github.com/Teddy-XiongGZ/MedRAG) [[1]](#ref1).
 
 The currently supported corpora are:
 
-| **Corpus**                | **Size** | **#Doc.** | **#Snippets** | **Domain** |
-| ------------------------- | -------- | --------- | ------------- | ---------- |
-| PubMed [\[2\]](#ref2)     | ~70GBs   | 23.9M     | 23.9M         | Biomedical |
-| StatPearls [\[3\]](#ref3) | ~2GBs    | 9.3k      | 301.2k        | Clinics    |
-| Textbooks [\[4\]](#ref4)  | ~209MBs  | 18        | 125.8k        | Medicine   |
-| Wikipedia [\[5\]](#ref5)  | ~44GBs   | 6.5M      | 29.9M         | General    |
+| **Corpus**              | **Size** | **#Doc.** | **#Snippets** | **Domain** |
+| ----------------------- | -------- | --------- | ------------- | ---------- |
+| PubMed [[2]](#ref2)     | ~70GBs   | 23.9M     | 23.9M         | Biomedical |
+| StatPearls [[3]](#ref3) | ~2GBs    | 9.3k      | 301.2k        | Clinics    |
+| Textbooks [[4]](#ref4)  | ~209MBs  | 18        | 125.8k        | Medicine   |
+| Wikipedia [[5]](#ref5)  | ~44GBs   | 6.5M      | 29.9M         | General    |
 
 For index generation we use the [FAISS](https://github.com/facebookresearch/faiss) library.
 
-> \[!NOTE\]
+> [!NOTE]
 > Please note that for each corpus, its corresponding index might need exactly the same disk space as the documents being indexed.
 
 # How-To-Run
@@ -39,7 +39,7 @@ as follows:
 To download the data we use the [MedRAG Toolkit](https://github.com/Teddy-XiongGZ/MedRAG) and the associated MedRAG
 dataset repository in [Hugging Face](https://huggingface.co/MedRAG), which holds all the curated corpus.
 
-> \[!NOTE\]
+> [!NOTE]
 > According to the [privacy policy](https://www.statpearls.com/home/privacypolicy/) of StatPearls, the StatPearls content is not allowed to be distributed.\
 > The StatPearls data are downloading directly from the [NCBI Bookshelf](https://www.ncbi.nlm.nih.gov/books/NBK430685/)
 > and the `statpearls.py` script provided by [MedRAG toolkit](https://github.com/Teddy-XiongGZ/MedRAG/blob/main/src/data/statpearls.py) is used to chunk the data.
@@ -78,7 +78,7 @@ embedding_dimension: 384
 
 ## QA Benchmark Datasets
 
-All the QA benchmark datasets are downloaded from the [MIRAGE](https://github.com/Teddy-XiongGZ/MIRAGE) benchmark [\[1\]](#ref1).
+All the QA benchmark datasets are downloaded from the [MIRAGE](https://github.com/Teddy-XiongGZ/MIRAGE) benchmark [[1]](#ref1).
 The `prepare.py` script is responsible for downloading the QA datasets. The script downloads the datasets after all the
 corpora are downloaded and the related FAISS indices are built.
 

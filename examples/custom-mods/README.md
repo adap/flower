@@ -73,14 +73,14 @@ pip install -e .
 
 ## Run the project
 
-> \[!TIP\]
+> [!TIP]
 > By default the `ClientApp` uses the TensorBoard mod, if you would like to enable the Weight & Biases mod, please edit the line at the bottom of `custom_mods/client_app.py` and pass the `get_wandb_mod` mod to the constructor of your `ClientApp`.
 
 You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
 ### Run with the Simulation Engine
 
-> \[!NOTE\]
+> [!NOTE]
 > Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
 
 ```bash
