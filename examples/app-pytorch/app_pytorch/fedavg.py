@@ -119,7 +119,7 @@ def sample_nodes(
 
     sampled_nodes = []
 
-    # wait for min_available_nodes to be online
+    # Wait for min_available_nodes to be online
     nodes_connected = grid.get_node_ids()
     while len(nodes_connected) < min_available_nodes:
         sleep(1)
@@ -341,7 +341,7 @@ class FedAvg:
         metrics_history = ReturnStrategyResults()
 
         t_start = time()
-        # do central eval with starting global parameters
+        # Do central eval with starting global parameters
         if central_eval_fn:
             res = central_eval_fn(server_round=0, array_record=arrays)
             log(INFO, "Central evaluation results: %s", res)

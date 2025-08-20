@@ -1,11 +1,9 @@
 """app-pytorch: A Flower / PyTorch app."""
 
-from logging import INFO
 
 import torch
 from app_pytorch.task import Net, test
 from flwr.common import ArrayRecord, ConfigRecord, Context, RecordDict
-from flwr.common.logger import log
 from flwr.common.record.metricrecord import MetricRecord
 from flwr.server import Grid, ServerApp
 from torch.utils.data import DataLoader
