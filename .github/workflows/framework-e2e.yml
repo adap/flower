@@ -204,7 +204,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ (matrix.directory == 'e2e-fastai') && '3.10' || '3.9' }}
-          python-version-file: ".python-version"
+          python-version-file: "pyproject.toml"
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v6
       # Using approach described here for Python location caching:
