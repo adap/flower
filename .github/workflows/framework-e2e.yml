@@ -208,9 +208,6 @@ jobs:
       run:
         working-directory: framework/e2e/${{ matrix.directory }}
     
-    env:
-      UV_INDEX: "pytorch=https://download.pytorch.org/whl/cpu"
-
     steps:
       - uses: actions/checkout@v4
       - name: Install uv and set the Python version
@@ -230,6 +227,7 @@ jobs:
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
           if [[ "${{ matrix.pytorch_cpu }}" == "true" ]]; then
+            UV_INDEX="pytorch=https://download.pytorch.org/whl/cpu" \
             uv lock --index-strategy unsafe-best-match --upgrade-package torch --upgrade-package torchvision --upgrade-package torchaudio
           else
             uv lock --index-strategy unsafe-best-match
