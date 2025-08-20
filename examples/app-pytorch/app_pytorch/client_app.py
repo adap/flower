@@ -18,71 +18,65 @@ app = ClientApp()
 
 @app.train()
 def train(msg: Message, context: Context):
+    """Train the model on local data."""
 
-    # Prepare
-    model, device, data_loader = setup_client(msg, context, is_train=True)
+    # Load the model
+    model = Net()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    model.to(device)
 
-    # Read from run config
-    local_epochs = context.run_config["local-epochs"]
-    # Read ConfigRecord from message
-    lr = msg.content["config"]["lr"]
+    # Load the data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    trainloader, _ = load_data(partition_id, num_partitions)
 
-    # Local training
+    # Call the training function
     train_loss = train_fn(
         model,
-        data_loader,
-        local_epochs,
-        lr,
+        trainloader,
+        context.run_config["local-epochs"],
+        msg.content["config"]["lr"],
         device,
     )
 
-    # Extract state_dict from model
+    # Construct and return reply Message
     model_record = ArrayRecord(model.state_dict())
-    # Prepare metrics
-    metric_record = MetricRecord(
-        {"train_loss": train_loss, "num-examples": len(data_loader.dataset)}
-    )
-    # Return reply message
+    metrics = {
+        "train_loss": train_loss,
+        "num-examples": len(trainloader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
     content = RecordDict({"arrays": model_record, "metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
 
 @app.evaluate()
 def evaluate(msg: Message, context: Context):
+    """Evaluate the model on local data."""
 
-    # Prepare
-    model, device, data_loader = setup_client(msg, context, is_train=False)
+    # Load the model
+    model = Net()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    model.to(device)
 
-    # Local evaluation
+    # Load the data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    _, valloader = load_data(partition_id, num_partitions)
+
+    # Call the evaluation function
     eval_loss, eval_acc = test_fn(
         model,
-        data_loader,
+        valloader,
         device,
     )
 
-    # Construct reply
+    # Construct and return reply Message
     metrics = {
         "eval_loss": eval_loss,
         "eval_acc": eval_acc,
-        "num-examples": len(data_loader.dataset),
+        "num-examples": len(valloader.dataset),
     }
     metric_record = MetricRecord(metrics)
     content = RecordDict({"metrics": metric_record})
     return Message(content=content, reply_to=msg)
-
-
-def setup_client(msg: Message, context: Context, is_train: bool):
-
-    # Instantiate model
-    model = Net()
-
-    # Apply global model weights from message
-    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
-    model.to(device)
-
-    # Load partition
-    partition_id = context.node_config["partition-id"]
-    num_partitions = context.node_config["num-partitions"]
-    trainloader, valloader = load_data(partition_id, num_partitions)
-
-    return model, device, trainloader if is_train else valloader
