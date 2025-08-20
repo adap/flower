@@ -114,31 +114,25 @@ def aggregate(
 
 
 def sample_nodes(
-    grid: Grid, min_sample_nodes: int, fraction_sample: float
+    grid: Grid, min_available_nodes: int, sample_size: int
 ) -> tuple[list[int], list[int]]:
 
     sampled_nodes = []
-    while len(sampled_nodes) < min_sample_nodes:
-        all_node_ids = list(grid.get_node_ids())
-        to_sample = int(len(all_node_ids) * fraction_sample)
-        # Are there enough nodes that if sampled the specified fraction
-        # the resulted sample size is equal or larger than the minimum required
-        if to_sample >= min_sample_nodes:
-            # Sample
-            sampled_nodes = random.sample(all_node_ids, to_sample)
-            break
-        log(
-            INFO,
-            f"Waiting for nodes to connect. Nodes connected {len(all_node_ids)}.",
-        )
-        log(
-            INFO,
-            f"Configured to sample a minimum of {min_sample_nodes} nodes with sampling "
-            f"fraction set to {fraction_sample} (over all connected nodes).",
-        )
-        sleep(3)
 
-    return sampled_nodes, all_node_ids
+    # wait for min_available_nodes to be online
+    nodes_connected = grid.get_node_ids()
+    while len(nodes_connected) < min_available_nodes:
+        sleep(1)
+        log(
+            INFO,
+            f"Waiting for nodes to connect. Nodes connected {len(nodes_connected)} (expecting at least {min_available_nodes}).",
+        )
+        nodes_connected = grid.get_node_ids()
+
+    # Sample nodes
+    sampled_nodes = random.sample(list(nodes_connected), sample_size)
+
+    return sampled_nodes, nodes_connected
 
 
 class FedAvg:
@@ -181,9 +175,9 @@ class FedAvg:
     ) -> list[Message]:
 
         # Sample nodes
-        node_ids, num_total = sample_nodes(
-            grid, self.min_train_nodes, self.fraction_train
-        )
+        num_nodes = int(len(grid.get_node_ids()) * self.fraction_train)
+        sample_size = max(num_nodes, self.min_train_nodes)
+        node_ids, num_total = sample_nodes(grid, self.min_available_nodes, sample_size)
         log(
             INFO,
             "configure_train: Sampled %s nodes (out of %s)",
@@ -254,9 +248,9 @@ class FedAvg:
         # Configure the next round of evaluation
 
         # Sample nodes
-        node_ids, num_total = sample_nodes(
-            grid, self.min_evaluate_nodes, self.fraction_evaluate
-        )
+        num_nodes = int(len(grid.get_node_ids()) * self.fraction_evaluate)
+        sample_size = max(num_nodes, self.min_evaluate_nodes)
+        node_ids, num_total = sample_nodes(grid, self.min_available_nodes, sample_size)
         log(
             INFO,
             "configure_evaluate: Sampled %s nodes (out of %s)",
@@ -363,7 +357,7 @@ class FedAvg:
             # aggregate fit
             arrays, agg_metrics = self.aggregate_train(current_round, replies)
             # Log training metrics and append to history
-            log(INFO, "Federated Training results: %s", agg_metrics)
+            log(INFO, "\tAggregated MetricRecord: %s", agg_metrics)
             metrics_history.train_metrics[current_round] = agg_metrics
             metrics_history.arrays = arrays
 
@@ -375,7 +369,7 @@ class FedAvg:
             replies = grid.send_and_receive(messages, timeout=timeout)
             # Aggregate evaluate
             eval_res = self.aggregate_evaluate(current_round, replies)
-            log(INFO, "Federated Evaluation results: %s", eval_res)
+            log(INFO, "\tAggregated MetricRecord: %s", eval_res)
             metrics_history.evaluate_metrics[current_round] = eval_res
 
             # Centralised eval
