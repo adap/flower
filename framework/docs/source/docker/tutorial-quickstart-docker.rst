@@ -345,7 +345,8 @@ Step 7: Update the Application
 
        $ docker build -f superexec.Dockerfile -t flwr_superexec:0.0.1 .
 
-4. Launch **one SuperExec container** for the new ServerApp and **two SuperExec containers** for the new ClientApps:
+4. Launch **one SuperExec container** for the new ServerApp and **two SuperExec
+   containers** for the new ClientApps:
 
    .. code-block:: console
 
