@@ -87,8 +87,8 @@ Open your terminal and run:
       tag of the image. The tag :substitution-code:`|stable_flwr_version|` represents a :doc:`specific version <pin-version>` of the image.
     * ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
       unencrypted communication.
-    * ``--isolation process``: Tells the SuperLink that the ServerApp is created by separate
-      independent process. The SuperLink does not attempt to create it. You can learn more about
+    * ``--isolation process``: Tells the SuperLink that the ServerApp is executed by separate
+      independent process. The SuperLink does not attempt to execute it. You can learn more about
       the different process modes here: :doc:`run-as-subprocess`.
 
 Step 3: Start the SuperNodes
