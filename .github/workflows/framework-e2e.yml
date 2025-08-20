@@ -207,7 +207,6 @@ jobs:
     defaults:
       run:
         working-directory: framework/e2e/${{ matrix.directory }}
-    
     steps:
       - uses: actions/checkout@v4
       - name: Install uv and set the Python version
