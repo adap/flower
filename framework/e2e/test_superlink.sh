@@ -65,6 +65,9 @@ uv pip install -e . --no-deps
 # Remove any duplicates
 sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
 
+# Create .gitignore to ignore .venv folder
+echo ".venv" > .gitignore
+
 # Check if the first argument is 'insecure'
 if [ "$server_arg" = "--insecure" ]; then
   # If $server_arg is '--insecure', append the first line
