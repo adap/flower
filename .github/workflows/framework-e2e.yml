@@ -215,9 +215,9 @@ jobs:
       - name: Lock PyTorch to CPU wheels
         if: ${{ needs.changes.outputs.framework == 'true' && ( matrix.directory == 'e2e-fastai' || matrix.directory == 'e2e-pytorch' || matrix.directory == 'e2e-pytorch-lightning' || matrix.directory == 'e2e-opacus' ) }}
         run: |
-          UV_INDEX="pytorch=https://download.pytorch.org/whl/cpu" \
-          uv lock --upgrade-package torch torchvision torchaudio
-      - name: Install the project
+          UV_INDEX="pytorch=https://download.pytorch.org/whl/cpu" && \
+          uv lock --upgrade-package torch --upgrade-package torchvision --upgrade-package torchaudio
+      - name: Install the project from lock
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: uv sync --all-extras --dev --locked
       - name: Install Flower wheel from artifact store
