@@ -197,9 +197,6 @@ jobs:
       run:
         working-directory: framework/e2e/${{ matrix.directory }}
 
-    env:
-      UV_DEFAULT_INDEX: "https://download.pytorch.org/whl/cpu"
-
     steps:
       - uses: actions/checkout@v4
       - name: Install uv and set the Python version
@@ -215,26 +212,31 @@ jobs:
       #   with:
       #     path: ${{ env.pythonLocation }}
       #     key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
+      - name: Lock PyTorch to CPU wheels
+        if: ${{ needs.changes.outputs.framework == 'true' && ( matrix.directory == 'e2e-fastai' || matrix.directory == 'e2e-pytorch' || matrix.directory == 'e2e-pytorch-lightning' || matrix.directory == 'e2e-opacus' ) }}
+        run: |
+          UV_INDEX="pytorch=https://download.pytorch.org/whl/cpu" \
+          uv lock --upgrade-package torch torchvision torchaudio
       - name: Install the project
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        run: uv sync --all-extras --dev
+        run: uv sync --all-extras --dev --locked
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
           uv pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Download dataset
         if: ${{ needs.changes.outputs.framework == 'true' && matrix.dataset }}
-        run: uv run python -c "${{ matrix.dataset }}"
+        run: uv run --locked python -c "${{ matrix.dataset }}"
       - name: Run edge client test
         if: ${{ needs.changes.outputs.framework == 'true' && matrix.directory != 'e2e-bare-auth' }}
         working-directory: framework/e2e/${{ matrix.directory }}/${{ matrix.e2e }}
         run: ./../../test_legacy.sh "${{ matrix.directory }}"
       - name: Run virtual client test
         if: ${{ needs.changes.outputs.framework == 'true' && matrix.directory != 'e2e-bare-auth' }}
-        run: uv run simulation.py
+        run: uv run --locked simulation.py
       - name: Run simulation engine test
         if: ${{ needs.changes.outputs.framework == 'true' && (matrix.directory == 'e2e-pytorch' || matrix.directory == 'e2e-tensorflow') }}
-        run: uv run simulation_next.py
+        run: uv run --locked simulation_next.py
       - name: Run driver test
         if: ${{ needs.changes.outputs.framework == 'true' && matrix.directory != 'e2e-bare-auth' }}
         run: ./../test_superlink.sh "${{ matrix.directory }}"
