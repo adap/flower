@@ -1,11 +1,16 @@
 """app-pytorch: A Flower / PyTorch app."""
 
+from flwr.client import ClientApp
+from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 import torch
+
 from app_pytorch.task import Net, load_data
 from app_pytorch.task import test as test_fn
 from app_pytorch.task import train as train_fn
-from flwr.client import ClientApp
-from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
+
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 # Flower ClientApp
 app = ClientApp()
@@ -25,13 +30,12 @@ def evaluate(msg: Message, context: Context):
     )
 
     # Construct reply
-    metric_record = MetricRecord(
-        {
-            "eval_loss": eval_loss,
-            "eval_acc": eval_acc,
-            "num-examples": len(data_loader.dataset),
-        }
-    )
+    metrics = {
+        "eval_loss": eval_loss,
+        "eval_acc": eval_acc,
+        "num-examples": len(data_loader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
     content = RecordDict({"metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
@@ -71,7 +75,6 @@ def setup_client(msg: Message, context: Context, is_train: bool):
 
     # Instantiate model
     model = Net()
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Apply global model weights from message
     model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
