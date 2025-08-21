@@ -110,7 +110,7 @@ run the SuperExec as a subprocess upon start. The ``process`` isolation mode, by
 contrast, expects the SuperExec to run in a separately managed external process, so the
 SuperLink/SuperNode will not launch one automatically. This enables, for example,
 running the SuperNode and SuperExec in separate Docker containers with different
-dependency sets. See the :doc:`docker/index` guide for a deeper understanding of how to
+dependency sets. Or running SuperNode and SuperExec in different servers in the same network. See the :doc:`docker/index` guide for a deeper understanding of how to
 use both modes.
 
 When using the ``process`` isolation mode, additional network connections are necessary
@@ -124,7 +124,7 @@ communicate with the SuperLink or SuperNode:
   ``ServerApp``. It also allows the ``ServerApp``, once running, to do typical things
   like sending/receiving messages to/from available SuperNodes (via the SuperLink).
 - **SuperExec/ClientApp process to SuperNode (ClientAppIO API)**: Both the SuperExec for
-  ``ServerApp``\s and the ``ServerApp`` processes act as gRPC clients and connect to the
+  ``ClientApp``\s and the ``ClientApp`` processes act as gRPC clients and connect to the
   SuperNode's ClientAppIO API. This connection enables the SuperExec to discover runs to
   launch and the ``ClientApp`` process to pull the necessary details (e.g., FAB file) to
   execute the ``ClientApp``, execute the ``ClientApp`` (e.g., local model training), and
