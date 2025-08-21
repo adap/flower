@@ -9,13 +9,10 @@ case "$1" in
                   --ssl-certfile    ../certificates/server.pem
                   --ssl-keyfile     ../certificates/server.key'
       client_arg='--root-certificates ../certificates/ca.crt'
-      # For $executor_config, note special ordering of single- and double-quotes
-      executor_config='root-certificates="../certificates/ca.crt"'
       ;;
     insecure)
       server_arg='--insecure'
       client_arg=$server_arg
-      executor_config=''
     ;;
 esac
 
@@ -40,10 +37,10 @@ esac
 # Set engine
 case "$3" in
     deployment-engine)
-      executor_arg="--executor flwr.superexec.deployment:executor"
+      simulation_arg=""
       ;;
     simulation-engine)
-      executor_arg="--executor flwr.superexec.simulation:executor"
+      simulation_arg="--simulation"
       ;;
 esac
 
@@ -76,9 +73,9 @@ if [ "$3" = "simulation-engine" ]; then
 fi
 
 # Combine the arguments into a single command for flower-superlink
-combined_args="$server_arg $server_auth $executor_arg"
+combined_args="$server_arg $server_auth $simulation_arg"
 
-timeout 2m flower-superlink $combined_args --executor-config "$executor_config" 2>&1 | tee flwr_output.log &
+timeout 2m flower-superlink $combined_args 2>&1 | tee flwr_output.log &
 sl_pid=$(pgrep -f "flower-superlink")
 sleep 2
 
