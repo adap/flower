@@ -23,7 +23,7 @@ from typing import Callable, Optional
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, log
 from flwr.server import Grid
 
-from .strategy_utils import StrategyResults
+from .strategy_utils import StrategyResults, log_strategy_start_info
 
 
 class Strategy(ABC):
@@ -169,23 +169,7 @@ class Strategy(ABC):
             evaluation metrics (if provided), and final model arrays from all rounds.
         """
         log(INFO, f"Starting {self.__class__.__name__} strategy.")
-        log(INFO, f"\t└──> Number of rounds: {num_rounds}")
-        log(
-            INFO,
-            f"\t└──> ArrayRecord: {len(arrays)} Arrays totalling "
-            f"{sum(len(array.data) for array in arrays.values())/(1024**2):.2f} MB",
-        )
-        log(
-            INFO,
-            "\t└──> ConfigRecord (train): "
-            f"{train_config if train_config else '(empty!)'}",
-        )
-        log(
-            INFO,
-            "\t└──> ConfigRecord (evaluate): "
-            f"{evaluate_config if evaluate_config else '(empty!)'}",
-        )
-        log(INFO, "")
+        log_strategy_start_info(num_rounds, arrays, train_config, evaluate_config)
 
         # Initialize if None
         train_config = ConfigRecord() if train_config is None else train_config

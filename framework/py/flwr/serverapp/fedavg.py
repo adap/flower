@@ -14,7 +14,7 @@
 # ==============================================================================
 """Flower message-based FedAvg strategy."""
 
-from logging import ERROR, INFO
+from logging import INFO
 from typing import Callable, Optional
 
 from flwr.common import (
@@ -32,6 +32,7 @@ from .strategy import Strategy
 from .strategy_utils import (
     aggregate_arrayrecords,
     aggregate_metricrecords,
+    check_message_reply_consistency,
     sample_nodes,
 )
 
@@ -116,70 +117,9 @@ class FedAvg(Strategy):
                 content=record,
                 message_type=message_type,
                 dst_node_id=node_id,
-            )  #! Note i'm not using group_id
+            )
             messages.append(message)
         return messages
-
-    def _check_message_reply_consistency(
-        self, replies: list[RecordDict], check_arrayrecord: bool
-    ) -> bool:
-        """Check that replies contain one ArrayRecord, OneMetricRecord and that the
-        weighting factor key is present."""
-        # Checking for ArrayRecord consistency
-        skip_aggregation = False
-        if check_arrayrecord:
-            if all(len(msg.array_records) != 1 for msg in replies):
-                log(
-                    ERROR,
-                    "Expected exactly one ArrayRecord in replies, but found more. "
-                    "Skipping aggregation.",
-                )
-                skip_aggregation = True
-            else:
-                # Ensure all key are present in all ArrayRecords
-                all_key_sets = [
-                    set(next(iter(d.array_records.values())).keys()) for d in replies
-                ]
-                if not all(s == all_key_sets[0] for s in all_key_sets):
-                    log(
-                        ERROR,
-                        "All ArrayRecords must have the same keys for aggregation. "
-                        "This condition wasn't met. Skipping aggregation.",
-                    )
-                    skip_aggregation = True
-
-        # Checking for MetricRecord consistency
-        if all(len(msg.metric_records) != 1 for msg in replies):
-            log(
-                ERROR,
-                "Expected exactly one MetricRecord in replies, but found more. "
-                "Skipping aggregation.",
-            )
-            skip_aggregation = True
-        else:
-            # Ensure all key are present in all MetricRecords
-            all_key_sets = [
-                set(next(iter(d.metric_records.values())).keys()) for d in replies
-            ]
-            if not all(s == all_key_sets[0] for s in all_key_sets):
-                log(
-                    ERROR,
-                    "All MetricRecords must have the same keys for aggregation. "
-                    "This condition wasn't met. Skipping aggregation.",
-                )
-                skip_aggregation = True
-
-            # Check one of the sets for the key to perform weighting averaging
-            if self.weighting_factor_key not in all_key_sets[0]:
-                log(
-                    ERROR,
-                    "The MetricRecord in the reply messages were expecting key "
-                    f"`{self.weighting_factor_key}` to perform averaging of "
-                    "ArrayRecords and MetricRecords. Skipping aggregation.",
-                )
-                skip_aggregation = True
-
-        return skip_aggregation
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
@@ -233,8 +173,10 @@ class FedAvg(Strategy):
         replies_with_content = [msg.content for msg in replies if msg.has_content()]
 
         # Ensure expected ArrayRecords and MetricRecords are received
-        skip_aggregation = self._check_message_reply_consistency(
-            replies=replies_with_content, check_arrayrecord=True
+        skip_aggregation = check_message_reply_consistency(
+            replies=replies_with_content,
+            weighting_factor_key=self.weighting_factor_key,
+            check_arrayrecord=True,
         )
 
         if skip_aggregation:
@@ -306,8 +248,10 @@ class FedAvg(Strategy):
         replies_with_content = [msg.content for msg in replies if msg.has_content()]
 
         # Ensure expected ArrayRecords and MetricRecords are received
-        skip_aggregation = self._check_message_reply_consistency(
-            replies=replies_with_content, check_arrayrecord=False
+        skip_aggregation = check_message_reply_consistency(
+            replies=replies_with_content,
+            weighting_factor_key=self.weighting_factor_key,
+            check_arrayrecord=False,
         )
 
         if skip_aggregation:

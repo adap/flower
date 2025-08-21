@@ -18,13 +18,21 @@
 import random
 from collections import OrderedDict
 from dataclasses import dataclass, field
-from logging import INFO
+from logging import ERROR, INFO
 from time import sleep
-from typing import cast
+from typing import Optional, cast
 
 import numpy as np
 
-from flwr.common import Array, ArrayRecord, MetricRecord, NDArray, RecordDict, log
+from flwr.common import (
+    Array,
+    ArrayRecord,
+    ConfigRecord,
+    MetricRecord,
+    NDArray,
+    RecordDict,
+    log,
+)
 from flwr.server import Grid
 
 
@@ -38,6 +46,41 @@ class StrategyResults:
     central_evaluate_metrics: dict[int, MetricRecord] = field(default_factory=dict)
 
 
+def config_to_str(configRecord: ConfigRecord) -> str:
+    """Convert a ConfigRecord to a string representation masking bytes."""
+    content = ", ".join(
+        f"'{k}': {'<bytes>' if isinstance(v, bytes) else v}"
+        for k, v in configRecord.items()
+    )
+    return f"{{{content}}}"
+
+
+def log_strategy_start_info(
+    num_rounds: int,
+    arrays: ArrayRecord,
+    train_config: Optional[ConfigRecord],
+    evaluate_config: Optional[ConfigRecord],
+) -> None:
+    """Log information about the strategy start."""
+    log(INFO, f"\t└──> Number of rounds: {num_rounds}")
+    log(
+        INFO,
+        f"\t└──> ArrayRecord: {len(arrays)} Arrays totalling "
+        f"{sum(len(array.data) for array in arrays.values())/(1024**2):.2f} MB",
+    )
+    log(
+        INFO,
+        "\t└──> ConfigRecord (train): "
+        f"{config_to_str(train_config) if train_config else '(empty!)'}",
+    )
+    log(
+        INFO,
+        "\t└──> ConfigRecord (evaluate): "
+        f"{config_to_str(evaluate_config) if evaluate_config else '(empty!)'}",
+    )
+    log(INFO, "")
+
+
 def aggregate_arrayrecords(
     records: list[RecordDict], weighting_metric_name: str
 ) -> ArrayRecord:
@@ -47,7 +90,9 @@ def aggregate_arrayrecords(
     for record in records:
         # Get the first (and only) MetricRecord in the record
         metricrecord = next(iter(record.metric_records.values()))
-        w = cast(int, metricrecord[weighting_metric_name])
+        # Because replies have been checked for consistency,
+        # we can safely cast the weighting factor to float
+        w = cast(float, metricrecord[weighting_metric_name])
         weights.append(w)
 
     # Average
@@ -80,7 +125,9 @@ def aggregate_metricrecords(
     for record in records:
         # Get the first (and only) MetricRecord in the record
         metricrecord = next(iter(record.metric_records.values()))
-        w = cast(int, metricrecord[weighting_metric_name])
+        # Because replies have been checked for consistency,
+        # we can safely cast the weighting factor to float
+        w = cast(float, metricrecord[weighting_metric_name])
         weights.append(w)
 
     # Average
@@ -133,3 +180,84 @@ def sample_nodes(
     sampled_nodes = random.sample(list(nodes_connected), sample_size)
 
     return sampled_nodes, nodes_connected
+
+
+def check_message_reply_consistency(
+    replies: list[RecordDict], weighting_factor_key: str, check_arrayrecord: bool
+) -> bool:
+    """Check that replies contain one ArrayRecord, one MetricRecord and that the
+    weighting factor key is present.
+
+    These checks assist in keeping the behaviour of Message-based strategies consistent
+    with *Ins/*Res-based strategies.
+    """
+    # Checking for ArrayRecord consistency
+    skip_aggregation = False
+    if check_arrayrecord:
+        if all(len(msg.array_records) != 1 for msg in replies):
+            log(
+                ERROR,
+                "Expected exactly one ArrayRecord in replies, but found more. "
+                "Skipping aggregation.",
+            )
+            skip_aggregation = True
+        else:
+            # Ensure all key are present in all ArrayRecords
+            all_key_sets = [
+                set(next(iter(d.array_records.values())).keys()) for d in replies
+            ]
+            if not all(s == all_key_sets[0] for s in all_key_sets):
+                log(
+                    ERROR,
+                    "All ArrayRecords must have the same keys for aggregation. "
+                    "This condition wasn't met. Skipping aggregation.",
+                )
+                skip_aggregation = True
+
+    # Checking for MetricRecord consistency
+    if all(len(msg.metric_records) != 1 for msg in replies):
+        log(
+            ERROR,
+            "Expected exactly one MetricRecord in replies, but found more. "
+            "Skipping aggregation.",
+        )
+        skip_aggregation = True
+    else:
+        # Ensure all key are present in all MetricRecords
+        all_key_sets = [
+            set(next(iter(d.metric_records.values())).keys()) for d in replies
+        ]
+        if not all(s == all_key_sets[0] for s in all_key_sets):
+            log(
+                ERROR,
+                "All MetricRecords must have the same keys for aggregation. "
+                "This condition wasn't met. Skipping aggregation.",
+            )
+            skip_aggregation = True
+
+        # Check one of the sets for the key to perform weighting averaging
+        if weighting_factor_key not in all_key_sets[0]:
+            log(
+                ERROR,
+                "The MetricRecord in the reply messages were expecting key "
+                f"`{weighting_factor_key}` to perform averaging of "
+                "ArrayRecords and MetricRecords. Skipping aggregation.",
+            )
+            skip_aggregation = True
+        else:
+            # Check that it is not a list
+            if any(
+                isinstance(
+                    next(iter(d.metric_records.values()))[weighting_factor_key], list
+                )
+                for d in replies
+            ):
+                log(
+                    ERROR,
+                    "The MetricRecord in the reply messages were expecting key "
+                    f"`{weighting_factor_key}` to be a single value (float or int), "
+                    "but found a list. Skipping aggregation.",
+                )
+                skip_aggregation = True
+
+    return skip_aggregation
