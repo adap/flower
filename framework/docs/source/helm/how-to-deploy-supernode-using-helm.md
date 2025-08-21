@@ -82,31 +82,75 @@ $ helm install tensorflow . --values values.yaml
 
 This will deploy 3 SuperNodes named `tensorflow-flower-client-supernode-<random>`.
 
-### Deploy Flower Framework with TLS
+## Deploy Flower Framework without TLS
 
-To ensure TLS communication within the Flower framework, you need to configure your
-deployment with proper TLS certificates.
+By default, the Flower Framework is deployed without TLS. This means `global.insecure` is
+set to `true`.
 
-**Note:** If `global.insecure` is set to `False`, you must pre-provide a secret of
-type `kubernetes.io/tls` named `flower-client-tls`.
+You might want to deploy the Flower framework without TLS for testing or internal use. Be
+cautious as this exposes your deployment to potential security risks.
 
-Example configuration for TLS deployment:
+```yaml
+global:
+  insecure: true
+```
+
+## Deploy Flower Framework with TLS
+
+When using private CAs, the SuperNode must trust the CA certificate in order to connect
+securely to the SuperLink.
+
+To provide the CA certificate, set `global.insecure` to `false` and create a `Secret` of type
+`kubernetes.io/tls` named `flower-client-tls`:
 
 ```yaml
 global:
   insecure: false
 ```
 
-## Deploy Flower Framework without TLS
-
-For testing or internal use, you might want to deploy the Flower framework without TLS. Be
-cautious as this exposes your deployment to potential security risks.
-
-Example configuration for insecure deployment:
+If you want to use a different `Secret` name, override the default by setting
+`supernode.superlink.certificate.existingSecret`:
 
 ```yaml
 global:
-  insecure: true
+  insecure: false
+supernode:
+  superlink:
+    certificate:
+      existingSecret: my-custom-tls-secret-name
+```
+
+**Important:**
+
+It is technically possible to specify the SuperLink `Secret`
+(the one containing the server certificate) as the `existingSecret` for the SuperNode. However,
+you should not mount the same `Secret` into both the SuperLink and the SuperNode to access `ca.crt`.
+
+Keeping these `Secrets` separate ensures that if the `Secret` containing the server’s private key
+and certificate is ever tampered with, the client will fail to connect rather than trusting
+a compromised server.
+
+For further details, see the cert-manager [documentation](https://cert-manager.io/docs/trust/).
+
+If the SuperLink certificate (of type `kubernetes.io/tls`) is deployed in the same cluster and
+namespace as the SuperNode, you can enable `supernode.superlink.certificate.copyFromExistingSecret`.
+This instructs the chart to create a new `Secret` containing the CA certificate.
+It copies `ca.crt` from the SuperLink `Secret`, or falls back to `tls.crt` if `ca.crt` is not
+present.
+
+By default, the copied `Secret` is named `flower-client-tls`. You can customize this name with
+`supernode.superlink.certificate.copyFromExistingSecret.secretName`:
+
+```yaml
+global:
+  insecure: false
+supernode:
+  superlink:
+    certificate:
+      existingSecret: superlink-tls-secret-name
+    copyFromExistingSecret:
+      enabled: true
+      secretName: my-custom-tls-secret-name
 ```
 
 ## Node Authentication
