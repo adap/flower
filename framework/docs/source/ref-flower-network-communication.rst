@@ -109,9 +109,9 @@ The ``subprocess`` isolation mode configures the SuperLink/SuperNode to automati
 run the SuperExec as a subprocess upon start. The ``process`` isolation mode, by
 contrast, expects the SuperExec to run in a separately managed external process, so the
 SuperLink/SuperNode will not launch one automatically. This enables, for example,
-running the SuperNode and SuperExec in separate Docker containers with different
-dependency sets. Or running SuperNode and SuperExec in different servers in the same network. See the :doc:`docker/index` guide for a deeper understanding of how to
-use both modes.
+running the SuperLink/SuperNode and SuperExec in separate Docker containers with
+different dependency sets, or running them on different servers within the same network.
+See the :doc:`docker/index` guide for a deeper understanding of how to use both modes.
 
 When using the ``process`` isolation mode, additional network connections are necessary
 to allow the external process running the SuperExec, ``ServerApp``, or ``ClientApp`` to
