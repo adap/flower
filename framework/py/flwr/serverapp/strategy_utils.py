@@ -46,11 +46,10 @@ class StrategyResults:
     central_evaluate_metrics: dict[int, MetricRecord] = field(default_factory=dict)
 
 
-def config_to_str(configRecord: ConfigRecord) -> str:
+def config_to_str(config: ConfigRecord) -> str:
     """Convert a ConfigRecord to a string representation masking bytes."""
     content = ", ".join(
-        f"'{k}': {'<bytes>' if isinstance(v, bytes) else v}"
-        for k, v in configRecord.items()
+        f"'{k}': {'<bytes>' if isinstance(v, bytes) else v}" for k, v in config.items()
     )
     return f"{{{content}}}"
 
@@ -62,21 +61,22 @@ def log_strategy_start_info(
     evaluate_config: Optional[ConfigRecord],
 ) -> None:
     """Log information about the strategy start."""
-    log(INFO, f"\t└──> Number of rounds: {num_rounds}")
+    log(INFO, "\t└──> Number of rounds: %d", num_rounds)
     log(
         INFO,
-        f"\t└──> ArrayRecord: {len(arrays)} Arrays totalling "
-        f"{sum(len(array.data) for array in arrays.values())/(1024**2):.2f} MB",
+        "\t└──> ArrayRecord: %d Arrays totalling %.2f MB",
+        len(arrays),
+        sum(len(array.data) for array in arrays.values()) / (1024**2),
     )
     log(
         INFO,
-        "\t└──> ConfigRecord (train): "
-        f"{config_to_str(train_config) if train_config else '(empty!)'}",
+        "\t└──> ConfigRecord (train): %s",
+        config_to_str(train_config) if train_config else "(empty!)",
     )
     log(
         INFO,
-        "\t└──> ConfigRecord (evaluate): "
-        f"{config_to_str(evaluate_config) if evaluate_config else '(empty!)'}",
+        "\t└──> ConfigRecord (evaluate): %s",
+        config_to_str(evaluate_config) if evaluate_config else "(empty!)",
     )
     log(INFO, "")
 
@@ -171,8 +171,10 @@ def sample_nodes(
         sleep(1)
         log(
             INFO,
-            f"Waiting for nodes to connect. Nodes connected {len(nodes_connected)} "
-            f"(expecting at least {min_available_nodes}).",
+            "Waiting for nodes to connect. Nodes connected %d "
+            "(expecting at least %d).",
+            len(nodes_connected),
+            min_available_nodes,
         )
         nodes_connected = list(grid.get_node_ids())
 
@@ -240,8 +242,9 @@ def check_message_reply_consistency(
             log(
                 ERROR,
                 "The MetricRecord in the reply messages were expecting key "
-                f"`{weighting_factor_key}` to perform averaging of "
+                "`%s` to perform averaging of "
                 "ArrayRecords and MetricRecords. Skipping aggregation.",
+                weighting_factor_key,
             )
             skip_aggregation = True
         else:
@@ -255,8 +258,9 @@ def check_message_reply_consistency(
                 log(
                     ERROR,
                     "The MetricRecord in the reply messages were expecting key "
-                    f"`{weighting_factor_key}` to be a single value (float or int), "
+                    "`%s` to be a single value (float or int), "
                     "but found a list. Skipping aggregation.",
+                    weighting_factor_key,
                 )
                 skip_aggregation = True
 

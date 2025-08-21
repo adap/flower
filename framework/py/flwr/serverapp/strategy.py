@@ -168,7 +168,7 @@ class Strategy(ABC):
             Results containing training metrics, evaluation metrics, centralized
             evaluation metrics (if provided), and final model arrays from all rounds.
         """
-        log(INFO, f"Starting {self.__class__.__name__} strategy.")
+        log(INFO, "Starting %s strategy:", self.__class__.__name__)
         log_strategy_start_info(num_rounds, arrays, train_config, evaluate_config)
 
         # Initialize if None
@@ -227,7 +227,7 @@ class Strategy(ABC):
             arrays = agg_arrays
 
         log(INFO, "")
-        log(INFO, f"Strategy execution finished in {time() - t_start:.2f}s")
+        log(INFO, "Strategy execution finished in %.2fs", time() - t_start)
         log(INFO, "")
 
         return results

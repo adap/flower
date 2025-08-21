@@ -37,6 +37,7 @@ from .strategy_utils import (
 )
 
 
+# pylint: disable=too-many-instance-attributes
 class FedAvg(Strategy):
     """Federated Averaging strategy.
 
