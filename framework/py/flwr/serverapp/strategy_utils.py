@@ -184,6 +184,7 @@ def sample_nodes(
     return sampled_nodes, nodes_connected
 
 
+# pylint: disable=too-many-return-statements
 def check_message_reply_consistency(
     replies: list[RecordDict], weighting_factor_key: str, check_arrayrecord: bool
 ) -> bool:
@@ -194,7 +195,6 @@ def check_message_reply_consistency(
     with *Ins/*Res-based strategies.
     """
     # Checking for ArrayRecord consistency
-    skip_aggregation = False
     if check_arrayrecord:
         if all(len(msg.array_records) != 1 for msg in replies):
             log(
@@ -202,19 +202,23 @@ def check_message_reply_consistency(
                 "Expected exactly one ArrayRecord in replies, but found more. "
                 "Skipping aggregation.",
             )
-            skip_aggregation = True
-        else:
-            # Ensure all key are present in all ArrayRecords
-            all_key_sets = [
-                set(next(iter(d.array_records.values())).keys()) for d in replies
-            ]
-            if not all(s == all_key_sets[0] for s in all_key_sets):
-                log(
-                    ERROR,
-                    "All ArrayRecords must have the same keys for aggregation. "
-                    "This condition wasn't met. Skipping aggregation.",
-                )
-                skip_aggregation = True
+            return True  # Skip aggregation
+
+        # Ensure all key are present in all ArrayRecords
+        all_key_sets = [
+            set(next(iter(d.array_records.values())).keys()) for d in replies
+        ]
+        # Also add the key of the ArrayRecord itself
+        all_key_sets = [
+            keys | set(d.array_records.keys()) for d, keys in zip(replies, all_key_sets)
+        ]
+        if not all(s == all_key_sets[0] for s in all_key_sets):
+            log(
+                ERROR,
+                "All ArrayRecords must have the same keys for aggregation. "
+                "This condition wasn't met. Skipping aggregation.",
+            )
+            return True  # Skip aggregation
 
     # Checking for MetricRecord consistency
     if all(len(msg.metric_records) != 1 for msg in replies):
@@ -223,45 +227,45 @@ def check_message_reply_consistency(
             "Expected exactly one MetricRecord in replies, but found more. "
             "Skipping aggregation.",
         )
-        skip_aggregation = True
-    else:
-        # Ensure all key are present in all MetricRecords
-        all_key_sets = [
-            set(next(iter(d.metric_records.values())).keys()) for d in replies
-        ]
-        if not all(s == all_key_sets[0] for s in all_key_sets):
-            log(
-                ERROR,
-                "All MetricRecords must have the same keys for aggregation. "
-                "This condition wasn't met. Skipping aggregation.",
-            )
-            skip_aggregation = True
+        return True  # Skip aggregation
 
-        # Check one of the sets for the key to perform weighting averaging
-        if weighting_factor_key not in all_key_sets[0]:
-            log(
-                ERROR,
-                "The MetricRecord in the reply messages were expecting key "
-                "`%s` to perform averaging of "
-                "ArrayRecords and MetricRecords. Skipping aggregation.",
-                weighting_factor_key,
-            )
-            skip_aggregation = True
-        else:
-            # Check that it is not a list
-            if any(
-                isinstance(
-                    next(iter(d.metric_records.values()))[weighting_factor_key], list
-                )
-                for d in replies
-            ):
-                log(
-                    ERROR,
-                    "The MetricRecord in the reply messages were expecting key "
-                    "`%s` to be a single value (float or int), "
-                    "but found a list. Skipping aggregation.",
-                    weighting_factor_key,
-                )
-                skip_aggregation = True
+    # Ensure all key are present in all MetricRecords
+    all_key_sets = [set(next(iter(d.metric_records.values())).keys()) for d in replies]
+    # Also add the key of the MetricRecord itself
+    all_key_sets = [
+        keys | set(d.metric_records.keys()) for d, keys in zip(replies, all_key_sets)
+    ]
+    if not all(s == all_key_sets[0] for s in all_key_sets):
+        log(
+            ERROR,
+            "All MetricRecords must have the same keys for aggregation. "
+            "This condition wasn't met. Skipping aggregation.",
+        )
+        return True  # Skip aggregation
 
-    return skip_aggregation
+    # Check one of the sets for the key to perform weighting averaging
+    if weighting_factor_key not in all_key_sets[0]:
+        log(
+            ERROR,
+            "The MetricRecord in the reply messages were expecting key "
+            "`%s` to perform averaging of "
+            "ArrayRecords and MetricRecords. Skipping aggregation.",
+            weighting_factor_key,
+        )
+        return True  # Skip aggregation
+
+    # Check that it is not a list
+    if any(
+        isinstance(next(iter(d.metric_records.values()))[weighting_factor_key], list)
+        for d in replies
+    ):
+        log(
+            ERROR,
+            "The MetricRecord in the reply messages were expecting key "
+            "`%s` to be a single value (float or int), "
+            "but found a list. Skipping aggregation.",
+            weighting_factor_key,
+        )
+        return True  # Skip aggregation
+
+    return False

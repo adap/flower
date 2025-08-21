@@ -15,10 +15,12 @@
 """Tests for message-based strategy utilities."""
 
 
+from collections import OrderedDict
+
 import numpy as np
 from parameterized import parameterized
 
-from flwr.common import ArrayRecord, ConfigRecord, MetricRecord, RecordDict
+from flwr.common import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 
 from .strategy_utils import (
     aggregate_arrayrecords,
@@ -129,8 +131,13 @@ def test_metricrecords_aggregation() -> None:
         ),  # Compliant
         (
             True,
-            RecordDict({"global-model": ArrayRecord([np.random.randn(7, 3)])}),
-        ),  # No MetricsRecord (BAD)
+            RecordDict(
+                {
+                    "global-model": ArrayRecord([np.random.randn(7, 3)]),
+                    "metrics": MetricRecord({"weight": [0.123]}),
+                }
+            ),
+        ),  # No weighting key is not a scalar (BAD)
         (
             True,
             RecordDict(
@@ -140,6 +147,10 @@ def test_metricrecords_aggregation() -> None:
                 }
             ),
         ),  # No weighting key in MetricRecord (BAD)
+        (
+            True,
+            RecordDict({"global-model": ArrayRecord([np.random.randn(7, 3)])}),
+        ),  # No MetricsRecord (BAD)
         (
             True,
             RecordDict(
@@ -161,7 +172,9 @@ def test_metricrecords_aggregation() -> None:
         ),  # Two MetricRecords (BAD)
     ]
 )
-def test_consistency_of_replies(skip_aggregation: bool, recorddict: RecordDict) -> None:
+def test_consistency_of_replies_with_matching_keys(
+    skip_aggregation: bool, recorddict: RecordDict
+) -> None:
     """Test consistency in replies."""
     # Create dummy records
     records = [recorddict for _ in range(3)]
@@ -170,6 +183,95 @@ def test_consistency_of_replies(skip_aggregation: bool, recorddict: RecordDict) 
     assert (
         check_message_reply_consistency(
             records, weighting_factor_key="weight", check_arrayrecord=True
+        )
+        == skip_aggregation
+    )
+
+
+@parameterized.expand(  # type: ignore
+    [
+        (
+            True,
+            [
+                RecordDict(
+                    {
+                        "global-model": ArrayRecord([np.random.randn(7, 3)]),
+                        "metrics": MetricRecord({"weight": 0.123}),
+                    }
+                ),
+                RecordDict(
+                    {
+                        "model": ArrayRecord([np.random.randn(7, 3)]),
+                        "metrics": MetricRecord({"weight": 0.123}),
+                    }
+                ),
+            ],
+        ),  # top-level keys don't match for ArrayRecords
+        (
+            True,
+            [
+                RecordDict(
+                    {
+                        "global-model": ArrayRecord(
+                            OrderedDict({"a": Array(np.random.randn(7, 3))})
+                        ),
+                        "metrics": MetricRecord({"weight": 0.123}),
+                    }
+                ),
+                RecordDict(
+                    {
+                        "global-model": ArrayRecord(
+                            OrderedDict({"b": Array(np.random.randn(7, 3))})
+                        ),
+                        "metrics": MetricRecord({"weight": 0.123}),
+                    }
+                ),
+            ],
+        ),  # top-level keys match for ArrayRecords but not those for Arrays
+        (
+            True,
+            [
+                RecordDict(
+                    {
+                        "global-model": ArrayRecord([np.random.randn(7, 3)]),
+                        "metrics": MetricRecord({"weight": 0.123}),
+                    }
+                ),
+                RecordDict(
+                    {
+                        "global-model": ArrayRecord([np.random.randn(7, 3)]),
+                        "my-metrics": MetricRecord({"weight": 0.123}),
+                    }
+                ),
+            ],
+        ),  # top-level keys don't match for MetricRecords
+        (
+            True,
+            [
+                RecordDict(
+                    {
+                        "global-model": ArrayRecord([np.random.randn(7, 3)]),
+                        "metrics": MetricRecord({"weight": 0.123}),
+                    }
+                ),
+                RecordDict(
+                    {
+                        "global-model": ArrayRecord([np.random.randn(7, 3)]),
+                        "my-metrics": MetricRecord({"my-weights": 0.123}),
+                    }
+                ),
+            ],
+        ),  # top-level keys match for MetricRecords but not inner ones
+    ]
+)
+def test_consistency_of_replies_with_different_keys(
+    skip_aggregation: bool, list_records: list[RecordDict]
+) -> None:
+    """Test consistency in replies when records don't have matching keys."""
+    # Check consistency
+    assert (
+        check_message_reply_consistency(
+            list_records, weighting_factor_key="weight", check_arrayrecord=True
         )
         == skip_aggregation
     )
