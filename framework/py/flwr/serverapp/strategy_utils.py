@@ -29,13 +29,13 @@ from flwr.server import Grid
 
 
 @dataclass
-class ReturnStrategyResults:
+class StrategyResults:
     """Data class carrying records generated during the execution of a strategy."""
 
+    arrays: ArrayRecord = field(default_factory=ArrayRecord)
     train_metrics: dict[int, MetricRecord] = field(default_factory=dict)
     evaluate_metrics: dict[int, MetricRecord] = field(default_factory=dict)
     central_evaluate_metrics: dict[int, MetricRecord] = field(default_factory=dict)
-    arrays: ArrayRecord = field(default_factory=ArrayRecord)
 
 
 def aggregate_arrayrecords(

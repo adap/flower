@@ -23,7 +23,7 @@ from typing import Callable, Optional
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, log
 from flwr.server import Grid
 
-from .strategy_utils import ReturnStrategyResults
+from .strategy_utils import StrategyResults
 
 
 class Strategy(ABC):
@@ -126,14 +126,14 @@ class Strategy(ABC):
 
     def start(
         self,
-        arrays: ArrayRecord,
         grid: Grid,
+        arrays: ArrayRecord,
         num_rounds: int,
         timeout: float,
         train_config: Optional[ConfigRecord] = None,
         evaluate_config: Optional[ConfigRecord] = None,
         central_eval_fn: Optional[Callable[[int, ArrayRecord], MetricRecord]] = None,
-    ) -> ReturnStrategyResults:
+    ) -> StrategyResults:
         """Execute the federated learning strategy.
 
         Runs the complete federated learning workflow for the specified number of
@@ -141,11 +141,11 @@ class Strategy(ABC):
 
         Parameters
         ----------
-        arrays : ArrayRecord
-            Initial model parameters (arrays) to be used for federated learning.
         grid : Grid
             The Grid instance used to send/receive Messages from nodes executing a
             ClientApp.
+        arrays : ArrayRecord
+            Initial model parameters (arrays) to be used for federated learning.
         num_rounds : int
             Number of federated learning rounds to execute.
         timeout : float
@@ -163,7 +163,7 @@ class Strategy(ABC):
 
         Returns
         -------
-        ReturnStrategyResults
+        StrategyResults
             Results containing training metrics, evaluation metrics, centralized
             evaluation metrics (if provided), and final model arrays from all rounds.
         """
@@ -189,14 +189,14 @@ class Strategy(ABC):
         # Initialize if None
         train_config = ConfigRecord() if train_config is None else train_config
         evaluate_config = ConfigRecord() if evaluate_config is None else evaluate_config
-        metrics_history = ReturnStrategyResults()
+        results = StrategyResults()
 
         t_start = time()
         # Do central eval with starting global parameters
         if central_eval_fn:
             res = central_eval_fn(0, arrays)
             log(INFO, "Initial central evaluation results: %s", res)
-            metrics_history.central_evaluate_metrics[0] = res
+            results.central_evaluate_metrics[0] = res
 
         for current_round in range(1, num_rounds + 1):
             log(INFO, "")
@@ -215,8 +215,8 @@ class Strategy(ABC):
             if agg_arrays is None or agg_metrics is None:
                 break
             log(INFO, "\t└──> Aggregated  MetricRecord: %s", agg_metrics)
-            metrics_history.train_metrics[current_round] = agg_metrics
-            metrics_history.arrays = agg_arrays
+            results.train_metrics[current_round] = agg_metrics
+            results.arrays = agg_arrays
 
             # Configure evaluate, send messages and wait for replies
             replies = grid.send_and_receive(
@@ -230,14 +230,14 @@ class Strategy(ABC):
             if agg_metrics is None:
                 break
             log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_metrics)
-            metrics_history.evaluate_metrics[current_round] = agg_metrics
+            results.evaluate_metrics[current_round] = agg_metrics
 
             # Centralised eval
             if central_eval_fn:
                 log(INFO, "Central evaluation")
                 res = central_eval_fn(current_round, agg_arrays)
                 log(INFO, "\t└──> MetricRecord: %s", res)
-                metrics_history.central_evaluate_metrics[current_round] = res
+                results.central_evaluate_metrics[current_round] = res
 
             arrays = agg_arrays
 
@@ -245,4 +245,4 @@ class Strategy(ABC):
         log(INFO, f"Strategy execution finished in {time() - t_start:.2f}s")
         log(INFO, "")
 
-        return metrics_history
+        return results
