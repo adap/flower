@@ -1,7 +1,8 @@
 """app-pytorch: A Flower / PyTorch app."""
 
+from logging import INFO
 from datasets import load_dataset
-from flwr.common import ArrayRecord, ConfigRecord, Context
+from flwr.common import ArrayRecord, ConfigRecord, Context, log
 from flwr.common.record.metricrecord import MetricRecord
 from flwr.server import Grid, ServerApp
 from flwr.serverapp import FedAvg
@@ -10,10 +11,6 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
 from app_pytorch.task import Net, test
-
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 
 # Create ServerApp
 app = ServerApp()
@@ -45,10 +42,15 @@ def main(grid: Grid, context: Context) -> None:
         central_eval_fn=central_evaluation,
     )
 
-    print(strategy_results.train_metrics)
-    print(strategy_results.evaluate_metrics)
-    print(strategy_results.central_evaluate_metrics)
+    # Log resulting metrics
+    log(INFO, strategy_results.train_metrics)
+    log(INFO, strategy_results.evaluate_metrics)
+    log(INFO, strategy_results.central_evaluate_metrics)
 
+    # Save final model to disk
+    state_dict = strategy_results.arrays.to_torch_state_dict()
+    log(INFO, "Saving final model to disk.")
+    torch.save(state_dict, "final_model.pt")
 
 def central_evaluation(server_round, array_record: ArrayRecord) -> MetricRecord:
     """Evaluate model on central data."""
@@ -56,6 +58,7 @@ def central_evaluation(server_round, array_record: ArrayRecord) -> MetricRecord:
     # Load the model and initialize it with the received weights
     model = Net()
     model.load_state_dict(array_record.to_torch_state_dict())
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
     # Load entire test set
