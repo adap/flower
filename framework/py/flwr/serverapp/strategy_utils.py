@@ -58,15 +58,13 @@ def aggregate_arrayrecords(
     aggregated_np_arrays: dict[str, NDArray] = {}
 
     for record, weight in zip(records, weight_factors):
-        for record_item in record.values():
-            # For ArrayRecord
-            if isinstance(record_item, ArrayRecord):
-                # aggregate in-place
-                for key, value in record_item.items():
-                    if key not in aggregated_np_arrays:
-                        aggregated_np_arrays[key] = value.numpy() * weight
-                    else:
-                        aggregated_np_arrays[key] += value.numpy() * weight
+        for record_item in record.array_records.values():
+            # aggregate in-place
+            for key, value in record_item.items():
+                if key not in aggregated_np_arrays:
+                    aggregated_np_arrays[key] = value.numpy() * weight
+                else:
+                    aggregated_np_arrays[key] += value.numpy() * weight
 
     return ArrayRecord(
         OrderedDict({k: Array(v) for k, v in aggregated_np_arrays.items()})
@@ -91,30 +89,25 @@ def aggregate_metricrecords(
 
     aggregated_metrics = MetricRecord()
     for record, weight in zip(records, weight_factors):
-        for record_item in record.values():
-            # For MetricRecord
-            if isinstance(record_item, MetricRecord):
-                # aggregate in-place
-                for key, value in record_item.items():
-                    if key == weighting_metric_name:
-                        # We exclude the weighting key from the aggregated MetricRecord
-                        continue
-                    if key not in aggregated_metrics:
-                        if isinstance(value, list):
-                            aggregated_metrics[key] = (
-                                np.array(value) * weight
-                            ).tolist()
-                        else:
-                            aggregated_metrics[key] = value * weight
+        for record_item in record.metric_records.values():
+            # aggregate in-place
+            for key, value in record_item.items():
+                if key == weighting_metric_name:
+                    # We exclude the weighting key from the aggregated MetricRecord
+                    continue
+                if key not in aggregated_metrics:
+                    if isinstance(value, list):
+                        aggregated_metrics[key] = (np.array(value) * weight).tolist()
                     else:
-                        if isinstance(value, list):
-                            aggregated_metrics[key] = (
-                                np.array(aggregated_metrics[key])
-                                + np.array(value) * weight
-                            ).tolist()
-                        else:
-                            current_value = cast(float, aggregated_metrics[key])
-                            aggregated_metrics[key] = current_value + value * weight
+                        aggregated_metrics[key] = value * weight
+                else:
+                    if isinstance(value, list):
+                        aggregated_metrics[key] = (
+                            np.array(aggregated_metrics[key]) + np.array(value) * weight
+                        ).tolist()
+                    else:
+                        current_value = cast(float, aggregated_metrics[key])
+                        aggregated_metrics[key] = current_value + value * weight
 
     return aggregated_metrics
 

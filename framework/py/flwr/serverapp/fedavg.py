@@ -77,6 +77,7 @@ class FedAvg(Strategy):
         MetricRecord.
     """
 
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self,
         fraction_train: float = 1.0,

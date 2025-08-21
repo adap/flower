@@ -124,6 +124,7 @@ class Strategy(ABC):
             or None if aggregation failed.
         """
 
+    # pylint: disable=too-many-arguments, too-many-positional-arguments
     def start(
         self,
         grid: Grid,
