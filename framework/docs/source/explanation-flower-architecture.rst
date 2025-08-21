@@ -124,8 +124,8 @@ participate in the training:
     Run 2 in a multi-run federated learning architecture with Flower. Only the first and
     second SuperNodes are selected to participate in the training round.
 
-Therefore, with Flower multi-run, different Flower App projects (each consisting of a
-``ServerApp`` and ``ClientApp``) can run on different sets of clients.
+Therefore, with Flower multi-run, different Flower App projects can run on different
+sets of clients.
 
 .. note::
 
