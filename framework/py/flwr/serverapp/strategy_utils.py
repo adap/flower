@@ -22,8 +22,6 @@ from logging import ERROR, INFO
 from time import sleep
 from typing import Optional, cast
 
-import numpy as np
-
 from flwr.common import (
     Array,
     ArrayRecord,
@@ -144,14 +142,16 @@ def aggregate_metricrecords(
                     continue
                 if key not in aggregated_metrics:
                     if isinstance(value, list):
-                        aggregated_metrics[key] = (np.array(value) * weight).tolist()
+                        aggregated_metrics[key] = [v * weight for v in value]
                     else:
                         aggregated_metrics[key] = value * weight
                 else:
                     if isinstance(value, list):
-                        aggregated_metrics[key] = (
-                            np.array(aggregated_metrics[key]) + np.array(value) * weight
-                        ).tolist()
+                        current_list = cast(list[float], aggregated_metrics[key])
+                        aggregated_metrics[key] = [
+                            curr + val * weight
+                            for curr, val in zip(current_list, value)
+                        ]
                     else:
                         current_value = cast(float, aggregated_metrics[key])
                         aggregated_metrics[key] = current_value + value * weight
