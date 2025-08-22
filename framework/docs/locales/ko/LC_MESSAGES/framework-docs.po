@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-20 00:07+0000\n"
+"POT-Creation-Date: 2025-08-21 00:06+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -363,14 +363,14 @@ msgstr "빌드 전달인자"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:39
 #: ../../source/contributor-how-to-build-docker-images.rst:105
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #: ../../source/how-to-configure-audit-logging.rst:57
-#: ../../source/ref-exit-codes/000.rst:5 ../../source/ref-exit-codes/001.rst:5
-#: ../../source/ref-exit-codes/002.rst:5 ../../source/ref-exit-codes/003.rst:5
+#: ../../source/ref-exit-codes/0.rst:5 ../../source/ref-exit-codes/1.rst:5
 #: ../../source/ref-exit-codes/100.rst:5 ../../source/ref-exit-codes/101.rst:5
 #: ../../source/ref-exit-codes/102.rst:5 ../../source/ref-exit-codes/103.rst:5
-#: ../../source/ref-exit-codes/104.rst:5 ../../source/ref-exit-codes/300.rst:5
+#: ../../source/ref-exit-codes/104.rst:5 ../../source/ref-exit-codes/2.rst:5
+#: ../../source/ref-exit-codes/3.rst:5 ../../source/ref-exit-codes/300.rst:5
 #: ../../source/ref-exit-codes/301.rst:5 ../../source/ref-exit-codes/302.rst:5
 #: ../../source/ref-exit-codes/600.rst:5 ../../source/ref-exit-codes/601.rst:5
 #: ../../source/ref-exit-codes/602.rst:5
@@ -2660,10 +2660,10 @@ msgstr ""
 #: ../../source/docker/enable-tls.rst:186
 #: ../../source/docker/enable-tls.rst:213
 #: ../../source/docker/enable-tls.rst:238
-#: ../../source/docker/tutorial-quickstart-docker.rst:72
-#: ../../source/docker/tutorial-quickstart-docker.rst:113
-#: ../../source/docker/tutorial-quickstart-docker.rst:225
-#: ../../source/docker/tutorial-quickstart-docker.rst:307
+#: ../../source/docker/tutorial-quickstart-docker.rst:77
+#: ../../source/docker/tutorial-quickstart-docker.rst:118
+#: ../../source/docker/tutorial-quickstart-docker.rst:233
+#: ../../source/docker/tutorial-quickstart-docker.rst:270
 #, fuzzy
 msgid "``docker run``: This tells Docker to run a container from an image."
 msgstr "``docker run``: 새 Docker 컨테이너를 실행하는 명령입니다."
@@ -2673,10 +2673,10 @@ msgstr "``docker run``: 새 Docker 컨테이너를 실행하는 명령입니다.
 #: ../../source/docker/enable-tls.rst:187
 #: ../../source/docker/enable-tls.rst:214
 #: ../../source/docker/enable-tls.rst:239
-#: ../../source/docker/tutorial-quickstart-docker.rst:73
-#: ../../source/docker/tutorial-quickstart-docker.rst:114
-#: ../../source/docker/tutorial-quickstart-docker.rst:226
-#: ../../source/docker/tutorial-quickstart-docker.rst:308
+#: ../../source/docker/tutorial-quickstart-docker.rst:78
+#: ../../source/docker/tutorial-quickstart-docker.rst:119
+#: ../../source/docker/tutorial-quickstart-docker.rst:234
+#: ../../source/docker/tutorial-quickstart-docker.rst:271
 msgid "``--rm``: Remove the container once it is stopped or the command exits."
 msgstr ""
 
@@ -2867,7 +2867,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/docker/enable-tls.rst
-#: ../../source/docker/tutorial-quickstart-docker.rst
 msgid ""
 ":substitution-code:`flwr/superlink:|stable_flwr_version|`: The name of "
 "the image to be run and the specific"
@@ -2880,7 +2879,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/docker/enable-tls.rst
-#: ../../source/docker/tutorial-quickstart-docker.rst
 msgid ""
 "``--isolation process``: Tells the SuperLink that the ServerApp is "
 "created by separate"
@@ -2891,7 +2889,6 @@ msgid "independent process. The SuperLink does not attempt to create it."
 msgstr ""
 
 #: ../../source/docker/enable-tls.rst:175
-#: ../../source/docker/tutorial-quickstart-docker.rst:211
 #, fuzzy
 msgid "Start the ServerApp container:"
 msgstr "현재 클라이언트 속성입니다."
@@ -2916,7 +2913,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/docker/enable-tls.rst
-#: ../../source/docker/tutorial-quickstart-docker.rst
 msgid ""
 "unencrypted communication. Secure connections will be added in future "
 "releases."
@@ -2955,14 +2951,12 @@ msgid ""
 msgstr ""
 
 #: ../../source/docker/enable-tls.rst
-#: ../../source/docker/tutorial-quickstart-docker.rst
 msgid ""
 "``--isolation process``: Tells the SuperNode that the ClientApp is "
 "created by separate"
 msgstr ""
 
 #: ../../source/docker/enable-tls.rst
-#: ../../source/docker/tutorial-quickstart-docker.rst
 msgid "independent process. The SuperNode does not attempt to create it."
 msgstr ""
 
@@ -2985,7 +2979,7 @@ msgstr "``pyproject.toml``에 다음 버전 제약 조건을 설정했는지 확
 
 #: ../../source/docker/enable-tls.rst:246
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:60
-#: ../../source/docker/tutorial-quickstart-docker.rst:334
+#: ../../source/docker/tutorial-quickstart-docker.rst:302
 #: ../../source/how-to-enable-tls-connections.rst:122
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:174
 #, fuzzy
@@ -3853,11 +3847,11 @@ msgstr ""
 msgid "Create a new Flower project (PyTorch):"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:42
+#: ../../source/docker/tutorial-quickstart-docker.rst:47
 msgid "Create a new Docker bridge network called ``flwr-network``:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:48
+#: ../../source/docker/tutorial-quickstart-docker.rst:53
 msgid ""
 "User-defined networks, such as ``flwr-network``, enable IP resolution of "
 "container names, a feature absent in the default bridge network. This "
@@ -3865,194 +3859,164 @@ msgid ""
 "first."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:53
+#: ../../source/docker/tutorial-quickstart-docker.rst:58
 #, fuzzy
 msgid "Step 2: Start the SuperLink"
 msgstr "서버(SuperLink)"
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:68
-#: ../../source/docker/tutorial-quickstart-docker.rst:55
+#: ../../source/docker/tutorial-quickstart-docker.rst:60
 msgid "Open your terminal and run:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:79
 msgid ""
 "``-p 9091:9091 -p 9092:9092 -p 9093:9093``: Map port ``9091``, ``9092`` "
-"and ``9093`` of the"
+"and ``9093`` of the container to the same port of the host machine, "
+"allowing other services to access the ServerAppIO API on "
+"``http://localhost:9091``, the Fleet API on ``http://localhost:9092`` and"
+" the Control API on ``http://localhost:9093``."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid ""
-"container to the same port of the host machine, allowing other services "
-"to access the"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid ""
-"ServerAppIO API on ``http://localhost:9091``, the Fleet API on "
-"``http://localhost:9092`` and"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "the Control API on ``http://localhost:9093``."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst:78
-#: ../../source/docker/tutorial-quickstart-docker.rst:118
-#: ../../source/docker/tutorial-quickstart-docker.rst:227
-#: ../../source/docker/tutorial-quickstart-docker.rst:309
+#: ../../source/docker/tutorial-quickstart-docker.rst:83
+#: ../../source/docker/tutorial-quickstart-docker.rst:123
+#: ../../source/docker/tutorial-quickstart-docker.rst:235
+#: ../../source/docker/tutorial-quickstart-docker.rst:272
 msgid ""
 "``--network flwr-network``: Make the container join the network named "
 "``flwr-network``."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:79
+#: ../../source/docker/tutorial-quickstart-docker.rst:84
 msgid "``--name superlink``: Assign the name ``superlink`` to the container."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:80
-#: ../../source/docker/tutorial-quickstart-docker.rst:120
-#: ../../source/docker/tutorial-quickstart-docker.rst:229
-#: ../../source/docker/tutorial-quickstart-docker.rst:310
+#: ../../source/docker/tutorial-quickstart-docker.rst:85
+#: ../../source/docker/tutorial-quickstart-docker.rst:125
+#: ../../source/docker/tutorial-quickstart-docker.rst:237
+#: ../../source/docker/tutorial-quickstart-docker.rst:274
 msgid ""
 "``--detach``: Run the container in the background, freeing up the "
 "terminal."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:86
 msgid ""
-"tag of the image. The tag :substitution-code:`|stable_flwr_version|` "
-"represents a :doc:`specific version <pin-version>` of the image."
+":substitution-code:`flwr/superlink:|stable_flwr_version|`: The name of "
+"the image to be run and the specific tag of the image. The tag "
+":substitution-code:`|stable_flwr_version|` represents a :doc:`specific "
+"version <pin-version>` of the image."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:88
+#: ../../source/docker/tutorial-quickstart-docker.rst:128
 msgid ""
 "``--insecure``: This flag tells the container to operate in an insecure "
-"mode, allowing"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "unencrypted communication."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid ""
-"independent process. The SuperLink does not attempt to create it. You can"
-" learn more about"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "the different process modes here: :doc:`run-as-subprocess`."
+"mode, allowing unencrypted communication."
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker.rst:90
+msgid ""
+"``--isolation process``: Tells the SuperLink that the ServerApp is "
+"executed by separate independent process. The SuperLink does not attempt "
+"to execute it. You can learn more about the different process modes here:"
+" :doc:`run-as-subprocess`."
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker.rst:95
 #, fuzzy
 msgid "Step 3: Start the SuperNodes"
 msgstr "서버(SuperLink)"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:92
+#: ../../source/docker/tutorial-quickstart-docker.rst:97
 msgid "Start two SuperNode containers."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:94
+#: ../../source/docker/tutorial-quickstart-docker.rst:99
 msgid "Start the first container:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "``-p 9094:9094``: Map port ``9094`` of the container to the same port of"
+#: ../../source/docker/tutorial-quickstart-docker.rst:120
+msgid ""
+"``-p 9094:9094``: Map port ``9094`` of the container to the same port of "
+"the host machine, allowing other services to access the SuperNode API on "
+"``http://localhost:9094``."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "the host machine, allowing other services to access the SuperNode API on"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "``http://localhost:9094``."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst:119
+#: ../../source/docker/tutorial-quickstart-docker.rst:124
 msgid "``--name supernode-1``: Assign the name ``supernode-1`` to the container."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:126
+#, fuzzy
 msgid ""
 ":substitution-code:`flwr/supernode:|stable_flwr_version|`: This is the "
-"name of the"
-msgstr ""
+"name of the image to be run and the specific tag of the image."
+msgstr "``flwr_supernode:0.0.1``: 사용할 Docker 이미지의 태그 이름입니다."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "image to be run and the specific tag of the image."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:130
 msgid ""
 "``--superlink superlink:9092``: Connect to the SuperLink's Fleet API at "
-"the address"
+"the address ``superlink:9092``."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "``superlink:9092``."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:132
 msgid ""
 "``--node-config \"partition-id=0 num-partitions=2\"``: Set the partition "
-"ID to ``0`` and the"
+"ID to ``0`` and the number of partitions to ``2`` for the SuperNode "
+"configuration."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "number of partitions to ``2`` for the SuperNode configuration."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:134
 msgid ""
 "``--clientappio-api-address 0.0.0.0:9094``: Set the address and port "
-"number that the"
+"number that the SuperNode is listening on to communicate with the "
+"ClientApp process. If multiple SuperNodes are started on the same "
+"machine, use a different port number for each SuperNode. (E.g. In the "
+"next step, we set the second SuperNode container to listen on port 9095)"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "SuperNode is listening on to communicate with the ClientApp. If"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:138
 msgid ""
-"two SuperNodes are started on the same machine, set two different port "
-"numbers for each SuperNode."
+"``--isolation process``: Tells the SuperNode that the ClientApp is "
+"executed by a separate independent process. The SuperNode does not "
+"attempt to execute it."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid ""
-"(E.g. In the next step, we set the second SuperNode container to listen "
-"on port 9095)"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst:136
+#: ../../source/docker/tutorial-quickstart-docker.rst:141
 msgid "Start the second container:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:154
+#: ../../source/docker/tutorial-quickstart-docker.rst:159
 #, fuzzy
-msgid "Step 4: Start a ServerApp"
+msgid "Step 4: Start the SuperExec to execute ServerApps"
 msgstr "서버(SuperLink)"
-
-#: ../../source/docker/tutorial-quickstart-docker.rst:156
-msgid ""
-"The ServerApp Docker image comes with a pre-installed version of Flower "
-"and serves as a base for building your own ServerApp image. In order to "
-"install the FAB dependencies, you will need to create a Dockerfile that "
-"extends the ServerApp image and installs the required dependencies."
-msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker.rst:161
 msgid ""
-"Create a ServerApp Dockerfile called ``serverapp.Dockerfile`` and paste "
-"the following code in:"
+"The **SuperExec** Docker image comes with a pre-installed version of "
+"Flower and serves as a base for building your own image. Use a **single**"
+" image and select the desired behavior (ServerApps vs ClientApps) at "
+"runtime via the ``--plugin-type`` flag. SuperExec spawns the "
+"corresponding processes on demand."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:164
+#: ../../source/docker/tutorial-quickstart-docker.rst:166
+msgid ""
+"When using SuperExec with the *serverapp* plugin, pass ``--appio-api-"
+"address`` pointing to the SuperLink's **ServerAppIO API** endpoint."
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker.rst:169
+msgid ""
+"Create a Dockerfile called ``superexec.Dockerfile`` and paste the "
+"following:"
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker.rst:171
 #: ../../source/how-to-run-flower-on-gcp.rst
 #, fuzzy
-msgid "serverapp.Dockerfile"
+msgid "superexec.Dockerfile"
 msgstr "SuperNode Dockerfile 만들기"
 
 #: ../../source/docker/tutorial-quickstart-docker.rst
@@ -4060,297 +4024,231 @@ msgstr "SuperNode Dockerfile 만들기"
 msgid "Understand the Dockerfile"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:187
+#, fuzzy
 msgid ""
-":substitution-code:`FROM flwr/serverapp:|stable_flwr_version|`: This line"
-" specifies that the Docker image"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid ""
-"to be built from is the ``flwr/serverapp`` image, version :substitution-"
+":substitution-code:`FROM flwr/superexec:|stable_flwr_version|`: This line"
+" specifies that the Docker image to be built from is the "
+"``flwr/superexec`` image, version :substitution-"
 "code:`|stable_flwr_version|`."
-msgstr ""
+msgstr "다음 명령은 ``superlink:1.8.0`` 태그가 참조하는 현재 이미지 해시를 반환합니다:"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "``WORKDIR /app``: Set the working directory for the container to ``/app``."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:189
 msgid ""
-"Any subsequent commands that reference a directory will be relative to "
-"this directory."
+"``WORKDIR /app``: Set the working directory for the container to "
+"``/app``. Any subsequent commands that reference a directory will be "
+"relative to this directory."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:191
 msgid ""
-"from the current working directory into the container's ``/app`` "
-"directory."
+"``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file. from the "
+"current working directory into the container's ``/app`` directory."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:193
 msgid ""
 "``RUN sed -i 's/.*flwr\\[simulation\\].*//' pyproject.toml``: Remove the "
-"``flwr`` dependency"
+"``flwr`` dependency from the ``pyproject.toml``."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
-#, fuzzy
-msgid "from the ``pyproject.toml``."
-msgstr "또는 ``pyproject.toml``:"
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:195
 msgid ""
 "``python -m pip install -U --no-cache-dir .``: Run the ``pip`` install "
-"command to"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "install the dependencies defined in the ``pyproject.toml`` file"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid ""
-"The ``-U`` flag indicates that any existing packages should be upgraded, "
-"and"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid ""
-"``--no-cache-dir`` prevents pip from using the cache to speed up the "
-"installation."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid ""
-"``ENTRYPOINT [\"flwr-serverapp\"]``: Set the command ``flwr-serverapp`` "
-"to be"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "the default command run when the container is started."
+"command to install the dependencies defined in the ``pyproject.toml`` "
+"file."
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker.rst:198
 msgid ""
+"The ``-U`` flag indicates that any existing packages should be upgraded, "
+"and ``--no-cache-dir`` prevents pip from using the cache to speed up the "
+"installation."
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker.rst:200
+msgid ""
+"``ENTRYPOINT [\"flower-superexec\"]``: Set the command ``flower-"
+"superexec`` to be the default command run when the container is started."
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker.rst:205
+msgid ""
 "Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed "
-"in the ``flwr/clientapp`` base image, so only other package dependencies "
+"in the ``flwr/superexec`` base image, so only other package dependencies "
 "such as ``flwr-datasets``, ``torch``, etc., need to be installed. As a "
 "result, the ``flwr`` dependency is removed from the ``pyproject.toml`` "
 "after it has been copied into the Docker image (see line 5)."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:204
+#: ../../source/docker/tutorial-quickstart-docker.rst:211
 msgid ""
 "Afterward, in the directory that holds the Dockerfile, execute this "
-"Docker command to build the ServerApp image:"
+"Docker command to build the SuperExec image:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:228
-msgid "``--name serverapp``: Assign the name ``serverapp`` to the container."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:218
 #, fuzzy
-msgid ""
-"``flwr_serverapp:0.0.1``: This is the name of the image to be run and the"
-" specific tag"
-msgstr "``flwr_supernode:0.0.1``: 사용할 Docker 이미지의 태그 이름입니다."
+msgid "Start the **SuperExec for ServerApps** container:"
+msgstr "현재 클라이언트 속성입니다."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "of the image."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid ""
-"``--serverappio-api-address superlink:9091``: Connect to the SuperLink's "
-"ServerAppIO API"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "at the address ``superlink:9091``."
+#: ../../source/docker/tutorial-quickstart-docker.rst:236
+msgid "``--name superexec-serverapp``: Give the container a descriptive name."
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker.rst:238
+#: ../../source/docker/tutorial-quickstart-docker.rst:275
 #, fuzzy
-msgid "Step 5: Start the ClientApp"
-msgstr "서버(SuperLink)"
+msgid ""
+"``flwr_superexec:0.0.1``: This is the name of the image to be run and the"
+" specific tag of the image."
+msgstr "``flwr_supernode:0.0.1``: 사용할 Docker 이미지의 태그 이름입니다."
 
 #: ../../source/docker/tutorial-quickstart-docker.rst:240
-#, fuzzy
+#: ../../source/docker/tutorial-quickstart-docker.rst:277
 msgid ""
-"The procedure for building and running a ClientApp image is almost "
-"identical to the ServerApp image."
-msgstr "ServerApp 이미지를 빌드하고 실행하는 절차는 SuperNode 이미지와 거의 동일합니다."
-
-#: ../../source/docker/tutorial-quickstart-docker.rst:243
-msgid ""
-"Similar to the ServerApp image, you will need to create a Dockerfile that"
-" extends the ClientApp image and installs the required FAB dependencies."
+"``--insecure``: This flag tells the container to operate in an insecure "
+"mode, allowing unencrypted communication. Secure connections will be "
+"added in future releases."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:246
+#: ../../source/docker/tutorial-quickstart-docker.rst:242
 msgid ""
-"Create a ClientApp Dockerfile called ``clientapp.Dockerfile`` and paste "
-"the following code into it:"
+"``--plugin-type serverapp``: Load the *serverapp* plugin. SuperExec will "
+"spawn ServerApp processes as needed."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:249
-#: ../../source/how-to-run-flower-on-gcp.rst
-#, fuzzy
-msgid "clientapp.Dockerfile"
-msgstr "클라이언트앱"
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:244
 msgid ""
-":substitution-code:`FROM flwr/clientapp:|stable_flwr_version|`: This line"
-" specifies that the Docker image"
+"``--appio-api-address superlink:9091``: Connect to the SuperLink's "
+"ServerAppIO API at the address ``superlink:9091``."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:248
 #, fuzzy
-msgid ""
-"to be built from is the ``flwr/clientapp`` image, version :substitution-"
-"code:`|stable_flwr_version|`."
-msgstr "다음 명령은 ``superlink:1.8.0`` 태그가 참조하는 현재 이미지 해시를 반환합니다:"
+msgid "Step 5: Start the SuperExec to execute ClientApps"
+msgstr "서버(SuperLink)"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst
+#: ../../source/docker/tutorial-quickstart-docker.rst:250
 msgid ""
-"``ENTRYPOINT [\"flwr-clientapp\"]``: Set the command ``flwr-clientapp`` "
-"to be"
+"For ClientApps, reuse the **same** image and change the plugin and API "
+"address. When using the *clientapp* plugin, pass ``--appio-api-address`` "
+"pointing to the SuperNode's **ClientAppIO API** endpoint."
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker.rst:254
+msgid "(No new Dockerfile is needed; reuse ``flwr_superexec:0.0.1``.)"
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker.rst:255
+#, fuzzy
+msgid "Start the first **SuperExec for ClientApps** container:"
+msgstr "현재 클라이언트 속성입니다."
+
+#: ../../source/docker/tutorial-quickstart-docker.rst:273
+msgid "``--name superexec-clientapp-1``: Give the container a descriptive name."
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker.rst:279
+msgid ""
+"``--plugin-type clientapp``: Load the *clientapp* plugin. SuperExec will "
+"spawn ClientApp processes as needed."
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker.rst:281
+msgid ""
+"``--appio-api-address supernode-1:9094``: Connect to the SuperNode's "
+"ClientAppIO API at the address ``supernode-1:9094``."
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker.rst:284
 #, fuzzy
-msgid ""
-"Next, build the ClientApp Docker image by running the following command "
-"in the directory where the Dockerfile is located:"
-msgstr ""
-"다음으로, Docker파일과 ServerApp 코드가 있는 디렉터리에서 다음 명령을 실행하여 ServerApp Docker 이미지를"
-" 빌드합니다."
+msgid "Start the second **SuperExec for ClientApps** container:"
+msgstr "현재 클라이언트 속성입니다."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:290
-#, fuzzy
-msgid ""
-"The image name was set as ``flwr_clientapp`` with the tag ``0.0.1``. "
-"Remember that these values are merely examples, and you can customize "
-"them according to your requirements."
-msgstr ""
-"이미지에``flwr_serverapp``이라는 이름을 붙이고 ``0.0.1``이라는 태그를 붙였습니다. 여기서 선택한 값은 예시일 "
-"뿐이라는 점을 기억하세요. 필요에 따라 변경할 수 있습니다."
-
-#: ../../source/docker/tutorial-quickstart-docker.rst:294
-msgid "Start the first ClientApp container:"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-#, fuzzy
-msgid ""
-"``flwr_clientapp:0.0.1``: This is the name of the image to be run and the"
-" specific tag"
-msgstr "``flwr_serverapp:0.0.1``: 사용할 Docker 이미지의 태그 이름입니다."
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid ""
-"``--clientappio-api-address supernode-1:9094``: Connect to the "
-"SuperNode's ClientAppIO"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst
-msgid "API at the address ``supernode-1:9094``."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst:318
-msgid "Start the second ClientApp container:"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker.rst:330
+#: ../../source/docker/tutorial-quickstart-docker.rst:298
 msgid "Step 6: Run the Quickstart Project"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:332
+#: ../../source/docker/tutorial-quickstart-docker.rst:300
 #, fuzzy
 msgid "Add the following lines to the ``pyproject.toml``:"
 msgstr "``pyproject.toml``에 다음 버전 제약 조건을 설정했는지 확인하세요:"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:341
+#: ../../source/docker/tutorial-quickstart-docker.rst:309
 msgid ""
 "Run the ``quickstart-docker`` project and follow the ServerApp logs to "
 "track the execution of the run:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:349
+#: ../../source/docker/tutorial-quickstart-docker.rst:317
 msgid "Step 7: Update the Application"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:351
+#: ../../source/docker/tutorial-quickstart-docker.rst:319
 msgid ""
 "Change the application code. For example, change the ``seed`` in "
 "``quickstart_docker/task.py`` to ``43`` and save it:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:354
+#: ../../source/docker/tutorial-quickstart-docker.rst:322
 msgid "quickstart_docker/task.py"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:361
+#: ../../source/docker/tutorial-quickstart-docker.rst:329
 #, fuzzy
-msgid "Stop the current ServerApp and ClientApp containers:"
-msgstr "현재 클라이언트 속성입니다."
+msgid "Stop the running containers:"
+msgstr "이미 *서버*를 시작할 수 있습니다:"
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:129
-#: ../../source/docker/tutorial-quickstart-docker.rst:365
+#: ../../source/docker/tutorial-quickstart-docker.rst:333
 msgid ""
 "If you have modified the dependencies listed in your ``pyproject.toml`` "
 "file, it is essential to rebuild images."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:368
-msgid "If you haven’t made any changes, you can skip steps 2 through 4."
+#: ../../source/docker/tutorial-quickstart-docker.rst:336
+msgid "If you haven't made any changes, you can skip steps 2 through 4."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:374
+#: ../../source/docker/tutorial-quickstart-docker.rst:342
 #, fuzzy
-msgid "Rebuild ServerApp and ClientApp images:"
+msgid "Rebuild the SuperExec image:"
 msgstr "기본 이미지 빌드"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:381
+#: ../../source/docker/tutorial-quickstart-docker.rst:348
 msgid ""
-"Launch one new ServerApp and two new ClientApp containers based on the "
-"newly built image:"
+"Launch **one SuperExec container** for the new ServerApp and **two "
+"SuperExec containers** for the new ClientApps:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:406
+#: ../../source/docker/tutorial-quickstart-docker.rst:378
 msgid "Run the updated project:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:413
+#: ../../source/docker/tutorial-quickstart-docker.rst:385
 msgid "Step 8: Clean Up"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:415
+#: ../../source/docker/tutorial-quickstart-docker.rst:387
 msgid "Remove the containers and the bridge network:"
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:404
-#: ../../source/docker/tutorial-quickstart-docker.rst:427
+#: ../../source/docker/tutorial-quickstart-docker.rst:398
 #, fuzzy
 msgid "Where to Go Next"
 msgstr "시작 위치"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:429
+#: ../../source/docker/tutorial-quickstart-docker.rst:400
 msgid ":doc:`enable-tls`"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:430
+#: ../../source/docker/tutorial-quickstart-docker.rst:401
 msgid ":doc:`persist-superlink-state`"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:431
+#: ../../source/docker/tutorial-quickstart-docker.rst:402
 msgid ":doc:`tutorial-quickstart-docker-compose`"
 msgstr ""
 
@@ -5551,171 +5449,197 @@ msgid ""
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:89
+#: ../../source/how-to-configure-audit-logging.rst:6
+#, fuzzy
+msgid "Configure Audit Logging"
+msgstr "클라이언트 구성"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:91
+msgid ""
+"Audit logging provides JSON-formatted log output for Flower, allowing you"
+" to capture and store events that occur in the SuperLink. This feature is"
+" useful for monitoring, debugging, or maintaining a historical record of "
+"important actions."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:95
+msgid ""
+"To enable audit logging, add the following flag to the SuperLink "
+"configuration:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:104
+msgid ""
+"For more details on audit logging configuration, visit: [Flower Audit "
+"Logging Documentation](../how-to-configure-audit-logging.rst)"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:107
 msgid "License Key"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:91
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:109
 msgid ""
 "Starting from `1.20.0`, the SuperLink service must be started with a "
 "valid license key."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:94
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:112
 msgid ""
 "You can configure the license key in the `global.license` section of your"
 " `values.yml` file in one of two ways:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:97
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:115
 msgid "Directly — by setting `global.license.key` to your license key."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:98
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:116
 msgid ""
 "From an existing Kubernetes Secret — by setting "
 "`global.license.existingSecret` to the name of a secret that contains "
 "your key."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:101
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:119
 msgid "Example: Setting the License Key Directly"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:111
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:129
 msgid ""
 "In this configuration, the Helm chart will automatically create a "
 "Kubernetes Secret and mount it into the SuperLink container."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:114
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:132
 #, fuzzy
 msgid "Example: Using an Existing Secret"
 msgstr "기존 전략 사용"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:124
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:142
 msgid ""
 "If both `key` and `existingSecret` are set, `existingSecret` takes "
 "precedence and the `key` value will be ignored."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:127
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:145
 msgid "Note that the existing secret must contain the key `FLWR_LICENSE_KEY`:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:135
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:153
 #, fuzzy
 msgid "Enable User Authentication"
 msgstr "설치 확인"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:137
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:155
 msgid ""
 "User authentication can be enabled if you're using the Flower Enterprise "
 "Edition (EE) Docker images. This is configured in the `global.userAuth` "
 "section of your `values.yml` file."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:140
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:158
 #, fuzzy
 msgid "Example: Enabling OpenID Connect (OIDC) Authentication"
 msgstr ":code:`SuperNode`에서 노드 인증을 활성화합니다"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:156
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:174
 #, fuzzy
 msgid "Explanation of Parameters:"
 msgstr "모델 매개변수."
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:158
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:176
 msgid "`auth_type`: The authentication mechanism being used (e.g., oidc)."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:159
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:177
 msgid ""
 "`auth_url`: The OpenID Connect authentication endpoint where users "
 "authenticate."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:160
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:178
 msgid "`token_url`: The URL for retrieving access tokens."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:161
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:179
 msgid "`validate_url`: The endpoint for validating user authentication."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:162
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:180
 msgid "`oidc_client_id`: The client ID issued by the authentication provider."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:163
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:181
 msgid "`oidc_client_secret`: The secret key associated with the client ID."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:165
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:183
 #, fuzzy
 msgid "Use an Existing Secret"
 msgstr "기존 전략 사용"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:167
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:185
 msgid ""
 "To use an existing secret that contains the user authentication "
 "configuration, set `existingSecret` to the name of the existing secret:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:178
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:196
 msgid "Note that the existing secret must contain the key `user-auth-config.yml`:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:193
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:211
 #, fuzzy
 msgid "Configuring OpenFGA"
 msgstr "구성"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:195
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:213
 msgid ""
 "The flower-server chat component supports OpenFGA as a fine-grained "
 "authorization service, but it is disabled by default."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:198
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:216
 msgid "To enable OpenFGA change the following value in your `values.yml` file:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:205
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:223
 msgid ""
 "By default, OpenFGA will run with an in-memory store, which is non-"
 "persistent and suitable only for testing or development."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:208
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:226
 msgid "OpenFGA supports persistent storage using PostgreSQL or MySQL:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:210
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:228
 msgid ""
 "To deploy OpenFGA with a new PostgreSQL/MySQL instance, enable the "
 "bundled chart configuration."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:211
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:229
 msgid ""
 "To connect to an existing database, provide the appropriate connection "
 "details via Helm values (e.g., `openfga.datastore.uri`)."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:214
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:232
 msgid ""
 "For more information visit the official [OpenFGA Helm Chart "
 "Documentation](https://artifacthub.io/packages/helm/openfga/openfga/0.2.30)."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:216
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:234
 msgid ""
 "The following commands set up a store, authorization model, and inserts "
 "users (using tuples) into OpenFGA. Run these once the OpenFGA instance is"
 " deployed."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:218
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:236
 msgid "Setup the authorization model and tuples:"
 msgstr ""
 
@@ -5727,30 +5651,30 @@ msgstr ""
 msgid "User permissions file `tuples.fga`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:252
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:270
 #, fuzzy
 msgid "Create store:"
 msgstr "새 페이지 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:262
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:280
 msgid ""
 "The response will include an `id` field, which is the OpenFGA store ID "
 "associated with the `OPENFGA_STORE_NAME` that was created."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:264
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:282
 msgid "Get store ID (alternative way):"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:271
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:289
 msgid "Set OpenFGA store ID from previous step and write model:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:281
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:299
 msgid "Set OpenFGA model ID from previous step and write tuples:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:292
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:310
 msgid ""
 "Add a new `authorization` section under your existing `global.userAuth` "
 "configuration or directly within your existing secret, depending on your "
@@ -5758,129 +5682,129 @@ msgid ""
 "previous steps in the file:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:304
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:322
 #, fuzzy
 msgid "Change Isolation Mode"
 msgstr "해결법"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:306
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:324
 msgid ""
 "The isolation mode determines how the SuperLink manages the ServerApp "
 "process execution. This setting can be adjusted using the "
 "`superlink.isolationMode` parameter:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:309
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:327
 msgid "**Example: Changing Isolation Mode**"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:321
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:339
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:85
 #, fuzzy
 msgid "Deploy Flower Framework with TLS"
 msgstr "Flower 프레임워크"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:323
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:341
 msgid ""
 "To ensure TLS communication within the Flower Framework, you need to "
 "configure your deployment with proper TLS certificates."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:333
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:351
 #, fuzzy
 msgid "Override certificate paths"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:335
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:353
 msgid ""
 "By default, the TLS-related flags use the following paths when TLS is "
 "enabled:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:337
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:355
 msgid ""
 "`--ssl-ca-certfile`: `/app/cert/ca.crt`, `--ssl-certfile`: "
 "`/app/cert/tls.crt`, `--ssl-keyfile`: `/app/cert/tls.key`."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:341
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:359
 msgid ""
 "These paths can be overridden by specifying the flags in the extraArgs, "
 "as shown below."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:357
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:375
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:100
 #, fuzzy
 msgid "Deploy Flower Framework without TLS"
 msgstr "플라워 프레임워크 문서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:359
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:377
 msgid ""
 "To deploy the Flower Framework simply, you need to configure your "
 "deployment as insecure."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:368
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:386
 msgid "Pre-provide TLS Certificate"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:370
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:388
 msgid ""
 "If certificate creation is disabled, you must provide a pre-existing "
 "secret of type `kubernetes.io/tls` named `<flower-server.fullname"
 ">-server-tls`."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:378
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:396
 #, fuzzy
 msgid "Ingress Configuration"
 msgstr "구성 값"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:380
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:398
 msgid "SSL-Passthrough"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:382
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:400
 msgid ""
 "When the `tls` option is set to `true`, it expects the existence of the "
 "`<flower-server.fullname>-server-tls` secret. Flower Framework components"
 " will load TLS certificates on startup."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:419
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:437
 msgid "**Pre-Provide TLS Certificate with Additional Hosts**"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:421
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:439
 msgid ""
 "In this example, we use `cert-manager` to create a certificate. By "
 "default, the certificate will only include the DNS name specified in "
 "`common-name`."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:424
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:442
 msgid ""
 "In some cases, the server and client charts are deployed in the same "
 "cluster, while the exec API is accessible via the internet."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:427
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:445
 msgid ""
 "To allow SuperNodes to connect to the SuperLink via the internal service "
 "URL, you need to add an additional host, as shown below:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:454
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:472
 #, fuzzy
 msgid "Enable Node Authentication"
 msgstr ":code:`SuperNode`에서 노드 인증을 활성화합니다"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:473
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:491
 msgid "Public keys can include comments at the end of the key data:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:482
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:500
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:205
 #: ../../source/ref-api/flwr.common.Parameters.rst:2 flwr.app.error.Error
 #: flwr.app.metadata.Metadata flwr.client.client.Client.evaluate
@@ -5947,1735 +5871,1735 @@ msgstr ""
 msgid "Parameters"
 msgstr "파라미터"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:484
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:502
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:207
 #, fuzzy
 msgid "Helm parameters"
 msgstr "모델 매개변수."
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Name"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "Value"
 msgstr "EvaluateRes"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`nameOverride`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Override Replaces the name of the chart in the Chart.yaml"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`flower-server`"
 msgstr "Flower 서버."
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`fullnameOverride`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Override Completely replaces the generated name."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`\"\"`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:491
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:509
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:214
 #, fuzzy
 msgid "Global parameters"
 msgstr "모델 매개변수."
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.annotations`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "Default Annotations"
 msgstr "설명"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, python-brace-format
 msgid "`{}`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.labels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default Labels"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.podLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default PodLabels"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.domain`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default Domain"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "`example.com`"
 msgstr "예시"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.insecure`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "Decide if you deploy the Flower Framework with TLS"
 msgstr "Flower 프레임워크"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "`true`"
 msgstr "``DISTRO``"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.ingressClassName`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default IngressClass"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.nodeSelector`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default node selector for all components"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.tolerations`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "Default tolerations for all components"
 msgstr "고객을 위한 맞춤 지침."
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`[]`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.affinity.podAntiAffinity`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default affinity preset for all components"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`soft`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default pod anti-affinity rules. Either: `none`, `soft` or `hard`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.affinity.nodeAffinity.type`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default node affinity rules. Either: `none`, `soft` or `hard`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`hard`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.affinity.nodeAffinity.matchExpressions`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default match expressions for node affinity"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.certificateAnnotations`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default Cert-Manager certificate annotations"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.nodeAuth.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "Enables or Disables Node-Authentication SuperLink \\<-> SuperNode"
 msgstr ":code:`SuperNode`에서 노드 인증을 활성화합니다"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "`false`"
 msgstr "``flwr/base``"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`global.nodeAuth.authListPublicKeys`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "A list of ecdsa-sha2-nistp384 SuperNode keys"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`global.userAuth.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Enables or disables the user authentication plugin."
 msgstr "설치 확인"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`global.userAuth.config`"
 msgstr ":code:`evaluate`"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Set the user authentication configuration."
 msgstr "구성 값"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`global.userAuth.existingSecret`"
 msgstr "기존 전략 사용"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Existing secret with user authentication configuration."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`global.license.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Enables or disables the configuration of the EE license."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`global.license.key`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "The EE license key."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`global.license.secretKey`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "The name of the key inside the Kubernetes Secret"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`FLWR_LICENSE_KEY`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`global.license.existingSecret`"
 msgstr "기존 전략 사용"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Name of an existing Kubernetes Secret"
 msgstr "기존 전략 사용"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.securityContext.runAsUser`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Set Security Context runAsUser"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`49999`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.securityContext.runAsGroup`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Set Security Context runAsGroup"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.securityContext.fsGroup`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Set Security Context fsGroup"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.podSecurityContext.runAsNonRoot`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Set Security Context runAsNonRoot"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.podSecurityContext.readOnlyRootFilesystem`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Set Security Context readOnlyRootFilesystem"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.podSecurityContext.allowPrivilegeEscalation`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Set Security Context allowPrivilegeEscalation"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.podSecurityContext.seccompProfile.type`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Set Security Context seccompProfile"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "`RuntimeDefault`"
 msgstr "``flwr/base``"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.podSecurityContext.capabilities.drop`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Set Security Context capabilities"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`[\"ALL\"]`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.env`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "Default environment variables"
 msgstr "환경 변수 설정"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.image.pullPolicy`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default image pullPolicy"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`IfNotPresent`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:528
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:546
 #, fuzzy
 msgid "Flower-TLS-Certificate parameters"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`certificate.enabled`"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Can be disabled if a Secret already exists"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`certificate.annotations`"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Certificate CRD annotations"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`certificate.name`"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Certificate name"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`flower-server-tls`"
 msgstr "Flower 서버."
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`certificate.duration`"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid ""
 "The requested ‘duration’ (i.e. lifetime) of the Certificate. Default is 5"
 " years."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`43800h`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`certificate.renewBefore`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid ""
 "How long before the currently issued certificate’s expiry cert-manager "
 "should renew the certificate. Default is 15 days."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`360h`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`certificate.privateKey`"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid ""
 "Private key options. These include the key algorithm and size, the used "
 "encoding and the rotation policy."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`certificate.usages`"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Requested key usages and extended key usages."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`certificate.additionalHosts`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Additional hosts you want to put into the SAN's of the certificate"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`certificate.issuer.group`"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Defaults to cert-Manager.io"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`cert-manager.io`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`certificate.issuer.kind`"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Defaults to Issuer"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`Issuer`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`certificate.issuer.name`"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Name of the Issuer or Issuer to use"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`certificate.issuer.spec`"
 msgstr "인증서"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "The contents of the `.spec` block for the cert-manager Issuer."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:545
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:563
 #, fuzzy
 msgid "Component SuperLink"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.name`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Name of the SuperLink"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.enabled`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Enable or Disable SuperLink"
 msgstr ":code:`SuperLink`에서 노드 인증 활성화"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.resources`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid ""
 "Set container requests and limits for different resources like CPU or "
 "memory (essential for production workloads)"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.volumes`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Specify a list of volumes for the SuperLink pod(s)"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.volumeMounts`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Allows to specify additional VolumeMounts"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.executor.plugin`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "The executer plugin of the SuperLink"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`flwr.superexec.deployment:executor`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.executor.config`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Set executor config arguments"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.isolationMode`"
 msgstr "해결법"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "The isolation mode of the SuperLink"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`subprocess`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.automountServiceAccountToken`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Automount SA-Token into the pod."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.serviceAccount.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Enabled a service account for the application controller"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.serviceAccount.annotations`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Annotations applied to enabled service account"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.serviceAccount.labels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Labels applied to enabled service account"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.serviceAccount.automountServiceAccountToken`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Automount SA-Token"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.service.servicePortApiName`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Prefix of the SuperLink API port"
 msgstr "서버(SuperLink)"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`api`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.service.servicePortApi`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Port to expose for the SuperLink API"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`9093`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.service.nodePortApi`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Node port for SuperLink API"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.service.type`"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Valid are ClusterIP, NodePort or Loadbalancer"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`ClusterIP`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.service.servicePortDriverName`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Prefix of the SuperLink Driver API port"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`driver`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.service.servicePortDriver`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Port to expose for the SuperLink Driver API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`9091`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.service.nodePortDriver`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Node port for SuperLink Driver API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.service.servicePortFleetName`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Prefix of the SuperLink Fleet API port"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`fleet`"
 msgstr "``flwr/base``"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.service.servicePortFleet`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Port to expose for the SuperLink Fleet API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`9092`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.service.nodePortFleet`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Node port for SuperLink Fleet API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.service.servicePortSimulationIoName`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Prefix of the SuperLink SimulationIo API port"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`simulationIo`"
 msgstr "CLI 시뮬레이션"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.service.servicePortSimulationIo`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Port to expose for the SuperLink SimulationIo API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`9096`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.service.nodePortSimulationIo`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Node port for SuperLink SimulationIo API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.containerPorts.api`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Container port for SuperLink Exec API"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.containerPorts.driver`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Container port for SuperLink Driver API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.containerPorts.fleet`"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Container port for SuperLink Fleet API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.containerPorts.simulationIo`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Container port for SuperLink SimulationIo API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.replicaCount`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "The number of SuperLink pods to run"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`1`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.labels`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Extra labels for SuperLink pods"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.extraArgs`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Add extra arguments to the default arguments for the SuperLink"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.nodeSelector`"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Node labels for SuperLink pods which merges with global.nodeSelector"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.tolerations`"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Node tolerations for SuperLink pods which merges with global.tolerations"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.updateStrategy.type`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "SuperLink deployment strategy type"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`RollingUpdate`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.updateStrategy.rollingUpdate`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "SuperLink deployment rolling update configuration parameters"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.affinity`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Node affinity for SuperLink pods which merges with global.affinity"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.env`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid ""
 "Array with extra environment variables to add to SuperLink nodes which "
 "merges with global.env"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.podSecurityContext`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Security settings that for the SuperLink Pods"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.securityContext`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Security settings that for the SuperLink"
 msgstr "서버(SuperLink)"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Enable the ingress resource"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.annotations`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Additional annotations for the ingress"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.ingressClassName`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Defines which ingress controller which implement the resource"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.ingress.tls`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "Ingress TLS configuration"
 msgstr "구성 값"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.api.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Enable an ingress resource for SuperLink API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.api.hostname`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Ingress hostname for the SuperLink API ingress"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`exec-api.example.com`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.api.path`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "SuperLink API ingress path"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`/`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.api.pathType`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Ingress path type. One of Exact, Prefix or ImplementationSpecific"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`ImplementationSpecific`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.fleet.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Enable an ingress resource for SuperLink Fleet API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.fleet.hostname`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Ingress hostname for the SuperLink Fleet API ingress"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`fleet.example.com`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.fleet.path`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "SuperLink Fleet API ingress path"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.fleet.pathType`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.driver.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Enable an ingress resource for SuperLink Driver API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.driver.hostname`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Ingress hostname for the SuperLink Driver API ingress"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`driver.example.com`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.driver.path`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "SuperLink Driver API ingress path"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.driver.pathType`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.simulationIo.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Enable an ingress resource for SuperLink SimulationIo API"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.simulationIo.hostname`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Ingress hostname for the SuperLink SimulationIo API ingress"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`simulation.example.com`"
 msgstr "시뮬레이션 예제"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.simulationIo.path`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "SuperLink SimulationIo API ingress path"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.simulationIo.pathType`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.extraHosts`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "An array with additional hostname(s) to be covered with the ingress record"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.extraTls`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid ""
 "TLS configuration for additional hostname(s) to be covered with this "
 "ingress record"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.ingress.extraRules`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Additional rules to be covered with this ingress record"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.lifecycle`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "SuperLink container(s) to automate configuration before or after startup"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.annotations`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Additional custom annotations for SuperLink"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.selectorLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Extra selectorLabels for SuperLink pods"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.podAnnotations`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Annotations for SuperLink pods"
 msgstr "서버(SuperLink)"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.podLabels`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Extra podLabels for SuperLink pods"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.imagePullSecrets`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "SuperLink image pull secrets which overrides global.imagePullSecrets"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.image.registry`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "SuperLink image registry"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`registry.hub.docker.com`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.image.repository`"
 msgstr "레포지토리 설정하기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "SuperLink image repository"
 msgstr "레포지토리 설정하기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`flwr/superlink-ee`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`superlink.image.tag`"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "SuperLink image tag"
 msgstr "flower 초연결"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "`1.20.0-ubuntu`"
 msgstr "``ubuntu``"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.image.digest`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "SuperLink image digest"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.image.pullPolicy`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "SuperLink image pullPolicy which Components image pullPolicy"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Specifies whether a NetworkPolicy should be created"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.allowExternal`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Allow external ingress traffic"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.allowExternalEgress`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Allow unrestricted egress traffic"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.extraIngress`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Add extra ingress rules to the NetworkPolicy"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.extraEgress`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid ""
 "Add extra ingress rules to the NetworkPolicy (ignored if "
 "allowExternalEgress=true)"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.driver.ingressPodMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid ""
 "Labels to match to allow traffic from other pods. Ignored if "
 "`superlink.networkPolicy.allowExternal` is true."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.driver.ingressNSMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid ""
 "Labels to match to allow traffic from other namespaces. Ignored if "
 "`superlink.networkPolicy.allowExternal` is true."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.driver.ingressNSPodMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid ""
 "Pod labels to match to allow traffic from other namespaces. Ignored if "
 "`superlink.networkPolicy.allowExternal` is true."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.fleet.ingressPodMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.fleet.ingressNSMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.fleet.ingressNSPodMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.api.ingressPodMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.api.ingressNSMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.api.ingressNSPodMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.simulationIo.ingressPodMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.simulationIo.ingressNSMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`superlink.networkPolicy.simulationIo.ingressNSPodMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:642
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:660
 #, fuzzy
 msgid "Component ServerApp"
 msgstr "Flower 서버앱"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.name`"
 msgstr "flower 서버 프로그램"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Name of the ServerApp"
 msgstr "Flower 서버앱"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp`"
 msgstr "flower 서버 프로그램"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.enabled`"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Enable or disable ServerApp"
 msgstr "현재 클라이언트 속성입니다."
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.resources`"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.superlink`"
 msgstr "|serverapp_link|_"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Address of the SuperLink the ServerApp should connect to"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.volumes`"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Optionally specify list of volumes for the ServerApp pod(s)"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.volumeMounts`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.automountServiceAccountToken`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.serviceAccount.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "Enable a service account for this component"
 msgstr "현재 클라이언트 속성입니다."
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.serviceAccount.annotations`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.serviceAccount.labels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.serviceAccount.automountServiceAccountToken`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.podSecurityContext`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.replicas`"
 msgstr "Flower 서버앱"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "The number of ServerApp pods to run"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.labels`"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Extra labels for ServerApp pods"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.extraArgs`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Add extra arguments to the default arguments for the ServerApp"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.nodeSelector`"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Node labels for ServerApp pods which merges with global.nodeSelector"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.tolerations`"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Node tolerations for ServerApp pods which merges with global.tolerations"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.updateStrategy.type`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "ServerApp deployment strategy type"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.updateStrategy.rollingUpdate`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "ServerApp deployment rolling update configuration parameters"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.affinity`"
 msgstr "Flower 서버앱"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Node affinity for ServerApp pods which merges with global.affinity"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.env`"
 msgstr "flower 서버 프로그램"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid ""
 "Array with extra environment variables to add to ServerApp nodes which "
 "merges with global.env"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.lifecycle`"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "ServerApp container(s) to automate configuration before or after startup"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.annotations`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Additional custom annotations for ServerApp"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.selectorLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Extra selectorLabels for ServerApp pods"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.podAnnotations`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Annotations for ServerApp pods"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.podLabels`"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Extra podLabels for ServerApp pods"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.imagePullSecrets`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "ServerApp image pull secrets which overrides global.imagePullSecrets"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.image.registry`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "ServerApp image registry"
 msgstr "Flower 서버앱"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.image.repository`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "ServerApp image repository"
 msgstr "레포지토리 설정하기"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`flwr/serverapp`"
 msgstr "flower 서버 프로그램"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.image.tag`"
 msgstr "Flower 서버앱"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Image tag of ServerApp"
 msgstr "Flower 서버앱"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`1.20.0-py3.11-ubuntu24.04`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "`serverapp.image.digest`"
 msgstr "Flower 서버앱"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #, fuzzy
 msgid "Image digest of ServerApp"
 msgstr "Flower 서버앱"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.image.pullPolicy`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Components image pullPolicy"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`Always`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.networkPolicy.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.networkPolicy.allowExternalEgress`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`serverapp.networkPolicy.extraEgress`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:682
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:700
 #, fuzzy
 msgid "Component OpenFGA"
 msgstr "공통"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "`openfga.enabled`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:239
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:257
 msgid "Enable the openfga subchart and deploy OpenFGA"
 msgstr ""
 
@@ -9025,11 +8949,6 @@ msgid ""
 "user interactions and application behavior."
 msgstr ""
 
-#: ../../source/how-to-configure-audit-logging.rst:6
-#, fuzzy
-msgid "Configure Audit Logging"
-msgstr "클라이언트 구성"
-
 #: ../../source/how-to-configure-audit-logging.rst:10
 msgid ""
 "Audit logging is a Flower Enterprise feature. See `Flower Enterprise "
@@ -9435,7 +9354,7 @@ msgid ""
 "use:"
 msgstr ""
 
-#: ../../source/how-to-configure-logging.rst:31
+#: ../../source/how-to-configure-logging.rst:33
 msgid ""
 "You can make use of the ``FLWR_LOG_LEVEL`` environment variable when "
 "executing other Flower commands to provision the different components in "
@@ -9443,12 +9362,12 @@ msgid ""
 " or using the `flwr CLI <ref-api-cli.html>`_."
 msgstr ""
 
-#: ../../source/how-to-configure-logging.rst:37
+#: ../../source/how-to-configure-logging.rst:39
 #, fuzzy
 msgid "Configure gRPC logging"
 msgstr "클라이언트 구성"
 
-#: ../../source/how-to-configure-logging.rst:39
+#: ../../source/how-to-configure-logging.rst:41
 msgid ""
 "Flower uses `gRPC <https://grpc.io/>`_ to communicate between each "
 "component (see :doc:`ref-flower-network-communication`). You can set the "
@@ -10936,7 +10855,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-azure.rst:196
-#: ../../source/how-to-run-flower-on-gcp.rst:613
+#: ../../source/how-to-run-flower-on-gcp.rst:584
 #, fuzzy
 msgid "Run Flower App"
 msgstr "Flower 서버."
@@ -10986,33 +10905,40 @@ msgid ""
 "on the `Google Cloud Platform (GCP) <https://console.cloud.google.com>`_ "
 "using the `Google Kubernetes Engine (GKE) <https://cloud.google.com"
 "/kubernetes-engine>`_. The figure below presents an overview of the "
-"architecture of the Flower components we will deploy on GCP using GKE."
+"architecture of the Flower components we will deploy on GCP using GKE. In"
+" this architecture, **ServerApps** and **ClientApps** are executed by the"
+" Flower SuperExec (`flower-superexec`)."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:20
+#: ../../source/how-to-run-flower-on-gcp.rst:21
 #, fuzzy
 msgid "Running Flower on GCP using GKE Architecture"
 msgstr "Flower 아키텍처"
 
-#: ../../source/how-to-run-flower-on-gcp.rst:22
+#: ../../source/how-to-run-flower-on-gcp.rst:21
+#, fuzzy
+msgid "Running Flower on GCP using GKE Architecture."
+msgstr "Flower 아키텍처"
+
+#: ../../source/how-to-run-flower-on-gcp.rst:23
 msgid ""
 "Part of this guide has also been presented during the `Flower AI Summit "
 "2025 <https://flower.ai/events/flower-ai-summit-2025/>`_, by Prashant "
 "Kulkarni, GenAI Security Engineer at Google Cloud."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:31
+#: ../../source/how-to-run-flower-on-gcp.rst:32
 msgid "Create a Kubernetes Cluster"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:33
+#: ../../source/how-to-run-flower-on-gcp.rst:34
 msgid ""
 "Here, we outline the steps to create a Kubernetes cluster in GCP through "
 "the GCP user interface. Before proceeding, please make sure you have an "
 "account on GCP."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:36
+#: ../../source/how-to-run-flower-on-gcp.rst:37
 msgid ""
 "**Create GCP Project**: Once you have created the account, please create "
 "a new project, by selecting the project picker button, i.e., the button "
@@ -11023,7 +10949,7 @@ msgid ""
 "project is selected in the top left corner."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:42
+#: ../../source/how-to-run-flower-on-gcp.rst:43
 msgid ""
 "**Enable Kubernetes API**: After the GCP project is created, in the "
 "search bar at the top of the GCP page type ``Kubernetes Engine API`` and "
@@ -11035,7 +10961,7 @@ msgid ""
 "Enabled``."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:48
+#: ../../source/how-to-run-flower-on-gcp.rst:49
 msgid ""
 "**Create Kubernetes Cluster**: in the home page of the GCP project, under"
 " the ``Products`` section, look for the tab called ``Create a Kubernetes "
@@ -11046,7 +10972,7 @@ msgid ""
 "guide, we use the ``Autopilot`` mode."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:54
+#: ../../source/how-to-run-flower-on-gcp.rst:55
 msgid ""
 "**Configure Kubernetes Cluster**: in the page that is shown, we assign a "
 "name to the new cluster, e.g., ``flower-numpy-example`` and we select the"
@@ -11056,18 +10982,18 @@ msgid ""
 "the ``Create`` button."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:62
+#: ../../source/how-to-run-flower-on-gcp.rst:63
 msgid ""
 "Please wait for a couple of minutes until the cluster is ready and fully "
 "deployed."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:65
+#: ../../source/how-to-run-flower-on-gcp.rst:66
 #, fuzzy
 msgid "Configure Google Cloud SDK"
 msgstr "클라이언트 구성"
 
-#: ../../source/how-to-run-flower-on-gcp.rst:67
+#: ../../source/how-to-run-flower-on-gcp.rst:68
 msgid ""
 "To interact with our newly deployed Kubernetes cluster, we will use the "
 "Google Cloud SDK and configure it locally. This SDK allows us to directly"
@@ -11075,13 +11001,13 @@ msgid ""
 "cluster."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:71
+#: ../../source/how-to-run-flower-on-gcp.rst:72
 msgid ""
 "To install the Google Cloud SDK, we first need to install and configure "
 "the ``gcloud`` CLI:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:93
+#: ../../source/how-to-run-flower-on-gcp.rst:94
 msgid ""
 "For more detailed installation instructions and for installing ``gcloud``"
 " for different operating systems, please take look at the official "
@@ -11089,13 +11015,13 @@ msgid ""
 "https://cloud.google.com/sdk/docs/install"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:97
+#: ../../source/how-to-run-flower-on-gcp.rst:98
 msgid ""
 "Once ``gcloud`` is installed we need to install ``kubectl``, which is a "
 "command-line tool to interact with Kubernetes clusters:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:105
+#: ../../source/how-to-run-flower-on-gcp.rst:106
 msgid ""
 "Before proceeding with the next steps, please make sure that you have an "
 "active account selected, otherwise you will receive a ``ERROR: "
@@ -11104,21 +11030,21 @@ msgid ""
 "account please run the following commands"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:116
+#: ../../source/how-to-run-flower-on-gcp.rst:117
 msgid ""
 "Now you need to set the ``project`` property in your current workspace "
 "using the unique project identifier, which can be found under the ID "
 "column when clicking on the project picker."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:127
+#: ../../source/how-to-run-flower-on-gcp.rst:128
 msgid ""
 "The <YOUR_PROJECT_ID> value will be different for each user, e.g., "
 "``flower-gcp``, ``flower-gcp-XXXXXX``. Its value will be used in "
 "subsequent steps, e.g.,"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:130
+#: ../../source/how-to-run-flower-on-gcp.rst:131
 msgid ""
 "The next step is to configure ``kubectl`` to point to the GKE cluster you"
 " created in the previous steps by using the name of the cluster, e.g., "
@@ -11126,7 +11052,7 @@ msgid ""
 "was created:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:138
+#: ../../source/how-to-run-flower-on-gcp.rst:139
 msgid ""
 "This will configure the required metadata and fetch the necessary "
 "credentials to allow your local ``kubectl`` to communicate with the GKE "
@@ -11134,45 +11060,45 @@ msgid ""
 "and get the necessary information, you can run the following command:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:149
+#: ../../source/how-to-run-flower-on-gcp.rst:150
 msgid ""
 "For more information on how ``kubectl`` works, please have a look at the "
 "following `official quick-reference guide "
 "<https://kubernetes.io/docs/reference/kubectl/quick-reference/>`_."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:154
+#: ../../source/how-to-run-flower-on-gcp.rst:155
 msgid "Create a Google Artifact Registry"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:156
+#: ../../source/how-to-run-flower-on-gcp.rst:157
 msgid ""
 "The Google Cloud Artifact Registry is a fully managed, scalable, and "
 "private service for storing and managing software build artifacts and "
 "dependencies. Consequently, to run our Flower app on the GKE cluster, we "
-"need to store the app's specific Flower Docker images within the "
-"registry, i.e., ``ClientApp`` and ``ServerApp``, which we discuss in the "
-"next section. For typical use-cases, the Flower SuperLink and SuperNode "
-"Docker images do not need to be built and can be pulled directly from the"
-" official `Flower DockerHub repository <https://hub.docker.com/u/flwr>`_."
-" This step is crucial as it enables the cluster, and subsequently the "
-"``Pods``, to download the built Docker images and deploy the necessary "
-"Flower components. Please see below the instructions on how to create the"
-" repository using the ``gcloud`` CLI:"
+"need to store the app's specific Flower Docker image within the registry,"
+" i.e., the Flower SuperExec, which we discuss in the next section. For "
+"typical use-cases, the Flower SuperLink and SuperNode Docker images do "
+"not need to be built and can be pulled directly from the official `Flower"
+" DockerHub repository <https://hub.docker.com/u/flwr>`_. This step is "
+"crucial as it enables the cluster, and subsequently the ``Pods``, to "
+"download the built Docker images and deploy the necessary Flower "
+"components. Please see below the instructions on how to create the "
+"repository using the ``gcloud`` CLI:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:183
+#: ../../source/how-to-run-flower-on-gcp.rst:184
 msgid "Registry Validation & Permissions"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:185
+#: ../../source/how-to-run-flower-on-gcp.rst:186
 msgid ""
 "The steps below validate that the Google Artifact Registry has been "
 "properly configured, you have correct access and you have writing "
 "permissions to push the docker images discussed in the next section."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:193
+#: ../../source/how-to-run-flower-on-gcp.rst:194
 msgid ""
 "The above command shows that the ``flower-gcp-example-artifacts`` "
 "repository has been successfully created under the specified project with"
@@ -11181,58 +11107,51 @@ msgid ""
 "please run the following command:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:205
+#: ../../source/how-to-run-flower-on-gcp.rst:206
 msgid "Configure Flower App Docker Images"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:207
+#: ../../source/how-to-run-flower-on-gcp.rst:208
 msgid ""
-"In order to proceed with this next step, first, we create a local Flower "
-"app, and then create a dedicated Dockerfile for the ServerApp and the "
-"ClientApp Docker images. Once we build the images, we tag them and push "
-"them to the newly created Google registry. Most of the steps on how to "
-"build Docker images discussed below are based on the `Flower Quickstart "
-"with Docker Tutorial <https://flower.ai/docs/framework/docker/tutorial-"
-"quickstart-docker.html>`_."
+"To proceed with the next step, we first create a local Flower app and "
+"then define a dedicated Dockerfile for the Docker image that will run "
+"SuperExec. Within SuperExec, either ServerApp or ClientApp will be "
+"executed. After building the image, we tag it and push it to the newly "
+"created Google registry. Most of the steps on how to build Docker image "
+"discussed below are based on the `Flower Quickstart with Docker Tutorial "
+"<https://flower.ai/docs/framework/docker/tutorial-quickstart-"
+"docker.html>`_."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:214
+#: ../../source/how-to-run-flower-on-gcp.rst:215
 msgid "We create the Flower NumPy app as follows:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:222
+#: ../../source/how-to-run-flower-on-gcp.rst:223
 msgid "Create Docker Images"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:224
+#: ../../source/how-to-run-flower-on-gcp.rst:225
 msgid ""
-"Once the app is created, we navigate inside the app directory (i.e., "
-"where the ``pyproject.toml`` file is) and create two ``Dockerfile``\\s "
-"one for the ``ClientApp`` component, named ``clientapp.Dockerfile`` and "
-"one for the ``ServerApp`` component, named ``serverapp.Dockerfile``. We "
-"will use both files to build locally the necessary Docker images. We will"
-" be using the default images for ``SuperLink`` and ``SuperLink`` "
-"available in the `Flower DockerHub repository "
-"<https://hub.docker.com/u/flwr>`_."
+"With ``flower-superexec``, **you do not need to bake your app code into "
+"the image**. SuperExec receives and installs the Flower App Bundle (FAB) "
+"at runtime inside the container, keeping your images lightweight."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:233
+#: ../../source/how-to-run-flower-on-gcp.rst:231
 msgid ""
-"Even though the app you created has only ``NumPy`` as dependency, you can"
-" use the provided ``clientapp.Dockerfile`` and ``serverapp.Dockerfile`` "
-"to create the corresponding images for any Flower app when going from "
-"simulation to deployment. The ``RUN`` command installs all the necessary "
-"dependencies for your app to run and removes the ``flwr[simulation]`` "
-"dependency while building the Docker images."
+"SuperExec does **NOT** install dependencies at runtime. If your app "
+"requires additional dependencies, make sure they are included in your "
+"Docker image, as shown in the Dockerfile example below."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:271
+#: ../../source/how-to-run-flower-on-gcp.rst:251
 msgid ""
-"Once we have created the required Dockerfiles, we build the Docker Images"
-" as follows:"
+"Once we have created the required Dockerfile, we build the Docker Image "
+"as follows:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:275
+#: ../../source/how-to-run-flower-on-gcp.rst:255
 msgid ""
 "Before running the commands below, make sure ``Docker`` is installed and "
 "it is up running. The ``--platform`` type is set to ``linux/amd64``, "
@@ -11240,54 +11159,53 @@ msgid ""
 " cluster (by default) are deployed with an ``amd64``-based architecture."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:289
+#: ../../source/how-to-run-flower-on-gcp.rst:265
 msgid "Tag Docker Images"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:291
+#: ../../source/how-to-run-flower-on-gcp.rst:267
 msgid ""
 "Before we are able to push our two newly locally created Docker images, "
 "we need to tag them with the Google Artifact Registry repository name and"
 " image name we created during the previous steps. If you have followed "
-"the earlier naming suggestions, the the repository name is ``flower-gcp-"
-"example-artifacts``, the local Docker images names are "
-"``flower_numpy_example_serverapp:0.0.1`` and "
-"``flower_numpy_example_numpy:0.0.1``, and the region is ``us-central1``. "
-"Please note that the ``<YOUR_PROJECT_ID>`` is different from user to user"
-" so in the commands below we use the ``<YOUR_PROJECT_ID>`` placeholder. "
-"Putting all this together, the final commands you need to run to tag the "
-"``ServerApp`` and ``ClientApp`` Docker images are:"
+"the earlier naming suggestions, the repository name is ``flower-gcp-"
+"example-artifacts``, the local Docker image name is "
+"``flower_numpy_example_superexec:0.0.1``, and the region is ``us-"
+"central1``. Please note that the ``<YOUR_PROJECT_ID>`` is different from "
+"user to user, so in the commands below we use the ``<YOUR_PROJECT_ID>`` "
+"placeholder. Putting all this together, the final command you need to run"
+" to tag the ``SuperExec`` Docker image is:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:314
+#: ../../source/how-to-run-flower-on-gcp.rst:284
 msgid "Push Docker Images"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:316
+#: ../../source/how-to-run-flower-on-gcp.rst:286
 msgid ""
-"Once our images are tagged correctly, you can push them to your "
-"``Artifact Registry`` repository using the ``docker push`` command with "
-"the tagged name:"
+"Once our image is tagged correctly, you can push it to your ``Artifact "
+"Registry`` repository using the ``docker push`` command with the tagged "
+"name:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:332
+#: ../../source/how-to-run-flower-on-gcp.rst:297
 msgid "Deploy Flower Infrastructure"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:334
+#: ../../source/how-to-run-flower-on-gcp.rst:299
 msgid ""
 "Before running our Flower app, we first need to deploy our ``Pods`` on "
 "the Kubernetes cluster."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:337
+#: ../../source/how-to-run-flower-on-gcp.rst:302
 msgid ""
 "In this step, we shall deploy six ``Pods``: 1x ``SuperLink``, 2x "
-"``SuperNode``, 2x ``ClientApp``, and 1x ``ServerApp``. To achieve this, "
-"below we provide the definition of the six ``yaml`` files that are "
-"necessary to deploy the ``Pods`` on the cluster and which are passed to "
-"``kubectl``, and a helper ``k8s-deploy.sh`` script, which will deploy the"
-" ``Pods``."
+"``SuperNode``, 2x ``SuperExec(ClientApp)``, and 1x "
+"``SuperExec(ServerApp)``. To achieve this, below we provide the "
+"definition of the six ``yaml`` files that are necessary to deploy the "
+"``Pods`` on the cluster and which are passed to ``kubectl``, and a helper"
+" ``k8s-deploy.sh`` script, which will deploy the ``Pods``."
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-gcp.rst
@@ -11303,24 +11221,24 @@ msgid "supernode-2-deployment.yaml"
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-gcp.rst
-msgid "serverapp-deployment.yaml"
+msgid "superexec-serverapp-deployment.yaml"
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-gcp.rst
-msgid "clientapp-1-deployment.yaml"
+msgid "superexec-clientapp-1-deployment.yaml"
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-gcp.rst
-msgid "clientapp-2-deployment.yaml"
+msgid "superexec-clientapp-2-deployment.yaml"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:567
+#: ../../source/how-to-run-flower-on-gcp.rst:538
 msgid ""
 "Once you have created the required files, you can use the following "
 "``k8s-deploy.sh`` helper script to deploy all the ``Pods``."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:572
+#: ../../source/how-to-run-flower-on-gcp.rst:543
 msgid ""
 "Make sure the Flower version you use to deploy the ``Pods`` matches the "
 "version of your Flower app."
@@ -11331,7 +11249,7 @@ msgstr ""
 msgid "k8s-deploy.sh"
 msgstr "배포"
 
-#: ../../source/how-to-run-flower-on-gcp.rst:602
+#: ../../source/how-to-run-flower-on-gcp.rst:573
 msgid ""
 "To see that your ``Pods`` are deployed, please go to the ``Navigation "
 "Menu`` on the Google Console, select ``Kubernetes Engine`` and then the "
@@ -11339,39 +11257,39 @@ msgid ""
 "the ``Pods`` under deployment."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:608
+#: ../../source/how-to-run-flower-on-gcp.rst:579
 msgid ""
 "Please wait for a couple of minutes (3' to 5' minutes should be enough) "
 "before the ``Pods`` are up and running. While ``Pods`` resources are "
 "being provisioned, some warnings are expected."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:615
+#: ../../source/how-to-run-flower-on-gcp.rst:586
 msgid ""
 "Once all ``Pods`` are up and running, we need to get the ``EXTERNAL_IP`` "
 "of the ``superlink-service`` and point our Flower app to use the "
 "Kubernetes cluster to submit and execute the job."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:619
+#: ../../source/how-to-run-flower-on-gcp.rst:590
 msgid ""
 "To get the ``EXTERNAL-IP`` of the ``superlink-service`` we run the "
 "following command, which will show the ``NAME``, ``TYPE``, ``CLUSTER-"
 "IP``, ``EXTERNAL-IP`` and ``PORTS`` of the service:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:627
+#: ../../source/how-to-run-flower-on-gcp.rst:598
 msgid ""
 "After we get the ``EXTERNAL-IP`` , we go to the directory of the Flower "
 "example, we open the ``pyproject.toml`` and then add the following "
 "section at the end of the file:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:636
+#: ../../source/how-to-run-flower-on-gcp.rst:607
 msgid "Then we can execute the example on the GCP cluster by running:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:644
+#: ../../source/how-to-run-flower-on-gcp.rst:615
 msgid ""
 "Please note that in the current deployment, communication is not "
 "encrypted. To enable TLS for secure connections, check the following "
@@ -11380,7 +11298,7 @@ msgid ""
 " more details on how to configure TLS."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:649
+#: ../../source/how-to-run-flower-on-gcp.rst:620
 msgid ""
 "If the job is successfully submitted, and executed, then in your console "
 "you should see the logs from the run. The output should look like the one"
@@ -11391,19 +11309,19 @@ msgstr ""
 msgid "Expected Output"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:700
+#: ../../source/how-to-run-flower-on-gcp.rst:671
 msgid ""
 "Please note that if you terminate or shut down the cluster, and create a "
 "new one, the value of the ``EXTERNAL_IP`` changes. In that case, you will"
 " have to update the ``pyproject.toml``."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:705
+#: ../../source/how-to-run-flower-on-gcp.rst:676
 #, fuzzy
 msgid "Shutdown Flower Infrastructure"
 msgstr "Flower 서버."
 
-#: ../../source/how-to-run-flower-on-gcp.rst:707
+#: ../../source/how-to-run-flower-on-gcp.rst:678
 msgid ""
 "If you would like to shutdown all the running pods deployed during this "
 "guide, you can use the ``kubectl delete`` command and pass the the "
@@ -15802,22 +15720,8 @@ msgstr "고급 Docker 옵션"
 
 #: ../../source/ref-api-cli.rst:42
 #, fuzzy
-msgid "``flwr-serverapp``"
-msgstr "flower 서버 프로그램"
-
-#: ../../source/ref-api-cli.rst:52
-#, fuzzy
-msgid "``flwr-clientapp``"
-msgstr "Flower ClientApp."
-
-#: ../../source/ref-api-cli.rst:60
-msgid "Technical Commands"
-msgstr ""
-
-#: ../../source/ref-api-cli.rst:65
-#, fuzzy
-msgid "``flower-simulation``"
-msgstr "flower 시뮬레이션"
+msgid "``flower-superexec``"
+msgstr "Flower SuperNode"
 
 #: ../../source/ref-api/flwr.rst:2
 msgid "flwr"
@@ -24914,8 +24818,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 ":py:obj:`run_simulation_process "
-"<flwr.simulation.run_simulation_process>`\\ \\(...\\[\\, token\\, "
-"...\\]\\)"
+"<flwr.simulation.run_simulation_process>`\\ \\(...\\[\\, flwr\\_dir\\_\\,"
+" ...\\]\\)"
 msgstr ""
 ":py:obj:`start_client <flwr.client.start_client>`\\ \\(\\*\\, "
 "server\\_address\\[\\, client\\_fn\\, ...\\]\\)"
@@ -33266,66 +33170,38 @@ msgstr ""
 
 #: ../../source/ref-exit-codes-dir.rst:12
 msgid ""
-"**ServerApp-specific exit codes (200-299)**: Specific to ``flwr-"
-"serverapp`` (ServerApp) errors."
-msgstr ""
-
-#: ../../source/ref-exit-codes-dir.rst:14
-msgid ""
 "**SuperNode-specific exit codes (300-399)**: Specific to ``flower-"
 "supernode`` (SuperNode) errors."
 msgstr ""
 
+#: ../../source/ref-exit-codes-dir.rst:14
+msgid ""
+"**SuperExec-specific exit codes (400-499)**: Specific to ``flower-"
+"superexec`` (SuperExec) errors."
+msgstr ""
+
 #: ../../source/ref-exit-codes-dir.rst:16
-msgid ""
-"**ClientApp-specific exit codes (400-499)**: Specific to ``flwr-"
-"clientapp`` (ClientApp) errors."
+msgid "**Common exit codes (600-699)**: Shared across multiple components."
 msgstr ""
 
-#: ../../source/ref-exit-codes-dir.rst:18
-msgid ""
-"**Simulation-specific exit codes (500-599)**: Specific to ``flwr-"
-"simulation`` (Simulation Engine) errors."
-msgstr ""
-
-#: ../../source/ref-exit-codes-dir.rst:20
-msgid "**Common exit codes (600-)**: Shared across multiple components."
-msgstr ""
-
-#: ../../source/ref-exit-codes-dir.rst:23
+#: ../../source/ref-exit-codes-dir.rst:19
 msgid "Indices"
 msgstr ""
 
-#: ../../source/ref-exit-codes/000.rst:2
+#: ../../source/ref-exit-codes/0.rst:2
 msgid "[0] SUCCESS"
 msgstr ""
 
-#: ../../source/ref-exit-codes/000.rst:7
+#: ../../source/ref-exit-codes/0.rst:7
 msgid "The process completed successfully."
 msgstr ""
 
-#: ../../source/ref-exit-codes/001.rst:2
+#: ../../source/ref-exit-codes/1.rst:2
 msgid "[1] GRACEFUL_EXIT_SIGINT"
 msgstr ""
 
-#: ../../source/ref-exit-codes/001.rst:7
+#: ../../source/ref-exit-codes/1.rst:7
 msgid "The process exited gracefully, triggered by ``SIGINT``."
-msgstr ""
-
-#: ../../source/ref-exit-codes/002.rst:2
-msgid "[2] GRACEFUL_EXIT_SIGQUIT"
-msgstr ""
-
-#: ../../source/ref-exit-codes/002.rst:7
-msgid "The process exited gracefully, triggered by ``SIGQUIT``."
-msgstr ""
-
-#: ../../source/ref-exit-codes/003.rst:2
-msgid "[3] GRACEFUL_EXIT_SIGTERM"
-msgstr ""
-
-#: ../../source/ref-exit-codes/003.rst:7
-msgid "The process exited gracefully, triggered by ``SIGTERM``."
 msgstr ""
 
 #: ../../source/ref-exit-codes/100.rst:2
@@ -33474,6 +33350,22 @@ msgid ""
 "Some of the arguments passed to the SuperLink are incompatible with each "
 "other. Check the SuperLink logs for additional help on how to resolve the"
 " issue."
+msgstr ""
+
+#: ../../source/ref-exit-codes/2.rst:2
+msgid "[2] GRACEFUL_EXIT_SIGQUIT"
+msgstr ""
+
+#: ../../source/ref-exit-codes/2.rst:7
+msgid "The process exited gracefully, triggered by ``SIGQUIT``."
+msgstr ""
+
+#: ../../source/ref-exit-codes/3.rst:2
+msgid "[3] GRACEFUL_EXIT_SIGTERM"
+msgstr ""
+
+#: ../../source/ref-exit-codes/3.rst:7
+msgid "The process exited gracefully, triggered by ``SIGTERM``."
 msgstr ""
 
 #: ../../source/ref-exit-codes/300.rst:2
@@ -33635,11 +33527,12 @@ msgstr ""
 
 #: ../../source/ref-exit-codes/602.rst:7
 msgid ""
-"The ``flwr-serverapp`` and ``flwr-clientapp`` do not currently support "
-"TLS, as they are assumed to be executed within the same network as their "
-"respective long-running processes: ``flower-superlink`` and ``flower-"
-"supernode``. Please refer to the `Flower Network Communication <../ref-"
-"flower-network-communication.html>`_ guide for further details."
+"The ``flower-superexec``, ``flwr-serverapp``, ``flwr-simulation``, and "
+"``flwr-clientapp`` do not currently support TLS, as they are assumed to "
+"be executed within the same network as their respective long-running "
+"processes: ``flower-superlink`` and ``flower-supernode``. Please refer to"
+" the `Flower Network Communication <../ref-flower-network-"
+"communication.html>`_ guide for further details."
 msgstr ""
 
 #: ../../source/ref-exit-codes/602.rst:16
@@ -49327,5 +49220,520 @@ msgstr ""
 #~ "[#847](https://github.com/adap/flower/pull/847), "
 #~ "[#993](https://github.com/adap/flower/pull/993), "
 #~ "[#994](https://github.com/adap/flower/pull/994))"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``-p 9091:9091 -p 9092:9092 -p "
+#~ "9093:9093``: Map port ``9091``, ``9092`` "
+#~ "and ``9093`` of the"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "container to the same port of the"
+#~ " host machine, allowing other services "
+#~ "to access the"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "ServerAppIO API on ``http://localhost:9091``, "
+#~ "the Fleet API on ``http://localhost:9092`` "
+#~ "and"
+#~ msgstr ""
+
+#~ msgid "the Control API on ``http://localhost:9093``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "tag of the image. The tag "
+#~ ":substitution-code:`|stable_flwr_version|` represents a"
+#~ " :doc:`specific version <pin-version>` of"
+#~ " the image."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--insecure``: This flag tells the "
+#~ "container to operate in an insecure "
+#~ "mode, allowing"
+#~ msgstr ""
+
+#~ msgid "unencrypted communication."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "independent process. The SuperLink does "
+#~ "not attempt to create it. You can"
+#~ " learn more about"
+#~ msgstr ""
+
+#~ msgid "the different process modes here: :doc:`run-as-subprocess`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``-p 9094:9094``: Map port ``9094`` of"
+#~ " the container to the same port "
+#~ "of"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "the host machine, allowing other "
+#~ "services to access the SuperNode API "
+#~ "on"
+#~ msgstr ""
+
+#~ msgid "``http://localhost:9094``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":substitution-code:`flwr/supernode:|stable_flwr_version|`: "
+#~ "This is the name of the"
+#~ msgstr ""
+
+#~ msgid "image to be run and the specific tag of the image."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--superlink superlink:9092``: Connect to the"
+#~ " SuperLink's Fleet API at the address"
+#~ msgstr ""
+
+#~ msgid "``superlink:9092``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--node-config \"partition-id=0 num-"
+#~ "partitions=2\"``: Set the partition ID "
+#~ "to ``0`` and the"
+#~ msgstr ""
+
+#~ msgid "number of partitions to ``2`` for the SuperNode configuration."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--clientappio-api-address 0.0.0.0:9094``: "
+#~ "Set the address and port number "
+#~ "that the"
+#~ msgstr ""
+
+#~ msgid "SuperNode is listening on to communicate with the ClientApp. If"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "two SuperNodes are started on the "
+#~ "same machine, set two different port "
+#~ "numbers for each SuperNode."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "(E.g. In the next step, we set "
+#~ "the second SuperNode container to listen"
+#~ " on port 9095)"
+#~ msgstr ""
+
+#~ msgid "Step 4: Start a ServerApp"
+#~ msgstr "서버(SuperLink)"
+
+#~ msgid ""
+#~ "The ServerApp Docker image comes with"
+#~ " a pre-installed version of Flower"
+#~ " and serves as a base for "
+#~ "building your own ServerApp image. In"
+#~ " order to install the FAB "
+#~ "dependencies, you will need to create"
+#~ " a Dockerfile that extends the "
+#~ "ServerApp image and installs the "
+#~ "required dependencies."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Create a ServerApp Dockerfile called "
+#~ "``serverapp.Dockerfile`` and paste the "
+#~ "following code in:"
+#~ msgstr ""
+
+#~ msgid "serverapp.Dockerfile"
+#~ msgstr "SuperNode Dockerfile 만들기"
+
+#~ msgid ""
+#~ ":substitution-code:`FROM "
+#~ "flwr/serverapp:|stable_flwr_version|`: This line "
+#~ "specifies that the Docker image"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "to be built from is the "
+#~ "``flwr/serverapp`` image, version :substitution-"
+#~ "code:`|stable_flwr_version|`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``WORKDIR /app``: Set the working "
+#~ "directory for the container to ``/app``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Any subsequent commands that reference a"
+#~ " directory will be relative to this"
+#~ " directory."
+#~ msgstr ""
+
+#~ msgid "``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "from the current working directory into"
+#~ " the container's ``/app`` directory."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``RUN sed -i 's/.*flwr\\[simulation\\].*//' "
+#~ "pyproject.toml``: Remove the ``flwr`` "
+#~ "dependency"
+#~ msgstr ""
+
+#~ msgid "from the ``pyproject.toml``."
+#~ msgstr "또는 ``pyproject.toml``:"
+
+#~ msgid ""
+#~ "``python -m pip install -U --no-"
+#~ "cache-dir .``: Run the ``pip`` "
+#~ "install command to"
+#~ msgstr ""
+
+#~ msgid "install the dependencies defined in the ``pyproject.toml`` file"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ``-U`` flag indicates that any "
+#~ "existing packages should be upgraded, "
+#~ "and"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--no-cache-dir`` prevents pip from "
+#~ "using the cache to speed up the"
+#~ " installation."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``ENTRYPOINT [\"flwr-serverapp\"]``: Set the"
+#~ " command ``flwr-serverapp`` to be"
+#~ msgstr ""
+
+#~ msgid "the default command run when the container is started."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note that `flwr <https://pypi.org/project/flwr/>`__"
+#~ " is already installed in the "
+#~ "``flwr/clientapp`` base image, so only "
+#~ "other package dependencies such as "
+#~ "``flwr-datasets``, ``torch``, etc., need to"
+#~ " be installed. As a result, the "
+#~ "``flwr`` dependency is removed from the"
+#~ " ``pyproject.toml`` after it has been "
+#~ "copied into the Docker image (see "
+#~ "line 5)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Afterward, in the directory that holds"
+#~ " the Dockerfile, execute this Docker "
+#~ "command to build the ServerApp image:"
+#~ msgstr ""
+
+#~ msgid "``--name serverapp``: Assign the name ``serverapp`` to the container."
+#~ msgstr ""
+
+#~ msgid "of the image."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--serverappio-api-address superlink:9091``: "
+#~ "Connect to the SuperLink's ServerAppIO "
+#~ "API"
+#~ msgstr ""
+
+#~ msgid "at the address ``superlink:9091``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The procedure for building and running"
+#~ " a ClientApp image is almost "
+#~ "identical to the ServerApp image."
+#~ msgstr "ServerApp 이미지를 빌드하고 실행하는 절차는 SuperNode 이미지와 거의 동일합니다."
+
+#~ msgid ""
+#~ "Similar to the ServerApp image, you "
+#~ "will need to create a Dockerfile "
+#~ "that extends the ClientApp image and "
+#~ "installs the required FAB dependencies."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Create a ClientApp Dockerfile called "
+#~ "``clientapp.Dockerfile`` and paste the "
+#~ "following code into it:"
+#~ msgstr ""
+
+#~ msgid "clientapp.Dockerfile"
+#~ msgstr "클라이언트앱"
+
+#~ msgid ""
+#~ ":substitution-code:`FROM "
+#~ "flwr/clientapp:|stable_flwr_version|`: This line "
+#~ "specifies that the Docker image"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``ENTRYPOINT [\"flwr-clientapp\"]``: Set the"
+#~ " command ``flwr-clientapp`` to be"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Next, build the ClientApp Docker image"
+#~ " by running the following command in"
+#~ " the directory where the Dockerfile "
+#~ "is located:"
+#~ msgstr ""
+#~ "다음으로, Docker파일과 ServerApp 코드가 있는 디렉터리에서"
+#~ " 다음 명령을 실행하여 ServerApp Docker 이미지를"
+#~ " 빌드합니다."
+
+#~ msgid ""
+#~ "The image name was set as "
+#~ "``flwr_clientapp`` with the tag ``0.0.1``. "
+#~ "Remember that these values are merely"
+#~ " examples, and you can customize them"
+#~ " according to your requirements."
+#~ msgstr ""
+#~ "이미지에``flwr_serverapp``이라는 이름을 붙이고 ``0.0.1``이라는 "
+#~ "태그를 붙였습니다. 여기서 선택한 값은 예시일 뿐이라는 "
+#~ "점을 기억하세요. 필요에 따라 변경할 수 있습니다."
+
+#~ msgid "Start the first ClientApp container:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``flwr_clientapp:0.0.1``: This is the name "
+#~ "of the image to be run and "
+#~ "the specific tag"
+#~ msgstr "``flwr_serverapp:0.0.1``: 사용할 Docker 이미지의 태그 이름입니다."
+
+#~ msgid ""
+#~ "``--clientappio-api-address supernode-1:9094``: "
+#~ "Connect to the SuperNode's ClientAppIO"
+#~ msgstr ""
+
+#~ msgid "API at the address ``supernode-1:9094``."
+#~ msgstr ""
+
+#~ msgid "Start the second ClientApp container:"
+#~ msgstr ""
+
+#~ msgid "Stop the current ServerApp and ClientApp containers:"
+#~ msgstr "현재 클라이언트 속성입니다."
+
+#~ msgid "If you haven’t made any changes, you can skip steps 2 through 4."
+#~ msgstr ""
+
+#~ msgid "Rebuild ServerApp and ClientApp images:"
+#~ msgstr "기본 이미지 빌드"
+
+#~ msgid ""
+#~ "Launch one new ServerApp and two "
+#~ "new ClientApp containers based on the"
+#~ " newly built image:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A step-by-step guide to learn "
+#~ "how to create, deploy and run a"
+#~ " Flower app on the `Google Cloud "
+#~ "Platform (GCP) <https://console.cloud.google.com>`_ "
+#~ "using the `Google Kubernetes Engine "
+#~ "(GKE) <https://cloud.google.com/kubernetes-engine>`_. "
+#~ "The figure below presents an overview"
+#~ " of the architecture of the Flower"
+#~ " components we will deploy on GCP "
+#~ "using GKE."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The Google Cloud Artifact Registry is"
+#~ " a fully managed, scalable, and "
+#~ "private service for storing and managing"
+#~ " software build artifacts and dependencies."
+#~ " Consequently, to run our Flower app"
+#~ " on the GKE cluster, we need to"
+#~ " store the app's specific Flower "
+#~ "Docker images within the registry, i.e.,"
+#~ " ``ClientApp`` and ``ServerApp``, which we"
+#~ " discuss in the next section. For "
+#~ "typical use-cases, the Flower SuperLink"
+#~ " and SuperNode Docker images do not"
+#~ " need to be built and can be"
+#~ " pulled directly from the official "
+#~ "`Flower DockerHub repository "
+#~ "<https://hub.docker.com/u/flwr>`_. This step is "
+#~ "crucial as it enables the cluster, "
+#~ "and subsequently the ``Pods``, to "
+#~ "download the built Docker images and "
+#~ "deploy the necessary Flower components. "
+#~ "Please see below the instructions on "
+#~ "how to create the repository using "
+#~ "the ``gcloud`` CLI:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In order to proceed with this next"
+#~ " step, first, we create a local "
+#~ "Flower app, and then create a "
+#~ "dedicated Dockerfile for the ServerApp "
+#~ "and the ClientApp Docker images. Once"
+#~ " we build the images, we tag "
+#~ "them and push them to the newly"
+#~ " created Google registry. Most of the"
+#~ " steps on how to build Docker "
+#~ "images discussed below are based on "
+#~ "the `Flower Quickstart with Docker "
+#~ "Tutorial <https://flower.ai/docs/framework/docker/tutorial-"
+#~ "quickstart-docker.html>`_."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Once the app is created, we "
+#~ "navigate inside the app directory (i.e.,"
+#~ " where the ``pyproject.toml`` file is) "
+#~ "and create two ``Dockerfile``\\s one for"
+#~ " the ``ClientApp`` component, named "
+#~ "``clientapp.Dockerfile`` and one for the "
+#~ "``ServerApp`` component, named "
+#~ "``serverapp.Dockerfile``. We will use both "
+#~ "files to build locally the necessary "
+#~ "Docker images. We will be using "
+#~ "the default images for ``SuperLink`` and"
+#~ " ``SuperLink`` available in the `Flower "
+#~ "DockerHub repository <https://hub.docker.com/u/flwr>`_."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Even though the app you created "
+#~ "has only ``NumPy`` as dependency, you"
+#~ " can use the provided "
+#~ "``clientapp.Dockerfile`` and ``serverapp.Dockerfile`` "
+#~ "to create the corresponding images for"
+#~ " any Flower app when going from "
+#~ "simulation to deployment. The ``RUN`` "
+#~ "command installs all the necessary "
+#~ "dependencies for your app to run "
+#~ "and removes the ``flwr[simulation]`` "
+#~ "dependency while building the Docker "
+#~ "images."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Once we have created the required "
+#~ "Dockerfiles, we build the Docker Images"
+#~ " as follows:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Before we are able to push our "
+#~ "two newly locally created Docker images,"
+#~ " we need to tag them with the"
+#~ " Google Artifact Registry repository name"
+#~ " and image name we created during "
+#~ "the previous steps. If you have "
+#~ "followed the earlier naming suggestions, "
+#~ "the the repository name is ``flower-"
+#~ "gcp-example-artifacts``, the local "
+#~ "Docker images names are "
+#~ "``flower_numpy_example_serverapp:0.0.1`` and "
+#~ "``flower_numpy_example_numpy:0.0.1``, and the region"
+#~ " is ``us-central1``. Please note that"
+#~ " the ``<YOUR_PROJECT_ID>`` is different "
+#~ "from user to user so in the "
+#~ "commands below we use the "
+#~ "``<YOUR_PROJECT_ID>`` placeholder. Putting all "
+#~ "this together, the final commands you"
+#~ " need to run to tag the "
+#~ "``ServerApp`` and ``ClientApp`` Docker images"
+#~ " are:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Once our images are tagged correctly,"
+#~ " you can push them to your "
+#~ "``Artifact Registry`` repository using the "
+#~ "``docker push`` command with the tagged"
+#~ " name:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this step, we shall deploy six"
+#~ " ``Pods``: 1x ``SuperLink``, 2x "
+#~ "``SuperNode``, 2x ``ClientApp``, and 1x "
+#~ "``ServerApp``. To achieve this, below we"
+#~ " provide the definition of the six"
+#~ " ``yaml`` files that are necessary to"
+#~ " deploy the ``Pods`` on the cluster"
+#~ " and which are passed to ``kubectl``,"
+#~ " and a helper ``k8s-deploy.sh`` "
+#~ "script, which will deploy the ``Pods``."
+#~ msgstr ""
+
+#~ msgid "serverapp-deployment.yaml"
+#~ msgstr ""
+
+#~ msgid "clientapp-1-deployment.yaml"
+#~ msgstr ""
+
+#~ msgid "clientapp-2-deployment.yaml"
+#~ msgstr ""
+
+#~ msgid "``flwr-serverapp``"
+#~ msgstr "flower 서버 프로그램"
+
+#~ msgid "``flwr-clientapp``"
+#~ msgstr "Flower ClientApp."
+
+#~ msgid "Technical Commands"
+#~ msgstr ""
+
+#~ msgid "``flower-simulation``"
+#~ msgstr "flower 시뮬레이션"
+
+#~ msgid ""
+#~ "**ServerApp-specific exit codes (200-299)**:"
+#~ " Specific to ``flwr-serverapp`` (ServerApp)"
+#~ " errors."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**ClientApp-specific exit codes (400-499)**:"
+#~ " Specific to ``flwr-clientapp`` (ClientApp)"
+#~ " errors."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Simulation-specific exit codes (500-599)**:"
+#~ " Specific to ``flwr-simulation`` "
+#~ "(Simulation Engine) errors."
+#~ msgstr ""
+
+#~ msgid "**Common exit codes (600-)**: Shared across multiple components."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ``flwr-serverapp`` and ``flwr-"
+#~ "clientapp`` do not currently support "
+#~ "TLS, as they are assumed to be "
+#~ "executed within the same network as "
+#~ "their respective long-running processes: "
+#~ "``flower-superlink`` and ``flower-supernode``."
+#~ " Please refer to the `Flower Network"
+#~ " Communication <../ref-flower-network-"
+#~ "communication.html>`_ guide for further "
+#~ "details."
 #~ msgstr ""
 

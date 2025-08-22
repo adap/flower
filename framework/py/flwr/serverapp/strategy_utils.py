@@ -200,6 +200,7 @@ def sample_nodes(
     return sampled_nodes, all_nodes
 
 
+# pylint: disable=too-many-return-statements
 def validate_message_reply_consistency(
     replies: list[RecordDict], weight_factor_key: str, check_arrayrecord: bool
 ) -> bool:

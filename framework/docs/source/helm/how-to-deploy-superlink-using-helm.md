@@ -86,6 +86,24 @@ superlink:
 For more details on logging configuration, visit:
 [Flower Logging Documentation](../how-to-configure-logging.rst)
 
+## Configure Audit Logging
+
+Audit logging provides JSON-formatted log output for Flower, allowing you to capture and store
+events that occur in the SuperLink. This feature is useful for monitoring, debugging, or
+maintaining a historical record of important actions.
+
+To enable audit logging, add the following flag to the SuperLink configuration:
+
+```yaml
+superlink:
+  enabled: true
+  extraArgs:
+    - --enable-event-log
+```
+
+For more details on audit logging configuration, visit:
+[Flower Audit Logging Documentation](../how-to-configure-audit-logging.rst)
+
 ## License Key
 
 Starting from `1.20.0`, the SuperLink service must be started with
