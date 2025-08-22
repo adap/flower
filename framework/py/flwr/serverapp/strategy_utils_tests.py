@@ -121,7 +121,7 @@ def test_metricrecords_aggregation() -> None:
 @parameterized.expand(  # type: ignore
     [
         (
-            False,
+            True,
             RecordDict(
                 {
                     "global-model": ArrayRecord([np.random.randn(7, 3)]),
@@ -130,7 +130,7 @@ def test_metricrecords_aggregation() -> None:
             ),
         ),  # Compliant
         (
-            True,
+            False,
             RecordDict(
                 {
                     "global-model": ArrayRecord([np.random.randn(7, 3)]),
@@ -139,7 +139,7 @@ def test_metricrecords_aggregation() -> None:
             ),
         ),  # Weighting key is not a scalar (BAD)
         (
-            True,
+            False,
             RecordDict(
                 {
                     "global-model": ArrayRecord([np.random.randn(7, 3)]),
@@ -148,11 +148,11 @@ def test_metricrecords_aggregation() -> None:
             ),
         ),  # No weighting key in MetricRecord (BAD)
         (
-            True,
+            False,
             RecordDict({"global-model": ArrayRecord([np.random.randn(7, 3)])}),
         ),  # No MetricsRecord (BAD)
         (
-            True,
+            False,
             RecordDict(
                 {
                     "global-model": ArrayRecord([np.random.randn(7, 3)]),
@@ -161,7 +161,7 @@ def test_metricrecords_aggregation() -> None:
             ),
         ),  # Two ArrayRecords (BAD)
         (
-            True,
+            False,
             RecordDict(
                 {
                     "global-model": ArrayRecord([np.random.randn(7, 3)]),
@@ -173,7 +173,7 @@ def test_metricrecords_aggregation() -> None:
     ]
 )
 def test_consistency_of_replies_with_matching_keys(
-    skip_aggregation: bool, recorddict: RecordDict
+    is_valid: bool, recorddict: RecordDict
 ) -> None:
     """Test consistency in replies."""
     # Create dummy records
@@ -181,17 +181,17 @@ def test_consistency_of_replies_with_matching_keys(
 
     # Check consistency
     assert (
-        not validate_message_reply_consistency(
+        validate_message_reply_consistency(
             records, weight_factor_key="weight", check_arrayrecord=True
         )
-        == skip_aggregation
+        == is_valid
     )
 
 
 @parameterized.expand(  # type: ignore
     [
         (
-            True,
+            False,
             [
                 RecordDict(
                     {
@@ -208,7 +208,7 @@ def test_consistency_of_replies_with_matching_keys(
             ],
         ),  # top-level keys don't match for ArrayRecords
         (
-            True,
+            False,
             [
                 RecordDict(
                     {
@@ -229,7 +229,7 @@ def test_consistency_of_replies_with_matching_keys(
             ],
         ),  # top-level keys match for ArrayRecords but not those for Arrays
         (
-            True,
+            False,
             [
                 RecordDict(
                     {
@@ -246,7 +246,7 @@ def test_consistency_of_replies_with_matching_keys(
             ],
         ),  # top-level keys don't match for MetricRecords
         (
-            True,
+            False,
             [
                 RecordDict(
                     {
@@ -265,13 +265,13 @@ def test_consistency_of_replies_with_matching_keys(
     ]
 )
 def test_consistency_of_replies_with_different_keys(
-    skip_aggregation: bool, list_records: list[RecordDict]
+    is_valid: bool, list_records: list[RecordDict]
 ) -> None:
     """Test consistency in replies when records don't have matching keys."""
     # Check consistency
     assert (
-        not validate_message_reply_consistency(
+        validate_message_reply_consistency(
             list_records, weight_factor_key="weight", check_arrayrecord=True
         )
-        == skip_aggregation
+        == is_valid
     )
