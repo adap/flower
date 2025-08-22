@@ -35,9 +35,6 @@ def main(grid: Grid, context: Context) -> None:
         grid=grid,
         arrays=ArrayRecord(global_model.state_dict()),
         train_config=ConfigRecord({"lr": 0.01}),
-        evaluate_config=ConfigRecord(
-            {"num-batches": 10, "save-model-checkpoint": True}
-        ),
         num_rounds=num_rounds,
         timeout=3600,
         central_eval_fn=central_evaluation,
