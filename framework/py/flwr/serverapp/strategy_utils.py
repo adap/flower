@@ -238,36 +238,36 @@ def validate_message_reply_consistency(
             "Skipping aggregation.",
         )
         return False
-    else:
-        # Ensure all key are present in all MetricRecords
-        record_key = next(iter(replies[0].metric_records.keys()))
-        all_keys = set(replies[0][record_key].keys())
-        if any(set(msg.get(record_key, {}).keys()) != all_keys for msg in replies[1:]):
-            log(
-                ERROR,
-                "All MetricRecords must have the same keys for aggregation. "
-                "This condition wasn't met. Skipping aggregation.",
-            )
-            return False
 
-        # Verify the weight factor key presence in all MetricRecords
-        if weight_factor_key not in all_keys:
-            log(
-                ERROR,
-                "Missing required key `%s` in the MetricRecord of reply messages. "
-                "Cannot average ArrayRecords and MetricRecords. Skipping aggregation.",
-                weight_factor_key,
-            )
-            return False
+    # Ensure all key are present in all MetricRecords
+    record_key = next(iter(replies[0].metric_records.keys()))
+    all_keys = set(replies[0][record_key].keys())
+    if any(set(msg.get(record_key, {}).keys()) != all_keys for msg in replies[1:]):
+        log(
+            ERROR,
+            "All MetricRecords must have the same keys for aggregation. "
+            "This condition wasn't met. Skipping aggregation.",
+        )
+        return False
 
-        # Check that it is not a list
-        if any(isinstance(msg[record_key][weight_factor_key], list) for msg in replies):
-            log(
-                ERROR,
-                "Key `%s` in the MetricRecord of reply messages must be a single value "
-                "(int or float), but a list was found. Skipping aggregation.",
-                weight_factor_key,
-            )
-            return False
+    # Verify the weight factor key presence in all MetricRecords
+    if weight_factor_key not in all_keys:
+        log(
+            ERROR,
+            "Missing required key `%s` in the MetricRecord of reply messages. "
+            "Cannot average ArrayRecords and MetricRecords. Skipping aggregation.",
+            weight_factor_key,
+        )
+        return False
+
+    # Check that it is not a list
+    if any(isinstance(msg[record_key][weight_factor_key], list) for msg in replies):
+        log(
+            ERROR,
+            "Key `%s` in the MetricRecord of reply messages must be a single value "
+            "(int or float), but a list was found. Skipping aggregation.",
+            weight_factor_key,
+        )
+        return False
 
     return True

@@ -25,8 +25,8 @@ from flwr.common import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDi
 from .strategy_utils import (
     aggregate_arrayrecords,
     aggregate_metricrecords,
-    check_message_reply_consistency,
     config_to_str,
+    validate_message_reply_consistency,
 )
 
 
@@ -181,8 +181,8 @@ def test_consistency_of_replies_with_matching_keys(
 
     # Check consistency
     assert (
-        check_message_reply_consistency(
-            records, weighting_factor_key="weight", check_arrayrecord=True
+        not validate_message_reply_consistency(
+            records, weight_factor_key="weight", check_arrayrecord=True
         )
         == skip_aggregation
     )
@@ -270,8 +270,8 @@ def test_consistency_of_replies_with_different_keys(
     """Test consistency in replies when records don't have matching keys."""
     # Check consistency
     assert (
-        check_message_reply_consistency(
-            list_records, weighting_factor_key="weight", check_arrayrecord=True
+        not validate_message_reply_consistency(
+            list_records, weight_factor_key="weight", check_arrayrecord=True
         )
         == skip_aggregation
     )
