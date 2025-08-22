@@ -250,7 +250,7 @@ class FedAvg(Strategy):
         replies_with_content = [msg.content for msg in replies if msg.has_content()]
 
         # Ensure expected ArrayRecords and MetricRecords are received
-        if validate_message_reply_consistency(
+        if not validate_message_reply_consistency(
             replies=replies_with_content,
             weight_factor_key=self.weight_factor_key,
             check_arrayrecord=False,
