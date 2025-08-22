@@ -1,16 +1,17 @@
 """app-pytorch: A Flower / PyTorch app."""
 
-from logging import INFO
-from datasets import load_dataset
-from flwr.common import ArrayRecord, ConfigRecord, Context, log
+from pprint import pprint
+
+import torch
+from app_pytorch.task import Net, test
+from flwr.common import ArrayRecord, ConfigRecord, Context
 from flwr.common.record.metricrecord import MetricRecord
 from flwr.server import Grid, ServerApp
 from flwr.serverapp import FedAvg
-import torch
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
-from app_pytorch.task import Net, test
+from datasets import load_dataset
 
 # Create ServerApp
 app = ServerApp()
@@ -43,14 +44,18 @@ def main(grid: Grid, context: Context) -> None:
     )
 
     # Log resulting metrics
-    log(INFO, strategy_results.train_metrics)
-    log(INFO, strategy_results.evaluate_metrics)
-    log(INFO, strategy_results.central_evaluate_metrics)
+    print("\nTrain metrics:")
+    pprint(strategy_results.train_metrics)
+    print("\nEvaluate metrics:")
+    pprint(strategy_results.evaluate_metrics)
+    print("\nCentral evaluate metrics:")
+    pprint(strategy_results.central_evaluate_metrics)
 
     # Save final model to disk
     state_dict = strategy_results.arrays.to_torch_state_dict()
-    log(INFO, "Saving final model to disk.")
+    print("\nSaving final model to disk.")
     torch.save(state_dict, "final_model.pt")
+
 
 def central_evaluation(server_round, array_record: ArrayRecord) -> MetricRecord:
     """Evaluate model on central data."""

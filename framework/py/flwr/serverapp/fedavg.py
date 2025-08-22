@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower message-based FedAvg strategy."""
 
+
 from logging import INFO
 from typing import Callable, Optional
 
@@ -32,8 +33,8 @@ from .strategy import Strategy
 from .strategy_utils import (
     aggregate_arrayrecords,
     aggregate_metricrecords,
-    check_message_reply_consistency,
     sample_nodes,
+    validate_message_reply_consistency,
 )
 
 
@@ -45,38 +46,38 @@ class FedAvg(Strategy):
 
     Parameters
     ----------
-    fraction_train : float, optional
+    fraction_train : float (default: 1.0)
         Fraction of nodes used during training. In case `min_train_nodes`
         is larger than `fraction_train * total_connected_nodes`, `min_train_nodes`
-        will still be sampled. Defaults to 1.0.
-    fraction_evaluate : float, optional
+        will still be sampled.
+    fraction_evaluate : float (default: 1.0)
         Fraction of nodes used during validation. In case `min_evaluate_nodes`
         is larger than `fraction_evaluate * total_connected_nodes`,
-        `min_evaluate_nodes` will still be sampled. Defaults to 1.0.
-    min_train_nodes : int, optional
-        Minimum number of nodes used during training. Defaults to 2.
-    min_evaluate_nodes : int, optional
-        Minimum number of nodes used during validation. Defaults to 2.
-    min_available_nodes : int, optional
-        Minimum number of total nodes in the system. Defaults to 2.
-    weighting_factor_key : str, optional
-        Key used to extract the weighting factor from received MetricRecords.
+        `min_evaluate_nodes` will still be sampled.
+    min_train_nodes : int (default: 2)
+        Minimum number of nodes used during training.
+    min_evaluate_nodes : int (default: 2)
+        Minimum number of nodes used during validation.
+    min_available_nodes : int (default: 2)
+        Minimum number of total nodes in the system.
+    weight_factor_key : str (default: "num-examples")
+        Key used to extract the weight factor from received MetricRecords.
         This value is used to perform weighted averaging of both ArrayRecords and
-        MetricRecords. Defaults to "num-examples".
-    arrayrecord_key : str, optional
+        MetricRecords.
+    arrayrecord_key : str (default: "arrays")
         Key used to store the ArrayRecord when constructing Messages.
-        Defaults to "arrays".
-    configrecord_key : str, optional
+    configrecord_key : str (default: "config")
          Key used to store the ConfigRecord when constructing Messages.
-        Defaults to "config".
-    train_metrics_aggr_fn : Callable[[list[RecordDict], str], MetricRecord], optional
-        Function used to aggregate MetricRecords from training round replies.
-        Takes a list of RecordDict and weighting key as input, returns aggregated
-        MetricRecord.
-    evaluate_metrics_aggr_fn : Callable[[list[RecordDict], str], MetricRecord], optional
-        Function used to aggregate MetricRecords from evaluation round replies.
-        Takes a list of RecordDict and weighting key as input, returns aggregated
-        MetricRecord.
+    train_metrics_aggr_fn : Optional[callable] (default: None)
+        Function with signature (list[RecordDict], str) -> MetricRecord,
+        used to aggregate MetricRecords from training round replies.
+        If `None`, defaults to `aggregate_metricrecords`, which performs a weighted
+        average using the provided weight factor key.
+    evaluate_metrics_aggr_fn : Optional[callable] (default: None)
+        Function with signature (list[RecordDict], str) -> MetricRecord,
+        used to aggregate MetricRecords from training round replies.
+        If `None`, defaults to `aggregate_metricrecords`, which performs a weighted
+        average using the provided weight factor key.
     """
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -87,26 +88,28 @@ class FedAvg(Strategy):
         min_train_nodes: int = 2,
         min_evaluate_nodes: int = 2,
         min_available_nodes: int = 2,
-        weighting_factor_key: str = "num-examples",
+        weight_factor_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
         configrecord_key: str = "config",
-        train_metrics_aggr_fn: Callable[
-            [list[RecordDict], str], MetricRecord
-        ] = aggregate_metricrecords,
-        evaluate_metrics_aggr_fn: Callable[
-            [list[RecordDict], str], MetricRecord
-        ] = aggregate_metricrecords,
+        train_metrics_aggr_fn: Optional[
+            Callable[[list[RecordDict], str], MetricRecord]
+        ] = None,
+        evaluate_metrics_aggr_fn: Optional[
+            Callable[[list[RecordDict], str], MetricRecord]
+        ] = None,
     ) -> None:
         self.fraction_train = fraction_train
         self.fraction_evaluate = fraction_evaluate
         self.min_train_nodes = min_train_nodes
         self.min_evaluate_nodes = min_evaluate_nodes
         self.min_available_nodes = min_available_nodes
-        self.weighting_factor_key = weighting_factor_key
+        self.weight_factor_key = weight_factor_key
         self.arrayrecord_key = arrayrecord_key
         self.configrecord_key = configrecord_key
-        self.train_metrics_aggr_fn = train_metrics_aggr_fn
-        self.evaluate_metrics_aggr_fn = evaluate_metrics_aggr_fn
+        self.train_metrics_aggr_fn = train_metrics_aggr_fn or aggregate_metricrecords
+        self.evaluate_metrics_aggr_fn = (
+            evaluate_metrics_aggr_fn or aggregate_metricrecords
+        )
 
     def _construct_messages(
         self, record: RecordDict, node_ids: list[int], message_type: str
@@ -174,25 +177,23 @@ class FedAvg(Strategy):
         replies_with_content = [msg.content for msg in replies if msg.has_content()]
 
         # Ensure expected ArrayRecords and MetricRecords are received
-        skip_aggregation = check_message_reply_consistency(
+        if not validate_message_reply_consistency(
             replies=replies_with_content,
-            weighting_factor_key=self.weighting_factor_key,
+            weight_factor_key=self.weight_factor_key,
             check_arrayrecord=True,
-        )
-
-        if skip_aggregation:
+        ):
             return None, None
 
         # Aggregate ArrayRecords
         arrays = aggregate_arrayrecords(
             replies_with_content,
-            self.weighting_factor_key,
+            self.weight_factor_key,
         )
 
         # Aggregate MetricRecords
         metrics = self.train_metrics_aggr_fn(
             replies_with_content,
-            self.weighting_factor_key,
+            self.weight_factor_key,
         )
         return arrays, metrics
 
@@ -249,18 +250,16 @@ class FedAvg(Strategy):
         replies_with_content = [msg.content for msg in replies if msg.has_content()]
 
         # Ensure expected ArrayRecords and MetricRecords are received
-        skip_aggregation = check_message_reply_consistency(
+        if not validate_message_reply_consistency(
             replies=replies_with_content,
-            weighting_factor_key=self.weighting_factor_key,
+            weight_factor_key=self.weight_factor_key,
             check_arrayrecord=False,
-        )
-
-        if skip_aggregation:
+        ):
             return None
 
         # Aggregate MetricRecords
         metrics = self.evaluate_metrics_aggr_fn(
             replies_with_content,
-            self.weighting_factor_key,
+            self.weight_factor_key,
         )
         return metrics
