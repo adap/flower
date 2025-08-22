@@ -43,7 +43,7 @@ def main(grid: Grid, context: Context) -> None:
     # Log resulting metrics
     print("\nTrain metrics:")
     pprint(strategy_results.train_metrics)
-    print("\nEvaluate metrics:")
+    print("\nDistributed evaluate metrics:")
     pprint(strategy_results.evaluate_metrics)
     print("\nCentral evaluate metrics:")
     pprint(strategy_results.central_evaluate_metrics)
