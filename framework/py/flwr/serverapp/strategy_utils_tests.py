@@ -182,7 +182,7 @@ def test_consistency_of_replies_with_matching_keys(
     # Check consistency
     assert (
         validate_message_reply_consistency(
-            records, weight_factor_key="weight", check_arrayrecord=True
+            records, weighted_by_key="weight", check_arrayrecord=True
         )
         == is_valid
     )
@@ -271,7 +271,7 @@ def test_consistency_of_replies_with_different_keys(
     # Check consistency
     assert (
         validate_message_reply_consistency(
-            list_records, weight_factor_key="weight", check_arrayrecord=True
+            list_records, weighted_by_key="weight", check_arrayrecord=True
         )
         == is_valid
     )

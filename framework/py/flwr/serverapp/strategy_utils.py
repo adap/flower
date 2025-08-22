@@ -202,7 +202,7 @@ def sample_nodes(
 
 # pylint: disable=too-many-return-statements
 def validate_message_reply_consistency(
-    replies: list[RecordDict], weight_factor_key: str, check_arrayrecord: bool
+    replies: list[RecordDict], weighted_by_key: str, check_arrayrecord: bool
 ) -> bool:
     """Validate that replies contain exactly one ArrayRecord and one MetricRecord, and
     that the MetricRecord includes a weight factor key.
@@ -251,22 +251,22 @@ def validate_message_reply_consistency(
         return False
 
     # Verify the weight factor key presence in all MetricRecords
-    if weight_factor_key not in all_keys:
+    if weighted_by_key not in all_keys:
         log(
             ERROR,
             "Missing required key `%s` in the MetricRecord of reply messages. "
             "Cannot average ArrayRecords and MetricRecords. Skipping aggregation.",
-            weight_factor_key,
+            weighted_by_key,
         )
         return False
 
     # Check that it is not a list
-    if any(isinstance(msg[record_key][weight_factor_key], list) for msg in replies):
+    if any(isinstance(msg[record_key][weighted_by_key], list) for msg in replies):
         log(
             ERROR,
             "Key `%s` in the MetricRecord of reply messages must be a single value "
             "(int or float), but a list was found. Skipping aggregation.",
-            weight_factor_key,
+            weighted_by_key,
         )
         return False
 

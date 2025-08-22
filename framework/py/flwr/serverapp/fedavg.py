@@ -60,10 +60,9 @@ class FedAvg(Strategy):
         Minimum number of nodes used during validation.
     min_available_nodes : int (default: 2)
         Minimum number of total nodes in the system.
-    weight_factor_key : str (default: "num-examples")
-        Key used to extract the weight factor from received MetricRecords.
-        This value is used to perform weighted averaging of both ArrayRecords and
-        MetricRecords.
+    weighted_by_key : str (default: "num-examples")
+        The key within each MetricRecord whose value is used as the weight when
+        computing weighted averages for both ArrayRecords and MetricRecords.
     arrayrecord_key : str (default: "arrays")
         Key used to store the ArrayRecord when constructing Messages.
     configrecord_key : str (default: "config")
@@ -88,7 +87,7 @@ class FedAvg(Strategy):
         min_train_nodes: int = 2,
         min_evaluate_nodes: int = 2,
         min_available_nodes: int = 2,
-        weight_factor_key: str = "num-examples",
+        weighted_by_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
         configrecord_key: str = "config",
         train_metrics_aggr_fn: Optional[
@@ -103,7 +102,7 @@ class FedAvg(Strategy):
         self.min_train_nodes = min_train_nodes
         self.min_evaluate_nodes = min_evaluate_nodes
         self.min_available_nodes = min_available_nodes
-        self.weight_factor_key = weight_factor_key
+        self.weighted_by_key = weighted_by_key
         self.arrayrecord_key = arrayrecord_key
         self.configrecord_key = configrecord_key
         self.train_metrics_aggr_fn = train_metrics_aggr_fn or aggregate_metricrecords
@@ -179,7 +178,7 @@ class FedAvg(Strategy):
         # Ensure expected ArrayRecords and MetricRecords are received
         if not validate_message_reply_consistency(
             replies=replies_with_content,
-            weight_factor_key=self.weight_factor_key,
+            weighted_by_key=self.weighted_by_key,
             check_arrayrecord=True,
         ):
             return None, None
@@ -187,13 +186,13 @@ class FedAvg(Strategy):
         # Aggregate ArrayRecords
         arrays = aggregate_arrayrecords(
             replies_with_content,
-            self.weight_factor_key,
+            self.weighted_by_key,
         )
 
         # Aggregate MetricRecords
         metrics = self.train_metrics_aggr_fn(
             replies_with_content,
-            self.weight_factor_key,
+            self.weighted_by_key,
         )
         return arrays, metrics
 
@@ -252,7 +251,7 @@ class FedAvg(Strategy):
         # Ensure expected ArrayRecords and MetricRecords are received
         if not validate_message_reply_consistency(
             replies=replies_with_content,
-            weight_factor_key=self.weight_factor_key,
+            weighted_by_key=self.weighted_by_key,
             check_arrayrecord=False,
         ):
             return None
@@ -260,6 +259,6 @@ class FedAvg(Strategy):
         # Aggregate MetricRecords
         metrics = self.evaluate_metrics_aggr_fn(
             replies_with_content,
-            self.weight_factor_key,
+            self.weighted_by_key,
         )
         return metrics
