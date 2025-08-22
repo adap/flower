@@ -110,6 +110,27 @@ class FedAvg(Strategy):
             evaluate_metrics_aggr_fn or aggregate_metricrecords
         )
 
+    def summary(self) -> None:
+        """Log summary configuration of the strategy."""
+        log(INFO, "\t├──> Sampling:")
+        log(
+            INFO,
+            "\t│\t├──Fraction: train (%.2f) | evaluate ( %.2f)",
+            self.fraction_train,
+            self.fraction_evaluate,
+        )  # pylint: disable=line-too-long
+        log(
+            INFO,
+            "\t│\t├──Minimum nodes: train (%d) | evaluate (%d)",
+            self.min_train_nodes,
+            self.min_evaluate_nodes,
+        )  # pylint: disable=line-too-long
+        log(INFO, "\t│\t└──Minimum available nodes: %d", self.min_available_nodes)
+        log(INFO, "\t└──> Keys in records:")
+        log(INFO, "\t\t├── Weighted by: '%s'", self.weighted_by_key)
+        log(INFO, "\t\t├── ArrayRecord key: '%s'", self.arrayrecord_key)
+        log(INFO, "\t\t└── ConfigRecord key: '%s'", self.configrecord_key)
+
     def _construct_messages(
         self, record: RecordDict, node_ids: list[int], message_type: str
     ) -> list[Message]:

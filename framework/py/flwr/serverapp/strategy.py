@@ -124,6 +124,10 @@ class Strategy(ABC):
             or None if aggregation failed.
         """
 
+    @abstractmethod
+    def summary(self) -> None:
+        """Log summary configuration of the strategy."""
+
     # pylint: disable=too-many-arguments, too-many-positional-arguments
     def start(
         self,
@@ -170,6 +174,8 @@ class Strategy(ABC):
         """
         log(INFO, "Starting %s strategy:", self.__class__.__name__)
         log_strategy_start_info(num_rounds, arrays, train_config, evaluate_config)
+        self.summary()
+        log(INFO, "")
 
         # Initialize if None
         train_config = ConfigRecord() if train_config is None else train_config

@@ -59,24 +59,23 @@ def log_strategy_start_info(
     evaluate_config: Optional[ConfigRecord],
 ) -> None:
     """Log information about the strategy start."""
-    log(INFO, "\t└──> Number of rounds: %d", num_rounds)
+    log(INFO, "\t├── Number of rounds: %d", num_rounds)
     log(
         INFO,
-        "\t└──> ArrayRecord: %d Arrays totalling %.2f MB",
+        "\t├── ArrayRecord: %d Arrays totalling %.2f MB",
         len(arrays),
         sum(len(array.data) for array in arrays.values()) / (1024**2),
     )
     log(
         INFO,
-        "\t└──> ConfigRecord (train): %s",
+        "\t├── ConfigRecord (train): %s",
         config_to_str(train_config) if train_config else "(empty!)",
     )
     log(
         INFO,
-        "\t└──> ConfigRecord (evaluate): %s",
+        "\t├── ConfigRecord (evaluate): %s",
         config_to_str(evaluate_config) if evaluate_config else "(empty!)",
     )
-    log(INFO, "")
 
 
 def aggregate_arrayrecords(
