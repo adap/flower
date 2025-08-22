@@ -15,9 +15,9 @@
 """Flower message-based strategy."""
 
 
+import time
 from abc import ABC, abstractmethod
 from logging import INFO
-from time import time
 from typing import Callable, Optional
 
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, log
@@ -176,7 +176,7 @@ class Strategy(ABC):
         evaluate_config = ConfigRecord() if evaluate_config is None else evaluate_config
         results = StrategyResults()
 
-        t_start = time()
+        t_start = time.time()
         # Do central eval with starting global parameters
         if central_eval_fn:
             res = central_eval_fn(0, arrays)
@@ -227,7 +227,7 @@ class Strategy(ABC):
             arrays = agg_arrays
 
         log(INFO, "")
-        log(INFO, "Strategy execution finished in %.2fs", time() - t_start)
+        log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)
         log(INFO, "")
 
         return results

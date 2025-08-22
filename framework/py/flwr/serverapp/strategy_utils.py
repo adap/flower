@@ -162,106 +162,111 @@ def aggregate_metricrecords(
 def sample_nodes(
     grid: Grid, min_available_nodes: int, sample_size: int
 ) -> tuple[list[int], list[int]]:
-    """Sample the specified number of nodes using the Grid."""
+    """Sample the specified number of nodes using the Grid.
+
+    Parameters
+    ----------
+    grid : Grid
+        The grid object.
+    min_available_nodes : int
+        The minimum number of available nodes to sample from.
+    sample_size : int
+        The number of nodes to sample.
+
+    Returns
+    -------
+    tuple[list[int], list[int]]
+        A tuple containing the sampled node IDs and the list
+        of all connected node IDs.
+    """
     sampled_nodes = []
 
+    # Ensure min_available_nodes is at least as large as sample_size
+    min_available_nodes = max(min_available_nodes, sample_size)
+
     # wait for min_available_nodes to be online
-    nodes_connected = list(grid.get_node_ids())
-    while len(nodes_connected) < min_available_nodes:
-        sleep(1)
+    while len(all_nodes := list(grid.get_node_ids())) < min_available_nodes:
         log(
             INFO,
-            "Waiting for nodes to connect. Nodes connected %d "
-            "(expecting at least %d).",
-            len(nodes_connected),
+            "Waiting for nodes to connect: %d connected (minimum required: %d).",
+            len(all_nodes),
             min_available_nodes,
         )
-        nodes_connected = list(grid.get_node_ids())
+        sleep(1)
 
     # Sample nodes
-    sampled_nodes = random.sample(list(nodes_connected), sample_size)
+    sampled_nodes = random.sample(all_nodes, sample_size)
 
-    return sampled_nodes, nodes_connected
+    return sampled_nodes, all_nodes
 
 
-def check_message_reply_consistency(
-    replies: list[RecordDict], weighting_factor_key: str, check_arrayrecord: bool
+def validate_message_reply_consistency(
+    replies: list[RecordDict], weight_factor_key: str, check_arrayrecord: bool
 ) -> bool:
-    """Check that replies contain one ArrayRecord, one MetricRecord and that the
-    weighting factor key is present.
+    """Validate that replies contain exactly one ArrayRecord and one MetricRecord, and
+    that the MetricRecord includes a weight factor key.
 
-    These checks assist in keeping the behaviour of Message-based strategies consistent
-    with *Ins/*Res-based strategies.
+    These checks ensure that Message-based strategies behave consistently with
+    *Ins/*Res-based strategies.
     """
     # Checking for ArrayRecord consistency
-    skip_aggregation = False
     if check_arrayrecord:
-        if all(len(msg.array_records) != 1 for msg in replies):
+        if any(len(msg.array_records) != 1 for msg in replies):
             log(
                 ERROR,
-                "Expected exactly one ArrayRecord in replies, but found more. "
-                "Skipping aggregation.",
+                "Expected exactly one ArrayRecord in replies.Skipping aggregation.",
             )
-            skip_aggregation = True
-        else:
-            # Ensure all key are present in all ArrayRecords
-            all_key_sets = [
-                set(next(iter(d.array_records.values())).keys()) for d in replies
-            ]
-            if not all(s == all_key_sets[0] for s in all_key_sets):
-                log(
-                    ERROR,
-                    "All ArrayRecords must have the same keys for aggregation. "
-                    "This condition wasn't met. Skipping aggregation.",
-                )
-                skip_aggregation = True
+            return False
+
+        # Ensure all key are present in all ArrayRecords
+        record_key = next(iter(replies[0].array_records.keys()))
+        all_keys = set(replies[0][record_key].keys())
+        if any(set(msg.get(record_key, {}).keys()) != all_keys for msg in replies[1:]):
+            log(
+                ERROR,
+                "All ArrayRecords must have the same keys for aggregation. "
+                "This condition wasn't met. Skipping aggregation.",
+            )
+            return False
 
     # Checking for MetricRecord consistency
-    if all(len(msg.metric_records) != 1 for msg in replies):
+    if any(len(msg.metric_records) != 1 for msg in replies):
         log(
             ERROR,
             "Expected exactly one MetricRecord in replies, but found more. "
             "Skipping aggregation.",
         )
-        skip_aggregation = True
+        return False
     else:
         # Ensure all key are present in all MetricRecords
-        all_key_sets = [
-            set(next(iter(d.metric_records.values())).keys()) for d in replies
-        ]
-        if not all(s == all_key_sets[0] for s in all_key_sets):
+        record_key = next(iter(replies[0].metric_records.keys()))
+        all_keys = set(replies[0][record_key].keys())
+        if any(set(msg.get(record_key, {}).keys()) != all_keys for msg in replies[1:]):
             log(
                 ERROR,
                 "All MetricRecords must have the same keys for aggregation. "
                 "This condition wasn't met. Skipping aggregation.",
             )
-            skip_aggregation = True
+            return False
 
-        # Check one of the sets for the key to perform weighting averaging
-        if weighting_factor_key not in all_key_sets[0]:
+        # Verify the weight factor key presence in all MetricRecords
+        if weight_factor_key not in all_keys:
             log(
                 ERROR,
-                "The MetricRecord in the reply messages were expecting key "
-                "`%s` to perform averaging of "
-                "ArrayRecords and MetricRecords. Skipping aggregation.",
-                weighting_factor_key,
+                "Missing required key `%s` in the MetricRecord of reply messages. "
+                "Cannot average ArrayRecords and MetricRecords. Skipping aggregation.",
+                weight_factor_key,
             )
-            skip_aggregation = True
-        else:
-            # Check that it is not a list
-            if any(
-                isinstance(
-                    next(iter(d.metric_records.values()))[weighting_factor_key], list
-                )
-                for d in replies
-            ):
-                log(
-                    ERROR,
-                    "The MetricRecord in the reply messages were expecting key "
-                    "`%s` to be a single value (float or int), "
-                    "but found a list. Skipping aggregation.",
-                    weighting_factor_key,
-                )
-                skip_aggregation = True
+            return False
 
-    return skip_aggregation
+        # Check that it is not a list
+        if any(isinstance(msg[record_key][weight_factor_key], list) for msg in replies):
+            log(
+                ERROR,
+                "Key `%s` in the MetricRecord of reply messages must be a single value "
+                "(int or float), but a list was found. Skipping aggregation.",
+                weight_factor_key,
+            )
+            return False
+
+    return True
