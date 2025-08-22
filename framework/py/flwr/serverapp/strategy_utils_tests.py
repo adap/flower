@@ -137,7 +137,7 @@ def test_metricrecords_aggregation() -> None:
                     "metrics": MetricRecord({"weight": [0.123]}),
                 }
             ),
-        ),  # No weighting key is not a scalar (BAD)
+        ),  # Weighting key is not a scalar (BAD)
         (
             True,
             RecordDict(
