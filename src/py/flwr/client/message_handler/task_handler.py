@@ -15,9 +15,6 @@
 """Task handling."""
 
 
-from typing import Optional
-
-from flwr.proto.fleet_pb2 import PullTaskInsResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 
@@ -38,17 +35,3 @@ def validate_task_ins(task_ins: TaskIns) -> bool:
     if not (task_ins.HasField("task") and task_ins.task.HasField("recordset")):
         return False
     return True
-
-
-def get_task_ins(
-    pull_task_ins_response: PullTaskInsResponse,
-) -> Optional[TaskIns]:
-    """Get the first TaskIns, if available."""
-    # Extract a single ServerMessage from the response, if possible
-    if len(pull_task_ins_response.task_ins_list) == 0:
-        return None
-
-    # Only evaluate the first message
-    task_ins: TaskIns = pull_task_ins_response.task_ins_list[0]
-
-    return task_ins

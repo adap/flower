@@ -28,7 +28,7 @@ echo "Formatting done: Python"
 
 # Notebooks
 echo "Formatting started: Notebooks"
-python -m black --ipynb -q doc/source/*.ipynb
+python -m black --ipynb -q docs/source/*.ipynb
 KEYS="metadata.celltoolbar metadata.language_info metadata.toc metadata.notify_time metadata.varInspector metadata.accelerator metadata.vscode cell.metadata.id cell.metadata.heading_collapsed cell.metadata.hidden cell.metadata.code_folding cell.metadata.tags cell.metadata.init_cell cell.metadata.vscode cell.metadata.pycharm"
-python -m nbstripout --keep-output doc/source/*.ipynb --extra-keys "$KEYS"
+python -m nbstripout --keep-output docs/source/*.ipynb --extra-keys "$KEYS"
 echo "Formatting done: Notebooks"

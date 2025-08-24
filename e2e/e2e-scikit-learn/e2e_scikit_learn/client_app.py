@@ -9,11 +9,10 @@ from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
 
 # Load MNIST dataset from https://www.openml.org/d/554
-(X_train, y_train), (X_test, y_test) = utils.load_mnist()
-
-# Split train set into 10 partitions and randomly use one for training.
-partition_id = np.random.choice(10)
-(X_train, y_train) = utils.partition(X_train, y_train, 10)[partition_id]
+num_partitions = 10
+X_train, X_test, y_train, y_test = utils.load_data(
+    num_partitions=num_partitions, partition_id=np.random.choice(num_partitions)
+)
 
 # Create LogisticRegression Model
 model = LogisticRegression(

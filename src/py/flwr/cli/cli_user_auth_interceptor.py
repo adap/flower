@@ -54,8 +54,12 @@ class CliUserAuthInterceptor(
 
         response = continuation(details, request)
         if response.initial_metadata():
-            retrieved_metadata = dict(response.initial_metadata())
-            self.auth_plugin.store_tokens(retrieved_metadata)
+            credentials = self.auth_plugin.read_tokens_from_metadata(
+                response.initial_metadata()
+            )
+            # The metadata contains tokens only if they have been refreshed
+            if credentials is not None:
+                self.auth_plugin.store_tokens(credentials)
 
         return response
 

@@ -14,8 +14,8 @@
 # ==============================================================================
 """Flower Simulation process."""
 
+
 import argparse
-import sys
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
 from time import sleep
@@ -23,7 +23,8 @@ from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
-from flwr.common import EventType
+from flwr.cli.utils import get_sha256_hash
+from flwr.common import EventType, event
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import (
     get_flwr_dir,
@@ -37,6 +38,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -47,6 +49,7 @@ from flwr.common.logger import (
 from flwr.common.serde import (
     configs_record_from_proto,
     context_from_proto,
+    context_to_proto,
     fab_from_proto,
     run_from_proto,
     run_status_to_proto,
@@ -78,12 +81,10 @@ def flwr_simulation() -> None:
     log(INFO, "Starting Flower Simulation")
 
     if not args.insecure:
-        log(
-            ERROR,
-            "`flwr-simulation` does not support TLS yet. "
-            "Please use the '--insecure' flag.",
+        flwr_exit(
+            ExitCode.COMMON_TLS_NOT_SUPPORTED,
+            "`flwr-simulation` does not support TLS yet. ",
         )
-        sys.exit(1)
 
     log(
         DEBUG,
@@ -200,8 +201,17 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             verbose: bool = fed_opt.get("verbose", False)
             enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
 
+            event(
+                EventType.FLWR_SIMULATION_RUN_ENTER,
+                event_details={
+                    "backend": "ray",
+                    "num-supernodes": num_supernodes,
+                    "run-id-hash": get_sha256_hash(run.run_id),
+                },
+            )
+
             # Launch the simulation
-            _run_simulation(
+            updated_context = _run_simulation(
                 server_app_attr=server_app_attr,
                 client_app_attr=client_app_attr,
                 num_supernodes=num_supernodes,
@@ -212,11 +222,11 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 verbose_logging=verbose,
                 server_app_run_config=fused_config,
                 is_app=True,
-                exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
+                exit_event=EventType.FLWR_SIMULATION_RUN_LEAVE,
             )
 
             # Send resulting context
-            context_proto = None  # context_to_proto(updated_context)
+            context_proto = context_to_proto(updated_context)
             out_req = PushSimulationOutputsRequest(
                 run_id=run.run_id, context=context_proto
             )

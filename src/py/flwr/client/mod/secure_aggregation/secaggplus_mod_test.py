@@ -14,6 +14,7 @@
 # ==============================================================================
 """The SecAgg+ protocol modifier tests."""
 
+
 import unittest
 from itertools import product
 from typing import Callable

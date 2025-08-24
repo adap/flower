@@ -7,7 +7,7 @@
 README.md @jafermarq @tanertopal @danieljanes
 
 # Flower Baselines
-/baselines @jafermarq @tanertopal @danieljanes
+/baselines @chongshenng @jafermarq @tanertopal @danieljanes
 
 # Flower Benchmarks
 /benchmarks @jafermarq @tanertopal @danieljanes
@@ -16,7 +16,7 @@ README.md @jafermarq @tanertopal @danieljanes
 /datasets @jafermarq @tanertopal @danieljanes
 
 # Flower Examples
-/examples @jafermarq @tanertopal @danieljanes
+/examples @chongshenng @jafermarq @tanertopal @danieljanes
 
 # Flower Templates
 /src/py/flwr/cli/new/templates @jafermarq @tanertopal @danieljanes

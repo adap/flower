@@ -23,7 +23,6 @@ import grpc
 
 from flwr.common import DEFAULT_TTL, RecordSet
 from flwr.common.message import Error
-from flwr.common.serde import error_to_proto, recordset_to_proto
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
@@ -31,11 +30,11 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
-    PullTaskResRequest,
-    PushTaskInsRequest,
+    PullResMessagesRequest,
+    PushInsMessagesRequest,
 )
-from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
+from ..superlink.linkstate.linkstate_test import create_res_message
 from .grpc_driver import GrpcDriver
 
 
@@ -94,8 +93,8 @@ class TestGrpcDriver(unittest.TestCase):
     def test_push_messages_valid(self) -> None:
         """Test pushing valid messages."""
         # Prepare
-        mock_response = Mock(task_ids=["id1", "id2"])
-        self.mock_stub.PushTaskIns.return_value = mock_response
+        mock_response = Mock(message_ids=["id1", "id2"])
+        self.mock_stub.PushMessages.return_value = mock_response
         msgs = [
             self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)
             for _ in range(2)
@@ -103,22 +102,22 @@ class TestGrpcDriver(unittest.TestCase):
 
         # Execute
         msg_ids = self.driver.push_messages(msgs)
-        args, kwargs = self.mock_stub.PushTaskIns.call_args
+        args, kwargs = self.mock_stub.PushMessages.call_args
 
         # Assert
         self.mock_stub.GetRun.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
-        self.assertIsInstance(args[0], PushTaskInsRequest)
-        self.assertEqual(msg_ids, mock_response.task_ids)
-        for task_ins in args[0].task_ins_list:
-            self.assertEqual(task_ins.run_id, 61016)
+        self.assertIsInstance(args[0], PushInsMessagesRequest)
+        self.assertEqual(msg_ids, mock_response.message_ids)
+        for message in args[0].messages_list:
+            self.assertEqual(message.metadata.run_id, 61016)
 
     def test_push_messages_invalid(self) -> None:
         """Test pushing invalid messages."""
         # Prepare
-        mock_response = Mock(task_ids=["id1", "id2"])
-        self.mock_stub.PushTaskIns.return_value = mock_response
+        mock_response = Mock(message_ids=["id1", "id2"])
+        self.mock_stub.PushMessages.return_value = mock_response
         msgs = [
             self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)
             for _ in range(2)
@@ -135,41 +134,48 @@ class TestGrpcDriver(unittest.TestCase):
         # Prepare
         mock_response = Mock()
         # A Message must have either content or error set so we prepare
-        # two tasks that contain these.
-        mock_response.task_res_list = [
-            TaskRes(
-                task=Task(ancestry=["id2"], recordset=recordset_to_proto(RecordSet()))
-            ),
-            TaskRes(task=Task(ancestry=["id3"], error=error_to_proto(Error(code=0)))),
-        ]
-        self.mock_stub.PullTaskRes.return_value = mock_response
+        run_id = 12345
+        ok_message = create_res_message(src_node_id=123, dst_node_id=456, run_id=run_id)
+        ok_message.metadata.reply_to_message = "id2"
+
+        error_message = create_res_message(
+            src_node_id=123, dst_node_id=789, run_id=run_id, error=Error(code=0)
+        )
+        error_message.metadata.reply_to_message = "id3"
+        # The the response from the DriverServicer is in the form of Protbuf Messages
+        mock_response.messages_list = [ok_message, error_message]
+        self.mock_stub.PullMessages.return_value = mock_response
         msg_ids = ["id1", "id2", "id3"]
 
         # Execute
         msgs = self.driver.pull_messages(msg_ids)
         reply_tos = {msg.metadata.reply_to_message for msg in msgs}
-        args, kwargs = self.mock_stub.PullTaskRes.call_args
+        args, kwargs = self.mock_stub.PullMessages.call_args
 
         # Assert
         self.mock_stub.GetRun.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
-        self.assertIsInstance(args[0], PullTaskResRequest)
-        self.assertEqual(args[0].task_ids, msg_ids)
+        self.assertIsInstance(args[0], PullResMessagesRequest)
+        self.assertEqual(args[0].message_ids, msg_ids)
         self.assertEqual(reply_tos, {"id2", "id3"})
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
         # Prepare
-        mock_response = Mock(task_ids=["id1"])
-        self.mock_stub.PushTaskIns.return_value = mock_response
+        mock_response = Mock(message_ids=["id1"])
+        self.mock_stub.PushMessages.return_value = mock_response
         # The response message must include either `content` (i.e. a recordset) or
         # an `Error`. We choose the latter in this case
-        error_proto = error_to_proto(Error(code=0))
-        mock_response = Mock(
-            task_res_list=[TaskRes(task=Task(ancestry=["id1"], error=error_proto))]
+        run_id = 1234
+        mssg = create_res_message(
+            src_node_id=123, dst_node_id=456, run_id=run_id, error=Error(code=0)
         )
-        self.mock_stub.PullTaskRes.return_value = mock_response
+        mssg.metadata.reply_to_message = "id1"
+        message_res_list = [mssg]
+
+        mock_response.messages_list = message_res_list
+        self.mock_stub.PullMessages.return_value = mock_response
         msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
 
         # Execute
@@ -183,10 +189,10 @@ class TestGrpcDriver(unittest.TestCase):
         """Test send and receive messages but time out."""
         # Prepare
         sleep_fn = time.sleep
-        mock_response = Mock(task_ids=["id1"])
-        self.mock_stub.PushTaskIns.return_value = mock_response
-        mock_response = Mock(task_res_list=[])
-        self.mock_stub.PullTaskRes.return_value = mock_response
+        mock_response = Mock(message_ids=["id1"])
+        self.mock_stub.PushMessages.return_value = mock_response
+        mock_response = Mock(messages_list=[])
+        self.mock_stub.PullMessages.return_value = mock_response
         msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
 
         # Execute

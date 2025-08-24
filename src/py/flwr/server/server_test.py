@@ -22,15 +22,7 @@ from pathlib import Path
 from typing import Optional
 
 import numpy as np
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.serialization import (
-    Encoding,
-    NoEncryption,
-    PrivateFormat,
-    PublicFormat,
-    load_ssh_private_key,
-    load_ssh_public_key,
-)
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 from flwr.common import (
     Code,
@@ -50,12 +42,11 @@ from flwr.common import (
 )
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
-    private_key_to_bytes,
     public_key_to_bytes,
 )
 from flwr.server.client_manager import SimpleClientManager
 
-from .app import _try_setup_node_authentication
+from .app import _try_load_public_keys_node_authentication
 from .client_proxy import ClientProxy
 from .server import Server, evaluate_clients, fit_clients
 
@@ -207,22 +198,12 @@ def test_setup_node_auth() -> None:  # pylint: disable=R0914
     """Test setup node authentication."""
     # Prepare
     _, first_public_key = generate_key_pairs()
-    private_key, public_key = generate_key_pairs()
-
-    server_public_key = public_key.public_bytes(
-        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
-    )
-    server_private_key = private_key.private_bytes(
-        Encoding.PEM, PrivateFormat.OpenSSH, NoEncryption()
-    )
     _, second_public_key = generate_key_pairs()
 
     # Execute
     with tempfile.TemporaryDirectory() as temp_dir:
         # Initialize temporary files
         node_keys_file_path = Path(temp_dir) / "node_keys.csv"
-        server_private_key_path = Path(temp_dir) / "server_private_key"
-        server_public_key_path = Path(temp_dir) / "server_public_key"
 
         # Fill the files with relevant keys
         with open(node_keys_file_path, "w", newline="", encoding="utf-8") as csvfile:
@@ -237,33 +218,20 @@ def test_setup_node_auth() -> None:  # pylint: disable=R0914
                     ).decode(),
                 ]
             )
-        server_public_key_path.write_bytes(server_public_key)
-        server_private_key_path.write_bytes(server_private_key)
 
         # Mock argparse with `require-node-authentication`` flag
         mock_args = argparse.Namespace(
             auth_list_public_keys=str(node_keys_file_path),
-            auth_superlink_private_key=str(server_private_key_path),
-            auth_superlink_public_key=str(server_public_key_path),
+            auth_superlink_private_key="",
+            auth_superlink_public_key="",
         )
 
         # Run _try_setup_node_authentication
-        result = _try_setup_node_authentication(mock_args, (b"", b"", b""))
-
-        expected_private_key = load_ssh_private_key(server_private_key, None)
-        expected_public_key = load_ssh_public_key(server_public_key)
+        node_pks = _try_load_public_keys_node_authentication(mock_args)
 
         # Assert
-        assert isinstance(expected_private_key, ec.EllipticCurvePrivateKey)
-        assert isinstance(expected_public_key, ec.EllipticCurvePublicKey)
-        assert result is not None
-        assert result[0] == {
+        assert node_pks is not None
+        assert node_pks == {
             public_key_to_bytes(first_public_key),
             public_key_to_bytes(second_public_key),
         }
-        assert private_key_to_bytes(result[1]) == private_key_to_bytes(
-            expected_private_key
-        )
-        assert public_key_to_bytes(result[2]) == public_key_to_bytes(
-            expected_public_key
-        )

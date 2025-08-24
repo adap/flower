@@ -18,6 +18,7 @@
 import time
 from typing import Union
 
+from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
@@ -44,9 +45,6 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> list[str
         validation_errors.append("`delivered_at` must be an empty str")
     if tasks_ins_res.task.ttl <= 0:
         validation_errors.append("`ttl` must be higher than zero")
-    if tasks_ins_res.task.pushed_at < 1711497600.0:
-        # unix timestamp of 27 March 2024 00h:00m:00s UTC
-        validation_errors.append("`pushed_at` is not a recent timestamp")
 
     # Verify TTL and created_at time
     current_time = time.time()
@@ -58,24 +56,14 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> list[str
         # Task producer
         if not tasks_ins_res.task.HasField("producer"):
             validation_errors.append("`producer` does not set field `producer`")
-        if tasks_ins_res.task.producer.node_id != 0:
-            validation_errors.append("`producer.node_id` is not 0")
-        if not tasks_ins_res.task.producer.anonymous:
-            validation_errors.append("`producer` is not anonymous")
+        if tasks_ins_res.task.producer.node_id != SUPERLINK_NODE_ID:
+            validation_errors.append(f"`producer.node_id` is not {SUPERLINK_NODE_ID}")
 
         # Task consumer
         if not tasks_ins_res.task.HasField("consumer"):
             validation_errors.append("`consumer` does not set field `consumer`")
-        if (
-            tasks_ins_res.task.consumer.anonymous
-            and tasks_ins_res.task.consumer.node_id != 0
-        ):
-            validation_errors.append("anonymous consumers MUST NOT set a `node_id`")
-        if (
-            not tasks_ins_res.task.consumer.anonymous
-            and tasks_ins_res.task.consumer.node_id == 0
-        ):
-            validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
+        if tasks_ins_res.task.consumer.node_id == SUPERLINK_NODE_ID:
+            validation_errors.append("consumer MUST provide a valid `node_id`")
 
         # Content check
         if tasks_ins_res.task.task_type == "":
@@ -95,30 +83,14 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> list[str
         # Task producer
         if not tasks_ins_res.task.HasField("producer"):
             validation_errors.append("`producer` does not set field `producer`")
-        if (
-            tasks_ins_res.task.producer.anonymous
-            and tasks_ins_res.task.producer.node_id != 0
-        ):
-            validation_errors.append("anonymous producers MUST NOT set a `node_id`")
-        if (
-            not tasks_ins_res.task.producer.anonymous
-            and tasks_ins_res.task.producer.node_id == 0
-        ):
-            validation_errors.append("non-anonymous producer MUST provide a `node_id`")
+        if tasks_ins_res.task.producer.node_id == SUPERLINK_NODE_ID:
+            validation_errors.append("producer MUST provide a valid `node_id`")
 
         # Task consumer
         if not tasks_ins_res.task.HasField("consumer"):
             validation_errors.append("`consumer` does not set field `consumer`")
-        if (
-            tasks_ins_res.task.consumer.anonymous
-            and tasks_ins_res.task.consumer.node_id != 0
-        ):
-            validation_errors.append("anonymous consumers MUST NOT set a `node_id`")
-        if (
-            not tasks_ins_res.task.consumer.anonymous
-            and tasks_ins_res.task.consumer.node_id == 0
-        ):
-            validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
+        if tasks_ins_res.task.consumer.node_id != SUPERLINK_NODE_ID:
+            validation_errors.append(f"consumer is not {SUPERLINK_NODE_ID}")
 
         # Content check
         if tasks_ins_res.task.task_type == "":

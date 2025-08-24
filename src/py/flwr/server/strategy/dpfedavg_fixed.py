@@ -17,6 +17,7 @@
 Paper: arxiv.org/pdf/1710.06963.pdf
 """
 
+
 from typing import Optional, Union
 
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Scalar

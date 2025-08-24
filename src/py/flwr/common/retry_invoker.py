@@ -20,7 +20,17 @@ import random
 import time
 from collections.abc import Generator, Iterable
 from dataclasses import dataclass
+from logging import INFO, WARN
 from typing import Any, Callable, Optional, Union, cast
+
+import grpc
+
+from flwr.common.constant import MAX_RETRY_DELAY
+from flwr.common.logger import log
+from flwr.common.typing import RunNotRunningException
+from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 
 
 def exponential(
@@ -303,3 +313,70 @@ class RetryInvoker:
                 # Trigger success event
                 try_call_event_handler(self.on_success)
                 return ret
+
+
+def _make_simple_grpc_retry_invoker() -> RetryInvoker:
+    """Create a simple gRPC retry invoker."""
+
+    def _on_sucess(retry_state: RetryState) -> None:
+        if retry_state.tries > 1:
+            log(
+                INFO,
+                "Connection successful after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+
+    def _on_backoff(retry_state: RetryState) -> None:
+        if retry_state.tries == 1:
+            log(WARN, "Connection attempt failed, retrying...")
+        else:
+            log(
+                WARN,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
+
+    def _on_giveup(retry_state: RetryState) -> None:
+        if retry_state.tries > 1:
+            log(
+                WARN,
+                "Giving up reconnection after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+
+    def _should_giveup_fn(e: Exception) -> bool:
+        if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
+            raise RunNotRunningException
+        if e.code() == grpc.StatusCode.UNAVAILABLE:  # type: ignore
+            return False
+        return True
+
+    return RetryInvoker(
+        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
+        recoverable_exceptions=grpc.RpcError,
+        max_tries=None,
+        max_time=None,
+        on_success=_on_sucess,
+        on_backoff=_on_backoff,
+        on_giveup=_on_giveup,
+        should_giveup=_should_giveup_fn,
+    )
+
+
+def _wrap_stub(
+    stub: Union[ServerAppIoStub, ClientAppIoStub, SimulationIoStub],
+    retry_invoker: RetryInvoker,
+) -> None:
+    """Wrap a gRPC stub with a retry invoker."""
+
+    def make_lambda(original_method: Any) -> Any:
+        return lambda *args, **kwargs: retry_invoker.invoke(
+            original_method, *args, **kwargs
+        )
+
+    for method_name in vars(stub):
+        method = getattr(stub, method_name)
+        if callable(method):
+            setattr(stub, method_name, make_lambda(method))

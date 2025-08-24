@@ -19,6 +19,7 @@ import time
 from collections.abc import Generator
 from logging import ERROR, INFO
 from typing import Any, Optional
+from uuid import UUID
 
 import grpc
 
@@ -160,6 +161,13 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             run_id=request.run_id,
             new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
         )
+
+        if update_success:
+            task_ids: set[UUID] = state.get_task_ids_from_run_id(request.run_id)
+
+            # Delete TaskIns and TaskRes for the `run_id`
+            state.delete_tasks(task_ids)
+
         return StopRunResponse(success=update_success)
 
     def GetLoginDetails(
@@ -173,8 +181,20 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 "ExecServicer initialized without user authentication",
             )
             raise grpc.RpcError()  # This line is unreachable
+
+        # Get login details
+        details = self.auth_plugin.get_login_details()
+
+        # Return empty response if details is None
+        if details is None:
+            return GetLoginDetailsResponse()
+
         return GetLoginDetailsResponse(
-            login_details=self.auth_plugin.get_login_details()
+            auth_type=details.auth_type,
+            device_code=details.device_code,
+            verification_uri_complete=details.verification_uri_complete,
+            expires_in=details.expires_in,
+            interval=details.interval,
         )
 
     def GetAuthTokens(
@@ -188,8 +208,17 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 "ExecServicer initialized without user authentication",
             )
             raise grpc.RpcError()  # This line is unreachable
+
+        # Get auth tokens
+        credentials = self.auth_plugin.get_auth_tokens(request.device_code)
+
+        # Return empty response if credentials is None
+        if credentials is None:
+            return GetAuthTokensResponse()
+
         return GetAuthTokensResponse(
-            auth_tokens=self.auth_plugin.get_auth_tokens(dict(request.auth_details))
+            access_token=credentials.access_token,
+            refresh_token=credentials.refresh_token,
         )
 
 

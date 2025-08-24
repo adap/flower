@@ -14,6 +14,7 @@
 # ==============================================================================
 """Test for Flower command line interface `run` command."""
 
+
 import os
 import textwrap
 from pathlib import Path
@@ -25,10 +26,8 @@ import pytest
 from .config_utils import (
     load,
     process_loaded_project_config,
-    validate,
     validate_certificate_in_federation_config,
     validate_federation_in_project_config,
-    validate_fields,
 )
 
 
@@ -162,184 +161,6 @@ def test_load_pyproject_toml_from_path(tmp_path: Path) -> None:
         os.chdir(origin)
 
 
-def test_validate_pyproject_toml_fields_empty() -> None:
-    """Test that validate_pyproject_toml_fields fails correctly."""
-    # Prepare
-    config: dict[str, Any] = {}
-
-    # Execute
-    is_valid, errors, warnings = validate_fields(config)
-
-    # Assert
-    assert not is_valid
-    assert len(errors) == 2
-    assert len(warnings) == 0
-
-
-def test_validate_pyproject_toml_fields_no_flower() -> None:
-    """Test that validate_pyproject_toml_fields fails correctly."""
-    # Prepare
-    config = {
-        "project": {
-            "name": "fedgpt",
-            "version": "1.0.0",
-            "description": "",
-            "license": "",
-            "authors": [],
-        }
-    }
-
-    # Execute
-    is_valid, errors, warnings = validate_fields(config)
-
-    # Assert
-    assert not is_valid
-    assert len(errors) == 1
-    assert len(warnings) == 0
-
-
-def test_validate_pyproject_toml_fields_no_flower_components() -> None:
-    """Test that validate_pyproject_toml_fields fails correctly."""
-    # Prepare
-    config = {
-        "project": {
-            "name": "fedgpt",
-            "version": "1.0.0",
-            "description": "",
-            "license": "",
-            "authors": [],
-        },
-        "tool": {"flwr": {"app": {}}},
-    }
-
-    # Execute
-    is_valid, errors, warnings = validate_fields(config)
-
-    # Assert
-    assert not is_valid
-    assert len(errors) == 2
-    assert len(warnings) == 0
-
-
-def test_validate_pyproject_toml_fields_no_server_and_client_app() -> None:
-    """Test that validate_pyproject_toml_fields fails correctly."""
-    # Prepare
-    config = {
-        "project": {
-            "name": "fedgpt",
-            "version": "1.0.0",
-            "description": "",
-            "license": "",
-            "authors": [],
-        },
-        "tool": {"flwr": {"app": {"components": {}}}},
-    }
-
-    # Execute
-    is_valid, errors, warnings = validate_fields(config)
-
-    # Assert
-    assert not is_valid
-    assert len(errors) == 3
-    assert len(warnings) == 0
-
-
-def test_validate_pyproject_toml_fields() -> None:
-    """Test that validate_pyproject_toml_fields succeeds correctly."""
-    # Prepare
-    config = {
-        "project": {
-            "name": "fedgpt",
-            "version": "1.0.0",
-            "description": "",
-            "license": "",
-            "authors": [],
-        },
-        "tool": {
-            "flwr": {
-                "app": {
-                    "publisher": "flwrlabs",
-                    "components": {"serverapp": "", "clientapp": ""},
-                },
-            },
-        },
-    }
-
-    # Execute
-    is_valid, errors, warnings = validate_fields(config)
-
-    # Assert
-    assert is_valid
-    assert len(errors) == 0
-    assert len(warnings) == 0
-
-
-def test_validate_pyproject_toml() -> None:
-    """Test that validate_pyproject_toml succeeds correctly."""
-    # Prepare
-    config = {
-        "project": {
-            "name": "fedgpt",
-            "version": "1.0.0",
-            "description": "",
-            "license": "",
-            "authors": [],
-        },
-        "tool": {
-            "flwr": {
-                "app": {
-                    "publisher": "flwrlabs",
-                    "components": {
-                        "serverapp": "flwr.cli.run:run",
-                        "clientapp": "flwr.cli.run:run",
-                    },
-                },
-            },
-        },
-    }
-
-    # Execute
-    is_valid, errors, warnings = validate(config)
-
-    # Assert
-    assert is_valid
-    assert not errors
-    assert not warnings
-
-
-def test_validate_pyproject_toml_fail() -> None:
-    """Test that validate_pyproject_toml fails correctly."""
-    # Prepare
-    config = {
-        "project": {
-            "name": "fedgpt",
-            "version": "1.0.0",
-            "description": "",
-            "license": "",
-            "authors": [],
-        },
-        "tool": {
-            "flwr": {
-                "app": {
-                    "publisher": "flwrlabs",
-                    "components": {
-                        "serverapp": "flwr.cli.run:run",
-                        "clientapp": "flwr.cli.run:runa",
-                    },
-                },
-            },
-        },
-    }
-
-    # Execute
-    is_valid, errors, warnings = validate(config)
-
-    # Assert
-    assert not is_valid
-    assert len(errors) == 1
-    assert len(warnings) == 0
-
-
 def test_validate_project_config_fail() -> None:
     """Test that validate_project_config fails correctly."""
     # Prepare
@@ -404,6 +225,51 @@ def test_validate_federation_in_project_config() -> None:
     # Assert
     assert federation == "new_federation"
     assert federation_config == {"new_key": "new_val"}
+
+
+def test_validate_federation_in_project_config_with_overrides() -> None:
+    """Test that validate_federation_in_config works with overrides."""
+    # Prepare - Test federation is None
+    federation_config = {"k1": "v1", "k2": True, "grp": {"k3": 42.8}}
+    config: dict[str, Any] = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+                "federations": {
+                    "default": "default_federation",
+                    "default_federation": federation_config,
+                },
+            },
+        },
+    }
+    overrides = ["k1=false grp.k3=42.9", "k2='hello, world!'"]
+    federation = None
+
+    # Execute
+    federation, federation_config = validate_federation_in_project_config(
+        federation, config, overrides
+    )
+
+    # Assert
+    assert federation == "default_federation"
+    assert federation_config == {
+        "k1": False,
+        "k2": "hello, world!",
+        "grp": {"k3": 42.9},
+    }
 
 
 def test_validate_federation_in_project_config_fail() -> None:

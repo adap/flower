@@ -13,7 +13,7 @@ dataset: [dataset1, dataset2] # TODO: list of datasets you include in your basel
 
 > [!IMPORTANT]
 > To help having all baselines similarly formatted and structured, we have included two scripts in `baselines/dev` that when run will format your code and run some tests checking if it's formatted.
-> These checks use standard packages such as `isort`, `black`, `pylint` and others. You as a baseline creator will need to install additional pacakges. These are already specified in the `pyproject.toml` of 
+> These checks use standard packages such as `isort`, `black`, `pylint` and others. You as a baseline creator will need to install additional packages. These are already specified in the `pyproject.toml` of
 > your baseline. Follow these steps:
 
 ```bash
@@ -66,9 +66,9 @@ cd .. # so you are in the `flower/baselines` directory
 
 ## About this baseline
 
-**What’s implemented:** :warning: *_Concisely describe what experiment(s) (e.g. Figure 1, Table 2, etc) in the publication can be replicated by running the code. Please only use a few sentences. ”_*
+**What’s implemented:** :warning: *_Concisely describe what experiment(s) (e.g. Figure 1, Table 2, etc.) in the publication can be replicated by running the code. Please only use a few sentences. ”_*
 
-**Datasets:** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset). We highly recommend using [FlowerDatasets](https://flower.ai/docs/datasets/index.html) to download and partition your dataset. If you have other ways to download the data, you can also use `FlowerDatasets` to partiion it._*
+**Datasets:** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset). We highly recommend using [FlowerDatasets](https://flower.ai/docs/datasets/index.html) to download and partition your dataset. If you have other ways to download the data, you can also use `FlowerDatasets` to partition it._*
 
 **Hardware Setup:** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Indicate how long it took to run the experiments. Someone out there might not have access to the same resources you have so, could you list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
 
@@ -122,6 +122,6 @@ flwr run . --run-config learning-rate=0.1,coefficient=0.123
 flwr run . --run-config <my-big-experiment-config>.toml
 ```
 
-:warning: _It is preferable to show a single commmand (or multilple commands if they belong to the same experiment) and then a table/plot with the expected results, instead of showing all the commands first and then all the results/plots._
+:warning: _It is preferable to show a single command (or multiple commands if they belong to the same experiment) and then a table/plot with the expected results, instead of showing all the commands first and then all the results/plots._
 :warning: _If you present plots or other figures, please include either a Jupyter notebook showing how to create them or include a utility function that can be called after the experiments finish running._
 :warning: If you include plots or figures, save them in `.png` format and place them in a new directory named `_static` at the same level as your `README.md`.

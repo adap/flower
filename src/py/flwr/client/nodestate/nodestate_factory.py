@@ -14,6 +14,7 @@
 # ==============================================================================
 """Factory class that creates NodeState instances."""
 
+
 import threading
 from typing import Optional
 

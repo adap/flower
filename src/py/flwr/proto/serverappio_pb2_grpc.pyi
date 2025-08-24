@@ -21,15 +21,15 @@ class ServerAppIoStub:
         flwr.proto.serverappio_pb2.GetNodesResponse]
     """Return a set of nodes"""
 
-    PushTaskIns: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.serverappio_pb2.PushTaskInsRequest,
-        flwr.proto.serverappio_pb2.PushTaskInsResponse]
-    """Create one or more tasks"""
+    PushMessages: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.serverappio_pb2.PushInsMessagesRequest,
+        flwr.proto.serverappio_pb2.PushInsMessagesResponse]
+    """Create one or more messages"""
 
-    PullTaskRes: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.serverappio_pb2.PullTaskResRequest,
-        flwr.proto.serverappio_pb2.PullTaskResResponse]
-    """Get task results"""
+    PullMessages: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.serverappio_pb2.PullResMessagesRequest,
+        flwr.proto.serverappio_pb2.PullResMessagesResponse]
+    """Get message results"""
 
     GetRun: grpc.UnaryUnaryMultiCallable[
         flwr.proto.run_pb2.GetRunRequest,
@@ -85,19 +85,19 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def PushTaskIns(self,
-        request: flwr.proto.serverappio_pb2.PushTaskInsRequest,
+    def PushMessages(self,
+        request: flwr.proto.serverappio_pb2.PushInsMessagesRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.serverappio_pb2.PushTaskInsResponse:
-        """Create one or more tasks"""
+    ) -> flwr.proto.serverappio_pb2.PushInsMessagesResponse:
+        """Create one or more messages"""
         pass
 
     @abc.abstractmethod
-    def PullTaskRes(self,
-        request: flwr.proto.serverappio_pb2.PullTaskResRequest,
+    def PullMessages(self,
+        request: flwr.proto.serverappio_pb2.PullResMessagesRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.serverappio_pb2.PullTaskResResponse:
-        """Get task results"""
+    ) -> flwr.proto.serverappio_pb2.PullResMessagesResponse:
+        """Get message results"""
         pass
 
     @abc.abstractmethod

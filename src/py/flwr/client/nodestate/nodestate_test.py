@@ -14,6 +14,7 @@
 # ==============================================================================
 """Tests all NodeState implementations have to conform to."""
 
+
 import unittest
 from abc import abstractmethod
 

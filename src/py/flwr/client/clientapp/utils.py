@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower ClientApp loading utils."""
 
+
 from logging import DEBUG
 from pathlib import Path
 from typing import Callable, Optional
@@ -65,7 +66,7 @@ def get_load_client_app_fn(
         # `fab_hash` is not required since the app is loaded from `runtime_app_dir`.
         elif app_path is not None:
             config = get_project_config(runtime_app_dir)
-            this_fab_version, this_fab_id = get_metadata_from_config(config)
+            this_fab_id, this_fab_version = get_metadata_from_config(config)
 
             if this_fab_version != fab_version or this_fab_id != fab_id:
                 raise LoadClientAppError(

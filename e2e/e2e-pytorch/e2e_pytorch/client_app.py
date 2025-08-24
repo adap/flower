@@ -11,7 +11,7 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
 from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import ConfigsRecord, Context
+from flwr.common import ConfigsRecord, Context, RecordSet
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -90,6 +90,10 @@ trainloader, testloader = load_data()
 
 # Define Flower client
 class FlowerClient(NumPyClient):
+
+    def __init__(self, state: RecordSet):
+        self.state = state
+
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -97,16 +101,14 @@ class FlowerClient(NumPyClient):
         """Record timestamp to client's state."""
         t_stamp = datetime.now().timestamp()
         value = str(t_stamp)
-        if STATE_VAR in self.context.state.configs_records.keys():
-            value = self.context.state.configs_records[STATE_VAR][STATE_VAR]  # type: ignore
+        if STATE_VAR in self.state.configs_records.keys():
+            value = self.state.configs_records[STATE_VAR][STATE_VAR]  # type: ignore
             value += f",{t_stamp}"
 
-        self.context.state.configs_records[STATE_VAR] = ConfigsRecord(
-            {STATE_VAR: value}
-        )
+        self.state.configs_records[STATE_VAR] = ConfigsRecord({STATE_VAR: value})
 
     def _retrieve_timestamp_from_state(self):
-        return self.context.state.configs_records[STATE_VAR][STATE_VAR]
+        return self.state.configs_records[STATE_VAR][STATE_VAR]
 
     def fit(self, parameters, config):
         set_parameters(net, parameters)
@@ -137,7 +139,7 @@ def set_parameters(model, parameters):
 
 
 def client_fn(context: Context):
-    return FlowerClient().to_client()
+    return FlowerClient(context.state).to_client()
 
 
 app = ClientApp(
@@ -149,5 +151,5 @@ if __name__ == "__main__":
     # Start Flower client
     start_client(
         server_address="127.0.0.1:8080",
-        client=FlowerClient().to_client(),
+        client=FlowerClient(state=RecordSet()).to_client(),
     )

@@ -10,9 +10,6 @@ REPLACE_CURR_VERSION = {
     "framework/docs/source/conf.py": [
         ".. |stable_flwr_version| replace:: {version}",
     ],
-    "src/py/flwr/cli/new/templates/app/pyproject.*.toml.tpl": [
-        "flwr[simulation]>={version}",
-    ],
 }
 
 REPLACE_NEXT_VERSION = {
@@ -25,6 +22,9 @@ REPLACE_NEXT_VERSION = {
     "src/docker/complete/compose.yml": ["FLWR_VERSION:-{version}"],
     "src/docker/distributed/client/compose.yml": ["FLWR_VERSION:-{version}"],
     "src/docker/distributed/server/compose.yml": ["FLWR_VERSION:-{version}"],
+    "src/py/flwr/cli/new/templates/app/pyproject.*.toml.tpl": [
+        "flwr[simulation]>={version}",
+    ],
 }
 
 EXAMPLES = {
@@ -80,7 +80,7 @@ def _update_versions(file_patterns, replace_strings, new_version, check):
 
 
 if __name__ == "__main__":
-    conf_path = Path("doc/source/conf.py")
+    conf_path = Path("framework/docs/source/conf.py")
 
     if not conf_path.is_file():
         raise FileNotFoundError(f"{conf_path} not found!")

@@ -136,7 +136,7 @@ class LocalDpMod:
         fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
 
         # Add noise to model params
-        add_localdp_gaussian_noise_to_params(
+        fit_res.parameters = add_localdp_gaussian_noise_to_params(
             fit_res.parameters, self.sensitivity, self.epsilon, self.delta
         )
 

@@ -14,6 +14,7 @@
 # ==============================================================================
 """Tests for the validation function of object refs."""
 
+
 from .object_ref import OBJECT_REF_HELP_STR, validate
 
 

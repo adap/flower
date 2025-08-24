@@ -15,9 +15,8 @@
 """Tests for module task_handler."""
 
 
-from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
+from flwr.client.message_handler.task_handler import validate_task_ins
 from flwr.common import RecordSet, serde
-from flwr.proto.fleet_pb2 import PullTaskInsResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
 
 
@@ -40,28 +39,3 @@ def test_validate_task_ins_valid() -> None:
     task_ins = TaskIns(task=Task(recordset=serde.recordset_to_proto(RecordSet())))
 
     assert validate_task_ins(task_ins)
-
-
-def test_get_task_ins_empty_response() -> None:
-    """Test get_task_ins."""
-    res = PullTaskInsResponse(reconnect=None, task_ins_list=[])
-    task_ins = get_task_ins(res)
-    assert task_ins is None
-
-
-def test_get_task_ins_single_ins() -> None:
-    """Test get_task_ins."""
-    expected_task_ins = TaskIns(task_id="123", task=Task())
-    res = PullTaskInsResponse(reconnect=None, task_ins_list=[expected_task_ins])
-    actual_task_ins = get_task_ins(res)
-    assert actual_task_ins == expected_task_ins
-
-
-def test_get_task_ins_multiple_ins() -> None:
-    """Test get_task_ins."""
-    expected_task_ins = TaskIns(task_id="123", task=Task())
-    res = PullTaskInsResponse(
-        reconnect=None, task_ins_list=[expected_task_ins, TaskIns(), TaskIns()]
-    )
-    actual_task_ins = get_task_ins(res)
-    assert actual_task_ins == expected_task_ins

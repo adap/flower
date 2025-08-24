@@ -22,9 +22,7 @@ esac
 # Set authentication parameters
 case "$2" in
     client-auth)
-      server_auth='--auth-list-public-keys      ../keys/client_public_keys.csv 
-                   --auth-superlink-private-key ../keys/server_credentials 
-                   --auth-superlink-public-key  ../keys/server_credentials.pub'
+      server_auth='--auth-list-public-keys      ../keys/client_public_keys.csv'
       client_auth_1='--auth-supernode-private-key ../keys/client_credentials_1 
                      --auth-supernode-public-key  ../keys/client_credentials_1.pub'
       client_auth_2='--auth-supernode-private-key ../keys/client_credentials_2 

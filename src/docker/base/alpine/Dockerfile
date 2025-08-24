@@ -30,7 +30,7 @@ FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} AS compile
 
 # Install system dependencies
 RUN apk add --no-cache \
-    # require for compiling grpcio on ARM64
+    # required for compiling grpcio on ARM64
     g++ \
     libffi-dev \
     # required for installing flwr via git

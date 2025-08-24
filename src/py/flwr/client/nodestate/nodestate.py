@@ -14,6 +14,7 @@
 # ==============================================================================
 """Abstract base class NodeState."""
 
+
 import abc
 from typing import Optional
 
