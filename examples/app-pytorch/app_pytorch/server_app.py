@@ -2,16 +2,16 @@
 
 from pprint import pprint
 
-import torch
-from app_pytorch.task import Net, test
+from datasets import load_dataset
 from flwr.common import ArrayRecord, ConfigRecord, Context
 from flwr.common.record.metricrecord import MetricRecord
 from flwr.server import Grid, ServerApp
 from flwr.serverapp import FedAvg
+import torch
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
-from datasets import load_dataset
+from app_pytorch.task import Net, test
 
 # Create ServerApp
 app = ServerApp()
@@ -21,19 +21,23 @@ app = ServerApp()
 def main(grid: Grid, context: Context) -> None:
     """Main entry point for the ServerApp."""
 
+    # Read run config
+    fraction_train: float = context.run_config["fraction-train"]
+    num_rounds: int = context.run_config["num-server-rounds"]
+
     # Load global model
     global_model = Net()
+    arrays = ArrayRecord(global_model.state_dict())
 
-    # Init strategy
+    # Initialize FedAvg strategy
     strategy = FedAvg(
-        fraction_train=context.run_config["fraction-train"],
+        fraction_train=fraction_train,
     )
 
-    # Execute strategy loop
-    num_rounds = context.run_config["num-server-rounds"]
+    # Start strategy, run FedAvg for `num_rounds`
     strategy_results = strategy.start(
         grid=grid,
-        arrays=ArrayRecord(global_model.state_dict()),
+        arrays=arrays,
         train_config=ConfigRecord({"lr": 0.01}),
         num_rounds=num_rounds,
         timeout=3600,
@@ -49,17 +53,17 @@ def main(grid: Grid, context: Context) -> None:
     pprint(strategy_results.central_evaluate_metrics)
 
     # Save final model to disk
+    print("\nSaving final model to disk...")
     state_dict = strategy_results.arrays.to_torch_state_dict()
-    print("\nSaving final model to disk.")
     torch.save(state_dict, "final_model.pt")
 
 
-def central_evaluation(server_round, array_record: ArrayRecord) -> MetricRecord:
+def central_evaluation(server_round: int, arrays: ArrayRecord) -> MetricRecord:
     """Evaluate model on central data."""
 
     # Load the model and initialize it with the received weights
     model = Net()
-    model.load_state_dict(array_record.to_torch_state_dict())
+    model.load_state_dict(arrays.to_torch_state_dict())
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
