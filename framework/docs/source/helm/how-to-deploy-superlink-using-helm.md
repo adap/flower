@@ -116,6 +116,10 @@ of two ways:
 2. From an existing Kubernetes Secret — by setting `global.license.existingSecret` to the name of
    a secret that contains your key.
 
+```{note}
+The SuperLink must be able to connect to `https://api.flower.ai` in order to validate the license.
+```
+
 ### Example: Setting the License Key Directly
 
 ```yaml
@@ -142,12 +146,34 @@ global:
 If both `key` and `existingSecret` are set, `existingSecret` takes precedence and the `key` value
 will be ignored.
 
-Note that the existing secret must contain the key `FLWR_LICENSE_KEY`:
+```{note}
+By default, the existing Secret must contain a key named `FLWR_LICENSE_KEY`.
+```
 
 ```yaml
 kind: Secret
 stringData:
   FLWR_LICENSE_KEY: <YOUR_FLWR_LICENSE_KEY>
+```
+
+### Example: Setting a Custom Secret Key
+
+If you prefer to use a different key name instead of the default `FLWR_LICENSE_KEY`,
+you can override it by setting `secretKey` to your desired name:
+
+```yaml
+global:
+  license:
+    enabled: true
+    key: ""
+    secretKey: "license-key"
+    existingSecret: "existing-license-key-secret"
+```
+
+```yaml
+kind: Secret
+stringData:
+  license-key: <YOUR_FLWR_LICENSE_KEY>
 ```
 
 ## Enable User Authentication
