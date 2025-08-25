@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simulation engine executor for backward compatibility."""
 
+ARG BASE_REPOSITORY=flwr/base
+ARG BASE_IMAGE
+FROM $BASE_REPOSITORY:$BASE_IMAGE
 
-from flwr.superlink.executor import SimulationEngine
-
-executor = SimulationEngine()
+ENTRYPOINT ["flower-superexec"]
