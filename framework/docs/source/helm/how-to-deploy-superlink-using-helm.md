@@ -380,7 +380,8 @@ If you leave `secretName` empty, the secret name defaults to `<chart-name>-serve
 The certificate includes `global.domain` as its common name, along with service DNS entries and
 any `additionalHosts` you provide.
 
-This setup is well suited for development.
+This setup is best suited for testing and validating the Helm charts in a non-production
+environment.
 
 You can switch from self-signed to another issuer type by providing a `spec` block
 for the `Issuer`.
