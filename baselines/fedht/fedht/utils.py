@@ -139,8 +139,6 @@ def load_data(context: Context) -> Client:
         dataset = FederatedDataset(dataset="mnist", 
                                    partitioners={"train": partitioner})
 
-    # test_dataset = dataset.load_split("test").with_format("numpy")
-    # testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     # Load the partition data
     train_dataset = dataset.load_partition(int(partition_id), "train").with_format(

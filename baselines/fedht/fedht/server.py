@@ -21,7 +21,8 @@ def gen_evaluate_fn(testloader, cfg, device: torch.device):
         """Define evaluate function for centralized metrics."""
 
         # define model
-        model = LogisticRegression(cfg.num_features, cfg.num_classes)
+        model = LogisticRegression(cfg.run_config["num_features"], 
+                                   cfg.run_config["num_classes"])
 
         # set model parameters
         params_dict = zip(model.state_dict().keys(), parameters)
