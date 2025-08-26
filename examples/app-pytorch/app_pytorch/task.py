@@ -3,6 +3,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from datasets import load_dataset
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
@@ -32,6 +33,14 @@ class Net(nn.Module):
 
 fds = None  # Cache FederatedDataset
 
+pytorch_transforms = Compose(
+    [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+)
+
+def apply_transforms(batch):
+    """Apply transforms to the partition from FederatedDataset."""
+    batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
+    return batch
 
 def load_data(partition_id: int, num_partitions: int):
     """Load partition CIFAR10 data."""
@@ -46,19 +55,23 @@ def load_data(partition_id: int, num_partitions: int):
     partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
-    pytorch_transforms = Compose(
-        [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-    )
-
-    def apply_transforms(batch):
-        """Apply transforms to the partition from FederatedDataset."""
-        batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
-        return batch
-
+    # Construct dataloaders
     partition_train_test = partition_train_test.with_transform(apply_transforms)
     trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
     testloader = DataLoader(partition_train_test["test"], batch_size=32)
     return trainloader, testloader
+
+
+def load_centralized_dataset(device: str):
+    """Load test set and return dataloader."""
+    # Load entire test set
+    test_dataset = load_dataset("uoft-cs/cifar10", split="test")
+
+    dataset = test_dataset.with_format("torch", device=device).with_transform(
+        apply_transforms
+    )
+
+    return DataLoader(dataset, batch_size=32)
 
 
 def train(net, trainloader, epochs, lr, device):

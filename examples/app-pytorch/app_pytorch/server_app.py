@@ -2,16 +2,13 @@
 
 from pprint import pprint
 
-from datasets import load_dataset
 from flwr.common import ArrayRecord, ConfigRecord, Context
 from flwr.common.record.metricrecord import MetricRecord
 from flwr.server import Grid, ServerApp
 from flwr.serverapp import FedAvg
 import torch
-from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, Normalize, ToTensor
 
-from app_pytorch.task import Net, test
+from app_pytorch.task import Net, test, load_centralized_dataset
 
 # Create ServerApp
 app = ServerApp()
@@ -68,22 +65,7 @@ def central_evaluation(server_round: int, arrays: ArrayRecord) -> MetricRecord:
     model.to(device)
 
     # Load entire test set
-    test_dataset = load_dataset("uoft-cs/cifar10", split="test")
-
-    pytorch_transforms = Compose(
-        [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-    )
-
-    def apply_transforms(batch):
-        """Apply transforms to the partition from FederatedDataset."""
-        batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
-        return batch
-
-    dataset = test_dataset.with_format("torch", device=device).with_transform(
-        apply_transforms
-    )
-
-    test_dataloader = DataLoader(dataset, batch_size=32)
+    test_dataloader = load_centralized_dataset(device)
 
     test_loss, test_acc = test(
         model,
