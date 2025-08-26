@@ -67,10 +67,12 @@ def central_evaluation(server_round: int, arrays: ArrayRecord) -> MetricRecord:
     # Load entire test set
     test_dataloader = load_centralized_dataset(device)
 
+    # Evaluate the global model on the test set
     test_loss, test_acc = test(
         model,
         test_dataloader,
         device,
     )
 
+    # Return the evaluation metrics
     return MetricRecord({"accuracy": test_acc, "loss": test_loss})
