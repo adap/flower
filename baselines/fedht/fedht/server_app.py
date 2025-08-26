@@ -8,7 +8,8 @@ import gzip
 import flwr as fl
 import hydra
 import numpy as np
-from flwr.common import NDArrays, ndarrays_to_parameters
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+from flwr.common import NDArrays, ndarrays_to_parameters, Context
 from flwr.server.strategy.strategy import Strategy
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import PathologicalPartitioner
@@ -21,8 +22,7 @@ from fedht.server import fit_round, gen_evaluate_fn
 from fedht.utils import MyDataset, sim_data
 
 
-@hydra.main(config_path="conf", config_name="base_mnist", version_base=None)
-def main(cfg: DictConfig):
+def server_fn(context: Context):
     """Run main file for fedht baseline.
 
     Parameters
@@ -34,52 +34,23 @@ def main(cfg: DictConfig):
     # set device to cuda:0, if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    if cfg.data == "mnist":
+    if context.run_config["data"] == "mnist":
         # set up mnist data
         # set partitioner
-        np.random.seed(cfg.dataset.seed)
+        np.random.seed(context.run_config["seed"])
         partitioner = PathologicalPartitioner(
-            num_partitions=cfg.num_clients,
+            num_partitions=context.run_config["num_clients"],
             partition_by="label",
             num_classes_per_partition=2,
             class_assignment_mode="first-deterministic",
         )
 
         # load MNIST data
-        num_features = cfg.num_features
-        num_classes = cfg.num_classes
+        num_features = context.run_config["num_features"]
+        num_classes = context.run_config["num_classes"]
         dataset = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
         test_dataset = dataset.load_split("test").with_format("numpy")
-        testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=False)
-
-        # set client function
-        client_fn = generate_client_fn_mnist(
-            dataset,
-            cfg=cfg
-        )
-
-    elif cfg.data == "simII":
-
-        # set seed
-        np.random.seed(2024)
-
-        # simulate data from Simulation II in Tong et al
-        num_obs = cfg.num_obs
-        num_clients = cfg.num_clients
-        num_features = cfg.num_features
-        num_classes = cfg.num_classes
-
-        # simulate data
-        X_train, y_train, X_test, y_test = sim_data(200, num_clients, 1000, 1, 1)
-        train_dataset = X_train, y_train
-        test_dataset = MyDataset(X_test, y_test[:,0])
-        testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=False)
-
-        # set client function
-        client_fn = generate_client_fn_simII(
-            train_dataset,
-            cfg=cfg
-        )
+        testloader = DataLoader(test_dataset, batch_size=context.run_config["batch_size"], shuffle=False)
 
     # initialize global model to all zeros
     weights = np.zeros((num_classes, num_features))
@@ -88,66 +59,52 @@ def main(cfg: DictConfig):
     init_params = ndarrays_to_parameters(init_params_arr.copy())
 
     strategy: Strategy
-    if cfg.agg == "fedht":
+    if context.run_config["agg"] == "fedht":
         # define strategy: fedht
         strategy = FedHT(
-            min_available_clients=cfg.strategy.min_available_clients,
-            num_keep=cfg.num_keep,
-            evaluate_fn=gen_evaluate_fn(testloader, cfg, device),
-            on_fit_config_fn=fit_round,
-            iterht=cfg.iterht,
+            min_available_clients=context.run_config["min_available_clients"],
+            num_keep=context.run_config["num_keep"],
+            evaluate_fn=gen_evaluate_fn(testloader, context, device),
+            iterht=context.run_config["iterht"],
             initial_parameters=init_params,
         )
-    elif cfg.agg == "fedavg":
+    elif context.run_config["agg"] == "fedavg":
         # define strategy: fedavg
         strategy = fl.server.strategy.FedAvg(
-            min_available_clients=cfg.strategy.min_available_clients,
-            evaluate_fn=gen_evaluate_fn(testloader, cfg, device),
-            on_fit_config_fn=fit_round,
+            min_available_clients=context.run_config["min_available_clients"],
+            evaluate_fn=gen_evaluate_fn(testloader, context, device),
             initial_parameters=init_params,
         )
     else:
         raise ValueError("Must select either fedht or fedavg for the aggregation strategy in this baseline.")
 
-    # start simulation
-    np.random.seed(cfg.dataset.seed)
-    hist_mnist = fl.simulation.start_simulation(
-        client_fn=client_fn,
-        num_clients=cfg.num_clients,
-        config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
-        strategy=strategy,
-        client_resources={
-            "num_cpus": cfg.client_resources.num_cpus,
-            "num_gpus": cfg.client_resources.num_gpus,
-        },
-    )
-
-    if cfg.iterht:
+    if context.run_config["iterht"]:
         iterstr = "iter"
     else:
         iterstr = ""
 
     filename = (
-        cfg.data
+        context.run_config["data"]
         + "_"
-        + cfg.agg
+        + context.run_config["agg"]
         + iterstr
         + "_local"
-        + str(cfg.num_local_epochs)
+        + str(context.run_config["num_local_epochs"])
         + "_lr"
-        + str(cfg.learning_rate)
+        + str(context.run_config["learning_rate"])
         + "_wd"
-        + str(cfg.weight_decay)
+        + str(context.run_config["weight_decay"])
         + "_numkeep"
-        + str(cfg.num_keep)
+        + str(context.run_config["num_keep"])
         + "_fold"
-        + str(cfg.dataset.seed)
+        + str(context.run_config["seed"])
         + ".pkl"
     )
 
-    with open(filename, "wb") as file:
-        pickle.dump(hist_mnist, file)
+    config = ServerConfig(num_rounds=context.run_config["num_rounds"])
+
+    return ServerAppComponents(strategy=strategy, config=config)
 
 
-if __name__ == "__main__":
-    main()
+# Create ServerApp
+app = ServerApp(server_fn=server_fn)

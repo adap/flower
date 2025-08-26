@@ -12,11 +12,10 @@ from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
 from fedht.model import test, train
-from fedht.utils import MyDataset
+from fedht.utils import MyDataset, load_data
 from fedht.model import LogisticRegression
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import PathologicalPartitioner
-from utils import load_data
 
 # MNIST client
 class MnistClient(NumPyClient):
@@ -79,45 +78,7 @@ def client_fn(context: Context) -> Client:
 
     num_features = context.run_config["num_features"]
     num_classes = context.run_config["num_classes"]
-    # batch_size = context.run_config["batch_size"]
-
-    # # Get node_config value to fetch partition_id
-    # partition_id = cast(int, context.node_config["partition-id"])
-
-    # # change to only do this if we haven't already pulled in data
-    # #####
-    # np.random.seed(context.run_config["seed"])
-    # partitioner = PathologicalPartitioner(
-    #     num_partitions=context.node_config["num-partitions"],
-    #     partition_by="label",
-    #     num_classes_per_partition=2,
-    #     class_assignment_mode="first-deterministic",
-    # )
-
-    # # load MNIST data
-    # num_features = context.run_config["num_features"]
-    # num_classes = context.run_config["num_classes"]
-    # batch_size = context.run_config["batch_size"]
-
-    # dataset = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
-    # #####
-
-    # test_dataset = dataset.load_split("test").with_format("numpy")
-    # testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-
-    # # Load the partition data
-    # train_dataset = dataset.load_partition(int(partition_id), "train").with_format(
-    #     "numpy"
-    # )
-    # num_obs = train_dataset.num_rows
-
-    # test_dataset = dataset.load_partition(int(partition_id), "train").with_format(
-    #     "numpy"
-    # )
-
-    # trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    # testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
-
+    
     trainloader, testloader, num_obs = load_data(context)
 
     # define model and set device

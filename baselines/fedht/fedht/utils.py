@@ -119,6 +119,8 @@ def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
 
     return z.copy(), y.copy(), zstack.copy(), ystack.copy()
 
+dataset = None
+
 def load_data(context: Context) -> Client:
 
     batch_size = context.run_config["batch_size"]
@@ -134,8 +136,9 @@ def load_data(context: Context) -> Client:
             class_assignment_mode="first-deterministic",
         )
 
-        dataset = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
-    
+        dataset = FederatedDataset(dataset="mnist", 
+                                   partitioners={"train": partitioner})
+
     # test_dataset = dataset.load_split("test").with_format("numpy")
     # testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 

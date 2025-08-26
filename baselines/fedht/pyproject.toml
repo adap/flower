@@ -1,41 +1,47 @@
 [build-system]
 requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.masonry.api"
+build-backend = "poetry.core.masonry.api"
 
-[tool.poetry]
+[project]
 name = "fedht"
 version = "1.0.0"
 description = "Federated nonconvex sparse learning"
-license = "Apache-2.0"
-authors = ["Chancellor Johnstone <chancellor.johnstone@gmail.com>"]
+license = { text = "Apache-2.0" }
+authors = [
+  { name = "Chancellor Johnstone", email = "chancellor.johnstone@gmail.com" }
+]
 readme = "README.md"
-homepage = "https://flower.ai"
-repository = "https://github.com/adap/flower"
-documentation = "https://flower.ai"
 
-[tool.poetry.dependencies]
-python = ">=3.10.0,<4.0"  
-flwr = { extras = ["simulation"], version = ">=1.11.0" }
-flwr-datasets = { extras = ["vision"], version = ">=0.3.0" }
-scikit-learn =">=1.1.1"
-matplotlib = ">=3.9.2"
-hydra-core = "1.3.2"
-torch = "2.0.1+cu117"
-torchvision = "0.15.2+cu117"
-numpy = ">=1.21.0, <2.0.0"
+dependencies = [
+  "flwr[simulation]>=1.11.0",
+  "flwr-datasets[vision]>=0.3.0",
+  "scikit-learn>=1.1.1",
+  "matplotlib>=3.9.2",
+  "hydra-core==1.3.2",
+  "torch==2.0.1",
+  "torchvision==0.15.2",
+  "numpy>=1.21.0,<2.0.0",
+]
 
-[tool.poetry.dev-dependencies]
-isort = "==5.13.2"
-black = "==24.2.0"
-docformatter = "==1.7.5"
-mypy = "==1.4.1"
-pylint = "==2.8.2"
-flake8 = "==3.9.2"
-pytest = "==6.2.4"
-pytest-watch = "==4.2.0"
-ruff = "==0.0.272"
-types-requests = "==2.27.7"
-virtualenv = "==20.21.0"
+[project.urls]
+Homepage = "https://flower.ai"
+Repository = "https://github.com/adap/flower"
+Documentation = "https://flower.ai"
+
+[project.optional-dependencies]
+dev = [
+  "isort==5.13.2",
+  "black==24.2.0",
+  "docformatter==1.7.5",
+  "mypy==1.4.1",
+  "pylint==2.8.2",
+  "flake8==3.9.2",
+  "pytest==6.2.4",
+  "pytest-watch==4.2.0",
+  "ruff==0.0.272",
+  "types-requests==2.27.7",
+  "virtualenv==20.21.0",
+]
 
 [tool.isort]
 line_length = 88
@@ -59,13 +65,6 @@ ignore_missing_imports = true
 strict = false
 plugins = "numpy.typing.mypy_plugin"
 
-[tool.pylint."MESSAGES CONTROL"]
-good-names = "i,j,k,_,x,y,X,Y"
-signature-mutators = "hydra.main.main"
-
-[tool.pylint."TYPECHECK"]
-generated-members = "numpy.*, torch.*, tensorflow.*"
-
 [[tool.mypy.overrides]]
 module = ["importlib.metadata.*", "importlib_metadata.*"]
 follow_imports = "skip"
@@ -76,6 +75,13 @@ disallow_untyped_calls = false
 module = "torch.*"
 follow_imports = "skip"
 follow_imports_for_stubs = true
+
+[tool.pylint."MESSAGES CONTROL"]
+good-names = "i,j,k,_,x,y,X,Y"
+signature-mutators = "hydra.main.main"
+
+[tool.pylint."TYPECHECK"]
+generated-members = "numpy.*, torch.*, tensorflow.*"
 
 [tool.docformatter]
 wrap-summaries = 88
@@ -88,27 +94,11 @@ select = ["D", "E", "F", "W", "B", "ISC", "C4"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
 ignore = ["B024", "B027"]
 exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".hg",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "venv",
-    "proto",
+    ".bzr", ".direnv", ".eggs", ".git", ".hg",
+    ".mypy_cache", ".nox", ".pants.d", ".pytype",
+    ".ruff_cache", ".svn", ".tox", ".venv",
+    "__pypackages__", "_build", "buck-out",
+    "build", "dist", "node_modules", "venv", "proto",
 ]
 
 [tool.ruff.pydocstyle]
@@ -119,6 +109,31 @@ publisher = [
     "The Flower Authors <hello@flower.ai>",
     "Chancellor Johnstone <chancellor.johnstone@gmail.com>",
 ]
+
+[tool.flwr.app.components]
+serverapp = "fedht.server_app:app"
+clientapp = "fedht.client_app:app"
+
+[tool.flwr.app.config]
+data = "mnist"
+seed = 2025
+agg = "fedht"
+num_keep = 500
+iterht =  true
+num_features = 784
+num_classes = 10
+num_clients = 10
+min_available_clients = 2
+penalty = "l2"
+fraction_fit = 0.5
+batch_size = 50
+num_rounds = 100
+num_local_epochs = 5
+learning_rate = 0.00001
+weight_decay = 0.000
+num_cpus = 10
+num_gpus = 0
+
 
 [tool.flwr.federations]
 default = "local-simulation"
