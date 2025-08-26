@@ -147,7 +147,7 @@ If both `key` and `existingSecret` are set, `existingSecret` takes precedence an
 will be ignored.
 
 ```{note}
-By default, the existing Secret must contain a key named `FLWR_LICENSE_KEY`.
+By default, the `existingSecret` parameter must contain a key named `FLWR_LICENSE_KEY`.
 ```
 
 ```yaml
