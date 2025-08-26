@@ -15,11 +15,12 @@
 """Clipping modifiers for central DP with client-side clipping."""
 
 
+from collections import OrderedDict
 from logging import INFO, WARN
 from typing import cast
 
 from flwr.client.typing import ClientAppCallable
-from flwr.common import ArrayRecord, Context, Message, MessageType, log
+from flwr.common import Array, ArrayRecord, Context, Message, MessageType, log
 from flwr.common.differential_privacy import compute_clip_model_update
 from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM
 
@@ -63,7 +64,8 @@ def fixedclipping_mod(
         )
         return call_next(msg, ctxt)
 
-    keys_in_config = set(next(iter(msg.content.config_records.keys())))
+    # Get keys in the single ConfigRecord
+    keys_in_config = set(next(iter(msg.content.config_records.values())).keys())
     if KEY_CLIPPING_NORM not in keys_in_config:
         raise KeyError(
             f"The {KEY_CLIPPING_NORM} value is not supplied by the "
@@ -71,9 +73,7 @@ def fixedclipping_mod(
             f" the server side."
         )
     # Record array record communicated to client and clipping norm
-    server_to_client_ndarrays = next(
-        iter(msg.content.array_records.values())
-    ).to_numpy_ndarrays()
+    original_array_record = next(iter(msg.content.array_records.values()))
     clipping_norm = cast(
         float, next(iter(msg.content.config_records.values()))[KEY_CLIPPING_NORM]
     )
@@ -94,18 +94,38 @@ def fixedclipping_mod(
         )
         return out_msg
 
-    key, client_to_server_arrecord = next(iter(out_msg.content.array_records.items()))
+    new_array_record_key, client_to_server_arrecord = next(
+        iter(out_msg.content.array_records.items())
+    )
+    # Ensure keys in returned ArrayRecord match those in the one sent from server
+    if set(original_array_record.keys()) != set(client_to_server_arrecord.keys()):
+        log(
+            WARN,
+            "fixedclipping_mod: Keys in ArrayRecord must match those from the model "
+            "that the ClientApp received. Skipping.",
+        )
+        return out_msg
+
     client_to_server_ndarrays = client_to_server_arrecord.to_numpy_ndarrays()
     # Clip the client update
     compute_clip_model_update(
         param1=client_to_server_ndarrays,
-        param2=server_to_client_ndarrays,
+        param2=original_array_record.to_numpy_ndarrays(),
         clipping_norm=clipping_norm,
     )
 
     log(
         INFO, "fixedclipping_mod: parameters are clipped by value: %.4f.", clipping_norm
     )
-    # Replace outgoing ArrayRecord
-    out_msg.content.array_records[key] = ArrayRecord(client_to_server_ndarrays)
+    # Replace outgoing ArrayRecord's Array while preserving their keys
+    out_msg.content.array_records[new_array_record_key] = ArrayRecord(
+        OrderedDict(
+            {
+                k: Array(v)
+                for k, v in zip(
+                    client_to_server_arrecord.keys(), client_to_server_ndarrays
+                )
+            }
+        )
+    )
     return out_msg
