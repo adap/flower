@@ -70,7 +70,6 @@ def load_centralized_dataset(device: str):
     dataset = test_dataset.with_format("torch", device=device).with_transform(
         apply_transforms
     )
-
     return DataLoader(dataset, batch_size=32)
 
 
@@ -83,14 +82,13 @@ def train(net, trainloader, epochs, lr, device):
     running_loss = 0.0
     for _ in range(epochs):
         for batch in trainloader:
-            images = batch["img"]
-            labels = batch["label"]
+            images = batch["img"].to(device)
+            labels = batch["label"].to(device)
             optimizer.zero_grad()
-            loss = criterion(net(images.to(device)), labels.to(device))
+            loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-
     avg_trainloss = running_loss / len(trainloader)
     return avg_trainloss
 
