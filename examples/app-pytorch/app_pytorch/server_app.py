@@ -2,13 +2,12 @@
 
 from pprint import pprint
 
+import torch
+from app_pytorch.task import Net, load_centralized_dataset, test
 from flwr.common import ArrayRecord, ConfigRecord, Context
 from flwr.common.record.metricrecord import MetricRecord
 from flwr.server import Grid, ServerApp
 from flwr.serverapp import FedAvg
-import torch
-
-from app_pytorch.task import Net, test, load_centralized_dataset
 
 # Create ServerApp
 app = ServerApp()
@@ -32,26 +31,25 @@ def main(grid: Grid, context: Context) -> None:
     )
 
     # Start strategy, run FedAvg for `num_rounds`
-    strategy_results = strategy.start(
+    result = strategy.start(
         grid=grid,
         initial_arrays=arrays,
         train_config=ConfigRecord({"lr": 0.01}),
         num_rounds=num_rounds,
-        timeout=3600,
         central_eval_fn=central_evaluation,
     )
 
     # Log resulting metrics
     print("\nTrain metrics:")
-    pprint(strategy_results.train_metrics)
+    pprint(result.train_metrics)
     print("\nDistributed evaluate metrics:")
-    pprint(strategy_results.evaluate_metrics)
+    pprint(result.evaluate_metrics)
     print("\nCentral evaluate metrics:")
-    pprint(strategy_results.central_evaluate_metrics)
+    pprint(result.central_evaluate_metrics)
 
     # Save final model to disk
     print("\nSaving final model to disk...")
-    state_dict = strategy_results.arrays.to_torch_state_dict()
+    state_dict = result.arrays.to_torch_state_dict()
     torch.save(state_dict, "final_model.pt")
 
 
@@ -65,12 +63,10 @@ def central_evaluation(server_round: int, arrays: ArrayRecord) -> MetricRecord:
     model.to(device)
 
     # Load entire test set
-    test_dataloader = load_centralized_dataset(device)
+    test_dataloader = load_centralized_dataset()
 
-    test_loss, test_acc = test(
-        model,
-        test_dataloader,
-        device,
-    )
+    # Evaluate the global model on the test set
+    test_loss, test_acc = test(model, test_dataloader, device)
 
+    # Return the evaluation metrics
     return MetricRecord({"accuracy": test_acc, "loss": test_loss})

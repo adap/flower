@@ -3,11 +3,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from datasets import load_dataset
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
+
+from datasets import load_dataset
 
 
 class Net(nn.Module):
@@ -33,14 +34,14 @@ class Net(nn.Module):
 
 fds = None  # Cache FederatedDataset
 
-pytorch_transforms = Compose(
-    [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-)
+pytorch_transforms = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
 
 def apply_transforms(batch):
     """Apply transforms to the partition from FederatedDataset."""
     batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
     return batch
+
 
 def load_data(partition_id: int, num_partitions: int):
     """Load partition CIFAR10 data."""
@@ -62,14 +63,11 @@ def load_data(partition_id: int, num_partitions: int):
     return trainloader, testloader
 
 
-def load_centralized_dataset(device: str):
+def load_centralized_dataset():
     """Load test set and return dataloader."""
     # Load entire test set
     test_dataset = load_dataset("uoft-cs/cifar10", split="test")
-    dataset = test_dataset.with_format("torch", device=device).with_transform(
-        apply_transforms
-    )
-
+    dataset = test_dataset.with_format("torch").with_transform(apply_transforms)
     return DataLoader(dataset, batch_size=32)
 
 
@@ -82,14 +80,13 @@ def train(net, trainloader, epochs, lr, device):
     running_loss = 0.0
     for _ in range(epochs):
         for batch in trainloader:
-            images = batch["img"]
-            labels = batch["label"]
+            images = batch["img"].to(device)
+            labels = batch["label"].to(device)
             optimizer.zero_grad()
-            loss = criterion(net(images.to(device)), labels.to(device))
+            loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-
     avg_trainloss = running_loss / len(trainloader)
     return avg_trainloss
 
