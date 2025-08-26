@@ -1,11 +1,11 @@
 ---
 myst:
   html_meta:
-    description: Deploy Flower's SuperLink Helm chart to set up federated 
-      learning servers. Default config mirrors official releases, enabling 
+    description: Deploy Flower's SuperLink Helm chart to set up federated
+      learning servers. Default config mirrors official releases, enabling
       seamless deployment, evaluation.
-    property:og:description: Deploy Flower's SuperLink Helm chart to set up 
-      federated learning servers. Default config mirrors official releases, 
+    property:og:description: Deploy Flower's SuperLink Helm chart to set up
+      federated learning servers. Default config mirrors official releases,
       enabling seamless deployment, evaluation.
 ---
 
@@ -147,7 +147,7 @@ If both `key` and `existingSecret` are set, `existingSecret` takes precedence an
 will be ignored.
 
 ```{note}
-By default, the `existingSecret` parameter must contain a key named `FLWR_LICENSE_KEY`.
+By default, the `existingSecret` resource must contain a key named `FLWR_LICENSE_KEY`.
 ```
 
 ```yaml
