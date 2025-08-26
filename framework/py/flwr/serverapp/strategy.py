@@ -134,8 +134,8 @@ class Strategy(ABC):
         self,
         grid: Grid,
         initial_arrays: ArrayRecord,
-        num_rounds: int,
-        timeout: float,
+        num_rounds: int = 3,
+        timeout: float = 3600,
         train_config: Optional[ConfigRecord] = None,
         evaluate_config: Optional[ConfigRecord] = None,
         central_eval_fn: Optional[Callable[[int, ArrayRecord], MetricRecord]] = None,
@@ -152,9 +152,9 @@ class Strategy(ABC):
             ClientApp.
         initial_arrays : ArrayRecord
             Initial model parameters (arrays) to be used for federated learning.
-        num_rounds : int
+        num_rounds : int (default: 3)
             Number of federated learning rounds to execute.
-        timeout : float
+        timeout : float (default: 3600)
             Timeout in seconds for waiting for node responses.
         train_config : ConfigRecord, optional
             Configuration to be sent to nodes during training rounds.

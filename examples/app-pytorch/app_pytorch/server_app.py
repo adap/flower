@@ -36,7 +36,6 @@ def main(grid: Grid, context: Context) -> None:
         initial_arrays=arrays,
         train_config=ConfigRecord({"lr": 0.01}),
         num_rounds=num_rounds,
-        timeout=3600,
         central_eval_fn=central_evaluation,
     )
 
