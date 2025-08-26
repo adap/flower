@@ -122,15 +122,13 @@ supernode:
 
 **Important:**
 
-It is technically possible to specify the SuperLink `Secret`
-(the one containing the server certificate) as the `existingSecret` for the SuperNode. However,
-you should not mount the same `Secret` into both the SuperLink and the SuperNode to access `ca.crt`.
+The recommended practice is to mount different `Secret`s for the SuperLink and the 
+SuperNodes `existingSecret` parameter. Keeping these `Secrets` separate ensures 
+that if the `Secret` containing the server’s private key and certificate is ever 
+tampered with, the client will fail to connect rather than trusting a compromised 
+server.
 
-Keeping these `Secrets` separate ensures that if the `Secret` containing the server’s private key
-and certificate is ever tampered with, the client will fail to connect rather than trusting
-a compromised server.
-
-For further details, see the cert-manager [documentation](https://cert-manager.io/docs/trust/).
+For further details, refer to the [`cert-manager` documentation](https://cert-manager.io/docs/trust/).
 
 If the SuperLink certificate (of type `kubernetes.io/tls`) is deployed in the same cluster and
 namespace as the SuperNode, you can enable `supernode.superlink.certificate.copyFromExistingSecret`.
