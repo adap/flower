@@ -22,6 +22,7 @@ from .exponential_partitioner import ExponentialPartitioner
 from .grouped_natural_id_partitioner import GroupedNaturalIdPartitioner
 from .id_to_size_fnc_partitioner import IdToSizeFncPartitioner
 from .iid_partitioner import IidPartitioner
+from .image_semantic_partitioner import ImageSemanticPartitioner
 from .inner_dirichlet_partitioner import InnerDirichletPartitioner
 from .linear_partitioner import LinearPartitioner
 from .natural_id_partitioner import NaturalIdPartitioner
@@ -41,6 +42,7 @@ __all__ = [
     "GroupedNaturalIdPartitioner",
     "IdToSizeFncPartitioner",
     "IidPartitioner",
+    "ImageSemanticPartitioner",
     "InnerDirichletPartitioner",
     "LinearPartitioner",
     "NaturalIdPartitioner",
