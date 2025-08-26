@@ -7,6 +7,8 @@ from typing import List, Tuple
 
 import numpy as np
 from flwr.common import NDArrays
+from logging import INFO
+from flwr.common import log
 
 # calls hardthreshold function for each list element in weights_all
 def hardthreshold_list(weights_all, num_keep: int) -> NDArrays:
@@ -66,10 +68,7 @@ def aggregate_hardthreshold(
 
     # check for iterht=True; set in cfg
     if iterht:
-        print(
-            f"{green}INFO {reset}:\t\tUsing Fed-IterHT with num_keep = ",
-            num_keep,
-        )
+        log(INFO, f"Using Fed-IterHT with num_keep = {num_keep}")
 
         # apply across all models within each client
 

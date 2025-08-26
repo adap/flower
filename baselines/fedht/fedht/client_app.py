@@ -78,7 +78,7 @@ def client_fn(context: Context) -> Client:
 
     num_features = context.run_config["num_features"]
     num_classes = context.run_config["num_classes"]
-    
+
     trainloader, testloader, num_obs = load_data(context)
 
     # define model and set device

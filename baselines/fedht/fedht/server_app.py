@@ -1,26 +1,26 @@
 """Run main for fedht baseline."""
 
-import pickle
-import random
 import torch
-import gzip
-
 import flwr as fl
-import hydra
 import numpy as np
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+from flwr.server import (
+    ServerApp, 
+    ServerAppComponents, 
+    ServerConfig, 
+    SimpleClientManager
+)
 from flwr.common import NDArrays, ndarrays_to_parameters, Context
 from flwr.server.strategy.strategy import Strategy
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import PathologicalPartitioner
-from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from fedht.client import generate_client_fn_mnist, generate_client_fn_simII
 from fedht.fedht import FedHT
-from fedht.server import fit_round, gen_evaluate_fn
-from fedht.utils import MyDataset, sim_data
-
+from fedht.server import (
+    gen_evaluate_fn, 
+    ResultsSaverServer, 
+    save_results_and_clean_dir
+)
 
 def server_fn(context: Context):
     """Run main file for fedht baseline.
@@ -102,8 +102,15 @@ def server_fn(context: Context):
     )
 
     config = ServerConfig(num_rounds=context.run_config["num_rounds"])
+    client_manager = SimpleClientManager()
+    server = ResultsSaverServer(
+        strategy=strategy,
+        client_manager=client_manager,
+        results_saver_fn=save_results_and_clean_dir,
+        context=context,
+    )
 
-    return ServerAppComponents(strategy=strategy, config=config)
+    return ServerAppComponents(server=server, config=config)
 
 
 # Create ServerApp

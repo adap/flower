@@ -133,6 +133,7 @@ learning_rate = 0.00001
 weight_decay = 0.000
 num_cpus = 10
 num_gpus = 0
+results_save_dir = "results"
 
 
 [tool.flwr.federations]
