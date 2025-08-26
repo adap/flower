@@ -174,6 +174,10 @@ class FedAvg(Strategy):
         replies: list[Message],
     ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
+
+        if not replies:
+            return None, None
+
         # Log if any Messages carried errors
         num_errors = 0
         for msg in replies:
@@ -247,6 +251,10 @@ class FedAvg(Strategy):
         replies: list[Message],
     ) -> Optional[MetricRecord]:
         """Aggregate MetricRecords in the received Messages."""
+
+        if not replies:
+            return None
+
         # Log if any Messages carried errors
         num_errors = 0
         for msg in replies:
