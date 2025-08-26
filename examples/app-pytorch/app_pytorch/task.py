@@ -66,7 +66,6 @@ def load_centralized_dataset(device: str):
     """Load test set and return dataloader."""
     # Load entire test set
     test_dataset = load_dataset("uoft-cs/cifar10", split="test")
-
     dataset = test_dataset.with_format("torch", device=device).with_transform(
         apply_transforms
     )
