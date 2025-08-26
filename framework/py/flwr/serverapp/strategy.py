@@ -23,7 +23,8 @@ from typing import Callable, Optional
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, log
 from flwr.server import Grid
 
-from .strategy_utils import StrategyResults, log_strategy_start_info
+from .result import Result
+from .strategy_utils import log_strategy_start_info
 
 
 class Strategy(ABC):
@@ -138,7 +139,7 @@ class Strategy(ABC):
         train_config: Optional[ConfigRecord] = None,
         evaluate_config: Optional[ConfigRecord] = None,
         central_eval_fn: Optional[Callable[[int, ArrayRecord], MetricRecord]] = None,
-    ) -> StrategyResults:
+    ) -> Result:
         """Execute the federated learning strategy.
 
         Runs the complete federated learning workflow for the specified number of
@@ -182,7 +183,7 @@ class Strategy(ABC):
         # Initialize if None
         train_config = ConfigRecord() if train_config is None else train_config
         evaluate_config = ConfigRecord() if evaluate_config is None else evaluate_config
-        results = StrategyResults()
+        results = Result()
 
         t_start = time.time()
         # Do central eval with starting global parameters

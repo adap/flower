@@ -17,7 +17,6 @@
 
 import random
 from collections import OrderedDict
-from dataclasses import dataclass, field
 from logging import ERROR, INFO
 from time import sleep
 from typing import Optional, cast
@@ -32,16 +31,6 @@ from flwr.common import (
     log,
 )
 from flwr.server import Grid
-
-
-@dataclass
-class StrategyResults:
-    """Data class carrying records generated during the execution of a strategy."""
-
-    arrays: ArrayRecord = field(default_factory=ArrayRecord)
-    train_metrics: dict[int, MetricRecord] = field(default_factory=dict)
-    evaluate_metrics: dict[int, MetricRecord] = field(default_factory=dict)
-    central_evaluate_metrics: dict[int, MetricRecord] = field(default_factory=dict)
 
 
 def config_to_str(config: ConfigRecord) -> str:
