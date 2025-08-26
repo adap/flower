@@ -18,6 +18,7 @@ Papers: https://arxiv.org/abs/1712.07557, https://arxiv.org/abs/1710.06963
 """
 
 
+from abc import ABC
 from logging import INFO, WARNING
 from typing import Optional
 
@@ -27,14 +28,20 @@ from flwr.common.differential_privacy import (
     compute_clip_model_update,
     compute_stdv,
 )
-from flwr.common.differential_privacy_constants import CLIENTS_DISCREPANCY_WARNING
+from flwr.common.differential_privacy_constants import (
+    CLIENTS_DISCREPANCY_WARNING,
+    KEY_CLIPPING_NORM,
+)
 from flwr.server import Grid
 
 from .strategy import Strategy
 
 
-class DifferentialPrivacyServerSideFixedClipping(Strategy):
-    """Strategy wrapper for central DP with server-side fixed clipping.
+class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
+    """Base class for DP strategies with fixed clipping.
+
+    This class contains common functionality shared between server-side and
+    client-side fixed clipping implementations.
 
     Parameters
     ----------
@@ -47,18 +54,6 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
         The value of the clipping norm.
     num_sampled_clients : int
         The number of clients that are sampled on each round.
-
-    Examples
-    --------
-    Create a strategy::
-
-        strategy = fl.serverapp.FedAvg( ... )
-
-    Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper::
-
-        dp_strategy = DifferentialPrivacyServerSideFixedClipping(
-            strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
-        )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -88,25 +83,20 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
         self.clipping_norm = clipping_norm
         self.num_sampled_clients = num_sampled_clients
 
-        self.current_arrays: ArrayRecord = ArrayRecord()
-
-    def __repr__(self) -> str:
-        """Compute a string representation of the strategy."""
-        rep = "Differential Privacy Strategy Wrapper (Server-Side Fixed Clipping)"
-        return rep
-
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> list[Message]:
         """Configure the next round of training."""
         return self.strategy.configure_train(server_round, arrays, config, grid)
 
-    def aggregate_train(
-        self,
-        server_round: int,
-        replies: list[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
-        """Aggregate ArrayRecords and MetricRecords in the received Messages."""
+    def _validate_replies(self, replies: list[Message]) -> bool:
+        """Validate replies and log errors/warnings.
+
+        Returns
+        -------
+        bool
+            True if replies are valid for aggregation, False otherwise.
+        """
         num_errors = 0
         for msg in replies:
             if msg.has_error():
@@ -124,7 +114,7 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
                 INFO,
                 "aggregate_train: Some clients reported errors. Skipping aggregation.",
             )
-            return None, None
+            return False
 
         log(
             INFO,
@@ -140,6 +130,107 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
                 len(replies),
                 self.num_sampled_clients,
             )
+
+        return True
+
+    def _add_noise_to_aggregated_arrays(
+        self, aggregated_arrays: ArrayRecord
+    ) -> ArrayRecord:
+        """Add Gaussian noise to aggregated arrays.
+
+        Parameters
+        ----------
+        aggregated_arrays : ArrayRecord
+            The aggregated arrays to add noise to.
+
+        Returns
+        -------
+        ArrayRecord
+            The aggregated arrays with noise added.
+        """
+        aggregated_ndarrays = aggregated_arrays.to_numpy_ndarrays()
+        stdv = compute_stdv(
+            self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+        )
+        add_gaussian_noise_inplace(aggregated_ndarrays, stdv)
+
+        log(
+            INFO,
+            "aggregate_fit: central DP noise with %.4f stdev added",
+            stdv,
+        )
+
+        return ArrayRecord(aggregated_ndarrays)
+
+    def configure_evaluate(
+        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
+    ) -> list[Message]:
+        """Configure the next round of federated evaluation."""
+        return self.strategy.configure_evaluate(server_round, arrays, config, grid)
+
+    def aggregate_evaluate(
+        self,
+        server_round: int,
+        replies: list[Message],
+    ) -> Optional[MetricRecord]:
+        """Aggregate MetricRecords in the received Messages."""
+        return self.strategy.aggregate_evaluate(server_round, replies)
+
+    def summary(self) -> None:
+        """Log summary configuration of the strategy."""
+        self.strategy.summary()
+
+
+class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippingBase):
+    """Strategy wrapper for central DP with server-side fixed clipping.
+
+    Parameters
+    ----------
+    strategy : Strategy
+        The strategy to which DP functionalities will be added by this wrapper.
+    noise_multiplier : float
+        The noise multiplier for the Gaussian mechanism for model updates.
+        A value of 1.0 or higher is recommended for strong privacy.
+    clipping_norm : float
+        The value of the clipping norm.
+    num_sampled_clients : int
+        The number of clients that are sampled on each round.
+
+    Examples
+    --------
+    Create a strategy::
+
+        strategy = fl.serverapp.FedAvg( ... )
+
+    Wrap the strategy with the `DifferentialPrivacyServerSideFixedClipping` wrapper::
+
+        dp_strategy = DifferentialPrivacyServerSideFixedClipping(
+            strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+        )
+    """
+
+    def __init__(
+        self,
+        strategy: Strategy,
+        noise_multiplier: float,
+        clipping_norm: float,
+        num_sampled_clients: int,
+    ) -> None:
+        super().__init__(strategy, noise_multiplier, clipping_norm, num_sampled_clients)
+        self.current_arrays: ArrayRecord = ArrayRecord()
+
+    def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
+        return "Differential Privacy Strategy Wrapper (Server-Side Fixed Clipping)"
+
+    def aggregate_train(
+        self,
+        server_round: int,
+        replies: list[Message],
+    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+        """Aggregate ArrayRecords and MetricRecords in the received Messages."""
+        if not self._validate_replies(replies):
+            return None, None
 
         # Clip arrays in replies
         current_ndarrays = self.current_arrays.to_numpy_ndarrays()
@@ -167,22 +258,79 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
 
         # Add Gaussian noise to the aggregated arrays
         if aggregated_arrays:
+            aggregated_arrays = self._add_noise_to_aggregated_arrays(aggregated_arrays)
 
-            aggregated_ndarrays = aggregated_arrays.to_numpy_ndarrays()
-            add_gaussian_noise_inplace(
-                aggregated_ndarrays,
-                compute_stdv(
-                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
-                ),
-            )
-            aggregated_arrays = ArrayRecord(aggregated_ndarrays)
+        return aggregated_arrays, aggregated_metrics
 
-            log(
-                INFO,
-                "aggregate_fit: central DP noise with %.4f stdev added",
-                compute_stdv(
-                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
-                ),
-            )
+
+class DifferentialPrivacyClientSideFixedClipping(DifferentialPrivacyFixedClippingBase):
+    """Strategy wrapper for central DP with client-side fixed clipping.
+
+    Use `fixedclipping_mod` modifier at the client side.
+
+    In comparison to `DifferentialPrivacyServerSideFixedClipping`,
+    which performs clipping on the server-side,
+    `DifferentialPrivacyClientSideFixedClipping` expects clipping to happen
+    on the client-side, usually by using the built-in `fixedclipping_mod`.
+
+    Parameters
+    ----------
+    strategy : Strategy
+        The strategy to which DP functionalities will be added by this wrapper.
+    noise_multiplier : float
+        The noise multiplier for the Gaussian mechanism for model updates.
+        A value of 1.0 or higher is recommended for strong privacy.
+    clipping_norm : float
+        The value of the clipping norm.
+    num_sampled_clients : int
+        The number of clients that are sampled on each round.
+
+    Examples
+    --------
+    Create a strategy::
+
+        strategy = fl.serverapp.FedAvg(...)
+
+    Wrap the strategy with the `DifferentialPrivacyClientSideFixedClipping` wrapper::
+
+        dp_strategy = DifferentialPrivacyClientSideFixedClipping(
+            strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+        )
+
+    On the client, add the `fixedclipping_mod` to the client-side mods::
+
+        app = fl.client.ClientApp(mods=[fixedclipping_mod])
+    """
+
+    def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
+        return "Differential Privacy Strategy Wrapper (Client-Side Fixed Clipping)"
+
+    def configure_train(
+        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
+    ) -> list[Message]:
+        """Configure the next round of training."""
+        # Inject clipping norm in config
+        config[KEY_CLIPPING_NORM] = self.clipping_norm
+        # Call parent method
+        return self.strategy.configure_train(server_round, arrays, config, grid)
+
+    def aggregate_train(
+        self,
+        server_round: int,
+        replies: list[Message],
+    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+        """Aggregate ArrayRecords and MetricRecords in the received Messages."""
+        if not self._validate_replies(replies):
+            return None, None
+
+        # Aggregate
+        aggregated_arrays, aggregated_metrics = self.strategy.aggregate_train(
+            server_round, replies
+        )
+
+        # Add Gaussian noise to the aggregated arrays
+        if aggregated_arrays:
+            aggregated_arrays = self._add_noise_to_aggregated_arrays(aggregated_arrays)
 
         return aggregated_arrays, aggregated_metrics
