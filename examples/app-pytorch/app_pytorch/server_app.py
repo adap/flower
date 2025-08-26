@@ -31,7 +31,7 @@ def main(grid: Grid, context: Context) -> None:
     )
 
     # Start strategy, run FedAvg for `num_rounds`
-    strategy_results = strategy.start(
+    result = strategy.start(
         grid=grid,
         initial_arrays=arrays,
         train_config=ConfigRecord({"lr": 0.01}),
@@ -42,15 +42,15 @@ def main(grid: Grid, context: Context) -> None:
 
     # Log resulting metrics
     print("\nTrain metrics:")
-    pprint(strategy_results.train_metrics)
+    pprint(result.train_metrics)
     print("\nDistributed evaluate metrics:")
-    pprint(strategy_results.evaluate_metrics)
+    pprint(result.evaluate_metrics)
     print("\nCentral evaluate metrics:")
-    pprint(strategy_results.central_evaluate_metrics)
+    pprint(result.central_evaluate_metrics)
 
     # Save final model to disk
     print("\nSaving final model to disk...")
-    state_dict = strategy_results.arrays.to_torch_state_dict()
+    state_dict = result.arrays.to_torch_state_dict()
     torch.save(state_dict, "final_model.pt")
 
 
