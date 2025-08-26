@@ -19,10 +19,11 @@ Papers: https://arxiv.org/abs/1712.07557, https://arxiv.org/abs/1710.06963
 
 
 from abc import ABC
+from collections import OrderedDict
 from logging import INFO, WARNING
 from typing import Optional
 
-from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, log
+from flwr.common import Array, ArrayRecord, ConfigRecord, Message, MetricRecord, log
 from flwr.common.differential_privacy import (
     add_gaussian_noise_inplace,
     compute_clip_model_update,
@@ -82,12 +83,6 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
         self.noise_multiplier = noise_multiplier
         self.clipping_norm = clipping_norm
         self.num_sampled_clients = num_sampled_clients
-
-    def configure_train(
-        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-    ) -> list[Message]:
-        """Configure the next round of training."""
-        return self.strategy.configure_train(server_round, arrays, config, grid)
 
     def _validate_replies(self, replies: list[Message]) -> bool:
         """Validate replies and log errors/warnings.
@@ -160,7 +155,14 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
             stdv,
         )
 
-        return ArrayRecord(aggregated_ndarrays)
+        return ArrayRecord(
+            OrderedDict(
+                {
+                    k: Array(v)
+                    for k, v in zip(aggregated_arrays.keys(), aggregated_ndarrays)
+                }
+            )
+        )
 
     def configure_evaluate(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
@@ -223,6 +225,13 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
         """Compute a string representation of the strategy."""
         return "Differential Privacy Strategy Wrapper (Server-Side Fixed Clipping)"
 
+    def configure_train(
+        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
+    ) -> list[Message]:
+        """Configure the next round of training."""
+        self.current_arrays = arrays
+        return self.strategy.configure_train(server_round, arrays, config, grid)
+
     def aggregate_train(
         self,
         server_round: int,
@@ -243,8 +252,12 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
                     param2=current_ndarrays,
                     clipping_norm=self.clipping_norm,
                 )
-                # Replace
-                reply.content[arr_name] = ArrayRecord(reply_ndarrays)
+                # Replace content while preserving keys
+                reply.content[arr_name] = ArrayRecord(
+                    OrderedDict(
+                        {k: Array(v) for k, v in zip(record.keys(), reply_ndarrays)}
+                    )
+                )
             log(
                 INFO,
                 "aggregate_fit: parameters are clipped by value: %.4f.",
