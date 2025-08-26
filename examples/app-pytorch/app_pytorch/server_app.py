@@ -36,7 +36,7 @@ def main(grid: Grid, context: Context) -> None:
         initial_arrays=arrays,
         train_config=ConfigRecord({"lr": 0.01}),
         num_rounds=num_rounds,
-        central_eval_fn=central_evaluation,
+        global_evaluate_fn=global_evaluate,
     )
 
     # Log resulting metrics
@@ -44,8 +44,8 @@ def main(grid: Grid, context: Context) -> None:
     pprint(result.train_metrics)
     print("\nDistributed evaluate metrics:")
     pprint(result.evaluate_metrics)
-    print("\nCentral evaluate metrics:")
-    pprint(result.central_evaluate_metrics)
+    print("\Global evaluate metrics:")
+    pprint(result.global_evaluate_metrics)
 
     # Save final model to disk
     print("\nSaving final model to disk...")
@@ -53,7 +53,7 @@ def main(grid: Grid, context: Context) -> None:
     torch.save(state_dict, "final_model.pt")
 
 
-def central_evaluation(server_round: int, arrays: ArrayRecord) -> MetricRecord:
+def global_evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
     """Evaluate model on central data."""
 
     # Load the model and initialize it with the received weights

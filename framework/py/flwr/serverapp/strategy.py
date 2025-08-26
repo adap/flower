@@ -191,7 +191,7 @@ class Strategy(ABC):
         if global_evaluate_fn:
             res = global_evaluate_fn(0, initial_arrays)
             log(INFO, "Initial global evaluation results: %s", res)
-            result.central_evaluate_metrics[0] = res
+            result.global_evaluate_metrics[0] = res
 
         arrays = initial_arrays
         for current_round in range(1, num_rounds + 1):
