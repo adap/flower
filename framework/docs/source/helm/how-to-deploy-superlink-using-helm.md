@@ -698,7 +698,6 @@ global:
 | `global.affinity.podAntiAffinity`                    | Default pod anti-affinity rules. Either: `none`, `soft` or `hard` | `soft`             |
 | `global.affinity.nodeAffinity.type`                  | Default node affinity rules. Either: `none`, `soft` or `hard`     | `hard`             |
 | `global.affinity.nodeAffinity.matchExpressions`      | Default match expressions for node affinity                       | `[]`               |
-| `global.certificateAnnotations`                      | Default Cert-Manager certificate annotations                      | `{}`               |
 | `global.nodeAuth.enabled`                            | Enables or Disables Node-Authentication SuperLink \<-> SuperNode  | `false`            |
 | `global.nodeAuth.authListPublicKeys`                 | A list of ecdsa-sha2-nistp384 SuperNode keys                      | `[]`               |
 | `global.userAuth.enabled`                            | Enables or disables the user authentication plugin.               | `false`            |
@@ -719,22 +718,25 @@ global:
 | `global.env`                                         | Default environment variables                                     | `[]`               |
 | `global.image.pullPolicy`                            | Default image pullPolicy                                          | `IfNotPresent`     |
 
-### Flower-TLS-Certificate parameters
+### TLS Configuration
 
-| Name                          | Description                                                                                                              | Value               |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| `certificate.enabled`         | Can be disabled if a Secret already exists                                                                               | `true`              |
-| `certificate.annotations`     | Certificate CRD annotations                                                                                              | `{}`                |
-| `certificate.name`            | Certificate name                                                                                                         | `flower-server-tls` |
-| `certificate.duration`        | The requested ‘duration’ (i.e. lifetime) of the Certificate. Default is 5 years.                                         | `43800h`            |
-| `certificate.renewBefore`     | How long before the currently issued certificate’s expiry cert-manager should renew the certificate. Default is 15 days. | `360h`              |
-| `certificate.privateKey`      | Private key options. These include the key algorithm and size, the used encoding and the rotation policy.                | `{}`                |
-| `certificate.usages`          | Requested key usages and extended key usages.                                                                            | `[]`                |
-| `certificate.additionalHosts` | Additional hosts you want to put into the SAN's of the certificate                                                       | `[]`                |
-| `certificate.issuer.group`    | Defaults to cert-Manager.io                                                                                              | `cert-manager.io`   |
-| `certificate.issuer.kind`     | Defaults to Issuer                                                                                                       | `Issuer`            |
-| `certificate.issuer.name`     | Name of the Issuer or Issuer to use                                                                                      | `""`                |
-| `certificate.issuer.spec`     | The contents of the `.spec` block for the cert-manager Issuer.                                                           | `{}`                |
+| Name                                 | Description                                                         | Value             |
+| ------------------------------------ | ------------------------------------------------------------------- | ----------------- |
+| `tls.issuer.enabled`                 | Enable automatic creation of a cert-manager Issuer.                 | `true`            |
+| `tls.issuer.name`                    | Name of the Issuer resource to use.                                 | `""`              |
+| `tls.issuer.spec`                    | The contents of the `.spec` block for the cert-manager Issuer.      | `{}`              |
+| `tls.certificate.enabled`            | Enable automatic creation of a cert-manager Certificate.            | `true`            |
+| `tls.certificate.annotations`        | Certificate CRD annotations.                                        | `{}`              |
+| `tls.certificate.secretName`         | Name of the Kubernetes Secret to store the TLS key and certificate. | `""`              |
+| `tls.certificate.issuerGroup`        | API group for the issuer. Defaults to `cert-manager.io`.            | `cert-manager.io` |
+| `tls.certificate.existingIssuer`     | Name of an existing Issuer or ClusterIssuer to use.                 | `""`              |
+| `tls.certificate.existingIssuerKind` | Kind of the existing issuer (`Issuer` or `ClusterIssuer`).          | `""`              |
+| `tls.certificate.duration`           | The requested ‘duration’ (i.e. lifetime) of the Certificate.        | `43800h`          |
+| `tls.certificate.renewBefore`        | How long before the currently issued certificate’s expiry           | `360h`            |
+| `tls.certificate.privateKey`         | Private key options. These include the key algorithm and            | `{}`              |
+| `tls.certificate.usages`             | Requested key usages and extended key usages.                       | `[]`              |
+| `tls.certificate.additionalHosts`    | Additional hosts you want to put into the SAN's                     | `[]`              |
+| `tls.existingSecret`                 | Name of an existing Kubernetes Secret                               | `""`              |
 
 ### Component SuperLink
 
@@ -763,7 +765,7 @@ global:
 | `superlink.service.servicePortFleetName`                       | Prefix of the SuperLink Fleet API port                                                                                  | `fleet`                              |
 | `superlink.service.servicePortFleet`                           | Port to expose for the SuperLink Fleet API                                                                              | `9092`                               |
 | `superlink.service.nodePortFleet`                              | Node port for SuperLink Fleet API                                                                                       | `""`                                 |
-| `superlink.service.servicePortSimulationIoName`                | Prefix of the SuperLink SimulationIo API port                                                                           | `simulationIo`                       |
+| `superlink.service.servicePortSimulationIoName`                | Prefix of the SuperLink SimulationIo API port                                                                           | `simulationio`                       |
 | `superlink.service.servicePortSimulationIo`                    | Port to expose for the SuperLink SimulationIo API                                                                       | `9096`                               |
 | `superlink.service.nodePortSimulationIo`                       | Node port for SuperLink SimulationIo API                                                                                | `""`                                 |
 | `superlink.containerPorts.api`                                 | Container port for SuperLink Exec API                                                                                   | `9093`                               |
@@ -784,7 +786,8 @@ global:
 | `superlink.ingress.enabled`                                    | Enable the ingress resource                                                                                             | `false`                              |
 | `superlink.ingress.annotations`                                | Additional annotations for the ingress                                                                                  | `{}`                                 |
 | `superlink.ingress.ingressClassName`                           | Defines which ingress controller which implement the resource                                                           | `""`                                 |
-| `superlink.ingress.tls`                                        | Ingress TLS configuration                                                                                               | `false`                              |
+| `superlink.ingress.tls.enabled`                                | Enable TLS termination at the Ingress level.                                                                            | `false`                              |
+| `superlink.ingress.tls.secretName`                             | Name of the Kubernetes Secret that will contain the                                                                     | `""`                                 |
 | `superlink.ingress.api.enabled`                                | Enable an ingress resource for SuperLink API                                                                            | `false`                              |
 | `superlink.ingress.api.hostname`                               | Ingress hostname for the SuperLink API ingress                                                                          | `exec-api.example.com`               |
 | `superlink.ingress.api.path`                                   | SuperLink API ingress path                                                                                              | `/`                                  |
