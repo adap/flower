@@ -128,11 +128,11 @@ class Strategy(ABC):
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
 
-    # pylint: disable=too-many-arguments, too-many-positional-arguments
+    # pylint: disable=too-many-arguments, too-many-positional-arguments, too-many-locals
     def start(
         self,
         grid: Grid,
-        arrays: ArrayRecord,
+        initial_arrays: ArrayRecord,
         num_rounds: int,
         timeout: float,
         train_config: Optional[ConfigRecord] = None,
@@ -149,7 +149,7 @@ class Strategy(ABC):
         grid : Grid
             The Grid instance used to send/receive Messages from nodes executing a
             ClientApp.
-        arrays : ArrayRecord
+        initial_arrays : ArrayRecord
             Initial model parameters (arrays) to be used for federated learning.
         num_rounds : int
             Number of federated learning rounds to execute.
@@ -173,7 +173,9 @@ class Strategy(ABC):
             evaluation metrics (if provided), and final model arrays from all rounds.
         """
         log(INFO, "Starting %s strategy:", self.__class__.__name__)
-        log_strategy_start_info(num_rounds, arrays, train_config, evaluate_config)
+        log_strategy_start_info(
+            num_rounds, initial_arrays, train_config, evaluate_config
+        )
         self.summary()
         log(INFO, "")
 
@@ -185,10 +187,11 @@ class Strategy(ABC):
         t_start = time.time()
         # Do central eval with starting global parameters
         if central_eval_fn:
-            res = central_eval_fn(0, arrays)
+            res = central_eval_fn(0, initial_arrays)
             log(INFO, "Initial central evaluation results: %s", res)
             results.central_evaluate_metrics[0] = res
 
+        arrays = initial_arrays
         for current_round in range(1, num_rounds + 1):
             log(INFO, "")
             log(INFO, "[ROUND %s/%s]", current_round, num_rounds)
@@ -200,37 +203,43 @@ class Strategy(ABC):
                 ),
                 timeout=timeout,
             )
-            # Aggregate train
-            agg_arrays, agg_metrics = self.aggregate_train(current_round, list(replies))
-            # Log training metrics and append to history
-            if agg_arrays is None or agg_metrics is None:
-                break
-            log(INFO, "\t└──> Aggregated  MetricRecord: %s", agg_metrics)
-            results.train_metrics[current_round] = agg_metrics
-            results.arrays = agg_arrays
+            replies_list = list(replies)
+            if replies_list:
+                # Aggregate train
+                agg_arrays, agg_metrics = self.aggregate_train(
+                    current_round, replies_list
+                )
+                del replies_list
+                # Log training metrics and append to history
+                if agg_arrays is None or agg_metrics is None:
+                    break
+                log(INFO, "\t└──> Aggregated  MetricRecord: %s", agg_metrics)
+                results.train_metrics[current_round] = agg_metrics
+                results.arrays = agg_arrays
+                arrays = agg_arrays
 
             # Configure evaluate, send messages and wait for replies
             replies = grid.send_and_receive(
                 messages=self.configure_evaluate(
-                    current_round, agg_arrays, evaluate_config, grid
+                    current_round, arrays, evaluate_config, grid
                 ),
                 timeout=timeout,
             )
-            # Aggregate evaluate
-            agg_metrics = self.aggregate_evaluate(current_round, list(replies))
-            if agg_metrics is None:
-                break
-            log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_metrics)
-            results.evaluate_metrics[current_round] = agg_metrics
+            replies_list = list(replies)
+            if replies_list:
+                # Aggregate evaluate
+                agg_metrics = self.aggregate_evaluate(current_round, replies_list)
+                if agg_metrics is None:
+                    break
+                log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_metrics)
+                results.evaluate_metrics[current_round] = agg_metrics
 
             # Centralised eval
             if central_eval_fn:
                 log(INFO, "Central evaluation")
-                res = central_eval_fn(current_round, agg_arrays)
+                res = central_eval_fn(current_round, arrays)
                 log(INFO, "\t└──> MetricRecord: %s", res)
                 results.central_evaluate_metrics[current_round] = res
-
-            arrays = agg_arrays
 
         log(INFO, "")
         log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)

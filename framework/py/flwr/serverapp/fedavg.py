@@ -188,7 +188,7 @@ class FedAvg(Strategy):
 
         log(
             INFO,
-            "aggregate_train: received %s results and %s failures",
+            "aggregate_train: Received %s results and %s failures",
             len(replies) - num_errors,
             num_errors,
         )
@@ -261,7 +261,7 @@ class FedAvg(Strategy):
 
         log(
             INFO,
-            "aggregate_evaluate: received %s results and %s failures",
+            "aggregate_evaluate: Received %s results and %s failures",
             len(replies) - num_errors,
             num_errors,
         )

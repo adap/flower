@@ -37,7 +37,7 @@ def main(grid: Grid, context: Context) -> None:
     # Start strategy, run FedAvg for `num_rounds`
     strategy_results = strategy.start(
         grid=grid,
-        arrays=arrays,
+        initial_arrays=arrays,
         train_config=ConfigRecord({"lr": 0.01}),
         num_rounds=num_rounds,
         timeout=3600,
