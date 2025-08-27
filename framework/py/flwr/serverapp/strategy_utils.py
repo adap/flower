@@ -51,8 +51,7 @@ def log_strategy_start_info(
     log(INFO, "\t├── Number of rounds: %d", num_rounds)
     log(
         INFO,
-        "\t├── ArrayRecord: %d Arrays (%.2f MB)",
-        len(arrays),
+        "\t├── ArrayRecord (%.2f MB)",
         sum(len(array.data) for array in arrays.values()) / (1024**2),
     )
     log(

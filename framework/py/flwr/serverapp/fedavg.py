@@ -15,6 +15,7 @@
 """Flower message-based FedAvg strategy."""
 
 
+from collections.abc import Iterable
 from logging import INFO
 from typing import Callable, Optional
 
@@ -171,11 +172,16 @@ class FedAvg(Strategy):
     def aggregate_train(
         self,
         server_round: int,
-        replies: list[Message],
+        replies: Iterable[Message],
     ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
+        if not replies:
+            return None, None
+
         # Log if any Messages carried errors
+        # Filter messages that carry content
         num_errors = 0
+        replies_with_content = []
         for msg in replies:
             if msg.has_error():
                 log(
@@ -185,16 +191,15 @@ class FedAvg(Strategy):
                     msg.error,
                 )
                 num_errors += 1
+            else:
+                replies_with_content.append(msg.content)
 
         log(
             INFO,
             "aggregate_train: Received %s results and %s failures",
-            len(replies) - num_errors,
+            len(replies_with_content) - num_errors,
             num_errors,
         )
-
-        # Filter messages that carry content
-        replies_with_content = [msg.content for msg in replies if msg.has_content()]
 
         # Ensure expected ArrayRecords and MetricRecords are received
         if not validate_message_reply_consistency(
@@ -244,11 +249,16 @@ class FedAvg(Strategy):
     def aggregate_evaluate(
         self,
         server_round: int,
-        replies: list[Message],
+        replies: Iterable[Message],
     ) -> Optional[MetricRecord]:
         """Aggregate MetricRecords in the received Messages."""
+        if not replies:
+            return None
+
         # Log if any Messages carried errors
+        # Filter messages that carry content
         num_errors = 0
+        replies_with_content = []
         for msg in replies:
             if msg.has_error():
                 log(
@@ -258,16 +268,15 @@ class FedAvg(Strategy):
                     msg.error,
                 )
                 num_errors += 1
+            else:
+                replies_with_content.append(msg.content)
 
         log(
             INFO,
             "aggregate_evaluate: Received %s results and %s failures",
-            len(replies) - num_errors,
+            len(replies_with_content) - num_errors,
             num_errors,
         )
-
-        # Filter messages that carry content
-        replies_with_content = [msg.content for msg in replies if msg.has_content()]
 
         # Ensure expected ArrayRecords and MetricRecords are received
         if not validate_message_reply_consistency(
