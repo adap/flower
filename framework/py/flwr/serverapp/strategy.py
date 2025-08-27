@@ -192,7 +192,7 @@ class Strategy(ABC):
         if evaluate_fn:
             res = evaluate_fn(0, initial_arrays)
             log(INFO, "Initial global evaluation results: %s", res)
-            result.global_evaluate_metrics[0] = res
+            result.evaluate_metrics_serverapp[0] = res
 
         arrays = initial_arrays
         for current_round in range(1, num_rounds + 1):
@@ -227,7 +227,7 @@ class Strategy(ABC):
                 arrays = agg_arrays
             if agg_train_metrics is not None:
                 log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_train_metrics)
-                result.train_metrics[current_round] = agg_train_metrics
+                result.train_metrics_clientapp[current_round] = agg_train_metrics
 
             # -----------------------------------------------------------------
             # --- EVALUATION (LOCAL) ------------------------------------------
@@ -254,7 +254,7 @@ class Strategy(ABC):
             # Log training metrics and append to history
             if agg_evaluate_metrics is not None:
                 log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_evaluate_metrics)
-                result.evaluate_metrics[current_round] = agg_evaluate_metrics
+                result.evaluate_metrics_clientapp[current_round] = agg_evaluate_metrics
 
             # -----------------------------------------------------------------
             # --- EVALUATION (GLOBAL) -----------------------------------------
@@ -265,7 +265,7 @@ class Strategy(ABC):
                 log(INFO, "Global evaluation")
                 res = evaluate_fn(current_round, arrays)
                 log(INFO, "\t└──> MetricRecord: %s", res)
-                result.global_evaluate_metrics[current_round] = res
+                result.evaluate_metrics_serverapp[current_round] = res
 
         log(INFO, "")
         log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)

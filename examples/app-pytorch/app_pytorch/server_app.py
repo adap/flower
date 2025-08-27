@@ -38,12 +38,12 @@ def main(grid: Grid, context: Context) -> None:
     )
 
     # Log resulting metrics
-    print("\nTrain metrics:")
-    pprint(result.train_metrics)
+    print("\nDistributed train metrics:")
+    pprint(result.train_metrics_clientapp)
     print("\nDistributed evaluate metrics:")
-    pprint(result.evaluate_metrics)
+    pprint(result.evaluate_metrics_clientapp)
     print("\nGlobal evaluate metrics:")
-    pprint(result.global_evaluate_metrics)
+    pprint(result.evaluate_metrics_serverapp)
 
     # Save final model to disk
     print("\nSaving final model to disk...")
