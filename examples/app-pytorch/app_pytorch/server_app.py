@@ -34,7 +34,7 @@ def main(grid: Grid, context: Context) -> None:
         initial_arrays=arrays,
         train_config=ConfigRecord({"lr": 0.01}),
         num_rounds=num_rounds,
-        global_evaluate_fn=global_evaluate,
+        evaluate_fn=global_evaluate,
     )
 
     # Log resulting metrics

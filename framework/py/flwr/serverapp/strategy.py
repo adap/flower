@@ -139,7 +139,7 @@ class Strategy(ABC):
         timeout: float = 3600,
         train_config: Optional[ConfigRecord] = None,
         evaluate_config: Optional[ConfigRecord] = None,
-        global_evaluate_fn: Optional[Callable[[int, ArrayRecord], MetricRecord]] = None,
+        evaluate_fn: Optional[Callable[[int, ArrayRecord], MetricRecord]] = None,
     ) -> Result:
         """Execute the federated learning strategy.
 
@@ -163,7 +163,7 @@ class Strategy(ABC):
         evaluate_config : ConfigRecord, optional
             Configuration to be sent to nodes during evaluation rounds.
             If unset, an empty ConfigRecord will be used.
-        global_evaluate_fn : Callable[[int, ArrayRecord], MetricRecord], optional
+        evaluate_fn : Callable[[int, ArrayRecord], MetricRecord], optional
             Optional function for centralized evaluation of the global model. Takes
             server round number and array record, returns a MetricRecord. If provided,
             will be called before the first round and after each round. Defaults to
@@ -189,8 +189,8 @@ class Strategy(ABC):
 
         t_start = time.time()
         # Evaluate starting global parameters
-        if global_evaluate_fn:
-            res = global_evaluate_fn(0, initial_arrays)
+        if evaluate_fn:
+            res = evaluate_fn(0, initial_arrays)
             log(INFO, "Initial global evaluation results: %s", res)
             result.global_evaluate_metrics[0] = res
 
@@ -260,10 +260,10 @@ class Strategy(ABC):
             # --- EVALUATION (GLOBAL) -----------------------------------------
             # -----------------------------------------------------------------
 
-            # Centralised evaluation
-            if global_evaluate_fn:
+            # Centralized evaluation
+            if evaluate_fn:
                 log(INFO, "Global evaluation")
-                res = global_evaluate_fn(current_round, arrays)
+                res = evaluate_fn(current_round, arrays)
                 log(INFO, "\t└──> MetricRecord: %s", res)
                 result.global_evaluate_metrics[current_round] = res
 
