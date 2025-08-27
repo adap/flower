@@ -1,0 +1,85 @@
+// Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
+
+syntax = "proto3";
+
+package flwr.proto;
+
+import "flwr/proto/error.proto";
+import "flwr/proto/recorddict.proto";
+import "flwr/proto/transport.proto";
+import "flwr/proto/node.proto";
+
+message Message {
+  Metadata metadata = 1;
+  RecordDict content = 2;
+  Error error = 3;
+}
+
+message Context {
+  uint64 run_id = 1;
+  uint64 node_id = 2;
+  map<string, Scalar> node_config = 3;
+  RecordDict state = 4;
+  map<string, Scalar> run_config = 5;
+}
+
+message Metadata {
+  uint64 run_id = 1;
+  string message_id = 2;
+  uint64 src_node_id = 3;
+  uint64 dst_node_id = 4;
+  string reply_to_message_id = 5;
+  string group_id = 6;
+  double ttl = 7;
+  string message_type = 8;
+  double created_at = 9;
+}
+
+message ObjectIDs { repeated string object_ids = 1; }
+
+message ObjectTree {
+  string object_id = 1;
+  repeated ObjectTree children = 2;
+}
+
+// PushObject messages
+message PushObjectRequest {
+  Node node = 1;
+  uint64 run_id = 2;
+  string object_id = 3;
+  bytes object_content = 4;
+}
+message PushObjectResponse { bool stored = 1; }
+
+// PullObject messages
+message PullObjectRequest {
+  Node node = 1;
+  uint64 run_id = 2;
+  string object_id = 3;
+}
+message PullObjectResponse {
+  bool object_found = 1;
+  bool object_available = 2;
+  bytes object_content = 3;
+}
+
+// ConfirmMessageReceived messages
+message ConfirmMessageReceivedRequest {
+  Node node = 1;
+  uint64 run_id = 2;
+  string message_object_id = 3;
+}
+message ConfirmMessageReceivedResponse {}

@@ -6,7 +6,7 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable alaw or agreed to in writing, software
+# Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
@@ -116,6 +116,34 @@ class TestNaturalIdPartitioner(unittest.TestCase):
         _, partitioner = _dummy_setup(num_rows=10, n_unique_natural_ids=2)
         with self.assertRaises(AttributeError):
             partitioner.partition_id_to_natural_id = {0: "0"}
+
+    def test_consistent_partition_ids(self) -> None:
+        """Test that the partition IDs assigned to the natural IDs are consistent."""
+        train_data = {
+            "features": [1, 2, 3],
+            "labels": [0, 0, 1],
+            "clients": ["a", "b", "a"],
+        }
+        test_data = {
+            "features": [4, 5, 6],
+            "labels": [1, 0, 0],
+            "clients": ["b", "a", "a"],
+        }
+        train_dataset = Dataset.from_dict(train_data)
+        test_dataset = Dataset.from_dict(test_data)
+
+        # Create partitioners
+        train_partitioner = NaturalIdPartitioner(partition_by="clients")
+        test_partitioner = NaturalIdPartitioner(partition_by="clients")
+        train_partitioner.dataset = train_dataset
+        test_partitioner.dataset = test_dataset
+        train_partitioner.load_partition(0)
+        test_partitioner.load_partition(0)
+
+        self.assertEqual(
+            train_partitioner.partition_id_to_natural_id,
+            test_partitioner.partition_id_to_natural_id,
+        )
 
 
 if __name__ == "__main__":

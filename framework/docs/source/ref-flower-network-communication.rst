@@ -39,11 +39,11 @@ Mandatory Network Connections
 
 Deployed Flower systems have at least two types of network connections:
 
-- **CLI to SuperLink (Exec API)**: The ``flwr`` `CLI command <ref-api-cli.html>`_,
+- **CLI to SuperLink (Control API)**: The ``flwr`` `CLI command <ref-api-cli.html>`_,
   typically run on the users workstation, is used to interface with a deployed Flower
   federation consisting of SuperLink and SuperNodes. From a networking perspective, the
   ``flwr`` CLI acts as a gRPC client and the SuperLink acts as a gRPC server. The
-  ``flwr`` CLI is the only way for a user (AI researchers, data scientist) to inferface
+  ``flwr`` CLI is the only way for a user (AI researchers, data scientist) to interface
   with a deployed Flower federation. They cannot, for example, interface directly with
   SuperNodes connected to the SuperLink. The ``flwr`` CLI to SuperLink connection should
   always use TLS, but ``insecure`` mode is supported for local testing.
@@ -62,43 +62,87 @@ Optional Network Connections
 Depending on the SuperLink and SuperNode configuration, Flower systems can have/use a
 number of additional network connections.
 
-Isolation mode
+Flower Components APIs
+~~~~~~~~~~~~~~~~~~~~~~
+
+All Flower components — SuperLink, SuperNode, SuperExec, ``ServerApp`` process, and
+``ClientApp`` process — expose APIs to interact with other Flower components. The
+SuperLink component includes three such APIs: the ServerAppIo API, Fleet API, and the
+Control API. Similarly, the SuperNode component includes the ClientAppIo API. Each of
+these APIs serves a distinct purpose when running a Flower app using the deployment
+runtime, as summarized in the table below.
+
+.. list-table::
+    :widths: 25 25 35 65
+    :header-rows: 1
+
+    - - Component
+      - Default Port
+      - API
+      - Purpose
+    - - SuperLink
+      - 9091
+      - ServerAppIo API
+      - Used by the SuperExec and the ``ServerApp`` processes
+    - -
+      - 9092
+      - Fleet API
+      - Used by the SuperNodes
+    - -
+      - 9093
+      - Control API
+      - Users interface with the SuperLink via this API using the `FlowerCLI
+        <ref-api-cli.html>`_
+    - - SuperNode
+      - 9094
+      - ClientAppIo API
+      - Used by the SuperExec and the ``ClientApp`` processes
+
+Isolation Mode
 ~~~~~~~~~~~~~~
 
-Both Flower SuperLink and Flower SuperNode can use different isolation modes. Isolation
-mode ``subprocess`` configures the SuperLink/SuperNode to run ServerApp/ClientApp in a
-sub-process. Isolation mode ``process`` expects ServerApp or ClientApp to run in
-separate externally-managed processes. This allows, for example, to run SuperNode and
-``ClientApp`` in separate Docker containers with different sets of dependencies
-installed. Check the :doc:`docker/index` guide to gain a better understanding on how to
-use both modes.
+Both SuperLink and SuperNode can operate in different isolation modes. The **SuperExec**
+is responsible for scheduling, launching, and managing app processes, such as the
+``ServerApp`` process and the ``ClientApp`` process.
 
-In isolation mode ``process``, additional network connections are necessary to allow the
-external process running ServerApp or ClientApp to communicate with the long-running
-SuperLink or SuperNode:
+The ``subprocess`` isolation mode configures the SuperLink/SuperNode to automatically
+run the SuperExec as a subprocess upon start. The ``process`` isolation mode, by
+contrast, expects the SuperExec to run in a separately managed external process, so the
+SuperLink/SuperNode will not launch one automatically. This enables, for example,
+running the SuperLink/SuperNode and SuperExec in separate Docker containers with
+different dependency sets, or running them on different servers within the same network.
+See the :doc:`docker/index` guide for a deeper understanding of how to use both modes.
 
-- **flwr-serverapp to SuperLink (ServerAppIO API)**: The process running the
-  ``ServerApp``, ``flwr-serveapp``, acts as a gRPC client and connects to the
-  SuperLink's ServerAppIO API. This connection enables the ``flwr-serverapp`` process to
-  pull the necessary inputs to execute the ``ServerApp``. It also allows the
-  ``ServerApp``, once running, to do typical things like sending/receiving messages
-  to/from available SuperNodes (via the SuperLink).
-- **flwr-clientapp to SuperNode (ClientAppIO API)**: The process running the
-  ``ClientApp``, ``flwr-clientapp``, acts as a gRPC client and connects to the
-  SuperNode's ClientAppIO API. This connection enables the ``flwr-clientapp`` process to
-  pull the necessary details (e.g., FAB file) to execute the ``ClientApp``, execute the
-  ``ClientApp`` (e.g., local model training) and return the execution results (e.g.,
-  locally update model parameters) to the SuperNode.
+When using the ``process`` isolation mode, additional network connections are necessary
+to allow the external process running the SuperExec, ``ServerApp``, or ``ClientApp`` to
+communicate with the SuperLink or SuperNode:
+
+- **SuperExec/ServerApp process to SuperLink (ServerAppIO API)**: Both the SuperExec for
+  ``ServerApp``\s and the ``ServerApp`` processes act as gRPC clients and connect to the
+  SuperLink's ServerAppIO API. This connection enables the SuperExec to discover runs to
+  launch and the ``ServerApp`` process to pull the necessary inputs to execute the
+  ``ServerApp``. It also allows the ``ServerApp``, once running, to do typical things
+  like sending/receiving messages to/from available SuperNodes (via the SuperLink).
+- **SuperExec/ClientApp process to SuperNode (ClientAppIO API)**: Both the SuperExec for
+  ``ClientApp``\s and the ``ClientApp`` processes act as gRPC clients and connect to the
+  SuperNode's ClientAppIO API. This connection enables the SuperExec to discover runs to
+  launch and the ``ClientApp`` process to pull the necessary details (e.g., FAB file) to
+  execute the ``ClientApp``, execute the ``ClientApp`` (e.g., local model training), and
+  return the execution results (e.g., locally update model parameters) to the SuperNode.
 
 .. note::
 
-    In the current version of Flower, both of these connections are insecure because
-    Flower expects SuperLink/SuperNode and ``flwr-serverapp`` / ``flwr-clientapp`` to be
-    run in the same network. ``flwr-serverapp`` / ``flwr-clientapp`` and
-    SuperLink/SuperNode should never communicate over untrusted networks (e.g., public
-    internet).
+    In the current version of Flower, both of the connections above are insecure because
+    Flower assumes that the following groups of processes run within the same trusted
+    network:
 
-User authentication
+    - SuperLink + SuperExec + ``ServerApp`` process
+    - SuperNode + SuperExec + ``ClientApp`` process
+
+    Each group must remain inside a single trusted network. They should never
+    communicate with each other over untrusted networks (e.g., the public internet).
+
+User Authentication
 ~~~~~~~~~~~~~~~~~~~
 
 When user authentication is enabled, Flower uses an OIDC-compatible server to
@@ -108,7 +152,7 @@ authenticate requests:
   authenticated users to interact with it. In this setting, the Flower SuperLink acts as
   a REST client to the OIDC-compatible server.
 
-Application-specific connections
+Application-specific Connections
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Users who write Flower Apps (``ServerApp`` and ``ClientApp``) can also make additional
@@ -129,8 +173,28 @@ Typical examples include:
   perform the action they have been designed for (e.g. evaluate a model on some data
   after aggregation). How this connection is established depends on what storage
   technology used at the client side. Note that in the diagram above we have omitted
-  showing a DB connected to the ServerApp components.
+  showing a DB connected to the ``ServerApp`` components.
 - **ServerApp to metric logging service**: Metric logging services like TensorBoard,
   MLFlow and Weights & Biases are often used to track the progress of training runs. In
   this setting, the ``ServerApp`` typically acts as a client to the metric logging
   service.
+
+Communication Model
+~~~~~~~~~~~~~~~~~~~
+
+During real-world deployment, the push/pull communication model adopted by each
+component can influence decisions related to resource provisioning, scaling, monitoring,
+and reliability. To support such decisions, the list below outlines the communication
+model used between the Flower components:
+
+- **SuperLink ↔ SuperNode (Fleet API)**: The SuperNode pulls/pushes Messages from/to the
+  SuperLink via the Fleet API. The SuperNode also pulls the FAB if a new run is being
+  executed.
+- **SuperLink ↔ ServerApp (ServerAppIo API)**: The ``ServerApp`` process pulls/pushes
+  Messages from/to the SuperLink via the ServerAppIo API. The ``ServerApp`` also pulls
+  the FAB as part of the first interaction with the SuperLink, and at the end of the
+  execution it pushes the Context back to the SuperLink.
+- **SuperNode ↔ ClientApp (ClientAppIo API)**: The ``ClientApp`` process pulls/pushes
+  Messages from/to the SuperNode via the ClientAppIo API. The ``ClientApp`` also pulls
+  the FAB as part of the first interaction with the SuperNode, and at the end of the
+  execution it pushes the Context back to the SuperNode.

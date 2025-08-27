@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """VerticalSizePartitioner class."""
-# flake8: noqa: E501
+# noqa: E501
 # pylint: disable=C0301, R0902, R0913
 from math import floor
 from typing import Literal, Optional, Union, cast
@@ -29,15 +29,15 @@ from flwr_datasets.partitioner.vertical_partitioner_utils import (
 
 
 class VerticalSizePartitioner(Partitioner):
-    """Creates vertical partitions by spliting features (columns) based on sizes.
+    """Creates vertical partitions by splitting features (columns) based on sizes.
 
     The sizes refer to the number of columns after the `drop_columns` are
     dropped. `shared_columns` and `active_party_column` are excluded and
     added only after the size-based division.
 
-    Enables selection of "active party" column(s) and palcement into
+    Enables selection of "active party" column(s) and placement into
     a specific partition or creation of a new partition just for it.
-    Also enables droping columns and sharing specified columns across
+    Also enables dropping columns and sharing specified columns across
     all partitions.
 
     Parameters
@@ -47,7 +47,7 @@ class VerticalSizePartitioner(Partitioner):
         list[int] -> each value represent an absolute number of columns. Size zero is
         allowed and will result in an empty partition if no shared columns are present.
         A list of floats -> each value represent a fraction total number of columns.
-        Note that these values apply to collums without `active_party_columns`, `shared_columns`.
+        Note that these values apply to columns without `active_party_columns`, `shared_columns`.
         They are additionally included in to the partition(s). `drop_columns` are also not counted
         toward the partition sizes.
         In case fo list[int]: sum(partition_sizes) == len(columns) - len(drop_columns) -
@@ -91,7 +91,7 @@ class VerticalSizePartitioner(Partitioner):
     >>> print([partition.column_names for partition in partitions])
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=R0917
         self,
         partition_sizes: Union[list[int], list[float]],
         active_party_columns: Optional[Union[str, list[str]]] = None,
@@ -261,7 +261,7 @@ class VerticalSizePartitioner(Partitioner):
         shared_columns: list[str],
         active_party_columns: list[str],
     ) -> None:
-        # Shared columns existance check
+        # Shared columns existence check
         for column in shared_columns:
             if column not in all_columns:
                 raise ValueError(f"Shared column '{column}' not found in the dataset.")

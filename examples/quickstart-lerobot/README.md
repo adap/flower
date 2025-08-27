@@ -61,7 +61,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 ### Run with the Simulation Engine
 
-> \[!TIP\]
+> [!TIP]
 > This example runs much faster when the `ClientApp`s have access to a GPU. If your system has one, you might want to try running the example with GPU right away, use the `local-simulation-gpu` federation as shown below.
 
 ```bash

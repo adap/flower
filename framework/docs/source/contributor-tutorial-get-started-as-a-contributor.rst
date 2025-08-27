@@ -48,38 +48,39 @@ Create Flower Dev Environment
 
 1. Clone the `Flower repository <https://github.com/adap/flower>`_ from GitHub:
 
-::
+       ::
 
-    $ git clone git@github.com:adap/flower.git
-    $ cd flower
+           $ git clone git@github.com:adap/flower.git
+           $ cd flower
 
-2. Let's create the Python environment for all-things Flower. If you wish to use
-   ``pyenv``, we provide two convenience scripts that you can use. If you prefer using
-   something else than ``pyenv``, create a new environment, activate and skip to the
-   last point where all packages are installed.
+2. Create and activate a Python virtual environment for development. See `Set up a
+   virtual env <contributor-how-to-set-up-a-virtual-env.rst>`_ for detailed
+   instructions.
 
-- If you don't have ``pyenv`` installed, the following script that will install it, set
-  it up, and create the virtual environment (with :substitution-code:`Python
-  |python_full_version|` by default):
+   One way to do this is by using `pyenv <https://github.com/pyenv/pyenv>`_ and
+   `pyenv-virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_. You can also
+   optionally install a specific Python version using pyenv if you haven't already
+   installed your desired version:
 
-  ::
+       ::
 
-      $ ./dev/setup-defaults.sh <version> # once completed, run the bootstrap script
+           $ pyenv install <your-python-version>
+           $ pyenv virtualenv <your-python-version> <your-env-name>
+           $ pyenv activate <your-env-name>
 
-- If you already have ``pyenv`` installed (along with the ``pyenv-virtualenv`` plugin),
-  you can use the following convenience script (with :substitution-code:`Python
-  |python_full_version|` by default):
+3. Install Poetry, which is used to manage dependencies and development workflows:
 
-  ::
+       ::
 
-      $ ./dev/venv-create.sh <version> # once completed, run the `bootstrap.sh` script
+           (your-env-name) $ pip install poetry==2.1.3
 
-3. Install the Flower package in development mode (think ``pip install -e``) along with
-all necessary dependencies:
+4. Navigate to the ``framework`` directory and install the Flower project in development
+   mode, including all optional dependencies:
 
-::
+       ::
 
-    (flower-<version>) $ ./dev/bootstrap.sh
+           (your-env-name) $ cd framework
+           (your-env-name) $ python -m poetry install --all-extras
 
 Convenience Scripts
 -------------------
@@ -87,15 +88,6 @@ Convenience Scripts
 The Flower repository contains a number of convenience scripts to make recurring
 development tasks easier and less error-prone. See the ``/dev`` subdirectory for a full
 list. The following scripts are amongst the most important ones:
-
-Create/Delete Virtual Environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: shell
-    :substitutions:
-
-    $ ./dev/venv-create.sh <version> # Default is |python_full_version|
-    $ ./dev/venv-delete.sh <version> # Default is |python_full_version|
 
 Compile ProtoBuf Definitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -109,21 +101,22 @@ Auto-Format Code
 
 ::
 
-    $ ./dev/format.sh
+    $ ./framework/dev/format.sh
 
 Run Linters and Tests
 ~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
-    $ ./dev/test.sh
+    $ ./framework/dev/test.sh
 
 Add a pre-commit hook
 ~~~~~~~~~~~~~~~~~~~~~
 
 Developers may integrate a pre-commit hook into their workflow utilizing the `pre-commit
 <https://pre-commit.com/#install>`_ library. The pre-commit hook is configured to
-execute two primary operations: ``./dev/format.sh`` and ``./dev/test.sh`` scripts.
+execute two primary operations: ``./framework/dev/format.sh`` and
+``./framework/dev/test.sh`` scripts.
 
 There are multiple ways developers can use this:
 
@@ -175,24 +168,22 @@ script:
 
 ::
 
-    $ ./dev/build.sh
+    $ ./framework/dev/build.sh
 
-The resulting ``.whl`` and ``.tar.gz`` releases will be stored in the ``/dist``
-subdirectory.
+The resulting ``.whl`` and ``.tar.gz`` releases will be stored in the
+``./framework/dist`` subdirectory.
 
 Build Documentation
 -------------------
 
-Flower's documentation uses `Sphinx <https://www.sphinx-doc.org/>`_. There's no
-convenience script to re-build the documentation yet, but it's pretty easy:
+Flower's documentation uses `Sphinx <https://www.sphinx-doc.org/>`_. To build the
+documentation locally, run the following script:
 
 ::
 
-    $ cd doc
-    $ make html
+    $ ./framework/dev/build-docs.sh
 
-This will generate HTML documentation in ``doc/build/html``.
+This will generate HTML documentation in ``./framework/doc/build/html``.
 
-Note that, in order to build the documentation locally (with ``poetry run make html``,
-like described below), `Pandoc <https://pandoc.org/installing.html>`_ needs to be
-installed on the system.
+Note that, in order to build the documentation locally, `Pandoc
+<https://pandoc.org/installing.html>`_ needs to be installed on the system.

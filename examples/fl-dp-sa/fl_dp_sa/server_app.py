@@ -45,7 +45,7 @@ app = ServerApp()
 
 
 @app.main()
-def main(driver: Driver, context: Context) -> None:
+def main(grid: Grid, context: Context) -> None:
 
     # Initialize global model
     model_weights = get_weights(Net())
@@ -67,7 +67,6 @@ def main(driver: Driver, context: Context) -> None:
 
     noise_multiplier = context.run_config["noise-multiplier"]
     clipping_norm = context.run_config["clipping-norm"]
-    num_sampled_clients = context.run_config["num-sampled-clients"]
 
     # strategy = DifferentialPrivacyClientSideFixedClipping(
     #     strategy,
@@ -93,4 +92,4 @@ def main(driver: Driver, context: Context) -> None:
     )
 
     # Execute
-    workflow(driver, context)
+    workflow(grid, context)
