@@ -26,9 +26,7 @@ def main(grid: Grid, context: Context) -> None:
     arrays = ArrayRecord(global_model.state_dict())
 
     # Initialize FedAvg strategy
-    strategy = FedAvg(
-        fraction_train=fraction_train,
-    )
+    strategy = FedAvg(fraction_train=fraction_train)
 
     # Start strategy, run FedAvg for `num_rounds`
     result = strategy.start(
@@ -44,7 +42,7 @@ def main(grid: Grid, context: Context) -> None:
     pprint(result.train_metrics)
     print("\nDistributed evaluate metrics:")
     pprint(result.evaluate_metrics)
-    print("\Global evaluate metrics:")
+    print("\nGlobal evaluate metrics:")
     pprint(result.global_evaluate_metrics)
 
     # Save final model to disk

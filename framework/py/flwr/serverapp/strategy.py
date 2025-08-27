@@ -17,6 +17,7 @@
 
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from logging import INFO
 from typing import Callable, Optional
 
@@ -58,7 +59,7 @@ class Strategy(ABC):
     def aggregate_train(
         self,
         server_round: int,
-        replies: list[Message],
+        replies: Iterable[Message],
     ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         """Aggregate training results from client nodes.
 
@@ -66,8 +67,8 @@ class Strategy(ABC):
         ----------
         server_round : int
             The current round of federated learning, starting from 1.
-        replies : list[Message]
-            List of reply messages received from client nodes after training.
+        replies : Iterable[Message]
+            Iterable of reply messages received from client nodes after training.
             Each message contains ArrayRecords and MetricRecords that get aggregated.
 
         Returns
@@ -106,7 +107,7 @@ class Strategy(ABC):
     def aggregate_evaluate(
         self,
         server_round: int,
-        replies: list[Message],
+        replies: Iterable[Message],
     ) -> Optional[MetricRecord]:
         """Aggregate evaluation metrics from client nodes.
 
@@ -114,8 +115,8 @@ class Strategy(ABC):
         ----------
         server_round : int
             The current round of federated learning.
-        replies : list[Message]
-            List of reply messages received from client nodes after evaluation.
+        replies : Iterable[Message]
+            Iterable of reply messages received from client nodes after evaluation.
             MetricRecords in the messages are aggregated.
 
         Returns
@@ -178,8 +179,8 @@ class Strategy(ABC):
         log_strategy_start_info(
             num_rounds, initial_arrays, train_config, evaluate_config
         )
-        summary = self.summary()
-        log(INFO, "%s\n", summary)
+        self.summary()
+        log(INFO, "")
 
         # Initialize if None
         train_config = ConfigRecord() if train_config is None else train_config
@@ -201,68 +202,57 @@ class Strategy(ABC):
             # -----------------------------------------------------------------
             # --- TRAINING ----------------------------------------------------
             # -----------------------------------------------------------------
-
             # Call strategy to configure training round
-            train_messages = self.configure_train(
-                current_round,
-                arrays,
-                train_config,
-                grid,
-            )
-
             # Send messages and wait for replies
             train_replies = grid.send_and_receive(
-                messages=train_messages,
+                messages=self.configure_train(
+                    current_round,
+                    arrays,
+                    train_config,
+                    grid,
+                ),
                 timeout=timeout,
             )
-            del train_messages
 
             # Aggregate train
             agg_arrays, agg_train_metrics = self.aggregate_train(
                 current_round,
-                list(train_replies),
+                train_replies,
             )
-            del train_replies
-            
-            # Log training metrics and append to history
-            if agg_arrays is None or agg_train_metrics is None:
-                break
-            log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_train_metrics)
-            result.train_metrics[current_round] = agg_train_metrics
-            result.arrays = agg_arrays
-            arrays = agg_arrays
 
+            # Log training metrics and append to history
+            if agg_arrays is not None:
+                result.arrays = agg_arrays
+                arrays = agg_arrays
+            if agg_train_metrics is not None:
+                log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_train_metrics)
+                result.train_metrics[current_round] = agg_train_metrics
             # -----------------------------------------------------------------
             # --- EVALUATION (LOCAL) ------------------------------------------
             # -----------------------------------------------------------------
 
             # Call strategy to configure evaluation round
-            evaluate_messages = self.configure_evaluate(
-                current_round,
-                arrays,
-                evaluate_config,
-                grid,
-            )
-
             # Send messages and wait for replies
             evaluate_replies = grid.send_and_receive(
-                messages=evaluate_messages,
+                messages=self.configure_evaluate(
+                    current_round,
+                    arrays,
+                    evaluate_config,
+                    grid,
+                ),
                 timeout=timeout,
             )
-            del evaluate_messages
 
             # Aggregate evaluate
             agg_evaluate_metrics = self.aggregate_evaluate(
                 current_round,
-                list(evaluate_replies),
+                evaluate_replies,
             )
-            del evaluate_replies
 
             # Log training metrics and append to history
-            if agg_evaluate_metrics is None:
-                break
-            log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_evaluate_metrics)
-            result.evaluate_metrics[current_round] = agg_evaluate_metrics
+            if agg_evaluate_metrics is not None:
+                log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_evaluate_metrics)
+                result.evaluate_metrics[current_round] = agg_evaluate_metrics
 
             # -----------------------------------------------------------------
             # --- EVALUATION (GLOBAL) -----------------------------------------
