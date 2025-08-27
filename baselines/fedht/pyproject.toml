@@ -17,8 +17,8 @@ flwr-datasets = { version = ">=0.3.0", extras = ["vision"] }
 scikit-learn = ">=1.1.1"
 matplotlib = ">=3.9.2"
 hydra-core = "1.3.2"
-torch = "2.0.1"
-torchvision = "0.15.2"
+torch = "2.0.1+cu117"
+torchvision = "0.15.2+cu117"
 numpy = ">=1.21.0,<2.0.0"
 
 [tool.poetry.group.dev.dependencies]
