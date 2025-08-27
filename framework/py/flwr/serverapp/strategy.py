@@ -272,8 +272,8 @@ class Strategy(ABC):
                     res = evaluate_fn(current_round, arrays)
                     log(INFO, "\t└──> MetricRecord: %s", res)
                     result.evaluate_metrics_serverapp[current_round] = res
-        except InconsistentMessageReplies as e:
-            log(INFO,"Terminating Strategy execution")
+        except InconsistentMessageReplies:
+            log(INFO, "Terminating Strategy execution")
             flwr_exit(ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET)
 
         log(INFO, "")
