@@ -1,21 +1,12 @@
 """Generate client for fedht baseline."""
-
-from collections import OrderedDict
-from typing import cast
-
 import torch
-import copy
-import numpy as np
+from collections import OrderedDict
 from flwr.client import Client, NumPyClient, ClientApp
 from flwr.common import Context
-from omegaconf import DictConfig
-from torch.utils.data import DataLoader
 
 from fedht.model import test, train
-from fedht.utils import MyDataset, load_data
+from fedht.utils import load_data
 from fedht.model import LogisticRegression
-from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import PathologicalPartitioner
 
 # MNIST client
 class MnistClient(NumPyClient):
@@ -67,7 +58,6 @@ class MnistClient(NumPyClient):
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.model.load_state_dict(state_dict, strict=True)
 
-        # need to change from log_loss to torch.loss and change other metrics
         loss, accuracy = test(self.model, self.trainloader, self.device)
 
         return loss, self.num_obs, {"accuracy": accuracy}

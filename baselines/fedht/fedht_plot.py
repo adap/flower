@@ -3,16 +3,18 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 import re
+import os
 
 def clean_results(results_pkl: str, metric: str):
-    with open(results_pkl, 'rb') as file:
+    os.makedirs("results", exist_ok=True)
+    with open(f"results/{results_pkl}", 'rb') as file:
         results = pickle.load(file)
 
     if metric == "accuracy":
-        first = getattr(results, "metrics_centralized")  
+        first = getattr(results["history"], "metrics_centralized")  
         getval = first["accuracy"]    
     else:
-        getval = getattr(results, metric)  
+        getval = getattr(results["history"], metric)  
     val_vec = [item for sublist in getval for item in sublist]
     val = np.array(val_vec)
     val.resize(int(val.shape[0]/2),2)
@@ -35,14 +37,15 @@ def plot_results(input, metric, labels: str, color: str = ['g','b','r','k','y','
     plt.show()
 
 def clean_crossval_results(results_pkl: str, metric: str):
-    with open(results_pkl, 'rb') as file:
+    os.makedirs("results", exist_ok=True)
+    with open(f"results/{results_pkl}", 'rb') as file:
         results = pickle.load(file)
 
     if metric == "accuracy":
-        first = getattr(results, "metrics_centralized")  
+        first = getattr(results["history"], "metrics_centralized")  
         getval = first["accuracy"]    
     else:
-        getval = getattr(results, metric)  
+        getval = getattr(results["history"], metric)  
     val_vec = [item for sublist in getval for item in sublist]
     val = np.array(val_vec)
     val.resize(int(val.shape[0]/2),2)
@@ -109,14 +112,14 @@ def plot_crossval_results(input, metric, labels: str, color: str = ['k','r','b',
     plt.grid(True)
     plt.show()
 
-input1 = ['mnist_fedavg_local1_lr1e-05_numkeep500.pkl',
-          'mnist_fedht_local1_lr1e-05_numkeep500.pkl',
-          'mnist_fedhtiter_local1_lr1e-05_numkeep500.pkl',
+input1 = ['mnist_fedavg_local1_lr1e-05_wd0.0_numkeep500_fold2025.pkl',
+          'mnist_fedht_local1_lr1e-05_wd0.0_numkeep500_fold2025.pkl',
+          'mnist_fedhtiter_local1_lr1e-05_wd0.0_numkeep500_fold2025.pkl',
          ]
 
-input2 = ['mnist_fedavg_local5_lr1e-05_numkeep500.pkl',
-          'mnist_fedht_local5_lr1e-05_numkeep500.pkl',
-          'mnist_fedhtiter_local5_lr1e-05_numkeep500.pkl',
+input2 = ['mnist_fedavg_local5_lr1e-05_wd0.0_numkeep500_fold2025.pkl',
+          'mnist_fedht_local5_lr1e-05_wd0.0_numkeep500_fold2025.pkl',
+          'mnist_fedhtiter_local5_lr1e-05_wd0.0_numkeep500_fold2025.pkl',
          ]
 
 plot_results(input1, 'losses_centralized', ['FedAvg (1 local epoch)','Fed-HT (1 local epoch)', 'FedIter-HT (1 local epoch)'])

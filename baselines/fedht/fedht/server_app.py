@@ -27,8 +27,8 @@ def server_fn(context: Context):
 
     Parameters
     ----------
-    cfg : DictConfig
-        Config file for federated baseline; read from fedht/conf.
+    context : Context
+        Config file for federated baseline.
     """
 
     # set device to cuda:0, if available
@@ -78,29 +78,6 @@ def server_fn(context: Context):
     else:
         raise ValueError("Must select either fedht or fedavg for the aggregation strategy in this baseline.")
 
-    if context.run_config["iterht"]:
-        iterstr = "iter"
-    else:
-        iterstr = ""
-
-    filename = (
-        context.run_config["data"]
-        + "_"
-        + context.run_config["agg"]
-        + iterstr
-        + "_local"
-        + str(context.run_config["num_local_epochs"])
-        + "_lr"
-        + str(context.run_config["learning_rate"])
-        + "_wd"
-        + str(context.run_config["weight_decay"])
-        + "_numkeep"
-        + str(context.run_config["num_keep"])
-        + "_fold"
-        + str(context.run_config["seed"])
-        + ".pkl"
-    )
-
     config = ServerConfig(num_rounds=context.run_config["num_rounds"])
     client_manager = SimpleClientManager()
     server = ResultsSaverServer(
@@ -111,7 +88,6 @@ def server_fn(context: Context):
     )
 
     return ServerAppComponents(server=server, config=config)
-
 
 # Create ServerApp
 app = ServerApp(server_fn=server_fn)

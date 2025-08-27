@@ -69,8 +69,32 @@ class ResultsSaverServer(Server):
 def save_results_and_clean_dir(history, context):
     """Save history and clean scaler dir."""
     results = {"history": history}
-    results_path = PROJECT_DIR / context.run_config["results_save_dir"] / context.run_config["agg"]
+    results_path = PROJECT_DIR / context.run_config["results_save_dir"] 
+
+    if context.run_config["iterht"]:
+        iterstr = "iter"
+    else:
+        iterstr = ""
+
+    filename = (
+        context.run_config["data"]
+        + "_"
+        + context.run_config["agg"]
+        + iterstr
+        + "_local"
+        + str(context.run_config["num_local_epochs"])
+        + "_lr"
+        + str(context.run_config["learning_rate"])
+        + "_wd"
+        + str(context.run_config["weight_decay"])
+        + "_numkeep"
+        + str(context.run_config["num_keep"])
+        + "_fold"
+        + str(context.run_config["seed"])
+        + ".pkl"
+    )
+
     results_path.mkdir(exist_ok=True, parents=True)
-    with open(results_path / "results.pickle", "wb") as file:
+    with open(results_path / filename, "wb") as file:
         pickle.dump(results, file)
     log(INFO, f"Results saved at {file}.")
