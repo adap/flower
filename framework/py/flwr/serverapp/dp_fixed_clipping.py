@@ -93,6 +93,7 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
             True if replies are valid for aggregation, False otherwise.
         """
         num_errors = 0
+        num_replies_with_content = 0
         for msg in replies:
             if msg.has_error():
                 log(
@@ -102,6 +103,8 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
                     msg.error,
                 )
                 num_errors += 1
+            else:
+                num_replies_with_content += 1
 
         # Errors are not allowed
         if num_errors:
@@ -114,15 +117,15 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
         log(
             INFO,
             "aggregate_train: Received %s results and %s failures",
-            len(replies) - num_errors,
+            num_replies_with_content,
             num_errors,
         )
 
-        if len(replies) != self.num_sampled_clients:
+        if num_replies_with_content != self.num_sampled_clients:
             log(
                 WARNING,
                 CLIENTS_DISCREPANCY_WARNING,
-                len(replies),
+                num_replies_with_content,
                 self.num_sampled_clients,
             )
 

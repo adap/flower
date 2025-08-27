@@ -25,6 +25,7 @@ from flwr.common.differential_privacy import compute_clip_model_update
 from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM
 
 
+# pylint: disable=too-many-return-statements
 def fixedclipping_mod(
     msg: Message, ctxt: Context, call_next: ClientAppCallable
 ) -> Message:
