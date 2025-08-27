@@ -18,7 +18,7 @@
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from logging import ERROR, INFO
+from logging import INFO
 from typing import Callable, Optional
 
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, log
@@ -224,7 +224,9 @@ class Strategy(ABC):
                     train_replies,
                 )
             except InconsistentMessageReplies as e:
-                flwr_exit(ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET, message=str(e))
+                flwr_exit(
+                    ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET, message=str(e)
+                )
 
             # Log training metrics and append to history
             if agg_arrays is not None:
@@ -257,7 +259,9 @@ class Strategy(ABC):
                     evaluate_replies,
                 )
             except InconsistentMessageReplies as e:
-                flwr_exit(ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET, message=str(e))
+                flwr_exit(
+                    ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET, message=str(e)
+                )
 
             # Log training metrics and append to history
             if agg_evaluate_metrics is not None:
