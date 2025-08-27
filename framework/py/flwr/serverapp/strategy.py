@@ -22,10 +22,11 @@ from logging import INFO
 from typing import Callable, Optional
 
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, log
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.server import Grid
 
 from .result import Result
-from .strategy_utils import log_strategy_start_info
+from .strategy_utils import InconsistentMessageReplies, log_strategy_start_info
 
 
 class Strategy(ABC):
@@ -195,6 +196,7 @@ class Strategy(ABC):
             result.evaluate_metrics_serverapp[0] = res
 
         arrays = initial_arrays
+
         for current_round in range(1, num_rounds + 1):
             log(INFO, "")
             log(INFO, "[ROUND %s/%s]", current_round, num_rounds)
@@ -216,10 +218,15 @@ class Strategy(ABC):
             )
 
             # Aggregate train
-            agg_arrays, agg_train_metrics = self.aggregate_train(
-                current_round,
-                train_replies,
-            )
+            try:
+                agg_arrays, agg_train_metrics = self.aggregate_train(
+                    current_round,
+                    train_replies,
+                )
+            except InconsistentMessageReplies as e:
+                flwr_exit(
+                    ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET, message=str(e)
+                )
 
             # Log training metrics and append to history
             if agg_arrays is not None:
@@ -246,10 +253,15 @@ class Strategy(ABC):
             )
 
             # Aggregate evaluate
-            agg_evaluate_metrics = self.aggregate_evaluate(
-                current_round,
-                evaluate_replies,
-            )
+            try:
+                agg_evaluate_metrics = self.aggregate_evaluate(
+                    current_round,
+                    evaluate_replies,
+                )
+            except InconsistentMessageReplies as e:
+                flwr_exit(
+                    ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET, message=str(e)
+                )
 
             # Log training metrics and append to history
             if agg_evaluate_metrics is not None:

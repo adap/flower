@@ -18,11 +18,13 @@
 from collections import OrderedDict
 
 import numpy as np
+import pytest
 from parameterized import parameterized
 
 from flwr.common import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 
 from .strategy_utils import (
+    InconsistentMessageReplies,
     aggregate_arrayrecords,
     aggregate_metricrecords,
     config_to_str,
@@ -179,19 +181,22 @@ def test_consistency_of_replies_with_matching_keys(
     # Create dummy records
     records = [recorddict for _ in range(3)]
 
-    # Check consistency
-    assert (
+    if not is_valid:
+        # Should raise InconsistentMessageReplies exception
+        with pytest.raises(InconsistentMessageReplies):
+            validate_message_reply_consistency(
+                records, weighted_by_key="weight", check_arrayrecord=True
+            )
+    else:
+        # Should not raise an exception
         validate_message_reply_consistency(
             records, weighted_by_key="weight", check_arrayrecord=True
         )
-        == is_valid
-    )
 
 
 @parameterized.expand(  # type: ignore
     [
         (
-            False,
             [
                 RecordDict(
                     {
@@ -208,7 +213,6 @@ def test_consistency_of_replies_with_matching_keys(
             ],
         ),  # top-level keys don't match for ArrayRecords
         (
-            False,
             [
                 RecordDict(
                     {
@@ -229,7 +233,6 @@ def test_consistency_of_replies_with_matching_keys(
             ],
         ),  # top-level keys match for ArrayRecords but not those for Arrays
         (
-            False,
             [
                 RecordDict(
                     {
@@ -246,7 +249,6 @@ def test_consistency_of_replies_with_matching_keys(
             ],
         ),  # top-level keys don't match for MetricRecords
         (
-            False,
             [
                 RecordDict(
                     {
@@ -265,13 +267,11 @@ def test_consistency_of_replies_with_matching_keys(
     ]
 )
 def test_consistency_of_replies_with_different_keys(
-    is_valid: bool, list_records: list[RecordDict]
+    list_records: list[RecordDict],
 ) -> None:
     """Test consistency in replies when records don't have matching keys."""
-    # Check consistency
-    assert (
+    # All test cases expect InconsistentMessageReplies exception to be raised
+    with pytest.raises(InconsistentMessageReplies):
         validate_message_reply_consistency(
             list_records, weighted_by_key="weight", check_arrayrecord=True
         )
-        == is_valid
-    )
