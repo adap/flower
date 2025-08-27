@@ -196,85 +196,86 @@ class Strategy(ABC):
             result.evaluate_metrics_serverapp[0] = res
 
         arrays = initial_arrays
-        try:
-            for current_round in range(1, num_rounds + 1):
-                log(INFO, "")
-                log(INFO, "[ROUND %s/%s]", current_round, num_rounds)
 
-                # -----------------------------------------------------------------
-                # --- TRAINING ----------------------------------------------------
-                # -----------------------------------------------------------------
+        for current_round in range(1, num_rounds + 1):
+            log(INFO, "")
+            log(INFO, "[ROUND %s/%s]", current_round, num_rounds)
 
-                # Call strategy to configure training round
-                # Send messages and wait for replies
-                train_replies = grid.send_and_receive(
-                    messages=self.configure_train(
-                        current_round,
-                        arrays,
-                        train_config,
-                        grid,
-                    ),
-                    timeout=timeout,
-                )
+            # -----------------------------------------------------------------
+            # --- TRAINING ----------------------------------------------------
+            # -----------------------------------------------------------------
 
-                # Aggregate train
+            # Call strategy to configure training round
+            # Send messages and wait for replies
+            train_replies = grid.send_and_receive(
+                messages=self.configure_train(
+                    current_round,
+                    arrays,
+                    train_config,
+                    grid,
+                ),
+                timeout=timeout,
+            )
+
+            # Aggregate train
+            try:
                 agg_arrays, agg_train_metrics = self.aggregate_train(
                     current_round,
                     train_replies,
                 )
+            except InconsistentMessageReplies:
+                log(INFO, "Terminating Strategy execution")
+                flwr_exit(ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET)
 
-                # Log training metrics and append to history
-                if agg_arrays is not None:
-                    result.arrays = agg_arrays
-                    arrays = agg_arrays
-                if agg_train_metrics is not None:
-                    log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_train_metrics)
-                    result.train_metrics_clientapp[current_round] = agg_train_metrics
+            # Log training metrics and append to history
+            if agg_arrays is not None:
+                result.arrays = agg_arrays
+                arrays = agg_arrays
+            if agg_train_metrics is not None:
+                log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_train_metrics)
+                result.train_metrics_clientapp[current_round] = agg_train_metrics
 
-                # -----------------------------------------------------------------
-                # --- EVALUATION (LOCAL) ------------------------------------------
-                # -----------------------------------------------------------------
+            # -----------------------------------------------------------------
+            # --- EVALUATION (LOCAL) ------------------------------------------
+            # -----------------------------------------------------------------
 
-                # Call strategy to configure evaluation round
-                # Send messages and wait for replies
-                evaluate_replies = grid.send_and_receive(
-                    messages=self.configure_evaluate(
-                        current_round,
-                        arrays,
-                        evaluate_config,
-                        grid,
-                    ),
-                    timeout=timeout,
-                )
+            # Call strategy to configure evaluation round
+            # Send messages and wait for replies
+            evaluate_replies = grid.send_and_receive(
+                messages=self.configure_evaluate(
+                    current_round,
+                    arrays,
+                    evaluate_config,
+                    grid,
+                ),
+                timeout=timeout,
+            )
 
-                # Aggregate evaluate
+            # Aggregate evaluate
+            try:
                 agg_evaluate_metrics = self.aggregate_evaluate(
                     current_round,
                     evaluate_replies,
                 )
+            except InconsistentMessageReplies:
+                log(INFO, "Terminating Strategy execution")
+                flwr_exit(ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET)
 
-                # Log training metrics and append to history
-                if agg_evaluate_metrics is not None:
-                    log(
-                        INFO, "\t└──> Aggregated MetricRecord: %s", agg_evaluate_metrics
-                    )
-                    result.evaluate_metrics_clientapp[current_round] = (
-                        agg_evaluate_metrics
-                    )
+            # Log training metrics and append to history
+            if agg_evaluate_metrics is not None:
+                log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_evaluate_metrics)
+                result.evaluate_metrics_clientapp[current_round] = agg_evaluate_metrics
 
-                # -----------------------------------------------------------------
-                # --- EVALUATION (GLOBAL) -----------------------------------------
-                # -----------------------------------------------------------------
+            # -----------------------------------------------------------------
+            # --- EVALUATION (GLOBAL) -----------------------------------------
+            # -----------------------------------------------------------------
 
-                # Centralized evaluation
-                if evaluate_fn:
-                    log(INFO, "Global evaluation")
-                    res = evaluate_fn(current_round, arrays)
-                    log(INFO, "\t└──> MetricRecord: %s", res)
-                    result.evaluate_metrics_serverapp[current_round] = res
-        except InconsistentMessageReplies:
-            log(INFO, "Terminating Strategy execution")
-            flwr_exit(ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET)
+            # Centralized evaluation
+            if evaluate_fn:
+                log(INFO, "Global evaluation")
+                res = evaluate_fn(current_round, arrays)
+                log(INFO, "\t└──> MetricRecord: %s", res)
+                result.evaluate_metrics_serverapp[current_round] = res
 
         log(INFO, "")
         log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)
