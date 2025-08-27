@@ -15,6 +15,7 @@
 """Flower message-based FedAvg strategy."""
 
 
+from collections.abc import Iterable
 from logging import INFO
 from typing import Callable, Optional
 
@@ -133,7 +134,7 @@ class FedAvg(Strategy):
 
     def _construct_messages(
         self, record: RecordDict, node_ids: list[int], message_type: str
-    ) -> list[Message]:
+    ) -> Iterable[Message]:
         """Construct N Messages carrying the same RecordDict payload."""
         messages = []
         for node_id in node_ids:  # one message for each node
@@ -147,7 +148,7 @@ class FedAvg(Strategy):
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-    ) -> list[Message]:
+    ) -> Iterable[Message]:
         """Configure the next round of federated training."""
         # Sample nodes
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_train)
@@ -171,11 +172,16 @@ class FedAvg(Strategy):
     def aggregate_train(
         self,
         server_round: int,
-        replies: list[Message],
+        replies: Iterable[Message],
     ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
+        if not replies:
+            return None, None
+
         # Log if any Messages carried errors
+        # Filter messages that carry content
         num_errors = 0
+        replies_with_content = []
         for msg in replies:
             if msg.has_error():
                 log(
@@ -185,24 +191,22 @@ class FedAvg(Strategy):
                     msg.error,
                 )
                 num_errors += 1
+            else:
+                replies_with_content.append(msg.content)
 
         log(
             INFO,
             "aggregate_train: Received %s results and %s failures",
-            len(replies) - num_errors,
+            len(replies_with_content) - num_errors,
             num_errors,
         )
 
-        # Filter messages that carry content
-        replies_with_content = [msg.content for msg in replies if msg.has_content()]
-
         # Ensure expected ArrayRecords and MetricRecords are received
-        if not validate_message_reply_consistency(
+        validate_message_reply_consistency(
             replies=replies_with_content,
             weighted_by_key=self.weighted_by_key,
             check_arrayrecord=True,
-        ):
-            return None, None
+        )
 
         # Aggregate ArrayRecords
         arrays = aggregate_arrayrecords(
@@ -219,7 +223,7 @@ class FedAvg(Strategy):
 
     def configure_evaluate(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-    ) -> list[Message]:
+    ) -> Iterable[Message]:
         """Configure the next round of federated evaluation."""
         # Sample nodes
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_evaluate)
@@ -244,11 +248,16 @@ class FedAvg(Strategy):
     def aggregate_evaluate(
         self,
         server_round: int,
-        replies: list[Message],
+        replies: Iterable[Message],
     ) -> Optional[MetricRecord]:
         """Aggregate MetricRecords in the received Messages."""
+        if not replies:
+            return None
+
         # Log if any Messages carried errors
+        # Filter messages that carry content
         num_errors = 0
+        replies_with_content = []
         for msg in replies:
             if msg.has_error():
                 log(
@@ -258,24 +267,22 @@ class FedAvg(Strategy):
                     msg.error,
                 )
                 num_errors += 1
+            else:
+                replies_with_content.append(msg.content)
 
         log(
             INFO,
             "aggregate_evaluate: Received %s results and %s failures",
-            len(replies) - num_errors,
+            len(replies_with_content) - num_errors,
             num_errors,
         )
 
-        # Filter messages that carry content
-        replies_with_content = [msg.content for msg in replies if msg.has_content()]
-
         # Ensure expected ArrayRecords and MetricRecords are received
-        if not validate_message_reply_consistency(
+        validate_message_reply_consistency(
             replies=replies_with_content,
             weighted_by_key=self.weighted_by_key,
             check_arrayrecord=False,
-        ):
-            return None
+        )
 
         # Aggregate MetricRecords
         metrics = self.evaluate_metrics_aggr_fn(

@@ -26,9 +26,7 @@ def main(grid: Grid, context: Context) -> None:
     arrays = ArrayRecord(global_model.state_dict())
 
     # Initialize FedAvg strategy
-    strategy = FedAvg(
-        fraction_train=fraction_train,
-    )
+    strategy = FedAvg(fraction_train=fraction_train)
 
     # Start strategy, run FedAvg for `num_rounds`
     result = strategy.start(
@@ -36,16 +34,16 @@ def main(grid: Grid, context: Context) -> None:
         initial_arrays=arrays,
         train_config=ConfigRecord({"lr": 0.01}),
         num_rounds=num_rounds,
-        central_eval_fn=central_evaluation,
+        evaluate_fn=global_evaluate,
     )
 
     # Log resulting metrics
-    print("\nTrain metrics:")
-    pprint(result.train_metrics)
+    print("\nDistributed train metrics:")
+    pprint(result.train_metrics_clientapp)
     print("\nDistributed evaluate metrics:")
-    pprint(result.evaluate_metrics)
-    print("\nCentral evaluate metrics:")
-    pprint(result.central_evaluate_metrics)
+    pprint(result.evaluate_metrics_clientapp)
+    print("\nGlobal evaluate metrics:")
+    pprint(result.evaluate_metrics_serverapp)
 
     # Save final model to disk
     print("\nSaving final model to disk...")
@@ -53,7 +51,7 @@ def main(grid: Grid, context: Context) -> None:
     torch.save(state_dict, "final_model.pt")
 
 
-def central_evaluation(server_round: int, arrays: ArrayRecord) -> MetricRecord:
+def global_evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
     """Evaluate model on central data."""
 
     # Load the model and initialize it with the received weights

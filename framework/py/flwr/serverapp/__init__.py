@@ -14,17 +14,11 @@
 # ==============================================================================
 """Public Flower ServerApp APIs."""
 
-from .dp_fixed_clipping import (
-    DifferentialPrivacyClientSideFixedClipping,
-    DifferentialPrivacyServerSideFixedClipping,
-)
 from .fedavg import FedAvg
 from .result import Result
 from .strategy import Strategy
 
 __all__ = [
-    "DifferentialPrivacyClientSideFixedClipping",
-    "DifferentialPrivacyServerSideFixedClipping",
     "FedAvg",
     "Result",
     "Strategy",
