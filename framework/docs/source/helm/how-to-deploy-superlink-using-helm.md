@@ -362,19 +362,131 @@ serverapp:
   enabled: true
 ```
 
+## Deploy Flower Framework without TLS
+
+By default, the Flower Framework is deployed without TLS. This means `global.insecure` is
+set to `true`.
+
+In this mode, the chart does not create any `cert-manager` `Issuer` or `Certificate` resources,
+and any TLS-related configuration on the `Ingress` resource is ignored.
+
+```yaml
+global:
+  insecure: true
+```
+
 ## Deploy Flower Framework with TLS
 
-To ensure TLS communication within the Flower Framework, you need to configure your deployment
-with proper TLS certificates.
+If `cert-manager` is installed in your Kubernetes cluster, this chart can be used to set up TLS in
+several ways. By default, it creates both a self-signed `Issuer` and a `Certificate`, but you can
+also choose to create only an `Issuer` or create a `Certificate` from an existing
+`Issuer`/`ClusterIssuer`.
+
+Regardless of the option you choose, TLS is only enabled when you set `global.insecure: false`.
+
+### Default Behavior (self-signed Issuer + Certificate)
 
 ```yaml
 global:
   insecure: false
-superlink:
-  enabled: true
+  domain: example.com
+
+tls:
+  issuer:
+    enabled: true
+  certificate:
+    enabled: true
 ```
 
-### Override certificate paths
+When deployed with these values, the chart creates a self-signed `Issuer` and then uses it to
+issue a TLS certificate. The generated `Certificate` is valid for five years,
+is renewed fifteen days before expiry, and is stored in a Kubernetes `Secret`.
+
+If you leave `secretName` empty, the secret name defaults to `<chart-name>-server-tls`.
+The certificate includes `global.domain` as its common name, along with service DNS entries and
+any `additionalHosts` you provide.
+
+This setup is best suited for testing and validating the Helm charts in a non-production
+environment.
+
+You can switch from self-signed to another issuer type by providing a `spec` block
+for the `Issuer`.
+
+### Create a Certificate using an Existing Issuer / ClusterIssuer
+
+Use this if you already have an `Issuer` or `ClusterIssuer` (e.g., Let’s Encrypt or a corporate CA)
+and you want the chart to create the `Certificate`.
+
+```yaml
+global:
+  insecure: false
+  domain: example.com
+
+tls:
+  issuer:
+    enabled: false
+  certificate:
+    enabled: true
+    existingIssuer: letsencrypt-clusterissuer
+    existingIssuerKind: ClusterIssuer
+```
+
+With this configuration, the chart does not create a new `Issuer`. Instead, it references the
+specified `ClusterIssuer` named `letsencrypt-clusterissuer` and requests a `Certificate` from it.
+It is stored in a Kubernetes `Secret` that, by default, is named `<chart-name>-server-tls`.
+
+To change the secret name, set `tls.certificate.secretName` to the desired name:
+
+```yaml
+tls:
+  certificate:
+    secretName: my-custom-tls-secret-name
+```
+
+### Create only an Issuer
+
+In this mode, the chart creates an `Issuer` but does not create a `Certificate`.
+This is useful if you want `cert-manager` to automatically generate certificates
+based on `Ingress` annotations.
+
+```yaml
+global:
+  insecure: false
+
+tls:
+  issuer:
+    enabled: true
+  certificate:
+    enabled: false
+  existingSecret: ""
+```
+
+See the [Ingress Configuration](###generate-a-certificate-via-ingress-annotations) section for more information.
+
+## Use an Existing TLS Certificate
+
+If you already have a TLS certificate available as a Kubernetes `Secret`, you can configure the
+chart to use it directly instead of creating a new `Certificate` with `cert-manager`. To do this,
+disable certificate creation and set `tls.existingSecret` to the name of your `Secret`.
+
+The `Secret` must be of type `kubernetes.io/tls` and contain the standard `tls.crt`, `tls.key`
+fields, with `ca.crt` being optional. If `ca.crt` is not provided, `tls.crt` will also be used
+as the CA certificate.
+
+If both `tls.existingSecret` and `tls.certificate.enabled` are set, the `tls.existingSecret` value
+will be ignored and a new `Certificate` will be issued.
+
+```yaml
+global:
+  insecure: false
+
+tls:
+  certificate:
+    enabled: false
+  existingSecret: my-custom-tls-secret
+```
+
+## Override Certificate Paths
 
 By default, the TLS-related flags use the following paths when TLS is enabled:
 
@@ -382,7 +494,7 @@ By default, the TLS-related flags use the following paths when TLS is enabled:
 `--ssl-certfile`: `/app/cert/tls.crt`,
 `--ssl-keyfile`: `/app/cert/tls.key`.
 
-These paths can be overridden by specifying the flags in the extraArgs, as shown below.
+These paths can be overridden by specifying the flags in the `extraArgs`, as shown below:
 
 ```yaml
 global:
@@ -398,86 +510,101 @@ superlink:
     - /mount/cert/tls.key
 ```
 
-## Deploy Flower Framework without TLS
+## Ingress Configuration
 
-To deploy the Flower Framework simply, you need to configure your deployment as insecure.
+### Generate a Certificate via Ingress Annotations
+
+If you prefer to let `cert-manager` generate a `Certificate` through `Ingress` annotations,
+you can disable the chart’s built-in certificate management.
+To do this, set `tls.certificate.enabled` to `false` and leave `tls.existingSecret` empty.
+Also ensure `global.insecure` is set to `false`.
+
+The annotations you specify under `superlink.ingress.annotations` will be passed directly to the
+`Ingress` resource. For supported annotation keys, refer to the `cert-manager`
+[documentation](https://cert-manager.io/docs/usage/ingress/).
 
 ```yaml
 global:
-  insecure: true
+  insecure: false
+
+tls:
+  certificate:
+    enabled: false
+  existingSecret: ""
+
 superlink:
-  enabled: true
-```
-
-## Pre-provide TLS Certificate
-
-If certificate creation is disabled, you must provide a pre-existing secret of type
-`kubernetes.io/tls` named `<flower-server.fullname>-server-tls`.
-
-```yaml
-certificate:
-  enabled: false
-```
-
-## Ingress Configuration
-
-### SSL-Passthrough
-
-When the `tls` option is set to `true`, it expects the existence of the
-`<flower-server.fullname>-server-tls` secret. Flower Framework components will load TLS
-certificates on startup.
-
-```yaml
-superlink:
-  enabled: true
-  ingress:
+ ingress:
+    enabled: true
     annotations:
       nginx.ingress.kubernetes.io/backend-protocol: GRPCS
       nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
       nginx.ingress.kubernetes.io/ssl-passthrough: "false"
       nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    ingressClassName: nginx
-    tls: true
+      cert-manager.io/cluster-issuer: cert-manager-selfsigned
+      cert-manager.io/common-name: api.example.com
     api:
       enabled: true
-      hostname: exec-api.example.com
-      path: /
-      pathType: ImplementationSpecific
-    fleet:
+      hostname: api.example.com
+    tls:
       enabled: true
-      hostname: fleet.example.com
-      path: /
-      pathType: ImplementationSpecific
-    driver:
-      enabled: true
-      hostname: driver.example.com
-      annotations:
-        nginx.ingress.kubernetes.io/backend-protocol: GRPCS
-        nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-        nginx.ingress.kubernetes.io/ssl-passthrough: "false"
-        nginx.ingress.kubernetes.io/ssl-redirect: "false"
-      path: /
-      pathType: ImplementationSpecific
 ```
 
-**Pre-Provide TLS Certificate with Additional Hosts**
+The chart creates an `Ingress` for SuperLink with the provided annotations. `cert-manager`
+generates a `Certificate`, and stores it in a Kubernetes `Secret`. That `Secret` is then mounted
+into the SuperLink container so it can use the TLS keypair for its endpoints. The same `Secret`
+is also referenced by the `Ingress` resource, which means the generated certificate is
+shared between the `Ingress` and the SuperLink service.
 
-In this example, we use `cert-manager` to create a certificate. By default, the certificate will
-only include the DNS name specified in `common-name`.
+By default, the Ingress-generated certificate is stored in a `Secret` named
+`<chart-name>-server-tls`.
 
-In some cases, the server and client charts are deployed in the same cluster, while the exec
-API is accessible via the internet.
-
-To allow SuperNodes to connect to the SuperLink via the internal service URL,
-you need to add an additional host, as shown below:
+You can override this by setting `superlink.ingress.tls.secretName`:
 
 ```yaml
-certificate:
-  enabled: false
 superlink:
  ingress:
     enabled: true
-    tls: true
+    tls:
+      enabled: true
+      secretName: my-custom-tls-secret
+```
+
+**Important:**
+
+- If `tls.certificate.enabled` is set to `true` or if `tls.existingSecret` is specified, the
+  `secretName` of the `Ingress` resource is ignored. In that case, the chart will rely on the
+  `Certificate` created through its own mechanism.
+- Always ensure that when you use `Ingress` annotations, no certificate is generated or referenced
+  by this chart. Otherwise, you may end up with conflicting secrets.
+
+### TLS Certificate with Additional Hosts
+
+By default, when `cert-manager` issues a `Certificate` it only includes the DNS name specified in
+`commonName`, which is derived from `global.domain`.
+
+In some deployments, the server and client charts may run inside the same Kubernetes cluster,
+while the Exec API is exposed publicly over the internet. In this scenario, the SuperNodes
+need to connect to the SuperLink using its internal service URL
+(e.g., `<superlink>.<namespace>.svc.cluster.local`).
+
+To support this, you can extend the certificate with additional hosts by using
+`superlink.ingress.extraHosts`.
+
+The example below shows how to configure the `Ingress` so that the generated `Certificate` covers
+both the external hostname and the internal service name:
+
+```yaml
+global:
+  insecure: false
+
+tls:
+  certificate:
+    enabled: false
+  existingSecret: ""
+
+superlink:
+ ingress:
+    enabled: true
     annotations:
       nginx.ingress.kubernetes.io/backend-protocol: GRPCS
       nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
@@ -493,6 +620,55 @@ superlink:
         pathType: ImplementationSpecific
         path: /
         port: 9092
+    tls:
+      enabled: true
+```
+
+### SSL-Passthrough
+
+In some scenarios, you may want to let the SuperLink service terminate TLS directly rather than
+having the Ingress controller handle TLS termination. This is useful if you need to use protocols
+such as gRPC over TLS end-to-end, where the Ingress should simply forward the encrypted traffic
+without decrypting it.
+
+To enable this mode with the NGINX Ingress Controller, you can configure SSL passthrough by setting
+the `nginx.ingress.kubernetes.io/ssl-passthrough` annotation to `"true"`. In this configuration,
+the Ingress forwards TLS traffic directly to the SuperLink container,
+which then handles certificate validation and encryption.
+
+```yaml
+global:
+  insecure: false
+
+tls:
+  certificate:
+    enabled: true
+
+superlink:
+  enabled: true
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: GRPCS
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    ingressClassName: nginx
+    tls: false
+    api:
+      enabled: true
+      hostname: exec-api.example.com
+      path: /
+      pathType: ImplementationSpecific
+    fleet:
+      enabled: true
+      hostname: fleet.example.com
+      path: /
+      pathType: ImplementationSpecific
+    driver:
+      enabled: true
+      hostname: driver.example.com
+      path: /
+      pathType: ImplementationSpecific
 ```
 
 ## Enable Node Authentication
@@ -548,7 +724,6 @@ global:
 | `global.affinity.podAntiAffinity`                    | Default pod anti-affinity rules. Either: `none`, `soft` or `hard` | `soft`             |
 | `global.affinity.nodeAffinity.type`                  | Default node affinity rules. Either: `none`, `soft` or `hard`     | `hard`             |
 | `global.affinity.nodeAffinity.matchExpressions`      | Default match expressions for node affinity                       | `[]`               |
-| `global.certificateAnnotations`                      | Default Cert-Manager certificate annotations                      | `{}`               |
 | `global.nodeAuth.enabled`                            | Enables or Disables Node-Authentication SuperLink \<-> SuperNode  | `false`            |
 | `global.nodeAuth.authListPublicKeys`                 | A list of ecdsa-sha2-nistp384 SuperNode keys                      | `[]`               |
 | `global.userAuth.enabled`                            | Enables or disables the user authentication plugin.               | `false`            |
@@ -569,22 +744,25 @@ global:
 | `global.env`                                         | Default environment variables                                     | `[]`               |
 | `global.image.pullPolicy`                            | Default image pullPolicy                                          | `IfNotPresent`     |
 
-### Flower-TLS-Certificate parameters
+### TLS Configuration
 
-| Name                          | Description                                                                                                              | Value               |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| `certificate.enabled`         | Can be disabled if a Secret already exists                                                                               | `true`              |
-| `certificate.annotations`     | Certificate CRD annotations                                                                                              | `{}`                |
-| `certificate.name`            | Certificate name                                                                                                         | `flower-server-tls` |
-| `certificate.duration`        | The requested ‘duration’ (i.e. lifetime) of the Certificate. Default is 5 years.                                         | `43800h`            |
-| `certificate.renewBefore`     | How long before the currently issued certificate’s expiry cert-manager should renew the certificate. Default is 15 days. | `360h`              |
-| `certificate.privateKey`      | Private key options. These include the key algorithm and size, the used encoding and the rotation policy.                | `{}`                |
-| `certificate.usages`          | Requested key usages and extended key usages.                                                                            | `[]`                |
-| `certificate.additionalHosts` | Additional hosts you want to put into the SAN's of the certificate                                                       | `[]`                |
-| `certificate.issuer.group`    | Defaults to cert-Manager.io                                                                                              | `cert-manager.io`   |
-| `certificate.issuer.kind`     | Defaults to Issuer                                                                                                       | `Issuer`            |
-| `certificate.issuer.name`     | Name of the Issuer or Issuer to use                                                                                      | `""`                |
-| `certificate.issuer.spec`     | The contents of the `.spec` block for the cert-manager Issuer.                                                           | `{}`                |
+| Name                                 | Description                                                         | Value             |
+| ------------------------------------ | ------------------------------------------------------------------- | ----------------- |
+| `tls.issuer.enabled`                 | Enable automatic creation of a cert-manager Issuer.                 | `true`            |
+| `tls.issuer.name`                    | Name of the Issuer resource to use.                                 | `""`              |
+| `tls.issuer.spec`                    | The contents of the `.spec` block for the cert-manager Issuer.      | `{}`              |
+| `tls.certificate.enabled`            | Enable automatic creation of a cert-manager Certificate.            | `true`            |
+| `tls.certificate.annotations`        | Certificate CRD annotations.                                        | `{}`              |
+| `tls.certificate.secretName`         | Name of the Kubernetes Secret to store the TLS key and certificate. | `""`              |
+| `tls.certificate.issuerGroup`        | API group for the issuer. Defaults to `cert-manager.io`.            | `cert-manager.io` |
+| `tls.certificate.existingIssuer`     | Name of an existing Issuer or ClusterIssuer to use.                 | `""`              |
+| `tls.certificate.existingIssuerKind` | Kind of the existing issuer (`Issuer` or `ClusterIssuer`).          | `""`              |
+| `tls.certificate.duration`           | The requested ‘duration’ (i.e. lifetime) of the Certificate.        | `43800h`          |
+| `tls.certificate.renewBefore`        | How long before the currently issued certificate’s expiry           | `360h`            |
+| `tls.certificate.privateKey`         | Private key options. These include the key algorithm and            | `{}`              |
+| `tls.certificate.usages`             | Requested key usages and extended key usages.                       | `[]`              |
+| `tls.certificate.additionalHosts`    | Additional hosts you want to put into the SAN's                     | `[]`              |
+| `tls.existingSecret`                 | Name of an existing Kubernetes Secret                               | `""`              |
 
 ### Component SuperLink
 
@@ -613,7 +791,7 @@ global:
 | `superlink.service.servicePortFleetName`                       | Prefix of the SuperLink Fleet API port                                                                                  | `fleet`                              |
 | `superlink.service.servicePortFleet`                           | Port to expose for the SuperLink Fleet API                                                                              | `9092`                               |
 | `superlink.service.nodePortFleet`                              | Node port for SuperLink Fleet API                                                                                       | `""`                                 |
-| `superlink.service.servicePortSimulationIoName`                | Prefix of the SuperLink SimulationIo API port                                                                           | `simulationIo`                       |
+| `superlink.service.servicePortSimulationIoName`                | Prefix of the SuperLink SimulationIo API port                                                                           | `simulationio`                       |
 | `superlink.service.servicePortSimulationIo`                    | Port to expose for the SuperLink SimulationIo API                                                                       | `9096`                               |
 | `superlink.service.nodePortSimulationIo`                       | Node port for SuperLink SimulationIo API                                                                                | `""`                                 |
 | `superlink.containerPorts.api`                                 | Container port for SuperLink Exec API                                                                                   | `9093`                               |
@@ -634,7 +812,8 @@ global:
 | `superlink.ingress.enabled`                                    | Enable the ingress resource                                                                                             | `false`                              |
 | `superlink.ingress.annotations`                                | Additional annotations for the ingress                                                                                  | `{}`                                 |
 | `superlink.ingress.ingressClassName`                           | Defines which ingress controller which implement the resource                                                           | `""`                                 |
-| `superlink.ingress.tls`                                        | Ingress TLS configuration                                                                                               | `false`                              |
+| `superlink.ingress.tls.enabled`                                | Enable TLS termination at the Ingress level.                                                                            | `false`                              |
+| `superlink.ingress.tls.secretName`                             | Name of the Kubernetes Secret that will contain the                                                                     | `""`                                 |
 | `superlink.ingress.api.enabled`                                | Enable an ingress resource for SuperLink API                                                                            | `false`                              |
 | `superlink.ingress.api.hostname`                               | Ingress hostname for the SuperLink API ingress                                                                          | `exec-api.example.com`               |
 | `superlink.ingress.api.path`                                   | SuperLink API ingress path                                                                                              | `/`                                  |
