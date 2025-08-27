@@ -197,7 +197,7 @@ class FedAvg(Strategy):
         log(
             INFO,
             "aggregate_train: Received %s results and %s failures",
-            len(replies_with_content) - num_errors,
+            len(replies_with_content),
             num_errors,
         )
 
@@ -208,17 +208,18 @@ class FedAvg(Strategy):
             check_arrayrecord=True,
         )
 
-        # Aggregate ArrayRecords
-        arrays = aggregate_arrayrecords(
-            replies_with_content,
-            self.weighted_by_key,
-        )
+        if replies_with_content:
+            # Aggregate ArrayRecords
+            arrays = aggregate_arrayrecords(
+                replies_with_content,
+                self.weighted_by_key,
+            )
 
-        # Aggregate MetricRecords
-        metrics = self.train_metrics_aggr_fn(
-            replies_with_content,
-            self.weighted_by_key,
-        )
+            # Aggregate MetricRecords
+            metrics = self.train_metrics_aggr_fn(
+                replies_with_content,
+                self.weighted_by_key,
+            )
         return arrays, metrics
 
     def configure_evaluate(
@@ -273,7 +274,7 @@ class FedAvg(Strategy):
         log(
             INFO,
             "aggregate_evaluate: Received %s results and %s failures",
-            len(replies_with_content) - num_errors,
+            len(replies_with_content),
             num_errors,
         )
 
@@ -283,10 +284,10 @@ class FedAvg(Strategy):
             weighted_by_key=self.weighted_by_key,
             check_arrayrecord=False,
         )
-
-        # Aggregate MetricRecords
-        metrics = self.evaluate_metrics_aggr_fn(
-            replies_with_content,
-            self.weighted_by_key,
-        )
+        if replies_with_content:
+            # Aggregate MetricRecords
+            metrics = self.evaluate_metrics_aggr_fn(
+                replies_with_content,
+                self.weighted_by_key,
+            )
         return metrics
