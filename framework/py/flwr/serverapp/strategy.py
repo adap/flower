@@ -202,6 +202,7 @@ class Strategy(ABC):
             # -----------------------------------------------------------------
             # --- TRAINING ----------------------------------------------------
             # -----------------------------------------------------------------
+
             # Call strategy to configure training round
             # Send messages and wait for replies
             train_replies = grid.send_and_receive(
@@ -227,6 +228,7 @@ class Strategy(ABC):
             if agg_train_metrics is not None:
                 log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_train_metrics)
                 result.train_metrics[current_round] = agg_train_metrics
+
             # -----------------------------------------------------------------
             # --- EVALUATION (LOCAL) ------------------------------------------
             # -----------------------------------------------------------------
