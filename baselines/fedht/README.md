@@ -54,9 +54,9 @@ A federated logistic regression classification model is implemented using the we
 | `num_clients`         | `10`                                |
 | `num_rounds`          | `100`                               |
 | `batch_size`          | `50`                                |
-| `num_local_epochs`    | `10`                                |
+| `num_local_epochs`    | `5`                                 |
 | `num_keep`            | `500`                               |
-| `learning_rate`       | `0.0005`                            |
+| `learning_rate`       | `0.00001`                           |
 | `weight_decay`        | `0.000`                             |
 | `client resources`    | `{'num_cpus': 10, 'num_gpus':0}`    |
 | `iterht`              | `false`                             |
