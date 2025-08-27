@@ -17,9 +17,9 @@
 Papers: https://arxiv.org/abs/1712.07557, https://arxiv.org/abs/1710.06963
 """
 
-
 from abc import ABC
 from collections import OrderedDict
+from collections.abc import Iterable
 from logging import INFO, WARNING
 from typing import Optional
 
@@ -84,7 +84,7 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
         self.clipping_norm = clipping_norm
         self.num_sampled_clients = num_sampled_clients
 
-    def _validate_replies(self, replies: list[Message]) -> bool:
+    def _validate_replies(self, replies: Iterable[Message]) -> bool:
         """Validate replies and log errors/warnings.
 
         Returns
@@ -166,14 +166,14 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
 
     def configure_evaluate(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-    ) -> list[Message]:
+    ) -> Iterable[Message]:
         """Configure the next round of federated evaluation."""
         return self.strategy.configure_evaluate(server_round, arrays, config, grid)
 
     def aggregate_evaluate(
         self,
         server_round: int,
-        replies: list[Message],
+        replies: Iterable[Message],
     ) -> Optional[MetricRecord]:
         """Aggregate MetricRecords in the received Messages."""
         return self.strategy.aggregate_evaluate(server_round, replies)
@@ -227,7 +227,7 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-    ) -> list[Message]:
+    ) -> Iterable[Message]:
         """Configure the next round of training."""
         self.current_arrays = arrays
         return self.strategy.configure_train(server_round, arrays, config, grid)
@@ -235,7 +235,7 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
     def aggregate_train(
         self,
         server_round: int,
-        replies: list[Message],
+        replies: Iterable[Message],
     ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         if not self._validate_replies(replies):
@@ -321,7 +321,7 @@ class DifferentialPrivacyClientSideFixedClipping(DifferentialPrivacyFixedClippin
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-    ) -> list[Message]:
+    ) -> Iterable[Message]:
         """Configure the next round of training."""
         # Inject clipping norm in config
         config[KEY_CLIPPING_NORM] = self.clipping_norm
@@ -331,7 +331,7 @@ class DifferentialPrivacyClientSideFixedClipping(DifferentialPrivacyFixedClippin
     def aggregate_train(
         self,
         server_round: int,
-        replies: list[Message],
+        replies: Iterable[Message],
     ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         if not self._validate_replies(replies):
