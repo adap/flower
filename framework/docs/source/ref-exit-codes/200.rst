@@ -40,20 +40,20 @@ Let's see a few examples of payloads (|recorddict_link|_) that can and can't be
 aggregated. Let's assume the `ServerApp` has been configured to use |fedavg_link|_ with
 `num-examples` as the key to perform weighted averaging:
 
-These two payloads can be aggregated because all keys match, there is one record of each type,
-and the key for weighted averaging is present.
+These two payloads can be aggregated because all keys match, there is one record of each
+type, and the key for weighted averaging is present.
 
 .. code-block:: python
 
     payload1 = RecordDict(
         {
-            "model-parameters": ArrayRecord(...),
+            "model-parameters": ArrayRecord(...),  # no ArrayRecord if in an evaluate round
             "metrics": MetricRecord({"loss": 0.123, "num-examples": 1234}),
         }
     )
     payload2 = RecordDict(
         {
-            "model-parameters": ArrayRecord(...),
+            "model-parameters": ArrayRecord(...),  # no ArrayRecord if in an evaluate round
             "metrics": MetricRecord({"loss": 0.01, "num-examples": 1234}),
         }
     )
