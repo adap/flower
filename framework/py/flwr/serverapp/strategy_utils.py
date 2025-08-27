@@ -33,6 +33,12 @@ from flwr.common import (
 from flwr.server import Grid
 
 
+# Define a new exception
+class InconsistentMessageReplies(Exception):
+    """Exception triggered when replies are inconsistent and therefore aggregation must
+    be skipped."""
+
+
 def config_to_str(config: ConfigRecord) -> str:
     """Convert a ConfigRecord to a string representation masking bytes."""
     content = ", ".join(
@@ -190,7 +196,7 @@ def sample_nodes(
 # pylint: disable=too-many-return-statements
 def validate_message_reply_consistency(
     replies: list[RecordDict], weighted_by_key: str, check_arrayrecord: bool
-) -> bool:
+) -> None:
     """Validate that replies contain exactly one ArrayRecord and one MetricRecord, and
     that the MetricRecord includes a weight factor key.
 
@@ -204,7 +210,7 @@ def validate_message_reply_consistency(
                 ERROR,
                 "Expected exactly one ArrayRecord in replies.Skipping aggregation.",
             )
-            return False
+            raise InconsistentMessageReplies
 
         # Ensure all key are present in all ArrayRecords
         record_key = next(iter(replies[0].array_records.keys()))
@@ -215,7 +221,7 @@ def validate_message_reply_consistency(
                 "All ArrayRecords must have the same keys for aggregation. "
                 "This condition wasn't met. Skipping aggregation.",
             )
-            return False
+            raise InconsistentMessageReplies
 
     # Checking for MetricRecord consistency
     if any(len(msg.metric_records) != 1 for msg in replies):
@@ -224,7 +230,7 @@ def validate_message_reply_consistency(
             "Expected exactly one MetricRecord in replies, but found more. "
             "Skipping aggregation.",
         )
-        return False
+        raise InconsistentMessageReplies
 
     # Ensure all key are present in all MetricRecords
     record_key = next(iter(replies[0].metric_records.keys()))
@@ -235,7 +241,7 @@ def validate_message_reply_consistency(
             "All MetricRecords must have the same keys for aggregation. "
             "This condition wasn't met. Skipping aggregation.",
         )
-        return False
+        raise InconsistentMessageReplies
 
     # Verify the weight factor key presence in all MetricRecords
     if weighted_by_key not in all_keys:
@@ -245,7 +251,7 @@ def validate_message_reply_consistency(
             "Cannot average ArrayRecords and MetricRecords. Skipping aggregation.",
             weighted_by_key,
         )
-        return False
+        raise InconsistentMessageReplies
 
     # Check that it is not a list
     if any(isinstance(msg[record_key][weighted_by_key], list) for msg in replies):
@@ -255,6 +261,4 @@ def validate_message_reply_consistency(
             "(int or float), but a list was found. Skipping aggregation.",
             weighted_by_key,
         )
-        return False
-
-    return True
+        raise InconsistentMessageReplies

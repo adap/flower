@@ -202,12 +202,11 @@ class FedAvg(Strategy):
         )
 
         # Ensure expected ArrayRecords and MetricRecords are received
-        if not validate_message_reply_consistency(
+        validate_message_reply_consistency(
             replies=replies_with_content,
             weighted_by_key=self.weighted_by_key,
             check_arrayrecord=True,
-        ):
-            return None, None
+        )
 
         # Aggregate ArrayRecords
         arrays = aggregate_arrayrecords(
@@ -279,12 +278,11 @@ class FedAvg(Strategy):
         )
 
         # Ensure expected ArrayRecords and MetricRecords are received
-        if not validate_message_reply_consistency(
+        validate_message_reply_consistency(
             replies=replies_with_content,
             weighted_by_key=self.weighted_by_key,
             check_arrayrecord=False,
-        ):
-            return None
+        )
 
         # Aggregate MetricRecords
         metrics = self.evaluate_metrics_aggr_fn(
