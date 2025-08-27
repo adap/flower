@@ -6,6 +6,10 @@
 
 .. _numpyclient_link: ref-api/flwr.client.NumPyClient.html
 
+.. |client_link| replace:: ``Client``
+
+.. _client_link: ref-api/flwr.client.Client.html
+
 .. |clientapp_link| replace:: ``ClientApp``
 
 .. _clientapp_link: ref-api/flwr.client.ClientApp.html
@@ -184,3 +188,128 @@ stages done at the `ServerApp`.
 
 Update your ClientApp
 ---------------------
+
+Similar to the `ServerApp`, the `ClientApp` no longer requires a helper function (i.e.
+``client_fn`` ) that instantiates a |numpyclient_link|_ or base |client_link|_ object.
+Instead, with the Message API, you get to define directly how the ClientApp operates on
+`Message` objects received from the `ServerApp`.
+
+Remember `NumPyClient` came with two key built-in methods ``fit`` and ``evaluate`` that
+were respectively designed for doing federated training and evaluation using the
+client's local data. With the new Message API, you can define similar methods directly
+on the `ClientApp` via decorators to handle incoming `Message` objects.
+
+Let's see a basic example show first a minimal `NumPyClient`-based `ClientApp` and then
+the the upgraded design using the Message API.
+
+.. code-block:: python
+
+    from flwr.client import ClientApp, NumPyClient
+    from flwr.common import Context
+    from my_utils import train_fn, test_fn, get_weights, set_weights
+
+
+    class MyFlowerClient(NumPyClient):
+
+        def __init__(self):
+            self.model = MyModel()
+            self.train_loader = DataLoader(...)
+            self.test_loader = DataLoader(...)
+
+        def fit(self, parameters, config):
+            """Fit the model to the local data using the parameters sent by ServerApp."""
+            # Update model with the latest parameters
+            set_weights(self.model, parameters)
+            # Train the model locally
+            train_fn(self.model, self.train_loader)
+            # Return the updated parameters and number of training examples
+            return get_weights(self.model), len(self.train_loader.dataset), {}
+
+        def evaluate(self, parameters, config):
+            """Evaluate the model on the local data using the parameters sent by ServerApp."""
+            # Update model with the latest parameters
+            set_weights(self.model, parameters)
+            # Evaluate the model locally
+            loss, accuracy = test_fn(self.model, self.test_loader)
+            # Return the evaluation results
+            return float(loss), len(self.test_loader.dataset), {"accuracy": float(accuracy)}
+
+
+    def client_fn(context: Context):
+        # Return an instance of MyFlowerClient
+        return MyFlowerClient().to_client()
+
+
+    app = ClientApp(client_fn=client_fn)
+
+Upgrading a ClientApp designed around the `NumPyClient` + `client_fn` abstractions to
+the `MessageAPI` would result in the following code. Note that that the behaviour of the
+`ClientApp` is defined directly in its methods (i.e. a secondary class is no longer
+needed). The `ClientApp` abstraction comes with built-in ``@app.train`` and
+``@app.evaluate`` decorators. The arguments the associated methods receive have been
+unified and they both operate on `Message` objects. Note that you'll still be able to
+use the helper functions you might have developed to, for example, train your model
+using the ML framework of your choice. In this example those are represented by
+``train_fn`` and ``test_fn``. Each method is responsible for handling the incoming
+`Message` objects and returning the appropriate response (also as a `Message`).
+
+.. code-block:: python
+    :emphasize-lines: 9,10,18,23,33,34,37,38,46,56,57
+
+    from flwr.client import ClientApp
+    from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
+    from my_utils import train_fn, test_fn
+
+    # Flower ClientApp
+    app = ClientApp()
+
+
+    @app.train()
+    def train(msg: Message, context: Context):
+        """Train the model on local data."""
+
+        # Init Model and data loader
+        train_loader = DataLoader(...)
+        model = MyModel()
+
+        # Read ArrayRecord received from ServerApp
+        arrays = msg.content["arrays"]
+        # Load weights to model
+        model.load_state_dict(arrays.to_torch_state_dict())
+
+        # Do local training
+        train_fn(model, train_loader)
+
+        # Construct reply Message: arrays and metrics
+        model_record = ArrayRecord(model.state_dict())
+        metrics = MetricRecord(
+            {
+                "train_loss": 0.123,  # Example metric
+                "num-examples": len(train_loader.dataset),
+            }
+        )
+        content = RecordDict({"arrays": model_record, "metrics": metrics})
+        return Message(content=content, reply_to=msg)
+
+
+    @app.evaluate()
+    def evaluate(msg: Message, context: Context):
+        """Evaluate the model on local data."""
+
+        # Identical to @app.train but returning only metrics
+        # after doing local evaluation
+        # ...
+
+        # Do local evaluation
+        loss, accuracy = test_fn(model, test_loader)
+
+        # Construct reply Message
+        metrics = MetricRecord(
+            {
+                "eval_loss": loss,
+                "eval_accuracy": accuracy,
+                "num-examples": len(test_loader.dataset),
+            }
+        )
+        content = RecordDict({"metrics": metrics})
+        return Message(content=content, reply_to=msg)
