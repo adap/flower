@@ -1,5 +1,5 @@
-[200] SERVERAPP_REPLIES_PRECONDITION_UNMET_FOR_STRATEGIES
-=========================================================
+[200] SERVERAPP_STRATEGY_PRECONDITION_UNMET
+===========================================
 
 .. |arrayrecord_link| replace:: ``ArrayRecord``
 

@@ -80,7 +80,7 @@ EXIT_CODE_HELP = {
         "usage. Alternatively, check the documentation."
     ),
     # ServerApp-specific exit codes (200-299)
-    ExitCode.SERVERAPP_REPLIES_PRECONDITION_UNMET_FOR_STRATEGIES: (
+    ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET: (
         "The strategy received replies that cannot be aggregated. Please ensure all "
         "replies returned by ClientApps have one `ArrayRecord` (none when replies are "
         "from a round of federated evaluation, i.e. when message type is "
