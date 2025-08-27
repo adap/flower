@@ -34,6 +34,9 @@ class ExitCode:
     SUPERLINK_LICENSE_URL_INVALID = 103
     SUPERLINK_INVALID_ARGS = 104
 
+    # ServerApp-specific exit codes (200-299)
+    SERVERAPP_REPLIES_PRECONDITION_UNMET_FOR_STRATEGIES = 200
+
     # SuperNode-specific exit codes (300-399)
     SUPERNODE_REST_ADDRESS_INVALID = 300
     SUPERNODE_NODE_AUTH_KEYS_REQUIRED = 301
@@ -75,6 +78,16 @@ EXIT_CODE_HELP = {
     ExitCode.SUPERLINK_INVALID_ARGS: (
         "Invalid arguments provided to SuperLink. Use `--help` check for the correct "
         "usage. Alternatively, check the documentation."
+    ),
+    # ServerApp-specific exit codes (200-299)
+    ExitCode.SERVERAPP_REPLIES_PRECONDITION_UNMET_FOR_STRATEGIES: (
+        "The strategy received replies that cannot be aggregated. Please ensure all "
+        "replies returned by ClientApps have one `ArrayRecord` (none when replies are "
+        "from a round of federated evaluation, i.e. when message type is "
+        "`MessageType.EVALUATE`) and one `MetricRecord`. The records in all replies "
+        "must use identical keys. In addition, if the strategy expects a key to "
+        "perform weighted average (e.g. in FedAvg) please ensure the returned "
+        "MetricRecord from ClientApps do include this key."
     ),
     # SuperNode-specific exit codes (300-399)
     ExitCode.SUPERNODE_REST_ADDRESS_INVALID: (
