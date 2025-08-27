@@ -35,7 +35,7 @@ class Strategy(ABC):
     @abstractmethod
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-    ) -> list[Message]:
+    ) -> Iterable[Message]:
         """Configure the next round of training.
 
         Parameters
@@ -52,8 +52,8 @@ class Strategy(ABC):
 
         Returns
         -------
-        list[Message]
-            List of messages to be sent to selected client nodes for training.
+        Iterable[Message]
+            An iterable of messages to be sent to selected client nodes for training.
         """
 
     @abstractmethod
@@ -83,7 +83,7 @@ class Strategy(ABC):
     @abstractmethod
     def configure_evaluate(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-    ) -> list[Message]:
+    ) -> Iterable[Message]:
         """Configure the next round of evaluation.
 
         Parameters
@@ -100,8 +100,8 @@ class Strategy(ABC):
 
         Returns
         -------
-        list[Message]
-            List of messages to be sent to selected client nodes for evaluation.
+        Iterable[Message]
+            An iterable of messages to be sent to selected client nodes for evaluation.
         """
 
     @abstractmethod

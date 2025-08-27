@@ -134,7 +134,7 @@ class FedAvg(Strategy):
 
     def _construct_messages(
         self, record: RecordDict, node_ids: list[int], message_type: str
-    ) -> list[Message]:
+    ) -> Iterable[Message]:
         """Construct N Messages carrying the same RecordDict payload."""
         messages = []
         for node_id in node_ids:  # one message for each node
@@ -148,7 +148,7 @@ class FedAvg(Strategy):
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-    ) -> list[Message]:
+    ) -> Iterable[Message]:
         """Configure the next round of federated training."""
         # Sample nodes
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_train)
@@ -223,7 +223,7 @@ class FedAvg(Strategy):
 
     def configure_evaluate(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-    ) -> list[Message]:
+    ) -> Iterable[Message]:
         """Configure the next round of federated evaluation."""
         # Sample nodes
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_evaluate)
