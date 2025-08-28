@@ -33,7 +33,6 @@ from flwr.common import (
 from flwr.server import Grid
 
 
-# Define a new exception
 class InconsistentMessageReplies(Exception):
     """Exception triggered when replies are inconsistent and therefore aggregation must
     be skipped."""

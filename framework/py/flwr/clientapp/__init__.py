@@ -13,3 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Public Flower ClientApp APIs."""
+
+from .centraldp_mods import fixedclipping_mod
+
+__all__ = ["fixedclipping_mod"]
