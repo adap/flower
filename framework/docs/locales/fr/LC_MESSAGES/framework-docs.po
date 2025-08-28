@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-08-27 00:08+0000\n"
+"POT-Creation-Date: 2025-08-28 00:07+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -396,10 +396,10 @@ msgstr "Amélioration de la documentation"
 #: ../../source/ref-exit-codes/100.rst:5 ../../source/ref-exit-codes/101.rst:5
 #: ../../source/ref-exit-codes/102.rst:5 ../../source/ref-exit-codes/103.rst:5
 #: ../../source/ref-exit-codes/104.rst:5 ../../source/ref-exit-codes/2.rst:5
-#: ../../source/ref-exit-codes/3.rst:5 ../../source/ref-exit-codes/300.rst:5
-#: ../../source/ref-exit-codes/301.rst:5 ../../source/ref-exit-codes/302.rst:5
-#: ../../source/ref-exit-codes/600.rst:5 ../../source/ref-exit-codes/601.rst:5
-#: ../../source/ref-exit-codes/602.rst:5
+#: ../../source/ref-exit-codes/200.rst:21 ../../source/ref-exit-codes/3.rst:5
+#: ../../source/ref-exit-codes/300.rst:5 ../../source/ref-exit-codes/301.rst:5
+#: ../../source/ref-exit-codes/302.rst:5 ../../source/ref-exit-codes/600.rst:5
+#: ../../source/ref-exit-codes/601.rst:5 ../../source/ref-exit-codes/602.rst:5
 #, fuzzy
 msgid "Description"
 msgstr "Dépréciations"
@@ -5887,111 +5887,303 @@ msgstr ""
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:365
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:85
 #, fuzzy
+msgid "Deploy Flower Framework without TLS"
+msgstr "Rédiger de la documentation"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:367
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:87
+msgid ""
+"By default, the Flower Framework is deployed without TLS. This means "
+"`global.insecure` is set to `true`."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:370
+msgid ""
+"In this mode, the chart does not create any `cert-manager` `Issuer` or "
+"`Certificate` resources, and any TLS-related configuration on the "
+"`Ingress` resource is ignored."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:378
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:98
+#, fuzzy
 msgid "Deploy Flower Framework with TLS"
 msgstr "Flower Framework"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:367
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:380
 msgid ""
-"To ensure TLS communication within the Flower Framework, you need to "
-"configure your deployment with proper TLS certificates."
+"If `cert-manager` is installed in your Kubernetes cluster, this chart can"
+" be used to set up TLS in several ways. By default, it creates both a "
+"self-signed `Issuer` and a `Certificate`, but you can also choose to "
+"create only an `Issuer` or create a `Certificate` from an existing "
+"`Issuer`/`ClusterIssuer`."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:377
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:385
+msgid ""
+"Regardless of the option you choose, TLS is only enabled when you set "
+"`global.insecure: false`."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:387
+msgid "Default Behavior (self-signed Issuer + Certificate)"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:401
+msgid ""
+"When deployed with these values, the chart creates a self-signed `Issuer`"
+" and then uses it to issue a TLS certificate. The generated `Certificate`"
+" is valid for five years, is renewed fifteen days before expiry, and is "
+"stored in a Kubernetes `Secret`."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:405
+msgid ""
+"If you leave `secretName` empty, the secret name defaults to `<chart-name"
+">-server-tls`. The certificate includes `global.domain` as its common "
+"name, along with service DNS entries and any `additionalHosts` you "
+"provide."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:409
+msgid ""
+"This setup is best suited for testing and validating the Helm charts in a"
+" non-production environment."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:412
+msgid ""
+"You can switch from self-signed to another issuer type by providing a "
+"`spec` block for the `Issuer`."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:415
+msgid "Create a Certificate using an Existing Issuer / ClusterIssuer"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:417
+msgid ""
+"Use this if you already have an `Issuer` or `ClusterIssuer` (e.g., Let’s "
+"Encrypt or a corporate CA) and you want the chart to create the "
+"`Certificate`."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:434
+msgid ""
+"With this configuration, the chart does not create a new `Issuer`. "
+"Instead, it references the specified `ClusterIssuer` named `letsencrypt-"
+"clusterissuer` and requests a `Certificate` from it. It is stored in a "
+"Kubernetes `Secret` that, by default, is named `<chart-name>-server-tls`."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:438
+msgid ""
+"To change the secret name, set `tls.certificate.secretName` to the "
+"desired name:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:446
+msgid "Create only an Issuer"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:448
+msgid ""
+"In this mode, the chart creates an `Issuer` but does not create a "
+"`Certificate`. This is useful if you want `cert-manager` to automatically"
+" generate certificates based on `Ingress` annotations."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:464
+msgid ""
+"See the [Ingress Configuration](###generate-a-certificate-via-ingress-"
+"annotations) section for more information."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:466
 #, fuzzy
-msgid "Override certificate paths"
+msgid "Use an Existing TLS Certificate"
+msgstr "Utilise une stratégie existante"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:468
+msgid ""
+"If you already have a TLS certificate available as a Kubernetes `Secret`,"
+" you can configure the chart to use it directly instead of creating a new"
+" `Certificate` with `cert-manager`. To do this, disable certificate "
+"creation and set `tls.existingSecret` to the name of your `Secret`."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:472
+msgid ""
+"The `Secret` must be of type `kubernetes.io/tls` and contain the standard"
+" `tls.crt`, `tls.key` fields, with `ca.crt` being optional. If `ca.crt` "
+"is not provided, `tls.crt` will also be used as the CA certificate."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:476
+msgid ""
+"If both `tls.existingSecret` and `tls.certificate.enabled` are set, the "
+"`tls.existingSecret` value will be ignored and a new `Certificate` will "
+"be issued."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:489
+#, fuzzy
+msgid "Override Certificate Paths"
 msgstr "Certificats"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:379
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:491
 msgid ""
 "By default, the TLS-related flags use the following paths when TLS is "
 "enabled:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:381
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:493
 msgid ""
 "`--ssl-ca-certfile`: `/app/cert/ca.crt`, `--ssl-certfile`: "
 "`/app/cert/tls.crt`, `--ssl-keyfile`: `/app/cert/tls.key`."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:385
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:497
 msgid ""
-"These paths can be overridden by specifying the flags in the extraArgs, "
-"as shown below."
+"These paths can be overridden by specifying the flags in the `extraArgs`,"
+" as shown below:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:401
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:100
-#, fuzzy
-msgid "Deploy Flower Framework without TLS"
-msgstr "Rédiger de la documentation"
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:403
-msgid ""
-"To deploy the Flower Framework simply, you need to configure your "
-"deployment as insecure."
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:412
-msgid "Pre-provide TLS Certificate"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:414
-msgid ""
-"If certificate creation is disabled, you must provide a pre-existing "
-"secret of type `kubernetes.io/tls` named `<flower-server.fullname"
-">-server-tls`."
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:422
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:513
 #, fuzzy
 msgid "Ingress Configuration"
 msgstr "Valeurs de configuration"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:424
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:515
+#, fuzzy
+msgid "Generate a Certificate via Ingress Annotations"
+msgstr "Certificats"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:517
+msgid ""
+"If you prefer to let `cert-manager` generate a `Certificate` through "
+"`Ingress` annotations, you can disable the chart’s built-in certificate "
+"management. To do this, set `tls.certificate.enabled` to `false` and "
+"leave `tls.existingSecret` empty. Also ensure `global.insecure` is set to"
+" `false`."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:522
+msgid ""
+"The annotations you specify under `superlink.ingress.annotations` will be"
+" passed directly to the `Ingress` resource. For supported annotation "
+"keys, refer to the `cert-manager` [documentation](https://cert-"
+"manager.io/docs/usage/ingress/)."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:552
+msgid ""
+"The chart creates an `Ingress` for SuperLink with the provided "
+"annotations. `cert-manager` generates a `Certificate`, and stores it in a"
+" Kubernetes `Secret`. That `Secret` is then mounted into the SuperLink "
+"container so it can use the TLS keypair for its endpoints. The same "
+"`Secret` is also referenced by the `Ingress` resource, which means the "
+"generated certificate is shared between the `Ingress` and the SuperLink "
+"service."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:558
+msgid ""
+"By default, the Ingress-generated certificate is stored in a `Secret` "
+"named `<chart-name>-server-tls`."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:561
+msgid "You can override this by setting `superlink.ingress.tls.secretName`:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:572
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:123
+#, fuzzy
+msgid "**Important:**"
+msgstr "Changements importants :"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:574
+msgid ""
+"If `tls.certificate.enabled` is set to `true` or if `tls.existingSecret` "
+"is specified, the `secretName` of the `Ingress` resource is ignored. In "
+"that case, the chart will rely on the `Certificate` created through its "
+"own mechanism."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:577
+msgid ""
+"Always ensure that when you use `Ingress` annotations, no certificate is "
+"generated or referenced by this chart. Otherwise, you may end up with "
+"conflicting secrets."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:580
+msgid "TLS Certificate with Additional Hosts"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:582
+msgid ""
+"By default, when `cert-manager` issues a `Certificate` it only includes "
+"the DNS name specified in `commonName`, which is derived from "
+"`global.domain`."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:585
+msgid ""
+"In some deployments, the server and client charts may run inside the same"
+" Kubernetes cluster, while the Exec API is exposed publicly over the "
+"internet. In this scenario, the SuperNodes need to connect to the "
+"SuperLink using its internal service URL (e.g., "
+"`<superlink>.<namespace>.svc.cluster.local`)."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:590
+msgid ""
+"To support this, you can extend the certificate with additional hosts by "
+"using `superlink.ingress.extraHosts`."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:593
+msgid ""
+"The example below shows how to configure the `Ingress` so that the "
+"generated `Certificate` covers both the external hostname and the "
+"internal service name:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:627
 msgid "SSL-Passthrough"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:426
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:629
 msgid ""
-"When the `tls` option is set to `true`, it expects the existence of the "
-"`<flower-server.fullname>-server-tls` secret. Flower Framework components"
-" will load TLS certificates on startup."
+"In some scenarios, you may want to let the SuperLink service terminate "
+"TLS directly rather than having the Ingress controller handle TLS "
+"termination. This is useful if you need to use protocols such as gRPC "
+"over TLS end-to-end, where the Ingress should simply forward the "
+"encrypted traffic without decrypting it."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:463
-msgid "**Pre-Provide TLS Certificate with Additional Hosts**"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:465
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:634
 msgid ""
-"In this example, we use `cert-manager` to create a certificate. By "
-"default, the certificate will only include the DNS name specified in "
-"`common-name`."
+"To enable this mode with the NGINX Ingress Controller, you can configure "
+"SSL passthrough by setting the `nginx.ingress.kubernetes.io/ssl-"
+"passthrough` annotation to `\"true\"`. In this configuration, the Ingress"
+" forwards TLS traffic directly to the SuperLink container, which then "
+"handles certificate validation and encryption."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:468
-msgid ""
-"In some cases, the server and client charts are deployed in the same "
-"cluster, while the exec API is accessible via the internet."
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:471
-msgid ""
-"To allow SuperNodes to connect to the SuperLink via the internal service "
-"URL, you need to add an additional host, as shown below:"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:498
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:674
 #, fuzzy
 msgid "Enable Node Authentication"
 msgstr "Vérifie l'installation"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:517
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:693
 msgid "Public keys can include comments at the end of the key data:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:526
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:205
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:702
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:247
 #: ../../source/ref-api/flwr.common.Parameters.rst:2 flwr.app.error.Error
 #: flwr.app.metadata.Metadata flwr.client.client.Client.evaluate
 #: flwr.client.client.Client.fit flwr.client.client.Client.get_parameters
@@ -6058,8 +6250,8 @@ msgstr ""
 msgid "Parameters"
 msgstr "Paramètres du modèle."
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:528
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:207
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:704
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:249
 #, fuzzy
 msgid "Helm parameters"
 msgstr "Paramètres du modèle."
@@ -6103,8 +6295,8 @@ msgstr ""
 msgid "`\"\"`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:535
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:214
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:711
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:256
 #, fuzzy
 msgid "Global parameters"
 msgstr "Paramètres du modèle."
@@ -6149,18 +6341,15 @@ msgid "Default PodLabels"
 msgstr "Flux de travail"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.domain`"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "Default Domain"
 msgstr "Flux de travail"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "`example.com`"
 msgstr "Exemples de PyTorch"
@@ -6182,12 +6371,10 @@ msgid "`true`"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`global.ingressClassName`"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default IngressClass"
 msgstr ""
 
@@ -6260,16 +6447,6 @@ msgstr ""
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Default match expressions for node affinity"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "`global.certificateAnnotations`"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "Default Cert-Manager certificate annotations"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
@@ -6483,110 +6660,74 @@ msgstr ""
 msgid "`IfNotPresent`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:572
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:747
 #, fuzzy
-msgid "Flower-TLS-Certificate parameters"
-msgstr "Certificats"
+msgid "TLS Configuration"
+msgstr "Valeurs de configuration"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "`certificate.enabled`"
-msgstr "Certificats"
+msgid "`tls.issuer.enabled`"
+msgstr "Démarrer le serveur"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid "Can be disabled if a Secret already exists"
+msgid "Enable automatic creation of a cert-manager Issuer."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "`certificate.annotations`"
+msgid "`tls.issuer.name`"
 msgstr "Certificats"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "Certificate CRD annotations"
-msgstr "Certificats"
+msgid "Name of the Issuer resource to use."
+msgstr "Démarrer le serveur"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "`certificate.name`"
+msgid "`tls.issuer.spec`"
 msgstr "Certificats"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#, fuzzy
-msgid "Certificate name"
-msgstr "Certificats"
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#, fuzzy
-msgid "`flower-server-tls`"
-msgstr "Serveur de Flower"
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#, fuzzy
-msgid "`certificate.duration`"
-msgstr "Certificats"
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid ""
-"The requested ‘duration’ (i.e. lifetime) of the Certificate. Default is 5"
-" years."
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid "`43800h`"
+msgid "The contents of the `.spec` block for the cert-manager Issuer."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "`certificate.renewBefore`"
+msgid "`tls.certificate.enabled`"
 msgstr "Certificats"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid ""
-"How long before the currently issued certificate’s expiry cert-manager "
-"should renew the certificate. Default is 15 days."
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid "`360h`"
+msgid "Enable automatic creation of a cert-manager Certificate."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "`certificate.privateKey`"
+msgid "`tls.certificate.annotations`"
 msgstr "Certificats"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid ""
-"Private key options. These include the key algorithm and size, the used "
-"encoding and the rotation policy."
+#, fuzzy
+msgid "Certificate CRD annotations."
+msgstr "Certificats"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+#, fuzzy
+msgid "`tls.certificate.secretName`"
+msgstr "Certificats"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+msgid "Name of the Kubernetes Secret to store the TLS key and certificate."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "`certificate.usages`"
+msgid "`tls.certificate.issuerGroup`"
 msgstr "Certificats"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid "Requested key usages and extended key usages."
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid "`certificate.additionalHosts`"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid "Additional hosts you want to put into the SAN's of the certificate"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#, fuzzy
-msgid "`certificate.issuer.group`"
-msgstr "Certificats"
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid "Defaults to cert-Manager.io"
+msgid "API group for the issuer. Defaults to `cert-manager.io`."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
@@ -6596,37 +6737,82 @@ msgstr "client"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "`certificate.issuer.kind`"
+msgid "`tls.certificate.existingIssuer`"
 msgstr "Certificats"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "Defaults to Issuer"
-msgstr "Flux de travail"
+msgid "Name of an existing Issuer or ClusterIssuer to use."
+msgstr "Utilise une stratégie existante"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid "`Issuer`"
+#, fuzzy
+msgid "`tls.certificate.existingIssuerKind`"
+msgstr "Certificats"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+msgid "Kind of the existing issuer (`Issuer` or `ClusterIssuer`)."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "`certificate.issuer.name`"
+msgid "`tls.certificate.duration`"
 msgstr "Certificats"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid "Name of the Issuer or Issuer to use"
+msgid "The requested ‘duration’ (i.e. lifetime) of the Certificate."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+msgid "`43800h`"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "`certificate.issuer.spec`"
+msgid "`tls.certificate.renewBefore`"
 msgstr "Certificats"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-msgid "The contents of the `.spec` block for the cert-manager Issuer."
+msgid "How long before the currently issued certificate’s expiry"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:589
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+msgid "`360h`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+#, fuzzy
+msgid "`tls.certificate.privateKey`"
+msgstr "Certificats"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+msgid "Private key options. These include the key algorithm and"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+#, fuzzy
+msgid "`tls.certificate.usages`"
+msgstr "Certificats"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+msgid "Requested key usages and extended key usages."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+#, fuzzy
+msgid "`tls.certificate.additionalHosts`"
+msgstr "Certificats"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+msgid "Additional hosts you want to put into the SAN's"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+#, fuzzy
+msgid "`tls.existingSecret`"
+msgstr "Utilise une stratégie existante"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:767
 #, fuzzy
 msgid "Component SuperLink"
 msgstr "flower-superlink"
@@ -6891,7 +7077,7 @@ msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "`simulationIo`"
+msgid "`simulationio`"
 msgstr "Simulation de moniteur"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
@@ -7062,7 +7248,6 @@ msgid "`superlink.ingress.enabled`"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Enable the ingress resource"
 msgstr ""
 
@@ -7071,7 +7256,6 @@ msgid "`superlink.ingress.annotations`"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Additional annotations for the ingress"
 msgstr ""
 
@@ -7080,20 +7264,27 @@ msgid "`superlink.ingress.ingressClassName`"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Defines which ingress controller which implement the resource"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "`superlink.ingress.tls`"
+msgid "`superlink.ingress.tls.enabled`"
 msgstr "flower-superlink"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "Enable TLS termination at the Ingress level."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 #, fuzzy
-msgid "Ingress TLS configuration"
-msgstr "Valeurs de configuration"
+msgid "`superlink.ingress.tls.secretName`"
+msgstr "flower-superlink"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
+#, fuzzy
+msgid "Name of the Kubernetes Secret that will contain the"
+msgstr "Utilise une stratégie existante"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
 msgid "`superlink.ingress.api.enabled`"
@@ -7124,7 +7315,6 @@ msgid "SuperLink API ingress path"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`/`"
 msgstr ""
 
@@ -7133,12 +7323,10 @@ msgid "`superlink.ingress.api.pathType`"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Ingress path type. One of Exact, Prefix or ImplementationSpecific"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:283
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "`ImplementationSpecific`"
 msgstr ""
 
@@ -7490,7 +7678,7 @@ msgstr ""
 msgid "`superlink.networkPolicy.simulationIo.ingressNSPodMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:686
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:865
 #, fuzzy
 msgid "Component ServerApp"
 msgstr "serveur"
@@ -7785,7 +7973,7 @@ msgstr ""
 msgid "`serverapp.networkPolicy.extraEgress`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:726
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:905
 #, fuzzy
 msgid "Component OpenFGA"
 msgstr "commun"
@@ -7856,39 +8044,69 @@ msgid ""
 "supernode-<random>`."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:87
-msgid ""
-"To ensure TLS communication within the Flower framework, you need to "
-"configure your deployment with proper TLS certificates."
-msgstr ""
-
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:90
 msgid ""
-"**Note:** If `global.insecure` is set to `False`, you must pre-provide a "
-"secret of type `kubernetes.io/tls` named `flower-client-tls`."
+"You might want to deploy the Flower framework without TLS for testing or "
+"internal use. Be cautious as this exposes your deployment to potential "
+"security risks."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:93
-msgid "Example configuration for TLS deployment:"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:102
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:100
 msgid ""
-"For testing or internal use, you might want to deploy the Flower "
-"framework without TLS. Be cautious as this exposes your deployment to "
-"potential security risks."
+"When using private CAs, the SuperNode must trust the CA certificate in "
+"order to connect securely to the SuperLink."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:105
-msgid "Example configuration for insecure deployment:"
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:103
+msgid ""
+"To provide the CA certificate, set `global.insecure` to `false` and "
+"create a `Secret` of type `kubernetes.io/tls` named `flower-client-tls`:"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:112
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:111
+msgid ""
+"If you want to use a different `Secret` name, override the default by "
+"setting `supernode.superlink.certificate.existingSecret`:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:125
+msgid ""
+"The recommended practice is to mount different `Secret`s for the "
+"SuperLink and the SuperNodes `existingSecret` parameter. Keeping these "
+"`Secrets` separate ensures that if the `Secret` containing the server’s "
+"private key and certificate is ever tampered with, the client will fail "
+"to connect rather than trusting a compromised server."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:131
+msgid ""
+"For further details, refer to the [`cert-manager` documentation](https"
+"://cert-manager.io/docs/trust/)."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:133
+msgid ""
+"If the SuperLink certificate (of type `kubernetes.io/tls`) is deployed in"
+" the same cluster and namespace as the SuperNode, you can enable "
+"`supernode.superlink.certificate.copyFromExistingSecret`. This instructs "
+"the chart to create a new `Secret` containing the CA certificate. It "
+"copies `ca.crt` from the SuperLink `Secret`, or falls back to `tls.crt` "
+"if `ca.crt` is not present."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:139
+msgid ""
+"By default, the copied `Secret` is named `flower-client-tls`. You can "
+"customize this name with "
+"`supernode.superlink.certificate.copyFromExistingSecret.secretName`:"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:154
 #, fuzzy
 msgid "Node Authentication"
 msgstr "Vérifie l'installation"
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:114
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:156
 msgid ""
 "To enable Node Authentication, you need to specify a private key in "
 "either PKCS8 or OpenSSH (PEM-like) format. This example assumes that the "
@@ -7896,16 +8114,16 @@ msgid ""
 "`ecdsa-sha2-nistp384 [...]` public key of this SuperNode."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:141
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:183
 msgid "Isolated Setup"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:143
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:185
 #, fuzzy
 msgid "Isolation All-in-One"
 msgstr "Solution"
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:145
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:187
 msgid ""
 "To install SuperNode in isolation mode using the \"process\" "
 "configuration, both the ClientApp and SuperNode need to be enabled. By "
@@ -7915,12 +8133,12 @@ msgid ""
 "that both components are running within the same cluster."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:162
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:204
 #, fuzzy
 msgid "Isolation Distributed"
 msgstr "Solution"
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:164
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:206
 msgid ""
 "You can also deploy the SuperNode and ClientApp separately. To do this, "
 "you need to deploy the chart twice: once with `supernode.enabled=true` "
@@ -7931,12 +8149,12 @@ msgid ""
 "environment involving Kubernetes and ClientApp native installations."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:187
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:229
 #, fuzzy
 msgid "Node Configuration"
 msgstr "Valeurs de configuration"
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:189
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:231
 msgid ""
 "You can add a node configuration to configure a SuperNode. The YAML "
 "datatype is preserved when passing it in the Python application:"
@@ -7971,7 +8189,7 @@ msgstr ""
 msgid "Specifies the ecdsa-sha2-nistp384 public key"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:245
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:284
 #, fuzzy
 msgid "Component SuperNode"
 msgstr "flower-superlink"
@@ -8038,6 +8256,19 @@ msgstr ""
 
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Port of the SuperLink the SuperNodes should connect to"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`supernode.superlink.certificate.existingSecret`"
+msgstr "Utilise une stratégie existante"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.superlink.certificate.copyFromExistingSecret.enabled`"
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "`supernode.superlink.certificate.copyFromExistingSecret.secretName`"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
@@ -8210,56 +8441,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "`supernode.ingress.enabled`"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "`supernode.ingress.annotations`"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "`supernode.ingress.ingressClassName`"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "`supernode.ingress.tls`"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "`supernode.ingress.clientappio.enabled`"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "Enable an ingress resource for SuperNode ClientAppIO"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "`supernode.ingress.clientappio.hostname`"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-#, fuzzy
-msgid "Ingress hostname for the SuperNode ClientAppIO ingress"
-msgstr "Démarrer le serveur"
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-#, fuzzy
-msgid "`clientappio.example.com`"
-msgstr "client"
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "`supernode.ingress.clientappio.path`"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "SuperNode ClientAppIO ingress path"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "`supernode.ingress.clientappio.pathType`"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "`supernode.lifecycle`"
 msgstr "Démarrer le serveur"
@@ -8405,7 +8586,7 @@ msgid ""
 "`supernode.networkPolicy.allowExternal` is true."
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:307
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:341
 #, fuzzy
 msgid "Component ClientApp"
 msgstr "client"
@@ -36478,6 +36659,7 @@ msgstr ""
 #: ../../source/ref-exit-codes/102.rst:10
 #: ../../source/ref-exit-codes/103.rst:10
 #: ../../source/ref-exit-codes/104.rst:10
+#: ../../source/ref-exit-codes/200.rst:29
 #: ../../source/ref-exit-codes/300.rst:11
 #: ../../source/ref-exit-codes/301.rst:16
 #: ../../source/ref-exit-codes/302.rst:16
@@ -36600,6 +36782,65 @@ msgstr ""
 
 #: ../../source/ref-exit-codes/2.rst:7
 msgid "The process exited gracefully, triggered by ``SIGQUIT``."
+msgstr ""
+
+#: ../../source/ref-exit-codes/200.rst:2
+msgid "[200] SERVERAPP_STRATEGY_PRECONDITION_UNMET"
+msgstr ""
+
+#: ../../source/ref-exit-codes/200.rst:23
+msgid ""
+"The strategy received replies that cannot be aggregated because either "
+"not all replies contain a supported number of records, because the keys "
+"used within each record do not match those in other replies, or because "
+"the key required by the strategy to perform weighted averaging is "
+"missing."
+msgstr ""
+
+#: ../../source/ref-exit-codes/200.rst:31
+msgid ""
+"Please ensure all replies returned by ClientApps have one "
+"|arrayrecord_link|_ (none when replies are from a round of federated "
+"evaluation, i.e. when message type is `MessageType.EVALUATE`) and one "
+"|metricrecord_link|_."
+msgstr ""
+
+#: ../../source/ref-exit-codes/200.rst:35
+msgid ""
+"The records in all replies must use identical keys. In addition, if the "
+"strategy expects a key to perform weighted average (e.g. in "
+"|fedavg_link|_) please ensure the returned |metricrecord_link|_ from "
+"ClientApps do include this key."
+msgstr ""
+
+#: ../../source/ref-exit-codes/200.rst:39
+msgid ""
+"Let's see a few examples of payloads (|recorddict_link|_) that can and "
+"can't be aggregated. Let's assume the `ServerApp` has been configured to "
+"use |fedavg_link|_ with `num-examples` as the key to perform weighted "
+"averaging:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/200.rst:43
+msgid ""
+"These two payloads can be aggregated because all keys match, there is one"
+" record of each type, and the key for weighted averaging is present."
+msgstr ""
+
+#: ../../source/ref-exit-codes/200.rst:61
+msgid ""
+"These payloads can't be aggregated because they have unmatching keys (see"
+" one has `loss`, the other has `loss` and `accuracy`)"
+msgstr ""
+
+#: ../../source/ref-exit-codes/200.rst:79
+msgid "These two payloads can't be aggregated (one has a missing `ArrayRecord`)"
+msgstr ""
+
+#: ../../source/ref-exit-codes/200.rst:91
+msgid ""
+"These payloads can't be aggregated because there is no key for weighted "
+"averaging"
 msgstr ""
 
 #: ../../source/ref-exit-codes/3.rst:2
@@ -60486,5 +60727,185 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Note that the existing secret must contain the key `FLWR_LICENSE_KEY`:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To ensure TLS communication within the"
+#~ " Flower Framework, you need to "
+#~ "configure your deployment with proper "
+#~ "TLS certificates."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "These paths can be overridden by "
+#~ "specifying the flags in the extraArgs,"
+#~ " as shown below."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To deploy the Flower Framework simply,"
+#~ " you need to configure your "
+#~ "deployment as insecure."
+#~ msgstr ""
+
+#~ msgid "Pre-provide TLS Certificate"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If certificate creation is disabled, you"
+#~ " must provide a pre-existing secret"
+#~ " of type `kubernetes.io/tls` named "
+#~ "`<flower-server.fullname>-server-tls`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "When the `tls` option is set to"
+#~ " `true`, it expects the existence of"
+#~ " the `<flower-server.fullname>-server-tls` "
+#~ "secret. Flower Framework components will "
+#~ "load TLS certificates on startup."
+#~ msgstr ""
+
+#~ msgid "**Pre-Provide TLS Certificate with Additional Hosts**"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this example, we use `cert-"
+#~ "manager` to create a certificate. By "
+#~ "default, the certificate will only "
+#~ "include the DNS name specified in "
+#~ "`common-name`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To allow SuperNodes to connect to "
+#~ "the SuperLink via the internal service"
+#~ " URL, you need to add an "
+#~ "additional host, as shown below:"
+#~ msgstr ""
+
+#~ msgid "`global.certificateAnnotations`"
+#~ msgstr ""
+
+#~ msgid "Default Cert-Manager certificate annotations"
+#~ msgstr ""
+
+#~ msgid "Flower-TLS-Certificate parameters"
+#~ msgstr "Certificats"
+
+#~ msgid "Can be disabled if a Secret already exists"
+#~ msgstr ""
+
+#~ msgid "`certificate.name`"
+#~ msgstr "Certificats"
+
+#~ msgid "Certificate name"
+#~ msgstr "Certificats"
+
+#~ msgid "`flower-server-tls`"
+#~ msgstr "Serveur de Flower"
+
+#~ msgid ""
+#~ "The requested ‘duration’ (i.e. lifetime) "
+#~ "of the Certificate. Default is 5 "
+#~ "years."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "How long before the currently issued "
+#~ "certificate’s expiry cert-manager should "
+#~ "renew the certificate. Default is 15 "
+#~ "days."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Private key options. These include the"
+#~ " key algorithm and size, the used "
+#~ "encoding and the rotation policy."
+#~ msgstr ""
+
+#~ msgid "`certificate.additionalHosts`"
+#~ msgstr ""
+
+#~ msgid "Additional hosts you want to put into the SAN's of the certificate"
+#~ msgstr ""
+
+#~ msgid "Defaults to cert-Manager.io"
+#~ msgstr ""
+
+#~ msgid "Defaults to Issuer"
+#~ msgstr "Flux de travail"
+
+#~ msgid "`Issuer`"
+#~ msgstr ""
+
+#~ msgid "Name of the Issuer or Issuer to use"
+#~ msgstr ""
+
+#~ msgid "Ingress TLS configuration"
+#~ msgstr "Valeurs de configuration"
+
+#~ msgid ""
+#~ "To ensure TLS communication within the"
+#~ " Flower framework, you need to "
+#~ "configure your deployment with proper "
+#~ "TLS certificates."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Note:** If `global.insecure` is set to"
+#~ " `False`, you must pre-provide a "
+#~ "secret of type `kubernetes.io/tls` named "
+#~ "`flower-client-tls`."
+#~ msgstr ""
+
+#~ msgid "Example configuration for TLS deployment:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For testing or internal use, you "
+#~ "might want to deploy the Flower "
+#~ "framework without TLS. Be cautious as"
+#~ " this exposes your deployment to "
+#~ "potential security risks."
+#~ msgstr ""
+
+#~ msgid "Example configuration for insecure deployment:"
+#~ msgstr ""
+
+#~ msgid "`supernode.ingress.enabled`"
+#~ msgstr ""
+
+#~ msgid "`supernode.ingress.annotations`"
+#~ msgstr ""
+
+#~ msgid "`supernode.ingress.ingressClassName`"
+#~ msgstr ""
+
+#~ msgid "`supernode.ingress.tls`"
+#~ msgstr ""
+
+#~ msgid "`supernode.ingress.clientappio.enabled`"
+#~ msgstr ""
+
+#~ msgid "Enable an ingress resource for SuperNode ClientAppIO"
+#~ msgstr ""
+
+#~ msgid "`supernode.ingress.clientappio.hostname`"
+#~ msgstr ""
+
+#~ msgid "Ingress hostname for the SuperNode ClientAppIO ingress"
+#~ msgstr "Démarrer le serveur"
+
+#~ msgid "`clientappio.example.com`"
+#~ msgstr "client"
+
+#~ msgid "`supernode.ingress.clientappio.path`"
+#~ msgstr ""
+
+#~ msgid "SuperNode ClientAppIO ingress path"
+#~ msgstr ""
+
+#~ msgid "`supernode.ingress.clientappio.pathType`"
 #~ msgstr ""
 
