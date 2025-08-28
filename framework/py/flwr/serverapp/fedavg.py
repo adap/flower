@@ -208,6 +208,7 @@ class FedAvg(Strategy):
             check_arrayrecord=True,
         )
 
+        arrays, metrics = None, None
         if replies_with_content:
             # Aggregate ArrayRecords
             arrays = aggregate_arrayrecords(
@@ -284,6 +285,7 @@ class FedAvg(Strategy):
             weighted_by_key=self.weighted_by_key,
             check_arrayrecord=False,
         )
+        metrics = None
         if replies_with_content:
             # Aggregate MetricRecords
             metrics = self.evaluate_metrics_aggr_fn(
