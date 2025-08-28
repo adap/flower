@@ -18,6 +18,10 @@
 
 .. _serverapp_link: ref-api/flwr.server.ServerApp.html
 
+.. |strategy_link| replace:: ``Strategy``
+
+.. _strategy_link: ref-api/flwr.serverapp.Strategy.html
+
 .. |fedavg_link| replace:: ``FedAvg``
 
 .. _fedavg_link: ref-api/flwr.serverapp.FedAvg.html
@@ -109,16 +113,18 @@ Update your ServerApp
 ---------------------
 
 Starting with Flower 1.21, the `ServerApp` no longer requires a `server_fn` function to
-make use of strategies. This is because a new collection of strategies has been created
-to operate directly on `Message` objects, allowing for a more streamlined and flexible
-approach to federated learning rounds.
+make use of strategies. This is because a new collection of strategies (all sharing the
+common |strategy_link|_ base classs) has been created to operate directly on `Message`
+objects, allowing for a more streamlined and flexible approach to federated learning
+rounds.
 
 .. note::
 
-    The new `Message`-based strategies are located in the `flwr.serverapp` module unlike
-    the previous strategies which were located in the `flwr.server` module. Over time
-    more strategies will be added to the `flwr.serverapp` module. Users are encouraged
-    to use these new strategies.
+    The new `Message`-based strategies are located in the `flwr.serverapp
+    <ref-api/flwr.serverapp.html>`_ module unlike the previous strategies which were
+    located in the `flwr.server.strategy <ref-api/flwr.server.strategy.html>`_ module.
+    Over time more strategies will be added to the `flwr.serverapp` module. Users are
+    encouraged to use these new strategies.
 
 Since Flower 1.10, the recommended `ServerApp` implementation would look something like
 the code snippet below. Naturally, more customization can be applied to the Strategy by,
@@ -151,10 +157,11 @@ use a simple example and assume we are federating a PyTorch model.
 With Flower 1.21 and later, the equivalent `ServerApp` using the new Message API would
 look as shown below. Note how we no longer need the `server_fn` function. The `Context`
 is still accessible, allowing you to customize how the `ServerApp` behaves at runtime.
-With the new strategies, a new `start` method is available. It defines a for loop which
-sets the steps involved in a round of FL. By default it behaves as the original
-strategies do. Note how the `start` method returns results. These are of type `Result`
-and by default contain the final `global model` as well as aggregated
+With the new strategies, a new ``start`` method is available. It defines a for loop
+which sets the steps involved in a round of FL. By default it behaves as the original
+strategies do, i.e. a round of FL training followed by one of FL evaluation and a stage
+to evaluate the global model. Note how the `start` method returns results. These are of
+type `Result` and by default contain the final `global model` as well as aggregated
 |metricrecord_link|_ from federated stages and, optionally, metrics from evaluation
 stages done at the `ServerApp`.
 
@@ -199,8 +206,8 @@ were respectively designed for doing federated training and evaluation using the
 client's local data. With the new Message API, you can define similar methods directly
 on the `ClientApp` via decorators to handle incoming `Message` objects.
 
-Let's see a basic example show first a minimal `NumPyClient`-based `ClientApp` and then
-the the upgraded design using the Message API.
+Let's see a basic example showing first a minimal `NumPyClient`-based `ClientApp` and
+then the upgraded design using the Message API.
 
 .. code-block:: python
 
@@ -243,7 +250,7 @@ the the upgraded design using the Message API.
     app = ClientApp(client_fn=client_fn)
 
 Upgrading a ClientApp designed around the `NumPyClient` + `client_fn` abstractions to
-the `MessageAPI` would result in the following code. Note that that the behaviour of the
+the Message API would result in the following code. Note that the behavior of the
 `ClientApp` is defined directly in its methods (i.e. a secondary class is no longer
 needed). The `ClientApp` abstraction comes with built-in ``@app.train`` and
 ``@app.evaluate`` decorators. The arguments the associated methods receive have been
