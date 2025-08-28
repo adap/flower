@@ -9,6 +9,11 @@ Welcome to the migration guide for updating Flower to Flower 1.13! Whether you'r
 seasoned user or just getting started, this guide will help you smoothly transition your
 existing setup to take advantage of the latest features and improvements in Flower 1.13.
 
+.. warning::
+
+    To upgrade to Flower 1.21 and later please refer to the migration guide to the
+    `Message API <how-to-upgrade-to-flower-with-message-api.html>`_.
+
 .. note::
 
     This guide shows how to make pre-``1.13`` Flower code compatible with Flower 1.13
