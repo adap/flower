@@ -217,7 +217,7 @@ def download_remote_app_via_api(identifier: str) -> None:
         )
     )
     with zipfile.ZipFile(zip_buf) as zf:
-        _safe_extract_zip(zf, project_dir)
+        _safe_extract_zip(zf, Path.cwd())
 
     print(
         typer.style(
