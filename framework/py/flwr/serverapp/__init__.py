@@ -14,11 +14,13 @@
 # ==============================================================================
 """Public Flower ServerApp APIs."""
 
+from .fedadagrad import FedAdagrad
 from .fedavg import FedAvg
 from .result import Result
 from .strategy import Strategy
 
 __all__ = [
+    "FedAdagrad",
     "FedAvg",
     "Result",
     "Strategy",
