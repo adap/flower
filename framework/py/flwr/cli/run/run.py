@@ -41,8 +41,8 @@ from flwr.common.constant import CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab
-from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
-from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
+from flwr.proto.control_pb2_grpc import ControlStub
 
 from ..log import start_stream
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
@@ -112,7 +112,7 @@ def run(
         )
 
         if "address" in federation_config:
-            _run_with_exec_api(
+            _run_with_control_api(
                 app,
                 federation,
                 federation_config,
@@ -121,7 +121,7 @@ def run(
                 output_format,
             )
         else:
-            _run_without_exec_api(
+            _run_without_control_api(
                 app, federation_config, run_config_overrides, federation
             )
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
@@ -142,7 +142,7 @@ def run(
 
 
 # pylint: disable-next=R0913, R0914, R0917
-def _run_with_exec_api(
+def _run_with_control_api(
     app: Path,
     federation: str,
     federation_config: dict[str, Any],
@@ -150,53 +150,60 @@ def _run_with_exec_api(
     stream: bool,
     output_format: str,
 ) -> None:
-    auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
-    channel = init_channel(app, federation_config, auth_plugin)
-    stub = ExecStub(channel)
+    channel = None
+    try:
+        auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
+        channel = init_channel(app, federation_config, auth_plugin)
+        stub = ControlStub(channel)
 
-    fab_bytes, fab_hash, config = build_fab(app)
-    fab_id, fab_version = get_metadata_from_config(config)
+        fab_bytes, fab_hash, config = build_fab(app)
+        fab_id, fab_version = get_metadata_from_config(config)
 
-    fab = Fab(fab_hash, fab_bytes)
+        fab = Fab(fab_hash, fab_bytes)
 
-    # Construct a `ConfigRecord` out of a flattened `UserConfig`
-    fed_config = flatten_dict(federation_config.get("options", {}))
-    c_record = user_config_to_configrecord(fed_config)
+        # Construct a `ConfigRecord` out of a flattened `UserConfig`
+        fed_config = flatten_dict(federation_config.get("options", {}))
+        c_record = user_config_to_configrecord(fed_config)
 
-    req = StartRunRequest(
-        fab=fab_to_proto(fab),
-        override_config=user_config_to_proto(parse_config_args(config_overrides)),
-        federation_options=config_record_to_proto(c_record),
-    )
-    with flwr_cli_grpc_exc_handler():
-        res = stub.StartRun(req)
-
-    if res.HasField("run_id"):
-        typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
-    else:
-        typer.secho("❌ Failed to start run", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-
-    if output_format == CliOutputFormat.JSON:
-        run_output = json.dumps(
-            {
-                "success": res.HasField("run_id"),
-                "run-id": res.run_id if res.HasField("run_id") else None,
-                "fab-id": fab_id,
-                "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
-                "fab-version": fab_version,
-                "fab-hash": fab_hash[:8],
-                "fab-filename": get_fab_filename(config, fab_hash),
-            }
+        req = StartRunRequest(
+            fab=fab_to_proto(fab),
+            override_config=user_config_to_proto(parse_config_args(config_overrides)),
+            federation_options=config_record_to_proto(c_record),
         )
-        restore_output()
-        Console().print_json(run_output)
+        with flwr_cli_grpc_exc_handler():
+            res = stub.StartRun(req)
 
-    if stream:
-        start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)
+        if res.HasField("run_id"):
+            typer.secho(
+                f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN
+            )
+        else:
+            typer.secho("❌ Failed to start run", fg=typer.colors.RED)
+            raise typer.Exit(code=1)
+
+        if output_format == CliOutputFormat.JSON:
+            run_output = json.dumps(
+                {
+                    "success": res.HasField("run_id"),
+                    "run-id": res.run_id if res.HasField("run_id") else None,
+                    "fab-id": fab_id,
+                    "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
+                    "fab-version": fab_version,
+                    "fab-hash": fab_hash[:8],
+                    "fab-filename": get_fab_filename(config, fab_hash),
+                }
+            )
+            restore_output()
+            Console().print_json(run_output)
+
+        if stream:
+            start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)
+    finally:
+        if channel:
+            channel.close()
 
 
-def _run_without_exec_api(
+def _run_without_control_api(
     app: Optional[Path],
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],

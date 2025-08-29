@@ -20,14 +20,14 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
-from flwr.common.typing import UserInfo
-from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.common.typing import AccountInfo
+from flwr.proto.control_pb2_grpc import ControlStub
 
 from ..typing import UserAuthCredentials, UserAuthLoginDetails
 
 
-class ExecAuthPlugin(ABC):
-    """Abstract Flower Auth Plugin class for ExecServicer.
+class ControlAuthPlugin(ABC):
+    """Abstract Flower Auth Plugin class for ControlServicer.
 
     Parameters
     ----------
@@ -53,7 +53,7 @@ class ExecAuthPlugin(ABC):
     @abstractmethod
     def validate_tokens_in_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> tuple[bool, Optional[UserInfo]]:
+    ) -> tuple[bool, Optional[AccountInfo]]:
         """Validate authentication tokens in the provided metadata."""
 
     @abstractmethod
@@ -63,12 +63,14 @@ class ExecAuthPlugin(ABC):
     @abstractmethod
     def refresh_tokens(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> tuple[Optional[Sequence[tuple[str, Union[str, bytes]]]], Optional[UserInfo]]:
+    ) -> tuple[
+        Optional[Sequence[tuple[str, Union[str, bytes]]]], Optional[AccountInfo]
+    ]:
         """Refresh authentication tokens in the provided metadata."""
 
 
-class ExecAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
-    """Abstract Flower Authorization Plugin class for ExecServicer.
+class ControlAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
+    """Abstract Flower Authorization Plugin class for ControlServicer.
 
     Parameters
     ----------
@@ -84,7 +86,7 @@ class ExecAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
         """Abstract constructor."""
 
     @abstractmethod
-    def verify_user_authorization(self, user_info: UserInfo) -> bool:
+    def verify_user_authorization(self, account_info: AccountInfo) -> bool:
         """Verify user authorization request."""
 
 
@@ -101,7 +103,7 @@ class CliAuthPlugin(ABC):
     @abstractmethod
     def login(
         login_details: UserAuthLoginDetails,
-        exec_stub: ExecStub,
+        control_stub: ControlStub,
     ) -> UserAuthCredentials:
         """Authenticate the user and retrieve authentication credentials.
 
@@ -109,7 +111,7 @@ class CliAuthPlugin(ABC):
         ----------
         login_details : UserAuthLoginDetails
             An object containing the user's login details.
-        exec_stub : ExecStub
+        control_stub : ControlStub
             A stub for executing RPC calls to the server.
 
         Returns

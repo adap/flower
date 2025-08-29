@@ -32,7 +32,13 @@ def get_init_dir_list_and_warnings(absolute_path: str) -> Tuple[list[str], list[
     path = os.walk(absolute_path)
     warning_list = []
     dir_list = []
-    ignore_list = ["__pycache__$", ".pytest_cache.*$", "dist", "flwr.egg-info$"]
+    ignore_list = [
+        "__pycache__$",
+        ".pytest_cache.*$",
+        "dist",
+        "flwr.egg-info$",
+        ".mypy_cache",
+    ]
 
     for dir_path, _, files_in_dir in path:
         # As some directories are automatically generated we are going to ignore them

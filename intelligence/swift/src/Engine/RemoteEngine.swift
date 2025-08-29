@@ -62,14 +62,18 @@ class RemoteEngine: RemoteEngineProtocol {
     if stream {
       var accumulatedResponse = ""
       try await NetworkService.streamElement(payload, authorization: authorization, on: url) {
-        (streamElement: [StreamChoice]) in
-        for choice in streamElement {
+        (streamElement: ServerSentEvent) in
+        guard let json = streamElement.data.data(using: .utf8) else { return }
+        guard let chunk = try? NetworkService.parseJson(from: json, as: StreamChunk.self) else {
+          return
+        }
+        for choice in chunk.choices {
           let deltaContent = choice.delta.content
           onStreamEvent?(StreamEvent(chunk: deltaContent))
           accumulatedResponse += deltaContent
         }
       }
-      return Message(
+      return try Message(
         role: "assistant",
         content: accumulatedResponse
       )
@@ -82,7 +86,7 @@ class RemoteEngine: RemoteEngineProtocol {
     guard let message = response.choices.first?.message else {
       throw Failure(code: .remoteError, message: "No message found in response")
     }
-    return Message(
+    return try Message(
       role: message.role,
       content: message.content ?? "",
       toolCalls: message.toolCalls
@@ -91,7 +95,7 @@ class RemoteEngine: RemoteEngineProtocol {
 }
 
 enum NetworkService {
-  private static func parseJson<T: Decodable>(
+  static func parseJson<T: Decodable>(
     from data: Data,
     as type: T.Type
   ) throws -> T {
@@ -113,6 +117,9 @@ enum NetworkService {
     if let authorization = authorization {
       urlRequest.addValue(authorization, forHTTPHeaderField: "Authorization")
     }
+
+    urlRequest.addValue(sdk, forHTTPHeaderField: "FI-SDK-Type")
+    urlRequest.addValue(version, forHTTPHeaderField: "FI-SDK-Version")
 
     urlRequest.httpBody = body
 
@@ -252,6 +259,16 @@ struct StreamChoice: Codable {
 struct DeltaMessage: Codable {
   let content: String
   let role: String
+}
+
+struct ServerSentEvent: Codable {
+  let data: String
+}
+
+struct StreamChunk: Codable {
+  let object: String
+  let model: String
+  let choices: [StreamChoice]
 }
 
 struct Usage: Codable {

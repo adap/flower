@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from dataclasses import dataclass
 from io import BytesIO
@@ -24,11 +25,15 @@ from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
-from flwr.proto.recorddict_pb2 import Array as ArrayProto  # pylint: disable=E0611
-
-from ..constant import SType
-from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
+from ..constant import MAX_ARRAY_CHUNK_SIZE, SType
+from ..inflatable import (
+    InflatableObject,
+    add_header_to_object_body,
+    get_object_body,
+    get_object_children_ids_from_object_content,
+)
 from ..typing import NDArray
+from .arraychunk import ArrayChunk
 
 if TYPE_CHECKING:
     import torch
@@ -252,16 +257,56 @@ class Array(InflatableObject):
         ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
         return cast(NDArray, ndarray_deserialized)
 
+    @property
+    def children(self) -> dict[str, InflatableObject]:
+        """Return a dictionary of ArrayChunks with their Object IDs as keys."""
+        return dict(self.slice_array())
+
+    def slice_array(self) -> list[tuple[str, InflatableObject]]:
+        """Slice Array data and construct a list of ArrayChunks."""
+        # Return cached chunks if they exist
+        if "_chunks" in self.__dict__:
+            return cast(list[tuple[str, InflatableObject]], self.__dict__["_chunks"])
+
+        # Chunks are not children as some of them may be identical
+        chunks: list[tuple[str, InflatableObject]] = []
+        # memoryview allows for zero-copy slicing
+        data_view = memoryview(self.data)
+        for start in range(0, len(data_view), MAX_ARRAY_CHUNK_SIZE):
+            end = min(start + MAX_ARRAY_CHUNK_SIZE, len(data_view))
+            ac = ArrayChunk(data_view[start:end])
+            chunks.append((ac.object_id, ac))
+
+        # Cache the chunks for future use
+        self.__dict__["_chunks"] = chunks
+        return chunks
+
     def deflate(self) -> bytes:
         """Deflate the Array."""
-        array_proto = ArrayProto(
-            dtype=self.dtype,
-            shape=self.shape,
-            stype=self.stype,
-            data=self.data,
-        )
+        array_metadata: dict[str, str | tuple[int, ...] | list[int]] = {}
 
-        obj_body = array_proto.SerializeToString(deterministic=True)
+        # We want to record all object_id even if repeated
+        # it can happend that chunks carry the exact same data
+        # for example when the array has only zeros
+        children_list = self.slice_array()
+        # Let's not save the entire object_id but a mapping to those
+        # that will be carried in the object head
+        # (replace a long object_id with a single scalar)
+        unique_children = list(self.children.keys())
+        arraychunk_ids = [unique_children.index(ch_id) for ch_id, _ in children_list]
+
+        # The deflated Array carries everything but the data
+        # The `arraychunk_ids` will be used during Array inflation
+        # to rematerialize the data from ArrayChunk objects.
+        array_metadata = {
+            "dtype": self.dtype,
+            "shape": self.shape,
+            "stype": self.stype,
+            "arraychunk_ids": arraychunk_ids,
+        }
+
+        # Serialize metadata dict
+        obj_body = json.dumps(array_metadata).encode("utf-8")
         return add_header_to_object_body(object_body=obj_body, obj=self)
 
     @classmethod
@@ -276,25 +321,54 @@ class Array(InflatableObject):
             The deflated object content of the Array.
 
         children : Optional[dict[str, InflatableObject]] (default: None)
-            Must be ``None``. ``Array`` does not support child objects.
-            Providing any children will raise a ``ValueError``.
+            Must be ``None``. ``Array`` must have child objects.
+            Providing no children will raise a ``ValueError``.
 
         Returns
         -------
         Array
             The inflated Array.
         """
-        if children:
-            raise ValueError("`Array` objects do not have children.")
+        if children is None:
+            children = {}
 
         obj_body = get_object_body(object_content, cls)
-        proto_array = ArrayProto.FromString(obj_body)
-        return cls(
-            dtype=proto_array.dtype,
-            shape=tuple(proto_array.shape),
-            stype=proto_array.stype,
-            data=proto_array.data,
+
+        # Extract children IDs from head
+        children_ids = get_object_children_ids_from_object_content(object_content)
+        # Decode the Array body
+        array_metadata: dict[str, str | tuple[int, ...] | list[int]] = json.loads(
+            obj_body.decode(encoding="utf-8")
         )
+
+        # Verify children ids in body match those passed for inflation
+        chunk_ids_indices = cast(list[int], array_metadata["arraychunk_ids"])
+        # Convert indices back to IDs
+        chunk_ids = [children_ids[i] for i in chunk_ids_indices]
+        # Check consistency
+        unique_arrayschunks = set(chunk_ids)
+        children_obj_ids = set(children.keys())
+        if unique_arrayschunks != children_obj_ids:
+            raise ValueError(
+                "Unexpected set of `children`. "
+                f"Expected {unique_arrayschunks} but got {children_obj_ids}."
+            )
+
+        # Materialize Array with empty data
+        array = cls(
+            dtype=cast(str, array_metadata["dtype"]),
+            shape=cast(tuple[int], tuple(array_metadata["shape"])),
+            stype=cast(str, array_metadata["stype"]),
+            data=b"",
+        )
+
+        # Now inject data from chunks
+        buff = bytearray()
+        for ch_id in chunk_ids:
+            buff += cast(ArrayChunk, children[ch_id]).data
+
+        array.data = bytes(buff)
+        return array
 
     @property
     def object_id(self) -> str:
@@ -320,4 +394,9 @@ class Array(InflatableObject):
         if name in ("dtype", "shape", "stype", "data"):
             # Mark as dirty if any of the main attributes are set
             self.is_dirty = True
+            # Clear cached object ID
+            self.__dict__.pop("_object_id", None)
+            # Clear cached chunks if data is set
+            if name == "data":
+                self.__dict__.pop("_chunks", None)
         super().__setattr__(name, value)

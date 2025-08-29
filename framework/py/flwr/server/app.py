@@ -18,9 +18,8 @@
 import argparse
 import csv
 import importlib.util
-import multiprocessing
-import multiprocessing.context
 import os
+import subprocess
 import sys
 import threading
 from collections.abc import Sequence
@@ -37,13 +36,13 @@ from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
-from flwr.common.auth_plugin import ExecAuthPlugin, ExecAuthzPlugin
-from flwr.common.config import get_flwr_dir, parse_config_args
+from flwr.common.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
+from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
     AUTH_TYPE_YAML_KEY,
     AUTHZ_TYPE_YAML_KEY,
     CLIENT_OCTET,
-    EXEC_API_DEFAULT_SERVER_ADDRESS,
+    CONTROL_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     FLEET_API_REST_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
@@ -55,6 +54,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     EventLogWriterType,
+    ExecPluginType,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit
@@ -69,13 +69,10 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
-from flwr.server.serverapp.app import flwr_serverapp
-from flwr.simulation.app import flwr_simulation
+from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.superexec.app import load_executor
-from flwr.superexec.exec_grpc import run_exec_api_grpc
+from flwr.superlink.servicer.control import run_control_api_grpc
 
-from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
@@ -85,16 +82,15 @@ from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
-P = TypeVar("P", ExecAuthPlugin, ExecAuthzPlugin)
+P = TypeVar("P", ControlAuthPlugin, ControlAuthzPlugin)
 
 
 try:
     from flwr.ee import (
         add_ee_args_superlink,
-        get_dashboard_server,
-        get_exec_auth_plugins,
-        get_exec_authz_plugins,
-        get_exec_event_log_writer_plugins,
+        get_control_auth_plugins,
+        get_control_authz_plugins,
+        get_control_event_log_writer_plugins,
         get_fleet_event_log_writer_plugins,
     )
 except ImportError:
@@ -103,16 +99,16 @@ except ImportError:
     def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
         """Add EE-specific arguments to the parser."""
 
-    def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
-        """Return all Exec API authentication plugins."""
+    def get_control_auth_plugins() -> dict[str, type[ControlAuthPlugin]]:
+        """Return all Control API authentication plugins."""
         raise NotImplementedError("No authentication plugins are currently supported.")
 
-    def get_exec_authz_plugins() -> dict[str, type[ExecAuthzPlugin]]:
-        """Return all Exec API authorization plugins."""
+    def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
+        """Return all Control API authorization plugins."""
         raise NotImplementedError("No authorization plugins are currently supported.")
 
-    def get_exec_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
-        """Return all Exec API event log writer plugins."""
+    def get_control_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
+        """Return all Control API event log writer plugins."""
         raise NotImplementedError(
             "No event log writer plugins are currently supported."
         )
@@ -139,9 +135,46 @@ def run_superlink() -> None:
             WARN, "The `--flwr-dir` option is currently not in use and will be ignored."
         )
 
+    # Detect if `--executor*` arguments were set
+    if args.executor or args.executor_dir or args.executor_config:
+        flwr_exit(
+            ExitCode.SUPERLINK_INVALID_ARGS,
+            "The arguments `--executor`, `--executor-dir`, and `--executor-config` are "
+            "deprecated and will be removed in a future release. To run SuperLink with "
+            "the SimulationIo API, please use `--simulation`.",
+        )
+
+    # Detect if both Control API and Exec API addresses were set explicitly
+    explicit_args = set()
+    for arg in sys.argv[1:]:
+        if arg.startswith("--"):
+            explicit_args.add(
+                arg.split("=")[0]
+            )  # handles both `--arg val` and `--arg=val`
+
+    control_api_set = "--control-api-address" in explicit_args
+    exec_api_set = "--exec-api-address" in explicit_args
+
+    if control_api_set and exec_api_set:
+        flwr_exit(
+            ExitCode.SUPERLINK_INVALID_ARGS,
+            "Both `--control-api-address` and `--exec-api-address` are set. "
+            "Please use only `--control-api-address` as `--exec-api-address` is "
+            "deprecated.",
+        )
+
+    # Warn deprecated `--exec-api-address` argument
+    if args.exec_api_address is not None:
+        log(
+            WARN,
+            "The `--exec-api-address` argument is deprecated and will be removed in a "
+            "future release. Use `--control-api-address` instead.",
+        )
+        args.control_api_address = args.exec_api_address
+
     # Parse IP addresses
     serverappio_address, _, _ = _format_address(args.serverappio_api_address)
-    exec_address, _, _ = _format_address(args.exec_api_address)
+    control_address, _, _ = _format_address(args.control_api_address)
     simulationio_address, _, _ = _format_address(args.simulationio_api_address)
 
     # Obtain certificates
@@ -151,17 +184,17 @@ def run_superlink() -> None:
     # provided
     verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", None)
 
-    auth_plugin: Optional[ExecAuthPlugin] = None
-    authz_plugin: Optional[ExecAuthzPlugin] = None
+    auth_plugin: Optional[ControlAuthPlugin] = None
+    authz_plugin: Optional[ControlAuthzPlugin] = None
     event_log_plugin: Optional[EventLogWriterPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
-        auth_plugin, authz_plugin = _try_obtain_exec_auth_plugins(
+        auth_plugin, authz_plugin = _try_obtain_control_auth_plugins(
             Path(cfg_path), verify_tls_cert
         )
         # Enable event logging if the args.enable_event_log is True
         if args.enable_event_log:
-            event_log_plugin = _try_obtain_exec_event_log_writer_plugin()
+            event_log_plugin = _try_obtain_control_event_log_writer_plugin()
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -172,29 +205,23 @@ def run_superlink() -> None:
     # Initialize ObjectStoreFactory
     objectstore_factory = ObjectStoreFactory()
 
-    # Start Exec API
-    executor = load_executor(args)
-    exec_server: grpc.Server = run_exec_api_grpc(
-        address=exec_address,
+    # Start Control API
+    is_simulation = args.simulation
+    control_server: grpc.Server = run_control_api_grpc(
+        address=control_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
-        executor=executor,
+        objectstore_factory=objectstore_factory,
         certificates=certificates,
-        config=parse_config_args(
-            [args.executor_config] if args.executor_config else args.executor_config
-        ),
+        is_simulation=is_simulation,
         auth_plugin=auth_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
     )
-    grpc_servers = [exec_server]
-
-    # Determine Exec plugin
-    # If simulation is used, don't start ServerAppIo and Fleet APIs
-    sim_exec = executor.__class__.__qualname__ == "SimulationEngine"
+    grpc_servers = [control_server]
     bckg_threads: list[threading.Thread] = []
 
-    if sim_exec:
+    if is_simulation:
         simulationio_server: grpc.Server = run_simulationio_api_grpc(
             address=simulationio_address,
             state_factory=state_factory,
@@ -312,36 +339,18 @@ def run_superlink() -> None:
         io_address = (
             f"{CLIENT_OCTET}:{_port}" if _octet == SERVER_OCTET else serverappio_address
         )
-        address_arg = (
-            "--simulationio-api-address" if sim_exec else "--serverappio-api-address"
-        )
-        address = simulationio_address if sim_exec else io_address
-        cmd = "flwr-simulation" if sim_exec else "flwr-serverapp"
-
-        # Scheduler thread
-        scheduler_th = threading.Thread(
-            target=_flwr_scheduler,
-            args=(
-                state_factory,
-                address_arg,
-                address,
-                cmd,
-            ),
-            daemon=True,
-        )
-        scheduler_th.start()
-        bckg_threads.append(scheduler_th)
-
-    # Add Dashboard server if available
-    if dashboard_address := getattr(args, "dashboard_address", None):
-        dashboard_address_str, _, _ = _format_address(dashboard_address)
-        dashboard_server = get_dashboard_server(
-            address=dashboard_address_str,
-            state_factory=state_factory,
-            certificates=None,
-        )
-
-        grpc_servers.append(dashboard_server)
+        command = ["flower-superexec", "--insecure"]
+        command += [
+            "--appio-api-address",
+            simulationio_address if is_simulation else io_address,
+        ]
+        command += [
+            "--plugin-type",
+            ExecPluginType.SIMULATION if is_simulation else ExecPluginType.SERVER_APP,
+        ]
+        command += ["--parent-pid", str(os.getpid())]
+        # pylint: disable-next=consider-using-with
+        subprocess.Popen(command)
 
     # Graceful shutdown
     register_exit_handlers(
@@ -357,75 +366,6 @@ def run_superlink() -> None:
     # Exit if any thread has exited prematurely
     # This code will not be reached if the SuperLink stops gracefully
     flwr_exit(ExitCode.SUPERLINK_THREAD_CRASH)
-
-
-def _run_flwr_command(args: list[str], main_pid: int) -> None:
-    # Monitor the main process in case of SIGKILL
-    def main_process_monitor() -> None:
-        while True:
-            sleep(1)
-            if os.getppid() != main_pid:
-                os.kill(os.getpid(), 9)
-
-    threading.Thread(target=main_process_monitor, daemon=True).start()
-
-    # Run the command
-    sys.argv = args
-    if args[0] == "flwr-serverapp":
-        flwr_serverapp()
-    elif args[0] == "flwr-simulation":
-        flwr_simulation()
-    else:
-        raise ValueError(f"Unknown command: {args[0]}")
-
-
-def _flwr_scheduler(
-    state_factory: LinkStateFactory,
-    io_api_arg: str,
-    io_api_address: str,
-    cmd: str,
-) -> None:
-    log(DEBUG, "Started %s scheduler thread.", cmd)
-    state = state_factory.state()
-    run_id_to_proc: dict[int, multiprocessing.context.SpawnProcess] = {}
-
-    # Use the "spawn" start method for multiprocessing.
-    mp_spawn_context = multiprocessing.get_context("spawn")
-
-    # Periodically check for a pending run in the LinkState
-    while True:
-        sleep(0.1)
-        pending_run_id = state.get_pending_run_id()
-
-        if pending_run_id and pending_run_id not in run_id_to_proc:
-
-            log(
-                INFO,
-                "Launching %s subprocess. Connects to SuperLink on %s",
-                cmd,
-                io_api_address,
-            )
-            # Start subprocess
-            command = [
-                cmd,
-                "--run-once",
-                io_api_arg,
-                io_api_address,
-                "--insecure",
-            ]
-
-            proc = mp_spawn_context.Process(
-                target=_run_flwr_command, args=(command, os.getpid()), daemon=True
-            )
-            proc.start()
-
-            # Store the process
-            run_id_to_proc[pending_run_id] = proc
-
-        # Clean up finished processes
-        for run_id, proc in list(run_id_to_proc.items()):
-            if not proc.is_alive():
-                del run_id_to_proc[run_id]
 
 
 def _format_address(address: str) -> tuple[str, str, int]:
@@ -481,10 +421,10 @@ def _try_load_public_keys_node_authentication(
     return node_public_keys
 
 
-def _try_obtain_exec_auth_plugins(
+def _try_obtain_control_auth_plugins(
     config_path: Path, verify_tls_cert: bool
-) -> tuple[ExecAuthPlugin, ExecAuthzPlugin]:
-    """Obtain Exec API authentication and authorization plugins."""
+) -> tuple[ControlAuthPlugin, ControlAuthzPlugin]:
+    """Obtain Control API authentication and authorization plugins."""
     # Load YAML file
     with config_path.open("r", encoding="utf-8") as file:
         config: dict[str, Any] = yaml.safe_load(file)
@@ -514,24 +454,24 @@ def _try_obtain_exec_auth_plugins(
     auth_plugin = _load_plugin(
         section="authentication",
         yaml_key=AUTH_TYPE_YAML_KEY,
-        loader=get_exec_auth_plugins,
+        loader=get_control_auth_plugins,
     )
 
     # Load authorization plugin
     authz_plugin = _load_plugin(
         section="authorization",
         yaml_key=AUTHZ_TYPE_YAML_KEY,
-        loader=get_exec_authz_plugins,
+        loader=get_control_authz_plugins,
     )
 
     return auth_plugin, authz_plugin
 
 
-def _try_obtain_exec_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]:
+def _try_obtain_control_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]:
     """Return an instance of the event log writer plugin."""
     try:
         all_plugins: dict[str, type[EventLogWriterPlugin]] = (
-            get_exec_event_log_writer_plugins()
+            get_control_event_log_writer_plugins()
         )
         plugin_class = all_plugins[EventLogWriterType.STDOUT]
         return plugin_class()
@@ -579,7 +519,9 @@ def _run_fleet_api_grpc_rere(  # pylint: disable=R0913, R0917
         interceptors=interceptors,
     )
 
-    log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
+    log(
+        INFO, "Flower Deployment Runtime: Starting Fleet API (gRPC-rere) on %s", address
+    )
     fleet_grpc_server.start()
 
     return fleet_grpc_server
@@ -607,7 +549,11 @@ def _run_fleet_api_grpc_adapter(
         certificates=certificates,
     )
 
-    log(INFO, "Flower ECE: Starting Fleet API (GrpcAdapter) on %s", address)
+    log(
+        INFO,
+        "Flower Deployment Runtime: Starting Fleet API (GrpcAdapter) on %s",
+        address,
+    )
     fleet_grpc_server.start()
 
     return fleet_grpc_server
@@ -662,7 +608,7 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     add_ee_args_superlink(parser=parser)
     _add_args_serverappio_api(parser=parser)
     _add_args_fleet_api(parser=parser)
-    _add_args_exec_api(parser=parser)
+    _add_args_control_api(parser=parser)
     _add_args_simulationio_api(parser=parser)
 
     return parser
@@ -786,30 +732,41 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def _add_args_exec_api(parser: argparse.ArgumentParser) -> None:
-    """Add command line arguments for Exec API."""
+def _add_args_control_api(parser: argparse.ArgumentParser) -> None:
+    """Add command line arguments for Control API."""
+    parser.add_argument(
+        "--control-api-address",
+        help="Control API server address (IPv4, IPv6, or a domain name) "
+        f"By default, it is set to {CONTROL_API_DEFAULT_SERVER_ADDRESS}.",
+        default=CONTROL_API_DEFAULT_SERVER_ADDRESS,
+    )
     parser.add_argument(
         "--exec-api-address",
-        help="Exec API server address (IPv4, IPv6, or a domain name) "
-        f"By default, it is set to {EXEC_API_DEFAULT_SERVER_ADDRESS}.",
-        default=EXEC_API_DEFAULT_SERVER_ADDRESS,
+        help="This argument is deprecated and will be removed in a future release. "
+        "Use `--control-api-address` instead.",
+        default=None,
     )
     parser.add_argument(
         "--executor",
-        help="For example: `deployment:exec` or `project.package.module:wrapper.exec`. "
-        "The default is `flwr.superexec.deployment:executor`",
-        default="flwr.superexec.deployment:executor",
+        help="This argument is deprecated and will be removed in a future release.",
+        default=None,
     )
     parser.add_argument(
         "--executor-dir",
-        help="The directory for the executor.",
-        default=".",
+        help="This argument is deprecated and will be removed in a future release.",
+        default=None,
     )
     parser.add_argument(
         "--executor-config",
-        help="Key-value pairs for the executor config, separated by spaces. "
-        "For example:\n\n`--executor-config 'verbose=true "
-        'root-certificates="certificates/superlink-ca.crt"\'`',
+        help="This argument is deprecated and will be removed in a future release.",
+        default=None,
+    )
+    parser.add_argument(
+        "--simulation",
+        action="store_true",
+        default=False,
+        help="Launch the SimulationIo API server in place of "
+        "the ServerAppIo API server.",
     )
 
 

@@ -16,11 +16,11 @@
 
 
 from .auth_plugin import CliAuthPlugin as CliAuthPlugin
-from .auth_plugin import ExecAuthPlugin as ExecAuthPlugin
-from .auth_plugin import ExecAuthzPlugin as ExecAuthzPlugin
+from .auth_plugin import ControlAuthPlugin as ControlAuthPlugin
+from .auth_plugin import ControlAuthzPlugin as ControlAuthzPlugin
 
 __all__ = [
     "CliAuthPlugin",
-    "ExecAuthPlugin",
-    "ExecAuthzPlugin",
+    "ControlAuthPlugin",
+    "ControlAuthzPlugin",
 ]

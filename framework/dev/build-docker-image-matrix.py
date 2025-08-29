@@ -90,7 +90,7 @@ UBUNTU_VARIANT = Variant(
 
 # alpine base image
 ALPINE_VARIANT = Variant(
-    Distro(DistroName.ALPINE, "3.19"),
+    Distro(DistroName.ALPINE, "3.22"),
     CpuVariant(),
 )
 
@@ -205,7 +205,7 @@ def tag_superlink_supernode_images(image: BaseImage) -> List[str]:
         return image.tags
 
 
-def tag_serverapp_clientapp_images(image: BaseImage) -> List[str]:
+def tag_superexec_images(image: BaseImage) -> List[str]:
     """
     Compute the Docker image tags based on its build arguments.
 
@@ -321,16 +321,9 @@ DISTRO_VERSION={distro_version}
         )
         # ubuntu images for each supported python version
         + generate_binary_images(
-            "serverapp",
+            "superexec",
             base_images,
-            tag_serverapp_clientapp_images,
-            lambda image: image.build_args.variant.distro.name == DistroName.UBUNTU,
-        )
-        # ubuntu images for each supported python version
-        + generate_binary_images(
-            "clientapp",
-            base_images,
-            tag_serverapp_clientapp_images,
+            tag_superexec_images,
             lambda image: image.build_args.variant.distro.name == DistroName.UBUNTU,
         )
     )
@@ -405,8 +398,7 @@ DISTRO_VERSION={distro_version}
             lambda image: image.tags,
             lambda image: isinstance(image.build_args.variant.extras, CpuVariant),
         )
-        + generate_binary_images("serverapp", base_images, lambda image: image.tags)
-        + generate_binary_images("clientapp", base_images, lambda image: image.tags)
+        + generate_binary_images("superexec", base_images, lambda image: image.tags)
     )
 
     return base_images, binary_images
@@ -486,8 +478,7 @@ DISTRO_VERSION={distro_version}
             lambda image: image.tags,
             lambda image: isinstance(image.build_args.variant.extras, CpuVariant),
         )
-        + generate_binary_images("serverapp", base_images, lambda image: image.tags)
-        + generate_binary_images("clientapp", base_images, lambda image: image.tags)
+        + generate_binary_images("superexec", base_images, lambda image: image.tags)
     )
 
     return base_images, binary_images

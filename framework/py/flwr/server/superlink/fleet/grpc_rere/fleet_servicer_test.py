@@ -21,13 +21,18 @@ import unittest
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigRecord, Message
+from flwr.common import ConfigRecord
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.inflatable import get_desdendant_object_ids, get_object_id
+from flwr.common.inflatable import (
+    get_all_nested_objects,
+    get_object_id,
+    get_object_tree,
+    iterate_object_tree,
+)
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import message_from_proto
 from flwr.common.typing import RunStatus
@@ -39,6 +44,9 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushMessagesResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
+    ObjectTree,
     PullObjectRequest,
     PullObjectResponse,
     PushObjectRequest,
@@ -47,13 +55,13 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.app import _run_fleet_api_grpc_rere
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import (
     create_ins_message,
     create_res_message,
 )
 from flwr.server.superlink.utils import _STATUS_TO_MSG
+from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 
 
@@ -115,6 +123,11 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=PullObjectRequest.SerializeToString,
             response_deserializer=PullObjectResponse.FromString,
         )
+        self._confirm_message_received = self._channel.unary_unary(
+            "/flwr.proto.Fleet/ConfirmMessageReceived",
+            request_serializer=ConfirmMessageReceivedRequest.SerializeToString,
+            response_deserializer=ConfirmMessageReceivedResponse.FromString,
+        )
 
     def tearDown(self) -> None:
         """Clean up grpc server."""
@@ -132,7 +145,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushMessages` success."""
         # Prepare
         node_id = self.state.create_node(heartbeat_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PushMessages RPC is only allowed in
         # running status.
         self._transition_run_status(run_id, 2)
@@ -148,7 +161,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         request = PushMessagesRequest(
             node=Node(node_id=node_id),
             messages_list=[msg_proto],
-            msg_to_descendant_mapping=descendant_mapping,
+            message_object_trees=[get_object_tree(message)],
         )
 
         # Execute
@@ -166,13 +179,8 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             for obj_id in obj_ids.object_ids
         }  # descendants
         # Construct a single set with all object ids
-        requested_object_ids = {
-            obj_id
-            for obj_ids in response.objects_to_push.values()
-            for obj_id in obj_ids.object_ids
-        }
+        requested_object_ids = set(response.objects_to_push)
         assert expected_object_ids == requested_object_ids
-        assert response.objects_to_push.keys() == descendant_mapping.keys()
 
     def _assert_push_messages_not_allowed(self, node_id: int, run_id: int) -> None:
         """Assert `PushMessages` not allowed."""
@@ -203,27 +211,11 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushMessages` not successful if RunStatus is not running."""
         # Prepare
         node_id = self.state.create_node(heartbeat_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
         self._assert_push_messages_not_allowed(node_id, run_id)
-
-    def _register_in_object_store(self, message: Message) -> list[str]:
-        # When pulling a Message, the response also must include the IDs of the objects
-        # to pull. To achieve this, we need to at least register the Objects in the
-        # message into the store. Note this would normally be done when the
-        # servicer handles a PushMessageRequest
-        descendants = list(get_desdendant_object_ids(message))
-        message_obj_id = message.metadata.message_id
-        # Store mapping
-        self.store.set_message_descendant_ids(
-            msg_object_id=message_obj_id, descendant_ids=descendants
-        )
-        # Preregister
-        obj_ids_registered = self.store.preregister(descendants + [message_obj_id])
-
-        return obj_ids_registered
 
     @parameterized.expand(
         [
@@ -239,7 +231,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(heartbeat_interval=30)
 
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PullMessagesRequest is only
         # allowed in running status.
         self._transition_run_status(run_id, 2)
@@ -255,7 +247,9 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         self.state.store_message_ins(message=message_ins)
         obj_ids_registered: list[str] = []
         if register_in_store:
-            obj_ids_registered = self._register_in_object_store(message_ins)
+            obj_ids_registered = self.store.preregister(
+                run_id, get_object_tree(message_ins)
+            )
 
         request = PullMessagesRequest(node=Node(node_id=node_id))
 
@@ -266,17 +260,18 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert isinstance(response, PullMessagesResponse)
         assert call.code() == grpc.StatusCode.OK
 
-        object_ids_in_response = {
-            obj_id
-            for obj_ids in response.objects_to_pull.values()
-            for obj_id in obj_ids.object_ids
-        }
         if register_in_store:
+            object_tree = response.message_object_trees[0]
+            object_ids_in_response = [
+                tree.object_id for tree in iterate_object_tree(object_tree)
+            ]
             # Assert expected object_ids
-            assert set(obj_ids_registered) == object_ids_in_response
-            assert message_ins.object_id == list(response.objects_to_pull.keys())[0]
+            assert set(obj_ids_registered) == set(object_ids_in_response)
+            # Assert the root node of the object tree is the message
+            assert message_ins.object_id == object_tree.object_id
         else:
-            assert set() == object_ids_in_response
+            assert len(response.messages_list) == 0
+            assert len(response.message_object_trees) == 0
             # Ins message was deleted
             assert self.state.num_message_ins() == 0
 
@@ -284,7 +279,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `GetRun` success."""
         # Prepare
         self.state.create_node(heartbeat_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. GetRun RPC is only allowed in running status.
         self._transition_run_status(run_id, 2)
         request = GetRunRequest(run_id=run_id)
@@ -316,7 +311,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_get_run_not_successful_if_not_running(self, num_transitions: int) -> None:
         """Test `GetRun` not successful if RunStatus is not running."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
@@ -328,7 +323,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         node_id = self.state.create_node(heartbeat_interval=30)
         fab_content = b"content"
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
-        run_id = self.state.create_run("", "", fab_hash, {}, ConfigRecord())
+        run_id = self.state.create_run("", "", fab_hash, {}, ConfigRecord(), "")
 
         # Transition status to running. GetFab RPC is only allowed in running status.
         self._transition_run_status(run_id, 2)
@@ -370,7 +365,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         node_id = self.state.create_node(heartbeat_interval=30)
         fab_content = b"content"
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
-        run_id = self.state.create_run("", "", fab_hash, {}, ConfigRecord())
+        run_id = self.state.create_run("", "", fab_hash, {}, ConfigRecord(), "")
 
         self._transition_run_status(run_id, num_transitions)
 
@@ -380,14 +375,14 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_push_object_succesful(self) -> None:
         """Test `PushObject`."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         node_id = self.state.create_node(heartbeat_interval=30)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
         self._transition_run_status(run_id, 2)
 
         # Pre-register object
-        self.store.preregister(object_ids=[obj.object_id])
+        self.store.preregister(run_id, get_object_tree(obj))
 
         # Execute
         req = PushObjectRequest(
@@ -403,36 +398,16 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_push_object_fails(self) -> None:
         """Test `PushObject` in unsupported scenarios."""
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Run is not running
         req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
             self._push_object(request=req)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
 
-        # Run is running but node ID isn't recognized
-        self._transition_run_status(run_id, 2)
-        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
-        with self.assertRaises(grpc.RpcError) as e:
-            self._push_object(request=req)
-        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-
-        # Correct node ID but invalid object_content
-        node_id = self.state.create_node(heartbeat_interval=30)
-        obj_b = b"extra content"
-        object_id = get_object_id(obj_b)
-        # Execute (doesn't match structure)
-        req = PushObjectRequest(
-            node=Node(node_id=node_id),
-            run_id=run_id,
-            object_id=object_id,
-            object_content=obj_b,
-        )
-        with self.assertRaises(grpc.RpcError) as e:
-            self._push_object(request=req)
-        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-
         # Prepare
+        self._transition_run_status(run_id, 2)
+        node_id = self.state.create_node(heartbeat_interval=30)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 
@@ -451,7 +426,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Push valid object but its hash doesnt match the one passed in the request
         # Preregister under a different object-id
         fake_object_id = get_object_id(b"1234")
-        self.store.preregister(object_ids=[fake_object_id])
+        self.store.preregister(run_id, ObjectTree(object_id=fake_object_id))
 
         # Execute
         req = PushObjectRequest(
@@ -468,14 +443,14 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_pull_object_successful(self) -> None:
         """Test `PullObject` functionality."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         self._transition_run_status(run_id, 2)
         node_id = self.state.create_node(heartbeat_interval=30)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 
         # Preregister object
-        self.store.preregister(object_ids=[obj.object_id])
+        self.store.preregister(run_id, get_object_tree(obj))
 
         # Pull
         req = PullObjectRequest(
@@ -502,21 +477,15 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_pull_object_fails(self) -> None:
         """Test `PullObject` in unsuported scenarios."""
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Run is not running
         req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
         with self.assertRaises(grpc.RpcError) as e:
             self._pull_object(request=req)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
 
-        # Run is running but node ID isn't recognized
-        self._transition_run_status(run_id, 2)
-        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
-        with self.assertRaises(grpc.RpcError) as e:
-            self._pull_object(request=req)
-        assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-
         # Attempt pulling object that doesn't exist
+        self._transition_run_status(run_id, 2)
         node_id = self.state.create_node(heartbeat_interval=30)
         req = PullObjectRequest(
             node=Node(node_id=node_id), run_id=run_id, object_id="1234"
@@ -524,3 +493,39 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         res: PullObjectResponse = self._pull_object(req)
         # Empty response
         assert not res.object_found
+
+    def test_confirm_message_received_successful(self) -> None:
+        """Test `ConfirmMessageReceived` functionality."""
+        # Prepare
+        node_id = self.state.create_node(heartbeat_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        self._transition_run_status(run_id, 2)
+
+        # Prepare: Create a message
+        msg_proto = create_res_message(
+            src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+        )
+        message = message_from_proto(msg_proto)
+        # pylint: disable-next=E1137
+        message.content["test_config"] = ConfigRecord({"a": 123, "b": [4, 5, 6]})
+        message.metadata.__dict__["_message_id"] = message.object_id
+
+        # Prepare: Store message in ObjectStore
+        all_objects = get_all_nested_objects(message)
+        self.store.preregister(run_id, get_object_tree(message))
+        for obj_id, obj in all_objects.items():
+            self.store.put(object_id=obj_id, object_content=obj.deflate())
+
+        # Assert: Message is in ObjectStore
+        assert len(self.store) == len(all_objects)
+
+        # Execute: Confirm message received
+        req = ConfirmMessageReceivedRequest(
+            node=Node(node_id=node_id),
+            run_id=run_id,
+            message_object_id=message.object_id,
+        )
+        self._confirm_message_received(request=req)
+
+        # Assert: Message is removed from ObjectStore
+        assert len(self.store) == 0

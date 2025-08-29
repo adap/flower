@@ -16,35 +16,37 @@
 
 
 import unittest
-from os import urandom
 from unittest.mock import Mock
 
 from flwr.common import Context, typing
-from flwr.common.constant import RUN_ID_NUM_BYTES
+from flwr.common.inflatable import (
+    get_all_nested_objects,
+    get_object_tree,
+    iterate_object_tree,
+)
 from flwr.common.message import make_message
-from flwr.common.serde import (
-    clientappstatus_from_proto,
-    clientappstatus_to_proto,
-    fab_to_proto,
-    message_to_proto,
-)
+from flwr.common.serde import fab_to_proto, message_to_proto
 from flwr.common.serde_test import RecordMaker
-
-# pylint:disable=E0611
-from flwr.proto.clientappio_pb2 import (
-    GetTokenResponse,
-    PullClientAppInputsResponse,
-    PushClientAppOutputsResponse,
+from flwr.proto.appio_pb2 import (  # pylint:disable=E0611
+    PullAppInputsResponse,
+    PullAppMessagesResponse,
+    PushAppMessagesResponse,
+    PushAppOutputsResponse,
 )
-from flwr.proto.message_pb2 import Context as ProtoContext
-from flwr.proto.run_pb2 import Run as ProtoRun
+from flwr.proto.message_pb2 import Context as ProtoContext  # pylint:disable=E0611
+from flwr.proto.message_pb2 import (  # pylint:disable=E0611
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
+)
+from flwr.proto.run_pb2 import Run as ProtoRun  # pylint:disable=E0611
 from flwr.supernode.runtime.run_clientapp import (
-    get_token,
     pull_clientappinputs,
     push_clientappoutputs,
 )
 
-from .clientappio_servicer import ClientAppInputs, ClientAppIoServicer, ClientAppOutputs
+from .clientappio_servicer import ClientAppIoServicer
 
 
 class TestClientAppIoServicer(unittest.TestCase):
@@ -52,101 +54,9 @@ class TestClientAppIoServicer(unittest.TestCase):
 
     def setUp(self) -> None:
         """Initialize."""
-        self.servicer = ClientAppIoServicer()
+        self.servicer = ClientAppIoServicer(Mock(), Mock(), Mock())
         self.maker = RecordMaker()
         self.mock_stub = Mock()
-
-    def test_set_inputs(self) -> None:
-        """Test setting ClientApp inputs."""
-        # Prepare
-        message = make_message(
-            metadata=self.maker.metadata(),
-            content=self.maker.recorddict(2, 2, 1),
-        )
-        context = Context(
-            run_id=1,
-            node_id=1,
-            node_config={"nodeconfig1": 4.2},
-            state=self.maker.recorddict(2, 2, 1),
-            run_config={"runconfig1": 6.1},
-        )
-        run = typing.Run(
-            run_id=1,
-            fab_id="lorem",
-            fab_version="ipsum",
-            fab_hash="dolor",
-            override_config=self.maker.user_config(),
-            pending_at="2021-01-01T00:00:00Z",
-            starting_at="",
-            running_at="",
-            finished_at="",
-            status=typing.RunStatus(status="pending", sub_status="", details=""),
-        )
-        fab = typing.Fab(
-            hash_str="abc123#$%",
-            content=b"\xf3\xf5\xf8\x98",
-        )
-
-        client_input = ClientAppInputs(message, context, run, fab, 1)
-        client_output = ClientAppOutputs(message, context)
-
-        # Execute and assert
-        # - when ClientAppInputs is not None, ClientAppOutputs is None
-        with self.assertRaises(ValueError):
-            self.servicer.clientapp_input = client_input
-            self.servicer.clientapp_output = None
-            self.servicer.set_inputs(client_input, token_returned=True)
-
-        # Execute and assert
-        # - when ClientAppInputs is None, ClientAppOutputs is not None
-        with self.assertRaises(ValueError):
-            self.servicer.clientapp_input = None
-            self.servicer.clientapp_output = client_output
-            self.servicer.set_inputs(client_input, token_returned=True)
-
-        # Execute and assert
-        # - when ClientAppInputs and ClientAppOutputs is not None
-        with self.assertRaises(ValueError):
-            self.servicer.clientapp_input = client_input
-            self.servicer.clientapp_output = client_output
-            self.servicer.set_inputs(client_input, token_returned=True)
-
-        # Execute and assert
-        # - when ClientAppInputs is set at .clientapp_input
-        self.servicer.clientapp_input = None
-        self.servicer.clientapp_output = None
-        self.servicer.set_inputs(client_input, token_returned=True)
-        assert client_input == self.servicer.clientapp_input
-
-    def test_get_outputs(self) -> None:
-        """Test getting ClientApp outputs."""
-        # Prepare
-        message = make_message(
-            metadata=self.maker.metadata(),
-            content=self.maker.recorddict(2, 2, 1),
-        )
-        context = Context(
-            run_id=1,
-            node_id=1,
-            node_config={"nodeconfig1": 4.2},
-            state=self.maker.recorddict(2, 2, 1),
-            run_config={"runconfig1": 6.1},
-        )
-        client_output = ClientAppOutputs(message, context)
-
-        # Execute and assert - when `ClientAppOutputs` is None
-        self.servicer.clientapp_output = None
-        with self.assertRaises(ValueError):
-            # `ClientAppOutputs` should not be None
-            _ = self.servicer.get_outputs()
-
-        # Execute and assert - when `ClientAppOutputs` is not None
-        self.servicer.clientapp_output = client_output
-        output = self.servicer.get_outputs()
-        assert isinstance(output, ClientAppOutputs)
-        assert output == client_output
-        assert self.servicer.clientapp_input is None
-        assert self.servicer.clientapp_output is None
 
     def test_pull_clientapp_inputs(self) -> None:
         """Test pulling messages from SuperNode."""
@@ -159,16 +69,34 @@ class TestClientAppIoServicer(unittest.TestCase):
             hash_str="abc123#$%",
             content=b"\xf3\xf5\xf8\x98",
         )
-        mock_response = PullClientAppInputsResponse(
-            message=message_to_proto(mock_message),
+        mock_response = PullAppInputsResponse(
             context=ProtoContext(node_id=123),
             run=ProtoRun(run_id=61016, fab_id="mock/mock", fab_version="v1.0.0"),
             fab=fab_to_proto(mock_fab),
         )
+        self.mock_stub.PullMessage.return_value = PullAppMessagesResponse(
+            messages_list=[message_to_proto(mock_message)],
+            message_object_trees=[get_object_tree(mock_message)],
+        )
+        # Create series of responses for PullObject
+        # Adding responses for objects in a post-order traversal of object tree order
+        all_objects = get_all_nested_objects(mock_message)
+        all_objects[mock_message.object_id] = mock_message
+
+        # Get the object tree and iterate in the correct order
+        def pull_object_side_effect(request: PullObjectRequest) -> PullObjectResponse:
+            obj_id = request.object_id
+            return PullObjectResponse(
+                object_found=True,
+                object_available=True,
+                object_content=all_objects[obj_id].deflate(),
+            )
+
+        self.mock_stub.PullObject.side_effect = pull_object_side_effect
         self.mock_stub.PullClientAppInputs.return_value = mock_response
 
         # Execute
-        message, context, run, fab = pull_clientappinputs(self.mock_stub, token=456)
+        message, context, run, fab = pull_clientappinputs(self.mock_stub, token="abc")
 
         # Assert
         self.mock_stub.PullClientAppInputs.assert_called_once()
@@ -185,7 +113,7 @@ class TestClientAppIoServicer(unittest.TestCase):
 
     def test_push_clientapp_outputs(self) -> None:
         """Test pushing messages to SuperNode."""
-        # Prepare
+        # Prepare: Create Message and context
         message = make_message(
             metadata=self.maker.metadata(),
             content=self.maker.recorddict(2, 2, 1),
@@ -197,33 +125,35 @@ class TestClientAppIoServicer(unittest.TestCase):
             state=self.maker.recorddict(2, 2, 1),
             run_config={"runconfig1": 6.1},
         )
-        code = typing.ClientAppOutputCode.SUCCESS
-        status_proto = clientappstatus_to_proto(
-            status=typing.ClientAppOutputStatus(code=code, message="SUCCESS"),
-        )
-        mock_response = PushClientAppOutputsResponse(status=status_proto)
+
+        # Prepare: Mock PushClientAppOutputs RPC call
+        mock_response = PushAppOutputsResponse()
         self.mock_stub.PushClientAppOutputs.return_value = mock_response
 
-        # Execute
-        res = push_clientappoutputs(
-            stub=self.mock_stub, token=789, message=message, context=context
+        # Prepare: Mock PushMessage RPC call
+        object_tree = get_object_tree(message)
+        all_obj_ids = [tree.object_id for tree in iterate_object_tree(object_tree)]
+        self.mock_stub.PushMessage.return_value = PushAppMessagesResponse(
+            message_ids=[message.object_id],
+            objects_to_push=all_obj_ids,
         )
-        status = clientappstatus_from_proto(res.status)
+
+        # Prepare: Mock PushObject RPC calls
+        pushed_obj_ids = set()
+
+        def mock_push_object(request: PushObjectRequest) -> PushObjectResponse:
+            """Mock PushObject RPC call."""
+            pushed_obj_ids.add(request.object_id)
+            return PushObjectResponse(stored=True)
+
+        self.mock_stub.PushObject.side_effect = mock_push_object
+
+        # Execute
+        _ = push_clientappoutputs(
+            stub=self.mock_stub, token="abc", message=message, context=context
+        )
 
         # Assert
         self.mock_stub.PushClientAppOutputs.assert_called_once()
-        self.assertEqual(status.message, "SUCCESS")
-
-    def test_get_token(self) -> None:
-        """Test getting a token from SuperNode."""
-        # Prepare
-        token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
-        mock_response = GetTokenResponse(token=token)
-        self.mock_stub.GetToken.return_value = mock_response
-
-        # Execute
-        res = get_token(stub=self.mock_stub)
-
-        # Assert
-        self.mock_stub.GetToken.assert_called_once()
-        self.assertEqual(res, token)
+        self.mock_stub.PushMessage.assert_called_once()
+        self.assertSetEqual(pushed_obj_ids, set(all_obj_ids))

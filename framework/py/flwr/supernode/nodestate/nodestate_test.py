@@ -15,7 +15,6 @@
 """Tests all NodeState implementations have to conform to."""
 
 
-import unittest
 from typing import Any
 
 from parameterized import parameterized
@@ -23,11 +22,12 @@ from parameterized import parameterized
 from flwr.common import ConfigRecord, Context, Message, Metadata, RecordDict
 from flwr.common.message import make_message
 from flwr.common.typing import Run
+from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 
 from . import InMemoryNodeState, NodeState
 
 
-class StateTest(unittest.TestCase):
+class StateTest(CoreStateTest):
     """Test all state implementations."""
 
     # This is to True in each child class
@@ -158,6 +158,29 @@ class StateTest(unittest.TestCase):
         msg_ids = {msg.metadata.message_id for msg in msgs}
         self.assertNotIn("msg1", msg_ids)
         self.assertIn("msg2", msg_ids)
+
+    def test_get_run_ids_with_pending_messages(self) -> None:
+        """Test retrieving run IDs with pending messages."""
+        # Prepare: store messages for runs 1, 2, and 3
+        # Run 1 has a pending message, run 2 has a token, run 3 has a reply,
+        # run 4 has a retrieved message (not pending),
+        #  and run 5 was assigned a token but was later deleted due to
+        # `flwr-clientapp` finishing the handling of a message.
+        self.state.store_message(make_dummy_message(1, False, "msg1"))
+        self.state.store_message(make_dummy_message(2, False, "msg2"))
+        self.state.store_message(make_dummy_message(3, True, "msg3"))
+        self.state.store_message(make_dummy_message(4, False, "msg4"))
+        self.state.store_message(make_dummy_message(5, False, "msg5"))
+        self.state.get_messages(run_ids=[4])
+        self.state.create_token(2)
+        self.state.create_token(5)
+        self.state.delete_token(5)
+
+        # Execute
+        run_ids = self.state.get_run_ids_with_pending_messages()
+
+        # Assert: run 1 and run 5 should be returned
+        self.assertEqual(set(run_ids), {1, 5})
 
 
 def make_dummy_message(

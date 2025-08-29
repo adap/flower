@@ -9,7 +9,8 @@ A step-by-step guide to learn how to create, deploy and run a Flower app on the 
 Cloud Platform (GCP) <https://console.cloud.google.com>`_ using the `Google Kubernetes
 Engine (GKE) <https://cloud.google.com/kubernetes-engine>`_. The figure below presents
 an overview of the architecture of the Flower components we will deploy on GCP using
-GKE.
+GKE. In this architecture, **ServerApps** and **ClientApps** are executed by the Flower
+SuperExec (`flower-superexec`).
 
 .. figure:: ./_static/flower-gke-architecture.png
     :align: center
@@ -17,7 +18,7 @@ GKE.
     :alt: Running Flower on GCP using GKE Architecture
     :class: no-scaled-link
 
-    Running Flower on GCP using GKE Architecture
+    Running Flower on GCP using GKE Architecture.
 
 Part of this guide has also been presented during the `Flower AI Summit 2025
 <https://flower.ai/events/flower-ai-summit-2025/>`_, by Prashant Kulkarni, GenAI
@@ -155,14 +156,14 @@ Create a Google Artifact Registry
 
 The Google Cloud Artifact Registry is a fully managed, scalable, and private service for
 storing and managing software build artifacts and dependencies. Consequently, to run our
-Flower app on the GKE cluster, we need to store the app's specific Flower Docker images
-within the registry, i.e., ``ClientApp`` and ``ServerApp``, which we discuss in the next
-section. For typical use-cases, the Flower SuperLink and SuperNode Docker images do not
-need to be built and can be pulled directly from the official `Flower DockerHub
-repository <https://hub.docker.com/u/flwr>`_. This step is crucial as it enables the
-cluster, and subsequently the ``Pods``, to download the built Docker images and deploy
-the necessary Flower components. Please see below the instructions on how to create the
-repository using the ``gcloud`` CLI:
+Flower app on the GKE cluster, we need to store the app's specific Flower Docker image
+within the registry, i.e., the Flower SuperExec, which we discuss in the next section.
+For typical use-cases, the Flower SuperLink and SuperNode Docker images do not need to
+be built and can be pulled directly from the official `Flower DockerHub repository
+<https://hub.docker.com/u/flwr>`_. This step is crucial as it enables the cluster, and
+subsequently the ``Pods``, to download the built Docker images and deploy the necessary
+Flower components. Please see below the instructions on how to create the repository
+using the ``gcloud`` CLI:
 
 .. code-block:: bash
 
@@ -204,11 +205,11 @@ accomplish this, please run the following command:
 Configure Flower App Docker Images
 ----------------------------------
 
-In order to proceed with this next step, first, we create a local Flower app, and then
-create a dedicated Dockerfile for the ServerApp and the ClientApp Docker images. Once we
-build the images, we tag them and push them to the newly created Google registry. Most
-of the steps on how to build Docker images discussed below are based on the `Flower
-Quickstart with Docker Tutorial
+To proceed with the next step, we first create a local Flower app and then define a
+dedicated Dockerfile for the Docker image that will run SuperExec. Within SuperExec,
+either ServerApp or ClientApp will be executed. After building the image, we tag it and
+push it to the newly created Google registry. Most of the steps on how to build Docker
+image discussed below are based on the `Flower Quickstart with Docker Tutorial
 <https://flower.ai/docs/framework/docker/tutorial-quickstart-docker.html>`_.
 
 We create the Flower NumPy app as follows:
@@ -221,44 +222,23 @@ We create the Flower NumPy app as follows:
 Create Docker Images
 ~~~~~~~~~~~~~~~~~~~~
 
-Once the app is created, we navigate inside the app directory (i.e., where the
-``pyproject.toml`` file is) and create two ``Dockerfile``\s one for the ``ClientApp``
-component, named ``clientapp.Dockerfile`` and one for the ``ServerApp`` component, named
-``serverapp.Dockerfile``. We will use both files to build locally the necessary Docker
-images. We will be using the default images for ``SuperLink`` and ``SuperLink``
-available in the `Flower DockerHub repository <https://hub.docker.com/u/flwr>`_.
+With ``flower-superexec``, **you do not need to bake your app code into the image**.
+SuperExec receives and installs the Flower App Bundle (FAB) at runtime inside the
+container, keeping your images lightweight.
 
 .. note::
 
-    Even though the app you created has only ``NumPy`` as dependency, you can use the
-    provided ``clientapp.Dockerfile`` and ``serverapp.Dockerfile`` to create the
-    corresponding images for any Flower app when going from simulation to deployment.
-    The ``RUN`` command installs all the necessary dependencies for your app to run and
-    removes the ``flwr[simulation]`` dependency while building the Docker images.
+    SuperExec does **NOT** install dependencies at runtime. If your app requires
+    additional dependencies, make sure they are included in your Docker image, as shown
+    in the Dockerfile example below.
 
-.. dropdown:: clientapp.Dockerfile
+.. dropdown:: superexec.Dockerfile
 
     .. code-block:: bash
         :substitutions:
 
-        # clientapp.Dockerfile
-        FROM flwr/clientapp:|stable_flwr_version|
-
-        WORKDIR /app
-
-        COPY pyproject.toml .
-        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
-            && python -m pip install -U --no-cache-dir .
-
-        ENTRYPOINT ["flwr-clientapp"]
-
-.. dropdown:: serverapp.Dockerfile
-
-    .. code-block:: bash
-        :substitutions:
-
-        # serverapp.Dockerfile
-        FROM flwr/serverapp:|stable_flwr_version|
+        # superexec.Dockerfile
+        FROM flwr/superexec:|stable_flwr_version|
 
         WORKDIR /app
 
@@ -266,9 +246,9 @@ available in the `Flower DockerHub repository <https://hub.docker.com/u/flwr>`_.
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
            && python -m pip install -U --no-cache-dir .
 
-        ENTRYPOINT ["flwr-serverapp"]
+        ENTRYPOINT ["flower-superexec"]
 
-Once we have created the required Dockerfiles, we build the Docker Images as follows:
+Once we have created the required Dockerfile, we build the Docker Image as follows:
 
 .. important::
 
@@ -279,54 +259,39 @@ Once we have created the required Dockerfiles, we build the Docker Images as fol
 
 .. code-block:: bash
 
-    # ServerApp
-    docker build --platform linux/amd64 -f serverapp.Dockerfile -t flower_numpy_example_serverapp:0.0.1 .
-
-    # ClientApp
-    docker build --platform linux/amd64 -f clientapp.Dockerfile -t flower_numpy_example_clientapp:0.0.1 .
+    docker build --platform linux/amd64 -f superexec.Dockerfile -t flower_numpy_example_superexec:0.0.1 .
 
 Tag Docker Images
 ~~~~~~~~~~~~~~~~~
 
 Before we are able to push our two newly locally created Docker images, we need to tag
 them with the Google Artifact Registry repository name and image name we created during
-the previous steps. If you have followed the earlier naming suggestions, the the
-repository name is ``flower-gcp-example-artifacts``, the local Docker images names are
-``flower_numpy_example_serverapp:0.0.1`` and ``flower_numpy_example_numpy:0.0.1``, and
-the region is ``us-central1``. Please note that the ``<YOUR_PROJECT_ID>`` is different
-from user to user so in the commands below we use the ``<YOUR_PROJECT_ID>`` placeholder.
-Putting all this together, the final commands you need to run to tag the ``ServerApp``
-and ``ClientApp`` Docker images are:
+the previous steps. If you have followed the earlier naming suggestions, the repository
+name is ``flower-gcp-example-artifacts``, the local Docker image name is
+``flower_numpy_example_superexec:0.0.1``, and the region is ``us-central1``. Please note
+that the ``<YOUR_PROJECT_ID>`` is different from user to user, so in the commands below
+we use the ``<YOUR_PROJECT_ID>`` placeholder. Putting all this together, the final
+command you need to run to tag the ``SuperExec`` Docker image is:
 
 .. code-block:: bash
 
     # docker tag YOUR_IMAGE_NAME YOUR_REGION-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY_NAME/YOUR_IMAGE_NAME:YOUR_TAG
 
-    # ServerApp
     # please change <YOUR_PROJECT_ID> to point to your project identifier
-    docker tag flower_numpy_example_serverapp:0.0.1 us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_serverapp:0.0.1
-
-    # ClientApp
-    # please change <YOUR_PROJECT_ID> to point to your project identifier
-    docker tag flower_numpy_example_clientapp:0.0.1 us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_clientapp:0.0.1
+    docker tag flower_numpy_example_superexec:0.0.1 us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_superexec:0.0.1
 
 Push Docker Images
 ~~~~~~~~~~~~~~~~~~
 
-Once our images are tagged correctly, you can push them to your ``Artifact Registry``
+Once our image is tagged correctly, you can push it to your ``Artifact Registry``
 repository using the ``docker push`` command with the tagged name:
 
 .. code-block:: bash
 
     # docker push YOUR_REGION-docker.pkg.dev/<YOUR_PROJECT_ID>/YOUR_REPOSITORY_NAME/YOUR_IMAGE_NAME:YOUR_TAG
 
-    # ServerApp
     # please change <YOUR_PROJECT_ID> to point to your project identifier
-    docker push us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_serverapp:0.0.1
-
-    # ClientApp
-    # please change <YOUR_PROJECT_ID> to point to your project identifier
-    docker push us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_clientapp:0.0.1
+    docker push us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_superexec:0.0.1
 
 Deploy Flower Infrastructure
 ----------------------------
@@ -335,10 +300,10 @@ Before running our Flower app, we first need to deploy our ``Pods`` on the Kuber
 cluster.
 
 In this step, we shall deploy six ``Pods``: 1x ``SuperLink``, 2x ``SuperNode``, 2x
-``ClientApp``, and 1x ``ServerApp``. To achieve this, below we provide the definition of
-the six ``yaml`` files that are necessary to deploy the ``Pods`` on the cluster and
-which are passed to ``kubectl``, and a helper ``k8s-deploy.sh`` script, which will
-deploy the ``Pods``.
+``SuperExec(ClientApp)``, and 1x ``SuperExec(ServerApp)``. To achieve this, below we
+provide the definition of the six ``yaml`` files that are necessary to deploy the
+``Pods`` on the cluster and which are passed to ``kubectl``, and a helper
+``k8s-deploy.sh`` script, which will deploy the ``Pods``.
 
 .. dropdown:: superlink-deployment.yaml
 
@@ -390,7 +355,7 @@ deploy the ``Pods``.
           - protocol: TCP
             port: 9093   # Port for Flower app submission
             targetPort: 9093  # the SuperLink container port
-            name: superlink-execapi
+            name: superlink-controlapi
           type: LoadBalancer  # balances workload, makes the service publicly available
 
 .. dropdown:: supernode-1-deployment.yaml
@@ -483,86 +448,92 @@ deploy the ``Pods``.
             port: 9094
             targetPort: 9094
 
-.. dropdown:: serverapp-deployment.yaml
+.. dropdown:: superexec-serverapp-deployment.yaml
 
     .. code-block:: bash
 
         apiVersion: apps/v1
         kind: Deployment
         metadata:
-          name: serverapp
+          name: superexec-serverapp
         spec:
           replicas: 1
           selector:
             matchLabels:
-              app: serverapp
+              app: superexec-serverapp
           template:
             metadata:
               labels:
-                app: serverapp
+                app: superexec-serverapp
             spec:
               containers:
-              - name: serverapp
+              - name: superexec-serverapp
                 # please change <YOUR_PROJECT_ID> to point to your project identifier
-                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_serverapp:0.0.1
+                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_superexec:0.0.1
                 args:
                   - "--insecure"
-                  - "--serverappio-api-address"
+                  - "--appio-api-address"
                   - "superlink-service:9091"
+                  - "--plugin-type"
+                  - "serverapp"
 
-.. dropdown:: clientapp-1-deployment.yaml
+.. dropdown:: superexec-clientapp-1-deployment.yaml
 
     .. code-block:: bash
 
         apiVersion: apps/v1
         kind: Deployment
         metadata:
-          name: clientapp-1
+          name: superexec-clientapp-1
         spec:
           replicas: 1
           selector:
             matchLabels:
-              app: clientapp-1
+              app: superexec-clientapp-1
           template:
             metadata:
               labels:
-                app: clientapp-1
+                app: superexec-clientapp-1
             spec:
               containers:
-              - name: clientapp
+              - name: superexec-clientapp
                 # please change <YOUR_PROJECT_ID> to point to your project identifier
-                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_clientapp:0.0.1
+                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_superexec:0.0.1
                 args:
                   - "--insecure"
-                  - "--clientappio-api-address"
+                  - "--appio-api-address"
                   - "supernode-1-service:9094"
+                  - "--plugin-type"
+                  - "clientapp"
 
-.. dropdown:: clientapp-2-deployment.yaml
+.. dropdown:: superexec-clientapp-2-deployment.yaml
 
     .. code-block:: bash
 
         apiVersion: apps/v1
         kind: Deployment
         metadata:
-          name: clientapp-2
+          name: superexec-clientapp-2
         spec:
           replicas: 1
           selector:
             matchLabels:
-              app: clientapp-2
+              app: superexec-clientapp-2
           template:
             metadata:
               labels:
-                app: clientapp-2
+                app: superexec-clientapp-2
             spec:
               containers:
-              - name: clientapp
+              - name: superexec-clientapp
                 # please change <YOUR_PROJECT_ID> to point to your project identifier
-                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_clientapp:0.0.1
+                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_superexec:0.0.1
                 args:
                   - "--insecure"
-                  - "--clientappio-api-address"
+                  - "--appio-api-address"
                   - "supernode-2-service:9094"
+                  - "--plugin-type"
+                  - "clientapp"
 
 Once you have created the required files, you can use the following ``k8s-deploy.sh``
 helper script to deploy all the ``Pods``.
@@ -590,13 +561,13 @@ helper script to deploy all the ``Pods``.
         kubectl apply -f supernode-2-deployment.yaml
         sleep 0.1
 
-        kubectl apply -f ./serverapp-deployment.yaml
+        kubectl apply -f superexec-serverapp-deployment.yaml
         sleep 0.1
 
-        kubectl apply -f ./clientapp-1-deployment.yaml
+        kubectl apply -f superexec-clientapp-1-deployment.yaml
         sleep 0.1
 
-        kubectl apply -f ./clientapp-2-deployment.yaml
+        kubectl apply -f superexec-clientapp-2-deployment.yaml
         sleep 0.1
 
 To see that your ``Pods`` are deployed, please go to the ``Navigation Menu`` on the
@@ -726,11 +697,11 @@ shown in the helper script below.
         kubectl delete -f supernode-2-deployment.yaml
         sleep 0.1
 
-        kubectl delete -f ./serverapp-deployment.yaml
+        kubectl delete -f superexec-serverapp-deployment.yaml
         sleep 0.1
 
-        kubectl delete -f ./clientapp-1-deployment.yaml
+        kubectl delete -f superexec-clientapp-1-deployment.yaml
         sleep 0.1
 
-        kubectl delete -f ./clientapp-2-deployment.yaml
+        kubectl delete -f superexec-clientapp-2-deployment.yaml
         sleep 0.1

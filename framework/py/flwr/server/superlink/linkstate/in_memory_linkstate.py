@@ -15,15 +15,18 @@
 """In-memory LinkState implementation."""
 
 
+import secrets
 import threading
 import time
 from bisect import bisect_right
+from collections import defaultdict
 from dataclasses import dataclass, field
 from logging import ERROR, WARNING
 from typing import Optional
 
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
+    FLWR_APP_TOKEN_LENGTH,
     HEARTBEAT_MAX_INTERVAL,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
@@ -78,6 +81,14 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.message_ins_store: dict[str, Message] = {}
         self.message_res_store: dict[str, Message] = {}
         self.message_ins_id_to_message_res_id: dict[str, str] = {}
+
+        # Store run ID to token mapping and token to run ID mapping
+        self.token_store: dict[int, str] = {}
+        self.token_to_run_id: dict[str, int] = {}
+        self.lock_token_store = threading.Lock()
+
+        # Map flwr_aid to run_ids for O(1) reverse index lookup
+        self.flwr_aid_to_run_ids: dict[str, set[int]] = defaultdict(set)
 
         self.node_public_keys: set[bytes] = set()
 
@@ -245,7 +256,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 inquired_in_message_ids=message_ids,
                 found_in_message_dict=self.message_ins_store,
                 node_id_to_online_until={
-                    node_id: self.node_ids[node_id][0] for node_id in dst_node_ids
+                    node_id: self.node_ids[node_id][0]
+                    for node_id in dst_node_ids
+                    if node_id in self.node_ids
                 },
                 current_time=current,
             )
@@ -398,6 +411,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         fab_hash: Optional[str],
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str],
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
         # Sample a random int64 as run_id
@@ -421,9 +435,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             sub_status="",
                             details="",
                         ),
+                        flwr_aid=flwr_aid if flwr_aid else "",
                     ),
                 )
                 self.run_ids[run_id] = run_record
+                # Add run_id to the flwr_aid_to_run_ids mapping if flwr_aid is provided
+                if flwr_aid:
+                    self.flwr_aid_to_run_ids[flwr_aid].add(run_id)
 
                 # Record federation options. Leave empty if not passed
                 self.federation_options[run_id] = federation_options
@@ -451,9 +469,15 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             return self.node_public_keys.copy()
 
-    def get_run_ids(self) -> set[int]:
-        """Retrieve all run IDs."""
+    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+        """Retrieve all run IDs if `flwr_aid` is not specified.
+
+        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
+        """
         with self.lock:
+            if flwr_aid is not None:
+                # Return run IDs for the specified flwr_aid
+                return set(self.flwr_aid_to_run_ids.get(flwr_aid, ()))
             return set(self.run_ids.keys())
 
     def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
@@ -463,7 +487,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if they have not sent a heartbeat before `active_until`.
         """
         current = now()
-        for record in [self.run_ids[run_id] for run_id in run_ids]:
+        for record in (self.run_ids.get(run_id) for run_id in run_ids):
+            if record is None:
+                continue
             with record.lock:
                 if record.run.status.status in (Status.STARTING, Status.RUNNING):
                     if record.active_until < current.timestamp():
@@ -659,3 +685,30 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             index = bisect_right(run.logs, (after_timestamp, ""))
             latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
             return "".join(log for _, log in run.logs[index:]), latest_timestamp
+
+    def create_token(self, run_id: int) -> Optional[str]:
+        """Create a token for the given run ID."""
+        token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
+        with self.lock_token_store:
+            if run_id in self.token_store:
+                return None  # Token already created for this run ID
+            self.token_store[run_id] = token
+            self.token_to_run_id[token] = run_id
+        return token
+
+    def verify_token(self, run_id: int, token: str) -> bool:
+        """Verify a token for the given run ID."""
+        with self.lock_token_store:
+            return self.token_store.get(run_id) == token
+
+    def delete_token(self, run_id: int) -> None:
+        """Delete the token for the given run ID."""
+        with self.lock_token_store:
+            token = self.token_store.pop(run_id, None)
+            if token is not None:
+                self.token_to_run_id.pop(token, None)
+
+    def get_run_id_by_token(self, token: str) -> Optional[int]:
+        """Get the run ID associated with a given token."""
+        with self.lock_token_store:
+            return self.token_to_run_id.get(token)

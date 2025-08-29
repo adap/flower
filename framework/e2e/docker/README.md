@@ -12,11 +12,13 @@ docker compose up -d
 ```
 
 Submit a run:. It should take under 30s to complete
+
 ```shell
 flwr run basic-app
 ```
 
 To stop the containers, run:
-``` shell
+
+```shell
 $ docker compose down
 ```

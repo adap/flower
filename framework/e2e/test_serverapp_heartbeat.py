@@ -1,6 +1,7 @@
 """Test run heartbeat functionality."""
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -8,7 +9,21 @@ import time
 import tomli
 import tomli_w
 
-from flwr.common.constant import Status, SubStatus
+from flwr.common.constant import (
+    SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
+    Status,
+    SubStatus,
+)
+
+use_sim = sys.argv[1] == "simulation" if len(sys.argv) > 1 else False
+plugin_type_arg = "simulation" if use_sim else "serverapp"
+address_arg = (
+    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS
+    if use_sim
+    else SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
+)
+app_cmd = "flwr-simulation" if use_sim else "flwr-serverapp"
 
 
 def add_e2e_federation() -> None:
@@ -32,31 +47,23 @@ def add_e2e_federation() -> None:
         tomli_w.dump(pyproject, f)
 
 
-def run_superlink(is_simulation: bool) -> subprocess.Popen:
+def run_superlink() -> subprocess.Popen:
     """Run the SuperLink."""
-    executor_arg = "flwr.superexec.deployment:executor"
-    if is_simulation:
-        executor_arg = "flwr.superexec.simulation:executor"
-    return subprocess.Popen(
-        [
-            "flower-superlink",
-            "--insecure",
-            "--database",
-            "tmp.db",
-            "--executor",
-            executor_arg,
-            "--isolation",
-            "process",
-        ],
-    )
+    cmd = ["flower-superlink", "--insecure"]
+    cmd += ["--database", "tmp.db"]
+    cmd += ["--isolation", "process"]
+    if use_sim:
+        cmd += ["--simulation"]
+
+    return subprocess.Popen(cmd)
 
 
-def run_worker_process(is_simulation: bool) -> subprocess.Popen:
-    """Run the flwr-serverapp or flwr-simulation process."""
-    cmd = "flwr-simulation" if is_simulation else "flwr-serverapp"
-    return subprocess.Popen(
-        [cmd, "--insecure"],
-    )
+def run_superexec() -> subprocess.Popen:
+    """Run the SuperExec."""
+    cmd = ["flower-superexec", "--insecure"]
+    cmd += ["--appio-api-address", address_arg]
+    cmd += ["--plugin-type", plugin_type_arg]
+    return subprocess.Popen(cmd)
 
 
 def flwr_run() -> int:
@@ -101,34 +108,51 @@ def flwr_ls() -> dict[int, str]:
     return {entry["run-id"]: entry["status"] for entry in data["runs"]}
 
 
+def get_pids(command: str) -> list[int]:
+    """Get the PIDs of a running command."""
+    result = subprocess.run(
+        ["pgrep", "-f", command],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    pids = result.stdout.strip().split("\n")
+    return [int(pid) for pid in pids if pid]
+
+
 def main() -> None:
     """."""
     # Determine if the test is running in simulation mode
-    is_simulation = sys.argv[1] == "simulation" if len(sys.argv) > 1 else False
-    print(f"Running in {'simulation' if is_simulation else 'deployment'} mode.")
+    print(f"Running in {'simulation' if use_sim else 'deployment'} mode.")
 
     # Add e2e federation to pyproject.toml
     add_e2e_federation()
 
     # Start the SuperLink
     print("Starting SuperLink...")
-    superlink_proc = run_superlink(is_simulation)
+    superlink_proc = run_superlink()
 
     # Allow time for SuperLink to start
     time.sleep(1)
 
-    # Submit the first run and run the first ServerApp process
-    print("Starting the first run and ServerApp process...")
+    # Start the SuperExec
+    print("Starting SuperExec...")
+    superexec_proc = run_superexec()
+
+    # Submit the first run
+    print("Starting the first run...")
     run_id1 = flwr_run()
-    serverapp_proc = run_worker_process(is_simulation)
 
-    # Brief pause to allow the ServerApp process to initialize
-    time.sleep(1)
+    # Get the PID of the first app process
+    while True:
+        if pids := get_pids(app_cmd):
+            app_pid = pids[0]
+            break
+        time.sleep(0.1)
 
-    # Submit the second run and run the second ServerApp process
-    print("Starting the second run and ServerApp process...")
+    # Submit the second run
+    print("Starting the second run...")
     run_id2 = flwr_run()
-    serverapp_proc2 = run_worker_process(is_simulation)
 
     # Wait up to 6 seconds for both runs to reach RUNNING status
     tic = time.time()
@@ -152,15 +176,12 @@ def main() -> None:
     superlink_proc.wait()
 
     # Kill the first ServerApp process
-    # The ServerApp process cannot be terminated gracefully yet,
-    # so we need to kill it via SIGKILL.
     print("Terminating the first ServerApp process...")
-    serverapp_proc.kill()
-    serverapp_proc.wait()
+    os.kill(app_pid, 9)  # SIGKILL to ensure it stops immediately
 
     # Restart the SuperLink
     print("Restarting SuperLink...")
-    superlink_proc = run_superlink(is_simulation)
+    superlink_proc = run_superlink()
 
     # Allow time for SuperLink to start
     time.sleep(1)
@@ -168,7 +189,7 @@ def main() -> None:
     # Allow time for SuperLink to detect heartbeat failures and update statuses
     tic = time.time()
     is_valid = False
-    while (time.time() - tic) < 20:
+    while (time.time() - tic) < 25:
         run_status = flwr_ls()
         if (
             run_status[run_id1] == f"{Status.FINISHED}:{SubStatus.FAILED}"
@@ -177,12 +198,12 @@ def main() -> None:
             is_valid = True
             break
         time.sleep(1)
-    assert is_valid, "Run statuses are not updated correctly"
+    assert is_valid, f"Run statuses are not updated correctly:\n{run_status}"
     print("Run statuses are updated correctly.")
 
     # Clean up
-    serverapp_proc2.kill()
-    serverapp_proc2.wait()
+    superexec_proc.terminate()
+    superexec_proc.wait()
     superlink_proc.terminate()
     superlink_proc.wait()
 

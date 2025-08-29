@@ -25,7 +25,12 @@ import pathspec
 import tomli_w
 import typer
 
-from flwr.common.constant import FAB_ALLOWED_EXTENSIONS, FAB_DATE, FAB_HASH_TRUNCATION
+from flwr.common.constant import (
+    FAB_ALLOWED_EXTENSIONS,
+    FAB_DATE,
+    FAB_HASH_TRUNCATION,
+    FAB_MAX_SIZE,
+)
 
 from .config_utils import load as load_toml
 from .config_utils import load_and_validate
@@ -57,7 +62,7 @@ def build(
         Optional[Path],
         typer.Option(help="Path of the Flower App to bundle into a FAB"),
     ] = None,
-) -> tuple[str, str]:
+) -> None:
     """Build a Flower App into a Flower App Bundle (FAB).
 
     You can run ``flwr build`` without any arguments to bundle the app located in the
@@ -119,8 +124,6 @@ def build(
         f"🎊 Successfully built {fab_filename}", fg=typer.colors.GREEN, bold=True
     )
 
-    return fab_filename, fab_hash
-
 
 def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
     """Build a FAB in memory and return the bytes, hash, and config.
@@ -181,7 +184,7 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
             # Read the file content manually
             file_contents = file_path.read_bytes()
 
-            archive_path = str(file_path.relative_to(app))
+            archive_path = str(file_path.relative_to(app)).replace("\\", "/")
             write_to_zip(fab_file, archive_path, file_contents)
 
             # Calculate file info
@@ -193,6 +196,13 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
         write_to_zip(fab_file, ".info/CONTENT", list_file_content)
 
     fab_bytes = fab_buffer.getvalue()
+    if len(fab_bytes) > FAB_MAX_SIZE:
+        raise ValueError(
+            f"FAB size exceeds maximum allowed size of {FAB_MAX_SIZE:,} bytes."
+            "To reduce the package size, consider ignoring unnecessary files "
+            "via your `.gitignore` file or excluding them from the build."
+        )
+
     fab_hash = hashlib.sha256(fab_bytes).hexdigest()
 
     return fab_bytes, fab_hash, config

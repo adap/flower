@@ -35,9 +35,34 @@ async function main() {
   });
 
   if (!response.ok) {
-    console.error(`${response.failure.code}: ${response.failure.description}`);
+    console.error(response.failure.description);
   } else {
     console.log(response.message.content);
+  }
+}
+
+await main().then().catch();
+```
+
+## Embedding
+
+```javascript
+import { FlowerIntelligence } from '@flwr/flwr';
+
+const fi = FlowerIntelligence.instance;
+fi.remoteHandoff = true;
+fi.apiKey = 'REPLACE_WITH_API_KEY';
+
+async function main() {
+  const response = await fi.embed({
+    model: 'qwen/qwen3-embedding',
+    input: 'Hello world!',
+  });
+
+  if (!response.ok) {
+    console.error(response.failure.description);
+  } else {
+    console.log(response.value);
   }
 }
 

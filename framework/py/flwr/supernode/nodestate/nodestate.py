@@ -15,15 +15,16 @@
 """Abstract base class NodeState."""
 
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from collections.abc import Sequence
 from typing import Optional
 
 from flwr.common import Context, Message
 from flwr.common.typing import Run
+from flwr.supercore.corestate import CoreState
 
 
-class NodeState(ABC):
+class NodeState(CoreState):
     """Abstract base class for node state."""
 
     @abstractmethod
@@ -154,4 +155,17 @@ class NodeState(ABC):
         -------
         Optional[Context]
             The `Context` instance if found, otherwise None.
+        """
+
+    @abstractmethod
+    def get_run_ids_with_pending_messages(self) -> Sequence[int]:
+        """Retrieve run IDs that have at least one pending message.
+
+        Run IDs that are currently in progress (i.e., those associated with tokens)
+        will not be returned, even if they have pending messages.
+
+        Returns
+        -------
+        Sequence[int]
+            Sequence of run IDs with pending messages.
         """

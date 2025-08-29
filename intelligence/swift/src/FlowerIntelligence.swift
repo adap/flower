@@ -85,8 +85,8 @@ public class FlowerIntelligence {
         engine = mlxEngine
       }
     }
-    let messages: [Message] = [Message(role: "user", content: input)]
     do {
+      let messages: [Message] = [try Message(role: "user", content: input)]
       let result = try await engine.chat(
         messages,
         model: maybeOptions?.model,

@@ -1,17 +1,16 @@
 """fedprox: A Flower Baseline."""
 
-from typing import Dict, Tuple
-
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from fedprox.dataset import load_data
-from fedprox.model import get_weights, instantiate_model, set_weights, test, train
-from fedprox.utils import context_to_easydict
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 from flwr.common.typing import NDArrays, Scalar
+
+from .dataset import load_data
+from .model import get_weights, instantiate_model, set_weights, test, train
+from .utils import context_to_easydict
 
 
 # pylint: disable=too-many-arguments
@@ -80,14 +79,15 @@ class FlowerClient(NumPyClient):  # pylint: disable=too-many-instance-attributes
         return get_weights(self.net), len(self.trainloader), {"is_straggler": False}
 
     def evaluate(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[float, int, Dict]:
+        self, parameters: NDArrays, config: dict[str, Scalar]
+    ) -> tuple[float, int, dict]:
         """Implement distributed evaluation for a given client."""
         set_weights(self.net, parameters)
         loss, accuracy = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
 
+# pylint: disable=E1101
 def client_fn(context: Context):
     """Construct a Client that will be run in a ClientApp."""
     # Load model and data
@@ -119,6 +119,8 @@ def client_fn(context: Context):
         configs=configs,
     ).to_client()
 
+
+# pylint: enable=E1101
 
 # Flower ClientApp
 app = ClientApp(client_fn)

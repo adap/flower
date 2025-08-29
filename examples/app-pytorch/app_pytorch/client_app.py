@@ -4,7 +4,6 @@ import torch
 from app_pytorch.task import Net, load_data
 from app_pytorch.task import test as test_fn
 from app_pytorch.task import train as train_fn
-
 from flwr.client import ClientApp
 from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 
@@ -12,60 +11,69 @@ from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 app = ClientApp()
 
 
-@app.evaluate()
-def evaluate(msg: Message, context: Context):
-
-    # Prepare
-    model, device, data_loader = setup_client(msg, context, is_train=False)
-
-    # Local evaluation
-    _, eval_acc = test_fn(
-        model,
-        data_loader,
-        device,
-    )
-
-    # Construct reply
-    metric_record = MetricRecord({"eval_acc": eval_acc})
-    content = RecordDict({"eval_metrics": metric_record})
-    return Message(content=content, reply_to=msg)
-
-
 @app.train()
 def train(msg: Message, context: Context):
+    """Train the model on local data."""
 
-    # Prepare
-    model, device, data_loader = setup_client(msg, context, is_train=True)
+    # Load the model and initialize it with the received weights
+    model = Net()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model.to(device)
 
-    # Local training
-    local_epochs = context.run_config["local-epochs"]
+    # Load the data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    trainloader, _ = load_data(partition_id, num_partitions)
+
+    # Call the training function
     train_loss = train_fn(
         model,
-        data_loader,
-        local_epochs,
+        trainloader,
+        context.run_config["local-epochs"],
+        msg.content["config"]["lr"],
         device,
     )
 
-    # Extract state_dict from model and construct reply message
+    # Construct and return reply Message
     model_record = ArrayRecord(model.state_dict())
-    metric_record = MetricRecord({"train_loss": train_loss})
-    content = RecordDict({"model": model_record, "train_metrics": metric_record})
+    metrics = {
+        "train_loss": train_loss,
+        "num-examples": len(trainloader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
 
-def setup_client(msg: Message, context: Context, is_train: bool):
+@app.evaluate()
+def evaluate(msg: Message, context: Context):
+    """Evaluate the model on local data."""
 
-    # Instantiate model
+    # Load the model and initialize it with the received weights
     model = Net()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-    # Apply global model weights from message
-    model.load_state_dict(msg.content["model"].to_torch_state_dict())
     model.to(device)
 
-    # Load partition
+    # Load the data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    trainloader, valloader = load_data(partition_id, num_partitions)
+    _, valloader = load_data(partition_id, num_partitions)
 
-    return model, device, trainloader if is_train else valloader
+    # Call the evaluation function
+    eval_loss, eval_acc = test_fn(
+        model,
+        valloader,
+        device,
+    )
+
+    # Construct and return reply Message
+    metrics = {
+        "eval_loss": eval_loss,
+        "eval_acc": eval_acc,
+        "num-examples": len(valloader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
+    return Message(content=content, reply_to=msg)

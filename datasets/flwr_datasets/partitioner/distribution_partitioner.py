@@ -101,7 +101,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
 
     Examples
     --------
-    In order to reproduce the power-law distrbution of the paper, follow this setup:
+    In order to reproduce the power-law distribution of the paper, follow this setup:
 
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import DistributionPartitioner

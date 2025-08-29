@@ -19,6 +19,7 @@
 
 import json
 import re
+import secrets
 import sqlite3
 import time
 from collections.abc import Sequence
@@ -27,6 +28,7 @@ from typing import Any, Optional, Union, cast
 
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
+    FLWR_APP_TOKEN_LENGTH,
     HEARTBEAT_MAX_INTERVAL,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
@@ -102,7 +104,8 @@ CREATE TABLE IF NOT EXISTS run(
     finished_at           TEXT,
     sub_status            TEXT,
     details               TEXT,
-    federation_options    BLOB
+    federation_options    BLOB,
+    flwr_aid              TEXT
 );
 """
 
@@ -162,6 +165,13 @@ CREATE TABLE IF NOT EXISTS message_res(
 );
 """
 
+SQL_CREATE_TABLE_TOKEN_STORE = """
+CREATE TABLE IF NOT EXISTS token_store (
+    run_id                  INTEGER PRIMARY KEY,
+    token                   TEXT UNIQUE NOT NULL
+);
+"""
+
 DictOrTuple = Union[tuple[Any, ...], dict[str, Any]]
 
 
@@ -211,6 +221,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_MESSAGE_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
+        cur.execute(SQL_CREATE_TABLE_TOKEN_STORE)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
         return res.fetchall()
@@ -719,6 +730,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         fab_hash: Optional[str],
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str],
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
@@ -735,8 +747,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 "INSERT INTO run "
                 "(run_id, active_until, heartbeat_interval, fab_id, fab_version, "
                 "fab_hash, override_config, federation_options, pending_at, "
-                "starting_at, running_at, finished_at, sub_status, details) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                "starting_at, running_at, finished_at, sub_status, details, flwr_aid) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             override_config_json = json.dumps(override_config)
             data = [
@@ -754,6 +766,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 "",
                 "",
                 "",
+                flwr_aid or "",
             ]
             self.query(query, tuple(data))
             return uint64_run_id
@@ -782,10 +795,18 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: set[bytes] = {row["public_key"] for row in rows}
         return result
 
-    def get_run_ids(self) -> set[int]:
-        """Retrieve all run IDs."""
-        query = "SELECT run_id FROM run;"
-        rows = self.query(query)
+    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+        """Retrieve all run IDs if `flwr_aid` is not specified.
+
+        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
+        """
+        if flwr_aid:
+            rows = self.query(
+                "SELECT run_id FROM run WHERE flwr_aid = ?;",
+                (flwr_aid,),
+            )
+        else:
+            rows = self.query("SELECT run_id FROM run;", ())
         return {convert_sint64_to_uint64(row["run_id"]) for row in rows}
 
     def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
@@ -836,6 +857,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                     sub_status=row["sub_status"],
                     details=row["details"],
                 ),
+                flwr_aid=row["flwr_aid"],
             )
         log(ERROR, "`run_id` does not exist.")
         return None
@@ -1125,6 +1147,41 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
 
         return message_ins
+
+    def create_token(self, run_id: int) -> Optional[str]:
+        """Create a token for the given run ID."""
+        token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
+        query = "INSERT INTO token_store (run_id, token) VALUES (:run_id, :token);"
+        data = {"run_id": convert_uint64_to_sint64(run_id), "token": token}
+        try:
+            self.query(query, data)
+        except sqlite3.IntegrityError:
+            return None  # Token already created for this run ID
+        return token
+
+    def verify_token(self, run_id: int, token: str) -> bool:
+        """Verify a token for the given run ID."""
+        query = "SELECT token FROM token_store WHERE run_id = :run_id;"
+        data = {"run_id": convert_uint64_to_sint64(run_id)}
+        rows = self.query(query, data)
+        if not rows:
+            return False
+        return cast(str, rows[0]["token"]) == token
+
+    def delete_token(self, run_id: int) -> None:
+        """Delete the token for the given run ID."""
+        query = "DELETE FROM token_store WHERE run_id = :run_id;"
+        data = {"run_id": convert_uint64_to_sint64(run_id)}
+        self.query(query, data)
+
+    def get_run_id_by_token(self, token: str) -> Optional[int]:
+        """Get the run ID associated with a given token."""
+        query = "SELECT run_id FROM token_store WHERE token = :token;"
+        data = {"token": token}
+        rows = self.query(query, data)
+        if not rows:
+            return None
+        return convert_sint64_to_uint64(rows[0]["run_id"])
 
 
 def dict_factory(

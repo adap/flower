@@ -21,9 +21,10 @@ from typing import Optional
 from flwr.common import Context, Message
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.supercore.corestate import CoreState
 
 
-class LinkState(abc.ABC):  # pylint: disable=R0904
+class LinkState(CoreState):  # pylint: disable=R0904
     """Abstract LinkState."""
 
     @abc.abstractmethod
@@ -164,12 +165,16 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         fab_hash: Optional[str],
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str],
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
 
     @abc.abstractmethod
-    def get_run_ids(self) -> set[int]:
-        """Retrieve all run IDs."""
+    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+        """Retrieve all run IDs if `flwr_aid` is not specified.
+
+        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
+        """
 
     @abc.abstractmethod
     def get_run(self, run_id: int) -> Optional[Run]:

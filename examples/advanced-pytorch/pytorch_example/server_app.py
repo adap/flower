@@ -65,7 +65,7 @@ def server_fn(context: Context):
 
     # Prepare dataset for central evaluation
 
-    # This is the exact same dataset as the one donwloaded by the clients via
+    # This is the exact same dataset as the one downloaded by the clients via
     # FlowerDatasets. However, we don't use FlowerDatasets for the server since
     # partitioning is not needed.
     # We make use of the "test" split only

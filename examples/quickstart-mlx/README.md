@@ -51,7 +51,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 ### Run with the Simulation Engine
 
-> \[!NOTE\]
+> [!NOTE]
 > Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
 
 ```bash
@@ -64,7 +64,7 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
 ```
 
-> \[!TIP\]
+> [!TIP]
 > For a more detailed walk-through check our [quickstart MLX tutorial](https://flower.ai/docs/framework/tutorial-quickstart-mlx.html)
 
 ### Run with the Deployment Engine

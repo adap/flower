@@ -19,6 +19,7 @@ from typing import Optional
 
 from flwr.common import Message, log
 from flwr.common.constant import Status
+from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.serde import (
     fab_to_proto,
     message_from_proto,
@@ -42,19 +43,25 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
-from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
     Run,
 )
-from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
+from flwr.supercore.ffs import Ffs
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStore
-
-from ...utils import store_mapping_and_register_objects
+from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 
 
 def create_node(
@@ -104,25 +111,22 @@ def pull_messages(
 
     # Convert to Messages
     msg_proto = []
-    objects_to_pull: dict[str, ObjectIDs] = {}
+    trees = []
     for msg in message_list:
         try:
-            msg_proto.append(message_to_proto(msg))
-
+            # Retrieve Message object tree from ObjectStore
             msg_object_id = msg.metadata.message_id
-            descendants = store.get_message_descendant_ids(msg_object_id)
-            # Include the object_id of the message itself
-            objects_to_pull[msg_object_id] = ObjectIDs(
-                object_ids=descendants + [msg_object_id]
-            )
+            obj_tree = store.get_object_tree(msg_object_id)
+
+            # Add Message and its object tree to the response
+            msg_proto.append(message_to_proto(msg))
+            trees.append(obj_tree)
         except NoObjectInStoreError as e:
             log(ERROR, e.message)
             # Delete message ins from state
             state.delete_messages(message_ins_ids={msg_object_id})
 
-    return PullMessagesResponse(
-        messages_list=msg_proto, objects_to_pull=objects_to_pull
-    )
+    return PullMessagesResponse(messages_list=msg_proto, message_object_trees=trees)
 
 
 def push_messages(
@@ -139,6 +143,7 @@ def push_messages(
         msg.metadata.run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
+        store,
     )
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
@@ -158,7 +163,9 @@ def push_messages(
     return response
 
 
-def get_run(request: GetRunRequest, state: LinkState) -> GetRunResponse:
+def get_run(
+    request: GetRunRequest, state: LinkState, store: ObjectStore
+) -> GetRunResponse:
     """Get run information."""
     run = state.get_run(request.run_id)
 
@@ -170,6 +177,7 @@ def get_run(request: GetRunRequest, state: LinkState) -> GetRunResponse:
         request.run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
+        store,
     )
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
@@ -186,7 +194,7 @@ def get_run(request: GetRunRequest, state: LinkState) -> GetRunResponse:
 
 
 def get_fab(
-    request: GetFabRequest, ffs: Ffs, state: LinkState  # pylint: disable=W0613
+    request: GetFabRequest, ffs: Ffs, state: LinkState, store: ObjectStore
 ) -> GetFabResponse:
     """Get FAB."""
     # Abort if the run is not running
@@ -194,6 +202,7 @@ def get_fab(
         request.run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
+        store,
     )
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
@@ -203,3 +212,75 @@ def get_fab(
         return GetFabResponse(fab=fab_to_proto(fab))
 
     raise ValueError(f"Found no FAB with hash: {request.hash_str}")
+
+
+def push_object(
+    request: PushObjectRequest, state: LinkState, store: ObjectStore
+) -> PushObjectResponse:
+    """Push Object."""
+    abort_msg = check_abort(
+        request.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+        store,
+    )
+    if abort_msg:
+        raise InvalidRunStatusException(abort_msg)
+
+    stored = False
+    try:
+        store.put(request.object_id, request.object_content)
+        stored = True
+    except (NoObjectInStoreError, ValueError) as e:
+        log(ERROR, str(e))
+    except UnexpectedObjectContentError as e:
+        # Object content is not valid
+        log(ERROR, str(e))
+        raise
+    return PushObjectResponse(stored=stored)
+
+
+def pull_object(
+    request: PullObjectRequest, state: LinkState, store: ObjectStore
+) -> PullObjectResponse:
+    """Pull Object."""
+    abort_msg = check_abort(
+        request.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+        store,
+    )
+    if abort_msg:
+        raise InvalidRunStatusException(abort_msg)
+
+    # Fetch from store
+    content = store.get(request.object_id)
+    if content is not None:
+        object_available = content != b""
+        return PullObjectResponse(
+            object_found=True,
+            object_available=object_available,
+            object_content=content,
+        )
+    return PullObjectResponse(object_found=False, object_available=False)
+
+
+def confirm_message_received(
+    request: ConfirmMessageReceivedRequest,
+    state: LinkState,
+    store: ObjectStore,
+) -> ConfirmMessageReceivedResponse:
+    """Confirm message received handler."""
+    abort_msg = check_abort(
+        request.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+        store,
+    )
+    if abort_msg:
+        raise InvalidRunStatusException(abort_msg)
+
+    # Delete the message object
+    store.delete(request.message_object_id)
+
+    return ConfirmMessageReceivedResponse()

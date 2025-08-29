@@ -1,6 +1,6 @@
 # Setting up your Embedded Device
 
-> \[!NOTE\]
+> [!NOTE]
 > This guide is applicable to many embedded devices such as Raspberry Pi. This guide assumes you have a fresh install of Raspberry Pi OS Lite or Ubuntu Server (e.g. 22.04) and that you have successfully `ssh`-ed into your device.
 
 ## Setting up your device for Python developemnet
@@ -42,7 +42,7 @@ exec "$SHELL"
 
 ## Create a Python environment and activate it
 
-> \[!TIP\]
+> [!TIP]
 > If you are using a Raspberry Pi Zero 2 or another embedded device with a small amount of RAM (e.g. \<1GB), you probably need to extend the size of the SWAP partition. See the guide at the end of this readme.
 
 Now all is ready to create a virtualenvironment. But first, let's install a recent version of Python:
@@ -74,7 +74,7 @@ pip install <your-clientapp-dependencies>
 
 ## Extening SWAP for `RPi Zero 2`
 
-> \[!NOTE\]
+> [!NOTE]
 > This mini-guide is useful if your RPi Zero 2 cannot complete installing some packages (e.g. TensorFlow or even Python) or do some processing due to its limited RAM.
 
 A workaround is to create a `swap` disk partition (non-existant by default) so the OS can offload some elements to disk. I followed the steps described [in this blogpost](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04) that I copy below. You can follow these steps if you often see your RPi Zero running out of memory:
