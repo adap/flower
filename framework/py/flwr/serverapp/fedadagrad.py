@@ -21,11 +21,11 @@ Paper: arxiv.org/abs/2003.00295
 
 from collections import OrderedDict
 from collections.abc import Iterable
-from typing import Optional
+from typing import Callable, Optional
 
 import numpy as np
 
-from flwr.common import Array, ArrayRecord, Message, MetricRecord
+from flwr.common import Array, ArrayRecord, Message, MetricRecord, RecordDict
 
 from .fedopt import FedOpt
 
@@ -77,6 +77,47 @@ class FedAdagrad(FedOpt):
         Controls the algorithm's degree of adaptability. Defaults to 1e-3.
     """
 
+    def __init__(
+        self,
+        *,
+        fraction_train: float = 1.0,
+        fraction_evaluate: float = 1.0,
+        min_train_nodes: int = 2,
+        min_evaluate_nodes: int = 2,
+        min_available_nodes: int = 2,
+        weighted_by_key: str = "num-examples",
+        arrayrecord_key: str = "arrays",
+        configrecord_key: str = "config",
+        train_metrics_aggr_fn: Optional[
+            Callable[[list[RecordDict], str], MetricRecord]
+        ] = None,
+        evaluate_metrics_aggr_fn: Optional[
+            Callable[[list[RecordDict], str], MetricRecord]
+        ] = None,
+        eta: float = 1e-1,
+        eta_l: float = 1e-1,
+        # TODO: changed from 1e-9 to 1e-3
+        # TODO: As per paper (see paragraph just before 5.3)
+        tau: float = 1e-3,
+    ) -> None:
+        super().__init__(
+            fraction_train=fraction_train,
+            fraction_evaluate=fraction_evaluate,
+            min_train_nodes=min_train_nodes,
+            min_evaluate_nodes=min_evaluate_nodes,
+            min_available_nodes=min_available_nodes,
+            weighted_by_key=weighted_by_key,
+            arrayrecord_key=arrayrecord_key,
+            configrecord_key=configrecord_key,
+            train_metrics_aggr_fn=train_metrics_aggr_fn,
+            evaluate_metrics_aggr_fn=evaluate_metrics_aggr_fn,
+            eta=eta,
+            eta_l=eta_l,
+            beta_1=0.0,
+            beta_2=0.0,
+            tau=tau,
+        )
+
     def aggregate_train(
         self,
         server_round: int,
@@ -90,34 +131,13 @@ class FedAdagrad(FedOpt):
         if aggregated_arrayrecord is None:
             return aggregated_arrayrecord, aggregated_metrics
 
-        aggregated_ndarrays = {
-            k: array.numpy() for k, array in aggregated_arrayrecord.items()
-        }
+        # Compute intermediate variables
+        self._compute_deltat_mt_and_vt(aggregated_arrayrecord)
 
         # Adagrad
-        delta_t = {
-            k: x - y
-            for (k, x), (_, y) in zip(
-                aggregated_ndarrays.items(), self.current_arrays.items()
-            )
-        }
-
-        # m_t
-        if not self.m_t:
-            self.m_t = {k: np.zeros_like(v) for k, v in aggregated_ndarrays.items()}
-        self.m_t = {
-            k: self.beta_1 * v + (1 - self.beta_1) * delta_t[k]
-            for k, v in self.m_t.items()
-        }
-
-        # v_t
-        if not self.v_t:
-            self.v_t = {k: np.zeros_like(v) for k, v in aggregated_ndarrays.items()}
-        self.v_t = {k: v + (delta_t[k] ** 2) for k, v in self.v_t.items()}
-
         new_arrays = {
             k: x + self.eta * self.m_t[k] / (np.sqrt(self.v_t[k]) + self.tau)
-            for k, x in aggregated_ndarrays.items()
+            for k, x in self.current_arrays.items()
         }
 
         # Update current arrays
