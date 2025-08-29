@@ -17,10 +17,20 @@
 Paper: arxiv.org/abs/2003.00295
 """
 
+from collections.abc import Iterable
 from logging import INFO
 from typing import Callable, Optional
 
-from flwr.common import ArrayRecord, MetricRecord, RecordDict, log
+from flwr.common import (
+    ArrayRecord,
+    ConfigRecord,
+    Message,
+    MetricRecord,
+    NDArray,
+    RecordDict,
+    log,
+)
+from flwr.server import Grid
 
 from .fedavg import FedAvg
 
@@ -112,14 +122,17 @@ class FedOpt(FedAvg):
             train_metrics_aggr_fn=train_metrics_aggr_fn,
             evaluate_metrics_aggr_fn=evaluate_metrics_aggr_fn,
         )
-        self.current_arrays: Optional[ArrayRecord] = None
+        # TODO: dict[str, NDArray]
+        # TODO: i.e. {k: array.numpy() for k,array in <arrayrecord>.items()})
+        # TODO: should we make it a new type?
+        self.current_arrays: Optional[dict[str, NDArray]] = None
         self.eta = eta
         self.eta_l = eta_l
         self.tau = tau
         self.beta_1 = beta_1
         self.beta_2 = beta_2
-        self.m_t: Optional[ArrayRecord] = None
-        self.v_t: Optional[ArrayRecord] = None
+        self.m_t: Optional[dict[str, NDArray]] = None
+        self.v_t: Optional[dict[str, NDArray]] = None
 
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
@@ -137,3 +150,15 @@ class FedOpt(FedAvg):
             self.beta_1,
             self.beta_2,
         )
+
+    def configure_train(
+        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
+    ) -> Iterable[Message]:
+        """Configure the next round of federated training."""
+        # Keep track of array record being communicated
+        # TODO: a point of diff w.r.t previous strategies.
+        # the current weights was always set (externally by the Server class fit FL loop)
+        # (the original FedOpt didn't need of this step in configure_fit)
+        # I think it's clearer to keep track of the current arrays explicitly like this
+        self.current_arrays = {k: array.numpy() for k, array in arrays.items()}
+        return super().configure_train(server_round, arrays, config, grid)
