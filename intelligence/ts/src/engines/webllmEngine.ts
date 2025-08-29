@@ -28,6 +28,7 @@ import {
   Result,
   StreamEvent,
   Tool,
+  ToolChoice,
 } from '../typing';
 import { getAvailableRAM } from '../env';
 import { BaseEngine } from './engine';
@@ -94,6 +95,7 @@ export class WebllmEngine extends BaseEngine {
     stream?: boolean,
     onStreamEvent?: (event: StreamEvent) => void,
     _tools?: Tool[],
+    _toolChoice?: ToolChoice,
     _encrypt?: boolean,
     signal?: AbortSignal
   ): Promise<ChatResponseResult> {
