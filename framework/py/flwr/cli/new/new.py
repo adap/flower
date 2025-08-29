@@ -168,7 +168,7 @@ def _request_download_link(identifier: str) -> str:
         raise typer.BadParameter(f"Failed to reach platform API: {e}") from e
 
     if resp.status_code == 404:
-        raise typer.BadParameter("Remote app not found")
+        raise typer.BadParameter(f"{identifier} not found in FlowerHub")
     if not resp.ok:
         raise typer.BadParameter(f"Platform API error: {resp.status_code} {resp.text}")
 
