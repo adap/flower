@@ -20,7 +20,6 @@ import re
 import requests
 import zipfile
 from enum import Enum
-from importlib import metadata as importlib_metadata
 from pathlib import Path
 from string import Template
 from typing import Annotated, Optional
@@ -33,6 +32,7 @@ from ..utils import (
     prompt_text,
     sanitize_project_name,
 )
+from flwr.common.version import package_version
 
 
 PLATFORM_API_URL = "https://api.flower.ai"
@@ -63,11 +63,6 @@ class LlmChallengeName(str, Enum):
 
 class TemplateNotFound(Exception):
     """Raised when template does not exist."""
-
-
-def _get_flwr_version() -> str:
-    """Get flwr version."""
-    return importlib_metadata.version("flwr")
 
 
 def load_template(name: str) -> str:
@@ -158,8 +153,8 @@ def _request_download_link(identifier: str) -> str:
         "Accept": "application/json",
     }
     body = {
-        "identifier": identifier,             # send raw string of identifier
-        "flwr_version": _get_flwr_version(),  # send flwr version
+        "identifier": identifier,         # send raw string of identifier
+        "flwr_version": package_version,  # send flwr version
     }
 
     try:
