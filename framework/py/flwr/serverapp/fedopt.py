@@ -83,7 +83,7 @@ class FedOpt(FedAvg):
     beta_2 : float, optional
         Second moment parameter. Defaults to 0.0.
     tau : float, optional
-        Controls the algorithm's degree of adaptability. Defaults to 1e-9.
+        Controls the algorithm's degree of adaptability. Defaults to 1e-3.
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals, line-too-long
@@ -108,7 +108,9 @@ class FedOpt(FedAvg):
         eta_l: float = 1e-1,
         beta_1: float = 0.0,
         beta_2: float = 0.0,
-        tau: float = 1e-9,
+        # TODO: changed from 1e-9 to 1e-3
+        # TODO: As per paper (see paragraph just before 5.3)
+        tau: float = 1e-3,
     ) -> None:
         super().__init__(
             fraction_train=fraction_train,

@@ -74,7 +74,7 @@ class FedAdagrad(FedOpt):
     eta_l : float, optional
         Client-side learning rate. Defaults to 1e-1.
     tau : float, optional
-        Controls the algorithm's degree of adaptability. Defaults to 1e-9.
+        Controls the algorithm's degree of adaptability. Defaults to 1e-3.
     """
 
     def aggregate_train(
