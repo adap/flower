@@ -216,7 +216,7 @@ def download_remote_app_via_api(identifier: str) -> None:
 
     print(
         typer.style(
-            f"📦 Unpacking into ./{app_name} …",
+            f"📦 Unpacking into {project_dir} …",
             fg=typer.colors.GREEN,
             bold=True,
         )
