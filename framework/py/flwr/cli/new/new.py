@@ -35,7 +35,8 @@ from ..utils import (
 from flwr.common.version import package_version
 
 
-PLATFORM_API_URL = "https://api.flower.ai"
+# PLATFORM_API_URL = "https://api.flower.ai"
+PLATFORM_API_URL = "http://0.0.0.0/v1"
 
 
 class MlFramework(str, Enum):
@@ -147,7 +148,7 @@ def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
 
 
 def _request_download_link(identifier: str) -> str:
-    url = f"{PLATFORM_API_URL}/hub"
+    url = f"{PLATFORM_API_URL}/hub/download-link"
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
