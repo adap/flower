@@ -100,8 +100,8 @@ class FedAdam(FedOpt):
         ] = None,
         eta: float = 1e-1,
         eta_l: float = 1e-1,
-        beta_1: float = 0.0,
-        beta_2: float = 0.0,
+        beta_1: float = 0.9,
+        beta_2: float = 0.99,
         # TODO: changed from 1e-9 to 1e-3
         # TODO: As per paper (see paragraph just before 5.3)
         tau: float = 1e-3,
@@ -138,9 +138,18 @@ class FedAdam(FedOpt):
             return aggregated_arrayrecord, aggregated_metrics
 
         # Compute intermediate variables
-        self._compute_deltat_mt_and_vt(aggregated_arrayrecord)
+        delta_t, m_t, aggregated_ndarrays = self._compute_deltat_and_mt(
+            aggregated_arrayrecord
+        )
 
-        # Adam
+        # v_t
+        if not self.v_t:
+            self.v_t = {k: np.zeros_like(v) for k, v in aggregated_ndarrays.items()}
+        self.v_t = {
+            k: self.beta_2 * v + (1 - self.beta_2) * (delta_t[k] ** 2)
+            for k, v in self.v_t.items()
+        }
+
         # Compute the bias-corrected learning rate, `eta_norm` for improving convergence
         # in the early rounds of FL training. This `eta_norm` is `\alpha_t` in Kingma &
         # Ba, 2014 (http://arxiv.org/abs/1412.6980) "Adam: A Method for Stochastic
@@ -152,9 +161,12 @@ class FedAdam(FedOpt):
         )
 
         new_arrays = {
-            k: x + eta_norm * self.m_t[k] / (np.sqrt(self.v_t[k]) + self.tau)
+            k: x + eta_norm * m_t[k] / (np.sqrt(self.v_t[k]) + self.tau)
             for k, x in self.current_arrays.items()
         }
+
+        # Update current arrays
+        self.current_arrays = new_arrays
 
         return (
             ArrayRecord(OrderedDict({k: Array(v) for k, v in new_arrays.items()})),

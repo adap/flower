@@ -167,8 +167,10 @@ class FedOpt(FedAvg):
         self.current_arrays = {k: array.numpy() for k, array in arrays.items()}
         return super().configure_train(server_round, arrays, config, grid)
 
-    def _compute_deltat_mt_and_vt(self, aggregated_arrayrecord: ArrayRecord) -> None:
-        """Compute delta_t, m_t and v_t.
+    def _compute_deltat_and_mt(
+        self, aggregated_arrayrecord: ArrayRecord
+    ) -> tuple[dict[str, NDArray], dict[str, NDArray], dict[str, NDArray]]:
+        """Compute delta_t and m_t.
 
         This is a shared stage during aggregation for FedAdagrad, FedAdam and FedYogi.
         """
@@ -176,7 +178,6 @@ class FedOpt(FedAvg):
             k: array.numpy() for k, array in aggregated_arrayrecord.items()
         }
 
-        # Adagrad
         delta_t = {
             k: x - y
             for (k, x), (_, y) in zip(
@@ -192,10 +193,4 @@ class FedOpt(FedAvg):
             for k, v in self.m_t.items()
         }
 
-        # v_t
-        if not self.v_t:
-            self.v_t = {k: np.zeros_like(v) for k, v in aggregated_ndarrays.items()}
-        self.v_t = {
-            k: self.beta_2 * v + (1 - self.beta_2) * (delta_t[k] ** 2)
-            for k, v in self.v_t.items()
-        }
+        return delta_t, self.m_t, aggregated_ndarrays

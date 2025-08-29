@@ -132,11 +132,17 @@ class FedAdagrad(FedOpt):
             return aggregated_arrayrecord, aggregated_metrics
 
         # Compute intermediate variables
-        self._compute_deltat_mt_and_vt(aggregated_arrayrecord)
+        delta_t, m_t, aggregated_ndarrays = self._compute_deltat_and_mt(
+            aggregated_arrayrecord
+        )
 
-        # Adagrad
+        # v_t
+        if not self.v_t:
+            self.v_t = {k: np.zeros_like(v) for k, v in aggregated_ndarrays.items()}
+        self.v_t = {k: v + (delta_t[k] ** 2) for k, v in self.v_t.items()}
+
         new_arrays = {
-            k: x + self.eta * self.m_t[k] / (np.sqrt(self.v_t[k]) + self.tau)
+            k: x + self.eta * m_t[k] / (np.sqrt(self.v_t[k]) + self.tau)
             for k, x in self.current_arrays.items()
         }
 
