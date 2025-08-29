@@ -230,8 +230,8 @@ def exit_if_no_address(federation_config: dict[str, Any], cmd: str) -> None:
     """Exit if the provided federation_config has no "address" key."""
     if "address" not in federation_config:
         typer.secho(
-            f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the correct"
-            "SuperLink (Control API) address is provided in `pyproject.toml`.",
+            f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the "
+            "correct SuperLink (Control API) address is provided in `pyproject.toml`.",
             fg=typer.colors.RED,
             bold=True,
         )

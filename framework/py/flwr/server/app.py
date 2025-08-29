@@ -37,7 +37,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
 from flwr.common.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
-from flwr.common.config import get_flwr_dir, parse_config_args
+from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
     AUTH_TYPE_YAML_KEY,
     AUTHZ_TYPE_YAML_KEY,
@@ -71,7 +71,6 @@ from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.superlink.executor import load_executor
 from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
@@ -136,6 +135,15 @@ def run_superlink() -> None:
             WARN, "The `--flwr-dir` option is currently not in use and will be ignored."
         )
 
+    # Detect if `--executor*` arguments were set
+    if args.executor or args.executor_dir or args.executor_config:
+        flwr_exit(
+            ExitCode.SUPERLINK_INVALID_ARGS,
+            "The arguments `--executor`, `--executor-dir`, and `--executor-config` are "
+            "deprecated and will be removed in a future release. To run SuperLink with "
+            "the SimulationIo API, please use `--simulation`.",
+        )
+
     # Detect if both Control API and Exec API addresses were set explicitly
     explicit_args = set()
     for arg in sys.argv[1:]:
@@ -198,26 +206,19 @@ def run_superlink() -> None:
     objectstore_factory = ObjectStoreFactory()
 
     # Start Control API
-    executor = load_executor(args)
+    is_simulation = args.simulation
     control_server: grpc.Server = run_control_api_grpc(
         address=control_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
-        executor=executor,
         certificates=certificates,
-        config=parse_config_args(
-            [args.executor_config] if args.executor_config else args.executor_config
-        ),
+        is_simulation=is_simulation,
         auth_plugin=auth_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
     )
     grpc_servers = [control_server]
-
-    # Determine Exec plugin
-    # If simulation is used, don't start ServerAppIo and Fleet APIs
-    is_simulation = executor.__class__.__qualname__ == "SimulationEngine"
     bckg_threads: list[threading.Thread] = []
 
     if is_simulation:
@@ -518,7 +519,9 @@ def _run_fleet_api_grpc_rere(  # pylint: disable=R0913, R0917
         interceptors=interceptors,
     )
 
-    log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
+    log(
+        INFO, "Flower Deployment Runtime: Starting Fleet API (gRPC-rere) on %s", address
+    )
     fleet_grpc_server.start()
 
     return fleet_grpc_server
@@ -546,7 +549,11 @@ def _run_fleet_api_grpc_adapter(
         certificates=certificates,
     )
 
-    log(INFO, "Flower ECE: Starting Fleet API (GrpcAdapter) on %s", address)
+    log(
+        INFO,
+        "Flower Deployment Runtime: Starting Fleet API (GrpcAdapter) on %s",
+        address,
+    )
     fleet_grpc_server.start()
 
     return fleet_grpc_server
@@ -741,20 +748,25 @@ def _add_args_control_api(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--executor",
-        help="For example: `deployment:exec` or `project.package.module:wrapper.exec`. "
-        "The default is `flwr.superexec.deployment:executor`",
-        default="flwr.superexec.deployment:executor",
+        help="This argument is deprecated and will be removed in a future release.",
+        default=None,
     )
     parser.add_argument(
         "--executor-dir",
-        help="The directory for the executor.",
-        default=".",
+        help="This argument is deprecated and will be removed in a future release.",
+        default=None,
     )
     parser.add_argument(
         "--executor-config",
-        help="Key-value pairs for the executor config, separated by spaces. "
-        "For example:\n\n`--executor-config 'verbose=true "
-        'root-certificates="certificates/superlink-ca.crt"\'`',
+        help="This argument is deprecated and will be removed in a future release.",
+        default=None,
+    )
+    parser.add_argument(
+        "--simulation",
+        action="store_true",
+        default=False,
+        help="Launch the SimulationIo API server in place of "
+        "the ServerAppIo API server.",
     )
 
 

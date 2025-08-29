@@ -12,9 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simulation engine executor for backward compatibility."""
+"""Strategy results."""
 
 
-from flwr.superlink.executor import SimulationEngine
+from dataclasses import dataclass, field
 
-executor = SimulationEngine()
+from flwr.common import ArrayRecord, MetricRecord
+
+
+@dataclass
+class Result:
+    """Data class carrying records generated during the execution of a strategy."""
+
+    arrays: ArrayRecord = field(default_factory=ArrayRecord)
+    train_metrics_clientapp: dict[int, MetricRecord] = field(default_factory=dict)
+    evaluate_metrics_clientapp: dict[int, MetricRecord] = field(default_factory=dict)
+    evaluate_metrics_serverapp: dict[int, MetricRecord] = field(default_factory=dict)
