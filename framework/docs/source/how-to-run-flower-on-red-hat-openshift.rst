@@ -5,21 +5,44 @@
 Run Flower on Red Hat OpenShift
 ===============================
 
-In this guide, you will learn how to create, deploy, and run a Flower app on the [Red
-Hat OpenShift (RHOS)](https://www.redhat.com/en/technologies/cloud-computing/openshift)
-application platform. The platform will be hosted in AWS and we will follow the steps to
-install the cluster on installer-provisioned Infrastructure using the [Red Hat OpenShift
-Service on AWS](https://aws.amazon.com/rosa/).
+In this guide, you will learn how to create, deploy, and run a Flower app on the `Red
+Hat OpenShift (RHOS)
+<https://www.redhat.com/en/technologies/cloud-computing/openshift>`_ application
+platform. The platform will be hosted in AWS and we will follow the steps to install the
+cluster on installer-provisioned infrastructure using the `Red Hat OpenShift Service on
+AWS <https://aws.amazon.com/rosa/>`_.
 
-AWS Prerequisites
------------------
+Login to Red Hat OpenShift Console
+----------------------------------
 
-Here, we outline the pre-requisites for AWS to create and manage a Red Hat OpenShift
-cluster. The instructions are based on the [RHOS getting started guide accessible from
-your AWS console](https://console.aws.amazon.com/rosa/home#/get-started).
+Start by logging in to your `Red Hat Hybrid Cloud Console
+<https://console.redhat.com/>`_ and click on ``OpenShift`` link in the ``Red Hat
+OpenShift`` card.
+
+.. figure:: ./_static/rhos/rh_console.png
+    :align: center
+    :width: 90%
+    :alt: Red Hat OpenShift link in Red Hat Hybrid Cloud Console
+
+    Red Hat OpenShift link in the cloud console.
+
+This will take you to the OpenShift console. Under ``Overview``, look for the ``Red Hat
+OpenShift Service on AWS (ROSA)`` card and click on ``Create Cluster``. You will be
+taken to the page to setup a Red Hat OpenShift service on AWS. There are two
+pre-requisites that you have to fulfill before you can create a cluster:
+
+1. AWS Pre-requisites - Sets up your AWS account for deploying ROSA.
+2. ROSA Pre-requisites - Installs the ROSA CLI tool on your system and login to your Red
+   Hat account.
+
+Complete AWS Pre-requisites
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Follow the steps required to fulfill the pre-requisites for AWS to create and manage a
+Red Hat OpenShift cluster:
 
 1. Enable RHOS service on AWS (ROSA) in your AWS account.
-2. Ensure that you have service quotas for ROSA.
+2. Ensure that you have sufficient service quotas for ROSA.
 3. Create a service-linked role for Elastic Load Balancing. This should be automatically
    creatd for you if not present.
 4. Link your AWS and Red Hat account.
@@ -31,15 +54,23 @@ your AWS console](https://console.aws.amazon.com/rosa/home#/get-started).
    - ``IAMFullAccess``
    - ``ServiceQuotasReadOnlyAccess``
 
-For convenience, install the ``aws`` CLI tool for your system. You can alternatively run
-it with Docker using the command:
+For more details, refer to the RHOS getting started guide from your AWS console.
+
+Complete ROSA Pre-requisites
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Follow the steps shown in the section to download and install the ROSA CLI tool.
+
+Next, install the |aws_cli_link|_ CLI tool for your system. You can alternatively run it
+with Docker using the command:
 
 .. code-block:: shell
 
     docker run --rm -it --volume ~/.aws:/root/.aws public.ecr.aws/aws-cli/aws-cli
 
 The ``--volume ~/.aws:/root/.aws`` option mounts your AWS credentials to the Docker
-container. Next, run the following to configure the AWS CLI tool:
+container. Next, run the following to configure the AWS CLI tool and provide your AWS
+credentials for the IAM user you created earlier:
 
 .. code-block:: shell
 
@@ -49,10 +80,113 @@ container. Next, run the following to configure the AWS CLI tool:
     Default region name [None]: [...]  # your region
     Default output format [None]: table  # the recommended output format
 
+Download and install the ROSA CLI tool by following the instructions for your operating
+system. Once you have installed the ROSA CLI tool, login with your Red Hat account:
+
+.. code-block:: shell
+
+    ➜ rosa login --use-auth-code
+    I: You will now be redirected to Red Hat SSO login
+    I: Token received successfully
+    I: Logged in as '[...]' on 'https://api.openshift.com'
+    I: To switch accounts, logout from https://sso.redhat.com and run `rosa logout` before attempting to login again
+
+If you are already logged into your Red Hat account on your browser, you will be
+redirected back to your terminal.
+
+Then, create the necessary account-wide roles and policies:
+
+.. code-block:: shell
+
+    ➜ rosa create account-roles --mode auto
+
+Finally, create a Virtual Private Network (VPC) for your cluster:
+
+.. code-block:: shell
+
+    ➜ rosa create network
+    ...
+    INFO[0177] Stack rosa-network-stack-[...] created
+
+With the AWS and ROSA pre-requisites completed, you are now ready to deploy a cluster.
+
 Create a Red Hat OpenShift Cluster on AWS
 -----------------------------------------
 
-WIP
+There are three ways to create the cluster: via ``rosa`` CLI, web interface, or with
+Terraform. For this guide, we will use the web interface. Click on the ``Create with web
+interface`` button in the ``Deploy with web interface`` card:
+
+.. figure:: ./_static/rhos/rhos_deploy_web_interface.png
+    :align: center
+    :width: 90%
+    :alt: Deploy Red Hat OpenShift cluster with web interface
+
+    Deploy Red Hat OpenShift cluster with web interface.
+
+You will be taken to a series of steps to create a ROSA cluster. In the following, some
+key steps are highlighted and we recommend that you follow the official guide in the Red
+Hat Cloud Console for more details.
+
+1. **Define Control Plane** - Select the ROSA hosted architecture and click on ``Next``.
+2. **Accounts and Roles** - Ensure the infrastructure and billing account details are
+   correct and click ``Next``.
+3. **Cluster settings**
+
+   1. **Details** - Specify ``flower-demo-cluster`` as the ``Cluster name``. For this
+      guide, select version ``4.18.22`` (you may select a newer version that suits your
+      requirements). Select the AWS region appropriate for your AWS account.
+   2. **Machine Pool** - Select an EC2 compute node instance type that is available in
+      your region. In this guide, we use the``eu-north-1`` region, and therefore
+      selected ``m6i.2xlarge - 8 vCPU 32 GiB RAM``. Enable autoscaling and set the
+      minimum node count to 2 and maximum to 4. This allows the cluster to scale up when
+      you deploy the OpenShift platform and OpenShift AI in the same cluster.
+
+4. **Networking**
+
+   1. **Configuration** - Under "Cluster privacy", select ``public`` and leave other
+      values as defaults.
+   2. **CIDR ranges** - Leave the default CIDR ranges as is.
+
+5. **Cluster roles and policies** - Follow the steps to create a new OIDC config ID.
+6. **Cluster updates** - Leave the default settings as is to "Recurring updates".
+7. Finally, review the cluster details and click ``Create cluster``.
+
+This will start the cluster creation process and may take several minutes to complete.
+You will be able to monitor the installation status of the control plane and machine
+pools in the "Overview" tab.
+
+Once your cluster is created, you will be prompted to create an identity provider to
+access the cluster. Click on the ``Create identity provider`` link and follow the steps
+for your preferred OIDC provider. Grant the user in your OIDC provider the
+``cluster-admin`` rights so that you can add apps from the OperatorHub later. To do so,
+go to ``Access control``, ``Cluster Roles and Access`` tab, and click on ``Add user``.
+Enter the user ID from your OIDC provider and save the changes.
+
+Your cluster is now ready. To view the cluster details, click on the ``Cluster List``
+link in the left sidebar. Click on your cluster name (``flower-demo-cluster``) to view
+the cluster details:
+
+.. figure:: ./_static/rhos/rhos_cluster_details.png
+    :align: center
+    :width: 90%
+    :alt: Red Hat OpenShift cluster details
+
+    Red Hat OpenShift cluster details.
+
+To access the OpenShift web console, click on the ``Open console`` link in the top
+right. You will be redirected to your OIDC provider to login. Once logged in, you will
+be taken to the OpenShift web console:
+
+.. figure:: ./_static/rhos/rhos_console.png
+    :align: center
+    :width: 90%
+    :alt: Red Hat OpenShift web console
+
+    Red Hat OpenShift web console.
+
+Congratulations on making it this far! You now have a running Red Hat OpenShift cluster
+on AWS. Now, let's walk through how to deploy Flower on your OpenShift cluster.
 
 Deploy Flower SuperLink and SuperNodes on OpenShift
 ---------------------------------------------------
@@ -78,3 +212,7 @@ Run the Flower App in OpenShift AI
 ----------------------------------
 
 WIP
+
+.. |aws_cli_link| replace:: ``aws``
+
+.. _aws_cli_link: https://aws.amazon.com/cli/
