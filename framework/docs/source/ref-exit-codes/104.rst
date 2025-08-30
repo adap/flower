@@ -1,0 +1,13 @@
+[104] SUPERLINK_INVALID_ARGS
+============================
+
+Description
+-----------
+
+The SuperLink was started with invalid arguments.
+
+How to Resolve
+--------------
+
+Some of the arguments passed to the SuperLink are incompatible with each other. Check
+the SuperLink logs for additional help on how to resolve the issue.

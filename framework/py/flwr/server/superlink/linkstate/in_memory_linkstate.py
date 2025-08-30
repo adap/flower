@@ -15,22 +15,27 @@
 """In-memory LinkState implementation."""
 
 
+import secrets
 import threading
 import time
 from bisect import bisect_right
+from collections import defaultdict
 from dataclasses import dataclass, field
 from logging import ERROR, WARNING
 from typing import Optional
-from uuid import UUID, uuid4
 
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
+    FLWR_APP_TOKEN_LENGTH,
+    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
-    PING_PATIENCE,
+    RUN_FAILURE_DETAILS_NO_HEARTBEAT,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
+    SubStatus,
 )
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
@@ -52,8 +57,11 @@ class RunRecord:  # pylint: disable=R0902
     """The record of a specific run, including its status and timestamps."""
 
     run: Run
+    active_until: float = 0.0
+    heartbeat_interval: float = 0.0
     logs: list[tuple[float, str]] = field(default_factory=list)
     log_lock: threading.Lock = field(default_factory=threading.Lock)
+    lock: threading.RLock = field(default_factory=threading.RLock)
 
 
 class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
@@ -61,7 +69,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def __init__(self) -> None:
 
-        # Map node_id to (online_until, ping_interval)
+        # Map node_id to (online_until, heartbeat_interval)
         self.node_ids: dict[int, tuple[float, float]] = {}
         self.public_key_to_node_id: dict[bytes, int] = {}
         self.node_id_to_public_key: dict[int, bytes] = {}
@@ -70,15 +78,23 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.run_ids: dict[int, RunRecord] = {}
         self.contexts: dict[int, Context] = {}
         self.federation_options: dict[int, ConfigRecord] = {}
-        self.message_ins_store: dict[UUID, Message] = {}
-        self.message_res_store: dict[UUID, Message] = {}
-        self.message_ins_id_to_message_res_id: dict[UUID, UUID] = {}
+        self.message_ins_store: dict[str, Message] = {}
+        self.message_res_store: dict[str, Message] = {}
+        self.message_ins_id_to_message_res_id: dict[str, str] = {}
+
+        # Store run ID to token mapping and token to run ID mapping
+        self.token_store: dict[int, str] = {}
+        self.token_to_run_id: dict[str, int] = {}
+        self.lock_token_store = threading.Lock()
+
+        # Map flwr_aid to run_ids for O(1) reverse index lookup
+        self.flwr_aid_to_run_ids: dict[str, set[int]] = defaultdict(set)
 
         self.node_public_keys: set[bytes] = set()
 
         self.lock = threading.RLock()
 
-    def store_message_ins(self, message: Message) -> Optional[UUID]:
+    def store_message_ins(self, message: Message) -> Optional[str]:
         """Store one Message."""
         # Validate message
         errors = validate_message(message, is_reply_message=False)
@@ -106,12 +122,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             )
             return None
 
-        # Create message_id
-        message_id = uuid4()
-
-        # Store Message
-        # pylint: disable-next=W0212
-        message.metadata._message_id = str(message_id)  # type: ignore
+        message_id = message.metadata.message_id
         with self.lock:
             self.message_ins_store[message_id] = message
 
@@ -147,7 +158,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         return message_ins_list
 
     # pylint: disable=R0911
-    def store_message_res(self, message: Message) -> Optional[UUID]:
+    def store_message_res(self, message: Message) -> Optional[str]:
         """Store one Message."""
         # Validate message
         errors = validate_message(message, is_reply_message=True)
@@ -159,7 +170,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             # Check if the Message it is replying to exists and is valid
             msg_ins_id = res_metadata.reply_to_message_id
-            msg_ins = self.message_ins_store.get(UUID(msg_ins_id))
+            msg_ins = self.message_ins_store.get(msg_ins_id)
 
             # Ensure that dst_node_id of original Message matches the src_node_id of
             # reply Message.
@@ -214,22 +225,17 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             log(ERROR, "`metadata.run_id` is invalid")
             return None
 
-        # Create message_id
-        message_id = uuid4()
-
-        # Store Message
-        # pylint: disable-next=W0212
-        message.metadata._message_id = str(message_id)  # type: ignore
+        message_id = message.metadata.message_id
         with self.lock:
             self.message_res_store[message_id] = message
-            self.message_ins_id_to_message_res_id[UUID(msg_ins_id)] = message_id
+            self.message_ins_id_to_message_res_id[msg_ins_id] = message_id
 
         # Return the new message_id
         return message_id
 
-    def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
+    def get_message_res(self, message_ids: set[str]) -> list[Message]:
         """Get reply Messages for the given Message IDs."""
-        ret: dict[UUID, Message] = {}
+        ret: dict[str, Message] = {}
 
         with self.lock:
             current = time.time()
@@ -250,7 +256,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 inquired_in_message_ids=message_ids,
                 found_in_message_dict=self.message_ins_store,
                 node_id_to_online_until={
-                    node_id: self.node_ids[node_id][0] for node_id in dst_node_ids
+                    node_id: self.node_ids[node_id][0]
+                    for node_id in dst_node_ids
+                    if node_id in self.node_ids
                 },
                 current_time=current,
             )
@@ -281,7 +289,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         return list(ret.values())
 
-    def delete_messages(self, message_ins_ids: set[UUID]) -> None:
+    def delete_messages(self, message_ins_ids: set[str]) -> None:
         """Delete a Message and its reply based on provided Message IDs."""
         if not message_ins_ids:
             return
@@ -298,9 +306,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     )
                     del self.message_res_store[message_res_id]
 
-    def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
+    def get_message_ids_from_run_id(self, run_id: int) -> set[str]:
         """Get all instruction Message IDs for the given run_id."""
-        message_id_list: set[UUID] = set()
+        message_id_list: set[str] = set()
         with self.lock:
             for message_id, message in self.message_ins_store.items():
                 if message.metadata.run_id == run_id:
@@ -322,7 +330,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.message_res_store)
 
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(self, heartbeat_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id = generate_rand_int_from_bytes(
@@ -334,8 +342,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
-            # Mark the node online util time.time() + ping_interval
-            self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+            # Mark the node online until time.time() + heartbeat_interval
+            self.node_ids[node_id] = (
+                time.time() + heartbeat_interval,
+                heartbeat_interval,
+            )
             return node_id
 
     def delete_node(self, node_id: int) -> None:
@@ -400,6 +411,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         fab_hash: Optional[str],
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str],
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
         # Sample a random int64 as run_id
@@ -423,9 +435,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             sub_status="",
                             details="",
                         ),
+                        flwr_aid=flwr_aid if flwr_aid else "",
                     ),
                 )
                 self.run_ids[run_id] = run_record
+                # Add run_id to the flwr_aid_to_run_ids mapping if flwr_aid is provided
+                if flwr_aid:
+                    self.flwr_aid_to_run_ids[flwr_aid].add(run_id)
 
                 # Record federation options. Leave empty if not passed
                 self.federation_options[run_id] = federation_options
@@ -453,13 +469,42 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             return self.node_public_keys.copy()
 
-    def get_run_ids(self) -> set[int]:
-        """Retrieve all run IDs."""
+    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+        """Retrieve all run IDs if `flwr_aid` is not specified.
+
+        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
+        """
         with self.lock:
+            if flwr_aid is not None:
+                # Return run IDs for the specified flwr_aid
+                return set(self.flwr_aid_to_run_ids.get(flwr_aid, ()))
             return set(self.run_ids.keys())
+
+    def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
+        """Check if any runs are no longer active.
+
+        Marks runs with status 'starting' or 'running' as failed
+        if they have not sent a heartbeat before `active_until`.
+        """
+        current = now()
+        for record in (self.run_ids.get(run_id) for run_id in run_ids):
+            if record is None:
+                continue
+            with record.lock:
+                if record.run.status.status in (Status.STARTING, Status.RUNNING):
+                    if record.active_until < current.timestamp():
+                        record.run.status = RunStatus(
+                            status=Status.FINISHED,
+                            sub_status=SubStatus.FAILED,
+                            details=RUN_FAILURE_DETAILS_NO_HEARTBEAT,
+                        )
+                        record.run.finished_at = now().isoformat()
 
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
+        # Check if runs are still active
+        self._check_and_tag_inactive_run(run_ids={run_id})
+
         with self.lock:
             if run_id not in self.run_ids:
                 log(ERROR, "`run_id` is invalid")
@@ -468,6 +513,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
+        # Check if runs are still active
+        self._check_and_tag_inactive_run(run_ids=run_ids)
+
         with self.lock:
             return {
                 run_id: self.run_ids[run_id].run.status
@@ -477,12 +525,16 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
+        # Check if runs are still active
+        self._check_and_tag_inactive_run(run_ids={run_id})
+
         with self.lock:
             # Check if the run_id exists
             if run_id not in self.run_ids:
                 log(ERROR, "`run_id` is invalid")
                 return False
 
+        with self.run_ids[run_id].lock:
             # Check if the status transition is valid
             current_status = self.run_ids[run_id].run.status
             if not is_valid_transition(current_status, new_status):
@@ -504,14 +556,23 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 )
                 return False
 
-            # Update the status
+            # Initialize heartbeat_interval and active_until
+            # when switching to starting or running
+            current = now()
             run_record = self.run_ids[run_id]
+            if new_status.status in (Status.STARTING, Status.RUNNING):
+                run_record.heartbeat_interval = HEARTBEAT_MAX_INTERVAL
+                run_record.active_until = (
+                    current.timestamp() + run_record.heartbeat_interval
+                )
+
+            # Update the run status
             if new_status.status == Status.STARTING:
-                run_record.run.starting_at = now().isoformat()
+                run_record.run.starting_at = current.isoformat()
             elif new_status.status == Status.RUNNING:
-                run_record.run.running_at = now().isoformat()
+                run_record.run.running_at = current.isoformat()
             elif new_status.status == Status.FINISHED:
-                run_record.run.finished_at = now().isoformat()
+                run_record.run.finished_at = current.isoformat()
             run_record.run.status = new_status
             return True
 
@@ -536,20 +597,61 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return None
             return self.federation_options[run_id]
 
-    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
-        """Acknowledge a ping received from a node, serving as a heartbeat.
+    def acknowledge_node_heartbeat(
+        self, node_id: int, heartbeat_interval: float
+    ) -> bool:
+        """Acknowledge a heartbeat received from a node, serving as a heartbeat.
 
-        It allows for one missed ping (in a PING_PATIENCE * ping_interval) before
-        marking the node as offline, where PING_PATIENCE = 2 in default.
+        A node is considered online as long as it sends heartbeats within
+        the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before
+        the node is marked as offline.
         """
         with self.lock:
             if node_id in self.node_ids:
                 self.node_ids[node_id] = (
-                    time.time() + PING_PATIENCE * ping_interval,
-                    ping_interval,
+                    time.time() + HEARTBEAT_PATIENCE * heartbeat_interval,
+                    heartbeat_interval,
                 )
                 return True
         return False
+
+    def acknowledge_app_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
+        """Acknowledge a heartbeat received from a ServerApp for a given run.
+
+        A run with status `"running"` is considered alive as long as it sends heartbeats
+        within the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before the run is
+        marked as `"completed:failed"`.
+        """
+        with self.lock:
+            # Search for the run
+            record = self.run_ids.get(run_id)
+
+            # Check if the run_id exists
+            if record is None:
+                log(ERROR, "`run_id` is invalid")
+                return False
+
+        with record.lock:
+            # Check if runs are still active
+            self._check_and_tag_inactive_run(run_ids={run_id})
+
+            # Check if the run is of status "running"/"starting"
+            current_status = record.run.status
+            if current_status.status not in (Status.RUNNING, Status.STARTING):
+                log(
+                    ERROR,
+                    'Cannot acknowledge heartbeat for run with status "%s"',
+                    current_status.status,
+                )
+                return False
+
+            # Update the `active_until` and `heartbeat_interval` for the given run
+            current = now().timestamp()
+            record.active_until = current + HEARTBEAT_PATIENCE * heartbeat_interval
+            record.heartbeat_interval = heartbeat_interval
+            return True
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""
@@ -583,3 +685,30 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             index = bisect_right(run.logs, (after_timestamp, ""))
             latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
             return "".join(log for _, log in run.logs[index:]), latest_timestamp
+
+    def create_token(self, run_id: int) -> Optional[str]:
+        """Create a token for the given run ID."""
+        token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
+        with self.lock_token_store:
+            if run_id in self.token_store:
+                return None  # Token already created for this run ID
+            self.token_store[run_id] = token
+            self.token_to_run_id[token] = run_id
+        return token
+
+    def verify_token(self, run_id: int, token: str) -> bool:
+        """Verify a token for the given run ID."""
+        with self.lock_token_store:
+            return self.token_store.get(run_id) == token
+
+    def delete_token(self, run_id: int) -> None:
+        """Delete the token for the given run ID."""
+        with self.lock_token_store:
+            token = self.token_store.pop(run_id, None)
+            if token is not None:
+                self.token_to_run_id.pop(token, None)
+
+    def get_run_id_by_token(self, token: str) -> Optional[int]:
+        """Get the run ID associated with a given token."""
+        with self.lock_token_store:
+            return self.token_to_run_id.get(token)

@@ -20,7 +20,7 @@ from typing import Any, Callable, Union
 import grpc
 
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
     StreamLogsRequest,
 )

@@ -90,7 +90,7 @@ UBUNTU_VARIANT = Variant(
 
 # alpine base image
 ALPINE_VARIANT = Variant(
-    Distro(DistroName.ALPINE, "3.19"),
+    Distro(DistroName.ALPINE, "3.22"),
     CpuVariant(),
 )
 
@@ -180,23 +180,46 @@ def generate_binary_images(
     ]
 
 
-def tag_latest_alpine_with_flwr_version(image: BaseImage) -> List[str]:
+def tag_superlink_supernode_images(image: BaseImage) -> List[str]:
+    """
+    Compute the Docker image tags based on its build arguments.
+
+    - If the image is built on Alpine with the latest supported Python version,
+      append the Flower framework version to the existing tags.
+    - Else if the image is built on Ubuntu with the latest supported Python version
+      and a CPU-only variant, append the "latest" tag to the existing tags.
+    - Otherwise, return the original tags unchanged.
+    """
     if (
         image.build_args.variant.distro.name == DistroName.ALPINE
         and image.build_args.python_version == LATEST_SUPPORTED_PYTHON_VERSION
     ):
         return image.tags + [image.build_args.flwr_version]
+    elif (
+        image.build_args.variant.distro.name == DistroName.UBUNTU
+        and image.build_args.python_version == LATEST_SUPPORTED_PYTHON_VERSION
+        and isinstance(image.build_args.variant.extras, CpuVariant)
+    ):
+        return image.tags + ["latest"]
     else:
         return image.tags
 
 
-def tag_latest_ubuntu_with_flwr_version(image: BaseImage) -> List[str]:
+def tag_superexec_images(image: BaseImage) -> List[str]:
+    """
+    Compute the Docker image tags based on its build arguments.
+
+    For images built on Ubuntu with the latest supported Python version
+    and a CPU variant, this will append the Flower framework version
+    and the "latest" tag to the existing tags list. All other images
+    simply retain their original tags.
+    """
     if (
         image.build_args.variant.distro.name == DistroName.UBUNTU
         and image.build_args.python_version == LATEST_SUPPORTED_PYTHON_VERSION
         and isinstance(image.build_args.variant.extras, CpuVariant)
     ):
-        return image.tags + [image.build_args.flwr_version]
+        return image.tags + [image.build_args.flwr_version, "latest"]
     else:
         return image.tags
 
@@ -277,7 +300,7 @@ DISTRO_VERSION={distro_version}
         generate_binary_images(
             "superlink",
             base_images,
-            tag_latest_alpine_with_flwr_version,
+            tag_superlink_supernode_images,
             lambda image: image.build_args.python_version
             == LATEST_SUPPORTED_PYTHON_VERSION
             and isinstance(image.build_args.variant.extras, CpuVariant),
@@ -286,7 +309,7 @@ DISTRO_VERSION={distro_version}
         + generate_binary_images(
             "supernode",
             base_images,
-            tag_latest_alpine_with_flwr_version,
+            tag_superlink_supernode_images,
             lambda image: (
                 image.build_args.variant.distro.name == DistroName.UBUNTU
                 and isinstance(image.build_args.variant.extras, CpuVariant)
@@ -298,16 +321,9 @@ DISTRO_VERSION={distro_version}
         )
         # ubuntu images for each supported python version
         + generate_binary_images(
-            "serverapp",
+            "superexec",
             base_images,
-            tag_latest_ubuntu_with_flwr_version,
-            lambda image: image.build_args.variant.distro.name == DistroName.UBUNTU,
-        )
-        # ubuntu images for each supported python version
-        + generate_binary_images(
-            "clientapp",
-            base_images,
-            tag_latest_ubuntu_with_flwr_version,
+            tag_superexec_images,
             lambda image: image.build_args.variant.distro.name == DistroName.UBUNTU,
         )
     )
@@ -382,8 +398,7 @@ DISTRO_VERSION={distro_version}
             lambda image: image.tags,
             lambda image: isinstance(image.build_args.variant.extras, CpuVariant),
         )
-        + generate_binary_images("serverapp", base_images, lambda image: image.tags)
-        + generate_binary_images("clientapp", base_images, lambda image: image.tags)
+        + generate_binary_images("superexec", base_images, lambda image: image.tags)
     )
 
     return base_images, binary_images
@@ -463,8 +478,7 @@ DISTRO_VERSION={distro_version}
             lambda image: image.tags,
             lambda image: isinstance(image.build_args.variant.extras, CpuVariant),
         )
-        + generate_binary_images("serverapp", base_images, lambda image: image.tags)
-        + generate_binary_images("clientapp", base_images, lambda image: image.tags)
+        + generate_binary_images("superexec", base_images, lambda image: image.tags)
     )
 
     return base_images, binary_images

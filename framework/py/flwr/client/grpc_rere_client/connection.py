@@ -15,11 +15,8 @@
 """Contextmanager for a gRPC request-response channel to the Flower server."""
 
 
-import random
-import threading
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
-from copy import copy
 from logging import ERROR
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
@@ -27,35 +24,38 @@ from typing import Callable, Optional, Union, cast
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from flwr.client.heartbeat import start_ping_loop
-from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import (
-    PING_BASE_MULTIPLIER,
-    PING_CALL_TIMEOUT,
-    PING_DEFAULT_INTERVAL,
-    PING_RANDOM_RANGE,
-)
+from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.grpc import create_channel, on_channel_state_change
+from flwr.common.heartbeat import HeartbeatSender
+from flwr.common.inflatable_protobuf_utils import (
+    make_confirm_message_received_fn_protobuf,
+    make_pull_object_fn_protobuf,
+    make_push_object_fn_protobuf,
+)
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
-from flwr.common.retry_invoker import RetryInvoker
+from flwr.common.message import Message, remove_content_from_message
+from flwr.common.retry_invoker import RetryInvoker, _wrap_stub
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
 )
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
-from flwr.common.typing import Fab, Run, RunNotRunningException
+from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
-    PingRequest,
-    PingResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
+)
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
@@ -76,12 +76,15 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     adapter_cls: Optional[Union[type[FleetStub], type[GrpcAdapter]]] = None,
 ) -> Iterator[
     tuple[
-        Callable[[], Optional[Message]],
-        Callable[[Message], None],
-        Optional[Callable[[], Optional[int]]],
-        Optional[Callable[[], None]],
-        Optional[Callable[[int], Run]],
-        Optional[Callable[[str, int], Fab]],
+        Callable[[], Optional[tuple[Message, ObjectTree]]],
+        Callable[[Message, ObjectTree], set[str]],
+        Callable[[], Optional[int]],
+        Callable[[], None],
+        Callable[[int], Run],
+        Callable[[str, int], Fab],
+        Callable[[int, str], bytes],
+        Callable[[int, str, bytes], None],
+        Callable[[int, str], None],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -124,6 +127,9 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
     get_run : Optional[Callable]
+    pull_object : Callable[[str], bytes]
+    push_object : Callable[[str, bytes], None]
+    confirm_message_received : Callable[[str], None]
     """
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
@@ -149,62 +155,60 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     if adapter_cls is None:
         adapter_cls = FleetStub
     stub = adapter_cls(channel)
-    metadata: Optional[Metadata] = None
     node: Optional[Node] = None
-    ping_thread: Optional[threading.Thread] = None
-    ping_stop_event = threading.Event()
 
-    def _should_giveup_fn(e: Exception) -> bool:
-        if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
-            raise RunNotRunningException
-        if e.code() == grpc.StatusCode.UNAVAILABLE:  # type: ignore
-            return False
-        return True
-
-    # Restrict retries to cases where the status code is UNAVAILABLE
-    # If the status code is PERMISSION_DENIED, additionally raise RunNotRunningException
-    retry_invoker.should_giveup = _should_giveup_fn
-
+    # Wrap stub
+    _wrap_stub(stub, retry_invoker)
     ###########################################################################
-    # ping/create_node/delete_node/receive/send/get_run functions
+    # send_node_heartbeat/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
 
-    def ping() -> None:
+    def send_node_heartbeat() -> bool:
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
-            return
+            return False
 
-        # Construct the ping request
-        req = PingRequest(node=node, ping_interval=PING_DEFAULT_INTERVAL)
+        # Construct the heartbeat request
+        req = SendNodeHeartbeatRequest(
+            node=node, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
+        )
 
         # Call FleetAPI
-        res: PingResponse = stub.Ping(req, timeout=PING_CALL_TIMEOUT)
+        try:
+            res: SendNodeHeartbeatResponse = stub.SendNodeHeartbeat(
+                req, timeout=HEARTBEAT_CALL_TIMEOUT
+            )
+        except grpc.RpcError as e:
+            status_code = e.code()
+            if status_code == grpc.StatusCode.UNAVAILABLE:
+                return False
+            if status_code == grpc.StatusCode.DEADLINE_EXCEEDED:
+                return False
+            raise
 
         # Check if success
         if not res.success:
-            raise RuntimeError("Ping failed unexpectedly.")
+            raise RuntimeError(
+                "Heartbeat failed unexpectedly. The SuperLink does not "
+                "recognize this SuperNode."
+            )
+        return True
 
-        # Wait
-        rd = random.uniform(*PING_RANDOM_RANGE)
-        next_interval: float = PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT
-        next_interval *= PING_BASE_MULTIPLIER + rd
-        if not ping_stop_event.is_set():
-            ping_stop_event.wait(next_interval)
+    heartbeat_sender = HeartbeatSender(send_node_heartbeat)
 
     def create_node() -> Optional[int]:
         """Set create_node."""
         # Call FleetAPI
-        create_node_request = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
-        create_node_response = retry_invoker.invoke(
-            stub.CreateNode,
-            request=create_node_request,
+        create_node_request = CreateNodeRequest(
+            heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
         )
+        create_node_response = stub.CreateNode(request=create_node_request)
 
-        # Remember the node and the ping-loop thread
-        nonlocal node, ping_thread
+        # Remember the node and start the heartbeat sender
+        nonlocal node
         node = cast(Node, create_node_response.node)
-        ping_thread = start_ping_loop(ping, ping_stop_event)
+        heartbeat_sender.start()
         return node.node_id
 
     def delete_node() -> None:
@@ -215,83 +219,67 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Node instance missing")
             return
 
-        # Stop the ping-loop thread
-        ping_stop_event.set()
+        # Stop the heartbeat sender
+        heartbeat_sender.stop()
 
         # Call FleetAPI
         delete_node_request = DeleteNodeRequest(node=node)
-        retry_invoker.invoke(stub.DeleteNode, request=delete_node_request)
+        stub.DeleteNode(request=delete_node_request)
 
         # Cleanup
         node = None
 
-    def receive() -> Optional[Message]:
-        """Receive next message from server."""
+    def receive() -> Optional[tuple[Message, ObjectTree]]:
+        """Pull a message with its ObjectTree from SuperLink."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
             return None
 
-        # Request instructions (message) from server
+        # Try to pull a message with its object tree from SuperLink
         request = PullMessagesRequest(node=node)
-        response: PullMessagesResponse = retry_invoker.invoke(
-            stub.PullMessages, request=request
-        )
+        response: PullMessagesResponse = stub.PullMessages(request=request)
 
-        # Get the current Messages
-        message_proto = (
-            None if len(response.messages_list) == 0 else response.messages_list[0]
-        )
+        # If no messages are available, return None
+        if len(response.messages_list) == 0:
+            return None
 
-        # Discard the current message if not valid
-        if message_proto is not None and not (
-            message_proto.metadata.dst_node_id == node.node_id
-        ):
-            message_proto = None
+        # Get the current Message and its object tree
+        message_proto = response.messages_list[0]
+        object_tree = response.message_object_trees[0]
 
         # Construct the Message
-        in_message = message_from_proto(message_proto) if message_proto else None
+        in_message = message_from_proto(message_proto)
 
-        # Remember `metadata` of the in message
-        nonlocal metadata
-        metadata = copy(in_message.metadata) if in_message else None
+        # Return the Message and its object tree
+        return in_message, object_tree
 
-        # Return the message if available
-        return in_message
-
-    def send(message: Message) -> None:
-        """Send message reply to server."""
+    def send(message: Message, object_tree: ObjectTree) -> set[str]:
+        """Send the message with its ObjectTree to SuperLink."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
-            return
+            return set()
 
-        # Get the metadata of the incoming message
-        nonlocal metadata
-        if metadata is None:
-            log(ERROR, "No current message")
-            return
+        # Remove the content from the message if it has
+        if message.has_content():
+            message = remove_content_from_message(message)
 
-        # Validate out message
-        if not validate_out_message(message, metadata):
-            log(ERROR, "Invalid out message")
-            return
+        # Send the message with its ObjectTree to SuperLink
+        request = PushMessagesRequest(
+            node=node,
+            messages_list=[message_to_proto(message)],
+            message_object_trees=[object_tree],
+        )
+        response: PushMessagesResponse = stub.PushMessages(request=request)
 
-        # Serialize Message
-        message_proto = message_to_proto(message=message)
-        request = PushMessagesRequest(node=node, messages_list=[message_proto])
-        _ = retry_invoker.invoke(stub.PushMessages, request)
-
-        # Cleanup
-        metadata = None
+        # Get and return the object IDs to push
+        return set(response.objects_to_push)
 
     def get_run(run_id: int) -> Run:
         # Call FleetAPI
         get_run_request = GetRunRequest(node=node, run_id=run_id)
-        get_run_response: GetRunResponse = retry_invoker.invoke(
-            stub.GetRun,
-            request=get_run_request,
-        )
+        get_run_response: GetRunResponse = stub.GetRun(request=get_run_request)
 
         # Return fab_id and fab_version
         return run_from_proto(get_run_response.run)
@@ -299,16 +287,62 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     def get_fab(fab_hash: str, run_id: int) -> Fab:
         # Call FleetAPI
         get_fab_request = GetFabRequest(node=node, hash_str=fab_hash, run_id=run_id)
-        get_fab_response: GetFabResponse = retry_invoker.invoke(
-            stub.GetFab,
-            request=get_fab_request,
-        )
+        get_fab_response: GetFabResponse = stub.GetFab(request=get_fab_request)
 
         return Fab(get_fab_response.fab.hash_str, get_fab_response.fab.content)
 
+    def pull_object(run_id: int, object_id: str) -> bytes:
+        """Pull the object from the SuperLink."""
+        # Check Node
+        if node is None:
+            raise RuntimeError("Node instance missing")
+
+        fn = make_pull_object_fn_protobuf(
+            pull_object_protobuf=stub.PullObject,
+            node=node,
+            run_id=run_id,
+        )
+        return fn(object_id)
+
+    def push_object(run_id: int, object_id: str, contents: bytes) -> None:
+        """Push the object to the SuperLink."""
+        # Check Node
+        if node is None:
+            raise RuntimeError("Node instance missing")
+
+        fn = make_push_object_fn_protobuf(
+            push_object_protobuf=stub.PushObject,
+            node=node,
+            run_id=run_id,
+        )
+        fn(object_id, contents)
+
+    def confirm_message_received(run_id: int, object_id: str) -> None:
+        """Confirm that the message has been received."""
+        # Check Node
+        if node is None:
+            raise RuntimeError("Node instance missing")
+
+        fn = make_confirm_message_received_fn_protobuf(
+            confirm_message_received_protobuf=stub.ConfirmMessageReceived,
+            node=node,
+            run_id=run_id,
+        )
+        fn(object_id)
+
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node, get_run, get_fab)
+        yield (
+            receive,
+            send,
+            create_node,
+            delete_node,
+            get_run,
+            get_fab,
+            pull_object,
+            push_object,
+            confirm_message_received,
+        )
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
     # Cleanup

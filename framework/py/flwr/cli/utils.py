@@ -28,7 +28,12 @@ import typer
 
 from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.constant import AUTH_TYPE_JSON_KEY, CREDENTIALS_DIR, FLWR_DIR
+from flwr.common.constant import (
+    AUTH_TYPE_JSON_KEY,
+    CREDENTIALS_DIR,
+    FLWR_DIR,
+    RUN_ID_NOT_FOUND_MESSAGE,
+)
 from flwr.common.grpc import (
     GRPC_MAX_MESSAGE_LENGTH,
     create_channel,
@@ -220,17 +225,6 @@ def try_obtain_cli_auth_plugin(
     if not federation_config.get("enable-user-auth", False):
         return None
 
-    # Check if TLS is enabled. If not, raise an error
-    if federation_config.get("root-certificates") is None:
-        typer.secho(
-            "❌ User authentication requires TLS to be enabled. "
-            "Please provide 'root-certificates' in the federation"
-            " configuration.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
     config_path = get_user_auth_config_path(root_dir, federation)
 
     # Get the auth type from the config if not provided
@@ -265,7 +259,7 @@ def try_obtain_cli_auth_plugin(
 def init_channel(
     app: Path, federation_config: dict[str, Any], auth_plugin: Optional[CliAuthPlugin]
 ) -> grpc.Channel:
-    """Initialize gRPC channel to the Exec API."""
+    """Initialize gRPC channel to the Control API."""
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
         app, federation_config
     )
@@ -273,6 +267,16 @@ def init_channel(
     # Initialize the CLI-side user auth interceptor
     interceptors: list[grpc.UnaryUnaryClientInterceptor] = []
     if auth_plugin is not None:
+        # Check if TLS is enabled. If not, raise an error
+        if insecure:
+            typer.secho(
+                "❌ User authentication requires TLS to be enabled. "
+                "Remove `insecure = true` from the federation configuration.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+
         auth_plugin.load_tokens()
         interceptors.append(CliUserAuthInterceptor(auth_plugin))
 
@@ -289,11 +293,12 @@ def init_channel(
 
 
 @contextmanager
-def unauthenticated_exc_handler() -> Iterator[None]:
-    """Context manager to handle gRPC UNAUTHENTICATED errors.
+def flwr_cli_grpc_exc_handler() -> Iterator[None]:
+    """Context manager to handle specific gRPC errors.
 
-    It catches grpc.RpcError exceptions with UNAUTHENTICATED status, informs the user,
-    and exits the application. All other exceptions will be allowed to escape.
+    It catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED,
+    UNAVAILABLE, and PERMISSION_DENIED statuses, informs the user, and exits the
+    application. All other exceptions will be allowed to escape.
     """
     try:
         yield
@@ -309,6 +314,33 @@ def unauthenticated_exc_handler() -> Iterator[None]:
         if e.code() == grpc.StatusCode.UNIMPLEMENTED:
             typer.secho(
                 "❌ User authentication is not enabled on this SuperLink.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.PERMISSION_DENIED:
+            typer.secho(
+                "❌ Permission denied.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            # pylint: disable=E1101
+            typer.secho(e.details(), fg=typer.colors.RED, bold=True)
+            raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.UNAVAILABLE:
+            typer.secho(
+                "Connection to the SuperLink is unavailable. Please check your network "
+                "connection and 'address' in the federation configuration.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
+        if (
+            e.code() == grpc.StatusCode.NOT_FOUND
+            and e.details() == RUN_ID_NOT_FOUND_MESSAGE
+        ):
+            typer.secho(
+                "❌ Run ID not found.",
                 fg=typer.colors.RED,
                 bold=True,
             )

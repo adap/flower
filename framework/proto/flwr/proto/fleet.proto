@@ -17,6 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/heartbeat.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
@@ -25,7 +26,8 @@ import "flwr/proto/message.proto";
 service Fleet {
   rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
   rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse) {}
-  rpc Ping(PingRequest) returns (PingResponse) {}
+  rpc SendNodeHeartbeat(SendNodeHeartbeatRequest)
+      returns (SendNodeHeartbeatResponse) {}
 
   // Retrieve one or more messages, if possible
   //
@@ -41,22 +43,25 @@ service Fleet {
 
   // Get FAB
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
+
+  // Push Object
+  rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
+
+  // Pull Object
+  rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
+
+  // Confirm Message Received
+  rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
+      returns (ConfirmMessageReceivedResponse) {}
 }
 
 // CreateNode messages
-message CreateNodeRequest { double ping_interval = 1; }
+message CreateNodeRequest { double heartbeat_interval = 1; }
 message CreateNodeResponse { Node node = 1; }
 
 // DeleteNode messages
 message DeleteNodeRequest { Node node = 1; }
 message DeleteNodeResponse {}
-
-// Ping messages
-message PingRequest {
-  Node node = 1;
-  double ping_interval = 2;
-}
-message PingResponse { bool success = 1; }
 
 // PullMessages messages
 message PullMessagesRequest {
@@ -66,16 +71,19 @@ message PullMessagesRequest {
 message PullMessagesResponse {
   Reconnect reconnect = 1;
   repeated Message messages_list = 2;
+  repeated ObjectTree message_object_trees = 3;
 }
 
 // PushMessages messages
 message PushMessagesRequest {
   Node node = 1;
   repeated Message messages_list = 2;
+  repeated ObjectTree message_object_trees = 3;
 }
 message PushMessagesResponse {
   Reconnect reconnect = 1;
   map<string, uint32> results = 2;
+  repeated string objects_to_push = 3;
 }
 
 message Reconnect { uint64 reconnect = 1; }

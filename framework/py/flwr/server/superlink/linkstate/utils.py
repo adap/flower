@@ -17,10 +17,10 @@
 
 from os import urandom
 from typing import Optional
-from uuid import UUID, uuid4
 
 from flwr.common import ConfigRecord, Context, Error, Message, Metadata, now, serde
 from flwr.common.constant import (
+    HEARTBEAT_PATIENCE,
     SUPERLINK_NODE_ID,
     ErrorCode,
     MessageType,
@@ -56,8 +56,8 @@ REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON = (
     "Error: Reply Message Unavailable - The reply message has expired."
 )
 NODE_UNAVAILABLE_ERROR_REASON = (
-    "Error: Node Unavailable - The destination node is currently unavailable. "
-    "It exceeds twice the time limit specified in its last ping."
+    "Error: Node Unavailable — The destination node failed to report a heartbeat "
+    f"within {HEARTBEAT_PATIENCE} × its expected interval."
 )
 
 
@@ -245,7 +245,7 @@ def create_message_error_unavailable_res_message(
     ttl = max(ins_metadata.ttl - (current_time - ins_metadata.created_at), 0)
     metadata = Metadata(
         run_id=ins_metadata.run_id,
-        message_id=str(uuid4()),
+        message_id="",
         src_node_id=SUPERLINK_NODE_ID,
         dst_node_id=SUPERLINK_NODE_ID,
         reply_to_message_id=ins_metadata.message_id,
@@ -255,7 +255,7 @@ def create_message_error_unavailable_res_message(
         ttl=ttl,
     )
 
-    return make_message(
+    msg = make_message(
         metadata=metadata,
         error=Error(
             code=(
@@ -270,30 +270,34 @@ def create_message_error_unavailable_res_message(
             ),
         ),
     )
+    msg.metadata.__dict__["_message_id"] = msg.object_id
+    return msg
 
 
-def create_message_error_unavailable_ins_message(reply_to_message_id: UUID) -> Message:
+def create_message_error_unavailable_ins_message(reply_to_message_id: str) -> Message:
     """Error to indicate that the enquired Message had expired before reply arrived or
     that it isn't found."""
     metadata = Metadata(
         run_id=0,  # Unknown
-        message_id=str(uuid4()),
+        message_id="",
         src_node_id=SUPERLINK_NODE_ID,
         dst_node_id=SUPERLINK_NODE_ID,
-        reply_to_message_id=str(reply_to_message_id),
+        reply_to_message_id=reply_to_message_id,
         group_id="",  # Unknown
         message_type=MessageType.SYSTEM,
         created_at=now().timestamp(),
         ttl=0,
     )
 
-    return make_message(
+    msg = make_message(
         metadata=metadata,
         error=Error(
             code=ErrorCode.MESSAGE_UNAVAILABLE,
             reason=MESSAGE_UNAVAILABLE_ERROR_REASON,
         ),
     )
+    msg.metadata.__dict__["_message_id"] = msg.object_id
+    return msg
 
 
 def message_ttl_has_expired(message_metadata: Metadata, current_time: float) -> bool:
@@ -302,18 +306,18 @@ def message_ttl_has_expired(message_metadata: Metadata, current_time: float) -> 
 
 
 def verify_message_ids(
-    inquired_message_ids: set[UUID],
-    found_message_ins_dict: dict[UUID, Message],
+    inquired_message_ids: set[str],
+    found_message_ins_dict: dict[str, Message],
     current_time: Optional[float] = None,
     update_set: bool = True,
-) -> dict[UUID, Message]:
+) -> dict[str, Message]:
     """Verify found Messages and generate error Messages for invalid ones.
 
     Parameters
     ----------
-    inquired_message_ids : set[UUID]
+    inquired_message_ids : set[str]
         Set of Message IDs for which to generate error Message if invalid.
-    found_message_ins_dict : dict[UUID, Message]
+    found_message_ins_dict : dict[str, Message]
         Dictionary containing all found Message indexed by their IDs.
     current_time : Optional[float] (default: None)
         The current time to check for expiration. If set to `None`, the current time
@@ -324,7 +328,7 @@ def verify_message_ids(
 
     Returns
     -------
-    dict[UUID, Message]
+    dict[str, Message]
         A dictionary of error Message indexed by the corresponding ID of the message
         they are a reply of.
     """
@@ -344,19 +348,19 @@ def verify_message_ids(
 
 
 def verify_found_message_replies(
-    inquired_message_ids: set[UUID],
-    found_message_ins_dict: dict[UUID, Message],
+    inquired_message_ids: set[str],
+    found_message_ins_dict: dict[str, Message],
     found_message_res_list: list[Message],
     current_time: Optional[float] = None,
     update_set: bool = True,
-) -> dict[UUID, Message]:
+) -> dict[str, Message]:
     """Verify found Message replies and generate error Message for invalid ones.
 
     Parameters
     ----------
-    inquired_message_ids : set[UUID]
+    inquired_message_ids : set[str]
         Set of Message IDs for which to generate error Message if invalid.
-    found_message_ins_dict : dict[UUID, Message]
+    found_message_ins_dict : dict[str, Message]
         Dictionary containing all found instruction Messages indexed by their IDs.
     found_message_res_list : dict[Message, Message]
         List of found Message to be verified.
@@ -369,13 +373,13 @@ def verify_found_message_replies(
 
     Returns
     -------
-    dict[UUID, Message]
+    dict[str, Message]
         A dictionary of Message indexed by the corresponding Message ID.
     """
-    ret_dict: dict[UUID, Message] = {}
+    ret_dict: dict[str, Message] = {}
     current = current_time if current_time else now().timestamp()
     for message_res in found_message_res_list:
-        message_ins_id = UUID(message_res.metadata.reply_to_message_id)
+        message_ins_id = message_res.metadata.reply_to_message_id
         if update_set:
             inquired_message_ids.remove(message_ins_id)
         # Check if the reply Message has expired
@@ -389,21 +393,21 @@ def verify_found_message_replies(
 
 
 def check_node_availability_for_in_message(
-    inquired_in_message_ids: set[UUID],
-    found_in_message_dict: dict[UUID, Message],
+    inquired_in_message_ids: set[str],
+    found_in_message_dict: dict[str, Message],
     node_id_to_online_until: dict[int, float],
     current_time: Optional[float] = None,
     update_set: bool = True,
-) -> dict[UUID, Message]:
+) -> dict[str, Message]:
     """Check node availability for given Message and generate error reply Message if
     unavailable. A Message error indicating node unavailability will be generated for
     each given Message whose destination node is offline or non-existent.
 
     Parameters
     ----------
-    inquired_in_message_ids : set[UUID]
+    inquired_in_message_ids : set[str]
         Set of Message IDs for which to check destination node availability.
-    found_in_message_dict : dict[UUID, Message]
+    found_in_message_dict : dict[str, Message]
         Dictionary containing all found Message indexed by their IDs.
     node_id_to_online_until : dict[int, float]
         Dictionary mapping node IDs to their online-until timestamps.
@@ -416,7 +420,7 @@ def check_node_availability_for_in_message(
 
     Returns
     -------
-    dict[UUID, Message]
+    dict[str, Message]
         A dictionary of error Message indexed by the corresponding Message ID.
     """
     ret_dict = {}

@@ -28,7 +28,9 @@ from flwr.common.constant import (
     PUBLIC_KEY_HEADER,
     SIGNATURE_HEADER,
     SUPERLINK_NODE_ID,
+    SYSTEM_TIME_TOLERANCE,
     TIMESTAMP_HEADER,
+    TIMESTAMP_TOLERANCE,
     Status,
 )
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -43,19 +45,28 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PingRequest,
-    PingResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
 )
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
+)
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.app import _run_fleet_api_grpc_rere
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_res_message
+from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.object_store import ObjectStoreFactory
 
 from .server_interceptor import AuthenticateServerInterceptor
 
@@ -71,13 +82,16 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state = state_factory.state()
         ffs_factory = FfsFactory(".")
         self.ffs = ffs_factory.ffs()
+        objectstore_factory = ObjectStoreFactory()
         self.state.store_node_public_keys({public_key_to_bytes(self.node_pk)})
+        self.store = objectstore_factory.store()
 
         self._server_interceptor = AuthenticateServerInterceptor(state_factory)
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
             ffs_factory,
+            objectstore_factory,
             None,
             [self._server_interceptor],
         )
@@ -103,15 +117,25 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=PushMessagesRequest.SerializeToString,
             response_deserializer=PushMessagesResponse.FromString,
         )
+        self._pull_object = self._channel.unary_unary(
+            "/flwr.proto.Fleet/PullObject",
+            request_serializer=PullObjectRequest.SerializeToString,
+            response_deserializer=PullObjectResponse.FromString,
+        )
+        self._push_object = self._channel.unary_unary(
+            "/flwr.proto.Fleet/PushObject",
+            request_serializer=PushObjectRequest.SerializeToString,
+            response_deserializer=PushObjectResponse.FromString,
+        )
         self._get_run = self._channel.unary_unary(
             "/flwr.proto.Fleet/GetRun",
             request_serializer=GetRunRequest.SerializeToString,
             response_deserializer=GetRunResponse.FromString,
         )
-        self._ping = self._channel.unary_unary(
-            "/flwr.proto.Fleet/Ping",
-            request_serializer=PingRequest.SerializeToString,
-            response_deserializer=PingResponse.FromString,
+        self._send_node_heartbeat = self._channel.unary_unary(
+            "/flwr.proto.Fleet/SendNodeHeartbeat",
+            request_serializer=SendNodeHeartbeatRequest.SerializeToString,
+            response_deserializer=SendNodeHeartbeatResponse.FromString,
         )
         self._get_fab = self._channel.unary_unary(
             "/flwr.proto.Fleet/GetFab",
@@ -157,7 +181,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def _make_metadata_with_invalid_timestamp(self) -> list[Any]:
         """Create metadata with invalid timestamp."""
-        timestamp = (now() - datetime.timedelta(seconds=99)).isoformat()
+        timestamp = (
+            now()
+            - datetime.timedelta(seconds=TIMESTAMP_TOLERANCE + SYSTEM_TIME_TOLERANCE)
+        ).isoformat()
         signature = sign_message(self.node_sk, timestamp.encode("ascii"))
         return [
             (PUBLIC_KEY_HEADER, public_key_to_bytes(self.node_pk)),
@@ -187,7 +214,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_push_messages(self, metadata: list[Any]) -> Any:
         """Test PushMessages."""
         node_id = self._create_node_and_set_public_key()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PushMessages is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
@@ -197,27 +224,54 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         req = PushMessagesRequest(node=Node(node_id=node_id), messages_list=[msg_proto])
         return self._push_messages.with_call(request=req, metadata=metadata)
 
+    def _test_pull_object(self, metadata: list[Any]) -> Any:
+        """Test PullObject."""
+        node_id = self._create_node_and_set_public_key()
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        # Transition status to running. PushMessages is only allowed in running status.
+        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        req = PullObjectRequest(
+            node=Node(node_id=node_id), run_id=run_id, object_id="1234"
+        )
+        return self._pull_object.with_call(request=req, metadata=metadata)
+
+    def _test_push_object(self, metadata: list[Any]) -> Any:
+        """Test PushObject."""
+        node_id = self._create_node_and_set_public_key()
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        # Transition status to running. PushMessages is only allowed in running status.
+        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        req = PushObjectRequest(
+            node=Node(node_id=node_id),
+            run_id=run_id,
+            object_id="1234",
+            object_content=b"1234",
+        )
+        return self._push_object.with_call(request=req, metadata=metadata)
+
     def _test_get_run(self, metadata: list[Any]) -> Any:
         """Test GetRun."""
         node_id = self._create_node_and_set_public_key()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. GetRun is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
         req = GetRunRequest(node=Node(node_id=node_id), run_id=run_id)
         return self._get_run.with_call(request=req, metadata=metadata)
 
-    def _test_ping(self, metadata: list[Any]) -> Any:
-        """Test Ping."""
+    def _test_send_node_heartbeat(self, metadata: list[Any]) -> Any:
+        """Test SendNodeHeartbeat."""
         node_id = self._create_node_and_set_public_key()
-        req = PingRequest(node=Node(node_id=node_id))
-        return self._ping.with_call(request=req, metadata=metadata)
+        req = SendNodeHeartbeatRequest(node=Node(node_id=node_id))
+        return self._send_node_heartbeat.with_call(request=req, metadata=metadata)
 
     def _test_get_fab(self, metadata: list[Any]) -> Any:
         """Test GetFab."""
         fab_hash = self.ffs.put(b"mock fab content", {})
         node_id = self._create_node_and_set_public_key()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord())
+        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. GetFabRequest is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
@@ -229,7 +283,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         return self._get_fab.with_call(request=req, metadata=metadata)
 
     def _create_node_and_set_public_key(self) -> int:
-        node_id = self.state.create_node(ping_interval=30)
+        node_id = self.state.create_node(heartbeat_interval=30)
         pk_bytes = public_key_to_bytes(self.node_pk)
         self.state.set_node_public_key(node_id, pk_bytes)
         return node_id
@@ -240,8 +294,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_delete_node,),
             (_test_pull_messages,),
             (_test_push_messages,),
+            (_test_pull_object,),
+            (_test_push_object,),
             (_test_get_run,),
-            (_test_ping,),
+            (_test_send_node_heartbeat,),
             (_test_get_fab,),
         ]
     )  # type: ignore
@@ -261,8 +317,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_delete_node,),
             (_test_pull_messages,),
             (_test_push_messages,),
+            (_test_pull_object,),
+            (_test_push_object,),
             (_test_get_run,),
-            (_test_ping,),
+            (_test_send_node_heartbeat,),
             (_test_get_fab,),
         ]
     )  # type: ignore
@@ -281,8 +339,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_delete_node,),
             (_test_pull_messages,),
             (_test_push_messages,),
+            (_test_pull_object,),
+            (_test_push_object,),
             (_test_get_run,),
-            (_test_ping,),
+            (_test_send_node_heartbeat,),
             (_test_get_fab,),
         ]
     )  # type: ignore
@@ -301,8 +361,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             (_test_delete_node,),
             (_test_pull_messages,),
             (_test_push_messages,),
+            (_test_pull_object,),
+            (_test_push_object,),
             (_test_get_run,),
-            (_test_ping,),
+            (_test_send_node_heartbeat,),
             (_test_get_fab,),
         ]
     )  # type: ignore

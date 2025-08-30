@@ -48,6 +48,10 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushMessagesRequest,
     PushMessagesResponse,
 )
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
@@ -79,6 +83,8 @@ class _MockServicer:
                 return PushMessagesResponse()
             if isinstance(request, GetRunRequest):
                 return GetRunResponse()
+            if isinstance(request, SendNodeHeartbeatRequest):
+                return SendNodeHeartbeatResponse(success=True)
             return PullMessagesResponse(messages_list=[])
 
     def received_client_metadata(
@@ -120,6 +126,11 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
             servicer.unary_unary,
             request_deserializer=GetRunRequest.FromString,
             response_serializer=GetRunResponse.SerializeToString,
+        ),
+        "SendNodeHeartbeat": grpc.unary_unary_rpc_method_handler(
+            servicer.unary_unary,
+            request_deserializer=SendNodeHeartbeatRequest.FromString,
+            response_serializer=SendNodeHeartbeatResponse.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -172,26 +183,26 @@ def _create_node(conn: Any) -> None:
 
 
 def _delete_node(conn: Any) -> None:
-    _, _, create_node, delete_node, _, _ = conn
+    _, _, create_node, delete_node, _, _, _, _, _ = conn
     create_node()
     delete_node()
 
 
 def _receive(conn: Any) -> None:
-    receive, _, create_node, _, _, _ = conn
+    receive, _, create_node, _, _, _, _, _, _ = conn
     create_node()
     receive()
 
 
 def _send(conn: Any) -> None:
-    receive, send, create_node, _, _, _ = conn
+    receive, send, create_node, _, _, _, _, _, _ = conn
     create_node()
     receive()
     send(Message(RecordDict(), dst_node_id=0, message_type="query"))
 
 
 def _get_run(conn: Any) -> None:
-    _, _, create_node, _, get_run, _ = conn
+    _, _, create_node, _, get_run, _, _, _, _ = conn
     create_node()
     get_run(0)
 
@@ -266,7 +277,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, _, _, _ = conn
+            _, _, create_node, _, _, _, _, _, _ = conn
             assert create_node is not None
             create_node()
 

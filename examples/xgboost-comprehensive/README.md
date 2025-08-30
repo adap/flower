@@ -81,7 +81,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 ### Run with the Simulation Engine
 
-> \[!NOTE\]
+> [!NOTE]
 > Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
 
 ```bash
@@ -98,7 +98,7 @@ flwr run . --run-config "train-method='bagging' num-server-rounds=5 centralised-
 flwr run . --run-config "train-method='cyclic' partitioner-type='linear' centralised-eval-client=true"
 ```
 
-> \[!TIP\]
+> [!TIP]
 > For a more detailed walk-through check our [XGBoost tutorial](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html).
 > To extend the aggregation strategy for saving, logging, or other functions, please refer to our [advanced-pytorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch) example.
 

@@ -6,7 +6,7 @@ framework: [torch]
 
 # Flower Simulation Step-by-Step
 
-> \[!NOTE\]
+> [!NOTE]
 > While this tutorial shows how to extend the functionality of a Flower App that uses PyTorch, there is little specific about PyTorch in the changes described in this tutorial series. This means that you can make use of all the concepts presented even if you decide to use a different ML framework.
 >
 > The previous version of this tutorial from the 2023 video tutorial series can be found here: [c8120f2](https://github.com/adap/flower/tree/c8120f2669fef0f2e6815ab1e957e5366d06d19d/examples/flower-simulation-step-by-step-pytorch). Please note that method of running simulations is no longer recommended and some parts of it, e.g. using `start_simulation`, are deprecated in recent versions of `flwr`.
@@ -17,7 +17,7 @@ This directory contains the code to follow along the `Flower AI Simulation 2025`
 | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | [![Image 5](https://img.youtube.com/vi/udDSIQyYzNM/0.jpg)](https://youtu.be/udDSIQyYzNM) | [![Image 6](https://img.youtube.com/vi/ir2okeinZ2g/0.jpg)](https://youtu.be/ir2okeinZ2g) | [![Image 7](https://img.youtube.com/vi/TAUxb9eEZ3w/0.jpg)](https://youtu.be/TAUxb9eEZ3w) | [![Image 8](https://img.youtube.com/vi/nUUkuqi4Lpo/0.jpg)](https://youtu.be/nUUkuqi4Lpo) |                                                                                          |
 
-> \[!TIP\]
+> [!TIP]
 > 🙋 Got questions? Something isn't covered or could be improved? **We'd love to hear from you!** Join the [🌼 Flower Workspace](https://flower.ai/join-slack/) and the [Flower Discuss Forum](https://discuss.flower.ai/)!
 
 ## Complementary Resources
@@ -33,7 +33,7 @@ In this tutorial series, we make reference to several pages in the [Flower Docum
 
 ## Getting Started
 
-> \[!TIP\]
+> [!TIP]
 > If you are developing on Windows, it is recommended to make use of the Windows Subsystem for Linux (WSL). Check the guide on [how to setup WSL for development on Windows](https://code.visualstudio.com/docs/remote/wsl).
 
 As presented in the video, we start from a new Python 3.11 environment. You only need to activate it and install `flwr`.
@@ -51,7 +51,7 @@ flwr new my-awesome-app
 
 The vast majority of the content added to the App (as described in the video tutorials) isn't specific to PyTorch. This means you are welcome to choose another template such as `TF`, `NumPy`, `MLX` or `JAX` if you prefer. Just keep in mind you might need to do additional edits to your App (e.g. save the model differently, in the recommended way by your chosen ML framework) If you are undecided, `PyTorch` is a great framework.
 
-> \[!NOTE\]
+> [!NOTE]
 > These steps represent the very first commands shown on the first video. They `flwr new` command will create a Flower App you can run directly. In videos 2-7 you'll learn how to modify the App and add, step by step, new functionality. You can check the `my-awesome-app` directory, which contains the completed code presented in the tutorial videos.
 
 ## Running the App

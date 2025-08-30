@@ -17,24 +17,31 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/heartbeat.proto";
 import "flwr/proto/log.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/message.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
+import "flwr/proto/appio.proto";
 
 service ServerAppIo {
-  // Request run_id
-  rpc CreateRun(CreateRunRequest) returns (CreateRunResponse) {}
+
+  // List runs to launch
+  rpc ListAppsToLaunch(ListAppsToLaunchRequest)
+      returns (ListAppsToLaunchResponse) {}
+
+  // Request token for a run
+  rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
 
   // Return a set of nodes
   rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
 
   // Create one or more messages
-  rpc PushMessages(PushInsMessagesRequest) returns (PushInsMessagesResponse) {}
+  rpc PushMessages(PushAppMessagesRequest) returns (PushAppMessagesResponse) {}
 
   // Get message results
-  rpc PullMessages(PullResMessagesRequest) returns (PullResMessagesResponse) {}
+  rpc PullMessages(PullAppMessagesRequest) returns (PullAppMessagesResponse) {}
 
   // Get run details
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
@@ -43,12 +50,10 @@ service ServerAppIo {
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
 
   // Pull ServerApp inputs
-  rpc PullServerAppInputs(PullServerAppInputsRequest)
-      returns (PullServerAppInputsResponse) {}
+  rpc PullAppInputs(PullAppInputsRequest) returns (PullAppInputsResponse) {}
 
   // Push ServerApp outputs
-  rpc PushServerAppOutputs(PushServerAppOutputsRequest)
-      returns (PushServerAppOutputsResponse) {}
+  rpc PushAppOutputs(PushAppOutputsRequest) returns (PushAppOutputsResponse) {}
 
   // Update the status of a given run
   rpc UpdateRunStatus(UpdateRunStatusRequest)
@@ -59,36 +64,22 @@ service ServerAppIo {
 
   // Push ServerApp logs
   rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
+
+  // Heartbeat
+  rpc SendAppHeartbeat(SendAppHeartbeatRequest)
+      returns (SendAppHeartbeatResponse) {}
+
+  // Push Object
+  rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
+
+  // Pull Object
+  rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
+
+  // Confirm Message Received
+  rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
+      returns (ConfirmMessageReceivedResponse) {}
 }
 
 // GetNodes messages
 message GetNodesRequest { uint64 run_id = 1; }
 message GetNodesResponse { repeated Node nodes = 1; }
-
-// PushMessages messages
-message PushInsMessagesRequest {
-  repeated Message messages_list = 1;
-  uint64 run_id = 2;
-}
-message PushInsMessagesResponse { repeated string message_ids = 1; }
-
-// PullMessages messages
-message PullResMessagesRequest {
-  repeated string message_ids = 1;
-  uint64 run_id = 2;
-}
-message PullResMessagesResponse { repeated Message messages_list = 1; }
-// PullServerAppInputs messages
-message PullServerAppInputsRequest {}
-message PullServerAppInputsResponse {
-  Context context = 1;
-  Run run = 2;
-  Fab fab = 3;
-}
-
-// PushServerAppOutputs messages
-message PushServerAppOutputsRequest {
-  uint64 run_id = 1;
-  Context context = 2;
-}
-message PushServerAppOutputsResponse {}

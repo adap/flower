@@ -33,7 +33,7 @@ class VerticalEvenPartitioner(Partitioner):
 
     Enables selection of "active party" column(s) and placement into
     a specific partition or creation of a new partition just for it.
-    Also enables droping columns and sharing specified columns across
+    Also enables dropping columns and sharing specified columns across
     all partitions.
 
     Parameters
@@ -208,7 +208,7 @@ class VerticalEvenPartitioner(Partitioner):
     ) -> None:
         if isinstance(active_party_column, str):
             active_party_column = [active_party_column]
-        # Shared columns existance check
+        # Shared columns existence check
         for column in shared_columns:
             if column not in all_columns:
                 raise ValueError(f"Shared column '{column}' not found in the dataset.")

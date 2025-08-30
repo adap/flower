@@ -22,23 +22,20 @@ import typer
 
 from flwr.cli.config_utils import (
     exit_if_no_address,
+    get_insecure_flag,
     load_and_validate,
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.common.typing import UserAuthLoginDetails
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
 )
-from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.proto.control_pb2_grpc import ControlStub
 
-from ..utils import (
-    init_channel,
-    try_obtain_cli_auth_plugin,
-    unauthenticated_exc_handler,
-)
+from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
 
 def login(  # pylint: disable=R0914
@@ -80,12 +77,22 @@ def login(  # pylint: disable=R0914
             bold=True,
         )
         raise typer.Exit(code=1)
+    # Check if insecure flag is set to `True`
+    insecure = get_insecure_flag(federation_config)
+    if insecure:
+        typer.secho(
+            "❌ `flwr login` requires TLS to be enabled. `insecure` must NOT be set to "
+            "`true` in the federation configuration.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
 
     channel = init_channel(app, federation_config, None)
-    stub = ExecStub(channel)
+    stub = ControlStub(channel)
 
     login_request = GetLoginDetailsRequest()
-    with unauthenticated_exc_handler():
+    with flwr_cli_grpc_exc_handler():
         login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
 
     # Get the auth plugin
@@ -109,7 +116,7 @@ def login(  # pylint: disable=R0914
         expires_in=login_response.expires_in,
         interval=login_response.interval,
     )
-    with unauthenticated_exc_handler():
+    with flwr_cli_grpc_exc_handler():
         credentials = auth_plugin.login(details, stub)
 
     # Store the tokens

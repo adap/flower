@@ -19,7 +19,7 @@ import unittest
 from typing import NoReturn
 from unittest.mock import Mock, call, patch
 
-from flwr.proto.exec_pb2 import StreamLogsResponse  # pylint: disable=E0611
+from flwr.proto.control_pb2 import StreamLogsResponse  # pylint: disable=E0611
 
 from .log import print_logs, stream_logs
 
@@ -42,7 +42,7 @@ class TestFlwrLog(unittest.TestCase):
     """Unit tests for `flwr log` CLI functions."""
 
     def setUp(self) -> None:
-        """Initialize mock ExecStub before each test."""
+        """Initialize mock ControlStub before each test."""
         self.expected_stream_call = [
             call("log_output_1"),
             call("log_output_2"),
@@ -57,7 +57,7 @@ class TestFlwrLog(unittest.TestCase):
         ]
         self.mock_stub = Mock()
         self.mock_stub.StreamLogs.side_effect = mock_response_iterator
-        self.patcher = patch("flwr.cli.log.ExecStub", return_value=self.mock_stub)
+        self.patcher = patch("flwr.cli.log.ControlStub", return_value=self.mock_stub)
 
         self.patcher.start()
 

@@ -5,15 +5,13 @@ import re
 import sys
 from pathlib import Path
 
+REPLACE_CURR_VERSION = {}
 
-REPLACE_CURR_VERSION = {
+REPLACE_NEXT_VERSION = {
     "framework/docs/source/conf.py": [
         ".. |stable_flwr_version| replace:: {version}",
     ],
-}
-
-REPLACE_NEXT_VERSION = {
-    "pyproject.toml": ['version = "{version}"'],
+    "framework/pyproject.toml": ['version = "{version}"'],
     "framework/docs/source/conf.py": [
         'release = "{version}"',
     ],

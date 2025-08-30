@@ -23,21 +23,21 @@ from concurrent.futures import ThreadPoolExecutor
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from queue import Empty, Queue
-from time import sleep
 from typing import Callable, Optional
+from uuid import uuid4
 
+from flwr.app.error import Error
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.clientapp.utils import get_load_client_app_fn
 from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import Message
 from flwr.common.constant import (
+    HEARTBEAT_MAX_INTERVAL,
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
-    PING_MAX_INTERVAL,
     ErrorCode,
 )
 from flwr.common.logger import log
-from flwr.common.message import Error
 from flwr.common.typing import Run
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
@@ -53,7 +53,7 @@ def _register_nodes(
     nodes_mapping: NodeToPartitionMapping = {}
     state = state_factory.state()
     for i in range(num_nodes):
-        node_id = state.create_node(ping_interval=PING_MAX_INTERVAL)
+        node_id = state.create_node(heartbeat_interval=HEARTBEAT_MAX_INTERVAL)
         nodes_mapping[node_id] = i
     log(DEBUG, "Registered %i nodes", len(nodes_mapping))
     return nodes_mapping
@@ -134,6 +134,8 @@ def worker(
 
         finally:
             if out_mssg:
+                # Assign a message_id
+                out_mssg.metadata.__dict__["_message_id"] = str(uuid4())
                 # Store reply Messages in state
                 messageres_queue.put(out_mssg)
 
@@ -150,7 +152,7 @@ def add_messages_to_queue(
             message_ins_list = state.get_message_ins(node_id=node_id, limit=1)
             for msg in message_ins_list:
                 queue.put(msg)
-        sleep(0.1)
+        f_stop.wait(0.1)
 
 
 def put_message_into_state(
@@ -179,6 +181,7 @@ def run_api(
     messageins_queue: Queue[Message] = Queue()
     messageres_queue: Queue[Message] = Queue()
 
+    backend = None
     try:
 
         # Instantiate backend
@@ -233,16 +236,16 @@ def run_api(
         log(ERROR, traceback.format_exc())
         log(WARN, "Stopping Simulation Engine.")
 
-        # Manually trigger stopping event
-        f_stop.set()
-
         # Raise exception
         raise RuntimeError("Simulation Engine crashed.") from ex
 
     finally:
+        # Manually trigger stopping event
+        f_stop.set()
 
         # Terminate backend
-        backend.terminate()
+        if backend is not None:
+            backend.terminate()
 
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches

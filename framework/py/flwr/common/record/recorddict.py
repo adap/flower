@@ -17,10 +17,12 @@
 
 from __future__ import annotations
 
+import json
 from logging import WARN
 from textwrap import indent
 from typing import TypeVar, Union, cast
 
+from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..logger import log
 from .arrayrecord import ArrayRecord
 from .configrecord import ConfigRecord
@@ -28,6 +30,22 @@ from .metricrecord import MetricRecord
 from .typeddict import TypedDict
 
 RecordType = Union[ArrayRecord, MetricRecord, ConfigRecord]
+
+
+class _WarningTracker:
+    """A class to track warnings for deprecated properties."""
+
+    def __init__(self) -> None:
+        # These variables are used to ensure that the deprecation warnings
+        # for the deprecated properties/class are logged only once.
+        self.recordset_init_logged = False
+        self.recorddict_init_logged = False
+        self.parameters_records_logged = False
+        self.metrics_records_logged = False
+        self.configs_records_logged = False
+
+
+_warning_tracker = _WarningTracker()
 
 T = TypeVar("T")
 
@@ -81,7 +99,7 @@ class _SyncedDict(TypedDict[str, T]):
             )
 
 
-class RecordDict(TypedDict[str, RecordType]):
+class RecordDict(TypedDict[str, RecordType], InflatableObject):
     """RecordDict stores groups of arrays, metrics and configs.
 
     A :class:`RecordDict` is the unified mechanism by which arrays,
@@ -143,8 +161,34 @@ class RecordDict(TypedDict[str, RecordType]):
     :code:`MetricRecord` and :code:`ArrayRecord`.
     """
 
-    def __init__(self, records: dict[str, RecordType] | None = None) -> None:
+    def __init__(
+        self,
+        records: dict[str, RecordType] | None = None,
+        *,
+        parameters_records: dict[str, ArrayRecord] | None = None,
+        metrics_records: dict[str, MetricRecord] | None = None,
+        configs_records: dict[str, ConfigRecord] | None = None,
+    ) -> None:
         super().__init__(_check_key, _check_value)
+
+        # Warning for deprecated usage
+        if (
+            parameters_records is not None
+            or metrics_records is not None
+            or configs_records is not None
+        ):
+            log(
+                WARN,
+                "The arguments `parameters_records`, `metrics_records`, and "
+                "`configs_records` of `RecordDict` are deprecated and will "
+                "be removed in a future release. "
+                "Please pass all records using the `records` argument instead.",
+            )
+            records = records or {}
+            records.update(parameters_records or {})
+            records.update(metrics_records or {})
+            records.update(configs_records or {})
+
         if records is not None:
             for key, record in records.items():
                 self[key] = record
@@ -196,6 +240,120 @@ class RecordDict(TypedDict[str, RecordType]):
                 type(value).__name__,
             )
 
+    @property
+    def parameters_records(self) -> TypedDict[str, ArrayRecord]:
+        """Deprecated property.
+
+        Use ``array_records`` instead.
+        """
+        if _warning_tracker.parameters_records_logged:
+            _warning_tracker.parameters_records_logged = True
+            log(
+                WARN,
+                "The `parameters_records` property of `RecordDict` "
+                "(formerly `RecordSet`) is deprecated and will be removed in a "
+                "future release. Please use the `array_records` property instead.",
+            )
+        return self.array_records
+
+    @property
+    def metrics_records(self) -> TypedDict[str, MetricRecord]:
+        """Deprecated property.
+
+        Use ``metric_records`` instead.
+        """
+        if not _warning_tracker.metrics_records_logged:
+            _warning_tracker.metrics_records_logged = True
+            log(
+                WARN,
+                "The `metrics_records` property of `RecordDict` "
+                "(formerly `RecordSet`) is deprecated and will be removed in a "
+                "future release. Please use the `metric_records` property instead.",
+            )
+        return self.metric_records
+
+    @property
+    def configs_records(self) -> TypedDict[str, ConfigRecord]:
+        """Deprecated property.
+
+        Use ``config_records`` instead.
+        """
+        if not _warning_tracker.configs_records_logged:
+            _warning_tracker.configs_records_logged = True
+            log(
+                WARN,
+                "The `configs_records` property of `RecordDict` "
+                "(formerly `RecordSet`) is deprecated and will be removed in a "
+                "future release. Please use the `config_records` property instead.",
+            )
+        return self.config_records
+
+    @property
+    def children(self) -> dict[str, InflatableObject]:
+        """Return a dictionary of records with their Object IDs as keys."""
+        return {record.object_id: record for record in self.values()}
+
+    def deflate(self) -> bytes:
+        """Deflate the RecordDict."""
+        # record_name: record_object_id mapping
+        record_refs: dict[str, str] = {}
+
+        for record_name, record in self.items():
+            record_refs[record_name] = record.object_id
+
+        # Serialize references dict
+        object_body = json.dumps(record_refs).encode("utf-8")
+        return add_header_to_object_body(object_body=object_body, obj=self)
+
+    @classmethod
+    def inflate(
+        cls, object_content: bytes, children: dict[str, InflatableObject] | None = None
+    ) -> RecordDict:
+        """Inflate an RecordDict from bytes.
+
+        Parameters
+        ----------
+        object_content : bytes
+            The deflated object content of the RecordDict.
+        children : Optional[dict[str, InflatableObject]]  (default: None)
+            Dictionary of children InflatableObjects mapped to their Object IDs.
+            These children enable the full inflation of the RecordDict. Default is None.
+
+        Returns
+        -------
+        RecordDict
+            The inflated RecordDict.
+        """
+        if children is None:
+            children = {}
+
+        # Inflate mapping of record_names (keys in the RecordDict) to Record' object IDs
+        obj_body = get_object_body(object_content, cls)
+        record_refs: dict[str, str] = json.loads(obj_body.decode(encoding="utf-8"))
+
+        unique_records = set(record_refs.values())
+        children_obj_ids = set(children.keys())
+        if unique_records != children_obj_ids:
+            raise ValueError(
+                "Unexpected set of `children`. "
+                f"Expected {unique_records} but got {children_obj_ids}."
+            )
+
+        # Ensure children are one of the *Record objects exepecte in a RecordDict
+        if not all(
+            isinstance(ch, (ArrayRecord, ConfigRecord, MetricRecord))
+            for ch in children.values()
+        ):
+            raise ValueError(
+                "`Children` are expected to be of type `ArrayRecord`, "
+                "`ConfigRecord` or `MetricRecord`."
+            )
+
+        # Instantiate new RecordDict
+        return RecordDict(
+            {name: children[object_id] for name, object_id in record_refs.items()}  # type: ignore
+        )
+
 
 class RecordSet(RecordDict):
     """Deprecated class ``RecordSet``, use ``RecordDict`` instead.
@@ -223,66 +381,25 @@ class RecordSet(RecordDict):
         my_content = RecordDict()
     """
 
-    _warning_logged = False
-    _warning_logged_params = False
-    _warning_logged_metrics = False
-    _warning_logged_configs = False
-
-    def __init__(self, records: dict[str, RecordType] | None = None) -> None:
-        if not RecordSet._warning_logged:
-            RecordSet._warning_logged = True
+    def __init__(
+        self,
+        records: dict[str, RecordType] | None = None,
+        *,
+        parameters_records: dict[str, ArrayRecord] | None = None,
+        metrics_records: dict[str, MetricRecord] | None = None,
+        configs_records: dict[str, ConfigRecord] | None = None,
+    ) -> None:
+        if not _warning_tracker.recordset_init_logged:
+            _warning_tracker.recordset_init_logged = True
             log(
                 WARN,
                 "The `RecordSet` class has been renamed to `RecordDict`. "
                 "Support for `RecordSet` will be removed in a future release. "
                 "Please update your code accordingly.",
             )
-        super().__init__(records)
-
-    @property
-    def parameters_records(self) -> TypedDict[str, ArrayRecord]:
-        """Deprecated property.
-
-        Use ``array_records`` instead.
-        """
-        if not RecordSet._warning_logged_params:
-            RecordSet._warning_logged_params = True
-            log(
-                WARN,
-                "`RecordSet.parameters_records` has been deprecated "
-                "and will be removed in a future release. Please use "
-                "`RecordDict.array_records` instead.",
-            )
-        return self.array_records
-
-    @property
-    def metrics_records(self) -> TypedDict[str, MetricRecord]:
-        """Deprecated property.
-
-        Use ``metric_records`` instead.
-        """
-        if not RecordSet._warning_logged_metrics:
-            RecordSet._warning_logged_metrics = True
-            log(
-                WARN,
-                "`RecordSet.metrics_records` has been deprecated "
-                "and will be removed in a future release. Please use "
-                "`RecordDict.metric_records` instead.",
-            )
-        return self.metric_records
-
-    @property
-    def configs_records(self) -> TypedDict[str, ConfigRecord]:
-        """Deprecated property.
-
-        Use ``config_records`` instead.
-        """
-        if not RecordSet._warning_logged_configs:
-            RecordSet._warning_logged_configs = True
-            log(
-                WARN,
-                "`RecordSet.configs_records` has been deprecated "
-                "and will be removed in a future release. Please use "
-                "`RecordDict.config_records` instead.",
-            )
-        return self.config_records
+        super().__init__(
+            records,
+            parameters_records=parameters_records,
+            metrics_records=metrics_records,
+            configs_records=configs_records,
+        )

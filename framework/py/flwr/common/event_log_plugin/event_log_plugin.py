@@ -21,11 +21,11 @@ from typing import Optional, Union
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.typing import LogEntry, UserInfo
+from flwr.common.typing import AccountInfo, LogEntry
 
 
 class EventLogWriterPlugin(ABC):
-    """Abstract Flower Event Log Writer Plugin class for ExecServicer."""
+    """Abstract Flower Event Log Writer Plugin class for ControlServicer."""
 
     @abstractmethod
     def __init__(self) -> None:
@@ -36,7 +36,7 @@ class EventLogWriterPlugin(ABC):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        user_info: Optional[UserInfo],
+        account_info: Optional[AccountInfo],
         method_name: str,
     ) -> LogEntry:
         """Compose pre-event log entry from the provided request and context."""
@@ -46,7 +46,7 @@ class EventLogWriterPlugin(ABC):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        user_info: Optional[UserInfo],
+        account_info: Optional[AccountInfo],
         method_name: str,
         response: Optional[Union[GrpcMessage, BaseException]],
     ) -> LogEntry:

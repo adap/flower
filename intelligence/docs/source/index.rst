@@ -6,7 +6,7 @@ interact with Large-Language Models both locally and remotely in a secure and pr
 way. The library was created by the ``Flower Labs`` team that also created `Flower: A
 Friendly Federated AI Framework <https://flower.ai>`_.
 
-We currently provide SDKs for TypeScript/JavaScript and Swift.
+We currently provide SDKs for TypeScript/JavaScript, Kotlin, and Swift.
 
 Install
 -------
@@ -38,6 +38,14 @@ Install
           #
           # To add dependency to your Swift package, you can run the following command:
           swift package add-dependency "https://github.com/adap/flower.git"
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: bash
+
+          # Add Flower Intelligence dependency to your build.gradle.kts
+          implementation("ai.flower:intelligence:0.1.8")
 
 Hello, Flower Intelligence!
 ---------------------------
@@ -104,6 +112,23 @@ setup helps you integrate powerful AI capabilities with minimal overhead.
               print(message.content)
             case .failure(let error):
               print(error.localizedDescription)
+            }
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.Failure
+
+            suspend fun main() {
+                val result = FlowerIntelligence.chat("Why is the sky blue?")
+                result.onSuccess { message ->
+                    println(message.content)
+                }.onFailure { error ->
+                    println((error as Failure).message)
+                }
             }
 
 Specify the model
@@ -177,6 +202,25 @@ the :doc:`available models list <ref-models>`.
                 print(message.content)
             case .failure(let error):
                 print(error.localizedDescription)
+            }
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.ChatOptions
+
+            suspend fun main() {
+                val options = ChatOptions(model = "meta/llama3.2-1b/instruct-fp16")
+                val result = FlowerIntelligence.chat("Why is the sky blue?", maybeOptions = options)
+
+                result.onSuccess { message ->
+                    println(message.content)
+                }.onFailure { error ->
+                    println((error as Failure).message)
+                }
             }
 
 Check for errors
@@ -257,6 +301,27 @@ application stability.
                 print(message.content)
             case .failure(let error):
                 print(error.localizedDescription)
+            }
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.ChatOptions
+            import ai.flower.intelligence.Failure
+
+            suspend fun main() {
+                val options = ChatOptions(model = "meta/llama3.2-1b/instruct-fp16")
+                val result = FlowerIntelligence.chat("Why is the sky blue?", maybeOptions = options)
+
+                result.onSuccess { message ->
+                    println(message.content)
+                }.onFailure { error ->
+                    val failure = error as Failure
+                    println("${failure.code}: ${failure.message}")
+                }
             }
 
 Stream Responses
@@ -346,6 +411,32 @@ available. The callback function must accept an argument of type :doc:`StreamEve
 
             if case .failure(let error) = result {
                 print(error.localizedDescription)
+            }
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.ChatOptions
+            import ai.flower.intelligence.StreamEvent
+            import ai.flower.intelligence.Failure
+
+            suspend fun main() {
+                val options = ChatOptions(
+                    model = "meta/llama3.2-1b/instruct-fp16",
+                    stream = true,
+                    onStreamEvent = { event: StreamEvent ->
+                        println(event.chunk)
+                    }
+                )
+
+                val result = FlowerIntelligence.chat("Why is the sky blue?", maybeOptions = options)
+
+                result.onFailure { error ->
+                    println((error as Failure).message)
+                }
             }
 
 Use Roles
@@ -442,6 +533,37 @@ ensuring that the assistant responds in a way that’s tailored to the scenario.
               print(message.content)
             case .failure(let error):
               print(error.localizedDescription)
+            }
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.Message
+            import ai.flower.intelligence.ChatOptions
+            import ai.flower.intelligence.Failure
+
+            suspend fun main() {
+                val messages = listOf(
+                    Message(role = "system", content = "You are a friendly assistant that loves using emojis."),
+                    Message(role = "user", content = "Why is the sky blue?")
+                )
+
+                val options = ChatOptions(
+                    model = "meta/llama3.2-1b/instruct-fp16",
+                    stream = true,
+                    onStreamEvent = { event -> println(event.chunk) }
+                )
+
+                val result = FlowerIntelligence.chat(messages, options)
+
+                result.onSuccess { message ->
+                    println(message.content)
+                }.onFailure { error ->
+                    println((error as Failure).message)
+                }
             }
 
 Handle history
@@ -585,6 +707,44 @@ interactions, resulting in a more coherent and dynamic conversation.
 
             // Start the conversation
             await chatWithHistory("Why is the sky blue?")
+
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.Message
+            import ai.flower.intelligence.ChatOptions
+            import ai.flower.intelligence.Failure
+            import ai.flower.intelligence.StreamEvent
+
+            private val history = mutableListOf(
+                Message(role = "system", content = "You are a friendly assistant that loves using emojis.")
+            )
+
+            suspend fun chatWithHistory(userInput: String) {
+                history.add(Message(role = "user", content = userInput))
+
+                val options = ChatOptions(
+                    model = "meta/llama3.2-1b/instruct-fp16",
+                    stream = true,
+                    onStreamEvent = { event: StreamEvent -> println(event.chunk) }
+                )
+
+                val result = FlowerIntelligence.chat(history, options)
+
+                result.onSuccess { response ->
+                    history.add(response)
+                    println("Assistant: ${response.content}")
+                }.onFailure { error ->
+                    println((error as Failure).message)
+                }
+            }
+
+            suspend fun main() {
+                chatWithHistory("Why is the sky blue?")
+            }
 
 Pre-loading the model
 ---------------------
@@ -844,6 +1004,120 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
               print(error.localizedDescription)
             }
 
+    .. tab-item:: Kotlin
+        :sync: kotlin
+
+        .. code-block:: kotlin
+
+            import ai.flower.intelligence.FlowerIntelligence
+            import ai.flower.intelligence.Message
+            import ai.flower.intelligence.ChatOptions
+            import ai.flower.intelligence.Failure
+            import ai.flower.intelligence.StreamEvent
+
+            suspend fun main() {
+                val fi = FlowerIntelligence
+                fi.apiKey = "YOUR_API_KEY"
+                // Flower Confidential Remote Compute enabled by default in backend setup
+
+                val messages = listOf(
+                    Message(role = "system", content = "You are a helpful assistant."),
+                    Message(role = "user", content = "Why is the sky blue?")
+                )
+
+                val options = ChatOptions(
+                    model = "meta/llama3.2-1b/instruct-fp16",
+                    stream = true,
+                    onStreamEvent = { event -> println(event.chunk) }
+                )
+
+                val result = fi.chat(messages, options)
+
+                result.onSuccess { message ->
+                    println(message.content)
+                }.onFailure { error ->
+                    println((error as Failure).message)
+                }
+            }
+
+Embedding
+---------
+
+.. warning::
+
+    This feature currently only works with Flower Confidential Remote Compute on the
+    TypeScript SDK. If you are interested in using Confidential Remote Compute, please
+    apply for Early Access via the `Flower Intelligence Pilot Program
+    <https://forms.gle/J8pFpMrsmek2VFKq8>`_.
+
+You can embed some text or an array of texts using the ``embed`` method of the
+``FlowerIntelligence`` obeject (currently this only works with the
+``qwen/qwen3-embedding`` model).
+
+You will need to enable ``remoteHandoff`` and to provide a valid API key via the
+``apiKey`` attribute.
+
+.. tab-set::
+    :sync-group: category
+
+    .. tab-item:: TypeScript
+        :sync: ts
+
+        .. code-block:: ts
+
+            import { Embedding, Result, FlowerIntelligence } from '@flwr/flwr';
+
+            // Access the singleton instance
+            const fi: FlowerIntelligence = FlowerIntelligence.instance;
+
+            // Enable remote processing and provide your API key
+            fi.remoteHandoff = true;
+            fi.apiKey = "YOUR_API_KEY";
+
+            async function main() {
+              const response: Result<Embedding> = await fi.embed({
+                model: 'qwen/qwen3-embedding',
+                input: 'Hello world!'
+              });
+
+              if (!response.ok) {
+                console.error(`${response.failure.code}: ${response.failure.description}`);
+              } else {
+                console.log('Full response:', response.value);
+              }
+            }
+
+            await main().then().catch();
+
+    .. tab-item:: JavaScript
+        :sync: js
+
+        .. code-block:: js
+
+            import { FlowerIntelligence } from '@flwr/flwr';
+
+            // Access the singleton instance
+            const fi = FlowerIntelligence.instance;
+
+            // Enable remote processing and provide your API key
+            fi.remoteHandoff = true;
+            fi.apiKey = "YOUR_API_KEY";
+
+            async function main() {
+              const response = await fi.embed({
+                model: 'qwen/qwen3-embedding',
+                input: 'Hello world!'
+              });
+
+              if (!response.ok) {
+                console.error(`${response.failure.code}: ${response.failure.description}`);
+              } else {
+                console.log(response.value);
+              }
+            }
+
+            await main().then().catch();
+
 References
 ----------
 
@@ -858,6 +1132,7 @@ Information-oriented API reference and other reference material.
     examples
     ts-api-ref/index
     swift-api-ref/index
+    kt-api-ref/index
 
 Contributor guides
 ------------------

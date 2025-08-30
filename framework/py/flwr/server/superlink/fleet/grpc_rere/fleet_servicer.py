@@ -20,6 +20,7 @@ from logging import DEBUG, INFO
 import grpc
 from google.protobuf.json_format import MessageToDict
 
+from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
@@ -29,34 +30,53 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PingRequest,
-    PingResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
 )
+from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendNodeHeartbeatRequest,
+    SendNodeHeartbeatResponse,
+)
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
+    PullObjectRequest,
+    PullObjectResponse,
+    PushObjectRequest,
+    PushObjectResponse,
+)
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_grpc_context
+from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.object_store import ObjectStoreFactory
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
     def __init__(
-        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+        self,
+        state_factory: LinkStateFactory,
+        ffs_factory: FfsFactory,
+        objectstore_factory: ObjectStoreFactory,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
+        self.objectstore_factory = objectstore_factory
 
     def CreateNode(
         self, request: CreateNodeRequest, context: grpc.ServicerContext
     ) -> CreateNodeResponse:
         """."""
-        log(INFO, "[Fleet.CreateNode] Request ping_interval=%s", request.ping_interval)
+        log(
+            INFO,
+            "[Fleet.CreateNode] Request heartbeat_interval=%s",
+            request.heartbeat_interval,
+        )
         log(DEBUG, "[Fleet.CreateNode] Request: %s", MessageToDict(request))
         response = message_handler.create_node(
             request=request,
@@ -77,10 +97,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             state=self.state_factory.state(),
         )
 
-    def Ping(self, request: PingRequest, context: grpc.ServicerContext) -> PingResponse:
+    def SendNodeHeartbeat(
+        self, request: SendNodeHeartbeatRequest, context: grpc.ServicerContext
+    ) -> SendNodeHeartbeatResponse:
         """."""
-        log(DEBUG, "[Fleet.Ping] Request: %s", MessageToDict(request))
-        return message_handler.ping(
+        log(DEBUG, "[Fleet.SendNodeHeartbeat] Request: %s", MessageToDict(request))
+        return message_handler.send_node_heartbeat(
             request=request,
             state=self.state_factory.state(),
         )
@@ -94,6 +116,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         return message_handler.pull_messages(
             request=request,
             state=self.state_factory.state(),
+            store=self.objectstore_factory.store(),
         )
 
     def PushMessages(
@@ -113,6 +136,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             res = message_handler.push_messages(
                 request=request,
                 state=self.state_factory.state(),
+                store=self.objectstore_factory.store(),
             )
         except InvalidRunStatusException as e:
             abort_grpc_context(e.message, context)
@@ -129,6 +153,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             res = message_handler.get_run(
                 request=request,
                 state=self.state_factory.state(),
+                store=self.objectstore_factory.store(),
             )
         except InvalidRunStatusException as e:
             abort_grpc_context(e.message, context)
@@ -145,6 +170,75 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 request=request,
                 ffs=self.ffs_factory.ffs(),
                 state=self.state_factory.state(),
+                store=self.objectstore_factory.store(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+
+        return res
+
+    def PushObject(
+        self, request: PushObjectRequest, context: grpc.ServicerContext
+    ) -> PushObjectResponse:
+        """Push an object to the ObjectStore."""
+        log(
+            DEBUG,
+            "[ServerAppIoServicer.PushObject] Push Object with object_id=%s",
+            request.object_id,
+        )
+
+        try:
+            # Insert in Store
+            res = message_handler.push_object(
+                request=request,
+                state=self.state_factory.state(),
+                store=self.objectstore_factory.store(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+        except UnexpectedObjectContentError as e:
+            # Object content is not valid
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+
+        return res
+
+    def PullObject(
+        self, request: PullObjectRequest, context: grpc.ServicerContext
+    ) -> PullObjectResponse:
+        """Pull an object from the ObjectStore."""
+        log(
+            DEBUG,
+            "[ServerAppIoServicer.PullObject] Pull Object with object_id=%s",
+            request.object_id,
+        )
+
+        try:
+            # Fetch from store
+            res = message_handler.pull_object(
+                request=request,
+                state=self.state_factory.state(),
+                store=self.objectstore_factory.store(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+
+        return res
+
+    def ConfirmMessageReceived(
+        self, request: ConfirmMessageReceivedRequest, context: grpc.ServicerContext
+    ) -> ConfirmMessageReceivedResponse:
+        """Confirm message received."""
+        log(
+            DEBUG,
+            "[Fleet.ConfirmMessageReceived] Message with ID '%s' has been received",
+            request.message_object_id,
+        )
+
+        try:
+            res = message_handler.confirm_message_received(
+                request=request,
+                state=self.state_factory.state(),
+                store=self.objectstore_factory.store(),
             )
         except InvalidRunStatusException as e:
             abort_grpc_context(e.message, context)

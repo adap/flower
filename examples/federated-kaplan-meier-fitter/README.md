@@ -35,7 +35,7 @@ Start by cloning the example project:
 $ git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/federated-kaplan-meier-fitter . && rm -rf _tmp && cd federated-kaplan-meier-fitter
 ```
 
-This will create a new directory called `federated-kaplan-meier-fitter`  with the following structure:
+This will create a new directory called `federated-kaplan-meier-fitter` with the following structure:
 
 ```shell
 federated-kaplan-meier-fitter

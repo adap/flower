@@ -19,30 +19,30 @@
 
 import json
 import re
+import secrets
 import sqlite3
 import time
 from collections.abc import Sequence
 from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
-from uuid import UUID, uuid4
 
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
+    FLWR_APP_TOKEN_LENGTH,
+    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
-    PING_PATIENCE,
+    RUN_FAILURE_DETAILS_NO_HEARTBEAT,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
+    SubStatus,
 )
 from flwr.common.message import make_message
 from flwr.common.record import ConfigRecord
-from flwr.common.serde import (
-    error_from_proto,
-    error_to_proto,
-    recorddict_from_proto,
-    recorddict_to_proto,
-)
+from flwr.common.serde import recorddict_from_proto, recorddict_to_proto
+from flwr.common.serde_utils import error_from_proto, error_to_proto
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
@@ -74,7 +74,7 @@ SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
     node_id         INTEGER UNIQUE,
     online_until    REAL,
-    ping_interval   REAL,
+    heartbeat_interval   REAL,
     public_key      BLOB
 );
 """
@@ -92,6 +92,8 @@ CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
     run_id                INTEGER UNIQUE,
+    active_until          REAL,
+    heartbeat_interval    REAL,
     fab_id                TEXT,
     fab_version           TEXT,
     fab_hash              TEXT,
@@ -102,7 +104,8 @@ CREATE TABLE IF NOT EXISTS run(
     finished_at           TEXT,
     sub_status            TEXT,
     details               TEXT,
-    federation_options    BLOB
+    federation_options    BLOB,
+    flwr_aid              TEXT
 );
 """
 
@@ -162,6 +165,13 @@ CREATE TABLE IF NOT EXISTS message_res(
 );
 """
 
+SQL_CREATE_TABLE_TOKEN_STORE = """
+CREATE TABLE IF NOT EXISTS token_store (
+    run_id                  INTEGER PRIMARY KEY,
+    token                   TEXT UNIQUE NOT NULL
+);
+"""
+
 DictOrTuple = Union[tuple[Any, ...], dict[str, Any]]
 
 
@@ -211,6 +221,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_MESSAGE_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
+        cur.execute(SQL_CREATE_TABLE_TOKEN_STORE)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
         return res.fetchall()
@@ -250,19 +261,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return result
 
-    def store_message_ins(self, message: Message) -> Optional[UUID]:
+    def store_message_ins(self, message: Message) -> Optional[str]:
         """Store one Message."""
         # Validate message
         errors = validate_message(message=message, is_reply_message=False)
         if any(errors):
             log(ERROR, errors)
             return None
-        # Create message_id
-        message_id = uuid4()
 
         # Store Message
-        # pylint: disable-next=W0212
-        message.metadata._message_id = str(message_id)  # type: ignore
         data = (message_to_dict(message),)
 
         # Convert values from uint64 to sint64 for SQLite
@@ -302,7 +309,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # This may need to be changed in the future version with more integrity checks.
         self.query(query, data)
 
-        return message_id
+        return message.metadata.message_id
 
     def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
         """Get all Messages that have not been delivered yet."""
@@ -365,7 +372,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return result
 
-    def store_message_res(self, message: Message) -> Optional[UUID]:
+    def store_message_res(self, message: Message) -> Optional[str]:
         """Store one Message."""
         # Validate message
         errors = validate_message(message=message, is_reply_message=True)
@@ -417,12 +424,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             )
             return None
 
-        # Create message_id
-        message_id = uuid4()
-
         # Store Message
-        # pylint: disable-next=W0212
-        message.metadata._message_id = str(message_id)  # type: ignore
         data = (message_to_dict(message),)
 
         # Convert values from uint64 to sint64 for SQLite
@@ -441,12 +443,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             log(ERROR, "`run` is invalid")
             return None
 
-        return message_id
+        return message.metadata.message_id
 
-    def get_message_res(self, message_ids: set[UUID]) -> list[Message]:
+    def get_message_res(self, message_ids: set[str]) -> list[Message]:
         """Get reply Messages for the given Message IDs."""
         # pylint: disable-msg=too-many-locals
-        ret: dict[UUID, Message] = {}
+        ret: dict[str, Message] = {}
 
         # Verify Message IDs
         current = time.time()
@@ -456,12 +458,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             WHERE message_id IN ({",".join(["?"] * len(message_ids))});
         """
         rows = self.query(query, tuple(str(message_id) for message_id in message_ids))
-        found_message_ins_dict: dict[UUID, Message] = {}
+        found_message_ins_dict: dict[str, Message] = {}
         for row in rows:
             convert_sint64_values_in_dict_to_uint64(
                 row, ["run_id", "src_node_id", "dst_node_id"]
             )
-            found_message_ins_dict[UUID(row["message_id"])] = dict_to_message(row)
+            found_message_ins_dict[row["message_id"]] = dict_to_message(row)
 
         ret = verify_message_ids(
             inquired_message_ids=message_ids,
@@ -550,7 +552,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: dict[str, int] = rows[0]
         return result["num"]
 
-    def delete_messages(self, message_ins_ids: set[UUID]) -> None:
+    def delete_messages(self, message_ins_ids: set[str]) -> None:
         """Delete a Message and its reply based on provided Message IDs."""
         if not message_ins_ids:
             return
@@ -576,7 +578,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             self.conn.execute(query_1, data)
             self.conn.execute(query_2, data)
 
-    def get_message_ids_from_run_id(self, run_id: int) -> set[UUID]:
+    def get_message_ids_from_run_id(self, run_id: int) -> set[str]:
         """Get all instruction Message IDs for the given run_id."""
         if self.conn is None:
             raise AttributeError("LinkState not initialized")
@@ -593,9 +595,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         with self.conn:
             rows = self.conn.execute(query, data).fetchall()
 
-        return {UUID(row["message_id"]) for row in rows}
+        return {row["message_id"] for row in rows}
 
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(self, heartbeat_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random uint64 as node_id
         uint64_node_id = generate_rand_int_from_bytes(
@@ -607,18 +609,18 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         query = (
             "INSERT INTO node "
-            "(node_id, online_until, ping_interval, public_key) "
+            "(node_id, online_until, heartbeat_interval, public_key) "
             "VALUES (?, ?, ?, ?)"
         )
 
-        # Mark the node online util time.time() + ping_interval
+        # Mark the node online util time.time() + heartbeat_interval
         try:
             self.query(
                 query,
                 (
                     sint64_node_id,
-                    time.time() + ping_interval,
-                    ping_interval,
+                    time.time() + heartbeat_interval,
+                    heartbeat_interval,
                     b"",  # Initialize with an empty public key
                 ),
             )
@@ -728,6 +730,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         fab_hash: Optional[str],
         override_config: UserConfig,
         federation_options: ConfigRecord,
+        flwr_aid: Optional[str],
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
@@ -742,26 +745,28 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if self.query(query, (sint64_run_id,))[0]["COUNT(*)"] == 0:
             query = (
                 "INSERT INTO run "
-                "(run_id, fab_id, fab_version, fab_hash, override_config, "
-                "federation_options, pending_at, starting_at, running_at, finished_at, "
-                "sub_status, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                "(run_id, active_until, heartbeat_interval, fab_id, fab_version, "
+                "fab_hash, override_config, federation_options, pending_at, "
+                "starting_at, running_at, finished_at, sub_status, details, flwr_aid) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             override_config_json = json.dumps(override_config)
             data = [
                 sint64_run_id,
+                0,  # The `active_until` is not used until the run is started
+                0,  # This `heartbeat_interval` is not used until the run is started
                 fab_id,
                 fab_version,
                 fab_hash,
                 override_config_json,
                 configrecord_to_bytes(federation_options),
-            ]
-            data += [
                 now().isoformat(),
                 "",
                 "",
                 "",
                 "",
                 "",
+                flwr_aid or "",
             ]
             self.query(query, tuple(data))
             return uint64_run_id
@@ -790,14 +795,47 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: set[bytes] = {row["public_key"] for row in rows}
         return result
 
-    def get_run_ids(self) -> set[int]:
-        """Retrieve all run IDs."""
-        query = "SELECT run_id FROM run;"
-        rows = self.query(query)
+    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+        """Retrieve all run IDs if `flwr_aid` is not specified.
+
+        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
+        """
+        if flwr_aid:
+            rows = self.query(
+                "SELECT run_id FROM run WHERE flwr_aid = ?;",
+                (flwr_aid,),
+            )
+        else:
+            rows = self.query("SELECT run_id FROM run;", ())
         return {convert_sint64_to_uint64(row["run_id"]) for row in rows}
+
+    def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
+        """Check if any runs are no longer active.
+
+        Marks runs with status 'starting' or 'running' as failed
+        if they have not sent a heartbeat before `active_until`.
+        """
+        sint_run_ids = [convert_uint64_to_sint64(run_id) for run_id in run_ids]
+        query = "UPDATE run SET finished_at = ?, sub_status = ?, details = ? "
+        query += "WHERE starting_at != '' AND finished_at = '' AND active_until < ?"
+        query += f" AND run_id IN ({','.join(['?'] * len(run_ids))});"
+        current = now()
+        self.query(
+            query,
+            (
+                current.isoformat(),
+                SubStatus.FAILED,
+                RUN_FAILURE_DETAILS_NO_HEARTBEAT,
+                current.timestamp(),
+                *sint_run_ids,
+            ),
+        )
 
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
+        # Check if runs are still active
+        self._check_and_tag_inactive_run(run_ids={run_id})
+
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
         query = "SELECT * FROM run WHERE run_id = ?;"
@@ -819,12 +857,16 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                     sub_status=row["sub_status"],
                     details=row["details"],
                 ),
+                flwr_aid=row["flwr_aid"],
             )
         log(ERROR, "`run_id` does not exist.")
         return None
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
+        # Check if runs are still active
+        self._check_and_tag_inactive_run(run_ids=run_ids)
+
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_ids = (convert_uint64_to_sint64(run_id) for run_id in set(run_ids))
         query = f"SELECT * FROM run WHERE run_id IN ({','.join(['?'] * len(run_ids))});"
@@ -842,6 +884,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
+        # Check if runs are still active
+        self._check_and_tag_inactive_run(run_ids={run_id})
+
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
         query = "SELECT * FROM run WHERE run_id = ?;"
@@ -879,9 +924,22 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return False
 
         # Update the status
-        query = "UPDATE run SET %s= ?, sub_status = ?, details = ? "
+        query = "UPDATE run SET %s= ?, sub_status = ?, details = ?, "
+        query += "active_until = ?, heartbeat_interval = ? "
         query += "WHERE run_id = ?;"
 
+        # Prepare data for query
+        # Initialize heartbeat_interval and active_until
+        # when switching to starting or running
+        current = now()
+        if new_status.status in (Status.STARTING, Status.RUNNING):
+            heartbeat_interval = HEARTBEAT_MAX_INTERVAL
+            active_until = current.timestamp() + heartbeat_interval
+        else:
+            heartbeat_interval = 0
+            active_until = 0
+
+        # Determine the timestamp field based on the new status
         timestamp_fld = ""
         if new_status.status == Status.STARTING:
             timestamp_fld = "starting_at"
@@ -891,10 +949,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             timestamp_fld = "finished_at"
 
         data = (
-            now().isoformat(),
+            current.isoformat(),
             new_status.sub_status,
             new_status.details,
-            sint64_run_id,
+            active_until,
+            heartbeat_interval,
+            convert_uint64_to_sint64(run_id),
         )
         self.query(query % timestamp_fld, data)
         return True
@@ -926,11 +986,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         row = rows[0]
         return configrecord_from_bytes(row["federation_options"])
 
-    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
-        """Acknowledge a ping received from a node, serving as a heartbeat.
+    def acknowledge_node_heartbeat(
+        self, node_id: int, heartbeat_interval: float
+    ) -> bool:
+        """Acknowledge a heartbeat received from a node, serving as a heartbeat.
 
-        It allows for one missed ping (in a PING_PATIENCE * ping_interval) before
-        marking the node as offline, where PING_PATIENCE = 2 in default.
+        A node is considered online as long as it sends heartbeats within
+        the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before
+        the node is marked as offline.
         """
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
@@ -939,16 +1003,56 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if not self.query(query, (sint64_node_id,)):
             return False
 
-        # Update `online_until` and `ping_interval` for the given `node_id`
-        query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?"
+        # Update `online_until` and `heartbeat_interval` for the given `node_id`
+        query = (
+            "UPDATE node SET online_until = ?, heartbeat_interval = ? WHERE node_id = ?"
+        )
         self.query(
             query,
             (
-                time.time() + PING_PATIENCE * ping_interval,
-                ping_interval,
+                time.time() + HEARTBEAT_PATIENCE * heartbeat_interval,
+                heartbeat_interval,
                 sint64_node_id,
             ),
         )
+        return True
+
+    def acknowledge_app_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
+        """Acknowledge a heartbeat received from a ServerApp for a given run.
+
+        A run with status `"running"` is considered alive as long as it sends heartbeats
+        within the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before the run is
+        marked as `"completed:failed"`.
+        """
+        # Check if runs are still active
+        self._check_and_tag_inactive_run(run_ids={run_id})
+
+        # Search for the run
+        sint_run_id = convert_uint64_to_sint64(run_id)
+        query = "SELECT * FROM run WHERE run_id = ?;"
+        rows = self.query(query, (sint_run_id,))
+
+        if not rows:
+            log(ERROR, "`run_id` is invalid")
+            return False
+
+        # Check if the run is of status "running"/"starting"
+        row = rows[0]
+        status = determine_run_status(row)
+        if status not in (Status.RUNNING, Status.STARTING):
+            log(
+                ERROR,
+                'Cannot acknowledge heartbeat for run with status "%s"',
+                status,
+            )
+            return False
+
+        # Update the `active_until` and `heartbeat_interval` for the given run
+        active_until = now().timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval
+        query = "UPDATE run SET active_until = ?, heartbeat_interval = ? "
+        query += "WHERE run_id = ?"
+        self.query(query, (active_until, heartbeat_interval, sint_run_id))
         return True
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
@@ -1043,6 +1147,41 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
 
         return message_ins
+
+    def create_token(self, run_id: int) -> Optional[str]:
+        """Create a token for the given run ID."""
+        token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
+        query = "INSERT INTO token_store (run_id, token) VALUES (:run_id, :token);"
+        data = {"run_id": convert_uint64_to_sint64(run_id), "token": token}
+        try:
+            self.query(query, data)
+        except sqlite3.IntegrityError:
+            return None  # Token already created for this run ID
+        return token
+
+    def verify_token(self, run_id: int, token: str) -> bool:
+        """Verify a token for the given run ID."""
+        query = "SELECT token FROM token_store WHERE run_id = :run_id;"
+        data = {"run_id": convert_uint64_to_sint64(run_id)}
+        rows = self.query(query, data)
+        if not rows:
+            return False
+        return cast(str, rows[0]["token"]) == token
+
+    def delete_token(self, run_id: int) -> None:
+        """Delete the token for the given run ID."""
+        query = "DELETE FROM token_store WHERE run_id = :run_id;"
+        data = {"run_id": convert_uint64_to_sint64(run_id)}
+        self.query(query, data)
+
+    def get_run_id_by_token(self, token: str) -> Optional[int]:
+        """Get the run ID associated with a given token."""
+        query = "SELECT run_id FROM token_store WHERE token = :token;"
+        data = {"token": token}
+        rows = self.query(query, data)
+        if not rows:
+            return None
+        return convert_sint64_to_uint64(rows[0]["run_id"])
 
 
 def dict_factory(

@@ -17,6 +17,7 @@
 
 import itertools
 import random
+import threading
 import time
 from collections.abc import Generator, Iterable
 from dataclasses import dataclass
@@ -25,10 +26,12 @@ from typing import Any, Callable, Optional, Union, cast
 
 import grpc
 
+from flwr.client.grpc_rere_client.grpc_adapter import GrpcAdapter
 from flwr.common.constant import MAX_RETRY_DELAY
 from flwr.common.logger import log
 from flwr.common.typing import RunNotRunningException
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
+from flwr.proto.fleet_pb2_grpc import FleetStub
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 
@@ -317,8 +320,12 @@ class RetryInvoker:
 
 def _make_simple_grpc_retry_invoker() -> RetryInvoker:
     """Create a simple gRPC retry invoker."""
+    lock = threading.Lock()
+    system_healthy = threading.Event()
+    system_healthy.set()  # Initially, the connection is healthy
 
-    def _on_sucess(retry_state: RetryState) -> None:
+    def _on_success(retry_state: RetryState) -> None:
+        system_healthy.set()
         if retry_state.tries > 1:
             log(
                 INFO,
@@ -327,17 +334,11 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
                 retry_state.tries,
             )
 
-    def _on_backoff(retry_state: RetryState) -> None:
-        if retry_state.tries == 1:
-            log(WARN, "Connection attempt failed, retrying...")
-        else:
-            log(
-                WARN,
-                "Connection attempt failed, retrying in %.2f seconds",
-                retry_state.actual_wait,
-            )
+    def _on_backoff(_: RetryState) -> None:
+        system_healthy.clear()
 
     def _on_giveup(retry_state: RetryState) -> None:
+        system_healthy.clear()
         if retry_state.tries > 1:
             log(
                 WARN,
@@ -353,20 +354,42 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
             return False
         return True
 
+    def _wait(wait_time: float) -> None:
+        # Use a lock to prevent multiple gRPC calls from retrying concurrently,
+        # which is unnecessary since they are all likely to fail.
+        with lock:
+            # Log the wait time
+            log(
+                WARN,
+                "Connection attempt failed, retrying in %.2f seconds",
+                wait_time,
+            )
+
+            start = time.monotonic()
+            # Avoid sequential waits if the system is healthy
+            system_healthy.wait(wait_time)
+
+        remaining_time = wait_time - (time.monotonic() - start)
+        if remaining_time > 0:
+            time.sleep(remaining_time)
+
     return RetryInvoker(
         wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
         recoverable_exceptions=grpc.RpcError,
         max_tries=None,
         max_time=None,
-        on_success=_on_sucess,
+        on_success=_on_success,
         on_backoff=_on_backoff,
         on_giveup=_on_giveup,
         should_giveup=_should_giveup_fn,
+        wait_function=_wait,
     )
 
 
 def _wrap_stub(
-    stub: Union[ServerAppIoStub, ClientAppIoStub, SimulationIoStub],
+    stub: Union[
+        ServerAppIoStub, ClientAppIoStub, SimulationIoStub, FleetStub, GrpcAdapter
+    ],
     retry_invoker: RetryInvoker,
 ) -> None:
     """Wrap a gRPC stub with a retry invoker."""
