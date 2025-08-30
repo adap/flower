@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-28 00:07+0000\n"
+"POT-Creation-Date: 2025-08-30 00:07+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -6115,6 +6115,12 @@ msgstr ""
 #: flwr.server.strategy.strategy.Strategy.initialize_parameters
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow
+#: flwr.serverapp.fedavg.FedAvg
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate
+#: flwr.serverapp.strategy.Strategy.aggregate_train
+#: flwr.serverapp.strategy.Strategy.configure_evaluate
+#: flwr.serverapp.strategy.Strategy.configure_train
+#: flwr.serverapp.strategy.Strategy.start
 #: flwr.simulation.run_simulation.run_simulation
 #: flwr.simulation.simulationio_connection.SimulationIoConnection of
 msgid "Parameters"
@@ -16188,155 +16194,176 @@ msgstr "Flower"
 msgid "Flower main package."
 msgstr "Flower 主包装。"
 
-#: ../../source/ref-api/flwr.client.rst:43 ../../source/ref-api/flwr.rst:25
-#: ../../source/ref-api/flwr.server.rst:49
+#: ../../source/ref-api/flwr.app.rst:25 ../../source/ref-api/flwr.client.rst:43
+#: ../../source/ref-api/flwr.rst:25 ../../source/ref-api/flwr.server.rst:49
 #, fuzzy
 msgid "Modules"
 msgstr "模块"
 
-#: ../../source/ref-api/flwr.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`flwr.app <flwr.app>`\\"
+msgstr ":py:obj:`flwr <flwr>`\\"
+
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1 flwr.app:1 of
+#, fuzzy
+msgid "Public Flower App APIs."
+msgstr "Flower 服务器。"
+
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`flwr.client <flwr.client>`\\"
 msgstr ":py:obj:`flwr.client <flwr.client>`\\"
 
-#: ../../source/ref-api/flwr.rst:35:<autosummary>:1 flwr.client:1 of
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1 flwr.client:1 of
 msgid "Flower client."
 msgstr "Flower 客户端。"
 
-#: ../../source/ref-api/flwr.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`flwr.clientapp <flwr.clientapp>`\\"
+msgstr ":py:obj:`flwr.client <flwr.client>`\\"
+
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1 flwr.clientapp:1 of
+#, fuzzy
+msgid "Public Flower ClientApp APIs."
+msgstr "Flower 客户端。"
+
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`flwr.common <flwr.common>`\\"
 msgstr ":py:obj:`flwr.common <flwr.common>`\\"
 
-#: ../../source/ref-api/flwr.rst:35:<autosummary>:1 flwr.common:1 of
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1 flwr.common:1 of
 msgid "Common components shared between server and client."
 msgstr "服务器和客户端共享的通用组件。"
 
-#: ../../source/ref-api/flwr.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`flwr.server <flwr.server>`\\"
 msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 
-#: ../../source/ref-api/flwr.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1 flwr.server:1
 #: flwr.server.server.Server:1 of
 msgid "Flower server."
 msgstr "Flower 服务器。"
 
-#: ../../source/ref-api/flwr.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`flwr.serverapp <flwr.serverapp>`\\"
+msgstr ":py:obj:`flwr.server <flwr.server>`\\"
+
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1 flwr.serverapp:1 of
+#, fuzzy
+msgid "Public Flower ServerApp APIs."
+msgstr "Flower 服务器。"
+
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`flwr.simulation <flwr.simulation>`\\"
 msgstr ":py:obj:`flwr.simulation <flwr.simulation>`\\"
 
-#: ../../source/ref-api/flwr.rst:35:<autosummary>:1 flwr.simulation:1 of
+#: ../../source/ref-api/flwr.rst:38:<autosummary>:1 flwr.simulation:1 of
 #, fuzzy
 msgid "Flower simulation."
 msgstr "运行模拟"
 
-#: ../../source/ref-api/flwr.client.rst:2
-msgid "client"
-msgstr "客户端"
-
-#: ../../source/ref-api/flwr.client.mod.rst:13
-#: ../../source/ref-api/flwr.client.rst:13
-#: ../../source/ref-api/flwr.common.rst:13
-#: ../../source/ref-api/flwr.server.rst:13
-#: ../../source/ref-api/flwr.simulation.rst:13
-#, fuzzy
-msgid "Functions"
-msgstr "四种函数："
-
-#: ../../source/ref-api/flwr.client.rst:23:<autosummary>:1
-#, fuzzy
-msgid ""
-":py:obj:`start_client <flwr.client.start_client>`\\ \\(\\*\\, "
-"server\\_address\\[\\, client\\_fn\\, ...\\]\\)"
+#: ../../source/ref-api/flwr.app.rst:2
+msgid "app"
 msgstr ""
-":py:obj:`start_client <flwr.client.start_client>`\\ \\(\\*\\, "
-"server\\_address\\[\\, client\\_fn\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.client.rst:23:<autosummary>:1
-#: flwr.compat.client.app.start_client:1 of
-msgid "Start a Flower client node which connects to a Flower server."
-msgstr "启动一个 Flower 客户节点，连接到 Flower 服务器。"
-
-#: ../../source/ref-api/flwr.client.rst:23:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:33:<autosummary>:1
 #, fuzzy
-msgid ""
-":py:obj:`start_numpy_client <flwr.client.start_numpy_client>`\\ \\(\\*\\,"
-" server\\_address\\, client\\)"
-msgstr ""
-":py:obj:`start_numpy_client <flwr.client.start_numpy_client>`\\ \\(\\*\\,"
-" server\\_address\\, client\\)"
+msgid ":py:obj:`flwr.app.error <flwr.app.error>`\\"
+msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 
-#: ../../source/ref-api/flwr.client.rst:23:<autosummary>:1
-#: flwr.compat.client.app.start_numpy_client:1 of
-msgid "Start a Flower NumPyClient which connects to a gRPC server."
-msgstr "启动 Flower NumPyClient，连接到 gRPC 服务器。"
+#: ../../source/ref-api/flwr.app.rst:33:<autosummary>:1 flwr.app.error:1 of
+#, fuzzy
+msgid "Error."
+msgstr "错误"
 
+#: ../../source/ref-api/flwr.app.rst:33:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`flwr.app.metadata <flwr.app.metadata>`\\"
+msgstr ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
+
+#: ../../source/ref-api/flwr.app.rst:33:<autosummary>:1 flwr.app.metadata:1 of
+#, fuzzy
+msgid "Metadata."
+msgstr "描述数据"
+
+#: ../../source/ref-api/flwr.app.error.rst:2
+#, fuzzy
+msgid "error"
+msgstr "错误"
+
+#: ../../source/ref-api/flwr.app.error.rst:17
+#: ../../source/ref-api/flwr.app.metadata.rst:25
 #: ../../source/ref-api/flwr.client.mod.rst:30
 #: ../../source/ref-api/flwr.client.rst:25
 #: ../../source/ref-api/flwr.common.rst:32
 #: ../../source/ref-api/flwr.server.rst:24
 #: ../../source/ref-api/flwr.server.strategy.rst:17
 #: ../../source/ref-api/flwr.server.workflow.rst:17
+#: ../../source/ref-api/flwr.serverapp.rst:17
 #: ../../source/ref-api/flwr.simulation.rst:26
 #, fuzzy
 msgid "Classes"
 msgstr "类别"
 
-#: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.app.error.rst:22:<autosummary>:1
 #, fuzzy
-msgid ":py:obj:`Client <flwr.client.Client>`\\ \\(\\)"
-msgstr ":py:obj:`Client <flwr.client.Client>`\\ \\(\\)"
+msgid ":py:obj:`Error <flwr.app.error.Error>`\\ \\(code\\[\\, reason\\]\\)"
+msgstr ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
 
-#: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
-#: flwr.client.client.Client:1 of
-msgid "Abstract base class for Flower clients."
-msgstr "Flower 客户端的抽象基类。"
-
-#: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
+#: ../../source/ref-api/flwr.app.error.rst:22:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#: flwr.app.error.Error:1 of
 #, fuzzy
-msgid ""
-":py:obj:`ClientApp <flwr.client.ClientApp>`\\ \\(\\[client\\_fn\\, "
-"mods\\]\\)"
-msgstr ""
-":py:obj:`ClientApp <flwr.client.ClientApp>`\\ \\(\\[client\\_fn\\, "
-"mods\\]\\)"
+msgid "The class storing information about an error that occurred."
+msgstr "数据类，用于存储所发生错误的相关信息。"
 
-#: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
-#: flwr.client.client_app.ClientApp:1 of
+#: ../../source/ref-api/flwr.app.error.Error.rst:2
+#: ../../source/ref-api/flwr.common.Error.rst:2
 #, fuzzy
-msgid "Flower ClientApp."
-msgstr "Flower 客户端。"
+msgid "Error"
+msgstr "错误"
 
-#: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
+#: flwr.app.error.Error:1 flwr.app.metadata.Metadata:1
+#: flwr.client.client_app.ClientApp:1 flwr.client.mod.localdp_mod.LocalDpMod:1
+#: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
+#: flwr.common.context.Context:1 flwr.common.typing.ClientMessage:1
+#: flwr.common.typing.DisconnectRes:1 flwr.common.typing.EvaluateIns:1
+#: flwr.common.typing.EvaluateRes:1 flwr.common.typing.FitIns:1
+#: flwr.common.typing.FitRes:1 flwr.common.typing.GetParametersIns:1
+#: flwr.common.typing.GetParametersRes:1 flwr.common.typing.GetPropertiesIns:1
+#: flwr.common.typing.GetPropertiesRes:1 flwr.common.typing.Parameters:1
+#: flwr.common.typing.ReconnectIns:1 flwr.common.typing.ServerMessage:1
+#: flwr.common.typing.Status:1 flwr.server.history.History:1
+#: flwr.server.server.Server:1 flwr.server.server_app.ServerApp:1
+#: flwr.server.server_config.ServerConfig:1
+#: flwr.server.serverapp_components.ServerAppComponents:1
+#: flwr.server.workflow.default_workflows.DefaultWorkflow:1
+#: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:1
+#: flwr.serverapp.result.Result:1
+#: flwr.simulation.simulationio_connection.SimulationIoConnection:1 of
 #, fuzzy
-msgid ":py:obj:`NumPyClient <flwr.client.NumPyClient>`\\ \\(\\)"
-msgstr ":py:obj:`NumPyClient <flwr.client.NumPyClient>`\\ \\(\\)"
+msgid "Bases: :py:class:`object`"
+msgstr "Bases: :py:class:`object`"
 
-#: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
-#: flwr.client.numpy_client.NumPyClient:1 of
-msgid "Abstract base class for Flower clients using NumPy."
-msgstr "使用 NumPy 的 Flower 客户端的抽象基类。"
-
-#: ../../source/ref-api/flwr.client.rst:50:<autosummary>:1
+#: flwr.app.error.Error:3 of
 #, fuzzy
-msgid ":py:obj:`flwr.client.mod <flwr.client.mod>`\\"
-msgstr ":py:obj:`flwr.client <flwr.client>`\\"
+msgid "An identifier for the error."
+msgstr "错误的标识符。"
 
-#: ../../source/ref-api/flwr.client.rst:50:<autosummary>:1 flwr.client.mod:1 of
+#: flwr.app.error.Error:5 of
 #, fuzzy
-msgid "Flower Built-in Mods."
-msgstr "使用内置调制器"
+msgid "A reason for why the error arose (e.g. an exception stack-trace)"
+msgstr "出错原因（如异常堆栈跟踪）"
 
-#: flwr.client.client.Client:1 flwr.client.numpy_client.NumPyClient:1
-#: flwr.server.client_manager.ClientManager:1 flwr.server.grid.grid.Grid:1
-#: flwr.server.strategy.strategy.Strategy:1 of
-#, fuzzy
-msgid "Bases: :py:class:`~abc.ABC`"
-msgstr "Bases: :py:class:`~abc.ABC`"
-
+#: ../../source/ref-api/flwr.app.error.Error.rst:15
+#: ../../source/ref-api/flwr.app.metadata.Metadata.rst:15
 #: ../../source/ref-api/flwr.client.Client.rst:15
 #: ../../source/ref-api/flwr.client.ClientApp.rst:15
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:15
@@ -16408,10 +16435,403 @@ msgstr "Bases: :py:class:`~abc.ABC`"
 #: ../../source/ref-api/flwr.server.workflow.DefaultWorkflow.rst:15
 #: ../../source/ref-api/flwr.server.workflow.SecAggPlusWorkflow.rst:15
 #: ../../source/ref-api/flwr.server.workflow.SecAggWorkflow.rst:15
+#: ../../source/ref-api/flwr.serverapp.FedAvg.rst:15
+#: ../../source/ref-api/flwr.serverapp.Result.rst:15
+#: ../../source/ref-api/flwr.serverapp.Strategy.rst:15
 #: ../../source/ref-api/flwr.simulation.SimulationIoConnection.rst:15
 #, fuzzy
 msgid "Methods"
 msgstr "方法"
+
+#: ../../source/ref-api/flwr.app.error.Error.rst:25
+#: ../../source/ref-api/flwr.app.metadata.Metadata.rst:25
+#: ../../source/ref-api/flwr.common.Array.rst:43
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:76
+#: ../../source/ref-api/flwr.common.ClientMessage.rst:25
+#: ../../source/ref-api/flwr.common.Code.rst:19
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:61
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:61
+#: ../../source/ref-api/flwr.common.Context.rst:25
+#: ../../source/ref-api/flwr.common.DisconnectRes.rst:25
+#: ../../source/ref-api/flwr.common.Error.rst:25
+#: ../../source/ref-api/flwr.common.EvaluateIns.rst:25
+#: ../../source/ref-api/flwr.common.EvaluateRes.rst:25
+#: ../../source/ref-api/flwr.common.EventType.rst:165
+#: ../../source/ref-api/flwr.common.FitIns.rst:25
+#: ../../source/ref-api/flwr.common.FitRes.rst:25
+#: ../../source/ref-api/flwr.common.GetParametersIns.rst:25
+#: ../../source/ref-api/flwr.common.GetParametersRes.rst:25
+#: ../../source/ref-api/flwr.common.GetPropertiesIns.rst:25
+#: ../../source/ref-api/flwr.common.GetPropertiesRes.rst:25
+#: ../../source/ref-api/flwr.common.Message.rst:43
+#: ../../source/ref-api/flwr.common.MessageType.rst:25
+#: ../../source/ref-api/flwr.common.MessageTypeLegacy.rst:25
+#: ../../source/ref-api/flwr.common.Metadata.rst:25
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:61
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:61
+#: ../../source/ref-api/flwr.common.Parameters.rst:25
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:76
+#: ../../source/ref-api/flwr.common.ReconnectIns.rst:25
+#: ../../source/ref-api/flwr.common.RecordDict.rst:58
+#: ../../source/ref-api/flwr.common.RecordSet.rst:58
+#: ../../source/ref-api/flwr.common.ServerMessage.rst:25
+#: ../../source/ref-api/flwr.common.Status.rst:25
+#: ../../source/ref-api/flwr.server.Driver.rst:43
+#: ../../source/ref-api/flwr.server.Grid.rst:43
+#: ../../source/ref-api/flwr.server.LegacyContext.rst:25
+#: ../../source/ref-api/flwr.server.ServerAppComponents.rst:25
+#: ../../source/ref-api/flwr.server.ServerConfig.rst:25
+#: ../../source/ref-api/flwr.serverapp.Result.rst:25
+#, fuzzy
+msgid "Attributes"
+msgstr "属性"
+
+#: flwr.app.error.Error.code:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`code <flwr.app.error.Error.code>`\\"
+msgstr ":py:obj:`code <flwr.common.Error.code>`\\"
+
+#: flwr.app.error.Error.code:1 flwr.app.error.Error.code:1:<autosummary>:1
+#: flwr.common.Error.code:1 flwr.common.Error.code:1:<autosummary>:1 of
+#, fuzzy
+msgid "Error code."
+msgstr "错误代码。"
+
+#: flwr.app.error.Error.code:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`reason <flwr.app.error.Error.reason>`\\"
+msgstr ":py:obj:`reason <flwr.common.Error.reason>`\\"
+
+#: flwr.app.error.Error.code:1:<autosummary>:1 flwr.app.error.Error.reason:1
+#: flwr.common.Error.code:1:<autosummary>:1 flwr.common.Error.reason:1 of
+#, fuzzy
+msgid "Reason reported about the error."
+msgstr "报告的错误原因。"
+
+#: ../../source/ref-api/flwr.app.metadata.rst:2
+#, fuzzy
+msgid "metadata"
+msgstr "描述数据"
+
+#: ../../source/ref-api/flwr.app.metadata.rst:13
+#: ../../source/ref-api/flwr.client.mod.rst:13
+#: ../../source/ref-api/flwr.client.rst:13
+#: ../../source/ref-api/flwr.common.rst:13
+#: ../../source/ref-api/flwr.server.rst:13
+#: ../../source/ref-api/flwr.simulation.rst:13
+#, fuzzy
+msgid "Functions"
+msgstr "四种函数："
+
+#: ../../source/ref-api/flwr.app.metadata.rst:23:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`validate_legacy_message_type "
+"<flwr.app.metadata.validate_legacy_message_type>`\\ \\(message\\_type\\)"
+msgstr ":py:obj:`message_type <flwr.common.Metadata.message_type>`\\"
+
+#: ../../source/ref-api/flwr.app.metadata.rst:23:<autosummary>:1
+#: flwr.app.metadata.validate_legacy_message_type:1 of
+#, fuzzy
+msgid "Validate if the legacy message type is valid."
+msgstr "传统信息类型。"
+
+#: ../../source/ref-api/flwr.app.metadata.rst:23:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`validate_message_type "
+"<flwr.app.metadata.validate_message_type>`\\ \\(message\\_type\\)"
+msgstr ":py:obj:`message_type <flwr.common.Metadata.message_type>`\\"
+
+#: ../../source/ref-api/flwr.app.metadata.rst:23:<autosummary>:1
+#: flwr.app.metadata.validate_message_type:1 of
+msgid "Validate if the message type is valid."
+msgstr ""
+
+#: ../../source/ref-api/flwr.app.metadata.rst:30:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`Metadata <flwr.app.metadata.Metadata>`\\ \\(run\\_id\\, "
+"message\\_id\\, src\\_node\\_id\\, ...\\)"
+msgstr ""
+":py:obj:`Metadata <flwr.common.Metadata>`\\ \\(run\\_id\\, "
+"message\\_id\\, src\\_node\\_id\\, ...\\)"
+
+#: ../../source/ref-api/flwr.app.metadata.rst:30:<autosummary>:1
+#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
+#: flwr.app.metadata.Metadata:1 of
+#, fuzzy
+msgid "The class representing metadata associated with the current message."
+msgstr "数据类型，包含与当前报文相关的元数据。"
+
+#: ../../source/ref-api/flwr.app.metadata.Metadata.rst:2
+#: ../../source/ref-api/flwr.common.Metadata.rst:2
+msgid "Metadata"
+msgstr "描述数据"
+
+#: flwr.app.metadata.Metadata:3
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1
+#: flwr.app.metadata.Metadata.run_id:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.run_id:1 of
+#, fuzzy
+msgid "An identifier for the current run."
+msgstr "当前运行的标识符。"
+
+#: flwr.app.metadata.Metadata:5
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1
+#: flwr.app.metadata.Metadata.message_id:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.message_id:1 of
+#, fuzzy
+msgid "An identifier for the current message."
+msgstr "当前信息的标识符。"
+
+#: flwr.app.metadata.Metadata:7
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1
+#: flwr.app.metadata.Metadata.src_node_id:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.src_node_id:1 of
+#, fuzzy
+msgid "An identifier for the node sending this message."
+msgstr "发送此信息的节点的标识符。"
+
+#: flwr.app.metadata.Metadata:9
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1
+#: flwr.app.metadata.Metadata.dst_node_id:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Message:12 of
+#, fuzzy
+msgid "An identifier for the node receiving this message."
+msgstr "接收此信息的节点的标识符。"
+
+#: flwr.app.metadata.Metadata:11
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1
+#: flwr.app.metadata.Metadata.reply_to_message_id:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.reply_to_message_id:1 of
+#, fuzzy
+msgid "An identifier for the message to which this message is a reply."
+msgstr "该信息回复的信息的标识符。"
+
+#: flwr.app.metadata.Metadata:13 flwr.common.message.Message:20 of
+#, fuzzy
+msgid ""
+"An identifier for grouping messages. In some settings, this is used as "
+"the FL round."
+msgstr "用于分组报文的标识符。在某些设置中，它被用作 FL 轮。"
+
+#: flwr.app.metadata.Metadata:16 flwr.app.metadata.Metadata.created_at:1
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.created_at:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1 of
+#, fuzzy
+msgid "Unix timestamp when the message was created."
+msgstr "创建信息时的 Unix 时间戳。"
+
+#: flwr.app.metadata.Metadata:18 of
+#, fuzzy
+msgid "Time-to-live for this message in seconds."
+msgstr "该信息的有效时间。"
+
+#: flwr.app.metadata.Metadata:20
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1
+#: flwr.app.metadata.Metadata.message_type:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.message_type:1 flwr.common.message.Message:14 of
+#, fuzzy
+msgid "A string that encodes the action to be executed on the receiving end."
+msgstr "编码接收端要执行的操作的字符串。"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`created_at <flwr.app.metadata.Metadata.created_at>`\\"
+msgstr ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`delivered_at <flwr.app.metadata.Metadata.delivered_at>`\\"
+msgstr ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1
+#: flwr.app.metadata.Metadata.delivered_at:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.delivered_at:1 of
+#, fuzzy
+msgid "Unix timestamp when the message was delivered."
+msgstr "创建信息时的 Unix 时间戳。"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`dst_node_id <flwr.app.metadata.Metadata.dst_node_id>`\\"
+msgstr ":py:obj:`dst_node_id <flwr.common.Metadata.dst_node_id>`\\"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`group_id <flwr.app.metadata.Metadata.group_id>`\\"
+msgstr ":py:obj:`group_id <flwr.common.Metadata.group_id>`\\"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1
+#: flwr.app.metadata.Metadata.group_id:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1
+#: flwr.common.Metadata.group_id:1 of
+#, fuzzy
+msgid "An identifier for grouping messages."
+msgstr "用于分组信息的标识符。"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`message_id <flwr.app.metadata.Metadata.message_id>`\\"
+msgstr ":py:obj:`message_id <flwr.common.Metadata.message_id>`\\"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`message_type <flwr.app.metadata.Metadata.message_type>`\\"
+msgstr ":py:obj:`message_type <flwr.common.Metadata.message_type>`\\"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`reply_to_message_id "
+"<flwr.app.metadata.Metadata.reply_to_message_id>`\\"
+msgstr ":py:obj:`reply_to_message <flwr.common.Metadata.reply_to_message>`\\"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`run_id <flwr.app.metadata.Metadata.run_id>`\\"
+msgstr ":py:obj:`run_id <flwr.common.Metadata.run_id>`\\"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`src_node_id <flwr.app.metadata.Metadata.src_node_id>`\\"
+msgstr ":py:obj:`src_node_id <flwr.common.Metadata.src_node_id>`\\"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`ttl <flwr.app.metadata.Metadata.ttl>`\\"
+msgstr ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
+
+#: flwr.app.metadata.Metadata.created_at:1:<autosummary>:1
+#: flwr.app.metadata.Metadata.ttl:1
+#: flwr.common.Metadata.created_at:1:<autosummary>:1 flwr.common.Metadata.ttl:1
+#: of
+#, fuzzy
+msgid "Time-to-live for this message."
+msgstr "该信息的有效时间。"
+
+#: ../../source/ref-api/flwr.app.metadata.validate_legacy_message_type.rst:2
+#, fuzzy
+msgid "validate\\_legacy\\_message\\_type"
+msgstr "传统信息类型。"
+
+#: ../../source/ref-api/flwr.app.metadata.validate_message_type.rst:2
+#, fuzzy
+msgid "validate\\_message\\_type"
+msgstr "返回类型"
+
+#: flwr.app.metadata.validate_message_type:3 of
+msgid "A valid message type format must be one of the following:"
+msgstr ""
+
+#: flwr.app.metadata.validate_message_type:5 of
+#, fuzzy
+msgid "\"<category>\""
+msgstr "属性"
+
+#: flwr.app.metadata.validate_message_type:6 of
+msgid "\"<category>.<action>\""
+msgstr ""
+
+#: flwr.app.metadata.validate_message_type:8 of
+msgid ""
+"where `category` must be one of \"train\", \"evaluate\", or \"query\", "
+"and `action` must be a valid Python identifier."
+msgstr ""
+
+#: ../../source/ref-api/flwr.client.rst:2
+msgid "client"
+msgstr "客户端"
+
+#: ../../source/ref-api/flwr.client.rst:23:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`start_client <flwr.client.start_client>`\\ \\(\\*\\, "
+"server\\_address\\[\\, client\\_fn\\, ...\\]\\)"
+msgstr ""
+":py:obj:`start_client <flwr.client.start_client>`\\ \\(\\*\\, "
+"server\\_address\\[\\, client\\_fn\\, ...\\]\\)"
+
+#: ../../source/ref-api/flwr.client.rst:23:<autosummary>:1
+#: flwr.compat.client.app.start_client:1 of
+msgid "Start a Flower client node which connects to a Flower server."
+msgstr "启动一个 Flower 客户节点，连接到 Flower 服务器。"
+
+#: ../../source/ref-api/flwr.client.rst:23:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`start_numpy_client <flwr.client.start_numpy_client>`\\ \\(\\*\\,"
+" server\\_address\\, client\\)"
+msgstr ""
+":py:obj:`start_numpy_client <flwr.client.start_numpy_client>`\\ \\(\\*\\,"
+" server\\_address\\, client\\)"
+
+#: ../../source/ref-api/flwr.client.rst:23:<autosummary>:1
+#: flwr.compat.client.app.start_numpy_client:1 of
+msgid "Start a Flower NumPyClient which connects to a gRPC server."
+msgstr "启动 Flower NumPyClient，连接到 gRPC 服务器。"
+
+#: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`Client <flwr.client.Client>`\\ \\(\\)"
+msgstr ":py:obj:`Client <flwr.client.Client>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
+#: flwr.client.client.Client:1 of
+msgid "Abstract base class for Flower clients."
+msgstr "Flower 客户端的抽象基类。"
+
+#: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`ClientApp <flwr.client.ClientApp>`\\ \\(\\[client\\_fn\\, "
+"mods\\]\\)"
+msgstr ""
+":py:obj:`ClientApp <flwr.client.ClientApp>`\\ \\(\\[client\\_fn\\, "
+"mods\\]\\)"
+
+#: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
+#: flwr.client.client_app.ClientApp:1 of
+#, fuzzy
+msgid "Flower ClientApp."
+msgstr "Flower 客户端。"
+
+#: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`NumPyClient <flwr.client.NumPyClient>`\\ \\(\\)"
+msgstr ":py:obj:`NumPyClient <flwr.client.NumPyClient>`\\ \\(\\)"
+
+#: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
+#: flwr.client.numpy_client.NumPyClient:1 of
+msgid "Abstract base class for Flower clients using NumPy."
+msgstr "使用 NumPy 的 Flower 客户端的抽象基类。"
+
+#: ../../source/ref-api/flwr.client.rst:50:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`flwr.client.mod <flwr.client.mod>`\\"
+msgstr ":py:obj:`flwr.client <flwr.client>`\\"
+
+#: ../../source/ref-api/flwr.client.rst:50:<autosummary>:1 flwr.client.mod:1 of
+#, fuzzy
+msgid "Flower Built-in Mods."
+msgstr "使用内置调制器"
+
+#: flwr.client.client.Client:1 flwr.client.numpy_client.NumPyClient:1
+#: flwr.server.client_manager.ClientManager:1 flwr.server.grid.grid.Grid:1
+#: flwr.server.strategy.strategy.Strategy:1 flwr.serverapp.strategy.Strategy:1
+#: of
+#, fuzzy
+msgid "Bases: :py:class:`~abc.ABC`"
+msgstr "Bases: :py:class:`~abc.ABC`"
 
 #: flwr.client.client.Client.evaluate:1:<autosummary>:1 of
 #, fuzzy
@@ -16508,7 +16928,12 @@ msgstr "评估指令包含从服务器接收的（全局）模型参数，以及
 #: flwr.server.strategy.strategy.Strategy.configure_evaluate
 #: flwr.server.strategy.strategy.Strategy.configure_fit
 #: flwr.server.strategy.strategy.Strategy.evaluate
-#: flwr.server.strategy.strategy.Strategy.initialize_parameters of
+#: flwr.server.strategy.strategy.Strategy.initialize_parameters
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate
+#: flwr.serverapp.strategy.Strategy.aggregate_train
+#: flwr.serverapp.strategy.Strategy.configure_evaluate
+#: flwr.serverapp.strategy.Strategy.configure_train
+#: flwr.serverapp.strategy.Strategy.start of
 msgid "Returns"
 msgstr "返回"
 
@@ -16550,7 +16975,12 @@ msgstr "评估结果包含本地数据集上的损失值和其他详细信息，
 #: flwr.server.strategy.strategy.Strategy.configure_evaluate
 #: flwr.server.strategy.strategy.Strategy.configure_fit
 #: flwr.server.strategy.strategy.Strategy.evaluate
-#: flwr.server.strategy.strategy.Strategy.initialize_parameters of
+#: flwr.server.strategy.strategy.Strategy.initialize_parameters
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate
+#: flwr.serverapp.strategy.Strategy.aggregate_train
+#: flwr.serverapp.strategy.Strategy.configure_evaluate
+#: flwr.serverapp.strategy.Strategy.configure_train
+#: flwr.serverapp.strategy.Strategy.start of
 msgid "Return type"
 msgstr "返回类型"
 
@@ -16586,27 +17016,6 @@ msgstr "从服务器接收的获取属性指令包含配置值字典。"
 #: flwr.client.client.Client.get_properties:7 of
 msgid "The current client properties."
 msgstr "当前客户端属性。"
-
-#: flwr.app.error.Error:1 flwr.app.metadata.Metadata:1
-#: flwr.client.client_app.ClientApp:1 flwr.client.mod.localdp_mod.LocalDpMod:1
-#: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
-#: flwr.common.context.Context:1 flwr.common.typing.ClientMessage:1
-#: flwr.common.typing.DisconnectRes:1 flwr.common.typing.EvaluateIns:1
-#: flwr.common.typing.EvaluateRes:1 flwr.common.typing.FitIns:1
-#: flwr.common.typing.FitRes:1 flwr.common.typing.GetParametersIns:1
-#: flwr.common.typing.GetParametersRes:1 flwr.common.typing.GetPropertiesIns:1
-#: flwr.common.typing.GetPropertiesRes:1 flwr.common.typing.Parameters:1
-#: flwr.common.typing.ReconnectIns:1 flwr.common.typing.ServerMessage:1
-#: flwr.common.typing.Status:1 flwr.server.history.History:1
-#: flwr.server.server.Server:1 flwr.server.server_app.ServerApp:1
-#: flwr.server.server_config.ServerConfig:1
-#: flwr.server.serverapp_components.ServerAppComponents:1
-#: flwr.server.workflow.default_workflows.DefaultWorkflow:1
-#: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:1
-#: flwr.simulation.simulationio_connection.SimulationIoConnection:1 of
-#, fuzzy
-msgid "Bases: :py:class:`object`"
-msgstr "Bases: :py:class:`object`"
 
 #: flwr.client.client_app.ClientApp:4
 #: flwr.client.client_app.ClientApp.evaluate:12
@@ -17328,6 +17737,11 @@ msgstr ""
 msgid "An implementation of the abstract base class `flwr.client.NumPyClient`."
 msgstr "抽象基类 `flwr.client.NumPyClient` 的实现。"
 
+#: ../../source/ref-api/flwr.clientapp.rst:2
+#, fuzzy
+msgid "clientapp"
+msgstr "客户端"
+
 #: ../../source/ref-api/flwr.common.rst:2
 msgid "common"
 msgstr "常见"
@@ -17572,12 +17986,6 @@ msgid ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
 msgstr ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
-#: flwr.app.error.Error:1 of
-#, fuzzy
-msgid "The class storing information about an error that occurred."
-msgstr "数据类，用于存储所发生错误的相关信息。"
-
-#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`EvaluateIns <flwr.common.EvaluateIns>`\\ \\(parameters\\, "
@@ -17727,12 +18135,6 @@ msgid ""
 msgstr ""
 ":py:obj:`Metadata <flwr.common.Metadata>`\\ \\(run\\_id\\, "
 "message\\_id\\, src\\_node\\_id\\, ...\\)"
-
-#: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
-#: flwr.app.metadata.Metadata:1 of
-#, fuzzy
-msgid "The class representing metadata associated with the current message."
-msgstr "数据类型，包含与当前报文相关的元数据。"
 
 #: ../../source/ref-api/flwr.common.rst:72:<autosummary>:1
 #, fuzzy
@@ -18047,46 +18449,6 @@ msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 #: flwr.common.record.array.Array.slice_array:1 of
 msgid "Slice Array data and construct a list of ArrayChunks."
 msgstr ""
-
-#: ../../source/ref-api/flwr.common.Array.rst:43
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:76
-#: ../../source/ref-api/flwr.common.ClientMessage.rst:25
-#: ../../source/ref-api/flwr.common.Code.rst:19
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:61
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:61
-#: ../../source/ref-api/flwr.common.Context.rst:25
-#: ../../source/ref-api/flwr.common.DisconnectRes.rst:25
-#: ../../source/ref-api/flwr.common.Error.rst:25
-#: ../../source/ref-api/flwr.common.EvaluateIns.rst:25
-#: ../../source/ref-api/flwr.common.EvaluateRes.rst:25
-#: ../../source/ref-api/flwr.common.EventType.rst:165
-#: ../../source/ref-api/flwr.common.FitIns.rst:25
-#: ../../source/ref-api/flwr.common.FitRes.rst:25
-#: ../../source/ref-api/flwr.common.GetParametersIns.rst:25
-#: ../../source/ref-api/flwr.common.GetParametersRes.rst:25
-#: ../../source/ref-api/flwr.common.GetPropertiesIns.rst:25
-#: ../../source/ref-api/flwr.common.GetPropertiesRes.rst:25
-#: ../../source/ref-api/flwr.common.Message.rst:43
-#: ../../source/ref-api/flwr.common.MessageType.rst:25
-#: ../../source/ref-api/flwr.common.MessageTypeLegacy.rst:25
-#: ../../source/ref-api/flwr.common.Metadata.rst:25
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:61
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:61
-#: ../../source/ref-api/flwr.common.Parameters.rst:25
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:76
-#: ../../source/ref-api/flwr.common.ReconnectIns.rst:25
-#: ../../source/ref-api/flwr.common.RecordDict.rst:58
-#: ../../source/ref-api/flwr.common.RecordSet.rst:58
-#: ../../source/ref-api/flwr.common.ServerMessage.rst:25
-#: ../../source/ref-api/flwr.common.Status.rst:25
-#: ../../source/ref-api/flwr.server.Driver.rst:43
-#: ../../source/ref-api/flwr.server.Grid.rst:43
-#: ../../source/ref-api/flwr.server.LegacyContext.rst:25
-#: ../../source/ref-api/flwr.server.ServerAppComponents.rst:25
-#: ../../source/ref-api/flwr.server.ServerConfig.rst:25
-#, fuzzy
-msgid "Attributes"
-msgstr "属性"
 
 #: flwr.common.Array.children:1:<autosummary>:1 of
 #, fuzzy
@@ -19051,40 +19413,15 @@ msgstr "断开Res"
 msgid ":py:obj:`reason <flwr.common.DisconnectRes.reason>`\\"
 msgstr ":py:obj:`reason <flwr.common.DisconnectRes.reason>`\\"
 
-#: ../../source/ref-api/flwr.common.Error.rst:2
-#, fuzzy
-msgid "Error"
-msgstr "错误"
-
-#: flwr.app.error.Error:3 of
-#, fuzzy
-msgid "An identifier for the error."
-msgstr "错误的标识符。"
-
-#: flwr.app.error.Error:5 of
-#, fuzzy
-msgid "A reason for why the error arose (e.g. an exception stack-trace)"
-msgstr "出错原因（如异常堆栈跟踪）"
-
 #: flwr.common.Error.code:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`code <flwr.common.Error.code>`\\"
 msgstr ":py:obj:`code <flwr.common.Error.code>`\\"
 
-#: flwr.common.Error.code:1 flwr.common.Error.code:1:<autosummary>:1 of
-#, fuzzy
-msgid "Error code."
-msgstr "错误代码。"
-
 #: flwr.common.Error.code:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`reason <flwr.common.Error.reason>`\\"
 msgstr ":py:obj:`reason <flwr.common.Error.reason>`\\"
-
-#: flwr.common.Error.code:1:<autosummary>:1 flwr.common.Error.reason:1 of
-#, fuzzy
-msgid "Reason reported about the error."
-msgstr "报告的错误原因。"
 
 #: ../../source/ref-api/flwr.common.EvaluateIns.rst:2
 #, fuzzy
@@ -20338,32 +20675,11 @@ msgid ""
 " processing another message."
 msgstr "数据类，用于捕捉处理其他报文时发生的错误信息。"
 
-#: flwr.app.metadata.Metadata:9
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Message:12 of
-#, fuzzy
-msgid "An identifier for the node receiving this message."
-msgstr "接收此信息的节点的标识符。"
-
-#: flwr.app.metadata.Metadata:20
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.message_type:1 flwr.common.message.Message:14 of
-#, fuzzy
-msgid "A string that encodes the action to be executed on the receiving end."
-msgstr "编码接收端要执行的操作的字符串。"
-
 #: flwr.common.message.Message:17 of
 msgid ""
 "Time-to-live (TTL) for this message in seconds. If `None` (default), the "
 "TTL is set to 43,200 seconds (12 hours)."
 msgstr ""
-
-#: flwr.app.metadata.Metadata:13 flwr.common.message.Message:20 of
-#, fuzzy
-msgid ""
-"An identifier for grouping messages. In some settings, this is used as "
-"the FL round."
-msgstr "用于分组报文的标识符。在某些设置中，它被用作 FL 轮。"
 
 #: flwr.common.message.Message:23 of
 msgid ""
@@ -20615,49 +20931,6 @@ msgstr ":py:obj:`GET_PARAMETERS <flwr.common.MessageTypeLegacy.GET_PARAMETERS>`\
 msgid ":py:obj:`GET_PROPERTIES <flwr.common.MessageTypeLegacy.GET_PROPERTIES>`\\"
 msgstr ":py:obj:`GET_PROPERTIES <flwr.common.MessageTypeLegacy.GET_PROPERTIES>`\\"
 
-#: ../../source/ref-api/flwr.common.Metadata.rst:2
-msgid "Metadata"
-msgstr "描述数据"
-
-#: flwr.app.metadata.Metadata:3
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.run_id:1 of
-#, fuzzy
-msgid "An identifier for the current run."
-msgstr "当前运行的标识符。"
-
-#: flwr.app.metadata.Metadata:5
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.message_id:1 of
-#, fuzzy
-msgid "An identifier for the current message."
-msgstr "当前信息的标识符。"
-
-#: flwr.app.metadata.Metadata:7
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.src_node_id:1 of
-#, fuzzy
-msgid "An identifier for the node sending this message."
-msgstr "发送此信息的节点的标识符。"
-
-#: flwr.app.metadata.Metadata:11
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.reply_to_message_id:1 of
-#, fuzzy
-msgid "An identifier for the message to which this message is a reply."
-msgstr "该信息回复的信息的标识符。"
-
-#: flwr.app.metadata.Metadata:16 flwr.common.Metadata.created_at:1
-#: flwr.common.Metadata.created_at:1:<autosummary>:1 of
-#, fuzzy
-msgid "Unix timestamp when the message was created."
-msgstr "创建信息时的 Unix 时间戳。"
-
-#: flwr.app.metadata.Metadata:18 of
-#, fuzzy
-msgid "Time-to-live for this message in seconds."
-msgstr "该信息的有效时间。"
-
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`created_at <flwr.common.Metadata.created_at>`\\"
@@ -20668,12 +20941,6 @@ msgstr ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
 msgid ":py:obj:`delivered_at <flwr.common.Metadata.delivered_at>`\\"
 msgstr ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
 
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.delivered_at:1 of
-#, fuzzy
-msgid "Unix timestamp when the message was delivered."
-msgstr "创建信息时的 Unix 时间戳。"
-
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`dst_node_id <flwr.common.Metadata.dst_node_id>`\\"
@@ -20683,12 +20950,6 @@ msgstr ":py:obj:`dst_node_id <flwr.common.Metadata.dst_node_id>`\\"
 #, fuzzy
 msgid ":py:obj:`group_id <flwr.common.Metadata.group_id>`\\"
 msgstr ":py:obj:`group_id <flwr.common.Metadata.group_id>`\\"
-
-#: flwr.common.Metadata.created_at:1:<autosummary>:1
-#: flwr.common.Metadata.group_id:1 of
-#, fuzzy
-msgid "An identifier for grouping messages."
-msgstr "用于分组信息的标识符。"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 #, fuzzy
@@ -20719,12 +20980,6 @@ msgstr ":py:obj:`src_node_id <flwr.common.Metadata.src_node_id>`\\"
 #, fuzzy
 msgid ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
 msgstr ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
-
-#: flwr.common.Metadata.created_at:1:<autosummary>:1 flwr.common.Metadata.ttl:1
-#: of
-#, fuzzy
-msgid "Time-to-live for this message."
-msgstr "该信息的有效时间。"
 
 #: ../../source/ref-api/flwr.common.MetricRecord.rst:2
 #, fuzzy
@@ -22984,8 +23239,10 @@ msgstr ""
 "fraction\\_fit\\, fraction\\_evaluate\\, ...\\]\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.rst:24:<autosummary>:1
 #: flwr.server.strategy.fedavg.FedAvg:1
-#: flwr.server.strategy.fedavg_android.FedAvgAndroid:1 of
+#: flwr.server.strategy.fedavg_android.FedAvgAndroid:1
+#: flwr.serverapp.fedavg.FedAvg:1 of
 msgid "Federated Averaging strategy."
 msgstr "联邦平均策略。"
 
@@ -23163,7 +23420,9 @@ msgid ":py:obj:`Strategy <flwr.server.strategy.Strategy>`\\ \\(\\)"
 msgstr "server.strategy.Strategy"
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: flwr.server.strategy.strategy.Strategy:1 of
+#: ../../source/ref-api/flwr.serverapp.rst:24:<autosummary>:1
+#: flwr.server.strategy.strategy.Strategy:1 flwr.serverapp.strategy.Strategy:1
+#: of
 msgid "Abstract base class for server strategy implementations."
 msgstr "服务器策略实现的抽象基类。"
 
@@ -23394,7 +23653,9 @@ msgstr ""
 #: flwr.server.strategy.qfedavg.QFedAvg.aggregate_evaluate:1:<autosummary>:1
 #: flwr.server.strategy.qfedavg.QFedAvg.configure_evaluate:1
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
-#: flwr.server.strategy.strategy.Strategy.configure_evaluate:1 of
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate:1
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.Strategy.configure_evaluate:1 of
 msgid "Configure the next round of evaluation."
 msgstr "配置下一轮评估。"
 
@@ -23429,7 +23690,9 @@ msgstr ""
 #: flwr.server.strategy.qfedavg.QFedAvg.aggregate_evaluate:1:<autosummary>:1
 #: flwr.server.strategy.qfedavg.QFedAvg.configure_fit:1
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
-#: flwr.server.strategy.strategy.Strategy.configure_fit:1 of
+#: flwr.server.strategy.strategy.Strategy.configure_fit:1
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.Strategy.configure_train:1 of
 msgid "Configure the next round of training."
 msgstr "配置下一轮训练。"
 
@@ -23664,7 +23927,10 @@ msgstr "使用给定的策略初始化全局模型参数。"
 #: flwr.server.strategy.strategy.Strategy.aggregate_fit:3
 #: flwr.server.strategy.strategy.Strategy.configure_evaluate:3
 #: flwr.server.strategy.strategy.Strategy.configure_fit:3
-#: flwr.server.strategy.strategy.Strategy.evaluate:6 of
+#: flwr.server.strategy.strategy.Strategy.evaluate:6
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:3
+#: flwr.serverapp.strategy.Strategy.configure_evaluate:3
+#: flwr.serverapp.strategy.Strategy.configure_train:3 of
 msgid "The current round of federated learning."
 msgstr "本轮联邦学习。"
 
@@ -24653,12 +24919,14 @@ msgstr ""
 "\\(num\\_available\\_clients\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.FedAvg.rst:2
+#: ../../source/ref-api/flwr.serverapp.FedAvg.rst:2
 #, fuzzy
 msgid "FedAvg"
 msgstr "DP-FedAvg"
 
 #: flwr.server.strategy.fedavg.FedAvg:3
-#: flwr.server.strategy.fedavg_android.FedAvgAndroid:3 of
+#: flwr.server.strategy.fedavg_android.FedAvgAndroid:3
+#: flwr.serverapp.fedavg.FedAvg:3 of
 msgid "Implementation based on https://arxiv.org/abs/1602.05629"
 msgstr "实施基于 https://arxiv.org/abs/1602.05629"
 
@@ -26070,6 +26338,7 @@ msgstr ""
 "\\(num\\_available\\_clients\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.Strategy.rst:2
+#: ../../source/ref-api/flwr.serverapp.Strategy.rst:2
 #, fuzzy
 msgid "Strategy"
 msgstr "Krum 策略。"
@@ -26694,6 +26963,411 @@ msgstr ""
 ":py:obj:`unmask_stage "
 "<flwr.server.workflow.SecAggWorkflow.unmask_stage>`\\ \\(driver\\, "
 "context\\, state\\)"
+
+#: ../../source/ref-api/flwr.serverapp.rst:2
+#, fuzzy
+msgid "serverapp"
+msgstr "服务器"
+
+#: ../../source/ref-api/flwr.serverapp.rst:24:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`FedAvg <flwr.serverapp.FedAvg>`\\ \\(\\[fraction\\_train\\, "
+"fraction\\_evaluate\\, ...\\]\\)"
+msgstr ""
+":py:obj:`FedAvg <flwr.server.strategy.FedAvg>`\\ \\(\\*\\[\\, "
+"fraction\\_fit\\, fraction\\_evaluate\\, ...\\]\\)"
+
+#: ../../source/ref-api/flwr.serverapp.rst:24:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`Result <flwr.serverapp.Result>`\\ \\(arrays\\, "
+"train\\_metrics\\_clientapp\\, ...\\)"
+msgstr ""
+":py:obj:`RecordSet <flwr.common.RecordSet>`\\ "
+"\\(\\[parameters\\_records\\, ...\\]\\)"
+
+#: ../../source/ref-api/flwr.serverapp.rst:24:<autosummary>:1
+#: flwr.serverapp.result.Result:1 of
+msgid "Data class carrying records generated during the execution of a strategy."
+msgstr ""
+
+#: ../../source/ref-api/flwr.serverapp.rst:24:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`Strategy <flwr.serverapp.Strategy>`\\ \\(\\)"
+msgstr "server.strategy.Strategy"
+
+#: flwr.serverapp.fedavg.FedAvg:1 of
+#, fuzzy
+msgid "Bases: :py:class:`~flwr.serverapp.strategy.Strategy`"
+msgstr "Bases: :py:class:`~flwr.server.strategy.strategy.Strategy`"
+
+#: flwr.serverapp.fedavg.FedAvg:5 of
+#, fuzzy
+msgid ""
+"Fraction of nodes used during training. In case `min_train_nodes` is "
+"larger than `fraction_train * total_connected_nodes`, `min_train_nodes` "
+"will still be sampled."
+msgstr ""
+"训练过程中使用的客户端比例。如果 `min_fit_clients` 大于 `fraction_fit * "
+"available_clients`，则仍会对 `min_fit_clients` 进行采样。默认为 1.0。"
+
+#: flwr.serverapp.fedavg.FedAvg:9 of
+#, fuzzy
+msgid ""
+"Fraction of nodes used during validation. In case `min_evaluate_nodes` is"
+" larger than `fraction_evaluate * total_connected_nodes`, "
+"`min_evaluate_nodes` will still be sampled."
+msgstr ""
+"验证过程中使用的客户端的比例。如果 `min_evaluate_clients` 大于 `fraction_evaluate * "
+"available_clients`，则仍会对 `min_evaluate_clients` 进行采样。默认为 1.0。"
+
+#: flwr.serverapp.fedavg.FedAvg:13 of
+#, fuzzy
+msgid "Minimum number of nodes used during training."
+msgstr "训练期间使用的最少客户数。默认为 2。"
+
+#: flwr.serverapp.fedavg.FedAvg:15 of
+#, fuzzy
+msgid "Minimum number of nodes used during validation."
+msgstr "验证过程中使用的最少客户端数量。默认为 2。"
+
+#: flwr.serverapp.fedavg.FedAvg:17 of
+#, fuzzy
+msgid "Minimum number of total nodes in the system."
+msgstr "系统中客户总数的最小值。默认为 2。"
+
+#: flwr.serverapp.fedavg.FedAvg:19 of
+msgid ""
+"The key within each MetricRecord whose value is used as the weight when "
+"computing weighted averages for both ArrayRecords and MetricRecords."
+msgstr ""
+
+#: flwr.serverapp.fedavg.FedAvg:22 of
+msgid "Key used to store the ArrayRecord when constructing Messages."
+msgstr ""
+
+#: flwr.serverapp.fedavg.FedAvg:24 of
+msgid "Key used to store the ConfigRecord when constructing Messages."
+msgstr ""
+
+#: flwr.serverapp.fedavg.FedAvg:26 flwr.serverapp.fedavg.FedAvg:31 of
+msgid ""
+"Function with signature (list[RecordDict], str) -> MetricRecord, used to "
+"aggregate MetricRecords from training round replies. If `None`, defaults "
+"to `aggregate_metricrecords`, which performs a weighted average using the"
+" provided weight factor key."
+msgstr ""
+
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_evaluate <flwr.serverapp.FedAvg.aggregate_evaluate>`\\"
+" \\(server\\_round\\, replies\\)"
+msgstr ""
+":py:obj:`aggregate_evaluate "
+"<flwr.server.strategy.FedAvg.aggregate_evaluate>`\\ \\(server\\_round\\, "
+"results\\, ...\\)"
+
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid "Aggregate MetricRecords in the received Messages."
+msgstr "使用给定的策略汇总评估损失。"
+
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_train <flwr.serverapp.FedAvg.aggregate_train>`\\ "
+"\\(server\\_round\\, replies\\)"
+msgstr ""
+":py:obj:`aggregate_fit <flwr.server.strategy.FedAvg.aggregate_fit>`\\ "
+"\\(server\\_round\\, results\\, failures\\)"
+
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.fedavg.FedAvg.aggregate_train:1 of
+msgid "Aggregate ArrayRecords and MetricRecords in the received Messages."
+msgstr ""
+
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`configure_evaluate <flwr.serverapp.FedAvg.configure_evaluate>`\\"
+" \\(server\\_round\\, arrays\\, ...\\)"
+msgstr ""
+":py:obj:`configure_evaluate "
+"<flwr.server.strategy.FedAvg.configure_evaluate>`\\ \\(server\\_round\\, "
+"parameters\\, ...\\)"
+
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.fedavg.FedAvg.configure_evaluate:1 of
+#, fuzzy
+msgid "Configure the next round of federated evaluation."
+msgstr "配置下一轮评估。"
+
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`configure_train <flwr.serverapp.FedAvg.configure_train>`\\ "
+"\\(server\\_round\\, arrays\\, ...\\)"
+msgstr ""
+":py:obj:`configure_fit <flwr.server.strategy.FedAvg.configure_fit>`\\ "
+"\\(server\\_round\\, parameters\\, ...\\)"
+
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.fedavg.FedAvg.configure_train:1 of
+#, fuzzy
+msgid "Configure the next round of federated training."
+msgstr "配置下一轮训练。"
+
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`start <flwr.serverapp.FedAvg.start>`\\ \\(grid\\, "
+"initial\\_arrays\\[\\, num\\_rounds\\, ...\\]\\)"
+msgstr ""
+":py:obj:`FedAvgM <flwr.server.strategy.FedAvgM>`\\ \\(\\*\\[\\, "
+"fraction\\_fit\\, ...\\]\\)"
+
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.Strategy.start:1 of
+#, fuzzy
+msgid "Execute the federated learning strategy."
+msgstr "使用联邦学习策略"
+
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`summary <flwr.serverapp.FedAvg.summary>`\\ \\(\\)"
+msgstr ":py:obj:`History <flwr.server.History>`\\ \\(\\)"
+
+#: flwr.serverapp.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.fedavg.FedAvg.summary:1
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.Strategy.summary:1 of
+msgid "Log summary configuration of the strategy."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.start:3 of
+msgid ""
+"Runs the complete federated learning workflow for the specified number of"
+" rounds, including training, evaluation, and optional centralized "
+"evaluation."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.start:6 of
+msgid ""
+"The Grid instance used to send/receive Messages from nodes executing a "
+"ClientApp."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.start:9 of
+msgid "Initial model parameters (arrays) to be used for federated learning."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.start:11 of
+#, fuzzy
+msgid "Number of federated learning rounds to execute."
+msgstr "使用联邦学习策略"
+
+#: flwr.serverapp.strategy.Strategy.start:13 of
+msgid "Timeout in seconds for waiting for node responses."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.start:15 of
+msgid ""
+"Configuration to be sent to nodes during training rounds. If unset, an "
+"empty ConfigRecord will be used."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.start:18 of
+msgid ""
+"Configuration to be sent to nodes during evaluation rounds. If unset, an "
+"empty ConfigRecord will be used."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.start:21 of
+msgid ""
+"Optional function for centralized evaluation of the global model. Takes "
+"server round number and array record, returns a MetricRecord. If "
+"provided, will be called before the first round and after each round. "
+"Defaults to None."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.start:27 of
+msgid ""
+"Results containing final model arrays and also training metrics, "
+"evaluation metrics and global evaluation metrics (if provided) from all "
+"rounds."
+msgstr ""
+
+#: ../../source/ref-api/flwr.serverapp.Result.rst:2
+#, fuzzy
+msgid "Result"
+msgstr "工作流程"
+
+#: ../../source/ref-api/flwr.serverapp.Result.rst:31:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`arrays <flwr.serverapp.Result.arrays>`\\"
+msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
+
+#: ../../source/ref-api/flwr.serverapp.Result.rst:31:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`train_metrics_clientapp "
+"<flwr.serverapp.Result.train_metrics_clientapp>`\\"
+msgstr ""
+":py:obj:`get_parameters_ins "
+"<flwr.common.ServerMessage.get_parameters_ins>`\\"
+
+#: ../../source/ref-api/flwr.serverapp.Result.rst:31:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`evaluate_metrics_clientapp "
+"<flwr.serverapp.Result.evaluate_metrics_clientapp>`\\"
+msgstr ":py:obj:`evaluate_ins <flwr.common.ServerMessage.evaluate_ins>`\\"
+
+#: ../../source/ref-api/flwr.serverapp.Result.rst:31:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`evaluate_metrics_serverapp "
+"<flwr.serverapp.Result.evaluate_metrics_serverapp>`\\"
+msgstr ":py:obj:`evaluate_ins <flwr.common.ServerMessage.evaluate_ins>`\\"
+
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_evaluate "
+"<flwr.serverapp.Strategy.aggregate_evaluate>`\\ \\(server\\_round\\, "
+"replies\\)"
+msgstr ""
+":py:obj:`aggregate_evaluate "
+"<flwr.server.strategy.Krum.aggregate_evaluate>`\\ \\(server\\_round\\, "
+"results\\, ...\\)"
+
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid "Aggregate evaluation metrics from client nodes."
+msgstr "采用加权平均法计算评估损失总额。"
+
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_train <flwr.serverapp.Strategy.aggregate_train>`\\ "
+"\\(server\\_round\\, replies\\)"
+msgstr ""
+":py:obj:`aggregate_fit <flwr.server.strategy.Krum.aggregate_fit>`\\ "
+"\\(server\\_round\\, results\\, failures\\)"
+
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.Strategy.aggregate_train:1 of
+#, fuzzy
+msgid "Aggregate training results from client nodes."
+msgstr "汇总 DPFedAvgFixed 中的训练结果并更新片段标准。"
+
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`configure_evaluate "
+"<flwr.serverapp.Strategy.configure_evaluate>`\\ \\(server\\_round\\, "
+"arrays\\, ...\\)"
+msgstr ""
+":py:obj:`configure_evaluate "
+"<flwr.server.strategy.Krum.configure_evaluate>`\\ \\(server\\_round\\, "
+"parameters\\, ...\\)"
+
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`configure_train <flwr.serverapp.Strategy.configure_train>`\\ "
+"\\(server\\_round\\, arrays\\, ...\\)"
+msgstr ""
+":py:obj:`configure_fit <flwr.server.strategy.Krum.configure_fit>`\\ "
+"\\(server\\_round\\, parameters\\, ...\\)"
+
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`start <flwr.serverapp.Strategy.start>`\\ \\(grid\\, "
+"initial\\_arrays\\[\\, num\\_rounds\\, ...\\]\\)"
+msgstr ""
+":py:obj:`FedAdagrad <flwr.server.strategy.FedAdagrad>`\\ \\(\\*\\[\\, "
+"fraction\\_fit\\, ...\\]\\)"
+
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`summary <flwr.serverapp.Strategy.summary>`\\ \\(\\)"
+msgstr "server.strategy.Strategy"
+
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:5 of
+msgid ""
+"Iterable of reply messages received from client nodes after evaluation. "
+"MetricRecords in the messages are aggregated."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.aggregate_evaluate:9 of
+msgid ""
+"Aggregated evaluation metrics from all participating clients, or None if "
+"aggregation failed."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.aggregate_train:3 of
+#, fuzzy
+msgid "The current round of federated learning, starting from 1."
+msgstr "本轮联邦学习。"
+
+#: flwr.serverapp.strategy.Strategy.aggregate_train:5 of
+msgid ""
+"Iterable of reply messages received from client nodes after training. "
+"Each message contains ArrayRecords and MetricRecords that get aggregated."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.aggregate_train:9 of
+msgid ""
+"A tuple containing: - ArrayRecord: Aggregated ArrayRecord, or None if "
+"aggregation failed - MetricRecord: Aggregated MetricRecord, or None if "
+"aggregation failed"
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.configure_evaluate:5 of
+msgid ""
+"Current global ArrayRecord (e.g. global model) to be sent to client nodes"
+" for evaluation."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.configure_evaluate:8 of
+#, fuzzy
+msgid "Configuration to be sent to clients nodes for evaluation."
+msgstr "使用部分可用客户进行评估。"
+
+#: flwr.serverapp.strategy.Strategy.configure_evaluate:10
+#: flwr.serverapp.strategy.Strategy.configure_train:10 of
+msgid "The Grid instance used for node sampling and communication."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.configure_evaluate:13 of
+#, fuzzy
+msgid ""
+"An iterable of messages to be sent to selected client nodes for "
+"evaluation."
+msgstr "要发送的信息迭代。"
+
+#: flwr.serverapp.strategy.Strategy.configure_train:5 of
+msgid ""
+"Current global ArrayRecord (e.g. global model) to be sent to client nodes"
+" for training."
+msgstr ""
+
+#: flwr.serverapp.strategy.Strategy.configure_train:8 of
+#, fuzzy
+msgid "Configuration to be sent to clients nodes for training."
+msgstr "通过内置策略进行配置"
+
+#: flwr.serverapp.strategy.Strategy.configure_train:13 of
+#, fuzzy
+msgid "An iterable of messages to be sent to selected client nodes for training."
+msgstr "要发送的信息迭代。"
 
 #: ../../source/ref-api/flwr.simulation.rst:2
 #, fuzzy
