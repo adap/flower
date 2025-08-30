@@ -46,12 +46,12 @@
 
 .. _recorddict_link: ref-api/flwr.common.RecordDict.html
 
-Upgrade to the Message API
-==========================
+Upgrade to Message API
+======================
 
-Welcome to the migration guide for updating your FlowerApps to use Flower's Message API!
+Welcome to the migration guide for updating your Flower Apps to use Flower's Message API!
 This guide will walk you through the necessary steps to transition from Flower Apps
-based on Strategies and NumPyClient to their equivalent using the new Message API. This
+based on ``Strategy`` and ``NumPyClient`` to their equivalent using the new Message API. This
 guide is relevant when updating pre-``1.21`` Flower apps to the latest stable version.
 
 Let's dive in!
