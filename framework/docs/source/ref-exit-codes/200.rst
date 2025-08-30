@@ -1,0 +1,106 @@
+[200] SERVERAPP_STRATEGY_PRECONDITION_UNMET
+===========================================
+
+.. |arrayrecord_link| replace:: ``ArrayRecord``
+
+.. |fedavg_link| replace:: ``FedAvg``
+
+.. |metricrecord_link| replace:: ``MetricRecord``
+
+.. |recorddict_link| replace:: ``RecordDict``
+
+.. _arrayrecord_link: ref-api/flwr.common.ArrayRecord.html
+
+.. _fedavg_link: ref-api/flwr.serverapp.FedAvg.html
+
+.. _metricrecord_link: ref-api/flwr.common.MetricRecord.html
+
+.. _recorddict_link: ref-api/flwr.common.RecordDict.html
+
+Description
+-----------
+
+The strategy received replies that cannot be aggregated because either not all replies
+contain a supported number of records, because the keys used within each record do not
+match those in other replies, or because the key required by the strategy to perform
+weighted averaging is missing.
+
+How to Resolve
+--------------
+
+Please ensure all replies returned by ClientApps have one |arrayrecord_link|_ (none when
+replies are from a round of federated evaluation, i.e. when message type is
+`MessageType.EVALUATE`) and one |metricrecord_link|_.
+
+The records in all replies must use identical keys. In addition, if the strategy expects
+a key to perform weighted average (e.g. in |fedavg_link|_) please ensure the returned
+|metricrecord_link|_ from ClientApps do include this key.
+
+Let's see a few examples of payloads (|recorddict_link|_) that can and can't be
+aggregated. Let's assume the `ServerApp` has been configured to use |fedavg_link|_ with
+`num-examples` as the key to perform weighted averaging:
+
+These two payloads can be aggregated because all keys match, there is one record of each
+type, and the key for weighted averaging is present.
+
+.. code-block:: python
+
+    payload1 = RecordDict(
+        {
+            "model-parameters": ArrayRecord(...),  # no ArrayRecord if in an evaluate round
+            "metrics": MetricRecord({"loss": 0.123, "num-examples": 1234}),
+        }
+    )
+    payload2 = RecordDict(
+        {
+            "model-parameters": ArrayRecord(...),  # no ArrayRecord if in an evaluate round
+            "metrics": MetricRecord({"loss": 0.01, "num-examples": 1234}),
+        }
+    )
+
+These payloads can't be aggregated because they have unmatching keys (see one has
+`loss`, the other has `loss` and `accuracy`)
+
+.. code-block:: python
+
+    payload1 = RecordDict(
+        {
+            "model-parameters": ArrayRecord(...),
+            "metrics": MetricRecord({"loss": 0.123, "num-examples": 1234}),
+        }
+    )
+    payload2 = RecordDict(
+        {
+            "model-parameters": ArrayRecord(...),
+            "metrics": MetricRecord({"loss": 0.01, "accuracy": 0.99, "num-examples": 1234}),
+        }
+    )
+
+These two payloads can't be aggregated (one has a missing `ArrayRecord`)
+
+.. code-block:: python
+
+    payload1 = RecordDict(
+        {
+            "model-parameters": ArrayRecord(...),
+            "metrics": MetricRecord({"loss": 0.123, "num-examples": 1234}),
+        }
+    )
+    payload2 = RecordDict({"metrics": MetricRecord({"loss": 0.01, "num-examples": 1234})})
+
+These payloads can't be aggregated because there is no key for weighted averaging
+
+.. code-block:: python
+
+    payload1 = RecordDict(
+        {
+            "model-parameters": ArrayRecord(...),
+            "metrics": MetricRecord({"loss": 0.123, "accuracy": 0.83}),
+        }
+    )
+    payload2 = RecordDict(
+        {
+            "model-parameters": ArrayRecord(...),
+            "metrics": MetricRecord({"loss": 0.01, "accuracy": 0.99}),
+        }
+    )

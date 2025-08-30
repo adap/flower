@@ -12,14 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Public Flower ServerApp APIs."""
+"""Strategy results."""
 
-from .fedavg import FedAvg
-from .result import Result
-from .strategy import Strategy
 
-__all__ = [
-    "FedAvg",
-    "Result",
-    "Strategy",
-]
+from dataclasses import dataclass, field
+
+from flwr.common import ArrayRecord, MetricRecord
+
+
+@dataclass
+class Result:
+    """Data class carrying records generated during the execution of a strategy."""
+
+    arrays: ArrayRecord = field(default_factory=ArrayRecord)
+    train_metrics_clientapp: dict[int, MetricRecord] = field(default_factory=dict)
+    evaluate_metrics_clientapp: dict[int, MetricRecord] = field(default_factory=dict)
+    evaluate_metrics_serverapp: dict[int, MetricRecord] = field(default_factory=dict)

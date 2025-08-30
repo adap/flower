@@ -82,31 +82,73 @@ $ helm install tensorflow . --values values.yaml
 
 This will deploy 3 SuperNodes named `tensorflow-flower-client-supernode-<random>`.
 
-### Deploy Flower Framework with TLS
+## Deploy Flower Framework without TLS
 
-To ensure TLS communication within the Flower framework, you need to configure your
-deployment with proper TLS certificates.
+By default, the Flower Framework is deployed without TLS. This means `global.insecure` is
+set to `true`.
 
-**Note:** If `global.insecure` is set to `False`, you must pre-provide a secret of
-type `kubernetes.io/tls` named `flower-client-tls`.
+You might want to deploy the Flower framework without TLS for testing or internal use. Be
+cautious as this exposes your deployment to potential security risks.
 
-Example configuration for TLS deployment:
+```yaml
+global:
+  insecure: true
+```
+
+## Deploy Flower Framework with TLS
+
+When using private CAs, the SuperNode must trust the CA certificate in order to connect
+securely to the SuperLink.
+
+To provide the CA certificate, set `global.insecure` to `false` and create a `Secret` of type
+`kubernetes.io/tls` named `flower-client-tls`:
 
 ```yaml
 global:
   insecure: false
 ```
 
-## Deploy Flower Framework without TLS
-
-For testing or internal use, you might want to deploy the Flower framework without TLS. Be
-cautious as this exposes your deployment to potential security risks.
-
-Example configuration for insecure deployment:
+If you want to use a different `Secret` name, override the default by setting
+`supernode.superlink.certificate.existingSecret`:
 
 ```yaml
 global:
-  insecure: true
+  insecure: false
+supernode:
+  superlink:
+    certificate:
+      existingSecret: my-custom-tls-secret-name
+```
+
+**Important:**
+
+The recommended practice is to mount different `Secret`s for the SuperLink and the
+SuperNodes `existingSecret` parameter. Keeping these `Secrets` separate ensures
+that if the `Secret` containing the server’s private key and certificate is ever
+tampered with, the client will fail to connect rather than trusting a compromised
+server.
+
+For further details, refer to the [`cert-manager` documentation](https://cert-manager.io/docs/trust/).
+
+If the SuperLink certificate (of type `kubernetes.io/tls`) is deployed in the same cluster and
+namespace as the SuperNode, you can enable `supernode.superlink.certificate.copyFromExistingSecret`.
+This instructs the chart to create a new `Secret` containing the CA certificate.
+It copies `ca.crt` from the SuperLink `Secret`, or falls back to `tls.crt` if `ca.crt` is not
+present.
+
+By default, the copied `Secret` is named `flower-client-tls`. You can customize this name with
+`supernode.superlink.certificate.copyFromExistingSecret.secretName`:
+
+```yaml
+global:
+  insecure: false
+supernode:
+  superlink:
+    certificate:
+      existingSecret: superlink-tls-secret-name
+    copyFromExistingSecret:
+      enabled: true
+      secretName: my-custom-tls-secret-name
 ```
 
 ## Node Authentication
@@ -218,16 +260,13 @@ supernode:
 | `global.annotations`                                 | Default Annotations                                               | `{}`             |
 | `global.labels`                                      | Default Labels                                                    | `{}`             |
 | `global.podLabels`                                   | Default PodLabels                                                 | `{}`             |
-| `global.domain`                                      | Default Domain                                                    | `example.com`    |
 | `global.insecure`                                    | Decide if you deploy the Flower Framework with TLS                | `true`           |
-| `global.ingressClassName`                            | Default IngressClass                                              | `""`             |
 | `global.nodeSelector`                                | Default node selector for all components                          | `{}`             |
 | `global.tolerations`                                 | Default tolerations for all components                            | `[]`             |
 | `global.affinity.podAntiAffinity`                    | Default affinity preset for all components                        | `soft`           |
 | `global.affinity.podAntiAffinity`                    | Default pod anti-affinity rules. Either: `none`, `soft` or `hard` | `soft`           |
 | `global.affinity.nodeAffinity.type`                  | Default node affinity rules. Either: `none`, `soft` or `hard`     | `hard`           |
 | `global.affinity.nodeAffinity.matchExpressions`      | Default match expressions for node affinity                       | `[]`             |
-| `global.certificateAnnotations`                      | Default Cert-Manager certificate annotations                      | `{}`             |
 | `global.nodeAuth.enabled`                            | Enables or Disables Node-Authentication SuperLink \<-> SuperNode  | `false`          |
 | `global.nodeAuth.authSupernodePrivateKey`            | Specifies the ecdsa-sha2-nistp384 private key                     | `""`             |
 | `global.nodeAuth.authSupernodePublicKey`             | Specifies the ecdsa-sha2-nistp384 public key                      | `""`             |
@@ -244,65 +283,60 @@ supernode:
 
 ### Component SuperNode
 
-| Name                                                    | Description                                                                                                             | Value                      |
-| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `supernode.name`                                        | Name of the SuperNode                                                                                                   | `supernode`                |
-| `supernode.enabled`                                     | Enable or disable SuperNode                                                                                             | `true`                     |
-| `supernode.resources`                                   | Set container requests and limits for different resources like CPU or memory (essential for production workloads)       | `{}`                       |
-| `supernode.node.config`                                 |                                                                                                                         | `{}`                       |
-| `supernode.isolationMode`                               | The isolation mode of the SuperNode                                                                                     | `subprocess`               |
-| `supernode.resources`                                   | Set container requests and limits for different resources like CPU or memory (essential for production workloads)       | `{}`                       |
-| `supernode.superlink.address`                           | Address of the SuperLink the SuperNodes should connect to                                                               | `my-superlink.example.com` |
-| `supernode.superlink.port`                              | Port of the SuperLink the SuperNodes should connect to                                                                  | `9092`                     |
-| `supernode.volumes`                                     | Specify a list of volumes for the SuperNode pod(s)                                                                      | `[]`                       |
-| `supernode.volumeMounts`                                | Allows to specify additional VolumeMounts                                                                               | `[]`                       |
-| `supernode.automountServiceAccountToken`                | Automount SA-Token into the pod.                                                                                        | `true`                     |
-| `supernode.serviceAccount.enabled`                      | Enable a service account for this component                                                                             | `true`                     |
-| `supernode.serviceAccount.annotations`                  | Annotations applied to enabled service account                                                                          | `{}`                       |
-| `supernode.serviceAccount.labels`                       | Labels applied to enabled service account                                                                               | `{}`                       |
-| `supernode.serviceAccount.automountServiceAccountToken` | Automount SA-Token                                                                                                      | `true`                     |
-| `supernode.service.type`                                | Valid are ClusterIP, NodePort or Loadbalancer                                                                           | `ClusterIP`                |
-| `supernode.service.servicePortClientAppIOName`          | Prefix of the SuperNode ClientAppIO API port                                                                            | `clientappio`              |
-| `supernode.service.servicePortClientAppIO`              | Port to expose for the SuperNode ClientAppIO API                                                                        | `9094`                     |
-| `supernode.service.nodePortClientAppIO`                 | Node port for SuperNode ClientAppIO API                                                                                 | `39094`                    |
-| `supernode.containerPorts.clientappio`                  | Container port for SuperNode ClientAppIO API                                                                            | `9094`                     |
-| `supernode.podSecurityContext`                          |                                                                                                                         | `{}`                       |
-| `supernode.replicas`                                    | The number of SuperNode pods to run                                                                                     | `1`                        |
-| `supernode.labels`                                      | Extra labels for SuperNode pods                                                                                         | `{}`                       |
-| `supernode.extraArgs`                                   | Add extra arguments to the default arguments for the SuperNode                                                          | `[]`                       |
-| `supernode.nodeSelector`                                | Node labels for SuperNode pods which merges with global.nodeSelector                                                    | `{}`                       |
-| `supernode.tolerations`                                 | Node tolerations for SuperNode pods which merges with global.tolerations                                                | `[]`                       |
-| `supernode.updateStrategy.type`                         | SuperNode deployment strategy type                                                                                      | `RollingUpdate`            |
-| `supernode.updateStrategy.rollingUpdate`                | SuperNode deployment rolling update configuration parameters                                                            | `{}`                       |
-| `supernode.affinity`                                    | Node affinity for SuperNode pods which merges with global.affinity                                                      | `{}`                       |
-| `supernode.env`                                         | Array with extra environment variables to add to SuperNode nodes which merges with global.env                           | `[]`                       |
-| `supernode.ingress.enabled`                             | Enable the ingress resource                                                                                             | `false`                    |
-| `supernode.ingress.annotations`                         | Additional annotations for the ingress                                                                                  | `{}`                       |
-| `supernode.ingress.ingressClassName`                    | Defines which ingress controller which implement the resource                                                           | `""`                       |
-| `supernode.ingress.tls`                                 | Ingress TLS configuration                                                                                               | `false`                    |
-| `supernode.ingress.clientappio.enabled`                 | Enable an ingress resource for SuperNode ClientAppIO                                                                    | `false`                    |
-| `supernode.ingress.clientappio.hostname`                | Ingress hostname for the SuperNode ClientAppIO ingress                                                                  | `clientappio.example.com`  |
-| `supernode.ingress.clientappio.path`                    | SuperNode ClientAppIO ingress path                                                                                      | `/`                        |
-| `supernode.ingress.clientappio.pathType`                | Ingress path type. One of Exact, Prefix or ImplementationSpecific                                                       | `ImplementationSpecific`   |
-| `supernode.lifecycle`                                   | SuperNode container(s) to automate configuration before or after startup                                                | `{}`                       |
-| `supernode.annotations`                                 | Additional custom annotations for SuperNode                                                                             | `{}`                       |
-| `supernode.selectorLabels`                              | Extra selectorLabels for SuperNode pods                                                                                 | `{}`                       |
-| `supernode.podAnnotations`                              | Annotations for SuperNode pods                                                                                          | `{}`                       |
-| `supernode.podLabels`                                   | Extra podLabels for SuperNode pods                                                                                      | `{}`                       |
-| `supernode.imagePullSecrets`                            | SuperNode image pull secrets which overrides global.imagePullSecrets                                                    | `[]`                       |
-| `supernode.image.registry`                              | SuperNode image registry                                                                                                | `registry.hub.docker.com`  |
-| `supernode.image.repository`                            | SuperNode image repository                                                                                              | `flwr/supernode-ee`        |
-| `supernode.image.tag`                                   | Image tag of SuperNode                                                                                                  | `1.20.0-ubuntu`            |
-| `supernode.image.digest`                                | Image digest of SuperNode                                                                                               | `""`                       |
-| `supernode.image.pullPolicy`                            | Components image pullPolicy                                                                                             | `IfNotPresent`             |
-| `supernode.networkPolicy.enabled`                       | Specifies whether a NetworkPolicy should be created                                                                     | `true`                     |
-| `supernode.networkPolicy.allowExternal`                 | Allow external ingress traffic                                                                                          | `true`                     |
-| `supernode.networkPolicy.allowExternalEgress`           | Allow unrestricted egress traffic                                                                                       | `true`                     |
-| `supernode.networkPolicy.extraIngress`                  | Add extra ingress rules to the NetworkPolicy                                                                            | `[]`                       |
-| `supernode.networkPolicy.extraEgress`                   | Add extra ingress rules to the NetworkPolicy (ignored if allowExternalEgress=true)                                      | `[]`                       |
-| `supernode.networkPolicy.ingressPodMatchLabels`         | Labels to match to allow traffic from other pods. Ignored if `supernode.networkPolicy.allowExternal` is true.           | `{}`                       |
-| `supernode.networkPolicy.ingressNSMatchLabels`          | Labels to match to allow traffic from other namespaces. Ignored if `supernode.networkPolicy.allowExternal` is true.     | `{}`                       |
-| `supernode.networkPolicy.ingressNSPodMatchLabels`       | Pod labels to match to allow traffic from other namespaces. Ignored if `supernode.networkPolicy.allowExternal` is true. | `{}`                       |
+| Name                                                                | Description                                                                                                             | Value                      |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `supernode.name`                                                    | Name of the SuperNode                                                                                                   | `supernode`                |
+| `supernode.enabled`                                                 | Enable or disable SuperNode                                                                                             | `true`                     |
+| `supernode.resources`                                               | Set container requests and limits for different resources like CPU or memory (essential for production workloads)       | `{}`                       |
+| `supernode.node.config`                                             |                                                                                                                         | `{}`                       |
+| `supernode.isolationMode`                                           | The isolation mode of the SuperNode                                                                                     | `subprocess`               |
+| `supernode.resources`                                               | Set container requests and limits for different resources like CPU or memory (essential for production workloads)       | `{}`                       |
+| `supernode.superlink.address`                                       | Address of the SuperLink the SuperNodes should connect to                                                               | `my-superlink.example.com` |
+| `supernode.superlink.port`                                          | Port of the SuperLink the SuperNodes should connect to                                                                  | `9092`                     |
+| `supernode.superlink.certificate.existingSecret`                    |                                                                                                                         | `""`                       |
+| `supernode.superlink.certificate.copyFromExistingSecret.enabled`    |                                                                                                                         | `false`                    |
+| `supernode.superlink.certificate.copyFromExistingSecret.secretName` |                                                                                                                         | `""`                       |
+| `supernode.volumes`                                                 | Specify a list of volumes for the SuperNode pod(s)                                                                      | `[]`                       |
+| `supernode.volumeMounts`                                            | Allows to specify additional VolumeMounts                                                                               | `[]`                       |
+| `supernode.automountServiceAccountToken`                            | Automount SA-Token into the pod.                                                                                        | `true`                     |
+| `supernode.serviceAccount.enabled`                                  | Enable a service account for this component                                                                             | `true`                     |
+| `supernode.serviceAccount.annotations`                              | Annotations applied to enabled service account                                                                          | `{}`                       |
+| `supernode.serviceAccount.labels`                                   | Labels applied to enabled service account                                                                               | `{}`                       |
+| `supernode.serviceAccount.automountServiceAccountToken`             | Automount SA-Token                                                                                                      | `true`                     |
+| `supernode.service.type`                                            | Valid are ClusterIP, NodePort or Loadbalancer                                                                           | `ClusterIP`                |
+| `supernode.service.servicePortClientAppIOName`                      | Prefix of the SuperNode ClientAppIO API port                                                                            | `clientappio`              |
+| `supernode.service.servicePortClientAppIO`                          | Port to expose for the SuperNode ClientAppIO API                                                                        | `9094`                     |
+| `supernode.service.nodePortClientAppIO`                             | Node port for SuperNode ClientAppIO API                                                                                 | `39094`                    |
+| `supernode.containerPorts.clientappio`                              | Container port for SuperNode ClientAppIO API                                                                            | `9094`                     |
+| `supernode.podSecurityContext`                                      |                                                                                                                         | `{}`                       |
+| `supernode.replicas`                                                | The number of SuperNode pods to run                                                                                     | `1`                        |
+| `supernode.labels`                                                  | Extra labels for SuperNode pods                                                                                         | `{}`                       |
+| `supernode.extraArgs`                                               | Add extra arguments to the default arguments for the SuperNode                                                          | `[]`                       |
+| `supernode.nodeSelector`                                            | Node labels for SuperNode pods which merges with global.nodeSelector                                                    | `{}`                       |
+| `supernode.tolerations`                                             | Node tolerations for SuperNode pods which merges with global.tolerations                                                | `[]`                       |
+| `supernode.updateStrategy.type`                                     | SuperNode deployment strategy type                                                                                      | `RollingUpdate`            |
+| `supernode.updateStrategy.rollingUpdate`                            | SuperNode deployment rolling update configuration parameters                                                            | `{}`                       |
+| `supernode.affinity`                                                | Node affinity for SuperNode pods which merges with global.affinity                                                      | `{}`                       |
+| `supernode.env`                                                     | Array with extra environment variables to add to SuperNode nodes which merges with global.env                           | `[]`                       |
+| `supernode.lifecycle`                                               | SuperNode container(s) to automate configuration before or after startup                                                | `{}`                       |
+| `supernode.annotations`                                             | Additional custom annotations for SuperNode                                                                             | `{}`                       |
+| `supernode.selectorLabels`                                          | Extra selectorLabels for SuperNode pods                                                                                 | `{}`                       |
+| `supernode.podAnnotations`                                          | Annotations for SuperNode pods                                                                                          | `{}`                       |
+| `supernode.podLabels`                                               | Extra podLabels for SuperNode pods                                                                                      | `{}`                       |
+| `supernode.imagePullSecrets`                                        | SuperNode image pull secrets which overrides global.imagePullSecrets                                                    | `[]`                       |
+| `supernode.image.registry`                                          | SuperNode image registry                                                                                                | `registry.hub.docker.com`  |
+| `supernode.image.repository`                                        | SuperNode image repository                                                                                              | `flwr/supernode-ee`        |
+| `supernode.image.tag`                                               | Image tag of SuperNode                                                                                                  | `1.20.0-ubuntu`            |
+| `supernode.image.digest`                                            | Image digest of SuperNode                                                                                               | `""`                       |
+| `supernode.image.pullPolicy`                                        | Components image pullPolicy                                                                                             | `IfNotPresent`             |
+| `supernode.networkPolicy.enabled`                                   | Specifies whether a NetworkPolicy should be created                                                                     | `true`                     |
+| `supernode.networkPolicy.allowExternal`                             | Allow external ingress traffic                                                                                          | `true`                     |
+| `supernode.networkPolicy.allowExternalEgress`                       | Allow unrestricted egress traffic                                                                                       | `true`                     |
+| `supernode.networkPolicy.extraIngress`                              | Add extra ingress rules to the NetworkPolicy                                                                            | `[]`                       |
+| `supernode.networkPolicy.extraEgress`                               | Add extra ingress rules to the NetworkPolicy (ignored if allowExternalEgress=true)                                      | `[]`                       |
+| `supernode.networkPolicy.ingressPodMatchLabels`                     | Labels to match to allow traffic from other pods. Ignored if `supernode.networkPolicy.allowExternal` is true.           | `{}`                       |
+| `supernode.networkPolicy.ingressNSMatchLabels`                      | Labels to match to allow traffic from other namespaces. Ignored if `supernode.networkPolicy.allowExternal` is true.     | `{}`                       |
+| `supernode.networkPolicy.ingressNSPodMatchLabels`                   | Pod labels to match to allow traffic from other namespaces. Ignored if `supernode.networkPolicy.allowExternal` is true. | `{}`                       |
 
 ### Component ClientApp
 
