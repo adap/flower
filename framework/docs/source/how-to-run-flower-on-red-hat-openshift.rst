@@ -185,13 +185,239 @@ be taken to the OpenShift web console:
 
     Red Hat OpenShift web console.
 
-Congratulations on making it this far! You now have a running Red Hat OpenShift cluster
-on AWS. Now, let's walk through how to deploy Flower on your OpenShift cluster.
+Congratulations! You now have a running Red Hat OpenShift cluster on AWS. Now, let's
+walk through how to deploy Flower on your OpenShift cluster.
 
 Deploy Flower SuperLink and SuperNodes on OpenShift
 ---------------------------------------------------
 
-WIP
+With the OpenShift cluster active, we can now deploy SuperLink and SuperNode pods and
+run a federated workload. In this guide, we will deploy four
+pods: 1x SuperLink, 2x SuperNodes, and 1x service pod to route the traffic to the
+designated ports in the SuperLink.
+
+First, we need to create an OpenShift project which is equivalent of a Kubernetes
+namespace. We will then deploy the SuperLink and SuperNode pods in this project.
+Navigate to ``Home`` > ``Projects`` and click on the ``Create Project`` button on the
+right. Set ``flower-openshift-demo`` as the project name.
+
+Next, we will add pods. Navigate to ``Workloads`` > ``Pods`` and click on the ``Create
+Pod`` button on the right. There are several ways to create a pod, such as using YAML or
+JSON definitions. For this guide, we will use the YAML definition. 
+Copy and paste the following YAML definition for the SuperLink pod. This manifest is
+adapted from our tutorial on :doc:`how to deploy Flower in GCP
+<how-to-run-flower-on-gcp>`.
+
+.. dropdown:: superlink-deployment.yaml
+
+    .. code-block:: bash
+        :substitutions:
+
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: superlink
+          namespace: flower-openshift-demo # The project name from above
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: superlink
+          template:
+            metadata:
+              labels:
+                app: superlink
+            spec:
+              # Ensures mounted volumes are writable by the pod's non-root user on OpenShift
+              securityContext:
+                runAsNonRoot: true
+              containers:
+              - name: superlink
+                image: flwr/superlink:|stable_flwr_version|
+                args:
+                  - "--insecure"
+                ports:  # which ports to expose/available
+                - containerPort: 9092
+                - containerPort: 9093
+                volumeMounts:
+                - name: cache-volume
+                  mountPath: /app/.cache
+                - name: tmp-volume
+                  mountPath: /var/tmp
+                - name: fab-volume
+                  mountPath: /app/.flwr
+                - name: config-volume
+                  mountPath: /app/.config
+              volumes:
+              - name: cache-volume
+                emptyDir:
+                  sizeLimit: 50Mi
+              - name: tmp-volume
+                emptyDir:
+                  sizeLimit: 50Mi
+              - name: fab-volume
+                emptyDir:
+                  sizeLimit: 50Mi
+              - name: config-volume
+                emptyDir:
+                  sizeLimit: 50Mi
+
+After the SuperLink pod is created, add the service pod following the steps to create a
+pod and insert the following YAML definition:
+
+.. dropdown:: superlink-service.yaml
+
+    .. code-block:: bash
+        :substitutions:
+
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: superlink-service
+          namespace: flower-openshift-demo
+        spec:
+          selector:
+            app: superlink
+          ports:  # like a dynamic IP routing table/mapping that routes traffic to the designated ports
+          - protocol: TCP
+            port: 9092   # Port for SuperNode connection
+            targetPort: 9092  # the SuperLink container port
+            name: superlink-fleetapi
+          - protocol: TCP
+            port: 9093   # Port for Flower app submission
+            targetPort: 9093  # the SuperLink container port
+            name: superlink-execapi
+          type: LoadBalancer  # balances workload, makes the service publicly available
+
+Finally, spin up two SuperNode pods with the following YAML definitions:
+
+.. dropdown:: supernode-1-deployment.yaml
+
+    .. code-block:: bash
+        :substitutions:
+
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: supernode-1
+          namespace: flower-openshift-demo # The project name from above
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: supernode-1
+          template:
+            metadata:
+              labels:
+                app: supernode-1
+            spec:
+              # Ensures mounted volumes are writable by the pod's non-root user on OpenShift
+              securityContext:
+                runAsNonRoot: true
+              containers:
+              - name: supernode
+                image: flwr/supernode:|stable_flwr_version|
+                args:
+                  - "--insecure"
+                  - "--superlink"
+                  - "superlink-service:9092"
+                  - "--clientappio-api-address"
+                  - "0.0.0.0:9094"
+                ports:
+                - containerPort: 9094
+                volumeMounts:
+                - name: cache-volume
+                  mountPath: /app/.cache
+                - name: tmp-volume
+                  mountPath: /var/tmp
+                - name: fab-volume
+                  mountPath: /app/.flwr
+                - name: config-volume
+                  mountPath: /app/.config
+              volumes:
+              - name: cache-volume
+                emptyDir:
+                  sizeLimit: 50Mi
+              - name: tmp-volume
+                emptyDir:
+                  sizeLimit: 50Mi
+              - name: fab-volume
+                emptyDir:
+                  sizeLimit: 50Mi
+              - name: config-volume
+                emptyDir:
+                  sizeLimit: 50Mi
+
+.. dropdown:: supernode-2-deployment.yaml
+
+    .. code-block:: bash
+        :substitutions:
+
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: supernode-2
+          namespace: flower-openshift-demo # The project name from above
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: supernode-2
+          template:
+            metadata:
+              labels:
+                app: supernode-2
+            spec:
+              # Ensures mounted volumes are writable by the pod's non-root user on OpenShift
+              securityContext:
+                runAsNonRoot: true
+              containers:
+              - name: supernode
+                image: flwr/supernode:|stable_flwr_version|
+                args:
+                  - "--insecure"
+                  - "--superlink"
+                  - "superlink-service:9092"
+                  - "--clientappio-api-address"
+                  - "0.0.0.0:9094"
+                ports:
+                - containerPort: 9094
+                volumeMounts:
+                - name: cache-volume
+                  mountPath: /app/.cache
+                - name: tmp-volume
+                  mountPath: /var/tmp
+                - name: fab-volume
+                  mountPath: /app/.flwr
+                - name: config-volume
+                  mountPath: /app/.config
+              volumes:
+              - name: cache-volume
+                emptyDir:
+                  sizeLimit: 50Mi
+              - name: tmp-volume
+                emptyDir:
+                  sizeLimit: 50Mi
+              - name: fab-volume
+                emptyDir:
+                  sizeLimit: 50Mi
+              - name: config-volume
+                emptyDir:
+                  sizeLimit: 50Mi
+
+To view the status of pods that were just deployed, click on the ``Workloads`` link
+in the left panel. You should be able to see three Flower pods in the "Running" status
+as shown in the screenshot below:
+
+.. figure:: ./_static/rhos/rhos_flower_pods.png
+    :align: center
+    :width: 90%
+    :alt: Flower SuperLink and SuperNode pods in Red Hat OpenShift
+
+    Flower SuperLink and SuperNode pods in Red Hat OpenShift.
+
+Click on the SuperLink pod to view the pod details and click on the ``Logs`` tab. You
+should be able to view the SuperLink logs showing two connected SuperNodes.
 
 Deploy Red Hat OpenShift AI
 ---------------------------
