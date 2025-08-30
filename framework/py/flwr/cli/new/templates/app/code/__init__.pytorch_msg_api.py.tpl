@@ -1,1 +1,1 @@
-"""$project_name: A Flower (Message API) / PyTorch app."""
+"""$project_name: A Flower / PyTorch app."""
