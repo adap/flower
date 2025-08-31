@@ -5,7 +5,7 @@ from pprint import pprint
 import torch
 from flwr.common import ArrayRecord, ConfigRecord, Context
 from flwr.server import Grid, ServerApp
-from flwr.serverapp import FedAvg
+from flwr.serverapp.strategy import FedAvg
 
 from $import_name.task import Net
 
