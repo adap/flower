@@ -158,10 +158,11 @@ use a simple example and assume we are federating a PyTorch model.
 With Flower 1.21 and later, the equivalent `ServerApp` using the new Message API would
 look as shown below after following these steps:
 
-1. Define the ``main`` method under the ``@app.main()`` decorator. If you were reading
-   config values from the ``Context`` you can still do so (consider copying those lines
-   directly from your `server_fn` function)
-2. Instantiate your model as usual and construct an ``ArrayRecord`` out of it.
+1. Define the ``main`` method under the ``@app.main()`` decorator. If your `server_fn`
+   was reading config values from the ``Context`` you can still do so (consider copying
+   those lines directly from your `server_fn` function)
+2. Instantiate your model as usual and construct an ``ArrayRecord`` out of its
+   parameters.
 3. Replace your existing strategy with one from the `flwr.serverapp` module. For example
    with |fedavg_link|_. Pass the arguments related to node sampling to the constructor
    of your strategy.
@@ -277,17 +278,16 @@ the Message API would result in the following code. Note that the behavior of th
 `ClientApp` is defined directly in its methods (i.e. a secondary class based on
 `NumPyClient` is no longer needed).
 
-The `ClientApp` abstraction comes with built-in ``@app.train`` and ``@app.evaluate``
-decorators. The arguments the associated methods receive have been unified and they both
-operate on `Message` objects. Note that you'll still be able to use the helper functions
-you might have developed to, for example, train your model using the ML framework of
-your choice. In this example those are represented by ``train_fn`` and ``test_fn``. Each
-method is responsible for handling the incoming `Message` objects and returning the
-appropriate response (also as a `Message`).
+The |clientapp_link|_ abstraction comes with built-in ``@app.train`` and
+``@app.evaluate`` decorators. The arguments the associated methods receive have been
+unified and they both operate on `Message` objects. Each method is responsible for
+handling the incoming `Message` objects and returning the appropriate response (also as
+a `Message`). Note that you'll still be able to use the functions you might have written
+to, for example, train your model using the ML framework of your choice. In this example
+those are represented by ``train_fn`` and ``test_fn``. Follow these steps to migrate
+your existing `Client App`:
 
-Follow these steps to migrate your existing `Client App`:
-
-1. Define the `@app.train` and `@app.evaluate` decorators.
+1. Introduce the `@app.train` and `@app.evaluate` decorators and respective methods.
 2. Copy the lines of code you had in your `client_fn` reading config values from the
    `Context` into your `train` and `evaluate` methods implementations (created in step
    1).
@@ -316,7 +316,7 @@ Follow these steps to migrate your existing `Client App`:
 
 
     @app.train()
-    def train(msg: Message, context: Context):
+    def train(msg: Message, context: Context) -> Message:
         """Train the model on local data."""
 
         # Init Model and data loader
@@ -329,22 +329,27 @@ Follow these steps to migrate your existing `Client App`:
         model.load_state_dict(arrays.to_torch_state_dict())
 
         # Do local training
-        train_fn(model, train_loader)
+        train_loss = train_fn(model, train_loader)
 
         # Construct reply Message: arrays and metrics
         model_record = ArrayRecord(model.state_dict())
+        # You can include any metric (scalar or list of scalars)
+        # relevant to your usecase.
+        # A weighting metric (`num-examples` by default) is always
+        # expected by FedAvg to do aggregation
         metrics = MetricRecord(
             {
-                "train_loss": 0.123,  # Example metric
+                "train_loss": train_loss,
                 "num-examples": len(train_loader.dataset),
             }
         )
+        # Construct RecorDict and add ArrayRecord and MetricRecord
         content = RecordDict({"arrays": model_record, "metrics": metrics})
         return Message(content=content, reply_to=msg)
 
 
     @app.evaluate()
-    def evaluate(msg: Message, context: Context):
+    def evaluate(msg: Message, context: Context) -> Message:
         """Evaluate the model on local data."""
 
         # Identical to @app.train but returning only metrics
@@ -355,6 +360,9 @@ Follow these steps to migrate your existing `Client App`:
         loss, accuracy = test_fn(model, test_loader)
 
         # Construct reply Message
+        # Retrun metrics relevant to usecase
+        # THe weighting metric is also sent and will be used
+        # to do weighted aggregation of metrics
         metrics = MetricRecord(
             {
                 "eval_loss": loss,
@@ -362,6 +370,7 @@ Follow these steps to migrate your existing `Client App`:
                 "num-examples": len(test_loader.dataset),
             }
         )
+        # Construct RecorDict and add MetricRecord
         content = RecordDict({"metrics": metrics})
         return Message(content=content, reply_to=msg)
 
@@ -370,4 +379,6 @@ This concludes the migration guide!
 .. tip::
 
     If you would like to create a new Flower App using the `Message API`, run the ``flwr
-    new`` command and choose the appropriate template.
+    new`` command and choose the appropriate template. Alternatively, you may want to
+    take a look at the `quickstart-pytorch
+    <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch>`_ example.
