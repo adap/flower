@@ -65,7 +65,7 @@ abstractions. With the introduction of the Message API, these apps can now take
 advantage of a more powerful and flexible communication layer with the |message_link|_
 abstraction being its cornerstone. Messages replace the previous `FitIns` and `FitRes`
 data structures (and their equivalent for the other operations) into a single, unified
-and more versatile datastructure.
+and more versatile data structure.
 
 To fully take advantage of the new Message API, you will need to update your app's code
 to use the new message-based communication patterns. This guide will show you how to:
@@ -115,7 +115,7 @@ Update your ServerApp
 
 Starting with Flower 1.21, the `ServerApp` no longer requires a `server_fn` function to
 make use of strategies. This is because a new collection of strategies (all sharing the
-common |strategy_link|_ base classs) has been created to operate directly on `Message`
+common |strategy_link|_ base class) has been created to operate directly on `Message`
 objects, allowing for a more streamlined and flexible approach to federated learning
 rounds.
 
@@ -156,15 +156,37 @@ use a simple example and assume we are federating a PyTorch model.
     app = ServerApp(server_fn=server_fn)
 
 With Flower 1.21 and later, the equivalent `ServerApp` using the new Message API would
-look as shown below. Note how we no longer need the `server_fn` function. The `Context`
-is still accessible, allowing you to customize how the `ServerApp` behaves at runtime.
-With the new strategies, a new ``start`` method is available. It defines a for loop
-which sets the steps involved in a round of FL. By default it behaves as the original
-strategies do, i.e. a round of FL training followed by one of FL evaluation and a stage
-to evaluate the global model. Note how the `start` method returns results. These are of
-type `Result` and by default contain the final `global model` as well as aggregated
+look as shown below after following these steps:
+
+1. Define the ``main`` method under the ``@app.main()`` decorator. If you were
+       reading config values from the ``Context`` you can still do so (consider copying
+       those lines directly from your `server_fn` function)
+2. Instantiate your model as usual and construct an ``ArrayRecord`` out of it.
+3. Replace your existing strategy with one from the `flwr.serverapp` module. For
+       example with |fedavg_link|_. Pass the arguments related to node sampling to the
+       constructor of your strategy.
+4. Call the ``start`` method of the new strategy passing to it the `ArrayRecord`
+       representing the initial state of your global model, the number of FL rounds and,
+       the `Grid` object (which is used internally to communicate with the nodes
+       executing the ``ClientApp``).
+
+Note how we no longer need the `server_fn` function. The `Context` is still accessible,
+allowing you to customize how the `ServerApp` behaves at runtime. With the new
+strategies, a new ``start`` method is available. It defines a for loop which sets the
+steps involved in a round of FL. By default it behaves as the original strategies do,
+i.e. a round of FL training followed by one of FL evaluation and a stage to evaluate the
+global model. Note how the `start` method returns results. These are of type `Result`
+and by default contain the final `global model` as well as aggregated
 |metricrecord_link|_ from federated stages and, optionally, metrics from evaluation
 stages done at the `ServerApp`.
+
+.. note::
+
+    In addition to helper methods for working with PyTorch models, the
+    |arrayrecord_link|_ class comes with a pair of methods to convert such record to and
+    from a list of `NumPy` arrays (i.e. to ``to_numpy_ndarrays`` and
+    ``from_numpy_ndarrays``). You may choose these methods if you aren't working with
+    PyTorch models.
 
 .. code-block:: python
     :emphasize-lines: 3,9,10,14,17,20
@@ -252,14 +274,35 @@ then the upgraded design using the Message API.
 
 Upgrading a ClientApp designed around the `NumPyClient` + `client_fn` abstractions to
 the Message API would result in the following code. Note that the behavior of the
-`ClientApp` is defined directly in its methods (i.e. a secondary class is no longer
-needed). The `ClientApp` abstraction comes with built-in ``@app.train`` and
-``@app.evaluate`` decorators. The arguments the associated methods receive have been
-unified and they both operate on `Message` objects. Note that you'll still be able to
-use the helper functions you might have developed to, for example, train your model
-using the ML framework of your choice. In this example those are represented by
-``train_fn`` and ``test_fn``. Each method is responsible for handling the incoming
-`Message` objects and returning the appropriate response (also as a `Message`).
+`ClientApp` is defined directly in its methods (i.e. a secondary class based on
+`NumPyClient` is no longer needed).
+
+The `ClientApp` abstraction comes with built-in ``@app.train`` and ``@app.evaluate``
+decorators. The arguments the associated methods receive have been unified and they both
+operate on `Message` objects. Note that you'll still be able to use the helper functions
+you might have developed to, for example, train your model using the ML framework of
+your choice. In this example those are represented by ``train_fn`` and ``test_fn``. Each
+method is responsible for handling the incoming `Message` objects and returning the
+appropriate response (also as a `Message`).
+
+Follow these steps to migrate your existing `Client App`:
+
+1. Define the `@app.train` and `@app.evaluate` decorators.
+2. Copy the lines of code you had in your `client_fn` reading config values from the
+   `Context` into your `train` and `evaluate` methods implementations (created in step
+   1).
+3. From the `Message` object, extract the relevant items (e.g. an ``ArrayRecord``
+   defining the global model, a ``ConfigRecord`` containing configs for the current
+   round) to use in your training and evaluation logic.
+4. Copy the lines calling the functions that do the actual training/evaluation (in the
+   code snippet below we named those ``train_fn`` and ``test_fn``).
+5. Based on the method, construct a ``RecordDict`` and use it to construct the reply
+   ``Message``.
+
+.. note::
+
+    The payload that `Message` objects carry is of type |recorddict_link|_ which can
+    contain records of type ``ArrayRecord``, ``MetricRecord`` and ``ConfigRecord``.
 
 .. code-block:: python
     :emphasize-lines: 9,10,18,23,33,34,37,38,46,56,57
@@ -321,3 +364,10 @@ using the ML framework of your choice. In this example those are represented by
         )
         content = RecordDict({"metrics": metrics})
         return Message(content=content, reply_to=msg)
+
+This concludes the migration guide!
+
+.. tip::
+
+    If you would like to create a new Flower App using the `Message API`, run the ``flwr
+    new`` command and choose the appropriate template.
