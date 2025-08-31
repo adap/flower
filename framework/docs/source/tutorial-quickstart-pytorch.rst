@@ -114,26 +114,26 @@ With default arguments you will see an output like this one:
     INFO :      [ROUND 1/3]
     INFO :      configure_train: Sampled 5 nodes (out of 10)
     INFO :      aggregate_train: Received 5 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'train_loss': 2.149280443954468}
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 2.149280}
     INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 2.313199865818024, 'eval_acc': 0.1004}
+    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 2.31319, 'eval_acc': 0.10004}
     INFO :
     INFO :      [ROUND 2/3]
     INFO :      configure_train: Sampled 5 nodes (out of 10)
     INFO :      aggregate_train: Received 5 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'train_loss': 2.109740121269226}
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 2.1097401}
     INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 2.2529619082808496, 'eval_acc': 0.14200000000000002}
+    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 2.2529, 'eval_acc': 0.142002}
     INFO :
     INFO :      [ROUND 3/3]
     INFO :      configure_train: Sampled 5 nodes (out of 10)
     INFO :      aggregate_train: Received 5 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'train_loss': 1.947683771133423}
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 1.9476833}
     INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 1.9190230954438452, 'eval_acc': 0.29740000000000005}
+    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 1.9190, 'eval_acc': 0.2974005}
     INFO :
     INFO :      Strategy execution finished in 16.56s
     INFO :
@@ -144,8 +144,8 @@ With default arguments you will see an output like this one:
 
     Distributed evaluate metrics:
     {1: {'eval_loss': 2.313199865818024, 'eval_acc': 0.1004},
-    2: {'eval_loss': 2.2529619082808496, 'eval_acc': 0.14200000000000002},
-    3: {'eval_loss': 1.9190230954438452, 'eval_acc': 0.29740000000000005}}
+    2: {'eval_loss': 2.2529619082808496, 'eval_acc': 0.1420000002},
+    3: {'eval_loss': 1.9190230954438452, 'eval_acc': 0.2974000005}}
 
     Saving final model to disk...
 
