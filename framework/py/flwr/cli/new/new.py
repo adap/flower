@@ -37,6 +37,7 @@ class MlFramework(str, Enum):
     PYTORCH = "PyTorch"
     PYTORCH_MSG_API = "PyTorch (Message API)"
     TENSORFLOW = "TensorFlow"
+    TENSORFLOW_MSG_API = "TensorFlow (Message API)"
     SKLEARN = "sklearn"
     HUGGINGFACE = "HuggingFace"
     JAX = "JAX"
@@ -157,6 +158,10 @@ def new(
 
     if framework_str == MlFramework.PYTORCH_MSG_API:
         framework_str = "pytorch_msg_api"
+    
+    if framework_str == MlFramework.TENSORFLOW_MSG_API:
+        framework_str = "tensorflow_msg_api"  
+    
 
     print(
         typer.style(
@@ -248,13 +253,14 @@ def new(
             MlFramework.SKLEARN.value,
             MlFramework.NUMPY.value,
             "pytorch_msg_api",
+            "tensorflow_msg_api"
         ]
         if framework_str in frameworks_with_tasks:
             files[f"{import_name}/task.py"] = {
                 "template": f"app/code/task.{template_name}.py.tpl"
             }
 
-        if framework_str == "pytorch_msg_api":
+        if "msg_api" in framework_str:
             # Use custom __init__ that better captures name of framework
             files[f"{import_name}/__init__.py"] = {
                 "template": f"app/code/__init__.{framework_str}.py.tpl"
