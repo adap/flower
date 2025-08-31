@@ -158,17 +158,17 @@ use a simple example and assume we are federating a PyTorch model.
 With Flower 1.21 and later, the equivalent `ServerApp` using the new Message API would
 look as shown below after following these steps:
 
-1. Define the ``main`` method under the ``@app.main()`` decorator. If you were
-       reading config values from the ``Context`` you can still do so (consider copying
-       those lines directly from your `server_fn` function)
+1. Define the ``main`` method under the ``@app.main()`` decorator. If you were reading
+   config values from the ``Context`` you can still do so (consider copying those lines
+   directly from your `server_fn` function)
 2. Instantiate your model as usual and construct an ``ArrayRecord`` out of it.
-3. Replace your existing strategy with one from the `flwr.serverapp` module. For
-       example with |fedavg_link|_. Pass the arguments related to node sampling to the
-       constructor of your strategy.
+3. Replace your existing strategy with one from the `flwr.serverapp` module. For example
+   with |fedavg_link|_. Pass the arguments related to node sampling to the constructor
+   of your strategy.
 4. Call the ``start`` method of the new strategy passing to it the `ArrayRecord`
-       representing the initial state of your global model, the number of FL rounds and,
-       the `Grid` object (which is used internally to communicate with the nodes
-       executing the ``ClientApp``).
+   representing the initial state of your global model, the number of FL rounds and, the
+   `Grid` object (which is used internally to communicate with the nodes executing the
+   ``ClientApp``).
 
 Note how we no longer need the `server_fn` function. The `Context` is still accessible,
 allowing you to customize how the `ServerApp` behaves at runtime. With the new
