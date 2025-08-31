@@ -41,5 +41,6 @@ def main(grid: Grid, context: Context) -> None:
 
     # Save final model to disk
     print("\nSaving final model to disk...")
-    state_dict = result.arrays.to_torch_state_dict()
-    torch.save(state_dict, "final_model.pt")
+    ndarrays = result.arrays.to_numpy_ndarrays()
+    global_model.set_weights(ndarrays)
+    global_model.save("final_model.keras")
