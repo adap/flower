@@ -36,6 +36,7 @@ class ExitCode:
 
     # ServerApp-specific exit codes (200-299)
     SERVERAPP_STRATEGY_PRECONDITION_UNMET = 200
+    SERVERAPP_STRATEGY_AGGREGATION_ERROR = 201
 
     # SuperNode-specific exit codes (300-399)
     SUPERNODE_REST_ADDRESS_INVALID = 300
@@ -88,6 +89,10 @@ EXIT_CODE_HELP = {
         "must use identical keys. In addition, if the strategy expects a key to "
         "perform weighted average (e.g. in FedAvg) please ensure the returned "
         "MetricRecord from ClientApps do include this key."
+    ),
+    ExitCode.SERVERAPP_STRATEGY_AGGREGATION_ERROR: (
+        "The strategy encountered an error during aggregation. Please check the logs "
+        "for more details."
     ),
     # SuperNode-specific exit codes (300-399)
     ExitCode.SUPERNODE_REST_ADDRESS_INVALID: (
