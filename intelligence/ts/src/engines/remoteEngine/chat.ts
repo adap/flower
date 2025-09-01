@@ -120,6 +120,7 @@ async function processStream(
         const chunkResult = await processChunk(
           part,
           finalTools,
+          usage,
           pendingToolCalls,
           cryptoHandler,
           encrypt,
@@ -147,7 +148,7 @@ async function processStream(
           role: 'assistant',
           content: '',
           toolCalls: finalTools,
-          usage: usage,
+          usage,
         },
       };
     }
@@ -157,6 +158,7 @@ async function processStream(
       message: {
         role: 'assistant',
         content: accumulated,
+        usage,
       },
     };
   } finally {
@@ -171,6 +173,7 @@ function splitJsonChunks(text: string): string[] {
 async function processChunk(
   chunk: string,
   finalTools: ToolCall[] | null,
+  usage: Usage | undefined,
   pendingToolCalls: Record<string, { name: string; buffer: string }>,
   cryptoHandler: CryptographyHandler,
   encrypt: boolean,
@@ -178,7 +181,7 @@ async function processChunk(
 ): Promise<ChatResponseResult & { toolsUpdated?: boolean; done?: boolean }> {
   const data = getServerSentEventData(chunk);
   if (data === '[DONE]') {
-    return { ok: true, message: { role: 'assistant', content: '' }, done: true };
+    return { ok: true, message: { role: 'assistant', content: '', usage }, done: true };
   }
 
   let parsed: unknown;
