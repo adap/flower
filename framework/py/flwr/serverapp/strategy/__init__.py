@@ -12,21 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower main package."""
+"""ServerApp strategies."""
 
 
-from flwr.common.version import package_version as _package_version
-
-from . import app, client, clientapp, common, server, serverapp, simulation
+from .fedavg import FedAvg
+from .result import Result
+from .strategy import Strategy
 
 __all__ = [
-    "app",
-    "client",
-    "clientapp",
-    "common",
-    "server",
-    "serverapp",
-    "simulation",
+    "FedAvg",
+    "Result",
+    "Strategy",
 ]
-
-__version__ = _package_version
