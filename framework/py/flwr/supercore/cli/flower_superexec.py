@@ -58,6 +58,7 @@ def flower_superexec() -> None:
         appio_api_address=args.appio_api_address,
         flwr_dir=args.flwr_dir,
         parent_pid=args.parent_pid,
+        health_server_address=args.health_server_address,
     )
 
 
