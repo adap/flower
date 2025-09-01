@@ -136,6 +136,7 @@ async function processStream(
         }
         if (chunkResult.toolsUpdated && chunkResult.message.toolCalls) {
           finalTools = chunkResult.message.toolCalls;
+          usage = chunkResult.message.usage;
         }
         accumulated += chunkResult.message.content;
       }
@@ -191,6 +192,22 @@ async function processChunk(
     return {
       ok: false,
       failure: { code: FailureCode.RemoteError, description: 'Invalid JSON chunk received.' },
+    };
+  }
+
+  if (isFinalChunk(parsed)) {
+    return {
+      ok: true,
+      message: {
+        role: 'assistant',
+        content: '',
+        usage: {
+          promptTokens: parsed.usage.prompt_tokens,
+          completionTokens: parsed.usage.completion_tokens,
+          totalTokens: parsed.usage.total_tokens,
+        },
+      },
+      done: true,
     };
   }
 
@@ -271,23 +288,13 @@ async function processChunk(
 
     return {
       ok: true,
-      message: { role: 'assistant', content: text, ...(finalTools && { toolCalls: finalTools }) },
-      toolsUpdated,
-    };
-  }
-
-  if (isFinalChunk(parsed)) {
-    return {
-      ok: true,
       message: {
         role: 'assistant',
-        content: '',
-        usage: {
-          promptTokens: parsed.usage.prompt_tokens,
-          completionTokens: parsed.usage.completion_tokens,
-          totalTokens: parsed.usage.total_tokens,
-        },
+        content: text,
+        ...(finalTools && { toolCalls: finalTools }),
+        usage,
       },
+      toolsUpdated,
     };
   }
 
