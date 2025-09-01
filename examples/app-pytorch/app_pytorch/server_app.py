@@ -6,7 +6,7 @@ import torch
 from app_pytorch.task import Net, load_centralized_dataset, test
 from flwr.common import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.server import Grid, ServerApp
-from flwr.serverapp import FedAvg
+from flwr.serverapp.strategy import FedAvg
 
 # Create ServerApp
 app = ServerApp()
