@@ -15,12 +15,18 @@
 """ServerApp strategies."""
 
 
+from .fedadagrad import FedAdagrad
+from .fedadam import FedAdam
 from .fedavg import FedAvg
+from .fedyogi import FedYogi
 from .result import Result
 from .strategy import Strategy
 
 __all__ = [
+    "FedAdagrad",
+    "FedAdam",
     "FedAvg",
+    "FedYogi",
     "Result",
     "Strategy",
 ]
