@@ -41,6 +41,13 @@ class InconsistentMessageReplies(Exception):
         super().__init__(reason)
 
 
+class AggregationError(Exception):
+    """Exception triggered when aggregation fails."""
+
+    def __init__(self, reason: str):
+        super().__init__(reason)
+
+
 def config_to_str(config: ConfigRecord) -> str:
     """Convert a ConfigRecord to a string representation masking bytes."""
     content = ", ".join(

@@ -35,6 +35,7 @@ from flwr.common import (
 from flwr.server import Grid
 
 from .fedavg import FedAvg
+from .strategy_utils import AggregationError
 
 
 # pylint: disable=line-too-long
@@ -126,7 +127,6 @@ class FedOpt(FedAvg):
             train_metrics_aggr_fn=train_metrics_aggr_fn,
             evaluate_metrics_aggr_fn=evaluate_metrics_aggr_fn,
         )
-        # TODO: should we make it a new type?
         self.current_arrays: Optional[dict[str, NDArray]] = None
         self.eta = eta
         self.eta_l = eta_l
@@ -174,7 +174,12 @@ class FedOpt(FedAvg):
 
         # Check keys in aggregated arrays match those in current arrays
         if set(aggregated_ndarrays.keys()) != set(self.current_arrays.keys()):
-            raise ValueError("Keys in aggregated arrays do not match current arrays")
+            reason = (
+                "Keys of the aggregated arrays do not match those of the arrays "
+                "stored at the strategy. `delta_t = aggregated_arrays - "
+                "current_arrays` cannot be computed."
+            )
+            raise AggregationError(reason=reason)
 
         delta_t = {
             k: x - self.current_arrays[k] for k, x in aggregated_ndarrays.items()

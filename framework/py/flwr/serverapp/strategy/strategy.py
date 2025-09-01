@@ -26,7 +26,11 @@ from flwr.common.exit import ExitCode, flwr_exit
 from flwr.server import Grid
 
 from .result import Result
-from .strategy_utils import InconsistentMessageReplies, log_strategy_start_info
+from .strategy_utils import (
+    AggregationError,
+    InconsistentMessageReplies,
+    log_strategy_start_info,
+)
 
 
 class Strategy(ABC):
@@ -227,6 +231,8 @@ class Strategy(ABC):
                 flwr_exit(
                     ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET, message=str(e)
                 )
+            except AggregationError as e:
+                flwr_exit(ExitCode.SERVERAPP_STRATEGY_AGGREGATION_ERROR, message=str(e))
 
             # Log training metrics and append to history
             if agg_arrays is not None:
