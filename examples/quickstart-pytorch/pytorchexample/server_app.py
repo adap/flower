@@ -1,6 +1,5 @@
 """pytorchexample: A Flower / PyTorch app."""
 
-
 from pprint import pprint
 
 import torch

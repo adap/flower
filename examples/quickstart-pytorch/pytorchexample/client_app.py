@@ -1,6 +1,5 @@
 """pytorchexample: A Flower / PyTorch app."""
 
-
 import torch
 from flwr.client import ClientApp
 from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
