@@ -133,6 +133,11 @@ export interface Tool {
 }
 
 /**
+ * Represents the choice of tool to be used in a chat interaction.
+ */
+export type ToolChoice = string | { type: 'function'; function: { name: string } };
+
+/**
  * Represents a single event in a streaming response.
  */
 export interface StreamEvent {
@@ -364,6 +369,15 @@ export interface ChatOptions {
    * Optional array of tools available for the chat.
    */
   tools?: Tool[];
+
+  /**
+   * Optional, if set to `auto`, the model will decide when to use one of the provided tools.
+   * If set to `none`, the model will not use any tools.
+   * If set to `require`, the model must use one of the provided tools.
+   * If set to a specific tool name, the model will use that tool.
+   * If set to a function, the model will use that function tool.
+   */
+  toolChoice?: ToolChoice;
 
   /**
    * If true and remote handoff is enabled, forces the use of a remote engine.

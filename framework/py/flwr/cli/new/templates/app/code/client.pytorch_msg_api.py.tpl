@@ -1,11 +1,12 @@
-"""pytorchexample: A Flower / PyTorch app."""
+"""$project_name: A Flower / $framework_str app."""
 
 import torch
 from flwr.client import ClientApp
 from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
-from pytorchexample.task import Net, load_data
-from pytorchexample.task import test as test_fn
-from pytorchexample.task import train as train_fn
+
+from $import_name.task import Net, load_data
+from $import_name.task import test as test_fn
+from $import_name.task import train as train_fn
 
 # Flower ClientApp
 app = ClientApp()
@@ -24,8 +25,7 @@ def train(msg: Message, context: Context):
     # Load the data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    batch_size = context.run_config["batch-size"]
-    trainloader, _ = load_data(partition_id, num_partitions, batch_size)
+    trainloader, _ = load_data(partition_id, num_partitions)
 
     # Call the training function
     train_loss = train_fn(
@@ -60,8 +60,7 @@ def evaluate(msg: Message, context: Context):
     # Load the data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    batch_size = context.run_config["batch-size"]
-    _, valloader = load_data(partition_id, num_partitions, batch_size)
+    _, valloader = load_data(partition_id, num_partitions)
 
     # Call the evaluation function
     eval_loss, eval_acc = test_fn(

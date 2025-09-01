@@ -22,6 +22,7 @@ import {
   StreamEvent,
   Tool,
   ToolCall,
+  ToolChoice,
 } from '../../typing';
 import { CryptographyHandler } from './cryptoHandler';
 import { createChatRequestData, getHeaders, sendRequest } from './remoteUtils';
@@ -47,6 +48,7 @@ export async function chatStream(
   maxCompletionTokens?: number,
   responseFormat?: ResponseFormat,
   tools?: Tool[],
+  toolChoice?: ToolChoice,
   onStreamEvent?: (event: StreamEvent) => void,
   signal?: AbortSignal
 ): Promise<ChatResponseResult> {
@@ -59,6 +61,7 @@ export async function chatStream(
     responseFormat,
     true,
     tools,
+    toolChoice,
     encrypt,
     cryptoHandler.encryptionId
   );
