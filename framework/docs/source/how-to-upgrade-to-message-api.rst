@@ -57,6 +57,13 @@ version.
 
 Let's dive in!
 
+.. tip::
+
+    If you would like to create a new Flower App using the `Message API`, run the ``flwr
+    new`` command and choose the appropriate template. Alternatively, you may want to
+    take a look at the `quickstart-pytorch
+    <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch>`_ example.
+
 Summary of changes
 ------------------
 
@@ -72,8 +79,8 @@ to use the new message-based communication patterns. This guide will show you ho
 
 1. Update your |serverapp_link|_ to make use of the new `Message`-based strategies. You
    won't need to use the `server_fn` anymore. The new strategies make it easier to
-   customize how the different federated learning rounds are executed, to retrieve results from your
-   run, and more.
+   customize how the different federated learning rounds are executed, to retrieve
+   results from your run, and more.
 2. Update your |clientapp_link|_ so it operates directly on `Message` objects received
    from the |serverapp_link|_. You will be able to keep most of the code from your
    |numpyclient_link|_ implementation but you won't need to create a new class anymore
@@ -81,8 +88,8 @@ to use the new message-based communication patterns. This guide will show you ho
 
 .. tip::
 
-    The main payload ``Message`` objects carry are of type |recorddict_link|_. You can think
-    of it as a dictionary that can hold other types of records, namely
+    The main payload ``Message`` objects carry are of type |recorddict_link|_. You can
+    think of it as a dictionary that can hold other types of records, namely
     |arrayrecord_link|_, |metricrecord_link|_, and |configrecord_link|_. Please refer to
     the documentation for each record for all the details on how they can be constructed
     and adapted to your usecase. In this guide we won't delve into the specifics of each
@@ -177,9 +184,9 @@ strategies, a new ``start`` method is available. It defines a for loop which set
 steps involved in a round of FL. By default it behaves as the original strategies do,
 i.e. a round of FL training followed by one of FL evaluation and a stage to evaluate the
 global model. Note how the `start` method returns results. These are of type `Result`
-and by default contain the final global model (via ``result.arrays``) as well as aggregated
-|metricrecord_link|_ from federated stages and, optionally, metrics from evaluation
-stages done at the `ServerApp`.
+and by default contain the final global model (via ``result.arrays``) as well as
+aggregated |metricrecord_link|_ from federated stages and, optionally, metrics from
+evaluation stages done at the `ServerApp`.
 
 .. note::
 
@@ -226,8 +233,8 @@ Similar to the `ServerApp`, the `ClientApp` no longer requires a helper function
 Instead, with the Message API, you get to define directly how the ClientApp operates on
 `Message` objects received from the `ServerApp`.
 
-Remember `NumPyClient` came with two key built-in methods, ``fit`` and ``evaluate``, that
-were respectively designed for doing federated training and evaluation using the
+Remember `NumPyClient` came with two key built-in methods, ``fit`` and ``evaluate``,
+that were respectively designed for doing federated training and evaluation using the
 client's local data. With the new Message API, you can define similar methods directly
 on the `ClientApp` via decorators to handle incoming `Message` objects.
 
@@ -376,10 +383,3 @@ your existing ``ClientApp``:
         return Message(content=content, reply_to=msg)
 
 This concludes the migration guide!
-
-.. tip::
-
-    If you would like to create a new Flower App using the `Message API`, run the ``flwr
-    new`` command and choose the appropriate template. Alternatively, you may want to
-    take a look at the `quickstart-pytorch
-    <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch>`_ example.
