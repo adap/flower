@@ -443,6 +443,9 @@ complete.
 
     Red Hat OpenShift AI Operator in OpenShift.
 
+Install Data Science Cluster
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 After the Operator is installed, we need to install the ``DataScienceCluster`` using the
 webconsole. Follow the official steps `in this link
 <https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.23/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install#installing-openshift-ai-components-using-web-console_component-install>`_.
@@ -521,6 +524,57 @@ AI``:
 
 Follow the instructions when prompted to "Log in with OpenShift". After logging in, you
 will be taken to the OpenShift AI dashboard.
+
+Create a Custom OpenShift AI Image with Flower
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In OpenShift AI, you will be building and running your Flower app in a workbench, which
+is a Jupyter notebook environment. However, the default OpenShift AI workbench image
+does not come with Flower installed. Therefore, we need to create a custom OpenShift AI
+image that has Flower installed. This custom image will then be used to create a
+workbench.
+
+In the Red Hat OpenShift console, go to ``Builds`` > ``ImageStreams`` >
+``s2i-minimal-notebook``, choose the DockerImage for Python 3.11. Next, in your local
+machine, create a ``Dockerfile`` with the following contents. This Dockerfile is based
+on the minimal Jupyter workbench image for OpenShift AI:
+
+.. dropdown:: Dockerfile
+
+    .. code-block:: bash
+        :substitutions:
+
+        FROM quay.io/modh/odh-workbench-jupyter-minimal-cpu-py311-ubi9@sha256:0ea737f6c626d5d01b44fc8c6537a193ad45c378aed9ff98b209968dff418075
+
+        USER 1001
+
+        RUN pip install flwr[simulation]==|stable_flwr_version|
+
+Build and push the container image to ``quay.io`` so that it's accessible by Red Hat
+OpenShift AI:
+
+.. code-block:: shell
+
+    docker build -t quay.io/flowerlabs/demo/flwr-rhos:0.0.1 . && docker push quay.io/flowerlabs/demo/flwr-rhos:0.0.1
+
+Create Data Science Project
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once the OpenShift AI dashboard is loaded, we need to create a Data Science project to
+host the workbench that you will use to develop and run your Flower app.
+
+1. On the left sidebar, click on ``Home`` and click on the ``Create project`` button in
+   the ``Data Science Projects`` section.
+2. Give your project a name, e.g., ``flower-openshift-demo`` and - if you like, a
+   description. Then, click ``Create``.
+3. Click on your created project to open it.
+4. Navigate to the ``Workbenches`` tab and click on ``Create workbench`` to create a new
+   workbench.
+
+   1. Under "Name and description", provide a name for your workbench, e.g.
+      ``flower-openshift-workbench``.
+
+WIP
 
 Build a custom OpenShift AI Image with Flower
 ---------------------------------------------
