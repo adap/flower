@@ -72,7 +72,7 @@ to use the new message-based communication patterns. This guide will show you ho
 
 1. Update your |serverapp_link|_ to make use of the new `Message`-based strategies. You
    won't need to use the `server_fn` anymore. The new strategies make it easier to
-   customize how the different FL rounds are executed, to retrieve results from your
+   customize how the different federated learning rounds are executed, to retrieve results from your
    run, and more.
 2. Update your |clientapp_link|_ so it operates directly on `Message` objects received
    from the |serverapp_link|_. You will be able to keep most of the code from your
@@ -81,7 +81,7 @@ to use the new message-based communication patterns. This guide will show you ho
 
 .. tip::
 
-    The main payload Message objects carry are of type |recorddict_link|_. You can think
+    The main payload ``Message`` objects carry are of type |recorddict_link|_. You can think
     of it as a dictionary that can hold other types of records, namely
     |arrayrecord_link|_, |metricrecord_link|_, and |configrecord_link|_. Please refer to
     the documentation for each record for all the details on how they can be constructed
@@ -110,8 +110,8 @@ Then, run the following command to install the updated dependencies:
     # Install the app with updated dependencies
     $ pip install -e .
 
-Update your ServerApp
----------------------
+Update your ``ServerApp``
+-------------------------
 
 Starting with Flower 1.21, the `ServerApp` no longer requires a `server_fn` function to
 make use of strategies. This is because a new collection of strategies (all sharing the
@@ -177,7 +177,7 @@ strategies, a new ``start`` method is available. It defines a for loop which set
 steps involved in a round of FL. By default it behaves as the original strategies do,
 i.e. a round of FL training followed by one of FL evaluation and a stage to evaluate the
 global model. Note how the `start` method returns results. These are of type `Result`
-and by default contain the final `global model` as well as aggregated
+and by default contain the final global model (via ``result.arrays``) as well as aggregated
 |metricrecord_link|_ from federated stages and, optionally, metrics from evaluation
 stages done at the `ServerApp`.
 
@@ -216,6 +216,7 @@ stages done at the `ServerApp`.
             initial_arrays=arrays,
             num_rounds=3,
         )
+        print(result)
 
 Update your ClientApp
 ---------------------
@@ -225,7 +226,7 @@ Similar to the `ServerApp`, the `ClientApp` no longer requires a helper function
 Instead, with the Message API, you get to define directly how the ClientApp operates on
 `Message` objects received from the `ServerApp`.
 
-Remember `NumPyClient` came with two key built-in methods ``fit`` and ``evaluate`` that
+Remember `NumPyClient` came with two key built-in methods, ``fit`` and ``evaluate``, that
 were respectively designed for doing federated training and evaluation using the
 client's local data. With the new Message API, you can define similar methods directly
 on the `ClientApp` via decorators to handle incoming `Message` objects.
@@ -273,7 +274,7 @@ then the upgraded design using the Message API.
 
     app = ClientApp(client_fn=client_fn)
 
-Upgrading a ClientApp designed around the `NumPyClient` + `client_fn` abstractions to
+Upgrading a ClientApp designed around the `NumPyClient` and `client_fn` abstractions to
 the Message API would result in the following code. Note that the behavior of the
 `ClientApp` is defined directly in its methods (i.e. a secondary class based on
 `NumPyClient` is no longer needed).
@@ -285,7 +286,7 @@ handling the incoming `Message` objects and returning the appropriate response (
 a `Message`). Note that you'll still be able to use the functions you might have written
 to, for example, train your model using the ML framework of your choice. In this example
 those are represented by ``train_fn`` and ``test_fn``. Follow these steps to migrate
-your existing `Client App`:
+your existing ``ClientApp``:
 
 1. Introduce the `@app.train` and `@app.evaluate` decorators and respective methods.
 2. Copy the lines of code you had in your `client_fn` reading config values from the
