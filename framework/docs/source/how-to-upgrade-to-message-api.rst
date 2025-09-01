@@ -20,11 +20,11 @@
 
 .. |strategy_link| replace:: ``Strategy``
 
-.. _strategy_link: ref-api/flwr.serverapp.Strategy.html
+.. _strategy_link: ref-api/flwr.serverapp.strategy.Strategy.html
 
 .. |fedavg_link| replace:: ``FedAvg``
 
-.. _fedavg_link: ref-api/flwr.serverapp.FedAvg.html
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
 
 .. |message_link| replace:: ``Message``
 
