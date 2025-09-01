@@ -12,30 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""GRPC health servers."""
+"""GRPC health servicers."""
 
 
-from logging import INFO
-
-import grpc
-from grpc_health.v1.health_pb2_grpc import add_HealthServicer_to_server
-
-from flwr.common.grpc import generic_create_grpc_server
-from flwr.common.logger import log
-
+from .health_server import add_args_health, run_health_service_grpc_no_tls
 from .simple_health_servicer import SimpleHealthServicer
 
-
-def run_health_service_grpc_no_tls(address: str) -> grpc.Server:
-    """Run gRPC health server with no TLS."""
-    health_server = generic_create_grpc_server(
-        servicer_and_add_fn=(
-            SimpleHealthServicer(),
-            add_HealthServicer_to_server,
-        ),
-        server_address=address,
-        certificates=None,
-    )
-    log(INFO, "Starting gRPC health server on %s", address)
-    health_server.start()
-    return health_server
+__all__ = [
+    "SimpleHealthServicer",
+    "add_args_health",
+    "run_health_service_grpc_no_tls",
+]

@@ -58,10 +58,10 @@ from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
+from flwr.supercore.grpc_health import run_health_service_grpc_no_tls
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
-from flwr.supercore.health
 
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 
@@ -86,6 +86,7 @@ def start_client_internal(
     flwr_path: Optional[Path] = None,
     isolation: str = ISOLATION_MODE_SUBPROCESS,
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
+    health_server_address: Optional[str] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -144,6 +145,7 @@ def start_client_internal(
     object_store_factory = ObjectStoreFactory()
 
     # Launch ClientAppIo API server
+    grpc_servers = []
     clientappio_server = run_clientappio_api_grpc(
         address=clientappio_api_address,
         state_factory=state_factory,
@@ -151,12 +153,18 @@ def start_client_internal(
         objectstore_factory=object_store_factory,
         certificates=None,
     )
+    grpc_servers.append(clientappio_server)
+
+    # Launch gRPC health server
+    if health_server_address is not None:
+        health_server = run_health_service_grpc_no_tls(health_server_address)
+        grpc_servers.append(health_server)
 
     # Register handlers for graceful shutdown
     register_exit_handlers(
         event_type=EventType.RUN_SUPERNODE_LEAVE,
         exit_message="SuperNode terminated gracefully.",
-        grpc_servers=[clientappio_server],
+        grpc_servers=grpc_servers,
     )
 
     # Initialize NodeState, Ffs, and ObjectStore

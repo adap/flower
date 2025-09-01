@@ -23,9 +23,6 @@ from logging import DEBUG, ERROR
 from typing import Any, Callable, Optional
 
 import grpc
-from grpc_health.v1.health_pb2_grpc import add_HealthServicer_to_server
-
-from flwr.supercore.health import SimpleHealthServicer
 
 from .address import is_port_in_use
 from .logger import log
