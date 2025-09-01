@@ -192,9 +192,9 @@ Deploy Flower SuperLink and SuperNodes on OpenShift
 ---------------------------------------------------
 
 With the OpenShift cluster active, we can now deploy SuperLink and SuperNode pods and
-run a federated workload. In this guide, we will deploy four
-pods: 1x SuperLink, 2x SuperNodes, and 1x service pod to route the traffic to the
-designated ports in the SuperLink.
+run a federated workload. In this guide, we will deploy four pods: 1x SuperLink, 2x
+SuperNodes, and 1x service pod to route the traffic to the designated ports in the
+SuperLink.
 
 First, we need to create an OpenShift project which is equivalent of a Kubernetes
 namespace. We will then deploy the SuperLink and SuperNode pods in this project.
@@ -203,10 +203,9 @@ right. Set ``flower-openshift-demo`` as the project name.
 
 Next, we will add pods. Navigate to ``Workloads`` > ``Pods`` and click on the ``Create
 Pod`` button on the right. There are several ways to create a pod, such as using YAML or
-JSON definitions. For this guide, we will use the YAML definition. 
-Copy and paste the following YAML definition for the SuperLink pod. This manifest is
-adapted from our tutorial on :doc:`how to deploy Flower in GCP
-<how-to-run-flower-on-gcp>`.
+JSON definitions. For this guide, we will use the YAML definition. Copy and paste the
+following YAML definition for the SuperLink pod. This manifest is adapted from our
+tutorial on :doc:`how to deploy Flower in GCP <how-to-run-flower-on-gcp>`.
 
 .. dropdown:: superlink-deployment.yaml
 
@@ -405,9 +404,9 @@ Finally, spin up two SuperNode pods with the following YAML definitions:
                 emptyDir:
                   sizeLimit: 50Mi
 
-To view the status of pods that were just deployed, click on the ``Workloads`` link
-in the left panel. You should be able to see three Flower pods in the "Running" status
-as shown in the screenshot below:
+To view the status of pods that were just deployed, click on the ``Workloads`` link in
+the left panel. You should be able to see three Flower pods in the "Running" status as
+shown in the screenshot below:
 
 .. figure:: ./_static/rhos/rhos_flower_pods.png
     :align: center
@@ -422,7 +421,106 @@ should be able to view the SuperLink logs showing two connected SuperNodes.
 Deploy Red Hat OpenShift AI
 ---------------------------
 
-WIP
+To interface with the deployed SuperLink and SuperNode in the OpenShift cluster, we want
+to make use of OpenShift AI workbench. So, we need to enable this Operator in the
+OpenShift cluster.
+
+First, ensure that the Red Hat OpenShift AI is enabled via the Red Hat OpenShift
+console. You may enable a free trial if you do not have a subscription. Navigate to
+``Operators`` > ``OperatorHub`` and search for ``Red Hat OpenShift AI``. Click on the
+``Red Hat OpenShift AI`` card and then click on the ``Install`` button. Alternatively,
+you may install the OpenShift AI Operator via the OpenShift CLI tool following the
+official instructions `here
+<https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.23/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install#installing-openshift-ai-operator-using-cli_operator-install>`_.
+You should see a green check mark under the ``Status`` column for the ``Red Hat
+OpenShift AI`` Operator in the ``Installed Operators`` tab once the installation is
+complete.
+
+.. figure:: ./_static/rhos/rhosai.png
+    :align: center
+    :width: 90%
+    :alt: Red Hat OpenShift AI Operator in OpenShift
+
+    Red Hat OpenShift AI Operator in OpenShift.
+
+After the Operator is installed, we need to install the ``DataScienceCluster`` using the
+webconsole. Follow the official steps `in this link
+<https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.23/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install#installing-openshift-ai-components-using-web-console_component-install>`_.
+It is also recommended for you to `disable KServe dependencies
+<https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.23/html/installing_and_uninstalling_openshift_ai_self-managed/installing-the-single-model-serving-platform_component-install#disabling-kserve-dependencies_component-install>`_
+since you are not serving ML models for inference. In the ``Installed Operators`` tab,
+click on ``Red Hat OpenShift AI``, navigate to the ``Data Science Cluster`` tab, and
+click on ``Create DataScienceCluster``. Select the YAML view of the configuration and
+paste the following YAML definition:
+
+.. dropdown:: rhosai-datasciencecluster.yaml
+
+    .. code-block:: bash
+        :substitutions:
+
+        apiVersion: datasciencecluster.opendatahub.io/v1
+        kind: DataScienceCluster
+        metadata:
+          name: default-dsc
+          labels:
+            app.kubernetes.io/created-by: rhods-operator
+            app.kubernetes.io/instance: default-dsc
+            app.kubernetes.io/managed-by: kustomize
+            app.kubernetes.io/name: datasciencecluster
+            app.kubernetes.io/part-of: rhods-operator
+        spec:
+          components:
+            codeflare:
+              managementState: Removed
+            kserve:
+              managementState: Removed
+            modelregistry:
+              managementState: Removed
+            feastoperator:
+              managementState: Removed
+            trustyai:
+              managementState: Removed
+            ray:
+              managementState: Removed
+            kueue:
+              managementState: Removed
+            workbenches:
+              workbenchNamespace: rhods-notebooks
+              managementState: Managed
+            dashboard:
+              managementState: Managed
+            modelmeshserving:
+              managementState: Removed
+            llamastackoperator:
+              managementState: Removed
+            datasciencepipelines:
+              managementState: Removed
+            trainingoperator:
+              managementState: Removed
+
+Click on ``Create`` to create the Data Science Cluster. If successful, you should see a
+``default-dsc`` instance in the ``Data Science Clusters`` tab with a green check mark:
+
+.. figure:: ./_static/rhos/rhosai_datasciencecluster.png
+    :align: center
+    :width: 90%
+    :alt: Red Hat OpenShift AI Data Science Cluster
+
+    Red Hat OpenShift AI Data Science Cluster.
+
+Once the above is complete, you will be able to launch OpenShift AI by clicking on the
+grid icon on the top right of the OpenShift console and selecting ``Red Hat OpenShift
+AI``:
+
+.. figure:: ./_static/rhos/launch_rhosai.png
+    :align: center
+    :width: 90%
+    :alt: Launch Red Hat OpenShift AI from OpenShift console
+
+    Launch Red Hat OpenShift AI from OpenShift console.
+
+Follow the instructions when prompted to "Log in with OpenShift". After logging in, you
+will be taken to the OpenShift AI dashboard.
 
 Build a custom OpenShift AI Image with Flower
 ---------------------------------------------
