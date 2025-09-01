@@ -221,6 +221,17 @@ evaluation stages done at the `ServerApp`.
     ``from_numpy_ndarrays``). You may choose these methods if you aren't working with
     PyTorch models.
 
+.. warning::
+
+    Note that the new strategies have renamed several arguments related to node/client
+    sampling, replacing the term ``fit`` with ``train`` and ``clients`` with ``nodes``.
+    The following arguments were renamed:
+
+    - ``fraction_fit`` → ``fraction_train``
+    - ``min_fit_clients`` → ``min_train_nodes``
+    - ``min_evaluate_clients`` → ``min_evaluate_nodes``
+    - ``min_available_clients`` → ``min_available_nodes``
+
 .. code-block:: python
     :emphasize-lines: 3,9,10,14,17,20
 
