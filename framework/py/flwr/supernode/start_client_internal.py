@@ -61,6 +61,7 @@ from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
+from flwr.supercore.health
 
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 
