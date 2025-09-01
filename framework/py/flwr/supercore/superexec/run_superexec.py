@@ -36,7 +36,7 @@ from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 from flwr.supercore.app_utils import start_parent_process_monitor
-from flwr.supercore.grpc_health import run_health_service_grpc_no_tls
+from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 
 from .plugin import ExecPlugin
 
@@ -77,7 +77,7 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
     # Launch gRPC health server
     grpc_servers = []
     if health_server_address is not None:
-        health_server = run_health_service_grpc_no_tls(health_server_address)
+        health_server = run_health_server_grpc_no_tls(health_server_address)
         grpc_servers.append(health_server)
 
     # Create the channel to the AppIO API

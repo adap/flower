@@ -58,7 +58,7 @@ from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
-from flwr.supercore.grpc_health import run_health_service_grpc_no_tls
+from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
@@ -160,7 +160,7 @@ def start_client_internal(
 
     # Launch gRPC health server
     if health_server_address is not None:
-        health_server = run_health_service_grpc_no_tls(health_server_address)
+        health_server = run_health_server_grpc_no_tls(health_server_address)
         grpc_servers.append(health_server)
 
     # Register handlers for graceful shutdown

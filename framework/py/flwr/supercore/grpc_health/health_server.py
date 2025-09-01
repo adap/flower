@@ -27,7 +27,7 @@ from flwr.common.logger import log
 from .simple_health_servicer import SimpleHealthServicer
 
 
-def run_health_service_grpc_no_tls(address: str) -> grpc.Server:
+def run_health_server_grpc_no_tls(address: str) -> grpc.Server:
     """Run gRPC health server with no TLS."""
     health_server = generic_create_grpc_server(
         servicer_and_add_fn=(

@@ -70,7 +70,7 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.supercore.ffs import FfsFactory
-from flwr.supercore.grpc_health import add_args_health, run_health_service_grpc_no_tls
+from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.servicer.control import run_control_api_grpc
 
@@ -358,7 +358,7 @@ def run_superlink() -> None:
 
     # Launch gRPC health server
     if health_server_address is not None:
-        health_server = run_health_service_grpc_no_tls(health_server_address)
+        health_server = run_health_server_grpc_no_tls(health_server_address)
         grpc_servers.append(health_server)
 
     # Graceful shutdown
