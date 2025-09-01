@@ -1,5 +1,6 @@
 """pytorchexample: A Flower / PyTorch app."""
 
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -58,9 +59,7 @@ def load_data(partition_id: int, num_partitions: int, batch_size: int):
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
     # Construct dataloaders
     partition_train_test = partition_train_test.with_transform(apply_transforms)
-    trainloader = DataLoader(
-        partition_train_test["train"], batch_size=batch_size, shuffle=True
-    )
+    trainloader = DataLoader(partition_train_test["train"], batch_size=batch_size, shuffle=True)
     testloader = DataLoader(partition_train_test["test"], batch_size=batch_size)
     return trainloader, testloader
 
