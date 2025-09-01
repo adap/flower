@@ -37,4 +37,4 @@ reconstruction-threshold = 4
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 100
+options.num-supernodes = 25

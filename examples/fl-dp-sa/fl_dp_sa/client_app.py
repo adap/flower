@@ -45,6 +45,5 @@ app = ClientApp(
     client_fn=client_fn,
     mods=[
         secaggplus_mod,
-        fixedclipping_mod,
     ],
 )
