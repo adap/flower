@@ -224,7 +224,7 @@ evaluation stages done at the `ServerApp`.
 .. warning::
 
     Note that the new strategies have renamed several arguments related to node/client
-    sampling, replacing the term ``fit`` with ``train`` and ``clients`` with ``nodes``.
+    sampling, replacing the term `"fit"` with `"train"` and `"clients"` with `"nodes"`.
     The following arguments were renamed:
 
     - ``fraction_fit`` → ``fraction_train``
