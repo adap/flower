@@ -131,7 +131,7 @@ rounds.
     The new `Message`-based strategies are located in the `flwr.serverapp
     <ref-api/flwr.serverapp.html>`_ module unlike the previous strategies which were
     located in the `flwr.server.strategy <ref-api/flwr.server.strategy.html>`_ module.
-    Over time more strategies will be added to the `flwr.serverapp` module. Users are
+    Over time more strategies will be added to the `flwr.serverapp.strategy` module. Users are
     encouraged to use these new strategies.
 
 Since Flower 1.10, the recommended `ServerApp` implementation would look something like
@@ -170,7 +170,7 @@ look as shown below after following these steps:
    those lines directly from your `server_fn` function)
 2. Instantiate your model as usual and construct an ``ArrayRecord`` out of its
    parameters.
-3. Replace your existing strategy with one from the `flwr.serverapp` module. For example
+3. Replace your existing strategy with one from the `flwr.serverapp.strategy` module. For example
    with |fedavg_link|_. Pass the arguments related to node sampling to the constructor
    of your strategy.
 4. Call the ``start`` method of the new strategy passing to it the `ArrayRecord`
@@ -201,7 +201,7 @@ evaluation stages done at the `ServerApp`.
 
     from flwr.common import ArrayRecord, ConfigRecord, Context, MetricRecord
     from flwr.server import Grid, ServerApp
-    from flwr.serverapp import FedAvg
+    from flwr.serverapp.strategy import FedAvg
 
     # Create ServerApp
     app = ServerApp()
@@ -351,7 +351,7 @@ your existing ``ClientApp``:
                 "num-examples": len(train_loader.dataset),
             }
         )
-        # Construct RecorDict and add ArrayRecord and MetricRecord
+        # Construct RecordDict and add ArrayRecord and MetricRecord
         content = RecordDict({"arrays": model_record, "metrics": metrics})
         return Message(content=content, reply_to=msg)
 
@@ -378,7 +378,7 @@ your existing ``ClientApp``:
                 "num-examples": len(test_loader.dataset),
             }
         )
-        # Construct RecorDict and add MetricRecord
+        # Construct RecordDict and add MetricRecord
         content = RecordDict({"metrics": metrics})
         return Message(content=content, reply_to=msg)
 
