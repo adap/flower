@@ -90,10 +90,35 @@ to use the new message-based communication patterns. This guide will show you ho
 
     The main payload ``Message`` objects carry are of type |recorddict_link|_. You can
     think of it as a dictionary that can hold other types of records, namely
-    |arrayrecord_link|_, |metricrecord_link|_, and |configrecord_link|_. Please refer to
-    the documentation for each record for all the details on how they can be constructed
-    and adapted to your usecase. In this guide we won't delve into the specifics of each
-    record type, but rather focus on the overall migration process.
+    |arrayrecord_link|_, |metricrecord_link|_, and |configrecord_link|_. Let's see with
+    a few short examples what's the intended usage behind each type of record.
+
+    .. code-block:: python
+
+        from flwr.common import ArrayRecord, MetricRecord, ConfigRecord, RecordDict
+
+        # ConfigRecord can be used to communicate configs between ServerApp and ClientApp
+        # They can hold scalars, but also strings and booleans
+        config = ConfigRecord(
+            {"batch_size": 32, "use_augmentation": True, "data-path": "/my/dataset"}
+        )
+
+        # MetricRecords are designed for scalar-based metrics only (i.e. int/float/list[int]/list[float])
+        # By limiting the types Flower can aggregate MetricRecords automatically
+        metrics = MetricRecord({"accuracy": 0.9, "losses": [0.1, 0.001], "perplexity": 2.31})
+
+        # ArrayRecord objects are designed to communicate arrays/tensors/weights from ML models
+        array_record = ArrayRecord(my_model.state_dict())  # for a PyTorch model
+        array_record_other = ArrayRecord(my_model.to_numpy_ndarrays())  # for other ML models
+
+        # A RecordDict is like a dictionary that holds named records.
+        # This is the main payload of a Message
+        rd = RecordDict({"my-config": config, "metrics": metrics, "my-model": array_record})
+
+    Please refer to the documentation for each record for all the details on how they
+    can be constructed and adapted to your usecase. In this guide we won't delve into
+    the specifics of each record type, but rather focus on the overall migration
+    process.
 
 Install update
 --------------
@@ -128,11 +153,11 @@ rounds.
 
 .. note::
 
-    The new `Message`-based strategies are located in the `flwr.serverapp
-    <ref-api/flwr.serverapp.html>`_ module unlike the previous strategies which were
-    located in the `flwr.server.strategy <ref-api/flwr.server.strategy.html>`_ module.
-    Over time more strategies will be added to the `flwr.serverapp.strategy` module. Users are
-    encouraged to use these new strategies.
+    The new `Message`-based strategies are located in the `flwr.serverapp.strate
+    <ref-api/flwr.serverapp.Strategy.html>`_ module unlike the previous strategies which
+    were located in the `flwr.server.strategy <ref-api/flwr.server.strategy.html>`_
+    module. Over time more strategies will be added to the `flwr.serverapp.strategy`
+    module. Users are encouraged to use these new strategies.
 
 Since Flower 1.10, the recommended `ServerApp` implementation would look something like
 the code snippet below. Naturally, more customization can be applied to the Strategy by,
@@ -170,9 +195,9 @@ look as shown below after following these steps:
    those lines directly from your `server_fn` function)
 2. Instantiate your model as usual and construct an ``ArrayRecord`` out of its
    parameters.
-3. Replace your existing strategy with one from the `flwr.serverapp.strategy` module. For example
-   with |fedavg_link|_. Pass the arguments related to node sampling to the constructor
-   of your strategy.
+3. Replace your existing strategy with one from the `flwr.serverapp.strategy` module.
+   For example with |fedavg_link|_. Pass the arguments related to node sampling to the
+   constructor of your strategy.
 4. Call the ``start`` method of the new strategy passing to it the `ArrayRecord`
    representing the initial state of your global model, the number of FL rounds and, the
    `Grid` object (which is used internally to communicate with the nodes executing the
