@@ -33,6 +33,31 @@ export interface Message {
    * An optional list of calls to specific tools
    */
   toolCalls?: ToolCall[];
+
+  /**
+   * For remote calls, the usage statistics of the message.
+   */
+  usage?: Usage;
+}
+
+/**
+ * The usage statistics for a chat message.
+ */
+export interface Usage {
+  /*
+   * The number of tokens in the prompt, if available.
+   */
+  promptTokens?: number;
+
+  /*
+   * The number of tokens contained in the response, if available.
+   */
+  completionTokens?: number;
+
+  /*
+   * The total number of tokens used (prompt + completion), if available.
+   */
+  totalTokens?: number;
 }
 
 /**

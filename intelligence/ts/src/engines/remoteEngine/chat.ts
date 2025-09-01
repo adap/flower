@@ -23,6 +23,7 @@ import {
   Tool,
   ToolCall,
   ToolChoice,
+  Usage,
 } from '../../typing';
 import { CryptographyHandler } from './cryptoHandler';
 import { createChatRequestData, getHeaders, sendRequest } from './remoteUtils';
@@ -102,6 +103,7 @@ async function processStream(
   const reader = body.getReader();
   let accumulated = '';
   let finalTools: ToolCall[] | null = null;
+  let usage: Usage | undefined;
   const pendingToolCalls: Record<string, { name: string; buffer: string }> = {};
   let done = false;
   const abortListener = () => void reader.cancel();
@@ -128,6 +130,7 @@ async function processStream(
         }
         if (chunkResult.done) {
           done = true;
+          usage = chunkResult.message.usage;
           break;
         }
         if (chunkResult.toolsUpdated && chunkResult.message.toolCalls) {
@@ -144,6 +147,7 @@ async function processStream(
           role: 'assistant',
           content: '',
           toolCalls: finalTools,
+          usage: usage,
         },
       };
     }
@@ -270,7 +274,18 @@ async function processChunk(
   }
 
   if (isFinalChunk(parsed)) {
-    return { ok: true, message: { role: 'assistant', content: '' } };
+    return {
+      ok: true,
+      message: {
+        role: 'assistant',
+        content: '',
+        usage: {
+          promptTokens: parsed.usage.prompt_tokens,
+          completionTokens: parsed.usage.completion_tokens,
+          totalTokens: parsed.usage.total_tokens,
+        },
+      },
+    };
   }
 
   if (isPlatformHttpError(parsed)) {
@@ -350,6 +365,7 @@ export async function extractChatOutput(
     message: {
       role: message.role as Message['role'],
       content: content,
+      usage: response.usage,
       ...(toolCalls && { toolCalls: toolCalls }),
     },
   };
