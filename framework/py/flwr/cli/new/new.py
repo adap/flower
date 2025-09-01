@@ -99,8 +99,48 @@ def render_and_create(file_path: Path, template: str, context: dict[str, str]) -
     create_file(file_path, content)
 
 
+def add_end_prompt(package_name: str, llm_challenge_str: str | None = None):
+    """Add ending prompt after Flower App creation."""
+    prompt = typer.style(
+        "🎊 Flower App creation successful.\n\n"
+        "To run your Flower App, first install its dependencies:\n\n",
+        fg=typer.colors.GREEN,
+        bold=True,
+    )
+
+    _add = "	huggingface-cli login\n" if llm_challenge_str else ""
+
+    prompt += typer.style(
+        f"	cd {package_name} && pip install -e .\n" + _add + "\n",
+        fg=typer.colors.BRIGHT_CYAN,
+        bold=True,
+    )
+
+    prompt += typer.style(
+        "then, run the app:\n\n ",
+        fg=typer.colors.GREEN,
+        bold=True,
+    )
+
+    prompt += typer.style(
+        "\tflwr run .\n\n",
+        fg=typer.colors.BRIGHT_CYAN,
+        bold=True,
+    )
+
+    prompt += typer.style(
+        "💡 Check the README in your app directory to learn how to\n"
+        "customize it and how to run it using the Deployment Runtime.\n",
+        fg=typer.colors.GREEN,
+        bold=True,
+    )
+
+    return prompt
+
+
 # Security: prevent zip-slip
 def _safe_extract_zip(zf: zipfile.ZipFile, dest_dir: Path) -> None:
+    """Extract ZIP file into destination directory."""
     dest_dir = dest_dir.resolve()
 
     def _is_within_directory(base: Path, target: Path) -> bool:
@@ -133,6 +173,7 @@ def _safe_extract_zip(zf: zipfile.ZipFile, dest_dir: Path) -> None:
 
 
 def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
+    """Download ZIP file from FlowerHub to memory."""
     try:
         r = requests.get(presigned_url, timeout=60)
         r.raise_for_status()
@@ -148,6 +189,7 @@ def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
 
 
 def _request_download_link(identifier: str) -> str:
+    """Request download link from Flower platform API"""
     url = f"{PLATFORM_API_URL}/hub/download-link"
     headers = {
         "Content-Type": "application/json",
@@ -161,20 +203,21 @@ def _request_download_link(identifier: str) -> str:
     try:
         resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
     except requests.RequestException as e:
-        raise typer.BadParameter(f"Failed to reach platform API: {e}") from e
+        raise typer.BadParameter(f"Failed to reach Flower platform API: {e}") from e
 
     if resp.status_code == 404:
         raise typer.BadParameter(f"{identifier} not found in FlowerHub")
     if not resp.ok:
-        raise typer.BadParameter(f"Platform API error: {resp.status_code} {resp.text}")
+        raise typer.BadParameter(f"Flower platform API error: {resp.status_code} {resp.text}")
 
     data = resp.json()
     if "url" not in data:
-        raise typer.BadParameter("Bad response from platform API (missing 'url')")
+        raise typer.BadParameter("Bad response from Flower platform API (missing 'url')")
     return data["url"]
 
 
 def download_remote_app_via_api(identifier: str) -> None:
+    """Download App from FlowerHub via Flower platform API"""
     # Parse @user/app just to derive local dir name
     m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", identifier)
     if not m:
@@ -194,7 +237,7 @@ def download_remote_app_via_api(identifier: str) -> None:
 
     print(
         typer.style(
-            f"\n🔗 Requesting download link for {identifier}…",
+            f"\n🔗 Requesting download link for {identifier}...",
             fg=typer.colors.GREEN,
             bold=True,
         )
@@ -203,7 +246,7 @@ def download_remote_app_via_api(identifier: str) -> None:
 
     print(
         typer.style(
-            f"⬇️  Downloading ZIP into memory…",
+            f"⬇️  Downloading ZIP into memory...",
             fg=typer.colors.GREEN,
             bold=True,
         )
@@ -212,7 +255,7 @@ def download_remote_app_via_api(identifier: str) -> None:
 
     print(
         typer.style(
-            f"📦 Unpacking into {project_dir} …",
+            f"📦 Unpacking into {project_dir}...",
             fg=typer.colors.GREEN,
             bold=True,
         )
@@ -220,18 +263,7 @@ def download_remote_app_via_api(identifier: str) -> None:
     with zipfile.ZipFile(zip_buf) as zf:
         _safe_extract_zip(zf, Path.cwd())
 
-    print(
-        typer.style(
-            "\n🎊 Flower App download successful.\n\n"
-            "To run your Flower App, first install its dependencies:\n\n"
-            f"\tcd {app_name} && pip install -e .\n\n"
-            "then, run the app:\n\n"
-            "\tflwr run .\n\n"
-            "💡 Check the README in your app directory for usage details.\n",
-            fg=typer.colors.GREEN,
-            bold=True,
-        )
-    )
+    print(add_end_prompt(app_name))
 
 
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
@@ -418,38 +450,4 @@ def new(
             context=context,
         )
 
-    prompt = typer.style(
-        "🎊 Flower App creation successful.\n\n"
-        "To run your Flower App, first install its dependencies:\n\n",
-        fg=typer.colors.GREEN,
-        bold=True,
-    )
-
-    _add = "	huggingface-cli login\n" if llm_challenge_str else ""
-
-    prompt += typer.style(
-        f"	cd {package_name} && pip install -e .\n" + _add + "\n",
-        fg=typer.colors.BRIGHT_CYAN,
-        bold=True,
-    )
-
-    prompt += typer.style(
-        "then, run the app:\n\n ",
-        fg=typer.colors.GREEN,
-        bold=True,
-    )
-
-    prompt += typer.style(
-        "\tflwr run .\n\n",
-        fg=typer.colors.BRIGHT_CYAN,
-        bold=True,
-    )
-
-    prompt += typer.style(
-        "💡 Check the README in your app directory to learn how to\n"
-        "customize it and how to run it using the Deployment Runtime.\n",
-        fg=typer.colors.GREEN,
-        bold=True,
-    )
-
-    print(prompt)
+    print(add_end_prompt(package_name, llm_challenge_str))
