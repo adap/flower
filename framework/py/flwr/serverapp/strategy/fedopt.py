@@ -126,8 +126,6 @@ class FedOpt(FedAvg):
             train_metrics_aggr_fn=train_metrics_aggr_fn,
             evaluate_metrics_aggr_fn=evaluate_metrics_aggr_fn,
         )
-        # TODO: dict[str, NDArray]
-        # TODO: i.e. {k: array.numpy() for k,array in <arrayrecord>.items()})
         # TODO: should we make it a new type?
         self.current_arrays: Optional[dict[str, NDArray]] = None
         self.eta = eta
@@ -160,10 +158,6 @@ class FedOpt(FedAvg):
     ) -> Iterable[Message]:
         """Configure the next round of federated training."""
         # Keep track of array record being communicated
-        # TODO: a point of diff w.r.t previous strategies.
-        # the current weights was always set (externally by the Server class fit FL loop)
-        # (the original FedOpt didn't need of this step in configure_fit)
-        # I think it's clearer to keep track of the current arrays explicitly like this
         self.current_arrays = {k: array.numpy() for k, array in arrays.items()}
         return super().configure_train(server_round, arrays, config, grid)
 
@@ -178,11 +172,12 @@ class FedOpt(FedAvg):
             k: array.numpy() for k, array in aggregated_arrayrecord.items()
         }
 
+        # Check keys in aggregated arrays match those in current arrays
+        if set(aggregated_ndarrays.keys()) != set(self.current_arrays.keys()):
+            raise ValueError("Keys in aggregated arrays do not match current arrays")
+
         delta_t = {
-            k: x - y
-            for (k, x), (_, y) in zip(
-                aggregated_ndarrays.items(), self.current_arrays.items()
-            )
+            k: x - self.current_arrays[k] for k, x in aggregated_ndarrays.items()
         }
 
         # m_t
