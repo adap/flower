@@ -135,6 +135,9 @@ def start_client_internal(
     clientappio_api_address : str
         (default: `CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS`)
         The SuperNode gRPC server address.
+    health_server_address : Optional[str] (default: None)
+        The address of the health server. If `None` is provided, the health server will
+        NOT be started.
     """
     if insecure is None:
         insecure = root_certificates is None
