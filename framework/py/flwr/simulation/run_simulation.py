@@ -50,6 +50,8 @@ from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
+from flwr.common.exception import AppExitException
+from flwr.common.exit import ExitCode, flwr_exit
 
 
 def _replace_keys(d: Any, match: str, target: str) -> Any:
@@ -156,17 +158,14 @@ def run_simulation_from_cli() -> None:
             server_app_run_config=fused_config,
             is_app=True,
         )
+        exit_code = ExitCode.SUCCESS
     except Exception as ex:  # pylint: disable=broad-exception-caught
-        exc_entity = "Simulation"
-        log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
-        run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
-
         # Set exit code
         exit_code = ExitCode.SERVERAPP_EXCEPTION  # General exit code
         if isinstance(ex, AppExitException):
             exit_code = ex.exit_code
 
-
+    flwr_exit(exit_code)
 
 # Entry point from Python session (script or notebook)
 # pylint: disable=too-many-arguments,too-many-positional-arguments
