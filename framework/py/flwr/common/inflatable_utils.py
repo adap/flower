@@ -34,7 +34,7 @@ from .constant import (
     PULL_MAX_TIME,
     PULL_MAX_TRIES_PER_OBJECT,
 )
-from .exit_handlers import add_exit_handler
+from .exit import add_exit_handler
 from .inflatable import (
     InflatableObject,
     UnexpectedObjectContentError,

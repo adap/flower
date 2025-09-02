@@ -20,7 +20,7 @@ from logging import WARN
 from typing import Optional, Union
 
 from flwr.common.config import get_flwr_dir
-from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.exit import register_signal_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
@@ -36,11 +36,12 @@ from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 from flwr.supercore.app_utils import start_parent_process_monitor
+from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 
 from .plugin import ExecPlugin
 
 
-def run_superexec(
+def run_superexec(  # pylint: disable=R0913,R0914,R0917
     plugin_class: type[ExecPlugin],
     stub_class: Union[
         type[ClientAppIoStub], type[ServerAppIoStub], type[SimulationIoStub]
@@ -48,6 +49,7 @@ def run_superexec(
     appio_api_address: str,
     flwr_dir: Optional[str] = None,
     parent_pid: Optional[int] = None,
+    health_server_address: Optional[str] = None,
 ) -> None:
     """Run Flower SuperExec.
 
@@ -64,10 +66,19 @@ def run_superexec(
     parent_pid : Optional[int] (default: None)
         The PID of the parent process. If provided, the SuperExec will terminate
         when the parent process exits.
+    health_server_address : Optional[str] (default: None)
+        The address of the health server. If `None` is provided, the health server will
+        NOT be started.
     """
     # Start monitoring the parent process if a PID is provided
     if parent_pid is not None:
         start_parent_process_monitor(parent_pid)
+
+    # Launch gRPC health server
+    grpc_servers = []
+    if health_server_address is not None:
+        health_server = run_health_server_grpc_no_tls(health_server_address)
+        grpc_servers.append(health_server)
 
     # Create the channel to the AppIO API
     # No TLS support for now, so insecure connection
@@ -79,9 +90,10 @@ def run_superexec(
     channel.subscribe(on_channel_state_change)
 
     # Register exit handlers to close the channel on exit
-    register_exit_handlers(
+    register_signal_handlers(
         event_type=EventType.RUN_SUPEREXEC_LEAVE,
         exit_message="SuperExec terminated gracefully.",
+        grpc_servers=grpc_servers,
         exit_handlers=[lambda: channel.close()],  # pylint: disable=W0108
     )
 
