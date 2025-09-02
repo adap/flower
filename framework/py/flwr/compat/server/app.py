@@ -22,7 +22,7 @@ from typing import Optional
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS
-from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.exit import register_signal_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
@@ -154,7 +154,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     )
 
     # Graceful shutdown
-    register_exit_handlers(
+    register_signal_handlers(
         event_type=EventType.START_SERVER_LEAVE,
         exit_message="Flower server terminated gracefully.",
         grpc_servers=[grpc_server],
