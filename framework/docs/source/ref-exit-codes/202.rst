@@ -1,0 +1,12 @@
+[202] SERVERAPP_STRATEGY_AGGREGATION_ERROR
+==========================================
+
+Description
+-----------
+
+The strategy encountered an error during aggregation.
+
+How to Resolve
+--------------
+
+Check the logs for more details on the specific aggregation error encountered.
