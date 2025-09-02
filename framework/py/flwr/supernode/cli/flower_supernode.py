@@ -41,6 +41,7 @@ from flwr.common.constant import (
 )
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import log
+from flwr.supercore.grpc_health import add_args_health
 from flwr.supernode.start_client_internal import start_client_internal
 
 
@@ -79,6 +80,7 @@ def flower_supernode() -> None:
         flwr_path=args.flwr_dir,
         isolation=args.isolation,
         clientappio_api_address=args.clientappio_api_address,
+        health_server_address=args.health_server_address,
     )
 
 
@@ -118,6 +120,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         help="ClientAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
         f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
     )
+    add_args_health(parser)
 
     return parser
 
