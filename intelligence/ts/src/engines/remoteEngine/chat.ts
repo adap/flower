@@ -23,6 +23,7 @@ import {
   Tool,
   ToolCall,
   ToolChoice,
+  Usage,
 } from '../../typing';
 import { CryptographyHandler } from './cryptoHandler';
 import { createChatRequestData, getHeaders, sendRequest } from './remoteUtils';
@@ -102,6 +103,7 @@ async function processStream(
   const reader = body.getReader();
   let accumulated = '';
   let finalTools: ToolCall[] | null = null;
+  let usage: Usage | undefined;
   const pendingToolCalls: Record<string, { name: string; buffer: string }> = {};
   let done = false;
   const abortListener = () => void reader.cancel();
@@ -118,6 +120,7 @@ async function processStream(
         const chunkResult = await processChunk(
           part,
           finalTools,
+          usage,
           pendingToolCalls,
           cryptoHandler,
           encrypt,
@@ -128,10 +131,12 @@ async function processStream(
         }
         if (chunkResult.done) {
           done = true;
+          usage = chunkResult.usage;
           break;
         }
         if (chunkResult.toolsUpdated && chunkResult.message.toolCalls) {
           finalTools = chunkResult.message.toolCalls;
+          usage = chunkResult.usage;
         }
         accumulated += chunkResult.message.content;
       }
@@ -145,6 +150,7 @@ async function processStream(
           content: '',
           toolCalls: finalTools,
         },
+        usage,
       };
     }
 
@@ -154,6 +160,7 @@ async function processStream(
         role: 'assistant',
         content: accumulated,
       },
+      usage,
     };
   } finally {
     signal?.removeEventListener('abort', abortListener);
@@ -167,6 +174,7 @@ function splitJsonChunks(text: string): string[] {
 async function processChunk(
   chunk: string,
   finalTools: ToolCall[] | null,
+  usage: Usage | undefined,
   pendingToolCalls: Record<string, { name: string; buffer: string }>,
   cryptoHandler: CryptographyHandler,
   encrypt: boolean,
@@ -174,7 +182,7 @@ async function processChunk(
 ): Promise<ChatResponseResult & { toolsUpdated?: boolean; done?: boolean }> {
   const data = getServerSentEventData(chunk);
   if (data === '[DONE]') {
-    return { ok: true, message: { role: 'assistant', content: '' }, done: true };
+    return { ok: true, message: { role: 'assistant', content: '' }, usage, done: true };
   }
 
   let parsed: unknown;
@@ -184,6 +192,22 @@ async function processChunk(
     return {
       ok: false,
       failure: { code: FailureCode.RemoteError, description: 'Invalid JSON chunk received.' },
+    };
+  }
+
+  if (isFinalChunk(parsed)) {
+    return {
+      ok: true,
+      message: {
+        role: 'assistant',
+        content: '',
+      },
+      usage: {
+        promptTokens: parsed.usage.prompt_tokens,
+        completionTokens: parsed.usage.completion_tokens,
+        totalTokens: parsed.usage.total_tokens,
+      },
+      done: true,
     };
   }
 
@@ -264,13 +288,14 @@ async function processChunk(
 
     return {
       ok: true,
-      message: { role: 'assistant', content: text, ...(finalTools && { toolCalls: finalTools }) },
+      message: {
+        role: 'assistant',
+        content: text,
+        ...(finalTools && { toolCalls: finalTools }),
+      },
+      usage,
       toolsUpdated,
     };
-  }
-
-  if (isFinalChunk(parsed)) {
-    return { ok: true, message: { role: 'assistant', content: '' } };
   }
 
   if (isPlatformHttpError(parsed)) {
@@ -352,5 +377,6 @@ export async function extractChatOutput(
       content: content,
       ...(toolCalls && { toolCalls: toolCalls }),
     },
+    usage: response.usage,
   };
 }
