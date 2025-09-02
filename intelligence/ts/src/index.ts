@@ -28,6 +28,7 @@ export type {
   StreamEvent,
   Tool,
   ToolCall,
+  ToolChoice,
   ToolParameterProperty,
   ToolFunctionParameters,
   ToolFunction,
