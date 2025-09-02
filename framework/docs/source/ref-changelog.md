@@ -1,6 +1,123 @@
 # Changelog
 
-## Unreleased
+## v1.21.0 (2025-09-03)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Evram`, `Heng Pan`, `Javier`, `Robert Steiner`, `Yan Gao` <!---TOKEN_v1.21.0-->
+
+
+- **Introduce SuperExec for orchestrating application processes** ([#5659](https://github.com/adap/flower/pull/5659), [#5674](https://github.com/adap/flower/pull/5674), [#5678](https://github.com/adap/flower/pull/5678), [#5680](https://github.com/adap/flower/pull/5680), [#5682](https://github.com/adap/flower/pull/5682), [#5683](https://github.com/adap/flower/pull/5683), [#5685](https://github.com/adap/flower/pull/5685), [#5696](https://github.com/adap/flower/pull/5696), [#5699](https://github.com/adap/flower/pull/5699), [#5700](https://github.com/adap/flower/pull/5700), [#5701](https://github.com/adap/flower/pull/5701), [#5702](https://github.com/adap/flower/pull/5702), [#5703](https://github.com/adap/flower/pull/5703), [#5706](https://github.com/adap/flower/pull/5706), [#5713](https://github.com/adap/flower/pull/5713), [#5726](https://github.com/adap/flower/pull/5726))
+
+	SuperExec is a new component responsible for scheduling, launching, and managing application processes (e.g., `ServerApp`, `ClientApp`) in Flower deployments. It is automatically spawned when running a `SuperLink` or `SuperNode` in subprocess mode. This feature introduces a token-based mechanism that enhances security by enabling app-level authentication for each execution. Supporting changes include new RPCs (`ListAppsToLaunch`, `RequestToken`, `GetRun`), protocol updates, plugin abstractions (`SimulationExecPlugin`, `ServerAppExecPlugin`), and Docker image support for SuperExec. For more details, refer to the updated [Flower architecture explainer](https://flower.ai/docs/framework/v1.20.0/en/explanation-flower-architecture.html).
+
+
+### Update docs for SuperExec
+- **docs(framework): Rearrange exit codes to include** `SuperExec` ([#5734](https://github.com/adap/flower/pull/5734))
+- **docs(framework): Update quickstart-docker guide to use SuperExec** ([#5737](https://github.com/adap/flower/pull/5737))
+- **docs(framework): Update Flower network communication doc to use SuperExec** ([#5759](https://github.com/adap/flower/pull/5759))
+- **docs(framework): Update Flower architecture explainer to use SuperExec** ([#5751](https://github.com/adap/flower/pull/5751))
+- **docs(framework): Update docs to include** `flower-superexec` **reference** ([#5735](https://github.com/adap/flower/pull/5735))
+- **docs(framework): Update GCP tutorial to use SuperExec** ([#5731](https://github.com/adap/flower/pull/5731))
+
+### Introduce strategy for Message API
+- **feat(framework): Introduce first** `Message` **-based strategy** ([#5710](https://github.com/adap/flower/pull/5710))
+- **feat(framework): Introduce Error code for** `Message` **-based strategies receiving an unaggregatable set of reply messages** ([#5771](https://github.com/adap/flower/pull/5771))
+- **refactor(framework): Fix recently introduced modules** ([#5774](https://github.com/adap/flower/pull/5774))
+- **refactor(framework): Move new strategies into submodule** ([#5787](https://github.com/adap/flower/pull/5787))
+
+### New template pytorch (message api)
+- **feat(framework): Add** `PyTorch` `flwr new` **template with** `Message API` ([#5784](https://github.com/adap/flower/pull/5784))
+
+### Update quickstart-pytorch to use Message API
+- **docs(framework): Update** `quickstart-pytorch` **tutorial** ([#5786](https://github.com/adap/flower/pull/5786))
+- **refactor(framework): Update** `quickstart-pytorch` **to** `Message API` ([#5785](https://github.com/adap/flower/pull/5785))
+
+### Improve helm guide
+- **docs(framework): Add parameters section to Helm guide** ([#5733](https://github.com/adap/flower/pull/5733))
+- **docs(framework): Change Helm docs to Markdown format for better compatibility** ([#5711](https://github.com/adap/flower/pull/5711))
+- **docs(framework): Document how to set a custom secretKey** ([#5765](https://github.com/adap/flower/pull/5765))
+- **docs(framework): Update Helm TLS documentation for 1.20** ([#5758](https://github.com/adap/flower/pull/5758))
+- **docs(framework): Add audit logging configuration to Helm docs** ([#5748](https://github.com/adap/flower/pull/5748))
+
+### Improve docs
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5788](https://github.com/adap/flower/pull/5788))
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5775](https://github.com/adap/flower/pull/5775))
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5764](https://github.com/adap/flower/pull/5764))
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5782](https://github.com/adap/flower/pull/5782))
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5769](https://github.com/adap/flower/pull/5769))
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5753](https://github.com/adap/flower/pull/5753))
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5723](https://github.com/adap/flower/pull/5723))
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5655](https://github.com/adap/flower/pull/5655))
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5738](https://github.com/adap/flower/pull/5738))
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5795](https://github.com/adap/flower/pull/5795))
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5692](https://github.com/adap/flower/pull/5692))
+- **docs(framework): Remove** `flower-simulation` **for CLI reference documentation** ([#5739](https://github.com/adap/flower/pull/5739))
+- **docs(framework): Use the correct stable version** ([#5740](https://github.com/adap/flower/pull/5740))
+- **docs(framework): Restructure tutorial series** ([#5159](https://github.com/adap/flower/pull/5159))
+- **ci(framework): Use the latest stable version as default version in framework documentation** ([#5668](https://github.com/adap/flower/pull/5668))
+
+### CI/CD
+- **feat(framework): Bump** `mdformat` **from** `0.7.18` **to** `0.7.22` ([#5714](https://github.com/adap/flower/pull/5714))
+- **docs(framework): Update Docker Readmes for 1.20.0** ([#5650](https://github.com/adap/flower/pull/5650))
+- **ci(framework): Fix auto translation PRs title** ([#5796](https://github.com/adap/flower/pull/5796))
+- **ci(:skip): Fail CI if** `"ERROR"` **keyword is found in the log** ([#5656](https://github.com/adap/flower/pull/5656))
+- **ci(framework): Fix incorrect bash parameter expansion for tests** ([#5712](https://github.com/adap/flower/pull/5712))
+- **ci(framework): Make framework E2E tests run with Python 3.10 as minimum** ([#5754](https://github.com/adap/flower/pull/5754))
+- **ci(:skip): Enforce a column in the PR titles** ([#5651](https://github.com/adap/flower/pull/5651))
+- **ci(framework): Bump TensorFlow version in E2E test** ([#5755](https://github.com/adap/flower/pull/5755))
+- **ci(framework): Bump** `spacy` **from the yanked** `3.7.6` **to** `3.8.7` ([#5747](https://github.com/adap/flower/pull/5747))
+- **ci(:skip): Bump versions to** `v1.21.0` **and add** `## Unreleased` **header** ([#5647](https://github.com/adap/flower/pull/5647))
+
+### General improvements
+- **feat(framework): Limit the concurrent attempts for reconnection** ([#5622](https://github.com/adap/flower/pull/5622))
+- **feat(framework): Introduce a minimal** `CoreState` ([#5673](https://github.com/adap/flower/pull/5673))
+- **feat(framework): Introduce** `SUPERLINK_INVALID_ARGS` **error code** ([#5675](https://github.com/adap/flower/pull/5675))
+- **refactor(framework): Delete the local variable** `messages` **after pushing in** `Grid.send_and_receive` ([#5746](https://github.com/adap/flower/pull/5746))
+- **refactor(framework): Ensure** `run_once=True` **when token is set for** `flwr-serverapp` ([#5708](https://github.com/adap/flower/pull/5708))
+- **refactor(framework): Update log message when using system certificates** ([#5660](https://github.com/adap/flower/pull/5660))
+- **fix(framework): Support parent process monitoring on Windows** ([#5697](https://github.com/adap/flower/pull/5697))
+- **fix(framework): Print the warning with timestamp** ([#5736](https://github.com/adap/flower/pull/5736))
+- **fix(framework): Fix version docs linked in repo README** ([#5676](https://github.com/adap/flower/pull/5676))
+- **refactor(framework): Replace** `"Flower ECE"` **with** `"Flower Deployment Runtime"` **in logs** ([#5750](https://github.com/adap/flower/pull/5750))
+- **fix(framework): Add missing space in error log** ([#5757](https://github.com/adap/flower/pull/5757))
+- **refactor(framework): Update** `CoreState.create_token` **behavior** ([#5686](https://github.com/adap/flower/pull/5686))
+- **fix(framework): Allow empty iterable of** `Message` **objects passed to** `GrpcGric.push_message` ([#5777](https://github.com/adap/flower/pull/5777))
+- **refactor(framework): Raise** `SIGKILL` **when the parent process terminates** ([#5722](https://github.com/adap/flower/pull/5722))
+- **refactor(framework): Ensure local variables are assigned before reference** ([#5720](https://github.com/adap/flower/pull/5720))
+- **refactor(examples): Format quickstart-pytorch** ([#5789](https://github.com/adap/flower/pull/5789))
+- **fix(framework): Fix test for** `ClientAppIoServicer` ([#5719](https://github.com/adap/flower/pull/5719))
+- **refactor(framework): Add new modules to top-level** `__init__.py` ([#5776](https://github.com/adap/flower/pull/5776))
+
+### New features
+
+### Documentation improvements
+
+### Incompatible changes
+
+- **break(framework): Rename Exec API to Control API throughout the framework** ([#5665](https://github.com/adap/flower/pull/5665))
+- **feat(framework): Bring back** `--exec-api-address` **for backward compatibility** ([#5671](https://github.com/adap/flower/pull/5671))
+- **refactor(framework): Rename** `exec.proto` **to** `control.proto` ([#5663](https://github.com/adap/flower/pull/5663))
+- **refactor(framework): Rename Exec API to Control API in documentation** ([#5667](https://github.com/adap/flower/pull/5667))
+
+- **break(framework): Deprecate long running** `flwr-` **commands** ([#5707](https://github.com/adap/flower/pull/5707))
+- **refactor(framework): Remove** `while` **loop in** `flwr-serverapp` ([#5727](https://github.com/adap/flower/pull/5727))
+- **refactor(framework): Remove** `while` **loop in** `flwr-clientapp` ([#5725](https://github.com/adap/flower/pull/5725))
+- **refactor(framework): Drop** `flwr-` **docker images** ([#5760](https://github.com/adap/flower/pull/5760))
+
+- **refactor(framework): Remove executors** ([#5745](https://github.com/adap/flower/pull/5745))
+- **break(framework): Deprecate** `--executor` **arguments and introduce** `--simulation` **flag for** `flower-superlink` ([#5749](https://github.com/adap/flower/pull/5749))
+- **break(framework): Move files out of** `superexec` **module and remove the module** ([#5657](https://github.com/adap/flower/pull/5657))
+
+
+### Other changes
+
+
+### Unknown changes
+
+- **build(deps): bump next from 15.2.4 to 15.4.7 in /intelligence/ts/examples/nextjs-web-chats** ([#5783](https://github.com/adap/flower/pull/5783))
 
 ## v1.20.0 (2025-07-29)
 
