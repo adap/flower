@@ -33,11 +33,6 @@ export interface Message {
    * An optional list of calls to specific tools
    */
   toolCalls?: ToolCall[];
-
-  /**
-   * For remote calls, the usage statistics of the message.
-   */
-  usage?: Usage;
 }
 
 /**
@@ -442,4 +437,6 @@ export type Result<T> = { ok: true; value: T } | { ok: false; failure: Failure }
  *   - `ok: false` indicating failure.
  *   - `failure: {@link Failure}` providing details about the error.
  */
-export type ChatResponseResult = { ok: true; message: Message } | { ok: false; failure: Failure };
+export type ChatResponseResult =
+  | { ok: true; message: Message; usage?: Usage }
+  | { ok: false; failure: Failure };

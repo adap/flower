@@ -131,12 +131,12 @@ async function processStream(
         }
         if (chunkResult.done) {
           done = true;
-          usage = chunkResult.message.usage;
+          usage = chunkResult.usage;
           break;
         }
         if (chunkResult.toolsUpdated && chunkResult.message.toolCalls) {
           finalTools = chunkResult.message.toolCalls;
-          usage = chunkResult.message.usage;
+          usage = chunkResult.usage;
         }
         accumulated += chunkResult.message.content;
       }
@@ -149,8 +149,8 @@ async function processStream(
           role: 'assistant',
           content: '',
           toolCalls: finalTools,
-          usage,
         },
+        usage,
       };
     }
 
@@ -159,8 +159,8 @@ async function processStream(
       message: {
         role: 'assistant',
         content: accumulated,
-        usage,
       },
+      usage,
     };
   } finally {
     signal?.removeEventListener('abort', abortListener);
@@ -182,7 +182,7 @@ async function processChunk(
 ): Promise<ChatResponseResult & { toolsUpdated?: boolean; done?: boolean }> {
   const data = getServerSentEventData(chunk);
   if (data === '[DONE]') {
-    return { ok: true, message: { role: 'assistant', content: '', usage }, done: true };
+    return { ok: true, message: { role: 'assistant', content: '' }, usage, done: true };
   }
 
   let parsed: unknown;
@@ -201,11 +201,11 @@ async function processChunk(
       message: {
         role: 'assistant',
         content: '',
-        usage: {
-          promptTokens: parsed.usage.prompt_tokens,
-          completionTokens: parsed.usage.completion_tokens,
-          totalTokens: parsed.usage.total_tokens,
-        },
+      },
+      usage: {
+        promptTokens: parsed.usage.prompt_tokens,
+        completionTokens: parsed.usage.completion_tokens,
+        totalTokens: parsed.usage.total_tokens,
       },
       done: true,
     };
@@ -292,8 +292,8 @@ async function processChunk(
         role: 'assistant',
         content: text,
         ...(finalTools && { toolCalls: finalTools }),
-        usage,
       },
+      usage,
       toolsUpdated,
     };
   }
@@ -375,8 +375,8 @@ export async function extractChatOutput(
     message: {
       role: message.role as Message['role'],
       content: content,
-      usage: response.usage,
       ...(toolCalls && { toolCalls: toolCalls }),
     },
+    usage: response.usage,
   };
 }
