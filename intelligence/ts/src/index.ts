@@ -28,7 +28,9 @@ export type {
   StreamEvent,
   Tool,
   ToolCall,
-  ToolParameterProperty,
-  ToolFunctionParameters,
+  ToolChoice,
   ToolFunction,
+  ToolFunctionParameters,
+  ToolParameterProperty,
+  Usage,
 } from './typing';
