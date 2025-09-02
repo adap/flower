@@ -151,7 +151,6 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
             stop_log_uploader(log_queue, log_uploader)
 
         # Update run status
-        print(f"Try to update run status to {run_status} via grid {grid}")
         if run_status and grid:
             run_status_proto = run_status_to_proto(run_status)
             grid._stub.UpdateRunStatus(
