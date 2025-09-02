@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Common function to register exit handlers for server and client."""
+"""Common function to register exit handlers."""
 
 
 import signal
