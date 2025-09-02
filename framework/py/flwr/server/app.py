@@ -57,8 +57,7 @@ from flwr.common.constant import (
     ExecPluginType,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
-from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -70,6 +69,7 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.servicer.control import run_control_api_grpc
 
@@ -176,6 +176,9 @@ def run_superlink() -> None:
     serverappio_address, _, _ = _format_address(args.serverappio_api_address)
     control_address, _, _ = _format_address(args.control_api_address)
     simulationio_address, _, _ = _format_address(args.simulationio_api_address)
+    health_server_address = None
+    if args.health_server_address is not None:
+        health_server_address, _, _ = _format_address(args.health_server_address)
 
     # Obtain certificates
     certificates = try_obtain_server_certificates(args)
@@ -352,8 +355,13 @@ def run_superlink() -> None:
         # pylint: disable-next=consider-using-with
         subprocess.Popen(command)
 
+    # Launch gRPC health server
+    if health_server_address is not None:
+        health_server = run_health_server_grpc_no_tls(health_server_address)
+        grpc_servers.append(health_server)
+
     # Graceful shutdown
-    register_exit_handlers(
+    register_signal_handlers(
         event_type=EventType.RUN_SUPERLINK_LEAVE,
         exit_message="SuperLink terminated gracefully.",
         grpc_servers=grpc_servers,
@@ -610,6 +618,7 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     _add_args_fleet_api(parser=parser)
     _add_args_control_api(parser=parser)
     _add_args_simulationio_api(parser=parser)
+    add_args_health(parser=parser)
 
     return parser
 

@@ -12,17 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower exit functionality."""
+"""ServerApp strategies."""
 
 
-from .exit import flwr_exit
-from .exit_code import ExitCode
-from .exit_handler import add_exit_handler
-from .signal_handler import register_signal_handlers
+from .fedavg import FedAvg
+from .result import Result
+from .strategy import Strategy
 
 __all__ = [
-    "ExitCode",
-    "add_exit_handler",
-    "flwr_exit",
-    "register_signal_handlers",
+    "FedAvg",
+    "Result",
+    "Strategy",
 ]
