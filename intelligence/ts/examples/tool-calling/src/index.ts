@@ -189,7 +189,7 @@ Never invent information unless the user explicitly requests creative fiction.`,
   } else {
     console.log(response.message.content);
     console.log(response.message.toolCalls);
-    console.log(response.message.usage);
+    console.log(response.usage);
   }
 }
 
