@@ -43,8 +43,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
     ExecPluginType,
 )
-from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.inflatable import iterate_object_tree
 from flwr.common.inflatable_utils import (
@@ -164,7 +163,7 @@ def start_client_internal(
         grpc_servers.append(health_server)
 
     # Register handlers for graceful shutdown
-    register_exit_handlers(
+    register_signal_handlers(
         event_type=EventType.RUN_SUPERNODE_LEAVE,
         exit_message="SuperNode terminated gracefully.",
         grpc_servers=grpc_servers,

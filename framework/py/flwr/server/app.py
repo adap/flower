@@ -57,8 +57,7 @@ from flwr.common.constant import (
     ExecPluginType,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
-from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -362,7 +361,7 @@ def run_superlink() -> None:
         grpc_servers.append(health_server)
 
     # Graceful shutdown
-    register_exit_handlers(
+    register_signal_handlers(
         event_type=EventType.RUN_SUPERLINK_LEAVE,
         exit_message="SuperLink terminated gracefully.",
         grpc_servers=grpc_servers,

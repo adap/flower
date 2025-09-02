@@ -20,7 +20,7 @@ from logging import WARN
 from typing import Optional, Union
 
 from flwr.common.config import get_flwr_dir
-from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.exit import register_signal_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
@@ -90,7 +90,7 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
     channel.subscribe(on_channel_state_change)
 
     # Register exit handlers to close the channel on exit
-    register_exit_handlers(
+    register_signal_handlers(
         event_type=EventType.RUN_SUPEREXEC_LEAVE,
         exit_message="SuperExec terminated gracefully.",
         grpc_servers=grpc_servers,

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for exit handler utils."""
+"""Tests for signal handler utils."""
 
 
 import os
@@ -20,12 +20,9 @@ import signal
 import unittest
 from unittest.mock import Mock, patch
 
-from .exit_handlers import (
-    add_exit_handler,
-    register_exit_handlers,
-    registered_exit_handlers,
-)
-from .telemetry import EventType
+from ..telemetry import EventType
+from .exit_handler import add_exit_handler, registered_exit_handlers
+from .signal_handler import register_signal_handlers
 
 
 class TestExitHandlers(unittest.TestCase):
@@ -40,7 +37,7 @@ class TestExitHandlers(unittest.TestCase):
         """Test register_exit_handlers."""
         # Prepare
         handlers = [Mock(), Mock(), Mock()]
-        register_exit_handlers(EventType.PING, exit_handlers=handlers[:-1])  # type: ignore
+        register_signal_handlers(EventType.PING, exit_handlers=handlers[:-1])  # type: ignore
         add_exit_handler(handlers[-1])
 
         # Execute
@@ -50,7 +47,6 @@ class TestExitHandlers(unittest.TestCase):
         for handler in handlers:
             handler.assert_called()
         mock_sys_exit.assert_called()
-        self.assertEqual(registered_exit_handlers, handlers)
 
     def test_add_exit_handler(self) -> None:
         """Test add_exit_handler."""
