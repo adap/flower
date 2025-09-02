@@ -29,7 +29,8 @@ export type {
   Tool,
   ToolCall,
   ToolChoice,
-  ToolParameterProperty,
-  ToolFunctionParameters,
   ToolFunction,
+  ToolFunctionParameters,
+  ToolParameterProperty,
+  Usage,
 } from './typing';
