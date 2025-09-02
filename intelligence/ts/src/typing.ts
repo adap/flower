@@ -36,6 +36,26 @@ export interface Message {
 }
 
 /**
+ * The usage statistics for a chat message.
+ */
+export interface Usage {
+  /*
+   * The number of tokens in the prompt, if available.
+   */
+  promptTokens?: number;
+
+  /*
+   * The number of tokens contained in the response, if available.
+   */
+  completionTokens?: number;
+
+  /*
+   * The total number of tokens used (prompt + completion), if available.
+   */
+  totalTokens?: number;
+}
+
+/**
  * Represents a call to a specific tool with its name and arguments.
  */
 export type ToolCall = Record<
@@ -417,4 +437,6 @@ export type Result<T> = { ok: true; value: T } | { ok: false; failure: Failure }
  *   - `ok: false` indicating failure.
  *   - `failure: {@link Failure}` providing details about the error.
  */
-export type ChatResponseResult = { ok: true; message: Message } | { ok: false; failure: Failure };
+export type ChatResponseResult =
+  | { ok: true; message: Message; usage?: Usage }
+  | { ok: false; failure: Failure };
