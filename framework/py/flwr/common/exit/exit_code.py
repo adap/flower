@@ -36,6 +36,7 @@ class ExitCode:
 
     # ServerApp-specific exit codes (200-299)
     SERVERAPP_STRATEGY_PRECONDITION_UNMET = 200
+    SERVERAPP_EXCEPTION = 201
 
     # SuperNode-specific exit codes (300-399)
     SUPERNODE_REST_ADDRESS_INVALID = 300
@@ -89,6 +90,7 @@ EXIT_CODE_HELP = {
         "perform weighted average (e.g. in FedAvg) please ensure the returned "
         "MetricRecord from ClientApps do include this key."
     ),
+    ExitCode.SERVERAPP_EXCEPTION: "An unhandled exception occurred in the ServerApp.",
     # SuperNode-specific exit codes (300-399)
     ExitCode.SUPERNODE_REST_ADDRESS_INVALID: (
         "When using the REST API, please provide `https://` or "
