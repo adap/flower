@@ -22,11 +22,10 @@ from logging import INFO
 from typing import Callable, Optional
 
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, log
-from flwr.common.exit import ExitCode, flwr_exit
 from flwr.server import Grid
 
 from .result import Result
-from .strategy_utils import InconsistentMessageReplies, log_strategy_start_info
+from .strategy_utils import log_strategy_start_info
 
 
 class Strategy(ABC):
@@ -218,15 +217,10 @@ class Strategy(ABC):
             )
 
             # Aggregate train
-            try:
-                agg_arrays, agg_train_metrics = self.aggregate_train(
-                    current_round,
-                    train_replies,
-                )
-            except InconsistentMessageReplies as e:
-                flwr_exit(
-                    ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET, message=str(e)
-                )
+            agg_arrays, agg_train_metrics = self.aggregate_train(
+                current_round,
+                train_replies,
+            )
 
             # Log training metrics and append to history
             if agg_arrays is not None:
@@ -253,15 +247,10 @@ class Strategy(ABC):
             )
 
             # Aggregate evaluate
-            try:
-                agg_evaluate_metrics = self.aggregate_evaluate(
-                    current_round,
-                    evaluate_replies,
-                )
-            except InconsistentMessageReplies as e:
-                flwr_exit(
-                    ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET, message=str(e)
-                )
+            agg_evaluate_metrics = self.aggregate_evaluate(
+                current_round,
+                evaluate_replies,
+            )
 
             # Log training metrics and append to history
             if agg_evaluate_metrics is not None:
