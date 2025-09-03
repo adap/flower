@@ -12,24 +12,19 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Introduce Flower SuperExec** ([#5659](https://github.com/adap/flower/pull/5659), [#5674](https://github.com/adap/flower/pull/5674), [#5678](https://github.com/adap/flower/pull/5678), [#5680](https://github.com/adap/flower/pull/5680), [#5682](https://github.com/adap/flower/pull/5682), [#5683](https://github.com/adap/flower/pull/5683), [#5685](https://github.com/adap/flower/pull/5685), [#5696](https://github.com/adap/flower/pull/5696), [#5699](https://github.com/adap/flower/pull/5699), [#5700](https://github.com/adap/flower/pull/5700), [#5701](https://github.com/adap/flower/pull/5701), [#5702](https://github.com/adap/flower/pull/5702), [#5703](https://github.com/adap/flower/pull/5703), [#5706](https://github.com/adap/flower/pull/5706), [#5713](https://github.com/adap/flower/pull/5713), [#5726](https://github.com/adap/flower/pull/5726))
 
-  SuperExec is a new component responsible for scheduling, launching, and managing app processes (e.g., `ServerApp`, `ClientApp`) within the Flower deployment runtime. It is automatically spawned when running a SuperLink or SuperNode in subprocess mode (default). This also introduces a token-based mechanism that improves security by assigning a unique token to each app execution. Supporting changes include new RPCs, protocol updates, plugin abstractions, and Docker image support for SuperExec. For more details, refer to the updated [Flower architecture explainer](https://flower.ai/docs/framework/v1.21.0/en/explanation-flower-architecture.html).
+  SuperExec is a new component responsible for scheduling, launching, and managing app processes (e.g., `ServerApp`, `ClientApp`) within the Flower deployment runtime. It is automatically spawned when running a SuperLink or SuperNode in subprocess mode (default). This also introduces a token-based mechanism that improves security by assigning a unique token to each app execution. Supporting changes include new RPCs, protocol updates, plugin abstractions, and Docker image support for SuperExec. For more details, refer to the updated [Flower architecture explainer](https://flower.ai/docs/framework/explanation-flower-architecture.html).
 
 - **Update documentation to use SuperExec** ([#5731](https://github.com/adap/flower/pull/5731), [#5734](https://github.com/adap/flower/pull/5734), [#5735](https://github.com/adap/flower/pull/5735), [#5737](https://github.com/adap/flower/pull/5737), [#5751](https://github.com/adap/flower/pull/5751), [#5759](https://github.com/adap/flower/pull/5759))
 
   Documentation has been revised to reflect the introduction of Flower SuperExec. Updates include restructuring exit codes, adding references to `flower-superexec`, and revising guides and tutorials such as quickstart with Docker, GCP deployment, network communication, and the architecture explainer to consistently use SuperExec.
 
-\\ TODO: Introduce strategy for Message API
-- **feat(framework): Introduce first** `Message` **-based strategy** ([#5710](https://github.com/adap/flower/pull/5710))
-- **feat(framework): Introduce Error code for** `Message` **-based strategies receiving an unaggregatable set of reply messages** ([#5771](https://github.com/adap/flower/pull/5771))
-- **refactor(framework): Fix recently introduced modules** ([#5774](https://github.com/adap/flower/pull/5774))
-- **refactor(framework): Move new strategies into submodule** ([#5787](https://github.com/adap/flower/pull/5787))
-- **feat(framework): Introduce** `SERVERAPP_STRATEGY_AGGREGATION_ERROR` ([#5794](https://github.com/adap/flower/pull/5794))
-- **feat(framework): Introduce** `AppExitException` **and improve** `flwr-serverapp` **logic** ([#5798](https://github.com/adap/flower/pull/5798))
+- **Introduce strategies for Message API** ([#5710](https://github.com/adap/flower/pull/5710), [#5766](https://github.com/adap/flower/pull/5766), [#5770](https://github.com/adap/flower/pull/5770), [#5771](https://github.com/adap/flower/pull/5771), [#5774](https://github.com/adap/flower/pull/5774), [#5779](https://github.com/adap/flower/pull/5779), [#5787](https://github.com/adap/flower/pull/5787), [#5794](https://github.com/adap/flower/pull/5794), [#5798](https://github.com/adap/flower/pull/5798), [#5804](https://github.com/adap/flower/pull/5804))
 
-\\ TODO: Update quickstart-pytorch to use Message API
-- **docs(framework): Update** `quickstart-pytorch` **tutorial** ([#5786](https://github.com/adap/flower/pull/5786))
-- **refactor(framework): Update** `quickstart-pytorch` **to** `Message API` ([#5785](https://github.com/adap/flower/pull/5785))
-- **fix(examples): Fix** `quickstart-pytorch` **example** ([#5802](https://github.com/adap/flower/pull/5802))
+  Introduces a new abstract base class `Strategy` for the Message API, mirroring the legacy design. Implements strategies such as `FedAvg`, `FedOpt`, `FedAdam`, and Differential Privacy strategies. A [migration guide](https://flower.ai/docs/framework/how-to-upgrade-to-message-api.html) has been added to help users transition to the Message API.
+
+- **Update quickstart-pytorch to use Message API** ([#5785](https://github.com/adap/flower/pull/5785), [#5786](https://github.com/adap/flower/pull/5786), [#5802](https://github.com/adap/flower/pull/5802))
+
+  The `quickstart-pytorch` [tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html) has been migrated to the Message API, using the new `FedAvg` strategy.
 
 - **New PyTorch template with Message API** ([#5784](https://github.com/adap/flower/pull/5784))
 
