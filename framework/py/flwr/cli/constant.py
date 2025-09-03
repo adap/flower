@@ -21,10 +21,9 @@ CONFIG_HELP_MESSAGE = (
     "--{1} '<k1>=<v1> <k2>=<v2>' | --{1} '<k1>=<v1>' --{1} '<k2>=<v2>' | "
     "--{1} <path/to/your/toml>\n\n"
     "When providing key-value pairs, values can be of any type supported by TOML "
-    "(e.g., bool, int, float, string). The specified keys (<k1>, <k2>, <k3> in the "
+    "(e.g., bool, int, float, string). The specified keys (<k1> and <k2> in the "
     "example) must exist in the {0} under the `{2}` section of `pyproject.toml` to be "
-    "overridden. Alternatively, provide a TOML file containing overrides; "
-    "in that case, ensure that its keys also exist in the {0}."
+    "overridden. Alternatively, provide a TOML file containing overrides."
 )
 
 # The help message for `--run-config` option
