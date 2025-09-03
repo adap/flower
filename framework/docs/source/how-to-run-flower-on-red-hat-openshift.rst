@@ -672,18 +672,18 @@ You can also view the logs of the SuperLink pod in the OpenShift console. Naviga
     SuperLink logs showing connected SuperNodes and running Flower app.
 
 Congratulations! You have successfully created, deployed, and run a Flower app on Red
-Hat OpenShift using the Red Hat OpenShift Service on AWS. You can explore running different
-Flower apps and federated workloads on your OpenShift cluster, for instance, :doc:`with PyTorch <tutorial-quickstart-pytorch>`.
-For further reading about deploying Flower with Docker and Kubernetes, check out our
-guides below:
+Hat OpenShift using the Red Hat OpenShift Service on AWS. You can explore running
+different Flower apps and federated workloads on your OpenShift cluster, for instance,
+:doc:`with PyTorch <tutorial-quickstart-pytorch>`. For further reading about deploying
+Flower with Docker and Kubernetes, check out our guides below:
 
-* :doc:`How to run Flower with Docker <docker/index>`
-* :doc:`How to run Flower with Helm <helm/index>`
+- :doc:`How to run Flower with Docker <docker/index>`
+- :doc:`How to run Flower with Helm <helm/index>`
 
 To learn about running Flower on other cloud platforms, check out our guides below:
 
-* :doc:`How to run Flower on Microsoft Azure <how-to-run-flower-on-azure>`
-* :doc:`How to run Flower on Google Cloud Platform <how-to-run-flower-on-gcp>`
+- :doc:`How to run Flower on Microsoft Azure <how-to-run-flower-on-azure>`
+- :doc:`How to run Flower on Google Cloud Platform <how-to-run-flower-on-gcp>`
 
 .. |aws_cli_link| replace:: ``aws``
 
