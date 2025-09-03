@@ -564,7 +564,7 @@ Next, in your machine, create a Dockerfile with the following contents:
 
         USER 1001
 
-        RUN pip install flwr[simulation]==|stable_flwr_version|
+        RUN pip install flwr==|stable_flwr_version|
 
 Build and push the container image to your public repository on ``quay.io``:
 
