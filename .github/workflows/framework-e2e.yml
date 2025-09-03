@@ -330,7 +330,7 @@ jobs:
       - name: Create project and install it
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g')
+          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
           flwr new tmp-${CLEAN_FRAMEWORK} --framework="${{ matrix.framework }}" --username gh_ci
           cd tmp-${CLEAN_FRAMEWORK}
           sed -i 's/"flwr\[[^]]*\][^"]*", *//g' pyproject.toml
@@ -339,7 +339,7 @@ jobs:
       - name: Run project
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g')
+          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
           cd tmp-${CLEAN_FRAMEWORK}
           flwr run --run-config num-server-rounds=1 2>&1 | tee flwr_output.log 
           if grep -q "ERROR" flwr_output.log; then
@@ -380,7 +380,7 @@ jobs:
       - name: Create project, build, and install it
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g')
+          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
           flwr new tmp-${CLEAN_FRAMEWORK} --framework ${{ matrix.framework }} --username gh_ci
           cd tmp-${CLEAN_FRAMEWORK}
           flwr build
