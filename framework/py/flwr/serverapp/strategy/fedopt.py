@@ -136,7 +136,6 @@ class FedOpt(FedAvg):
 
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
-        super().summary()
         log(INFO, "\t├──> FedOpt settings:")
         log(
             INFO,
@@ -150,6 +149,7 @@ class FedOpt(FedAvg):
             self.beta_1,
             self.beta_2,
         )
+        super().summary()
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
