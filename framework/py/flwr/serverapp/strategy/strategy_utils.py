@@ -45,8 +45,10 @@ class InconsistentMessageReplies(AppExitException):
         super().__init__(reason)
 
 
-class AggregationError(Exception):
+class AggregationError(AppExitException):
     """Exception triggered when aggregation fails."""
+
+    exit_code = ExitCode.SERVERAPP_STRATEGY_AGGREGATION_ERROR
 
     def __init__(self, reason: str):
         super().__init__(reason)
