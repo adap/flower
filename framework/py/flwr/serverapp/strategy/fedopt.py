@@ -111,8 +111,6 @@ class FedOpt(FedAvg):
         eta_l: float = 1e-1,
         beta_1: float = 0.0,
         beta_2: float = 0.0,
-        # TODO: changed from 1e-9 to 1e-3
-        # TODO: As per paper (see paragraph just before 5.3)
         tau: float = 1e-3,
     ) -> None:
         super().__init__(
@@ -168,6 +166,13 @@ class FedOpt(FedAvg):
 
         This is a shared stage during aggregation for FedAdagrad, FedAdam and FedYogi.
         """
+        if self.current_arrays is None:
+            reason = (
+                "Current arrays not set. Ensure that `configure_train` has been "
+                "called before aggregation."
+            )
+            raise AggregationError(reason=reason)
+
         aggregated_ndarrays = {
             k: array.numpy() for k, array in aggregated_arrayrecord.items()
         }
@@ -180,6 +185,18 @@ class FedOpt(FedAvg):
                 "current_arrays` cannot be computed."
             )
             raise AggregationError(reason=reason)
+
+        # Check that the shape of values match
+        # Only shapes that match can compute delta_t (we don't want
+        # broadcasting to happen)
+        for k, x in aggregated_ndarrays.items():
+            if x.shape != self.current_arrays[k].shape:
+                reason = (
+                    f"Shape of aggregated array '{k}' does not match "
+                    f"shape of the array under the same key stored in the strategy. "
+                    f"Cannot compute `delta_t`."
+                )
+                raise AggregationError(reason=reason)
 
         delta_t = {
             k: x - self.current_arrays[k] for k, x in aggregated_ndarrays.items()

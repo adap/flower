@@ -27,6 +27,7 @@ import numpy as np
 from flwr.common import Array, ArrayRecord, Message, MetricRecord, RecordDict
 
 from .fedopt import FedOpt
+from .strategy_utils import AggregationError
 
 
 # pylint: disable=line-too-long
@@ -82,6 +83,7 @@ class FedYogi(FedOpt):
         Defaults to 1e-3.
     """
 
+    # pylint: disable=too-many-arguments, too-many-locals
     def __init__(
         self,
         *,
@@ -135,6 +137,13 @@ class FedYogi(FedOpt):
 
         if aggregated_arrayrecord is None:
             return aggregated_arrayrecord, aggregated_metrics
+
+        if self.current_arrays is None:
+            reason = (
+                "Current arrays not set. Ensure that `configure_train` has been "
+                "called before aggregation."
+            )
+            raise AggregationError(reason=reason)
 
         # Compute intermediate variables
         delta_t, m_t, aggregated_ndarrays = self._compute_deltat_and_mt(

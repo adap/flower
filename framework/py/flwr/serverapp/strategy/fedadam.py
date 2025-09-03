@@ -28,6 +28,7 @@ import numpy as np
 from flwr.common import Array, ArrayRecord, Message, MetricRecord, RecordDict
 
 from .fedopt import FedOpt
+from .strategy_utils import AggregationError
 
 
 # pylint: disable=line-too-long
@@ -81,6 +82,7 @@ class FedAdam(FedOpt):
         Controls the algorithm's degree of adaptability. Defaults to 1e-3.
     """
 
+    # pylint: disable=too-many-arguments, too-many-locals
     def __init__(
         self,
         *,
@@ -102,8 +104,6 @@ class FedAdam(FedOpt):
         eta_l: float = 1e-1,
         beta_1: float = 0.9,
         beta_2: float = 0.99,
-        # TODO: changed from 1e-9 to 1e-3
-        # TODO: As per paper (see paragraph just before 5.3)
         tau: float = 1e-3,
     ) -> None:
         super().__init__(
@@ -136,6 +136,13 @@ class FedAdam(FedOpt):
 
         if aggregated_arrayrecord is None:
             return aggregated_arrayrecord, aggregated_metrics
+
+        if self.current_arrays is None:
+            reason = (
+                "Current arrays not set. Ensure that `configure_train` has been "
+                "called before aggregation."
+            )
+            raise AggregationError(reason=reason)
 
         # Compute intermediate variables
         delta_t, m_t, aggregated_ndarrays = self._compute_deltat_and_mt(
