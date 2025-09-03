@@ -28,6 +28,7 @@ REPLACE_NEXT_VERSION = {
 EXAMPLES = {
     "examples/*/pyproject.toml": [
         "flwr[simulation]>={version}",
+        "flwr>={version}",
     ],
 }
 
