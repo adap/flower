@@ -25,6 +25,7 @@ from flwr.common.logger import log
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
+from flwr.supercore.grpc_health import add_args_health
 from flwr.supercore.superexec.plugin import (
     ClientAppExecPlugin,
     ExecPlugin,
@@ -57,6 +58,7 @@ def flower_superexec() -> None:
         appio_api_address=args.appio_api_address,
         flwr_dir=args.flwr_dir,
         parent_pid=args.parent_pid,
+        health_server_address=args.health_server_address,
     )
 
 
@@ -100,6 +102,7 @@ def _parse_args() -> argparse.ArgumentParser:
         help="The PID of the parent process. When set, the process will terminate "
         "when the parent process exits.",
     )
+    add_args_health(parser)
     return parser
 
 

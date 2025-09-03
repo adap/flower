@@ -12,14 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""GRPC health servicers."""
+"""Flower application exceptions."""
 
 
-from .health_server import add_args_health, run_health_server_grpc_no_tls
-from .simple_health_servicer import SimpleHealthServicer
+class AppExitException(Exception):
+    """Base exception for all application-level errors in ServerApp and ClientApp.
 
-__all__ = [
-    "SimpleHealthServicer",
-    "add_args_health",
-    "run_health_server_grpc_no_tls",
-]
+    When raised, the process will exit and report a telemetry event with the associated
+    exit code.
+    """
+
+    # Default exit code — subclasses must override
+    exit_code = -1
+
+    def __init_subclass__(cls) -> None:
+        """Ensure subclasses override the exit_code attribute."""
+        if cls.exit_code == -1:
+            raise ValueError("Subclasses must override the exit_code attribute.")
