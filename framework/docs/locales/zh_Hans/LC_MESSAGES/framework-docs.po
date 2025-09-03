@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-01 00:09+0000\n"
+"POT-Creation-Date: 2025-09-02 00:07+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -38093,7 +38093,7 @@ msgstr ""
 "learning-in-less-than-20-lines-of-code>`_"
 
 #: ../../source/ref-example-projects.rst:24
-#: ../../source/tutorial-quickstart-pytorch.rst:8
+#: ../../source/tutorial-quickstart-pytorch.rst:36
 msgid "Quickstart PyTorch"
 msgstr "PyTorch快速入门"
 
@@ -39687,7 +39687,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-jax.rst:64
 #: ../../source/tutorial-quickstart-mlx.rst:64
 #: ../../source/tutorial-quickstart-pytorch-lightning.rst:59
-#: ../../source/tutorial-quickstart-pytorch.rst:66
+#: ../../source/tutorial-quickstart-pytorch.rst:93
 #: ../../source/tutorial-quickstart-scikitlearn.rst:63
 #: ../../source/tutorial-quickstart-tensorflow.rst:66
 #: ../../source/tutorial-quickstart-xgboost.rst:496
@@ -39698,7 +39698,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:116
 #: ../../source/tutorial-quickstart-jax.rst:106
 #: ../../source/tutorial-quickstart-pytorch-lightning.rst:109
-#: ../../source/tutorial-quickstart-pytorch.rst:107
+#: ../../source/tutorial-quickstart-pytorch.rst:152
 #: ../../source/tutorial-quickstart-scikitlearn.rst:105
 #: ../../source/tutorial-quickstart-tensorflow.rst:107
 #: ../../source/tutorial-quickstart-xgboost.rst:541
@@ -39753,7 +39753,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:21
 #: ../../source/tutorial-quickstart-jax.rst:20
 #: ../../source/tutorial-quickstart-mlx.rst:21
-#: ../../source/tutorial-quickstart-pytorch.rst:22
+#: ../../source/tutorial-quickstart-pytorch.rst:49
 #: ../../source/tutorial-quickstart-scikitlearn.rst:19
 #: ../../source/tutorial-quickstart-tensorflow.rst:22
 #, fuzzy
@@ -39772,7 +39772,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:37
 #: ../../source/tutorial-quickstart-jax.rst:36
 #: ../../source/tutorial-quickstart-mlx.rst:36
-#: ../../source/tutorial-quickstart-pytorch.rst:38
+#: ../../source/tutorial-quickstart-pytorch.rst:65
 #: ../../source/tutorial-quickstart-scikitlearn.rst:35
 #: ../../source/tutorial-quickstart-tensorflow.rst:38
 msgid ""
@@ -39783,7 +39783,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:51
 #: ../../source/tutorial-quickstart-jax.rst:50
 #: ../../source/tutorial-quickstart-mlx.rst:50
-#: ../../source/tutorial-quickstart-pytorch.rst:52
+#: ../../source/tutorial-quickstart-pytorch.rst:79
 #: ../../source/tutorial-quickstart-scikitlearn.rst:49
 #: ../../source/tutorial-quickstart-tensorflow.rst:52
 msgid ""
@@ -39793,7 +39793,7 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:58
 #: ../../source/tutorial-quickstart-jax.rst:57
-#: ../../source/tutorial-quickstart-pytorch.rst:59
+#: ../../source/tutorial-quickstart-pytorch.rst:86
 #: ../../source/tutorial-quickstart-scikitlearn.rst:56
 #: ../../source/tutorial-quickstart-tensorflow.rst:59
 #: ../../source/tutorial-quickstart-xgboost.rst:489
@@ -39813,7 +39813,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:124
 #: ../../source/tutorial-quickstart-jax.rst:114
 #: ../../source/tutorial-quickstart-mlx.rst:114
-#: ../../source/tutorial-quickstart-pytorch.rst:115
+#: ../../source/tutorial-quickstart-pytorch.rst:160
 #: ../../source/tutorial-quickstart-scikitlearn.rst:113
 msgid ""
 "What follows is an explanation of each component in the project you just "
@@ -39824,7 +39824,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:128
 #: ../../source/tutorial-quickstart-jax.rst:118
 #: ../../source/tutorial-quickstart-mlx.rst:118
-#: ../../source/tutorial-quickstart-pytorch.rst:119
+#: ../../source/tutorial-quickstart-pytorch.rst:164
 #: ../../source/tutorial-quickstart-scikitlearn.rst:117
 #: ../../source/tutorial-quickstart-tensorflow.rst:116
 #: ../../source/tutorial-quickstart-xgboost.rst:93
@@ -39848,7 +39848,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:175
 #: ../../source/tutorial-quickstart-jax.rst:132
 #: ../../source/tutorial-quickstart-mlx.rst:159
-#: ../../source/tutorial-quickstart-pytorch.rst:154
+#: ../../source/tutorial-quickstart-pytorch.rst:199
 #: ../../source/tutorial-quickstart-scikitlearn.rst:142
 #: ../../source/tutorial-quickstart-tensorflow.rst:143
 #, fuzzy
@@ -39890,7 +39890,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:232
 #: ../../source/tutorial-quickstart-jax.rst:174
 #: ../../source/tutorial-quickstart-mlx.rst:203
-#: ../../source/tutorial-quickstart-pytorch.rst:228
+#: ../../source/tutorial-quickstart-pytorch.rst:273
 #: ../../source/tutorial-quickstart-scikitlearn.rst:161
 #: ../../source/tutorial-quickstart-tensorflow.rst:172
 #: ../../source/tutorial-quickstart-xgboost.rst:153
@@ -39912,7 +39912,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:245
-#: ../../source/tutorial-quickstart-pytorch.rst:238
 msgid ""
 "The specific implementation of ``get_weights()`` and ``set_weights()`` "
 "depends on the type of models you use. The ones shown below work for a "
@@ -39922,7 +39921,6 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:261
 #: ../../source/tutorial-quickstart-jax.rst:201
-#: ../../source/tutorial-quickstart-pytorch.rst:254
 msgid ""
 "The rest of the functionality is directly inspired by the centralized "
 "case. The ``fit()`` method in the client trains the model using the local"
@@ -39944,7 +39942,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:320
 #: ../../source/tutorial-quickstart-jax.rst:250
 #: ../../source/tutorial-quickstart-mlx.rst:365
-#: ../../source/tutorial-quickstart-pytorch.rst:311
+#: ../../source/tutorial-quickstart-pytorch.rst:370
 #: ../../source/tutorial-quickstart-scikitlearn.rst:259
 #: ../../source/tutorial-quickstart-tensorflow.rst:236
 #: ../../source/tutorial-quickstart-xgboost.rst:273
@@ -40462,7 +40460,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:390
-#: ../../source/tutorial-quickstart-pytorch.rst:348
+#: ../../source/tutorial-quickstart-pytorch.rst:440
 #: ../../source/tutorial-quickstart-tensorflow.rst:270
 msgid ""
 "Congratulations! You've successfully built and run your first federated "
@@ -40508,7 +40506,7 @@ msgid ""
 "federated learning with Flower and PyTorch in this step-by-step tutorial."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:10
+#: ../../source/tutorial-quickstart-pytorch.rst:38
 #, fuzzy
 msgid ""
 "In this federated learning tutorial we will learn how to train a "
@@ -40519,26 +40517,24 @@ msgstr ""
 "首先，建议创建一个虚拟环境，并在 `virtualenv <https://flower.ai/docs/recommended-env-"
 "setup.html>`_ 中运行一切。"
 
-#: ../../source/tutorial-quickstart-pytorch.rst:15
+#: ../../source/tutorial-quickstart-pytorch.rst:43
 msgid ""
 "Let's use `flwr new` to create a complete Flower+PyTorch project. It will"
 " generate all the files needed to run, by default with the Flower "
-"Simulation Engine, a federation of 10 nodes using `FedAvg "
-"<https://flower.ai/docs/framework/ref-"
-"api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_. The "
-"dataset will be partitioned using Flower Dataset's `IidPartitioner "
-"<https://flower.ai/docs/datasets/ref-"
+"Simulation Engine, a federation of 10 nodes using `FedAvg <ref-"
+"api/flwr.serverapp.FedAvg.html>`_. The dataset will be partitioned using "
+"Flower Dataset's `IidPartitioner <https://flower.ai/docs/datasets/ref-"
 "api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:30
+#: ../../source/tutorial-quickstart-pytorch.rst:57
 msgid ""
 "Then, run the command below. You will be prompted to select one of the "
-"available templates (choose ``PyTorch``), give a name to your project, "
-"and type in your developer name:"
+"available templates (choose ``PyTorch (Message API)``), give a name to "
+"your project, and type in your developer name:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:121
+#: ../../source/tutorial-quickstart-pytorch.rst:166
 msgid ""
 "This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ "
 "to easily download and partition the `CIFAR-10` dataset. In this example "
@@ -40552,13 +40548,13 @@ msgid ""
 " that correspond to their data partition."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:156
+#: ../../source/tutorial-quickstart-pytorch.rst:201
 msgid ""
 "We defined a simple Convolutional Neural Network (CNN), but feel free to "
 "replace it with a more sophisticated model if you'd like:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:181
+#: ../../source/tutorial-quickstart-pytorch.rst:226
 msgid ""
 "In addition to defining the model architecture, we also include two "
 "utility functions to perform both training (i.e. ``train()``) and "
@@ -40571,42 +40567,127 @@ msgid ""
 "training or evaluation:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:230
+#: ../../source/tutorial-quickstart-pytorch.rst:275
 msgid ""
-"The main changes we have to make to use `PyTorch` with `Flower` will be "
-"found in the ``get_weights()`` and ``set_weights()`` functions. In "
-"``get_weights()`` PyTorch model parameters are extracted and represented "
-"as a list of NumPy arrays. The ``set_weights()`` function that's the "
-"oposite: given a list of NumPy arrays it applies them to an existing "
-"PyTorch model. Doing this in fairly easy in PyTorch."
+"The main changes we have to make to use `PyTorch` with `Flower` have to "
+"do with converting the |arrayrecord_link|_ received in the "
+"|message_link|_ into a `PyTorch` state_dict, and vice versa when "
+"generating the reply ``Message`` from the ClientApp. We can make use of "
+"built-in methods in the ``ArrayRecord`` to make these conversions:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:286
+#: ../../source/tutorial-quickstart-pytorch.rst:297
 msgid ""
-"Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` "
-"defined above by means of a ``client_fn()`` callback. Note that the "
-"`context` enables you to get access to hyperparemeters defined in your "
-"``pyproject.toml`` to configure the run. In this tutorial we access the "
-"`local-epochs` setting to control the number of epochs a ``ClientApp`` "
-"will perform when running the ``fit()`` method. You could define "
-"additioinal hyperparameters in ``pyproject.toml`` and access them here."
+"The rest of the functionality is directly inspired by the centralized "
+"case. The |clientapp_link|_ comes with three core methods (``train``, "
+"``evaluate``, and ``query``) that we can implement for different "
+"purposes. For example: ``train`` to train the received model using the "
+"local data; ``evaluate`` to assess its performance of the received model "
+"on a validation set; and ``query`` to retrieve information about the node"
+" executing the ``ClientApp``. In this tutorial we will only make use of "
+"``train`` and ``evaluate``."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:305
+msgid ""
+"Let's see how the ``train`` method can be implemented. It receives as "
+"input arguments a |message_link|_ from the ``ServerApp``. By default it "
+"carries:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:308
+msgid ""
+"an ``ArrayRecord`` with the arrays of the model to federate. By default "
+"they can be retrieved with key ``\"arrays\"`` when accessing the message "
+"content."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:310
+msgid ""
+"a ``ConfigRecord`` with the configuration sent from the ``ServerApp``. By"
+" default it can be retrieved with key ``\"config\"`` when accessing the "
+"message content."
 msgstr ""
 
 #: ../../source/tutorial-quickstart-pytorch.rst:313
 msgid ""
-"To construct a ``ServerApp`` we define a ``server_fn()`` callback with an"
-" identical signature to that of ``client_fn()`` but the return type is "
-"`ServerAppComponents <https://flower.ai/docs/framework/ref-"
-"api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ as "
-"opposed to a `Client <https://flower.ai/docs/framework/ref-"
-"api/flwr.client.Client.html#client>`_. In this example we use the "
-"`FedAvg`. To it we pass a randomly initialized model that will server as "
-"the global model to federated. Note that the value of ``fraction_fit`` is"
-" read from the run config. You can find the default value defined in the "
-"``pyproject.toml``."
+"The ``train`` method also receives the ``Context``, giving access to "
+"configs for your run and node. The run config hyperparameters are defined"
+" in the ``pyproject.toml`` of your Flower App. The node config can only "
+"be set when running Flower with the Deployment Runtime and is not "
+"directly configurable during simulations."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:352
+#: ../../source/tutorial-quickstart-pytorch.rst:364
+msgid ""
+"The ``@app.evaluate()`` method would be near identical with two "
+"exceptions: (1) the model is not locally trained, instead it is used to "
+"evaluate its performance on the locally held-out validation set; (2) "
+"including the model in the reply Message is no longer needed because it "
+"is not locally modified."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:372
+msgid ""
+"To construct a |serverapp_link|_ we define its ``@app.main()`` method. "
+"This method receive as input arguments:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:375
+msgid ""
+"a ``Grid`` object that will be used to interface with the nodes running "
+"the ``ClientApp`` to involve them in a round of train/evaluate/query or "
+"other."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:377
+msgid "a ``Context`` object that provides access to the run configuration."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:379
+msgid ""
+"In this example we use the |fedavg_link|_ and configure it with a "
+"specific value of ``fraction_train`` which is read from the run config. "
+"You can find the default value defined in the ``pyproject.toml``. Then, "
+"the execution of the strategy is launched when invoking its "
+"|strategy_start_link|_ method. To it we pass:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:384
+msgid "the ``Grid`` object."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:385
+msgid ""
+"an ``ArrayRecord`` carrying a randomly initialized model that will serve "
+"as the global model to federated."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:387
+msgid ""
+"a ``ConfigRecord`` with the training hyperparameters to be sent to the "
+"clients. The strategy will also insert the current round number in this "
+"config before sending it to the participating nodes."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:390
+msgid ""
+"the ``num_rounds`` parameter specifying how many rounds of ``FedAvg`` to "
+"perform."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:433
+msgid ""
+"Note the ``start`` method of the strategy returns a result object. This "
+"object contains all the relevant information about the FL process, "
+"including the final model weights as an ``ArrayRecord``, and federated "
+"training and evaluation metrics as ``MetricRecords``. You can easily log "
+"the metrics using Python's `pprint "
+"<https://docs.python.org/3/library/pprint.html>`_ and save the global "
+"model `state_dict` using ``torch.save``."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch.rst:444
 #, fuzzy
 msgid ""
 "Check the `source code <https://github.com/adap/flower/blob/main/examples"
@@ -55823,4 +55904,81 @@ msgstr ""
 
 #~ msgid ":py:obj:`summary <flwr.serverapp.FedAvg.summary>`\\ \\(\\)"
 #~ msgstr ":py:obj:`History <flwr.server.History>`\\ \\(\\)"
+
+#~ msgid ""
+#~ "Let's use `flwr new` to create a"
+#~ " complete Flower+PyTorch project. It will"
+#~ " generate all the files needed to "
+#~ "run, by default with the Flower "
+#~ "Simulation Engine, a federation of 10"
+#~ " nodes using `FedAvg "
+#~ "<https://flower.ai/docs/framework/ref-"
+#~ "api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_."
+#~ " The dataset will be partitioned "
+#~ "using Flower Dataset's `IidPartitioner "
+#~ "<https://flower.ai/docs/datasets/ref-"
+#~ "api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Then, run the command below. You "
+#~ "will be prompted to select one of"
+#~ " the available templates (choose "
+#~ "``PyTorch``), give a name to your "
+#~ "project, and type in your developer "
+#~ "name:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The main changes we have to make"
+#~ " to use `PyTorch` with `Flower` will"
+#~ " be found in the ``get_weights()`` "
+#~ "and ``set_weights()`` functions. In "
+#~ "``get_weights()`` PyTorch model parameters are"
+#~ " extracted and represented as a list"
+#~ " of NumPy arrays. The ``set_weights()`` "
+#~ "function that's the oposite: given a "
+#~ "list of NumPy arrays it applies "
+#~ "them to an existing PyTorch model. "
+#~ "Doing this in fairly easy in "
+#~ "PyTorch."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Finally, we can construct a "
+#~ "``ClientApp`` using the ``FlowerClient`` "
+#~ "defined above by means of a "
+#~ "``client_fn()`` callback. Note that the "
+#~ "`context` enables you to get access "
+#~ "to hyperparemeters defined in your "
+#~ "``pyproject.toml`` to configure the run. "
+#~ "In this tutorial we access the "
+#~ "`local-epochs` setting to control the "
+#~ "number of epochs a ``ClientApp`` will"
+#~ " perform when running the ``fit()`` "
+#~ "method. You could define additioinal "
+#~ "hyperparameters in ``pyproject.toml`` and "
+#~ "access them here."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To construct a ``ServerApp`` we define"
+#~ " a ``server_fn()`` callback with an "
+#~ "identical signature to that of "
+#~ "``client_fn()`` but the return type is"
+#~ " `ServerAppComponents <https://flower.ai/docs/framework"
+#~ "/ref-"
+#~ "api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ "
+#~ "as opposed to a `Client "
+#~ "<https://flower.ai/docs/framework/ref-"
+#~ "api/flwr.client.Client.html#client>`_. In this "
+#~ "example we use the `FedAvg`. To it"
+#~ " we pass a randomly initialized model"
+#~ " that will server as the global "
+#~ "model to federated. Note that the "
+#~ "value of ``fraction_fit`` is read from"
+#~ " the run config. You can find "
+#~ "the default value defined in the "
+#~ "``pyproject.toml``."
+#~ msgstr ""
 
