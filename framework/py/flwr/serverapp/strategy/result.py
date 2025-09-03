@@ -61,22 +61,19 @@ class Result:
         arr_size = sum(len(array.data) for array in self.arrays.values()) / (1024**2)
         rep += "Global Arrays:\n" + f"\tArrayRecord ({arr_size:.3f} MB)\n" + "\n"
         rep += (
-            "Federated Train Metrics (per-round training metrics "
-            "from ClientApps):\n"
+            "Aggregated Client-side Train Metrics:\n"
             + pprint.pformat(stringify_dict(self.train_metrics_clientapp), indent=2)
             + "\n\n"
         )
 
         rep += (
-            "Federated Evaluate Metrics (per-round evaluation metrics "
-            "from ClientApps):\n"
+            "Aggregated Client-side Evaluate Metrics:\n"
             + pprint.pformat(stringify_dict(self.evaluate_metrics_clientapp), indent=2)
             + "\n\n"
         )
 
         rep += (
-            "Centralized Evaluate Metrics (per-round evaluation metrics "
-            "from ServerApp):\n"
+            "Server-side Evaluate Metrics:\n"
             + pprint.pformat(stringify_dict(self.evaluate_metrics_serverapp), indent=2)
             + "\n"
         )

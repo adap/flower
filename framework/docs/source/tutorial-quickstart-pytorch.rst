@@ -139,21 +139,21 @@ With default arguments you will see an output like this one:
     INFO :
     INFO :      Final results:
     INFO :
-    INFO :         Global Arrays:
-    INFO :                 ArrayRecord (0.238 MB)
+    INFO :          Global Arrays:
+    INFO :                  ArrayRecord (0.238 MB)
     INFO :
-    INFO :         Federated Train Metrics (per-round training metrics from ClientApps):
-    INFO :         { 1: {'train_loss': '2.1267e+00'},
-    INFO :           2: {'train_loss': '2.0586e+00'},
-    INFO :           3: {'train_loss': '1.9559e+00'}}
+    INFO :          Aggregated Client-side Train Metrics:
+    INFO :          { 1: {'train_loss': '2.1839e+00'},
+    INFO :            2: {'train_loss': '2.0512e+00'},
+    INFO :            3: {'train_loss': '1.9784e+00'}}
     INFO :
-    INFO :         Federated Evaluate Metrics (per-round evaluation metrics from ClientApps):
-    INFO :         { 1: {'eval_acc': '1.0040e-01', 'eval_loss': '2.2954e+00'},
-    INFO :           2: {'eval_acc': '2.4670e-01', 'eval_loss': '1.9911e+00'},
-    INFO :           3: {'eval_acc': '2.9830e-01', 'eval_loss': '1.8754e+00'}}
+    INFO :          Aggregated Client-side Evaluate Metrics:
+    INFO :          { 1: {'eval_acc': '1.0770e-01', 'eval_loss': '2.2858e+00'},
+    INFO :            2: {'eval_acc': '2.1810e-01', 'eval_loss': '1.9734e+00'},
+    INFO :            3: {'eval_acc': '2.7140e-01', 'eval_loss': '1.9069e+00'}}
     INFO :
-    INFO :         Centralized Evaluate Metrics (per-round evaluation metrics from ServerApp):
-    INFO :         {}
+    INFO :          Server-side Evaluate Metrics:
+    INFO :          {}
     INFO :
 
     Saving final model to disk...
