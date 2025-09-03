@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.21.0 (2025-09-03)
+## v1.21.0 (2025-09-04)
 
 ### Thanks to our contributors
 
@@ -8,68 +8,62 @@ We would like to give our special thanks to all the contributors who made the ne
 
 `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Evram`, `Heng Pan`, `Javier`, `Robert Steiner`, `Yan Gao` <!---TOKEN_v1.21.0-->
 
+### What's new?
 
 - **Introduce Flower SuperExec** ([#5659](https://github.com/adap/flower/pull/5659), [#5674](https://github.com/adap/flower/pull/5674), [#5678](https://github.com/adap/flower/pull/5678), [#5680](https://github.com/adap/flower/pull/5680), [#5682](https://github.com/adap/flower/pull/5682), [#5683](https://github.com/adap/flower/pull/5683), [#5685](https://github.com/adap/flower/pull/5685), [#5696](https://github.com/adap/flower/pull/5696), [#5699](https://github.com/adap/flower/pull/5699), [#5700](https://github.com/adap/flower/pull/5700), [#5701](https://github.com/adap/flower/pull/5701), [#5702](https://github.com/adap/flower/pull/5702), [#5703](https://github.com/adap/flower/pull/5703), [#5706](https://github.com/adap/flower/pull/5706), [#5713](https://github.com/adap/flower/pull/5713), [#5726](https://github.com/adap/flower/pull/5726))
 
-	SuperExec is a new component responsible for scheduling, launching, and managing app processes (e.g., `ServerApp`, `ClientApp`) within the Flower deployment runtime. It is automatically spawned when running a SuperLink or SuperNode in subprocess mode (default). This also introduces a token-based mechanism that improves security by assigning a unique token to each app execution. Supporting changes include new RPCs, protocol updates, plugin abstractions, and Docker image support for SuperExec. For more details, refer to the updated [Flower architecture explainer](https://flower.ai/docs/framework/v1.21.0/en/explanation-flower-architecture.html).
-
+  SuperExec is a new component responsible for scheduling, launching, and managing app processes (e.g., `ServerApp`, `ClientApp`) within the Flower deployment runtime. It is automatically spawned when running a SuperLink or SuperNode in subprocess mode (default). This also introduces a token-based mechanism that improves security by assigning a unique token to each app execution. Supporting changes include new RPCs, protocol updates, plugin abstractions, and Docker image support for SuperExec. For more details, refer to the updated [Flower architecture explainer](https://flower.ai/docs/framework/v1.21.0/en/explanation-flower-architecture.html).
 
 - **Update documentation to use SuperExec** ([#5731](https://github.com/adap/flower/pull/5731), [#5734](https://github.com/adap/flower/pull/5734), [#5735](https://github.com/adap/flower/pull/5735), [#5737](https://github.com/adap/flower/pull/5737), [#5751](https://github.com/adap/flower/pull/5751), [#5759](https://github.com/adap/flower/pull/5759))
 
-	Documentation has been revised to reflect the introduction of Flower SuperExec. Updates include restructuring exit codes, adding references to `flower-superexec`, and revising guides and tutorials such as quickstart with Docker, GCP deployment, network communication, and the architecture explainer to consistently use SuperExec.
+  Documentation has been revised to reflect the introduction of Flower SuperExec. Updates include restructuring exit codes, adding references to `flower-superexec`, and revising guides and tutorials such as quickstart with Docker, GCP deployment, network communication, and the architecture explainer to consistently use SuperExec.
 
-
-### Introduce strategy for Message API
+\\ TODO: Introduce strategy for Message API
 - **feat(framework): Introduce first** `Message` **-based strategy** ([#5710](https://github.com/adap/flower/pull/5710))
 - **feat(framework): Introduce Error code for** `Message` **-based strategies receiving an unaggregatable set of reply messages** ([#5771](https://github.com/adap/flower/pull/5771))
 - **refactor(framework): Fix recently introduced modules** ([#5774](https://github.com/adap/flower/pull/5774))
 - **refactor(framework): Move new strategies into submodule** ([#5787](https://github.com/adap/flower/pull/5787))
+- **feat(framework): Introduce** `SERVERAPP_STRATEGY_AGGREGATION_ERROR` ([#5794](https://github.com/adap/flower/pull/5794))
+- **feat(framework): Introduce** `AppExitException` **and improve** `flwr-serverapp` **logic** ([#5798](https://github.com/adap/flower/pull/5798))
 
-### New template pytorch (message api)
-- **feat(framework): Add** `PyTorch` `flwr new` **template with** `Message API` ([#5784](https://github.com/adap/flower/pull/5784))
-
-### Update quickstart-pytorch to use Message API
+\\ TODO: Update quickstart-pytorch to use Message API
 - **docs(framework): Update** `quickstart-pytorch` **tutorial** ([#5786](https://github.com/adap/flower/pull/5786))
 - **refactor(framework): Update** `quickstart-pytorch` **to** `Message API` ([#5785](https://github.com/adap/flower/pull/5785))
+- **fix(examples): Fix** `quickstart-pytorch` **example** ([#5802](https://github.com/adap/flower/pull/5802))
+
+- **New PyTorch template with Message API** ([#5784](https://github.com/adap/flower/pull/5784))
+
+  A new PyTorch template using the Message API is now available through `flwr new`.
 
 - **Improve Helm documentation** ([#5711](https://github.com/adap/flower/pull/5711), [#5733](https://github.com/adap/flower/pull/5733), [#5748](https://github.com/adap/flower/pull/5748), [#5758](https://github.com/adap/flower/pull/5758), [#5765](https://github.com/adap/flower/pull/5765))
 
-	Helm guide has been enhanced with additional configuration details and updated formatting. Changes include adding a parameters section, documenting how to set a custom `secretKey`, updating TLS instructions for version 1.20, and introducing audit logging configuration.
+  Helm guide has been enhanced with additional configuration details and updated formatting. Changes include adding a parameters section, documenting how to set a custom `secretKey`, updating TLS instructions for version 1.20, and introducing audit logging configuration.
 
 - **Improve documentation** ([#5159](https://github.com/adap/flower/pull/5159), [#5655](https://github.com/adap/flower/pull/5655), [#5668](https://github.com/adap/flower/pull/5668), [#5692](https://github.com/adap/flower/pull/5692), [#5723](https://github.com/adap/flower/pull/5723), [#5738](https://github.com/adap/flower/pull/5738), [#5739](https://github.com/adap/flower/pull/5739), [#5740](https://github.com/adap/flower/pull/5740), [#5753](https://github.com/adap/flower/pull/5753), [#5764](https://github.com/adap/flower/pull/5764), [#5769](https://github.com/adap/flower/pull/5769), [#5775](https://github.com/adap/flower/pull/5775), [#5782](https://github.com/adap/flower/pull/5782), [#5788](https://github.com/adap/flower/pull/5788), [#5795](https://github.com/adap/flower/pull/5795))
 
-	Restructures the tutorial series, removes `flower-simulation` references, and updates versioned docs to use the correct `flwr` versions. The [framework documentation homepage](https://flower.ai/docs/framework/) now defaults to the latest stable release instead of the `main` branch.
+  Restructures the tutorial series, removes `flower-simulation` references, and updates versioned docs to use the correct `flwr` versions. The [framework documentation homepage](https://flower.ai/docs/framework/) now defaults to the latest stable release instead of the `main` branch.
+
+- **Add `--health-server-address` flag to Flower SuperLink/SuperNode/SuperExec** ([#5792](https://github.com/adap/flower/pull/5792))
 
 - **Update CI/CD workflows and dependencies** ([#5647](https://github.com/adap/flower/pull/5647), [#5650](https://github.com/adap/flower/pull/5650), [#5651](https://github.com/adap/flower/pull/5651), [#5656](https://github.com/adap/flower/pull/5656), [#5712](https://github.com/adap/flower/pull/5712), [#5714](https://github.com/adap/flower/pull/5714), [#5747](https://github.com/adap/flower/pull/5747), [#5754](https://github.com/adap/flower/pull/5754), [#5755](https://github.com/adap/flower/pull/5755), [#5796](https://github.com/adap/flower/pull/5796))
 
-- **General improvements** ([#5622](https://github.com/adap/flower/pull/5622), [#5660](https://github.com/adap/flower/pull/5660), [#5673](https://github.com/adap/flower/pull/5673), [#5675](https://github.com/adap/flower/pull/5675), [#5676](https://github.com/adap/flower/pull/5676), [#5686](https://github.com/adap/flower/pull/5686), [#5697](https://github.com/adap/flower/pull/5697), [#5708](https://github.com/adap/flower/pull/5708), [#5719](https://github.com/adap/flower/pull/5719), [#5720](https://github.com/adap/flower/pull/5720), [#5722](https://github.com/adap/flower/pull/5722), [#5736](https://github.com/adap/flower/pull/5736), [#5746](https://github.com/adap/flower/pull/5746), [#5750](https://github.com/adap/flower/pull/5750), [#5757](https://github.com/adap/flower/pull/5757), [#5776](https://github.com/adap/flower/pull/5776), [#5777](https://github.com/adap/flower/pull/5777), [#5789](https://github.com/adap/flower/pull/5789))
+- **General improvements** ([#5622](https://github.com/adap/flower/pull/5622), [#5660](https://github.com/adap/flower/pull/5660), [#5673](https://github.com/adap/flower/pull/5673), [#5675](https://github.com/adap/flower/pull/5675), [#5676](https://github.com/adap/flower/pull/5676), [#5686](https://github.com/adap/flower/pull/5686), [#5697](https://github.com/adap/flower/pull/5697), [#5708](https://github.com/adap/flower/pull/5708), [#5719](https://github.com/adap/flower/pull/5719), [#5720](https://github.com/adap/flower/pull/5720), [#5722](https://github.com/adap/flower/pull/5722), [#5736](https://github.com/adap/flower/pull/5736), [#5746](https://github.com/adap/flower/pull/5746), [#5750](https://github.com/adap/flower/pull/5750), [#5757](https://github.com/adap/flower/pull/5757), [#5776](https://github.com/adap/flower/pull/5776), [#5777](https://github.com/adap/flower/pull/5777), [#5789](https://github.com/adap/flower/pull/5789), [#5805](https://github.com/adap/flower/pull/5805), [#5797](https://github.com/adap/flower/pull/5797))
 
   As always, many parts of the Flower framework and quality infrastructure were improved and updated.
-
-
-### New features
-
-### Documentation improvements
 
 ### Incompatible changes
 
 - **Rename Exec API to Control API** ([#5663](https://github.com/adap/flower/pull/5663), [#5665](https://github.com/adap/flower/pull/5665), [#5667](https://github.com/adap/flower/pull/5667), [#5671](https://github.com/adap/flower/pull/5671))
 
-	The Exec API has been fully renamed to Control API to make its purpose clearer and avoid confusion with SuperExec. This includes renaming `exec.proto` to `control.proto`, updating documentation, and changing the `--exec-api-address` flag to `--control-api-address`. For backward compatibility, the old flag is still supported.
+  The Exec API has been fully renamed to Control API to make its purpose clearer and avoid confusion with SuperExec. This includes renaming `exec.proto` to `control.proto`, updating documentation, and changing the `--exec-api-address` flag to `--control-api-address`. For backward compatibility, the old flag is still supported.
 
 - **Deprecate `flwr-*` commands** ([#5707](https://github.com/adap/flower/pull/5707), [#5725](https://github.com/adap/flower/pull/5725), [#5727](https://github.com/adap/flower/pull/5727), [#5760](https://github.com/adap/flower/pull/5760))
 
-	The long-running commands `flwr-serverapp`, `flwr-clientapp`, and `flwr-simulation` are deprecated in favor of SuperExec. Invoking them now launches the corresponding SuperExec process for backward compatibility.
+  The long-running commands `flwr-serverapp`, `flwr-clientapp`, and `flwr-simulation` are deprecated in favor of SuperExec. Invoking them now launches the corresponding SuperExec process for backward compatibility.
 
 - **Remove `--executor*` flags** ([#5657](https://github.com/adap/flower/pull/5657), [#5745](https://github.com/adap/flower/pull/5745), [#5749](https://github.com/adap/flower/pull/5749))
 
-	The `--executor`, `--executor-dir`, and `--executor-config` flags have been deprecated and the executor code removed. Use the new `--simulation` flag to run SuperLink with the simulation runtime.
-
-### Other changes
-
-### Unknown changes
-
-- **build(deps): bump next from 15.2.4 to 15.4.7 in /intelligence/ts/examples/nextjs-web-chats** ([#5783](https://github.com/adap/flower/pull/5783))
+  The `--executor`, `--executor-dir`, and `--executor-config` flags have been deprecated and the executor code removed. Use the new `--simulation` flag to run SuperLink with the simulation runtime.
 
 ## v1.20.0 (2025-07-29)
 
