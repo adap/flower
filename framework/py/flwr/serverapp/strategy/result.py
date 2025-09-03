@@ -35,19 +35,22 @@ class Result:
         arr_size = sum(len(array.data) for array in self.arrays.values()) / (1024**2)
         rep += "\nResult.arrays:\n" + f"\tArrayRecord ({arr_size:.3f} MB)\n" + "\n"
         rep += (
-            "Result.train_metrics_clientapp (per-round training metrics from clients):\n"
+            "Result.train_metrics_clientapp (per-round training metrics "
+            "from ClientApps):\n"
             + pprint.pformat(self.train_metrics_clientapp, indent=2)
             + "\n\n"
         )
 
         rep += (
-            "Result.evaluate_metrics_clientapp (per-round evaluation metrics from clients):\n"
+            "Result.evaluate_metrics_clientapp (per-round evaluation metrics "
+            "from ClientApps):\n"
             + pprint.pformat(self.evaluate_metrics_clientapp, indent=2)
             + "\n\n"
         )
 
         rep += (
-            "Result.evaluate_metrics_serverapp (per-round evaluation metrics from server):\n"
+            "Result.evaluate_metrics_serverapp (per-round evaluation metrics "
+            "from ServerApp):\n"
             + pprint.pformat(self.evaluate_metrics_serverapp, indent=2)
             + "\n"
         )
