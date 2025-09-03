@@ -139,15 +139,20 @@ class FedOpt(FedAvg):
         log(INFO, "\t├──> FedOpt settings:")
         log(
             INFO,
-            "\t│\t├──eta (%.2f) | eta_l ( %.2f)",
-            self.eta,
-            self.eta_l,
+            "\t│\t├── eta (%s) | eta_l (%s)",
+            f"{self.eta:.6g}",
+            f"{self.eta_l:.6g}",
         )
         log(
             INFO,
-            "\t│\t├──beta_1 (%.2f) | beta_2 ( %.2f)",
-            self.beta_1,
-            self.beta_2,
+            "\t│\t├── beta_1 (%s) | beta_2 (%s)",
+            f"{self.beta_1:.6g}",
+            f"{self.beta_2:.6g}",
+        )
+        log(
+            INFO,
+            "\t│\t└── tau (%s)",
+            f"{self.tau:.6g}",
         )
         super().summary()
 
