@@ -33,21 +33,21 @@ class Result:
         """Create a representation of the Result instance."""
         rep = ""
         arr_size = sum(len(array.data) for array in self.arrays.values()) / (1024**2)
-        rep += "\nResult (arrays):\n" + f"\tArrayRecord ({arr_size:.3f} MB)\n" + "\n"
+        rep += "\nResult.arrays:\n" + f"\tArrayRecord ({arr_size:.3f} MB)\n" + "\n"
         rep += (
-            "Result (round: train_metrics_clientapp):\n"
+            "Result.train_metrics_clientapp (per-round training metrics from clients):\n"
             + pprint.pformat(self.train_metrics_clientapp, indent=2)
             + "\n\n"
         )
 
         rep += (
-            "Result (round: evaluate_metrics_clientapp):\n"
+            "Result.evaluate_metrics_clientapp (per-round evaluation metrics from clients):\n"
             + pprint.pformat(self.evaluate_metrics_clientapp, indent=2)
             + "\n\n"
         )
 
         rep += (
-            "Result (round: evaluate_metrics_serverapp):\n"
+            "Result.evaluate_metrics_serverapp (per-round evaluation metrics from server):\n"
             + pprint.pformat(self.evaluate_metrics_serverapp, indent=2)
             + "\n"
         )
