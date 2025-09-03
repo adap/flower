@@ -418,6 +418,13 @@ shown in the screenshot below:
 Click on the SuperLink pod to view the pod details and click on the ``Logs`` tab. You
 should be able to view the SuperLink logs showing two connected SuperNodes.
 
+.. tip::
+
+    To shut down the pods, navigate to ``Workloads`` > ``Deployments``, select the
+    deployed pods, and click on ``Edit Pod Count`` to set the replica count to 0. Now,
+    you can delete the pods by selecting them and clicking on the ``Delete Deployment``
+    button.
+
 Deploy Red Hat OpenShift AI
 ---------------------------
 
