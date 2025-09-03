@@ -18,6 +18,7 @@ import pprint
 from dataclasses import dataclass, field
 
 from flwr.common import ArrayRecord, MetricRecord
+from flwr.common.typing import MetricRecordValues
 
 
 @dataclass
@@ -62,22 +63,45 @@ class Result:
         rep += (
             "Federated Train Metrics (per-round training metrics "
             "from ClientApps):\n"
-            + pprint.pformat(self.train_metrics_clientapp, indent=2)
+            + pprint.pformat(stringify_dict(self.train_metrics_clientapp), indent=2)
             + "\n\n"
         )
 
         rep += (
             "Federated Evaluate Metrics (per-round evaluation metrics "
             "from ClientApps):\n"
-            + pprint.pformat(self.evaluate_metrics_clientapp, indent=2)
+            + pprint.pformat(stringify_dict(self.evaluate_metrics_clientapp), indent=2)
             + "\n\n"
         )
 
         rep += (
             "Centralized Evaluate Metrics (per-round evaluation metrics "
             "from ServerApp):\n"
-            + pprint.pformat(self.evaluate_metrics_serverapp, indent=2)
+            + pprint.pformat(stringify_dict(self.evaluate_metrics_serverapp), indent=2)
             + "\n"
         )
 
         return rep
+
+
+def format_value(val: MetricRecordValues) -> str:
+    """Format a value as string, applying scientific notation for floats."""
+    if isinstance(val, float):
+        return f"{val:.4e}"
+    if isinstance(val, int):
+        return str(val)
+    if isinstance(val, list):
+        return str([f"{x:.4e}" if isinstance(x, float) else str(x) for x in val])
+    return str(val)
+
+
+def stringify_dict(d: dict[int, MetricRecord]) -> dict[int, dict[str, str]]:
+    """Return a copy results metrics but with values converted to string and formatted
+    accordingtly."""
+    new_metrics_dict = {}
+    for k, inner in d.items():
+        new_inner = {}
+        for ik, iv in inner.items():
+            new_inner[ik] = format_value(iv)
+        new_metrics_dict[k] = new_inner
+    return new_metrics_dict
