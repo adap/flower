@@ -30,7 +30,7 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
-from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
+from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE, RUN_CONFIG_HELP_MESSAGE
 from flwr.common.config import (
     flatten_dict,
     get_metadata_from_config,
@@ -65,11 +65,7 @@ def run(
         typer.Option(
             "--run-config",
             "-c",
-            help="Override run configuration values in the format:\n\n"
-            "`--run-config 'key1=value1 key2=value2' --run-config 'key3=value3'`\n\n"
-            "Values can be of any type supported in TOML, such as bool, int, "
-            "float, or string. Ensure that the keys (`key1`, `key2`, `key3` "
-            "in this example) exist in `pyproject.toml` for proper overriding.",
+            help=RUN_CONFIG_HELP_MESSAGE,
         ),
     ] = None,
     federation_config_overrides: Annotated[
