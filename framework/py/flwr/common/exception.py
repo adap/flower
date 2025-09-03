@@ -12,17 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower exit functionality."""
+"""Flower application exceptions."""
 
 
-from .exit import flwr_exit
-from .exit_code import ExitCode
-from .exit_handler import add_exit_handler
-from .signal_handler import register_signal_handlers
+class AppExitException(Exception):
+    """Base exception for all application-level errors in ServerApp and ClientApp.
 
-__all__ = [
-    "ExitCode",
-    "add_exit_handler",
-    "flwr_exit",
-    "register_signal_handlers",
-]
+    When raised, the process will exit and report a telemetry event with the associated
+    exit code.
+    """
+
+    # Default exit code — subclasses must override
+    exit_code = -1
+
+    def __init_subclass__(cls) -> None:
+        """Ensure subclasses override the exit_code attribute."""
+        if cls.exit_code == -1:
+            raise ValueError("Subclasses must override the exit_code attribute.")

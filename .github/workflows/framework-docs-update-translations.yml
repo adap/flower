@@ -2,7 +2,7 @@ name: Framework Docs Translations
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs every day at midnight
+    - cron: "0 0 * * *" # Runs every day at midnight
   workflow_dispatch: # Allows to manually trigger the workflow
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
@@ -57,7 +57,7 @@ jobs:
           git commit -m "Update text and language files"
         continue-on-error: true
 
-      - name: Calculate diff  # Even without doc changes the update-lang command will generate 228 additions and 60 deletions, so we only want to open a PR when there is more
+      - name: Calculate diff # Even without doc changes the update-lang command will generate 228 additions and 60 deletions, so we only want to open a PR when there is more
         id: calculate_diff
         run: |
           additions=$(git diff --numstat HEAD^1 | awk '{s+=$1} END {print s}')
@@ -82,6 +82,6 @@ jobs:
           branch: ${{ env.branch-name }}
           base: ${{ env.base-branch }}
           delete-branch: true
-          title: 'docs(framework:skip) Update source texts for translations (automated)'
-          body: 'This PR is auto-generated to update text and language files.'
+          title: "docs(framework:skip): Update source texts for translations (auto)"
+          body: "This PR is auto-generated to update text and language files."
           draft: false

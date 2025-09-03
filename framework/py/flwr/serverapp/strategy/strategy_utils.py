@@ -30,12 +30,16 @@ from flwr.common import (
     RecordDict,
     log,
 )
+from flwr.common.exception import AppExitException
+from flwr.common.exit import ExitCode
 from flwr.server import Grid
 
 
-class InconsistentMessageReplies(Exception):
+class InconsistentMessageReplies(AppExitException):
     """Exception triggered when replies are inconsistent and therefore aggregation must
     be skipped."""
+
+    exit_code = ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET
 
     def __init__(self, reason: str):
         super().__init__(reason)
