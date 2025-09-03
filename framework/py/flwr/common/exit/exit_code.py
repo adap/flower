@@ -36,6 +36,7 @@ class ExitCode:
 
     # ServerApp-specific exit codes (200-299)
     SERVERAPP_STRATEGY_PRECONDITION_UNMET = 200
+    SERVERAPP_EXCEPTION = 201
     SERVERAPP_STRATEGY_AGGREGATION_ERROR = 202
 
     # SuperNode-specific exit codes (300-399)
@@ -90,6 +91,7 @@ EXIT_CODE_HELP = {
         "perform weighted average (e.g. in FedAvg) please ensure the returned "
         "MetricRecord from ClientApps do include this key."
     ),
+    ExitCode.SERVERAPP_EXCEPTION: "An unhandled exception occurred in the ServerApp.",
     ExitCode.SERVERAPP_STRATEGY_AGGREGATION_ERROR: (
         "The strategy encountered an error during aggregation. Please check the logs "
         "for more details."
