@@ -20,11 +20,11 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Introduce strategies for Message API** ([#5710](https://github.com/adap/flower/pull/5710), [#5766](https://github.com/adap/flower/pull/5766), [#5770](https://github.com/adap/flower/pull/5770), [#5771](https://github.com/adap/flower/pull/5771), [#5774](https://github.com/adap/flower/pull/5774), [#5779](https://github.com/adap/flower/pull/5779), [#5787](https://github.com/adap/flower/pull/5787), [#5794](https://github.com/adap/flower/pull/5794), [#5798](https://github.com/adap/flower/pull/5798), [#5804](https://github.com/adap/flower/pull/5804))
 
-  Introduces a new abstract base class `Strategy` for the Message API, mirroring the legacy design. Implements strategies such as `FedAvg`, `FedOpt`, `FedAdam`, and Differential Privacy strategies. A [migration guide](https://flower.ai/docs/framework/how-to-upgrade-to-message-api.html) has been added to help users transition to the Message API.
+  Introduces a new abstract base class `Strategy` that operate on `Message` replies, mirroring the design of those operating on `FitIns/FitRes` or `EvaluateIns/EvaluteRes` while providing more versatility on the type of payloads that can be federated with Flower. The first batch of `Message`-based strategies are: `FedAvg`, `FedOpt`, `FedAdam`, and fixed-clipping Differential Privacy strategies. More will follow in subsequent releases. A [migration guide](https://flower.ai/docs/framework/how-to-upgrade-to-message-api.html) has been added to help users transition their existing Flower Apps operating on the original `Strategy` and `NumPyClient` abstractions to the Message API.
 
 - **Update quickstart-pytorch to use Message API** ([#5785](https://github.com/adap/flower/pull/5785), [#5786](https://github.com/adap/flower/pull/5786), [#5802](https://github.com/adap/flower/pull/5802))
 
-  The `quickstart-pytorch` [tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html) has been migrated to the Message API, using the new `FedAvg` strategy.
+  The `quickstart-pytorch` [tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html) has been migrated to the Message API, using the new `FedAvg` strategy and the new `flwr new` template.
 
 - **New PyTorch template with Message API** ([#5784](https://github.com/adap/flower/pull/5784))
 
