@@ -429,12 +429,12 @@ First, ensure that the Red Hat OpenShift AI is enabled via the Red Hat OpenShift
 console. You may enable a free trial if you do not have a subscription. Navigate to
 ``Operators`` > ``OperatorHub`` and search for ``Red Hat OpenShift AI``. Click on the
 ``Red Hat OpenShift AI`` card and then click on the ``Install`` button. Alternatively,
-you may install the OpenShift AI Operator via the OpenShift CLI tool following the
-official instructions `here
+install the OpenShift AI Operator via the OpenShift CLI tool following the official
+instructions `here
 <https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.23/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install#installing-openshift-ai-operator-using-cli_operator-install>`_.
-You should see a green check mark under the ``Status`` column for the ``Red Hat
-OpenShift AI`` Operator in the ``Installed Operators`` tab once the installation is
-complete.
+Once the installation is complete, you should see a green check mark under the
+``Status`` column for the ``Red Hat OpenShift AI`` Operator in the ``Installed
+Operators`` tab:
 
 .. figure:: ./_static/rhos/rhosai.png
     :align: center
@@ -446,12 +446,12 @@ complete.
 Install Data Science Cluster
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-After the Operator is installed, we need to install the ``DataScienceCluster`` using the
-webconsole. Follow the official steps `in this link
+After installing the Operator, we need to install the ``DataScienceCluster`` using the
+web console. Follow the official steps `in this link
 <https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.23/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install#installing-openshift-ai-components-using-web-console_component-install>`_.
-It is also recommended for you to `disable KServe dependencies
+It is also recommended to `disable KServe dependencies
 <https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.23/html/installing_and_uninstalling_openshift_ai_self-managed/installing-the-single-model-serving-platform_component-install#disabling-kserve-dependencies_component-install>`_
-since you are not serving ML models for inference. In the ``Installed Operators`` tab,
+since we are not serving ML models for inference. In the ``Installed Operators`` tab,
 click on ``Red Hat OpenShift AI``, navigate to the ``Data Science Cluster`` tab, and
 click on ``Create DataScienceCluster``. Select the YAML view of the configuration and
 paste the following YAML definition:
@@ -507,13 +507,13 @@ Click on ``Create`` to create the Data Science Cluster. If successful, you shoul
 .. figure:: ./_static/rhos/rhosai_datasciencecluster.png
     :align: center
     :width: 90%
-    :alt: Red Hat OpenShift AI Data Science Cluster
+    :alt: View of a successfully created Red Hat OpenShift AI Data Science Cluster
 
-    Red Hat OpenShift AI Data Science Cluster.
+    View of a successfully created Red Hat OpenShift AI Data Science Cluster.
 
 Once the above is complete, you will be able to launch OpenShift AI by clicking on the
-grid icon on the top right of the OpenShift console and selecting ``Red Hat OpenShift
-AI``:
+grid icon on the top right of the OpenShift console and clicking on the ``Red Hat
+OpenShift AI`` link:
 
 .. figure:: ./_static/rhos/launch_rhosai.png
     :align: center
@@ -522,22 +522,38 @@ AI``:
 
     Launch Red Hat OpenShift AI from OpenShift console.
 
-Follow the instructions when prompted to "Log in with OpenShift". After logging in, you
-will be taken to the OpenShift AI dashboard.
+Follow the instructions when prompted to ``Log in with OpenShift``. After logging in,
+you will be taken to the OpenShift AI dashboard.
 
 Create a Custom OpenShift AI Image with Flower
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In OpenShift AI, you will be building and running your Flower app in a workbench, which
 is a Jupyter notebook environment. However, the default OpenShift AI workbench image
-does not come with Flower installed. Therefore, we need to create a custom OpenShift AI
-image that has Flower installed. This custom image will then be used to create a
-workbench.
+does not come with Flower installed. Therefore, we will first create a custom OpenShift
+AI image with Flower pre-installed. This custom image will then be used to create a
+workbench. The steps in this section are adapted from the official Red Hat OpenShift AI
+guide for `creating a custom workbench image
+<https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.16/html/managing_openshift_ai/creating-custom-workbench-images#creating-a-custom-image-from-default-image_custom-images>`_.
 
-In the Red Hat OpenShift console, go to ``Builds`` > ``ImageStreams`` >
-``s2i-minimal-notebook``, choose the DockerImage for Python 3.11. Next, in your local
-machine, create a ``Dockerfile`` with the following contents. This Dockerfile is based
-on the minimal Jupyter workbench image for OpenShift AI:
+**Pre-requisites**: Given that Red Hat OpenShift AI needs to be able to pull from a
+container registry, you will need to create an account on ``quay.io`` if you do not have
+one already. Then, create a new repository, e.g., ``flowerlabs/demo``, and make it
+public. You will also need to install the `Docker CLI tool
+<https://docs.docker.com/get-docker/>`_ on your system. Then, login to your ``quay.io``
+account using the command:
+
+.. code-block:: shell
+
+    docker login quay.io
+
+Now, we select a base image for our custom OpenShift AI image. In the Red Hat OpenShift
+console, go to ``Builds`` > ``ImageStreams``. You can find the default workbench images
+for the ``redhat-ods-applications`` project. Select the ``s2i-minimal-notebook`` and
+choose the image tag that you want to use and copy the ``sha256`` identifier. In this
+guide, we will use the ``2025.1`` tag.
+
+Next, in your machine, create a Dockerfile with the following contents:
 
 .. dropdown:: Dockerfile
 
@@ -550,46 +566,124 @@ on the minimal Jupyter workbench image for OpenShift AI:
 
         RUN pip install flwr[simulation]==|stable_flwr_version|
 
-Build and push the container image to ``quay.io`` so that it's accessible by Red Hat
-OpenShift AI:
+Build and push the container image to your public repository on ``quay.io``:
 
 .. code-block:: shell
 
     docker build -t quay.io/flowerlabs/demo/flwr-rhos:0.0.1 . && docker push quay.io/flowerlabs/demo/flwr-rhos:0.0.1
 
-Create Data Science Project
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Once the image is pushed, we will configure OpenShift AI to load this custom workbench
+image. In the OpenShift AI dashboard, go to ``Settings`` > ``Workbench images`` and
+click on ``Import new image``. Set the ``Image location`` to your custom image (e.g.,
+``quay.io/flowerlabs/demo/flwr-rhos:0.0.1@sha256[...]``) and give it a name (e.g.,
+``flwr-rhos-image``). Take note of the resource name as you will need it in the next
+section when creating your workbench. Then, click on ``Import`` to import the image. If
+successful, you should see your custom image in the list of workbench images:
 
-Once the OpenShift AI dashboard is loaded, we need to create a Data Science project to
-host the workbench that you will use to develop and run your Flower app.
+.. figure:: ./_static/rhos/rhosai_custom_image.png
+    :align: center
+    :width: 90%
+    :alt: Custom OpenShift AI workbench image with Flower
 
-1. On the left sidebar, click on ``Home`` and click on the ``Create project`` button in
-   the ``Data Science Projects`` section.
-2. Give your project a name, e.g., ``flower-openshift-demo`` and - if you like, a
-   description. Then, click ``Create``.
-3. Click on your created project to open it.
-4. Navigate to the ``Workbenches`` tab and click on ``Create workbench`` to create a new
-   workbench.
+    Custom OpenShift AI workbench image with Flower.
 
-   1. Under "Name and description", provide a name for your workbench, e.g.
-      ``flower-openshift-workbench``.
+Create a Data Science Project
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-WIP
+Now we are ready to create a Data Science project in OpenShift AI and create a workbench
+using the custom image we just created from the previous section.
 
-Build a custom OpenShift AI Image with Flower
----------------------------------------------
+On the left sidebar, click on ``Home``, navigate to the ``Data Science Projects``
+section, and click on the ``Create project`` button. Give your project a name, e.g.,
+``flower-openshift-demo`` and - if you like, a description. Then, click ``Create``.
+Click on your created project to open it.
 
-WIP
+.. figure:: ./_static/rhos/rhosai_ds_project.png
+    :align: center
+    :width: 90%
+    :alt: Data Science project in Red Hat OpenShift AI
 
-Run the Custom OpenShift AI Workbench with Flower
--------------------------------------------------
+    Data Science project in Red Hat OpenShift AI.
 
-WIP
+Navigate to the ``Workbenches`` tab and click on ``Create workbench`` to create a new
+workbench. Under "Name and description", provide a name for your workbench, e.g.
+``flwr-rhos-demo-workbench``. Under ``Workbench image`` > ``Image selection``, select
+the name of the image that you provided earlier (i.e., ``flwr-rhos-image``). Choose a
+medium container size and leave other settings as default. Finally, click on ``Create
+Workbench``. The status of your workbench should switch to ``Running`` after a few
+minutes:
+
+.. figure:: ./_static/rhos/rhosai_ds_workbench.png
+    :align: center
+    :width: 90%
+    :alt: Running workbench in Red Hat OpenShift AI
+
+    Running workbench in Red Hat OpenShift AI.
+
+Now, click on your workbench and launch the JupyterLab environment.
 
 Run the Flower App in OpenShift AI
 ----------------------------------
 
-WIP
+With a running workbench and deployed SuperLink and SuperNode pods in your OpenShift
+cluster, you are now ready to run a Flower app! In the JupyterLab environment of your
+workbench, let's verify Flower is installed correctly and working as expected: open a
+new terminal and run ``flwr --version`` to check the Flower version:
+
+.. figure:: ./_static/rhos/rhosai_flower_version.png
+    :align: center
+    :width: 90%
+    :alt: Verify Flower installation in OpenShift AI workbench
+
+    Verify Flower installation in OpenShift AI workbench.
+
+With Flower running correctly, you can now follow the usual steps of using ``flwr new``
+to create a new Flower app from a template, and ``flwr run`` to run your Flower app on
+the deployed SuperLink and SuperNode pods. Given that we deployed the OpenShift AI
+instance in the same namespace (``flower-openshift-demo``) as the SuperLink in the
+OpenShift cluster, the only change you need to make is to specify the SuperLink service
+name as the address in your ``pyproject.toml``:
+
+.. code-block:: toml
+
+    # ... Existing code in pyproject.toml ...
+
+    [tool.flwr.federations.remote]
+    address = "superlink-service:9093"  # use the service name created earlier
+    insecure = true
+
+And finally, run your Flower app as usual with ``flwr run``:
+
+.. figure:: ./_static/rhos/rhosai_flwr_run.png
+    :align: center
+    :width: 90%
+    :alt: Running Flower app in OpenShift AI workbench
+
+    Running Flower app in OpenShift AI workbench.
+
+You can also view the logs of the SuperLink pod in the OpenShift console. Navigate to
+``Workloads`` > ``Pods``, click on the SuperLink pod, and then click on the ``Logs``:
+
+.. figure:: ./_static/rhos/rhos_superlink_logs.png
+    :align: center
+    :width: 90%
+    :alt: SuperLink logs showing connected SuperNodes and running Flower app
+
+    SuperLink logs showing connected SuperNodes and running Flower app.
+
+Congratulations! You have successfully created, deployed, and run a Flower app on Red
+Hat OpenShift using the Red Hat OpenShift Service on AWS. You can explore running different
+Flower apps and federated workloads on your OpenShift cluster, for instance, :doc:`with PyTorch <tutorial-quickstart-pytorch>`.
+For further reading about deploying Flower with Docker and Kubernetes, check out our
+guides below:
+
+* :doc:`How to run Flower with Docker <docker/index>`
+* :doc:`How to run Flower with Helm <helm/index>`
+
+To learn about running Flower on other cloud platforms, check out our guides below:
+
+* :doc:`How to run Flower on Microsoft Azure <how-to-run-flower-on-azure>`
+* :doc:`How to run Flower on Google Cloud Platform <how-to-run-flower-on-gcp>`
 
 .. |aws_cli_link| replace:: ``aws``
 
