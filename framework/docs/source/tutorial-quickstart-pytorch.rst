@@ -137,15 +137,24 @@ With default arguments you will see an output like this one:
     INFO :
     INFO :      Strategy execution finished in 16.56s
     INFO :
-    Distributed train metrics:
-    {1: {'train_loss': 2.149280443954468},
-    2: {'train_loss': 2.109740121269226},
-    3: {'train_loss': 1.947683771133423}}
-
-    Distributed evaluate metrics:
-    {1: {'eval_loss': 2.313199865818024, 'eval_acc': 0.1004},
-    2: {'eval_loss': 2.2529619082808496, 'eval_acc': 0.1420000002},
-    3: {'eval_loss': 1.9190230954438452, 'eval_acc': 0.2974000005}}
+    INFO :      Final results:
+    INFO :
+    INFO :          Global Arrays:
+    INFO :                  ArrayRecord (0.238 MB)
+    INFO :
+    INFO :          Aggregated Client-side Train Metrics:
+    INFO :          { 1: {'train_loss': '2.1839e+00'},
+    INFO :            2: {'train_loss': '2.0512e+00'},
+    INFO :            3: {'train_loss': '1.9784e+00'}}
+    INFO :
+    INFO :          Aggregated Client-side Evaluate Metrics:
+    INFO :          { 1: {'eval_acc': '1.0770e-01', 'eval_loss': '2.2858e+00'},
+    INFO :            2: {'eval_acc': '2.1810e-01', 'eval_loss': '1.9734e+00'},
+    INFO :            3: {'eval_acc': '2.7140e-01', 'eval_loss': '1.9069e+00'}}
+    INFO :
+    INFO :          Server-side Evaluate Metrics:
+    INFO :          {}
+    INFO :
 
     Saving final model to disk...
 
@@ -418,12 +427,6 @@ invoking its |strategy_start_link|_ method. To it we pass:
             train_config=ConfigRecord({"lr": lr}),
             num_rounds=num_rounds,
         )
-
-        # Log resulting metrics
-        print("\nDistributed train metrics:")
-        pprint(result.train_metrics_clientapp)
-        print("\nDistributed evaluate metrics:")
-        pprint(result.evaluate_metrics_clientapp)
 
         # Save final model to disk
         print("\nSaving final model to disk...")
