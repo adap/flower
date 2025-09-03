@@ -15,6 +15,7 @@
 """Flower message-based strategy."""
 
 
+import io
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
@@ -270,6 +271,11 @@ class Strategy(ABC):
 
         log(INFO, "")
         log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)
+        log(INFO, "")
+        log(INFO, "Final results:")
+        log(INFO, "")
+        for line in io.StringIO(str(result)):
+            log(INFO, "\t%s", line.strip("\n"))
         log(INFO, "")
 
         return result
