@@ -176,10 +176,10 @@ class Strategy(ABC):
             metrics and global evaluation metrics (if provided) from all rounds.
         """
         log(INFO, "Starting %s strategy:", self.__class__.__name__)
+        self.summary()
         log_strategy_start_info(
             num_rounds, initial_arrays, train_config, evaluate_config
         )
-        self.summary()
         log(INFO, "")
 
         # Initialize if None

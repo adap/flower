@@ -73,7 +73,7 @@ def log_strategy_start_info(
     )
     log(
         INFO,
-        "\t├── ConfigRecord (evaluate): %s",
+        "\t└── ConfigRecord (evaluate): %s",
         config_to_str(evaluate_config) if evaluate_config else "(empty!)",
     )
 

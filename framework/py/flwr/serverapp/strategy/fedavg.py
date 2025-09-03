@@ -127,10 +127,10 @@ class FedAvg(Strategy):
             self.min_evaluate_nodes,
         )  # pylint: disable=line-too-long
         log(INFO, "\t│\t└──Minimum available nodes: %d", self.min_available_nodes)
-        log(INFO, "\t└──> Keys in records:")
-        log(INFO, "\t\t├── Weighted by: '%s'", self.weighted_by_key)
-        log(INFO, "\t\t├── ArrayRecord key: '%s'", self.arrayrecord_key)
-        log(INFO, "\t\t└── ConfigRecord key: '%s'", self.configrecord_key)
+        log(INFO, "\t├──> Keys in records:")
+        log(INFO, "\t│\t├── Weighted by: '%s'", self.weighted_by_key)
+        log(INFO, "\t│\t├── ArrayRecord key: '%s'", self.arrayrecord_key)
+        log(INFO, "\t│\t└── ConfigRecord key: '%s'", self.configrecord_key)
 
     def _construct_messages(
         self, record: RecordDict, node_ids: list[int], message_type: str
