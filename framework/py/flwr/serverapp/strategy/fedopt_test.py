@@ -44,9 +44,9 @@ from .strategy_utils import AggregationError
 def test_compute_deltat_raises_error(
     is_valid: bool, aggregated_arrayrecord: ArrayRecord
 ) -> None:
-    """Test that compute_deltat raises AggregationError when there is a mismatch
-    between the global ArrayRecord at the strategy and the resulting aggregated one
-    from the replies."""
+    """Test that compute_deltat raises AggregationError when there is a mismatch between
+    the global ArrayRecord at the strategy and the resulting aggregated one from the
+    replies."""
     # Instantiate strategy
     strategy = FedOpt()
     # Instantiate global model arrays and set in strategy
