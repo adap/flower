@@ -273,6 +273,7 @@ class Strategy(ABC):
         log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)
         log(INFO, "")
         log(INFO, "Final results:")
+        log(INFO, "")
         for line in io.StringIO(str(result)):
             log(INFO, "\t%s", line.strip("\n"))
         log(INFO, "")
