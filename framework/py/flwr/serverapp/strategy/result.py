@@ -14,7 +14,7 @@
 # ==============================================================================
 """Strategy results."""
 
-
+import pprint
 from dataclasses import dataclass, field
 
 from flwr.common import ArrayRecord, MetricRecord
@@ -28,3 +28,28 @@ class Result:
     train_metrics_clientapp: dict[int, MetricRecord] = field(default_factory=dict)
     evaluate_metrics_clientapp: dict[int, MetricRecord] = field(default_factory=dict)
     evaluate_metrics_serverapp: dict[int, MetricRecord] = field(default_factory=dict)
+
+    def __repr__(self) -> str:
+        """Create a representation of the Result instance."""
+        repr = ""
+        arr_size = sum(len(array.data) for array in self.arrays.values()) / (1024**2)
+        repr += "\nResult (arrays):\n" + f"\tArrayRecord ({arr_size} MB)\n" + "\n"
+        repr += (
+            "Result (train_metrics_clientapp):\n"
+            + pprint.pformat(self.train_metrics_clientapp, indent=2)
+            + "\n\n"
+        )
+
+        repr += (
+            "Result (evaluate_metrics_clientapp):\n"
+            + pprint.pformat(self.evaluate_metrics_clientapp, indent=2)
+            + "\n\n"
+        )
+
+        repr += (
+            "Result (evaluate_metrics_serverapp):\n"
+            + pprint.pformat(self.evaluate_metrics_serverapp, indent=2)
+            + "\n"
+        )
+
+        return repr
