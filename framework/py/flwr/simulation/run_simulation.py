@@ -29,7 +29,6 @@ from queue import Empty, Queue
 from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
-from flwr.cli.utils import get_sha256_hash
 from flwr.client import ClientApp
 from flwr.common import Context, EventType, RecordDict, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
@@ -51,6 +50,8 @@ from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
+from flwr.common.exception import AppExitException
+from flwr.common.exit import ExitCode, flwr_exit
 
 
 def _replace_keys(d: Any, match: str, target: str) -> Any:
@@ -143,21 +144,28 @@ def run_simulation_from_cli() -> None:
     run = Run.create_empty(run_id)
     run.override_config = override_config
 
-    _ = _run_simulation(
-        server_app_attr=server_app_attr,
-        client_app_attr=client_app_attr,
-        num_supernodes=args.num_supernodes,
-        backend_name=args.backend,
-        backend_config=backend_config_dict,
-        app_dir=args.app,
-        run=run,
-        enable_tf_gpu_growth=args.enable_tf_gpu_growth,
-        verbose_logging=args.verbose,
-        server_app_run_config=fused_config,
-        is_app=True,
-        exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
-    )
+    try:
+        _ = _run_simulation(
+            server_app_attr=server_app_attr,
+            client_app_attr=client_app_attr,
+            num_supernodes=args.num_supernodes,
+            backend_name=args.backend,
+            backend_config=backend_config_dict,
+            app_dir=args.app,
+            run=run,
+            enable_tf_gpu_growth=args.enable_tf_gpu_growth,
+            verbose_logging=args.verbose,
+            server_app_run_config=fused_config,
+            is_app=True,
+        )
+        exit_code = ExitCode.SUCCESS
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+        # Set exit code
+        exit_code = ExitCode.SERVERAPP_EXCEPTION  # General exit code
+        if isinstance(ex, AppExitException):
+            exit_code = ex.exit_code
 
+    flwr_exit(exit_code)
 
 # Entry point from Python session (script or notebook)
 # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -233,7 +241,6 @@ def run_simulation(
         backend_config=backend_config,
         enable_tf_gpu_growth=enable_tf_gpu_growth,
         verbose_logging=verbose_logging,
-        exit_event=EventType.PYTHON_API_RUN_SIMULATION_LEAVE,
     )
 
 
@@ -245,30 +252,20 @@ def run_serverapp_th(
     grid: Grid,
     app_dir: str,
     f_stop: threading.Event,
-    has_exception: threading.Event,
     enable_tf_gpu_growth: bool,
     run_id: int,
-    ctx_queue: "Queue[Context]",
+    ctx_queue: Queue[Context],
+    exc_queue: Queue[Exception],
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
 
-    def server_th_with_start_checks(
-        tf_gpu_growth: bool,
-        stop_event: threading.Event,
-        exception_event: threading.Event,
-        _grid: Grid,
-        _server_app_dir: str,
-        _server_app_run_config: UserConfig,
-        _server_app_attr: Optional[str],
-        _server_app: Optional[ServerApp],
-        _ctx_queue: "Queue[Context]",
-    ) -> None:
+    def server_th_with_start_checks() -> None:
         """Run SeverApp, after check if GPU memory growth has to be set.
 
         Upon exception, trigger stop event for Simulation Engine.
         """
         try:
-            if tf_gpu_growth:
+            if enable_tf_gpu_growth:
                 log(INFO, "Enabling GPU growth for Tensorflow on the server thread.")
                 enable_gpu_growth()
 
@@ -278,43 +275,30 @@ def run_serverapp_th(
                 node_id=0,
                 node_config={},
                 state=RecordDict(),
-                run_config=_server_app_run_config,
+                run_config=server_app_run_config,
             )
 
             # Run ServerApp
             updated_context = _run(
-                grid=_grid,
+                grid=grid,
                 context=context,
-                server_app_dir=_server_app_dir,
-                server_app_attr=_server_app_attr,
-                loaded_server_app=_server_app,
+                server_app_dir=app_dir,
+                server_app_attr=server_app_attr,
+                loaded_server_app=server_app,
             )
-            _ctx_queue.put(updated_context)
+            ctx_queue.put(updated_context)
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, "ServerApp thread raised an exception: %s", ex)
-            log(ERROR, traceback.format_exc())
-            exception_event.set()
-            raise
+            exc_queue.put(ex)
         finally:
             log(DEBUG, "ServerApp finished running.")
             # Upon completion, trigger stop event if one was passed
-            if stop_event is not None:
-                stop_event.set()
+            if f_stop is not None:
+                f_stop.set()
                 log(DEBUG, "Triggered stop event for Simulation Engine.")
 
     serverapp_th = threading.Thread(
         target=server_th_with_start_checks,
-        args=(
-            enable_tf_gpu_growth,
-            f_stop,
-            has_exception,
-            grid,
-            app_dir,
-            server_app_run_config,
-            server_app_attr,
-            server_app,
-            ctx_queue,
-        ),
     )
     serverapp_th.start()
     return serverapp_th
@@ -329,7 +313,6 @@ def _main_loop(
     is_app: bool,
     enable_tf_gpu_growth: bool,
     run: Run,
-    exit_event: EventType,
     flwr_dir: Optional[str] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
@@ -343,9 +326,8 @@ def _main_loop(
 
     f_stop = threading.Event()
     # A Threading event to indicate if an exception was raised in the ServerApp thread
-    server_app_thread_has_exception = threading.Event()
     serverapp_th = None
-    success = True
+    exc_queue: Queue[Exception] = Queue()
     updated_context = Context(
         run_id=run.run_id,
         node_id=0,
@@ -377,10 +359,10 @@ def _main_loop(
             grid=grid,
             app_dir=app_dir,
             f_stop=f_stop,
-            has_exception=server_app_thread_has_exception,
             enable_tf_gpu_growth=enable_tf_gpu_growth,
             run_id=run.run_id,
             ctx_queue=output_context_queue,
+            exc_queue=exc_queue,
         )
 
         # Start Simulation Engine
@@ -406,23 +388,16 @@ def _main_loop(
     except Exception as ex:
         log(ERROR, "An exception occurred !! %s", ex)
         log(ERROR, traceback.format_exc())
-        success = False
         raise RuntimeError("An error was encountered. Ending simulation.") from ex
 
     finally:
         # Trigger stop event
         f_stop.set()
-        event(
-            exit_event,
-            event_details={
-                "run-id-hash": get_sha256_hash(run.run_id),
-                "success": success,
-            },
-        )
         if serverapp_th:
             serverapp_th.join()
-            if server_app_thread_has_exception.is_set():
-                raise RuntimeError("Exception in ServerApp thread")
+            # Re-raise the exception in ServerApp
+            if not exc_queue.empty():
+                raise exc_queue.get()
 
     log(DEBUG, "Stopping Simulation Engine now.")
     return updated_context
@@ -431,7 +406,6 @@ def _main_loop(
 # pylint: disable=too-many-arguments,too-many-locals,too-many-positional-arguments
 def _run_simulation(
     num_supernodes: int,
-    exit_event: EventType,
     client_app: Optional[ClientApp] = None,
     server_app: Optional[ServerApp] = None,
     backend_name: str = "ray",
@@ -496,7 +470,6 @@ def _run_simulation(
         is_app,
         enable_tf_gpu_growth,
         run,
-        exit_event,
         flwr_dir,
         client_app,
         client_app_attr,

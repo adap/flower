@@ -38,7 +38,8 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.exit import ExitCode, flwr_exit
+from flwr.common.exception import AppExitException
+from flwr.common.exit import ExitCode, add_exit_handler, flwr_exit
 from flwr.common.heartbeat import HeartbeatSender, get_grpc_app_heartbeat_fn
 from flwr.common.logger import (
     log,
@@ -143,9 +144,29 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
 
     # Resolve directory where FABs are installed
     flwr_dir = get_flwr_dir(flwr_dir_)
+    hash_run_id = None
     log_uploader = None
     heartbeat_sender = None
     run_status = None
+    exit_code = ExitCode.SUCCESS
+
+    def on_exit() -> None:
+        # Stop heartbeat sender
+        if heartbeat_sender:
+            heartbeat_sender.stop()
+
+        # Stop log uploader for this run and upload final logs
+        if log_uploader:
+            stop_log_uploader(log_queue, log_uploader)
+
+        # Update run status
+        if run_status:
+            run_status_proto = run_status_to_proto(run_status)
+            conn._stub.UpdateRunStatus(
+                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
+            )
+
+    add_exit_handler(on_exit)
 
     try:
         # Pull SimulationInputs from LinkState
@@ -154,6 +175,8 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         context = context_from_proto(res.context)
         run = run_from_proto(res.run)
         fab = fab_from_proto(res.fab)
+
+        hash_run_id = get_sha256_hash(run.run_id)
 
         # Start log uploader for this run
         log_uploader = start_log_uploader(
@@ -264,27 +287,19 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
         run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
 
-    finally:
-        # Stop heartbeat sender
-        if heartbeat_sender:
-            heartbeat_sender.stop()
+        # Set exit code
+        exit_code = ExitCode.SERVERAPP_EXCEPTION  # General exit code
+        if isinstance(ex, AppExitException):
+            exit_code = ex.exit_code
 
-        # Stop log uploader for this run and upload final logs
-        if log_uploader:
-            stop_log_uploader(log_queue, log_uploader)
-
-        # Update run status
-        if run_status:
-            run_status_proto = run_status_to_proto(run_status)
-            conn._stub.UpdateRunStatus(
-                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
-            )
-
-        # Clean up the Context if it exists
-        try:
-            del updated_context
-        except NameError:
-            pass
+    flwr_exit(
+        code=exit_code,
+        event_type=EventType.FLWR_SIMULATION_RUN_LEAVE,
+        event_details={
+            "run-id-hash": hash_run_id,
+            "success": exit_code == ExitCode.SUCCESS,
+        },
+    )
 
 
 def _parse_args_run_flwr_simulation() -> argparse.ArgumentParser:
