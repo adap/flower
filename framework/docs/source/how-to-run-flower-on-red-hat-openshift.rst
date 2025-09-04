@@ -231,35 +231,37 @@ tutorial on :doc:`how to deploy Flower in GCP <how-to-run-flower-on-gcp>`.
               securityContext:
                 runAsNonRoot: true
               containers:
-              - name: superlink
-                image: flwr/superlink:|stable_flwr_version|
-                args:
-                  - "--insecure"
-                ports:  # which ports to expose/available
-                - containerPort: 9092
-                - containerPort: 9093
-                volumeMounts:
-                - name: cache-volume
-                  mountPath: /app/.cache
-                - name: tmp-volume
-                  mountPath: /var/tmp
-                - name: fab-volume
-                  mountPath: /app/.flwr
-                - name: config-volume
-                  mountPath: /app/.config
+                - name: superlink
+                  image: flwr/superlink:|stable_flwr_version|
+                  args:
+                    - "--insecure"
+                  ports: # which ports to expose/available
+                    - containerPort: 9092
+                      name: fleet
+                    - containerPort: 9093
+                      name: control
+                  volumeMounts:
+                    - name: cache-volume
+                      mountPath: /app/.cache
+                    - name: tmp-volume
+                      mountPath: /var/tmp
+                    - name: fab-volume
+                      mountPath: /app/.flwr
+                    - name: config-volume
+                      mountPath: /app/.config
               volumes:
-              - name: cache-volume
-                emptyDir:
-                  sizeLimit: 50Mi
-              - name: tmp-volume
-                emptyDir:
-                  sizeLimit: 50Mi
-              - name: fab-volume
-                emptyDir:
-                  sizeLimit: 50Mi
-              - name: config-volume
-                emptyDir:
-                  sizeLimit: 50Mi
+                - name: cache-volume
+                  emptyDir:
+                    sizeLimit: 50Mi
+                - name: tmp-volume
+                  emptyDir:
+                    sizeLimit: 50Mi
+                - name: fab-volume
+                  emptyDir:
+                    sizeLimit: 50Mi
+                - name: config-volume
+                  emptyDir:
+                    sizeLimit: 50Mi
 
 After the SuperLink pod is created, add the service pod following the steps to create a
 pod and insert the following YAML definition:
@@ -280,12 +282,12 @@ pod and insert the following YAML definition:
           ports:  # like a dynamic IP routing table/mapping that routes traffic to the designated ports
           - protocol: TCP
             port: 9092   # Port for SuperNode connection
-            targetPort: 9092  # the SuperLink container port
+            targetPort: fleet  # the SuperLink container port
             name: superlink-fleetapi
           - protocol: TCP
             port: 9093   # Port for Flower app submission
-            targetPort: 9093  # the SuperLink container port
-            name: superlink-execapi
+            targetPort: control  # the SuperLink container port
+            name: superlink-controlapi
           type: LoadBalancer  # balances workload, makes the service publicly available
 
 Finally, spin up two SuperNode pods with the following YAML definitions:
