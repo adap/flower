@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-02 00:07+0000\n"
+"POT-Creation-Date: 2025-09-04 00:07+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -370,7 +370,8 @@ msgstr "构建文档"
 #: ../../source/ref-exit-codes/100.rst:5 ../../source/ref-exit-codes/101.rst:5
 #: ../../source/ref-exit-codes/102.rst:5 ../../source/ref-exit-codes/103.rst:5
 #: ../../source/ref-exit-codes/104.rst:5 ../../source/ref-exit-codes/2.rst:5
-#: ../../source/ref-exit-codes/200.rst:21 ../../source/ref-exit-codes/3.rst:5
+#: ../../source/ref-exit-codes/200.rst:21 ../../source/ref-exit-codes/201.rst:5
+#: ../../source/ref-exit-codes/202.rst:5 ../../source/ref-exit-codes/3.rst:5
 #: ../../source/ref-exit-codes/300.rst:5 ../../source/ref-exit-codes/301.rst:5
 #: ../../source/ref-exit-codes/302.rst:5 ../../source/ref-exit-codes/600.rst:5
 #: ../../source/ref-exit-codes/601.rst:5 ../../source/ref-exit-codes/602.rst:5
@@ -2998,6 +2999,7 @@ msgstr "将 ``pyproject.toml`` 中的次要版本增加一个。"
 #: ../../source/docker/tutorial-quickstart-docker.rst:302
 #: ../../source/how-to-enable-tls-connections.rst:122
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:174
+#: ../../source/how-to-upgrade-to-message-api.rst:129
 #, fuzzy
 msgid "pyproject.toml"
 msgstr "或 ``pyproject.toml```："
@@ -6115,6 +6117,8 @@ msgstr ""
 #: flwr.server.strategy.strategy.Strategy.initialize_parameters
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping
 #: flwr.serverapp.strategy.fedavg.FedAvg
 #: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate
 #: flwr.serverapp.strategy.strategy.Strategy.aggregate_train
@@ -12657,6 +12661,7 @@ msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:23
 #: ../../source/how-to-upgrade-to-flower-1.13.rst:53
+#: ../../source/how-to-upgrade-to-message-api.rst:124
 msgid "Install update"
 msgstr "安装更新"
 
@@ -12995,6 +13000,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.13.rst:17
+#: ../../source/how-to-upgrade-to-message-api.rst:58
 #, fuzzy
 msgid "Let's dive in!"
 msgstr "让我们深入了解一下！"
@@ -13259,6 +13265,320 @@ msgstr "随着 Flower Next 的不断快速改进，我们将定期更新本指�
 #, fuzzy
 msgid "Happy migrating! 🚀"
 msgstr "移民愉快！🚀"
+
+#: ../../source/how-to-upgrade-to-message-api.rst:-1
+msgid ""
+"Upgrade seamlessly to Flower 1.21 with this guide for transitioning your "
+"setup to the latest features and enhancements powered by Flower's Message"
+" API."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:50
+#, fuzzy
+msgid "Upgrade to Message API"
+msgstr "升级至 Flower 1.0"
+
+#: ../../source/how-to-upgrade-to-message-api.rst:52
+msgid ""
+"Welcome to the migration guide for updating your Flower Apps to use "
+"Flower's Message API! This guide will walk you through the necessary "
+"steps to transition from Flower Apps based on ``Strategy`` and "
+"``NumPyClient`` to their equivalent using the new Message API. This guide"
+" is relevant when updating pre-``1.21`` Flower apps to the latest stable "
+"version."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:62
+msgid ""
+"If you would like to create a new Flower App using the `Message API`, run"
+" the ``flwr new`` command and choose the appropriate template. "
+"Alternatively, you may want to take a look at the `quickstart-pytorch "
+"<https://github.com/adap/flower/blob/main/examples/quickstart-pytorch>`_ "
+"example."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:68
+#, fuzzy
+msgid "Summary of changes"
+msgstr "做出改变"
+
+#: ../../source/how-to-upgrade-to-message-api.rst:70
+msgid ""
+"Thousands of Flower Apps have been created using the Strategies and "
+"|numpyclient_link|_ abstractions. With the introduction of the Message "
+"API, these apps can now take advantage of a more powerful and flexible "
+"communication layer with the |message_link|_ abstraction being its "
+"cornerstone. Messages replace the previous `FitIns` and `FitRes` data "
+"structures (and their equivalent for the other operations) into a single,"
+" unified and more versatile data structure."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:77
+msgid ""
+"To fully take advantage of the new Message API, you will need to update "
+"your app's code to use the new message-based communication patterns. This"
+" guide will show you how to:"
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:80
+msgid ""
+"Update your |serverapp_link|_ to make use of the new `Message`-based "
+"strategies. You won't need to use the `server_fn` anymore. The new "
+"strategies make it easier to customize how the different federated "
+"learning rounds are executed, to retrieve results from your run, and "
+"more."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:84
+msgid ""
+"Update your |clientapp_link|_ so it operates directly on `Message` "
+"objects received from the |serverapp_link|_. You will be able to keep "
+"most of the code from your |numpyclient_link|_ implementation but you "
+"won't need to create a new class anymore or use the helper `client_fn` "
+"function."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:91
+msgid ""
+"The main payload ``Message`` objects carry are of type "
+"|recorddict_link|_. You can think of it as a dictionary that can hold "
+"other types of records, namely |arrayrecord_link|_, |metricrecord_link|_,"
+" and |configrecord_link|_. Let's see with a few short examples what's the"
+" intended usage behind each type of record."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:118
+msgid ""
+"Please refer to the documentation for each record for all the details on "
+"how they can be constructed and adapted to your usecase. In this guide we"
+" won't delve into the specifics of each record type, but rather focus on "
+"the overall migration process."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:126
+msgid ""
+"The first step is to update the Flower version defined in the "
+"`pyproject.toml` in your app:"
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:138
+msgid "Then, run the following command to install the updated dependencies:"
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:146
+#, fuzzy
+msgid "Update your ``ServerApp``"
+msgstr "服务器"
+
+#: ../../source/how-to-upgrade-to-message-api.rst:148
+msgid ""
+"Starting with Flower 1.21, the `ServerApp` no longer requires a "
+"`server_fn` function to make use of strategies. This is because a new "
+"collection of strategies (all sharing the common |strategy_link|_ base "
+"class) has been created to operate directly on `Message` objects, "
+"allowing for a more streamlined and flexible approach to federated "
+"learning rounds."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:156
+msgid ""
+"The new `Message`-based strategies are located in the "
+"`flwr.serverapp.strate <ref-api/flwr.serverapp.Strategy.html>`_ module "
+"unlike the previous strategies which were located in the "
+"`flwr.server.strategy <ref-api/flwr.server.strategy.html>`_ module. Over "
+"time more strategies will be added to the `flwr.serverapp.strategy` "
+"module. Users are encouraged to use these new strategies."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:162
+msgid ""
+"Since Flower 1.10, the recommended `ServerApp` implementation would look "
+"something like the code snippet below. Naturally, more customization can "
+"be applied to the Strategy by, for example, reading the config from the "
+"`Context`. But to keep things focused, we will use a simple example and "
+"assume we are federating a PyTorch model."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:190
+msgid ""
+"With Flower 1.21 and later, the equivalent `ServerApp` using the new "
+"Message API would look as shown below after following these steps:"
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:193
+msgid ""
+"Define the ``main`` method under the ``@app.main()`` decorator. If your "
+"`server_fn` was reading config values from the ``Context`` you can still "
+"do so (consider copying those lines directly from your `server_fn` "
+"function)"
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:196
+msgid ""
+"Instantiate your model as usual and construct an ``ArrayRecord`` out of "
+"its parameters."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:198
+msgid ""
+"Replace your existing strategy with one from the "
+"`flwr.serverapp.strategy` module. For example with |fedavg_link|_. Pass "
+"the arguments related to node sampling to the constructor of your "
+"strategy."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:201
+msgid ""
+"Call the ``start`` method of the new strategy passing to it the "
+"`ArrayRecord` representing the initial state of your global model, the "
+"number of FL rounds and, the `Grid` object (which is used internally to "
+"communicate with the nodes executing the ``ClientApp``)."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:206
+msgid ""
+"Note how we no longer need the `server_fn` function. The `Context` is "
+"still accessible, allowing you to customize how the `ServerApp` behaves "
+"at runtime. With the new strategies, a new ``start`` method is available."
+" It defines a for loop which sets the steps involved in a round of FL. By"
+" default it behaves as the original strategies do, i.e. a round of FL "
+"training followed by one of FL evaluation and a stage to evaluate the "
+"global model. Note how the `start` method returns results. These are of "
+"type `Result` and by default contain the final global model (via "
+"``result.arrays``) as well as aggregated |metricrecord_link|_ from "
+"federated stages and, optionally, metrics from evaluation stages done at "
+"the `ServerApp`."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:218
+msgid ""
+"In addition to helper methods for working with PyTorch models, the "
+"|arrayrecord_link|_ class comes with a pair of methods to convert such "
+"record to and from a list of `NumPy` arrays (i.e. to "
+"``to_numpy_ndarrays`` and ``from_numpy_ndarrays``). You may choose these "
+"methods if you aren't working with PyTorch models."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:226
+msgid ""
+"Note that the new strategies have renamed several arguments related to "
+"node/client sampling, replacing the term `\"fit\"` with `\"train\"` and "
+"`\"clients\"` with `\"nodes\"`. The following arguments were renamed:"
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:230
+#, fuzzy
+msgid "``fraction_fit`` → ``fraction_train``"
+msgstr "``fraction_eval`` --> ``fraction_evaluate``"
+
+#: ../../source/how-to-upgrade-to-message-api.rst:231
+#, fuzzy
+msgid "``min_fit_clients`` → ``min_train_nodes``"
+msgstr "``min_eval_clients`` --> ``min_evaluate_clients``"
+
+#: ../../source/how-to-upgrade-to-message-api.rst:232
+msgid "``min_evaluate_clients`` → ``min_evaluate_nodes``"
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:233
+#, fuzzy
+msgid "``min_available_clients`` → ``min_available_nodes``"
+msgstr "``min_eval_clients`` --> ``min_evaluate_clients``"
+
+#: ../../source/how-to-upgrade-to-message-api.rst:265
+#, fuzzy
+msgid "Update your ClientApp"
+msgstr "客户端"
+
+#: ../../source/how-to-upgrade-to-message-api.rst:267
+msgid ""
+"Similar to the `ServerApp`, the `ClientApp` no longer requires a helper "
+"function (i.e. ``client_fn`` ) that instantiates a |numpyclient_link|_ or"
+" base |client_link|_ object. Instead, with the Message API, you get to "
+"define directly how the ClientApp operates on `Message` objects received "
+"from the `ServerApp`."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:272
+msgid ""
+"Remember `NumPyClient` came with two key built-in methods, ``fit`` and "
+"``evaluate``, that were respectively designed for doing federated "
+"training and evaluation using the client's local data. With the new "
+"Message API, you can define similar methods directly on the `ClientApp` "
+"via decorators to handle incoming `Message` objects."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:277
+msgid ""
+"Let's see a basic example showing first a minimal `NumPyClient`-based "
+"`ClientApp` and then the upgraded design using the Message API."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:320
+msgid ""
+"Upgrading a ClientApp designed around the `NumPyClient` and `client_fn` "
+"abstractions to the Message API would result in the following code. Note "
+"that the behavior of the `ClientApp` is defined directly in its methods "
+"(i.e. a secondary class based on `NumPyClient` is no longer needed)."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:325
+msgid ""
+"The |clientapp_link|_ abstraction comes with built-in ``@app.train`` and "
+"``@app.evaluate`` decorators. The arguments the associated methods "
+"receive have been unified and they both operate on `Message` objects. "
+"Each method is responsible for handling the incoming `Message` objects "
+"and returning the appropriate response (also as a `Message`). Note that "
+"you'll still be able to use the functions you might have written to, for "
+"example, train your model using the ML framework of your choice. In this "
+"example those are represented by ``train_fn`` and ``test_fn``. Follow "
+"these steps to migrate your existing ``ClientApp``:"
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:334
+msgid ""
+"Introduce the `@app.train` and `@app.evaluate` decorators and respective "
+"methods."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:335
+msgid ""
+"Copy the lines of code you had in your `client_fn` reading config values "
+"from the `Context` into your `train` and `evaluate` methods "
+"implementations (created in step 1)."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:338
+msgid ""
+"From the `Message` object, extract the relevant items (e.g. an "
+"``ArrayRecord`` defining the global model, a ``ConfigRecord`` containing "
+"configs for the current round) to use in your training and evaluation "
+"logic."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:341
+msgid ""
+"Copy the lines calling the functions that do the actual "
+"training/evaluation (in the code snippet below we named those "
+"``train_fn`` and ``test_fn``)."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:343
+msgid ""
+"Based on the method, construct a ``RecordDict`` and use it to construct "
+"the reply ``Message``."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:348
+msgid ""
+"The payload that `Message` objects carry is of type |recorddict_link|_ "
+"which can contain records of type ``ArrayRecord``, ``MetricRecord`` and "
+"``ConfigRecord``."
+msgstr ""
+
+#: ../../source/how-to-upgrade-to-message-api.rst:421
+msgid "This concludes the migration guide!"
+msgstr ""
 
 #: ../../source/how-to-use-built-in-mods.rst:-1
 msgid ""
@@ -15950,22 +16270,25 @@ msgid "Get logs from a Flower project run."
 msgstr ""
 
 #: ../../flwr log:1 login:1 ls:1 run:1 stop:1
-msgid "Override federation configuration values in the format:"
+#, fuzzy
+msgid ""
+"Override federation configuration values using one of the following "
+"formats:"
+msgstr "运行以下命令激活 virtualenv："
+
+#: ../../flwr log:1 login:1 ls:1 run:1 stop:1
+msgid ""
+"--federation-config '<k1>=<v1> <k2>=<v2>' | --federation-config "
+"'<k1>=<v1>' --federation-config '<k2>=<v2>'"
 msgstr ""
 
 #: ../../flwr log:1 login:1 ls:1 run:1 stop:1
 msgid ""
-"`--federation-config 'key1=value1 key2=value2' --federation-config "
-"'key3=value3'`"
-msgstr ""
-
-#: ../../flwr log:1 login:1 ls:1 run:1 stop:1
-msgid ""
-"Values can be of any type supported in TOML, such as bool, int, float, or"
-" string. Ensure that the keys (`key1`, `key2`, `key3` in this example) "
-"exist in the federation configuration under the "
-"`[tool.flwr.federations.<YOUR_FEDERATION>]` table of the `pyproject.toml`"
-" for proper overriding."
+"When providing key-value pairs, values can be of any type supported by "
+"TOML (e.g., bool, int, float, string). The specified keys (<k1> and <k2> "
+"in the example) must exist in the federation configuration under the "
+"`[tool.flwr.federations.<YOUR-FEDERATION>]` section of `pyproject.toml` "
+"to be overridden."
 msgstr ""
 
 #: ../../flwr log:1
@@ -16131,18 +16454,23 @@ msgid "Run Flower App."
 msgstr "Flower 服务器。"
 
 #: ../../flwr run:1
-msgid "Override run configuration values in the format:"
-msgstr ""
+#, fuzzy
+msgid "Override run configuration values using one of the following formats:"
+msgstr "运行以下命令激活 virtualenv："
 
 #: ../../flwr run:1
-msgid "`--run-config 'key1=value1 key2=value2' --run-config 'key3=value3'`"
+msgid ""
+"--run-config '<k1>=<v1> <k2>=<v2>' | --run-config '<k1>=<v1>' --run-"
+"config '<k2>=<v2>' | --run-config <path/to/your/toml>"
 msgstr ""
 
 #: ../../flwr run:1
 msgid ""
-"Values can be of any type supported in TOML, such as bool, int, float, or"
-" string. Ensure that the keys (`key1`, `key2`, `key3` in this example) "
-"exist in `pyproject.toml` for proper overriding."
+"When providing key-value pairs, values can be of any type supported by "
+"TOML (e.g., bool, int, float, string). The specified keys (<k1> and <k2> "
+"in the example) must exist in the run configuration under the "
+"`[tool.flwr.app.config]` section of `pyproject.toml` to be overridden. "
+"Alternatively, provide a TOML file containing overrides."
 msgstr ""
 
 #: ../../flwr run:1
@@ -16436,6 +16764,8 @@ msgstr "出错原因（如异常堆栈跟踪）"
 #: ../../source/ref-api/flwr.server.workflow.DefaultWorkflow.rst:15
 #: ../../source/ref-api/flwr.server.workflow.SecAggPlusWorkflow.rst:15
 #: ../../source/ref-api/flwr.server.workflow.SecAggWorkflow.rst:15
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.rst:15
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.FedAvg.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.Result.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.Strategy.rst:15
@@ -16517,6 +16847,7 @@ msgstr "描述数据"
 #: ../../source/ref-api/flwr.app.metadata.rst:13
 #: ../../source/ref-api/flwr.client.mod.rst:13
 #: ../../source/ref-api/flwr.client.rst:13
+#: ../../source/ref-api/flwr.clientapp.rst:13
 #: ../../source/ref-api/flwr.common.rst:13
 #: ../../source/ref-api/flwr.server.rst:13
 #: ../../source/ref-api/flwr.simulation.rst:13
@@ -17042,6 +17373,8 @@ msgstr "当前客户端属性。"
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:22
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:21
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:14
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:21
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:14
 #: of
 msgid "Examples"
 msgstr "实例"
@@ -17389,7 +17722,9 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: flwr.client.mod.centraldp_mods.fixedclipping_mod:1 of
+#: ../../source/ref-api/flwr.clientapp.rst:17:<autosummary>:1
+#: flwr.client.mod.centraldp_mods.fixedclipping_mod:1
+#: flwr.clientapp.centraldp_mods.fixedclipping_mod:1 of
 #, fuzzy
 msgid "Client-side fixed clipping modifier."
 msgstr "客户端逻辑"
@@ -17475,13 +17810,16 @@ msgstr ""
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:12
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:10
-#: flwr.client.mod.localdp_mod.LocalDpMod:6 of
+#: flwr.client.mod.localdp_mod.LocalDpMod:6
+#: flwr.clientapp.centraldp_mods.fixedclipping_mod:10 of
 msgid "It operates on messages of type `MessageType.TRAIN`."
 msgstr ""
 
 #: flwr.client.mod.localdp_mod.LocalDpMod:8
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:15
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:8
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:15
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:8
 #: of
 #, fuzzy
 msgid "The value of the clipping norm."
@@ -17523,13 +17861,15 @@ msgid ""
 msgstr "用 \"DifferentialPrivacyClientSideAdaptiveClipping \"包装器对策略进行包装："
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:6
-#: flwr.client.mod.centraldp_mods.fixedclipping_mod:6 of
+#: flwr.client.mod.centraldp_mods.fixedclipping_mod:6
+#: flwr.clientapp.centraldp_mods.fixedclipping_mod:6 of
 #, fuzzy
 msgid "The wrapper sends the clipping_norm value to the client."
 msgstr "向客户发送近端因子mu"
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:8
-#: flwr.client.mod.centraldp_mods.fixedclipping_mod:8 of
+#: flwr.client.mod.centraldp_mods.fixedclipping_mod:8
+#: flwr.clientapp.centraldp_mods.fixedclipping_mod:8 of
 msgid "This mod clips the client model updates before sending them to the server."
 msgstr ""
 
@@ -17541,6 +17881,7 @@ msgstr ""
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:15
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:13
+#: flwr.clientapp.centraldp_mods.fixedclipping_mod:13
 #: flwr.server.grid.grid.Grid.send_and_receive:18
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:54
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:61
@@ -17550,7 +17891,8 @@ msgid "Notes"
 msgstr "无"
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:16
-#: flwr.client.mod.centraldp_mods.fixedclipping_mod:14 of
+#: flwr.client.mod.centraldp_mods.fixedclipping_mod:14
+#: flwr.clientapp.centraldp_mods.fixedclipping_mod:14 of
 msgid "Consider the order of mods when using multiple."
 msgstr ""
 
@@ -17570,6 +17912,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.fixedclipping_mod.rst:2
+#: ../../source/ref-api/flwr.clientapp.fixedclipping_mod.rst:2
 #, fuzzy
 msgid "fixedclipping\\_mod"
 msgstr "剪贴"
@@ -17581,7 +17924,8 @@ msgid ""
 "DifferentialPrivacyClientSideFixedClipping server-side strategy wrapper."
 msgstr "用 \"DifferentialPrivacyClientSideFixedClipping \"包装器包装策略："
 
-#: flwr.client.mod.centraldp_mods.fixedclipping_mod:16 of
+#: flwr.client.mod.centraldp_mods.fixedclipping_mod:16
+#: flwr.clientapp.centraldp_mods.fixedclipping_mod:16 of
 msgid "Typically, fixedclipping_mod should be the last to operate on params."
 msgstr ""
 
@@ -17742,6 +18086,21 @@ msgstr "抽象基类 `flwr.client.NumPyClient` 的实现。"
 #, fuzzy
 msgid "clientapp"
 msgstr "客户端"
+
+#: ../../source/ref-api/flwr.clientapp.rst:17:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`fixedclipping_mod <flwr.clientapp.fixedclipping_mod>`\\ "
+"\\(msg\\, ctxt\\, call\\_next\\)"
+msgstr ":py:obj:`set_context <flwr.client.Client.set_context>`\\ \\(context\\)"
+
+#: flwr.clientapp.centraldp_mods.fixedclipping_mod:3 of
+#, fuzzy
+msgid ""
+"This mod needs to be used with the "
+"`DifferentialPrivacyClientSideFixedClipping` server-side strategy "
+"wrapper."
+msgstr "用 \"DifferentialPrivacyClientSideFixedClipping \"包装器包装策略："
 
 #: ../../source/ref-api/flwr.common.rst:2
 msgid "common"
@@ -18536,6 +18895,7 @@ msgid "The inflated Array."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.ArrayRecord.rst:2
+#: flwr.serverapp.strategy.result.Result:13 of
 #, fuzzy
 msgid "ArrayRecord"
 msgstr "参数"
@@ -23145,7 +23505,9 @@ msgstr ""
 "\\(...\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:1
 #: of
 #, fuzzy
 msgid "Strategy wrapper for central DP with client-side fixed clipping."
@@ -23181,7 +23543,9 @@ msgstr ""
 "\\(...\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:1
 #: of
 #, fuzzy
 msgid "Strategy wrapper for central DP with server-side fixed clipping."
@@ -23241,7 +23605,7 @@ msgstr ""
 "fraction\\_fit\\, fraction\\_evaluate\\, ...\\]\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:24:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
 #: flwr.server.strategy.fedavg.FedAvg:1
 #: flwr.server.strategy.fedavg_android.FedAvgAndroid:1
 #: flwr.serverapp.strategy.fedavg.FedAvg:1 of
@@ -23422,7 +23786,7 @@ msgid ":py:obj:`Strategy <flwr.server.strategy.Strategy>`\\ \\(\\)"
 msgstr "server.strategy.Strategy"
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:24:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
 #: flwr.server.strategy.strategy.Strategy:1
 #: flwr.serverapp.strategy.strategy.Strategy:1 of
 msgid "Abstract base class for server strategy implementations."
@@ -23693,6 +24057,9 @@ msgstr ""
 #: flwr.server.strategy.qfedavg.QFedAvg.configure_fit:1
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: flwr.server.strategy.strategy.Strategy.configure_fit:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping.configure_train:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping.configure_train:1
 #: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.strategy.Strategy.configure_train:1 of
 msgid "Configure the next round of training."
@@ -24101,6 +24468,8 @@ msgstr ""
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:3
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:10
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:3
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:10
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:3
 #: of
 #, fuzzy
 msgid "The strategy to which DP functionalities will be added by this wrapper."
@@ -24117,6 +24486,8 @@ msgstr "用于模型更新的高斯机制的噪声乘数。"
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:7
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:17
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:10
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:17
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:10
 #: of
 #, fuzzy
 msgid "The number of clients that are sampled on each round."
@@ -24159,6 +24530,8 @@ msgstr "添加到当前低于估计值的更新计数中的噪声的 stddev。�
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:23
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:22
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:15
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:22
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:15
 #: of
 #, fuzzy
 msgid "Create a strategy::"
@@ -24260,17 +24633,20 @@ msgstr ""
 " \\(client\\_manager\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.DifferentialPrivacyClientSideFixedClipping.rst:2
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.rst:2
 #, fuzzy
 msgid "DifferentialPrivacyClientSideFixedClipping"
 msgstr "差分隐私"
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:3
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:3
 #: of
 #, fuzzy
 msgid "Use `fixedclipping_mod` modifier at the client side."
 msgstr "在客户端使用 `fixedclipping_mod` 修改器。"
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:5
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:5
 #: of
 #, fuzzy
 msgid ""
@@ -24285,6 +24661,8 @@ msgstr ""
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:12
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:5
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:12
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:5
 #: of
 #, fuzzy
 msgid ""
@@ -24293,6 +24671,7 @@ msgid ""
 msgstr "模型更新高斯机制的噪声乘数。建议使用 1.0 或更高的值，以获得较强的隐私性。"
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:26
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:26
 #: of
 #, fuzzy
 msgid ""
@@ -24301,6 +24680,7 @@ msgid ""
 msgstr "用 \"DifferentialPrivacyClientSideFixedClipping \"包装器包装策略："
 
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:32
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:32
 #: of
 #, fuzzy
 msgid "On the client, add the `fixedclipping_mod` to the client-side mods::"
@@ -24480,6 +24860,7 @@ msgstr ""
 " \\(client\\_manager\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.DifferentialPrivacyServerSideFixedClipping.rst:2
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.rst:2
 #, fuzzy
 msgid "DifferentialPrivacyServerSideFixedClipping"
 msgstr "差分隐私"
@@ -26982,7 +27363,29 @@ msgstr "server.strategy.Strategy"
 msgid "ServerApp strategies."
 msgstr "使用策略"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:24:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`DifferentialPrivacyClientSideFixedClipping "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping>`\\ "
+"\\(...\\)"
+msgstr ""
+":py:obj:`DifferentialPrivacyClientSideFixedClipping "
+"<flwr.server.strategy.DifferentialPrivacyClientSideFixedClipping>`\\ "
+"\\(...\\)"
+
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`DifferentialPrivacyServerSideFixedClipping "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping>`\\ "
+"\\(...\\)"
+msgstr ""
+":py:obj:`DifferentialPrivacyServerSideFixedClipping "
+"<flwr.server.strategy.DifferentialPrivacyServerSideFixedClipping>`\\ "
+"\\(...\\)"
+
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FedAvg <flwr.serverapp.strategy.FedAvg>`\\ "
@@ -26991,7 +27394,7 @@ msgstr ""
 ":py:obj:`FedAvg <flwr.server.strategy.FedAvg>`\\ \\(\\*\\[\\, "
 "fraction\\_fit\\, fraction\\_evaluate\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:24:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`Result <flwr.serverapp.strategy.Result>`\\ \\(arrays\\, "
@@ -27000,14 +27403,262 @@ msgstr ""
 ":py:obj:`RecordSet <flwr.common.RecordSet>`\\ "
 "\\(\\[parameters\\_records\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:24:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
 #: flwr.serverapp.strategy.result.Result:1 of
 msgid "Data class carrying records generated during the execution of a strategy."
 msgstr ""
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:24:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Strategy <flwr.serverapp.strategy.Strategy>`\\ \\(\\)"
+msgstr "server.strategy.Strategy"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:1
+#: of
+#, fuzzy
+msgid ""
+"Bases: "
+":py:class:`~flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase`"
+msgstr "Bases: :py:class:`~flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed`"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_evaluate "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.aggregate_evaluate>`\\"
+" \\(server\\_round\\, replies\\)"
+msgstr ""
+":py:obj:`aggregate_evaluate "
+"<flwr.server.strategy.DifferentialPrivacyClientSideFixedClipping.aggregate_evaluate>`\\"
+" \\(server\\_round\\, results\\, ...\\)"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid "Aggregate MetricRecords in the received Messages."
+msgstr "使用给定的策略汇总评估损失。"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_train "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.aggregate_train>`\\"
+" \\(server\\_round\\, replies\\)"
+msgstr ""
+":py:obj:`aggregate_fit "
+"<flwr.server.strategy.DifferentialPrivacyClientSideFixedClipping.aggregate_fit>`\\"
+" \\(server\\_round\\, results\\, failures\\)"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping.aggregate_train:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping.aggregate_train:1
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_train:1 of
+msgid "Aggregate ArrayRecords and MetricRecords in the received Messages."
+msgstr ""
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_evaluate "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.configure_evaluate>`\\"
+" \\(server\\_round\\, arrays\\, ...\\)"
+msgstr ""
+":py:obj:`configure_evaluate "
+"<flwr.server.strategy.DifferentialPrivacyClientSideFixedClipping.configure_evaluate>`\\"
+" \\(server\\_round\\, parameters\\, ...\\)"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.configure_evaluate:1
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.fedavg.FedAvg.configure_evaluate:1 of
+#, fuzzy
+msgid "Configure the next round of federated evaluation."
+msgstr "配置下一轮评估。"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_train "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.configure_train>`\\"
+" \\(server\\_round\\, arrays\\, ...\\)"
+msgstr ""
+":py:obj:`configure_fit "
+"<flwr.server.strategy.DifferentialPrivacyClientSideFixedClipping.configure_fit>`\\"
+" \\(server\\_round\\, parameters\\, ...\\)"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`start "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.start>`\\"
+" \\(grid\\, initial\\_arrays\\[\\, num\\_rounds\\, ...\\]\\)"
+msgstr ""
+":py:obj:`FedAdagrad <flwr.server.strategy.FedAdagrad>`\\ \\(\\*\\[\\, "
+"fraction\\_fit\\, ...\\]\\)"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.strategy.Strategy.start:1 of
+#, fuzzy
+msgid "Execute the federated learning strategy."
+msgstr "使用联邦学习策略"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`summary "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.summary>`\\"
+" \\(\\)"
+msgstr "server.strategy.Strategy"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.summary:1
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.fedavg.FedAvg.summary:1
+#: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.strategy.Strategy.summary:1 of
+msgid "Log summary configuration of the strategy."
+msgstr ""
+
+#: flwr.serverapp.strategy.strategy.Strategy.start:3 of
+msgid ""
+"Runs the complete federated learning workflow for the specified number of"
+" rounds, including training, evaluation, and optional centralized "
+"evaluation."
+msgstr ""
+
+#: flwr.serverapp.strategy.strategy.Strategy.start:6 of
+msgid ""
+"The Grid instance used to send/receive Messages from nodes executing a "
+"ClientApp."
+msgstr ""
+
+#: flwr.serverapp.strategy.strategy.Strategy.start:9 of
+msgid "Initial model parameters (arrays) to be used for federated learning."
+msgstr ""
+
+#: flwr.serverapp.strategy.strategy.Strategy.start:11 of
+#, fuzzy
+msgid "Number of federated learning rounds to execute."
+msgstr "使用联邦学习策略"
+
+#: flwr.serverapp.strategy.strategy.Strategy.start:13 of
+msgid "Timeout in seconds for waiting for node responses."
+msgstr ""
+
+#: flwr.serverapp.strategy.strategy.Strategy.start:15 of
+msgid ""
+"Configuration to be sent to nodes during training rounds. If unset, an "
+"empty ConfigRecord will be used."
+msgstr ""
+
+#: flwr.serverapp.strategy.strategy.Strategy.start:18 of
+msgid ""
+"Configuration to be sent to nodes during evaluation rounds. If unset, an "
+"empty ConfigRecord will be used."
+msgstr ""
+
+#: flwr.serverapp.strategy.strategy.Strategy.start:21 of
+msgid ""
+"Optional function for centralized evaluation of the global model. Takes "
+"server round number and array record, returns a MetricRecord. If "
+"provided, will be called before the first round and after each round. "
+"Defaults to None."
+msgstr ""
+
+#: flwr.serverapp.strategy.strategy.Strategy.start:27 of
+msgid ""
+"Results containing final model arrays and also training metrics, "
+"evaluation metrics and global evaluation metrics (if provided) from all "
+"rounds."
+msgstr ""
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:19
+#: of
+#, fuzzy
+msgid ""
+"Wrap the strategy with the `DifferentialPrivacyServerSideFixedClipping` "
+"wrapper::"
+msgstr "用 DifferentialPrivacyServerSideFixedClipping 封装器封装策略"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_evaluate "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.aggregate_evaluate>`\\"
+" \\(server\\_round\\, replies\\)"
+msgstr ""
+":py:obj:`aggregate_evaluate "
+"<flwr.server.strategy.DifferentialPrivacyServerSideFixedClipping.aggregate_evaluate>`\\"
+" \\(server\\_round\\, results\\, ...\\)"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_train "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.aggregate_train>`\\"
+" \\(server\\_round\\, replies\\)"
+msgstr ""
+":py:obj:`aggregate_fit "
+"<flwr.server.strategy.DifferentialPrivacyServerSideFixedClipping.aggregate_fit>`\\"
+" \\(server\\_round\\, results\\, failures\\)"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_evaluate "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.configure_evaluate>`\\"
+" \\(server\\_round\\, arrays\\, ...\\)"
+msgstr ""
+":py:obj:`configure_evaluate "
+"<flwr.server.strategy.DifferentialPrivacyServerSideFixedClipping.configure_evaluate>`\\"
+" \\(server\\_round\\, parameters\\, ...\\)"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_train "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.configure_train>`\\"
+" \\(server\\_round\\, arrays\\, ...\\)"
+msgstr ""
+":py:obj:`configure_fit "
+"<flwr.server.strategy.DifferentialPrivacyServerSideFixedClipping.configure_fit>`\\"
+" \\(server\\_round\\, parameters\\, ...\\)"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`start "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.start>`\\"
+" \\(grid\\, initial\\_arrays\\[\\, num\\_rounds\\, ...\\]\\)"
+msgstr ""
+":py:obj:`FedAdagrad <flwr.server.strategy.FedAdagrad>`\\ \\(\\*\\[\\, "
+"fraction\\_fit\\, ...\\]\\)"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`summary "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.summary>`\\"
+" \\(\\)"
 msgstr "server.strategy.Strategy"
 
 #: flwr.serverapp.strategy.fedavg.FedAvg:1 of
@@ -27085,13 +27736,6 @@ msgstr ""
 "<flwr.server.strategy.Krum.aggregate_evaluate>`\\ \\(server\\_round\\, "
 "results\\, ...\\)"
 
-#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1
-#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
-#: of
-#, fuzzy
-msgid "Aggregate MetricRecords in the received Messages."
-msgstr "使用给定的策略汇总评估损失。"
-
 #: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
 #: of
 #, fuzzy
@@ -27104,11 +27748,6 @@ msgstr ""
 "\\(server\\_round\\, results\\, failures\\)"
 
 #: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
-#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_train:1 of
-msgid "Aggregate ArrayRecords and MetricRecords in the received Messages."
-msgstr ""
-
-#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
 #: of
 #, fuzzy
 msgid ""
@@ -27119,12 +27758,6 @@ msgstr ""
 ":py:obj:`configure_evaluate "
 "<flwr.server.strategy.Krum.configure_evaluate>`\\ \\(server\\_round\\, "
 "parameters\\, ...\\)"
-
-#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
-#: flwr.serverapp.strategy.fedavg.FedAvg.configure_evaluate:1 of
-#, fuzzy
-msgid "Configure the next round of federated evaluation."
-msgstr "配置下一轮评估。"
 
 #: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
 #: of
@@ -27154,82 +27787,63 @@ msgstr ""
 "fraction\\_fit\\, ...\\]\\)"
 
 #: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
-#: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
-#: flwr.serverapp.strategy.strategy.Strategy.start:1 of
-#, fuzzy
-msgid "Execute the federated learning strategy."
-msgstr "使用联邦学习策略"
-
-#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
 #: of
 #, fuzzy
 msgid ":py:obj:`summary <flwr.serverapp.strategy.FedAvg.summary>`\\ \\(\\)"
 msgstr "server.strategy.Strategy"
 
-#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
-#: flwr.serverapp.strategy.fedavg.FedAvg.summary:1
-#: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
-#: flwr.serverapp.strategy.strategy.Strategy.summary:1 of
-msgid "Log summary configuration of the strategy."
-msgstr ""
-
-#: flwr.serverapp.strategy.strategy.Strategy.start:3 of
-msgid ""
-"Runs the complete federated learning workflow for the specified number of"
-" rounds, including training, evaluation, and optional centralized "
-"evaluation."
-msgstr ""
-
-#: flwr.serverapp.strategy.strategy.Strategy.start:6 of
-msgid ""
-"The Grid instance used to send/receive Messages from nodes executing a "
-"ClientApp."
-msgstr ""
-
-#: flwr.serverapp.strategy.strategy.Strategy.start:9 of
-msgid "Initial model parameters (arrays) to be used for federated learning."
-msgstr ""
-
-#: flwr.serverapp.strategy.strategy.Strategy.start:11 of
-#, fuzzy
-msgid "Number of federated learning rounds to execute."
-msgstr "使用联邦学习策略"
-
-#: flwr.serverapp.strategy.strategy.Strategy.start:13 of
-msgid "Timeout in seconds for waiting for node responses."
-msgstr ""
-
-#: flwr.serverapp.strategy.strategy.Strategy.start:15 of
-msgid ""
-"Configuration to be sent to nodes during training rounds. If unset, an "
-"empty ConfigRecord will be used."
-msgstr ""
-
-#: flwr.serverapp.strategy.strategy.Strategy.start:18 of
-msgid ""
-"Configuration to be sent to nodes during evaluation rounds. If unset, an "
-"empty ConfigRecord will be used."
-msgstr ""
-
-#: flwr.serverapp.strategy.strategy.Strategy.start:21 of
-msgid ""
-"Optional function for centralized evaluation of the global model. Takes "
-"server round number and array record, returns a MetricRecord. If "
-"provided, will be called before the first round and after each round. "
-"Defaults to None."
-msgstr ""
-
-#: flwr.serverapp.strategy.strategy.Strategy.start:27 of
-msgid ""
-"Results containing final model arrays and also training metrics, "
-"evaluation metrics and global evaluation metrics (if provided) from all "
-"rounds."
-msgstr ""
-
 #: ../../source/ref-api/flwr.serverapp.strategy.Result.rst:2
 #, fuzzy
 msgid "Result"
 msgstr "工作流程"
+
+#: flwr.serverapp.strategy.result.Result:3 of
+msgid ""
+"This class encapsulates the results of a federated learning strategy "
+"execution, including the final global model parameters and metrics "
+"collected throughout the federated training and evaluation (both "
+"federated and centralized) stages."
+msgstr ""
+
+#: flwr.serverapp.strategy.result.Result:9 of
+msgid ""
+"The final global model parameters. Contains the aggregated model "
+"weights/parameters that resulted from the federated learning process."
+msgstr ""
+
+#: flwr.serverapp.strategy.result.Result of
+#, fuzzy
+msgid "type"
+msgstr "返回类型"
+
+#: flwr.serverapp.strategy.result.Result:17 of
+msgid ""
+"Training metrics collected from ClientApps, indexed by round number. "
+"Contains aggregated metrics (e.g., loss, accuracy) from the training "
+"phase of each federated learning round."
+msgstr ""
+
+#: flwr.serverapp.strategy.result.Result:21
+#: flwr.serverapp.strategy.result.Result:30
+#: flwr.serverapp.strategy.result.Result:38 of
+#, fuzzy
+msgid "dict[int, MetricRecord]"
+msgstr "指标记录。"
+
+#: flwr.serverapp.strategy.result.Result:25 of
+msgid ""
+"Evaluation metrics collected from ClientApps, indexed by round number. "
+"Contains aggregated metrics  (e.g. validation loss) from the evaluation "
+"phase where ClientApps evaluate the global model on their local "
+"validation/test data."
+msgstr ""
+
+#: flwr.serverapp.strategy.result.Result:34 of
+msgid ""
+"Evaluation metrics generated at the ServerApp, indexed by round number. "
+"Contains metrics from centralized evaluation performed by the ServerApp "
+"(e.g., when the server evaluates the global model on a held-out dataset)."
+msgstr ""
 
 #: ../../source/ref-api/flwr.serverapp.strategy.Result.rst:31:<autosummary>:1
 #, fuzzy
@@ -38261,6 +38875,8 @@ msgstr ""
 #: ../../source/ref-exit-codes/103.rst:10
 #: ../../source/ref-exit-codes/104.rst:10
 #: ../../source/ref-exit-codes/200.rst:29
+#: ../../source/ref-exit-codes/201.rst:10
+#: ../../source/ref-exit-codes/202.rst:10
 #: ../../source/ref-exit-codes/300.rst:11
 #: ../../source/ref-exit-codes/301.rst:16
 #: ../../source/ref-exit-codes/302.rst:16
@@ -38442,6 +39058,37 @@ msgstr ""
 msgid ""
 "These payloads can't be aggregated because there is no key for weighted "
 "averaging"
+msgstr ""
+
+#: ../../source/ref-exit-codes/201.rst:2
+msgid "[201] SERVERAPP_EXCEPTION"
+msgstr ""
+
+#: ../../source/ref-exit-codes/201.rst:7
+msgid ""
+"An unhandled exception was raised during the execution of your ServerApp "
+"code."
+msgstr ""
+
+#: ../../source/ref-exit-codes/201.rst:12
+msgid ""
+"This error indicates that your ServerApp code failed with an unhandled "
+"exception. Check the logged exception details in the logs, review your "
+"code carefully, and fix the underlying issue causing the error."
+msgstr ""
+
+#: ../../source/ref-exit-codes/202.rst:2
+msgid "[202] SERVERAPP_STRATEGY_AGGREGATION_ERROR"
+msgstr ""
+
+#: ../../source/ref-exit-codes/202.rst:7
+msgid "The strategy encountered an error during aggregation."
+msgstr ""
+
+#: ../../source/ref-exit-codes/202.rst:12
+msgid ""
+"Check the logs for more details on the specific aggregation error "
+"encountered."
 msgstr ""
 
 #: ../../source/ref-exit-codes/3.rst:2
@@ -39698,7 +40345,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:116
 #: ../../source/tutorial-quickstart-jax.rst:106
 #: ../../source/tutorial-quickstart-pytorch-lightning.rst:109
-#: ../../source/tutorial-quickstart-pytorch.rst:152
+#: ../../source/tutorial-quickstart-pytorch.rst:161
 #: ../../source/tutorial-quickstart-scikitlearn.rst:105
 #: ../../source/tutorial-quickstart-tensorflow.rst:107
 #: ../../source/tutorial-quickstart-xgboost.rst:541
@@ -39813,7 +40460,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:124
 #: ../../source/tutorial-quickstart-jax.rst:114
 #: ../../source/tutorial-quickstart-mlx.rst:114
-#: ../../source/tutorial-quickstart-pytorch.rst:160
+#: ../../source/tutorial-quickstart-pytorch.rst:169
 #: ../../source/tutorial-quickstart-scikitlearn.rst:113
 msgid ""
 "What follows is an explanation of each component in the project you just "
@@ -39824,7 +40471,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:128
 #: ../../source/tutorial-quickstart-jax.rst:118
 #: ../../source/tutorial-quickstart-mlx.rst:118
-#: ../../source/tutorial-quickstart-pytorch.rst:164
+#: ../../source/tutorial-quickstart-pytorch.rst:173
 #: ../../source/tutorial-quickstart-scikitlearn.rst:117
 #: ../../source/tutorial-quickstart-tensorflow.rst:116
 #: ../../source/tutorial-quickstart-xgboost.rst:93
@@ -39848,7 +40495,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:175
 #: ../../source/tutorial-quickstart-jax.rst:132
 #: ../../source/tutorial-quickstart-mlx.rst:159
-#: ../../source/tutorial-quickstart-pytorch.rst:199
+#: ../../source/tutorial-quickstart-pytorch.rst:208
 #: ../../source/tutorial-quickstart-scikitlearn.rst:142
 #: ../../source/tutorial-quickstart-tensorflow.rst:143
 #, fuzzy
@@ -39890,7 +40537,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:232
 #: ../../source/tutorial-quickstart-jax.rst:174
 #: ../../source/tutorial-quickstart-mlx.rst:203
-#: ../../source/tutorial-quickstart-pytorch.rst:273
+#: ../../source/tutorial-quickstart-pytorch.rst:282
 #: ../../source/tutorial-quickstart-scikitlearn.rst:161
 #: ../../source/tutorial-quickstart-tensorflow.rst:172
 #: ../../source/tutorial-quickstart-xgboost.rst:153
@@ -39942,7 +40589,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-huggingface.rst:320
 #: ../../source/tutorial-quickstart-jax.rst:250
 #: ../../source/tutorial-quickstart-mlx.rst:365
-#: ../../source/tutorial-quickstart-pytorch.rst:370
+#: ../../source/tutorial-quickstart-pytorch.rst:379
 #: ../../source/tutorial-quickstart-scikitlearn.rst:259
 #: ../../source/tutorial-quickstart-tensorflow.rst:236
 #: ../../source/tutorial-quickstart-xgboost.rst:273
@@ -40460,7 +41107,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:390
-#: ../../source/tutorial-quickstart-pytorch.rst:440
+#: ../../source/tutorial-quickstart-pytorch.rst:443
 #: ../../source/tutorial-quickstart-tensorflow.rst:270
 msgid ""
 "Congratulations! You've successfully built and run your first federated "
@@ -40534,7 +41181,7 @@ msgid ""
 "your project, and type in your developer name:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:166
+#: ../../source/tutorial-quickstart-pytorch.rst:175
 msgid ""
 "This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ "
 "to easily download and partition the `CIFAR-10` dataset. In this example "
@@ -40548,13 +41195,13 @@ msgid ""
 " that correspond to their data partition."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:201
+#: ../../source/tutorial-quickstart-pytorch.rst:210
 msgid ""
 "We defined a simple Convolutional Neural Network (CNN), but feel free to "
 "replace it with a more sophisticated model if you'd like:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:226
+#: ../../source/tutorial-quickstart-pytorch.rst:235
 msgid ""
 "In addition to defining the model architecture, we also include two "
 "utility functions to perform both training (i.e. ``train()``) and "
@@ -40567,7 +41214,7 @@ msgid ""
 "training or evaluation:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:275
+#: ../../source/tutorial-quickstart-pytorch.rst:284
 msgid ""
 "The main changes we have to make to use `PyTorch` with `Flower` have to "
 "do with converting the |arrayrecord_link|_ received in the "
@@ -40576,7 +41223,7 @@ msgid ""
 "built-in methods in the ``ArrayRecord`` to make these conversions:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:297
+#: ../../source/tutorial-quickstart-pytorch.rst:306
 msgid ""
 "The rest of the functionality is directly inspired by the centralized "
 "case. The |clientapp_link|_ comes with three core methods (``train``, "
@@ -40588,28 +41235,28 @@ msgid ""
 "``train`` and ``evaluate``."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:305
+#: ../../source/tutorial-quickstart-pytorch.rst:314
 msgid ""
 "Let's see how the ``train`` method can be implemented. It receives as "
 "input arguments a |message_link|_ from the ``ServerApp``. By default it "
 "carries:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:308
+#: ../../source/tutorial-quickstart-pytorch.rst:317
 msgid ""
 "an ``ArrayRecord`` with the arrays of the model to federate. By default "
 "they can be retrieved with key ``\"arrays\"`` when accessing the message "
 "content."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:310
+#: ../../source/tutorial-quickstart-pytorch.rst:319
 msgid ""
 "a ``ConfigRecord`` with the configuration sent from the ``ServerApp``. By"
 " default it can be retrieved with key ``\"config\"`` when accessing the "
 "message content."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:313
+#: ../../source/tutorial-quickstart-pytorch.rst:322
 msgid ""
 "The ``train`` method also receives the ``Context``, giving access to "
 "configs for your run and node. The run config hyperparameters are defined"
@@ -40618,7 +41265,7 @@ msgid ""
 "directly configurable during simulations."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:364
+#: ../../source/tutorial-quickstart-pytorch.rst:373
 msgid ""
 "The ``@app.evaluate()`` method would be near identical with two "
 "exceptions: (1) the model is not locally trained, instead it is used to "
@@ -40627,24 +41274,24 @@ msgid ""
 "is not locally modified."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:372
+#: ../../source/tutorial-quickstart-pytorch.rst:381
 msgid ""
 "To construct a |serverapp_link|_ we define its ``@app.main()`` method. "
 "This method receive as input arguments:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:375
+#: ../../source/tutorial-quickstart-pytorch.rst:384
 msgid ""
 "a ``Grid`` object that will be used to interface with the nodes running "
 "the ``ClientApp`` to involve them in a round of train/evaluate/query or "
 "other."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:377
+#: ../../source/tutorial-quickstart-pytorch.rst:386
 msgid "a ``Context`` object that provides access to the run configuration."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:379
+#: ../../source/tutorial-quickstart-pytorch.rst:388
 msgid ""
 "In this example we use the |fedavg_link|_ and configure it with a "
 "specific value of ``fraction_train`` which is read from the run config. "
@@ -40653,30 +41300,30 @@ msgid ""
 "|strategy_start_link|_ method. To it we pass:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:384
+#: ../../source/tutorial-quickstart-pytorch.rst:393
 msgid "the ``Grid`` object."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:385
+#: ../../source/tutorial-quickstart-pytorch.rst:394
 msgid ""
 "an ``ArrayRecord`` carrying a randomly initialized model that will serve "
 "as the global model to federated."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:387
+#: ../../source/tutorial-quickstart-pytorch.rst:396
 msgid ""
 "a ``ConfigRecord`` with the training hyperparameters to be sent to the "
 "clients. The strategy will also insert the current round number in this "
 "config before sending it to the participating nodes."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:390
+#: ../../source/tutorial-quickstart-pytorch.rst:399
 msgid ""
 "the ``num_rounds`` parameter specifying how many rounds of ``FedAvg`` to "
 "perform."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:433
+#: ../../source/tutorial-quickstart-pytorch.rst:436
 msgid ""
 "Note the ``start`` method of the strategy returns a result object. This "
 "object contains all the relevant information about the FL process, "
@@ -40687,7 +41334,7 @@ msgid ""
 "model `state_dict` using ``torch.save``."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:444
+#: ../../source/tutorial-quickstart-pytorch.rst:447
 #, fuzzy
 msgid ""
 "Check the `source code <https://github.com/adap/flower/blob/main/examples"
@@ -55980,5 +56627,39 @@ msgstr ""
 #~ " the run config. You can find "
 #~ "the default value defined in the "
 #~ "``pyproject.toml``."
+#~ msgstr ""
+
+#~ msgid "Override federation configuration values in the format:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "`--federation-config 'key1=value1 key2=value2' "
+#~ "--federation-config 'key3=value3'`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Values can be of any type "
+#~ "supported in TOML, such as bool, "
+#~ "int, float, or string. Ensure that "
+#~ "the keys (`key1`, `key2`, `key3` in "
+#~ "this example) exist in the federation"
+#~ " configuration under the "
+#~ "`[tool.flwr.federations.<YOUR_FEDERATION>]` table of "
+#~ "the `pyproject.toml` for proper overriding."
+#~ msgstr ""
+
+#~ msgid "Override run configuration values in the format:"
+#~ msgstr ""
+
+#~ msgid "`--run-config 'key1=value1 key2=value2' --run-config 'key3=value3'`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Values can be of any type "
+#~ "supported in TOML, such as bool, "
+#~ "int, float, or string. Ensure that "
+#~ "the keys (`key1`, `key2`, `key3` in "
+#~ "this example) exist in `pyproject.toml` "
+#~ "for proper overriding."
 #~ msgstr ""
 
