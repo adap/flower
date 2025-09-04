@@ -209,7 +209,7 @@ def _request_download_link(identifier: str) -> str:
     if resp.status_code == 404:
         raise typer.BadParameter(f"'{identifier}' not found in FlowerHub")
     if not resp.ok:
-        raise typer.BadParameter(f"Flower platform API error: {resp.status_code} {resp.text}")
+        raise typer.BadParameter(f"FlowerHub request failed with status {resp.status_code}. Details: {resp.text}")
 
     data = resp.json()
     if "url" not in data:
