@@ -44,7 +44,7 @@ Red Hat OpenShift cluster:
 1. Enable RHOS service on AWS (ROSA) in your AWS account.
 2. Ensure that you have sufficient service quotas for ROSA.
 3. Create a service-linked role for Elastic Load Balancing. This should be automatically
-   creatd for you if not present.
+   created for you if not present.
 4. Link your AWS and Red Hat account.
 5. Create AWS Identity and Access Management (IAM) roles. You will need to create an IAM
    user with these required permissions:
