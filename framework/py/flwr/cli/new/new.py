@@ -100,8 +100,8 @@ def render_and_create(file_path: Path, template: str, context: dict[str, str]) -
     create_file(file_path, content)
 
 
-def add_end_prompt(package_name: str, llm_challenge_str: str | None = None):
-    """Add ending prompt after Flower App creation."""
+def print_success_prompt(package_name: str, llm_challenge_str: str | None = None) -> None:
+    """Print styled setup instructions for running a new Flower App after creation."""
     prompt = typer.style(
         "🎊 Flower App creation successful.\n\n"
         "To run your Flower App, first install its dependencies:\n\n",
