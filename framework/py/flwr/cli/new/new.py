@@ -204,7 +204,7 @@ def _request_download_link(identifier: str) -> str:
     try:
         resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
     except requests.RequestException as e:
-        raise typer.BadParameter(f"Failed to reach Flower platform API: {e}") from e
+        raise typer.BadParameter(f"Unable to connect to FlowerHub: {e}") from e
 
     if resp.status_code == 404:
         raise typer.BadParameter(f"{identifier} not found in FlowerHub")
