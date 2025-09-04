@@ -4,9 +4,7 @@ services:
     command:
       - --superlink
       - ${SUPERLINK_IP:-127.0.0.1}:9092
-      - --plugin-type
-      - clientapp
-      - --appio-api-address
+      - --clientappio-api-address
       - 0.0.0.0:9094
       - --isolation
       - process
