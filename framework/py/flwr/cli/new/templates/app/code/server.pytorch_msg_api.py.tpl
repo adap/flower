@@ -1,7 +1,5 @@
 """$project_name: A Flower / $framework_str app."""
 
-from pprint import pprint
-
 import torch
 from flwr.common import ArrayRecord, ConfigRecord, Context
 from flwr.server import Grid, ServerApp
@@ -36,12 +34,6 @@ def main(grid: Grid, context: Context) -> None:
         train_config=ConfigRecord({"lr": lr}),
         num_rounds=num_rounds,
     )
-
-    # Log resulting metrics
-    print("\nDistributed train metrics:")
-    pprint(result.train_metrics_clientapp)
-    print("\nDistributed evaluate metrics:")
-    pprint(result.evaluate_metrics_clientapp)
 
     # Save final model to disk
     print("\nSaving final model to disk...")
