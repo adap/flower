@@ -8,12 +8,10 @@ from pathlib import Path
 REPLACE_CURR_VERSION = {}
 
 REPLACE_NEXT_VERSION = {
-    "framework/docs/source/conf.py": [
-        ".. |stable_flwr_version| replace:: {version}",
-    ],
     "framework/pyproject.toml": ['version = "{version}"'],
     "framework/docs/source/conf.py": [
         'release = "{version}"',
+        ".. |stable_flwr_version| replace:: {version}",
     ],
     "examples/docs/source/conf.py": ['release = "{version}"'],
     "baselines/docs/source/conf.py": ['release = "{version}"'],
