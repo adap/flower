@@ -26,7 +26,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   A new PyTorch template using the Message API is now available through `flwr new`.
 
-- **Update documentation to use SuperExec** ([#5731](https://github.com/adap/flower/pull/5731), [#5734](https://github.com/adap/flower/pull/5734), [#5735](https://github.com/adap/flower/pull/5735), [#5737](https://github.com/adap/flower/pull/5737), [#5751](https://github.com/adap/flower/pull/5751), [#5759](https://github.com/adap/flower/pull/5759))
+- **Update documentation to use SuperExec** ([#5731](https://github.com/adap/flower/pull/5731), [#5734](https://github.com/adap/flower/pull/5734), [#5735](https://github.com/adap/flower/pull/5735), [#5737](https://github.com/adap/flower/pull/5737), [#5751](https://github.com/adap/flower/pull/5751), [#5759](https://github.com/adap/flower/pull/5759), [#5811](https://github.com/adap/flower/pull/5811))
 
   Documentation has been revised to reflect the introduction of Flower SuperExec. Updates include restructuring exit codes, adding references to `flower-superexec`, and revising guides and tutorials such as quickstart with Docker, GCP deployment, network communication, and the architecture explainer to consistently use SuperExec.
 
