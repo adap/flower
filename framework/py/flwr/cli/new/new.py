@@ -213,7 +213,7 @@ def _request_download_link(identifier: str) -> str:
 
     data = resp.json()
     if "url" not in data:
-        raise typer.BadParameter("Bad response from Flower platform API (missing 'url')")
+        raise typer.BadParameter("Invalid response from FlowerHub")
     return data["url"]
 
 
