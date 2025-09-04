@@ -1,7 +1,5 @@
 """pytorchexample: A Flower / PyTorch app."""
 
-from pprint import pprint
-
 import torch
 from flwr.common import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.server import Grid, ServerApp
@@ -36,14 +34,6 @@ def main(grid: Grid, context: Context) -> None:
         num_rounds=num_rounds,
         evaluate_fn=global_evaluate,
     )
-
-    # Log resulting metrics
-    print("\nDistributed train metrics:")
-    pprint(result.train_metrics_clientapp)
-    print("\nDistributed evaluate metrics:")
-    pprint(result.evaluate_metrics_clientapp)
-    print("\nGlobal evaluate metrics:")
-    pprint(result.evaluate_metrics_serverapp)
 
     # Save final model to disk
     print("\nSaving final model to disk...")
