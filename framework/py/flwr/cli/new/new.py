@@ -451,4 +451,4 @@ def new(
             context=context,
         )
 
-    print(add_end_prompt(package_name, llm_challenge_str))
+    print_success_prompt(package_name, llm_challenge_str)
