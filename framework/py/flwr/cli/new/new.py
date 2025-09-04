@@ -222,7 +222,7 @@ def download_remote_app_via_api(identifier: str) -> None:
     # Parse @user/app just to derive local dir name
     m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", identifier)
     if not m:
-        raise typer.BadParameter("Remote app id must look like '@user_name/app_name'.")
+        raise typer.BadParameter("Invalid remote app ID. Expected format: '@user_name/app_name'.")
     app_name = m.group("app")
 
     project_dir = Path.cwd() / app_name
