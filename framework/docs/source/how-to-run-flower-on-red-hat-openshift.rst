@@ -137,7 +137,7 @@ Hat Cloud Console for more details.
       guide, select version ``4.18.22`` (you may select a newer version that suits your
       requirements). Select the AWS region appropriate for your AWS account.
    2. **Machine Pool** - Select an EC2 compute node instance type that is available in
-      your region. In this guide, we use the``eu-north-1`` region, and therefore
+      your region. In this guide, we use the ``eu-north-1`` region, and therefore
       selected ``m6i.2xlarge - 8 vCPU 32 GiB RAM``. Enable autoscaling and set the
       minimum node count to 2 and maximum to 4. This allows the cluster to scale up when
       you deploy the OpenShift platform and OpenShift AI in the same cluster.
