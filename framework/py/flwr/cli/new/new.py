@@ -264,7 +264,7 @@ def download_remote_app_via_api(identifier: str) -> None:
     with zipfile.ZipFile(zip_buf) as zf:
         _safe_extract_zip(zf, Path.cwd())
 
-    print(add_end_prompt(app_name))
+    print_success_prompt(app_name)
 
 
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
