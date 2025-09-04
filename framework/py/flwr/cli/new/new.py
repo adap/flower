@@ -136,7 +136,7 @@ def print_success_prompt(package_name: str, llm_challenge_str: str | None = None
         bold=True,
     )
 
-    return prompt
+    print(prompt)
 
 
 # Security: prevent zip-slip
