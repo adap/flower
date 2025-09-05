@@ -140,7 +140,9 @@ class Strategy(ABC):
         timeout: float = 3600,
         train_config: Optional[ConfigRecord] = None,
         evaluate_config: Optional[ConfigRecord] = None,
-        evaluate_fn: Optional[Callable[[int, ArrayRecord], MetricRecord]] = None,
+        evaluate_fn: Optional[
+            Callable[[int, ArrayRecord], Optional[MetricRecord]]
+        ] = None,
     ) -> Result:
         """Execute the federated learning strategy.
 
@@ -164,11 +166,11 @@ class Strategy(ABC):
         evaluate_config : ConfigRecord, optional
             Configuration to be sent to nodes during evaluation rounds.
             If unset, an empty ConfigRecord will be used.
-        evaluate_fn : Callable[[int, ArrayRecord], MetricRecord], optional
+        evaluate_fn : Callable[[int, ArrayRecord], Optional[MetricRecord]], optional
             Optional function for centralized evaluation of the global model. Takes
-            server round number and array record, returns a MetricRecord. If provided,
-            will be called before the first round and after each round. Defaults to
-            None.
+            server round number and array record, returns a MetricRecord or None. If
+            provided, will be called before the first round and after each round.
+            Defaults to None.
 
         Returns
         -------
@@ -192,8 +194,9 @@ class Strategy(ABC):
         # Evaluate starting global parameters
         if evaluate_fn:
             res = evaluate_fn(0, initial_arrays)
-            log(INFO, "Initial global evaluation results: %s", res)
-            result.evaluate_metrics_serverapp[0] = res
+            if res is not None:
+                log(INFO, "Initial global evaluation results: %s", res)
+                result.evaluate_metrics_serverapp[0] = res
 
         arrays = initial_arrays
 
@@ -266,8 +269,9 @@ class Strategy(ABC):
             if evaluate_fn:
                 log(INFO, "Global evaluation")
                 res = evaluate_fn(current_round, arrays)
-                log(INFO, "\t└──> MetricRecord: %s", res)
-                result.evaluate_metrics_serverapp[current_round] = res
+                if res is not None:
+                    log(INFO, "\t└──> MetricRecord: %s", res)
+                    result.evaluate_metrics_serverapp[current_round] = res
 
         log(INFO, "")
         log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)
