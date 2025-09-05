@@ -1,11 +1,11 @@
 """$project_name: A Flower / $framework_str app."""
 
 import torch
-from flwr.common import ArrayRecord, ConfigRecord, Context
-from flwr.server import Grid, ServerApp
-from flwr.serverapp.strategy import FedAvg
-
 from $import_name.task import Net
+
+from flwr.app import ArrayRecord, ConfigRecord, Context, ServerApp
+from flwr.serverapp import Grid
+from flwr.serverapp.strategy import FedAvg
 
 # Create ServerApp
 app = ServerApp()
