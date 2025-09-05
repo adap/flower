@@ -194,8 +194,8 @@ class Strategy(ABC):
         # Evaluate starting global parameters
         if evaluate_fn:
             res = evaluate_fn(0, initial_arrays)
+            log(INFO, "Initial global evaluation results: %s", res)
             if res is not None:
-                log(INFO, "Initial global evaluation results: %s", res)
                 result.evaluate_metrics_serverapp[0] = res
 
         arrays = initial_arrays
