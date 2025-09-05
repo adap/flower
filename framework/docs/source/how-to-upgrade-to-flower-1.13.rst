@@ -119,8 +119,9 @@ project both in the traditional (now deprecated) way and in the new (recommended
 .. code-block:: python
     :emphasize-lines: 6,10
 
-    from flwr.client import ClientApp, start_client
-    from flwr.common import Context
+    from flwr.app import Context
+    from flwr.client import start_client
+    from flwr.clientapp import ClientApp
 
 
     # Flower 1.10 and later (recommended)
@@ -155,9 +156,10 @@ project both in the traditional (now deprecated) way and in the new (recommended
 .. code-block:: python
     :emphasize-lines: 7,13
 
-    from flwr.common import Context
-    from flwr.server import ServerApp, ServerAppComponents, ServerConfig, start_server
+    from flwr.app import Context
+    from flwr.server import ServerAppComponents, ServerConfig, start_server
     from flwr.server.strategy import FedAvg
+    from flwr.serverapp import ServerApp
 
 
     # Flower 1.10 and later (recommended)
@@ -260,10 +262,11 @@ respectively. There is no need to use ``start_simulation()`` anymore. Here's an 
 .. code-block:: python
     :emphasize-lines: 9,15,19,22,28
 
-    from flwr.client import ClientApp
-    from flwr.common import Context
-    from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+    from flwr.app import Context
+    from flwr.clientapp import ClientApp
+    from flwr.server import ServerAppComponents, ServerConfig
     from flwr.server.strategy import FedAvg
+    from flwr.serverapp import ServerApp
     from flwr.simulation import start_simulation
 
 
@@ -396,9 +399,9 @@ depending on your Flower version:
 .. code-block:: python
     :emphasize-lines: 10,12,14-17
 
-    from flwr.client import ClientApp
-    from flwr.common import Context
-    from flwr.server import ServerApp
+    from flwr.app import Context
+    from flwr.clientapp import ClientApp
+    from flwr.serverapp import ServerApp
     from flwr.simulation import run_simulation, start_simulation
 
 
