@@ -269,8 +269,8 @@ class Strategy(ABC):
             if evaluate_fn:
                 log(INFO, "Global evaluation")
                 res = evaluate_fn(current_round, arrays)
+                log(INFO, "\t└──> MetricRecord: %s", res)
                 if res is not None:
-                    log(INFO, "\t└──> MetricRecord: %s", res)
                     result.evaluate_metrics_serverapp[current_round] = res
 
         log(INFO, "")
