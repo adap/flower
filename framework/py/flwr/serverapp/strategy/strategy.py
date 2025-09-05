@@ -202,7 +202,7 @@ class Strategy(ABC):
             log(INFO, "[ROUND %s/%s]", current_round, num_rounds)
 
             # -----------------------------------------------------------------
-            # --- TRAINING ----------------------------------------------------
+            # --- TRAINING (CLIENTAPP-SIDE) -----------------------------------
             # -----------------------------------------------------------------
 
             # Call strategy to configure training round
@@ -232,7 +232,7 @@ class Strategy(ABC):
                 result.train_metrics_clientapp[current_round] = agg_train_metrics
 
             # -----------------------------------------------------------------
-            # --- EVALUATION (LOCAL) ------------------------------------------
+            # --- EVALUATION (CLIENTAPP-SIDE) ---------------------------------
             # -----------------------------------------------------------------
 
             # Call strategy to configure evaluation round
@@ -259,7 +259,7 @@ class Strategy(ABC):
                 result.evaluate_metrics_clientapp[current_round] = agg_evaluate_metrics
 
             # -----------------------------------------------------------------
-            # --- EVALUATION (GLOBAL) -----------------------------------------
+            # --- EVALUATION (SERVERAPP-SIDE) ---------------------------------
             # -----------------------------------------------------------------
 
             # Centralized evaluation

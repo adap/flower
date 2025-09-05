@@ -14,6 +14,7 @@
 # ==============================================================================
 """Strategy results."""
 
+
 import pprint
 from dataclasses import dataclass, field
 
@@ -61,19 +62,19 @@ class Result:
         arr_size = sum(len(array.data) for array in self.arrays.values()) / (1024**2)
         rep += "Global Arrays:\n" + f"\tArrayRecord ({arr_size:.3f} MB)\n" + "\n"
         rep += (
-            "Aggregated Client-side Train Metrics:\n"
+            "Aggregated ClientApp-side Train Metrics:\n"
             + pprint.pformat(stringify_dict(self.train_metrics_clientapp), indent=2)
             + "\n\n"
         )
 
         rep += (
-            "Aggregated Client-side Evaluate Metrics:\n"
+            "Aggregated ClientApp-side Evaluate Metrics:\n"
             + pprint.pformat(stringify_dict(self.evaluate_metrics_clientapp), indent=2)
             + "\n\n"
         )
 
         rep += (
-            "Server-side Evaluate Metrics:\n"
+            "ServerApp-side Evaluate Metrics:\n"
             + pprint.pformat(stringify_dict(self.evaluate_metrics_serverapp), indent=2)
             + "\n"
         )
