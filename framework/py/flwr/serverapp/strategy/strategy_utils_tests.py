@@ -23,8 +23,8 @@ from parameterized import parameterized
 
 from flwr.common import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 
+from ..exception import InconsistentMessageReplies
 from .strategy_utils import (
-    InconsistentMessageReplies,
     aggregate_arrayrecords,
     aggregate_metricrecords,
     config_to_str,

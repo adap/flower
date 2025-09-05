@@ -3,7 +3,8 @@ from sys import argv
 import tensorflow as tf
 from client import SUBSET_SIZE, FlowerClient, get_model
 
-from flwr.common import Context, ndarrays_to_parameters
+from flwr.app import Context
+from flwr.common import ndarrays_to_parameters
 from flwr.server import ServerConfig
 from flwr.server.strategy import (
     FaultTolerantFedAvg,

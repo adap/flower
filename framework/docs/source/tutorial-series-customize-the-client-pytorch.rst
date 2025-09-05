@@ -202,10 +202,11 @@ file called ``custom_client_app.py`` and copy the following code into it:
 
     import numpy as np
     import torch
-    from flwr.client import Client, ClientApp
+    from flwr.app import Context
+    from flwr.client import Client
+    from flwr.clientapp import ClientApp
     from flwr.common import (
         Code,
-        Context,
         EvaluateIns,
         EvaluateRes,
         FitIns,
@@ -469,10 +470,11 @@ function. In a new file called ``serde_client_app.py``, copy the following code 
 
     import numpy as np
     import torch
-    from flwr.client import Client, ClientApp
+    from flwr.app import Context
+    from flwr.client import Client
+    from flwr.clientapp import ClientApp
     from flwr.common import (
         Code,
-        Context,
         EvaluateIns,
         EvaluateRes,
         FitIns,

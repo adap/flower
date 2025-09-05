@@ -5,8 +5,9 @@ import numpy as np
 import torch
 from fastai.vision.all import *
 
-from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import Context
+from flwr.app import Context
+from flwr.client import NumPyClient, start_client
+from flwr.clientapp import ClientApp
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

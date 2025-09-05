@@ -3,7 +3,7 @@ from e2e_tensorflow.client_app import app as client_app
 import flwr as fl
 
 # Define ServerAppp
-server_app = fl.server.ServerApp(
+server_app = fl.serverapp.ServerApp(
     config=fl.server.ServerConfig(num_rounds=3),
 )
 

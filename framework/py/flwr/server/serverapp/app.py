@@ -21,6 +21,7 @@ from pathlib import Path
 from queue import Queue
 from typing import Optional
 
+from flwr.app.exception import AppExitException
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.cli.utils import get_sha256_hash
@@ -37,7 +38,6 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.exception import AppExitException
 from flwr.common.exit import ExitCode, add_exit_handler, flwr_exit
 from flwr.common.heartbeat import HeartbeatSender, get_grpc_app_heartbeat_fn
 from flwr.common.logger import (

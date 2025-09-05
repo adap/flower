@@ -5,8 +5,9 @@ from e2e_scikit_learn import utils
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 
-from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import Context
+from flwr.app import Context
+from flwr.client import NumPyClient, start_client
+from flwr.clientapp import ClientApp
 
 # Load MNIST dataset from https://www.openml.org/d/554
 num_partitions = 10

@@ -23,9 +23,10 @@ instantiated as follows:
 
 .. code-block:: python
 
-    from flwr.common import Context
+    from flwr.app import Context
     from flwr.server.strategy import FedAvg
-    from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+    from flwr.server import ServerAppComponents, ServerConfig
+    from flwr.serverapp import ServerApp
 
 
     def server_fn(context: Context):
@@ -84,9 +85,10 @@ client. It must return a dictionary of arbitrary configuration values ``client.f
 
 .. code-block:: python
 
-    from flwr.common import Context
+    from flwr.app import Context
     from flwr.server.strategy import FedAvg
-    from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+    from flwr.server import ServerAppComponents, ServerConfig
+    from flwr.serverapp import ServerApp
 
 
     def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:

@@ -34,8 +34,8 @@ from flwr.common import (
 )
 from flwr.server import Grid
 
+from ..exception import AggregationError
 from .fedavg import FedAvg
-from .strategy_utils import AggregationError
 
 
 # pylint: disable=line-too-long

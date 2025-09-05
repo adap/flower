@@ -2,7 +2,7 @@ import time
 
 import flwr as fl
 
-app = fl.server.ServerApp()
+app = fl.serverapp.ServerApp()
 
 
 @app.main()

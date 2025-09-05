@@ -27,8 +27,8 @@ import numpy as np
 
 from flwr.common import Array, ArrayRecord, Message, MetricRecord, RecordDict
 
+from ..exception import AggregationError
 from .fedopt import FedOpt
-from .strategy_utils import AggregationError
 
 
 # pylint: disable=line-too-long

@@ -14,8 +14,14 @@
 # ==============================================================================
 """Public Flower ServerApp APIs."""
 
+
+from flwr.server.grid import Grid
+from flwr.server.server_app import ServerApp
+
 from . import strategy
 
 __all__ = [
+    "Grid",
+    "ServerApp",
     "strategy",
 ]

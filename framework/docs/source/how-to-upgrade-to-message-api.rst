@@ -70,21 +70,21 @@ Summary of changes
 Thousands of Flower Apps have been created using the Strategies and |numpyclient_link|_
 abstractions. With the introduction of the Message API, these apps can now take
 advantage of a more powerful and flexible communication layer with the |message_link|_
-abstraction being its cornerstone. Messages replace the previous `FitIns` and `FitRes`
-data structures (and their equivalent for the other operations) into a single, unified
-and more versatile data structure.
+abstraction being its cornerstone. Messages replace the previous ``FitIns`` and
+``FitRes`` data structures (and their equivalent for the other operations) into a
+single, unified and more versatile data structure.
 
 To fully take advantage of the new Message API, you will need to update your app's code
 to use the new message-based communication patterns. This guide will show you how to:
 
-1. Update your |serverapp_link|_ to make use of the new `Message`-based strategies. You
-   won't need to use the `server_fn` anymore. The new strategies make it easier to
+1. Update your |serverapp_link|_ to make use of the new ``Message``-based strategies.
+   You won't need to use the ``server_fn`` anymore. The new strategies make it easier to
    customize how the different federated learning rounds are executed, to retrieve
    results from your run, and more.
-2. Update your |clientapp_link|_ so it operates directly on `Message` objects received
+2. Update your |clientapp_link|_ so it operates directly on ``Message`` objects received
    from the |serverapp_link|_. You will be able to keep most of the code from your
    |numpyclient_link|_ implementation but you won't need to create a new class anymore
-   or use the helper `client_fn` function.
+   or use the helper ``client_fn`` function.
 
 .. tip::
 
@@ -95,7 +95,7 @@ to use the new message-based communication patterns. This guide will show you ho
 
     .. code-block:: python
 
-        from flwr.common import ArrayRecord, MetricRecord, ConfigRecord, RecordDict
+        from flwr.app import ArrayRecord, MetricRecord, ConfigRecord, RecordDict
 
         # ConfigRecord can be used to communicate configs between ServerApp and ClientApp
         # They can hold scalars, but also strings and booleans
@@ -145,29 +145,35 @@ Then, run the following command to install the updated dependencies:
 Update your ``ServerApp``
 -------------------------
 
-Starting with Flower 1.21, the `ServerApp` no longer requires a `server_fn` function to
-make use of strategies. This is because a new collection of strategies (all sharing the
-common |strategy_link|_ base class) has been created to operate directly on `Message`
-objects, allowing for a more streamlined and flexible approach to federated learning
-rounds.
+Starting with Flower 1.21, the ``ServerApp`` no longer requires a ``server_fn`` function
+to make use of strategies. This is because a new collection of strategies (all sharing
+the common |strategy_link|_ base class) has been created to operate directly on
+``Message`` objects, allowing for a more streamlined and flexible approach to federated
+learning rounds.
 
 .. note::
 
-    The new `Message`-based strategies are located in the `flwr.serverapp.strate
+    The new ``Message``-based strategies are located in the `flwr.serverapp.strate
     <ref-api/flwr.serverapp.Strategy.html>`_ module unlike the previous strategies which
     were located in the `flwr.server.strategy <ref-api/flwr.server.strategy.html>`_
     module. Over time more strategies will be added to the `flwr.serverapp.strategy`
     module. Users are encouraged to use these new strategies.
 
-Since Flower 1.10, the recommended `ServerApp` implementation would look something like
-the code snippet below. Naturally, more customization can be applied to the Strategy by,
-for example, reading the config from the `Context`. But to keep things focused, we will
-use a simple example and assume we are federating a PyTorch model.
+Since Flower 1.10, the recommended ``ServerApp`` implementation would look something
+like the code snippet below. Naturally, more customization can be applied to the
+Strategy by, for example, reading the config from the ``Context``. But to keep things
+focused, we will use a simple example and assume we are federating a PyTorch model.
+
+.. note::
+
+    ``Context`` has moved to ``flwr.app`` and ``ServerApp`` to ``flwr.serverapp``.
+    Importing them from ``flwr.common`` or ``flwr.server`` is deprecated.
 
 .. code-block:: python
 
-    from flwr.common import Context
-    from flwr.server import ServerApp, ServerAppComponents, ServerConfig, start_server
+    from flwr.common import Context  # Deprecated, import from flwr.app instead
+    from flwr.server import ServerApp  # Deprecated, import from flwr.serverapp instead
+    from flwr.server import ServerAppComponents, ServerConfig, start_server
     from flwr.server.strategy import FedAvg
 
 
@@ -187,31 +193,31 @@ use a simple example and assume we are federating a PyTorch model.
     # Create ServerApp with helper function
     app = ServerApp(server_fn=server_fn)
 
-With Flower 1.21 and later, the equivalent `ServerApp` using the new Message API would
+With Flower 1.21 and later, the equivalent ``ServerApp`` using the new Message API would
 look as shown below after following these steps:
 
-1. Define the ``main`` method under the ``@app.main()`` decorator. If your `server_fn`
+1. Define the ``main`` method under the ``@app.main()`` decorator. If your ``server_fn``
    was reading config values from the ``Context`` you can still do so (consider copying
-   those lines directly from your `server_fn` function)
+   those lines directly from your ``server_fn`` function)
 2. Instantiate your model as usual and construct an ``ArrayRecord`` out of its
    parameters.
-3. Replace your existing strategy with one from the `flwr.serverapp.strategy` module.
+3. Replace your existing strategy with one from the ``flwr.serverapp.strategy`` module.
    For example with |fedavg_link|_. Pass the arguments related to node sampling to the
    constructor of your strategy.
-4. Call the ``start`` method of the new strategy passing to it the `ArrayRecord`
+4. Call the ``start`` method of the new strategy passing to it the ``ArrayRecord``
    representing the initial state of your global model, the number of FL rounds and, the
-   `Grid` object (which is used internally to communicate with the nodes executing the
+   ``Grid`` object (which is used internally to communicate with the nodes executing the
    ``ClientApp``).
 
-Note how we no longer need the `server_fn` function. The `Context` is still accessible,
-allowing you to customize how the `ServerApp` behaves at runtime. With the new
-strategies, a new ``start`` method is available. It defines a for loop which sets the
-steps involved in a round of FL. By default it behaves as the original strategies do,
-i.e. a round of FL training followed by one of FL evaluation and a stage to evaluate the
-global model. Note how the `start` method returns results. These are of type `Result`
-and by default contain the final global model (via ``result.arrays``) as well as
-aggregated |metricrecord_link|_ from federated stages and, optionally, metrics from
-evaluation stages done at the `ServerApp`.
+Note how we no longer need the ``server_fn`` function. The ``Context`` is still
+accessible, allowing you to customize how the ``ServerApp`` behaves at runtime. With the
+new strategies, a new ``start`` method is available. It defines a for loop which sets
+the steps involved in a round of FL. By default it behaves as the original strategies
+do, i.e. a round of FL training followed by one of FL evaluation and a stage to evaluate
+the global model. Note how the ``start`` method returns results. These are of type
+``Result`` and by default contain the final global model (via ``result.arrays``) as well
+as aggregated |metricrecord_link|_ from federated stages and, optionally, metrics from
+evaluation stages done at the ``ServerApp``.
 
 .. note::
 
@@ -235,8 +241,8 @@ evaluation stages done at the `ServerApp`.
 .. code-block:: python
     :emphasize-lines: 3,9,10,14,17,20
 
-    from flwr.common import ArrayRecord, ConfigRecord, Context, MetricRecord
-    from flwr.server import Grid, ServerApp
+    from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
+    from flwr.serverapp import Grid, ServerApp
     from flwr.serverapp.strategy import FedAvg
 
     # Create ServerApp
@@ -264,23 +270,29 @@ evaluation stages done at the `ServerApp`.
 Update your ClientApp
 ---------------------
 
-Similar to the `ServerApp`, the `ClientApp` no longer requires a helper function (i.e.
-``client_fn`` ) that instantiates a |numpyclient_link|_ or base |client_link|_ object.
-Instead, with the Message API, you get to define directly how the ClientApp operates on
-`Message` objects received from the `ServerApp`.
+Similar to the ``ServerApp``, the ``ClientApp`` no longer requires a helper function
+(i.e. ``client_fn`` ) that instantiates a |numpyclient_link|_ or base |client_link|_
+object. Instead, with the Message API, you get to define directly how the ClientApp
+operates on ``Message`` objects received from the ``ServerApp``.
 
-Remember `NumPyClient` came with two key built-in methods, ``fit`` and ``evaluate``,
+Remember ``NumPyClient`` came with two key built-in methods, ``fit`` and ``evaluate``,
 that were respectively designed for doing federated training and evaluation using the
 client's local data. With the new Message API, you can define similar methods directly
-on the `ClientApp` via decorators to handle incoming `Message` objects.
+on the ``ClientApp`` via decorators to handle incoming ``Message`` objects.
 
-Let's see a basic example showing first a minimal `NumPyClient`-based `ClientApp` and
-then the upgraded design using the Message API.
+Let's see a basic example showing first a minimal ``NumPyClient``-based ``ClientApp``
+and then the upgraded design using the Message API.
+
+.. note::
+
+    ``Context`` has moved to ``flwr.app`` and ``ClientApp`` to ``flwr.clientapp``.
+    Importing them from ``flwr.common`` or ``flwr.client`` is deprecated.
 
 .. code-block:: python
 
-    from flwr.client import ClientApp, NumPyClient
-    from flwr.common import Context
+    from flwr.client import ClientApp  # Deprecated, import from flwr.clientapp instead
+    from flwr.client import NumPyClient
+    from flwr.common import Context  # Deprecated, import from flwr.app instead
     from my_utils import train_fn, test_fn, get_weights, set_weights
 
 
@@ -317,25 +329,25 @@ then the upgraded design using the Message API.
 
     app = ClientApp(client_fn=client_fn)
 
-Upgrading a ClientApp designed around the `NumPyClient` and `client_fn` abstractions to
-the Message API would result in the following code. Note that the behavior of the
-`ClientApp` is defined directly in its methods (i.e. a secondary class based on
-`NumPyClient` is no longer needed).
+Upgrading a ClientApp designed around the ``NumPyClient`` and ``client_fn`` abstractions
+to the Message API would result in the following code. Note that the behavior of the
+``ClientApp`` is defined directly in its methods (i.e. a secondary class based on
+``NumPyClient`` is no longer needed).
 
 The |clientapp_link|_ abstraction comes with built-in ``@app.train`` and
 ``@app.evaluate`` decorators. The arguments the associated methods receive have been
-unified and they both operate on `Message` objects. Each method is responsible for
-handling the incoming `Message` objects and returning the appropriate response (also as
-a `Message`). Note that you'll still be able to use the functions you might have written
-to, for example, train your model using the ML framework of your choice. In this example
-those are represented by ``train_fn`` and ``test_fn``. Follow these steps to migrate
-your existing ``ClientApp``:
+unified and they both operate on ``Message`` objects. Each method is responsible for
+handling the incoming ``Message`` objects and returning the appropriate response (also
+as a ``Message``). Note that you'll still be able to use the functions you might have
+written to, for example, train your model using the ML framework of your choice. In this
+example those are represented by ``train_fn`` and ``test_fn``. Follow these steps to
+migrate your existing ``ClientApp``:
 
-1. Introduce the `@app.train` and `@app.evaluate` decorators and respective methods.
-2. Copy the lines of code you had in your `client_fn` reading config values from the
-   `Context` into your `train` and `evaluate` methods implementations (created in step
-   1).
-3. From the `Message` object, extract the relevant items (e.g. an ``ArrayRecord``
+1. Introduce the ``@app.train`` and ``@app.evaluate`` decorators and respective methods.
+2. Copy the lines of code you had in your ``client_fn`` reading config values from the
+   ``Context`` into your ``train`` and ``evaluate`` methods implementations (created in
+   step 1).
+3. From the ``Message`` object, extract the relevant items (e.g. an ``ArrayRecord``
    defining the global model, a ``ConfigRecord`` containing configs for the current
    round) to use in your training and evaluation logic.
 4. Copy the lines calling the functions that do the actual training/evaluation (in the
@@ -345,14 +357,14 @@ your existing ``ClientApp``:
 
 .. note::
 
-    The payload that `Message` objects carry is of type |recorddict_link|_ which can
+    The payload that ``Message`` objects carry is of type |recorddict_link|_ which can
     contain records of type ``ArrayRecord``, ``MetricRecord`` and ``ConfigRecord``.
 
 .. code-block:: python
     :emphasize-lines: 9,10,18,23,33,34,37,38,46,56,57
 
-    from flwr.client import ClientApp
-    from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
+    from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+    from flwr.clientapp import ClientApp
     from my_utils import train_fn, test_fn
 
     # Flower ClientApp
@@ -418,4 +430,4 @@ your existing ``ClientApp``:
         content = RecordDict({"metrics": metrics})
         return Message(content=content, reply_to=msg)
 
-This concludes the migration guide!
+This concludes the migration guide, we hope you found it useful! Happy federating!
