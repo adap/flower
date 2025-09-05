@@ -219,7 +219,8 @@ interest. For example, following the example above:
     # Get Array from context
     arr = context.state["some_parameters"]["my_array"]
 
-    # If you constructed the ArrayRecord with a list of Numpy
+    # If you constructed the ArrayRecord with a list of Numpy, then do
+    # arr = context.state["some_parameters"].to_numpy_ndarrays()[0]  # get first array
 
     # Deserialize it
     arr_deserialized = arr.numpy()
