@@ -15,18 +15,15 @@
 """Public Flower App APIs."""
 
 
-from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.message import Message
 from flwr.common.record import ArrayRecord, ConfigRecord, MetricRecord, RecordDict
-from flwr.server.server_app import ServerApp
 
 from .error import Error
 from .metadata import Metadata
 
 __all__ = [
     "ArrayRecord",
-    "ClientApp",
     "ConfigRecord",
     "Context",
     "Error",
@@ -34,5 +31,4 @@ __all__ = [
     "Metadata",
     "MetricRecord",
     "RecordDict",
-    "ServerApp",
 ]

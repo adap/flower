@@ -2,8 +2,8 @@
 
 import torch
 from app_pytorch.task import Net, load_centralized_dataset, test
-from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord, ServerApp
-from flwr.serverapp import Grid
+from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
+from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 
 # Create ServerApp
