@@ -83,8 +83,7 @@ if __name__ == "__main__":
     changelog_path = ROOT_DIR / "framework/docs/source/ref-changelog.md"
     with changelog_path.open("r") as f:
         for line in f:
-            match = re.match(r"^## v(\d+\.\d+\.\d+).+", line)
-            if match:
+            if match := re.match(r"^## v(\d+\.\d+\.\d+).+", line):
                 break
 
     parser = argparse.ArgumentParser(
