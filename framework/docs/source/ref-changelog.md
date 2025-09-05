@@ -30,11 +30,15 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Documentation has been revised to reflect the introduction of Flower SuperExec. Updates include restructuring exit codes, adding references to `flower-superexec`, and revising guides and tutorials such as quickstart with Docker, GCP deployment, network communication, and the architecture explainer to consistently use SuperExec.
 
+- **Add OpenShift deployment guide for Flower** ([#5781](https://github.com/adap/flower/pull/5781))
+
+	Introduces a [guide](https://flower.ai/docs/framework/how-to-run-flower-on-red-hat-openshift.html) for deploying Flower on Red Hat OpenShift, including setup steps and configuration examples.
+
 - **Improve Helm documentation** ([#5711](https://github.com/adap/flower/pull/5711), [#5733](https://github.com/adap/flower/pull/5733), [#5748](https://github.com/adap/flower/pull/5748), [#5758](https://github.com/adap/flower/pull/5758), [#5765](https://github.com/adap/flower/pull/5765))
 
   Helm guide has been enhanced with additional configuration details and updated formatting. Changes include adding a parameters section, documenting how to set a custom `secretKey`, updating TLS instructions for version 1.20, and introducing audit logging configuration.
 
-- **Improve documentation** ([#5159](https://github.com/adap/flower/pull/5159), [#5655](https://github.com/adap/flower/pull/5655), [#5668](https://github.com/adap/flower/pull/5668), [#5692](https://github.com/adap/flower/pull/5692), [#5723](https://github.com/adap/flower/pull/5723), [#5738](https://github.com/adap/flower/pull/5738), [#5739](https://github.com/adap/flower/pull/5739), [#5740](https://github.com/adap/flower/pull/5740), [#5753](https://github.com/adap/flower/pull/5753), [#5764](https://github.com/adap/flower/pull/5764), [#5769](https://github.com/adap/flower/pull/5769), [#5775](https://github.com/adap/flower/pull/5775), [#5782](https://github.com/adap/flower/pull/5782), [#5788](https://github.com/adap/flower/pull/5788), [#5795](https://github.com/adap/flower/pull/5795), [#5809](https://github.com/adap/flower/pull/5809))
+- **Improve documentation** ([#5159](https://github.com/adap/flower/pull/5159), [#5655](https://github.com/adap/flower/pull/5655), [#5668](https://github.com/adap/flower/pull/5668), [#5692](https://github.com/adap/flower/pull/5692), [#5723](https://github.com/adap/flower/pull/5723), [#5738](https://github.com/adap/flower/pull/5738), [#5739](https://github.com/adap/flower/pull/5739), [#5740](https://github.com/adap/flower/pull/5740), [#5753](https://github.com/adap/flower/pull/5753), [#5764](https://github.com/adap/flower/pull/5764), [#5769](https://github.com/adap/flower/pull/5769), [#5775](https://github.com/adap/flower/pull/5775), [#5782](https://github.com/adap/flower/pull/5782), [#5788](https://github.com/adap/flower/pull/5788), [#5795](https://github.com/adap/flower/pull/5795), [#5809](https://github.com/adap/flower/pull/5809), [#5812](https://github.com/adap/flower/pull/5812))
 
   Restructures the tutorial series, removes `flower-simulation` references, and updates versioned docs to use the correct `flwr` versions. The [framework documentation homepage](https://flower.ai/docs/framework/) now defaults to the latest stable release instead of the `main` branch.
 
