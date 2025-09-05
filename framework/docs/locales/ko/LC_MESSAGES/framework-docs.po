@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-04 00:07+0000\n"
+"POT-Creation-Date: 2025-09-05 00:07+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -6106,7 +6106,10 @@ msgstr ""
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad
+#: flwr.serverapp.strategy.fedadam.FedAdam
 #: flwr.serverapp.strategy.fedavg.FedAvg
+#: flwr.serverapp.strategy.fedyogi.FedYogi
 #: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate
 #: flwr.serverapp.strategy.strategy.Strategy.aggregate_train
 #: flwr.serverapp.strategy.strategy.Strategy.configure_evaluate
@@ -11446,14 +11449,17 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-gcp.rst
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst
 msgid "superlink-deployment.yaml"
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-gcp.rst
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst
 msgid "supernode-1-deployment.yaml"
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-gcp.rst
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst
 msgid "supernode-2-deployment.yaml"
 msgstr ""
 
@@ -11567,6 +11573,719 @@ msgstr ""
 
 #: ../../source/how-to-run-flower-on-gcp.rst
 msgid "k8s-shutdown.sh"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:-1
+msgid ""
+"A step-by-step guide to learn how to create, deploy and run a Flower app "
+"on Red Hat OpenShift using the Red Hat OpenShift Service on AWS."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:6
+#, fuzzy
+msgid "Run Flower on Red Hat OpenShift"
+msgstr "Flower 서버."
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:8
+msgid ""
+"In this guide, you will learn how to create, deploy, and run a Flower app"
+" on the `Red Hat OpenShift (RHOS) <https://www.redhat.com/en/technologies"
+"/cloud-computing/openshift>`_ application platform. The platform will be "
+"hosted in AWS and we will follow the steps to install the cluster on "
+"installer-provisioned infrastructure using the `Red Hat OpenShift Service"
+" on AWS <https://aws.amazon.com/rosa/>`_."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:16
+msgid "Login to Red Hat OpenShift Console"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:18
+msgid ""
+"Start by logging in to your `Red Hat Hybrid Cloud Console "
+"<https://console.redhat.com/>`_ and click on ``OpenShift`` link in the "
+"``Red Hat OpenShift`` card."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:27
+msgid "Red Hat OpenShift link in Red Hat Hybrid Cloud Console"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:27
+msgid "Red Hat OpenShift link in the cloud console."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:29
+msgid ""
+"This will take you to the OpenShift console. Under ``Overview``, look for"
+" the ``Red Hat OpenShift Service on AWS (ROSA)`` card and click on "
+"``Create Cluster``. You will be taken to the page to setup a Red Hat "
+"OpenShift service on AWS. There are two pre-requisites that you have to "
+"fulfill before you can create a cluster:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:34
+msgid "AWS Pre-requisites - Sets up your AWS account for deploying ROSA."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:35
+msgid ""
+"ROSA Pre-requisites - Installs the ROSA CLI tool on your system and login"
+" to your Red Hat account."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:39
+#, fuzzy
+msgid "Complete AWS Pre-requisites"
+msgstr "전제 조건"
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:41
+msgid ""
+"Follow the steps required to fulfill the pre-requisites for AWS to create"
+" and manage a Red Hat OpenShift cluster:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:44
+msgid "Enable RHOS service on AWS (ROSA) in your AWS account."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:45
+msgid "Ensure that you have sufficient service quotas for ROSA."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:46
+msgid ""
+"Create a service-linked role for Elastic Load Balancing. This should be "
+"automatically created for you if not present."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:48
+msgid "Link your AWS and Red Hat account."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:49
+msgid ""
+"Create AWS Identity and Access Management (IAM) roles. You will need to "
+"create an IAM user with these required permissions:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:52
+msgid "``AmazonEC2FullAccess``"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:53
+msgid "``AWSCloudFormationFullAccess``"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:54
+msgid "``IAMFullAccess``"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:55
+msgid "``ServiceQuotasReadOnlyAccess``"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:57
+msgid ""
+"For more details, refer to the RHOS getting started guide from your AWS "
+"console."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:60
+#, fuzzy
+msgid "Complete ROSA Pre-requisites"
+msgstr "전제 조건"
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:62
+msgid ""
+"Follow the steps shown in the section to download and install the ROSA "
+"CLI tool."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:64
+msgid ""
+"Next, install the |aws_cli_link|_ CLI tool for your system. You can "
+"alternatively run it with Docker using the command:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:71
+msgid ""
+"The ``--volume ~/.aws:/root/.aws`` option mounts your AWS credentials to "
+"the Docker container. Next, run the following to configure the AWS CLI "
+"tool and provide your AWS credentials for the IAM user you created "
+"earlier:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:83
+msgid ""
+"Download and install the ROSA CLI tool by following the instructions for "
+"your operating system. Once you have installed the ROSA CLI tool, login "
+"with your Red Hat account:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:94
+msgid ""
+"If you are already logged into your Red Hat account on your browser, you "
+"will be redirected back to your terminal."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:97
+msgid "Then, create the necessary account-wide roles and policies:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:103
+msgid "Finally, create a Virtual Private Network (VPC) for your cluster:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:111
+msgid ""
+"With the AWS and ROSA pre-requisites completed, you are now ready to "
+"deploy a cluster."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:114
+msgid "Create a Red Hat OpenShift Cluster on AWS"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:116
+msgid ""
+"There are three ways to create the cluster: via ``rosa`` CLI, web "
+"interface, or with Terraform. For this guide, we will use the web "
+"interface. Click on the ``Create with web interface`` button in the "
+"``Deploy with web interface`` card:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:125
+msgid "Deploy Red Hat OpenShift cluster with web interface"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:125
+msgid "Deploy Red Hat OpenShift cluster with web interface."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:127
+msgid ""
+"You will be taken to a series of steps to create a ROSA cluster. In the "
+"following, some key steps are highlighted and we recommend that you "
+"follow the official guide in the Red Hat Cloud Console for more details."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:131
+msgid ""
+"**Define Control Plane** - Select the ROSA hosted architecture and click "
+"on ``Next``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:132
+msgid ""
+"**Accounts and Roles** - Ensure the infrastructure and billing account "
+"details are correct and click ``Next``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:134
+msgid "**Cluster settings**"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:136
+msgid ""
+"**Details** - Specify ``flower-demo-cluster`` as the ``Cluster name``. "
+"For this guide, select version ``4.18.22`` (you may select a newer "
+"version that suits your requirements). Select the AWS region appropriate "
+"for your AWS account."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:139
+msgid ""
+"**Machine Pool** - Select an EC2 compute node instance type that is "
+"available in your region. In this guide, we use the ``eu-north-1`` "
+"region, and therefore selected ``m6i.2xlarge - 8 vCPU 32 GiB RAM``. "
+"Enable autoscaling and set the minimum node count to 2 and maximum to 4. "
+"This allows the cluster to scale up when you deploy the OpenShift "
+"platform and OpenShift AI in the same cluster."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:145
+msgid "**Networking**"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:147
+msgid ""
+"**Configuration** - Under \"Cluster privacy\", select ``public`` and "
+"leave other values as defaults."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:149
+msgid "**CIDR ranges** - Leave the default CIDR ranges as is."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:151
+msgid ""
+"**Cluster roles and policies** - Follow the steps to create a new OIDC "
+"config ID."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:152
+msgid ""
+"**Cluster updates** - Leave the default settings as is to \"Recurring "
+"updates\"."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:153
+msgid "Finally, review the cluster details and click ``Create cluster``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:155
+msgid ""
+"This will start the cluster creation process and may take several minutes"
+" to complete. You will be able to monitor the installation status of the "
+"control plane and machine pools in the \"Overview\" tab."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:159
+msgid ""
+"Once your cluster is created, you will be prompted to create an identity "
+"provider to access the cluster. Click on the ``Create identity provider``"
+" link and follow the steps for your preferred OIDC provider. Grant the "
+"user in your OIDC provider the ``cluster-admin`` rights so that you can "
+"add apps from the OperatorHub later. To do so, go to ``Access control``, "
+"``Cluster Roles and Access`` tab, and click on ``Add user``. Enter the "
+"user ID from your OIDC provider and save the changes."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:166
+msgid ""
+"Your cluster is now ready. To view the cluster details, click on the "
+"``Cluster List`` link in the left sidebar. Click on your cluster name "
+"(``flower-demo-cluster``) to view the cluster details:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:175
+msgid "Red Hat OpenShift cluster details"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:175
+msgid "Red Hat OpenShift cluster details."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:177
+msgid ""
+"To access the OpenShift web console, click on the ``Open console`` link "
+"in the top right. You will be redirected to your OIDC provider to login. "
+"Once logged in, you will be taken to the OpenShift web console:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:186
+msgid "Red Hat OpenShift web console"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:186
+msgid "Red Hat OpenShift web console."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:188
+msgid ""
+"Congratulations! You now have a running Red Hat OpenShift cluster on AWS."
+" Now, let's walk through how to deploy Flower on your OpenShift cluster."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:192
+msgid "Deploy Flower SuperLink and SuperNodes on OpenShift"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:194
+msgid ""
+"With the OpenShift cluster active, we can now deploy SuperLink and "
+"SuperNode pods and run a federated workload. In this guide, we will "
+"deploy four pods: 1x SuperLink, 2x SuperNodes, and 1x service pod to "
+"route the traffic to the designated ports in the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:199
+msgid ""
+"First, we need to create an OpenShift project which is equivalent of a "
+"Kubernetes namespace. We will then deploy the SuperLink and SuperNode "
+"pods in this project. Navigate to ``Home`` > ``Projects`` and click on "
+"the ``Create Project`` button on the right. Set ``flower-openshift-demo``"
+" as the project name."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:204
+msgid ""
+"Next, we will add pods. Navigate to ``Workloads`` > ``Pods`` and click on"
+" the ``Create Pod`` button on the right. There are several ways to create"
+" a pod, such as using YAML or JSON definitions. For this guide, we will "
+"use the YAML definition. Copy and paste the following YAML definition for"
+" the SuperLink pod. This manifest is adapted from our tutorial on "
+":doc:`how to deploy Flower in GCP <how-to-run-flower-on-gcp>`."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:266
+msgid ""
+"After the SuperLink pod is created, add the service pod following the "
+"steps to create a pod and insert the following YAML definition:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst
+#, fuzzy
+msgid "superlink-service.yaml"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:293
+msgid "Finally, spin up two SuperNode pods with the following YAML definitions:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:409
+msgid ""
+"To view the status of pods that were just deployed, click on the "
+"``Workloads`` link in the left panel. You should be able to see three "
+"Flower pods in the \"Running\" status as shown in the screenshot below:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:418
+msgid "Flower SuperLink and SuperNode pods in Red Hat OpenShift"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:418
+msgid "Flower SuperLink and SuperNode pods in Red Hat OpenShift."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:420
+msgid ""
+"Click on the SuperLink pod to view the pod details and click on the "
+"``Logs`` tab. You should be able to view the SuperLink logs showing two "
+"connected SuperNodes."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:425
+msgid ""
+"To shut down the pods, navigate to ``Workloads`` > ``Deployments``, "
+"select the deployed pods, and click on ``Edit Pod Count`` to set the "
+"replica count to 0. Now, you can delete the pods by selecting them and "
+"clicking on the ``Delete Deployment`` button."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:431
+msgid "Deploy Red Hat OpenShift AI"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:433
+msgid ""
+"To interface with the deployed SuperLink and SuperNode in the OpenShift "
+"cluster, we want to make use of OpenShift AI workbench. So, we need to "
+"enable this Operator in the OpenShift cluster."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:437
+msgid ""
+"First, ensure that the Red Hat OpenShift AI is enabled via the Red Hat "
+"OpenShift console. You may enable a free trial if you do not have a "
+"subscription. Navigate to ``Operators`` > ``OperatorHub`` and search for "
+"``Red Hat OpenShift AI``. Click on the ``Red Hat OpenShift AI`` card and "
+"then click on the ``Install`` button. Alternatively, install the "
+"OpenShift AI Operator via the OpenShift CLI tool following the official "
+"instructions `here <https://docs.redhat.com/en/documentation"
+"/red_hat_openshift_ai_self-managed/2.23/html"
+"/installing_and_uninstalling_openshift_ai_self-managed/installing-and-"
+"deploying-openshift-ai_install#installing-openshift-ai-operator-using-"
+"cli_operator-install>`_. Once the installation is complete, you should "
+"see a green check mark under the ``Status`` column for the ``Red Hat "
+"OpenShift AI`` Operator in the ``Installed Operators`` tab:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:453
+msgid "Red Hat OpenShift AI Operator in OpenShift"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:453
+msgid "Red Hat OpenShift AI Operator in OpenShift."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:456
+msgid "Install Data Science Cluster"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:458
+msgid ""
+"After installing the Operator, we need to install the "
+"``DataScienceCluster`` using the web console. Follow the official steps "
+"`in this link <https://docs.redhat.com/en/documentation"
+"/red_hat_openshift_ai_self-managed/2.23/html"
+"/installing_and_uninstalling_openshift_ai_self-managed/installing-and-"
+"deploying-openshift-ai_install#installing-openshift-ai-components-using-"
+"web-console_component-install>`_. It is also recommended to `disable "
+"KServe dependencies <https://docs.redhat.com/en/documentation"
+"/red_hat_openshift_ai_self-managed/2.23/html"
+"/installing_and_uninstalling_openshift_ai_self-managed/installing-the-"
+"single-model-serving-platform_component-install#disabling-kserve-"
+"dependencies_component-install>`_ since we are not serving ML models for "
+"inference. In the ``Installed Operators`` tab, click on ``Red Hat "
+"OpenShift AI``, navigate to the ``Data Science Cluster`` tab, and click "
+"on ``Create DataScienceCluster``. Select the YAML view of the "
+"configuration and paste the following YAML definition:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst
+msgid "rhosai-datasciencecluster.yaml"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:513
+msgid ""
+"Click on ``Create`` to create the Data Science Cluster. If successful, "
+"you should see a ``default-dsc`` instance in the ``Data Science "
+"Clusters`` tab with a green check mark:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:521
+msgid "View of a successfully created Red Hat OpenShift AI Data Science Cluster"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:521
+msgid "View of a successfully created Red Hat OpenShift AI Data Science Cluster."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:523
+msgid ""
+"Once the above is complete, you will be able to launch OpenShift AI by "
+"clicking on the grid icon on the top right of the OpenShift console and "
+"clicking on the ``Red Hat OpenShift AI`` link:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:532
+msgid "Launch Red Hat OpenShift AI from OpenShift console"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:532
+msgid "Launch Red Hat OpenShift AI from OpenShift console."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:534
+msgid ""
+"Follow the instructions when prompted to ``Log in with OpenShift``. After"
+" logging in, you will be taken to the OpenShift AI dashboard."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:538
+msgid "Create a Custom OpenShift AI Image with Flower"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:540
+msgid ""
+"In OpenShift AI, you will be building and running your Flower app in a "
+"workbench, which is a Jupyter notebook environment. However, the default "
+"OpenShift AI workbench image does not come with Flower installed. "
+"Therefore, we will first create a custom OpenShift AI image with Flower "
+"pre-installed. This custom image will then be used to create a workbench."
+" The steps in this section are adapted from the official Red Hat "
+"OpenShift AI guide for `creating a custom workbench image "
+"<https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-"
+"managed/2.16/html/managing_openshift_ai/creating-custom-workbench-"
+"images#creating-a-custom-image-from-default-image_custom-images>`_."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:548
+msgid ""
+"**Pre-requisites**: Given that Red Hat OpenShift AI needs to be able to "
+"pull from a container registry, you will need to create an account on "
+"``quay.io`` if you do not have one already. Then, create a new "
+"repository, e.g., ``flowerlabs/demo``, and make it public. You will also "
+"need to install the `Docker CLI tool <https://docs.docker.com/get-"
+"docker/>`_ on your system. Then, login to your ``quay.io`` account using "
+"the command:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:559
+msgid ""
+"Now, we select a base image for our custom OpenShift AI image. In the Red"
+" Hat OpenShift console, go to ``Builds`` > ``ImageStreams``. You can find"
+" the default workbench images for the ``redhat-ods-applications`` "
+"project. Select the ``s2i-minimal-notebook`` and choose the image tag "
+"that you want to use and copy the ``sha256`` identifier. In this guide, "
+"we will use the ``2025.1`` tag."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:565
+#, fuzzy
+msgid "Next, in your machine, create a Dockerfile with the following contents:"
+msgstr "다음 변경 사항이 포함된 pull request를 만듭니다:"
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst
+#, fuzzy
+msgid "Dockerfile"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:578
+msgid ""
+"Build and push the container image to your public repository on "
+"``quay.io``:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:584
+msgid ""
+"Once the image is pushed, we will configure OpenShift AI to load this "
+"custom workbench image. In the OpenShift AI dashboard, go to ``Settings``"
+" > ``Workbench images`` and click on ``Import new image``. Set the "
+"``Image location`` to your custom image (e.g., ``quay.io/flowerlabs/demo"
+"/flwr-rhos:0.0.1@sha256[...]``) and give it a name (e.g., ``flwr-rhos-"
+"image``). Take note of the resource name as you will need it in the next "
+"section when creating your workbench. Then, click on ``Import`` to import"
+" the image. If successful, you should see your custom image in the list "
+"of workbench images:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:597
+msgid "Custom OpenShift AI workbench image with Flower"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:597
+msgid "Custom OpenShift AI workbench image with Flower."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:600
+#, fuzzy
+msgid "Create a Data Science Project"
+msgstr "새 페이지 만들기"
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:602
+msgid ""
+"Now we are ready to create a Data Science project in OpenShift AI and "
+"create a workbench using the custom image we just created from the "
+"previous section."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:605
+msgid ""
+"On the left sidebar, click on ``Home``, navigate to the ``Data Science "
+"Projects`` section, and click on the ``Create project`` button. Give your"
+" project a name, e.g., ``flower-openshift-demo`` and - if you like, a "
+"description. Then, click ``Create``. Click on your created project to "
+"open it."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:615
+msgid "Data Science project in Red Hat OpenShift AI"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:615
+msgid "Data Science project in Red Hat OpenShift AI."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:617
+msgid ""
+"Navigate to the ``Workbenches`` tab and click on ``Create workbench`` to "
+"create a new workbench. Under \"Name and description\", provide a name "
+"for your workbench, e.g. ``flwr-rhos-demo-workbench``. Under ``Workbench "
+"image`` > ``Image selection``, select the name of the image that you "
+"provided earlier (i.e., ``flwr-rhos-image``). Choose a medium container "
+"size and leave other settings as default. Finally, click on ``Create "
+"Workbench``. The status of your workbench should switch to ``Running`` "
+"after a few minutes:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:630
+msgid "Running workbench in Red Hat OpenShift AI"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:630
+msgid "Running workbench in Red Hat OpenShift AI."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:632
+msgid "Now, click on your workbench and launch the JupyterLab environment."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:635
+msgid "Run the Flower App in OpenShift AI"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:637
+msgid ""
+"With a running workbench and deployed SuperLink and SuperNode pods in "
+"your OpenShift cluster, you are now ready to run a Flower app! In the "
+"JupyterLab environment of your workbench, let's verify Flower is "
+"installed correctly and working as expected: open a new terminal and run "
+"``flwr --version`` to check the Flower version:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:647
+msgid "Verify Flower installation in OpenShift AI workbench"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:647
+msgid "Verify Flower installation in OpenShift AI workbench."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:649
+msgid ""
+"With Flower running correctly, you can now follow the usual steps of "
+"using ``flwr new`` to create a new Flower app from a template, and ``flwr"
+" run`` to run your Flower app on the deployed SuperLink and SuperNode "
+"pods. Given that we deployed the OpenShift AI instance in the same "
+"namespace (``flower-openshift-demo``) as the SuperLink in the OpenShift "
+"cluster, the only change you need to make is to specify the SuperLink "
+"service name as the address in your ``pyproject.toml``:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:664
+msgid "And finally, run your Flower app as usual with ``flwr run``:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:671
+msgid "Running Flower app in OpenShift AI workbench"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:671
+msgid "Running Flower app in OpenShift AI workbench."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:673
+msgid ""
+"You can also view the logs of the SuperLink pod in the OpenShift console."
+" Navigate to ``Workloads`` > ``Pods``, click on the SuperLink pod, and "
+"then click on the ``Logs``:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:681
+msgid "SuperLink logs showing connected SuperNodes and running Flower app"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:681
+msgid "SuperLink logs showing connected SuperNodes and running Flower app."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:683
+msgid ""
+"Congratulations! You have successfully created, deployed, and run a "
+"Flower app on Red Hat OpenShift using the Red Hat OpenShift Service on "
+"AWS. You can explore running different Flower apps and federated "
+"workloads on your OpenShift cluster, for instance, :doc:`with PyTorch "
+"<tutorial-quickstart-pytorch>`. For further reading about deploying "
+"Flower with Docker and Kubernetes, check out our guides below:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:689
+#, fuzzy
+msgid ":doc:`How to run Flower with Docker <docker/index>`"
+msgstr ":doc:`Docker를 사용하여 Flower를 실행하는 방법 <how-to-run-flower-using-docker>`"
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:690
+#, fuzzy
+msgid ":doc:`How to run Flower with Helm <helm/index>`"
+msgstr ":doc:`Docker를 사용하여 Flower를 실행하는 방법 <how-to-run-flower-using-docker>`"
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:692
+msgid ""
+"To learn about running Flower on other cloud platforms, check out our "
+"guides below:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:694
+msgid ":doc:`How to run Flower on Microsoft Azure <how-to-run-flower-on-azure>`"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:695
+msgid ""
+":doc:`How to run Flower on Google Cloud Platform <how-to-run-flower-on-"
+"gcp>`"
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:-1
@@ -16529,7 +17248,10 @@ msgstr "오류가 발생한 이유(예: 예외 스택 추적)"
 #: ../../source/ref-api/flwr.server.workflow.SecAggWorkflow.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.rst:15
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdagrad.rst:15
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdam.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.FedAvg.rst:15
+#: ../../source/ref-api/flwr.serverapp.strategy.FedYogi.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.Result.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.Strategy.rst:15
 #: ../../source/ref-api/flwr.simulation.SimulationIoConnection.rst:15
@@ -22765,7 +23487,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:1
 #: of
@@ -22793,7 +23515,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:1
 #: of
@@ -22819,7 +23541,9 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: flwr.server.strategy.fedadagrad.FedAdagrad:1 of
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
+#: flwr.server.strategy.fedadagrad.FedAdagrad:1
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:1 of
 msgid "FedAdagrad strategy - Adaptive Federated Optimization using Adagrad."
 msgstr ""
 
@@ -22830,7 +23554,9 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: flwr.server.strategy.fedadam.FedAdam:1 of
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
+#: flwr.server.strategy.fedadam.FedAdam:1
+#: flwr.serverapp.strategy.fedadam.FedAdam:1 of
 msgid "FedAdam - Adaptive Federated Optimization using Adam."
 msgstr ""
 
@@ -22841,7 +23567,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
 #: flwr.server.strategy.fedavg.FedAvg:1
 #: flwr.server.strategy.fedavg_android.FedAvgAndroid:1
 #: flwr.serverapp.strategy.fedavg.FedAvg:1 of
@@ -22949,7 +23675,9 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: flwr.server.strategy.fedyogi.FedYogi:1 of
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
+#: flwr.server.strategy.fedyogi.FedYogi:1
+#: flwr.serverapp.strategy.fedyogi.FedYogi:1 of
 msgid "FedYogi [Reddi et al., 2020] strategy."
 msgstr ""
 
@@ -22980,7 +23708,7 @@ msgid ":py:obj:`Strategy <flwr.server.strategy.Strategy>`\\ \\(\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
 #: flwr.server.strategy.strategy.Strategy:1
 #: flwr.serverapp.strategy.strategy.Strategy:1 of
 msgid "Abstract base class for server strategy implementations."
@@ -24027,6 +24755,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.FedAdagrad.rst:2
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdagrad.rst:2
 #: ../../source/ref-changelog.md:2000
 msgid "FedAdagrad"
 msgstr ""
@@ -24039,7 +24768,10 @@ msgstr ""
 
 #: flwr.server.strategy.fedadagrad.FedAdagrad:3
 #: flwr.server.strategy.fedadam.FedAdam:3 flwr.server.strategy.fedopt.FedOpt:3
-#: flwr.server.strategy.fedyogi.FedYogi:3 of
+#: flwr.server.strategy.fedyogi.FedYogi:3
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:3
+#: flwr.serverapp.strategy.fedadam.FedAdam:3
+#: flwr.serverapp.strategy.fedyogi.FedYogi:3 of
 msgid "Implementation based on https://arxiv.org/abs/2003.00295v5"
 msgstr ""
 
@@ -24058,13 +24790,17 @@ msgstr ""
 
 #: flwr.server.strategy.fedadagrad.FedAdagrad:29
 #: flwr.server.strategy.fedadam.FedAdam:29
-#: flwr.server.strategy.fedopt.FedOpt:29 of
+#: flwr.server.strategy.fedopt.FedOpt:29
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:36
+#: flwr.serverapp.strategy.fedadam.FedAdam:36 of
 msgid "Server-side learning rate. Defaults to 1e-1."
 msgstr ""
 
 #: flwr.server.strategy.fedadagrad.FedAdagrad:31
 #: flwr.server.strategy.fedadam.FedAdam:31
-#: flwr.server.strategy.fedopt.FedOpt:31 of
+#: flwr.server.strategy.fedopt.FedOpt:31
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:38
+#: flwr.serverapp.strategy.fedadam.FedAdam:38 of
 msgid "Client-side learning rate. Defaults to 1e-1."
 msgstr ""
 
@@ -24128,16 +24864,21 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.FedAdam.rst:2
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdam.rst:2
 msgid "FedAdam"
 msgstr ""
 
 #: flwr.server.strategy.fedadam.FedAdam:33
-#: flwr.server.strategy.fedyogi.FedYogi:36 of
+#: flwr.server.strategy.fedyogi.FedYogi:36
+#: flwr.serverapp.strategy.fedadam.FedAdam:40
+#: flwr.serverapp.strategy.fedyogi.FedYogi:41 of
 msgid "Momentum parameter. Defaults to 0.9."
 msgstr ""
 
 #: flwr.server.strategy.fedadam.FedAdam:35
-#: flwr.server.strategy.fedyogi.FedYogi:38 of
+#: flwr.server.strategy.fedyogi.FedYogi:38
+#: flwr.serverapp.strategy.fedadam.FedAdam:42
+#: flwr.serverapp.strategy.fedyogi.FedYogi:43 of
 msgid "Second moment parameter. Defaults to 0.99."
 msgstr ""
 
@@ -24983,18 +25724,24 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.FedYogi.rst:2
+#: ../../source/ref-api/flwr.serverapp.strategy.FedYogi.rst:2
 msgid "FedYogi"
 msgstr ""
 
-#: flwr.server.strategy.fedyogi.FedYogi:32 of
+#: flwr.server.strategy.fedyogi.FedYogi:32
+#: flwr.serverapp.strategy.fedyogi.FedYogi:37 of
 msgid "Server-side learning rate. Defaults to 1e-2."
 msgstr ""
 
-#: flwr.server.strategy.fedyogi.FedYogi:34 of
+#: flwr.server.strategy.fedyogi.FedYogi:34
+#: flwr.serverapp.strategy.fedyogi.FedYogi:39 of
 msgid "Client-side learning rate. Defaults to 0.0316."
 msgstr ""
 
-#: flwr.server.strategy.fedyogi.FedYogi:40 of
+#: flwr.server.strategy.fedyogi.FedYogi:40
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:40
+#: flwr.serverapp.strategy.fedadam.FedAdam:44
+#: flwr.serverapp.strategy.fedyogi.FedYogi:45 of
 msgid "Controls the algorithm's degree of adaptability. Defaults to 1e-3."
 msgstr ""
 
@@ -25696,21 +26443,39 @@ msgstr ":py:obj:`state <flwr.common.Context.state>`\\"
 msgid "ServerApp strategies."
 msgstr "전략 사용하기"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
 msgid ""
 ":py:obj:`DifferentialPrivacyClientSideFixedClipping "
 "<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping>`\\ "
 "\\(...\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
 msgid ""
 ":py:obj:`DifferentialPrivacyServerSideFixedClipping "
 "<flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping>`\\ "
 "\\(...\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`FedAdagrad <flwr.serverapp.strategy.FedAdagrad>`\\ \\(\\*\\[\\, "
+"fraction\\_train\\, ...\\]\\)"
+msgstr ""
+":py:obj:`ServerMessage <flwr.common.ServerMessage>`\\ "
+"\\(\\[get\\_properties\\_ins\\, ...\\]\\)"
+
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`FedAdam <flwr.serverapp.strategy.FedAdam>`\\ \\(\\*\\[\\, "
+"fraction\\_train\\, ...\\]\\)"
+msgstr ""
+":py:obj:`ServerMessage <flwr.common.ServerMessage>`\\ "
+"\\(\\[get\\_properties\\_ins\\, ...\\]\\)"
+
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FedAvg <flwr.serverapp.strategy.FedAvg>`\\ "
@@ -25719,7 +26484,16 @@ msgstr ""
 ":py:obj:`ServerMessage <flwr.common.ServerMessage>`\\ "
 "\\(\\[get\\_properties\\_ins\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`FedYogi <flwr.serverapp.strategy.FedYogi>`\\ \\(\\*\\[\\, "
+"fraction\\_train\\, ...\\]\\)"
+msgstr ""
+":py:obj:`ServerMessage <flwr.common.ServerMessage>`\\ "
+"\\(\\[get\\_properties\\_ins\\, ...\\]\\)"
+
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`Result <flwr.serverapp.strategy.Result>`\\ \\(arrays\\, "
@@ -25728,12 +26502,12 @@ msgstr ""
 ":py:obj:`RecordSet <flwr.common.RecordSet>`\\ "
 "\\(\\[parameters\\_records\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
 #: flwr.serverapp.strategy.result.Result:1 of
 msgid "Data class carrying records generated during the execution of a strategy."
 msgstr ""
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:26:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:29:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Strategy <flwr.serverapp.strategy.Strategy>`\\ \\(\\)"
 msgstr ":py:obj:`state <flwr.common.Context.state>`\\"
@@ -25775,8 +26549,11 @@ msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping.aggregate_train:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping.aggregate_train:1
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad.aggregate_train:1
+#: flwr.serverapp.strategy.fedadam.FedAdam.aggregate_train:1
 #: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
-#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_train:1 of
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_train:1
+#: flwr.serverapp.strategy.fedyogi.FedYogi.aggregate_train:1 of
 msgid "Aggregate ArrayRecords and MetricRecords in the received Messages."
 msgstr ""
 
@@ -25840,6 +26617,7 @@ msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.summary:1
 #: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.fedavg.FedAvg.summary:1
+#: flwr.serverapp.strategy.fedopt.FedOpt.summary:1
 #: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.strategy.Strategy.summary:1 of
 msgid "Log summary configuration of the strategy."
@@ -25964,59 +26742,210 @@ msgid ""
 " \\(\\)"
 msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 
-#: flwr.serverapp.strategy.fedavg.FedAvg:1 of
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:1
+#: flwr.serverapp.strategy.fedadam.FedAdam:1
+#: flwr.serverapp.strategy.fedyogi.FedYogi:1 of
 #, fuzzy
-msgid "Bases: :py:class:`~flwr.serverapp.strategy.strategy.Strategy`"
+msgid "Bases: :py:class:`~flwr.serverapp.strategy.fedopt.FedOpt`"
 msgstr ":py:obj:`state <flwr.common.Context.state>`\\"
 
-#: flwr.serverapp.strategy.fedavg.FedAvg:5 of
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:5
+#: flwr.serverapp.strategy.fedadam.FedAdam:5
+#: flwr.serverapp.strategy.fedavg.FedAvg:5
+#: flwr.serverapp.strategy.fedyogi.FedYogi:6 of
 msgid ""
 "Fraction of nodes used during training. In case `min_train_nodes` is "
 "larger than `fraction_train * total_connected_nodes`, `min_train_nodes` "
 "will still be sampled."
 msgstr ""
 
-#: flwr.serverapp.strategy.fedavg.FedAvg:9 of
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:9
+#: flwr.serverapp.strategy.fedadam.FedAdam:9
+#: flwr.serverapp.strategy.fedavg.FedAvg:9
+#: flwr.serverapp.strategy.fedyogi.FedYogi:10 of
 msgid ""
 "Fraction of nodes used during validation. In case `min_evaluate_nodes` is"
 " larger than `fraction_evaluate * total_connected_nodes`, "
 "`min_evaluate_nodes` will still be sampled."
 msgstr ""
 
-#: flwr.serverapp.strategy.fedavg.FedAvg:13 of
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:13
+#: flwr.serverapp.strategy.fedadam.FedAdam:13
+#: flwr.serverapp.strategy.fedavg.FedAvg:13
+#: flwr.serverapp.strategy.fedyogi.FedYogi:14 of
 msgid "Minimum number of nodes used during training."
 msgstr ""
 
-#: flwr.serverapp.strategy.fedavg.FedAvg:15 of
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:15
+#: flwr.serverapp.strategy.fedadam.FedAdam:15
+#: flwr.serverapp.strategy.fedavg.FedAvg:15
+#: flwr.serverapp.strategy.fedyogi.FedYogi:16 of
 msgid "Minimum number of nodes used during validation."
 msgstr ""
 
-#: flwr.serverapp.strategy.fedavg.FedAvg:17 of
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:17
+#: flwr.serverapp.strategy.fedadam.FedAdam:17
+#: flwr.serverapp.strategy.fedavg.FedAvg:17
+#: flwr.serverapp.strategy.fedyogi.FedYogi:18 of
 msgid "Minimum number of total nodes in the system."
 msgstr ""
 
-#: flwr.serverapp.strategy.fedavg.FedAvg:19 of
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:19
+#: flwr.serverapp.strategy.fedadam.FedAdam:19
+#: flwr.serverapp.strategy.fedavg.FedAvg:19
+#: flwr.serverapp.strategy.fedyogi.FedYogi:20 of
 msgid ""
 "The key within each MetricRecord whose value is used as the weight when "
 "computing weighted averages for both ArrayRecords and MetricRecords."
 msgstr ""
 
-#: flwr.serverapp.strategy.fedavg.FedAvg:22 of
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:22
+#: flwr.serverapp.strategy.fedadam.FedAdam:22
+#: flwr.serverapp.strategy.fedavg.FedAvg:22
+#: flwr.serverapp.strategy.fedyogi.FedYogi:23 of
 msgid "Key used to store the ArrayRecord when constructing Messages."
 msgstr ""
 
-#: flwr.serverapp.strategy.fedavg.FedAvg:24 of
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:24
+#: flwr.serverapp.strategy.fedadam.FedAdam:24
+#: flwr.serverapp.strategy.fedavg.FedAvg:24
+#: flwr.serverapp.strategy.fedyogi.FedYogi:25 of
 msgid "Key used to store the ConfigRecord when constructing Messages."
 msgstr ""
 
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:26
+#: flwr.serverapp.strategy.fedadagrad.FedAdagrad:31
+#: flwr.serverapp.strategy.fedadam.FedAdam:26
+#: flwr.serverapp.strategy.fedadam.FedAdam:31
 #: flwr.serverapp.strategy.fedavg.FedAvg:26
-#: flwr.serverapp.strategy.fedavg.FedAvg:31 of
+#: flwr.serverapp.strategy.fedavg.FedAvg:31
+#: flwr.serverapp.strategy.fedyogi.FedYogi:27
+#: flwr.serverapp.strategy.fedyogi.FedYogi:32 of
 msgid ""
 "Function with signature (list[RecordDict], str) -> MetricRecord, used to "
 "aggregate MetricRecords from training round replies. If `None`, defaults "
 "to `aggregate_metricrecords`, which performs a weighted average using the"
 " provided weight factor key."
 msgstr ""
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_evaluate "
+"<flwr.serverapp.strategy.FedAdagrad.aggregate_evaluate>`\\ "
+"\\(server\\_round\\, replies\\)"
+msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_train "
+"<flwr.serverapp.strategy.FedAdagrad.aggregate_train>`\\ "
+"\\(server\\_round\\, replies\\)"
+msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_evaluate "
+"<flwr.serverapp.strategy.FedAdagrad.configure_evaluate>`\\ "
+"\\(server\\_round\\, arrays\\, ...\\)"
+msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_train "
+"<flwr.serverapp.strategy.FedAdagrad.configure_train>`\\ "
+"\\(server\\_round\\, arrays\\, ...\\)"
+msgstr ""
+":py:obj:`configure <flwr.common.configure>`\\ \\(identifier\\[\\, "
+"filename\\, host\\]\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.fedavg.FedAvg.configure_train:1
+#: flwr.serverapp.strategy.fedopt.FedOpt.configure_train:1 of
+msgid "Configure the next round of federated training."
+msgstr ""
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`start <flwr.serverapp.strategy.FedAdagrad.start>`\\ \\(grid\\, "
+"initial\\_arrays\\[\\, num\\_rounds\\, ...\\]\\)"
+msgstr ""
+":py:obj:`start_client <flwr.client.start_client>`\\ \\(\\*\\, "
+"server\\_address\\[\\, client\\_fn\\, ...\\]\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ":py:obj:`summary <flwr.serverapp.strategy.FedAdagrad.summary>`\\ \\(\\)"
+msgstr ":py:obj:`flwr.server <flwr.server>`\\"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_evaluate "
+"<flwr.serverapp.strategy.FedAdam.aggregate_evaluate>`\\ "
+"\\(server\\_round\\, replies\\)"
+msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_train "
+"<flwr.serverapp.strategy.FedAdam.aggregate_train>`\\ \\(server\\_round\\,"
+" replies\\)"
+msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_evaluate "
+"<flwr.serverapp.strategy.FedAdam.configure_evaluate>`\\ "
+"\\(server\\_round\\, arrays\\, ...\\)"
+msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_train "
+"<flwr.serverapp.strategy.FedAdam.configure_train>`\\ \\(server\\_round\\,"
+" arrays\\, ...\\)"
+msgstr ""
+":py:obj:`configure <flwr.common.configure>`\\ \\(identifier\\[\\, "
+"filename\\, host\\]\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`start <flwr.serverapp.strategy.FedAdam.start>`\\ \\(grid\\, "
+"initial\\_arrays\\[\\, num\\_rounds\\, ...\\]\\)"
+msgstr ""
+":py:obj:`start_client <flwr.client.start_client>`\\ \\(\\*\\, "
+"server\\_address\\[\\, client\\_fn\\, ...\\]\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ":py:obj:`summary <flwr.serverapp.strategy.FedAdam.summary>`\\ \\(\\)"
+msgstr ":py:obj:`flwr.server <flwr.server>`\\"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg:1 of
+#, fuzzy
+msgid "Bases: :py:class:`~flwr.serverapp.strategy.strategy.Strategy`"
+msgstr ":py:obj:`state <flwr.common.Context.state>`\\"
 
 #: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
 #: of
@@ -26057,11 +26986,6 @@ msgstr ""
 "filename\\, host\\]\\)"
 
 #: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
-#: flwr.serverapp.strategy.fedavg.FedAvg.configure_train:1 of
-msgid "Configure the next round of federated training."
-msgstr ""
-
-#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
 #: of
 #, fuzzy
 msgid ""
@@ -26075,6 +26999,60 @@ msgstr ""
 #: of
 #, fuzzy
 msgid ":py:obj:`summary <flwr.serverapp.strategy.FedAvg.summary>`\\ \\(\\)"
+msgstr ":py:obj:`flwr.server <flwr.server>`\\"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_evaluate "
+"<flwr.serverapp.strategy.FedYogi.aggregate_evaluate>`\\ "
+"\\(server\\_round\\, replies\\)"
+msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_train "
+"<flwr.serverapp.strategy.FedYogi.aggregate_train>`\\ \\(server\\_round\\,"
+" replies\\)"
+msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_evaluate "
+"<flwr.serverapp.strategy.FedYogi.configure_evaluate>`\\ "
+"\\(server\\_round\\, arrays\\, ...\\)"
+msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_train "
+"<flwr.serverapp.strategy.FedYogi.configure_train>`\\ \\(server\\_round\\,"
+" arrays\\, ...\\)"
+msgstr ""
+":py:obj:`configure <flwr.common.configure>`\\ \\(identifier\\[\\, "
+"filename\\, host\\]\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`start <flwr.serverapp.strategy.FedYogi.start>`\\ \\(grid\\, "
+"initial\\_arrays\\[\\, num\\_rounds\\, ...\\]\\)"
+msgstr ""
+":py:obj:`start_client <flwr.client.start_client>`\\ \\(\\*\\, "
+"server\\_address\\[\\, client\\_fn\\, ...\\]\\)"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ":py:obj:`summary <flwr.serverapp.strategy.FedYogi.summary>`\\ \\(\\)"
 msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 
 #: ../../source/ref-api/flwr.serverapp.strategy.Result.rst:2
