@@ -31,7 +31,7 @@ def loss_fn(params, X, y):
 def train(params, grad_fn, X, y):
     loss = 1_000_000
     num_examples = X.shape[0]
-    for epochs in range(50):
+    for _ in range(50):
         grads = grad_fn(params, X, y)
         params = jax.tree.map(lambda p, g: p - 0.05 * g, params, grads)
         loss = loss_fn(params, X, y)
@@ -48,7 +48,10 @@ def evaluation(params, grad_fn, X_test, y_test):
 def get_params(params):
     parameters = []
     for _, val in params.items():
-        parameters.append(np.array(val))
+        np_val = np.array(val)
+        if np_val.ndim == 0:
+            np_val = np.array([val])
+        parameters.append(np_val)
     return parameters
 
 

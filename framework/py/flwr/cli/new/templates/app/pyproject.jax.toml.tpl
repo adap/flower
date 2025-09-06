@@ -15,9 +15,9 @@ license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
     "flwr[simulation]>=1.21.0",
-    "jax==0.4.30",
-    "jaxlib==0.4.30",
-    "scikit-learn==1.6.1",
+    "jax==0.7.1",
+    "jaxlib==0.7.1",
+    "scikit-learn==1.7.1",
 ]
 
 [tool.hatch.build.targets.wheel]
