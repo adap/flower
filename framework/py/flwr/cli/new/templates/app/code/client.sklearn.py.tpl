@@ -95,8 +95,6 @@ def evaluate(msg: Message, context: Context):
     f1 = f1_score(y_test, y_train_pred, average="macro", zero_division=0)
 
     # Construct and return reply Message
-    ndarrays = get_model_params(model)
-    model_record = ArrayRecord(ndarrays)
     metrics = {
         "num-examples": len(X_test),
         "test_logloss": loss,
@@ -106,5 +104,5 @@ def evaluate(msg: Message, context: Context):
         "f1": f1,
     }
     metric_record = MetricRecord(metrics)
-    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    content = RecordDict({"metrics": metric_record})
     return Message(content=content, reply_to=msg)

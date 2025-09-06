@@ -17,7 +17,7 @@ def main(grid: Grid, context: Context) -> None:
 
     # Read from config
     num_rounds = context.run_config["num-server-rounds"]
-    input_dim = context.run_config["input-dim"]
+    input_dim = (context.run_config["input-dim"],)
 
     # Load global model
     global_model = load_model(
