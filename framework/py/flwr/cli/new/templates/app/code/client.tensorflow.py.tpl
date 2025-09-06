@@ -29,7 +29,7 @@ def train(msg: Message, context: Context):
     x_train, y_train, _, _ = load_data(partition_id, num_partitions)
 
     # Fit the model to the data
-    model.fit(
+    history = model.fit(
         x_train,
         y_train,
         epochs=epochs,
@@ -37,11 +37,18 @@ def train(msg: Message, context: Context):
         verbose=verbose,
     )
 
+    # Get final training loss and accuracy
+    train_loss = history.history["loss"][-1] if "loss" in history.history else None
+    train_acc = history.history.get("accuracy")
+    train_acc = train_acc[-1] if train_acc is not None else None
+
     # Construct and return reply Message
     model_record = ArrayRecord(model.get_weights())
-    metrics = {
-        "num-examples": len(x_train),
-    }
+    metrics = {"num-examples": len(x_train)}
+    if train_loss is not None:
+        metrics["train_loss"] = train_loss
+    if train_acc is not None:
+        metrics["train_acc"] = train_acc
     metric_record = MetricRecord(metrics)
     content = RecordDict({"arrays": model_record, "metrics": metric_record})
     return Message(content=content, reply_to=msg)
