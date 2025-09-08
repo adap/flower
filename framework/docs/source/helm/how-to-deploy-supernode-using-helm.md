@@ -238,3 +238,166 @@ supernode:
 ```
 
 ## Parameters
+
+### Helm parameters
+
+| Name               | Description                                      | Value           |
+| ------------------ | ------------------------------------------------ | --------------- |
+| `nameOverride`     | Replaces the name of the chart in the Chart.yaml | `flower-client` |
+| `fullnameOverride` | Completely replaces the generated name.          | `""`            |
+
+### Global parameters
+
+| Name                                                 | Description                                                       | Value            |
+| ---------------------------------------------------- | ----------------------------------------------------------------- | ---------------- |
+| `global.annotations`                                 | Default Annotations                                               | `{}`             |
+| `global.labels`                                      | Default Labels                                                    | `{}`             |
+| `global.podLabels`                                   | Default PodLabels                                                 | `{}`             |
+| `global.nodeSelector`                                | Default node selector for all components                          | `{}`             |
+| `global.tolerations`                                 | Default tolerations for all components                            | `[]`             |
+| `global.affinity.podAntiAffinity`                    | Default affinity preset for all components                        | `soft`           |
+| `global.affinity.podAntiAffinity`                    | Default pod anti-affinity rules. Either: `none`, `soft` or `hard` | `soft`           |
+| `global.affinity.nodeAffinity.type`                  | Default node affinity rules. Either: `none`, `soft` or `hard`     | `hard`           |
+| `global.affinity.nodeAffinity.matchExpressions`      | Default match expressions for node affinity                       | `[]`             |
+| `global.nodeAuth.enabled`                            | Enables or Disables Node-Authentication SuperLink \<-> SuperNode  | `false`          |
+| `global.nodeAuth.authSupernodePrivateKey`            | Specifies the ecdsa-sha2-nistp384 private key                     | `""`             |
+| `global.nodeAuth.authSupernodePublicKey`             | Specifies the ecdsa-sha2-nistp384 public key                      | `""`             |
+| `global.securityContext.runAsUser`                   | Set Security Context runAsUser                                    | `49999`          |
+| `global.securityContext.runAsGroup`                  | Set Security Context runAsGroup                                   | `49999`          |
+| `global.securityContext.fsGroup`                     | Set Security Context fsGroup                                      | `49999`          |
+| `global.podSecurityContext.runAsNonRoot`             | Set Security Context runAsNonRoot                                 | `true`           |
+| `global.podSecurityContext.readOnlyRootFilesystem`   | Set Security Context readOnlyRootFilesystem                       | `true`           |
+| `global.podSecurityContext.allowPrivilegeEscalation` | Set Security Context allowPrivilegeEscalation                     | `false`          |
+| `global.podSecurityContext.seccompProfile.type`      | Set Security Context seccompProfile                               | `RuntimeDefault` |
+| `global.podSecurityContext.capabilities.drop`        | Set Security Context capabilities                                 | `["ALL"]`        |
+| `global.env`                                         | Default environment variables                                     | `[]`             |
+| `global.image.pullPolicy`                            | Default image pullPolicy                                          | `IfNotPresent`   |
+
+### TLS Configuration
+
+| Name          | Description                                        | Value  |
+| ------------- | -------------------------------------------------- | ------ |
+| `tls.enabled` | Enable TLS configuration for the Flower Framework. | `true` |
+
+### Component SuperNode
+
+| Name                                                                | Description                                                                                                             | Value                      |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `supernode.name`                                                    | Name of the SuperNode                                                                                                   | `supernode`                |
+| `supernode.enabled`                                                 | Enable or disable SuperNode                                                                                             | `true`                     |
+| `supernode.resources`                                               | Set container requests and limits for different resources like CPU or memory (essential for production workloads)       | `{}`                       |
+| `supernode.node.config`                                             |                                                                                                                         | `{}`                       |
+| `supernode.isolationMode`                                           | The isolation mode of the SuperNode                                                                                     | `subprocess`               |
+| `supernode.resources`                                               | Set container requests and limits for different resources like CPU or memory (essential for production workloads)       | `{}`                       |
+| `supernode.superlink.address`                                       | Address of the SuperLink the SuperNodes should connect to                                                               | `my-superlink.example.com` |
+| `supernode.superlink.port`                                          | Port of the SuperLink the SuperNodes should connect to                                                                  | `9092`                     |
+| `supernode.superlink.certificate.existingSecret`                    |                                                                                                                         | `""`                       |
+| `supernode.superlink.certificate.copyFromExistingSecret.enabled`    |                                                                                                                         | `false`                    |
+| `supernode.superlink.certificate.copyFromExistingSecret.secretName` |                                                                                                                         | `""`                       |
+| `supernode.volumes`                                                 | Specify a list of volumes for the SuperNode pod(s)                                                                      | `[]`                       |
+| `supernode.volumeMounts`                                            | Allows to specify additional VolumeMounts                                                                               | `[]`                       |
+| `supernode.automountServiceAccountToken`                            | Automount SA-Token into the pod.                                                                                        | `true`                     |
+| `supernode.serviceAccount.enabled`                                  | Enable a service account for this component                                                                             | `true`                     |
+| `supernode.serviceAccount.annotations`                              | Annotations applied to enabled service account                                                                          | `{}`                       |
+| `supernode.serviceAccount.labels`                                   | Labels applied to enabled service account                                                                               | `{}`                       |
+| `supernode.serviceAccount.automountServiceAccountToken`             | Automount SA-Token                                                                                                      | `true`                     |
+| `supernode.service.type`                                            | Valid are ClusterIP, NodePort or Loadbalancer                                                                           | `ClusterIP`                |
+| `supernode.service.servicePortClientAppIoName`                      | Prefix of the SuperNode ClientAppIo API port                                                                            | `clientappio`              |
+| `supernode.service.servicePortClientAppIo`                          | Port to expose for the SuperNode ClientAppIo API                                                                        | `9094`                     |
+| `supernode.service.nodePortClientAppIo`                             | Node port for SuperNode ClientAppIo API                                                                                 | `39094`                    |
+| `supernode.containerPorts.clientAppIo`                              | Container port for SuperNode ClientAppIo API                                                                            | `9094`                     |
+| `supernode.containerPorts.health`                                   | Container port for SuperNode Health API                                                                                 | `9090`                     |
+| `supernode.podSecurityContext`                                      |                                                                                                                         | `{}`                       |
+| `supernode.replicas`                                                | The number of SuperNode pods to run                                                                                     | `1`                        |
+| `supernode.labels`                                                  | Extra labels for SuperNode pods                                                                                         | `{}`                       |
+| `supernode.extraArgs`                                               | Add extra arguments to the default arguments for the SuperNode                                                          | `[]`                       |
+| `supernode.nodeSelector`                                            | Node labels for SuperNode pods which merges with global.nodeSelector                                                    | `{}`                       |
+| `supernode.tolerations`                                             | Node tolerations for SuperNode pods which merges with global.tolerations                                                | `[]`                       |
+| `supernode.updateStrategy.type`                                     | SuperNode deployment strategy type                                                                                      | `RollingUpdate`            |
+| `supernode.updateStrategy.rollingUpdate`                            | SuperNode deployment rolling update configuration parameters                                                            | `{}`                       |
+| `supernode.affinity`                                                | Node affinity for SuperNode pods which merges with global.affinity                                                      | `{}`                       |
+| `supernode.env`                                                     | Array with extra environment variables to add to SuperNode nodes which merges with global.env                           | `[]`                       |
+| `supernode.livenessProbe.enabled`                                   | Enable livenessProbe on SuperNode containers                                                                            | `true`                     |
+| `supernode.livenessProbe.initialDelaySeconds`                       | Initial delay seconds for livenessProbe                                                                                 | `0`                        |
+| `supernode.livenessProbe.periodSeconds`                             | Period seconds for livenessProbe                                                                                        | `10`                       |
+| `supernode.livenessProbe.timeoutSeconds`                            | Timeout seconds for livenessProbe                                                                                       | `1`                        |
+| `supernode.livenessProbe.failureThreshold`                          | Failure threshold for livenessProbe                                                                                     | `3`                        |
+| `supernode.livenessProbe.successThreshold`                          | Success threshold for livenessProbe                                                                                     | `1`                        |
+| `supernode.readinessProbe.enabled`                                  | Enable readinessProbe on SuperNode containers                                                                           | `true`                     |
+| `supernode.readinessProbe.initialDelaySeconds`                      | Initial delay seconds for readinessProbe                                                                                | `0`                        |
+| `supernode.readinessProbe.periodSeconds`                            | Period seconds for readinessProbe                                                                                       | `10`                       |
+| `supernode.readinessProbe.timeoutSeconds`                           | Timeout seconds for readinessProbe                                                                                      | `1`                        |
+| `supernode.readinessProbe.failureThreshold`                         | Failure threshold for readinessProbe                                                                                    | `3`                        |
+| `supernode.readinessProbe.successThreshold`                         | Success threshold for readinessProbe                                                                                    | `1`                        |
+| `supernode.lifecycle`                                               | SuperNode container(s) to automate configuration before or after startup                                                | `{}`                       |
+| `supernode.annotations`                                             | Additional custom annotations for SuperNode                                                                             | `{}`                       |
+| `supernode.selectorLabels`                                          | Extra selectorLabels for SuperNode pods                                                                                 | `{}`                       |
+| `supernode.podAnnotations`                                          | Annotations for SuperNode pods                                                                                          | `{}`                       |
+| `supernode.podLabels`                                               | Extra podLabels for SuperNode pods                                                                                      | `{}`                       |
+| `supernode.imagePullSecrets`                                        | SuperNode image pull secrets which overrides global.imagePullSecrets                                                    | `[]`                       |
+| `supernode.image.registry`                                          | SuperNode image registry                                                                                                | `registry.hub.docker.com`  |
+| `supernode.image.repository`                                        | SuperNode image repository                                                                                              | `flwr/supernode`           |
+| `supernode.image.tag`                                               | Image tag of SuperNode                                                                                                  | `1.21.0-ubuntu`            |
+| `supernode.image.digest`                                            | Image digest of SuperNode                                                                                               | `""`                       |
+| `supernode.image.pullPolicy`                                        | Components image pullPolicy                                                                                             | `IfNotPresent`             |
+| `supernode.networkPolicy.enabled`                                   | Specifies whether a NetworkPolicy should be created                                                                     | `true`                     |
+| `supernode.networkPolicy.allowExternal`                             | Allow external ingress traffic                                                                                          | `true`                     |
+| `supernode.networkPolicy.allowExternalEgress`                       | Allow unrestricted egress traffic                                                                                       | `true`                     |
+| `supernode.networkPolicy.extraIngress`                              | Add extra ingress rules to the NetworkPolicy                                                                            | `[]`                       |
+| `supernode.networkPolicy.extraEgress`                               | Add extra ingress rules to the NetworkPolicy (ignored if allowExternalEgress=true)                                      | `[]`                       |
+| `supernode.networkPolicy.ingressPodMatchLabels`                     | Labels to match to allow traffic from other pods. Ignored if `supernode.networkPolicy.allowExternal` is true.           | `{}`                       |
+| `supernode.networkPolicy.ingressNSMatchLabels`                      | Labels to match to allow traffic from other namespaces. Ignored if `supernode.networkPolicy.allowExternal` is true.     | `{}`                       |
+| `supernode.networkPolicy.ingressNSPodMatchLabels`                   | Pod labels to match to allow traffic from other namespaces. Ignored if `supernode.networkPolicy.allowExternal` is true. | `{}`                       |
+
+### Component ClientApp
+
+| Name                                                    | Description                                                                                                       | Value                       |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `clientapp.name`                                        | Name of the ClientApp                                                                                             | `clientapp`                 |
+| `clientapp.enabled`                                     | Enable or disable ClientApp component                                                                             | `false`                     |
+| `clientapp.resources`                                   | Set container requests and limits for different resources like CPU or memory (essential for production workloads) | `{}`                        |
+| `clientapp.supernode`                                   | Address of the supernode the ClientApp should connect to                                                          | `{}`                        |
+| `clientapp.volumes`                                     | Specify a list of volumes for the ClientApp pod(s)                                                                | `[]`                        |
+| `clientapp.volumeMounts`                                | Allows to specify additional VolumeMounts                                                                         | `[]`                        |
+| `clientapp.automountServiceAccountToken`                | Automount SA-Token into the pod.                                                                                  | `true`                      |
+| `clientapp.serviceAccount.enabled`                      | Enable a service account for this component                                                                       | `true`                      |
+| `clientapp.serviceAccount.annotations`                  | Annotations applied to enabled service account                                                                    | `{}`                        |
+| `clientapp.serviceAccount.labels`                       | Labels applied to enabled service account                                                                         | `{}`                        |
+| `clientapp.serviceAccount.automountServiceAccountToken` | Automount SA-Token                                                                                                | `true`                      |
+| `clientapp.containerPorts.health`                       | Container port for ClientApp Health API                                                                           | `9090`                      |
+| `clientapp.podSecurityContext`                          |                                                                                                                   | `{}`                        |
+| `clientapp.livenessProbe.enabled`                       | Enable livenessProbe on ClientApp containers                                                                      | `true`                      |
+| `clientapp.livenessProbe.initialDelaySeconds`           | Initial delay seconds for livenessProbe                                                                           | `0`                         |
+| `clientapp.livenessProbe.periodSeconds`                 | Period seconds for livenessProbe                                                                                  | `10`                        |
+| `clientapp.livenessProbe.timeoutSeconds`                | Timeout seconds for livenessProbe                                                                                 | `1`                         |
+| `clientapp.livenessProbe.failureThreshold`              | Failure threshold for livenessProbe                                                                               | `3`                         |
+| `clientapp.livenessProbe.successThreshold`              | Success threshold for livenessProbe                                                                               | `1`                         |
+| `clientapp.readinessProbe.enabled`                      | Enable readinessProbe on ClientApp containers                                                                     | `true`                      |
+| `clientapp.readinessProbe.initialDelaySeconds`          | Initial delay seconds for readinessProbe                                                                          | `0`                         |
+| `clientapp.readinessProbe.periodSeconds`                | Period seconds for readinessProbe                                                                                 | `10`                        |
+| `clientapp.readinessProbe.timeoutSeconds`               | Timeout seconds for readinessProbe                                                                                | `1`                         |
+| `clientapp.readinessProbe.failureThreshold`             | Failure threshold for readinessProbe                                                                              | `3`                         |
+| `clientapp.readinessProbe.successThreshold`             | Success threshold for readinessProbe                                                                              | `1`                         |
+| `clientapp.replicas`                                    | The number of ClientApp pods to run                                                                               | `1`                         |
+| `clientapp.labels`                                      | Extra labels for ClientApp pods                                                                                   | `{}`                        |
+| `clientapp.extraArgs`                                   | Add extra arguments to the default arguments for the ClientApp                                                    | `[]`                        |
+| `clientapp.nodeSelector`                                | Node labels for ClientApp pods which merges with global.nodeSelector                                              | `{}`                        |
+| `clientapp.tolerations`                                 | Node tolerations for ClientApp pods which merges with global.tolerations                                          | `[]`                        |
+| `clientapp.updateStrategy.type`                         | ClientApp deployment strategy type                                                                                | `RollingUpdate`             |
+| `clientapp.updateStrategy.rollingUpdate`                | ClientApp deployment rolling update configuration parameters                                                      | `{}`                        |
+| `clientapp.affinity`                                    | Node affinity for ClientApp pods which merges with global.affinity                                                | `{}`                        |
+| `clientapp.env`                                         | Array with extra environment variables to add to ClientApp nodes which merges with global.env                     | `[]`                        |
+| `clientapp.lifecycle`                                   | ClientApp container(s) to automate configuration before or after startup                                          | `{}`                        |
+| `clientapp.annotations`                                 | Additional custom annotations for ClientApp                                                                       | `{}`                        |
+| `clientapp.selectorLabels`                              | Extra selectorLabels for ClientApp pods                                                                           | `{}`                        |
+| `clientapp.podAnnotations`                              | Annotations for ClientApp pods                                                                                    | `{}`                        |
+| `clientapp.podLabels`                                   | Extra podLabels for ClientApp pods                                                                                | `{}`                        |
+| `clientapp.imagePullSecrets`                            | ClientApp image pull secrets which overrides global.imagePullSecrets                                              | `[]`                        |
+| `clientapp.image.registry`                              | ClientApp image registry                                                                                          | `registry.hub.docker.com`   |
+| `clientapp.image.repository`                            | ClientApp image repository                                                                                        | `flwr/superexec`            |
+| `clientapp.image.tag`                                   | Image tag of ClientApp                                                                                            | `1.21.0-py3.11-ubuntu24.04` |
+| `clientapp.image.digest`                                | Image digest of ClientApp                                                                                         | `""`                        |
+| `clientapp.image.pullPolicy`                            | Components image pullPolicy                                                                                       | `IfNotPresent`              |
+| `clientapp.networkPolicy.enabled`                       | Specifies whether a NetworkPolicy should be created                                                               | `true`                      |
+| `clientapp.networkPolicy.allowExternalEgress`           | Allow unrestricted egress traffic                                                                                 | `true`                      |
+| `clientapp.networkPolicy.extraEgress`                   | Add extra ingress rules to the NetworkPolicy (ignored if allowExternalEgress=true)                                | `[]`                        |
