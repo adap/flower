@@ -110,6 +110,7 @@ class FedAvg(Strategy):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         inplace: bool = True,
+        stop_criteria: Optional[dict] = None,
     ) -> None:
         super().__init__()
 
@@ -132,6 +133,9 @@ class FedAvg(Strategy):
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
         self.inplace = inplace
+        self.stop_criteria = stop_criteria or {}
+        self.stop_triggered = False
+
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
@@ -157,18 +161,14 @@ class FedAvg(Strategy):
         return initial_parameters
 
     def evaluate(
-        self, server_round: int, parameters: Parameters
+            self, server_round: int, parameters: Parameters
     ) -> Optional[tuple[float, dict[str, Scalar]]]:
-        """Evaluate model parameters using an evaluation function."""
-        if self.evaluate_fn is None:
-            # No evaluation function provided
+        """Evaluate model parameters, stop if triggered."""
+        if self.stop_triggered:
+            log(WARNING, f"[EarlyStop] Training stopped at round {server_round}")
+
             return None
-        parameters_ndarrays = parameters_to_ndarrays(parameters)
-        eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {})
-        if eval_res is None:
-            return None
-        loss, metrics = eval_res
-        return loss, metrics
+        return super().evaluate(server_round, parameters)
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -254,19 +254,18 @@ class FedAvg(Strategy):
         return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
-        self,
-        server_round: int,
-        results: list[tuple[ClientProxy, EvaluateRes]],
-        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
+            self,
+            server_round: int,
+            results: list[tuple[ClientProxy, EvaluateRes]],
+            failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> tuple[Optional[float], dict[str, Scalar]]:
-        """Aggregate evaluation losses using weighted average."""
+        """Aggregate evaluation losses using weighted average + check stop."""
         if not results:
             return None, {}
-        # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
 
-        # Aggregate loss
+        # Loss medio pesato
         loss_aggregated = weighted_loss_avg(
             [
                 (evaluate_res.num_examples, evaluate_res.loss)
@@ -274,12 +273,26 @@ class FedAvg(Strategy):
             ]
         )
 
-        # Aggregate custom metrics if aggregation fn was provided
+        # Metriche aggregate
         metrics_aggregated = {}
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-        elif server_round == 1:  # Only log this warning once
+        elif server_round == 1:
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
+        # 🔴 Early stop check
+        if self.stop_criteria:
+            if "loss_leq" in self.stop_criteria and loss_aggregated is not None:
+                if loss_aggregated <= self.stop_criteria["loss_leq"]:
+                    self.stop_triggered = True
+                    log(WARNING, f"[EarlyStop] Loss <= {self.stop_criteria['loss_leq']} at round {server_round}")
+            if "metric_ge" in self.stop_criteria:
+                metric_name, threshold = self.stop_criteria["metric_ge"]
+                if metrics_aggregated and metric_name in metrics_aggregated:
+                    if metrics_aggregated[metric_name] >= threshold:
+                        self.stop_triggered = True
+                        log(WARNING, f"[EarlyStop] {metric_name} >= {threshold} at round {server_round}")
+
         return loss_aggregated, metrics_aggregated
+

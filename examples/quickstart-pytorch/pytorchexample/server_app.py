@@ -1,5 +1,11 @@
 """pytorchexample: A Flower / PyTorch app."""
+from random import random
 
+import numpy as np
+from pytorchexample.task import Net, get_weights
+
+import torch
+import random
 from typing import List, Tuple
 
 from flwr.common import Context, Metrics, ndarrays_to_parameters
@@ -36,6 +42,7 @@ def server_fn(context: Context):
         min_available_clients=2,
         evaluate_metrics_aggregation_fn=weighted_average,
         initial_parameters=parameters,
+        stop_criteria={"metric_ge": ("accuracy", 0.2)}
     )
     config = ServerConfig(num_rounds=num_rounds)
 

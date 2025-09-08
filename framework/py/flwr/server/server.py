@@ -17,6 +17,7 @@
 
 import concurrent.futures
 import io
+import os
 import timeit
 from logging import INFO, WARN
 from typing import Optional, Union
@@ -40,6 +41,8 @@ from flwr.server.history import History
 from flwr.server.strategy import FedAvg, Strategy
 
 from .server_config import ServerConfig
+from ..common.crypto import log_file
+from ..common.crypto.log_file import log_time
 
 FitResultsAndFailures = tuple[
     list[tuple[ClientProxy, FitRes]],
@@ -87,7 +90,8 @@ class Server:
     def fit(self, num_rounds: int, timeout: Optional[float]) -> tuple[History, float]:
         """Run federated averaging for a number of rounds."""
         history = History()
-
+        num_clients = self._client_manager.num_available();
+        log_time("Numero totale di client disponibili: %s", num_clients)
         # Initialize parameters
         log(INFO, "[INIT]")
         self.parameters = self._get_initial_parameters(server_round=0, timeout=timeout)
@@ -109,13 +113,18 @@ class Server:
         start_time = timeit.default_timer()
 
         for current_round in range(1, num_rounds + 1):
+            if getattr(self.strategy, "stop_triggered", False):
+                log(INFO, "Early stopping triggered at round %s, stopping server.", current_round - 1)
+                log_time("Early stopping triggered at round %s, stopping server.", current_round - 1)
+                break
+
             log(INFO, "")
+            round_start = timeit.default_timer()
             log(INFO, "[ROUND %s]", current_round)
-            # Train model and replace previous global model
-            res_fit = self.fit_round(
-                server_round=current_round,
-                timeout=timeout,
-            )
+            log_time(f"[ROUND {current_round}]")
+
+            # Train model
+            res_fit = self.fit_round(server_round=current_round, timeout=timeout)
             if res_fit is not None:
                 parameters_prime, fit_metrics, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
@@ -128,30 +137,36 @@ class Server:
             res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
-                log(
-                    INFO,
-                    "fit progress: (%s, %s, %s, %s)",
-                    current_round,
-                    loss_cen,
-                    metrics_cen,
-                    timeit.default_timer() - start_time,
-                )
+
+
+                log(INFO, "fit progress: (%s, %s, %s, %s)",
+                    current_round, loss_cen, metrics_cen, timeit.default_timer() - round_start)
+                log_time(f"fit progress: ({current_round}, {loss_cen}, {metrics_cen}, {timeit.default_timer() - round_start:.5f}s)")
                 history.add_loss_centralized(server_round=current_round, loss=loss_cen)
                 history.add_metrics_centralized(
                     server_round=current_round, metrics=metrics_cen
                 )
+                if "accuracy" in metrics_cen:
+
+                    log_time("Round %s Accuracy (centralized): %.4f", current_round, metrics_cen["accuracy"])
 
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
             if res_fed is not None:
                 loss_fed, evaluate_metrics_fed, _ = res_fed
                 if loss_fed is not None:
-                    history.add_loss_distributed(
-                        server_round=current_round, loss=loss_fed
-                    )
-                    history.add_metrics_distributed(
-                        server_round=current_round, metrics=evaluate_metrics_fed
-                    )
+                    history.add_loss_distributed(server_round=current_round, loss=loss_fed)
+                    history.add_metrics_distributed(server_round=current_round, metrics=evaluate_metrics_fed)
+                    if "accuracy" in evaluate_metrics_fed:
+
+                        log_time("Round %s Accuracy (federated): %.4f", current_round, evaluate_metrics_fed["accuracy"])
+            # Fine round: calcolo e log del tempo
+            round_elapsed = timeit.default_timer() - round_start
+            log_time("Tempo totale round %s: %.2f s", current_round, round_elapsed)
+            history.add_metrics_centralized(
+                server_round=current_round,
+                metrics={"round_time": round_elapsed}
+            )
 
         # Bookkeeping
         end_time = timeit.default_timer()
@@ -483,10 +498,24 @@ def init_defaults(
 
     return server, config
 
+import requests
+
+BOT_TOKEN = "8440783074:AAGBenk_eeglVRWIIvuNACUBCkhSxVJoAio"
+CHAT_ID = 587180276
+
+def send_telegram_file(file_path: str, caption: str = ""):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
+    try:
+        with open(file_path, "rb") as f:
+            files = {"document": f}
+            data = {"chat_id": CHAT_ID, "caption": caption}
+            requests.post(url, data=data, files=files)
+    except Exception as e:
+        print(f"Errore invio file Telegram: {e}")
 
 def run_fl(
-    server: Server,
-    config: ServerConfig,
+        server: Server,
+        config: ServerConfig,
 ) -> History:
     """Train a model on the given server and return the History object."""
     hist, elapsed_time = server.fit(
@@ -496,10 +525,30 @@ def run_fl(
     log(INFO, "")
     log(INFO, "[SUMMARY]")
     log(INFO, "Run finished %s round(s) in %.2fs", config.num_rounds, elapsed_time)
-    for line in io.StringIO(str(hist)):
-        log(INFO, "\t%s", line.strip("\n"))
-    log(INFO, "")
+    log_time("Run finished %s round(s) in %.2fs", config.num_rounds, elapsed_time)
 
+    # 📩 Messaggio Telegram
+    #send_telegram_file(null,"Ho finito!!!!")
+
+    # 📄 Invio CSV se esiste
+
+
+    for line in io.StringIO(str(hist)):
+        log_time("\t%s", line.strip("\n"))
+        log_time("")
+
+    log_time("")  # riga vuota finale
+    if log_file.CSV_PATH is not None:
+        # costruisco percorso assoluto (directory + nome file generato)
+        base_dir = "/home/sarahfalco/IdeaProjects/flowerCrypto/examples/quickstart-pytorch/"
+        abs_path = os.path.join(base_dir, log_file.CSV_PATH)
+
+        if os.path.exists(abs_path):
+            send_telegram_file(abs_path, caption="Ecco il log del run")
+        else:
+            print(f"[run_fl] File non trovato: {abs_path}")
+    else:
+        print("[run_fl] Nessun CSV_PATH disponibile")
     # Graceful shutdown
     server.disconnect_all_clients(timeout=config.round_timeout)
 

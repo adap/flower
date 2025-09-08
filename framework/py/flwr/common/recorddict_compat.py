@@ -14,13 +14,15 @@
 # ==============================================================================
 """RecordDict utilities."""
 import sys
+
 from collections import OrderedDict
 from collections.abc import Mapping
 from typing import Union, cast, get_args
 
 from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 from .crypto.crypto_selector import encrypt,decrypt
-from .crypto.config_critpto import ENCRYPTION_METHOD,ENCRYPTION_ENABLED
+from .crypto.config_cripto import ENCRYPTION_METHOD,ENCRYPTION_ENABLED
+from .crypto.log_file import log_time
 from .typing import (
     Code,
     ConfigRecordValues,
@@ -39,6 +41,7 @@ from .typing import (
 )
 
 EMPTY_TENSOR_KEY = "_empty"
+import time
 
 
 def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Parameters:
@@ -64,11 +67,11 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
     parameters : Parameters
         The parameters in the legacy format Parameters.
     """
+    start_tot=time.perf_counter()
     parameters = Parameters(tensors=[], tensor_type="")
 
     for key in list(record.keys()):
         if key != EMPTY_TENSOR_KEY:
-            #to-do
             tensor = record[key].data
             if ENCRYPTION_ENABLED:
                 tensor = decrypt(tensor, ENCRYPTION_METHOD)
@@ -81,11 +84,15 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
 
         if not keep_input:
             del record[key]
-
+    end_tot = time.perf_counter();
+    tot = end_tot - start_tot
+    log_time(f"[{time.strftime('%H:%M:%S')}.{int(time.time()*1e6)%1_000_000:06d}] "
+           f"Tempo totale deserializzazione: {(end_tot - start_tot):.5f} s")
     return parameters
 
 
 def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> ArrayRecord:
+
     """Convert legacy Parameters into a single ArrayRecord.
 
     Because there is no concept of names in the legacy Parameters, arbitrary keys will
@@ -106,6 +113,7 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
     ArrayRecord
         The ArrayRecord containing the provided parameters.
     """
+    start_tot = time.perf_counter()
     tensor_type = parameters.tensor_type
 
     num_arrays = len(parameters.tensors)
@@ -117,6 +125,7 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
             tensor = parameters.tensors.pop(0)
         #TO-D0
         dataR = tensor
+
         if ENCRYPTION_ENABLED:
             encrypted = encrypt(dataR, ENCRYPTION_METHOD)
             tensor = encrypted
@@ -128,6 +137,11 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
         ordered_dict[EMPTY_TENSOR_KEY] = Array(
             data=b"", dtype="", stype=tensor_type, shape=()
         )
+    end_tot = time.perf_counter()
+    tot = end_tot - start_tot
+
+    log_time(f"[{time.strftime('%H:%M:%S')}.{int(time.time()*1e6)%1_000_000:06d}] "
+          f"Tempo totale serializzazione: {tot:.5f} s")
     return ArrayRecord(ordered_dict, keep_input=keep_input)
 
 
@@ -203,6 +217,7 @@ def _extract_status_from_recorddict(res_str: str, recorddict: RecordDict) -> Sta
 
 def recorddict_to_fitins(recorddict: RecordDict, keep_input: bool) -> FitIns:
     """Derive FitIns from a RecordDict object."""
+    # log_time("Client deserializza")
     parameters, config = _recorddict_to_fit_or_evaluate_ins_components(
         recorddict,
         ins_str="fitins",
@@ -214,11 +229,14 @@ def recorddict_to_fitins(recorddict: RecordDict, keep_input: bool) -> FitIns:
 
 def fitins_to_recorddict(fitins: FitIns, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a FitIns object."""
+
+    #("Server serializza")
     return _fit_or_evaluate_ins_to_recorddict(fitins, keep_input)
 
 
 def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
     """Derive FitRes from a RecordDict object."""
+    #log_time("Server deserializza")
     ins_str = "fitres"
     parameters = arrayrecord_to_parameters(
         recorddict.array_records[f"{ins_str}.parameters"], keep_input=keep_input
@@ -239,6 +257,7 @@ def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
 
 def fitres_to_recorddict(fitres: FitRes, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a FitRes object."""
+  #  log_time("Client serializza")
     recorddict = RecordDict()
 
     res_str = "fitres"
@@ -262,6 +281,7 @@ def fitres_to_recorddict(fitres: FitRes, keep_input: bool) -> RecordDict:
 
 def recorddict_to_evaluateins(recorddict: RecordDict, keep_input: bool) -> EvaluateIns:
     """Derive EvaluateIns from a RecordDict object."""
+    #("client deserializza modello valutato")
     parameters, config = _recorddict_to_fit_or_evaluate_ins_components(
         recorddict,
         ins_str="evaluateins",
@@ -273,6 +293,7 @@ def recorddict_to_evaluateins(recorddict: RecordDict, keep_input: bool) -> Evalu
 
 def evaluateins_to_recorddict(evaluateins: EvaluateIns, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a EvaluateIns object."""
+    #log_time("Server serializza modello valutato")
     return _fit_or_evaluate_ins_to_recorddict(evaluateins, keep_input)
 
 

@@ -1,4 +1,8 @@
 """pytorchexample: A Flower / PyTorch app."""
+import warnings
+
+# In client_app.py, prima di creare il modello
+import numpy as np, random
 
 import torch
 from flwr.client import ClientApp, NumPyClient
@@ -6,6 +10,7 @@ from flwr.common import Context
 
 from pytorchexample.task import Net, get_weights, load_data, set_weights, test, train
 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # Define Flower Client
 class FlowerClient(NumPyClient):
