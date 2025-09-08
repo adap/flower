@@ -135,7 +135,7 @@ class Array(InflatableObject):
         shape: tuple[int, ...] | None = None,
         stype: str | None = None,
         data: bytes | None = None,
-        ndarray: NDArray | np.generic | None = None,  # type: ignore[type-arg]
+        ndarray: NDArray | np.generic | None = None,
         torch_tensor: torch.Tensor | None = None,
     ) -> None:
         # Determine the initialization method and validate input arguments.
@@ -214,9 +214,7 @@ class Array(InflatableObject):
         _raise_array_init_error()
 
     @classmethod
-    def from_numpy_ndarray(
-        cls, ndarray: NDArray | np.generic  # type: ignore[type-arg]
-    ) -> Array:
+    def from_numpy_ndarray(cls, ndarray: NDArray | np.generic) -> Array:
         """Create Array from NumPy ndarray."""
         assert isinstance(
             ndarray, (np.ndarray, np.generic)

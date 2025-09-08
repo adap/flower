@@ -79,7 +79,7 @@ class TestArray(unittest.TestCase):
         ]
     )
     def test_numpy_conversion_valid(
-        self, np_array: Union[NDArray, np.generic]  # type: ignore[type-arg]
+        self, np_array: Union[NDArray, np.generic]
     ) -> None:
         """Test the numpy method with valid Array instance."""
         # Prepare
