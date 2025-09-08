@@ -12,16 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Public Flower ServerApp APIs."""
+"""Flower ServerApp exceptions."""
 
 
-from flwr.server.grid import Grid
-from flwr.server.server_app import ServerApp
+from flwr.app.exception import AppExitException
+from flwr.common.exit import ExitCode
 
-from . import strategy
 
-__all__ = [
-    "Grid",
-    "ServerApp",
-    "strategy",
-]
+class InconsistentMessageReplies(AppExitException):
+    """Exception triggered when replies are inconsistent and therefore aggregation must
+    be skipped."""
+
+    exit_code = ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET
+
+    def __init__(self, reason: str):
+        super().__init__(reason)
+
+
+class AggregationError(AppExitException):
+    """Exception triggered when aggregation fails."""
+
+    exit_code = ExitCode.SERVERAPP_STRATEGY_AGGREGATION_ERROR
+
+    def __init__(self, reason: str):
+        super().__init__(reason)
