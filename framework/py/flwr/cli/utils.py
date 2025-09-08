@@ -32,6 +32,7 @@ from flwr.common.constant import (
     AUTH_TYPE_JSON_KEY,
     CREDENTIALS_DIR,
     FLWR_DIR,
+    NO_USER_AUTH_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
 )
 from flwr.common.grpc import (
@@ -312,11 +313,20 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
             )
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.UNIMPLEMENTED:
-            typer.secho(
-                "❌ User authentication is not enabled on this SuperLink.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
+            if e.details() == NO_USER_AUTH_MESSAGE:  # pylint: disable=E1101
+                typer.secho(
+                    "❌ User authentication is not enabled on this SuperLink.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+            else:
+                typer.secho(
+                    "❌ The SuperLink cannot process this request. Please verify that "
+                    "you set the address to its Control API endpoint correctly, and "
+                    "ensure you are using a compatible Flower version.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
             typer.secho(
@@ -324,7 +334,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
                 fg=typer.colors.RED,
                 bold=True,
             )
-            # pylint: disable=E1101
+            # pylint: disable-next=E1101
             typer.secho(e.details(), fg=typer.colors.RED, bold=True)
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.UNAVAILABLE:
@@ -337,7 +347,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
             raise typer.Exit(code=1) from None
         if (
             e.code() == grpc.StatusCode.NOT_FOUND
-            and e.details() == RUN_ID_NOT_FOUND_MESSAGE
+            and e.details() == RUN_ID_NOT_FOUND_MESSAGE  # pylint: disable=E1101
         ):
             typer.secho(
                 "❌ Run ID not found.",
