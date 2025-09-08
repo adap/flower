@@ -322,8 +322,9 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
             else:
                 typer.secho(
                     "❌ The SuperLink cannot process this request. Please verify that "
-                    "you set the address to its Control API endpoint correctly in `pyproject.toml`, and "
-                    "ensure that the Flower versions used by the CLI and SuperLink are compatible.",
+                    "you set the address to its Control API endpoint correctly in "
+                    "`pyproject.toml`, and ensure that the Flower versions used by "
+                    "the CLI and SuperLink are compatible.",
                     fg=typer.colors.RED,
                     bold=True,
                 )
