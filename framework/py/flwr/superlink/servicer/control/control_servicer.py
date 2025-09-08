@@ -29,6 +29,7 @@ from flwr.common.auth_plugin import ControlAuthPlugin
 from flwr.common.constant import (
     FAB_MAX_SIZE,
     LOG_STREAM_INTERVAL,
+    NO_USER_AUTH_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
     Status,
     SubStatus,
@@ -291,7 +292,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         if self.auth_plugin is None:
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
-                "ControlServicer initialized without user authentication",
+                NO_USER_AUTH_MESSAGE,
             )
             raise grpc.RpcError()  # This line is unreachable
 
@@ -318,7 +319,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         if self.auth_plugin is None:
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
-                "ControlServicer initialized without user authentication",
+                NO_USER_AUTH_MESSAGE,
             )
             raise grpc.RpcError()  # This line is unreachable
 
