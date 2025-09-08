@@ -2,8 +2,8 @@
 
 import warnings
 
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.client import ClientApp
-from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from sklearn.metrics import (
     accuracy_score,
     f1_score,

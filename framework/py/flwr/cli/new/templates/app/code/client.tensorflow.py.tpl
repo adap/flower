@@ -1,7 +1,7 @@
 """$project_name: A Flower / $framework_str app."""
 
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.client import ClientApp
-from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 
 from $import_name.task import load_data, load_model
 

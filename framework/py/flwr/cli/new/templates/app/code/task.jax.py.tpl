@@ -48,10 +48,7 @@ def evaluation(params, grad_fn, X_test, y_test):
 def get_params(params):
     parameters = []
     for _, val in params.items():
-        np_val = np.array(val)
-        if np_val.ndim == 0:
-            np_val = np.array([val])
-        parameters.append(np_val)
+        parameters.append(np.array(val))
     return parameters
 
 

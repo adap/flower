@@ -1,7 +1,7 @@
 """$project_name: A Flower / $framework_str app."""
 
 import torch
-from flwr.common import ArrayRecord, Context
+from flwr.app import ArrayRecord, Context
 from flwr.server import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 from transformers import AutoModelForSequenceClassification

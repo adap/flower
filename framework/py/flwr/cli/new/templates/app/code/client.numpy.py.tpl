@@ -1,8 +1,8 @@
 """$project_name: A Flower / $framework_str app."""
 
 import numpy as np
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.client import ClientApp
-from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 
 # Flower ClientApp
 app = ClientApp()

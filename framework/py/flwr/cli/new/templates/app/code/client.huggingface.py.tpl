@@ -1,8 +1,8 @@
 """$project_name: A Flower / $framework_str app."""
 
 import torch
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.client import ClientApp
-from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from transformers import AutoModelForSequenceClassification
 
 from $import_name.task import load_data
