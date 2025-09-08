@@ -80,7 +80,7 @@ class Array(InflatableObject):
         A buffer of bytes containing the data. Only required if you are not passing in
         a ndarray or a tensor.
 
-    ndarray : Optional[Union[NDArray, np.generic]] (default: None)
+    ndarray : Optional[NDArray] (default: None)
         A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data`
         fields are derived automatically from it. NumPy scalars (i.e., `np.generic`
         types) are also supported and will be converted to 0-dim ndarrays internally.
@@ -135,7 +135,7 @@ class Array(InflatableObject):
         shape: tuple[int, ...] | None = None,
         stype: str | None = None,
         data: bytes | None = None,
-        ndarray: NDArray | np.generic | None = None,
+        ndarray: NDArray | None = None,
         torch_tensor: torch.Tensor | None = None,
     ) -> None:
         # Determine the initialization method and validate input arguments.
@@ -214,7 +214,7 @@ class Array(InflatableObject):
         _raise_array_init_error()
 
     @classmethod
-    def from_numpy_ndarray(cls, ndarray: NDArray | np.generic) -> Array:
+    def from_numpy_ndarray(cls, ndarray: NDArray) -> Array:
         """Create Array from NumPy ndarray."""
         assert isinstance(
             ndarray, (np.ndarray, np.generic)
