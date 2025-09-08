@@ -20,7 +20,7 @@ import sys
 import unittest
 from io import BytesIO
 from types import ModuleType
-from typing import Any, cast
+from typing import Any, Union, cast
 from unittest.mock import Mock
 
 import numpy as np
@@ -66,24 +66,36 @@ class TestArray(unittest.TestCase):
         if self._original_torch is not None:
             sys.modules["torch"] = self._original_torch
 
-    def test_numpy_conversion_valid(self) -> None:
+    @parameterized.expand(  # type: ignore
+        [
+            (np.array([1, 2, 3], dtype=np.float32),),
+            (np.array([[1, 2], [3, 4]], dtype=np.int64),),
+            (np.array(["haha"]),),
+            (np.array([True, False, True]),),
+            (np.array(42, dtype=np.float64),),  # 0-dim array
+            (np.float64(110),),  # NumPy scalar (float)
+            (np.bool_(True),),  # NumPy scalar (bool)
+            (np.str_("test test!"),),  # NumPy scalar (string)
+        ]
+    )
+    def test_numpy_conversion_valid(
+        self, np_array: Union[NDArray, np.generic]  # type: ignore[type-arg]
+    ) -> None:
         """Test the numpy method with valid Array instance."""
         # Prepare
-        original_array = np.array([1, 2, 3], dtype=np.float32)
-
-        buffer = _get_buffer_from_ndarray(original_array)
+        np_array = np.asarray(np_array)  # Ensure it's an ndarray
+        buffer = _get_buffer_from_ndarray(np_array)
 
         # Execute
-        array_instance = Array(
-            dtype=str(original_array.dtype),
-            shape=tuple(original_array.shape),
-            stype=SType.NUMPY,
-            data=buffer,
-        )
+        array_instance = Array(np_array)
         converted_array = array_instance.numpy()
 
         # Assert
-        np.testing.assert_array_equal(converted_array, original_array)
+        np.testing.assert_array_equal(converted_array, np_array)
+        self.assertEqual(array_instance.dtype, str(np_array.dtype))
+        self.assertEqual(array_instance.shape, tuple(np_array.shape))
+        self.assertEqual(array_instance.stype, SType.NUMPY)
+        self.assertEqual(array_instance.data, buffer)
 
     def test_numpy_conversion_invalid(self) -> None:
         """Test the numpy method with invalid Array instance."""
@@ -149,6 +161,7 @@ class TestArray(unittest.TestCase):
         [
             (MOCK_TORCH_TENSOR,),
             (np.array([1, 2, 3]),),
+            (np.int64(42),),
             ("float32", (2, 2), "dense", b"data"),
         ]
     )

@@ -80,9 +80,10 @@ class Array(InflatableObject):
         A buffer of bytes containing the data. Only required if you are not passing in
         a ndarray or a tensor.
 
-    ndarray : Optional[NDArray] (default: None)
+    ndarray : Optional[Union[NDArray, np.generic]] (default: None)
         A NumPy ndarray. If provided, the `dtype`, `shape`, `stype`, and `data`
-        fields are derived automatically from it.
+        fields are derived automatically from it. NumPy scalars (i.e., `np.generic`
+        types) are also supported and will be converted to 0-dim ndarrays internally.
 
     torch_tensor : Optional[torch.Tensor] (default: None)
         A PyTorch tensor. If provided, it will be **detached and moved to CPU**
@@ -134,7 +135,7 @@ class Array(InflatableObject):
         shape: tuple[int, ...] | None = None,
         stype: str | None = None,
         data: bytes | None = None,
-        ndarray: NDArray | None = None,
+        ndarray: NDArray | np.generic | None = None,  # type: ignore[type-arg]
         torch_tensor: torch.Tensor | None = None,
     ) -> None:
         # Determine the initialization method and validate input arguments.
@@ -196,7 +197,7 @@ class Array(InflatableObject):
 
         # Handle NumPy array
         if not init_method or init_method == "ndarray":
-            if len(all_args) == 1 and isinstance(all_args[0], np.ndarray):
+            if len(all_args) == 1 and isinstance(all_args[0], (np.ndarray, np.generic)):
                 self.__dict__.update(self.from_numpy_ndarray(all_args[0]).__dict__)
                 return
 
@@ -213,12 +214,17 @@ class Array(InflatableObject):
         _raise_array_init_error()
 
     @classmethod
-    def from_numpy_ndarray(cls, ndarray: NDArray) -> Array:
+    def from_numpy_ndarray(
+        cls, ndarray: NDArray | np.generic  # type: ignore[type-arg]
+    ) -> Array:
         """Create Array from NumPy ndarray."""
         assert isinstance(
-            ndarray, np.ndarray
+            ndarray, (np.ndarray, np.generic)
         ), f"Expected NumPy ndarray, got {type(ndarray)}"
         buffer = BytesIO()
+        # Convert NumPy scalar to ndarray
+        # `np.asarray` works for both ndarray and np.generic without copying data
+        ndarray = np.asarray(ndarray)
         # WARNING: NEVER set allow_pickle to true.
         # Reason: loading pickled data can execute arbitrary code
         # Source: https://numpy.org/doc/stable/reference/generated/numpy.save.html
