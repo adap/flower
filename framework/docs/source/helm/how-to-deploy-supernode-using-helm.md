@@ -304,9 +304,9 @@ supernode:
 | `supernode.service.type`                                            | Valid are ClusterIP, NodePort or Loadbalancer                                                                           | `ClusterIP`                |
 | `supernode.service.servicePortClientAppIoName`                      | Prefix of the SuperNode ClientAppIo API port                                                                            | `clientappio`              |
 | `supernode.service.servicePortClientAppIo`                          | Port to expose for the SuperNode ClientAppIo API                                                                        | `9094`                     |
-| `supernode.service.nodePortClientAppIo`                             | Node port for SuperNode ClientAppIo API                                                                                 | `39094`                    |
+| `supernode.service.nodePortClientAppIo`                             | Node port for SuperNode ClientAppIo API                                                                                 | `""`                       |
 | `supernode.containerPorts.clientAppIo`                              | Container port for SuperNode ClientAppIo API                                                                            | `9094`                     |
-| `supernode.containerPorts.health`                                   | Container port for SuperNode Health API                                                                                 | `9090`                     |
+| `supernode.containerPorts.health`                                   | Container port for SuperNode Health API                                                                                 | `8081`                     |
 | `supernode.podSecurityContext`                                      |                                                                                                                         | `{}`                       |
 | `supernode.replicas`                                                | The number of SuperNode pods to run                                                                                     | `1`                        |
 | `supernode.labels`                                                  | Extra labels for SuperNode pods                                                                                         | `{}`                       |
@@ -364,7 +364,7 @@ supernode:
 | `clientapp.serviceAccount.annotations`                  | Annotations applied to enabled service account                                                                    | `{}`                        |
 | `clientapp.serviceAccount.labels`                       | Labels applied to enabled service account                                                                         | `{}`                        |
 | `clientapp.serviceAccount.automountServiceAccountToken` | Automount SA-Token                                                                                                | `true`                      |
-| `clientapp.containerPorts.health`                       | Container port for ClientApp Health API                                                                           | `9090`                      |
+| `clientapp.containerPorts.health`                       | Container port for ClientApp Health API                                                                           | `8081`                      |
 | `clientapp.podSecurityContext`                          |                                                                                                                   | `{}`                        |
 | `clientapp.livenessProbe.enabled`                       | Enable livenessProbe on ClientApp containers                                                                      | `true`                      |
 | `clientapp.livenessProbe.initialDelaySeconds`           | Initial delay seconds for livenessProbe                                                                           | `0`                         |

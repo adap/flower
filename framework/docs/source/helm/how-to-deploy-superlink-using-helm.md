@@ -781,7 +781,7 @@ global:
 | `superlink.containerPorts.serverAppIo`                         | Container port for SuperLink ServerAppIo API                                                                            | `9091`                    |
 | `superlink.containerPorts.fleet`                               | Container port for SuperLink Fleet API                                                                                  | `9092`                    |
 | `superlink.containerPorts.simulationIo`                        | Container port for SuperLink SimulationIo API                                                                           | `9096`                    |
-| `superlink.containerPorts.health`                              | Container port for SuperLink Health API                                                                                 | `9090`                    |
+| `superlink.containerPorts.health`                              | Container port for SuperLink Health API                                                                                 | `8081`                    |
 | `superlink.replicaCount`                                       | The number of SuperLink pods to run                                                                                     | `1`                       |
 | `superlink.labels`                                             | Extra labels for SuperLink pods                                                                                         | `{}`                      |
 | `superlink.extraArgs`                                          | Add extra arguments to the default arguments for the SuperLink                                                          | `[]`                      |
@@ -873,7 +873,7 @@ global:
 | `serverapp.serviceAccount.annotations`                  | Annotations applied to enabled service account                                                                    | `{}`                        |
 | `serverapp.serviceAccount.labels`                       | Labels applied to enabled service account                                                                         | `{}`                        |
 | `serverapp.serviceAccount.automountServiceAccountToken` | Automount SA-Token                                                                                                | `true`                      |
-| `serverapp.containerPorts.health`                       | Container port for ServerApp Health API                                                                           | `9090`                      |
+| `serverapp.containerPorts.health`                       | Container port for ServerApp Health API                                                                           | `8081`                      |
 | `serverapp.podSecurityContext`                          | Security settings that for the SuperLink Pods                                                                     | `{}`                        |
 | `serverapp.livenessProbe.enabled`                       | Enable livenessProbe on ServerApp containers                                                                      | `true`                      |
 | `serverapp.livenessProbe.initialDelaySeconds`           | Initial delay seconds for livenessProbe                                                                           | `0`                         |
