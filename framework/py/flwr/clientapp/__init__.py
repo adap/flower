@@ -14,6 +14,14 @@
 # ==============================================================================
 """Public Flower ClientApp APIs."""
 
+
+from flwr.client import mod
+from flwr.client.client_app import ClientApp
+
 from .centraldp_mods import fixedclipping_mod
 
-__all__ = ["fixedclipping_mod"]
+__all__ = [
+    "ClientApp",
+    "fixedclipping_mod",
+    "mod",
+]

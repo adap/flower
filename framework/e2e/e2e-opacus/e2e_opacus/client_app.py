@@ -9,8 +9,9 @@ from opacus import PrivacyEngine
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 
-from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import Context
+from flwr.app import Context
+from flwr.client import NumPyClient, start_client
+from flwr.clientapp import ClientApp
 
 # Define parameters.
 PARAMS = {

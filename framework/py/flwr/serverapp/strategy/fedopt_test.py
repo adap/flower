@@ -21,8 +21,8 @@ from parameterized import parameterized
 
 from flwr.common import ArrayRecord
 
+from ..exception import AggregationError
 from .fedopt import FedOpt
-from .strategy_utils import AggregationError
 
 
 @parameterized.expand(  # type: ignore
