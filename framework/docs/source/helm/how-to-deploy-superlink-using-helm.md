@@ -836,7 +836,7 @@ global:
 | `superlink.podLabels`                                          | Extra podLabels for SuperLink pods                                                                                      | `{}`                      |
 | `superlink.imagePullSecrets`                                   | SuperLink image pull secrets which overrides global.imagePullSecrets                                                    | `[]`                      |
 | `superlink.image.registry`                                     | SuperLink image registry                                                                                                | `registry.hub.docker.com` |
-| `superlink.image.repository`                                   | SuperLink image repository                                                                                              | `flwr/superlink`          |
+| `superlink.image.repository`                                   | SuperLink image repository                                                                                              | `flwr/superlink-ee`       |
 | `superlink.image.tag`                                          | SuperLink image tag                                                                                                     | `1.21.0-ubuntu`           |
 | `superlink.image.digest`                                       | SuperLink image digest                                                                                                  | `""`                      |
 | `superlink.image.pullPolicy`                                   | SuperLink image pullPolicy which Components image pullPolicy                                                            | `IfNotPresent`            |
