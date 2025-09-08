@@ -154,6 +154,7 @@ PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
 
 # ControlServicer constants
 RUN_ID_NOT_FOUND_MESSAGE = "Run ID not found"
+NO_USER_AUTH_MESSAGE = "ControlServicer initialized without user authentication"
 
 
 class MessageType:
