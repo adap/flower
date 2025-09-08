@@ -10,7 +10,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### What's new?
 
-- **Introduce strategies for Message API** ([#5710](https://github.com/adap/flower/pull/5710), [#5766](https://github.com/adap/flower/pull/5766), [#5770](https://github.com/adap/flower/pull/5770), [#5771](https://github.com/adap/flower/pull/5771), [#5774](https://github.com/adap/flower/pull/5774), [#5779](https://github.com/adap/flower/pull/5779), [#5787](https://github.com/adap/flower/pull/5787), [#5794](https://github.com/adap/flower/pull/5794), [#5798](https://github.com/adap/flower/pull/5798), [#5804](https://github.com/adap/flower/pull/5804), [#5807](https://github.com/adap/flower/pull/5807))
+- **Introduce strategies for Message API** ([#5710](https://github.com/adap/flower/pull/5710), [#5766](https://github.com/adap/flower/pull/5766), [#5770](https://github.com/adap/flower/pull/5770), [#5771](https://github.com/adap/flower/pull/5771), [#5774](https://github.com/adap/flower/pull/5774), [#5779](https://github.com/adap/flower/pull/5779), [#5787](https://github.com/adap/flower/pull/5787), [#5794](https://github.com/adap/flower/pull/5794), [#5798](https://github.com/adap/flower/pull/5798), [#5804](https://github.com/adap/flower/pull/5804), [#5807](https://github.com/adap/flower/pull/5807), [#5813](https://github.com/adap/flower/pull/5813))
 
   Introduces a new abstract base class `Strategy` that operate on `Message` replies, mirroring the design of those operating on `FitIns/FitRes` or `EvaluateIns/EvaluteRes` while providing more versatility on the type of payloads that can be federated with Flower. The first batch of `Message`-based strategies are: `FedAvg`, `FedOpt`, `FedAdam`, `FedAdagrad`, `FedYogi`, and fixed-clipping Differential Privacy strategies. More will follow in subsequent releases. A [migration guide](https://flower.ai/docs/framework/how-to-upgrade-to-message-api.html) has been added to help users transition their existing Flower Apps operating on the original `Strategy` and `NumPyClient` abstractions to the Message API.
 
@@ -38,9 +38,19 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Helm guide has been enhanced with additional configuration details and updated formatting. Changes include adding a parameters section, documenting how to set a custom `secretKey`, updating TLS instructions for version 1.20, and introducing audit logging configuration.
 
-- **Improve documentation** ([#5159](https://github.com/adap/flower/pull/5159), [#5655](https://github.com/adap/flower/pull/5655), [#5668](https://github.com/adap/flower/pull/5668), [#5692](https://github.com/adap/flower/pull/5692), [#5723](https://github.com/adap/flower/pull/5723), [#5738](https://github.com/adap/flower/pull/5738), [#5739](https://github.com/adap/flower/pull/5739), [#5740](https://github.com/adap/flower/pull/5740), [#5753](https://github.com/adap/flower/pull/5753), [#5764](https://github.com/adap/flower/pull/5764), [#5769](https://github.com/adap/flower/pull/5769), [#5775](https://github.com/adap/flower/pull/5775), [#5782](https://github.com/adap/flower/pull/5782), [#5788](https://github.com/adap/flower/pull/5788), [#5795](https://github.com/adap/flower/pull/5795), [#5809](https://github.com/adap/flower/pull/5809), [#5812](https://github.com/adap/flower/pull/5812))
+- **Improve documentation** ([#5159](https://github.com/adap/flower/pull/5159), [#5655](https://github.com/adap/flower/pull/5655), [#5668](https://github.com/adap/flower/pull/5668), [#5692](https://github.com/adap/flower/pull/5692), [#5723](https://github.com/adap/flower/pull/5723), [#5738](https://github.com/adap/flower/pull/5738), [#5739](https://github.com/adap/flower/pull/5739), [#5740](https://github.com/adap/flower/pull/5740), [#5753](https://github.com/adap/flower/pull/5753), [#5764](https://github.com/adap/flower/pull/5764), [#5769](https://github.com/adap/flower/pull/5769), [#5775](https://github.com/adap/flower/pull/5775), [#5782](https://github.com/adap/flower/pull/5782), [#5788](https://github.com/adap/flower/pull/5788), [#5795](https://github.com/adap/flower/pull/5795), [#5809](https://github.com/adap/flower/pull/5809), [#5812](https://github.com/adap/flower/pull/5812), [#5817](https://github.com/adap/flower/pull/5817))
 
   Restructures the tutorial series, removes `flower-simulation` references, and updates versioned docs to use the correct `flwr` versions. The [framework documentation homepage](https://flower.ai/docs/framework/) now defaults to the latest stable release instead of the `main` branch.
+
+- **Re-export user-facing API from `flwr.*app`** ([#5814](https://github.com/adap/flower/pull/5814))
+
+  The following classes are now re-exported:
+
+  - From `flwr.serverapp`: `ServerApp`, `Grid`
+  - From `flwr.clientapp`: `ClientApp`
+  - From `flwr.app`: `Array`, `ArrayRecord`, `ConfigRecord`, `Context`, `Message`, `MetricRecord`, `RecordDict`
+
+  Importing these from `flwr.server`, `flwr.client`, or `flwr.common` is **deprecated**. Please update your imports to use `flwr.serverapp`, `flwr.clientapp`, or `flwr.app` instead to ensure forward compatibility.
 
 - **Add `--health-server-address` flag to Flower SuperLink/SuperNode/SuperExec** ([#5792](https://github.com/adap/flower/pull/5792))
 
