@@ -1,11 +1,11 @@
 ---
 myst:
   html_meta:
-    description: Deploy Flower's SuperLink Helm chart to set up federated 
-      learning servers. Default config mirrors official releases, enabling 
+    description: Deploy Flower's SuperLink Helm chart to set up federated
+      learning servers. Default config mirrors official releases, enabling
       seamless deployment, evaluation.
-    property:og:description: Deploy Flower's SuperLink Helm chart to set up 
-      federated learning servers. Default config mirrors official releases, 
+    property:og:description: Deploy Flower's SuperLink Helm chart to set up
+      federated learning servers. Default config mirrors official releases,
       enabling seamless deployment, evaluation.
 ---
 
@@ -32,11 +32,10 @@ superlink:
   enabled: false
 ```
 
-## Enable the ServerApp component
+## Enable the SuperExec component
 
 ```yaml
-serverapp:
-  name: serverapp
+superexec:
   enabled: true
 ```
 
@@ -344,7 +343,7 @@ authorization:
 
 ## Change Isolation Mode
 
-The isolation mode determines how the SuperLink manages the ServerApp process execution.
+The isolation mode determines how the SuperLink manages the SuperExec process execution.
 This setting can be adjusted using the `superlink.isolationMode` parameter:
 
 **Example: Changing Isolation Mode**
@@ -353,9 +352,9 @@ This setting can be adjusted using the `superlink.isolationMode` parameter:
 superlink:
   isolationMode: process
 
-# Don’t forget to enable the serverapp if you don’t
+# Don’t forget to enable the superexec if you don’t
 # plan to use an existing one.
-serverapp:
+superexec:
   enabled: true
 ```
 

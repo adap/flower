@@ -1,11 +1,11 @@
 ---
 myst:
   html_meta:
-    description: Deploy Flower's SuperNode Helm chart to install client 
-      federated learning components. Default config mirrors official releases 
+    description: Deploy Flower's SuperNode Helm chart to install client
+      federated learning components. Default config mirrors official releases
       for seamless integration.
-    property:og:description: Deploy Flower's SuperNode Helm chart to install 
-      client federated learning components. Default config mirrors official 
+    property:og:description: Deploy Flower's SuperNode Helm chart to install
+      client federated learning components. Default config mirrors official
       releases for seamless integration.
 ---
 
@@ -178,7 +178,7 @@ supernode:
     address: my-superlink.example.com
     port: 9092
 
-clientapp:
+superexec:
   enabled: true
   supernode:
     address: my-supernode.example.com
@@ -189,8 +189,8 @@ clientapp:
 
 ### Isolation All-in-One
 
-To install SuperNode in isolation mode using the "process" configuration, both the ClientApp and
-SuperNode need to be enabled. By default, the ClientApp connects to the SuperNode internally
+To install SuperNode in isolation mode using the "process" configuration, both the SuperExec and
+SuperNode need to be enabled. By default, the SuperExec connects to the SuperNode internally
 within the cluster, so there is no need to set `supernode.address` and `supernode.port` unless the
 connection is external. This setup assumes that both components are running within the same cluster.
 
@@ -199,20 +199,20 @@ supernode:
   enabled: true
   isolationMode: process
 
-clientapp:
+superexec:
   enabled: true
 ```
 
 ### Isolation Distributed
 
-You can also deploy the SuperNode and ClientApp separately. To do this, you need to deploy the
-chart twice: once with `supernode.enabled=true` and once with `clientapp.enabled=true`.
+You can also deploy the SuperNode and SuperExec separately. To do this, you need to deploy the
+chart twice: once with `supernode.enabled=true` and once with `superexec.enabled=true`.
 
 ```yaml
 supernode:
   enabled: true
 
-clientapp:
+superexec:
   enabled: true
   supernode:
     address: my-supernode.example.com
