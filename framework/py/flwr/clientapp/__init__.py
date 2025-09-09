@@ -17,11 +17,6 @@
 
 from flwr.client.client_app import ClientApp
 
-from . import mod
-from .centraldp_mods import fixedclipping_mod
-
 __all__ = [
     "ClientApp",
-    "fixedclipping_mod",
-    "mod",
 ]

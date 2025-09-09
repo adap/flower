@@ -16,10 +16,11 @@
 
 
 from flwr.client.mod.comms_mods import arrays_size_mod, message_size_mod
-from flwr.client.mod.utils import make_ffn
+
+from .centraldp_mods import fixedclipping_mod
 
 __all__ = [
     "arrays_size_mod",
-    "make_ffn",
+    "fixedclipping_mod",
     "message_size_mod",
 ]
