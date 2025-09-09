@@ -42,7 +42,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Restructures the tutorial series, removes `flower-simulation` references, and updates versioned docs to use the correct `flwr` versions. The [framework documentation homepage](https://flower.ai/docs/framework/) now defaults to the latest stable release instead of the `main` branch.
 
-- **Re-export user-facing API from `flwr.*app`** ([#5814](https://github.com/adap/flower/pull/5814), [#5821](https://github.com/adap/flower/pull/5821), [#5832](https://github.com/adap/flower/pull/5832))
+- **Re-export user-facing API from `flwr.*app`** ([#5814](https://github.com/adap/flower/pull/5814), [#5821](https://github.com/adap/flower/pull/5821), [#5832](https://github.com/adap/flower/pull/5832), [#5835](https://github.com/adap/flower/pull/5835))
 
   The following classes are now re-exported:
 
