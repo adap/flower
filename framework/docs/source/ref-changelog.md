@@ -47,7 +47,7 @@ We would like to give our special thanks to all the contributors who made the ne
   The following classes are now re-exported:
 
   - From `flwr.serverapp`: `ServerApp`, `Grid`
-  - From `flwr.clientapp`: `ClientApp`, `mod` module
+  - From `flwr.clientapp`: `ClientApp`, `arrays_size_mod`, `fixedclipping_mod`, `message_size_mod`
   - From `flwr.app`: `Array`, `ArrayRecord`, `ConfigRecord`, `Context`, `Message`, `MetricRecord`, `RecordDict`
 
   Importing these from `flwr.server`, `flwr.client`, or `flwr.common` is **deprecated**. Please update your imports to use `flwr.serverapp`, `flwr.clientapp`, or `flwr.app` instead to ensure forward compatibility.
