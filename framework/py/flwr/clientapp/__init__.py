@@ -17,6 +17,8 @@
 
 from flwr.client.client_app import ClientApp
 
+from . import mod
+
 __all__ = [
     "ClientApp",
     "mod",
