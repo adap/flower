@@ -11,14 +11,12 @@ from pytorch_example.task import train as train_fn
 app = ClientApp()
 classification_head_name = "classification-head"
 
-
 def save_layer_weights_to_state(state: RecordDict, net: Net):
     """Save last layer weights to state."""
     arr_record = ArrayRecord(net.fc2.state_dict())
 
     # Add to RecordDict (replace if already exists)
     state[classification_head_name] = arr_record
-
 
 def load_layer_weights_from_state(state: RecordDict, net: Net):
     """Load last layer weights from state and applies them to the model."""
@@ -29,7 +27,6 @@ def load_layer_weights_from_state(state: RecordDict, net: Net):
 
     # apply previously saved classification head by this client
     net.fc2.load_state_dict(state_dict, strict=True)
-
 
 @app.train()
 def train(msg: Message, context: Context):

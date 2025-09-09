@@ -28,9 +28,8 @@ clientapp = "tensorflow_example.client_app:app"
 num-server-rounds = 5
 local-epochs = 1
 batch-size = 32
-fraction-fit = 0.25
+fraction-train = 0.25
 fraction-evaluate = 0.5
-use-wandb = true
 
 [tool.flwr.federations]
 default = "local-sim"

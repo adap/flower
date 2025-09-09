@@ -100,6 +100,9 @@ With default parameters, 25% of the total 50 nodes (see `num-supernodes` in `pyp
 > [!TIP]
 > To run your `ClientApps` on GPU or to adjust the degree or parallelism of your simulation, edit the `[tool.flwr.federations.local-simulation]` section in the `pyproject.tom`. Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
 
+```bash
+flwr run .
+```
 
 You can run the app using another federation (see `pyproject.toml`). For example, if you have a GPU available, select the `local-sim-gpu` federation:
 
