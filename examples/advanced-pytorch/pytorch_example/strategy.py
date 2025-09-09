@@ -2,6 +2,7 @@
 
 import io
 import json
+import os
 import time
 from logging import INFO
 from pathlib import Path
@@ -21,7 +22,8 @@ PROJECT_NAME = "FLOWER-advanced-pytorch"
 
 class CustomFedAvg(FedAvg):
     """A class that behaves like FedAvg but has extra functionality
-    added into the `start` method.
+    added into the `start` method. It also overrides `configure_train`
+    to implement a simple learning rate schedule.
 
     This strategy: (1) saves results to the filesystem each rounds, (2)
     saves a checkpoint of the global model when a new best is found,
@@ -52,6 +54,38 @@ class CustomFedAvg(FedAvg):
             file_name = f"model_state_acc_{accuracy}_round_{current_round}.pth"
             torch.save(model.state_dict(), self.save_path / file_name)
             logger.log(INFO, "💾 New best model saved to disk: %s", file_name)
+
+    def save_metrics_as_json(self, current_round: int, result: Result) -> None:
+        """Saves the current results to a JSON file."""
+
+        # Load current JSON if file exists
+        if os.path.exists(f"{self.save_path}/results.json"):
+            with open(f"{self.save_path}/results.json", "r", encoding="utf-8") as fp:
+                try:
+                    results = json.load(fp)
+                except json.JSONDecodeError:
+                    results = []
+        else:
+            results = []
+
+        # Extract metrics from current round
+        last_train_metrics = dict(result.train_metrics_clientapp.get(current_round, {}))
+        last_eval_client_metrics = dict(
+            result.evaluate_metrics_clientapp.get(current_round, {})
+        )
+        last_eval_server_metrics = dict(
+            result.evaluate_metrics_serverapp.get(current_round, {})
+        )
+        round_results = {
+            "round": current_round,
+            "train_metrics": last_train_metrics,
+            "evaluate_metrics_clientapp": last_eval_client_metrics,
+            "evaluate_metrics_serverapp": last_eval_server_metrics,
+        }
+        results.append(round_results)
+        # Save to JSON
+        with open(f"{self.save_path}/results.json", "w", encoding="utf-8") as fp:
+            json.dump(results, fp)
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
@@ -188,23 +222,7 @@ class CustomFedAvg(FedAvg):
                     wandb.log(dict(res), step=current_round)
 
             # Save metrics to disk as JSON
-            with open(f"{self.save_path}/results.json", "w", encoding="utf-8") as fp:
-                last_train_metrics = dict(
-                    result.train_metrics_clientapp.get(current_round, {})
-                )
-                last_eval_client_metrics = dict(
-                    result.evaluate_metrics_clientapp.get(current_round, {})
-                )
-                last_eval_server_metrics = dict(
-                    result.evaluate_metrics_serverapp.get(current_round, {})
-                )
-                round_results = {
-                    "round": current_round,
-                    "train_metrics": last_train_metrics,
-                    "evaluate_metrics_clientapp": last_eval_client_metrics,
-                    "evaluate_metrics_serverapp": last_eval_server_metrics,
-                }
-                json.dump(round_results, fp)
+            self.save_metrics_as_json(current_round=current_round, result=result)
 
         log(INFO, "")
         log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)
