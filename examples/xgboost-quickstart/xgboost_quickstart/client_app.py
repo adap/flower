@@ -5,7 +5,14 @@ import warnings
 import xgboost as xgb
 
 from flwr.client import ClientApp
-from flwr.common import ArrayRecord, ConfigRecord, Context, Message, RecordDict, MetricRecord
+from flwr.common import (
+    ArrayRecord,
+    ConfigRecord,
+    Context,
+    Message,
+    RecordDict,
+    MetricRecord,
+)
 from flwr.common.config import unflatten_dict
 
 from xgboost_quickstart.task import load_data, replace_keys
@@ -25,9 +32,9 @@ def _local_boost(bst_input, num_local_round, train_dmatrix):
 
     # Bagging: extract the last N=num_local_round trees for sever aggregation
     bst = bst_input[
-          bst_input.num_boosted_rounds()
-          - num_local_round: bst_input.num_boosted_rounds()
-          ]
+        bst_input.num_boosted_rounds()
+        - num_local_round : bst_input.num_boosted_rounds()
+    ]
     return bst
 
 
@@ -56,7 +63,7 @@ def train(msg: Message, context: Context) -> Message:
         )
     else:
         bst = xgb.Booster(params=params)
-        global_model = bytearray(msg.content["arrays"]['0'].numpy().tobytes())
+        global_model = bytearray(msg.content["arrays"]["0"].numpy().tobytes())
 
         # Load global model into booster
         bst.load_model(global_model)
@@ -83,9 +90,7 @@ def evaluate(msg: Message, context: Context) -> Message:
     # Load model and data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    _, valid_dmatrix, _, num_val = load_data(
-        partition_id, num_partitions
-    )
+    _, valid_dmatrix, _, num_val = load_data(partition_id, num_partitions)
 
     # Load config
     cfg = replace_keys(unflatten_dict(context.run_config))
@@ -93,7 +98,7 @@ def evaluate(msg: Message, context: Context) -> Message:
 
     # Load global model
     bst = xgb.Booster(params=params)
-    para_b = bytearray(msg.content["arrays"]['0'].numpy().tobytes())
+    para_b = bytearray(msg.content["arrays"]["0"].numpy().tobytes())
     bst.load_model(para_b)
 
     # Run evaluation

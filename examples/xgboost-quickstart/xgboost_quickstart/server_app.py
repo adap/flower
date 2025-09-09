@@ -37,6 +37,6 @@ def main(grid: Grid, context: Context) -> None:
 
     # Save final model to disk
     print("\nSaving final model to disk...")
-    model_arr = bytearray(result.arrays['0'].numpy().tobytes())
+    model_arr = bytearray(result.arrays["0"].numpy().tobytes())
     with open("final_model.json", "wb") as f:
         f.write(model_arr)
