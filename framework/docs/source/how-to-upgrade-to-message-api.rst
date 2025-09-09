@@ -153,8 +153,8 @@ learning rounds.
 
 .. note::
 
-    The new ``Message``-based strategies are located in the `flwr.serverapp.strate
-    <ref-api/flwr.serverapp.Strategy.html>`_ module unlike the previous strategies which
+    The new ``Message``-based strategies are located in the `flwr.serverapp.strategy
+    <ref-api/flwr.serverapp.strategy.html>`_ module unlike the previous strategies which
     were located in the `flwr.server.strategy <ref-api/flwr.server.strategy.html>`_
     module. Over time more strategies will be added to the `flwr.serverapp.strategy`
     module. Users are encouraged to use these new strategies.
