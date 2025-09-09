@@ -50,4 +50,3 @@ README.md @jafermarq @tanertopal @danieljanes
 # Override for CLI
 /framework/py/flwr/superlink/cli/ @tanertopal @danieljanes
 /framework/py/flwr/supernode/cli/ @tanertopal @danieljanes
-/framework/py/flwr/supercore/cli/ @tanertopal @danieljanes
