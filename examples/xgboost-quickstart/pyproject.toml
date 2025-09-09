@@ -28,7 +28,6 @@ clientapp = "xgboost_quickstart.client_app:app"
 num-server-rounds = 3
 fraction-train = 0.1
 fraction-evaluate = 0.1
-min-available-nodes = 2
 
 # ClientApp
 local-epochs = 1

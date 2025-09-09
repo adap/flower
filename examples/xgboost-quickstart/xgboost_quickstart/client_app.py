@@ -1,10 +1,11 @@
 """xgboost_quickstart: A Flower / XGBoost app."""
 
+import numpy as np
 import warnings
 import xgboost as xgb
 
 from flwr.client import ClientApp
-from flwr.common import Context, Message, ConfigRecord, RecordDict, MetricRecord
+from flwr.common import ArrayRecord, ConfigRecord, Context, Message, RecordDict, MetricRecord
 from flwr.common.config import unflatten_dict
 
 from xgboost_quickstart.task import load_data, replace_keys
@@ -44,7 +45,7 @@ def train(msg: Message, context: Context) -> Message:
     num_local_round = cfg["local_epochs"]
     params = cfg["params"]
 
-    global_round = msg.content["model_config"]["server-round"]
+    global_round = msg.content["config"]["server-round"]
     if global_round == 1:
         # First round local training
         bst = xgb.train(
@@ -55,7 +56,7 @@ def train(msg: Message, context: Context) -> Message:
         )
     else:
         bst = xgb.Booster(params=params)
-        global_model = bytearray(msg.content["model_config"]["model"])
+        global_model = bytearray(msg.content["arrays"]['0'].numpy().tobytes())
 
         # Load global model into booster
         bst.load_model(global_model)
@@ -65,11 +66,15 @@ def train(msg: Message, context: Context) -> Message:
 
     # Save model
     local_model = bst.save_raw("json")
-    local_model_bytes = bytes(local_model)
+    model_np = np.frombuffer(local_model, dtype=np.uint8)
 
     # Construct reply message
-    model_record = ConfigRecord({"model": local_model_bytes})
-    content = RecordDict({"local_model": model_record})
+    model_record = ArrayRecord([model_np])
+    metrics = {
+        "num-examples": num_train,
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
     return Message(content=content, reply_to=msg)
 
 
@@ -88,7 +93,7 @@ def evaluate(msg: Message, context: Context) -> Message:
 
     # Load global model
     bst = xgb.Booster(params=params)
-    para_b = bytearray(msg.content["model_config"]["model"])
+    para_b = bytearray(msg.content["arrays"]['0'].numpy().tobytes())
     bst.load_model(para_b)
 
     # Run evaluation
