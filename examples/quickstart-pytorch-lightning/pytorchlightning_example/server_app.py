@@ -4,7 +4,7 @@ import torch
 from flwr.app import ArrayRecord, ConfigRecord, Context
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
-from pytorchlightning_example.task import LitAutoEncoder, get_parameters
+from pytorchlightning_example.task import LitAutoEncoder
 
 # Create ServerApp
 app = ServerApp()
@@ -16,7 +16,6 @@ def main(grid: Grid, context: Context) -> None:
 
     # Read run config
     num_rounds: int = context.run_config["num-server-rounds"]
-    lr: float = context.run_config["learning-rate"]
 
     # Load global model
     global_model = LitAutoEncoder()
@@ -29,7 +28,6 @@ def main(grid: Grid, context: Context) -> None:
     result = strategy.start(
         grid=grid,
         initial_arrays=arrays,
-        train_config=ConfigRecord({"lr": lr}),
         num_rounds=num_rounds,
     )
 
