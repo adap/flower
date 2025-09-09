@@ -40,6 +40,7 @@ A learning-oriented series of federated learning tutorials, the best place to st
     tutorial-series-use-a-federated-learning-strategy-pytorch
     tutorial-series-build-a-strategy-from-scratch-pytorch
     tutorial-series-customize-the-client-pytorch
+    tutorial-fedmd-pytorch
     notebooks/index
 
 .. toctree::
@@ -100,6 +101,7 @@ ideas behind Flower and collaborative AI.
     explanation-federated-evaluation
     explanation-differential-privacy
     explanation-flower-architecture
+    explanation-fedmd
 
 References
 ~~~~~~~~~~
