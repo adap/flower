@@ -58,6 +58,41 @@ By default, the metrics: {`centralized_accuracy`, `centralized_loss`, `federated
 
 ![](_static/wandb_plots.png)
 
+The `results.json` would look along the lines of:
+
+```JSON
+[
+    {
+        "round": 1,
+        "train_metrics": {
+            "train_loss": 2.42163295142398
+        },
+        "evaluate_metrics_clientapp": {
+            "eval_loss": 2.303316633324679,
+            "eval_acc": 0.11882631674867869
+        },
+        "evaluate_metrics_serverapp": {
+            "accuracy": 0.1,
+            "loss": 2.3280856304656203
+        }
+    },
+    {
+        "round": 2,
+        "train_metrics": {
+            "train_loss": 1.8474334717885639
+        },
+        "evaluate_metrics_clientapp": {
+            "eval_loss": 2.1314486836388467,
+            "eval_acc": 0.19826539462272333
+        },
+        "evaluate_metrics_serverapp": {
+            "accuracy": 0.1,
+            "loss": 2.2980988307501944
+        }
+    },
+]
+```
+
 ### Run with the Simulation Engine
 
 With default parameters, 25% of the total 50 nodes (see `num-supernodes` in `pyproject.toml`) will be sampled for `fit` and 50% for an `evaluate` round. By default `ClientApp` objects will run on CPU.
