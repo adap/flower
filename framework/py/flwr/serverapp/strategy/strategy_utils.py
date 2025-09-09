@@ -21,6 +21,8 @@ from logging import INFO
 from time import sleep
 from typing import Optional, cast
 
+import numpy as np
+
 from flwr.common import (
     Array,
     ArrayRecord,
@@ -99,7 +101,7 @@ def aggregate_arrayrecords(
                     aggregated_np_arrays[key] += value.numpy() * weight
 
     return ArrayRecord(
-        OrderedDict({k: Array(v) for k, v in aggregated_np_arrays.items()})
+        OrderedDict({k: Array(np.asarray(v)) for k, v in aggregated_np_arrays.items()})
     )
 
 

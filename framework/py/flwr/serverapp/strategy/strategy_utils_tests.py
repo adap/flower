@@ -22,8 +22,8 @@ import pytest
 from parameterized import parameterized
 
 from flwr.common import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
+from flwr.serverapp.exception import InconsistentMessageReplies
 
-from ..exception import InconsistentMessageReplies
 from .strategy_utils import (
     aggregate_arrayrecords,
     aggregate_metricrecords,
@@ -69,6 +69,33 @@ def test_arrayrecords_aggregation() -> None:
     # Assert consistency
     assert all(np.allclose(a, b) for a, b in zip(aggrd.to_numpy_ndarrays(), avg_list))
     assert aggrd.object_id == ArrayRecord(avg_list).object_id
+
+
+def test_arrayrecords_aggregation_with_ndim_zero() -> None:
+    """Test aggregation of ArrayRecords with 0-dim arrays."""
+    num_replies = 3
+    weights = [0.25, 0.4, 0.35]
+    np_arrays = [np.array(np.random.randn()) for _ in range(num_replies)]
+
+    # For 0-dimensional arrays, we just compute the weighted average directly
+    avg_list = [np.average(np_arrays, axis=0, weights=weights)]
+
+    # Construct RecordDicts (mimicing replies)
+    records = [
+        RecordDict(
+            {
+                "arrays": ArrayRecord([np_arrays[i]]),
+                "metrics": MetricRecord({"weight": weights[i]}),
+            }
+        )
+        for i in range(num_replies)
+    ]
+    # Execute aggregate
+    aggrd = aggregate_arrayrecords(records, weighting_metric_name="weight")
+
+    # Assert consistency
+    assert np.isclose(aggrd.to_numpy_ndarrays()[0], avg_list[0])
+    assert aggrd.object_id == ArrayRecord([np.array(avg_list[0])]).object_id
 
 
 def test_metricrecords_aggregation() -> None:
