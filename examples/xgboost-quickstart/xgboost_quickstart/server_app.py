@@ -110,7 +110,7 @@ def configure_nodes(
     # Create messages
     gmodel_config_record = ConfigRecord({
         "model": global_model,
-        "server-round": server_round,
+        "server-round": server_round + 1,
     })
     recorddict = RecordDict({"model_config": gmodel_config_record})
 
