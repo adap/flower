@@ -42,12 +42,12 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Restructures the tutorial series, removes `flower-simulation` references, and updates versioned docs to use the correct `flwr` versions. The [framework documentation homepage](https://flower.ai/docs/framework/) now defaults to the latest stable release instead of the `main` branch.
 
-- **Re-export user-facing API from `flwr.*app`** ([#5814](https://github.com/adap/flower/pull/5814), [#5821](https://github.com/adap/flower/pull/5821))
+- **Re-export user-facing API from `flwr.*app`** ([#5814](https://github.com/adap/flower/pull/5814), [#5821](https://github.com/adap/flower/pull/5821), [#5832](https://github.com/adap/flower/pull/5832))
 
   The following classes are now re-exported:
 
   - From `flwr.serverapp`: `ServerApp`, `Grid`
-  - From `flwr.clientapp`: `ClientApp`
+  - From `flwr.clientapp`: `ClientApp`, `mod` module
   - From `flwr.app`: `Array`, `ArrayRecord`, `ConfigRecord`, `Context`, `Message`, `MetricRecord`, `RecordDict`
 
   Importing these from `flwr.server`, `flwr.client`, or `flwr.common` is **deprecated**. Please update your imports to use `flwr.serverapp`, `flwr.clientapp`, or `flwr.app` instead to ensure forward compatibility.
