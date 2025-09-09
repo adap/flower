@@ -17,6 +17,7 @@
 
 import argparse
 from logging import INFO
+from typing import Optional
 
 from flwr.common import EventType, event
 from flwr.common.constant import ExecPluginType
@@ -33,6 +34,25 @@ from flwr.supercore.superexec.plugin import (
     SimulationExecPlugin,
 )
 from flwr.supercore.superexec.run_superexec import run_superexec
+
+try:
+    from flwr.ee.constant import ExecEePluginType
+    from flwr.ee.exec_plugin import get_ee_plugin_and_stub_class
+except ImportError:
+
+    class ExecEePluginType:  # type: ignore[no-redef]
+        """SuperExec EE plugin types."""
+
+        @staticmethod
+        def all() -> list[str]:
+            """Return all SuperExec EE plugin types."""
+            return []
+
+    def get_ee_plugin_and_stub_class(  # pylint: disable=unused-argument
+        plugin_type: str,
+    ) -> Optional[tuple[type[ExecPlugin], type[object]]]:
+        """Get the EE plugin class and stub class based on the plugin type."""
+        return None
 
 
 def flower_superexec() -> None:
@@ -73,7 +93,7 @@ def _parse_args() -> argparse.ArgumentParser:
     parser.add_argument(
         "--plugin-type",
         type=str,
-        choices=ExecPluginType.all(),
+        choices=ExecPluginType.all() + ExecEePluginType.all(),
         required=True,
         help="The type of plugin to use.",
     )
@@ -116,4 +136,6 @@ def _get_plugin_and_stub_class(
         return ServerAppExecPlugin, ServerAppIoStub
     if plugin_type == ExecPluginType.SIMULATION:
         return SimulationExecPlugin, SimulationIoStub
+    if ret := get_ee_plugin_and_stub_class(plugin_type):
+        return ret  # type: ignore[no-any-return]
     raise ValueError(f"Unknown plugin type: {plugin_type}")
