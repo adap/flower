@@ -72,8 +72,7 @@ class TestControlServicer(unittest.TestCase):
 
     def tearDown(self) -> None:
         """Clean up after tests."""
-        if hasattr(self, "tmp_dir"):
-            self.tmp_dir.cleanup()
+        self.tmp_dir.cleanup()
 
     def test_start_run(self) -> None:
         """Test StartRun method of ControlServicer."""
