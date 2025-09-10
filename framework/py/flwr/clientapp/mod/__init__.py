@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Public Flower ServerApp APIs."""
+"""Flower Built-in Mods."""
 
 
-from flwr.server.grid import Grid
-from flwr.server.server_app import ServerApp
+from flwr.client.mod.comms_mods import arrays_size_mod, message_size_mod
 
-from . import strategy
+from .centraldp_mods import fixedclipping_mod
 
 __all__ = [
-    "Grid",
-    "ServerApp",
-    "strategy",
+    "arrays_size_mod",
+    "fixedclipping_mod",
+    "message_size_mod",
 ]

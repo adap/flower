@@ -21,6 +21,8 @@ from logging import INFO
 from time import sleep
 from typing import Optional, cast
 
+import numpy as np
+
 from flwr.common import (
     Array,
     ArrayRecord,
@@ -30,28 +32,9 @@ from flwr.common import (
     RecordDict,
     log,
 )
-from flwr.common.exception import AppExitException
-from flwr.common.exit import ExitCode
 from flwr.server import Grid
 
-
-class InconsistentMessageReplies(AppExitException):
-    """Exception triggered when replies are inconsistent and therefore aggregation must
-    be skipped."""
-
-    exit_code = ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET
-
-    def __init__(self, reason: str):
-        super().__init__(reason)
-
-
-class AggregationError(AppExitException):
-    """Exception triggered when aggregation fails."""
-
-    exit_code = ExitCode.SERVERAPP_STRATEGY_AGGREGATION_ERROR
-
-    def __init__(self, reason: str):
-        super().__init__(reason)
+from ..exception import InconsistentMessageReplies
 
 
 def config_to_str(config: ConfigRecord) -> str:
@@ -118,7 +101,7 @@ def aggregate_arrayrecords(
                     aggregated_np_arrays[key] += value.numpy() * weight
 
     return ArrayRecord(
-        OrderedDict({k: Array(v) for k, v in aggregated_np_arrays.items()})
+        OrderedDict({k: Array(np.asarray(v)) for k, v in aggregated_np_arrays.items()})
     )
 
 
