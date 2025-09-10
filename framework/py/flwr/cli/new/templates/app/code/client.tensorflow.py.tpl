@@ -15,8 +15,8 @@ def train(msg: Message, context: Context):
 
     # Load the model and initialize it with the received weights
     model = load_model()
-    global_ndarrays = msg.content["arrays"].to_numpy_ndarrays()
-    model.set_weights(global_ndarrays)
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    model.set_weights(glondarraysbal_ndarrays)
 
     # Read from config
     epochs = context.run_config["local-epochs"]
@@ -60,8 +60,8 @@ def evaluate(msg: Message, context: Context):
 
     # Load the model and initialize it with the received weights
     model = load_model()
-    global_ndarrays = msg.content["arrays"].to_numpy_ndarrays()
-    model.set_weights(global_ndarrays)
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    model.set_weights(ndarrays)
 
     # Load the data
     partition_id = context.node_config["partition-id"]

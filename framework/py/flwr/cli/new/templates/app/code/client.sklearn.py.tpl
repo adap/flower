@@ -36,8 +36,8 @@ def train(msg: Message, context: Context):
     set_initial_params(model)
 
     # Apply received pararameters
-    global_ndarrays = msg.content["arrays"].to_numpy_ndarrays()
-    set_model_params(model, global_ndarrays)
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    set_model_params(model, ndarrays)
 
     # Load the data
     partition_id = context.node_config["partition-id"]
@@ -76,8 +76,8 @@ def evaluate(msg: Message, context: Context):
     set_initial_params(model)
 
     # Apply received pararameters
-    global_ndarrays = msg.content["arrays"].to_numpy_ndarrays()
-    set_model_params(model, global_ndarrays)
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    set_model_params(model, ndarrays)
 
     # Load the data
     partition_id = context.node_config["partition-id"]

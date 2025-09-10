@@ -25,8 +25,8 @@ def train(msg: Message, context: Context):
     grad_fn = jax.grad(loss_fn)
 
     # Set model parameters
-    global_array = msg.content["arrays"].to_numpy_ndarrays()
-    set_params(model, global_array)
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    set_params(model, ndarrays)
 
     # Train the model on local data
     model, loss, num_examples = train_fn(model, grad_fn, train_x, train_y)
@@ -55,8 +55,8 @@ def evaluate(msg: Message, context: Context):
     grad_fn = jax.grad(loss_fn)
 
     # Set model parameters
-    global_array = msg.content["arrays"].to_numpy_ndarrays()
-    set_params(model, global_array)
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    set_params(model, ndarrays)
 
     # Evaluate the model on local data
     loss, num_examples = evaluation_fn(model, grad_fn, test_x, test_y)

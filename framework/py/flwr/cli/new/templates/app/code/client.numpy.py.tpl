@@ -13,10 +13,10 @@ def train(msg: Message, context: Context):
     """Train the model on local data."""
 
     # The model is the global arrays
-    model = msg.content["arrays"].to_numpy_ndarrays()
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
 
     # Simulate local training (here we just add random noise to model parameters)
-    model = [m + np.random.rand(*m.shape) for m in model]
+    model = [m + np.random.rand(*m.shape) for m in ndarrays]
 
     # Construct and return reply Message
     model_record = ArrayRecord(model)
@@ -34,7 +34,7 @@ def evaluate(msg: Message, context: Context):
     """Evaluate the model on local data."""
 
     # The model is the global arrays
-    model = msg.content["arrays"].to_numpy_ndarrays()
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
 
     # Return reply Message
     metrics = {
