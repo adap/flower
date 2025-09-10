@@ -170,8 +170,7 @@ class TestControlServicerAuth(unittest.TestCase):
 
     def tearDown(self) -> None:
         """Clean up after tests."""
-        if hasattr(self, "tmp_dir"):
-            self.tmp_dir.cleanup()
+        self.tmp_dir.cleanup()
 
     def make_context(self) -> MagicMock:
         """Create a mock context."""
