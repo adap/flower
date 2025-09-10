@@ -178,19 +178,18 @@ class FedAvg(Strategy):
         if not replies:
             return None, None
 
-        # Log if any Messages carried errors
         # Filter messages that carry content
-        num_errors = 0
         replies_with_content = []
+        errors: tuple[str, int, str] = []
         for msg in replies:
             if msg.has_error():
-                log(
-                    INFO,
-                    "Received error in reply from node %d: %s",
-                    msg.metadata.src_node_id,
-                    msg.error,
+                errors.append(
+                    (
+                        "\t> Received error in reply from node %d: %s",
+                        msg.metadata.src_node_id,
+                        msg.error.reason,
+                    )
                 )
-                num_errors += 1
             else:
                 replies_with_content.append(msg.content)
 
@@ -198,18 +197,23 @@ class FedAvg(Strategy):
             INFO,
             "aggregate_train: Received %s results and %s failures",
             len(replies_with_content),
-            num_errors,
+            len(errors),
         )
 
-        # Ensure expected ArrayRecords and MetricRecords are received
-        validate_message_reply_consistency(
-            replies=replies_with_content,
-            weighted_by_key=self.weighted_by_key,
-            check_arrayrecord=True,
-        )
+        # Log errors
+        for err in errors:
+            log(INFO, *err)
 
         arrays, metrics = None, None
         if replies_with_content:
+
+            # Ensure expected ArrayRecords and MetricRecords are received
+            validate_message_reply_consistency(
+                replies=replies_with_content,
+                weighted_by_key=self.weighted_by_key,
+                check_arrayrecord=True,
+            )
+
             # Aggregate ArrayRecords
             arrays = aggregate_arrayrecords(
                 replies_with_content,
@@ -256,19 +260,18 @@ class FedAvg(Strategy):
         if not replies:
             return None
 
-        # Log if any Messages carried errors
         # Filter messages that carry content
-        num_errors = 0
         replies_with_content = []
+        errors: tuple[str, int, str] = []
         for msg in replies:
             if msg.has_error():
-                log(
-                    INFO,
-                    "Received error in reply from node %d: %s",
-                    msg.metadata.src_node_id,
-                    msg.error,
+                errors.append(
+                    (
+                        "\t> Received error in reply from node %d: %s",
+                        msg.metadata.src_node_id,
+                        msg.error.reason,
+                    )
                 )
-                num_errors += 1
             else:
                 replies_with_content.append(msg.content)
 
@@ -276,17 +279,23 @@ class FedAvg(Strategy):
             INFO,
             "aggregate_evaluate: Received %s results and %s failures",
             len(replies_with_content),
-            num_errors,
+            len(errors),
         )
 
-        # Ensure expected ArrayRecords and MetricRecords are received
-        validate_message_reply_consistency(
-            replies=replies_with_content,
-            weighted_by_key=self.weighted_by_key,
-            check_arrayrecord=False,
-        )
+        # Log errors
+        for err in errors:
+            log(INFO, *err)
+
         metrics = None
         if replies_with_content:
+
+            # Ensure expected MetricRecords are received
+            validate_message_reply_consistency(
+                replies=replies_with_content,
+                weighted_by_key=self.weighted_by_key,
+                check_arrayrecord=False,
+            )
+
             # Aggregate MetricRecords
             metrics = self.evaluate_metrics_aggr_fn(
                 replies_with_content,
