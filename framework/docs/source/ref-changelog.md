@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## v1.21.0 (2025-09-10)
 
 ### Thanks to our contributors
@@ -25,8 +27,6 @@ We would like to give our special thanks to all the contributors who made the ne
 - **New PyTorch template with Message API** ([#5784](https://github.com/adap/flower/pull/5784))
 
   A new PyTorch template using the Message API is now available through `flwr new`.
-
-- **Update documentation to use SuperExec** ()
 
 - **Add OpenShift deployment guide for Flower** ([#5781](https://github.com/adap/flower/pull/5781))
 
