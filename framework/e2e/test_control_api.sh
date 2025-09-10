@@ -75,7 +75,7 @@ fi
 # Combine the arguments into a single command for flower-superlink
 combined_args="$server_arg $server_auth $simulation_arg"
 
-timeout 2m flower-superlink $combined_args 2>&1 | tee flwr_output.log &
+timeout 2m flower-superlink $combined_args &
 sl_pid=$(pgrep -f "flower-superlink")
 sleep 2
 
