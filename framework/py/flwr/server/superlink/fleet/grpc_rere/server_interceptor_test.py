@@ -149,8 +149,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Clean up grpc server."""
         self._server.stop(None)
         # Cleanup the temp directory
-        if hasattr(self, "tmp_dir"):
-            self.tmp_dir.cleanup()
+        self.tmp_dir.cleanup()
 
     def _make_metadata(self) -> list[Any]:
         """Create metadata with signature and timestamp."""
