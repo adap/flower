@@ -15,11 +15,11 @@
 """Flower application exceptions."""
 
 
-class AppExitException(Exception):
+class AppExitException(BaseException):
     """Base exception for all application-level errors in ServerApp and ClientApp.
 
     When raised, the process will exit and report a telemetry event with the associated
-    exit code.
+    exit code. This is not intended to be caught by user code.
     """
 
     # Default exit code — subclasses must override
