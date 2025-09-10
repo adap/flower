@@ -16,7 +16,7 @@ def train(msg: Message, context: Context):
     # Load the model and initialize it with the received weights
     model = load_model()
     ndarrays = msg.content["arrays"].to_numpy_ndarrays()
-    model.set_weights(glondarraysbal_ndarrays)
+    model.set_weights(ndarrays)
 
     # Read from config
     epochs = context.run_config["local-epochs"]
