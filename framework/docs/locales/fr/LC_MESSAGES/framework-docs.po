@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-09-09 00:07+0000\n"
+"POT-Creation-Date: 2025-09-10 00:07+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -14393,7 +14393,7 @@ msgstr ""
 #: ../../source/how-to-upgrade-to-message-api.rst:156
 msgid ""
 "The new ``Message``-based strategies are located in the "
-"`flwr.serverapp.strate <ref-api/flwr.serverapp.Strategy.html>`_ module "
+"`flwr.serverapp.strategy <ref-api/flwr.serverapp.strategy.html>`_ module "
 "unlike the previous strategies which were located in the "
 "`flwr.server.strategy <ref-api/flwr.server.strategy.html>`_ module. Over "
 "time more strategies will be added to the `flwr.serverapp.strategy` "
@@ -17884,7 +17884,7 @@ msgid "Flower main package."
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:43
-#: ../../source/ref-api/flwr.clientapp.rst:40 ../../source/ref-api/flwr.rst:25
+#: ../../source/ref-api/flwr.clientapp.rst:33 ../../source/ref-api/flwr.rst:25
 #: ../../source/ref-api/flwr.server.rst:49
 #: ../../source/ref-api/flwr.serverapp.rst:34
 msgid "Modules"
@@ -17968,8 +17968,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.app.rst:17
 #: ../../source/ref-api/flwr.client.mod.rst:30
 #: ../../source/ref-api/flwr.client.rst:25
-#: ../../source/ref-api/flwr.clientapp.mod.rst:30
-#: ../../source/ref-api/flwr.clientapp.rst:24
+#: ../../source/ref-api/flwr.clientapp.rst:17
 #: ../../source/ref-api/flwr.common.rst:32
 #: ../../source/ref-api/flwr.server.rst:24
 #: ../../source/ref-api/flwr.server.strategy.rst:17
@@ -20182,7 +20181,6 @@ msgstr "client"
 #: ../../source/ref-api/flwr.client.mod.rst:13
 #: ../../source/ref-api/flwr.client.rst:13
 #: ../../source/ref-api/flwr.clientapp.mod.rst:13
-#: ../../source/ref-api/flwr.clientapp.rst:13
 #: ../../source/ref-api/flwr.common.rst:13
 #: ../../source/ref-api/flwr.server.rst:13
 #: ../../source/ref-api/flwr.simulation.rst:13
@@ -20228,7 +20226,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.rst:29:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.rst:22:<autosummary>:1
 #: flwr.client.client_app.ClientApp:1 of
 #, fuzzy
 msgid "Flower ClientApp."
@@ -20248,8 +20246,8 @@ msgstr ""
 msgid ":py:obj:`flwr.client.mod <flwr.client.mod>`\\"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../docstring ../../source/ref-api/flwr.client.rst:50:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.rst:47:<autosummary>:1 flwr.client.mod:1
+#: ../../source/ref-api/flwr.client.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.rst:40:<autosummary>:1 flwr.client.mod:1
 #: flwr.clientapp.mod:1 of
 #, fuzzy
 msgid "Flower Built-in Mods."
@@ -20640,7 +20638,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:1 of
 #, fuzzy
 msgid "Client-side adaptive clipping modifier."
@@ -20653,7 +20650,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
 #: flwr.client.mod.comms_mods.arrays_size_mod:1 of
 #, fuzzy
 msgid "Arrays size mod."
@@ -20666,10 +20663,9 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.rst:22:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:1
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:1 of
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:1 of
 #, fuzzy
 msgid "Client-side fixed clipping modifier."
 msgstr "Logique côté client"
@@ -20680,7 +20676,6 @@ msgid ":py:obj:`make_ffn <flwr.client.mod.make_ffn>`\\ \\(ffn\\, mods\\)"
 msgstr "serveur.stratégie.Stratégie"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.utils.make_ffn:1 of
 msgid "."
 msgstr ""
@@ -20692,7 +20687,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
 #: flwr.client.mod.comms_mods.message_size_mod:1 of
 msgid "Message size mod."
 msgstr ""
@@ -20704,7 +20699,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.secure_aggregation.secagg_mod.secagg_mod:1 of
 msgid "Handle incoming message and return results, following the SecAgg protocol."
 msgstr ""
@@ -20716,7 +20710,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.secure_aggregation.secaggplus_mod.secaggplus_mod:1 of
 msgid ""
 "Handle incoming message and return results, following the SecAgg+ "
@@ -20730,7 +20723,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:35:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:35:<autosummary>:1
 #: flwr.client.mod.localdp_mod.LocalDpMod:1 of
 #, fuzzy
 msgid "Modifier for local differential privacy."
@@ -20749,7 +20741,7 @@ msgstr ""
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:12
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:10
 #: flwr.client.mod.localdp_mod.LocalDpMod:6
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:10 of
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:10 of
 msgid "It operates on messages of type `MessageType.TRAIN`."
 msgstr ""
 
@@ -20786,7 +20778,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.adaptiveclipping_mod.rst:2
-#: ../../source/ref-api/flwr.clientapp.mod.adaptiveclipping_mod.rst:2
 msgid "adaptiveclipping\\_mod"
 msgstr ""
 
@@ -20799,13 +20790,13 @@ msgstr ""
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:6
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:6
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:6 of
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:6 of
 msgid "The wrapper sends the clipping_norm value to the client."
 msgstr ""
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:8
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:8
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:8 of
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:8 of
 msgid "This mod clips the client model updates before sending them to the server."
 msgstr ""
 
@@ -20817,7 +20808,7 @@ msgstr ""
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:15
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:13
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:13
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:13
 #: flwr.server.grid.grid.Grid.send_and_receive:18
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:54
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:61
@@ -20828,7 +20819,7 @@ msgstr "Aucun"
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:16
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:14
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:14 of
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:14 of
 msgid "Consider the order of mods when using multiple."
 msgstr ""
 
@@ -20849,7 +20840,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.fixedclipping_mod.rst:2
-#: ../../source/ref-api/flwr.clientapp.fixedclipping_mod.rst:2
 #: ../../source/ref-api/flwr.clientapp.mod.fixedclipping_mod.rst:2
 msgid "fixedclipping\\_mod"
 msgstr ""
@@ -20861,12 +20851,11 @@ msgid ""
 msgstr ""
 
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:16
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:16 of
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:16 of
 msgid "Typically, fixedclipping_mod should be the last to operate on params."
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.make_ffn.rst:2
-#: ../../source/ref-api/flwr.clientapp.mod.make_ffn.rst:2
 msgid "make\\_ffn"
 msgstr ""
 
@@ -20880,12 +20869,10 @@ msgid "This mod logs the size in bytes of the message being transmited."
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.secagg_mod.rst:2
-#: ../../source/ref-api/flwr.clientapp.mod.secagg_mod.rst:2
 msgid "secagg\\_mod"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.secaggplus_mod.rst:2
-#: ../../source/ref-api/flwr.clientapp.mod.secaggplus_mod.rst:2
 #, fuzzy
 msgid "secaggplus\\_mod"
 msgstr "Flux de travail"
@@ -21017,19 +21004,13 @@ msgid "clientapp"
 msgstr "client"
 
 #: ../../source/ref-api/flwr.clientapp.rst:22:<autosummary>:1
-msgid ""
-":py:obj:`fixedclipping_mod <flwr.clientapp.fixedclipping_mod>`\\ "
-"\\(msg\\, ctxt\\, call\\_next\\)"
-msgstr ""
-
-#: ../../source/ref-api/flwr.clientapp.rst:29:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`ClientApp <flwr.clientapp.ClientApp>`\\ \\(\\[client\\_fn\\, "
 "mods\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.clientapp.rst:47:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.rst:40:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`flwr.clientapp.mod <flwr.clientapp.mod>`\\"
 msgstr "serveur.stratégie.Stratégie"
@@ -21060,67 +21041,33 @@ msgid ""
 "mods\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:3 of
-#, fuzzy
-msgid ""
-"This mod needs to be used with the "
-"`DifferentialPrivacyClientSideFixedClipping` server-side strategy "
-"wrapper."
-msgstr "Confidentialité différentielle"
-
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
-msgid ""
-":py:obj:`adaptiveclipping_mod "
-"<flwr.clientapp.mod.adaptiveclipping_mod>`\\ \\(msg\\, ctxt\\, "
-"call\\_next\\)"
-msgstr ""
-
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`arrays_size_mod <flwr.clientapp.mod.arrays_size_mod>`\\ "
 "\\(msg\\, ctxt\\, call\\_next\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
 msgid ""
 ":py:obj:`fixedclipping_mod <flwr.clientapp.mod.fixedclipping_mod>`\\ "
 "\\(msg\\, ctxt\\, call\\_next\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
-#, fuzzy
-msgid ":py:obj:`make_ffn <flwr.clientapp.mod.make_ffn>`\\ \\(ffn\\, mods\\)"
-msgstr "serveur.stratégie.Stratégie"
-
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`message_size_mod <flwr.clientapp.mod.message_size_mod>`\\ "
 "\\(msg\\, ctxt\\, call\\_next\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:3 of
+#, fuzzy
 msgid ""
-":py:obj:`secagg_mod <flwr.clientapp.mod.secagg_mod>`\\ \\(msg\\, ctxt\\, "
-"call\\_next\\)"
-msgstr ""
-
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
-msgid ""
-":py:obj:`secaggplus_mod <flwr.clientapp.mod.secaggplus_mod>`\\ \\(msg\\, "
-"ctxt\\, call\\_next\\)"
-msgstr ""
-
-#: ../../source/ref-api/flwr.clientapp.mod.rst:35:<autosummary>:1
-msgid ""
-":py:obj:`LocalDpMod <flwr.clientapp.mod.LocalDpMod>`\\ "
-"\\(clipping\\_norm\\, sensitivity\\, ...\\)"
-msgstr ""
-
-#: ../../source/ref-api/flwr.clientapp.mod.LocalDpMod.rst:2
-msgid "mod.LocalDpMod"
-msgstr ""
+"This mod needs to be used with the "
+"`DifferentialPrivacyClientSideFixedClipping` server-side strategy "
+"wrapper."
+msgstr "Confidentialité différentielle"
 
 #: ../../source/ref-api/flwr.common.rst:2
 msgid "common"
@@ -65401,5 +65348,50 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "`clientapp.networkPolicy.extraEgress`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The new ``Message``-based strategies are "
+#~ "located in the `flwr.serverapp.strate <ref-"
+#~ "api/flwr.serverapp.Strategy.html>`_ module unlike "
+#~ "the previous strategies which were "
+#~ "located in the `flwr.server.strategy <ref-"
+#~ "api/flwr.server.strategy.html>`_ module. Over time"
+#~ " more strategies will be added to "
+#~ "the `flwr.serverapp.strategy` module. Users "
+#~ "are encouraged to use these new "
+#~ "strategies."
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`fixedclipping_mod <flwr.clientapp.fixedclipping_mod>`\\"
+#~ " \\(msg\\, ctxt\\, call\\_next\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`adaptiveclipping_mod "
+#~ "<flwr.clientapp.mod.adaptiveclipping_mod>`\\ \\(msg\\, "
+#~ "ctxt\\, call\\_next\\)"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`make_ffn <flwr.clientapp.mod.make_ffn>`\\ \\(ffn\\, mods\\)"
+#~ msgstr "serveur.stratégie.Stratégie"
+
+#~ msgid ""
+#~ ":py:obj:`secagg_mod <flwr.clientapp.mod.secagg_mod>`\\ "
+#~ "\\(msg\\, ctxt\\, call\\_next\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`secaggplus_mod <flwr.clientapp.mod.secaggplus_mod>`\\"
+#~ " \\(msg\\, ctxt\\, call\\_next\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`LocalDpMod <flwr.clientapp.mod.LocalDpMod>`\\ "
+#~ "\\(clipping\\_norm\\, sensitivity\\, ...\\)"
+#~ msgstr ""
+
+#~ msgid "mod.LocalDpMod"
 #~ msgstr ""
 
