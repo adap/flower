@@ -43,7 +43,7 @@ cleanup_and_exit() {
     exit $1
 }
 
-# Check for "Run finished" in a loop with a timeout
+# Check for "finished:completed" status in a loop with a timeout
 while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     # Run the command and capture output
     output=$(flwr ls . e2e --format=json)
