@@ -65,8 +65,7 @@ def train(net, trainloader, num_steps, device):
     optimizer = AdamW(net.parameters(), lr=5e-5)
     net.train()
     running_loss = 0.0
-    steps = max(len(trainloader), num_steps)
-    steps_ = 0
+    step_cnt = 0
     for batch in trainloader:
         batch = {k: v.to(device) for k, v in batch.items()}
         outputs = net(**batch)
@@ -75,10 +74,10 @@ def train(net, trainloader, num_steps, device):
         optimizer.step()
         optimizer.zero_grad()
         running_loss += loss.item()
-        steps_ += 1
-        if steps_ >= steps:
+        step_cnt += 1
+        if step_cnt >= num_steps:
             break
-    avg_trainloss = running_loss / steps_
+    avg_trainloss = running_loss / step_cnt
     return avg_trainloss
 
 
