@@ -16,6 +16,7 @@
 
 
 import datetime
+import tempfile
 import unittest
 from typing import Any, Callable
 
@@ -80,7 +81,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
         state_factory = LinkStateFactory(":flwr-in-memory-state:")
         self.state = state_factory.state()
-        ffs_factory = FfsFactory(".")
+        self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        ffs_factory = FfsFactory(self.tmp_dir.name)
         self.ffs = ffs_factory.ffs()
         objectstore_factory = ObjectStoreFactory()
         self.state.store_node_public_keys({public_key_to_bytes(self.node_pk)})
@@ -146,6 +148,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def tearDown(self) -> None:
         """Clean up grpc server."""
         self._server.stop(None)
+        # Cleanup the temp directory
+        self.tmp_dir.cleanup()
 
     def _make_metadata(self) -> list[Any]:
         """Create metadata with signature and timestamp."""
