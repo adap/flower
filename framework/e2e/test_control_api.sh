@@ -124,6 +124,7 @@ while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     if [ "$status" == "finished:completed" ]; then
       found_success=true
       echo "Training worked correctly!"
+      cleanup_and_exit 0
     else
       echo "⏳ Not completed yet, retrying in 2s..."
       sleep 2
