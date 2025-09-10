@@ -12,20 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower application exceptions."""
+"""Flower Built-in Mods."""
 
 
-class AppExitException(BaseException):
-    """Base exception for all application-level errors in ServerApp and ClientApp.
+from flwr.client.mod.comms_mods import arrays_size_mod, message_size_mod
 
-    When raised, the process will exit and report a telemetry event with the associated
-    exit code. This is not intended to be caught by user code.
-    """
+from .centraldp_mods import fixedclipping_mod
 
-    # Default exit code — subclasses must override
-    exit_code = -1
-
-    def __init_subclass__(cls) -> None:
-        """Ensure subclasses override the exit_code attribute."""
-        if cls.exit_code == -1:
-            raise ValueError("Subclasses must override the exit_code attribute.")
+__all__ = [
+    "arrays_size_mod",
+    "fixedclipping_mod",
+    "message_size_mod",
+]
