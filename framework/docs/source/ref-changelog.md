@@ -28,8 +28,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
   A new PyTorch template using the Message API is now available through `flwr new`.
 
-- **Update documentation to use SuperExec** ()
-
 - **Add OpenShift deployment guide for Flower** ([#5781](https://github.com/adap/flower/pull/5781))
 
   Introduces a [guide](https://flower.ai/docs/framework/how-to-run-flower-on-red-hat-openshift.html) for deploying Flower on Red Hat OpenShift, including setup steps and configuration examples.
