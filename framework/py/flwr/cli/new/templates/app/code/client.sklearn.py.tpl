@@ -47,7 +47,7 @@ def train(msg: Message, context: Context):
     # Ignore convergence failure due to low local epochs
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        # Fit model to the data
+        # Train the model on local data
         model.fit(X_train, y_train)
 
     # Let's compute train loss
@@ -84,7 +84,7 @@ def evaluate(msg: Message, context: Context):
     num_partitions = context.node_config["num-partitions"]
     _, X_test, _, y_test = load_data(partition_id, num_partitions)
 
-    # Compute predictions on local test data
+    # Evaluate the model on local data
     y_train_pred = model.predict(X_test)
     y_train_pred_proba = model.predict_proba(X_test)
 

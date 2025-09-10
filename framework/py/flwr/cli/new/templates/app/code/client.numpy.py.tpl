@@ -15,7 +15,7 @@ def train(msg: Message, context: Context):
     # The model is the global arrays
     model = msg.content["arrays"].to_numpy_ndarrays()
 
-    # Apply a random transformation to the model
+    # Simulate local training (here we just add random noise to model parameters)
     model = [m + np.random.rand(*m.shape) for m in model]
 
     # Construct and return reply Message

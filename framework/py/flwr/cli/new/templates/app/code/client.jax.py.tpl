@@ -28,7 +28,7 @@ def train(msg: Message, context: Context):
     global_array = msg.content["arrays"].to_numpy_ndarrays()
     set_params(model, global_array)
 
-    # Train model
+    # Train the model on local data
     model, loss, num_examples = train_fn(model, grad_fn, train_x, train_y)
 
     # Construct and return reply Message
@@ -58,7 +58,7 @@ def evaluate(msg: Message, context: Context):
     global_array = msg.content["arrays"].to_numpy_ndarrays()
     set_params(model, global_array)
 
-    # Evaluate model
+    # Evaluate the model on local data
     loss, num_examples = evaluation_fn(model, grad_fn, test_x, test_y)
 
     # Construct and return reply Message

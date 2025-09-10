@@ -18,8 +18,8 @@ def main(grid: Grid, context: Context) -> None:
     num_rounds: int = context.run_config["num-server-rounds"]
 
     # Load global model
-    global_model = load_model()
-    arrays = ArrayRecord(global_model.get_weights())
+    model = load_model()
+    arrays = ArrayRecord(model.get_weights())
 
     # Initialize FedAvg strategy
     strategy = FedAvg(fraction_train=1.0, fraction_evaluate=1.0)

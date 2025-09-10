@@ -28,7 +28,7 @@ def train(msg: Message, context: Context):
     num_partitions = context.node_config["num-partitions"]
     x_train, y_train, _, _ = load_data(partition_id, num_partitions)
 
-    # Fit the model to the data
+    # Train the model on local data
     history = model.fit(
         x_train,
         y_train,
@@ -68,7 +68,7 @@ def evaluate(msg: Message, context: Context):
     num_partitions = context.node_config["num-partitions"]
     _, _, x_test, y_test = load_data(partition_id, num_partitions)
 
-    # Call the evaluation function
+    # Evaluate the model on local data
     loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
 
     # Construct and return reply Message

@@ -19,8 +19,8 @@ def main(grid: Grid, context: Context) -> None:
     num_rounds: int = context.run_config["num-server-rounds"]
 
     # Load global model
-    global_model = get_dummy_model()
-    arrays = ArrayRecord(global_model)
+    model = get_dummy_model()
+    arrays = ArrayRecord(model)
 
     # Initialize FedAvg strategy
     strategy = FedAvg()

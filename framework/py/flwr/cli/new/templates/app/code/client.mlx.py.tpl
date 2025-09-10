@@ -46,7 +46,7 @@ def train(msg: Message, context: Context):
     num_partitions = context.node_config["num-partitions"]
     train_images, train_labels, _, _ = load_data(partition_id, num_partitions)
 
-    # Train on local data
+    # Train the model on local data
     for _ in range(num_epochs):
         for X, y in batch_iterate(batch_size, train_images, train_labels):
             _, grads = loss_and_grad_fn(model, X, y)
@@ -87,7 +87,7 @@ def evaluate(msg: Message, context: Context):
     num_partitions = context.node_config["num-partitions"]
     _, _, test_images, test_labels = load_data(partition_id, num_partitions)
 
-    # Evaluate model on local data
+    # Evaluate the model on local data
     accuracy = eval_fn(model, test_images, test_labels)
     loss = loss_fn(model, test_images, test_labels)
 

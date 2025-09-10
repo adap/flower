@@ -34,7 +34,7 @@ def train(msg: Message, context: Context):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     net.to(device)
 
-    # Call the training function
+    # Train the model on local data
     train_loss = train_fn(
         net,
         trainloader,
@@ -74,7 +74,7 @@ def evaluate(msg: Message, context: Context):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     net.to(device)
 
-    # Call the training function
+    # Evaluate the model on local data
     val_loss, val_accuracy = test_fn(
         net,
         valloader,
