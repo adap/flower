@@ -34,5 +34,5 @@ def main(grid: Grid, context: Context) -> None:
     # Save final model to disk
     print("\nSaving final model to disk...")
     ndarrays = result.arrays.to_numpy_ndarrays()
-    global_model.set_weights(ndarrays)
-    global_model.save("final_model.keras")
+    model.set_weights(ndarrays)
+    model.save("final_model.keras")
