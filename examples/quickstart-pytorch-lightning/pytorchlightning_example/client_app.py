@@ -37,10 +37,7 @@ def train(msg: Message, context: Context):
 
     # FIT does not return values, but you can read final epoch metrics here:
     fit_metrics = trainer.callback_metrics  # Dict[str, Tensor]
-    metrics = {
-        "train_loss": float(fit_metrics["train_loss"]),
-    }
-    print(metrics)
+    loss = float(fit_metrics["train_loss"])
 
     # Construct and return reply Message
     model_record = ArrayRecord(model.state_dict())
