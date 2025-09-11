@@ -7,6 +7,7 @@ from authexample.task import train as train_fn
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 
+
 app = ClientApp()
 
 

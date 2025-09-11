@@ -62,16 +62,16 @@ The `generate_cert.sh` script generates certificates for creating a secure TLS c
 
 ## Generate public and private keys for SuperNode authentication
 
-The `generate_auth_keys.sh` script generates three private and public key pairs. One pair for the SuperLink and two pairs for the two SuperNodes.
+The `generate_auth_keys.sh` script generates two private–public key pairs for two SuperNodes by default. If you have more SuperNodes, you can specify the number of key pairs to generate.
 
 > [!NOTE]
 > Note that this script should only be used for development purposes and not for creating production key pairs. The script also generates a CSV file that includes each of the generated (client) public keys.
 
 ```bash
-# Generate two key pairs
+# Generate two key pairs by default
 ./generate_auth_keys.sh
 
-# Or pass the desired the number of kesy
+# Or pass the desired the number of key pairs
 ./generate_auth_keys.sh {your_number_of_clients}
 ```
 
@@ -127,7 +127,7 @@ If you generated more than 2 client credentials, you can add more clients by ope
 above. Don't forget to specify the correct client private and public keys for each client instance you created.
 
 > [!TIP]
-> Note the `--node-config` passed when spawning the `SuperNode` is accessible to the `ClientApp` via the context. In this example, the `ClientApp` uses it to load the dataset and then proceed with the training of the model.
+> Note the `--node-config` passed when spawning the `SuperNode` is accessible to the `ClientApp` via the `context` argument, i.e., `context.node_config`. In this example, the `ClientApp` uses it to load the dataset and then proceed with the training of the model.
 >
 > ```python
 > @app.train()
@@ -139,7 +139,7 @@ above. Don't forget to specify the correct client private and public keys for ea
 
 ## Run the Flower App
 
-With both the long-running server (SuperLink) and two SuperNodes up and running, we can now start the run. Note that the command below points to a federation named `my-federation`. Its entry point is defined in the `pyproject.toml`.
+With both the long-running server (SuperLink) and two SuperNodes up and running, we can now start the run. Note that the command below points to a federation named `my-federation`. Its entry point is defined in the `pyproject.toml`. You can optionally use the `--stream` flag to stream logs from your `ServerApp` running on SuperLink.
 
 ```bash
 flwr run . my-federation --stream
