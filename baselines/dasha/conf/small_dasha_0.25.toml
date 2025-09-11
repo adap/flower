@@ -1,0 +1,7 @@
+[compressor]
+number-of-coordinates = 10
+
+[method]
+name = "dasha"
+step-size = 0.25
+send-gradient = true
