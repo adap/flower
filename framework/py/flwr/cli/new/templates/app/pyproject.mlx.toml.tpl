@@ -16,7 +16,7 @@ license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.22.0",
     "flwr-datasets[vision]>=0.5.0",
-    "mlx==0.26.5",
+    "mlx==0.29.0",
 ]
 
 [tool.hatch.build.targets.wheel]
