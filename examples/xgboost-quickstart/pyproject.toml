@@ -24,13 +24,12 @@ serverapp = "xgboost_quickstart.server_app:app"
 clientapp = "xgboost_quickstart.client_app:app"
 
 [tool.flwr.app.config]
-# ServerApp
 num-server-rounds = 3
 fraction-train = 0.1
 fraction-evaluate = 0.1
-
-# ClientApp
 local-epochs = 1
+
+# XGBoost parameters
 params.objective = "binary:logistic"
 params.eta = 0.1 # Learning rate
 params.max-depth = 8
