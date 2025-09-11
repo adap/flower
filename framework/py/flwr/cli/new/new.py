@@ -35,7 +35,6 @@ class MlFramework(str, Enum):
     """Available frameworks."""
 
     PYTORCH = "PyTorch"
-    PYTORCH_LEGACY_API = "PyTorch (Legacy API, deprecated)"
     TENSORFLOW = "TensorFlow"
     SKLEARN = "sklearn"
     HUGGINGFACE = "HuggingFace"
@@ -44,6 +43,7 @@ class MlFramework(str, Enum):
     NUMPY = "NumPy"
     FLOWERTUNE = "FlowerTune"
     BASELINE = "Flower Baseline"
+    PYTORCH_LEGACY_API = "PyTorch (Legacy API, deprecated)"
 
 
 class LlmChallengeName(str, Enum):
