@@ -47,9 +47,10 @@ def train(msg: Message, context: Context) -> Message:
         partition_id, num_partitions
     )
 
-    # Load config
+    # Read from run config
+    num_local_round = context.run_config["local-epochs"]
+    # Flatted config dict and replace "-" with "_"
     cfg = replace_keys(unflatten_dict(context.run_config))
-    num_local_round = cfg["local_epochs"]
     params = cfg["params"]
 
     global_round = msg.content["config"]["server-round"]
