@@ -100,6 +100,14 @@ class Fleet final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::flwr::proto::GetRunResponse>> PrepareAsyncGetRun(::grpc::ClientContext* context, const ::flwr::proto::GetRunRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::flwr::proto::GetRunResponse>>(PrepareAsyncGetRunRaw(context, request, cq));
     }
+    // Get FAB
+    virtual ::grpc::Status GetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::flwr::proto::GetFabResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::flwr::proto::GetFabResponse>> AsyncGetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::flwr::proto::GetFabResponse>>(AsyncGetFabRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::flwr::proto::GetFabResponse>> PrepareAsyncGetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::flwr::proto::GetFabResponse>>(PrepareAsyncGetFabRaw(context, request, cq));
+    }
     class async_interface {
      public:
       virtual ~async_interface() {}
@@ -121,6 +129,9 @@ class Fleet final {
       virtual void PushTaskRes(::grpc::ClientContext* context, const ::flwr::proto::PushTaskResRequest* request, ::flwr::proto::PushTaskResResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void GetRun(::grpc::ClientContext* context, const ::flwr::proto::GetRunRequest* request, ::flwr::proto::GetRunResponse* response, std::function<void(::grpc::Status)>) = 0;
       virtual void GetRun(::grpc::ClientContext* context, const ::flwr::proto::GetRunRequest* request, ::flwr::proto::GetRunResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      // Get FAB
+      virtual void GetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest* request, ::flwr::proto::GetFabResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void GetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest* request, ::flwr::proto::GetFabResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
     };
     typedef class async_interface experimental_async_interface;
     virtual class async_interface* async() { return nullptr; }
@@ -138,6 +149,8 @@ class Fleet final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::flwr::proto::PushTaskResResponse>* PrepareAsyncPushTaskResRaw(::grpc::ClientContext* context, const ::flwr::proto::PushTaskResRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::flwr::proto::GetRunResponse>* AsyncGetRunRaw(::grpc::ClientContext* context, const ::flwr::proto::GetRunRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::flwr::proto::GetRunResponse>* PrepareAsyncGetRunRaw(::grpc::ClientContext* context, const ::flwr::proto::GetRunRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::flwr::proto::GetFabResponse>* AsyncGetFabRaw(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::flwr::proto::GetFabResponse>* PrepareAsyncGetFabRaw(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -184,6 +197,13 @@ class Fleet final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::flwr::proto::GetRunResponse>> PrepareAsyncGetRun(::grpc::ClientContext* context, const ::flwr::proto::GetRunRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::flwr::proto::GetRunResponse>>(PrepareAsyncGetRunRaw(context, request, cq));
     }
+    ::grpc::Status GetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::flwr::proto::GetFabResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::flwr::proto::GetFabResponse>> AsyncGetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::flwr::proto::GetFabResponse>>(AsyncGetFabRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::flwr::proto::GetFabResponse>> PrepareAsyncGetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::flwr::proto::GetFabResponse>>(PrepareAsyncGetFabRaw(context, request, cq));
+    }
     class async final :
       public StubInterface::async_interface {
      public:
@@ -199,6 +219,8 @@ class Fleet final {
       void PushTaskRes(::grpc::ClientContext* context, const ::flwr::proto::PushTaskResRequest* request, ::flwr::proto::PushTaskResResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
       void GetRun(::grpc::ClientContext* context, const ::flwr::proto::GetRunRequest* request, ::flwr::proto::GetRunResponse* response, std::function<void(::grpc::Status)>) override;
       void GetRun(::grpc::ClientContext* context, const ::flwr::proto::GetRunRequest* request, ::flwr::proto::GetRunResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void GetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest* request, ::flwr::proto::GetFabResponse* response, std::function<void(::grpc::Status)>) override;
+      void GetFab(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest* request, ::flwr::proto::GetFabResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
      private:
       friend class Stub;
       explicit async(Stub* stub): stub_(stub) { }
@@ -222,12 +244,15 @@ class Fleet final {
     ::grpc::ClientAsyncResponseReader< ::flwr::proto::PushTaskResResponse>* PrepareAsyncPushTaskResRaw(::grpc::ClientContext* context, const ::flwr::proto::PushTaskResRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::flwr::proto::GetRunResponse>* AsyncGetRunRaw(::grpc::ClientContext* context, const ::flwr::proto::GetRunRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::flwr::proto::GetRunResponse>* PrepareAsyncGetRunRaw(::grpc::ClientContext* context, const ::flwr::proto::GetRunRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::flwr::proto::GetFabResponse>* AsyncGetFabRaw(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::flwr::proto::GetFabResponse>* PrepareAsyncGetFabRaw(::grpc::ClientContext* context, const ::flwr::proto::GetFabRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_CreateNode_;
     const ::grpc::internal::RpcMethod rpcmethod_DeleteNode_;
     const ::grpc::internal::RpcMethod rpcmethod_Ping_;
     const ::grpc::internal::RpcMethod rpcmethod_PullTaskIns_;
     const ::grpc::internal::RpcMethod rpcmethod_PushTaskRes_;
     const ::grpc::internal::RpcMethod rpcmethod_GetRun_;
+    const ::grpc::internal::RpcMethod rpcmethod_GetFab_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -247,6 +272,8 @@ class Fleet final {
     // HTTP API path: /api/v1/fleet/push-task-res
     virtual ::grpc::Status PushTaskRes(::grpc::ServerContext* context, const ::flwr::proto::PushTaskResRequest* request, ::flwr::proto::PushTaskResResponse* response);
     virtual ::grpc::Status GetRun(::grpc::ServerContext* context, const ::flwr::proto::GetRunRequest* request, ::flwr::proto::GetRunResponse* response);
+    // Get FAB
+    virtual ::grpc::Status GetFab(::grpc::ServerContext* context, const ::flwr::proto::GetFabRequest* request, ::flwr::proto::GetFabResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_CreateNode : public BaseClass {
@@ -368,7 +395,27 @@ class Fleet final {
       ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_CreateNode<WithAsyncMethod_DeleteNode<WithAsyncMethod_Ping<WithAsyncMethod_PullTaskIns<WithAsyncMethod_PushTaskRes<WithAsyncMethod_GetRun<Service > > > > > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_GetFab : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_GetFab() {
+      ::grpc::Service::MarkMethodAsync(6);
+    }
+    ~WithAsyncMethod_GetFab() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetFab(::grpc::ServerContext* /*context*/, const ::flwr::proto::GetFabRequest* /*request*/, ::flwr::proto::GetFabResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetFab(::grpc::ServerContext* context, ::flwr::proto::GetFabRequest* request, ::grpc::ServerAsyncResponseWriter< ::flwr::proto::GetFabResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_CreateNode<WithAsyncMethod_DeleteNode<WithAsyncMethod_Ping<WithAsyncMethod_PullTaskIns<WithAsyncMethod_PushTaskRes<WithAsyncMethod_GetRun<WithAsyncMethod_GetFab<Service > > > > > > > AsyncService;
   template <class BaseClass>
   class WithCallbackMethod_CreateNode : public BaseClass {
    private:
@@ -531,7 +578,34 @@ class Fleet final {
     virtual ::grpc::ServerUnaryReactor* GetRun(
       ::grpc::CallbackServerContext* /*context*/, const ::flwr::proto::GetRunRequest* /*request*/, ::flwr::proto::GetRunResponse* /*response*/)  { return nullptr; }
   };
-  typedef WithCallbackMethod_CreateNode<WithCallbackMethod_DeleteNode<WithCallbackMethod_Ping<WithCallbackMethod_PullTaskIns<WithCallbackMethod_PushTaskRes<WithCallbackMethod_GetRun<Service > > > > > > CallbackService;
+  template <class BaseClass>
+  class WithCallbackMethod_GetFab : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_GetFab() {
+      ::grpc::Service::MarkMethodCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::flwr::proto::GetFabRequest, ::flwr::proto::GetFabResponse>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::flwr::proto::GetFabRequest* request, ::flwr::proto::GetFabResponse* response) { return this->GetFab(context, request, response); }));}
+    void SetMessageAllocatorFor_GetFab(
+        ::grpc::MessageAllocator< ::flwr::proto::GetFabRequest, ::flwr::proto::GetFabResponse>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(6);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::flwr::proto::GetFabRequest, ::flwr::proto::GetFabResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_GetFab() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetFab(::grpc::ServerContext* /*context*/, const ::flwr::proto::GetFabRequest* /*request*/, ::flwr::proto::GetFabResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* GetFab(
+      ::grpc::CallbackServerContext* /*context*/, const ::flwr::proto::GetFabRequest* /*request*/, ::flwr::proto::GetFabResponse* /*response*/)  { return nullptr; }
+  };
+  typedef WithCallbackMethod_CreateNode<WithCallbackMethod_DeleteNode<WithCallbackMethod_Ping<WithCallbackMethod_PullTaskIns<WithCallbackMethod_PushTaskRes<WithCallbackMethod_GetRun<WithCallbackMethod_GetFab<Service > > > > > > > CallbackService;
   typedef CallbackService ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_CreateNode : public BaseClass {
@@ -631,6 +705,23 @@ class Fleet final {
     }
     // disable synchronous version of this method
     ::grpc::Status GetRun(::grpc::ServerContext* /*context*/, const ::flwr::proto::GetRunRequest* /*request*/, ::flwr::proto::GetRunResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_GetFab : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_GetFab() {
+      ::grpc::Service::MarkMethodGeneric(6);
+    }
+    ~WithGenericMethod_GetFab() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetFab(::grpc::ServerContext* /*context*/, const ::flwr::proto::GetFabRequest* /*request*/, ::flwr::proto::GetFabResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -753,6 +844,26 @@ class Fleet final {
     }
     void RequestGetRun(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_GetFab : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_GetFab() {
+      ::grpc::Service::MarkMethodRaw(6);
+    }
+    ~WithRawMethod_GetFab() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetFab(::grpc::ServerContext* /*context*/, const ::flwr::proto::GetFabRequest* /*request*/, ::flwr::proto::GetFabResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetFab(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -885,6 +996,28 @@ class Fleet final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     virtual ::grpc::ServerUnaryReactor* GetRun(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_GetFab : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_GetFab() {
+      ::grpc::Service::MarkMethodRawCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetFab(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_GetFab() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetFab(::grpc::ServerContext* /*context*/, const ::flwr::proto::GetFabRequest* /*request*/, ::flwr::proto::GetFabResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* GetFab(
       ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
@@ -1049,9 +1182,36 @@ class Fleet final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedGetRun(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::flwr::proto::GetRunRequest,::flwr::proto::GetRunResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_CreateNode<WithStreamedUnaryMethod_DeleteNode<WithStreamedUnaryMethod_Ping<WithStreamedUnaryMethod_PullTaskIns<WithStreamedUnaryMethod_PushTaskRes<WithStreamedUnaryMethod_GetRun<Service > > > > > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_GetFab : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_GetFab() {
+      ::grpc::Service::MarkMethodStreamed(6,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::flwr::proto::GetFabRequest, ::flwr::proto::GetFabResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::flwr::proto::GetFabRequest, ::flwr::proto::GetFabResponse>* streamer) {
+                       return this->StreamedGetFab(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_GetFab() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status GetFab(::grpc::ServerContext* /*context*/, const ::flwr::proto::GetFabRequest* /*request*/, ::flwr::proto::GetFabResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedGetFab(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::flwr::proto::GetFabRequest,::flwr::proto::GetFabResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_CreateNode<WithStreamedUnaryMethod_DeleteNode<WithStreamedUnaryMethod_Ping<WithStreamedUnaryMethod_PullTaskIns<WithStreamedUnaryMethod_PushTaskRes<WithStreamedUnaryMethod_GetRun<WithStreamedUnaryMethod_GetFab<Service > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_CreateNode<WithStreamedUnaryMethod_DeleteNode<WithStreamedUnaryMethod_Ping<WithStreamedUnaryMethod_PullTaskIns<WithStreamedUnaryMethod_PushTaskRes<WithStreamedUnaryMethod_GetRun<Service > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_CreateNode<WithStreamedUnaryMethod_DeleteNode<WithStreamedUnaryMethod_Ping<WithStreamedUnaryMethod_PullTaskIns<WithStreamedUnaryMethod_PushTaskRes<WithStreamedUnaryMethod_GetRun<WithStreamedUnaryMethod_GetFab<Service > > > > > > > StreamedService;
 };
 
 }  // namespace proto
