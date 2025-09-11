@@ -2,7 +2,7 @@
 
 import jax
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
-from flwr.client import ClientApp
+from flwr.clientapp import ClientApp
 
 from $import_name.task import evaluation as evaluation_fn
 from $import_name.task import get_params, load_data, load_model, loss_fn, set_params

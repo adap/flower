@@ -2,7 +2,7 @@
 
 import numpy as np
 from flwr.app import ArrayRecord, Context
-from flwr.server import Grid, ServerApp
+from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 
 from $import_name.task import get_dummy_model

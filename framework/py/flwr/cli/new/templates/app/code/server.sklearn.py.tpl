@@ -2,7 +2,7 @@
 
 import joblib
 from flwr.app import ArrayRecord, Context
-from flwr.server import Grid, ServerApp
+from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 
 from $import_name.task import get_model, get_model_params, set_initial_params, set_model_params
