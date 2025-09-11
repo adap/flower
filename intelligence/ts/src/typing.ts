@@ -13,6 +13,7 @@
 // limitations under the License.
 // =============================================================================
 
+import { type JsonSchema7Type } from 'zod-to-json-schema';
 import { ALLOWED_ROLES } from './constants';
 
 /**
@@ -305,31 +306,9 @@ export interface Progress {
   description?: string;
 }
 
-export interface JsonSchema {
-  $defs?: Record<
-    string,
-    {
-      enum: string[];
-      title: string;
-      type: string;
-    }
-  >;
-  properties: Record<
-    string,
-    {
-      title: string;
-      type: string;
-      $ref?: string;
-    }
-  >;
-  required: string[];
-  title: string;
-  type: string;
-}
-
 export interface JsonSchemaPayload {
   name: string;
-  schema: JsonSchema;
+  schema: JsonSchema7Type;
 }
 
 export interface ResponseFormat {
