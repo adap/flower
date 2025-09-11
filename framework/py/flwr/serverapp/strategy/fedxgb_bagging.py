@@ -15,7 +15,7 @@
 """Flower message-based FedXgbBagging strategy."""
 from collections.abc import Iterable
 from logging import INFO
-from typing import Optional
+from typing import Any, Optional, cast
 
 import numpy as np
 
@@ -29,6 +29,13 @@ from .strategy_utils import aggregate_bagging, validate_message_reply_consistenc
 # pylint: disable=line-too-long
 class FedXgbBagging(FedAvg):
     """Configurable FedXgbBagging strategy implementation."""
+
+    def __init__(
+        self,
+        **kwargs: Any,
+    ):
+        self.current_bst: Optional[bytes] = None
+        super().__init__(**kwargs)
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
@@ -82,9 +89,11 @@ class FedXgbBagging(FedAvg):
             # Aggregate ArrayRecords
             for content in replies_with_content:
                 bst = content["arrays"]["0"].numpy().tobytes()  # type: ignore[union-attr]
-                self.current_bst = aggregate_bagging(self.current_bst, bst)
+                self.current_bst = aggregate_bagging(cast(bytes, self.current_bst), bst)
 
-            arrays = ArrayRecord([np.frombuffer(self.current_bst, dtype=np.uint8)])
+            arrays = ArrayRecord(
+                [np.frombuffer(cast(bytes, self.current_bst), dtype=np.uint8)]
+            )
 
             # Aggregate MetricRecords
             metrics = self.train_metrics_aggr_fn(
