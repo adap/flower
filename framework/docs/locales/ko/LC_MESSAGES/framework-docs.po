@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-09 00:07+0000\n"
+"POT-Creation-Date: 2025-09-10 00:07+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -14233,7 +14233,7 @@ msgstr ""
 #: ../../source/how-to-upgrade-to-message-api.rst:156
 msgid ""
 "The new ``Message``-based strategies are located in the "
-"`flwr.serverapp.strate <ref-api/flwr.serverapp.Strategy.html>`_ module "
+"`flwr.serverapp.strategy <ref-api/flwr.serverapp.strategy.html>`_ module "
 "unlike the previous strategies which were located in the "
 "`flwr.server.strategy <ref-api/flwr.server.strategy.html>`_ module. Over "
 "time more strategies will be added to the `flwr.serverapp.strategy` "
@@ -17141,7 +17141,7 @@ msgid "Flower main package."
 msgstr "Flower 메인 패키지."
 
 #: ../../source/ref-api/flwr.client.rst:43
-#: ../../source/ref-api/flwr.clientapp.rst:40 ../../source/ref-api/flwr.rst:25
+#: ../../source/ref-api/flwr.clientapp.rst:33 ../../source/ref-api/flwr.rst:25
 #: ../../source/ref-api/flwr.server.rst:49
 #: ../../source/ref-api/flwr.serverapp.rst:34
 msgid "Modules"
@@ -17222,8 +17222,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.app.rst:17
 #: ../../source/ref-api/flwr.client.mod.rst:30
 #: ../../source/ref-api/flwr.client.rst:25
-#: ../../source/ref-api/flwr.clientapp.mod.rst:30
-#: ../../source/ref-api/flwr.clientapp.rst:24
+#: ../../source/ref-api/flwr.clientapp.rst:17
 #: ../../source/ref-api/flwr.common.rst:32
 #: ../../source/ref-api/flwr.server.rst:24
 #: ../../source/ref-api/flwr.server.strategy.rst:17
@@ -19504,7 +19503,6 @@ msgstr "클라이언트"
 #: ../../source/ref-api/flwr.client.mod.rst:13
 #: ../../source/ref-api/flwr.client.rst:13
 #: ../../source/ref-api/flwr.clientapp.mod.rst:13
-#: ../../source/ref-api/flwr.clientapp.rst:13
 #: ../../source/ref-api/flwr.common.rst:13
 #: ../../source/ref-api/flwr.server.rst:13
 #: ../../source/ref-api/flwr.simulation.rst:13
@@ -19555,7 +19553,7 @@ msgstr ""
 "mods\\]\\)"
 
 #: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.rst:29:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.rst:22:<autosummary>:1
 #: flwr.client.client_app.ClientApp:1 of
 msgid "Flower ClientApp."
 msgstr "Flower ClientApp."
@@ -19574,8 +19572,8 @@ msgstr "NumPy를 사용하는 Flower 클라이언트를 위한 추상 베이스 
 msgid ":py:obj:`flwr.client.mod <flwr.client.mod>`\\"
 msgstr ":py:obj:`flwr.client.mod <flwr.client.mod>`\\"
 
-#: ../../docstring ../../source/ref-api/flwr.client.rst:50:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.rst:47:<autosummary>:1 flwr.client.mod:1
+#: ../../source/ref-api/flwr.client.rst:50:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.rst:40:<autosummary>:1 flwr.client.mod:1
 #: flwr.clientapp.mod:1 of
 msgid "Flower Built-in Mods."
 msgstr "Flower 내장 모드."
@@ -20006,7 +20004,6 @@ msgstr ""
 "\\(msg\\, ctxt\\, call\\_next\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:1 of
 msgid "Client-side adaptive clipping modifier."
 msgstr "클라이언트 측 적응형 클리핑 수정자."
@@ -20021,7 +20018,7 @@ msgstr ""
 "\\(msg\\, ctxt\\, call\\_next\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
 #: flwr.client.mod.comms_mods.arrays_size_mod:1 of
 #, fuzzy
 msgid "Arrays size mod."
@@ -20036,10 +20033,9 @@ msgstr ""
 "\\(msg\\, ctxt\\, call\\_next\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.rst:22:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:1
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:1 of
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:1 of
 msgid "Client-side fixed clipping modifier."
 msgstr "클라이언트 측 고정 클리핑 수정자."
 
@@ -20048,7 +20044,6 @@ msgid ":py:obj:`make_ffn <flwr.client.mod.make_ffn>`\\ \\(ffn\\, mods\\)"
 msgstr ":py:obj:`make_ffn <flwr.client.mod.make_ffn>`\\ \\(ffn\\, mods\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.utils.make_ffn:1 of
 msgid "."
 msgstr "."
@@ -20062,7 +20057,7 @@ msgstr ""
 " ctxt\\, call\\_next\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
 #: flwr.client.mod.comms_mods.message_size_mod:1 of
 msgid "Message size mod."
 msgstr "메시지 크기 수정."
@@ -20076,7 +20071,6 @@ msgstr ""
 "call\\_next\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.secure_aggregation.secagg_mod.secagg_mod:1 of
 msgid "Handle incoming message and return results, following the SecAgg protocol."
 msgstr "SecAgg 프로토콜에 따라 수신 메시지를 처리하고 결과를 반환합니다."
@@ -20090,7 +20084,6 @@ msgstr ""
 "ctxt\\, call\\_next\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.secure_aggregation.secaggplus_mod.secaggplus_mod:1 of
 msgid ""
 "Handle incoming message and return results, following the SecAgg+ "
@@ -20106,7 +20099,6 @@ msgstr ""
 " sensitivity\\, ...\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:35:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:35:<autosummary>:1
 #: flwr.client.mod.localdp_mod.LocalDpMod:1 of
 msgid "Modifier for local differential privacy."
 msgstr "로컬 차분 프라이버시를 위한 수정자."
@@ -20124,7 +20116,7 @@ msgstr "이 모드는 클라이언트 모델 업데이트를 클립하고 서버
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:12
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:10
 #: flwr.client.mod.localdp_mod.LocalDpMod:6
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:10 of
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:10 of
 msgid "It operates on messages of type `MessageType.TRAIN`."
 msgstr "이 함수는 `MessageType.TRAIN` 유형의 메시지에 대해 작동합니다."
 
@@ -20164,7 +20156,6 @@ msgid ""
 msgstr "로컬 DP 모드의 인스턴스를 생성하고 클라이언트 측 모드에 추가합니다:"
 
 #: ../../source/ref-api/flwr.client.mod.adaptiveclipping_mod.rst:2
-#: ../../source/ref-api/flwr.clientapp.mod.adaptiveclipping_mod.rst:2
 msgid "adaptiveclipping\\_mod"
 msgstr "adaptiveclipping\\_mod"
 
@@ -20177,13 +20168,13 @@ msgstr "이 모드는 서버 측 전략 래퍼인 차분 프라이버시 클라�
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:6
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:6
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:6 of
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:6 of
 msgid "The wrapper sends the clipping_norm value to the client."
 msgstr "래퍼는 클라이언트에 clipping_norm 값을 전송합니다."
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:8
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:8
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:8 of
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:8 of
 msgid "This mod clips the client model updates before sending them to the server."
 msgstr "이 모드는 클라이언트 모델 업데이트를 서버로 보내기 전에 클립합니다."
 
@@ -20195,7 +20186,7 @@ msgstr "또한 새 클리핑 값을 계산하기 위해 서버로 KEY_NORM_BIT�
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:15
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:13
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:13
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:13
 #: flwr.server.grid.grid.Grid.send_and_receive:18
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:54
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:61
@@ -20205,7 +20196,7 @@ msgstr "참고"
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:16
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:14
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:14 of
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:14 of
 msgid "Consider the order of mods when using multiple."
 msgstr "여러 개를 사용할 때는 모드의 순서를 고려하세요."
 
@@ -20227,7 +20218,6 @@ msgid ""
 msgstr "이 모드는 메시지에서 전송된 매개변수의 수와 그 크기를 바이트 단위로 기록합니다."
 
 #: ../../source/ref-api/flwr.client.mod.fixedclipping_mod.rst:2
-#: ../../source/ref-api/flwr.clientapp.fixedclipping_mod.rst:2
 #: ../../source/ref-api/flwr.clientapp.mod.fixedclipping_mod.rst:2
 msgid "fixedclipping\\_mod"
 msgstr "fixedclipping\\_mod"
@@ -20239,12 +20229,11 @@ msgid ""
 msgstr "이 모드는 서버 측 전략 래퍼인 DifferentialPrivacyClientSideFixedClipping과 함께 사용해야 합니다."
 
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:16
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:16 of
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:16 of
 msgid "Typically, fixedclipping_mod should be the last to operate on params."
 msgstr "일반적으로 fixedclipping_mod는 매개변수에서 가장 마지막으로 작동해야 합니다."
 
 #: ../../source/ref-api/flwr.client.mod.make_ffn.rst:2
-#: ../../source/ref-api/flwr.clientapp.mod.make_ffn.rst:2
 msgid "make\\_ffn"
 msgstr "make\\_ffn"
 
@@ -20258,12 +20247,10 @@ msgid "This mod logs the size in bytes of the message being transmited."
 msgstr "이 모드는 전송되는 메시지의 크기를 바이트 단위로 기록합니다."
 
 #: ../../source/ref-api/flwr.client.mod.secagg_mod.rst:2
-#: ../../source/ref-api/flwr.clientapp.mod.secagg_mod.rst:2
 msgid "secagg\\_mod"
 msgstr "secagg\\_mod"
 
 #: ../../source/ref-api/flwr.client.mod.secaggplus_mod.rst:2
-#: ../../source/ref-api/flwr.clientapp.mod.secaggplus_mod.rst:2
 msgid "secaggplus\\_mod"
 msgstr "secaggplus\\_mod"
 
@@ -20408,22 +20395,13 @@ msgstr "클라이언트앱"
 #: ../../source/ref-api/flwr.clientapp.rst:22:<autosummary>:1
 #, fuzzy
 msgid ""
-":py:obj:`fixedclipping_mod <flwr.clientapp.fixedclipping_mod>`\\ "
-"\\(msg\\, ctxt\\, call\\_next\\)"
-msgstr ""
-":py:obj:`fixedclipping_mod <flwr.client.mod.fixedclipping_mod>`\\ "
-"\\(msg\\, ctxt\\, call\\_next\\)"
-
-#: ../../source/ref-api/flwr.clientapp.rst:29:<autosummary>:1
-#, fuzzy
-msgid ""
 ":py:obj:`ClientApp <flwr.clientapp.ClientApp>`\\ \\(\\[client\\_fn\\, "
 "mods\\]\\)"
 msgstr ""
 ":py:obj:`ClientApp <flwr.client.ClientApp>`\\ \\(\\[client\\_fn\\, "
 "mods\\]\\)"
 
-#: ../../source/ref-api/flwr.clientapp.rst:47:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.rst:40:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`flwr.clientapp.mod <flwr.clientapp.mod>`\\"
 msgstr ":py:obj:`flwr.client.mod <flwr.client.mod>`\\"
@@ -20454,25 +20432,7 @@ msgid ""
 "mods\\]\\)"
 msgstr ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\)"
 
-#: flwr.clientapp.centraldp_mods.fixedclipping_mod:3 of
-#, fuzzy
-msgid ""
-"This mod needs to be used with the "
-"`DifferentialPrivacyClientSideFixedClipping` server-side strategy "
-"wrapper."
-msgstr "이 모드는 서버 측 전략 래퍼인 DifferentialPrivacyClientSideFixedClipping과 함께 사용해야 합니다."
-
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
-#, fuzzy
-msgid ""
-":py:obj:`adaptiveclipping_mod "
-"<flwr.clientapp.mod.adaptiveclipping_mod>`\\ \\(msg\\, ctxt\\, "
-"call\\_next\\)"
-msgstr ""
-":py:obj:`adaptiveclipping_mod <flwr.client.mod.adaptiveclipping_mod>`\\ "
-"\\(msg\\, ctxt\\, call\\_next\\)"
-
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`arrays_size_mod <flwr.clientapp.mod.arrays_size_mod>`\\ "
@@ -20481,7 +20441,7 @@ msgstr ""
 ":py:obj:`parameters_size_mod <flwr.client.mod.parameters_size_mod>`\\ "
 "\\(msg\\, ctxt\\, call\\_next\\)"
 
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`fixedclipping_mod <flwr.clientapp.mod.fixedclipping_mod>`\\ "
@@ -20490,12 +20450,7 @@ msgstr ""
 ":py:obj:`fixedclipping_mod <flwr.client.mod.fixedclipping_mod>`\\ "
 "\\(msg\\, ctxt\\, call\\_next\\)"
 
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
-#, fuzzy
-msgid ":py:obj:`make_ffn <flwr.clientapp.mod.make_ffn>`\\ \\(ffn\\, mods\\)"
-msgstr ":py:obj:`make_ffn <flwr.client.mod.make_ffn>`\\ \\(ffn\\, mods\\)"
-
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`message_size_mod <flwr.clientapp.mod.message_size_mod>`\\ "
@@ -20504,37 +20459,13 @@ msgstr ""
 ":py:obj:`message_size_mod <flwr.client.mod.message_size_mod>`\\ \\(msg\\,"
 " ctxt\\, call\\_next\\)"
 
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
+#: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:3 of
 #, fuzzy
 msgid ""
-":py:obj:`secagg_mod <flwr.clientapp.mod.secagg_mod>`\\ \\(msg\\, ctxt\\, "
-"call\\_next\\)"
-msgstr ""
-":py:obj:`secagg_mod <flwr.client.mod.secagg_mod>`\\ \\(msg\\, ctxt\\, "
-"call\\_next\\)"
-
-#: ../../source/ref-api/flwr.clientapp.mod.rst:28:<autosummary>:1
-#, fuzzy
-msgid ""
-":py:obj:`secaggplus_mod <flwr.clientapp.mod.secaggplus_mod>`\\ \\(msg\\, "
-"ctxt\\, call\\_next\\)"
-msgstr ""
-":py:obj:`secaggplus_mod <flwr.client.mod.secaggplus_mod>`\\ \\(msg\\, "
-"ctxt\\, call\\_next\\)"
-
-#: ../../source/ref-api/flwr.clientapp.mod.rst:35:<autosummary>:1
-#, fuzzy
-msgid ""
-":py:obj:`LocalDpMod <flwr.clientapp.mod.LocalDpMod>`\\ "
-"\\(clipping\\_norm\\, sensitivity\\, ...\\)"
-msgstr ""
-":py:obj:`LocalDpMod <flwr.client.mod.LocalDpMod>`\\ \\(clipping\\_norm\\,"
-" sensitivity\\, ...\\)"
-
-#: ../../source/ref-api/flwr.clientapp.mod.LocalDpMod.rst:2
-#, fuzzy
-msgid "mod.LocalDpMod"
-msgstr "LocalDpMod"
+"This mod needs to be used with the "
+"`DifferentialPrivacyClientSideFixedClipping` server-side strategy "
+"wrapper."
+msgstr "이 모드는 서버 측 전략 래퍼인 DifferentialPrivacyClientSideFixedClipping과 함께 사용해야 합니다."
 
 #: ../../source/ref-api/flwr.common.rst:2
 msgid "common"
@@ -55039,4 +54970,61 @@ msgstr ""
 
 #~ msgid "`clientapp.networkPolicy.extraEgress`"
 #~ msgstr ""
+
+#~ msgid ""
+#~ "The new ``Message``-based strategies are "
+#~ "located in the `flwr.serverapp.strate <ref-"
+#~ "api/flwr.serverapp.Strategy.html>`_ module unlike "
+#~ "the previous strategies which were "
+#~ "located in the `flwr.server.strategy <ref-"
+#~ "api/flwr.server.strategy.html>`_ module. Over time"
+#~ " more strategies will be added to "
+#~ "the `flwr.serverapp.strategy` module. Users "
+#~ "are encouraged to use these new "
+#~ "strategies."
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`fixedclipping_mod <flwr.clientapp.fixedclipping_mod>`\\"
+#~ " \\(msg\\, ctxt\\, call\\_next\\)"
+#~ msgstr ""
+#~ ":py:obj:`fixedclipping_mod "
+#~ "<flwr.client.mod.fixedclipping_mod>`\\ \\(msg\\, ctxt\\,"
+#~ " call\\_next\\)"
+
+#~ msgid ""
+#~ ":py:obj:`adaptiveclipping_mod "
+#~ "<flwr.clientapp.mod.adaptiveclipping_mod>`\\ \\(msg\\, "
+#~ "ctxt\\, call\\_next\\)"
+#~ msgstr ""
+#~ ":py:obj:`adaptiveclipping_mod "
+#~ "<flwr.client.mod.adaptiveclipping_mod>`\\ \\(msg\\, "
+#~ "ctxt\\, call\\_next\\)"
+
+#~ msgid ":py:obj:`make_ffn <flwr.clientapp.mod.make_ffn>`\\ \\(ffn\\, mods\\)"
+#~ msgstr ":py:obj:`make_ffn <flwr.client.mod.make_ffn>`\\ \\(ffn\\, mods\\)"
+
+#~ msgid ""
+#~ ":py:obj:`secagg_mod <flwr.clientapp.mod.secagg_mod>`\\ "
+#~ "\\(msg\\, ctxt\\, call\\_next\\)"
+#~ msgstr ""
+#~ ":py:obj:`secagg_mod <flwr.client.mod.secagg_mod>`\\ "
+#~ "\\(msg\\, ctxt\\, call\\_next\\)"
+
+#~ msgid ""
+#~ ":py:obj:`secaggplus_mod <flwr.clientapp.mod.secaggplus_mod>`\\"
+#~ " \\(msg\\, ctxt\\, call\\_next\\)"
+#~ msgstr ""
+#~ ":py:obj:`secaggplus_mod <flwr.client.mod.secaggplus_mod>`\\ "
+#~ "\\(msg\\, ctxt\\, call\\_next\\)"
+
+#~ msgid ""
+#~ ":py:obj:`LocalDpMod <flwr.clientapp.mod.LocalDpMod>`\\ "
+#~ "\\(clipping\\_norm\\, sensitivity\\, ...\\)"
+#~ msgstr ""
+#~ ":py:obj:`LocalDpMod <flwr.client.mod.LocalDpMod>`\\ "
+#~ "\\(clipping\\_norm\\, sensitivity\\, ...\\)"
+
+#~ msgid "mod.LocalDpMod"
+#~ msgstr "LocalDpMod"
 
