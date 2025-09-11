@@ -257,7 +257,7 @@ def aggregate_bagging(
     bst_curr_org: bytes,
 ) -> bytes:
     """Conduct bagging aggregation for given trees."""
-    if bst_prev_org == b'':
+    if bst_prev_org == b"":
         return bst_curr_org
 
     # Get the tree numbers

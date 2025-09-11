@@ -12,37 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""Flower message-based FedXgbBagging strategy."""
 from collections.abc import Iterable
 from logging import INFO
 from typing import Optional
 
 import numpy as np
 
-from flwr.common import (
-    ArrayRecord,
-    ConfigRecord,
-    Message,
-    MetricRecord,
-    log,
-)
+from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, log
 from flwr.server import Grid
 
 from .fedavg import FedAvg
-from .strategy_utils import (
-    aggregate_bagging,
-    validate_message_reply_consistency,
-)
+from .strategy_utils import aggregate_bagging, validate_message_reply_consistency
 
 
 # pylint: disable=line-too-long
 class FedXgbBagging(FedAvg):
     """Configurable FedXgbBagging strategy implementation."""
+
     def configure_train(
-            self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
+        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
         """Configure the next round of federated training."""
         # Keep track of array record being communicated
-        self.current_bst = arrays['0'].numpy().tobytes()
+        self.current_bst = arrays["0"].numpy().tobytes()
         return super().configure_train(server_round, arrays, config, grid)
 
     def aggregate_train(
@@ -88,7 +81,7 @@ class FedXgbBagging(FedAvg):
         if replies_with_content:
             # Aggregate ArrayRecords
             for content in replies_with_content:
-                bst = content["arrays"]['0'].numpy().tobytes()
+                bst = content["arrays"]["0"].numpy().tobytes()  # type: ignore[union-attr]
                 self.current_bst = aggregate_bagging(self.current_bst, bst)
 
             arrays = ArrayRecord([np.frombuffer(self.current_bst, dtype=np.uint8)])

@@ -77,6 +77,8 @@ def train(msg: Message, context: Context) -> Message:
     model_np = np.frombuffer(local_model, dtype=np.uint8)
 
     # Construct reply message
+    # Note: we store the model as the first item in a list into ArrayRecord,
+    # which can be accessed using index ["0"].
     model_record = ArrayRecord([model_np])
     metrics = {
         "num-examples": num_train,
@@ -99,8 +101,8 @@ def evaluate(msg: Message, context: Context) -> Message:
 
     # Load global model
     bst = xgb.Booster(params=params)
-    para_b = bytearray(msg.content["arrays"]["0"].numpy().tobytes())
-    bst.load_model(para_b)
+    global_model = bytearray(msg.content["arrays"]["0"].numpy().tobytes())
+    bst.load_model(global_model)
 
     # Run evaluation
     eval_results = bst.eval_set(

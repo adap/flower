@@ -27,6 +27,8 @@ def main(grid: Grid, context: Context) -> None:
 
     # Init global model
     global_model = b""  # Init with an empty object; the XGBooster will be created and trained on the client side.
+    # Note: we store the model as the first item in a list into ArrayRecord,
+    # which can be accessed using index ["0"].
     arrays = ArrayRecord([np.frombuffer(global_model, dtype=np.uint8)])
 
     # Initialize FedXgbBagging strategy

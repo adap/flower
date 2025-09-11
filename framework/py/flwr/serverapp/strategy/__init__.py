@@ -22,8 +22,8 @@ from .dp_fixed_clipping import (
 from .fedadagrad import FedAdagrad
 from .fedadam import FedAdam
 from .fedavg import FedAvg
-from .fedyogi import FedYogi
 from .fedxgb_bagging import FedXgbBagging
+from .fedyogi import FedYogi
 from .result import Result
 from .strategy import Strategy
 
