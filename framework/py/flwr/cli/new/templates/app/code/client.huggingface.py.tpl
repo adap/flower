@@ -2,7 +2,7 @@
 
 import torch
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
-from flwr.client import ClientApp
+from flwr.clientapp import ClientApp
 from transformers import AutoModelForSequenceClassification
 
 from $import_name.task import load_data

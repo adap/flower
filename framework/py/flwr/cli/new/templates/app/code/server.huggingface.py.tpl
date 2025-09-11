@@ -2,7 +2,7 @@
 
 import torch
 from flwr.app import ArrayRecord, Context
-from flwr.server import Grid, ServerApp
+from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 from transformers import AutoModelForSequenceClassification
 

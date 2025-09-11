@@ -1,7 +1,7 @@
 """$project_name: A Flower / $framework_str app."""
 
 from flwr.app import ArrayRecord, Context
-from flwr.server import Grid, ServerApp
+from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 
 from $import_name.task import MLP, get_params, set_params
