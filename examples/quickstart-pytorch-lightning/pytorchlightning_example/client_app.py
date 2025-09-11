@@ -42,7 +42,7 @@ def train(msg: Message, context: Context):
     # Construct and return reply Message
     model_record = ArrayRecord(model.state_dict())
     metrics = {
-        **metrics,
+        "train_loss": loss,
         "num-examples": len(train_loader.dataset),
     }
     metric_record = MetricRecord(metrics)
