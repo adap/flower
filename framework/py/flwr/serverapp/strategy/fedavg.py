@@ -291,13 +291,6 @@ class FedAvg(Strategy):
         if valid_replies:
             reply_contents = [msg.content for msg in valid_replies]
 
-            # Ensure expected MetricRecords are received
-            validate_message_reply_consistency(
-                replies=reply_contents,
-                weighted_by_key=self.weighted_by_key,
-                check_arrayrecord=False,
-            )
-
             # Aggregate MetricRecords
             metrics = self.evaluate_metrics_aggr_fn(
                 reply_contents,

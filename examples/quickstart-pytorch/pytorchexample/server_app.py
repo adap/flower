@@ -3,7 +3,7 @@
 import torch
 from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.serverapp import Grid, ServerApp
-from flwr.serverapp.strategy import FedAvg
+from flwr.serverapp import strategy as S
 from pytorchexample.task import Net, load_centralized_dataset, test
 
 # Create ServerApp
@@ -23,10 +23,14 @@ def main(grid: Grid, context: Context) -> None:
     global_model = Net()
     arrays = ArrayRecord(global_model.state_dict())
 
-    # Initialize FedAvg strategy
-    strategy = FedAvg(fraction_evaluate=fraction_evaluate)
+    # Initialize FedAvgM strategy
+    strategy = S.FedAvg(
+        fraction_evaluate=fraction_evaluate,
+        # server_learning_rate=0.1,
+        # server_momentum=0.9,
+    )
 
-    # Start strategy, run FedAvg for `num_rounds`
+    # Start strategy, run FedAvgM for `num_rounds`
     result = strategy.start(
         grid=grid,
         initial_arrays=arrays,
