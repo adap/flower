@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pennylane-flower-tutorial"
+version = "1.0.0"
+description = "Quantum Federated Learning with PennyLane and Flower"
+license = "Apache-2.0"
+authors = [
+    { name = "SECQUOIA Research Group", website = "https://secquoia.github.io/" },
+    { name = "David Bernal Neira", email = "dbernaln@purdue.edu" },
+    { name = "Daniel Anoruo", email = "danoruo1@students.towson.edu" },
+    { name = "Alan Yi", email = "yi161@purdue.edu" }
+]
+dependencies = [
+    "flwr[simulation]>=1.21.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "torch>=1.12.0",
+    "torchvision>=0.13.0",
+    "pennylane==0.41.1",
+    "autoray>=0.6,<0.7",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["pennylane_example"]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "pennylane_example.server_app:app"
+clientapp = "pennylane_example.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 10
+batch-size = 32
+local-epochs = 2
+learning-rate = 0.001
+fraction-fit = 1.0
+fraction-evaluate = 1.0
+min-available-clients = 2
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10
+
+[tool.flwr.federations.local-simulation-gpu]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.2
