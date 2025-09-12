@@ -1,10 +1,10 @@
 """fedvaeexample: A Flower / PyTorch app for Federated Variational Autoencoder."""
 
 import torch
-from fedvaeexample.task import Net, get_weights, load_data, set_weights, test, train
-
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
+
+from fedvaeexample.task import Net, get_weights, load_data, set_weights, test, train
 
 
 class CifarClient(NumPyClient):

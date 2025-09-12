@@ -2,11 +2,11 @@
 
 from typing import List, Tuple
 
-from custom_mods.task import Net, get_weights
-
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
+
+from custom_mods.task import Net, get_weights
 
 
 # Define metric aggregation function

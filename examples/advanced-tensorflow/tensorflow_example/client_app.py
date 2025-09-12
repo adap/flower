@@ -1,10 +1,10 @@
 """tensorflow-example: A Flower / Tensorflow app."""
 
 import keras
-from tensorflow_example.task import load_data, load_model
-
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Array, ArrayRecord, Context, RecordDict
+
+from tensorflow_example.task import load_data, load_model
 
 
 # Define Flower Client and client_fn
