@@ -1,7 +1,6 @@
 """app-pytorch: A Flower / PyTorch app."""
 
 import torch
-
 from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg

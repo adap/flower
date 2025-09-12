@@ -10,6 +10,9 @@ from datasets import load_dataset
 # Create ServerApp
 app = ServerApp()
 
+from tensorflow_example.strategy import CustomFedAvg
+from tensorflow_example.task import load_model
+
 
 @app.main()
 def main(grid: Grid, context: Context) -> None:

@@ -3,11 +3,11 @@
 import logging
 from typing import List, Tuple
 
-from opacus_fl.task import Net, get_weights
-
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
+
+from opacus_fl.task import Net, get_weights
 
 # Opacus logger seems to change the flwr logger to DEBUG level. Set back to INFO
 logging.getLogger("flwr").setLevel(logging.INFO)

@@ -16,6 +16,8 @@ from flwr.serverapp.strategy import FedAvg, Result
 from flwr.serverapp.strategy.strategy_utils import log_strategy_start_info
 from tensorflow_example.task import load_model
 
+from tensorflow_example.task import load_model
+
 PROJECT_NAME = "FLOWER-advanced-tensorflow"
 
 

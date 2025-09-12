@@ -2,7 +2,7 @@
 
 import keras
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
-from flwr.client import ClientApp, NumPyClient
+from flwr.client import ClientApp
 from flwr.clientapp import ClientApp
 from flwr.common import Array, ArrayRecord, Context, RecordDict
 from tensorflow_example.task import load_data, load_model
@@ -10,6 +10,8 @@ from tensorflow_example.task import load_data, load_model
 # Flower ClientApp
 app = ClientApp()
 classification_head_name = "classification-head"
+
+from tensorflow_example.task import load_data, load_model
 
 
 def save_layer_weights_to_state(state: RecordDict, model):

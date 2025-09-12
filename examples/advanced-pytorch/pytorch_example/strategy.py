@@ -17,6 +17,8 @@ from flwr.serverapp.strategy import FedAvg, Result
 from flwr.serverapp.strategy.strategy_utils import log_strategy_start_info
 from pytorch_example.task import Net
 
+from pytorch_example.task import Net
+
 PROJECT_NAME = "FLOWER-advanced-pytorch"
 
 
