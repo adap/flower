@@ -20,11 +20,13 @@ Paper: arxiv.org/abs/1803.01498
 
 from collections import OrderedDict
 from collections.abc import Iterable
+from logging import INFO
 from typing import Callable, Optional, cast
 
 import numpy as np
 
 from flwr.common import Array, ArrayRecord, Message, MetricRecord, NDArray, RecordDict
+from flwr.common.logger import log
 
 from .fedavg import FedAvg
 
@@ -102,6 +104,12 @@ class FedTrimmedAvg(FedAvg):
             evaluate_metrics_aggr_fn=evaluate_metrics_aggr_fn,
         )
         self.beta = beta
+
+    def summary(self) -> None:
+        """Log summary configuration of the strategy."""
+        log(INFO, "\t├──> FedTrimmedAvg settings:")
+        log(INFO, "\t|\t└── beta: %s", self.beta)
+        super().summary()
 
     def aggregate_train(
         self,
