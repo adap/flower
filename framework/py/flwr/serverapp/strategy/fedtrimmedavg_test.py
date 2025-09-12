@@ -28,6 +28,7 @@ def test_aggregate_fit() -> None:
     # Prepare
     strategy = FedMedian()
     replies = [
+        create_mock_reply(ArrayRecord([np.array([0.5, 0.5, 0.5, 0.5])]), 1),
         create_mock_reply(ArrayRecord([np.array([1.0, 0.2, 0.5, 1.0])]), 5),
         create_mock_reply(ArrayRecord([np.array([0.2, 0.5, 1.0, 0.2])]), 2),
         create_mock_reply(ArrayRecord([np.array([0.5, 1.0, 0.2, 0.5])]), 9),

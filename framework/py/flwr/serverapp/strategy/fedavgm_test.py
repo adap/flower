@@ -15,24 +15,12 @@
 """FedAvgM tests."""
 
 
-from unittest.mock import Mock
-
 import numpy as np
 
-from flwr.common import ArrayRecord, Message, MetricRecord, NDArrays, RecordDict
+from flwr.common import ArrayRecord, Message, NDArrays
 
 from .fedavgm import FedAvgM
-
-
-def _mock_reply(arrays: ArrayRecord, num_examples: float) -> Message:
-    """Create a mock reply Message with default keys."""
-    message = Mock(spec=Message)
-    message.content = RecordDict(
-        {"arrays": arrays, "metrics": MetricRecord({"num-examples": num_examples})}
-    )
-    message.has_error.side_effect = lambda: False
-    message.has_content.side_effect = lambda: True
-    return message
+from .strategy_utils_tests import create_mock_reply
 
 
 def _prepare_strategy() -> tuple[FedAvgM, list[Message], NDArrays]:
@@ -49,8 +37,8 @@ def _prepare_strategy() -> tuple[FedAvgM, list[Message], NDArrays]:
     weights1_0 = np.array([[29, 23, 19], [17, 13, 11]], dtype=np.float32)
     weights1_1 = np.array([7, 5, 3, 2], dtype=np.float32)
     replies = [
-        _mock_reply(ArrayRecord([weights0_0, weights0_1]), num_examples=1),
-        _mock_reply(ArrayRecord([weights1_0, weights1_1]), num_examples=2),
+        create_mock_reply(ArrayRecord([weights0_0, weights0_1]), num_examples=1),
+        create_mock_reply(ArrayRecord([weights1_0, weights1_1]), num_examples=2),
     ]
 
     # Prepare: Compute expected weights after aggregation
