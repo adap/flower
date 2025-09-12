@@ -18,6 +18,7 @@ Paper: arxiv.org/pdf/1909.06335.pdf
 """
 
 
+from collections import OrderedDict
 from collections.abc import Iterable
 from logging import INFO
 from typing import Callable, Optional
@@ -65,7 +66,7 @@ class FedAvgM(FedAvg):
     arrayrecord_key : str (default: "arrays")
         Key used to store the ArrayRecord when constructing Messages.
     configrecord_key : str (default: "config")
-         Key used to store the ConfigRecord when constructing Messages.
+        Key used to store the ConfigRecord when constructing Messages.
     train_metrics_aggr_fn : Optional[callable] (default: None)
         Function with signature (list[RecordDict], str) -> MetricRecord,
         used to aggregate MetricRecords from training round replies.
@@ -168,6 +169,10 @@ class FedAvgM(FedAvg):
             ndarrays = self.current_arrays.to_numpy_ndarrays()
             aggregated_ndarrays = aggregated_arrays.to_numpy_ndarrays()
 
+            # Preserve keys for arrays in ArrayRecord
+            array_keys = list(aggregated_arrays.keys())
+            aggregated_arrays.clear()
+
             # Remember that updates are the opposite of gradients
             pseudo_gradient = [
                 old - new for new, old in zip(aggregated_ndarrays, ndarrays)
@@ -186,16 +191,14 @@ class FedAvgM(FedAvg):
                 # No nesterov for now
                 pseudo_gradient = self.momentum_vector
 
-            # SGD
-            aggregated_ndarrays = [
-                old - self.server_learning_rate * pg
+            # SGD and convert back to ArrayRecord
+            updated_array_list = [
+                Array(old - self.server_learning_rate * pg)
                 for old, pg in zip(ndarrays, pseudo_gradient)
             ]
-            del ndarrays, pseudo_gradient  # save memory
-            # Ensure aggregated_arrays has the same keys as before
-            for key, ndarray in zip(aggregated_arrays.keys(), aggregated_ndarrays):
-                aggregated_arrays[key] = Array(ndarray=ndarray)
-            del aggregated_ndarrays  # save memory
+            aggregated_arrays = ArrayRecord(
+                OrderedDict(zip(array_keys, updated_array_list))
+            )
 
             # Update current weights
             self.current_arrays = aggregated_arrays
