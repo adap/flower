@@ -51,6 +51,7 @@ extend_exclude = [
 
 [tool.isort]
 profile = "black"
+known_third_party = ["datasets"]
 
 [tool.black]
 line-length = 88

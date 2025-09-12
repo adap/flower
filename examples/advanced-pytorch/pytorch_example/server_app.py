@@ -1,11 +1,11 @@
 """pytorch-example: A Flower / PyTorch app."""
 
 import torch
+from datasets import load_dataset
 from flwr.common import Context, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from torch.utils.data import DataLoader
 
-from datasets import load_dataset
 from pytorch_example.strategy import CustomFedAvg
 from pytorch_example.task import (
     Net,

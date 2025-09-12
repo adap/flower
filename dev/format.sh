@@ -7,8 +7,8 @@ taplo fmt
 
 # Examples
 # Find all possible module names in examples
-project_arg=$(find ../examples/* -maxdepth 1 -type d -printf " -p %f")
-python -m isort ../examples $project_arg
+src_args=$(find ../examples -mindepth 1 -maxdepth 1 -type d -printf '--src %p ')
+python -m isort ../examples $src_args --settings-path .
 python -m black -q ../examples
 python -m docformatter -i -r ../examples
 

@@ -1,9 +1,9 @@
 """tensorflow-example: A Flower / TensorFlow app."""
 
+from datasets import load_dataset
 from flwr.common import Context, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 
-from datasets import load_dataset
 from tensorflow_example.strategy import CustomFedAvg
 from tensorflow_example.task import load_model
 

@@ -4,6 +4,7 @@ from logging import INFO
 from typing import List, Tuple
 
 import torch
+from datasets import load_dataset
 from flwr.common import Context, FitRes, Metrics, NDArrays, ndarrays_to_parameters
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
@@ -13,7 +14,6 @@ from flwr.server.strategy import FedAvg
 from torch.utils.data import DataLoader
 from transformers import WhisperProcessor
 
-from datasets import load_dataset
 from whisper_example.dataset import get_encoding_fn
 from whisper_example.model import eval_model, get_model, get_params, set_params
 

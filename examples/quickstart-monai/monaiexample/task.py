@@ -7,6 +7,7 @@ from urllib import request
 
 import monai
 import torch
+from datasets import Dataset
 from filelock import FileLock
 from flwr_datasets.partitioner import IidPartitioner
 from monai.networks.nets import densenet
@@ -20,8 +21,6 @@ from monai.transforms import (
     ScaleIntensity,
     ToTensor,
 )
-
-from datasets import Dataset
 
 
 def load_model():

@@ -1,10 +1,9 @@
 """pytorchlightning_example: A Flower / PyTorch Lightning app."""
 
 import pytorch_lightning as pl
+from datasets.utils.logging import disable_progress_bar
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
-
-from datasets.utils.logging import disable_progress_bar
 
 disable_progress_bar()
 

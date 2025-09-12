@@ -3,13 +3,13 @@
 from logging import INFO
 
 import torch
+from datasets import Dataset, load_dataset
 from flwr.common import Context, ndarrays_to_parameters
 from flwr.common.logger import log
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 from torch.utils.data import DataLoader
 
-from datasets import Dataset, load_dataset
 from vitexample.task import (
     apply_eval_transforms,
     get_model,

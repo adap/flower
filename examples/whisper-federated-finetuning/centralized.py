@@ -2,10 +2,10 @@ import argparse
 import random
 
 import torch
+from datasets import concatenate_datasets, load_dataset
 from torch.utils.data import DataLoader
 from transformers import WhisperProcessor
 
-from datasets import concatenate_datasets, load_dataset
 from whisper_example.dataset import get_encoding_fn, prepare_silences_dataset
 from whisper_example.model import (
     construct_balanced_sampler,

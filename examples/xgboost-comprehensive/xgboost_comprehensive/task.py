@@ -3,6 +3,7 @@
 from logging import INFO
 
 import xgboost as xgb
+from datasets import DatasetDict, concatenate_datasets
 from flwr.common import log
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import (
@@ -11,8 +12,6 @@ from flwr_datasets.partitioner import (
     LinearPartitioner,
     SquarePartitioner,
 )
-
-from datasets import DatasetDict, concatenate_datasets
 
 CORRELATION_TO_PARTITIONER = {
     "uniform": IidPartitioner,
