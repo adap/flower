@@ -6,13 +6,14 @@ import torch
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context
 from transformers import logging
+
 from huggingface_example.task import (
-    train,
-    test,
+    get_model,
+    get_params,
     load_data,
     set_params,
-    get_params,
-    get_model,
+    test,
+    train,
 )
 
 warnings.filterwarnings("ignore", category=FutureWarning)

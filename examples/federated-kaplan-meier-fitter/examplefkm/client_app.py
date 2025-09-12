@@ -5,7 +5,7 @@ from typing import Dict, List, Tuple
 import flwr as fl
 import numpy as np
 from flwr.client import Client, ClientApp
-from flwr.common import NDArray, NDArrays, Context
+from flwr.common import Context, NDArray, NDArrays
 
 from examplefkm.task import load_partition
 
