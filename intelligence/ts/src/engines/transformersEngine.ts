@@ -22,7 +22,7 @@ import {
   pipeline,
 } from '@huggingface/transformers';
 
-import type { ProgressInfo, TextGenerationConfig } from '@huggingface/transformers';
+import type { DataType, ProgressInfo, TextGenerationConfig } from '@huggingface/transformers';
 import {
   FailureCode,
   Message,
@@ -38,6 +38,21 @@ import { getEngineModelConfig } from './common/model';
 
 const stoppingCriteria = new InterruptableStoppingCriteria();
 const choice = 0;
+const DATA_TYPES = [
+  'auto',
+  'fp32',
+  'fp16',
+  'q8',
+  'int8',
+  'uint8',
+  'q4',
+  'bnb4',
+  'q4f16',
+] as const satisfies readonly DataType[]; // compile-time check against the lib type
+
+export function isDataType(x: unknown): x is DataType {
+  return typeof x === 'string' && (DATA_TYPES as readonly string[]).includes(x);
+}
 
 export class TransformersEngine extends BaseEngine {
   private generationPipelines: Record<string, TextGenerationPipeline> = {};
@@ -67,9 +82,20 @@ export class TransformersEngine extends BaseEngine {
         const modelElems = modelConfigRes.value.name.split('|');
         const modelId = modelElems[0];
 
-        this.generationPipelines.model = await pipeline('text-generation', modelId, {
-          ...(modelElems.length > 1 && { dtype: modelElems[1] as DTYPE }),
-        });
+        if (modelElems.length > 1 && isDataType(modelElems[1])) {
+          this.generationPipelines.model = await pipeline<'text-generation'>(
+            'text-generation',
+            modelId,
+            {
+              dtype: modelElems[1],
+            }
+          );
+        } else {
+          this.generationPipelines.model = await pipeline<'text-generation'>(
+            'text-generation',
+            modelId
+          );
+        }
       }
       const tokenizer = this.generationPipelines.model.tokenizer;
       const modelInstance = this.generationPipelines.model.model;
@@ -119,7 +145,7 @@ export class TransformersEngine extends BaseEngine {
 
       let promptLengths: number[] | undefined;
       const inputIds = inputs.input_ids as Tensor;
-      const inputDim = inputIds.dims.at(-1);
+      const inputDim = inputIds.dims[-1];
       if (typeof inputDim === 'number' && inputDim > 0) {
         promptLengths = tokenizer
           .batch_decode(inputIds, { skip_special_tokens: true })
@@ -166,30 +192,34 @@ export class TransformersEngine extends BaseEngine {
         const modelElems = modelConfigRes.value.name.split('|');
         const modelId = modelElems[0];
 
-        this.generationPipelines.model = await pipeline('text-generation', modelId, {
-          progress_callback: (progressInfo: ProgressInfo) => {
-            let percentage = 0;
-            let total = 0;
-            let loaded = 0;
-            let description = progressInfo.status as string;
-            if (progressInfo.status == 'progress') {
-              percentage = progressInfo.progress;
-              total = progressInfo.total;
-              loaded = progressInfo.loaded;
-              description = progressInfo.file;
-            } else if (progressInfo.status === 'done') {
-              percentage = 100;
-              description = progressInfo.status;
-            }
-            callback({
-              totalBytes: total,
-              loadedBytes: loaded,
-              percentage,
-              description,
-            });
-          },
-          ...(modelElems.length > 1 && { dtype: modelElems[1] as DTYPE }),
-        });
+        this.generationPipelines.model = await pipeline<'text-generation'>(
+          'text-generation',
+          modelId,
+          {
+            progress_callback: (progressInfo: ProgressInfo) => {
+              let percentage = 0;
+              let total = 0;
+              let loaded = 0;
+              let description = progressInfo.status as string;
+              if (progressInfo.status == 'progress') {
+                percentage = progressInfo.progress;
+                total = progressInfo.total;
+                loaded = progressInfo.loaded;
+                description = progressInfo.file;
+              } else if (progressInfo.status === 'done') {
+                percentage = 100;
+                description = progressInfo.status;
+              }
+              callback({
+                totalBytes: total,
+                loadedBytes: loaded,
+                percentage,
+                description,
+              });
+            },
+            ...(modelElems.length > 1 && { dtype: modelElems[1] as DataType }),
+          }
+        );
       }
       return { ok: true, value: undefined };
     } catch (error) {
@@ -236,15 +266,3 @@ export class TransformersEngine extends BaseEngine {
     };
   }
 }
-
-type DTYPE =
-  | 'auto'
-  | 'fp32'
-  | 'fp16'
-  | 'q8'
-  | 'int8'
-  | 'uint8'
-  | 'q4'
-  | 'bnb4'
-  | 'q4f16'
-  | Record<string, 'auto' | 'fp32' | 'fp16' | 'q8' | 'int8' | 'uint8' | 'q4' | 'bnb4' | 'q4f16'>;
