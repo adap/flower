@@ -293,16 +293,10 @@ def aggregate_bagging(
 
 def _get_tree_nums(xgb_model_org: bytes) -> tuple[int, int]:
     xgb_model = json.loads(bytearray(xgb_model_org))
-    # Get the number of trees
-    tree_num = int(
-        xgb_model["learner"]["gradient_booster"]["model"]["gbtree_model_param"][
-            "num_trees"
-        ]
-    )
-    # Get the number of parallel trees
-    paral_tree_num = int(
-        xgb_model["learner"]["gradient_booster"]["model"]["gbtree_model_param"][
-            "num_parallel_tree"
-        ]
-    )
-    return tree_num, paral_tree_num
+
+    # Access model parameters
+    model_param = xgb_model["learner"]["gradient_booster"]["model"][
+        "gbtree_model_param"
+    ]
+    # Return the number of trees and the number of parallel trees
+    return int(model_param["num_trees"]), int(model_param["num_parallel_tree"])
