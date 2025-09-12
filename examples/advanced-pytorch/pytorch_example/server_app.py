@@ -1,13 +1,13 @@
 """pytorch-example: A Flower / PyTorch app."""
 
 import torch
+from datasets import load_dataset
 from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.serverapp import Grid, ServerApp
-from pytorch_example.strategy import CustomFedAvg
-from pytorch_example.task import Net, apply_eval_transforms, create_run_dir, test
 from torch.utils.data import DataLoader
 
-from datasets import load_dataset
+from pytorch_example.strategy import CustomFedAvg
+from pytorch_example.task import Net, apply_eval_transforms, create_run_dir, test
 
 # Create ServerApp
 app = ServerApp()

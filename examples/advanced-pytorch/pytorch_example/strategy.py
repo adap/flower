@@ -15,7 +15,6 @@ from flwr.common import log, logger
 from flwr.serverapp import Grid
 from flwr.serverapp.strategy import FedAvg, Result
 from flwr.serverapp.strategy.strategy_utils import log_strategy_start_info
-from pytorch_example.task import Net
 
 from pytorch_example.task import Net
 
@@ -23,9 +22,9 @@ PROJECT_NAME = "FLOWER-advanced-pytorch"
 
 
 class CustomFedAvg(FedAvg):
-    """A class that behaves like FedAvg but has extra functionality
-    added into the `start` method. It also overrides `configure_train`
-    to implement a simple learning rate schedule.
+    """A class that behaves like FedAvg but has extra functionality added into the
+    `start` method. It also overrides `configure_train` to implement a simple learning
+    rate schedule.
 
     This strategy: (1) saves results to the filesystem each rounds, (2)
     saves a checkpoint of the global model when a new best is found,
@@ -112,8 +111,8 @@ class CustomFedAvg(FedAvg):
             Callable[[int, ArrayRecord], Optional[MetricRecord]]
         ] = None,
     ) -> Result:
-        """Execute the federated learning strategy logging results
-        to W&B and saving them to disk."""
+        """Execute the federated learning strategy logging results to W&B and saving
+        them to disk."""
 
         # Init W&B
         wandb.init(project=PROJECT_NAME, name=f"{str(self.run_dir)}-ServerApp")

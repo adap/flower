@@ -1,11 +1,11 @@
 """tensorflow-example: A Flower / TensorFlow app."""
 
+from datasets import load_dataset
 from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.serverapp import Grid, ServerApp
+
 from tensorflow_example.strategy import CustomFedAvg
 from tensorflow_example.task import create_run_dir, load_model
-
-from datasets import load_dataset
 
 # Create ServerApp
 app = ServerApp()
