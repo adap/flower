@@ -1,22 +1,13 @@
 """xgboost_quickstart: A Flower / XGBoost app."""
 
-import numpy as np
 import warnings
+
+import numpy as np
 import xgboost as xgb
-
 from flwr.client import ClientApp
-from flwr.common import (
-    ArrayRecord,
-    ConfigRecord,
-    Context,
-    Message,
-    RecordDict,
-    MetricRecord,
-)
+from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.common.config import unflatten_dict
-
 from xgboost_quickstart.task import load_data, replace_keys
-
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -43,9 +34,7 @@ def train(msg: Message, context: Context) -> Message:
     # Load model and data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    train_dmatrix, valid_dmatrix, num_train, num_val = load_data(
-        partition_id, num_partitions
-    )
+    train_dmatrix, valid_dmatrix, num_train, _ = load_data(partition_id, num_partitions)
 
     # Read from run config
     num_local_round = context.run_config["local-epochs"]

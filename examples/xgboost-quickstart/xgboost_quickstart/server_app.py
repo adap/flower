@@ -2,14 +2,11 @@
 
 import numpy as np
 import xgboost as xgb
-
 from flwr.common import ArrayRecord, Context
 from flwr.common.config import unflatten_dict
 from flwr.server import Grid, ServerApp
 from flwr.serverapp.strategy import FedXgbBagging
-
 from xgboost_quickstart.task import replace_keys
-
 
 # Create ServerApp
 app = ServerApp()
@@ -26,7 +23,9 @@ def main(grid: Grid, context: Context) -> None:
     params = cfg["params"]
 
     # Init global model
-    global_model = b""  # Init with an empty object; the XGBooster will be created and trained on the client side.
+    # Init with an empty object; the XGBooster will be created
+    # and trained on the client side.
+    global_model = b""
     # Note: we store the model as the first item in a list into ArrayRecord,
     # which can be accessed using index ["0"].
     arrays = ArrayRecord([np.frombuffer(global_model, dtype=np.uint8)])
