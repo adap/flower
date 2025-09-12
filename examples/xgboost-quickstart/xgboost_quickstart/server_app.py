@@ -52,4 +52,4 @@ def main(grid: Grid, context: Context) -> None:
 
     # Save model
     print("\nSaving final model to disk...")
-    bst.save_model("model.json")
+    bst.save_model("final_model.json")

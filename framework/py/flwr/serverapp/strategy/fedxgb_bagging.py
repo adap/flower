@@ -64,7 +64,7 @@ class FedXgbBagging(FedAvg):
 
             # Aggregate ArrayRecords
             for content in reply_contents:
-                self._ensure_single_array(content["arrays"])
+                self._ensure_single_array(cast(ArrayRecord, content["arrays"]))
                 bst = content["arrays"]["0"].numpy().tobytes()  # type: ignore[union-attr]
                 self.current_bst = aggregate_bagging(cast(bytes, self.current_bst), bst)
 
