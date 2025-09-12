@@ -36,7 +36,6 @@ from flwr.common import (
 from flwr.server import Grid
 
 from .fedavg import FedAvg
-from .result import Result
 
 
 class FedAvgM(FedAvg):
@@ -131,6 +130,14 @@ class FedAvgM(FedAvg):
         log(INFO, "\t|\t└── Server Momentum: %s", self.server_momentum)
         super().summary()
 
+    def configure_train(
+        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
+    ) -> Iterable[Message]:
+        """Configure the next round of federated training."""
+        if self.current_arrays is None:
+            self.current_arrays = arrays
+        return super().configure_train(server_round, arrays, config, grid)
+
     def aggregate_train(
         self,
         server_round: int,
@@ -186,28 +193,3 @@ class FedAvgM(FedAvg):
             self.current_arrays = aggregated_arrays
 
         return aggregated_arrays, aggregated_metrics
-
-    def start(  # pylint: disable=R0913, R0917
-        self,
-        grid: Grid,
-        initial_arrays: ArrayRecord,
-        num_rounds: int = 3,
-        timeout: float = 3600,
-        train_config: Optional[ConfigRecord] = None,
-        evaluate_config: Optional[ConfigRecord] = None,
-        evaluate_fn: Optional[
-            Callable[[int, ArrayRecord], Optional[MetricRecord]]
-        ] = None,
-    ) -> Result:
-        """Execute the federated learning strategy."""
-        # Save initial parameters
-        self.current_arrays = initial_arrays
-        return super().start(
-            grid,
-            initial_arrays,
-            num_rounds,
-            timeout,
-            train_config,
-            evaluate_config,
-            evaluate_fn,
-        )
