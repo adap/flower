@@ -8,10 +8,7 @@ from datasets.utils.logging import disable_progress_bar
 
 disable_progress_bar()
 
-from pytorchlightning_example.task import (
-    LitAutoEncoder,
-    load_data,
-)
+from pytorchlightning_example.task import LitAutoEncoder, load_data
 
 # Flower ClientApp
 app = ClientApp()

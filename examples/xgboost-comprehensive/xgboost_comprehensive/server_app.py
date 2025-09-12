@@ -4,9 +4,6 @@ from logging import INFO
 from typing import Dict, List, Optional
 
 import xgboost as xgb
-from xgboost_comprehensive.task import replace_keys, transform_dataset_to_dmatrix
-
-from datasets import load_dataset
 from flwr.common import Context, Parameters, Scalar
 from flwr.common.config import unflatten_dict
 from flwr.common.logger import log
@@ -15,6 +12,9 @@ from flwr.server.client_manager import SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
 from flwr.server.strategy import FedXgbBagging, FedXgbCyclic
+
+from datasets import load_dataset
+from xgboost_comprehensive.task import replace_keys, transform_dataset_to_dmatrix
 
 
 class CyclicClientManager(SimpleClientManager):

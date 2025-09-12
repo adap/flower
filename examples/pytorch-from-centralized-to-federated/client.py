@@ -8,8 +8,9 @@ import cifar
 import flwr as fl
 import numpy as np
 import torch
-from datasets.utils.logging import disable_progress_bar
 from torch.utils.data import DataLoader
+
+from datasets.utils.logging import disable_progress_bar
 
 disable_progress_bar()
 

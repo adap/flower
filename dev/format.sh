@@ -6,6 +6,9 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/
 taplo fmt
 
 # Examples
+# Find all possible module names in examples
+project_arg=$(find ../examples/* -maxdepth 1 -type d -printf " -p %f")
+python -m isort ../examples $project_arg
 python -m black -q ../examples
 python -m docformatter -i -r ../examples
 

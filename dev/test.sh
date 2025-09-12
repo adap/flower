@@ -8,6 +8,8 @@ echo "=== test.sh ==="
 echo "- Start Python checks"
 
 echo "- isort: start"
+project_arg=$(find ../examples/* -maxdepth 1 -type d -printf " -p %f")
+python -m isort --check-only ../examples $project_arg
 python -m isort --check-only ../benchmarks
 echo "- isort: done"
 

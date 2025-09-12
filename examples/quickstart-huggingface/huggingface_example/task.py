@@ -1,21 +1,21 @@
 """huggingface_example: A Flower / Hugging Face app."""
 
-from typing import Any
 from collections import OrderedDict
+from typing import Any
 
 import torch
 from evaluate import load as load_metric
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from transformers import (
+    AutoModelForSequenceClassification,
     AutoTokenizer,
     DataCollatorWithPadding,
-    AutoModelForSequenceClassification,
 )
-from datasets.utils.logging import disable_progress_bar
-from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import IidPartitioner
 
+from datasets.utils.logging import disable_progress_bar
 
 disable_progress_bar()
 fds = None  # Cache FederatedDataset

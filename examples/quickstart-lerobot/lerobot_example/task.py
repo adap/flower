@@ -11,10 +11,12 @@ import imageio
 import numpy
 import numpy as np
 import torch
-from lerobot.common.datasets.lerobot_dataset import LeRobotDataset, CODEBASE_VERSION
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import GroupedNaturalIdPartitioner
+from lerobot.common.datasets.lerobot_dataset import CODEBASE_VERSION, LeRobotDataset
 from lerobot.common.datasets.utils import (
-    hf_transform_to_torch,
     get_hf_dataset_safe_version,
+    hf_transform_to_torch,
 )
 from lerobot.common.policies.diffusion.configuration_diffusion import DiffusionConfig
 from lerobot.common.policies.diffusion.modeling_diffusion import DiffusionPolicy
@@ -23,9 +25,6 @@ from torch.utils.data import DataLoader
 from datasets.utils.logging import disable_progress_bar
 
 from .lerobot_federated_dataset import FilteredLeRobotDataset
-from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import GroupedNaturalIdPartitioner
-
 
 disable_progress_bar()
 fds = None  # Cache FederatedDataset

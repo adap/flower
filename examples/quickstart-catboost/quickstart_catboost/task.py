@@ -1,14 +1,15 @@
 """quickstart-catboost: A Flower / CatBoost app."""
 
-from catboost import CatBoostClassifier
-from datasets import Dataset
 import json
-from pandas import DataFrame, Series
 import tempfile
 from typing import Tuple
+
+from catboost import CatBoostClassifier
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
+from pandas import DataFrame, Series
 
+from datasets import Dataset
 
 fds = None  # Cache FederatedDataset
 

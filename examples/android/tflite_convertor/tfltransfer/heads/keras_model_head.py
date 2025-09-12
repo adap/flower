@@ -23,7 +23,6 @@ import tempfile
 import tensorflow as tf
 from tensorflow.compat import v1 as tfv1
 from tensorflow.python.tools import freeze_graph
-
 from tfltransfer import utils
 
 
