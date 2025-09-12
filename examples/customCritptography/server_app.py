@@ -6,11 +6,9 @@ from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
-from authexample.task import Net, get_weights
+from customCriptography.task import Net, get_weights
 import logging
 
-# ⚡ Imposta logging a livello DEBUG **prima di qualsiasi import di Flower**
-logging.basicConfig(level=logging.DEBUG)
 
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:

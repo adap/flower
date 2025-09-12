@@ -42,7 +42,7 @@ def server_fn(context: Context):
         min_available_clients=2,
         evaluate_metrics_aggregation_fn=weighted_average,
         initial_parameters=parameters,
-        stop_criteria={"metric_ge": ("accuracy", 0.2)}
+        stop_criteria={"metric_ge": ("accuracy", 0.5)}
     )
     config = ServerConfig(num_rounds=num_rounds)
 

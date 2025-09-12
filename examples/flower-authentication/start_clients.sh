@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NUM_CLIENTS=5
+NUM_CLIENTS=2
 
 # 1. Genera tutte le chiavi in un colpo solo
 

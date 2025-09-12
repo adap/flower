@@ -20,8 +20,8 @@ from collections.abc import Mapping
 from typing import Union, cast, get_args
 
 from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
-from .crypto.crypto_selector import encrypt,decrypt
-from .crypto.config_cripto import ENCRYPTION_METHOD,ENCRYPTION_ENABLED
+from .crypto.crypto_selector import encrypt, decrypt, add_integrity, check_integrity
+from .crypto.config_cripto import ENCRYPTION_METHOD,ENCRYPTION_ENABLED, INTEGRITY_ENABLED, INTEGRITY_METHOD
 from .crypto.log_file import log_time
 from .typing import (
     Code,
@@ -75,6 +75,9 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
             tensor = record[key].data
             if ENCRYPTION_ENABLED:
                 tensor = decrypt(tensor, ENCRYPTION_METHOD)
+            if INTEGRITY_ENABLED:
+                tensor = check_integrity(tensor, INTEGRITY_METHOD)
+
             parameters.tensors.append(tensor)
 
         if not parameters.tensor_type:
@@ -128,7 +131,8 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
 
         if ENCRYPTION_ENABLED:
             encrypted = encrypt(dataR, ENCRYPTION_METHOD)
-            tensor = encrypted
+        if INTEGRITY_ENABLED:
+            tensor = add_integrity(dataR, INTEGRITY_METHOD)
         ordered_dict[str(idx)] = Array(
             data=tensor, dtype="", stype=tensor_type, shape=()
         )

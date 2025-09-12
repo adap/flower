@@ -15,17 +15,14 @@ def unpad(data: bytes) -> bytes:
         raise ValueError("Padding non valido")
     return data[:-pad_len]
 def encrypt(data: bytes) -> bytes:
-
     iv = os.urandom(BLOCK_SIZE)
     cipher = Cipher(algorithms.AES(KEY_AES), modes.CBC(iv), backend=default_backend())
     encryptor = cipher.encryptor()
     padded_data = pad(data)
     ciphertext = encryptor.update(padded_data) + encryptor.finalize()
-
     return iv + ciphertext
 
 def decrypt(encrypted_data: bytes) -> bytes:
-
     if len(encrypted_data) < BLOCK_SIZE:
         raise ValueError("Dati cifrati troppo corti")
     iv = encrypted_data[:BLOCK_SIZE]
@@ -34,5 +31,4 @@ def decrypt(encrypted_data: bytes) -> bytes:
     decryptor = cipher.decryptor()
     padded_plaintext = decryptor.update(ciphertext) + decryptor.finalize()
     plaintext = unpad(padded_plaintext)
-
     return plaintext
