@@ -48,9 +48,10 @@ class FedMedian(FedAvg):
             return None, None
 
         # Aggregate ArrayRecords using median
+        # Get the key for the only ArrayRecord from the first Message
+        record_key = list(valid_replies[0].content.array_records.keys())[0]
         # Preserve keys for arrays in ArrayRecord
-        array_keys = list(valid_replies[0].content[self.arrayrecord_key].keys())
-        record_key = self.arrayrecord_key
+        array_keys = list(valid_replies[0].content[record_key].keys())
 
         # Retrieve all model weights as numpy arrays
         ndarrays_list = [
