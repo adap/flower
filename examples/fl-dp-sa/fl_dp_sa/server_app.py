@@ -2,12 +2,12 @@
 
 from typing import List, Tuple
 
-from fl_dp_sa.task import Net, get_weights
-
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import Grid, LegacyContext, ServerApp, ServerConfig
 from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping, FedAvg
 from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow
+
+from fl_dp_sa.task import Net, get_weights
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:

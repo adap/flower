@@ -3,18 +3,17 @@
 from collections import OrderedDict
 
 import torch
-from torchvision.models import vit_b_16, ViT_B_16_Weights
-from torchvision.transforms import (
-    Compose,
-    Normalize,
-    ToTensor,
-    RandomResizedCrop,
-    Resize,
-    CenterCrop,
-)
-
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
+from torchvision.models import ViT_B_16_Weights, vit_b_16
+from torchvision.transforms import (
+    CenterCrop,
+    Compose,
+    Normalize,
+    RandomResizedCrop,
+    Resize,
+    ToTensor,
+)
 
 
 def get_model(num_classes: int):

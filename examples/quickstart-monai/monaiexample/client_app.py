@@ -1,10 +1,10 @@
 """monaiexample: A Flower / MONAI app."""
 
 import torch
+from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
-from flwr.client import NumPyClient, ClientApp
 
-from monaiexample.task import load_data, load_model, test, train, get_params, set_params
+from monaiexample.task import get_params, load_data, load_model, set_params, test, train
 
 
 # Define Flower client

@@ -3,8 +3,6 @@
 import warnings
 
 import xgboost as xgb
-from xgboost_comprehensive.task import load_data, replace_keys
-
 from flwr.client import Client, ClientApp
 from flwr.common import (
     Code,
@@ -17,6 +15,8 @@ from flwr.common import (
 )
 from flwr.common.config import unflatten_dict
 from flwr.common.context import Context
+
+from xgboost_comprehensive.task import load_data, replace_keys
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

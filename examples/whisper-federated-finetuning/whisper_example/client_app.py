@@ -4,10 +4,11 @@ import time
 
 time.sleep(5)
 import torch
+from flwr.client import ClientApp, NumPyClient
+from flwr.common import Context
 from torch.utils.data import DataLoader
-from whisper_example.dataset import load_data
-from whisper_example.dataset import load_data_from_disk
 
+from whisper_example.dataset import load_data, load_data_from_disk
 from whisper_example.model import (
     construct_balanced_sampler,
     get_model,
@@ -15,9 +16,6 @@ from whisper_example.model import (
     set_params,
     train_one_epoch,
 )
-
-from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
 
 torch.set_float32_matmul_precision(
     "high"

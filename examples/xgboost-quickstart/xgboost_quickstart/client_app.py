@@ -2,11 +2,8 @@
 
 import warnings
 
-from flwr.common.context import Context
-
 import xgboost as xgb
 from flwr.client import Client, ClientApp
-from flwr.common.config import unflatten_dict
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -16,6 +13,8 @@ from flwr.common import (
     Parameters,
     Status,
 )
+from flwr.common.config import unflatten_dict
+from flwr.common.context import Context
 
 from xgboost_quickstart.task import load_data, replace_keys
 

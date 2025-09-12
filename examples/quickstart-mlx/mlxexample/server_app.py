@@ -6,7 +6,6 @@ from flwr.serverapp.strategy import FedAvg
 
 from mlxexample.task import MLP, get_params, set_params
 
-
 # Create ServerApp
 app = ServerApp()
 

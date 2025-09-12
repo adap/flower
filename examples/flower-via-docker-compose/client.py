@@ -4,8 +4,8 @@ import os
 
 import flwr as fl
 import tensorflow as tf
-from helpers.load_data import load_data
 
+from helpers.load_data import load_data
 from model.model import Model
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
