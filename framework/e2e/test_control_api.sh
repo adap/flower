@@ -75,7 +75,7 @@ fi
 # Combine the arguments into a single command for flower-superlink
 combined_args="$server_arg $server_auth $simulation_arg"
 
-timeout 2m flower-superlink $combined_args 2>&1 | tee flwr_output.log &
+timeout 2m flower-superlink $combined_args &
 sl_pid=$(pgrep -f "flower-superlink")
 sleep 2
 
@@ -112,21 +112,23 @@ cleanup_and_exit() {
     exit $1
 }
 
-# Check for "Run finished" in a loop with a timeout
 while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
-    if grep -q "ERROR" flwr_output.log; then
-        echo "An ERROR occurred during training. Exiting."
-        cleanup_and_exit 1
-    elif grep -q "Run finished" flwr_output.log; then
-        echo "Training worked correctly!"
-        found_success=true
-        cleanup_and_exit 0
+    # Run the command and capture output
+    output=$(flwr ls . e2e --format=json)
+
+    # Extract status from the first run (or loop over all if needed)
+    status=$(echo "$output" | jq -r '.runs[0].status')
+
+    echo "Current status: $status"
+
+    if [ "$status" == "finished:completed" ]; then
+      found_success=true
+      echo "Training worked correctly!"
+      cleanup_and_exit 0
     else
-        echo "Waiting for training ... ($elapsed seconds elapsed)"
+      echo "⏳ Not completed yet, retrying in 2s..."
+      sleep 2
     fi
-    # Sleep for a short period and increment the elapsed time
-    sleep 2
-    elapsed=$((elapsed + 2))
 done
 
 if [ "$found_success" = false ]; then
