@@ -22,6 +22,8 @@ from .dp_fixed_clipping import (
 from .fedadagrad import FedAdagrad
 from .fedadam import FedAdam
 from .fedavg import FedAvg
+from .fedxgb_bagging import FedXgbBagging
+from .fedxgb_cyclic import FedXgbCyclic
 from .fedyogi import FedYogi
 from .result import Result
 from .strategy import Strategy
@@ -32,6 +34,8 @@ __all__ = [
     "FedAdagrad",
     "FedAdam",
     "FedAvg",
+    "FedXgbBagging",
+    "FedXgbCyclic",
     "FedYogi",
     "Result",
     "Strategy",
