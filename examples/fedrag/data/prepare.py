@@ -3,10 +3,10 @@
 import argparse
 import os
 
+from data.download import DownloadCorpora
+
 from fedrag.mirage_qa import MirageQA
 from fedrag.retriever import Retriever
-
-from .download import DownloadCorpora
 
 VALID_DATASETS = ["pubmed", "statpearls", "textbooks", "wikipedia"]
 
