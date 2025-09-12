@@ -23,6 +23,7 @@ from .fedadagrad import FedAdagrad
 from .fedadam import FedAdam
 from .fedavg import FedAvg
 from .fedavgm import FedAvgM
+from .fedmedian import FedMedian
 from .fedyogi import FedYogi
 from .result import Result
 from .strategy import Strategy
@@ -34,6 +35,7 @@ __all__ = [
     "FedAdam",
     "FedAvg",
     "FedAvgM",
+    "FedMedian",
     "FedYogi",
     "Result",
     "Strategy",
