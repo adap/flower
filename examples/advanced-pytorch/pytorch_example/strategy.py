@@ -5,11 +5,11 @@ from logging import INFO
 
 import torch
 import wandb
-from pytorch_example.task import Net, create_run_dir, set_weights
-
 from flwr.common import logger, parameters_to_ndarrays
 from flwr.common.typing import UserConfig
 from flwr.server.strategy import FedAvg
+
+from pytorch_example.task import Net, create_run_dir, set_weights
 
 PROJECT_NAME = "FLOWER-advanced-pytorch"
 

@@ -8,6 +8,7 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from flwr.common.typing import UserConfig
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import DirichletPartitioner
 from torch.utils.data import DataLoader
@@ -18,8 +19,6 @@ from torchvision.transforms import (
     RandomHorizontalFlip,
     ToTensor,
 )
-
-from flwr.common.typing import UserConfig
 
 FM_NORMALIZATION = ((0.1307,), (0.3081,))
 EVAL_TRANSFORMS = Compose([ToTensor(), Normalize(*FM_NORMALIZATION)])
