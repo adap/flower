@@ -10,7 +10,6 @@ from flwr.common import Context
 from flwr.common.config import unflatten_dict
 from flwr.common.typing import NDArrays, Scalar
 from omegaconf import DictConfig
-
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
@@ -22,8 +21,8 @@ from flowertune_llm.dataset import (
 from flowertune_llm.models import (
     cosine_annealing,
     get_model,
-    set_parameters,
     get_parameters,
+    set_parameters,
 )
 
 # Avoid warnings

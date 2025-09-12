@@ -4,11 +4,11 @@ import json
 from logging import INFO
 
 import wandb
-from tensorflow_example.task import create_run_dir, load_model
-
 from flwr.common import logger, parameters_to_ndarrays
 from flwr.common.typing import UserConfig
 from flwr.server.strategy import FedAvg
+
+from tensorflow_example.task import create_run_dir, load_model
 
 PROJECT_NAME = "FLOWER-advanced-tensorflow"
 
