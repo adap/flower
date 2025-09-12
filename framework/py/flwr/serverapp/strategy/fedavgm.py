@@ -124,30 +124,12 @@ class FedAvgM(FedAvg):
 
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
-        log(INFO, "\t├──> Sampling:")
-        log(
-            INFO,
-            "\t│\t├──Fraction: train (%.2f) | evaluate ( %.2f)",
-            self.fraction_train,
-            self.fraction_evaluate,
-        )
-        log(
-            INFO,
-            "\t│\t├──Minimum nodes: train (%d) | evaluate (%d)",
-            self.min_train_nodes,
-            self.min_evaluate_nodes,
-        )
-        log(INFO, "\t│\t└──Minimum available nodes: %d", self.min_available_nodes)
-        log(INFO, "\t├──> Keys in records:")
-        log(INFO, "\t│\t├── Weighted by: '%s'", self.weighted_by_key)
-        log(INFO, "\t│\t├── ArrayRecord key: '%s'", self.arrayrecord_key)
-        log(INFO, "\t│\t└── ConfigRecord key: '%s'", self.configrecord_key)
-        if self.server_opt:
-            log(INFO, "\t└──> Server optimizer:")
-            log(INFO, "\t\t├── Learning rate: %.4f", self.server_learning_rate)
-            log(INFO, "\t\t└── Momentum: %.4f", self.server_momentum)
-        else:
-            log(INFO, "\t└──> Server optimizer: None")
+        opt_status = "ON" if self.server_opt else "OFF"
+        log(INFO, "\t├──> FedAvgM settings:")
+        log(INFO, "\t|\t├── Server optimization: %s", opt_status)
+        log(INFO, "\t|\t├── Server learning rate: %s", self.server_learning_rate)
+        log(INFO, "\t|\t└── Server Momentum: %s", self.server_momentum)
+        super().summary()
 
     def aggregate_train(
         self,
