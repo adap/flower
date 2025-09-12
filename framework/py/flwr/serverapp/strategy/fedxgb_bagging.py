@@ -14,16 +14,15 @@
 # ==============================================================================
 """Flower message-based FedXgbBagging strategy."""
 from collections.abc import Iterable
-from logging import INFO
 from typing import Any, Optional, cast
 
 import numpy as np
 
-from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, log
+from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord
 from flwr.server import Grid
 
 from .fedavg import FedAvg
-from .strategy_utils import aggregate_bagging, validate_message_reply_consistency
+from .strategy_utils import aggregate_bagging
 
 
 # pylint: disable=line-too-long
@@ -51,43 +50,14 @@ class FedXgbBagging(FedAvg):
         replies: Iterable[Message],
     ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
-        if not replies:
-            return None, None
-
-        # Log if any Messages carried errors
-        # Filter messages that carry content
-        num_errors = 0
-        replies_with_content = []
-        for msg in replies:
-            if msg.has_error():
-                log(
-                    INFO,
-                    "Received error in reply from node %d: %s",
-                    msg.metadata.src_node_id,
-                    msg.error,
-                )
-                num_errors += 1
-            else:
-                replies_with_content.append(msg.content)
-
-        log(
-            INFO,
-            "aggregate_train: Received %s results and %s failures",
-            len(replies_with_content),
-            num_errors,
-        )
-
-        # Ensure expected ArrayRecords and MetricRecords are received
-        validate_message_reply_consistency(
-            replies=replies_with_content,
-            weighted_by_key=self.weighted_by_key,
-            check_arrayrecord=True,
-        )
+        valid_replies, _ = self._check_and_log_replies(replies, is_train=True)
 
         arrays, metrics = None, None
-        if replies_with_content:
+        if valid_replies:
+            reply_contents = [msg.content for msg in valid_replies]
+
             # Aggregate ArrayRecords
-            for content in replies_with_content:
+            for content in reply_contents:
                 bst = content["arrays"]["0"].numpy().tobytes()  # type: ignore[union-attr]
                 self.current_bst = aggregate_bagging(cast(bytes, self.current_bst), bst)
 
@@ -97,7 +67,7 @@ class FedXgbBagging(FedAvg):
 
             # Aggregate MetricRecords
             metrics = self.train_metrics_aggr_fn(
-                replies_with_content,
+                reply_contents,
                 self.weighted_by_key,
             )
         return arrays, metrics
