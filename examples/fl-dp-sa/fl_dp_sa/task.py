@@ -33,6 +33,16 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         return self.fc3(x)
 
+def get_transform():
+    pytorch_transforms = Compose([ToTensor(), Normalize((0.5,), (0.5,))])
+
+    def apply_transforms(batch):
+        """Apply transforms to the partition from FederatedDataset."""
+        batch["image"] = [pytorch_transforms(img) for img in batch["image"]]
+        return batch
+    
+    return apply_transforms
+
 
 def load_data(partition_id: int, num_partitions: int):
     """Load partition MNIST data."""
