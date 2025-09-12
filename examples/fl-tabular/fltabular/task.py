@@ -6,12 +6,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OrdinalEncoder, StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
-from flwr_datasets.partitioner import IidPartitioner
 
 fds = None  # Cache FederatedDataset
 

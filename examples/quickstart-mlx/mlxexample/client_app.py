@@ -5,6 +5,7 @@ import mlx.nn as nn
 import mlx.optimizers as optim
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.client import ClientApp
+
 from mlxexample.task import (
     MLP,
     batch_iterate,
@@ -14,7 +15,6 @@ from mlxexample.task import (
     loss_fn,
     set_params,
 )
-
 
 # Flower ClientApp
 app = ClientApp()

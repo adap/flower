@@ -1,6 +1,8 @@
 """xgboost_comprehensive: A Flower / XGBoost app."""
 
 import xgboost as xgb
+from datasets import DatasetDict, concatenate_datasets
+from flwr.common import log
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import (
     ExponentialPartitioner,
@@ -8,6 +10,7 @@ from flwr_datasets.partitioner import (
     LinearPartitioner,
     SquarePartitioner,
 )
+
 
 from datasets import DatasetDict, concatenate_datasets
 

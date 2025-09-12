@@ -4,15 +4,19 @@ from logging import INFO
 
 import torch
 from datasets import Dataset, load_dataset
-from torch.utils.data import DataLoader
-
-from vitexample.task import apply_eval_transforms
-from vitexample.task import get_model, set_params, test, get_params
-
 from flwr.common import Context, ndarrays_to_parameters
 from flwr.common.logger import log
-from flwr.server import ServerApp, ServerConfig, ServerAppComponents
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
+from torch.utils.data import DataLoader
+
+from vitexample.task import (
+    apply_eval_transforms,
+    get_model,
+    get_params,
+    set_params,
+    test,
+)
 
 
 def get_evaluate_fn(

@@ -2,6 +2,7 @@
 
 import numpy as np
 import warnings
+
 import xgboost as xgb
 
 from flwr.client import ClientApp

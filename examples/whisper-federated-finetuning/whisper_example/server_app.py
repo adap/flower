@@ -4,11 +4,6 @@ from logging import INFO
 from typing import List, Tuple
 
 import torch
-from torch.utils.data import DataLoader
-from transformers import WhisperProcessor
-from whisper_example.dataset import get_encoding_fn
-from whisper_example.model import eval_model, get_model, get_params, set_params
-
 from datasets import load_dataset
 from flwr.common import Context, FitRes, Metrics, NDArrays, ndarrays_to_parameters
 from flwr.common.logger import log
@@ -16,6 +11,11 @@ from flwr.common.typing import UserConfig
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
+from torch.utils.data import DataLoader
+from transformers import WhisperProcessor
+
+from whisper_example.dataset import get_encoding_fn
+from whisper_example.model import eval_model, get_model, get_params, set_params
 
 
 def get_evaluate_fn(
