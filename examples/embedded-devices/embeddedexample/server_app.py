@@ -26,7 +26,7 @@ def main(grid: Grid, context: Context) -> None:
     # Initialize FedAvg strategy
     strategy = FedAvg(fraction_evaluate=fraction_evaluate)
 
-    # Start strategy, run FedAvg for `num_rounds`
+    # Start strategy, running FedAvg for `num_rounds`
     result = strategy.start(
         grid=grid,
         initial_arrays=arrays,
