@@ -66,11 +66,12 @@ class FedXgbBagging(FedAvg):
             for content in reply_contents:
                 self._ensure_single_array(cast(ArrayRecord, content["arrays"]))
                 bst = content["arrays"]["0"].numpy().tobytes()  # type: ignore[union-attr]
-                self.current_bst = aggregate_bagging(cast(bytes, self.current_bst), bst)
 
-            arrays = ArrayRecord(
-                [np.frombuffer(cast(bytes, self.current_bst), dtype=np.uint8)]
-            )
+                if self.current_bst is not None:
+                    self.current_bst = aggregate_bagging(self.current_bst, bst)
+
+            if self.current_bst is not None:
+                arrays = ArrayRecord([np.frombuffer(self.current_bst, dtype=np.uint8)])
 
             # Aggregate MetricRecords
             metrics = self.train_metrics_aggr_fn(
