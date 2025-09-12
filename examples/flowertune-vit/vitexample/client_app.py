@@ -1,14 +1,18 @@
 """vitexample: A Flower / PyTorch app with Vision Transformers."""
 
 import torch
+from flwr.client import ClientApp, NumPyClient
+from flwr.common import Context
 from torch.utils.data import DataLoader
 
-from flwr.common import Context
-from flwr.client import NumPyClient, ClientApp
-
-
-from vitexample.task import apply_train_transforms, get_dataset_partition
-from vitexample.task import get_model, set_params, get_params, train
+from vitexample.task import (
+    apply_train_transforms,
+    get_dataset_partition,
+    get_model,
+    get_params,
+    set_params,
+    train,
+)
 
 
 class FedViTClient(NumPyClient):

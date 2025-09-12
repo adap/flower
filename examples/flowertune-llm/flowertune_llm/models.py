@@ -1,8 +1,9 @@
 import math
+from collections import OrderedDict
 
 import torch
+from flwr.common.typing import NDArrays
 from omegaconf import DictConfig
-from collections import OrderedDict
 from peft import (
     LoraConfig,
     get_peft_model,
@@ -11,8 +12,6 @@ from peft import (
 )
 from peft.utils import prepare_model_for_kbit_training
 from transformers import AutoModelForCausalLM, BitsAndBytesConfig
-
-from flwr.common.typing import NDArrays
 
 
 def cosine_annealing(
