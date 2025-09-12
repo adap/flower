@@ -1,14 +1,14 @@
 """opacus: Training with Sample-Level Differential Privacy using Opacus Privacy Engine."""
 
+import logging
 import warnings
 
 import torch
-from opacus import PrivacyEngine
-from opacus_fl.task import Net, get_weights, load_data, set_weights, test, train
-import logging
-
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
+
+from opacus import PrivacyEngine
+from opacus_fl.task import Net, get_weights, load_data, set_weights, test, train
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
