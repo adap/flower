@@ -18,8 +18,17 @@
 from collections.abc import Iterable
 from logging import INFO
 from time import sleep
+from typing import Optional
 
-from flwr.common import ArrayRecord, ConfigRecord, Message, MessageType, RecordDict, log
+from flwr.common import (
+    ArrayRecord,
+    ConfigRecord,
+    Message,
+    MessageType,
+    MetricRecord,
+    RecordDict,
+    log,
+)
 from flwr.server import Grid
 
 from .fedavg import FedAvg
@@ -48,11 +57,10 @@ class FedXgbCyclic(FedAvg):
 
         return all_nodes
 
-    def configure_train(
-        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-    ) -> Iterable[Message]:
-        """Configure the next round of federated training."""
-        # Sample nodes
+    def _make_sampling(
+        self, grid: Grid, server_round: int, configure_type: str
+    ) -> list[int]:
+        """Sample nodes using the Grid."""
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_train)
         sample_size = max(num_nodes, self.min_train_nodes)
         node_ids = self._sample_nodes(grid, self.min_available_nodes, sample_size)
@@ -63,10 +71,19 @@ class FedXgbCyclic(FedAvg):
 
         log(
             INFO,
-            "configure_train: Sampled %s nodes (out of %s)",
+            f"{configure_type}: Sampled %s nodes (out of %s)",
             len(sampled_node_id),
             len(node_ids),
         )
+        return sampled_node_id
+
+    def configure_train(
+        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
+    ) -> Iterable[Message]:
+        """Configure the next round of federated training."""
+        # Sample nodes
+        sampled_node_id = self._make_sampling(grid, server_round, "configure_train")
+
         # Always inject current server round
         config["server-round"] = server_round
 
@@ -76,3 +93,40 @@ class FedXgbCyclic(FedAvg):
         )
         return self._construct_messages(record, sampled_node_id, MessageType.TRAIN)
 
+    def aggregate_train(
+        self,
+        server_round: int,
+        replies: Iterable[Message],
+    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+        """Aggregate ArrayRecords and MetricRecords in the received Messages."""
+        valid_replies, _ = self._check_and_log_replies(replies, is_train=True)
+
+        arrays, metrics = None, None
+        if valid_replies:
+            reply_contents = [msg.content for msg in valid_replies]
+
+            # Fetch the client model from last round as global model
+            arrays = reply_contents[0]["arrays"]
+
+            # Aggregate MetricRecords
+            metrics = self.train_metrics_aggr_fn(
+                reply_contents,
+                self.weighted_by_key,
+            )
+        return arrays, metrics
+
+    def configure_evaluate(
+        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
+    ) -> Iterable[Message]:
+        """Configure the next round of federated evaluation."""
+        # Sample nodes
+        sampled_node_id = self._make_sampling(grid, server_round, "configure_evaluate")
+
+        # Always inject current server round
+        config["server-round"] = server_round
+
+        # Construct messages
+        record = RecordDict(
+            {self.arrayrecord_key: arrays, self.configrecord_key: config}
+        )
+        return self._construct_messages(record, sampled_node_id, MessageType.EVALUATE)

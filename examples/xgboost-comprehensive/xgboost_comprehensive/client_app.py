@@ -14,7 +14,7 @@ from flwr.common import (
 )
 from flwr.common.config import unflatten_dict
 
-from xgboost_quickstart.task import load_data, replace_keys
+from xgboost_comprehensive.task import load_data, replace_keys
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -115,11 +115,24 @@ def evaluate(msg: Message, context: Context) -> Message:
     # Load model and data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    _, valid_dmatrix, _, num_val = load_data(partition_id, num_partitions)
 
-    # Load config
+    # Parse configs
+    # Flatted config dict and replace "-" with "_"
     cfg = replace_keys(unflatten_dict(context.run_config))
     params = cfg["params"]
+    partitioner_type = cfg["partitioner_type"]
+    seed = cfg["seed"]
+    test_fraction = cfg["test_fraction"]
+    centralised_eval_client = cfg["centralised_eval_client"]
+
+    _, valid_dmatrix, _, num_val = load_data(
+        partitioner_type,
+        partition_id,
+        num_partitions,
+        centralised_eval_client,
+        test_fraction,
+        seed,
+    )
 
     # Load global model
     bst = xgb.Booster(params=params)
