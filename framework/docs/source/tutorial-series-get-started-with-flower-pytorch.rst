@@ -175,23 +175,22 @@ The PyTorch template has also provided us with the usual training and test funct
 
 .. code-block:: python
 
-    def train(net, trainloader, epochs, device):
+    def train(net, trainloader, epochs, lr, device):
         """Train the model on the training set."""
         net.to(device)  # move model to GPU if available
         criterion = torch.nn.CrossEntropyLoss().to(device)
-        optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
+        optimizer = torch.optim.Adam(net.parameters(), lr=lr)
         net.train()
         running_loss = 0.0
         for _ in range(epochs):
             for batch in trainloader:
-                images = batch["img"]
-                labels = batch["label"]
+                images = batch["img"].to(device)
+                labels = batch["label"].to(device)
                 optimizer.zero_grad()
-                loss = criterion(net(images.to(device)), labels.to(device))
+                loss = criterion(net(images), labels)
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
-
         avg_trainloss = running_loss / len(trainloader)
         return avg_trainloss
 
@@ -221,37 +220,71 @@ the model on the local data (which changes the model parameters locally) and sen
 updated/changed model parameters back to the server (or, alternatively, it sends just
 the gradients back to the server, not the full model parameters).
 
-Update model parameters
-~~~~~~~~~~~~~~~~~~~~~~~
+Constructing Messages
+~~~~~~~~~~~~~~~~~~~~~
 
-We need two helper functions to get the updated model parameters from the local model
-and to update the local model with parameters received from the server: ``get_weights``
-and ``set_weights``. The following two functions do just that for the PyTorch model
-above and are predefined in ``task.py``.
+In Flower, the server and clients communicate by sending and receiving ``Message``
+objects. A ``Message`` carries a ``RecordDict`` as its main payload. The ``RecordDict``
+it's like python dictionary that can contain multiple records of different types. There
+are three main types of records:
 
-The details of how this works are not really important here (feel free to consult the
-PyTorch documentation if you want to learn more). In essence, we use ``state_dict`` to
-access PyTorch model parameter tensors. The parameter tensors are then converted to/from
-a list of NumPy ``ndarray``\s (which the Flower ``NumPyClient`` knows how to
-serialize/deserialize):
+- ``ArrayRecord``: Contains model parameters as a dictionary of NumPy arrays
+- ``MetricRecord``: Contains training or evaluation metrics as a dictionary of scalars
+  or list of scalars.
+- ``ConfigRecord``: Contains configuration parameters as a dictionary of scalars,
+  strings, booleas or bytes. Lists of these types are also supported.
+
+Let's see a few examples of how to work with these types of records and, ultimately,
+construct a ``RecordDict`` that can be sent over a ``Message``.
 
 .. code-block:: python
 
-    def get_weights(net):
-        return [val.cpu().numpy() for _, val in net.state_dict().items()]
+    from flwr.app import ArrayRecord, MetricRecord, ConfigRecord, RecordDict
 
+    # ConfigRecord can be used to communicate configs between ServerApp and ClientApp
+    # They can hold scalars, but also strings and booleans
+    config = ConfigRecord(
+        {"batch_size": 32, "use_augmentation": True, "data-path": "/my/dataset"}
+    )
 
-    def set_weights(net, parameters):
-        params_dict = zip(net.state_dict().keys(), parameters)
-        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        net.load_state_dict(state_dict, strict=True)
+    # MetricRecords are designed for scalar-based metrics only (i.e. int/float/list[int]/list[float])
+    # By limiting the types Flower can aggregate MetricRecords automatically
+    metrics = MetricRecord({"accuracy": 0.9, "losses": [0.1, 0.001], "perplexity": 2.31})
+
+    # ArrayRecord objects are designed to communicate arrays/tensors/weights from ML models
+    array_record = ArrayRecord(my_model.state_dict())  # for a PyTorch model
+    array_record_other = ArrayRecord(my_model.to_numpy_ndarrays())  # for other ML models
+
+    # A RecordDict is like a dictionary that holds named records.
+    # This is the main payload of a Message
+    rd = RecordDict({"my-config": config, "metrics": metrics, "my-model": array_record})
 
 Define the Flower ClientApp
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-With that out of the way, let's move on to the interesting part. Federated learning
-systems consist of a server and multiple clients. In Flower, we create a ``ServerApp``
-and a ``ClientApp`` to run the server-side and client-side code, respectively.
+Federated learning systems consist of a server and multiple nodes or clients. In Flower,
+we create a ``ServerApp`` and a ``ClientApp`` to run the server-side and client-side
+code, respectively.
+
+The core functionality of the ``ClientApp`` is to perform some action with the local
+data that the node it runs from (e.g. an edge device, a server in a data center, or a
+laptop) has access to. In this tutorial such action is to train and evaluate the small
+CNN model defined earlier using the local training and validation data.
+
+We can define how the ``ClientApp`` performs training by wrapping a function with the
+``@app.train()`` decorator. In this case we name this function ``train``. The function
+always expects two arguments:
+
+- A ``Message``: The message received from the server. It contains the model parameters
+  and any other configuration information sent by the server.
+- A ``Context``: The context object that contains information about the node executing
+  the ``ClientApp`` and about the current run.
+
+Through the context you can retrieve the config settings defined in the
+``pyproject.toml`` of you app. The context can be used to persist the state of the
+client across multiple calls to ``train`` or ``evaluate``. In Flower, ``ClientApps`` are
+ephemeral objects that get instantiated for the execution of one ``Message`` and
+destroyed when a reply is communicated back to the server.
 
 The first step toward creating a ``ClientApp`` is to implement a subclasses of
 ``flwr.client.Client`` or ``flwr.client.NumPyClient``. We use ``NumPyClient`` in this
@@ -272,33 +305,43 @@ been done for us in our Flower project:
 
 .. code-block:: python
 
-    class FlowerClient(NumPyClient):
-        def __init__(self, net, trainloader, valloader, local_epochs):
-            self.net = net
-            self.trainloader = trainloader
-            self.valloader = valloader
-            self.local_epochs = local_epochs
-            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-            self.net.to(self.device)
+    # Flower ClientApp
+    app = ClientApp()
 
-        def fit(self, parameters, config):
-            set_weights(self.net, parameters)
-            train_loss = train(
-                self.net,
-                self.trainloader,
-                self.local_epochs,
-                self.device,
-            )
-            return (
-                get_weights(self.net),
-                len(self.trainloader.dataset),
-                {"train_loss": train_loss},
-            )
 
-        def evaluate(self, parameters, config):
-            set_weights(self.net, parameters)
-            loss, accuracy = test(self.net, self.valloader, self.device)
-            return loss, len(self.valloader.dataset), {"accuracy": accuracy}
+    @app.train()
+    def train(msg: Message, context: Context):
+        """Train the model on local data."""
+
+        # Load the model and initialize it with the received weights
+        model = Net()
+        model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        model.to(device)
+
+        # Load the data
+        partition_id = context.node_config["partition-id"]
+        num_partitions = context.node_config["num-partitions"]
+        trainloader, _ = load_data(partition_id, num_partitions)
+
+        # Call the training function
+        train_loss = train_fn(
+            model,
+            trainloader,
+            context.run_config["local-epochs"],
+            msg.content["config"]["lr"],
+            device,
+        )
+
+        # Construct and return reply Message
+        model_record = ArrayRecord(model.state_dict())
+        metrics = {
+            "train_loss": train_loss,
+            "num-examples": len(trainloader.dataset),
+        }
+        metric_record = MetricRecord(metrics)
+        content = RecordDict({"arrays": model_record, "metrics": metric_record})
+        return Message(content=content, reply_to=msg)
 
 Our class ``FlowerClient`` defines how local training/evaluation will be performed and
 allows Flower to call the local training/evaluation through ``fit`` and ``evaluate``.
