@@ -29,12 +29,7 @@ from .strategy_utils import aggregate_bagging
 class FedXgbBagging(FedAvg):
     """Configurable FedXgbBagging strategy implementation."""
 
-    def __init__(
-        self,
-        **kwargs: Any,
-    ):
-        self.current_bst: Optional[bytes] = None
-        super().__init__(**kwargs)
+    current_bst: Optional[bytes] = None
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
