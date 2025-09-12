@@ -4,6 +4,7 @@ import torch
 from flwr.app import ArrayRecord, ConfigRecord, Context
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
+
 from pytorchlightning_example.task import LitAutoEncoder
 
 # Create ServerApp

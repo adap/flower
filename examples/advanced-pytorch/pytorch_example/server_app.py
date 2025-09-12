@@ -1,6 +1,11 @@
 """pytorch-example: A Flower / PyTorch app."""
 
 import torch
+from datasets import load_dataset
+from flwr.common import Context, ndarrays_to_parameters
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+from torch.utils.data import DataLoader
+
 from pytorch_example.strategy import CustomFedAvg
 from pytorch_example.task import (
     Net,
@@ -9,11 +14,6 @@ from pytorch_example.task import (
     set_weights,
     test,
 )
-from torch.utils.data import DataLoader
-
-from datasets import load_dataset
-from flwr.common import Context, ndarrays_to_parameters
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 
 
 def gen_evaluate_fn(

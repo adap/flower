@@ -7,6 +7,7 @@ import xgboost as xgb
 from flwr.client import ClientApp
 from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.common.config import unflatten_dict
+
 from xgboost_quickstart.task import load_data, replace_keys
 
 warnings.filterwarnings("ignore", category=UserWarning)
