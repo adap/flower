@@ -14,13 +14,14 @@
 # ==============================================================================
 """Flower message-based FedXgbBagging strategy."""
 from collections.abc import Iterable
-from typing import Any, Optional, cast
+from typing import Optional, cast
 
 import numpy as np
 
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord
 from flwr.server import Grid
 
+from ..exception import InconsistentMessageReplies
 from .fedavg import FedAvg
 from .strategy_utils import aggregate_bagging
 
@@ -31,10 +32,20 @@ class FedXgbBagging(FedAvg):
 
     current_bst: Optional[bytes] = None
 
+    def _ensure_single_array(self, arrays: ArrayRecord) -> None:
+        """Check that ensures there's only one Array in the ArrayRecord."""
+        n = len(arrays)
+        if n != 1:
+            raise InconsistentMessageReplies(
+                reason="Expected exactly one Array in ArrayRecord. "
+                "Skipping aggregation."
+            )
+
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
         """Configure the next round of federated training."""
+        self._ensure_single_array(arrays)
         # Keep track of array record being communicated
         self.current_bst = arrays["0"].numpy().tobytes()
         return super().configure_train(server_round, arrays, config, grid)
@@ -53,6 +64,7 @@ class FedXgbBagging(FedAvg):
 
             # Aggregate ArrayRecords
             for content in reply_contents:
+                self._ensure_single_array(content["arrays"])
                 bst = content["arrays"]["0"].numpy().tobytes()  # type: ignore[union-attr]
                 self.current_bst = aggregate_bagging(cast(bytes, self.current_bst), bst)
 
