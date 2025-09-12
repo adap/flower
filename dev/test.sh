@@ -8,7 +8,7 @@ echo "=== test.sh ==="
 echo "- Start Python checks"
 
 echo "- isort: start"
-src_args=$(find ../examples -mindepth 1 -maxdepth 1 -type d -printf '--src %p ')
+src_args=$(find ../examples -mindepth 1 -maxdepth 2 -type d -printf '--src %p ')
 python -m isort --check-only ../examples $src_args --settings-path .
 python -m isort --check-only ../benchmarks
 echo "- isort: done"
