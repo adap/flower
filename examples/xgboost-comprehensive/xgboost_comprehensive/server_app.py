@@ -58,51 +58,31 @@ def get_evaluate_fn(test_data, params):
     """Return a function for centralised evaluation."""
 
     def evaluate_fn(
-        server_round: int, parameters: Parameters, config: Dict[str, Scalar]
-    ):
-        # If at the first round, skip the evaluation
+        server_round: int, arrays: ArrayRecord
+    ) -> MetricRecord:
+
+        # Skip init eval
         if server_round == 0:
-            return 0, {}
-        else:
-            bst = xgb.Booster(params=params)
-            for para in parameters.tensors:
-                para_b = bytearray(para)
+            return
 
-            # Load global model
-            bst.load_model(para_b)
-            # Run evaluation
-            eval_results = bst.eval_set(
-                evals=[(test_data, "valid")],
-                iteration=bst.num_boosted_rounds() - 1,
-            )
-            auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
+        # Load global model
+        global_model = bytearray(arrays["0"].numpy().tobytes())
+        bst = xgb.Booster(params=params)
+        bst.load_model(global_model)
 
-            # Save results to disk.
-            # Note we add new entry to the same file with each call to this function.
-            with open(f"./centralised_eval.txt", "a", encoding="utf-8") as fp:
-                fp.write(f"Round:{server_round},AUC:{auc}\n")
+        # Run evaluation
+        eval_results = bst.eval_set(
+            evals=[(test_data, "valid")],
+            iteration=bst.num_boosted_rounds() - 1,
+        )
+        auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
 
-            return 0, {"AUC": auc}
+        return MetricRecord({"AUC": auc})
 
     return evaluate_fn
 
 
-def evaluate_metrics_aggregation(eval_metrics):
-    """Return an aggregated metric (AUC) for evaluation."""
-    total_num = sum([num for num, _ in eval_metrics])
-    auc_aggregated = (
-        sum([metrics["AUC"] * num for num, metrics in eval_metrics]) / total_num
-    )
-    metrics_aggregated = {"AUC": auc_aggregated}
-    return metrics_aggregated
 
-
-def config_func(rnd: int) -> Dict[str, str]:
-    """Return a configuration with global epochs."""
-    config = {
-        "global_round": str(rnd),
-    }
-    return config
 
 
 def server_fn(context: Context):
@@ -195,7 +175,7 @@ def main(grid: Grid, context: Context) -> None:
     # Flatted config dict and replace "-" with "_"
     cfg = replace_keys(unflatten_dict(context.run_config))
     num_rounds = cfg["num_server_rounds"]
-    fraction_fit = cfg["fraction_fit"]
+    fraction_train = cfg["fraction_train"]
     fraction_evaluate = cfg["fraction_evaluate"]
     train_method = cfg["train_method"]
     params = cfg["params"]
@@ -210,30 +190,41 @@ def main(grid: Grid, context: Context) -> None:
         test_set.set_format("numpy")
         test_dmatrix = transform_dataset_to_dmatrix(test_set)
 
-
-
-
-    # Read run config
-    num_rounds = context.run_config["num-server-rounds"]
-    fraction_train = context.run_config["fraction-train"]
-    fraction_evaluate = context.run_config["fraction-evaluate"]
-    # Flatted config dict and replace "-" with "_"
-    cfg = replace_keys(unflatten_dict(context.run_config))
-    params = cfg["params"]
-
     # Init global model
     global_model = b""  # Init with an empty object; the XGBooster will be created and trained on the client side.
     # Note: we store the model as the first item in a list into ArrayRecord,
     # which can be accessed using index ["0"].
     arrays = ArrayRecord([np.frombuffer(global_model, dtype=np.uint8)])
 
-    # Initialize FedXgbBagging strategy
-    strategy = FedXgbBagging(
-        fraction_train=fraction_train,
-        fraction_evaluate=fraction_evaluate,
-    )
+    # Define strategy
+    if train_method == "bagging":
+        # Bagging training
+        strategy = FedXgbBagging(
+            fraction_train=fraction_train,
+            fraction_evaluate=fraction_evaluate if not centralised_eval else 0.0,
+            evaluate_function=(
+                get_evaluate_fn(test_dmatrix, params) if centralised_eval else None
+            ),
+        )
+    else:
+        # Cyclic training
+        strategy = FedXgbCyclic(
+            fraction_fit=1.0,
+            fraction_evaluate=1.0,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation,
+            on_evaluate_config_fn=config_func,
+            on_fit_config_fn=config_func,
+            initial_parameters=parameters,
+        )
 
-    # Start strategy, run FedXgbBagging for `num_rounds`
+
+
+
+
+
+
+
+    # Start strategy, run for `num_rounds`
     result = strategy.start(
         grid=grid,
         initial_arrays=arrays,
@@ -249,4 +240,4 @@ def main(grid: Grid, context: Context) -> None:
 
     # Save model
     print("\nSaving final model to disk...")
-    bst.save_model("model.json")
+    bst.save_model("final_model.json")
