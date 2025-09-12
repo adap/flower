@@ -18,7 +18,7 @@
 from collections.abc import Iterable
 from logging import INFO
 from time import sleep
-from typing import Optional
+from typing import Optional, cast
 
 from flwr.common import (
     ArrayRecord,
@@ -106,7 +106,7 @@ class FedXgbCyclic(FedAvg):
             reply_contents = [msg.content for msg in valid_replies]
 
             # Fetch the client model from last round as global model
-            arrays = reply_contents[0]["arrays"]
+            arrays = cast(ArrayRecord, reply_contents[0]["arrays"])
 
             # Aggregate MetricRecords
             metrics = self.train_metrics_aggr_fn(
