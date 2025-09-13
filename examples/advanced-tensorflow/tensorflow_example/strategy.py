@@ -39,8 +39,7 @@ class CustomFedAvg(FedAvg):
         self, current_round: int, accuracy: float, arrays: ArrayRecord
     ) -> None:
         """Update best accuracy and save model checkpoint if current accuracy is
-        higher.
-        """
+        higher."""
         if accuracy > self.best_acc_so_far:
             self.best_acc_so_far = accuracy
             logger.log(INFO, "💡 New best global model found: %f", accuracy)

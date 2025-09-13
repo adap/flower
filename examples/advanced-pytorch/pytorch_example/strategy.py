@@ -16,7 +16,6 @@ from flwr.serverapp import Grid
 from flwr.serverapp.strategy import FedAvg, Result
 from flwr.serverapp.strategy.strategy_utils import log_strategy_start_info
 
-
 PROJECT_NAME = "FLOWER-advanced-pytorch"
 
 
@@ -39,8 +38,7 @@ class CustomFedAvg(FedAvg):
         self, current_round: int, accuracy: float, arrays: ArrayRecord
     ) -> None:
         """Update best accuracy and save model checkpoint if current accuracy is
-        higher.
-        """
+        higher."""
         if accuracy > self.best_acc_so_far:
             self.best_acc_so_far = accuracy
             logger.log(INFO, "💡 New best global model found: %f", accuracy)
