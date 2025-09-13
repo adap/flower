@@ -6,7 +6,7 @@ from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
-from customCriptography.task import Net, get_weights
+from .task import get_weights, get_model
 import logging
 
 
@@ -25,19 +25,18 @@ def server_fn(context: Context):
 
     # Read from config
     num_rounds = context.run_config["num-server-rounds"]
-
+    net = get_model("resnet18", num_classes=10, pretrained=False)
     # Initialize model parameters
-    ndarrays = get_weights(Net())
+    ndarrays = get_weights(net)
     parameters = ndarrays_to_parameters(ndarrays)
 
     # Define the strategy
     strategy = FedAvg(
-        fraction_fit=1.0,
+        fraction_fit=0.2,
         fraction_evaluate=context.run_config["fraction-evaluate"],
         min_available_clients=2,
         evaluate_metrics_aggregation_fn=weighted_average,
-        initial_parameters=parameters,
-        stop_criteria={"metric_ge": ("accuracy", 0.5)}
+        initial_parameters=parameters
     )
     config = ServerConfig(num_rounds=num_rounds)
 

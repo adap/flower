@@ -10,7 +10,7 @@ import tomli_w  # pip install tomli tomli-w
 # --- CONFIG TELEGRAM ---
 BOT_TOKEN = "8440783074:AAGBenk_eeglVRWIIvuNACUBCkhSxVJoAio"
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
-PROJECT_DIR = "/home/sarahfalco/IdeaProjects/flowerCrypto/examples/quickstart-pytorch"
+PROJECT_DIR = "/home/sarahfalco/IdeaProjects/flowerCrypto/examples/customCritptography"
 PYPROJECT_FILE = os.path.join(PROJECT_DIR, "pyproject.toml")
 VENV_DIR = "/home/sarahfalco/IdeaProjects/flowerCrypto/framework/py/flwr/venv"
 VENV_PYTHON = "/home/sarahfalco/IdeaProjects/flowerCrypto/framework/py/flwr/venv/bin/python3"
