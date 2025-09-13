@@ -15,10 +15,7 @@ classification_head_name = "classification-head"
 
 def save_layer_weights_to_state(state: RecordDict, net: Net):
     """Save last layer weights to state."""
-    arr_record = ArrayRecord(net.fc2.state_dict())
-
-    # Add to RecordDict (replace if already exists)
-    state[classification_head_name] = arr_record
+    state[classification_head_name] = ArrayRecord(net.fc2.state_dict())
 
 
 def load_layer_weights_from_state(state: RecordDict, net: Net):
@@ -26,9 +23,8 @@ def load_layer_weights_from_state(state: RecordDict, net: Net):
     if classification_head_name not in state:
         return
 
+    # Restore this client's saved classification head
     state_dict = state[classification_head_name].to_torch_state_dict()
-
-    # apply previously saved classification head by this client
     net.fc2.load_state_dict(state_dict, strict=True)
 
 
@@ -36,11 +32,11 @@ def load_layer_weights_from_state(state: RecordDict, net: Net):
 def train(msg: Message, context: Context):
     """Train the model on local data."""
 
-    # Load the model and initialize it with the received weights
+    # Load model and apply received weights
     model = Net()
     model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
-    # Override weights in classification layer with those this client
-    # had at the end of the last train() round it participated in
+    # Restore this client's previously saved classification layer weights
+    # (no action if this is the first round it participates in)
     load_layer_weights_from_state(context.state, model)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -59,7 +55,7 @@ def train(msg: Message, context: Context):
         device,
     )
 
-    # Save classification head to context's state to use in a future fit() call
+    # Save classification head in `context.state` to use in future rounds
     save_layer_weights_to_state(context.state, model)
 
     # Construct and return reply Message
@@ -77,11 +73,11 @@ def train(msg: Message, context: Context):
 def evaluate(msg: Message, context: Context):
     """Evaluate the model on local data."""
 
-    # Load the model and initialize it with the received weights
+    # Load model and apply received weights
     model = Net()
     model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
-    # Override weights in classification layer with those this client
-    # had at the end of the last train() round it participated in
+    # Restore this client's previously saved classification layer weights
+    # (no action if this is the first round it participates in)
     load_layer_weights_from_state(context.state, model)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)

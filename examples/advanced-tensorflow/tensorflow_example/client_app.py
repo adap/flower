@@ -31,9 +31,8 @@ def load_layer_weights_from_state(state: RecordDict, model):
     if classification_head_name not in state:
         return
 
-    list_weights = state[classification_head_name].to_numpy_ndarrays()
-
     # Apply weights
+    list_weights = state[classification_head_name].to_numpy_ndarrays()
     model.get_layer("dense").set_weights(list_weights)
 
 
@@ -46,12 +45,12 @@ def train(msg: Message, context: Context):
     local_epochs = context.run_config["local-epochs"]
     batch_size = context.run_config["batch-size"]
 
-    # Load the model and initialize it with the received weights
+    # Load model and apply received weights
     lr = msg.content["config"]["lr"]
     model = load_model(learning_rate=lr)
     model.set_weights(msg.content["arrays"].to_numpy_ndarrays())
-    # Override weights in classification layer with those this client
-    # had at the end of the last train() round it participated in
+    # Restore this client's previously saved classification layer weights
+    # (no action if this is the first round it participates in)
     load_layer_weights_from_state(context.state, model)
 
     # Load the data
@@ -72,7 +71,7 @@ def train(msg: Message, context: Context):
     train_acc = history.history.get("accuracy")
     train_acc = train_acc[-1] if train_acc is not None else None
 
-    # Save classification head to context's state to use in a future train() call
+    # Save classification head in `context.state` to use in future rounds
     save_layer_weights_to_state(context.state, model)
 
     # Construct and return reply Message
@@ -92,11 +91,11 @@ def evaluate(msg: Message, context: Context):
 
     keras.backend.clear_session()
 
-    # Load the model and initialize it with the received weights
+    # Load model and apply received weights
     model = load_model()
     model.set_weights(msg.content["arrays"].to_numpy_ndarrays())
-    # Override weights in classification layer with those this client
-    # had at the end of the last train() round it participated in
+    # Restore this client's previously saved classification layer weights
+    # (no action if this is the first round it participates in)
     load_layer_weights_from_state(context.state, model)
 
     # Load the data

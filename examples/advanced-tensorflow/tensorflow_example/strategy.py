@@ -38,16 +38,15 @@ class CustomFedAvg(FedAvg):
     def _update_best_acc(
         self, current_round: int, accuracy: float, arrays: ArrayRecord
     ) -> None:
-        """Determines if a new best global model has been found.
-
-        If so, the model checkpoint is saved to disk.
+        """Update best accuracy and save model checkpoint if current accuracy is
+        higher.
         """
         if accuracy > self.best_acc_so_far:
             self.best_acc_so_far = accuracy
             logger.log(INFO, "💡 New best global model found: %f", accuracy)
             # You could save the parameters object directly.
             # Instead we are going to apply them to a Tensorflow
-            # model and save the state dict.
+            # model and save its state.
             model = load_model()
             # Save the Tensorflow model
             model.set_weights(arrays.to_numpy_ndarrays())
@@ -60,7 +59,7 @@ class CustomFedAvg(FedAvg):
             logger.log(INFO, "💾 New best model saved to disk: %s", file_name)
 
     def save_metrics_as_json(self, current_round: int, result: Result) -> None:
-        """Saves the current results to a JSON file."""
+        """Save the current results to a JSON file."""
 
         # Load current JSON if file exists
         if os.path.exists(f"{self.save_path}/results.json"):
