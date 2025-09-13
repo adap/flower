@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       framework: ${{ steps.filter.outputs.framework }}
+      ex_bench: ${{ steps.filter.outputs.ex_bench }}  # Examples and Benchmarks
     steps:
       - uses: actions/checkout@v4
 
@@ -31,6 +32,10 @@ jobs:
             framework:
               - 'framework/**/*'
               - '.github/workflows/framework.yml'
+            ex_bench:
+              - 'examples/**/*'
+              - 'benchmarks/**/*'
+              - 'dev/test.sh'
 
   test_core:
     runs-on: ubuntu-22.04
@@ -65,5 +70,5 @@ jobs:
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: ./framework/dev/test.sh
       - name: Check benchmarks and examples
-        if: ${{ needs.changes.outputs.framework == 'true' }}
+        if: ${{ needs.changes.outputs.ex_bench == 'true' }}
         run: ./dev/test.sh
