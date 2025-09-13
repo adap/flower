@@ -15,6 +15,7 @@
 """Flower message-based strategy utilities."""
 
 
+import json
 import random
 from collections import OrderedDict
 from logging import INFO
@@ -249,3 +250,50 @@ def validate_message_reply_consistency(
             "must be a single value (int or float), but a list was found. Skipping "
             "aggregation."
         )
+
+
+def aggregate_bagging(
+    bst_prev_org: bytes,
+    bst_curr_org: bytes,
+) -> bytes:
+    """Conduct bagging aggregation for given trees."""
+    if bst_prev_org == b"":
+        return bst_curr_org
+
+    # Get the tree numbers
+    tree_num_prev, _ = _get_tree_nums(bst_prev_org)
+    _, paral_tree_num_curr = _get_tree_nums(bst_curr_org)
+
+    bst_prev = json.loads(bytearray(bst_prev_org))
+    bst_curr = json.loads(bytearray(bst_curr_org))
+
+    previous_model = bst_prev["learner"]["gradient_booster"]["model"]
+    previous_model["gbtree_model_param"]["num_trees"] = str(
+        tree_num_prev + paral_tree_num_curr
+    )
+    iteration_indptr = previous_model["iteration_indptr"]
+    previous_model["iteration_indptr"].append(
+        iteration_indptr[-1] + paral_tree_num_curr
+    )
+
+    # Aggregate new trees
+    trees_curr = bst_curr["learner"]["gradient_booster"]["model"]["trees"]
+    for tree_count in range(paral_tree_num_curr):
+        trees_curr[tree_count]["id"] = tree_num_prev + tree_count
+        previous_model["trees"].append(trees_curr[tree_count])
+        previous_model["tree_info"].append(0)
+
+    bst_prev_bytes = bytes(json.dumps(bst_prev), "utf-8")
+
+    return bst_prev_bytes
+
+
+def _get_tree_nums(xgb_model_org: bytes) -> tuple[int, int]:
+    xgb_model = json.loads(bytearray(xgb_model_org))
+
+    # Access model parameters
+    model_param = xgb_model["learner"]["gradient_booster"]["model"][
+        "gbtree_model_param"
+    ]
+    # Return the number of trees and the number of parallel trees
+    return int(model_param["num_trees"]), int(model_param["num_parallel_tree"])
