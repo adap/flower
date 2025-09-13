@@ -12,6 +12,10 @@
 
 .. _arrayrecord_link: ref-api/flwr.common.ArrayRecord.html
 
+.. |context_link| replace:: ``Context``
+
+.. _context_link: ref-api/flwr.common.Context.html
+
 .. |clientapp_link| replace:: ``ClientApp``
 
 .. _clientapp_link: ref-api/flwr.client.ClientApp.html
@@ -42,8 +46,8 @@ environment and run everything within a :doc:`virtualenv
 
 Let's use `flwr new` to create a complete Flower+PyTorch project. It will generate all
 the files needed to run, by default with the Flower Simulation Engine, a federation of
-10 nodes using `FedAvg <ref-api/flwr.serverapp.FedAvg.html>`_. The dataset will be
-partitioned using Flower Dataset's `IidPartitioner
+10 nodes using |fedavg_link|_. The dataset will be partitioned using Flower Dataset's
+`IidPartitioner
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
 
 Now that we have a rough idea of what this example is about, let's get started. First,
@@ -319,10 +323,10 @@ Let's see how the ``train`` method can be implemented. It receives as input argu
 - a ``ConfigRecord`` with the configuration sent from the ``ServerApp``. By default it
   can be retrieved with key ``"config"`` when accessing the message content.
 
-The ``train`` method also receives the ``Context``, giving access to configs for your
-run and node. The run config hyperparameters are defined in the ``pyproject.toml`` of
-your Flower App. The node config can only be set when running Flower with the Deployment
-Runtime and is not directly configurable during simulations.
+The ``train`` method also receives the |context_link|_, giving access to configs for
+your run and node. The run config hyperparameters are defined in the ``pyproject.toml``
+of your Flower App. The node config can only be set when running Flower with the
+Deployment Runtime and is not directly configurable during simulations.
 
 .. code-block:: python
 
@@ -436,9 +440,6 @@ invoking its |strategy_start_link|_ method. To it we pass:
 Note the ``start`` method of the strategy returns a result object. This object contains
 all the relevant information about the FL process, including the final model weights as
 an ``ArrayRecord``, and federated training and evaluation metrics as ``MetricRecords``.
-You can easily log the metrics using Python's `pprint
-<https://docs.python.org/3/library/pprint.html>`_ and save the global model `state_dict`
-using ``torch.save``.
 
 Congratulations! You've successfully built and run your first federated learning system.
 
