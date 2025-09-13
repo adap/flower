@@ -36,6 +36,7 @@ jobs:
               - 'examples/**/*'
               - 'benchmarks/**/*'
               - 'dev/test.sh'
+              - '.github/workflows/framework.yml'
 
   test_core:
     runs-on: ubuntu-22.04
