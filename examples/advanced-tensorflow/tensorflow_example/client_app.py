@@ -18,12 +18,10 @@ def save_layer_weights_to_state(state: RecordDict, model):
     """Save last layer weights to state."""
     state_dict_arrays = {}
     # Get weights from the last layer
-    layer_name = "dense"
-    for variable in model.get_layer(layer_name).trainable_variables:
-        state_dict_arrays[f"{layer_name}.{variable.name}"] = Array(variable.numpy())
+    list_weights = model.get_layer("dense").get_weights()
 
     # Add to RecordDict (replace if already exists)
-    state[classification_head_name] = ArrayRecord(state_dict_arrays)
+    state[classification_head_name] = ArrayRecord(list_weights)
 
 
 def load_layer_weights_from_state(state: RecordDict, model):
