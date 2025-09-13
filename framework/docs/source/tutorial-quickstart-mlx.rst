@@ -6,35 +6,39 @@
 
 .. |message_link| replace:: ``Message``
 
-.. _message_link: ref-api/flwr.common.Message.html
+.. _message_link: ref-api/flwr.app.Message.html
 
 .. |arrayrecord_link| replace:: ``ArrayRecord``
 
-.. _arrayrecord_link: ref-api/flwr.common.ArrayRecord.html
+.. _arrayrecord_link: ref-api/flwr.app.ArrayRecord.html
 
 .. |context_link| replace:: ``Context``
 
-.. _context_link: ref-api/flwr.common.Context.html
+.. _context_link: ref-api/flwr.app.Context.html
 
 .. |clientapp_link| replace:: ``ClientApp``
 
-.. _clientapp_link: ref-api/flwr.client.ClientApp.html
+.. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
 
 .. |fedavg_link| replace:: ``FedAvg``
 
-.. _fedavg_link: ref-api/flwr.serverapp.FedAvg.html
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
 
 .. |serverapp_link| replace:: ``ServerApp``
 
-.. _serverapp_link: ref-api/flwr.server.ServerApp.html
+.. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
 
 .. |strategy_start_link| replace:: ``start``
 
-.. _strategy_start_link: ref-api/flwr.serverapp.Strategy.html#flwr.serverapp.Strategy.start
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
 
 .. |strategy_link| replace:: ``Strategy``
 
-.. _strategy_link: ref-api/flwr.serverapp.Strategy.html
+.. _strategy_link: ref-api/flwr.serverapp.strategy.Strategy.html
+
+.. |result_link| replace:: ``Result``
+
+.. _result_link: ref-api/flwr.serverapp.strategy.Result.html
 
 Quickstart MLX
 ==============
@@ -474,9 +478,10 @@ To it we pass:
         set_params(model, ndarrays)
         model.save_weights("final_model.npz")
 
-Note the ``start`` method of the strategy returns a result object. This object contains
-all the relevant information about the FL process, including the final model weights as
-an ``ArrayRecord``, and federated training and evaluation metrics as ``MetricRecords``.
+Note the ``start`` method of the strategy returns a |result_link|_ object. This object
+contains all the relevant information about the FL process, including the final model
+weights as an ``ArrayRecord``, and federated training and evaluation metrics as
+``MetricRecords``.
 
 Congratulations! You've successfully built and run your first federated learning system.
 
