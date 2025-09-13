@@ -247,7 +247,7 @@ construct a ``RecordDict`` that can be sent over a ``Message``.
         {"batch_size": 32, "use_augmentation": True, "data-path": "/my/dataset"}
     )
 
-    # MetricRecords are designed for scalar-based metrics only (i.e. int/float/list[int]/list[float])
+    # MetricRecords expect scalar-based metrics (i.e. int/float/list[int]/list[float])
     # By limiting the types Flower can aggregate MetricRecords automatically
     metrics = MetricRecord({"accuracy": 0.9, "losses": [0.1, 0.001], "perplexity": 2.31})
 
@@ -272,8 +272,8 @@ laptop) has access to. In this tutorial such action is to train and evaluate the
 CNN model defined earlier using the local training and validation data.
 
 We can define how the ``ClientApp`` performs training by wrapping a function with the
-``@app.train()`` decorator. In this case we name this function ``train``. The function
-always expects two arguments:
+``@app.train()`` decorator. In this case we name this function ``train`` because we'll
+use it to train the model on the local data. The function always expects two arguments:
 
 - A ``Message``: The message received from the server. It contains the model parameters
   and any other configuration information sent by the server.
@@ -286,24 +286,15 @@ client across multiple calls to ``train`` or ``evaluate``. In Flower, ``ClientAp
 ephemeral objects that get instantiated for the execution of one ``Message`` and
 destroyed when a reply is communicated back to the server.
 
-The first step toward creating a ``ClientApp`` is to implement a subclasses of
-``flwr.client.Client`` or ``flwr.client.NumPyClient``. We use ``NumPyClient`` in this
-tutorial because it is easier to implement and requires us to write less boilerplate. To
-implement ``NumPyClient``, we create a subclass that implements the three methods
-``get_weights``, ``fit``, and ``evaluate``:
-
-- ``get_weights``: Return the current local model parameters
-- ``fit``: Receive model parameters from the server, train the model on the local data,
-  and return the updated model parameters to the server
-- ``evaluate``: Receive model parameters from the server, evaluate the model on the
-  local data, and return the evaluation result to the server
-
-We mentioned that our clients will use the previously defined PyTorch components for
-model training and evaluation. Let's see a simple Flower client implementation that
-brings everything together. Note that all of this boilerplate implementation has already
-been done for us in our Flower project:
+Let's see an implementation of ``ClientApp`` that uses the previously defined PyTorch
+CNN model, applies the parameters received from the ``ServerApp`` via the message, loads
+the its local data, trains the model with it (using the ``train_fn`` function), and
+generates a reply ``Message`` containing the updated model parameters as well some
+metrics of interest.
 
 .. code-block:: python
+
+    from flower_tutorial.task import test as test_fn
 
     # Flower ClientApp
     app = ClientApp()
@@ -343,67 +334,78 @@ been done for us in our Flower project:
         content = RecordDict({"arrays": model_record, "metrics": metric_record})
         return Message(content=content, reply_to=msg)
 
-Our class ``FlowerClient`` defines how local training/evaluation will be performed and
-allows Flower to call the local training/evaluation through ``fit`` and ``evaluate``.
-Each instance of ``FlowerClient`` represents a *single client* in our federated learning
-system. Federated learning systems have multiple clients (otherwise, there's not much to
-federate), so each client will be represented by its own instance of ``FlowerClient``.
-If we have, for example, three clients in our workload, then we'd have three instances
-of ``FlowerClient`` (one on each of the machines we'd start the client on). Flower calls
-``FlowerClient.fit`` on the respective instance when the server selects a particular
-client for training (and ``FlowerClient.evaluate`` for evaluation).
+Note that the ``train_fn`` is simply an alias name pointing to the train function
+defined earlier in this tutorial (where we defining the PyTorch training loop and
+optimizer). To this function we pass the model we want to train locally and the data
+loader, but also the number of local epochs and the learning rate (``lr``) to use. Note
+how in this case the ``local-epochs`` setting is read from the run config via the
+``Context`` while the ``lr`` is read from the ``ConfigRecord`` sent by the server via
+the ``Message``. This can be used to adjust the learning rate on each round from the
+server. When this dynamism isn't needed, reading the ``lr`` from the run config via the
+``Context`` is also perfectly valid.
 
-In this project, we want to simulate a federated learning system with 10 clients *on a
-single machine*. This means that the server and all 10 clients will live on a single
-machine and share resources such as CPU, GPU, and memory. Having 10 clients would mean
-having 10 instances of ``FlowerClient`` in memory. Doing this on a single machine can
-quickly exhaust the available memory resources, even if only a subset of these clients
-participates in a single round of federated learning.
+Once the training is completed, the ``ClientApp`` constructs a reply ``Message``. The
+reply ``Message`` would typically contain a ``RecordDict`` with two records: an
+``ArrayRecord`` containing the updated model parameters and a ``MetricRecord`` with some
+metrics of interest (in this case, the training loss and the number of examples used for
+training). Note that returning the number of examples under the ``num-examples`` key is
+required so the ``ServerApp`` can aggregate both models and metrics received correctly
+(more on this soon). The ``ClientApp`` then returns the reply ``Message``, then Flower
+takes care of sending it back to the server.
 
-In addition to the regular capabilities where server and clients run on multiple
-machines, Flower, therefore, provides special simulation capabilities that create
-``FlowerClient`` instances only when they are actually necessary for training or
-evaluation. To enable the Flower framework to create clients when necessary, we need to
-implement a function that creates a ``FlowerClient`` instance on demand. We typically
-call this function ``client_fn``. Flower calls ``client_fn`` whenever it needs an
-instance of one particular client to call ``fit`` or ``evaluate`` (those instances are
-usually discarded after use, so they should not keep any local state). In federated
-learning experiments using Flower, clients are identified by a partition ID, or
-``partition_id``. This ``partition_id`` is used to load different local data partitions
-for different clients, as can be seen below. The value of ``partition_id`` is retrieved
-from the ``node_config`` dictionary in the ``Context`` object, which holds the
-information that persists throughout each training round.
-
-With this, we have the class ``FlowerClient`` which defines client-side
-training/evaluation and ``client_fn`` which allows Flower to create ``FlowerClient``
-instances whenever it needs to call ``fit`` or ``evaluate`` on one particular client.
-Last, but definitely not least, we create an instance of ``ClientApp`` and pass it the
-``client_fn``. ``ClientApp`` is the entrypoint that a running Flower client uses to call
-your code (as defined in, for example, ``FlowerClient.fit``). The following code is
-reproduced from ``client_app.py`` with additional comments:
+In a typical federated learning setup, the ``ClientApp`` would also implement an
+``@app.evaluate()`` function to evaluate the model received from the ``ServerApp`` on
+local validation data. This is especially useful to monitor the performance of the
+global model on each client during training. The implementation of the ``evaluate``
+function is very similar to the ``train`` function, except that it calls the ``test_fn``
+function defined earlier in this tutorial (which implements the PyTorch evaluation loop)
+and it returns a ``Message`` containing only a ``MetricRecord`` with the evaluation
+metrics (no ``ArrayRecord`` because the model parameters are not updated during
+evaluation). Here's how the ``evaluate`` function looks like:
 
 .. code-block:: python
 
-    def client_fn(context: Context):
-        # Load model and data
-        net = Net()
+    from flower_tutorial.task import train as train_fn
+
+
+    @app.evaluate()
+    def evaluate(msg: Message, context: Context):
+        """Evaluate the model on local data."""
+
+        # Load the model and initialize it with the received weights
+        model = Net()
+        model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        model.to(device)
+
+        # Load the data
         partition_id = context.node_config["partition-id"]
         num_partitions = context.node_config["num-partitions"]
-        # Load data (CIFAR-10)
-        # Note: each client gets a different trainloader/valloader, so each client
-        # will train and evaluate on their own unique data partition
-        # Read the node_config to fetch data partition associated to this node
-        trainloader, valloader = load_data(partition_id, num_partitions)
-        local_epochs = context.run_config["local-epochs"]
+        _, valloader = load_data(partition_id, num_partitions)
 
-        # Create a single Flower client representing a single organization
-        # FlowerClient is a subclass of NumPyClient, so we need to call .to_client()
-        # to convert it to a subclass of `flwr.client.Client`
-        return FlowerClient(net, trainloader, valloader, local_epochs).to_client()
+        # Call the evaluation function
+        eval_loss, eval_acc = test_fn(
+            model,
+            valloader,
+            device,
+        )
 
+        # Construct and return reply Message
+        metrics = {
+            "eval_loss": eval_loss,
+            "eval_acc": eval_acc,
+            "num-examples": len(valloader.dataset),
+        }
+        metric_record = MetricRecord(metrics)
+        content = RecordDict({"metrics": metric_record})
+        return Message(content=content, reply_to=msg)
 
-    # Create the Flower ClientApp
-    app = ClientApp(client_fn=client_fn)
+As you can see the ``evaluate`` implementation is near identical to the ``train``
+implementation, except that it calls the ``test_fn`` function instead of the
+``train_fn`` function and it returns a ``Message`` containing only a ``MetricRecord``
+with metrics relevant to evaluation (``eval_loss``, ``eval_acc`` -- both scalars). We
+also need to include the ``num-examples`` key in the metrics so the server can aggregate
+the evaluation metrics correctly.
 
 Define the Flower ServerApp
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -411,55 +413,60 @@ Define the Flower ServerApp
 On the server side, we need to configure a strategy which encapsulates the federated
 learning approach/algorithm, for example, *Federated Averaging* (FedAvg). Flower has a
 number of built-in strategies, but we can also use our own strategy implementations to
-customize nearly all aspects of the federated learning approach. For this example, we
-use the built-in ``FedAvg`` implementation and customize it using a few basic
-parameters:
+customize nearly all aspects of the federated learning approach. For this tutorial, we
+use the built-in ``FedAvg`` implementation and customize it slightly by specifiying the
+fraction of connected nodes to involve in a round of training.
+
+Before launching the strategy via the ``start()`` method, we want to initialize the
+global model. This will be the model that gets sent to the ``ClientApp`` running on the
+clients in the first round of federated learning. We can do this by creating an instance
+of the model (``Net``) and extract the parameters in its ``state_dict`` and construct an
+``ArrayRecord`` with them. We can then make it available to the strategy via the
+``initial_arrays`` argument of the ``start()`` method.
+
+To the ``start()`` method we can also optionally pass a ``ConfigRecord`` containing
+settings that we would like to communicate to the clients. These will be sent as part of
+the ``Message`` that also carries the model parameters.
 
 .. code-block:: python
 
-    # Create FedAvg strategy
-    strategy = FedAvg(
-        fraction_fit=fraction_fit,  # Sample this value of available client for training
-        fraction_evaluate=1.0,  # Sample 100% of available clients for evaluation
-        min_available_clients=2,  # Wait until 2 clients are available
-        initial_parameters=parameters,  # Use these initial model parameters
-    )
+    app = ServerApp()
 
-Similar to ``ClientApp``, we create a ``ServerApp`` using a utility function
-``server_fn``. This function is predefined for us in ``server_app.py``. In
-``server_fn``, we pass an instance of ``ServerConfig`` for defining the number of
-federated learning rounds (``num_rounds``) and we also pass the previously created
-``strategy``. The ``server_fn`` returns a ``ServerAppComponents`` object containing the
-settings that define the ``ServerApp`` behaviour. ``ServerApp`` is the entrypoint that
-Flower uses to call all your server-side code (for example, the strategy).
 
-.. code-block:: python
+    @app.main()
+    def main(grid: Grid, context: Context) -> None:
+        """Main entry point for the ServerApp."""
 
-    def server_fn(context: Context):
-        """Construct components that set the ServerApp behaviour.
+        # Read run config
+        fraction_train: float = context.run_config["fraction-train"]
+        num_rounds: int = context.run_config["num-server-rounds"]
+        lr: float = context.run_config["lr"]
 
-        You can use the settings in `context.run_config` to parameterize the
-        construction of all elements (e.g the strategy or the number of rounds)
-        wrapped in the returned ServerAppComponents object.
-        """
-        # Read from config
-        num_rounds = context.run_config["num-server-rounds"]
-        fraction_fit = context.run_config["fraction-fit"]
+        # Load global model
+        global_model = Net()
+        arrays = ArrayRecord(global_model.state_dict())
 
-        # Initialize model parameters
-        ndarrays = get_weights(Net())
-        parameters = ndarrays_to_parameters(ndarrays)
+        # Initialize FedAvg strategy
+        strategy = FedAvg(fraction_train=fraction_train)
 
-        # Define strategy
-        strategy = FedAvg(
-            fraction_fit=fraction_fit,
-            fraction_evaluate=1.0,
-            min_available_clients=2,
-            initial_parameters=parameters,
+        # Start strategy, run FedAvg for `num_rounds`
+        result = strategy.start(
+            grid=grid,
+            initial_arrays=arrays,
+            train_config=ConfigRecord({"lr": lr}),
+            num_rounds=num_rounds,
         )
-        config = ServerConfig(num_rounds=num_rounds)
 
-        return ServerAppComponents(strategy=strategy, config=config)
+        # Save final model to disk
+        print("\nSaving final model to disk...")
+        state_dict = result.arrays.to_torch_state_dict()
+        torch.save(state_dict, "final_model.pt")
+
+Most of the execution of the ``ServerApp`` happens inside the ``strategy.start()``
+method. After the specified number of rounds (``num_rounds``), the ``start()`` method
+returns a ``StrategyResult`` object containing the final model parameters and metrics
+received from the clients or generated by the strategy itself. We can then save the
+final model to disk for later use.
 
 Run the training
 ~~~~~~~~~~~~~~~~
@@ -473,8 +480,76 @@ with Flower! The last step is to run our simulation in the command line, as foll
 
 This will execute the federated learning simulation with 10 clients, or SuperNodes,
 defined in the ``[tool.flwr.federations.local-simulation]`` section in the
-``pyproject.toml``. You can also override the parameters defined in the
-``[tool.flwr.app.config]`` section in ``pyproject.toml`` like this:
+``pyproject.toml``. You should expect a output log similar to this:
+
+.. code-block:: shell
+
+    Loading project configuration...
+    Success
+    INFO :      Starting FedAvg strategy:
+    INFO :          ├── Number of rounds: 3
+    INFO :          ├── ArrayRecord (0.24 MB)
+    INFO :          ├── ConfigRecord (train): {'lr': 0.01}
+    INFO :          ├── ConfigRecord (evaluate): (empty!)
+    INFO :          ├──> Sampling:
+    INFO :          │       ├──Fraction: train (0.50) | evaluate ( 1.00)
+    INFO :          │       ├──Minimum nodes: train (2) | evaluate (2)
+    INFO :          │       └──Minimum available nodes: 2
+    INFO :          └──> Keys in records:
+    INFO :                  ├── Weighted by: 'num-examples'
+    INFO :                  ├── ArrayRecord key: 'arrays'
+    INFO :                  └── ConfigRecord key: 'config'
+    INFO :
+    INFO :
+    INFO :      [ROUND 1/3]
+    INFO :      configure_train: Sampled 5 nodes (out of 10)
+    INFO :      aggregate_train: Received 5 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 2.25811}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 2.304821, 'eval_acc': 0.0965}
+    INFO :
+    INFO :      [ROUND 2/3]
+    INFO :      configure_train: Sampled 5 nodes (out of 10)
+    INFO :      aggregate_train: Received 5 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 2.17333}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 2.304577, 'eval_acc': 0.10030}
+    INFO :
+    INFO :      [ROUND 3/3]
+    INFO :      configure_train: Sampled 5 nodes (out of 10)
+    INFO :      aggregate_train: Received 5 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 2.16953}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 2.29976, 'eval_acc': 0.1015}
+    INFO :
+    INFO :      Strategy execution finished in 17.18s
+    INFO :
+    INFO :      Final results:
+    INFO :
+    INFO :          Global Arrays:
+    INFO :                  ArrayRecord (0.238 MB)
+    INFO :
+    INFO :          Aggregated ClientApp-side Train Metrics:
+    INFO :          { 1: {'train_loss': '2.2581e+00'},
+    INFO :            2: {'train_loss': '2.1733e+00'},
+    INFO :            3: {'train_loss': '2.1695e+00'}}
+    INFO :
+    INFO :          Aggregated ClientApp-side Evaluate Metrics:
+    INFO :          { 1: {'eval_acc': '9.6500e-02', 'eval_loss': '2.3048e+00'},
+    INFO :            2: {'eval_acc': '1.0030e-01', 'eval_loss': '2.3046e+00'},
+    INFO :            3: {'eval_acc': '1.0150e-01', 'eval_loss': '2.2998e+00'}}
+    INFO :
+    INFO :          ServerApp-side Evaluate Metrics:
+    INFO :          {}
+    INFO :
+
+    Saving final model to disk...
+
+You can also override the parameters defined in the ``[tool.flwr.app.config]`` section
+in ``pyproject.toml`` like this:
 
 .. code-block:: shell
 
@@ -500,90 +575,15 @@ available clients (``fraction-fit=0.5``), so it goes ahead and selects 5 random 
 (i.e., 50% of 10).
 
 Flower then asks the selected 5 clients to train the model. Each of the 5 ``ClientApp``
-instances receives a message, which causes it to call ``client_fn`` to create an
-instance of ``FlowerClient``. It then calls ``.fit()`` on each of the ``FlowerClient``
-instances and returns the resulting model parameter updates to the ``ServerApp``. When
-the ``ServerApp`` receives the model parameter updates from the clients, it hands those
-updates over to the strategy (*FedAvg*) for aggregation. The strategy aggregates those
-updates and returns the new global model, which then gets used in the next round of
-federated learning.
-
-Where's the accuracy?
-~~~~~~~~~~~~~~~~~~~~~
-
-You may have noticed that all metrics except for ``losses_distributed`` are empty. Where
-did the ``{"accuracy": float(accuracy)}`` go?
-
-Flower can automatically aggregate losses returned by individual clients, but it cannot
-do the same for metrics in the generic metrics dictionary (the one with the ``accuracy``
-key). Metrics dictionaries can contain very different kinds of metrics and even
-key/value pairs that are not metrics at all, so the framework does not (and can not)
-know how to handle these automatically.
-
-As users, we need to tell the framework how to handle/aggregate these custom metrics,
-and we do so by passing metric aggregation functions to the strategy. The strategy will
-then call these functions whenever it receives fit or evaluate metrics from clients. The
-two possible functions are ``fit_metrics_aggregation_fn`` and
-``evaluate_metrics_aggregation_fn``.
-
-Let's create a simple weighted averaging function to aggregate the ``accuracy`` metric
-we return from ``evaluate``. Copy the following ``weighted_average()`` function to
-``task.py``:
-
-.. code-block:: python
-
-    from typing import List, Tuple
-    from flwr.common.typing import Metrics
-
-
-    def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-        # Multiply accuracy of each client by number of examples used
-        accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
-        examples = [num_examples for num_examples, _ in metrics]
-
-        # Aggregate and return custom metric (weighted average)
-        return {"accuracy": sum(accuracies) / sum(examples)}
-
-Now, in ``server_app.py``, we import the function and pass it to the ``FedAvg``
-strategy:
-
-.. code-block:: python
-
-    from flower_tutorial.task import weighted_average
-
-
-    def server_fn(context: Context):
-        # Read from config
-        num_rounds = context.run_config["num-server-rounds"]
-        fraction_fit = context.run_config["fraction-fit"]
-
-        # Initialize model parameters
-        ndarrays = get_weights(Net())
-        parameters = ndarrays_to_parameters(ndarrays)
-
-        # Define strategy
-        strategy = FedAvg(
-            fraction_fit=fraction_fit,
-            fraction_evaluate=1.0,
-            min_available_clients=2,
-            initial_parameters=parameters,
-            evaluate_metrics_aggregation_fn=weighted_average,
-        )
-        config = ServerConfig(num_rounds=num_rounds)
-
-        return ServerAppComponents(strategy=strategy, config=config)
-
-
-    # Create ServerApp
-    app = ServerApp(server_fn=server_fn)
-
-We now have a full system that performs federated training and federated evaluation. It
-uses the ``weighted_average`` function to aggregate custom evaluation metrics and
-calculates a single ``accuracy`` metric across all clients on the server side.
-
-The other two categories of metrics (``losses_centralized`` and ``metrics_centralized``)
-are still empty because they only apply when centralized evaluation is being used. Part
-two of the Flower tutorial will cover centralized evaluation.
+instances receives a message, which causes it to call either the function under
+``@app.train()`` or under ``@app.evaluate()``, depending on the type of ``Message``. A
+reply ``Message`` is always returned by either function to the ``ServerApp``. When the
+``ServerApp`` receives the ``Messages`` from all participating clients, it hands them to
+the ``FedAvg`` strategy for aggregation. Both ``ArrayRecord`` and ``MetricRecord`` are
+aggregated. If it's a training round, the result of aggregating all ``ArrayRecords`` is
+another ``ArrayRecord`` representing the new global model. Then, the next step of
+federated learning begins which will be an `evaluation` round followed by another round
+of training+evaluation.
 
 Final remarks
 -------------
