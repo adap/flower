@@ -1,6 +1,50 @@
 Get started with Flower
 =======================
 
+.. |Grid_link| replace:: ``Grid``
+
+.. _grid_link: ref-api/flwr.serverapp.Grid.html
+
+.. |context_link| replace:: ``Context``
+
+.. _context_link: ref-api/flwr.app.Context.html
+
+.. |message_link| replace:: ``Message``
+
+.. _message_link: ref-api/flwr.app.Message.html
+
+.. |arrayrecord_link| replace:: ``ArrayRecord``
+
+.. _arrayrecord_link: ref-api/flwr.app.ArrayRecord.html
+
+.. |metricrecord_link| replace:: ``MetricRecord``
+
+.. _metricrecord_link: ref-api/flwr.app.MetricRecord.html
+
+.. |configrecord_link| replace:: ``ConfigRecord``
+
+.. _configrecord_link: ref-api/flwr.app.ConfigRecord.html
+
+.. |clientapp_link| replace:: ``ClientApp``
+
+.. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
+
+.. |fedavg_link| replace:: ``FedAvg``
+
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
+
+.. |serverapp_link| replace:: ``ServerApp``
+
+.. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
+
+.. |strategy_start_link| replace:: ``start``
+
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
+
+.. |result_link| replace:: ``Result``
+
+.. _result_link: ref-api/flwr.serverapp.strategy.Result.html
+
 Welcome to the Flower federated learning tutorial!
 
 In this tutorial, we'll build a federated learning system using the Flower framework,
@@ -223,16 +267,16 @@ the gradients back to the server, not the full model parameters).
 Constructing Messages
 ~~~~~~~~~~~~~~~~~~~~~
 
-In Flower, the server and clients communicate by sending and receiving ``Message``
+In Flower, the server and clients communicate by sending and receiving |message_link|_
 objects. A ``Message`` carries a ``RecordDict`` as its main payload. The ``RecordDict``
 it's like python dictionary that can contain multiple records of different types. There
 are three main types of records:
 
-- ``ArrayRecord``: Contains model parameters as a dictionary of NumPy arrays
-- ``MetricRecord``: Contains training or evaluation metrics as a dictionary of scalars
-  or list of scalars.
-- ``ConfigRecord``: Contains configuration parameters as a dictionary of scalars,
-  strings, booleas or bytes. Lists of these types are also supported.
+- |arrayrecord_link|_: Contains model parameters as a dictionary of NumPy arrays
+- |metricrecord_link|_: Contains training or evaluation metrics as a dictionary of
+  scalars or list of scalars.
+- |configrecord_link|_: Contains configuration parameters as a dictionary of scalars,
+      strings, booleans or bytes. Lists of these types are also supported.
 
 Let's see a few examples of how to work with these types of records and, ultimately,
 construct a ``RecordDict`` that can be sent over a ``Message``.
@@ -263,8 +307,8 @@ Define the Flower ClientApp
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Federated learning systems consist of a server and multiple nodes or clients. In Flower,
-we create a ``ServerApp`` and a ``ClientApp`` to run the server-side and client-side
-code, respectively.
+we create a |serverapp_link|_ and a |clientapp_link|_ to run the server-side and
+client-side code, respectively.
 
 The core functionality of the ``ClientApp`` is to perform some action with the local
 data that the node it runs from (e.g. an edge device, a server in a data center, or a
@@ -275,13 +319,13 @@ We can define how the ``ClientApp`` performs training by wrapping a function wit
 ``@app.train()`` decorator. In this case we name this function ``train`` because we'll
 use it to train the model on the local data. The function always expects two arguments:
 
-- A ``Message``: The message received from the server. It contains the model parameters
-  and any other configuration information sent by the server.
-- A ``Context``: The context object that contains information about the node executing
-  the ``ClientApp`` and about the current run.
+- A |message_link|_: The message received from the server. It contains the model
+  parameters and any other configuration information sent by the server.
+- A |context_link|_: The context object that contains information about the node
+  executing the ``ClientApp`` and about the current run.
 
 Through the context you can retrieve the config settings defined in the
-``pyproject.toml`` of you app. The context can be used to persist the state of the
+``pyproject.toml`` of your app. The context can be used to persist the state of the
 client across multiple calls to ``train`` or ``evaluate``. In Flower, ``ClientApps`` are
 ephemeral objects that get instantiated for the execution of one ``Message`` and
 destroyed when a reply is communicated back to the server.
@@ -417,12 +461,19 @@ customize nearly all aspects of the federated learning approach. For this tutori
 use the built-in ``FedAvg`` implementation and customize it slightly by specifiying the
 fraction of connected nodes to involve in a round of training.
 
-Before launching the strategy via the ``start()`` method, we want to initialize the
-global model. This will be the model that gets sent to the ``ClientApp`` running on the
-clients in the first round of federated learning. We can do this by creating an instance
-of the model (``Net``) and extract the parameters in its ``state_dict`` and construct an
-``ArrayRecord`` with them. We can then make it available to the strategy via the
-``initial_arrays`` argument of the ``start()`` method.
+To construct a |serverapp_link|_, we define its ``@app.main()`` method. This method
+receives as input arguments:
+
+- a ``Grid`` object that will be used to interface with the nodes running the
+  ``ClientApp`` to involve them in a round of train/evaluate/query or other.
+- a |context_link|_ object that provides access to the run configuration.
+
+Before launching the strategy via the |strategy_start_link|_ method, we want to
+initialize the global model. This will be the model that gets sent to the ``ClientApp``
+running on the clients in the first round of federated learning. We can do this by
+creating an instance of the model (``Net``) and extract the parameters in its
+``state_dict`` and construct an ``ArrayRecord`` with them. We can then make it available
+to the strategy via the ``initial_arrays`` argument of the ``start()`` method.
 
 To the ``start()`` method we can also optionally pass a ``ConfigRecord`` containing
 settings that we would like to communicate to the clients. These will be sent as part of
@@ -464,7 +515,7 @@ the ``Message`` that also carries the model parameters.
 
 Most of the execution of the ``ServerApp`` happens inside the ``strategy.start()``
 method. After the specified number of rounds (``num_rounds``), the ``start()`` method
-returns a ``StrategyResult`` object containing the final model parameters and metrics
+returns a |result_link|_ object containing the final model parameters and metrics
 received from the clients or generated by the strategy itself. We can then save the
 final model to disk for later use.
 
