@@ -1,7 +1,6 @@
 """pytorch-example: A Flower / PyTorch app."""
 
 import json
-from collections import OrderedDict
 from datetime import datetime
 from pathlib import Path
 
@@ -89,16 +88,6 @@ def test(net, testloader, device):
     return loss, accuracy
 
 
-def get_weights(net):
-    return [val.cpu().numpy() for _, val in net.state_dict().items()]
-
-
-def set_weights(net, parameters):
-    params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    net.load_state_dict(state_dict, strict=True)
-
-
 def apply_train_transforms(batch):
     """Apply transforms to the partition from FederatedDataset."""
     batch["image"] = [TRAIN_TRANSFORMS(img) for img in batch["image"]]
@@ -142,7 +131,7 @@ def load_data(partition_id: int, num_partitions: int):
     return trainloader, testloader
 
 
-def create_run_dir(config: UserConfig) -> Path:
+def create_run_dir(config: UserConfig) -> tuple[Path, str]:
     """Create a directory where to save results from this run."""
     # Create output directory given current timestamp
     current_time = datetime.now()
