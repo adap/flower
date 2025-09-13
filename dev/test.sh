@@ -8,8 +8,11 @@ echo "=== test.sh ==="
 echo "- Start Python checks"
 
 echo "- isort: start"
-src_args=$(find ../examples -mindepth 1 -maxdepth 2 -type d -printf '--src %p ')
-python -m isort --check-only ../examples $src_args --settings-path .
+for dir in ../examples/*/; do
+    src_args=$(find "$dir" -maxdepth 1 -type d | sed 's/^/--src /' | tr '\n' ' ')
+    python -m isort --check-only $dir $src_args --settings-path . &
+done
+wait
 python -m isort --check-only ../benchmarks
 echo "- isort: done"
 
