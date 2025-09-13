@@ -1,7 +1,6 @@
 """pytorch-example: A Flower / PyTorch app."""
 
 import json
-from collections import OrderedDict
 from datetime import datetime
 from pathlib import Path
 

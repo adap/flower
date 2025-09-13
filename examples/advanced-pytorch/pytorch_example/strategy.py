@@ -16,7 +16,6 @@ from flwr.serverapp import Grid
 from flwr.serverapp.strategy import FedAvg, Result
 from flwr.serverapp.strategy.strategy_utils import log_strategy_start_info
 
-from pytorch_example.task import Net
 
 PROJECT_NAME = "FLOWER-advanced-pytorch"
 
@@ -45,14 +44,9 @@ class CustomFedAvg(FedAvg):
         if accuracy > self.best_acc_so_far:
             self.best_acc_so_far = accuracy
             logger.log(INFO, "💡 New best global model found: %f", accuracy)
-            # You could save the parameters object directly.
-            # Instead we are going to apply them to a PyTorch
-            # model and save the state dict.
-            model = Net()
-            model.load_state_dict(arrays.to_torch_state_dict())
             # Save the PyTorch model
             file_name = f"model_state_acc_{accuracy}_round_{current_round}.pth"
-            torch.save(model.state_dict(), self.save_path / file_name)
+            torch.save(arrays.to_torch_state_dict(), self.save_path / file_name)
             logger.log(INFO, "💾 New best model saved to disk: %s", file_name)
 
     def save_metrics_as_json(self, current_round: int, result: Result) -> None:
