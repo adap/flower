@@ -39,9 +39,9 @@
 Quickstart MLX
 ==============
 
-In this federated learning tutorial we will learn how to train simple MLP on MNIST using
-Flower and MLX. It is recommended to create a virtual environment and run everything
-within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+In this federated learning tutorial, we will learn how to train a simple MLP on MNIST
+using Flower and MLX. It is recommended to create a virtual environment and run
+everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
 Let's use `flwr new` to create a complete Flower+MLX project. It will generate all the
 files needed to run, by default with the Simulation Engine, a federation of 10 nodes
@@ -57,8 +57,8 @@ install Flower in your new environment:
     # In a new Python environment
     $ pip install flwr
 
-Then, run the command below. You will be prompted to select of the available templates
-(choose ``MLX``), give a name to your project, and type in your developer name:
+Then, run the command below. You will be prompted to select one of the available
+templates (choose ``MLX``), give a name to your project, and enter your developer name:
 
 .. code-block:: shell
 
@@ -92,7 +92,7 @@ To run the project do:
     # Run with default arguments
     $ flwr run .
 
-With default arguments you will see an output like this one:
+With default arguments, you will see output like this:
 
 .. code-block:: shell
 
@@ -160,8 +160,8 @@ With default arguments you will see an output like this one:
 
     Saving final model to disk...
 
-You can also override the parameters defined in ``[tool.flwr.app.config]`` section in
-the ``pyproject.toml`` like this:
+You can also override the parameters defined in the ``[tool.flwr.app.config]`` section
+in the ``pyproject.toml`` like this:
 
 .. code-block:: shell
 
@@ -169,15 +169,16 @@ the ``pyproject.toml`` like this:
     $ flwr run . --run-config "num-server-rounds=5 lr=0.05"
 
 What follows is an explanation of each component in the project you just created:
-dataset partition, the model, defining the ``ClientApp`` and defining the ``ServerApp``.
+dataset partitioning, the model, defining the ``ClientApp``, and defining the
+``ServerApp``.
 
 The Data
 --------
 
 We will use `Flower Datasets <https://flower.ai/docs/datasets/>`_ to easily download and
-partition the `MNIST` dataset. In this example you'll make use of the `IidPartitioner
+partition the `MNIST` dataset. In this example, you'll make use of the `IidPartitioner
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_
-to generate `num_partitions` partitions. You can choose `other partitioners
+to generate `num_partitions` partitions. You can choose from other partitioners
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html>`_ available in
 Flower Datasets:
 
@@ -260,11 +261,11 @@ The ClientApp
 ~~~~~~~~~~~~~
 
 The main changes we have to make to use `MLX` with `Flower` will be found in the
-``get_params()`` and ``set_params()`` functions. Indeed, MLX doesn't provide an easy way
-to convert the model parameters into a list of ``np.array`` objects (the format we need
-for the serialization of the messages to work).
+``get_params()`` and ``set_params()`` functions. MLX doesn't provide an easy way to
+convert the model parameters into a list of ``np.array`` objects (the format we need for
+message serialization to work).
 
-The way MLX stores its parameters is as follows:
+MLX stores its parameters as follows:
 
 .. code-block:: shell
 
@@ -278,7 +279,7 @@ The way MLX stores its parameters is as follows:
     }
 
 Therefore, to get our list of ``np.array`` objects, we need to extract each array and
-convert them into a NumPy array:
+convert it into a NumPy array:
 
 .. code-block:: python
 
@@ -289,7 +290,7 @@ convert them into a NumPy array:
 For the ``set_params()`` function, we perform the reverse operation. We receive a list
 of NumPy arrays and want to convert them into MLX parameters. Therefore, we iterate
 through pairs of parameters and assign them to the `weight` and `bias` keys of each
-layer dict:
+layer dictionary:
 
 .. code-block:: python
 
@@ -315,8 +316,8 @@ loop:
             mx.eval(model.parameters(), optimizer.state)
 
 Let's put everything together and see the complete implementation of the ``ClientApp``.
-First, the behaviour in a round of training is defined inside a function wrapped with
-the ``@app.train()`` decorator.
+First, the behavior in a round of training is defined inside a function wrapped with the
+``@app.train()`` decorator.
 
 After reading configuration parameters from the |context_link|_, we instantiate the
 model and apply the global parameters sent by the server using the ``set_params()``
@@ -386,12 +387,11 @@ The ``ClientApp`` also allows for evaluation of the model on local test data. Th
 be done by defining a function wrapped with the ``@app.evaluate()`` decorator. The
 signature of the function is identical to that of the ``train()`` function. As shown
 below, the evaluation function is very similar to the training function, except that we
-don't perform any training. We still need to update the model parameters with the ones
-sent by the server, and then we compute the loss and accuracy using the functions
-defined above. Finally, we construct a reply |message_link|_ containing a
-``MetricRecord`` with the evaluation accuracy and loss, as well as the key
-`num-examples` which will be used by the server to perform weighted averaging of the
-metrics.
+don't perform any training. We still need to update the model parameters with those sent
+by the server, and then we compute the loss and accuracy using the functions defined
+above. Finally, we construct a reply |message_link|_ containing a ``MetricRecord`` with
+the evaluation accuracy and loss, as well as the key `num-examples`, which will be used
+by the server to perform weighted averaging of the metrics.
 
 .. code-block:: python
 
@@ -421,21 +421,21 @@ The ServerApp
 The ServerApp
 -------------
 
-To construct a |serverapp_link|_ we define its ``@app.main()`` method. This method
-receive as input arguments:
+To construct a |serverapp_link|_, we define its ``@app.main()`` method. This method
+receives as input arguments:
 
 - a ``Grid`` object that will be used to interface with the nodes running the
   ``ClientApp`` to involve them in a round of train/evaluate/query or other.
 - a ``Context`` object that provides access to the run configuration.
 
-In this example we use the |fedavg_link|_ and configure it with a specific value of
-``fraction_train`` which is read from the run config. You can find the default value
-defined in the ``pyproject.toml``. Then, the execution of the strategy is launched when
-invoking its |strategy_start_link|_ method. To it we pass:
+In this example we use the |fedavg_link|_ and left with its default parameters. Then,
+after initializing the ``MLP`` that would serve as global model in the first round, the
+execution of the strategy is launched when invoking its |strategy_start_link|_ method.
+To it we pass:
 
 - the ``Grid`` object.
 - an ``ArrayRecord`` carrying a randomly initialized model that will serve as the global
-  model to federated.
+      model to federate.
 - the ``num_rounds`` parameter specifying how many rounds of ``FedAvg`` to perform.
 
 .. code-block:: python
