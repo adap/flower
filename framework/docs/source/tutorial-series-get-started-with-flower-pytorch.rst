@@ -338,7 +338,7 @@ metrics of interest.
 
 .. code-block:: python
 
-    from flower_tutorial.task import test as test_fn
+    from flower_tutorial.task import train as train_fn
 
     # Flower ClientApp
     app = ClientApp()
@@ -409,7 +409,7 @@ evaluation). Here's how the ``evaluate`` function looks like:
 
 .. code-block:: python
 
-    from flower_tutorial.task import train as train_fn
+    from flower_tutorial.task import test as test_fn
 
 
     @app.evaluate()
@@ -646,8 +646,9 @@ PyTorch) and tasks (not just CIFAR-10 images classification), for example NLP wi
 Hugging Face Transformers or speech with SpeechBrain.
 
 In the next tutorial, we're going to cover some more advanced concepts. Want to
-customize your strategy? Initialize parameters on the server side? Or evaluate the
-aggregated model on the server side? We'll cover all this and more in the next tutorial.
+customize your strategy? Do learning rate decay at the strategy and communicate it to
+the clients ? Or evaluate the aggregated model on the server side? We'll cover all this
+and more in the next tutorial.
 
 Next steps
 ----------
