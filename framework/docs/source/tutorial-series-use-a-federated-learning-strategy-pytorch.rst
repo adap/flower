@@ -36,6 +36,8 @@ tutorial, we introduced federated learning with PyTorch and Flower (:doc:`part 1
 In part 2, we'll begin to customize the federated learning system we built in part 1
 using the Flower framework, Flower Datasets, and PyTorch.
 
+.. tip::
+
     `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
     help:
@@ -98,14 +100,11 @@ Next, we install the project and its dependencies, which are specified in the
     $ cd flower-tutorial
     $ pip install -e .
 
-Strategy customization
-----------------------
-
 So far, everything should look familiar if you've worked through the introductory
 tutorial. With that, we're ready to introduce a number of new features.
 
-Starting with a customized strategy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Choosing a different strategy
+-----------------------------
 
 In part 1, we created a |serverapp_link|_ (in ``server_app.py``). In it, we defined the
 strategy, the model to federatedly train, and then we launched the strategy by calling
@@ -312,7 +311,7 @@ see how this looks like in code. Create a new file called ``custom_strategy.py``
             self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
         ) -> Iterable[Message]:
             """Configure the next round of federated training and maybe do LR decay."""
-            # Decrease learning rate by a factor of 0.5 every 10 rounds
+            # Decrease learning rate by a factor of 0.5 every 5 rounds
             if server_round % 5 == 0 and server_round > 0:
                 config["lr"] *= 0.5
                 print("LR decreased to:", config["lr"])

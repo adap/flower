@@ -51,6 +51,8 @@ In this tutorial, we'll build a federated learning system using the Flower frame
 Flower Datasets and PyTorch. In part 1, we use PyTorch for the model training pipeline
 and data loading. In part 2, we federate the PyTorch project using Flower.
 
+.. tip::
+
     `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
     help:
