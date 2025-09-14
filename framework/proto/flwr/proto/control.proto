@@ -41,6 +41,9 @@ service Control {
 
   // Get auth tokens upon request
   rpc GetAuthTokens(GetAuthTokensRequest) returns (GetAuthTokensResponse) {}
+
+  // Pull artifacts generated during a run (flwr pull)
+  rpc PullArtifacts(PullArtifactsRequest) returns (PullArtifactsResponse) {}
 }
 
 message StartRunRequest {
@@ -80,3 +83,6 @@ message GetAuthTokensResponse {
 
 message StopRunRequest { uint64 run_id = 1; }
 message StopRunResponse { bool success = 1; }
+
+message PullArtifactsRequest { uint64 run_id = 1; }
+message PullArtifactsResponse { optional string url = 1; }

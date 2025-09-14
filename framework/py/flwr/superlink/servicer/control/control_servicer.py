@@ -49,6 +49,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetLoginDetailsResponse,
     ListRunsRequest,
     ListRunsResponse,
+    PullArtifactsRequest,
+    PullArtifactsResponse,
     StartRunRequest,
     StartRunResponse,
     StopRunRequest,
@@ -334,6 +336,33 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             access_token=credentials.access_token,
             refresh_token=credentials.refresh_token,
         )
+
+    def PullArtifacts(
+        self, request: PullArtifactsRequest, context: grpc.ServicerContext
+    ) -> PullArtifactsResponse:
+        """Pull artifacts for a given run ID."""
+        log(INFO, "ControlServicer.PullArtifacts")
+        state = self.linkstate_factory.state()
+
+        # Retrieve run ID and run
+        run_id = request.run_id
+        run = state.get_run(run_id)
+
+        # Exit if `run_id` not found
+        if not run:
+            context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+
+        artifacts_url = ""
+        # If user auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
+        if self.auth_plugin:
+            flwr_aid = shared_account_info.get().flwr_aid
+            _check_flwr_aid_in_run(
+                flwr_aid=flwr_aid, run=cast(Run, run), context=context
+            )
+
+        # TODO: implement
+
+        return PullArtifactsResponse(url=artifacts_url)
 
 
 def _create_list_runs_response(
