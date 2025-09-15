@@ -31,12 +31,7 @@ from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppE
 from flwr.client.clientapp.utils import get_load_client_app_fn
 from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import Message
-from flwr.common.constant import (
-    HEARTBEAT_MAX_INTERVAL,
-    NUM_PARTITIONS_KEY,
-    PARTITION_ID_KEY,
-    ErrorCode,
-)
+from flwr.common.constant import HEARTBEAT_MAX_INTERVAL, PARTITION_ID_KEY, ErrorCode
 from flwr.common.logger import log
 from flwr.common.typing import Run
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
@@ -66,17 +61,23 @@ def _register_node_info_stores(
 ) -> dict[int, DeprecatedRunInfoStore]:
     """Create DeprecatedRunInfoStore objects and register the context for the run."""
     node_info_store: dict[int, DeprecatedRunInfoStore] = {}
-    num_partitions = len(set(nodes_mapping.values()))
     for node_id, partition_id in nodes_mapping.items():
         data_path = os.environ.get("FLOWER_DATA_PATH", None)
-        if data_path is not None:
-            raise ValueError("The `FLOWER_DATA_PATH` environment variable is not set. ")
+        if data_path is None:
+            raise ValueError(
+                "The `FLOWER_DATA_PATH` environment variable is not set. Ensure it is "
+                "set and points to the data directory containing pre-partitioned "
+                "datasets."
+            )
         node_info_store[node_id] = DeprecatedRunInfoStore(
             node_id=node_id,
             node_config={
                 PARTITION_ID_KEY: partition_id,
-                NUM_PARTITIONS_KEY: num_partitions,
                 "pathmnist": f"{data_path}/pathmnist/{partition_id}",
+                "dermamnist": f"{data_path}/dermamnist/{partition_id}",
+                "organamnist": f"{data_path}/organamnist/{partition_id}",
+                "retinamnist": f"{data_path}/retinamnist/{partition_id}",
+                "bloodmnist": f"{data_path}/bloodmnist/{partition_id}",
             },
         )
 
