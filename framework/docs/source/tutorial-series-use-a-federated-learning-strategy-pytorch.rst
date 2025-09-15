@@ -158,7 +158,7 @@ Next, run the training with the following command:
 Server-side parameter **evaluation**
 ------------------------------------
 
-Flower can evaluate the aggregated model on the server-side or on the client-side.
+Flower can evaluate the aggregated model on the server side or on the client side.
 Client-side and server-side evaluation are similar in some ways, but different in
 others.
 
@@ -182,10 +182,10 @@ model, we'd see our evaluation results fluctuate over consecutive rounds.
 
 We've seen how federated evaluation works on the client side (i.e., by implementing a
 function wrapped with the ``@app.evaluate`` decorator in your ``ClientApp``). Now let's
-see how we can evaluate the aggregated model parameters on the server-side.
+see how we can evaluate the aggregated model parameters on the server side.
 
 To do so, we need to create a new function in ``task.py`` that we can name
-``central_evaluate``. This function is a callback that we'll be passed to the
+``central_evaluate``. This function is a callback that will be passed to the
 |strategy_start_link|_ method of our strategy. This means that the strategy will call
 this function after every round of federated learning passing two arguments: the current
 round of federated learning and the aggregated model parameters.
@@ -204,7 +204,7 @@ Our ``central_evaluate`` function performs the following steps:
 
 
     def central_evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
-        """Evaluate model on the server-side."""
+        """Evaluate model on the server side."""
 
         # Load the model and initialize it with the received weights
         model = Net()
@@ -234,7 +234,7 @@ Our ``central_evaluate`` function performs the following steps:
         return MetricRecord({"accuracy": accuracy, "loss": loss})
 
 Remember we mentioned this ``central_evaluate`` will be called by the strategy. To do so
-we need to pass it to the strategy's ``start`` method as show below.
+we need to pass it to the strategy's ``start`` method as shown below.
 
 .. code-block:: python
     :emphasize-lines: 1,16
@@ -266,7 +266,7 @@ Finally, we run the simulation.
     $ flwr run .
 
 You'll note that the server logs the metrics returned by the callback after each round.
-Also, at the end of the run, note the ``ServerApp-side Evaluation Metrics`` shown:
+Also, at the end of the run, note the ``ServerApp-side Evaluate Metrics`` shown:
 
 .. code-block:: shell
 
@@ -280,7 +280,7 @@ Sending configurations to clients from strategies
 -------------------------------------------------
 
 In some situations, we want to configure client-side execution (training, evaluation)
-from the server-side. One example for that is the server asking the clients to train for
+from the server side. One example of this is the server asking the clients to train for
 with a different learning rate based on the current round number. Flower provides a way
 to send configuration values from the server to the clients as part of the
 |message_link|_ that the ``ClientApp`` receives. Let's see how we can do this.
@@ -290,7 +290,7 @@ To the |strategy_start_link|_ method of our strategy we are already passing a
 sent to the clients in all the ``Messages`` addressing the ``@app.train()`` function of
 the ``ClientApp``. Let's say we want to decrease the learning rate by a factor of 0.5
 every 5 rounds, then we need to override the ``configure_train`` method of our strategy
-and embedd such logic.
+and embed such logic.
 
 To do so, we create a new class inheriting from |fedadagrad_link|_ and override the
 ``configure_train`` method. We then use this new strategy in our ``ServerApp``. Let's
@@ -331,9 +331,9 @@ rounds to 15 to see the learning rate decay in action.
 You'll note that in the ``configure_train`` stage of rounds 5 and 10, the learning rate
 is decreased by a factor of 0.5 and the new learning rate is printed to the terminal.
 
-How do we know the ``ClientApp`` is making use of thant new learning rate? Recall that
-in ``client_app.py``, we are reading the learning rate from the ``Message`` received by
-the ``@app.train()`` function:
+How do we know the ``ClientApp`` is using that new learning rate? Recall that in
+``client_app.py``, we are reading the learning rate from the ``Message`` received by the
+``@app.train()`` function:
 
 .. code-block:: python
     :emphasize-lines: 11
@@ -355,7 +355,7 @@ the ``@app.train()`` function:
         # ... prepare reply Message
         return Message(content=content, reply_to=msg)
 
-Congratulations! You have created your first custom strategy bringing dynamism to the
+Congratulations! You have created your first custom strategy adding dynamism to the
 ``ConfigRecord`` that is sent to clients.
 
 Scaling federated learning
@@ -419,14 +419,14 @@ Recap
 -----
 
 In this tutorial, we've seen how we can gradually enhance our system by customizing the
-strategy choosing a different strategy, doing learning rate decay at the strategy level,
-and evaluating models on the server-side. That's quite a bit of flexibility with so
-little code, right?
+strategy, choosing a different strategy, applying learning rate decay at the strategy
+level, and evaluating models on the server side. That's quite a bit of flexibility with
+so little code, right?
 
 In the later sections, we've seen how we can communicate arbitrary values between server
 and clients to fully customize client-side execution. With that capability, we built a
 large-scale Federated Learning simulation using the Flower Virtual Client Engine and ran
-an experiment involving 1000 clients in the same workload - all in the same Flower
+an experiment involving 1000 clients in the same workload — all in the same Flower
 project!
 
 Next steps
