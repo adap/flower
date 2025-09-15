@@ -21,7 +21,7 @@ app = ClientApp()
 def train(msg: Message, context: Context):
     """Train the model on local data."""
 
-    # Load the model and initialize it with the received weights
+    # Create train state object (model + optimizer)
     lr = float(context.run_config["learning-rate"])
     train_state = create_train_state(lr)
     # Extract numpy arrays from ArrayRecord before applying
@@ -53,7 +53,7 @@ def train(msg: Message, context: Context):
 def evaluate(msg: Message, context: Context):
     """Evaluate the model on local data."""
 
-    # Load the model and initialize it with the received weights
+    # Create train state object (model + optimizer)
     lr = float(context.run_config["learning-rate"])
     train_state = create_train_state(lr)
     ndarrays = cast(ArrayRecord, msg.content["arrays"]).to_numpy_ndarrays()
