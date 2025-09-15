@@ -1,0 +1,25 @@
+syntax = "proto3";
+package flwr.proto;
+
+message Tensor {
+  repeated int64 shape = 1;
+  bytes buffer = 2;      // raw ndarray bytes
+  string dtype = 3;      // e.g., "float32"
+}
+
+message DistillIns {
+  string public_id = 1;         // identifier of public dataset snapshot/version
+  repeated int64 sample_ids = 2; // index list for the public dataset
+}
+
+message DistillRes {
+  string public_id = 1;
+  repeated int64 sample_ids = 2;
+  Tensor logits = 3;            // [N, num_classes]
+}
+
+message ConsensusIns {
+  string public_id = 1;
+  repeated int64 sample_ids = 2;
+  Tensor avg_logits = 3;        // [N, num_classes]
+}
