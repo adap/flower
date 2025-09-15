@@ -48,8 +48,8 @@ Get started with Flower
 Welcome to the Flower federated learning tutorial!
 
 In this tutorial, we'll build a federated learning system using the Flower framework,
-Flower Datasets and PyTorch. In part 1, we use PyTorch for the model training pipeline
-and data loading. In part 2, we federate the PyTorch project using Flower.
+Flower Datasets and PyTorch. In part 1, we use PyTorch for model training and data
+loading. In part 2, we federate this PyTorch project using Flower.
 
 .. tip::
 
@@ -129,7 +129,7 @@ to train image classifiers that distinguish between images from ten different cl
 We simulate having multiple datasets from multiple organizations (also called the
 “cross-silo” setting in federated learning) by splitting the original CIFAR-10 dataset
 into multiple partitions. Each partition will represent the data from a single
-organization. We're doing this purely for experimentation purposes, in the real world
+organization. We're doing this purely for experimentation purposes. In the real world
 there's no need for data splitting because each organization already has their own data
 (the data is naturally partitioned).
 
@@ -180,8 +180,8 @@ test set). Again, this is only necessary for building research or educational sy
 actual federated learning systems have their data naturally distributed across multiple
 partitions.
 
-The model and train and evaluate functions
-------------------------------------------
+The model, training, and test functions
+---------------------------------------
 
 Next, we're going to use PyTorch to define a simple convolutional neural network. This
 introduction assumes basic familiarity with PyTorch, so it doesn't cover the
@@ -189,8 +189,8 @@ PyTorch-related aspects in full detail. If you want to dive deeper into PyTorch,
 recommend `this introductory tutorial
 <https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html>`_.
 
-The model
-~~~~~~~~~
+Model
+~~~~~
 
 We will use the simple CNN described in the aforementioned PyTorch tutorial (The
 following code is already defined in ``task.py``):
@@ -217,7 +217,10 @@ following code is already defined in ``task.py``):
             x = F.relu(self.fc2(x))
             return self.fc3(x)
 
-The PyTorch template has also provided us with the usual training and test functions:
+Training and test functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The PyTorch template also provides the usual training and test functions:
 
 .. code-block:: python
 
@@ -271,14 +274,14 @@ Constructing Messages
 
 In Flower, the server and clients communicate by sending and receiving |message_link|_
 objects. A ``Message`` carries a ``RecordDict`` as its main payload. The ``RecordDict``
-it's like python dictionary that can contain multiple records of different types. There
+is like a Python dictionary that can contain multiple records of different types. There
 are three main types of records:
 
 - |arrayrecord_link|_: Contains model parameters as a dictionary of NumPy arrays
 - |metricrecord_link|_: Contains training or evaluation metrics as a dictionary of
-  scalars or list of scalars.
-- |configrecord_link|_: Contains configuration parameters as a dictionary of scalars,
-      strings, booleans or bytes. Lists of these types are also supported.
+  integers, floats, lists of integers, or lists of floats.
+- |configrecord_link|_: Contains configuration parameters as a dictionary of integers,
+  floats, strings, booleans, or bytes. Lists of these types are also supported.
 
 Let's see a few examples of how to work with these types of records and, ultimately,
 construct a ``RecordDict`` that can be sent over a ``Message``.
@@ -317,6 +320,9 @@ data that the node it runs from (e.g. an edge device, a server in a data center,
 laptop) has access to. In this tutorial such action is to train and evaluate the small
 CNN model defined earlier using the local training and validation data.
 
+Training
+++++++++
+
 We can define how the ``ClientApp`` performs training by wrapping a function with the
 ``@app.train()`` decorator. In this case we name this function ``train`` because we'll
 use it to train the model on the local data. The function always expects two arguments:
@@ -334,8 +340,8 @@ destroyed when a reply is communicated back to the server.
 
 Let's see an implementation of ``ClientApp`` that uses the previously defined PyTorch
 CNN model, applies the parameters received from the ``ServerApp`` via the message, loads
-the its local data, trains the model with it (using the ``train_fn`` function), and
-generates a reply ``Message`` containing the updated model parameters as well some
+its local data, trains the model with it (using the ``train_fn`` function), and
+generates a reply ``Message`` containing the updated model parameters as well as some
 metrics of interest.
 
 .. code-block:: python
@@ -381,7 +387,7 @@ metrics of interest.
         return Message(content=content, reply_to=msg)
 
 Note that the ``train_fn`` is simply an alias name pointing to the train function
-defined earlier in this tutorial (where we defining the PyTorch training loop and
+defined earlier in this tutorial (where we defined the PyTorch training loop and
 optimizer). To this function we pass the model we want to train locally and the data
 loader, but also the number of local epochs and the learning rate (``lr``) to use. Note
 how in this case the ``local-epochs`` setting is read from the run config via the
@@ -390,14 +396,26 @@ the ``Message``. This can be used to adjust the learning rate on each round from
 server. When this dynamism isn't needed, reading the ``lr`` from the run config via the
 ``Context`` is also perfectly valid.
 
-Once the training is completed, the ``ClientApp`` constructs a reply ``Message``. The
-reply ``Message`` would typically contain a ``RecordDict`` with two records: an
-``ArrayRecord`` containing the updated model parameters and a ``MetricRecord`` with some
-metrics of interest (in this case, the training loss and the number of examples used for
-training). Note that returning the number of examples under the ``num-examples`` key is
-required so the ``ServerApp`` can aggregate both models and metrics received correctly
-(more on this soon). The ``ClientApp`` then returns the reply ``Message``, then Flower
-takes care of sending it back to the server.
+Once training is completed, the ``ClientApp`` constructs a reply ``Message``. This reply
+typically includes a ``RecordDict`` with two records:
+
+- An ``ArrayRecord`` containing the updated model parameters
+- A ``MetricRecord`` with relevant metrics (in this case, the training loss and the
+  number of examples used for training)
+
+.. note::
+
+    Returning the number of examples under the ``"num-examples"`` key is **required**,
+    because strategies such as |fedavg_link|_ used by the ``ServerApp`` rely on this key
+    to aggregate both models and metrics by default, unless you override the
+    ``weighted_by_key`` argument (for example:
+    ``FedAvg(weighted_by="my-different-key")``).
+
+After constructing the reply ``Message``, the ``ClientApp`` returns it. Flower then
+handles sending the reply back to the server automatically.
+
+Evaluation
+++++++++++
 
 In a typical federated learning setup, the ``ClientApp`` would also implement an
 ``@app.evaluate()`` function to evaluate the model received from the ``ServerApp`` on
@@ -460,7 +478,7 @@ On the server side, we need to configure a strategy which encapsulates the feder
 learning approach/algorithm, for example, *Federated Averaging* (FedAvg). Flower has a
 number of built-in strategies, but we can also use our own strategy implementations to
 customize nearly all aspects of the federated learning approach. For this tutorial, we
-use the built-in ``FedAvg`` implementation and customize it slightly by specifiying the
+use the built-in ``FedAvg`` implementation and customize it slightly by specifying the
 fraction of connected nodes to involve in a round of training.
 
 To construct a |serverapp_link|_, we define its ``@app.main()`` method. This method
@@ -473,11 +491,11 @@ receives as input arguments:
 Before launching the strategy via the |strategy_start_link|_ method, we want to
 initialize the global model. This will be the model that gets sent to the ``ClientApp``
 running on the clients in the first round of federated learning. We can do this by
-creating an instance of the model (``Net``) and extract the parameters in its
-``state_dict`` and construct an ``ArrayRecord`` with them. We can then make it available
-to the strategy via the ``initial_arrays`` argument of the ``start()`` method.
+creating an instance of the model (``Net``), extracting the parameters in its
+``state_dict``, and constructing an ``ArrayRecord`` with them. We can then make it
+available to the strategy via the ``initial_arrays`` argument of the ``start()`` method.
 
-To the ``start()`` method we can also optionally pass a ``ConfigRecord`` containing
+We can also optionally pass to the ``start()`` method a ``ConfigRecord`` containing
 settings that we would like to communicate to the clients. These will be sent as part of
 the ``Message`` that also carries the model parameters.
 
@@ -533,7 +551,7 @@ with Flower! The last step is to run our simulation in the command line, as foll
 
 This will execute the federated learning simulation with 10 clients, or SuperNodes,
 defined in the ``[tool.flwr.federations.local-simulation]`` section in the
-``pyproject.toml``. You should expect a output log similar to this:
+``pyproject.toml``. You should expect an output log similar to this:
 
 .. code-block:: shell
 
@@ -620,23 +638,43 @@ Behind the scenes
 So how does this work? How does Flower execute this simulation?
 
 When we execute ``flwr run``, we tell Flower that there are 10 clients
-(``options.num-supernodes = 10``, where 1 ``SuperNode`` launches 1 ``ClientApp``).
+(``options.num-supernodes = 10``, where each SuperNode launches one ``ClientApp``).
 
-Flower then goes ahead and asks the ``ServerApp`` to issue instructions to those nodes
-using the ``FedAvg`` strategy. ``FedAvg`` knows that it should select 50% of the
-available clients (``fraction-fit=0.5``), so it goes ahead and selects 5 random clients
-(i.e., 50% of 10).
+Flower then asks the ``ServerApp`` to issue instructions to those nodes using the
+``FedAvg`` strategy. In this example, ``FedAvg`` is configured with two key parameters:
 
-Flower then asks the selected 5 clients to train the model. Each of the 5 ``ClientApp``
-instances receives a message, which causes it to call either the function under
-``@app.train()`` or under ``@app.evaluate()``, depending on the type of ``Message``. A
-reply ``Message`` is always returned by either function to the ``ServerApp``. When the
-``ServerApp`` receives the ``Messages`` from all participating clients, it hands them to
-the ``FedAvg`` strategy for aggregation. Both ``ArrayRecord`` and ``MetricRecord`` are
-aggregated. If it's a training round, the result of aggregating all ``ArrayRecords`` is
-another ``ArrayRecord`` representing the new global model. Then, the next step of
-federated learning begins which will be an `evaluation` round followed by another round
-of training+evaluation.
+- ``fraction-train=0.5`` → select 50% of the available clients for training
+- ``fraction-evaluate=1.0`` → select 100% of the available clients for evaluation
+
+This means in our example, 5 out of 10 clients will be selected for training, and all 10
+clients will later participate in evaluation.
+
+A typical round looks like this:
+
+- **Training**
+
+  1. ``FedAvg`` randomly selects 5 clients (50% of 10).
+  2. Flower sends a ``TRAIN`` message to each selected ``ClientApp``.
+  3. Each ``ClientApp`` calls the function decorated with ``@app.train()``, then returns
+     a ``Message`` containing an ``ArrayRecord`` (the updated model parameters) and a
+     ``MetricRecord`` (the training loss and number of examples).
+  4. The ``ServerApp`` receives all replies.
+  5. ``FedAvg`` aggregates all ``ArrayRecord`` into a new ``ArrayRecord`` representing
+     the new global model and combines all ``MetricRecord``.
+
+- **Evaluation**
+
+  1. ``FedAvg`` selects all 10 clients (100%).
+  2. Flower sends an ``EVALUATE`` message to each ``ClientApp``.
+  3. Each ``ClientApp`` calls the function decorated with ``@app.evaluate()`` and
+     returns a ``Message`` containing a ``MetricRecord`` (the evaluation loss, accuracy,
+     and number of examples).
+  4. The ``ServerApp`` receives all replies.
+  5. ``FedAvg`` aggregates all ``MetricRecord``.
+
+Once both training and evaluation are done, the next round begins: another training
+step, then another evaluation step, and so on, until the configured number of rounds is
+reached.
 
 Final remarks
 -------------
@@ -644,7 +682,7 @@ Final remarks
 Congratulations, you just trained a convolutional neural network, federated over 10
 clients! With that, you understand the basics of federated learning with Flower. The
 same approach you've seen can be used with other machine learning frameworks (not just
-PyTorch) and tasks (not just CIFAR-10 images classification), for example NLP with
+PyTorch) and tasks (not just CIFAR-10 image classification), for example NLP with
 Hugging Face Transformers or speech with SpeechBrain.
 
 In the next tutorial, we're going to cover some more advanced concepts. Want to
