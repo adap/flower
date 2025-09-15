@@ -11,9 +11,6 @@ from flwr_datasets.partitioner import (
     SquarePartitioner,
 )
 
-
-from datasets import DatasetDict, concatenate_datasets
-
 CORRELATION_TO_PARTITIONER = {
     "uniform": IidPartitioner,
     "linear": LinearPartitioner,
