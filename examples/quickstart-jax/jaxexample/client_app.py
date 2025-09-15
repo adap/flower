@@ -46,7 +46,6 @@ class FlowerClient(NumPyClient):
 
 
 def client_fn(context: Context):
-
     num_partitions = context.node_config["num-partitions"]
     partition_id = context.node_config["partition-id"]
     batch_size = context.run_config["batch-size"]
