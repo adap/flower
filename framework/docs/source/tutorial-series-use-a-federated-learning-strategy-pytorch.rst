@@ -3,7 +3,7 @@ Use a federated learning strategy
 
 .. |fedavg_link| replace:: ``FedAvg``
 
-.. _fedavg_link ref-api/flwr.serverapp.strategy.FedAvg.html
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
 
 .. |fedadagrad_link| replace:: ``FedAdagrad``
 
