@@ -178,6 +178,9 @@ class RayBackend(Backend):
                 updated_context,
             ) = self.pool.fetch_result_and_return_actor_to_pool(future)
 
+            # Re-add PARTITION_ID_KEY to context
+            updated_context.node_config[PARTITION_ID_KEY] = partition_id
+
             return out_mssg, updated_context
 
         except Exception as ex:
@@ -186,14 +189,14 @@ class RayBackend(Backend):
                 "An exception was raised when processing a message by %s",
                 self.__class__.__name__,
             )
+            # Re-add PARTITION_ID_KEY to context
+            context.node_config[PARTITION_ID_KEY] = partition_id
+
             # add actor back into pool
             if future is not None:
                 self.pool.add_actor_back_to_pool(future)
             raise ex
-        
-        finally:
-            # Re-add PARTITION_ID_KEY to context
-            context.node_config[PARTITION_ID_KEY] = partition_id
+
 
     def terminate(self) -> None:
         """Terminate all actors in actor pool."""
