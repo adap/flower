@@ -6,7 +6,7 @@ from datasets import load_dataset
 
 from flwr.common import ArrayRecord, Context, MetricRecord
 from flwr.common.config import unflatten_dict
-from flwr.server import Grid, ServerApp
+from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedXgbBagging, FedXgbCyclic
 
 from xgboost_comprehensive.task import replace_keys, transform_dataset_to_dmatrix
