@@ -28,7 +28,7 @@ our own custom strategy from scratch (:doc:`part 3
 In this final tutorial, we turn our attention again to the ``ClientApp`` and show how to
 communicate arbitrary Python objects via a ``Message`` and how to use it on the
 ``ServerApp``. This can be useful if you want to send additional information between
-``ClientApp <--> ServerApp`` needing of custom serialization.
+``ClientApp <--> ServerApp`` without the need for custom protocol serialization.
 
 .. tip::
 
@@ -127,11 +127,11 @@ Then, on the ``ServerApp``, the Flower strategy will automatically aggregate the
 the aggregated metrics. Now, what if we wanted to send additional information from the
 ``ClientApp`` to the ``ServerApp``? For example, let's say we want to send how long the
 execution of the ``ClientApp`` took. We can do this by adding a new metric to the
-``MetricRecord``. It will be also aggregated automatically by the strategy. If you do
+``MetricRecord``. It will also be aggregated automatically by the strategy. If you do
 for example:
 
 .. code-block:: python
-    :emphasize-lines: 1,8,12,20
+    :emphasize-lines: 1,8,12,13,20
 
     import time
 
@@ -158,15 +158,16 @@ for example:
         content = RecordDict({"arrays": model_record, "metrics": metric_record})
         return Message(content=content, reply_to=msg)
 
-If you'd like to communicate other type of objects and leave them out of the aggregation
-process, you can use a |configrecord_link|_. In addition to scalars (``int``, ``float``)
-can use a ``ConfigRecord`` to send strings, booleans and even bytes. In the next section
-we'll learn to communicate arbitrary Python objects by first serializing them to bytes.
+If you'd like to communicate other types of objects and leave them out of the
+aggregation process, you can use a |configrecord_link|_. In addition to integers and
+floats, you can use a ``ConfigRecord`` to send strings, booleans and even bytes. In the
+next section we'll learn to communicate arbitrary Python objects by first serializing
+them to bytes.
 
 Communicating arbitrary objects
 -------------------------------
 
-Let's assume the training stage of our ``ClientApp`` produces a dataclass as the one
+Let's assume the training stage of our ``ClientApp`` produces a dataclass like the one
 below and we would like to communicate it to the ``ServerApp`` via the ``Message``.
 Let's go ahead and define this in ``task.py``:
 
@@ -191,15 +192,21 @@ Sending from ClientApps
 
 Let's assume our ``ClientApp`` trains the model locally and generates an instance of
 ``TrainProcessMetadata``. In order to send it as part of the message reply, we need to
-serialize it to bytes. In this case, we can use the ``json`` module from the Python
-standard library. We can then send the serialized object as a ``ConfigRecord`` in the
+serialize it to bytes. In this case, we can use the ``pickle`` module from the Python
+standard library. We can then send the serialized object in a ``ConfigRecord`` in the
 ``Message`` reply. Let's see how this would look like in code:
 
-.. code-block:: python
-    :emphasize-lines: 1,2,11,21,23,36
+.. warning::
 
-    from dataclasses import asdict
-    import json
+    The following code is for demonstration purposes only. In real-world applications,
+    you should use a **SAFE** serialization method than ``pickle``, such as ``json`` or
+    a simple custom solution if the object is not too complex. ``pickle`` is used here
+    solely for simplicity.
+
+.. code-block:: python
+    :emphasize-lines: 1,10,20,22,35
+
+    import pickle
 
 
     @app.train()
@@ -217,8 +224,8 @@ standard library. We can then send the serialized object as a ``ConfigRecord`` i
         #     training_losses={"epoch1": 0.56, "epoch2": 0.34}
         # )
 
-        # Serialize the TrainProcessMetadata object to JSON bytes
-        train_meta_bytes = json.dumps(asdict(train_metadata), indent=2).encode("utf-8")
+        # UNSAFE: Serialize the TrainProcessMetadata object to bytes
+        train_meta_bytes = pickle.dumps(train_metadata)
         # Construct a ConfigRecord
         config_record = ConfigRecord({"meta": train_meta_bytes})
 
@@ -262,15 +269,15 @@ strategy to handle the deserialization and use of the ``TrainProcessMetadata`` o
     ``@app.train()`` function. If we had sent it from an ``@app.evaluate()`` function,
     we would override the ``aggregate_evaluate`` method instead.
 
-Let's create a new custom (or reuse the one created in part-2 and part-3 of this
-tutorial) strategy in ``server_app.py`` that extends the ``FedAdagrad`` strategy and
+Let's create a new custom strategy (or reuse the one created in part 2 and part 3 of
+this tutorial) in ``server_app.py`` that extends the ``FedAdagrad`` strategy and
 overrides the ``aggregate_train`` method to deserialize the ``TrainProcessMetadata``
 object from each client and print the training time and convergence status:
 
 .. code-block:: python
     :emphasize-lines: 1,7,17,18,20
 
-    import json
+    import pickle
     from typing import Iterable, Optional
 
 
@@ -287,9 +294,9 @@ object from each client and print the training time and convergence status:
                 if reply.has_content():
                     # Retrieve the ConfigRecord from the message
                     config_record = reply.content["train_metadata"]
-                    metadatay_bytes = config_record["meta"]
-                    # Deserialize it
-                    train_meta = json.loads(metadata_bytes.decode("utf-8"))
+                    metadata_bytes = config_record["meta"]
+                    # UNSAFE: Deserialize it
+                    train_meta = pickle.loads(metadata_bytes)
                     print(train_meta)
             # Aggregate the ArrayRecords and MetricRecords as usual
             return super().aggregate_train(server_round, replies)
@@ -323,7 +330,7 @@ In this part of the tutorial, we've seen how to communicate arbitrary Python obj
 between the ``ClientApp`` and the ``ServerApp`` by serializing them to bytes and sending
 them as a ``ConfigRecord`` in a ``Message``. We also learned how to deserialize them
 back to their original form on the server side and use them in a custom strategy. Note
-that the steps here presented are identical if you need to serialize objects in the
+that the steps presented here are identical if you need to serialize objects in the
 strategy to send them to the clients.
 
 Next steps
