@@ -28,7 +28,7 @@ our own custom strategy from scratch (:doc:`part 3
 In this final tutorial, we turn our attention again to the ``ClientApp`` and show how to
 communicate arbitrary Python objects via a ``Message`` and how to use it on the
 ``ServerApp``. This can be useful if you want to send additional information between
-``ClientApp <--> ServerApp`` without the need for custom protocol serialization.
+``ClientApp <--> ServerApp`` without the need for custom protocols.
 
 .. tip::
 
