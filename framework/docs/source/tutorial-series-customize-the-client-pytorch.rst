@@ -269,9 +269,10 @@ overrides the ``aggregate_train`` method to deserialize the ``TrainProcessMetada
 object from each client and print the training time and convergence status:
 
 .. code-block:: python
-    :emphasize-lines: 1,7,17,18,20
+    :emphasize-lines: 1,8,18,19,21
 
     import pickle
+    from dataclasses import asdict
     from typing import Iterable, Optional
 
 
@@ -291,7 +292,7 @@ object from each client and print the training time and convergence status:
                     metadata_bytes = config_record["meta"]
                     # Deserialize it
                     train_meta = pickle.loads(metadata_bytes)
-                    print(train_meta)
+                    print(asdict(train_meta))
             # Aggregate the ArrayRecords and MetricRecords as usual
             return super().aggregate_train(server_round, replies)
 
