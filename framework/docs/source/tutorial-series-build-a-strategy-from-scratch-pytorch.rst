@@ -384,6 +384,10 @@ Flower strategy. This method is the main entry point of any strategy and contain
 logic to execute the federated learning process. In this tutorial you learned how to log
 the metrics to Weight & Biases and how to save model checkpoints to disk.
 
+In the next tutorial, we're going to cover how to communicate arbitrary Python objects
+between the ``ClientApp`` and the ``ServerApp`` by serializing them and send them in a
+``Message`` as a ``ConfigRecord``.
+
 Next steps
 ----------
 
