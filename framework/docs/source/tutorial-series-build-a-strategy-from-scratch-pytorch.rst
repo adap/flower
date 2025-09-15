@@ -35,9 +35,10 @@ previously by creating a much more customized version of ``FedAdagrad``.
       the ``#introductions`` channel! If anything is unclear, head over to the
       ``#questions`` channel.
 
-Let's build a new ``Strategy`` with a customized |strategy_start_link|_ method 🌼
-enabling: the saving of the global model when a new best global accuracy is found; and
-log the metrics generated during the run to Weights & Biases!
+Let's build a new ``Strategy`` with a customized |strategy_start_link|_ method that:
+
+- saves a copy of the global model when a new best global accuracy is found;
+- logs the metrics generated during the run to Weights & Biases!
 
 Preparation
 -----------
@@ -49,7 +50,9 @@ Installing dependencies
 
 .. note::
 
-    If you've completed part 1 and 2 of the tutorial, you can skip this step.
+    If you've completed part 1 and 2 of the tutorial, you can skip this step. But
+    remember to include ``wandb`` as a dependency in your ``pyproject.toml`` file and
+    install it in your environment.
 
 First, we install the Flower package ``flwr``:
 
@@ -81,7 +84,7 @@ It should have the following structure:
     └── README.md
 
 Next, add the `wandb` dependency to the project by editing the ``pyproject.toml`` file
-located in the root of the project. Add the following line the list of dependencies
+located in the root of the project. Add the following line to the list of dependencies:
 
 .. code-block:: shell
 
@@ -97,7 +100,7 @@ Next, we install the project and its dependencies, which are specified in the
 
 .. note::
 
-    If this is the first time you install ``wandb``, you might be asked to create an
+    If this is your first time installing ``wandb``, you might be asked to create an
     account and then log in to your system. You can start this process by typing this in
     your terminal:
 
@@ -108,22 +111,23 @@ Next, we install the project and its dependencies, which are specified in the
 Customize the ``start`` method of a strategy
 --------------------------------------------
 
-Flower strategies have a number of methods that can be overwritten to customize their
-behavior. In part-2 you learned how to customize the ``configure_train`` method to
+Flower strategies have a number of methods that can be overridden to customize their
+behavior. In part 2, you learned how to customize the ``configure_train`` method to
 perform learning rate decay and communicate the updated learning rate as part of the
 |configrecord_link|_ sent to the clients in the ``Message``. In this tutorial you'll
 learn how to customize the |strategy_start_link|_ method. If you inspect the `source
 code
 <https://github.com/adap/flower/blob/main/framework/py/flwr/serverapp/strategy/strategy.py#L135>`_
 of this method you'll see that it contains a for loop where each iteration represents a
-federated learning round. Each round is comprised of three distinct stages:
+federated learning round. Each round consists of three distinct stages:
 
 1. A training stage, where a subset of clients is selected to train the current global
    model on their local data.
 2. An evaluation stage, where a subset of clients is selected to evaluate the updated
    global model on their local validation sets.
-3. An optional stage to evaluate the global model on the server side. Note this is what
-   you enabled in part-2 of this tutorial by means of the ``central_evaluate`` callback.
+3. An optional stage to evaluate the global model on the server side. Note that this is
+   what you enabled in part 2 of this tutorial by means of the ``central_evaluate``
+   callback.
 
 Let's extend the ``CustomFedAdagrad`` strategy we created earlier and introduce:
 
@@ -320,7 +324,7 @@ Let's extend the ``CustomFedAdagrad`` strategy we created earlier and introduce:
 
             return result
 
-With the extended ``CustomFedAdagrad`` strategy defined we need now to set the path
+With the extended ``CustomFedAdagrad`` strategy defined, we now need to set the path
 where the model checkpoints will be saved as well as the name of the runs in ``W&B``. We
 need to call the ``set_save_path`` method after instantiating the strategy and before
 calling the ``start`` method. In ``server_app.py``, we can create a new directory called
@@ -367,12 +371,12 @@ After starting the run you will notice two things:
 
 1. A new directory will be created in ``outputs/YYYY-MM-DD/HH-MM-SS`` where
    ``YYYY-MM-DD/HH-MM-SS`` is the current date and time. This directory will contain the
-   model checkpoints saved during the run. Recall a checkpoint is saved whenever a new
-   best accuracy is found during the centralized evaluation stage.
+   model checkpoints saved during the run. Recall that a checkpoint is saved whenever a
+   new best accuracy is found during the centralized evaluation stage.
 2. A new run will be created in your `W&B project <https://wandb.ai/home>`_ where you
    can visualize the metrics logged during the run.
 
-Congratulations! You've successfully created a custom Flower strategy by overwriting the
+Congratulations! You've successfully created a custom Flower strategy by overriding the
 |strategy_start_link|_ method. You've also learned how to log metrics to Weight & Biases
 and how to save model checkpoints to disk.
 
@@ -381,8 +385,8 @@ Recap
 
 In this tutorial, we've seen how to customize the |strategy_start_link|_ method of a
 Flower strategy. This method is the main entry point of any strategy and contains the
-logic to execute the federated learning process. In this tutorial you learned how to log
-the metrics to Weight & Biases and how to save model checkpoints to disk.
+logic to execute the federated learning process. In this tutorial, you learned how to
+log the metrics to Weight & Biases and how to save model checkpoints to disk.
 
 Next steps
 ----------
