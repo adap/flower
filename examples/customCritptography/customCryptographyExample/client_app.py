@@ -3,6 +3,9 @@
 import torch
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
+# Ora puoi fare un import assoluto
+from flwr.common.crypto.config_cripto import NET
+
 
 from .task import (
     get_model,
@@ -17,7 +20,7 @@ from .task import (
 # Define Flower Client
 class FlowerClient(NumPyClient):
     def __init__(self, trainloader, valloader, local_epochs, learning_rate):
-        self.net = get_model("resnet18", num_classes=10, pretrained=False)
+        self.net = get_model(NET, num_classes=10, pretrained=False)
         self.trainloader = trainloader
         self.valloader = valloader
         self.local_epochs = local_epochs

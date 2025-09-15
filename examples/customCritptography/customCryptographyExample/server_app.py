@@ -6,9 +6,12 @@ from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
+
 from .task import get_weights, get_model
 import logging
 
+# Ora puoi fare un import assoluto
+from flwr.common.crypto.config_cripto  import NET, ACCURACY
 
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
@@ -25,7 +28,7 @@ def server_fn(context: Context):
 
     # Read from config
     num_rounds = context.run_config["num-server-rounds"]
-    net = get_model("resnet18", num_classes=10, pretrained=False)
+    net = get_model(NET, num_classes=10, pretrained=False)
     # Initialize model parameters
     ndarrays = get_weights(net)
     parameters = ndarrays_to_parameters(ndarrays)
@@ -36,7 +39,11 @@ def server_fn(context: Context):
         fraction_evaluate=context.run_config["fraction-evaluate"],
         min_available_clients=2,
         evaluate_metrics_aggregation_fn=weighted_average,
-        initial_parameters=parameters
+        initial_parameters=parameters,
+        stop_criteria={
+            "metric_ge": ("accuracy", ACCURACY)
+        }
+
     )
     config = ServerConfig(num_rounds=num_rounds)
 
