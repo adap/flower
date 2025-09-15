@@ -1,23 +1,14 @@
 """xgboost_quickstart: A Flower / XGBoost app."""
 
-import numpy as np
 import warnings
 
+import numpy as np
 import xgboost as xgb
-
 from flwr.client import ClientApp
-from flwr.common import (
-    ArrayRecord,
-    ConfigRecord,
-    Context,
-    Message,
-    RecordDict,
-    MetricRecord,
-)
+from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.common.config import unflatten_dict
 
 from xgboost_quickstart.task import load_data, replace_keys
-
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -44,9 +35,7 @@ def train(msg: Message, context: Context) -> Message:
     # Load model and data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    train_dmatrix, valid_dmatrix, num_train, num_val = load_data(
-        partition_id, num_partitions
-    )
+    train_dmatrix, valid_dmatrix, num_train, _ = load_data(partition_id, num_partitions)
 
     # Read from run config
     num_local_round = context.run_config["local-epochs"]
@@ -61,7 +50,6 @@ def train(msg: Message, context: Context) -> Message:
             params,
             train_dmatrix,
             num_boost_round=num_local_round,
-            evals=[(valid_dmatrix, "validate"), (train_dmatrix, "train")],
         )
     else:
         bst = xgb.Booster(params=params)
@@ -110,7 +98,7 @@ def evaluate(msg: Message, context: Context) -> Message:
         evals=[(valid_dmatrix, "valid")],
         iteration=bst.num_boosted_rounds() - 1,
     )
-    auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
+    auc = float(eval_results.split("\t")[1].split(":")[1])
 
     # Construct and return reply Message
     metrics = {

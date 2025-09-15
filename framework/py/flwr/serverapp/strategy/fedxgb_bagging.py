@@ -14,13 +14,14 @@
 # ==============================================================================
 """Flower message-based FedXgbBagging strategy."""
 from collections.abc import Iterable
-from typing import Any, Optional, cast
+from typing import Optional, cast
 
 import numpy as np
 
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord
 from flwr.server import Grid
 
+from ..exception import InconsistentMessageReplies
 from .fedavg import FedAvg
 from .strategy_utils import aggregate_bagging
 
@@ -29,17 +30,22 @@ from .strategy_utils import aggregate_bagging
 class FedXgbBagging(FedAvg):
     """Configurable FedXgbBagging strategy implementation."""
 
-    def __init__(
-        self,
-        **kwargs: Any,
-    ):
-        self.current_bst: Optional[bytes] = None
-        super().__init__(**kwargs)
+    current_bst: Optional[bytes] = None
+
+    def _ensure_single_array(self, arrays: ArrayRecord) -> None:
+        """Check that ensures there's only one Array in the ArrayRecord."""
+        n = len(arrays)
+        if n != 1:
+            raise InconsistentMessageReplies(
+                reason="Expected exactly one Array in ArrayRecord. "
+                "Skipping aggregation."
+            )
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
         """Configure the next round of federated training."""
+        self._ensure_single_array(arrays)
         # Keep track of array record being communicated
         self.current_bst = arrays["0"].numpy().tobytes()
         return super().configure_train(server_round, arrays, config, grid)
@@ -55,15 +61,18 @@ class FedXgbBagging(FedAvg):
         arrays, metrics = None, None
         if valid_replies:
             reply_contents = [msg.content for msg in valid_replies]
+            array_record_key = next(iter(reply_contents[0].array_records.keys()))
 
             # Aggregate ArrayRecords
             for content in reply_contents:
-                bst = content["arrays"]["0"].numpy().tobytes()  # type: ignore[union-attr]
-                self.current_bst = aggregate_bagging(cast(bytes, self.current_bst), bst)
+                self._ensure_single_array(cast(ArrayRecord, content[array_record_key]))
+                bst = content[array_record_key]["0"].numpy().tobytes()  # type: ignore[union-attr]
 
-            arrays = ArrayRecord(
-                [np.frombuffer(cast(bytes, self.current_bst), dtype=np.uint8)]
-            )
+                if self.current_bst is not None:
+                    self.current_bst = aggregate_bagging(self.current_bst, bst)
+
+            if self.current_bst is not None:
+                arrays = ArrayRecord([np.frombuffer(self.current_bst, dtype=np.uint8)])
 
             # Aggregate MetricRecords
             metrics = self.train_metrics_aggr_fn(
