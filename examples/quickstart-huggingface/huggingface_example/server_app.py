@@ -3,6 +3,7 @@
 from flwr.app import ArrayRecord, Context
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
+
 from huggingface_example.task import get_model
 
 app = ServerApp()
