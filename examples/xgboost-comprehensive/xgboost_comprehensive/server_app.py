@@ -3,14 +3,12 @@
 import numpy as np
 import xgboost as xgb
 from datasets import load_dataset
-
 from flwr.common import ArrayRecord, Context, MetricRecord
 from flwr.common.config import unflatten_dict
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedXgbBagging, FedXgbCyclic
 
 from xgboost_comprehensive.task import replace_keys, transform_dataset_to_dmatrix
-
 
 # Create ServerApp
 app = ServerApp()
@@ -82,9 +80,7 @@ def main(grid: Grid, context: Context) -> None:
 def get_evaluate_fn(test_data, params):
     """Return a function for centralised evaluation."""
 
-    def evaluate_fn(
-        server_round: int, arrays: ArrayRecord
-    ) -> MetricRecord:
+    def evaluate_fn(server_round: int, arrays: ArrayRecord) -> MetricRecord:
 
         # Skip init eval
         if server_round == 0:

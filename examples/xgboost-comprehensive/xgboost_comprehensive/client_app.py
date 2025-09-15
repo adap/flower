@@ -1,21 +1,14 @@
 """xgboost_comprehensive: A Flower / XGBoost app."""
 
-import numpy as np
 import warnings
-import xgboost as xgb
 
+import numpy as np
+import xgboost as xgb
 from flwr.client import ClientApp
-from flwr.common import (
-    ArrayRecord,
-    Context,
-    Message,
-    RecordDict,
-    MetricRecord,
-)
+from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.common.config import unflatten_dict
 
 from xgboost_comprehensive.task import load_data, replace_keys
-
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -33,8 +26,8 @@ def _local_boost(bst_input, num_local_round, train_dmatrix, train_method):
     # Cyclic: return the entire model
     bst = (
         bst_input[
-        bst_input.num_boosted_rounds()
-        - num_local_round: bst_input.num_boosted_rounds()
+            bst_input.num_boosted_rounds()
+            - num_local_round : bst_input.num_boosted_rounds()
         ]
         if train_method == "bagging"
         else bst_input
