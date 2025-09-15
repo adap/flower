@@ -5,15 +5,11 @@ import warnings
 import torch
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
-from flwr.client import Client, NumPyClient
-from flwr.common import Context
 from transformers import logging
 
 from huggingface_example.task import (
     get_model,
-    get_params,
     load_data,
-    set_params,
     test,
     train,
 )
@@ -30,29 +26,26 @@ app = ClientApp()
 @app.train()
 def train(msg: Message, context: Context) -> Message:
     """Train the model on local data."""
-     # Read the node_config to fetch data partition associated to this node
+    
+    # Get this client's dataset partition
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-
-    # Read the run config to get settings to configure the Client
-    model_name = context.run_config["model-name"]   
     trainloader, _ = load_data(partition_id, num_partitions, model_name)
     
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    
-    # Initialize model
+    # Load model
+    model_name = context.run_config["model-name"]   
     model = get_model(model_name)
+     
+    # Initialize it with the received weights
+    arrays = msg.content["arrays"]
+    model.load_state_dict(arrays.to_torch_state_dict(), strict=True)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
     
-    # Read ArrayRecord received from ServerApp
-    arrays = msg.content["arrays"]
-    # Load weights to model
-    model.load_state_dict(arrays.to_torch_state_dict(), strict=True)
-    
-    # Do local training
+    # Train the model on local data
     train(model, trainloader, epochs=1, device=device)
     
-    # Cosntruct reply Message: arrays and metrics
+    # Construct and return reply Message
     model_record = ArrayRecord(model.state_dict())
     metrics = MetricRecord(
         {"num-examples": len(trainloader)}
@@ -64,57 +57,31 @@ def train(msg: Message, context: Context) -> Message:
 @app.evaluate()
 def evaluate(msg: Message, context: Context) -> Message:
     """Evaluate the model on local data."""
-    # Read the node_config to fetch data partition associated to this node
+    
+    # Get this client's dataset partition
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-
-    # Read the run config to get settings to configure the Client
+    _, testloader = load_data(partition_id, num_partitions, model_name)
+    
+    
+    # Load model
     model_name = context.run_config["model-name"]   
-    trainloader, _ = load_data(partition_id, num_partitions, model_name)
-    
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    
-    # Initialize model
     model = get_model(model_name)
-    model.to(device)
-    
-    # Read ArrayRecord received from ServerApp
-    arrays = msg.content["arrays"]
-    # Load weights to model
-    model.load_state_dict(arrays.to_torch_state_dict(), strict=True) 
      
-
-# Flower client
-class IMDBClient(NumPyClient):
-    def __init__(self, model_name, trainloader, testloader) -> None:
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.trainloader = trainloader
-        self.testloader = testloader
-        self.net = get_model(model_name)
-        self.net.to(self.device)
-
-    def fit(self, parameters, config) -> tuple[list, int, dict]:
-        set_params(self.net, parameters)
-        train(self.net, self.trainloader, epochs=1, device=self.device)
-        return get_params(self.net), len(self.trainloader), {}
-
-    def evaluate(self, parameters, config) -> tuple[float, int, dict[str, float]]:
-        set_params(self.net, parameters)
-        loss, accuracy = test(self.net, self.testloader, device=self.device)
-        return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
-
-
-def client_fn(context: Context) -> Client:
-    """Construct a Client that will be run in a ClientApp."""
-    # Read the node_config to fetch data partition associated to this node
-    partition_id = context.node_config["partition-id"]
-    num_partitions = context.node_config["num-partitions"]
-
-    # Read the run config to get settings to configure the Client
-    model_name = context.run_config["model-name"]
-    trainloader, testloader = load_data(partition_id, num_partitions, model_name)
-
-    return IMDBClient(model_name, trainloader, testloader).to_client()
-
-
-app = ClientApp(client_fn=client_fn)
+    # Initialize it with the received weights
+    arrays = msg.content["arrays"]
+    model.load_state_dict(arrays.to_torch_state_dict(), strict=True)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+   
+    # Evaluate the model on local data
+    loss, accuracy = test(model, testloader, device=device) 
+    
+    # Construct and return reply Message
+    model_record = ArrayRecord(model.state_dict())
+    metrics = MetricRecord(
+        {"num-examples": len(testloader), "loss": float(loss), "accuracy": float(accuracy)}
+    )
+    # Construct RecordDict and add ArrayRecord and MetricRecord
+    content = RecordDict({"arrays": model_record, "metrics": metrics})
+    return Message(content=content, reply_to=msg)
