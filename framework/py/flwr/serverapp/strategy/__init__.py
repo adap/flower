@@ -25,6 +25,7 @@ from .fedavg import FedAvg
 from .fedavgm import FedAvgM
 from .fedmedian import FedMedian
 from .fedtrimmedavg import FedTrimmedAvg
+from .fedxgb_bagging import FedXgbBagging
 from .fedyogi import FedYogi
 from .result import Result
 from .strategy import Strategy
@@ -38,6 +39,7 @@ __all__ = [
     "FedAvgM",
     "FedMedian",
     "FedTrimmedAvg",
+    "FedXgbBagging",
     "FedYogi",
     "Result",
     "Strategy",
