@@ -199,9 +199,10 @@ standard library. We can then send the serialized object in a ``ConfigRecord`` i
 .. warning::
 
     The following code is for demonstration purposes only. In real-world applications,
-    you should use a **SAFE** serialization method than ``pickle``, such as ``json`` or
-    a simple custom solution if the object is not too complex. ``pickle`` is used here
-    solely for simplicity.
+    since `pickle <https://docs.python.org/3/library/pickle.html>`_ can execute
+    arbitrary code during unpickling, you should use a **SAFE** serialization method
+    than ``pickle``, such as ``json`` or a simple custom solution if the object is not
+    too complex. ``pickle`` is used here solely for simplicity.
 
 .. code-block:: python
     :emphasize-lines: 1,10,20,22,35
@@ -244,13 +245,6 @@ standard library. We can then send the serialized object in a ``ConfigRecord`` i
             }
         )
         return Message(content=content, reply_to=msg)
-
-.. note::
-
-    You may use the `pickle <https://docs.python.org/3/library/pickle.html>`_ module if
-    you need to serialize more complex Python objects. However, be aware of the security
-    implications of using ``pickle`` as it can execute arbitrary code during
-    deserialization. Only use ``pickle`` with trusted data structures.
 
 Let's see next how the strategy on the ``ServerApp`` can deserialize the object back to
 its original form and use it.
