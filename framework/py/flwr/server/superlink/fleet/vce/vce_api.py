@@ -73,11 +73,11 @@ def _register_node_info_stores(
             node_id=node_id,
             node_config={
                 PARTITION_ID_KEY: partition_id,
-                "pathmnist": f"{data_path}/pathmnist/{partition_id}",
-                "dermamnist": f"{data_path}/dermamnist/{partition_id}",
-                "organamnist": f"{data_path}/organamnist/{partition_id}",
-                "retinamnist": f"{data_path}/retinamnist/{partition_id}",
-                "bloodmnist": f"{data_path}/bloodmnist/{partition_id}",
+                "pathmnist": f"{data_path}/pathmnist_{partition_id}",
+                "dermamnist": f"{data_path}/dermamnist_{partition_id}",
+                "organamnist": f"{data_path}/organamnist_{partition_id}",
+                "retinamnist": f"{data_path}/retinamnist_{partition_id}",
+                "bloodmnist": f"{data_path}/bloodmnist_{partition_id}",
             },
         )
 
