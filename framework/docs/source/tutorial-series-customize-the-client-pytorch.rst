@@ -225,7 +225,7 @@ standard library. We can then send the serialized object in a ``ConfigRecord`` i
         #     training_losses={"epoch1": 0.56, "epoch2": 0.34}
         # )
 
-        # UNSAFE: Serialize the TrainProcessMetadata object to bytes
+        # Serialize the TrainProcessMetadata object to bytes
         train_meta_bytes = pickle.dumps(train_metadata)
         # Construct a ConfigRecord
         config_record = ConfigRecord({"meta": train_meta_bytes})
@@ -289,7 +289,7 @@ object from each client and print the training time and convergence status:
                     # Retrieve the ConfigRecord from the message
                     config_record = reply.content["train_metadata"]
                     metadata_bytes = config_record["meta"]
-                    # UNSAFE: Deserialize it
+                    # Deserialize it
                     train_meta = pickle.loads(metadata_bytes)
                     print(train_meta)
             # Aggregate the ArrayRecords and MetricRecords as usual
