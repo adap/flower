@@ -269,7 +269,7 @@ overrides the ``aggregate_train`` method to deserialize the ``TrainProcessMetada
 object from each client and print the training time and convergence status:
 
 .. code-block:: python
-    :emphasize-lines: 1,7,17,18,20
+    :emphasize-lines: 1,8,18,19,21
 
     import pickle
     from dataclasses import asdict
