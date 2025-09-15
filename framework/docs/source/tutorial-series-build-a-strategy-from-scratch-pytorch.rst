@@ -35,7 +35,7 @@ previously by creating a much more customized version of ``FedAdagrad``.
       the ``#introductions`` channel! If anything is unclear, head over to the
       ``#questions`` channel.
 
-Let's build a new ``Strategy`` fit a customized |strategy_start_link|_ method 🌼
+Let's build a new ``Strategy`` with a customized |strategy_start_link|_ method 🌼
 enabling: the saving of the global model when a new best global accuracy is found; and
 log the metrics generated during the run to Weights & Biases!
 
@@ -357,7 +357,7 @@ run`` a new directory will be used. Let's see how this looks in code:
 
         # ... rest unchanged
 
-Finally, we let's run the ``FlowerApp``:
+Finally, let's run the ``FlowerApp``:
 
 .. code-block:: shell
 
