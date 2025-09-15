@@ -268,9 +268,6 @@ overrides the ``aggregate_train`` method to deserialize the ``TrainProcessMetada
 object from each client and print the training time and convergence status:
 
 .. code-block:: python
-
-
-.. code-block:: python
     :emphasize-lines: 1,7,17,18,20
 
     import json
@@ -304,7 +301,8 @@ Finally, we run the Flower App.
     $ flwr run .
 
 You will observe that the training metadata from each client is logged to the console of
-the ``ServerApp``.
+the ``ServerApp``. If you finish embedding the creation of the ``TrainProcessMetadata``
+object in the ``ClientApp``, you should see output similar to this:
 
 .. code-block:: console
 
