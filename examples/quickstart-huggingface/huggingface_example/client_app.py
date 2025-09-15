@@ -3,7 +3,9 @@
 import warnings
 
 import torch
-from flwr.client import Client, ClientApp, NumPyClient
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
+from flwr.client import Client, NumPyClient
 from flwr.common import Context
 from transformers import logging
 
@@ -22,6 +24,65 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 # This is something this example does.
 logging.set_verbosity_error()
 
+# Flower ClientApp
+app = ClientApp()
+
+@app.train()
+def train(msg: Message, context: Context) -> Message:
+    """Train the model on local data."""
+     # Read the node_config to fetch data partition associated to this node
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+
+    # Read the run config to get settings to configure the Client
+    model_name = context.run_config["model-name"]   
+    trainloader, _ = load_data(partition_id, num_partitions, model_name)
+    
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    
+    # Initialize model
+    model = get_model(model_name)
+    model.to(device)
+    
+    # Read ArrayRecord received from ServerApp
+    arrays = msg.content["arrays"]
+    # Load weights to model
+    model.load_state_dict(arrays.to_torch_state_dict(), strict=True)
+    
+    # Do local training
+    train(model, trainloader, epochs=1, device=device)
+    
+    # Cosntruct reply Message: arrays and metrics
+    model_record = ArrayRecord(model.state_dict())
+    metrics = MetricRecord(
+        {"num-examples": len(trainloader)}
+    )
+    # Construct RecordDict and add ArrayRecord and MetricRecord
+    content = RecordDict({"arrays": model_record, "metrics": metrics})
+    return Message(content=content, reply_to=msg)
+    
+@app.evaluate()
+def evaluate(msg: Message, context: Context) -> Message:
+    """Evaluate the model on local data."""
+    # Read the node_config to fetch data partition associated to this node
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+
+    # Read the run config to get settings to configure the Client
+    model_name = context.run_config["model-name"]   
+    trainloader, _ = load_data(partition_id, num_partitions, model_name)
+    
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    
+    # Initialize model
+    model = get_model(model_name)
+    model.to(device)
+    
+    # Read ArrayRecord received from ServerApp
+    arrays = msg.content["arrays"]
+    # Load weights to model
+    model.load_state_dict(arrays.to_torch_state_dict(), strict=True) 
+     
 
 # Flower client
 class IMDBClient(NumPyClient):
