@@ -64,7 +64,7 @@ def get_model(model_name):
     return AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
 
 
-def train(net, trainloader, epochs, device) -> None:
+def train_fn(net, trainloader, epochs, device) -> None:
     optimizer = AdamW(net.parameters(), lr=5e-5)
     net.train()
     for _ in range(epochs):
@@ -77,7 +77,7 @@ def train(net, trainloader, epochs, device) -> None:
             optimizer.zero_grad()
 
 
-def test(net, testloader, device) -> tuple[Any | float, Any]:
+def test_fn(net, testloader, device) -> tuple[Any | float, Any]:
     metric = load_metric("accuracy")
     loss = 0
     net.eval()

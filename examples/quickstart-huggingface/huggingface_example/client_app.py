@@ -10,8 +10,8 @@ from transformers import logging
 from huggingface_example.task import (
     get_model,
     load_data,
-    test,
-    train,
+    test_fn,
+    train_fn,
 )
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -30,10 +30,10 @@ def train(msg: Message, context: Context) -> Message:
     # Get this client's dataset partition
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
+    model_name = context.run_config["model-name"]   
     trainloader, _ = load_data(partition_id, num_partitions, model_name)
     
     # Load model
-    model_name = context.run_config["model-name"]   
     model = get_model(model_name)
      
     # Initialize it with the received weights
@@ -43,7 +43,7 @@ def train(msg: Message, context: Context) -> Message:
     model.to(device)
     
     # Train the model on local data
-    train(model, trainloader, epochs=1, device=device)
+    train_fn(model, trainloader, epochs=1, device=device)
     
     # Construct and return reply Message
     model_record = ArrayRecord(model.state_dict())
@@ -61,11 +61,11 @@ def evaluate(msg: Message, context: Context) -> Message:
     # Get this client's dataset partition
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
+    model_name = context.run_config["model-name"]   
     _, testloader = load_data(partition_id, num_partitions, model_name)
     
     
     # Load model
-    model_name = context.run_config["model-name"]   
     model = get_model(model_name)
      
     # Initialize it with the received weights
@@ -75,7 +75,7 @@ def evaluate(msg: Message, context: Context) -> Message:
     model.to(device)
    
     # Evaluate the model on local data
-    loss, accuracy = test(model, testloader, device=device) 
+    loss, accuracy = test_fn(model, testloader, device=device) 
     
     # Construct and return reply Message
     model_record = ArrayRecord(model.state_dict())
