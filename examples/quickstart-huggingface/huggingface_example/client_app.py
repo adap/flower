@@ -5,8 +5,9 @@ import warnings
 import torch
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
-from huggingface_example.task import get_model, load_data, test_fn, train_fn
 from transformers import logging
+
+from huggingface_example.task import get_model, load_data, test_fn, train_fn
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
