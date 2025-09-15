@@ -18,7 +18,6 @@ Paper: arxiv.org/pdf/1803.01498v1.pdf
 """
 
 
-from collections import OrderedDict
 from collections.abc import Iterable
 from typing import Optional, cast
 
@@ -53,20 +52,16 @@ class FedMedian(FedAvg):
         # Preserve keys for arrays in ArrayRecord
         array_keys = list(valid_replies[0].content[record_key].keys())
 
-        # Retrieve all model weights as numpy arrays
-        ndarrays_list = [
-            cast(ArrayRecord, msg.content[record_key]).to_numpy_ndarrays()
-            for msg in valid_replies
-        ]
-
-        # Compute median for each layer and convert back to Array
-        median_arrays = [
-            Array(np.median(np.stack(layers), axis=0)) for layers in zip(*ndarrays_list)
-        ]
-        del ndarrays_list
-
-        # Construct aggregated ArrayRecord
-        arrays = ArrayRecord(OrderedDict(zip(array_keys, median_arrays)))
+        # Compute median for each layer and construct ArrayRecord
+        arrays = ArrayRecord()
+        for array_key in array_keys:
+            # Get the corresponding layer from each client
+            layers = [
+                cast(ArrayRecord, msg.content[record_key]).pop(array_key).numpy()
+                for msg in valid_replies
+            ]
+            # Compute median and save as Array in ArrayRecord
+            arrays[array_key] = Array(np.median(np.stack(layers), axis=0))
 
         # Aggregate MetricRecords
         metrics = self.train_metrics_aggr_fn(

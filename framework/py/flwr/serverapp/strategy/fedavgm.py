@@ -35,6 +35,7 @@ from flwr.common import (
 )
 from flwr.server import Grid
 
+from ..exception import AggregationError
 from .fedavg import FedAvg
 
 
@@ -154,7 +155,10 @@ class FedAvgM(FedAvg):
         if self.server_opt and aggregated_arrays is not None:
             # The initial parameters should be set in `start()` method already
             if self.current_arrays is None:
-                raise RuntimeError("No initial parameters set for FedAvgM")
+                raise AggregationError(
+                    "No initial parameters set for FedAvgM. "
+                    "Ensure that `configure_train` has been called before aggregation."
+                )
             ndarrays = self.current_arrays.to_numpy_ndarrays()
             aggregated_ndarrays = aggregated_arrays.to_numpy_ndarrays()
 
@@ -167,11 +171,10 @@ class FedAvgM(FedAvg):
                 old - new for new, old in zip(aggregated_ndarrays, ndarrays)
             ]
             if self.server_momentum > 0.0:
-                if server_round == 1:
+                if self.momentum_vector is None:
+                    # Initialize momentum vector in the first round
                     self.momentum_vector = pseudo_gradient
                 else:
-                    if self.momentum_vector is None:
-                        raise RuntimeError("Momentum vector not initialized")
                     self.momentum_vector = [
                         self.server_momentum * mv + pg
                         for mv, pg in zip(self.momentum_vector, pseudo_gradient)
