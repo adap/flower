@@ -16,7 +16,7 @@
 
 
 import contextvars
-from typing import Any, Callable, Union
+from typing import Any, Callable, Optional, Union
 
 import grpc
 
@@ -45,8 +45,8 @@ Response = Union[
 ]
 
 
-shared_account_info: contextvars.ContextVar[AccountInfo] = contextvars.ContextVar(
-    "account_info", default=AccountInfo(flwr_aid=None, account_name=None)
+shared_account_info: contextvars.ContextVar[Optional[AccountInfo]] = (
+    contextvars.ContextVar("account_info", default=None)
 )
 
 
