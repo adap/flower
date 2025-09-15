@@ -360,7 +360,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 flwr_aid=flwr_aid, run=cast(Run, run), context=context
             )
 
-        # TODO: implement
+        # Call plugin
 
         return PullArtifactsResponse(url=artifacts_url)
 
