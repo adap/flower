@@ -50,7 +50,6 @@ def train(msg: Message, context: Context) -> Message:
             params,
             train_dmatrix,
             num_boost_round=num_local_round,
-            evals=[(valid_dmatrix, "validate"), (train_dmatrix, "train")],
         )
     else:
         bst = xgb.Booster(params=params)
@@ -99,7 +98,7 @@ def evaluate(msg: Message, context: Context) -> Message:
         evals=[(valid_dmatrix, "valid")],
         iteration=bst.num_boosted_rounds() - 1,
     )
-    auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
+    auc = float(eval_results.split("\t")[1].split(":")[1])
 
     # Construct and return reply Message
     metrics = {
