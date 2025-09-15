@@ -6,9 +6,12 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/
 taplo fmt
 
 # Examples
-# Find all source folders in examples/
-src_args=$(find ../examples -mindepth 1 -maxdepth 2 -type d -printf '--src %p ')
-python -m isort ../examples $src_args --settings-path .
+# Iterate over all example directories
+for dir in ../examples/*/; do
+    src_args=$(find "$dir" -maxdepth 1 -type d | sed 's/^/--src /' | tr '\n' ' ')
+    python -m isort $dir $src_args --settings-path . &
+done
+wait
 python -m black -q ../examples
 python -m docformatter -i -r ../examples
 
