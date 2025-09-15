@@ -32,6 +32,7 @@ from flwr.common.constant import (
     AUTH_TYPE_JSON_KEY,
     CREDENTIALS_DIR,
     FLWR_DIR,
+    NO_ARTIFACT_PROVIDER_MESSAGE,
     NO_USER_AUTH_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
 )
@@ -316,6 +317,12 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
             if e.details() == NO_USER_AUTH_MESSAGE:  # pylint: disable=E1101
                 typer.secho(
                     "❌ User authentication is not enabled on this SuperLink.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+            elif e.details() == NO_ARTIFACT_PROVIDER_MESSAGE:  # pylint: disable=E1101
+                typer.secho(
+                    "❌ The SuperLink does not support `flwr pull` command.",
                     fg=typer.colors.RED,
                     bold=True,
                 )
