@@ -259,6 +259,10 @@ class FedAvg(Strategy):
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
         """Configure the next round of federated evaluation."""
+        # Do not configure federated evaluation if fraction eval is 0.
+        self.min_evaluate_nodes = (
+            0 if self.fraction_evaluate == 0.0 else self.min_evaluate_nodes
+        )
         # Sample nodes
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_evaluate)
         sample_size = max(num_nodes, self.min_evaluate_nodes)
