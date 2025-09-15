@@ -1,5 +1,7 @@
 """vitexample: A Flower / PyTorch app with Vision Transformers."""
 
+import warnings
+
 import torch
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
@@ -9,8 +11,11 @@ from vitexample.task import (
     apply_train_transforms,
     get_dataset_partition,
     get_model,
-    train,
+    trainer,
 )
+
+
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 # Flower ClientApp
@@ -46,7 +51,7 @@ def train(msg: Message, context: Context):
     # Set optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     # Train locally
-    avg_train_loss = train(
+    avg_train_loss = trainer(
         model, trainloader, optimizer, epochs=1, device=device
     )
 

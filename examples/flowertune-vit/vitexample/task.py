@@ -35,7 +35,7 @@ def get_model(num_classes: int):
     return model
 
 
-def train(net, trainloader, optimizer, epochs, device):
+def trainer(net, trainloader, optimizer, epochs, device):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     net.train()
