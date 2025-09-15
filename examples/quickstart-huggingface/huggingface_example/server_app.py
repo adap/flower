@@ -18,7 +18,7 @@ def main(grid: Grid, context: Context) -> None:
     arrays = ArrayRecord(model.state_dict())
     
     # Instantiate strategy
-    fraction_train = context.run_config["fraction-fit"]
+    fraction_train = context.run_config["fraction-train"]
     fraction_evaluate = context.run_config["fraction-evaluate"]
     strategy = FedAvg(
         fraction_train=fraction_train,
