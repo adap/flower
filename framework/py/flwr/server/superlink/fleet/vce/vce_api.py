@@ -14,8 +14,8 @@
 # ==============================================================================
 """Fleet Simulation Engine API."""
 
-
 import json
+import os
 import threading
 import time
 import traceback
@@ -68,11 +68,15 @@ def _register_node_info_stores(
     node_info_store: dict[int, DeprecatedRunInfoStore] = {}
     num_partitions = len(set(nodes_mapping.values()))
     for node_id, partition_id in nodes_mapping.items():
+        data_path = os.environ.get("FLOWER_DATA_PATH", None)
+        if data_path is not None:
+            raise ValueError("The `FLOWER_DATA_PATH` environment variable is not set. ")
         node_info_store[node_id] = DeprecatedRunInfoStore(
             node_id=node_id,
             node_config={
                 PARTITION_ID_KEY: partition_id,
                 NUM_PARTITIONS_KEY: num_partitions,
+                "pathmnist": f"{data_path}/pathmnist/{partition_id}",
             },
         )
 

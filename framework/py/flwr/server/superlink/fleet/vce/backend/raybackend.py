@@ -160,6 +160,9 @@ class RayBackend(Backend):
                 "Unspecified function to load a `ClientApp`. "
                 "Call the backend's `build()` method before processing messages."
             )
+        
+        # Remove PARTITION_ID_KEY from context
+        context.node_config.pop(PARTITION_ID_KEY, None)
 
         future = None
         try:
@@ -187,6 +190,10 @@ class RayBackend(Backend):
             if future is not None:
                 self.pool.add_actor_back_to_pool(future)
             raise ex
+        
+        finally:
+            # Re-add PARTITION_ID_KEY to context
+            context.node_config[PARTITION_ID_KEY] = partition_id
 
     def terminate(self) -> None:
         """Terminate all actors in actor pool."""
