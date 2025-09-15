@@ -27,6 +27,7 @@ import numpy as np
 from flwr.common import Array, ArrayRecord, Message, MetricRecord, NDArray, RecordDict
 from flwr.common.logger import log
 
+from ..exception import AggregationError
 from .fedavg import FedAvg
 
 
@@ -137,7 +138,13 @@ class FedTrimmedAvg(FedAvg):
                 for msg in valid_replies
             ]
             # Compute trimmed mean and save as Array in ArrayRecord
-            arrays[array_key] = Array(trim_mean(np.stack(layers), self.beta))
+            try:
+                arrays[array_key] = Array(trim_mean(np.stack(layers), self.beta))
+            except ValueError as e:
+                raise AggregationError(
+                    f"Trimmed mean could not be computed. "
+                    f"Likely cause: beta={self.beta} is too large."
+                ) from e
 
         # Aggregate MetricRecords
         metrics = self.train_metrics_aggr_fn(
@@ -159,7 +166,7 @@ def trim_mean(array: NDArray, cut_fraction: float) -> NDArray:
     lowercut = int(cut_fraction * nobs)
     uppercut = nobs - lowercut
     if lowercut > uppercut:
-        raise ValueError("Proportion too big.")
+        raise ValueError("Fraction too big.")
 
     atmp = np.partition(array, (lowercut, uppercut - 1), axis)
 
