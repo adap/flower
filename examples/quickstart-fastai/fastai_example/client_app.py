@@ -32,7 +32,7 @@ def train(msg: Message, context: Context):
     trainloader, valloader, _ = load_data(partition_id, num_partitions)
     dls = DataLoaders(trainloader, valloader)
 
-    # Intialized learner
+    # Intialize learner
     learn = Learner(
         dls,
         model,
@@ -69,7 +69,7 @@ def evaluate(msg: Message, context: Context):
     trainloader, valloader, _ = load_data(partition_id, num_partitions)
     dls = DataLoaders(trainloader, valloader)
 
-    # Intialized learner
+    # Intialize learner
     learn = Learner(
         dls,
         model,
