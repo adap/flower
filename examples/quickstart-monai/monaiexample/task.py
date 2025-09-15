@@ -2,11 +2,14 @@
 
 import os
 import tarfile
-from urllib import request
 from collections import OrderedDict
+from urllib import request
 
-import torch
 import monai
+import torch
+from datasets import Dataset
+from filelock import FileLock
+from flwr_datasets.partitioner import IidPartitioner
 from monai.networks.nets import densenet
 from monai.transforms import (
     Compose,
@@ -18,9 +21,6 @@ from monai.transforms import (
     ScaleIntensity,
     ToTensor,
 )
-from filelock import FileLock
-from datasets import Dataset
-from flwr_datasets.partitioner import IidPartitioner
 
 
 def load_model():

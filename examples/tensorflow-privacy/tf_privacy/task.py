@@ -1,7 +1,6 @@
 """tf_privacy: Training with Sample-Level Differential Privacy using TensorFlow-Privacy Engine."""
 
 import tensorflow as tf
-
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
