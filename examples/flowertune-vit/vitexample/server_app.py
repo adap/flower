@@ -38,7 +38,6 @@ def main(grid: Grid, context: Context) -> None:
     strategy = FedAvg(
         fraction_train=0.5,  # Sample 50% of available clients
         fraction_evaluate=0.0,  # No federated evaluation
-        min_evaluate_nodes=0,
     )
 
     # Start strategy, run FedAvg for `num_rounds`
