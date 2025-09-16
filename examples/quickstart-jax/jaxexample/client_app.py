@@ -4,7 +4,7 @@ from typing import cast
 
 import numpy as np
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
-from flwr.client import ClientApp
+from flwr.clientapp import ClientApp
 
 from jaxexample.task import (
     apply_model,
