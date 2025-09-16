@@ -67,7 +67,7 @@ class FedAvg(Strategy):
     arrayrecord_key : str (default: "arrays")
         Key used to store the ArrayRecord when constructing Messages.
     configrecord_key : str (default: "config")
-         Key used to store the ConfigRecord when constructing Messages.
+        Key used to store the ConfigRecord when constructing Messages.
     train_metrics_aggr_fn : Optional[callable] (default: None)
         Function with signature (list[RecordDict], str) -> MetricRecord,
         used to aggregate MetricRecords from training round replies.
