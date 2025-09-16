@@ -24,7 +24,7 @@ class FlowerTuneLlm(FedAvg):
             self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
         """Configure the next round of training."""
-        messages = super().configure_fit(server_round, arrays, config, grid)
+        messages = super().configure_train(server_round, arrays, config, grid)
 
         # Track communication costs
         self.comm_tracker.track(messages)
@@ -40,7 +40,7 @@ class FlowerTuneLlm(FedAvg):
         # Track communication costs
         self.comm_tracker.track(replies)
 
-        arrays, metrics = super().aggregate_fit(server_round, replies)
+        arrays, metrics = super().aggregate_train(server_round, replies)
 
         return arrays, metrics
 
