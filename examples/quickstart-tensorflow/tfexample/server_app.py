@@ -19,8 +19,8 @@ def main(grid: Grid, context: Context) -> None:
     fraction_train = context.run_config["fraction-train"]
 
     # Load initial model
-    initial_model = load_model()
-    arrays = ArrayRecord(initial_model.get_weights())
+    model = load_model()
+    arrays = ArrayRecord(model.get_weights())
 
     # Define and start FedAvg strategy
     strategy = FedAvg(
@@ -32,5 +32,10 @@ def main(grid: Grid, context: Context) -> None:
         initial_arrays = arrays,
         num_rounds=num_rounds,
     )
-    print(result)
  
+    # Save the final model
+    ndarrays = result.arrays.to_numpy_ndarrays()
+    final_model_name = "final_model.keras"
+    print(f'Saving final model to disk as {final_model_name}...')
+    model.set_weights(ndarrays)
+    model.save(final_model_name)
