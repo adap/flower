@@ -5,7 +5,7 @@
 .. _quickstart-huggingface:
 
 Quickstart 🤗 Transformers
-=========================
+==========================
 
 In this federated learning tutorial we will learn how to train a large language model
 (LLM) on the `IMDB <https://huggingface.co/datasets/stanfordnlp/imdb>`_ dataset using
@@ -360,7 +360,7 @@ receive as input arguments:
   ``ClientApp`` to involve them in a round of train/evaluate/query or other.
 - a ``Context`` object that provides access to the run configuration.
 
-In this example we use the |fedavg_link|_ and configure it with a specific value of
+In this example we use the |fedavg|_ and configure it with a specific value of
 ``fraction_train`` which is read from the run config. You can find the default value
 defined in the ``pyproject.toml``. Then, the execution of the strategy is launched when
 invoking its |strategy_start_link|_ method. To it we pass:
@@ -443,7 +443,7 @@ for an LLM.
 
 .. _berttiny: https://huggingface.co/prajjwal1/bert-tiny
 
-.. _fedavg: ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg
+.. _fedavg: ref-api/flwr.serverapp.strategy.FedAvg.html
 
 .. _flowerdatasets: https://flower.ai/docs/datasets/
 
@@ -466,3 +466,11 @@ for an LLM.
 .. |clientapp_link| replace:: ``ClientApp``
 
 .. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
+
+.. |serverapp_link| replace:: ``ServerApp``
+
+.. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
+
+.. |strategy_start_link| replace:: ``start``
+
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
