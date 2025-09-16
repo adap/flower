@@ -208,6 +208,7 @@ def run_superlink() -> None:
     # Load artifact provider if the args.artifact_provider_config is provided
     artifact_provider = None
     if cfg_path := getattr(args, "artifact_provider_config", None):
+        log(WARN, "The `--artifact-provider-config` flag is highly experimental.")
         artifact_provider = get_ee_artifact_provider(cfg_path)
 
     # Initialize StateFactory
