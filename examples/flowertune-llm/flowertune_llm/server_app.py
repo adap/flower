@@ -7,16 +7,11 @@ from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.common.config import unflatten_dict
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
-
 from omegaconf import DictConfig
-from peft import (
-    get_peft_model_state_dict,
-    set_peft_model_state_dict,
-)
+from peft import get_peft_model_state_dict, set_peft_model_state_dict
 
 from flowertune_llm.dataset import replace_keys
 from flowertune_llm.models import get_model
-
 
 # Create ServerApp
 app = ServerApp()
@@ -56,6 +51,7 @@ def main(grid: Grid, context: Context) -> None:
             cfg.model, cfg.train.save_every_round, num_rounds, save_path
         ),
     )
+
 
 # Get function that will be executed by the strategy
 # Here we use it to save global model checkpoints

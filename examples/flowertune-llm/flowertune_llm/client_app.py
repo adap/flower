@@ -8,10 +8,7 @@ from flwr.clientapp import ClientApp
 from flwr.common import Context
 from flwr.common.config import unflatten_dict
 from omegaconf import DictConfig
-from peft import (
-    get_peft_model_state_dict,
-    set_peft_model_state_dict,
-)
+from peft import get_peft_model_state_dict, set_peft_model_state_dict
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
@@ -20,10 +17,7 @@ from flowertune_llm.dataset import (
     load_data,
     replace_keys,
 )
-from flowertune_llm.models import (
-    cosine_annealing,
-    get_model,
-)
+from flowertune_llm.models import cosine_annealing, get_model
 
 # Avoid warnings
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
