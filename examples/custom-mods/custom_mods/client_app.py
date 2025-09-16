@@ -13,8 +13,9 @@ from flwr.clientapp import ClientApp
 # Flower ClientApp
 app = ClientApp(
     mods=[
-        get_tensorboard_mod(".runs_history/")
-    ],  # or get_wandb_mod("Custom mods example")
+        # get_tensorboard_mod(".runs_history/"),
+        get_wandb_mod("Custom mods example"),
+    ],
 )
 
 
@@ -25,7 +26,7 @@ def train(msg: Message, context: Context):
     # Load the model and initialize it with the received weights
     model = Net()
     model.load_state_dict(
-        cast(ArrayRecord, msg.content["arrays"]).to_torch_state_dict()
+        cast(ArrayRecord, msg.content.array_records["arrays"]).to_torch_state_dict()
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
