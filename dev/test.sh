@@ -8,17 +8,11 @@ echo "=== test.sh ==="
 echo "- Start Python checks"
 
 echo "- isort: start"
-pids=()
 for dir in ../examples/*/; do
     src_args=$(find "$dir" -maxdepth 1 -type d | sed 's/^/--src /' | tr '\n' ' ')
     python -m isort --check-only $dir $src_args --settings-path . &
-    pids+=($!)
 done
-for pid in "${pids[@]}"; do
-    if ! wait "$pid"; then
-        exit 1   # Fail CI if any `isort` job fails
-    fi
-done
+wait
 python -m isort --check-only ../benchmarks
 echo "- isort: done"
 
