@@ -8,13 +8,12 @@ import jax.numpy as jnp
 import numpy as np
 import numpy.typing as npt
 import optax
+from datasets.utils.logging import disable_progress_bar
 from flax import linen as nn
 from flax.training.train_state import TrainState
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from jax import Array
-
-from datasets.utils.logging import disable_progress_bar
 
 disable_progress_bar()
 

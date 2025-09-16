@@ -1,9 +1,11 @@
 """jaxexample: A Flower / JAX app."""
 
+import numpy as np
 from flwr.app import ArrayRecord, ConfigRecord, Context
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 from jax import random
+
 from jaxexample.task import create_model, get_params
 
 # Create ServerApp
@@ -38,4 +40,7 @@ def main(grid: Grid, context: Context) -> None:
         num_rounds=num_rounds,
     )
 
-    print(result.evaluate_metrics_clientapp)
+    # Save final model to disk
+    print("\nSaving final model to disk...")
+    ndarrays = result.arrays.to_numpy_ndarrays()
+    np.savez("final_model.npz", *ndarrays)
