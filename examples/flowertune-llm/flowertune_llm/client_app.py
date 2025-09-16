@@ -5,7 +5,6 @@ import warnings
 
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
-from flwr.common import Context
 from flwr.common.config import unflatten_dict
 from omegaconf import DictConfig
 from peft import get_peft_model_state_dict, set_peft_model_state_dict
