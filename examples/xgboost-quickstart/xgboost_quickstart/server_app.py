@@ -2,7 +2,7 @@
 
 import numpy as np
 import xgboost as xgb
-from flwr.common import ArrayRecord, Context
+from flwr.app import ArrayRecord, Context
 from flwr.common.config import unflatten_dict
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedXgbBagging
