@@ -86,26 +86,26 @@ With default arguments you will see an output like this one:
     INFO :      [ROUND 1/3]
     INFO :      configure_train: Sampled 5 nodes (out of 10)
     INFO :      aggregate_train: Received 5 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.6973818755149842}
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.6974}
     INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'val_loss': 0.022264523696899418, 'val_accuracy': 0.5024000000000001}
+    INFO :          └──> Aggregated MetricRecord: {'val_loss': 0.0223, 'val_accuracy': 0.5024}
     INFO :
     INFO :      [ROUND 2/3]
     INFO :      configure_train: Sampled 5 nodes (out of 10)
     INFO :      aggregate_train: Received 5 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.7019126415252687}
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.7019}
     INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'val_loss': 0.022134415304660798, 'val_accuracy': 0.5176000000000001}
+    INFO :          └──> Aggregated MetricRecord: {'val_loss': 0.0221, 'val_accuracy': 0.5176}
     INFO :
     INFO :      [ROUND 3/3]
     INFO :      configure_train: Sampled 5 nodes (out of 10)
     INFO :      aggregate_train: Received 5 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.6844923353195191}
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.6845}
     INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'val_loss': 0.022123832750320434, 'val_accuracy': 0.5042}
+    INFO :          └──> Aggregated MetricRecord: {'val_loss': 0.0221, 'val_accuracy': 0.5042}
     INFO :
     INFO :      Strategy execution finished in 151.02s
     INFO :
