@@ -16,7 +16,7 @@ for dir in ../examples/*/; do
 done
 for pid in "${pids[@]}"; do
     if ! wait "$pid"; then
-        exit 1   # Fail CI if any background process fails
+        exit 1   # Fail CI if any `isort` job fails
     fi
 done
 python -m isort --check-only ../benchmarks
