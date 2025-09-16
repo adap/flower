@@ -5,7 +5,7 @@
 .. _quickstart-huggingface:
 
 Quickstart 🤗 Transformers
-==========================
+=========================
 
 In this federated learning tutorial we will learn how to train a large language model
 (LLM) on the `IMDB <https://huggingface.co/datasets/stanfordnlp/imdb>`_ dataset using
@@ -127,7 +127,7 @@ With default arguments you will see an output like this one:
     INFO :          ServerApp-side Evaluate Metrics:
     INFO :          {}
     INFO :
-    
+
     Saving final model to disk...
 
 You can also run the project with GPU as follows:
@@ -259,9 +259,10 @@ The ClientApp
 -------------
 
 The main changes we have to make to use 🤗 Hugging Face with Flower have to do with
-converting the |arrayrecord_link|_ received in the |message_link|_ into a PyTorch ``state_dict``
-and vice versa when generating the reply ``Message`` from the ClientApp. We can make use
-of the built-in methods in the ``ArrayRecord`` to make these conversions:
+converting the |arrayrecord_link|_ received in the |message_link|_ into a PyTorch
+``state_dict`` and vice versa when generating the reply ``Message`` from the ClientApp.
+We can make use of the built-in methods in the ``ArrayRecord`` to make these
+conversions:
 
 .. code-block:: python
 
@@ -303,29 +304,29 @@ Runtime and is not directly configurable during simulations.
 
     # Flower ClientApp
     app = ClientApp()
-   
-   
+
+
     @app.train()
     def train(msg: Message, context: Context):
         """Train the model on local data."""
-   
+
         # Get this client's dataset partition
         partition_id = context.node_config["partition-id"]
         num_partitions = context.node_config["num-partitions"]
         model_name = context.run_config["model-name"]
         trainloader, _ = load_data(partition_id, num_partitions, model_name)
-   
+
         # Load model
         num_labels = context.run_config["num-labels"]
         net = AutoModelForSequenceClassification.from_pretrained(
             model_name, num_labels=num_labels
         )
-   
+
         # Initialize it with the received weights
         net.load_state_dict(msg.content["arrays"].to_torch_state_dict())
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net.to(device)
-   
+
         # Train the model on local data
         train_loss = train_fn(
             net,
@@ -333,7 +334,7 @@ Runtime and is not directly configurable during simulations.
             context.run_config["local-steps"],
             device,
         )
-   
+
         # Construct and return reply Message
         model_record = ArrayRecord(net.state_dict())
         metrics = {
@@ -342,7 +343,7 @@ Runtime and is not directly configurable during simulations.
         }
         metric_record = MetricRecord(metrics)
         content = RecordDict({"arrays": model_record, "metrics": metric_record})
-        return Message(content=content, reply_to=msg) 
+        return Message(content=content, reply_to=msg)
 
 The ``@app.evaluate()`` method would be near identical with two exceptions: (1) the
 model is not locally trained, instead it is used to evaluate its performance on the
@@ -376,16 +377,16 @@ invoking its |strategy_start_link|_ method. To it we pass:
 
     # Create ServerApp
     app = ServerApp()
-    
-    
+
+
     @app.main()
     def main(grid: Grid, context: Context) -> None:
         """Main entry point for the ServerApp."""
-    
+
         # Read from config
         num_rounds = context.run_config["num-server-rounds"]
         fraction_train = context.run_config["fraction-train"]
-    
+
         # Initialize global model
         model_name = context.run_config["model-name"]
         num_labels = context.run_config["num-labels"]
@@ -393,22 +394,21 @@ invoking its |strategy_start_link|_ method. To it we pass:
             model_name, num_labels=num_labels
         )
         arrays = ArrayRecord(net.state_dict())
-    
+
         # Initialize FedAvg strategy
         strategy = FedAvg(fraction_train=fraction_train)
-    
+
         # Start strategy, run FedAvg for `num_rounds`
         result = strategy.start(
             grid=grid,
             initial_arrays=arrays,
             num_rounds=num_rounds,
         )
-    
+
         # Save final model to disk
         print("\nSaving final model to disk...")
         state_dict = result.arrays.to_torch_state_dict()
         torch.save(state_dict, "final_model.pt")
-
 
 Note the ``start`` method of the strategy returns a result object. This object contains
 all the relevant information about the FL process, including the final model weights as
