@@ -5,7 +5,6 @@ from typing import Dict, List
 from flwr.app import ArrayRecord, Context, MetricRecord, RecordDict
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
-
 from sklearnexample.task import (
     create_log_reg_and_instantiate_parameters,
     get_model_parameters,

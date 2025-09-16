@@ -1,12 +1,11 @@
 """sklearnexample: A Flower / sklearn app."""
 
+import warnings
 from typing import List
 
-import warnings
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from sklearn.metrics import log_loss
-
 from sklearnexample.task import (
     UNIQUE_LABELS,
     create_log_reg_and_instantiate_parameters,
@@ -14,7 +13,6 @@ from sklearnexample.task import (
     load_data,
     set_model_params,
 )
-
 
 # Flower ClientApp
 app = ClientApp()
