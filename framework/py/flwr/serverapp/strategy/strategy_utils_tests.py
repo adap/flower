@@ -16,12 +16,20 @@
 
 
 from collections import OrderedDict
+from unittest.mock import Mock
 
 import numpy as np
 import pytest
 from parameterized import parameterized
 
-from flwr.common import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
+from flwr.common import (
+    Array,
+    ArrayRecord,
+    ConfigRecord,
+    Message,
+    MetricRecord,
+    RecordDict,
+)
 from flwr.serverapp.exception import InconsistentMessageReplies
 
 from .strategy_utils import (
@@ -30,6 +38,17 @@ from .strategy_utils import (
     config_to_str,
     validate_message_reply_consistency,
 )
+
+
+def create_mock_reply(arrays: ArrayRecord, num_examples: float) -> Message:
+    """Create a mock reply Message with default keys."""
+    message = Mock(spec=Message)
+    message.content = RecordDict(
+        {"arrays": arrays, "metrics": MetricRecord({"num-examples": num_examples})}
+    )
+    message.has_error.side_effect = lambda: False
+    message.has_content.side_effect = lambda: True
+    return message
 
 
 def test_config_to_str() -> None:

@@ -1,5 +1,17 @@
-Build a strategy from scratch
-=============================
+Customize a Flower Strategy
+===========================
+
+.. |configrecord_link| replace:: ``ConfigRecord``
+
+.. _configrecord_link: ref-api/flwr.app.ConfigRecord.html
+
+.. |strategy_start_link| replace:: ``start``
+
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
+
+.. |fedadagrad_link| replace:: ``FedAdagrad``
+
+.. _fedadagrad_link: ref-api/flwr.serverapp.strategy.FedAdagrad.html
 
 Welcome to the third part of the Flower federated learning tutorial. In previous parts
 of this tutorial, we introduced federated learning with PyTorch and the Flower framework
@@ -8,8 +20,9 @@ strategies can be used to customize the execution on both the server and the cli
 (:doc:`part 2 <tutorial-series-use-a-federated-learning-strategy-pytorch>`).
 
 In this tutorial, we'll continue to customize the federated learning system we built
-previously by creating a custom version of FedAvg using the Flower framework, Flower
-Datasets, and PyTorch.
+previously by creating a much more customized version of ``FedAdagrad``.
+
+.. tip::
 
     `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
@@ -22,7 +35,10 @@ Datasets, and PyTorch.
       the ``#introductions`` channel! If anything is unclear, head over to the
       ``#questions`` channel.
 
-Let's build a new ``Strategy`` from scratch! 🌼
+Let's build a new ``Strategy`` with a customized |strategy_start_link|_ method that:
+
+- saves a copy of the global model when a new best global accuracy is found;
+- logs the metrics generated during the run to Weights & Biases!
 
 Preparation
 -----------
@@ -34,7 +50,9 @@ Installing dependencies
 
 .. note::
 
-    If you've completed part 1 of the tutorial, you can skip this step.
+    If you've completed part 1 and 2 of the tutorial, you can skip this step. But
+    remember to include ``wandb`` as a dependency in your ``pyproject.toml`` file and
+    install it in your environment.
 
 First, we install the Flower package ``flwr``:
 
@@ -65,6 +83,13 @@ It should have the following structure:
     ├── pyproject.toml      # Project metadata like dependencies and configs
     └── README.md
 
+Next, add the `wandb` dependency to the project by editing the ``pyproject.toml`` file
+located in the root of the project. Add the following line to the list of dependencies:
+
+.. code-block:: shell
+
+    "wandb>=0.17.8"
+
 Next, we install the project and its dependencies, which are specified in the
 ``pyproject.toml`` file:
 
@@ -73,210 +98,299 @@ Next, we install the project and its dependencies, which are specified in the
     $ cd flower-tutorial
     $ pip install -e .
 
-Build a Strategy from scratch
------------------------------
+.. note::
 
-Let's overwrite the ``configure_fit`` method such that it passes a higher learning rate
-(potentially also other hyperparameters) to the optimizer of a fraction of the clients.
-We will keep the sampling of the clients as it is in ``FedAvg`` and then change the
-configuration dictionary (one of the ``FitIns`` attributes). Create a new module called
-``strategy.py`` in the ``flower_tutorial`` directory. Next, we define a new class
-``FedCustom`` that inherits from ``Strategy``. Copy and paste the following code into
-``strategy.py``:
+    If this is your first time installing ``wandb``, you might be asked to create an
+    account and then log in to your system. You can start this process by typing this in
+    your terminal:
+
+    .. code-block:: shell
+
+        $ wandb login
+
+Customize the ``start`` method of a strategy
+--------------------------------------------
+
+Flower strategies have a number of methods that can be overridden to customize their
+behavior. In part 2, you learned how to customize the ``configure_train`` method to
+perform learning rate decay and communicate the updated learning rate as part of the
+|configrecord_link|_ sent to the clients in the ``Message``. In this tutorial you'll
+learn how to customize the |strategy_start_link|_ method. If you inspect the `source
+code
+<https://github.com/adap/flower/blob/main/framework/py/flwr/serverapp/strategy/strategy.py#L135>`_
+of this method you'll see that it contains a for loop where each iteration represents a
+federated learning round. Each round consists of three distinct stages:
+
+1. A training stage, where a subset of clients is selected to train the current global
+   model on their local data.
+2. An evaluation stage, where a subset of clients is selected to evaluate the updated
+   global model on their local validation sets.
+3. An optional stage to evaluate the global model on the server side. Note that this is
+   what you enabled in part 2 of this tutorial by means of the ``central_evaluate``
+   callback.
+
+Let's extend the ``CustomFedAdagrad`` strategy we created earlier and introduce:
+
+1. ``_update_best_acc``: An auxiliary method to save the global model whenever a new
+   best accuracy is found.
+2. ``set_save_path``: An auxiliary method to set the path where ``wandb`` logs and model
+   checkpoints will be saved. This method will be called from the ``server_app.py``
+   after instantiating the strategy.
+3. A customized |strategy_start_link|_ method to log metrics to Weight & Biases (`W&B
+   <https://wandb.ai/site>`__) and save the model checkpoints to disk.
 
 .. code-block:: python
+    :emphasize-lines: 31,35,65,68,126,155,168,170
 
-    from typing import Dict, List, Optional, Tuple, Union
+    import io
+    import time
+    from logging import INFO
+    from pathlib import Path
+    from typing import Callable, Iterable, Optional
 
-    from flwr.common import (
-        EvaluateIns,
-        EvaluateRes,
-        FitIns,
-        FitRes,
-        Parameters,
-        Scalar,
-        ndarrays_to_parameters,
-        parameters_to_ndarrays,
-    )
-    from flwr.server.client_manager import ClientManager
-    from flwr.server.client_proxy import ClientProxy
-    from flwr.server.strategy import Strategy
-    from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
+    import torch
+    import wandb
+    from flwr.app import ArrayRecord, ConfigRecord, Message, MetricRecord
+    from flwr.common import log, logger
+    from flwr.serverapp import Grid
+    from flwr.serverapp.strategy import FedAdagrad, Result
+    from flwr.serverapp.strategy.strategy_utils import log_strategy_start_info
 
-    from flower_tutorial.task import Net, get_weights
+    PROJECT_NAME = "FLOWER-advanced-pytorch"
 
 
-    class FedCustom(Strategy):
-        def __init__(
-            self,
-            fraction_fit: float = 1.0,
-            fraction_evaluate: float = 1.0,
-            min_fit_clients: int = 2,
-            min_evaluate_clients: int = 2,
-            min_available_clients: int = 2,
+    class CustomFedAdagrad(FedAdagrad):
+
+        def configure_train(
+            self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
+        ) -> Iterable[Message]:
+            """Configure the next round of federated training and maybe do LR decay."""
+            # Decrease learning rate by a factor of 0.5 every 5 rounds
+            if server_round % 5 == 0 and server_round > 0:
+                config["lr"] *= 0.5
+                print("LR decreased to:", config["lr"])
+            # Pass the updated config and the rest of arguments to the parent class
+            return super().configure_train(server_round, arrays, config, grid)
+
+        def set_save_path(self, path: Path):
+            """Set the path where wandb logs and model checkpoints will be saved."""
+            self.save_path = path
+
+        def _update_best_acc(
+            self, current_round: int, accuracy: float, arrays: ArrayRecord
         ) -> None:
-            super().__init__()
-            self.fraction_fit = fraction_fit
-            self.fraction_evaluate = fraction_evaluate
-            self.min_fit_clients = min_fit_clients
-            self.min_evaluate_clients = min_evaluate_clients
-            self.min_available_clients = min_available_clients
+            """Update best accuracy and save model checkpoint if current accuracy is
+            higher."""
+            if accuracy > self.best_acc_so_far:
+                self.best_acc_so_far = accuracy
+                logger.log(INFO, "💡 New best global model found: %f", accuracy)
+                # Save the PyTorch model
+                file_name = f"model_state_acc_{accuracy}_round_{current_round}.pth"
+                torch.save(arrays.to_torch_state_dict(), self.save_path / file_name)
+                logger.log(INFO, "💾 New best model saved to disk: %s", file_name)
 
-            # Initialize model parameters
-            ndarrays = get_weights(Net())
-            self.initial_parameters = ndarrays_to_parameters(ndarrays)
-
-        def __repr__(self) -> str:
-            return "FedCustom"
-
-        def initialize_parameters(
-            self, client_manager: ClientManager
-        ) -> Optional[Parameters]:
-            """Initialize global model parameters."""
-            initial_parameters = self.initial_parameters
-            self.initial_parameters = None  # Don't keep initial parameters in memory
-            return initial_parameters
-
-        def configure_fit(
-            self, server_round: int, parameters: Parameters, client_manager: ClientManager
-        ) -> List[Tuple[ClientProxy, FitIns]]:
-            """Configure the next round of training."""
-
-            # Sample clients
-            sample_size, min_num_clients = self.num_fit_clients(
-                client_manager.num_available()
-            )
-            clients = client_manager.sample(
-                num_clients=sample_size, min_num_clients=min_num_clients
-            )
-
-            # Create custom configs
-            n_clients = len(clients)
-            half_clients = n_clients // 2
-            standard_config = {"lr": 0.001}
-            higher_lr_config = {"lr": 0.003}
-            fit_configurations = []
-            for idx, client in enumerate(clients):
-                if idx < half_clients:
-                    fit_configurations.append((client, FitIns(parameters, standard_config)))
-                else:
-                    fit_configurations.append(
-                        (client, FitIns(parameters, higher_lr_config))
-                    )
-            return fit_configurations
-
-        def aggregate_fit(
+        def start(
             self,
-            server_round: int,
-            results: List[Tuple[ClientProxy, FitRes]],
-            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-        ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-            """Aggregate fit results using weighted average."""
+            grid: Grid,
+            initial_arrays: ArrayRecord,
+            num_rounds: int = 3,
+            timeout: float = 3600,
+            train_config: Optional[ConfigRecord] = None,
+            evaluate_config: Optional[ConfigRecord] = None,
+            evaluate_fn: Optional[
+                Callable[[int, ArrayRecord], Optional[MetricRecord]]
+            ] = None,
+        ) -> Result:
+            """Execute the federated learning strategy logging results to W&B and saving
+            them to disk."""
 
-            weights_results = [
-                (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-                for _, fit_res in results
-            ]
-            parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
-            metrics_aggregated = {}
-            return parameters_aggregated, metrics_aggregated
+            # Init W&B
+            name = f"{str(self.save_path.parent.name)}/{str(self.save_path.name)}-ServerApp"
+            wandb.init(project=PROJECT_NAME, name=name)
 
-        def configure_evaluate(
-            self, server_round: int, parameters: Parameters, client_manager: ClientManager
-        ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-            """Configure the next round of evaluation."""
-            if self.fraction_evaluate == 0.0:
-                return []
-            config = {}
-            evaluate_ins = EvaluateIns(parameters, config)
+            # Keep track of best acc
+            self.best_acc_so_far = 0.0
 
-            # Sample clients
-            sample_size, min_num_clients = self.num_evaluation_clients(
-                client_manager.num_available()
+            log(INFO, "Starting %s strategy:", self.__class__.__name__)
+            log_strategy_start_info(
+                num_rounds, initial_arrays, train_config, evaluate_config
             )
-            clients = client_manager.sample(
-                num_clients=sample_size, min_num_clients=min_num_clients
-            )
+            self.summary()
+            log(INFO, "")
 
-            # Return client/config pairs
-            return [(client, evaluate_ins) for client in clients]
+            # Initialize if None
+            train_config = ConfigRecord() if train_config is None else train_config
+            evaluate_config = ConfigRecord() if evaluate_config is None else evaluate_config
+            result = Result()
 
-        def aggregate_evaluate(
-            self,
-            server_round: int,
-            results: List[Tuple[ClientProxy, EvaluateRes]],
-            failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
-        ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-            """Aggregate evaluation losses using weighted average."""
+            t_start = time.time()
+            # Evaluate starting global parameters
+            if evaluate_fn:
+                res = evaluate_fn(0, initial_arrays)
+                log(INFO, "Initial global evaluation results: %s", res)
+                if res is not None:
+                    result.evaluate_metrics_serverapp[0] = res
 
-            if not results:
-                return None, {}
+            arrays = initial_arrays
 
-            loss_aggregated = weighted_loss_avg(
-                [
-                    (evaluate_res.num_examples, evaluate_res.loss)
-                    for _, evaluate_res in results
-                ]
-            )
-            metrics_aggregated = {}
-            return loss_aggregated, metrics_aggregated
+            for current_round in range(1, num_rounds + 1):
+                log(INFO, "")
+                log(INFO, "[ROUND %s/%s]", current_round, num_rounds)
 
-        def evaluate(
-            self, server_round: int, parameters: Parameters
-        ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-            """Evaluate global model parameters using an evaluation function."""
+                # -----------------------------------------------------------------
+                # --- TRAINING (CLIENTAPP-SIDE) -----------------------------------
+                # -----------------------------------------------------------------
 
-            # Let's assume we won't perform the global model evaluation on the server side.
-            return None
+                # Call strategy to configure training round
+                # Send messages and wait for replies
+                train_replies = grid.send_and_receive(
+                    messages=self.configure_train(
+                        current_round,
+                        arrays,
+                        train_config,
+                        grid,
+                    ),
+                    timeout=timeout,
+                )
 
-        def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-            """Return sample size and required number of clients."""
-            num_clients = int(num_available_clients * self.fraction_fit)
-            return max(num_clients, self.min_fit_clients), self.min_available_clients
+                # Aggregate train
+                agg_arrays, agg_train_metrics = self.aggregate_train(
+                    current_round,
+                    train_replies,
+                )
 
-        def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
-            """Use a fraction of available clients for evaluation."""
-            num_clients = int(num_available_clients * self.fraction_evaluate)
-            return max(num_clients, self.min_evaluate_clients), self.min_available_clients
+                # Log training metrics and append to history
+                if agg_arrays is not None:
+                    result.arrays = agg_arrays
+                    arrays = agg_arrays
+                if agg_train_metrics is not None:
+                    log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_train_metrics)
+                    result.train_metrics_clientapp[current_round] = agg_train_metrics
+                    # Log to W&B
+                    wandb.log(dict(agg_train_metrics), step=current_round)
 
-The only thing left is to use the newly created custom Strategy ``FedCustom`` when
-starting the experiment. In the ``server_app.py`` file, import the custom strategy and
-use it in ``server_fn``:
+                # -----------------------------------------------------------------
+                # --- EVALUATION (CLIENTAPP-SIDE) ---------------------------------
+                # -----------------------------------------------------------------
+
+                # Call strategy to configure evaluation round
+                # Send messages and wait for replies
+                evaluate_replies = grid.send_and_receive(
+                    messages=self.configure_evaluate(
+                        current_round,
+                        arrays,
+                        evaluate_config,
+                        grid,
+                    ),
+                    timeout=timeout,
+                )
+
+                # Aggregate evaluate
+                agg_evaluate_metrics = self.aggregate_evaluate(
+                    current_round,
+                    evaluate_replies,
+                )
+
+                # Log training metrics and append to history
+                if agg_evaluate_metrics is not None:
+                    log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_evaluate_metrics)
+                    result.evaluate_metrics_clientapp[current_round] = agg_evaluate_metrics
+                    # Log to W&B
+                    wandb.log(dict(agg_evaluate_metrics), step=current_round)
+                # -----------------------------------------------------------------
+                # --- EVALUATION (SERVERAPP-SIDE) ---------------------------------
+                # -----------------------------------------------------------------
+
+                # Centralized evaluation
+                if evaluate_fn:
+                    log(INFO, "Global evaluation")
+                    res = evaluate_fn(current_round, arrays)
+                    log(INFO, "\t└──> MetricRecord: %s", res)
+                    if res is not None:
+                        result.evaluate_metrics_serverapp[current_round] = res
+                        # Maybe save to disk if new best is found
+                        self._update_best_acc(current_round, res["accuracy"], arrays)
+                        # Log to W&B
+                        wandb.log(dict(res), step=current_round)
+
+            log(INFO, "")
+            log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)
+            log(INFO, "")
+            log(INFO, "Final results:")
+            log(INFO, "")
+            for line in io.StringIO(str(result)):
+                log(INFO, "\t%s", line.strip("\n"))
+            log(INFO, "")
+
+            return result
+
+With the extended ``CustomFedAdagrad`` strategy defined, we now need to set the path
+where the model checkpoints will be saved as well as the name of the runs in ``W&B``. We
+need to call the ``set_save_path`` method after instantiating the strategy and before
+calling the ``start`` method. In ``server_app.py``, we can create a new directory called
+``results`` and then a subdirectory with the current timestamp to store the results of
+each run. We can then call the ``set_save_path``. In this tutorial we create the
+directory based on the current date and time, this means that each time you do ``flwr
+run`` a new directory will be used. Let's see how this looks in code:
 
 .. code-block:: python
+    :emphasize-lines: 22
 
-    from flower_tutorial.strategy import FedCustom
-
-
-    def server_fn(context: Context):
-        # Read from config
-        num_rounds = context.run_config["num-server-rounds"]
-
-        # Define strategy
-        strategy = FedCustom()
-        config = ServerConfig(num_rounds=num_rounds)
-
-        return ServerAppComponents(strategy=strategy, config=config)
+    from datetime import datetime
+    from pathlib import Path
 
 
-    # Create ServerApp
-    app = ServerApp(server_fn=server_fn)
+    @app.main()
+    def main(grid: Grid, context: Context) -> None:
+        """Main entry point for the ServerApp."""
 
-Finally, we run the simulation.
+        # ... unchanged
+
+        # Initialize FedAdagrad strategy
+        # strategy = CustomFedAdagrad( ... )
+
+        # Get the current date and time
+        current_time = datetime.now()
+        run_dir = current_time.strftime("%Y-%m-%d/%H-%M-%S")
+        # Save path is based on the current directory
+        save_path = Path.cwd() / f"outputs/{run_dir}"
+        save_path.mkdir(parents=True, exist_ok=False)
+
+        # Set the path where results and model checkpoints will be saved
+        strategy.set_save_path(save_path)
+
+        # ... rest unchanged
+
+Finally, let's run the ``FlowerApp``:
 
 .. code-block:: shell
 
     $ flwr run .
 
+After starting the run you will notice two things:
+
+1. A new directory will be created in ``outputs/YYYY-MM-DD/HH-MM-SS`` where
+   ``YYYY-MM-DD/HH-MM-SS`` is the current date and time. This directory will contain the
+   model checkpoints saved during the run. Recall that a checkpoint is saved whenever a
+   new best accuracy is found during the centralized evaluation stage.
+2. A new run will be created in your `W&B project <https://wandb.ai/home>`_ where you
+   can visualize the metrics logged during the run.
+
+Congratulations! You've successfully created a custom Flower strategy by overriding the
+|strategy_start_link|_ method. You've also learned how to log metrics to Weight & Biases
+and how to save model checkpoints to disk.
+
 Recap
 -----
 
-In this tutorial, we've seen how to implement a custom strategy. A custom strategy
-enables granular control over client node configuration, result aggregation, and more.
-To define a custom strategy, you only have to overwrite the abstract methods of the
-(abstract) base class ``Strategy``. To make custom strategies even more powerful, you
-can pass custom functions to the constructor of your new class (``__init__``) and then
-call these functions whenever needed.
+In this tutorial, we've seen how to customize the |strategy_start_link|_ method of a
+Flower strategy. This method is the main entry point of any strategy and contains the
+logic to execute the federated learning process. In this tutorial, you learned how to
+log the metrics to Weight & Biases and how to save model checkpoints to disk.
+
+In the next tutorial, we're going to cover how to communicate arbitrary Python objects
+between the ``ClientApp`` and the ``ServerApp`` by serializing them and send them in a
+``Message`` as a ``ConfigRecord``.
 
 Next steps
 ----------
@@ -287,7 +401,3 @@ Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack
 
 There's a dedicated ``#questions`` Slack channel if you need help, but we'd also love to
 hear who you are in ``#introductions``!
-
-The :doc:`Flower Federated Learning Tutorial - Part 4
-<tutorial-series-customize-the-client-pytorch>` introduces ``Client``, the flexible API
-underlying ``NumPyClient``.

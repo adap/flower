@@ -34,7 +34,7 @@ clientapp = "huggingface_example.client_app:app"
 [tool.flwr.app.config]
 num-server-rounds = 3
 model-name = "prajjwal1/bert-tiny"
-fraction-fit = 0.05
+fraction-train = 0.05
 fraction-evaluate = 0.1
 
 [tool.flwr.federations]
