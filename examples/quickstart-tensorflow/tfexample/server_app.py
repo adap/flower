@@ -17,7 +17,6 @@ def main(grid: Grid, context: Context) -> None:
     # Load config
     num_rounds = context.run_config["num-server-rounds"]
     fraction_train = context.run_config["fraction-train"]
-    learning_rate = context.run_config["learning-rate"]
 
     # Load initial model
     initial_model = load_model()
