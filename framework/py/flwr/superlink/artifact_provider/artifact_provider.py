@@ -25,3 +25,13 @@ class ArtifactProvider(ABC):
     @abstractmethod
     def get_url(self, run_id: int) -> Optional[str]:
         """Return the artifact download link for the given run ID."""
+
+    @property
+    @abstractmethod
+    def output_dir(self) -> str:
+        """Permanent storage directory."""
+
+    @property
+    @abstractmethod
+    def tmp_dir(self) -> str:
+        """Temporary storage directory."""

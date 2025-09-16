@@ -86,7 +86,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self.auth_plugin = auth_plugin
         self.artifact_provider = artifact_provider
 
-    def StartRun(
+    def StartRun(  # pylint: disable=too-many-locals
         self, request: StartRunRequest, context: grpc.ServicerContext
     ) -> StartRunResponse:
         """Create run ID."""
@@ -132,11 +132,20 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 flwr_aid,
             )
 
+            # Initialize node config
+            node_config = {}
+            if self.artifact_provider is not None:
+                node_config = {
+                    "output_dir": self.artifact_provider.output_dir,
+                    "tmp_dir": self.artifact_provider.tmp_dir,
+                }
+
             # Create an empty context for the Run
             context = Context(
                 run_id=run_id,
                 node_id=0,
-                node_config={},
+                # Dict is invariant in mypy
+                node_config=node_config,  # type: ignore[arg-type]
                 state=RecordDict(),
                 run_config={},
             )
