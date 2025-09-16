@@ -52,7 +52,7 @@ class CommunicationTracker:
 
     @staticmethod
     def _compute_bytes(msg: Message):
-        return sum(len(array.data) for array in msg.array_records.values())
+        return sum(len(array.data) for array in msg.content.array_records.values())
 
     def track(self, messages: Iterable[Message]):
         size_bytes_list = [
