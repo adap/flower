@@ -369,7 +369,7 @@ invoking its |strategy_start_link|_ method. To it we pass:
 
 - the ``Grid`` object.
 - an ``ArrayRecord`` carrying a randomly initialized model that will serve as the global
-  model to federated.
+  model to be federated.
 - a ``ConfigRecord`` with the training hyperparameters to be sent to the clients. The
   strategy will also insert the current round number in this config before sending it to
   the participating nodes.
