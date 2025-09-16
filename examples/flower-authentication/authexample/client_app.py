@@ -1,12 +1,11 @@
 """authexample: An authenticated Flower / PyTorch app."""
 
 import torch
-from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
-from flwr.clientapp import ClientApp
-
 from authexample.task import Net, load_data_from_disk
 from authexample.task import test as test_fn
 from authexample.task import train as train_fn
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 
 app = ClientApp()
 
