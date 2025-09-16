@@ -63,6 +63,7 @@ train.training-arguments.gradient-checkpointing = true
 train.training-arguments.lr-scheduler-type = "constant"
 strategy.fraction-train = $fraction_train
 strategy.fraction-evaluate = 0.0
+strategy.min-evaluate-nodes = 0
 num-server-rounds = 200
 
 # Dataset config (static for FlowerTune LLM Leaderboard)
