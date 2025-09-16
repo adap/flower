@@ -3,18 +3,11 @@
 import warnings
 
 import torch
-from flwr.client import Client, ClientApp, NumPyClient
-from flwr.common import Context
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 from transformers import logging
 
-from huggingface_example.task import (
-    get_model,
-    get_params,
-    load_data,
-    set_params,
-    test,
-    train,
-)
+from huggingface_example.task import get_model, load_data, test_fn, train_fn
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -22,38 +15,71 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 # This is something this example does.
 logging.set_verbosity_error()
 
-
-# Flower client
-class IMDBClient(NumPyClient):
-    def __init__(self, model_name, trainloader, testloader) -> None:
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.trainloader = trainloader
-        self.testloader = testloader
-        self.net = get_model(model_name)
-        self.net.to(self.device)
-
-    def fit(self, parameters, config) -> tuple[list, int, dict]:
-        set_params(self.net, parameters)
-        train(self.net, self.trainloader, epochs=1, device=self.device)
-        return get_params(self.net), len(self.trainloader), {}
-
-    def evaluate(self, parameters, config) -> tuple[float, int, dict[str, float]]:
-        set_params(self.net, parameters)
-        loss, accuracy = test(self.net, self.testloader, device=self.device)
-        return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
+# Flower ClientApp
+app = ClientApp()
 
 
-def client_fn(context: Context) -> Client:
-    """Construct a Client that will be run in a ClientApp."""
-    # Read the node_config to fetch data partition associated to this node
+@app.train()
+def train(msg: Message, context: Context) -> Message:
+    """Train the model on local data."""
+
+    # Get this client's dataset partition
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-
-    # Read the run config to get settings to configure the Client
     model_name = context.run_config["model-name"]
-    trainloader, testloader = load_data(partition_id, num_partitions, model_name)
+    trainloader, _ = load_data(partition_id, num_partitions, model_name)
 
-    return IMDBClient(model_name, trainloader, testloader).to_client()
+    # Load model
+    model = get_model(model_name)
+
+    # Initialize it with the received weights
+    arrays = msg.content["arrays"]
+    model.load_state_dict(arrays.to_torch_state_dict(), strict=True)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    # Train the model on local data
+    train_fn(model, trainloader, epochs=1, device=device)
+
+    # Construct and return reply Message
+    model_record = ArrayRecord(model.state_dict())
+    metrics = MetricRecord({"num-examples": len(trainloader)})
+    # Construct RecordDict and add ArrayRecord and MetricRecord
+    content = RecordDict({"arrays": model_record, "metrics": metrics})
+    return Message(content=content, reply_to=msg)
 
 
-app = ClientApp(client_fn=client_fn)
+@app.evaluate()
+def evaluate(msg: Message, context: Context) -> Message:
+    """Evaluate the model on local data."""
+
+    # Get this client's dataset partition
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    model_name = context.run_config["model-name"]
+    _, testloader = load_data(partition_id, num_partitions, model_name)
+
+    # Load model
+    model = get_model(model_name)
+
+    # Initialize it with the received weights
+    arrays = msg.content["arrays"]
+    model.load_state_dict(arrays.to_torch_state_dict(), strict=True)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    # Evaluate the model on local data
+    loss, accuracy = test_fn(model, testloader, device=device)
+
+    # Construct and return reply Message
+    model_record = ArrayRecord(model.state_dict())
+    metrics = MetricRecord(
+        {
+            "num-examples": len(testloader),
+            "loss": float(loss),
+            "accuracy": float(accuracy),
+        }
+    )
+    # Construct RecordDict and add ArrayRecord and MetricRecord
+    content = RecordDict({"arrays": model_record, "metrics": metrics})
+    return Message(content=content, reply_to=msg)
