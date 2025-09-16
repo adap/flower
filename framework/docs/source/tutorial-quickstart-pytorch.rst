@@ -6,31 +6,31 @@
 
 .. |message_link| replace:: ``Message``
 
-.. _message_link: ref-api/flwr.common.Message.html
+.. _message_link: ref-api/flwr.app.Message.html
 
 .. |arrayrecord_link| replace:: ``ArrayRecord``
 
-.. _arrayrecord_link: ref-api/flwr.common.ArrayRecord.html
+.. _arrayrecord_link: ref-api/flwr.app.ArrayRecord.html
 
 .. |clientapp_link| replace:: ``ClientApp``
 
-.. _clientapp_link: ref-api/flwr.client.ClientApp.html
+.. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
 
 .. |fedavg_link| replace:: ``FedAvg``
 
-.. _fedavg_link: ref-api/flwr.serverapp.FedAvg.html
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
 
 .. |serverapp_link| replace:: ``ServerApp``
 
-.. _serverapp_link: ref-api/flwr.server.ServerApp.html
+.. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
 
 .. |strategy_start_link| replace:: ``start``
 
-.. _strategy_start_link: ref-api/flwr.serverapp.Strategy.html#flwr.serverapp.Strategy.start
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.Strategy.start
 
 .. |strategy_link| replace:: ``Strategy``
 
-.. _strategy_link: ref-api/flwr.serverapp.Strategy.html
+.. _strategy_link: ref-api/flwr.serverapp.strategy.Strategy.html
 
 Quickstart PyTorch
 ==================
