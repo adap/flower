@@ -19,7 +19,6 @@ import time
 from logging import WARN
 from typing import Any, Optional, Union
 
-
 from flwr.common.config import get_flwr_dir
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
@@ -52,7 +51,6 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
     flwr_dir: Optional[str] = None,
     parent_pid: Optional[int] = None,
     health_server_address: Optional[str] = None,
-    plugin_config_path: Optional[str] = None,
 ) -> None:
     """Run Flower SuperExec.
 
@@ -121,7 +119,8 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
 
     # Load plugin configuration from file if provided
     try:
-        plugin.load_config(plugin_config)
+        if plugin_config is not None:
+            plugin.load_config(plugin_config)
     except KeyError as e:
         flwr_exit(
             code=ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG,
