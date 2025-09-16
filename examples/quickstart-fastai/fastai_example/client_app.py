@@ -6,10 +6,11 @@ from fastai.learner import Learner
 from fastai.losses import CrossEntropyLossFlat
 from fastai.vision.all import error_rate, squeezenet1_1
 from fastai.vision.data import DataLoaders
-from fastai_example.task import load_data
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from flwr.common import Context
+
+from fastai_example.task import load_data
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

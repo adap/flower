@@ -3,6 +3,7 @@
 from typing import Any
 
 import torch
+from datasets.utils.logging import disable_progress_bar
 from evaluate import load as load_metric
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
@@ -13,8 +14,6 @@ from transformers import (
     AutoTokenizer,
     DataCollatorWithPadding,
 )
-
-from datasets.utils.logging import disable_progress_bar
 
 disable_progress_bar()
 fds = None  # Cache FederatedDataset
