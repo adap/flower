@@ -115,8 +115,9 @@ class FedAvg(Strategy):
             self.min_evaluate_nodes = 0
             log(
                 WARNING,
-                "fraction_evaluate is set to 0.0. Evaluation will be skipped "
-                "and min_evaluate_nodes has been forced to 0."
+                "fraction_evaluate is set to 0.0. "
+                "Federated evaluation will be skipped "
+                "and min_evaluate_nodes has been forced to 0.",
             )
 
     def summary(self) -> None:
