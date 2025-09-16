@@ -80,7 +80,7 @@ class IncomeClassifier(nn.Module):
         return x
 
 
-def train(model, train_loader, num_epochs=1):
+def trainer(model, train_loader, num_epochs=1):
     criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     model.train()
@@ -93,7 +93,7 @@ def train(model, train_loader, num_epochs=1):
             optimizer.step()
 
 
-def evaluate(model, test_loader):
+def evaluator(model, test_loader):
     model.eval()
     criterion = nn.BCELoss()
     loss = 0.0
