@@ -70,8 +70,6 @@ def evaluate(msg: Message, context: Context):
     # Load the model
     model = load_model(context.run_config["learning-rate"])
     model.set_weights(msg.content["arrays"].to_numpy_ndarrays())
-    epochs = context.run_config["local-epochs"]
-    batch_size = context.run_config["batch-size"]
 
     # Evaluate the model
     eval_loss, eval_acc = model.evaluate(x_test, y_test, verbose=0)
