@@ -3,12 +3,13 @@
 from typing import cast
 
 import torch
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
+
 from custom_mods.mods import get_tensorboard_mod, get_wandb_mod
 from custom_mods.task import Net, load_data
 from custom_mods.task import test as test_fn
 from custom_mods.task import train as train_fn
-from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
-from flwr.clientapp import ClientApp
 
 # Flower ClientApp
 app = ClientApp(
