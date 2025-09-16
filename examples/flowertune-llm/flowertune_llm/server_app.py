@@ -42,7 +42,7 @@ def main(grid: Grid, context: Context) -> None:
     )
 
     # Start strategy, run FedAvg for `num_rounds`
-    result = strategy.start(
+    strategy.start(
         grid=grid,
         initial_arrays=arrays,
         train_config=ConfigRecord({"save_path": save_path}),
