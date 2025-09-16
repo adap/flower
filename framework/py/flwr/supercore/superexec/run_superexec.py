@@ -17,10 +17,11 @@
 
 import time
 from logging import WARN
-from typing import Optional, Union
+from typing import Any, Optional, Union
+
 
 from flwr.common.config import get_flwr_dir
-from flwr.common.exit import register_signal_handlers
+from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
@@ -47,9 +48,11 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
         type[ClientAppIoStub], type[ServerAppIoStub], type[SimulationIoStub]
     ],
     appio_api_address: str,
+    plugin_config: Optional[dict[str, Any]] = None,
     flwr_dir: Optional[str] = None,
     parent_pid: Optional[int] = None,
     health_server_address: Optional[str] = None,
+    plugin_config_path: Optional[str] = None,
 ) -> None:
     """Run Flower SuperExec.
 
@@ -61,6 +64,9 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
         The gRPC stub class for the AppIO API.
     appio_api_address : str
         The address of the AppIO API.
+    plugin_config : Optional[dict[str, Any]] (default: None)
+        The configuration dictionary for the plugin. If `None`, the plugin will use
+        its default configuration.
     flwr_dir : Optional[str] (default: None)
         The Flower directory.
     parent_pid : Optional[int] (default: None)
@@ -112,6 +118,15 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
         flwr_dir=str(get_flwr_dir(flwr_dir)),
         get_run=get_run,
     )
+
+    # Load plugin configuration from file if provided
+    try:
+        plugin.load_config(plugin_config)
+    except KeyError as e:
+        flwr_exit(
+            code=ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG,
+            message=f"Missing key in plugin config: {e}",
+        )
 
     # Start the main loop
     try:
