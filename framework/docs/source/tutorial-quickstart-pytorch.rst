@@ -36,6 +36,10 @@
 
 .. _strategy_link: ref-api/flwr.serverapp.strategy.Strategy.html
 
+.. |result_link| replace:: ``Result``
+
+.. _result_link: ref-api/flwr.serverapp.strategy.Result.html
+
 Quickstart PyTorch
 ==================
 
