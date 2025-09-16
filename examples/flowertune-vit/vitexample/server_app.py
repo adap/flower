@@ -7,12 +7,7 @@ from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 from torch.utils.data import DataLoader
 
-from vitexample.task import (
-    apply_eval_transforms,
-    get_model,
-    test,
-)
-
+from vitexample.task import apply_eval_transforms, get_model, test
 
 # Create ServerApp
 app = ServerApp()

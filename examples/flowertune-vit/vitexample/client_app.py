@@ -14,7 +14,6 @@ from vitexample.task import (
     trainer,
 )
 
-
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
@@ -45,15 +44,15 @@ def train(msg: Message, context: Context):
     # Load model
     model = get_model(num_classes)
     finetune_layers = model.heads
-    finetune_layers.load_state_dict(msg.content["arrays"].to_torch_state_dict(), strict=True)
+    finetune_layers.load_state_dict(
+        msg.content["arrays"].to_torch_state_dict(), strict=True
+    )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Set optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     # Train locally
-    avg_train_loss = trainer(
-        model, trainloader, optimizer, epochs=1, device=device
-    )
+    avg_train_loss = trainer(model, trainloader, optimizer, epochs=1, device=device)
 
     # Construct and return reply Message
     model_record = ArrayRecord(finetune_layers.state_dict())
