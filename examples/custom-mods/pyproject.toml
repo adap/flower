@@ -31,6 +31,7 @@ local-epochs = 1
 batch-size = 32
 learning-rate = 0.005
 verbose = false
+fraction-evaluate = 0.4
 
 [tool.flwr.federations]
 default = "local-simulation"
