@@ -45,7 +45,7 @@ def train(msg: Message, context: Context):
     training_arguments = TrainingArguments(**cfg.train.training_arguments)
 
     # Let's get the client partition
-    trainset = load_data(partition_id, num_partitions, cfg.dataset.name)
+    trainset = load_data(partition_id, num_partitions, cfg.static.dataset.name)
     (
         tokenizer,
         data_collator,
