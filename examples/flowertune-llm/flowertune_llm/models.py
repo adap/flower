@@ -1,8 +1,6 @@
 import math
-from collections import OrderedDict
 
 import torch
-from flwr.common.typing import NDArrays
 from omegaconf import DictConfig
 from peft import (
     LoraConfig,
@@ -60,17 +58,3 @@ def get_model(model_cfg: DictConfig):
     )
 
     return get_peft_model(model, peft_config)
-
-
-def set_parameters(model, parameters: NDArrays) -> None:
-    """Change the parameters of the model using the given ones."""
-    peft_state_dict_keys = get_peft_model_state_dict(model).keys()
-    params_dict = zip(peft_state_dict_keys, parameters)
-    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-    set_peft_model_state_dict(model, state_dict)
-
-
-def get_parameters(model) -> NDArrays:
-    """Return the parameters of the current net."""
-    state_dict = get_peft_model_state_dict(model)
-    return [val.cpu().numpy() for _, val in state_dict.items()]
