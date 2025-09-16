@@ -28,7 +28,7 @@ num-server-rounds = 3
 local-epochs = 1
 batch-size = 32
 learning-rate = 0.005
-fraction-fit = 0.5
+fraction-train = 0.5
 verbose = false
 
 [tool.flwr.federations]
