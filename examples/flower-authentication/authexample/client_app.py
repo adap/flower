@@ -8,7 +8,6 @@ from authexample.task import Net, load_data_from_disk
 from authexample.task import test as test_fn
 from authexample.task import train as train_fn
 
-
 app = ClientApp()
 
 
