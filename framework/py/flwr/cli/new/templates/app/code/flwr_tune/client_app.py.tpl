@@ -18,6 +18,11 @@ from $import_name.dataset import (
 )
 from $import_name.models import cosine_annealing, get_model
 
+# Avoid warnings
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
+os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = "1"
+warnings.filterwarnings("ignore", category=UserWarning)
+
 
 # Avoid warnings
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
@@ -85,4 +90,3 @@ def train(msg: Message, context: Context):
     metric_record = MetricRecord(metrics)
     content = RecordDict({"arrays": model_record, "metrics": metric_record})
     return Message(content=content, reply_to=msg)
-

@@ -6,14 +6,12 @@ from datetime import datetime
 from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.common.config import unflatten_dict
 from flwr.serverapp import Grid, ServerApp
-from flwr.serverapp.strategy import FedAvg
 from omegaconf import DictConfig
 from peft import get_peft_model_state_dict, set_peft_model_state_dict
 
 from $import_name.dataset import replace_keys
 from $import_name.models import get_model
 from $import_name.strategy import FlowerTuneLlm
-
 
 # Create ServerApp
 app = ServerApp()
