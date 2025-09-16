@@ -116,7 +116,13 @@ class FedAvg(Strategy):
             log(
                 WARNING,
                 "fraction_evaluate is set to 0.0. "
-                "Federated evaluation will be skipped."
+                "Federated evaluation will be skipped.",
+            )
+        if self.fraction_train == 0.0:
+            self.min_train_nodes = 0
+            log(
+                WARNING,
+                "fraction_train is set to 0.0. Federated training will be skipped.",
             )
 
     def summary(self) -> None:
@@ -158,6 +164,9 @@ class FedAvg(Strategy):
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
         """Configure the next round of federated training."""
+        # Do not configure federated train if fraction_train is 0.
+        if self.fraction_train == 0.0:
+            return []
         # Sample nodes
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_train)
         sample_size = max(num_nodes, self.min_train_nodes)
