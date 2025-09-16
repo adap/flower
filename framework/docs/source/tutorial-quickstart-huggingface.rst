@@ -271,10 +271,12 @@ conversions:
         model_name, num_labels=num_labels
     )
 
-    # Extract ArrayRecord from Message, convert to PyTorch state_dict, and load it into the model
-    net.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    # Extract ArrayRecord from Message and convert to PyTorch state_dict,
+    state_dict = msg.content["arrays"].to_torch_state_dict()
+    # Load state_dict into the model
+    net.load_state_dict(state_dict)
 
-    # ...
+    # ... do some training
 
     # Convert state_dict back into an ArrayRecord
     model_record = ArrayRecord(net.state_dict())
