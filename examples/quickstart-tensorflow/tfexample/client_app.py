@@ -2,7 +2,7 @@
 
 import keras
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 
 from tfexample.task import load_data, load_model
 
