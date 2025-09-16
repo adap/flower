@@ -16,7 +16,7 @@
 
 
 from collections.abc import Iterable
-from logging import INFO
+from logging import INFO, WARNING
 from typing import Callable, Optional
 
 from flwr.common import (
@@ -110,6 +110,14 @@ class FedAvg(Strategy):
         self.evaluate_metrics_aggr_fn = (
             evaluate_metrics_aggr_fn or aggregate_metricrecords
         )
+
+        if self.fraction_evaluate == 0.0:
+            self.min_evaluate_nodes = 0
+            log(
+                WARNING,
+                "fraction_evaluate is 0.0, "
+                "so min_evaluate_nodes has been set to 0 accordingly.",
+            )
 
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
