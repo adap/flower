@@ -67,7 +67,7 @@ def evaluate(msg: Message, context: Context):
 
     # Construct and return reply Message
     metrics = {
-        "loss": loss,
+        "loss": float(loss),
         "num-examples": len(testloader.dataset),
     }
     metric_record = MetricRecord(metrics)
