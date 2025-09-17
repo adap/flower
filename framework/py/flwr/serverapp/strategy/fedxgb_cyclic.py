@@ -16,9 +16,8 @@
 
 
 from collections.abc import Iterable
-from logging import INFO
-from time import sleep
-from typing import Optional, cast
+from logging import INFO, WARNING
+from typing import Callable, Optional, cast
 
 from flwr.common import (
     ArrayRecord,
@@ -32,38 +31,77 @@ from flwr.common import (
 from flwr.server import Grid
 
 from .fedavg import FedAvg
+from .strategy_utils import sample_nodes
 
 
 # pylint: disable=line-too-long
 class FedXgbCyclic(FedAvg):
-    """Configurable FedXgbCyclic strategy implementation."""
+    """Configurable FedXgbCyclic strategy implementation.
 
-    def _sample_nodes(
-        self, grid: Grid, min_available_nodes: int, sample_size: int
-    ) -> list[int]:
-        """Sample all connected nodes using the Grid."""
-        # Ensure min_available_nodes is at least as large as sample_size
-        min_available_nodes = max(min_available_nodes, sample_size)
+    Parameters
+    ----------
+    min_available_nodes : int (default: 2)
+        Minimum number of total nodes in the system.
+    weighted_by_key : str (default: "num-examples")
+        The key within each MetricRecord whose value is used as the weight when
+        computing weighted averages for both ArrayRecords and MetricRecords.
+    arrayrecord_key : str (default: "arrays")
+        Key used to store the ArrayRecord when constructing Messages.
+    configrecord_key : str (default: "config")
+        Key used to store the ConfigRecord when constructing Messages.
+    train_metrics_aggr_fn : Optional[callable] (default: None)
+        Function with signature (list[RecordDict], str) -> MetricRecord,
+        used to aggregate MetricRecords from training round replies.
+        If `None`, defaults to `aggregate_metricrecords`, which performs a weighted
+        average using the provided weight factor key.
+    evaluate_metrics_aggr_fn : Optional[callable] (default: None)
+        Function with signature (list[RecordDict], str) -> MetricRecord,
+        used to aggregate MetricRecords from training round replies.
+        If `None`, defaults to `aggregate_metricrecords`, which performs a weighted
+        average using the provided weight factor key.
+    """
 
-        # wait for min_available_nodes to be online
-        while len(all_nodes := list(grid.get_node_ids())) < min_available_nodes:
-            log(
-                INFO,
-                "Waiting for nodes to connect: %d connected (minimum required: %d).",
-                len(all_nodes),
-                min_available_nodes,
-            )
-            sleep(1)
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def __init__(
+            self,
+            min_available_nodes: int = 2,
+            weighted_by_key: str = "num-examples",
+            arrayrecord_key: str = "arrays",
+            configrecord_key: str = "config",
+            train_metrics_aggr_fn: Optional[
+                Callable[[list[RecordDict], str], MetricRecord]
+            ] = None,
+            evaluate_metrics_aggr_fn: Optional[
+                Callable[[list[RecordDict], str], MetricRecord]
+            ] = None,
+    ) -> None:
+        super().__init__(
+            fraction_train=1.0,
+            fraction_evaluate=1.0,
+            min_train_nodes=2,
+            min_evaluate_nodes=2,
+            min_available_nodes=min_available_nodes,
+            weighted_by_key=weighted_by_key,
+            arrayrecord_key=arrayrecord_key,
+            configrecord_key=configrecord_key,
+            train_metrics_aggr_fn=train_metrics_aggr_fn,
+            evaluate_metrics_aggr_fn=evaluate_metrics_aggr_fn,
+        )
 
-        return all_nodes
+        log(
+            WARNING,
+            "fraction_evaluate and fraction_evaluate are forced to 1.0.",
+        )
 
     def _make_sampling(
         self, grid: Grid, server_round: int, configure_type: str
     ) -> list[int]:
         """Sample nodes using the Grid."""
+
+        # Sample nodes
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_train)
         sample_size = max(num_nodes, self.min_train_nodes)
-        node_ids = self._sample_nodes(grid, self.min_available_nodes, sample_size)
+        node_ids, _ = sample_nodes(grid, self.min_available_nodes, sample_size)
 
         # Sample the clients sequentially given server_round
         sampled_idx = server_round % len(node_ids)

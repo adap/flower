@@ -52,10 +52,7 @@ def main(grid: Grid, context: Context) -> None:
         )
     else:
         # Cyclic training
-        strategy = FedXgbCyclic(
-            fraction_train=1.0,
-            fraction_evaluate=1.0,
-        )
+        strategy = FedXgbCyclic()
 
     # Start strategy, run for `num_rounds`
     result = strategy.start(
