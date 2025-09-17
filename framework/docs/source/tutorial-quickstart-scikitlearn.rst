@@ -9,7 +9,8 @@ Quickstart scikit-learn
 
 In this federated learning tutorial we will learn how to train a Logistic Regression on
 the MNIST dataset using Flower and scikit-learn. It is recommended to create a virtual
-environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+environment and run everything within a :doc:`virtualenv
+<contributor-how-to-set-up-a-virtual-env>`.
 
 We'll use ``flwr new`` to create a complete Flower+scikit-learn project scaffold. It
 will generate all the files needed to run, by default with the Flower Simulation Engine,
@@ -188,16 +189,15 @@ function:
 The ClientApp
 -------------
 
-The new Message API defines clients via the ``ClientApp`` class and
-decorators.  Each client implements two functions—``train`` and ``evaluate``—
-which operate on a ``Message`` and return a ``Message``.  A ``Message``
-received from the server carries the current global model weights
-as an ``ArrayRecord`` (stored under the key ``"arrays"``) and an optional
-``ConfigRecord`` with hyperparameters (stored under the key ``"config"``).
-The ``Context`` parameter gives access to the run configuration defined in
-your ``pyproject.toml`` and, when running on the Deployment Engine, the
-node configuration.  In this example we only use the run configuration
-to read the penalty and number of local epochs.
+The new Message API defines clients via the ``ClientApp`` class and decorators. Each
+client implements two functions—\ ``train`` and ``evaluate``\ — which operate on a
+``Message`` and return a ``Message``. A ``Message`` received from the server carries the
+current global model weights as an ``ArrayRecord`` (stored under the key ``"arrays"``)
+and an optional ``ConfigRecord`` with hyperparameters (stored under the key
+``"config"``). The ``Context`` parameter gives access to the run configuration defined
+in your ``pyproject.toml`` and, when running on the Deployment Engine, the node
+configuration. In this example we only use the run configuration to read the penalty and
+number of local epochs.
 
 A typical ``train`` method for logistic regression looks like this:
 
@@ -207,6 +207,7 @@ A typical ``train`` method for logistic regression looks like this:
     from typing import Tuple
 
     app = ClientApp()
+
 
     @app.train()
     def train(msg: Message, context: Context) -> Message:
@@ -230,57 +231,47 @@ A typical ``train`` method for logistic regression looks like this:
 
         # 4) Build the reply Message.
         arrays_record = ArrayRecord.from_numpy_ndarrays(get_model_params(model))
-        metrics = MetricRecord({
-            "train_accuracy": train_accuracy,
-            "num-examples": len(X_train),
-        })
+        metrics = MetricRecord(
+            {
+                "train_accuracy": train_accuracy,
+                "num-examples": len(X_train),
+            }
+        )
         reply_content = RecordDict({"arrays": arrays_record, "metrics": metrics})
         return Message(content=reply_content, reply_to=msg)
 
-The ``@app.evaluate`` method mirrors ``train`` but only evaluates
-the received model on the local validation set.  It returns a
-``MetricRecord`` containing the evaluation loss and accuracy and does
-not include the model weights, since they are not modified during
+The ``@app.evaluate`` method mirrors ``train`` but only evaluates the received model on
+the local validation set. It returns a ``MetricRecord`` containing the evaluation loss
+and accuracy and does not include the model weights, since they are not modified during
 evaluation.
 
 The ServerApp
 -------------
 
-The server runs a ``ServerApp`` which contains a single entrypoint
-annotated with ``@app.main()``.  This function receives two
-arguments:
+The server runs a ``ServerApp`` which contains a single entrypoint annotated with
+``@app.main()``. This function receives two arguments:
 
-* **grid** – an instance of ``Grid`` used to communicate with the
-  participating nodes running the ``ClientApp``.  It abstracts
-  details of the underlying transport (e.g., gRPC, HTTP) and allows
-  the ``ServerApp`` to broadcast requests and gather replies.
-
-* **context** – a ``Context`` providing access to the run
-  configuration.  From here you can read values defined in your
-  ``pyproject.toml``, such as the number of server rounds, the
-  regularisation penalty for logistic regression, or the number of
-  local epochs to be performed on each client.
+- **grid** – an instance of ``Grid`` used to communicate with the participating nodes
+  running the ``ClientApp``. It abstracts details of the underlying transport (e.g.,
+  gRPC, HTTP) and allows the ``ServerApp`` to broadcast requests and gather replies.
+- **context** – a ``Context`` providing access to the run configuration. From here you
+  can read values defined in your ``pyproject.toml``, such as the number of server
+  rounds, the regularisation penalty for logistic regression, or the number of local
+  epochs to be performed on each client.
 
 Within the ``main`` method you typically:
 
-1. **Create the global model** and wrap its parameters in an
-   ``ArrayRecord``.  For scikit-learn we instantiate a
-   ``LogisticRegression`` model with the desired penalty and maximum
-   number of iterations and convert its coefficients and intercept
-   into a list of NumPy arrays via ``get_model_params``.
-
-2. **Initialize the strategy**.  In this tutorial we use
-   |fedavg|_ with two custom aggregation functions:
-   ``train_metrics_aggr_fn`` and ``evaluate_metrics_aggr_fn``.
-   These functions compute a weighted average of client metrics
-   using the number of examples processed on each client as the
-   weight.  Passing them to the strategy ensures that
-   ``train_loss`` and ``eval_accuracy`` are aggregated correctly across
-   clients.
-
-3. **Launch the federated training loop** by calling
-   ``strategy.start``.  You must pass the ``grid``, the
-   ``initial_arrays`` (the model parameters), and ``num_rounds``
+1. **Create the global model** and wrap its parameters in an ``ArrayRecord``. For
+   scikit-learn we instantiate a ``LogisticRegression`` model with the desired penalty
+   and maximum number of iterations and convert its coefficients and intercept into a
+   list of NumPy arrays via ``get_model_params``.
+2. **Initialize the strategy**. In this tutorial we use |fedavg|_ with two custom
+   aggregation functions: ``train_metrics_aggr_fn`` and ``evaluate_metrics_aggr_fn``.
+   These functions compute a weighted average of client metrics using the number of
+   examples processed on each client as the weight. Passing them to the strategy ensures
+   that ``train_loss`` and ``eval_accuracy`` are aggregated correctly across clients.
+3. **Launch the federated training loop** by calling ``strategy.start``. You must pass
+   the ``grid``, the ``initial_arrays`` (the model parameters), and ``num_rounds``
    specifying how many rounds of `FedAvg` to perform.
 
 Here is a simplified version of the ``main`` method:
@@ -292,6 +283,7 @@ Here is a simplified version of the ``main`` method:
     from flwr.serverapp.strategy import FedAvg
 
     app = ServerApp()
+
 
     @app.main()
     def main(grid: Grid, context: Context) -> None:
@@ -327,8 +319,8 @@ in scikit-learn on the MNIST dataset using the new Message API.
 
 .. note::
 
-   Check the source code of this tutorial in the
-   `Flower GitHub repository <https://github.com/adap/flower/tree/main/examples/quickstart-sklearn-tabular>`_.
+    Check the source code of this tutorial in the `Flower GitHub repository
+    <https://github.com/adap/flower/tree/main/examples/quickstart-sklearn-tabular>`_.
 
 .. |client| replace:: ``Client``
 
