@@ -63,7 +63,7 @@ class FedProx(FedAvg):
     To:
 
     .. code:: python
-        # Get proximal term from configuration
+        # Get proximal term weight from message
         mu = msg.content["config"]["proximal-mu"]
 
         # Compute proximal term
