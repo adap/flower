@@ -1,7 +1,5 @@
 """$project_name: A Flower Baseline."""
 
-from collections import OrderedDict
-
 import torch
 import torch.nn.functional as F
 from torch import nn
