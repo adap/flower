@@ -66,15 +66,3 @@ def test(net, testloader, device):
     accuracy = correct / len(testloader.dataset)
     loss = loss / len(testloader)
     return loss, accuracy
-
-
-def get_weights(net):
-    """Extract model parameters as numpy arrays from state_dict."""
-    return [val.cpu().numpy() for _, val in net.state_dict().items()]
-
-
-def set_weights(net, parameters):
-    """Apply parameters to an existing model."""
-    params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
-    net.load_state_dict(state_dict, strict=True)
