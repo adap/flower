@@ -92,15 +92,15 @@ With default arguments you will see an output like this one:
 
 .. code-block:: shell
 
-    Loading project configuration... 
+    Loading project configuration...
     Success
     INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
-    INFO :      
+    INFO :
     INFO :      [INIT]
     INFO :      Using initial global parameters provided by strategy
     INFO :      Starting evaluation of initial global parameters
     INFO :      Evaluation returned no results (`None`)
-    INFO :      
+    INFO :
     INFO :      [ROUND 1]
     INFO :      configure_fit: strategy sampled 10 clients (out of 10)
     INFO :      aggregate_fit: received 10 results and 0 failures
@@ -108,19 +108,19 @@ With default arguments you will see an output like this one:
     INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
     INFO :      aggregate_evaluate: received 10 results and 0 failures
     WARNING :   No evaluate_metrics_aggregation_fn provided
-    INFO :      
+    INFO :
     INFO :      [ROUND 2]
     INFO :      configure_fit: strategy sampled 10 clients (out of 10)
     INFO :      aggregate_fit: received 10 results and 0 failures
     INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
     INFO :      aggregate_evaluate: received 10 results and 0 failures
-    INFO :      
+    INFO :
     INFO :      [ROUND 3]
     INFO :      configure_fit: strategy sampled 10 clients (out of 10)
     INFO :      aggregate_fit: received 10 results and 0 failures
     INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
     INFO :      aggregate_evaluate: received 10 results and 0 failures
-    INFO :      
+    INFO :
     INFO :      [SUMMARY]
     INFO :      Run finished 3 round(s) in 14.53s
     INFO :          History (loss, distributed):
@@ -205,33 +205,24 @@ A typical ``train`` method for logistic regression looks like this:
     @app.train()
     def train(msg: Message, context: Context) -> Message:
         """Handle a training request from the server."""
-        # 1) Instantiate a logistic regression model and
-        # set its parameters from the received ArrayRecord.
-        penalty = context.run_config["penalty"]
-        local_epochs = context.run_config["local-epochs"]
-        model = get_model(penalty, local_epochs)
-        ndarrays = msg.content["arrays"].to_numpy_ndarrays()
-        model = set_model_params(model, ndarrays)
+        # Instantiate a logistic regression model
+        n_classes = 10  # MNIST has 10 classes
+        n_features = 784  # Number of features in dataset
+        model.classes_ = np.array([i for i in range(10)])
 
-        # 2) Load the local training data.
-        partition_id = context.node_config["partition-id"]
-        num_partitions = context.node_config["num-partitions"]
-        X_train, _, y_train, _ = load_data(partition_id, num_partitions)
+        # ...
 
-        # 3) Fit the model on the local data.
-        model.fit(X_train, y_train)
-        train_accuracy = model.score(X_train, y_train)
+        model.coef_ = np.zeros((n_classes, n_features))
+        if model.fit_intercept:
+            model.intercept_ = np.zeros((n_classes,))
 
-        # 4) Build the reply Message.
-        arrays_record = ArrayRecord.from_numpy_ndarrays(get_model_params(model))
-        metrics = MetricRecord(
-            {
-                "train_accuracy": train_accuracy,
-                "num-examples": len(X_train),
-            }
-        )
-        reply_content = RecordDict({"arrays": arrays_record, "metrics": metrics})
-        return Message(content=reply_content, reply_to=msg)
+        # 2) Fit the model
+        set_model_params(self.model, parameters)
+
+        # Ignore convergence failure due to low local epochs
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.model.fit(self.X_train, self.y_train)
 
 The ``@app.evaluate`` method mirrors ``train`` but only evaluates the received model on
 the local validation set. It returns a ``MetricRecord`` containing the evaluation loss
@@ -281,31 +272,27 @@ Here is a simplified version of the ``main`` method:
     @app.main()
     def main(grid: Grid, context: Context) -> None:
         """Entry point for the server."""
-        # 1) Build the initial logistic regression model
+        # Read from config
+        num_rounds = context.run_config["num-server-rounds"]
+
+        # Create LogisticRegression Model
         penalty = context.run_config["penalty"]
         local_epochs = context.run_config["local-epochs"]
         model = get_model(penalty, local_epochs)
-        initial_arrays = ArrayRecord.from_numpy_ndarrays(get_model_params(model))
 
-        # 2) Configure the strategy.  Use the weighted average functions
-        # to aggregate client-side metrics.
-        min_available_nodes = context.run_config["min-available-clients"]
+        # Setting initial parameters, akin to model.compile for keras models
+        set_initial_params(model)
+
+        initial_parameters = ndarrays_to_parameters(get_model_params(model))
+
+        # Define strategy
         strategy = FedAvg(
-            min_available_nodes=min_available_nodes,
-            train_metrics_aggr_fn=weighted_average,
-            evaluate_metrics_aggr_fn=weighted_average,
+            fraction_fit=1.0,
+            fraction_evaluate=1.0,
+            min_available_clients=2,
+            initial_parameters=initial_parameters,
         )
-
-        # 3) Start federated learning.  Run FedAvg for the specified number of rounds.
-        num_rounds = context.run_config["num-server-rounds"]
-        result = strategy.start(
-            grid=grid,
-            initial_arrays=initial_arrays,
-            num_rounds=num_rounds,
-        )
-
-        # 4) Print or save the final model and metrics (optional)
-        print(result)
+        config = ServerConfig(num_rounds=num_rounds)
 
 Congratulations! You've successfully built and run your first federated learning system
 in scikit-learn on the MNIST dataset using the new Message API.
@@ -340,7 +327,6 @@ in scikit-learn on the MNIST dataset using the new Message API.
 .. _logisticregression: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
 
 .. _otherpartitioners: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html
-
 
 .. meta::
     :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a linear regression model.
