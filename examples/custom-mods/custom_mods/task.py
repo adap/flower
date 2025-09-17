@@ -1,24 +1,19 @@
 """custom_mods: A Flower app with custom mods."""
 
-import warnings
-from collections import OrderedDict
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from datasets import load_dataset
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
-warnings.filterwarnings("ignore", category=UserWarning)
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
 
-    def __init__(self) -> None:
+    def __init__(self):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
@@ -27,7 +22,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = x.view(-1, 16 * 5 * 5)
@@ -36,17 +31,15 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
-def get_weights(net):
-    return [val.cpu().numpy() for _, val in net.state_dict().items()]
-
-
-def set_weights(net, parameters):
-    params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    net.load_state_dict(state_dict, strict=True)
-
-
 fds = None  # Cache FederatedDataset
+
+pytorch_transforms = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+
+def apply_transforms(batch):
+    """Apply transforms to the partition from FederatedDataset."""
+    batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
+    return batch
 
 
 def load_data(partition_id: int, num_partitions: int, batch_size: int):
@@ -62,15 +55,7 @@ def load_data(partition_id: int, num_partitions: int, batch_size: int):
     partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
-    pytorch_transforms = Compose(
-        [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-    )
-
-    def apply_transforms(batch):
-        """Apply transforms to the partition from FederatedDataset."""
-        batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
-        return batch
-
+    # Construct dataloaders
     partition_train_test = partition_train_test.with_transform(apply_transforms)
     trainloader = DataLoader(
         partition_train_test["train"], batch_size=batch_size, shuffle=True
@@ -79,35 +64,37 @@ def load_data(partition_id: int, num_partitions: int, batch_size: int):
     return trainloader, testloader
 
 
-def train(net, trainloader, valloader, epochs, learning_rate, device):
+def load_centralized_dataset():
+    """Load test set and return dataloader."""
+    # Load entire test set
+    test_dataset = load_dataset("uoft-cs/cifar10", split="test")
+    dataset = test_dataset.with_format("torch").with_transform(apply_transforms)
+    return DataLoader(dataset, batch_size=128)
+
+
+def train(net, trainloader, epochs, lr, device):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
+    optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9)
     net.train()
+    running_loss = 0.0
     for _ in range(epochs):
         for batch in trainloader:
-            images = batch["img"]
-            labels = batch["label"]
+            images = batch["img"].to(device)
+            labels = batch["label"].to(device)
             optimizer.zero_grad()
-            criterion(net(images.to(device)), labels.to(device)).backward()
+            loss = criterion(net(images), labels)
+            loss.backward()
             optimizer.step()
-
-    train_loss, train_acc = test(net, trainloader, device)
-    val_loss, val_acc = test(net, valloader, device)
-
-    results = {
-        "train_loss": train_loss,
-        "train_accuracy": train_acc,
-        "val_loss": val_loss,
-        "val_accuracy": val_acc,
-    }
-    return results
+            running_loss += loss.item()
+    avg_trainloss = running_loss / len(trainloader)
+    return avg_trainloss
 
 
 def test(net, testloader, device):
     """Validate the model on the test set."""
-    net.to(device)  # move model to GPU if available
+    net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
