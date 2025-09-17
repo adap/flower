@@ -1,7 +1,5 @@
 """fltabular: Flower Example on Adult Census Income Tabular Dataset."""
 
-from collections import OrderedDict
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -110,14 +108,3 @@ def evaluator(model, test_loader):
     accuracy = correct / total
     loss = loss / len(test_loader)
     return loss, accuracy
-
-
-def set_weights(net, parameters):
-    params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    net.load_state_dict(state_dict, strict=True)
-
-
-def get_weights(net):
-    ndarrays = [val.cpu().numpy() for _, val in net.state_dict().items()]
-    return ndarrays
