@@ -129,9 +129,8 @@ class Krum(FedAvg):
         """
         flat_w = np.array(
             [
-                np.concatenate(ndarray, axis=None).ravel()
+                np.concatenate(rec.to_numpy_ndarrays(), axis=None).ravel()
                 for rec in records
-                for ndarray in rec.to_numpy_ndarrays()
             ]
         )
         distance_matrix = np.zeros((len(records), len(records)))
@@ -142,7 +141,7 @@ class Krum(FedAvg):
                 distance_matrix[i, j] = norm**2
         return distance_matrix
 
-    def _krum(self, replies: Iterable[RecordDict]) -> Iterable[RecordDict]:
+    def _krum(self, replies: list[RecordDict]) -> list[RecordDict]:
 
         # Construct list of ArrayRecord objects from replies
         # Recall aggregate_train first ensures replies only containe on ArrayRecord
@@ -173,7 +172,7 @@ class Krum(FedAvg):
             return [replies[i] for i in best_indices]
 
         # Return the RecordDict with the ArrayRecord that minimize the score (Krum)
-        return replies[np.argmin(scores)]
+        return [replies[np.argmin(scores)]]
 
     def aggregate_train(
         self,
