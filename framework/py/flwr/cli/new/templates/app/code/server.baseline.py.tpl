@@ -27,7 +27,7 @@ def main(grid: Grid, context: Context) -> None:
     strategy = FedAvg(
         fraction_train=fraction_train,
         fraction_evaluate=1.0,
-        min_available_clients=2,
+        min_available_nodes=2,
     )
 
     # Start strategy, run FedAvg for `num_rounds`
