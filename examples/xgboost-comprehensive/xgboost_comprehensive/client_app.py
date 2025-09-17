@@ -4,8 +4,8 @@ import warnings
 
 import numpy as np
 import xgboost as xgb
-from flwr.clientapp import ClientApp
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 from flwr.common.config import unflatten_dict
 
 from xgboost_comprehensive.task import load_data, replace_keys
