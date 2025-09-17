@@ -33,7 +33,7 @@ def main(grid: Grid, context: Context) -> None:
         initial_arrays=arrays,
         num_rounds=num_rounds,
     )
-    
+
     # Save final model to disk
     print("\nSaving final model to disk...")
     state_dict = result.arrays.to_torch_state_dict()
