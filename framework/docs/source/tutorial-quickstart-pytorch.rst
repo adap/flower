@@ -63,8 +63,8 @@ install Flower in your new environment:
     $ pip install flwr
 
 Then, run the command below. You will be prompted to select one of the available
-templates (choose ``PyTorch (Message API)``), give a name to your project, and type in
-your developer name:
+templates (choose ``PyTorch``), give a name to your project, and type in your developer
+name:
 
 .. code-block:: shell
 
