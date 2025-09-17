@@ -90,7 +90,7 @@ def flower_superexec() -> None:
         except (FileNotFoundError, yaml.YAMLError, ValueError) as e:
             flwr_exit(
                 ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG,
-                f"Failed to load plugin config from '{plugin_config_path}': {e}",
+                f"Failed to load plugin config from '{plugin_config_path}': {e!r}",
             )
 
     # Get the plugin class and stub class based on the plugin type
