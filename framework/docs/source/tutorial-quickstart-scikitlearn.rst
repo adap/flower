@@ -2,7 +2,35 @@
 .. meta::
     :description: Learn how to train a logistic regression on MNIST using federated learning with Flower and scikit-learn in this step-by-step tutorial.
 
-.. _quickstart-scikitlearn:
+.. _quickstart-pytorch:
+
+.. |message_link| replace:: ``Message``
+
+.. _message_link: ref-api/flwr.common.Message.html
+
+.. |arrayrecord_link| replace:: ``ArrayRecord``
+
+.. _arrayrecord_link: ref-api/flwr.common.ArrayRecord.html
+
+.. |clientapp_link| replace:: ``ClientApp``
+
+.. _clientapp_link: ref-api/flwr.client.ClientApp.html
+
+.. |fedavg_link| replace:: ``FedAvg``
+
+.. _fedavg_link: ref-api/flwr.serverapp.FedAvg.html
+
+.. |serverapp_link| replace:: ``ServerApp``
+
+.. _serverapp_link: ref-api/flwr.server.ServerApp.html
+
+.. |strategy_start_link| replace:: ``start``
+
+.. _strategy_start_link: ref-api/flwr.serverapp.Strategy.html#flwr.serverapp.Strategy.start
+
+.. |strategy_link| replace:: ``Strategy``
+
+.. _strategy_link: ref-api/flwr.serverapp.Strategy.html
 
 Quickstart scikit-learn
 =======================
@@ -64,76 +92,41 @@ With default arguments you will see an output like this one:
 
 .. code-block:: shell
 
-    Loading project configuration...
+    Loading project configuration... 
     Success
-    INFO :      Starting FedAvg strategy:
-    INFO :          ├── Number of rounds: 3
-    INFO :          ├── ArrayRecord (0.24 MB)
-    INFO :          ├── ConfigRecord (train): {'penalty': 'l2'}
-    INFO :          ├── ConfigRecord (evaluate): (empty!)
-    INFO :          ├──> Sampling:
-    INFO :          │       ├──Fraction: train (1.00) | evaluate (0.50)
-    INFO :          │       ├──Minimum nodes: train (2) | evaluate (2)
-    INFO :          │       └──Minimum available nodes: 2
-    INFO :          └──> Keys in records:
-    INFO :                  ├── Weighted by: 'num-examples'
-    INFO :                  ├── ArrayRecord key: 'arrays'
-    INFO :                  └── ConfigRecord key: 'config'
-    INFO :
-    INFO :      Initial global evaluation results: {'accuracy': 0.1, 'loss': 2.30}
-    INFO :
-    INFO :      [ROUND 1/3]
-    INFO :      configure_train: Sampled 10 nodes (out of 10)
-    INFO :      aggregate_train: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'train_loss': 2.10}
-    INFO :      configure_evaluate: Sampled 5 nodes (out of 10)
-    INFO :      aggregate_evaluate: Received 5 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 2.20, 'eval_accuracy': 0.12}
-    INFO :      Global evaluation
-    INFO :          └──> MetricRecord: {'accuracy': 0.11, 'loss': 2.22}
-    INFO :
-    INFO :      [ROUND 2/3]
-    INFO :      configure_train: Sampled 10 nodes (out of 10)
-    INFO :      aggregate_train: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'train_loss': 2.00}
-    INFO :      configure_evaluate: Sampled 5 nodes (out of 10)
-    INFO :      aggregate_evaluate: Received 5 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 2.05, 'eval_accuracy': 0.20}
-    INFO :      Global evaluation
-    INFO :          └──> MetricRecord: {'accuracy': 0.19, 'loss': 2.05}
-    INFO :
-    INFO :      [ROUND 3/3]
-    INFO :      configure_train: Sampled 10 nodes (out of 10)
-    INFO :      aggregate_train: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'train_loss': 1.95}
-    INFO :      configure_evaluate: Sampled 5 nodes (out of 10)
-    INFO :      aggregate_evaluate: Received 5 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 1.90, 'eval_accuracy': 0.28}
-    INFO :      Global evaluation
-    INFO :          └──> MetricRecord: {'accuracy': 0.25, 'loss': 1.95}
-    INFO :
-    INFO :      Strategy execution finished in XX.XXs
-    INFO :
-    INFO :      Final results:
-    INFO :
-    INFO :          Global Arrays:
-    INFO :                  ArrayRecord (0.23 MB)
-    INFO :
-    INFO :          Aggregated ClientApp-side Train Metrics:
-    INFO :          { 1: {'train_loss': '2.10e+00'},
-    INFO :            2: {'train_loss': '2.00e+00'},
-    INFO :            3: {'train_loss': '1.95e+00'}}
-    INFO :
-    INFO :          Aggregated ClientApp-side Evaluate Metrics:
-    INFO :          { 1: {'eval_accuracy': '1.20e-01', 'eval_loss': '2.20e+00'},
-    INFO :            2: {'eval_accuracy': '2.00e-01', 'eval_loss': '2.05e+00'},
-    INFO :            3: {'eval_accuracy': '2.80e-01', 'eval_loss': '1.90e+00'}}
-    INFO :
-    INFO :          ServerApp-side Evaluate Metrics:
-    INFO :          { 0: {'accuracy': '1.00e-01', 'loss': '2.30e+00'},
-    INFO :            1: {'accuracy': '1.10e-01', 'loss': '2.22e+00'},
-    INFO :            2: {'accuracy': '1.90e-01', 'loss': '2.05e+00'},
-    INFO :            3: {'accuracy': '2.50e-01', 'loss': '1.95e+00'}}
+    INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
+    INFO :      
+    INFO :      [INIT]
+    INFO :      Using initial global parameters provided by strategy
+    INFO :      Starting evaluation of initial global parameters
+    INFO :      Evaluation returned no results (`None`)
+    INFO :      
+    INFO :      [ROUND 1]
+    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
+    INFO :      aggregate_fit: received 10 results and 0 failures
+    WARNING :   No fit_metrics_aggregation_fn provided
+    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
+    INFO :      aggregate_evaluate: received 10 results and 0 failures
+    WARNING :   No evaluate_metrics_aggregation_fn provided
+    INFO :      
+    INFO :      [ROUND 2]
+    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
+    INFO :      aggregate_fit: received 10 results and 0 failures
+    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
+    INFO :      aggregate_evaluate: received 10 results and 0 failures
+    INFO :      
+    INFO :      [ROUND 3]
+    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
+    INFO :      aggregate_fit: received 10 results and 0 failures
+    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
+    INFO :      aggregate_evaluate: received 10 results and 0 failures
+    INFO :      
+    INFO :      [SUMMARY]
+    INFO :      Run finished 3 round(s) in 14.53s
+    INFO :          History (loss, distributed):
+    INFO :                  round 1: 1.233069000819992
+    INFO :                  round 2: 0.8805567523494775
+    INFO :                  round 3: 0.7020750690299342
 
 You can also override the parameters defined in the ``[tool.flwr.app.config]`` section
 in ``pyproject.toml`` like this:
@@ -334,8 +327,6 @@ in scikit-learn on the MNIST dataset using the new Message API.
 
 .. |otherpartitioners| replace:: other partitioners
 
-.. |serverappcomponents| replace:: ``ServerAppComponents``
-
 .. |quickstart_sklearn_link| replace:: ``examples/sklearn-logreg-mnist``
 
 .. _client: ref-api/flwr.client.Client.html#client
@@ -350,9 +341,6 @@ in scikit-learn on the MNIST dataset using the new Message API.
 
 .. _otherpartitioners: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html
 
-.. _quickstart_sklearn_link: https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist
-
-.. _serverappcomponents: ref-api/flwr.server.ServerAppComponents.html#serverappcomponents
 
 .. meta::
     :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a linear regression model.
