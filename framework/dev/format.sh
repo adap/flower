@@ -21,11 +21,6 @@ python -m isort e2e
 python -m black -q e2e
 python -m docformatter -i -r e2e
 
-# Notebooks
-python -m black --ipynb -q docs/source/notebooks/*.ipynb
-KEYS="metadata.celltoolbar metadata.language_info metadata.toc metadata.notify_time metadata.varInspector metadata.accelerator metadata.vscode cell.metadata.id cell.metadata.heading_collapsed cell.metadata.hidden cell.metadata.code_folding cell.metadata.tags cell.metadata.init_cell cell.metadata.vscode cell.metadata.pycharm"
-python -m nbstripout docs/source/notebooks/*.ipynb --extra-keys "$KEYS"
-
 # Markdown
 python -m mdformat --number docs/source
 

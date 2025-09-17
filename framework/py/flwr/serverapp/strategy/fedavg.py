@@ -16,7 +16,7 @@
 
 
 from collections.abc import Iterable
-from logging import INFO
+from logging import INFO, WARNING
 from typing import Callable, Optional
 
 from flwr.common import (
@@ -67,7 +67,7 @@ class FedAvg(Strategy):
     arrayrecord_key : str (default: "arrays")
         Key used to store the ArrayRecord when constructing Messages.
     configrecord_key : str (default: "config")
-         Key used to store the ConfigRecord when constructing Messages.
+        Key used to store the ConfigRecord when constructing Messages.
     train_metrics_aggr_fn : Optional[callable] (default: None)
         Function with signature (list[RecordDict], str) -> MetricRecord,
         used to aggregate MetricRecords from training round replies.
@@ -111,6 +111,20 @@ class FedAvg(Strategy):
             evaluate_metrics_aggr_fn or aggregate_metricrecords
         )
 
+        if self.fraction_evaluate == 0.0:
+            self.min_evaluate_nodes = 0
+            log(
+                WARNING,
+                "fraction_evaluate is set to 0.0. "
+                "Federated evaluation will be skipped.",
+            )
+        if self.fraction_train == 0.0:
+            self.min_train_nodes = 0
+            log(
+                WARNING,
+                "fraction_train is set to 0.0. Federated training will be skipped.",
+            )
+
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
         log(INFO, "\t├──> Sampling:")
@@ -150,6 +164,9 @@ class FedAvg(Strategy):
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
         """Configure the next round of federated training."""
+        # Do not configure federated train if fraction_train is 0.
+        if self.fraction_train == 0.0:
+            return []
         # Sample nodes
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_train)
         sample_size = max(num_nodes, self.min_train_nodes)
@@ -259,6 +276,10 @@ class FedAvg(Strategy):
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
         """Configure the next round of federated evaluation."""
+        # Do not configure federated evaluation if fraction_evaluate is 0.
+        if self.fraction_evaluate == 0.0:
+            return []
+
         # Sample nodes
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_evaluate)
         sample_size = max(num_nodes, self.min_evaluate_nodes)
