@@ -31,6 +31,7 @@ from flwr.common.constant import (
     LOG_STREAM_INTERVAL,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NO_USER_AUTH_MESSAGE,
+    PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
     Status,
     SubStatus,
@@ -374,13 +375,18 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Exit if `run_id` not found
         if not run:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+            raise grpc.RpcError()  # This line is unreachable
+
+        # Exit if the run is not finished yet
+        if run.status.status != Status.FINISHED:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION, PULL_UNFINISHED_RUN_MESSAGE
+            )
 
         # Check if `flwr_aid` matches the run's `flwr_aid` when user auth is enabled
         if self.auth_plugin:
             flwr_aid = shared_account_info.get().flwr_aid
-            _check_flwr_aid_in_run(
-                flwr_aid=flwr_aid, run=cast(Run, run), context=context
-            )
+            _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
         # Call artifact provider
         download_url = self.artifact_provider.get_url(run_id)

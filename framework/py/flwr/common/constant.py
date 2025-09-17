@@ -156,6 +156,7 @@ PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
 RUN_ID_NOT_FOUND_MESSAGE = "Run ID not found"
 NO_USER_AUTH_MESSAGE = "ControlServicer initialized without user authentication"
 NO_ARTIFACT_PROVIDER_MESSAGE = "ControlServicer initialized without artifact provider"
+PULL_UNFINISHED_RUN_MESSAGE = "Cannot pull artifacts for an unfinished run"
 
 
 class MessageType:

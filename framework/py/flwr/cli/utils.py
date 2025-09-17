@@ -34,6 +34,7 @@ from flwr.common.constant import (
     FLWR_DIR,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NO_USER_AUTH_MESSAGE,
+    PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
 )
 from flwr.common.grpc import (
@@ -363,4 +364,13 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
                 bold=True,
             )
             raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.FAILED_PRECONDITION:
+            if e.details() == PULL_UNFINISHED_RUN_MESSAGE:  # pylint: disable=E1101
+                typer.secho(
+                    "❌ Run is not finished yet. Please wait until the run is finished "
+                    "and try again. You can check the run status using `flwr ls`.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1) from None
         raise
