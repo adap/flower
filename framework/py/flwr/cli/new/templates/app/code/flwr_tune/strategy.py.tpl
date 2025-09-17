@@ -50,7 +50,6 @@ class CommunicationTracker:
     def __init__(self):
         self.curr_comm_cost = 0.0
 
-    @staticmethod
     def track(self, messages: Iterable[Message]):
         comm_cost = (
             sum(
