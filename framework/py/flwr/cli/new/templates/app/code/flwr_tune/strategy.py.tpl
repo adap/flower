@@ -57,10 +57,10 @@ class CommunicationTracker:
     def track(self, messages: Iterable[Message]):
         comm_cost = (
             sum(
-                self._compute_bytes(msg.content.array_records[key])
+                self._compute_bytes(record)
                 for msg in messages
                 if msg.has_content()
-                for key in msg.content.array_records.keys()
+                for record in msg.content.array_records.values()
             )
             / 1024**2
         )
