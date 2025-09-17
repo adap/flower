@@ -42,7 +42,7 @@ class FedProx(FedAvg):
 
     FedProx extends FedAvg by introducing a proximal term into the client-side
     optimization objective. The strategy itself behaves identically to FedAvg
-    on the server side, but each client must add a proximal regularization
+    on the server side, but each client **MUST** add a proximal regularization
     term to its local loss function during training:
 
     .. math::
