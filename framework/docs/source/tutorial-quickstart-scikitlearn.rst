@@ -1,39 +1,34 @@
-:og:description: Learn how to train a logistic regression on MNIST using federated learning with Flower and scikit-learn in this step-by-step tutorial.
+:og:description: Learn how to train a logistic regression on the Iris dataset using federated learning with Flower and scikit-learn in this step-by-step tutorial.
 .. meta::
-    :description: Learn how to train a logistic regression on MNIST using federated learning with Flower and scikit-learn in this step-by-step tutorial.
+    :description: Learn how to train a logistic regression on the Iris dataset using federated learning with Flower and scikit-learn in this step-by-step tutorial.
 
-.. _quickstart-scikitlearn:
+.. _quickstart-sklearn-tabular:
 
-Quickstart scikit-learn
-=======================
+Quickstart scikit-learn (tabular)
+=================================
 
 In this federated learning tutorial we will learn how to train a Logistic Regression on
-MNIST using Flower and scikit-learn. It is recommended to create a virtual environment
+the Iris dataset using Flower and scikit-learn. It is recommended to create a virtual environment
 and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
-Let's use ``flwr new`` to create a complete Flower+scikit-learn project. It will
+We'll use ``flwr new`` to create a complete Flower+scikit-learn project scaffold. It will
 generate all the files needed to run, by default with the Flower Simulation Engine, a
-federation of 10 nodes using |fedavg|_. The dataset will be partitioned using
-|flowerdatasets|_'s |iidpartitioner|_.
+federation of 10 nodes using |fedavg|_. Instead of MNIST, we will work with the classic Iris dataset.
 
-Now that we have a rough idea of what this example is about, let's get started. First,
-install Flower in your new environment:
+First, install Flower in your environment:
 
 .. code-block:: shell
 
     # In a new Python environment
     $ pip install flwr
 
-Then, run the command below. You will be prompted to select one of the available
-templates (choose ``sklearn``), give a name to your project, and type in your developer
-name:
+Then, run the command below. Choose the ``sklearn`` template, provide a project name, and your developer name:
 
 .. code-block:: shell
 
     $ flwr new
 
-After running it you'll notice a new directory with your project name has been created.
-It should have the following structure:
+After running it you'll see a new directory with this structure:
 
 .. code-block:: shell
 
@@ -42,25 +37,23 @@ It should have the following structure:
     │   ├── __init__.py
     │   ├── client_app.py   # Defines your ClientApp (@app.train / @app.evaluate)
     │   ├── server_app.py   # Defines your ServerApp (@app.main)
-    │   └── task.py         # Defines your model, training and data loading
-    ├── pyproject.toml      # Project metadata like dependencies and configs
+    │   └── task.py         # Defines model, training, evaluation, and data loading
+    ├── pyproject.toml
     └── README.md
 
-If you haven't yet installed the project and its dependencies, you can do so by:
+Install the project and dependencies:
 
 .. code-block:: shell
 
-    # From the directory where your pyproject.toml is
     $ pip install -e .
 
-To run the project, do:
+Run the project:
 
 .. code-block:: shell
 
-    # Run with default arguments
     $ flwr run .
 
-With default arguments you will see an output like this one:
+With default arguments you should see an output like this:
 
 .. code-block:: shell
 
@@ -68,59 +61,41 @@ With default arguments you will see an output like this one:
     Success
     INFO :      Starting FedAvg strategy:
     INFO :          ├── Number of rounds: 3
-    INFO :          ├── ArrayRecord (0.24 MB)
+    INFO :          ├── ArrayRecord (small, ~kB)
     INFO :          ├── ConfigRecord (train): {'lr': 0.1}
-    INFO :          ├── ConfigRecord (evaluate): (empty!)
     INFO :          ├──> Sampling:
     INFO :          │       ├──Fraction: train (1.00) | evaluate (0.50)
-    INFO :          │       ├──Minimum nodes: train (2) | evaluate (2)
     INFO :          │       └──Minimum available nodes: 2
     INFO :          └──> Keys in records:
     INFO :                  ├── Weighted by: 'num-examples'
     INFO :                  ├── ArrayRecord key: 'arrays'
     INFO :                  └── ConfigRecord key: 'config'
 
-You can also override the parameters defined in the ``[tool.flwr.app.config]`` section
-in ``pyproject.toml`` like this:
+You can override config values defined in ``[tool.flwr.app.config]`` in ``pyproject.toml``:
 
 .. code-block:: shell
 
-    # Override some arguments
     $ flwr run . --run-config "num-server-rounds=5 local-epochs=2"
-
-What follows is an explanation of each component in the project you just created:
-dataset partition, the model, defining the ``ClientApp`` and defining the ``ServerApp``.
 
 The Data
 --------
 
-This tutorial uses |flowerdatasets|_ to easily download and partition the `MNIST
-<https://huggingface.co/datasets/ylecun/mnist>`_ dataset. In this example you'll make
-use of the |iidpartitioner|_ to generate ``num_partitions`` partitions. You can choose
-|otherpartitioners|_ available in Flower Datasets. Each ``ClientApp`` will call this
-function to create dataloaders with the data that correspond to their data partition.
+This tutorial uses scikit-learn’s built-in Iris dataset. We split it into 10 partitions
+(one for each client) and within each partition, 80% is used for training and 20% for testing:
 
 .. code-block:: python
 
-    partitioner = IidPartitioner(num_partitions=num_partitions)
-    fds = FederatedDataset(
-        dataset="mnist",
-        partitioners={"train": partitioner},
-    )
+    iris = load_iris()
+    X, y = iris.data, iris.target
 
-    dataset = fds.load_partition(partition_id, "train").with_format("numpy")
-
-    X, y = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
-
-    # Split the on edge data: 80% train, 20% test
+    # Partition data
     X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
     y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
 
 The Model
 ---------
 
-We define the |logisticregression|_ model from scikit-learn in the ``get_model()``
-function:
+We define the |logisticregression|_ model in ``task.py``:
 
 .. code-block:: python
 
@@ -134,8 +109,7 @@ function:
 The ClientApp
 -------------
 
-Instead of subclassing ``NumPyClient``, the new API uses decorators. You implement
-``@app.train`` and ``@app.evaluate`` to handle training and evaluation on each client.
+Instead of subclassing ``NumPyClient``, the new API uses decorators. In ``client_app.py`` you’ll see:
 
 .. code-block:: python
 
@@ -151,14 +125,10 @@ Instead of subclassing ``NumPyClient``, the new API uses decorators. You impleme
         # set model params, evaluate locally, return loss + accuracy
         ...
 
-This allows direct use of |arrayrecord|_ and |metricrecord|_ for exchanging model
-parameters and metrics, making the API more consistent across frameworks.
-
 The ServerApp
 -------------
 
-Instead of ``server_fn`` returning ``ServerAppComponents``, the new API defines
-a single entrypoint using ``@app.main``:
+In ``server_app.py`` the federated averaging strategy is defined:
 
 .. code-block:: python
 
@@ -166,47 +136,25 @@ a single entrypoint using ``@app.main``:
 
     @app.main()
     def main(grid: Grid, context: Context) -> None:
-        # Create initial model parameters
         initial_arrays = ArrayRecord.from_numpy_ndarrays(get_model_params(model))
-
-        # Define strategy with aggregation functions
         strategy = FedAvg(
             min_available_nodes=2,
             train_metrics_aggr_fn=weighted_average,
             evaluate_metrics_aggr_fn=weighted_average,
         )
-
-        # Run training
         strategy.start(
             grid=grid,
             initial_arrays=initial_arrays,
             num_rounds=context.run_config["num-server-rounds"],
         )
 
-Congratulations! You've successfully built and run your first federated learning system
-in scikit-learn using the new Message API.
+Congratulations! You've now built and run your first federated learning system
+in scikit-learn on the Iris dataset using the new Message API.
 
 .. note::
 
-    Check the source code of the extended version of this tutorial in
-    |quickstart_sklearn_link|_ in the Flower GitHub repository.
+    Check the source code of this tutorial in the
+   `Flower GitHub repository <https://github.com/adap/flower/tree/main/examples/quickstart-sklearn-tabular>`_.
 
 .. |fedavg| replace:: ``FedAvg``
-.. |flowerdatasets| replace:: Flower Datasets
-.. |iidpartitioner| replace:: ``IidPartitioner``
 .. |logisticregression| replace:: ``LogisticRegression``
-.. |otherpartitioners| replace:: other partitioners
-.. |arrayrecord| replace:: ``ArrayRecord``
-.. |metricrecord| replace:: ``MetricRecord``
-
-.. _fedavg: ref-api/flwr.serverapp.strategy.FedAvg.html
-.. _flowerdatasets: https://flower.ai/docs/datasets/
-.. _iidpartitioner: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html
-.. _logisticregression: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
-.. _otherpartitioners: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html
-.. _arrayrecord: ref-api/flwr.app.ArrayRecord.html
-.. _metricrecord: ref-api/flwr.app.MetricRecord.html
-.. _quickstart_sklearn_link: https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist
-
-.. meta::
-    :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a logistic regression model.
