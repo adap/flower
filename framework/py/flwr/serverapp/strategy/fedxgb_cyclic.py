@@ -63,17 +63,17 @@ class FedXgbCyclic(FedAvg):
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
-            self,
-            min_available_nodes: int = 2,
-            weighted_by_key: str = "num-examples",
-            arrayrecord_key: str = "arrays",
-            configrecord_key: str = "config",
-            train_metrics_aggr_fn: Optional[
-                Callable[[list[RecordDict], str], MetricRecord]
-            ] = None,
-            evaluate_metrics_aggr_fn: Optional[
-                Callable[[list[RecordDict], str], MetricRecord]
-            ] = None,
+        self,
+        min_available_nodes: int = 2,
+        weighted_by_key: str = "num-examples",
+        arrayrecord_key: str = "arrays",
+        configrecord_key: str = "config",
+        train_metrics_aggr_fn: Optional[
+            Callable[[list[RecordDict], str], MetricRecord]
+        ] = None,
+        evaluate_metrics_aggr_fn: Optional[
+            Callable[[list[RecordDict], str], MetricRecord]
+        ] = None,
     ) -> None:
         super().__init__(
             fraction_train=1.0,
@@ -97,7 +97,6 @@ class FedXgbCyclic(FedAvg):
         self, grid: Grid, server_round: int, configure_type: str
     ) -> list[int]:
         """Sample nodes using the Grid."""
-
         # Sample nodes
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_train)
         sample_size = max(num_nodes, self.min_train_nodes)
