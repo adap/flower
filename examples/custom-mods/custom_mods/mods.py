@@ -2,14 +2,14 @@
 
 import os
 import time
+from typing import cast
 
 import wandb
 from flwr.client.typing import ClientAppCallable, Mod
-from flwr.common import ConfigRecord
 from flwr.common.constant import MessageType
 from flwr.common.context import Context
 from flwr.common.message import Message
-from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard.writer import SummaryWriter
 
 
 def get_wandb_mod(name: str) -> Mod:
@@ -18,7 +18,7 @@ def get_wandb_mod(name: str) -> Mod:
     def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message:
         """Flower Mod that logs the metrics dictionary returned by the client's fit
         function to Weights & Biases."""
-        server_round = int(msg.metadata.group_id)
+        server_round = msg.content["config"]["server-round"]
 
         if server_round == 1 and msg.metadata.message_type == MessageType.TRAIN:
             run_id = msg.metadata.run_id
@@ -55,15 +55,25 @@ def get_wandb_mod(name: str) -> Mod:
 
         # if the `ClientApp` just processed a "fit" message, let's log some metrics to W&B
         if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
-            metrics = reply.content.config_records
-
-            results_to_log = dict(metrics.get("fitres.metrics", ConfigRecord()))
+            metric_record = reply.content.metric_records.get("metrics")
+            results_to_log = dict(metric_record) if metric_record else {}
 
             results_to_log["fit_time"] = time_diff
 
             # Ensure all metrics to be logged use the same custom `step_metric`
             wandb.define_metric("*", step_metric="server-round")
-            results_to_log["server-round"] = server_round
+            results_to_log["server-round"] = cast(int, server_round)
+            # Log as usual
+            wandb.log(results_to_log, commit=True)
+        if reply.metadata.message_type == MessageType.EVALUATE and reply.has_content():
+            metric_record = reply.content.metric_records.get("metrics")
+            results_to_log = dict(metric_record) if metric_record else {}
+
+            results_to_log["eval_time"] = time_diff
+
+            # Ensure all metrics to be logged use the same custom `step_metric`
+            wandb.define_metric("*", step_metric="server-round")
+            results_to_log["server-round"] = cast(int, server_round)
             # Log as usual
             wandb.log(results_to_log, commit=True)
 
@@ -84,7 +94,7 @@ def get_tensorboard_mod(logdir: str) -> Mod:
         logdir_run = os.path.join(logdir, str(msg.metadata.run_id))
 
         node_id = str(msg.metadata.dst_node_id)
-        server_round = int(msg.metadata.group_id)
+        server_round = msg.content["config"]["server-round"]
 
         # Let's say we want to measure the time taken to run the app.
         # We can easily do this in the mod by measuring the time difference as shown below.
@@ -100,10 +110,26 @@ def get_tensorboard_mod(logdir: str) -> Mod:
             writer = SummaryWriter(os.path.join(logdir_run, node_id))
 
             # Write metrics
-            metrics = dict(
-                reply.content.config_records.get("fitres.metrics", ConfigRecord())
-            )
+            metric_record = reply.content.metric_records.get("metrics")
+            metrics = dict(metric_record) if metric_record else {}
+            print(metrics)
             writer.add_scalar("fit_time", time_diff, global_step=server_round)
+            for metric in metrics:
+                writer.add_scalar(
+                    f"{metric}",
+                    metrics[metric],
+                    global_step=server_round,
+                )
+            writer.flush()
+
+        if reply.metadata.message_type == MessageType.EVALUATE and reply.has_content():
+            writer = SummaryWriter(os.path.join(logdir_run, node_id))
+
+            # Write metrics
+            metric_record = reply.content.metric_records.get("metrics")
+            metrics = dict(metric_record) if metric_record else {}
+            print(metrics)
+            writer.add_scalar("eval_time", time_diff, global_step=server_round)
             for metric in metrics:
                 writer.add_scalar(
                     f"{metric}",

@@ -29,7 +29,9 @@ from flwr.common.auth_plugin import ControlAuthPlugin
 from flwr.common.constant import (
     FAB_MAX_SIZE,
     LOG_STREAM_INTERVAL,
+    NO_ARTIFACT_PROVIDER_MESSAGE,
     NO_USER_AUTH_MESSAGE,
+    PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
     Status,
     SubStatus,
@@ -49,6 +51,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetLoginDetailsResponse,
     ListRunsRequest,
     ListRunsResponse,
+    PullArtifactsRequest,
+    PullArtifactsResponse,
     StartRunRequest,
     StartRunResponse,
     StopRunRequest,
@@ -59,6 +63,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
+from flwr.superlink.artifact_provider import ArtifactProvider
 
 from .control_user_auth_interceptor import shared_account_info
 
@@ -73,14 +78,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         objectstore_factory: ObjectStoreFactory,
         is_simulation: bool,
         auth_plugin: Optional[ControlAuthPlugin] = None,
+        artifact_provider: Optional[ArtifactProvider] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
         self.is_simulation = is_simulation
         self.auth_plugin = auth_plugin
+        self.artifact_provider = artifact_provider
 
-    def StartRun(
+    def StartRun(  # pylint: disable=too-many-locals
         self, request: StartRunRequest, context: grpc.ServicerContext
     ) -> StartRunResponse:
         """Create run ID."""
@@ -126,11 +133,20 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 flwr_aid,
             )
 
+            # Initialize node config
+            node_config = {}
+            if self.artifact_provider is not None:
+                node_config = {
+                    "output_dir": self.artifact_provider.output_dir,
+                    "tmp_dir": self.artifact_provider.tmp_dir,
+                }
+
             # Create an empty context for the Run
             context = Context(
                 run_id=run_id,
                 node_id=0,
-                node_config={},
+                # Dict is invariant in mypy
+                node_config=node_config,  # type: ignore[arg-type]
                 state=RecordDict(),
                 run_config={},
             )
@@ -334,6 +350,47 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             access_token=credentials.access_token,
             refresh_token=credentials.refresh_token,
         )
+
+    def PullArtifacts(
+        self, request: PullArtifactsRequest, context: grpc.ServicerContext
+    ) -> PullArtifactsResponse:
+        """Pull artifacts for a given run ID."""
+        log(INFO, "ControlServicer.PullArtifacts")
+
+        # Check if artifact provider is configured
+        if self.artifact_provider is None:
+            context.abort(
+                grpc.StatusCode.UNIMPLEMENTED,
+                NO_ARTIFACT_PROVIDER_MESSAGE,
+            )
+            raise grpc.RpcError()  # This line is unreachable
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        # Retrieve run ID and run
+        run_id = request.run_id
+        run = state.get_run(run_id)
+
+        # Exit if `run_id` not found
+        if not run:
+            context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+            raise grpc.RpcError()  # This line is unreachable
+
+        # Exit if the run is not finished yet
+        if run.status.status != Status.FINISHED:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION, PULL_UNFINISHED_RUN_MESSAGE
+            )
+
+        # Check if `flwr_aid` matches the run's `flwr_aid` when user auth is enabled
+        if self.auth_plugin:
+            flwr_aid = shared_account_info.get().flwr_aid
+            _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
+
+        # Call artifact provider
+        download_url = self.artifact_provider.get_url(run_id)
+        return PullArtifactsResponse(url=download_url)
 
 
 def _create_list_runs_response(
