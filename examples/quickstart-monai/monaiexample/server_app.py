@@ -1,6 +1,5 @@
 """monaiexample: A Flower / MONAI app."""
 
-from typing import List, Tuple
 
 import torch
 from flwr.app import ArrayRecord, Context
