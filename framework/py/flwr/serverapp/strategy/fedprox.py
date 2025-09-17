@@ -40,43 +40,45 @@ class FedProx(FedAvg):
 
     Implementation based on https://arxiv.org/abs/1812.06127
 
-    The strategy in itself will not be different than FedAvg, the client needs to
-    be adjusted.
-    A proximal term needs to be added to the loss function during the training:
+    FedProx extends FedAvg by introducing a proximal term into the client-side
+    optimization objective. The strategy itself behaves identically to FedAvg
+    on the server side, but each client must add a proximal regularization
+    term to its local loss function during training:
 
     .. math::
         \frac{\mu}{2} || w - w^t ||^2
 
-    Where $w^t$ are the global parameters and $w$ are the local weights the function
-    will be optimized with.
+    Where $w^t$ denotes the global parameters and $w$ denotes the local weights
+    being optimized.
 
     This strategy sends the proximal term inside the ``ConfigRecord`` as part of the
-    `configure_train` method under key "proximal-mu". The client can then use this
+    ``configure_train`` method under key ``"proximal-mu"``. The client can then use this
     value to add the proximal term to the loss function.
 
     In PyTorch, for example, the loss would go from:
 
     .. code:: python
-
-      loss = criterion(net(inputs), labels)
+        loss = criterion(net(inputs), labels)
 
     To:
 
     .. code:: python
+        # Get proximal term from configuration
+        mu = msg.content["config"]["proximal-mu"]
 
-      # get proximal term from message
-      mu = msg.content["config"]["proximal-mu"]
-      # apply proximal term to loss calculation
-      for local_weights, global_weights in zip(net.parameters(), global_params):
-          proximal_term += (local_weights - global_weights).norm(2)
-      loss = criterion(net(inputs), labels) + (mu / 2) * proximal_term
+        # Compute proximal term
+        proximal_term = 0.0
+        for local_weights, global_weights in zip(net.parameters(), global_params):
+            proximal_term += (local_weights - global_weights).norm(2)
 
-    With `global_params` being a copy of the parameters before the training takes
-    place.
+        # Update loss
+        loss = criterion(net(inputs), labels) + (mu / 2) * proximal_term
+
+    With ``global_params`` being a copy of the model parameters, created **after**
+    applying the received global weights but **before** local training begins.
 
     .. code:: python
-
-      global_params = copy.deepcopy(net).parameters()
+        global_params = copy.deepcopy(net).parameters()
 
     Parameters
     ----------
@@ -153,8 +155,8 @@ class FedProx(FedAvg):
         if self.proximal_mu == 0.0:
             log(
                 WARN,
-                "Using FedProx strategy with proximal_mu=0.0, is equivalent to"
-                " FedAvg",
+                "FedProx initialized with `proximal_mu=0.0`. "
+                "This makes the strategy equivalent to FedAvg.",
             )
 
     def summary(self) -> None:
