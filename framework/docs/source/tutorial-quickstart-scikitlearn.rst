@@ -114,7 +114,7 @@ function to create dataloaders with the data that correspond to their data parti
 
     # Split the on edge data: 80% train, 20% test
     X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
-    y_train, y_test = y[: int(0.8 * len(y)) :]
+    y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
 
 The Model
 ---------
