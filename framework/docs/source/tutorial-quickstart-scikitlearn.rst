@@ -8,12 +8,14 @@ Quickstart scikit-learn (tabular)
 =================================
 
 In this federated learning tutorial we will learn how to train a Logistic Regression on
-the Iris dataset using Flower and scikit-learn. It is recommended to create a virtual environment
-and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+the Iris dataset using Flower and scikit-learn. It is recommended to create a virtual
+environment and run everything within a :doc:`virtualenv
+<contributor-how-to-set-up-a-virtual-env>`.
 
-We'll use ``flwr new`` to create a complete Flower+scikit-learn project scaffold. It will
-generate all the files needed to run, by default with the Flower Simulation Engine, a
-federation of 10 nodes using |fedavg|_. Instead of MNIST, we will work with the classic Iris dataset.
+We'll use ``flwr new`` to create a complete Flower+scikit-learn project scaffold. It
+will generate all the files needed to run, by default with the Flower Simulation Engine,
+a federation of 10 nodes using |fedavg|_. Instead of MNIST, we will work with the
+classic Iris dataset.
 
 First, install Flower in your environment:
 
@@ -22,7 +24,8 @@ First, install Flower in your environment:
     # In a new Python environment
     $ pip install flwr
 
-Then, run the command below. Choose the ``sklearn`` template, provide a project name, and your developer name:
+Then, run the command below. Choose the ``sklearn`` template, provide a project name,
+and your developer name:
 
 .. code-block:: shell
 
@@ -71,7 +74,8 @@ With default arguments you should see an output like this:
     INFO :                  ├── ArrayRecord key: 'arrays'
     INFO :                  └── ConfigRecord key: 'config'
 
-You can override config values defined in ``[tool.flwr.app.config]`` in ``pyproject.toml``:
+You can override config values defined in ``[tool.flwr.app.config]`` in
+``pyproject.toml``:
 
 .. code-block:: shell
 
@@ -81,7 +85,8 @@ The Data
 --------
 
 This tutorial uses scikit-learn’s built-in Iris dataset. We split it into 10 partitions
-(one for each client) and within each partition, 80% is used for training and 20% for testing:
+(one for each client) and within each partition, 80% is used for training and 20% for
+testing:
 
 .. code-block:: python
 
@@ -109,16 +114,19 @@ We define the |logisticregression|_ model in ``task.py``:
 The ClientApp
 -------------
 
-Instead of subclassing ``NumPyClient``, the new API uses decorators. In ``client_app.py`` you’ll see:
+Instead of subclassing ``NumPyClient``, the new API uses decorators. In
+``client_app.py`` you’ll see:
 
 .. code-block:: python
 
     app = ClientApp()
 
+
     @app.train()
     def train(config: Config, data: Tuple) -> RecordDict:
         # set model params, train locally, return updated weights + metrics
         ...
+
 
     @app.evaluate()
     def evaluate(config: Config, data: Tuple) -> RecordDict:
@@ -134,6 +142,7 @@ In ``server_app.py`` the federated averaging strategy is defined:
 
     app = ServerApp()
 
+
     @app.main()
     def main(grid: Grid, context: Context) -> None:
         initial_arrays = ArrayRecord.from_numpy_ndarrays(get_model_params(model))
@@ -148,13 +157,14 @@ In ``server_app.py`` the federated averaging strategy is defined:
             num_rounds=context.run_config["num-server-rounds"],
         )
 
-Congratulations! You've now built and run your first federated learning system
-in scikit-learn on the Iris dataset using the new Message API.
+Congratulations! You've now built and run your first federated learning system in
+scikit-learn on the Iris dataset using the new Message API.
 
 .. note::
 
-   Check the source code of this tutorial in the
-   `Flower GitHub repository <https://github.com/adap/flower/tree/main/examples/quickstart-sklearn-tabular>`_.
+    Check the source code of this tutorial in the `Flower GitHub repository
+    <https://github.com/adap/flower/tree/main/examples/quickstart-sklearn-tabular>`_.
 
 .. |fedavg| replace:: ``FedAvg``
+
 .. |logisticregression| replace:: ``LogisticRegression``
