@@ -153,7 +153,7 @@ in scikit-learn on the Iris dataset using the new Message API.
 
 .. note::
 
-    Check the source code of this tutorial in the
+   Check the source code of this tutorial in the
    `Flower GitHub repository <https://github.com/adap/flower/tree/main/examples/quickstart-sklearn-tabular>`_.
 
 .. |fedavg| replace:: ``FedAvg``
