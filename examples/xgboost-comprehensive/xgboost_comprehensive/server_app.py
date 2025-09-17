@@ -17,14 +17,16 @@ app = ServerApp()
 @app.main()
 def main(grid: Grid, context: Context) -> None:
     # Read from config
+
+    num_rounds = context.run_config["num-server-rounds"]
+    fraction_train = context.run_config["fraction-train"]
+    fraction_evaluate = context.run_config["fraction-evaluate"]
+    train_method = context.run_config["train-method"]
+    centralised_eval = context.run_config["centralised-eval"]
+
     # Flatted config dict and replace "-" with "_"
     cfg = replace_keys(unflatten_dict(context.run_config))
-    num_rounds = cfg["num_server_rounds"]
-    fraction_train = cfg["fraction_train"]
-    fraction_evaluate = cfg["fraction_evaluate"]
-    train_method = cfg["train_method"]
     params = cfg["params"]
-    centralised_eval = cfg["centralised_eval"]
 
     if centralised_eval:
         # This is the exact same dataset as the one downloaded by the clients via

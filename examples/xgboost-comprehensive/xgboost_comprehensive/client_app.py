@@ -38,20 +38,19 @@ def _local_boost(bst_input, num_local_round, train_dmatrix, train_method):
 
 @app.train()
 def train(msg: Message, context: Context) -> Message:
-    # Load model and data
+    # Parse configs
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
+    num_local_round = context.run_config["local-epochs"]
+    train_method = context.run_config["train-method"]
+    partitioner_type = context.run_config["partitioner-type"]
+    seed = context.run_config["seed"]
+    test_fraction = context.run_config["test-fraction"]
+    centralised_eval_client = context.run_config["centralised-eval-client"]
 
-    # Parse configs
     # Flatted config dict and replace "-" with "_"
     cfg = replace_keys(unflatten_dict(context.run_config))
-    num_local_round = cfg["local_epochs"]
-    train_method = cfg["train_method"]
     params = cfg["params"]
-    partitioner_type = cfg["partitioner_type"]
-    seed = cfg["seed"]
-    test_fraction = cfg["test_fraction"]
-    centralised_eval_client = cfg["centralised_eval_client"]
 
     # Load training and validation data
     train_dmatrix, _, num_train, _ = load_data(
@@ -104,18 +103,17 @@ def train(msg: Message, context: Context) -> Message:
 
 @app.evaluate()
 def evaluate(msg: Message, context: Context) -> Message:
-    # Load model and data
+    # Parse configs
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
+    partitioner_type = context.run_config["partitioner-type"]
+    seed = context.run_config["seed"]
+    test_fraction = context.run_config["test-fraction"]
+    centralised_eval_client = context.run_config["centralised-eval-client"]
 
-    # Parse configs
     # Flatted config dict and replace "-" with "_"
     cfg = replace_keys(unflatten_dict(context.run_config))
     params = cfg["params"]
-    partitioner_type = cfg["partitioner_type"]
-    seed = cfg["seed"]
-    test_fraction = cfg["test_fraction"]
-    centralised_eval_client = cfg["centralised_eval_client"]
 
     _, valid_dmatrix, _, num_val = load_data(
         partitioner_type,
