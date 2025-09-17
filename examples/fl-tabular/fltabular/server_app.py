@@ -1,11 +1,11 @@
 """fltabular: Flower Example on Adult Census Income Tabular Dataset."""
 
 import torch
-from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
+from flwr.app import ArrayRecord, Context
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 
-from fltabular.task import IncomeClassifier, get_weights
+from fltabular.task import IncomeClassifier
 
 # Create ServerApp
 app = ServerApp()
