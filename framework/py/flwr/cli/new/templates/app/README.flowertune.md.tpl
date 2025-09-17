@@ -26,7 +26,7 @@ pip install -e .
 ## Experimental setup
 
 The dataset is divided into $num_clients partitions in an IID fashion, a partition is assigned to each ClientApp.
-We randomly sample a fraction ($fraction_fit) of the total nodes to participate in each round, for a total of `200` rounds.
+We randomly sample a fraction ($fraction_train) of the total nodes to participate in each round, for a total of `200` rounds.
 All settings are defined in `pyproject.toml`.
 
 > [!IMPORTANT]
