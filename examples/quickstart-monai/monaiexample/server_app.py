@@ -6,7 +6,7 @@ from flwr.app import ArrayRecord, Context
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 
-from monaiexample.task import get_params, load_model
+from monaiexample.task import load_model
 
 # Create ServerApp
 app = ServerApp()
