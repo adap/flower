@@ -5,10 +5,8 @@ from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 
 from monaiexample.task import (
-    get_params,
     load_data,
     load_model,
-    set_params,
     test_func,
     train_func,
 )
