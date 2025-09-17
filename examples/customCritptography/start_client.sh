@@ -1,6 +1,7 @@
 #!/bin/bash
 
-NUM_CLIENTS=20
+NUM_CLIENTS=$(python3 -c "from flwr.common.crypto.config_cripto  import NUM_CLIENTS; print(NUM_CLIENTS)")
+
 LOG_DIR="logs"
 
 mkdir -p $LOG_DIR
@@ -16,9 +17,7 @@ for ((i=1; i<=NUM_CLIENTS; i++)); do
       --insecure \
       --node-config "dataset-path=\"$DATASET\"" \
       >"$LOG_FILE" 2>&1 &
-
     echo "[✓] Avviato client $i su porta $PORT con dataset $DATASET (log: $LOG_FILE)"
 done
 
-# Attendi la terminazione di tutti i processi
 wait
