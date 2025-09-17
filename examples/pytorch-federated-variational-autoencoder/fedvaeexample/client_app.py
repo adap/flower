@@ -40,7 +40,7 @@ def train(msg: Message, context: Context):
     # Construct and return reply Message
     model_record = ArrayRecord(model.state_dict())
     metrics = {
-        "num-examples": len(trainloader),
+        "num-examples": len(trainloader.dataset),
     }
     metric_record = MetricRecord(metrics)
     content = RecordDict({"arrays": model_record, "metrics": metric_record})
@@ -56,8 +56,6 @@ def evaluate(msg: Message, context: Context):
 
     # Read the run_config to fetch hyperparameters relevant to this run
     _, testloader = load_data(partition_id, num_partitions)
-    local_epochs = context.run_config["local-epochs"]
-    lr = context.run_config["learning-rate"]
 
     # Load the model and initialize it with the received weights
     model = Net()
@@ -70,7 +68,7 @@ def evaluate(msg: Message, context: Context):
     # Construct and return reply Message
     metrics = {
         "loss": loss,
-        "num-examples": len(testloader),
+        "num-examples": len(testloader.dataset),
     }
     metric_record = MetricRecord(metrics)
     content = RecordDict({"metrics": metric_record})
