@@ -39,6 +39,11 @@ class ControlStub:
         flwr.proto.control_pb2.GetAuthTokensResponse]
     """Get auth tokens upon request"""
 
+    PullArtifacts: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.PullArtifactsRequest,
+        flwr.proto.control_pb2.PullArtifactsResponse]
+    """Pull artifacts generated during a run (flwr pull)"""
+
 
 class ControlServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -87,6 +92,14 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.control_pb2.GetAuthTokensResponse:
         """Get auth tokens upon request"""
+        pass
+
+    @abc.abstractmethod
+    def PullArtifacts(self,
+        request: flwr.proto.control_pb2.PullArtifactsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.control_pb2.PullArtifactsResponse:
+        """Pull artifacts generated during a run (flwr pull)"""
         pass
 
 
