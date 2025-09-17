@@ -109,7 +109,7 @@ def load_data(partition_id, num_partitions):
     return trainloader, testloader
 
 
-def train(net, trainloader, epochs, learning_rate, device):
+def trainer(net, trainloader, epochs, learning_rate, device):
     """Train the network on the training set."""
     net.to(device)  # move model to GPU if available
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
