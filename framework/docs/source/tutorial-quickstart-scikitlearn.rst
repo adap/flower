@@ -8,16 +8,16 @@ Quickstart scikit-learn
 =======================
 
 In this federated learning tutorial we will learn how to train a Logistic Regression on
-the MNIST dataset using Flower and scikit-learn. It is recommended to create a virtual
-environment and run everything within a :doc:`virtualenv
-<contributor-how-to-set-up-a-virtual-env>`.
+MNIST using Flower and scikit-learn. It is recommended to create a virtual environment
+and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
-We'll use ``flwr new`` to create a complete Flower+scikit-learn project scaffold. It
-will generate all the files needed to run, by default with the Flower Simulation Engine,
-a federation of 10 nodes using |fedavg|_. The dataset will be partitioned using
-|flowerdatasets|_'s |iidpartitioner|_.
+Let's use ``flwr new`` to create a complete Flower+scikit-learn project. It will
+generate all the files needed to run, by default with the Flower Simulation Engine, a
+federation of 10 nodes using |fedavg|_ The dataset will be partitioned using
+|flowerdatasets|_'s |iidpartitioner|_
 
-First, install Flower in your environment:
+Now that we have a rough idea of what this example is about, let's get started. First,
+install Flower in your new environment:
 
 .. code-block:: shell
 
@@ -60,7 +60,7 @@ To run the project, do:
     # Run with default arguments
     $ flwr run .
 
-With default arguments you should see an output like this one:
+With default arguments you will see an output like this one:
 
 .. code-block:: shell
 
@@ -353,3 +353,6 @@ in scikit-learn on the MNIST dataset using the new Message API.
 .. _quickstart_sklearn_link: https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist
 
 .. _serverappcomponents: ref-api/flwr.server.ServerAppComponents.html#serverappcomponents
+
+.. meta::
+    :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a linear regression model.
