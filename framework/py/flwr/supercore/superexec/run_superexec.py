@@ -121,15 +121,10 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
     try:
         if plugin_config is not None:
             plugin.load_config(plugin_config)
-    except KeyError as e:
+    except (KeyError, ValueError) as e:
         flwr_exit(
             code=ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG,
-            message=f"Missing key in plugin config: {e}",
-        )
-    except ValueError as e:
-        flwr_exit(
-            code=ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG,
-            message=f"Invalid value in plugin config: {e}",
+            message=f"Invalid plugin config: {e!r}",
         )
 
     # Start the main loop
