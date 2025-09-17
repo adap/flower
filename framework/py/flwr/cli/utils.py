@@ -367,8 +367,8 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
         if e.code() == grpc.StatusCode.FAILED_PRECONDITION:
             if e.details() == PULL_UNFINISHED_RUN_MESSAGE:  # pylint: disable=E1101
                 typer.secho(
-                    "❌ Run is not finished yet. Please wait until the run is finished "
-                    "and try again. You can check the run status using `flwr ls`.",
+                    "❌ Run is not finished yet. Artifacts can only be pulled after "
+                    "the run is finished. You can check the run status with `flwr ls`.",
                     fg=typer.colors.RED,
                     bold=True,
                 )
