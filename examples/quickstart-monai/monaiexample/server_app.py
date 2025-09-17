@@ -1,6 +1,5 @@
 """monaiexample: A Flower / MONAI app."""
 
-
 import torch
 from flwr.app import ArrayRecord, Context
 from flwr.serverapp import Grid, ServerApp

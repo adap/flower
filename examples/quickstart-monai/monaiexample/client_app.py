@@ -4,12 +4,7 @@ import torch
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 
-from monaiexample.task import (
-    load_data,
-    load_model,
-    test_func,
-    train_func,
-)
+from monaiexample.task import load_data, load_model, test_func, train_func
 
 # Flower ClientApp
 app = ClientApp()
