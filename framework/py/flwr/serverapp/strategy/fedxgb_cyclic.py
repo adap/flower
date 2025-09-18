@@ -16,7 +16,7 @@
 
 
 from collections.abc import Iterable
-from logging import INFO, WARNING
+from logging import INFO
 from typing import Callable, Optional, cast
 
 from flwr.common import (
@@ -101,9 +101,13 @@ class FedXgbCyclic(FedAvg):
         self.registered_nodes: dict[int, int] = {}
 
         if fraction_train not in (0.0, 1.0):
-            raise ValueError("fraction_train can only be set to 1.0 or 0.0 for FedXgbCyclic.")
+            raise ValueError(
+                "fraction_train can only be set to 1.0 or 0.0 for FedXgbCyclic."
+            )
         if fraction_evaluate not in (0.0, 1.0):
-            raise ValueError("fraction_evaluate can only be set to 1.0 or 0.0 for FedXgbCyclic.")
+            raise ValueError(
+                "fraction_evaluate can only be set to 1.0 or 0.0 for FedXgbCyclic."
+            )
 
     def _reorder_nodes(self, node_ids: list[int]) -> list[int]:
         """Re-order node ids based on registered nodes.
