@@ -88,10 +88,36 @@ class FedXgbCyclic(FedAvg):
             evaluate_metrics_aggr_fn=evaluate_metrics_aggr_fn,
         )
 
+        self.registered_nodes: dict[int, int] = {}
         log(
             WARNING,
             "fraction_evaluate and fraction_evaluate are forced to 1.0.",
         )
+
+    def _reorder_nodes(self, node_ids: list[int]) -> list[int]:
+        """Re-order node ids based on registered nodes."""
+        # Assign new indices to unknown nodes
+        next_index = max(self.registered_nodes.values(), default=0) + 1
+        for nid in node_ids:
+            if nid not in self.registered_nodes:
+                self.registered_nodes[nid] = next_index
+                next_index += 1
+
+        # Sort node_ids by their stored indices
+        sorted_by_index = sorted(node_ids, key=lambda x: self.registered_nodes[x])
+
+        # Compact re-map of indices just for this output list
+        unique_indices = sorted(self.registered_nodes[nid] for nid in sorted_by_index)
+        remap = {old: new for new, old in enumerate(unique_indices, start=1)}
+
+        # Build the result list ordered by compact indices
+        result_list = [
+            nid
+            for _, nid in sorted(
+                (remap[self.registered_nodes[nid]], nid) for nid in sorted_by_index
+            )
+        ]
+        return result_list
 
     def _make_sampling(
         self, grid: Grid, server_round: int, configure_type: str
@@ -101,6 +127,9 @@ class FedXgbCyclic(FedAvg):
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_train)
         sample_size = max(num_nodes, self.min_train_nodes)
         node_ids, _ = sample_nodes(grid, self.min_available_nodes, sample_size)
+
+        # Re-order node_ids
+        node_ids = self._reorder_nodes(node_ids)
 
         # Sample the clients sequentially given server_round
         sampled_idx = (server_round - 1) % len(node_ids)
