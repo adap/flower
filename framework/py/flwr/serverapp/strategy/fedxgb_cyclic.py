@@ -95,7 +95,13 @@ class FedXgbCyclic(FedAvg):
         )
 
     def _reorder_nodes(self, node_ids: list[int]) -> list[int]:
-        """Re-order node ids based on registered nodes."""
+        """Re-order node ids based on registered nodes.
+
+        Each node ID is assigned a persistent index in `self.registered_nodes`
+        the first time it appears. The input list is then reordered according
+        to these stored indices, and the result is compacted into ascending
+        order (1..N) for the current call.
+        """
         # Assign new indices to unknown nodes
         next_index = max(self.registered_nodes.values(), default=0) + 1
         for nid in node_ids:
