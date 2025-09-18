@@ -192,7 +192,7 @@ class FedXgbCyclic(FedAvg):
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
         """Configure the next round of federated evaluation."""
-        # Sample nodes
+        # Sample one node
         sampled_node_id = self._make_sampling(grid, server_round, "configure_evaluate")
 
         # Always inject current server round
