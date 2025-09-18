@@ -15,49 +15,57 @@
 """Krum tests."""
 
 
-from unittest.mock import MagicMock
+import numpy as np
 
-from numpy import array, float32
-
-from flwr.common import (
-    Code,
-    FitRes,
-    NDArrays,
-    Parameters,
-    Status,
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
-)
-
-from flwr.common import ArrayRecord, RecordDict, MetricRecord
-from .strategy_utils_test import create_mock_reply
+from flwr.common import ArrayRecord
 
 from .krum import Krum
+from .strategy_utils_test import create_mock_reply
 
 
-def test_aggregate_train() -> None:
+def test_aggregate_train_krum() -> None:
     """Tests if Krum is aggregating correctly."""
     # Prepare
     strategy = Krum(
         num_malicious_nodes=1,
     )
-    reply_0 = create_mock_reply(ArrayRecord(
-        [array([0.2, 0.2, 0.2, 0.2], dtype=float32)]
-    ), num_examples=5)
-    reply_1 = create_mock_reply(ArrayRecord(
-        [array([0.5, 0.5, 0.5, 0.5], dtype=float32)]
-    ), num_examples=5)
-    reply_2 = create_mock_reply(ArrayRecord(
-        [array([1.0, 1.0, 1.0, 1.0], dtype=float32)]
-    ), num_examples=5)
+    reply_0 = create_mock_reply(
+        ArrayRecord([np.array([0.2, 0.2, 0.2, 0.2])]), num_examples=5
+    )
+    reply_1 = create_mock_reply(
+        ArrayRecord([np.array([0.7, 0.7, 0.7, 0.7])]), num_examples=5
+    )
+    reply_2 = create_mock_reply(
+        ArrayRecord([np.array([1.0, 1.0, 1.0, 1.0])]), num_examples=5
+    )
     replies = [reply_0, reply_1, reply_2]
 
-    expected = ArrayRecord([array([0.7, 0.7, 0.7, 0.7], dtype=float32)])
+    expected = ArrayRecord([np.array([0.7, 0.7, 0.7, 0.7])])
 
     # Execute
-    actual_aggregated, _ = strategy.aggregate_train(
-        server_round=1, replies=replies
+    actual, _ = strategy.aggregate_train(server_round=1, replies=replies)
+    assert actual
+    assert actual.object_id == expected.object_id
+
+
+def test_aggregate_train_multikrum() -> None:
+    """Tests if multi-Krum is aggregating correctly."""
+    # Prepare
+    strategy = Krum(num_malicious_nodes=1, num_nodes_to_keep=2)
+    reply_0 = create_mock_reply(
+        ArrayRecord([np.array([0.2, 0.2, 0.2, 0.2])]), num_examples=5
     )
-    assert actual_aggregated
-    actual = actual_aggregated
-    assert (actual == expected[0]).all()
+    reply_1 = create_mock_reply(
+        ArrayRecord([np.array([0.5, 0.5, 0.5, 0.5])]), num_examples=5
+    )
+    reply_2 = create_mock_reply(
+        ArrayRecord([np.array([1.0, 1.0, 1.0, 1.0])]), num_examples=5
+    )
+    replies = [reply_0, reply_1, reply_2]
+
+    expected = ArrayRecord([np.array([0.35, 0.35, 0.35, 0.35])])
+
+    # Execute
+    actual, _ = strategy.aggregate_train(server_round=1, replies=replies)
+    assert actual
+    assert actual.object_id == expected.object_id
