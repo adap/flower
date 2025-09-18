@@ -18,10 +18,10 @@ Paper: openreview.net/pdf?id=ByexElSYDr
 """
 
 
+from collections import OrderedDict
 from collections.abc import Iterable
 from logging import INFO
 from typing import Callable, Optional
-from collections import OrderedDict
 
 import numpy as np
 
