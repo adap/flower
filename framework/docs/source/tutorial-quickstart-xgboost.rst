@@ -4,35 +4,180 @@
 
 .. _quickstart-xgboost:
 
+.. |message_link| replace:: ``Message``
+
+.. _message_link: ref-api/flwr.app.Message.html
+
+.. |arrayrecord_link| replace:: ``ArrayRecord``
+
+.. _arrayrecord_link: ref-api/flwr.app.ArrayRecord.html
+
+.. |context_link| replace:: ``Context``
+
+.. _context_link: ref-api/flwr.app.Context.html
+
+.. |clientapp_link| replace:: ``ClientApp``
+
+.. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
+
+.. |fedavg_link| replace:: ``FedAvg``
+
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
+
+.. |serverapp_link| replace:: ``ServerApp``
+
+.. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
+
+.. |strategy_start_link| replace:: ``start``
+
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
+
+.. |strategy_link| replace:: ``Strategy``
+
+.. _strategy_link: ref-api/flwr.serverapp.strategy.Strategy.html
+
+.. |result_link| replace:: ``Result``
+
+.. _result_link: ref-api/flwr.serverapp.strategy.Result.html
+
+
 Quickstart XGBoost
 ==================
 
-XGBoost
--------
+In this federated learning tutorial, we will learn how to train a simple XGBoost classifier on Higgs dataset
+using Flower and XGBoost. It is recommended to create a virtual environment and run
+everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
-EXtreme Gradient Boosting (**XGBoost**) is a robust and efficient implementation of
-gradient-boosted decision tree (**GBDT**), that maximises the computational boundaries
-for boosted tree methods. It's primarily designed to enhance both the performance and
-computational speed of machine learning models. In XGBoost, trees are constructed
-concurrently, unlike the sequential approach taken by GBDT.
+Let's use `flwr new` to create a complete Flower+XGBoost project. It will generate all the
+files needed to run, by default with the Simulation Engine, a federation of 10 nodes
+using bagging aggregation. The dataset will be partitioned using Flower Dataset's
+`IidPartitioner
+<https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
 
-Often, for tabular data on medium-sized datasets with fewer than 10k training examples,
-XGBoost surpasses the results of deep learning techniques.
+Now that we have a rough idea of what this example is about, let's get started. First,
+install Flower in your new environment:
 
-Why Federated XGBoost?
-~~~~~~~~~~~~~~~~~~~~~~
+.. code-block:: shell
 
-As the demand for data privacy and decentralized learning grows, there's an increasing
-requirement to implement federated XGBoost systems for specialised applications, like
-survival analysis and financial fraud detection.
+    # In a new Python environment
+    $ pip install flwr
 
-Federated learning ensures that raw data remains on the local device, making it an
-attractive approach for sensitive domains where data privacy is paramount. Given the
-robustness and efficiency of XGBoost, combining it with federated learning offers a
-promising solution for these specific challenges.
+Then, run the command below. You will be prompted to select one of the available
+templates (choose ``XGBoost``), give a name to your project, and enter your developer name:
 
-Environment Setup
------------------
+.. code-block:: shell
+
+    $ flwr new
+
+After running it you'll notice a new directory with your project name has been created.
+It should have the following structure:
+
+.. code-block:: shell
+
+    <your-project-name>
+    ├── <your-project-name>
+    │   ├── __init__.py
+    │   ├── client_app.py   # Defines your ClientApp
+    │   ├── server_app.py   # Defines your ServerApp
+    │   └── task.py         # Defines your data loading and utility functions
+    ├── pyproject.toml      # Project metadata like dependencies and configs
+    └── README.md
+
+If you haven't yet installed the project and its dependencies, you can do so by:
+
+.. code-block:: shell
+
+    # From the directory where your pyproject.toml is
+    $ pip install -e .
+
+To run the project do:
+
+.. code-block:: shell
+
+    # Run with default arguments
+    $ flwr run .
+
+With default arguments, you will see output like this:
+
+.. code-block:: shell
+
+    Loading project configuration...
+    Success
+    INFO :      Starting FedXgbBagging strategy:
+    INFO :      	├── Number of rounds: 3
+    INFO :      	├── ArrayRecord (0.00 MB)
+    INFO :      	├── ConfigRecord (train): (empty!)
+    INFO :      	├── ConfigRecord (evaluate): (empty!)
+    INFO :      	├──> Sampling:
+    INFO :      	│	├──Fraction: train (0.10) | evaluate ( 0.10)
+    INFO :      	│	├──Minimum nodes: train (2) | evaluate (2)
+    INFO :      	│	└──Minimum available nodes: 2
+    INFO :      	└──> Keys in records:
+    INFO :      		├── Weighted by: 'num-examples'
+    INFO :      		├── ArrayRecord key: 'arrays'
+    INFO :      		└── ConfigRecord key: 'config'
+    INFO :
+    INFO :
+    INFO :      [ROUND 1/3]
+    INFO :      configure_train: Sampled 2 nodes (out of 10)
+    INFO :      aggregate_train: Received 2 results and 0 failures
+    INFO :      	└──> Aggregated MetricRecord: {}
+    INFO :      configure_evaluate: Sampled 2 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 2 results and 0 failures
+    INFO :      	└──> Aggregated MetricRecord: {'auc': 0.7677505289821278}
+    INFO :
+    INFO :      [ROUND 2/3]
+    INFO :      configure_train: Sampled 2 nodes (out of 10)
+    INFO :      aggregate_train: Received 2 results and 0 failures
+    INFO :      	└──> Aggregated MetricRecord: {}
+    INFO :      configure_evaluate: Sampled 2 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 2 results and 0 failures
+    INFO :      	└──> Aggregated MetricRecord: {'auc': 0.7758267351298489}
+    INFO :
+    INFO :      [ROUND 3/3]
+    INFO :      configure_train: Sampled 2 nodes (out of 10)
+    INFO :      aggregate_train: Received 2 results and 0 failures
+    INFO :      	└──> Aggregated MetricRecord: {}
+    INFO :      configure_evaluate: Sampled 2 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 2 results and 0 failures
+    INFO :      	└──> Aggregated MetricRecord: {'auc': 0.7811659285552999}
+    INFO :
+    INFO :      Strategy execution finished in 132.88s
+    INFO :
+    INFO :      Final results:
+    INFO :
+    INFO :      	Global Arrays:
+    INFO :      		ArrayRecord (0.195 MB)
+    INFO :
+    INFO :      	Aggregated ClientApp-side Train Metrics:
+    INFO :      	{1: {}, 2: {}, 3: {}}
+    INFO :
+    INFO :      	Aggregated ClientApp-side Evaluate Metrics:
+    INFO :      	{1: {'auc': '7.6775e-01'}, 2: {'auc': '7.7583e-01'}, 3: {'auc': '7.8117e-01'}}
+    INFO :
+    INFO :      	ServerApp-side Evaluate Metrics:
+    INFO :      	{}
+    INFO :
+
+    Saving final model to disk...
+
+You can also override the parameters defined in the ``[tool.flwr.app.config]`` section
+in the ``pyproject.toml`` like this:
+
+.. code-block:: shell
+
+    # Override some arguments
+    $ flwr run . --run-config "num-server-rounds=5 params.eta=0.2"
+
+What follows is an explanation of each component in the project you just created:
+dataset partitioning, the model, defining the ``ClientApp``, and defining the
+``ServerApp``.
+
+
+
+
+
+
 
 In this tutorial, we learn how to train a federated XGBoost model on the HIGGS dataset
 using Flower and the ``xgboost`` package to perform a binary classification task. We use
@@ -59,6 +204,10 @@ install ``xgboost``:
 .. code-block:: shell
 
     $ pip install xgboost
+
+
+
+
 
 The Configurations
 ~~~~~~~~~~~~~~~~~~
