@@ -48,6 +48,17 @@ class QFedAvg(FedAvg):
 
     Parameters
     ----------
+    client_learning_rate : float
+        Local learning rate used by clients during training. This value is used by
+        the strategy to approximate the base Lipschitz constant L, via
+        L = 1 / client_learning_rate.
+    q : float (default: 0.1)
+        The parameter q that controls the degree of fairness of the algorithm. Please
+        tune this parameter based on your use case.
+        When set to 0, q-FedAvg is equivalent to FedAvg.
+    train_loss_key : str (default: "train_loss")
+        The key within the MetricRecord whose value is used as the training loss when
+        aggregating ArrayRecords following q-FedAvg.
     fraction_train : float (default: 1.0)
         Fraction of nodes used during training. In case `min_train_nodes`
         is larger than `fraction_train * total_connected_nodes`, `min_train_nodes`
@@ -79,20 +90,13 @@ class QFedAvg(FedAvg):
         used to aggregate MetricRecords from training round replies.
         If `None`, defaults to `aggregate_metricrecords`, which performs a weighted
         average using the provided weight factor key.
-    q : float (default: 0.2)
-        The parameter q that controls the degree of fairness of the algorithm.
-        When set to 0, q-FedAvg is equivalent to FedAvg.
-    client_learning_rate : float (default: 0.01)
-        Local learning rate used by clients during training. This value is used by
-        the strategy to approximate the base Lipschitz constant L, via
-        L = 1 / client_learning_rate.
-    train_loss_key : str (default: "train_loss")
-        The key within the MetricRecord whose value is used as the training loss when
-        aggregating ArrayRecords following q-FedAvg.
     """
 
     def __init__(  # pylint: disable=R0913, R0917
         self,
+        client_learning_rate: float,
+        q: float = 0.1,
+        train_loss_key: str = "train_loss",
         fraction_train: float = 1.0,
         fraction_evaluate: float = 1.0,
         min_train_nodes: int = 2,
@@ -107,9 +111,6 @@ class QFedAvg(FedAvg):
         evaluate_metrics_aggr_fn: Optional[
             Callable[[list[RecordDict], str], MetricRecord]
         ] = None,
-        q: float = 0.2,
-        client_learning_rate: float = 0.1,
-        train_loss_key: str = "train_loss",
     ) -> None:
         super().__init__(
             fraction_train=fraction_train,
@@ -131,8 +132,8 @@ class QFedAvg(FedAvg):
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
         log(INFO, "\t├──> q-FedAvg settings:")
-        log(INFO, "\t|\t├── q: %s", self.q)
         log(INFO, "\t|\t├── client_learning_rate: %s", self.client_learning_rate)
+        log(INFO, "\t|\t├── q: %s", self.q)
         log(INFO, "\t|\t└── train_loss_key: '%s'", self.train_loss_key)
         super().summary()
 
@@ -207,11 +208,10 @@ def get_train_loss(msg: Message, loss_key: str) -> float:
     metrics = list(msg.content.metric_records.values())[0]
     if (loss := metrics.get(loss_key)) is None or not isinstance(loss, (int, float)):
         raise AggregationError(
-            "Missing or invalid local training loss in MetricRecord."
-            "The strategy was configured to receive a training loss "
-            f"using key `{loss_key}`. ",
-            f" Make sure the key '{loss_key}' exists and "
-            "maps to a float value."
+            "Missing or invalid training loss. "
+            f"The strategy expected a float value for the key '{loss_key}' "
+            "as the training loss in each MetricRecord from the clients. "
+            f"Ensure that '{loss_key}' is present and maps to a valid float."
         )
     return float(loss)
 
