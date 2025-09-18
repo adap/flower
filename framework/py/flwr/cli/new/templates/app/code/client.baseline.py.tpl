@@ -1,58 +1,75 @@
 """$project_name: A Flower Baseline."""
 
 import torch
-from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 
 from $import_name.dataset import load_data
-from $import_name.model import Net, get_weights, set_weights, test, train
-
-
-class FlowerClient(NumPyClient):
-    """A class defining the client."""
-
-    def __init__(self, net, trainloader, valloader, local_epochs):
-        self.net = net
-        self.trainloader = trainloader
-        self.valloader = valloader
-        self.local_epochs = local_epochs
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.net.to(self.device)
-
-    def fit(self, parameters, config):
-        """Traim model using this client's data."""
-        set_weights(self.net, parameters)
-        train_loss = train(
-            self.net,
-            self.trainloader,
-            self.local_epochs,
-            self.device,
-        )
-        return (
-            get_weights(self.net),
-            len(self.trainloader.dataset),
-            {"train_loss": train_loss},
-        )
-
-    def evaluate(self, parameters, config):
-        """Evaluate model using this client's data."""
-        set_weights(self.net, parameters)
-        loss, accuracy = test(self.net, self.valloader, self.device)
-        return loss, len(self.valloader.dataset), {"accuracy": accuracy}
-
-
-def client_fn(context: Context):
-    """Construct a Client that will be run in a ClientApp."""
-    # Load model and data
-    net = Net()
-    partition_id = int(context.node_config["partition-id"])
-    num_partitions = int(context.node_config["num-partitions"])
-    trainloader, valloader = load_data(partition_id, num_partitions)
-    local_epochs = context.run_config["local-epochs"]
-
-    # Return Client instance
-    return FlowerClient(net, trainloader, valloader, local_epochs).to_client()
-
+from $import_name.model import Net
+from $import_name.model import test as test_fn
+from $import_name.model import train as train_fn
 
 # Flower ClientApp
-app = ClientApp(client_fn)
+app = ClientApp()
+
+
+@app.train()
+def train(msg: Message, context: Context):
+    """Train the model on local data."""
+
+    # Load the model and initialize it with the received weights
+    model = Net()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    # Load the data
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+    trainloader, _ = load_data(partition_id, num_partitions)
+    local_epochs = context.run_config["local-epochs"]
+
+    # Call the training function
+    train_loss = train_fn(
+        model,
+        trainloader,
+        local_epochs,
+        device,
+    )
+
+    # Construct and return reply Message
+    model_record = ArrayRecord(model.state_dict())
+    metrics = {
+        "train_loss": train_loss,
+        "num-examples": len(trainloader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)
+
+
+@app.evaluate()
+def evaluate(msg: Message, context: Context):
+    """Evaluate the model on local data."""
+
+    # Load the model and initialize it with the received weights
+    model = Net()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    # Load the data
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+    _, valloader = load_data(partition_id, num_partitions)
+
+    # Call the evaluation function
+    eval_loss, eval_acc = test_fn(model, valloader, device)
+
+    # Construct and return reply Message
+    metrics = {
+        "eval_loss": eval_loss,
+        "eval_acc": eval_acc,
+        "num-examples": len(valloader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
+    return Message(content=content, reply_to=msg)

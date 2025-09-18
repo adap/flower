@@ -41,6 +41,7 @@ class MlFramework(str, Enum):
     JAX = "JAX"
     MLX = "MLX"
     NUMPY = "NumPy"
+    XGBOOST = "XGBoost"
     FLOWERTUNE = "FlowerTune"
     BASELINE = "Flower Baseline"
     PYTORCH_LEGACY_API = "PyTorch (Legacy API, deprecated)"
@@ -201,7 +202,7 @@ def new(
         }
 
         # Challenge specific context
-        fraction_fit = "0.2" if llm_challenge_str == "code" else "0.1"
+        fraction_train = "0.2" if llm_challenge_str == "code" else "0.1"
         if llm_challenge_str == "generalnlp":
             challenge_name = "General NLP"
             num_clients = "20"
@@ -220,7 +221,7 @@ def new(
             dataset_name = "flwrlabs/code-alpaca-20k"
 
         context["llm_challenge_str"] = llm_challenge_str
-        context["fraction_fit"] = fraction_fit
+        context["fraction_train"] = fraction_train
         context["challenge_name"] = challenge_name
         context["num_clients"] = num_clients
         context["dataset_name"] = dataset_name
@@ -247,6 +248,7 @@ def new(
             MlFramework.TENSORFLOW.value,
             MlFramework.SKLEARN.value,
             MlFramework.NUMPY.value,
+            MlFramework.XGBOOST.value,
             "pytorch_legacy_api",
         ]
         if framework_str in frameworks_with_tasks:
