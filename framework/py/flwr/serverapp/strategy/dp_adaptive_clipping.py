@@ -46,7 +46,7 @@ from .strategy import Strategy
 class DifferentialPrivacyAdaptiveBase(Strategy, ABC):
     """Base class for DP strategies with adaptive clipping."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-positional-arguments
     def __init__(
         self,
         strategy: Strategy,
@@ -161,6 +161,7 @@ class DifferentialPrivacyAdaptiveBase(Strategy, ABC):
 class DifferentialPrivacyServerSideAdaptiveClipping(DifferentialPrivacyAdaptiveBase):
     """Message-based central DP with server-side adaptive clipping."""
 
+    # pylint: disable=too-many-arguments,too-many-locals,too-many-positional-arguments
     def __init__(
         self,
         strategy: Strategy,
