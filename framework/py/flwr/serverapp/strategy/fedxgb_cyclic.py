@@ -40,10 +40,14 @@ class FedXgbCyclic(FedAvg):
 
     Parameters
     ----------
-    do_train : bool (default: True)
-        Perform federated training if set to True.
-    do_eval : bool (default: True)
-        Perform federated evaluation if set to True.
+    fraction_train : float (default: 1.0)
+        Fraction of nodes used during training. In case `min_train_nodes`
+        is larger than `fraction_train * total_connected_nodes`, `min_train_nodes`
+        will still be sampled.
+    fraction_evaluate : float (default: 1.0)
+        Fraction of nodes used during validation. In case `min_evaluate_nodes`
+        is larger than `fraction_evaluate * total_connected_nodes`,
+        `min_evaluate_nodes` will still be sampled.
     min_available_nodes : int (default: 2)
         Minimum number of total nodes in the system.
     weighted_by_key : str (default: "num-examples")
@@ -68,8 +72,8 @@ class FedXgbCyclic(FedAvg):
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self,
-        do_train: bool = True,
-        do_eval: bool = True,
+        fraction_train: float = 1.0,
+        fraction_evaluate: float = 1.0,
         min_available_nodes: int = 2,
         weighted_by_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
@@ -82,8 +86,8 @@ class FedXgbCyclic(FedAvg):
         ] = None,
     ) -> None:
         super().__init__(
-            fraction_train=1.0 if do_train else 0.0,
-            fraction_evaluate=1.0 if do_eval else 0.0,
+            fraction_train=fraction_train,
+            fraction_evaluate=fraction_evaluate,
             min_train_nodes=2,
             min_evaluate_nodes=2,
             min_available_nodes=min_available_nodes,
@@ -96,16 +100,10 @@ class FedXgbCyclic(FedAvg):
 
         self.registered_nodes: dict[int, int] = {}
 
-        if do_train:
-            log(
-                WARNING,
-                "fraction_train is forced to 1.0.",
-            )
-        if do_eval:
-            log(
-                WARNING,
-                "fraction_evaluate is forced to 1.0.",
-            )
+        if fraction_train not in (0.0, 1.0):
+            raise ValueError("fraction_train can only be set to 1.0 or 0.0 for FedXgbCyclic.")
+        if fraction_evaluate not in (0.0, 1.0):
+            raise ValueError("fraction_evaluate can only be set to 1.0 or 0.0 for FedXgbCyclic.")
 
     def _reorder_nodes(self, node_ids: list[int]) -> list[int]:
         """Re-order node ids based on registered nodes.
