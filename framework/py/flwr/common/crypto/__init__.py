@@ -1,0 +1,2 @@
+def NET():
+    return None

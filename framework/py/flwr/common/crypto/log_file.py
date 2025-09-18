@@ -1,4 +1,3 @@
-import datetime
 import os
 from .config_cripto import ENCRYPTION_METHOD, ENCRYPTION_ENABLED
 
@@ -10,21 +9,13 @@ def init_csv():
     if CSV_INITIALIZED:
         return CSV_PATH
 
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Nome fisso per questa esecuzione
     base_name = f"serialization_times_{ENCRYPTION_METHOD}.csv" if ENCRYPTION_ENABLED else "serialization_times_noCritto.csv"
     CSV_PATH = base_name
 
-    # Se il file esiste già, aggiungi suffisso numerico
-    counter = 1
-    while os.path.exists(CSV_PATH):
-        name, ext = os.path.splitext(base_name)
-        CSV_PATH = f"{name}_{counter}{ext}"
-        counter += 1
-
-    # Scrive intestazione con info crittografia
-    header_msg = f"Encryption enabled: {ENCRYPTION_METHOD}" if ENCRYPTION_ENABLED else "Encryption disabled"
-
+    # Sovrascrive se esiste già
     with open(CSV_PATH, mode="w", encoding="utf-8") as f:
+        header_msg = f"Encryption enabled: {ENCRYPTION_METHOD}" if ENCRYPTION_ENABLED else "Encryption disabled"
         print(header_msg, flush=True)
         f.write(header_msg + "\n")
 

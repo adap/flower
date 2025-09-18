@@ -7,8 +7,19 @@ CONFIG_FILE = "config_cripto.py"
 # Opzioni disponibili
 ENCRYPTION_METHODS = ["AES", "CHACHA", "CHACHA_AEAD", "AES_GCM"]
 INTEGRITY_METHODS = ["HMAC"]
-NET_OPTIONS = ["custom_cnn", "resnet18", "resnet50"]
+NET_OPTIONS = ["custom_cnn", "resnet18", "resnet34"]
 
+def ask_accuracy(prompt, default=0.5):
+    allowed = [0.2, 0.5, 0.7, 0.9]
+    allowed_str = [str(a) for a in allowed]
+    default_str = str(default)
+    while True:
+        val = input(f"{prompt} {allowed} (default: {default}): ").strip()
+        if val == '':
+            return default
+        if val in allowed_str:
+            return float(val)
+        print(f"Valore non valido, scegli tra {allowed}")
 
 def ask_bool(prompt, default=False):
     while True:
@@ -86,8 +97,8 @@ def configure():
 
     # Rete e altri parametri
     NET = ask_choice("Tipo di rete", NET_OPTIONS, existing.get('NET', "resnet18"))
-    INSECURE = ask_bool("Modalità insicura?", existing.get('INSECURE', False))
-    ACCURACY = ask_float("Accuratezza iniziale", existing.get('ACCURACY', 0.5))
+    TLS = ask_bool("Attivo TLS?", existing.get('TLS', False))
+    ACCURACY = ask_accuracy("Accuratezza iniziale", existing.get('ACCURACY', 0.5))
 
     # Numero di client
     NUM_CLIENTS = ask_int("Numero di client", existing.get('NUM_CLIENTS', 1))
@@ -99,7 +110,7 @@ def configure():
         f.write(f"INTEGRITY_ENABLED = {INTEGRITY_ENABLED}\n")
         f.write(f"INTEGRITY_METHOD = {repr(INTEGRITY_METHOD)}\n")
         f.write(f"NET = '{NET}'\n")
-        f.write(f"INSECURE = {INSECURE}\n")
+        f.write(f"TLS = {TLS}\n")
         f.write(f"ACCURACY = {ACCURACY}\n")
         f.write(f"NUM_CLIENTS = {NUM_CLIENTS}\n")
 

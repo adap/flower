@@ -29,6 +29,7 @@ class FlowerClient(NumPyClient):
 
     def fit(self, parameters, config):
         """Train the model with data of this client."""
+
         set_weights(self.net, parameters)
         results = train(
             self.net,

@@ -8,7 +8,8 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from datasets import load_from_disk
 from torchvision.transforms import Compose, Normalize, ToTensor, Resize
-from torchvision.models import resnet18
+from torchvision.models import resnet18, resnet34
+
 
 # ----------------------
 # MODELLI
@@ -39,6 +40,10 @@ def get_model(model_name: str, num_classes=10, pretrained=False):
 
     elif model_name == "resnet18":
         model = resnet18(pretrained=pretrained)
+        model.fc = nn.Linear(model.fc.in_features, num_classes)
+        return model
+    elif model_name == "resnet34":
+        model = resnet34(pretrained=pretrained)
         model.fc = nn.Linear(model.fc.in_features, num_classes)
         return model
 
