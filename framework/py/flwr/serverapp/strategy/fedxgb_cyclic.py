@@ -40,6 +40,10 @@ class FedXgbCyclic(FedAvg):
 
     Parameters
     ----------
+    do_train : bool (default: True)
+        Perform federated training if set to True.
+    do_eval : bool (default: True)
+        Perform federated evaluation if set to True.
     min_available_nodes : int (default: 2)
         Minimum number of total nodes in the system.
     weighted_by_key : str (default: "num-examples")
@@ -64,6 +68,8 @@ class FedXgbCyclic(FedAvg):
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self,
+        do_train: bool = True,
+        do_eval: bool = True,
         min_available_nodes: int = 2,
         weighted_by_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
@@ -76,8 +82,8 @@ class FedXgbCyclic(FedAvg):
         ] = None,
     ) -> None:
         super().__init__(
-            fraction_train=1.0,
-            fraction_evaluate=1.0,
+            fraction_train=1.0 if do_train else 0.0,
+            fraction_evaluate=1.0 if do_eval else 0.0,
             min_train_nodes=2,
             min_evaluate_nodes=2,
             min_available_nodes=min_available_nodes,
@@ -89,10 +95,17 @@ class FedXgbCyclic(FedAvg):
         )
 
         self.registered_nodes: dict[int, int] = {}
-        log(
-            WARNING,
-            "fraction_evaluate and fraction_evaluate are forced to 1.0.",
-        )
+
+        if do_train:
+            log(
+                WARNING,
+                "fraction_train is forced to 1.0.",
+            )
+        if do_eval:
+            log(
+                WARNING,
+                "fraction_evaluate is forced to 1.0.",
+            )
 
     def _reorder_nodes(self, node_ids: list[int]) -> list[int]:
         """Re-order node ids based on registered nodes.
