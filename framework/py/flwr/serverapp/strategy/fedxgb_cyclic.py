@@ -178,7 +178,7 @@ class FedXgbCyclic(FedAvg):
             reply_contents = [msg.content for msg in valid_replies]
             array_record_key = next(iter(reply_contents[0].array_records.keys()))
 
-            # Fetch the client model from last round as global model
+            # Fetch the client model from current round as global model
             arrays = cast(ArrayRecord, reply_contents[0][array_record_key])
 
             # Aggregate MetricRecords
