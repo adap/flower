@@ -41,6 +41,7 @@ class MlFramework(str, Enum):
     JAX = "JAX"
     MLX = "MLX"
     NUMPY = "NumPy"
+    XGBOOST = "XGBoost"
     FLOWERTUNE = "FlowerTune"
     BASELINE = "Flower Baseline"
     PYTORCH_LEGACY_API = "PyTorch (Legacy API, deprecated)"
@@ -247,6 +248,7 @@ def new(
             MlFramework.TENSORFLOW.value,
             MlFramework.SKLEARN.value,
             MlFramework.NUMPY.value,
+            MlFramework.XGBOOST.value,
             "pytorch_legacy_api",
         ]
         if framework_str in frameworks_with_tasks:
