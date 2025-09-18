@@ -83,7 +83,7 @@ def flower_superexec() -> None:
     if plugin_config_path := getattr(args, "plugin_config", None):
         try:
             with open(plugin_config_path, encoding="utf-8") as file:
-                yaml_config: dict[str, Any] = yaml.safe_load(file)
+                yaml_config: Optional[dict[str, Any]] = yaml.safe_load(file)
                 if yaml_config is None or EXEC_PLUGIN_SECTION not in yaml_config:
                     raise ValueError(f"Missing '{EXEC_PLUGIN_SECTION}' section.")
                 plugin_config = yaml_config[EXEC_PLUGIN_SECTION]
