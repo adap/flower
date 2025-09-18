@@ -36,16 +36,16 @@
 
 .. _result_link: ref-api/flwr.serverapp.strategy.Result.html
 
-
 Quickstart XGBoost
 ==================
 
-In this federated learning tutorial, we will learn how to train a simple XGBoost classifier on Higgs dataset
-using Flower and XGBoost. It is recommended to create a virtual environment and run
-everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+In this federated learning tutorial, we will learn how to train a simple XGBoost
+classifier on Higgs dataset using Flower and XGBoost. It is recommended to create a
+virtual environment and run everything within a :doc:`virtualenv
+<contributor-how-to-set-up-a-virtual-env>`.
 
-Let's use `flwr new` to create a complete Flower+XGBoost project. It will generate all the
-files needed to run, by default with the Simulation Engine, a federation of 10 nodes
+Let's use `flwr new` to create a complete Flower+XGBoost project. It will generate all
+the files needed to run, by default with the Simulation Engine, a federation of 10 nodes
 using bagging aggregation. The dataset will be partitioned using Flower Dataset's
 `IidPartitioner
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
@@ -59,7 +59,8 @@ install Flower in your new environment:
     $ pip install flwr
 
 Then, run the command below. You will be prompted to select one of the available
-templates (choose ``XGBoost``), give a name to your project, and enter your developer name:
+templates (choose ``XGBoost``), give a name to your project, and enter your developer
+name:
 
 .. code-block:: shell
 
@@ -100,59 +101,59 @@ With default arguments, you will see output like this:
     Loading project configuration...
     Success
     INFO :      Starting FedXgbBagging strategy:
-    INFO :      	├── Number of rounds: 3
-    INFO :      	├── ArrayRecord (0.00 MB)
-    INFO :      	├── ConfigRecord (train): (empty!)
-    INFO :      	├── ConfigRecord (evaluate): (empty!)
-    INFO :      	├──> Sampling:
-    INFO :      	│	├──Fraction: train (0.10) | evaluate ( 0.10)
-    INFO :      	│	├──Minimum nodes: train (2) | evaluate (2)
-    INFO :      	│	└──Minimum available nodes: 2
-    INFO :      	└──> Keys in records:
-    INFO :      		├── Weighted by: 'num-examples'
-    INFO :      		├── ArrayRecord key: 'arrays'
-    INFO :      		└── ConfigRecord key: 'config'
+    INFO :              ├── Number of rounds: 3
+    INFO :              ├── ArrayRecord (0.00 MB)
+    INFO :              ├── ConfigRecord (train): (empty!)
+    INFO :              ├── ConfigRecord (evaluate): (empty!)
+    INFO :              ├──> Sampling:
+    INFO :              │       ├──Fraction: train (0.10) | evaluate ( 0.10)
+    INFO :              │       ├──Minimum nodes: train (2) | evaluate (2)
+    INFO :              │       └──Minimum available nodes: 2
+    INFO :              └──> Keys in records:
+    INFO :                      ├── Weighted by: 'num-examples'
+    INFO :                      ├── ArrayRecord key: 'arrays'
+    INFO :                      └── ConfigRecord key: 'config'
     INFO :
     INFO :
     INFO :      [ROUND 1/3]
     INFO :      configure_train: Sampled 2 nodes (out of 10)
     INFO :      aggregate_train: Received 2 results and 0 failures
-    INFO :      	└──> Aggregated MetricRecord: {}
+    INFO :              └──> Aggregated MetricRecord: {}
     INFO :      configure_evaluate: Sampled 2 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 2 results and 0 failures
-    INFO :      	└──> Aggregated MetricRecord: {'auc': 0.7677505289821278}
+    INFO :              └──> Aggregated MetricRecord: {'auc': 0.7677505289821278}
     INFO :
     INFO :      [ROUND 2/3]
     INFO :      configure_train: Sampled 2 nodes (out of 10)
     INFO :      aggregate_train: Received 2 results and 0 failures
-    INFO :      	└──> Aggregated MetricRecord: {}
+    INFO :              └──> Aggregated MetricRecord: {}
     INFO :      configure_evaluate: Sampled 2 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 2 results and 0 failures
-    INFO :      	└──> Aggregated MetricRecord: {'auc': 0.7758267351298489}
+    INFO :              └──> Aggregated MetricRecord: {'auc': 0.7758267351298489}
     INFO :
     INFO :      [ROUND 3/3]
     INFO :      configure_train: Sampled 2 nodes (out of 10)
     INFO :      aggregate_train: Received 2 results and 0 failures
-    INFO :      	└──> Aggregated MetricRecord: {}
+    INFO :              └──> Aggregated MetricRecord: {}
     INFO :      configure_evaluate: Sampled 2 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 2 results and 0 failures
-    INFO :      	└──> Aggregated MetricRecord: {'auc': 0.7811659285552999}
+    INFO :              └──> Aggregated MetricRecord: {'auc': 0.7811659285552999}
     INFO :
     INFO :      Strategy execution finished in 132.88s
     INFO :
     INFO :      Final results:
     INFO :
-    INFO :      	Global Arrays:
-    INFO :      		ArrayRecord (0.195 MB)
+    INFO :              Global Arrays:
+    INFO :                      ArrayRecord (0.195 MB)
     INFO :
-    INFO :      	Aggregated ClientApp-side Train Metrics:
-    INFO :      	{1: {}, 2: {}, 3: {}}
+    INFO :              Aggregated ClientApp-side Train Metrics:
+    INFO :              {1: {}, 2: {}, 3: {}}
     INFO :
-    INFO :      	Aggregated ClientApp-side Evaluate Metrics:
-    INFO :      	{1: {'auc': '7.6775e-01'}, 2: {'auc': '7.7583e-01'}, 3: {'auc': '7.8117e-01'}}
+    INFO :              Aggregated ClientApp-side Evaluate Metrics:
+    INFO :              {1: {'auc': '7.6775e-01'}, 2: {'auc': '7.7583e-01'}, 3: {'auc': '7.8117e-01'}}
     INFO :
-    INFO :      	ServerApp-side Evaluate Metrics:
-    INFO :      	{}
+    INFO :              ServerApp-side Evaluate Metrics:
+    INFO :              {}
     INFO :
 
     Saving final model to disk...
@@ -226,10 +227,9 @@ Flower Datasets:
     train_dmatrix = transform_dataset_to_dmatrix(train_data)
     valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 
-We train/test split using the given partition (client's local data), and
-reformat data to DMatrix for the ``xgboost`` package.
-The functions of ``train_test_split`` and ``transform_dataset_to_dmatrix`` are defined
-as below:
+We train/test split using the given partition (client's local data), and reformat data
+to DMatrix for the ``xgboost`` package. The functions of ``train_test_split`` and
+``transform_dataset_to_dmatrix`` are defined as below:
 
 .. code-block:: python
 
@@ -257,8 +257,8 @@ The ClientApp
 
 The main changes we have to make to use `XGBoost` with `Flower` have to do with
 converting the |arrayrecord_link|_ received in the |message_link|_ into a `XGBoost`
-loadable binary object, and vice versa when generating the reply ``Message`` from the ClientApp. We
-can make use of the following conversions:
+loadable binary object, and vice versa when generating the reply ``Message`` from the
+ClientApp. We can make use of the following conversions:
 
 .. code-block:: python
 
@@ -354,10 +354,10 @@ Deployment Runtime and is not directly configurable during simulations.
         content = RecordDict({"arrays": model_record, "metrics": metric_record})
         return Message(content=content, reply_to=msg)
 
-At the first round, we call ``xgb.train()`` to build up the first set of
-trees. From the second round, we load the global model sent from server to new build
-Booster object, and then update model weights on local training data with function
-``_local_boost`` as follows:
+At the first round, we call ``xgb.train()`` to build up the first set of trees. From the
+second round, we load the global model sent from server to new build Booster object, and
+then update model weights on local training data with function ``_local_boost`` as
+follows:
 
 .. code-block:: python
 
@@ -416,11 +416,10 @@ receives as input arguments:
   ``ClientApp`` to involve them in a round of train/evaluate/query or other.
 - a ``Context`` object that provides access to the run configuration.
 
-In this example we use the ``FedXgbBagging`` strategy. Then,
-we initialize an empty global model as the XGBoost model will be initialized on
-client side in the first round. After that, the execution of the strategy is
-launched when invoking its |strategy_start_link|_ method.
-To it we pass:
+In this example we use the ``FedXgbBagging`` strategy. Then, we initialize an empty
+global model as the XGBoost model will be initialized on client side in the first round.
+After that, the execution of the strategy is launched when invoking its
+|strategy_start_link|_ method. To it we pass:
 
 - the ``Grid`` object.
 - an ``ArrayRecord`` carrying a randomly initialized model that will serve as the global
@@ -486,57 +485,57 @@ Tree-based Bagging Aggregation
 You must be curious about how bagging aggregation works. Let's look into the details.
 
 In file ``flwr.serverapp.strategy.fedxgb_bagging.py``, we define ``FedXgbBagging``
-inherited from ``flwr.serverapp.strategy.FedAvg``. Then, we override the ``configure_train`` and
-``aggregate_train`` methods as follows:
+inherited from ``flwr.serverapp.strategy.FedAvg``. Then, we override the
+``configure_train`` and ``aggregate_train`` methods as follows:
 
 .. code-block:: python
 
     class FedXgbBagging(FedAvg):
-    """Configurable FedXgbBagging strategy implementation."""
+        """Configurable FedXgbBagging strategy implementation."""
 
-    current_bst: Optional[bytes] = None
+        current_bst: Optional[bytes] = None
 
-    ...
+        ...
 
-    def configure_train(
-        self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-    ) -> Iterable[Message]:
-        """Configure the next round of federated training."""
-        self._ensure_single_array(arrays)
-        # Keep track of array record being communicated
-        self.current_bst = arrays["0"].numpy().tobytes()
-        return super().configure_train(server_round, arrays, config, grid)
+        def configure_train(
+            self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
+        ) -> Iterable[Message]:
+            """Configure the next round of federated training."""
+            self._ensure_single_array(arrays)
+            # Keep track of array record being communicated
+            self.current_bst = arrays["0"].numpy().tobytes()
+            return super().configure_train(server_round, arrays, config, grid)
 
-    def aggregate_train(
-        self,
-        server_round: int,
-        replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
-        """Aggregate ArrayRecords and MetricRecords in the received Messages."""
-        valid_replies, _ = self._check_and_log_replies(replies, is_train=True)
+        def aggregate_train(
+            self,
+            server_round: int,
+            replies: Iterable[Message],
+        ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+            """Aggregate ArrayRecords and MetricRecords in the received Messages."""
+            valid_replies, _ = self._check_and_log_replies(replies, is_train=True)
 
-        arrays, metrics = None, None
-        if valid_replies:
-            reply_contents = [msg.content for msg in valid_replies]
-            array_record_key = next(iter(reply_contents[0].array_records.keys()))
+            arrays, metrics = None, None
+            if valid_replies:
+                reply_contents = [msg.content for msg in valid_replies]
+                array_record_key = next(iter(reply_contents[0].array_records.keys()))
 
-            # Aggregate ArrayRecords
-            for content in reply_contents:
-                self._ensure_single_array(cast(ArrayRecord, content[array_record_key]))
-                bst = content[array_record_key]["0"].numpy().tobytes()  # type: ignore[union-attr]
+                # Aggregate ArrayRecords
+                for content in reply_contents:
+                    self._ensure_single_array(cast(ArrayRecord, content[array_record_key]))
+                    bst = content[array_record_key]["0"].numpy().tobytes()  # type: ignore[union-attr]
+
+                    if self.current_bst is not None:
+                        self.current_bst = aggregate_bagging(self.current_bst, bst)
 
                 if self.current_bst is not None:
-                    self.current_bst = aggregate_bagging(self.current_bst, bst)
+                    arrays = ArrayRecord([np.frombuffer(self.current_bst, dtype=np.uint8)])
 
-            if self.current_bst is not None:
-                arrays = ArrayRecord([np.frombuffer(self.current_bst, dtype=np.uint8)])
-
-            # Aggregate MetricRecords
-            metrics = self.train_metrics_aggr_fn(
-                reply_contents,
-                self.weighted_by_key,
-            )
-        return arrays, metrics
+                # Aggregate MetricRecords
+                metrics = self.train_metrics_aggr_fn(
+                    reply_contents,
+                    self.weighted_by_key,
+                )
+            return arrays, metrics
 
 In ``aggregate_train``, we sequentially aggregate the clients' XGBoost trees by calling
 ``aggregate_bagging()`` function:
@@ -544,8 +543,8 @@ In ``aggregate_train``, we sequentially aggregate the clients' XGBoost trees by 
 .. code-block:: python
 
     def aggregate_bagging(
-    bst_prev_org: bytes,
-    bst_curr_org: bytes,
+        bst_prev_org: bytes,
+        bst_curr_org: bytes,
     ) -> bytes:
         """Conduct bagging aggregation for given trees."""
         if bst_prev_org == b"":
@@ -599,6 +598,6 @@ Congratulations! You've successfully built and run your first federated learning
 .. note::
 
     Check the `source code
-    <https://github.com/adap/flower/blob/main/examples/xgboost-quickstart>`_ of the extended
-    version of this tutorial in ``examples/xgboost-quickstart`` in the Flower GitHub
-    repository.
+    <https://github.com/adap/flower/blob/main/examples/xgboost-quickstart>`_ of the
+    extended version of this tutorial in ``examples/xgboost-quickstart`` in the Flower
+    GitHub repository.
