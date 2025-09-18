@@ -92,41 +92,81 @@ With default arguments you will see an output like this one:
 
 .. code-block:: shell
 
-    Loading project configuration...
+    Loading project configuration... 
     Success
-    INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
-    INFO :
-    INFO :      [INIT]
-    INFO :      Using initial global parameters provided by strategy
-    INFO :      Starting evaluation of initial global parameters
-    INFO :      Evaluation returned no results (`None`)
-    INFO :
-    INFO :      [ROUND 1]
-    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_fit: received 10 results and 0 failures
-    WARNING :   No fit_metrics_aggregation_fn provided
-    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_evaluate: received 10 results and 0 failures
-    WARNING :   No evaluate_metrics_aggregation_fn provided
-    INFO :
-    INFO :      [ROUND 2]
-    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_fit: received 10 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_evaluate: received 10 results and 0 failures
-    INFO :
-    INFO :      [ROUND 3]
-    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_fit: received 10 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_evaluate: received 10 results and 0 failures
-    INFO :
-    INFO :      [SUMMARY]
-    INFO :      Run finished 3 round(s) in 14.53s
-    INFO :          History (loss, distributed):
-    INFO :                  round 1: 1.233069000819992
-    INFO :                  round 2: 0.8805567523494775
-    INFO :                  round 3: 0.7020750690299342
+    INFO :      Starting FedAvg strategy:
+    INFO :          ├── Number of rounds: 3
+    INFO :          ├── ArrayRecord (0.06 MB)
+    INFO :          ├── ConfigRecord (train): (empty!)
+    INFO :          ├── ConfigRecord (evaluate): (empty!)
+    INFO :          ├──> Sampling:
+    INFO :          │       ├──Fraction: train (1.00) | evaluate ( 1.00)
+    INFO :          │       ├──Minimum nodes: train (2) | evaluate (2)
+    INFO :          │       └──Minimum available nodes: 2
+    INFO :          └──> Keys in records:
+    INFO :                  ├── Weighted by: 'num-examples'
+    INFO :                  ├── ArrayRecord key: 'arrays'
+    INFO :                  └── ConfigRecord key: 'config'
+    INFO :      
+    INFO :      
+    INFO :      [ROUND 1/3]
+    INFO :      configure_train: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_train: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_logloss': 1.3937176081476854}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'test_logloss': 1.2330690008199938, 'accuracy': 0.6915833333333334, 'precision': 0.686590664385589, 'recall': 0.6804619911253561, 'f1': 0.6575157112942838}
+    INFO :      
+    INFO :      [ROUND 2/3]
+    INFO :      configure_train: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_train: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_logloss': 0.8565170774432291}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'test_logloss': 0.8805567523494777, 'accuracy': 0.7342500000000001, 'precision': 0.7923715440451836, 'recall': 0.7329471009556615, 'f1': 0.7043857103531533}
+    INFO :      
+    INFO :      [ROUND 3/3]
+    INFO :      configure_train: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_train: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_logloss': 0.703260769576}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'test_logloss': 0.7020750690299385, 'accuracy': 0.7725000000000002, 'precision': 0.8220079490221321, 'recall': 0.7634786024767164, 'f1': 0.7506870949907579}
+    INFO :      
+    INFO :      Strategy execution finished in 17.87s
+    INFO :      
+    INFO :      Final results:
+    INFO :      
+    INFO :          Global Arrays:
+    INFO :                  ArrayRecord (0.060 MB)
+    INFO :      
+    INFO :          Aggregated ClientApp-side Train Metrics:
+    INFO :          { 1: {'train_logloss': '1.3937e+00'},
+    INFO :            2: {'train_logloss': '8.5652e-01'},
+    INFO :            3: {'train_logloss': '7.0326e-01'}}
+    INFO :      
+    INFO :          Aggregated ClientApp-side Evaluate Metrics:
+    INFO :          { 1: { 'accuracy': '6.9158e-01',
+    INFO :                 'f1': '6.5752e-01',
+    INFO :                 'precision': '6.8659e-01',
+    INFO :                 'recall': '6.8046e-01',
+    INFO :                 'test_logloss': '1.2331e+00'},
+    INFO :            2: { 'accuracy': '7.3425e-01',
+    INFO :                 'f1': '7.0439e-01',
+    INFO :                 'precision': '7.9237e-01',
+    INFO :                 'recall': '7.3295e-01',
+    INFO :                 'test_logloss': '8.8056e-01'},
+    INFO :            3: { 'accuracy': '7.7250e-01',
+    INFO :                 'f1': '7.5069e-01',
+    INFO :                 'precision': '8.2201e-01',
+    INFO :                 'recall': '7.6348e-01',
+    INFO :                 'test_logloss': '7.0208e-01'}}
+    INFO :      
+    INFO :          ServerApp-side Evaluate Metrics:
+    INFO :          {}
+    INFO :      
+
+    Saving final model to disk...
 
 You can also override the parameters defined in the ``[tool.flwr.app.config]`` section
 in ``pyproject.toml`` like this:
@@ -203,26 +243,42 @@ A typical ``train`` method for logistic regression looks like this:
 
 
     @app.train()
-    def train(msg: Message, context: Context) -> Message:
-        """Handle a training request from the server."""
-        # Instantiate a logistic regression model
-        n_classes = 10  # MNIST has 10 classes
-        n_features = 784  # Number of features in dataset
-        model.classes_ = np.array([i for i in range(10)])
+    def train(msg: Message, context: Context):
+        """Train the model on local data."""
 
-        # ...
+        # Create LogisticRegression Model
+        penalty = context.run_config["penalty"]
+        local_epochs = context.run_config["local-epochs"]
+        model = get_model(penalty, local_epochs)
+        # Setting initial parameters, akin to model.compile for keras models
+        set_initial_params(model)
 
-        model.coef_ = np.zeros((n_classes, n_features))
-        if model.fit_intercept:
-            model.intercept_ = np.zeros((n_classes,))
+        # Apply received pararameters
+        ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+        set_model_params(model, ndarrays)
 
-        # 2) Fit the model
-        set_model_params(self.model, parameters)
+        # Load the data
+        partition_id = context.node_config["partition-id"]
+        num_partitions = context.node_config["num-partitions"]
+        X_train, _, y_train, _ = load_data(partition_id, num_partitions)
 
         # Ignore convergence failure due to low local epochs
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            self.model.fit(self.X_train, self.y_train)
+            # Train the model on local data
+            model.fit(X_train, y_train)
+
+        # Let's compute train loss
+        y_train_pred_proba = model.predict_proba(X_train)
+        train_logloss = log_loss(y_train, y_train_pred_proba)
+
+        # Construct and return reply Message
+        ndarrays = get_model_params(model)
+        model_record = ArrayRecord(ndarrays)
+        metrics = {"num-examples": len(X_train), "train_logloss": train_logloss}
+        metric_record = MetricRecord(metrics)
+        content = RecordDict({"arrays": model_record, "metrics": metric_record})
+        return Message(content=content, reply_to=msg)
 
 The ``@app.evaluate`` method mirrors ``train`` but only evaluates the received model on
 the local validation set. It returns a ``MetricRecord`` containing the evaluation loss
@@ -271,28 +327,35 @@ Here is a simplified version of the ``main`` method:
 
     @app.main()
     def main(grid: Grid, context: Context) -> None:
-        """Entry point for the server."""
-        # Read from config
-        num_rounds = context.run_config["num-server-rounds"]
+        """Main entry point for the ServerApp."""
+
+        # Read run config
+        num_rounds: int = context.run_config["num-server-rounds"]
 
         # Create LogisticRegression Model
         penalty = context.run_config["penalty"]
         local_epochs = context.run_config["local-epochs"]
         model = get_model(penalty, local_epochs)
-
         # Setting initial parameters, akin to model.compile for keras models
         set_initial_params(model)
+        # Construct ArrayRecord representation
+        arrays = ArrayRecord(get_model_params(model))
 
-        initial_parameters = ndarrays_to_parameters(get_model_params(model))
+        # Initialize FedAvg strategy
+        strategy = FedAvg(fraction_train=1.0, fraction_evaluate=1.0)
 
-        # Define strategy
-        strategy = FedAvg(
-            fraction_fit=1.0,
-            fraction_evaluate=1.0,
-            min_available_clients=2,
-            initial_parameters=initial_parameters,
+        # Start strategy, run FedAvg for `num_rounds`
+        result = strategy.start(
+            grid=grid,
+            initial_arrays=arrays,
+            num_rounds=num_rounds,
         )
-        config = ServerConfig(num_rounds=num_rounds)
+
+        # Save final model parameters
+        print("\nSaving final model to disk...")
+        ndarrays = result.arrays.to_numpy_ndarrays()
+        set_model_params(model, ndarrays)
+        joblib.dump(model, "logreg_model.pkl")
 
 Congratulations! You've successfully built and run your first federated learning system
 in scikit-learn on the MNIST dataset using the new Message API.
