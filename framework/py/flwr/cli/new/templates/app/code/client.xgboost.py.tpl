@@ -1,4 +1,4 @@
-"""xgboost_comprehensive: A Flower / XGBoost app."""
+"""$project_name: A Flower / $framework_str app."""
 
 import warnings
 
@@ -8,7 +8,7 @@ from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from flwr.common.config import unflatten_dict
 
-from xgboost_comprehensive.task import load_data, replace_keys
+from $import_name.task import load_data, replace_keys
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -17,55 +17,31 @@ warnings.filterwarnings("ignore", category=UserWarning)
 app = ClientApp()
 
 
-def _local_boost(bst_input, num_local_round, train_dmatrix, train_method):
+def _local_boost(bst_input, num_local_round, train_dmatrix):
     # Update trees based on local training data.
     for i in range(num_local_round):
         bst_input.update(train_dmatrix, bst_input.num_boosted_rounds())
 
     # Bagging: extract the last N=num_local_round trees for sever aggregation
-    # Cyclic: return the entire model
-    bst = (
-        bst_input[
-            bst_input.num_boosted_rounds()
-            - num_local_round : bst_input.num_boosted_rounds()
-        ]
-        if train_method == "bagging"
-        else bst_input
-    )
-
+    bst = bst_input[
+        bst_input.num_boosted_rounds()
+        - num_local_round : bst_input.num_boosted_rounds()
+    ]
     return bst
 
 
 @app.train()
 def train(msg: Message, context: Context) -> Message:
-    # Parse configs
+    # Load model and data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    num_local_round = context.run_config["local-epochs"]
-    train_method = context.run_config["train-method"]
-    partitioner_type = context.run_config["partitioner-type"]
-    seed = context.run_config["seed"]
-    test_fraction = context.run_config["test-fraction"]
-    centralised_eval_client = context.run_config["centralised-eval-client"]
+    train_dmatrix, valid_dmatrix, num_train, _ = load_data(partition_id, num_partitions)
 
+    # Read from run config
+    num_local_round = context.run_config["local-epochs"]
     # Flatted config dict and replace "-" with "_"
     cfg = replace_keys(unflatten_dict(context.run_config))
     params = cfg["params"]
-
-    # Load training and validation data
-    train_dmatrix, _, num_train, _ = load_data(
-        partitioner_type,
-        partition_id,
-        num_partitions,
-        centralised_eval_client,
-        test_fraction,
-        seed,
-    )
-
-    # Setup learning rate
-    if cfg["scaled_lr"]:
-        new_lr = cfg["params"]["eta"] / num_partitions
-        cfg["params"].update({"eta": new_lr})
 
     global_round = msg.content["config"]["server-round"]
     if global_round == 1:
@@ -83,7 +59,7 @@ def train(msg: Message, context: Context) -> Message:
         bst.load_model(global_model)
 
         # Local training
-        bst = _local_boost(bst, num_local_round, train_dmatrix, train_method)
+        bst = _local_boost(bst, num_local_round, train_dmatrix)
 
     # Save model
     local_model = bst.save_raw("json")
@@ -103,26 +79,14 @@ def train(msg: Message, context: Context) -> Message:
 
 @app.evaluate()
 def evaluate(msg: Message, context: Context) -> Message:
-    # Parse configs
+    # Load model and data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    partitioner_type = context.run_config["partitioner-type"]
-    seed = context.run_config["seed"]
-    test_fraction = context.run_config["test-fraction"]
-    centralised_eval_client = context.run_config["centralised-eval-client"]
+    _, valid_dmatrix, _, num_val = load_data(partition_id, num_partitions)
 
-    # Flatted config dict and replace "-" with "_"
+    # Load config
     cfg = replace_keys(unflatten_dict(context.run_config))
     params = cfg["params"]
-
-    _, valid_dmatrix, _, num_val = load_data(
-        partitioner_type,
-        partition_id,
-        num_partitions,
-        centralised_eval_client,
-        test_fraction,
-        seed,
-    )
 
     # Load global model
     bst = xgb.Booster(params=params)
