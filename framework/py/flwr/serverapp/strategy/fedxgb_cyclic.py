@@ -103,7 +103,7 @@ class FedXgbCyclic(FedAvg):
         node_ids, _ = sample_nodes(grid, self.min_available_nodes, sample_size)
 
         # Sample the clients sequentially given server_round
-        sampled_idx = server_round % len(node_ids)
+        sampled_idx = (server_round - 1) % len(node_ids)
         sampled_node_id = [node_ids[sampled_idx]]
 
         log(
