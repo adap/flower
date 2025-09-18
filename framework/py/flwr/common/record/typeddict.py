@@ -92,7 +92,7 @@ class TypedDict(MutableMapping[K, V], Generic[K, V]):
     def copy(self) -> Self:
         """Return a shallow copy of the dictionary."""
         # Allocate instance without going through __init__
-        new = self.__new__(type(self))
+        new = self.__class__.__new__(type(self))
         # Copy internal state
         new.__dict__["_check_key_fn"] = self.__dict__["_check_key_fn"]
         new.__dict__["_check_value_fn"] = self.__dict__["_check_value_fn"]
