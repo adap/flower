@@ -6,23 +6,23 @@
 
 .. |message_link| replace:: ``Message``
 
-.. _message_link: ref-api/flwr.common.Message.html
+.. _message_link: ref-api/flwr.app.Message.html
 
 .. |arrayrecord_link| replace:: ``ArrayRecord``
 
-.. _arrayrecord_link: ref-api/flwr.common.ArrayRecord.html
+.. _arrayrecord_link: ref-api/flwr.app.ArrayRecord.html
 
 .. |clientapp_link| replace:: ``ClientApp``
 
-.. _clientapp_link: ref-api/flwr.client.ClientApp.html
+.. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
 
 .. |fedavg_link| replace:: ``FedAvg``
 
-.. _fedavg_link: ref-api/flwr.serverapp.FedAvg.html
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
 
 .. |serverapp_link| replace:: ``ServerApp``
 
-.. _serverapp_link: ref-api/flwr.server.ServerApp.html
+.. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
 
 .. |strategy_start_link| replace:: ``start``
 
@@ -41,7 +41,7 @@ and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtua
 
 Let's use ``flwr new`` to create a complete Flower+scikit-learn project. It will
 generate all the files needed to run, by default with the Flower Simulation Engine, a
-federation of 10 nodes using |fedavg|_ The dataset will be partitioned using
+federation of 10 nodes using |fedavg_link|_ The dataset will be partitioned using
 |flowerdatasets|_'s |iidpartitioner|_
 
 Now that we have a rough idea of what this example is about, let's get started. First,
@@ -92,7 +92,7 @@ With default arguments you will see an output like this one:
 
 .. code-block:: shell
 
-    Loading project configuration... 
+    Loading project configuration...
     Success
     INFO :      Starting FedAvg strategy:
     INFO :          ├── Number of rounds: 3
@@ -107,44 +107,44 @@ With default arguments you will see an output like this one:
     INFO :                  ├── Weighted by: 'num-examples'
     INFO :                  ├── ArrayRecord key: 'arrays'
     INFO :                  └── ConfigRecord key: 'config'
-    INFO :      
-    INFO :      
+    INFO :
+    INFO :
     INFO :      [ROUND 1/3]
     INFO :      configure_train: Sampled 10 nodes (out of 10)
     INFO :      aggregate_train: Received 10 results and 0 failures
     INFO :          └──> Aggregated MetricRecord: {'train_logloss': 1.3937176081476854}
     INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'test_logloss': 1.2330690008199938, 'accuracy': 0.6915833333333334, 'precision': 0.686590664385589, 'recall': 0.6804619911253561, 'f1': 0.6575157112942838}
-    INFO :      
+    INFO :          └──> Aggregated MetricRecord: {'test_logloss': 1.23306, 'accuracy': 0.69154, 'precision': 0.68659, 'recall': 0.68046, 'f1': 0.65752}
+    INFO :
     INFO :      [ROUND 2/3]
     INFO :      configure_train: Sampled 10 nodes (out of 10)
     INFO :      aggregate_train: Received 10 results and 0 failures
     INFO :          └──> Aggregated MetricRecord: {'train_logloss': 0.8565170774432291}
     INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'test_logloss': 0.8805567523494777, 'accuracy': 0.7342500000000001, 'precision': 0.7923715440451836, 'recall': 0.7329471009556615, 'f1': 0.7043857103531533}
-    INFO :      
+    INFO :          └──> Aggregated MetricRecord: {'test_logloss': 0.8805, 'accuracy': 0.73425, 'precision': 0.792371, 'recall': 0.7329, 'f1': 0.70438}
+    INFO :
     INFO :      [ROUND 3/3]
     INFO :      configure_train: Sampled 10 nodes (out of 10)
     INFO :      aggregate_train: Received 10 results and 0 failures
     INFO :          └──> Aggregated MetricRecord: {'train_logloss': 0.703260769576}
     INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'test_logloss': 0.7020750690299385, 'accuracy': 0.7725000000000002, 'precision': 0.8220079490221321, 'recall': 0.7634786024767164, 'f1': 0.7506870949907579}
-    INFO :      
+    INFO :          └──> Aggregated MetricRecord: {'test_logloss': 0.70207, 'accuracy': 0.77250, 'precision': 0.82201, 'recall': 0.76348, 'f1': 0.75069}
+    INFO :
     INFO :      Strategy execution finished in 17.87s
-    INFO :      
+    INFO :
     INFO :      Final results:
-    INFO :      
+    INFO :
     INFO :          Global Arrays:
     INFO :                  ArrayRecord (0.060 MB)
-    INFO :      
+    INFO :
     INFO :          Aggregated ClientApp-side Train Metrics:
     INFO :          { 1: {'train_logloss': '1.3937e+00'},
     INFO :            2: {'train_logloss': '8.5652e-01'},
     INFO :            3: {'train_logloss': '7.0326e-01'}}
-    INFO :      
+    INFO :
     INFO :          Aggregated ClientApp-side Evaluate Metrics:
     INFO :          { 1: { 'accuracy': '6.9158e-01',
     INFO :                 'f1': '6.5752e-01',
@@ -161,10 +161,10 @@ With default arguments you will see an output like this one:
     INFO :                 'precision': '8.2201e-01',
     INFO :                 'recall': '7.6348e-01',
     INFO :                 'test_logloss': '7.0208e-01'}}
-    INFO :      
+    INFO :
     INFO :          ServerApp-side Evaluate Metrics:
     INFO :          {}
-    INFO :      
+    INFO :
 
     Saving final model to disk...
 
@@ -222,22 +222,55 @@ function:
 The ClientApp
 -------------
 
-The new Message API defines clients via the ``ClientApp`` class and decorators. Each
-client implements two functions—\ ``train`` and ``evaluate``\ — which operate on a
-``Message`` and return a ``Message``. A ``Message`` received from the server carries the
-current global model weights as an ``ArrayRecord`` (stored under the key ``"arrays"``)
-and an optional ``ConfigRecord`` with hyperparameters (stored under the key
-``"config"``). The ``Context`` parameter gives access to the run configuration defined
-in your ``pyproject.toml`` and, when running on the Deployment Engine, the node
-configuration. In this example we only use the run configuration to read the penalty and
-number of local epochs.
-
-A typical ``train`` method for logistic regression looks like this:
+The main changes we have to make to use ``Scikit-learn`` with ``Flower`` have to do with
+converting the |arrayrecord_link|_ received in the |message_link|_ into numpy ndarrays
+and then use them to set the model parameters. After training, another auxiliary
+function can be used to extract then pack the updated numpy ndarrays into a ``Message``
+from the ClientApp. We can make use of built-in methods in the ``ArrayRecord`` to make
+these conversions:
 
 .. code-block:: python
 
-    from flwr.app import ArrayRecord, MetricRecord, RecordDict, Message
-    from typing import Tuple
+    @app.train()
+    def train(msg: Message, context: Context):
+
+        # Load the model
+        model = get_model()  # construct your scikit-learn model
+        # Extract the ArrayRecord from Message and convert to numpy ndarrays
+        ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+        # Set the model parameters with auxhiliary function
+        set_model_params(model, ndarrays)
+
+        # Train the model
+        ...
+
+        # Extract the updated model parameters with auxhiliary function
+        updated_ndarrays = get_model_params(model)
+        # Pack the updated parameters into an ArrayRecord
+        model_record = ArrayRecord(updated_ndarrays)
+
+The rest of the functionality is directly inspired by the centralized case. The
+|clientapp_link|_ comes with three core methods (``train``, ``evaluate``, and ``query``)
+that we can implement for different purposes. For example: ``train`` to train the
+received model using the local data; ``evaluate`` to assess its performance of the
+received model on a validation set; and ``query`` to retrieve information about the node
+executing the ``ClientApp``. In this tutorial we will only make use of ``train`` and
+``evaluate``.
+
+Let's see how the ``train`` method can be implemented. It receives as input arguments a
+|message_link|_ from the ``ServerApp``. By default it carries:
+
+- an ``ArrayRecord`` with the arrays of the model to federate. By default they can be
+  retrieved with key ``"arrays"`` when accessing the message content.
+- a ``ConfigRecord`` with the configuration sent from the ``ServerApp``. By default it
+  can be retrieved with key ``"config"`` when accessing the message content.
+
+The ``train`` method also receives the ``Context``, giving access to configs for your
+run and node. The run config hyperparameters are defined in the ``pyproject.toml`` of
+your Flower App. The node config can only be set when running Flower with the Deployment
+Runtime and is not directly configurable during simulations.
+
+.. code-block:: python
 
     app = ClientApp()
 
@@ -288,39 +321,27 @@ evaluation.
 The ServerApp
 -------------
 
-The server runs a ``ServerApp`` which contains a single entrypoint annotated with
-``@app.main()``. This function receives two arguments:
+To construct a |serverapp_link|_ we define its ``@app.main()`` method. This method
+receive as input arguments:
 
-- **grid** – an instance of ``Grid`` used to communicate with the participating nodes
-  running the ``ClientApp``. It abstracts details of the underlying transport (e.g.,
-  gRPC, HTTP) and allows the ``ServerApp`` to broadcast requests and gather replies.
-- **context** – a ``Context`` providing access to the run configuration. From here you
-  can read values defined in your ``pyproject.toml``, such as the number of server
-  rounds, the regularisation penalty for logistic regression, or the number of local
-  epochs to be performed on each client.
+- a ``Grid`` object that will be used to interface with the nodes running the
+  ``ClientApp`` to involve them in a round of train/evaluate/query or other.
+- a ``Context`` object that provides access to the run configuration.
 
-Within the ``main`` method you typically:
+In this example we use the |fedavg_link|_ and configure it with a specific value of
+``fraction_train`` which is read from the run config. You can find the default value
+defined in the ``pyproject.toml``. Then, the execution of the strategy is launched when
+invoking its |strategy_start_link|_ method. To it we pass:
 
-1. **Create the global model** and wrap its parameters in an ``ArrayRecord``. For
-   scikit-learn we instantiate a ``LogisticRegression`` model with the desired penalty
-   and maximum number of iterations and convert its coefficients and intercept into a
-   list of NumPy arrays via ``get_model_params``.
-2. **Initialize the strategy**. In this tutorial we use |fedavg|_ with two custom
-   aggregation functions: ``train_metrics_aggr_fn`` and ``evaluate_metrics_aggr_fn``.
-   These functions compute a weighted average of client metrics using the number of
-   examples processed on each client as the weight. Passing them to the strategy ensures
-   that ``train_loss`` and ``eval_accuracy`` are aggregated correctly across clients.
-3. **Launch the federated training loop** by calling ``strategy.start``. You must pass
-   the ``grid``, the ``initial_arrays`` (the model parameters), and ``num_rounds``
-   specifying how many rounds of `FedAvg` to perform.
-
-Here is a simplified version of the ``main`` method:
+- the ``Grid`` object.
+- an ``ArrayRecord`` carrying a randomly initialized model that will serve as the global
+  model to federated.
+- a ``ConfigRecord`` with the training hyperparameters to be sent to the clients. The
+  strategy will also insert the current round number in this config before sending it to
+  the participating nodes.
+- the ``num_rounds`` parameter specifying how many rounds of ``FedAvg`` to perform.
 
 .. code-block:: python
-
-    from flwr.app import ArrayRecord
-    from flwr.serverapp import Grid, ServerApp
-    from flwr.serverapp.strategy import FedAvg
 
     app = ServerApp()
 
@@ -362,12 +383,9 @@ in scikit-learn on the MNIST dataset using the new Message API.
 
 .. note::
 
-    Check the source code of this tutorial in the `Flower GitHub repository
+    Check the source code of another Flower App using ``scikit-learn`` in the `Flower
+    GitHub repository
     <https://github.com/adap/flower/tree/main/examples/quickstart-sklearn-tabular>`_.
-
-.. |client| replace:: ``Client``
-
-.. |fedavg| replace:: ``FedAvg``
 
 .. |flowerdatasets| replace:: Flower Datasets
 
