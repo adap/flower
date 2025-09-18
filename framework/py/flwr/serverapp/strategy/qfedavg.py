@@ -208,6 +208,8 @@ def get_train_loss(msg: Message, loss_key: str) -> float:
     if (loss := metrics.get(loss_key)) is None or not isinstance(loss, (int, float)):
         raise AggregationError(
             "Missing or invalid local training loss in MetricRecord."
+            "The strategy was configured to receive a training loss "
+            f"using key `{loss_key}`. ",
             f" Make sure the key '{loss_key}' exists and "
             "maps to a float value."
         )
