@@ -39,10 +39,10 @@ def server_fn(context: Context):
         fraction_evaluate=context.run_config["fraction-evaluate"],
         min_available_clients=2,
         evaluate_metrics_aggregation_fn=weighted_average,
-        initial_parameters=parameters
-        # stop_criteria={
-        #     "metric_ge": ("accuracy", ACCURACY)
-        # }
+        initial_parameters=parameters,
+        stop_criteria={
+         "metric_ge": ("accuracy", ACCURACY)
+        }
 
     )
     config = ServerConfig(num_rounds=num_rounds)
