@@ -15,6 +15,10 @@
 """ServerApp strategies."""
 
 
+from .dp_adaptive_clipping import (
+    DifferentialPrivacyClientSideAdaptiveClipping,
+    DifferentialPrivacyServerSideAdaptiveClipping,
+)
 from .dp_fixed_clipping import (
     DifferentialPrivacyClientSideFixedClipping,
     DifferentialPrivacyServerSideFixedClipping,
@@ -32,7 +36,9 @@ from .result import Result
 from .strategy import Strategy
 
 __all__ = [
+    "DifferentialPrivacyClientSideAdaptiveClipping",
     "DifferentialPrivacyClientSideFixedClipping",
+    "DifferentialPrivacyServerSideAdaptiveClipping",
     "DifferentialPrivacyServerSideFixedClipping",
     "FedAdagrad",
     "FedAdam",

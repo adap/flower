@@ -20,9 +20,22 @@ from logging import INFO, WARN
 from typing import cast
 
 from flwr.client.typing import ClientAppCallable
-from flwr.common import Array, ArrayRecord, Context, Message, MessageType, log
-from flwr.common.differential_privacy import compute_clip_model_update
-from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM
+from flwr.common import (
+    Array,
+    ArrayRecord,
+    Context,
+    Message,
+    MessageType,
+    log,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
+from flwr.common import recorddict_compat as compat
+from flwr.common.differential_privacy import (
+    compute_adaptive_clip_model_update,
+    compute_clip_model_update,
+)
+from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM, KEY_NORM_BIT
 
 
 # pylint: disable=too-many-return-statements
@@ -129,4 +142,72 @@ def fixedclipping_mod(
             }
         )
     )
+    return out_msg
+
+
+def adaptiveclipping_mod(
+    msg: Message, ctxt: Context, call_next: ClientAppCallable
+) -> Message:
+    """Client-side adaptive clipping modifier.
+
+    This mod needs to be used with the DifferentialPrivacyClientSideAdaptiveClipping
+    server-side strategy wrapper.
+
+    The wrapper sends the clipping_norm value to the client.
+
+    This mod clips the client model updates before sending them to the server.
+
+    It also sends KEY_NORM_BIT to the server for computing the new clipping value.
+
+    It operates on messages of type `MessageType.TRAIN`.
+
+    Notes
+    -----
+    Consider the order of mods when using multiple.
+
+    Typically, adaptiveclipping_mod should be the last to operate on params.
+    """
+    if msg.metadata.message_type != MessageType.TRAIN:
+        return call_next(msg, ctxt)
+
+    fit_ins = compat.recorddict_to_fitins(msg.content, keep_input=True)
+
+    if KEY_CLIPPING_NORM not in fit_ins.config:
+        raise KeyError(
+            f"The {KEY_CLIPPING_NORM} value is not supplied by the "
+            f"DifferentialPrivacyClientSideFixedClipping wrapper at"
+            f" the server side."
+        )
+    if not isinstance(fit_ins.config[KEY_CLIPPING_NORM], float):
+        raise ValueError(f"{KEY_CLIPPING_NORM} should be a float value.")
+    clipping_norm = float(fit_ins.config[KEY_CLIPPING_NORM])
+    server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
+
+    # Call inner app
+    out_msg = call_next(msg, ctxt)
+
+    # Check if the msg has error
+    if out_msg.has_error():
+        return out_msg
+
+    fit_res = compat.recorddict_to_fitres(out_msg.content, keep_input=True)
+
+    client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
+
+    # Clip the client update
+    norm_bit = compute_adaptive_clip_model_update(
+        client_to_server_params,
+        server_to_client_params,
+        clipping_norm,
+    )
+    log(
+        INFO,
+        "adaptiveclipping_mod: parameters are clipped by value: %.4f.",
+        clipping_norm,
+    )
+
+    fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
+
+    fit_res.metrics[KEY_NORM_BIT] = norm_bit
+    out_msg.content = compat.fitres_to_recorddict(fit_res, keep_input=True)
     return out_msg
