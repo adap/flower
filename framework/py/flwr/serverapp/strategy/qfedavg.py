@@ -20,19 +20,29 @@ Paper: openreview.net/pdf?id=ByexElSYDr
 
 from collections.abc import Iterable
 from logging import INFO
-from typing import Callable, Optional, cast
+from typing import Callable, Optional
+from collections import OrderedDict
 
 import numpy as np
-from flwr.server import Grid
-from flwr.common import Array, ArrayRecord, Message, MetricRecord, NDArray, RecordDict, ConfigRecord
+
+from flwr.common import (
+    Array,
+    ArrayRecord,
+    ConfigRecord,
+    Message,
+    MetricRecord,
+    NDArray,
+    RecordDict,
+)
 from flwr.common.logger import log
+from flwr.server import Grid
 
 from ..exception import AggregationError
 from .fedavg import FedAvg
 
 
 class QFedAvg(FedAvg):
-    """q-FedAvg strategy.
+    """Q-FedAvg strategy.
 
     Implementation based on openreview.net/pdf?id=ByexElSYDr
 
@@ -73,8 +83,8 @@ class QFedAvg(FedAvg):
         The parameter q that controls the degree of fairness of the algorithm.
         When set to 0, q-FedAvg is equivalent to FedAvg.
     client_learning_rate : float (default: 0.01)
-        Local learning rate used by clients during training. This value is used by 
-        the strategy to approximate the base Lipschitz constant L, via 
+        Local learning rate used by clients during training. This value is used by
+        the strategy to approximate the base Lipschitz constant L, via
         L = 1 / client_learning_rate.
     train_loss_key : str (default: "train_loss")
         The key within the MetricRecord whose value is used as the training loss when
@@ -123,20 +133,17 @@ class QFedAvg(FedAvg):
         log(INFO, "\t├──> q-FedAvg settings:")
         log(INFO, "\t|\t├── q: %s", self.q)
         log(INFO, "\t|\t├── client_learning_rate: %s", self.client_learning_rate)
-        log(INFO, "\t|\t└── train_loss_key: %s", self.train_loss_key)
+        log(INFO, "\t|\t└── train_loss_key: '%s'", self.train_loss_key)
         super().summary()
-
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
         """Configure the next round of federated training."""
-        if self.current_arrays is None:
-            self.current_arrays = arrays
+        self.current_arrays = arrays
         return super().configure_train(server_round, arrays, config, grid)
 
-
-    def aggregate_train(
+    def aggregate_train(  # pylint: disable=too-many-locals
         self,
         server_round: int,
         replies: Iterable[Message],
@@ -149,25 +156,68 @@ class QFedAvg(FedAvg):
             return None, None
 
         # Compute estimate of Lipschitz constant L
-        L = 1.0 / self.client_learning_rate
-
-        # Aggregate ArrayRecords using trimmed mean
-        # Get the key for the only ArrayRecord and MetricRecord from the first Message
-        array_record_key = list(valid_replies[0].content.array_records.keys())[0]
-        metric_record_key = list(valid_replies[0].content.metric_records.keys())[0]
-        # Preserve keys for arrays in ArrayRecord
-        array_keys = list(valid_replies[0].content[array_record_key].keys())
+        L = 1.0 / self.client_learning_rate  # pylint: disable=C0103
 
         # q-FedAvg aggregation
-        global_weights = 
-        sum_delta, sum_h = 
+        if self.current_arrays is None:
+            raise AggregationError(
+                "Current global model weights are not available. Make sure to call"
+                "`configure_train` before calling `aggregate_train`."
+            )
+        array_keys = list(self.current_arrays.keys())  # Preserve keys
+        global_weights = self.current_arrays.to_numpy_ndarrays(keep_input=False)
+        sum_delta = None
+        sum_h = 0.0
+
+        for msg in valid_replies:
+            # Extract local weights and training loss from Message
+            local_weights = get_local_weights(msg)
+            loss = get_train_loss(msg, self.train_loss_key)
+
+            # Compute delta and h
+            delta, h = compute_delta_and_h(
+                global_weights, local_weights, self.q, L, loss
+            )
+
+            # Compute sum of deltas and sum of h
+            if sum_delta is None:
+                sum_delta = delta
+            else:
+                sum_delta = [sd + d for sd, d in zip(sum_delta, delta)]
+            sum_h += h
+
+        # Compute new global weights and convert to Array type
+        # `np.asarray` can convert numpy scalars to 0-dim arrays
+        assert sum_delta is not None  # Make mypy happy
+        array_list = [
+            Array(np.asarray(gw - (d / sum_h)))
+            for gw, d in zip(global_weights, sum_delta)
+        ]
 
         # Aggregate MetricRecords
         metrics = self.train_metrics_aggr_fn(
             [msg.content for msg in valid_replies],
             self.weighted_by_key,
         )
-        return arrays, metrics
+        return ArrayRecord(OrderedDict(zip(array_keys, array_list))), metrics
+
+
+def get_train_loss(msg: Message, loss_key: str) -> float:
+    """Extract training loss from a Message."""
+    metrics = list(msg.content.metric_records.values())[0]
+    if (loss := metrics.get(loss_key)) is None or not isinstance(loss, (int, float)):
+        raise AggregationError(
+            "Missing or invalid local training loss in MetricRecord."
+            f" Make sure the key '{loss_key}' exists and "
+            "maps to a float value."
+        )
+    return float(loss)
+
+
+def get_local_weights(msg: Message) -> list[NDArray]:
+    """Extract local weights from a Message."""
+    arrays = list(msg.content.array_records.values())[0]
+    return arrays.to_numpy_ndarrays(keep_input=False)
 
 
 def l2_norm(ndarrays: list[NDArray]) -> float:
@@ -176,16 +226,19 @@ def l2_norm(ndarrays: list[NDArray]) -> float:
 
 
 def compute_delta_and_h(
-    global_weights: list[NDArray], 
-    local_weights: list[NDArray], q: float, L: float, loss: float
-) -> tuple[float, float]:
+    global_weights: list[NDArray],
+    local_weights: list[NDArray],
+    q: float,
+    L: float,  # Lipschitz constant  # pylint: disable=C0103
+    loss: float,
+) -> tuple[list[NDArray], float]:
     """Compute delta and h used in q-FedAvg aggregation."""
     # Compute gradient_k
     grad = [L * (gw - lw) for gw, lw in zip(global_weights, local_weights)]
     # Compute ||w_k - w||^2
     norm = l2_norm(grad)
     # Compute delta_k
-    loss_pow_q = np.float_power(loss + 1e-10, q)
+    loss_pow_q: float = np.float_power(loss + 1e-10, q)
     grad = [loss_pow_q * g for g in grad]  # This is delta_k already
     delta = grad  # Avoid duplicate memory usage
     # Compute h_k
