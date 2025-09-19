@@ -215,6 +215,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
                     model_update, self.clipping_norm
                 )
                 clipped_indicator_count += int(norm_bit)
+                # reconstruct array using clipped contribution from current round
                 restored = [c + u for c, u in zip(current_nd, model_update)]
                 reply.content[arr_name] = ArrayRecord(
                     OrderedDict({k: Array(v) for k, v in zip(record.keys(), restored)})
