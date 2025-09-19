@@ -1,7 +1,7 @@
 """fedrag: A Flower Federated RAG app."""
 
-from flwr.clientapp import ClientApp
 from flwr.app import ConfigRecord, Context, Message, RecordDict
+from flwr.clientapp import ClientApp
 
 from fedrag.retriever import Retriever
 
