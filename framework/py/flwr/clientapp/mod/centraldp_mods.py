@@ -20,7 +20,7 @@ from logging import ERROR, INFO
 from typing import cast
 
 from flwr.app import Error
-from flwr.client.typing import ClientAppCallable
+from flwr.clientapp.typing import ClientAppCallable
 from flwr.common import (
     Array,
     ArrayRecord,
