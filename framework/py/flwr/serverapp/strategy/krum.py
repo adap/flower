@@ -149,7 +149,25 @@ class Krum(FedAvg):
         return distance_matrix
 
     def _krum(self, replies: list[RecordDict]) -> list[RecordDict]:
+        """Selects the set of RecordDicts to aggregate using the Krum or MultiKrum algorithm.
 
+        For each node, computes the sum of squared distances to its n-f-2 closest parameter vectors,
+        where n is the number of nodes and f is the number of malicious nodes. The node(s) with the
+        lowest score(s) are selected for aggregation.
+
+        Parameters
+        ----------
+        replies : list[RecordDict]
+            List of RecordDicts, each containing an ArrayRecord representing model parameters
+            from a client.
+
+        Returns
+        -------
+        list[RecordDict]
+            List of RecordDicts selected for aggregation. If `num_nodes_to_keep` > 0, returns
+            the top `num_nodes_to_keep` RecordDicts (MultiKrum); otherwise, returns the single
+            RecordDict with the lowest score (Krum).
+        """
         # Construct list of ArrayRecord objects from replies
         # Recall aggregate_train first ensures replies only contain one ArrayRecord
         array_records = [list(reply.array_records.values())[0] for reply in replies]
