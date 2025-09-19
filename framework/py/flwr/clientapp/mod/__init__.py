@@ -17,9 +17,10 @@
 
 from flwr.client.mod.comms_mods import arrays_size_mod, message_size_mod
 
-from .centraldp_mods import fixedclipping_mod
+from .centraldp_mods import adaptiveclipping_mod, fixedclipping_mod
 
 __all__ = [
+    "adaptiveclipping_mod",
     "arrays_size_mod",
     "fixedclipping_mod",
     "message_size_mod",
