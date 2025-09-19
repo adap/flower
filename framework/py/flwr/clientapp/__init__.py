@@ -15,9 +15,14 @@
 """Public Flower ClientApp APIs."""
 
 
+from typing import Callable
+
 from flwr.client.client_app import ClientApp
+from flwr.common import Context, Message
 
 from . import mod
+
+ClientAppCallable = Callable[[Message, Context], Message]
 
 __all__ = [
     "ClientApp",
