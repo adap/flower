@@ -58,40 +58,40 @@ So far this should all look fairly familiar if you've used Flower with PyTorch b
 FedBN
 -----
 
-To adopt FedBN, only the ``get_parameters`` and ``set_parameters`` functions in
-``task.py`` need to be revised. FedBN only changes the client-side by excluding batch
-normalization parameters from being exchanged with the server.
-
-We revise the *client* logic by changing ``get_parameters`` and ``set_parameters`` in
-``task.py``. The batch normalization parameters are excluded from model parameter list
-when sending to or receiving from the server:
+To adopt FedBN, we revise the ``train`` method in ClientApp. The batch normalization
+parameters are excluded from model parameter dict when sending to or receiving from the
+server:
 
 .. code-block:: python
 
-    class FlowerClient(NumPyClient):
-        """Flower client for CIFAR-10 image classification using PyTorch."""
+    app = ClientApp()
 
-        # ... [other FlowerClient methods]
 
-        def get_parameters(self, config) -> List[np.ndarray]:
-            # Return model parameters as a list of NumPy ndarrays
-            # Exclude parameters of BN layers when using FedBN
-            return [
-                val.cpu().numpy()
-                for name, val in self.model.state_dict().items()
-                if "bn" not in name
-            ]
+    @app.train()
+    def train(msg: Message, context: Context):
+        """Train the model on local data."""
 
-        def set_parameters(self, parameters: List[np.ndarray]) -> None:
-            # Set model parameters from a list of NumPy ndarrays
-            keys = [k for k in self.model.state_dict().keys() if "bn" not in k]
-            params_dict = zip(keys, parameters)
-            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-            self.model.load_state_dict(state_dict, strict=False)
+        # Load the model and initialize it with the received weights
+        model = Net()
+        state_dict = msg.content["arrays"].to_torch_state_dict()
+
+        # Exclude batch normalization parameters
+        state_dict_wo_bn = OrderedDict(
+            (k, v) for k, v in state_dict.items() if "bn" not in k
+        )
+        model.load_state_dict(state_dict_wo_bn)
+
+        # ... [Perform training]
+
+        # Construct and return reply Message
+        state_dict_wo_bn = OrderedDict(
+            (k, v) for k, v in model.state_dict().items() if "bn" not in k
+        )
+        model_record = ArrayRecord(state_dict_wo_bn)
 
         ...
 
-To test the new appraoch, run the project again:
+To test the new approach, run the project again:
 
 .. code-block:: bash
 
