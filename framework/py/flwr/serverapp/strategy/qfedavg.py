@@ -141,7 +141,7 @@ class QFedAvg(FedAvg):
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
         """Configure the next round of federated training."""
-        self.current_arrays = arrays
+        self.current_arrays = arrays.copy()
         return super().configure_train(server_round, arrays, config, grid)
 
     def aggregate_train(  # pylint: disable=too-many-locals
@@ -235,14 +235,18 @@ def compute_delta_and_h(
     loss: float,
 ) -> tuple[list[NDArray], float]:
     """Compute delta and h used in q-FedAvg aggregation."""
-    # Compute gradient_k
-    grad = [L * (gw - lw) for gw, lw in zip(global_weights, local_weights)]
+    # Compute gradient_k = L * (w - w_k)
+    for gw, lw in zip(global_weights, local_weights):
+        lw -= gw
+        lw *= L
+    grad = local_weights  # After in-place operations, local_weights is now grad
     # Compute ||w_k - w||^2
     norm = l2_norm(grad)
-    # Compute delta_k
+    # Compute delta_k = loss_k^q * gradient_k
     loss_pow_q: float = np.float_power(loss + 1e-10, q)
-    grad = [loss_pow_q * g for g in grad]  # This is delta_k already
-    delta = grad  # Avoid duplicate memory usage
+    for g in grad:
+        g *= loss_pow_q
+    delta = grad  # After in-place multiplication, grad is now delta
     # Compute h_k
     h = q * np.float_power(loss + 1e-10, q - 1) * norm + L * loss_pow_q
     return delta, h
