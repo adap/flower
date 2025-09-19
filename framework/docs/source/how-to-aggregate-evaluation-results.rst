@@ -1,6 +1,6 @@
-:og:description: Aggregate custom evaluation results from federated clients in Flower using a strategy that applies weighted averaging for metrics like accuracy.
+:og:description: Aggregate custom evaluation results from federated clients in Flower using a callable function that applies weighted averaging for metrics like accuracy.
 .. meta::
-    :description: Aggregate custom evaluation results from federated clients in Flower using a strategy that applies weighted averaging for metrics like accuracy.
+    :description: Aggregate custom evaluation results from federated clients in Flower using a callable function that applies weighted averaging for metrics like accuracy.
 
 .. |fedavg_link| replace:: ``FedAvg``
 
