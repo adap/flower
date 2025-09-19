@@ -59,68 +59,66 @@ With default arguments you will see an output like this one:
 
 .. code-block:: shell
 
-    Loading project configuration...                                               
-    Success                                                 
-    INFO :      Starting FedAvg strategy:                                          
-    INFO :          ├── Number of rounds: 3                                        
-    INFO :          ├── ArrayRecord (4.72 MB)                   
-    INFO :          ├── ConfigRecord (train): (empty!)                
-    INFO :          ├── ConfigRecord (evaluate): (empty!)                                                                                                         
-    INFO :          ├──> Sampling:                                                 
+    Loading project configuration...
+    Success
+    INFO :      Starting FedAvg strategy:
+    INFO :          ├── Number of rounds: 3
+    INFO :          ├── ArrayRecord (4.72 MB)
+    INFO :          ├── ConfigRecord (train): (empty!)
+    INFO :          ├── ConfigRecord (evaluate): (empty!)
+    INFO :          ├──> Sampling:
     INFO :          │       ├──Fraction: train (0.50) | evaluate ( 1.00)
-    INFO :          │       ├──Minimum nodes: train (2) | evaluate (2)             
-    INFO :          │       └──Minimum available nodes: 2                          
-    INFO :          └──> Keys in records:                                          
-    INFO :                  ├── Weighted by: 'num-examples'                        
+    INFO :          │       ├──Minimum nodes: train (2) | evaluate (2)
+    INFO :          │       └──Minimum available nodes: 2
+    INFO :          └──> Keys in records:
+    INFO :                  ├── Weighted by: 'num-examples'
     INFO :                  ├── ArrayRecord key: 'arrays'
-    INFO :                  └── ConfigRecord key: 'config'                         
-    INFO :                                                                         
-    INFO :                                                                         
-    INFO :      [ROUND 1/3]                                                        
-    INFO :      configure_train: Sampled 5 nodes (out of 10)   
-    Generating train split: 100%|██████████| 60000/60000 [00:00<00:00, 880798.56 examples/s]
-    Generating test split: 100%|██████████| 10000/10000 [00:00<00:00, 1172346.48 examples/s]
-    INFO :      aggregate_train: Received 5 results and 0 failures             
-    INFO :          └──> Aggregated MetricRecord: {}                               
-    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
-    INFO :      aggregate_evaluate: Received 10 results and 0 failures             
-    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 3.1197075128555305, 'eval_acc': 0.14874998927116395}
-    INFO : 
-    INFO :      [ROUND 2/3]                                                                                                                                                                                                                                                              
-    INFO :      configure_train: Sampled 5 nodes (out of 10)           
-    INFO :      aggregate_train: Received 5 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {}
-    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
-    INFO :      aggregate_evaluate: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 0.8070505917072296, 'eval_acc': 0.7488333329558372}
-    INFO :                                                                         
-    INFO :      [ROUND 3/3]                                                        
+    INFO :                  └── ConfigRecord key: 'config'
+    INFO :
+    INFO :
+    INFO :      [ROUND 1/3]
     INFO :      configure_train: Sampled 5 nodes (out of 10)
     INFO :      aggregate_train: Received 5 results and 0 failures
     INFO :          └──> Aggregated MetricRecord: {}
     INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
     INFO :      aggregate_evaluate: Received 10 results and 0 failures
-    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 0.5014506578445435, 'eval_acc': 0.8546666696667672}
-    INFO :                                                                         
+    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 3.1197, 'eval_acc': 0.14874}
+    INFO :
+    INFO :      [ROUND 2/3]
+    INFO :      configure_train: Sampled 5 nodes (out of 10)
+    INFO :      aggregate_train: Received 5 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 0.8071, 'eval_acc': 0.7488}
+    INFO :
+    INFO :      [ROUND 3/3]
+    INFO :      configure_train: Sampled 5 nodes (out of 10)
+    INFO :      aggregate_train: Received 5 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 0.5015, 'eval_acc': 0.8547}
+    INFO :
     INFO :      Strategy execution finished in 72.84s
-    INFO :                                                                         
-    INFO :      Final results:                                                     
-    INFO :                                                                         
-    INFO :          Global Arrays:                                                 
+    INFO :
+    INFO :      Final results:
+    INFO :
+    INFO :          Global Arrays:
     INFO :                  ArrayRecord (4.719 MB)
-    INFO :                                                                         
+    INFO :
     INFO :          Aggregated ClientApp-side Train Metrics:
-    INFO :          {1: {}, 2: {}, 3: {}}                                          
-    INFO :                                                                         
+    INFO :          {1: {}, 2: {}, 3: {}}
+    INFO :
     INFO :          Aggregated ClientApp-side Evaluate Metrics:
     INFO :          { 1: {'eval_acc': '1.4875e-01', 'eval_loss': '3.1197e+00'},
     INFO :            2: {'eval_acc': '7.4883e-01', 'eval_loss': '8.0705e-01'},
     INFO :            3: {'eval_acc': '8.5467e-01', 'eval_loss': '5.0145e-01'}}
-    INFO :                                                                         
+    INFO :
     INFO :          ServerApp-side Evaluate Metrics:
-    INFO :          {}                                                             
-    INFO :                                                                         
-    
+    INFO :          {}
+    INFO :
+
     Saving final model to disk...
 
 You can also override the parameters defined in the ``[tool.flwr.app.config]`` section
