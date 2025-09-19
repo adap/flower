@@ -308,6 +308,13 @@ class DifferentialPrivacyClientSideFixedClipping(DifferentialPrivacyFixedClippin
 def validate_replies(replies: Iterable[Message], num_sampled_clients: int) -> bool:
     """Validate replies and log errors/warnings.
 
+    Arguments
+    ----------
+    replies : Iterable[Message]
+        The replies to validate.
+    num_sampled_clients : int
+        The expected number of sampled clients.
+
     Returns
     -------
     bool
