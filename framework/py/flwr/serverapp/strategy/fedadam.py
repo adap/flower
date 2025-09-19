@@ -172,9 +172,6 @@ class FedAdam(FedOpt):
             for k, x in self.current_arrays.items()
         }
 
-        # Update current arrays
-        self.current_arrays = new_arrays
-
         return (
             ArrayRecord(OrderedDict({k: Array(v) for k, v in new_arrays.items()})),
             aggregated_metrics,
