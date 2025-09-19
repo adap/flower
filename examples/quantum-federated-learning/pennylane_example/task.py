@@ -1,0 +1,197 @@
+"""Quantum Federated Learning with PennyLane and Flower."""
+
+from collections import OrderedDict
+from typing import Tuple, Dict
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import pennylane as qml
+import numpy as np
+import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
+
+
+# Quantum circuit configuration
+N_QUBITS = 4
+N_LAYERS = 3
+WEIGHT_SHAPES = {"weights": (N_LAYERS, N_QUBITS)}
+
+# Create quantum device
+dev = qml.device("default.qubit", wires=N_QUBITS)
+
+
+
+@qml.qnode(dev, interface='torch')
+def quantum_circuit(inputs, weights):
+    """Quantum circuit for the QNN layer."""
+    qml.AngleEmbedding(inputs, wires=range(N_QUBITS))
+    qml.BasicEntanglerLayers(weights, wires=range(N_QUBITS))
+    return [qml.expval(qml.PauliZ(i)) for i in range(N_QUBITS)]
+
+
+class QuantumNet(nn.Module):
+    """Quantum Neural Network combining CNN, classical and quantum layers."""
+    
+    def __init__(self, num_classes: int = 10):
+        super(QuantumNet, self).__init__()
+        
+        # CNN feature extraction layers
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        
+        # Classical dense layers
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, N_QUBITS)
+        
+        # Quantum layer
+        self.qnn = qml.qnn.TorchLayer(quantum_circuit, WEIGHT_SHAPES)
+        
+        # Classical post-processing
+        self.fc_out = nn.Linear(N_QUBITS, num_classes)
+        
+        # Dropout for regularization
+        self.dropout = nn.Dropout(0.2)
+        
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass through the hybrid CNN-quantum neural network."""
+        # CNN feature extraction
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        
+        # Flatten for dense layers
+        x = x.view(-1, 16 * 5 * 5)
+        
+        # Classical dense layers
+        x = F.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = F.relu(self.fc2(x))
+        x = self.dropout(x)
+        x = self.fc3(x)
+
+        x = torch.relu(x)
+        
+        # Quantum layer
+        x = self.qnn(x)
+        
+        # Output layer
+        x = self.fc_out(x)
+        return x
+
+
+def get_weights(net: nn.Module) -> list:
+    """Extract model weights as a list of numpy arrays."""
+    return [val.cpu().numpy() for _, val in net.state_dict().items()]
+
+
+def set_weights(net: nn.Module, parameters: list) -> None:
+    """Set model weights from a list of numpy arrays."""
+    params_dict = zip(net.state_dict().keys(), parameters)
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    net.load_state_dict(state_dict, strict=True)
+
+
+
+
+def load_data(partition_id: int, num_partitions: int, batch_size: int = 32) -> Tuple[DataLoader, DataLoader]:
+    """Load and partition the dataset for federated learning."""
+
+    partitioner = IidPartitioner(num_partitions=num_partitions)
+    fds = FederatedDataset(
+        dataset="uoft-cs/cifar10",
+        partitioners={"train": partitioner},
+    )
+    partition = fds.load_partition(partition_id)
+    # Divide data on each node: 80% train, 20% validation
+    partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
+
+
+    # Define preprocessing: convert CIFAR-10 images to tensor and normalize pixel values to mean=0.5, std=0.5 
+    pytorch_transforms = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+
+
+    def apply_transforms(batch):
+        """Apply transforms to the partition from FederatedDataset."""
+        batch["img"] = torch.stack([pytorch_transforms(img) for img in batch["img"]])
+        return batch
+    
+
+    partition_train_test = partition_train_test.with_transform(apply_transforms)
+    trainloader = DataLoader(partition_train_test["train"], batch_size=batch_size, shuffle=True)
+    valloader = DataLoader(partition_train_test["test"], batch_size=batch_size)  # validation split
+    return trainloader, valloader
+
+
+def train(
+    net: nn.Module,
+    trainloader: DataLoader,
+    valloader: DataLoader,
+    epochs: int,
+    learning_rate: float,
+    device: torch.device
+) -> Dict[str, float]:
+    """Train the quantum neural network."""
+    net.to(device)
+    net.train()
+    
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
+    
+    running_loss = 0.0
+    for epoch in range(epochs):
+        for batch_idx, batch in enumerate(trainloader):
+            data = batch["img"].to(device)
+            target = torch.as_tensor(batch["label"], dtype=torch.long, device=device)
+            
+            optimizer.zero_grad()
+            output = net(data)
+            loss = criterion(output, target)
+            loss.backward()
+            optimizer.step()
+            
+            running_loss += loss.item()
+    
+    # Evaluate on validation set
+    val_loss, val_accuracy = test(net, valloader, device)
+    
+    avg_train_loss = running_loss / (epochs * len(trainloader))
+    
+    return {
+        "train_loss": avg_train_loss,
+        "val_loss": val_loss,
+        "val_accuracy": val_accuracy,
+    }
+
+
+def test(net: nn.Module, testloader: DataLoader, device: torch.device) -> Tuple[float, float]:
+    """Evaluate the quantum neural network on validation data."""
+    net.to(device)
+    net.eval()
+    
+    criterion = nn.CrossEntropyLoss()
+    test_loss = 0.0
+    correct = 0
+    total = 0
+    
+    with torch.no_grad():
+        for batch in testloader:
+            data = batch["img"].to(device)
+            target = torch.as_tensor(batch["label"], dtype=torch.long, device=device)
+            output = net(data)
+            
+            test_loss += criterion(output, target).item()
+            
+            _, predicted = torch.max(output.data, 1)
+            total += target.size(0)
+            correct += (predicted == target).sum().item()
+    
+    test_loss /= len(testloader)
+    accuracy = 100.0 * correct / total
+    
+    return test_loss, accuracy
