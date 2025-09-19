@@ -213,7 +213,7 @@ The Data
 We will use `Flower Datasets <https://flower.ai/docs/datasets/>`_ to easily download and
 partition the `Higgs` dataset. In this example, you'll make use of the `IidPartitioner
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_
-to generate `num_partitions` partitions. You can choose from other partitioners
+to generate `num_partitions` partitions. You can choose from other `partitioners
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html>`_ available in
 Flower Datasets:
 
