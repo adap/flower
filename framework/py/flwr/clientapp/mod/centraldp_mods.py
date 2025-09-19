@@ -218,7 +218,7 @@ def _handle_err(msg: Message, reason: str) -> Message:
     )
 
 
-def _handle_multi_record_err(mod_name: str, msg: Message, record_type: type) -> str:
+def _handle_multi_record_err(mod_name: str, msg: Message, record_type: type) -> Message:
     """Log and return multi-record error."""
     cnt = sum(isinstance(_, record_type) for _ in msg.content.values())
     return _handle_err(
@@ -228,7 +228,7 @@ def _handle_multi_record_err(mod_name: str, msg: Message, record_type: type) -> 
     )
 
 
-def _handle_no_key_err(mod_name: str, msg: Message) -> str:
+def _handle_no_key_err(mod_name: str, msg: Message) -> Message:
     """Log and return no-key error."""
     return _handle_err(
         msg,
@@ -239,7 +239,7 @@ def _handle_no_key_err(mod_name: str, msg: Message) -> str:
     )
 
 
-def _handle_array_key_mismatch_err(mod_name: str, msg: Message) -> str:
+def _handle_array_key_mismatch_err(mod_name: str, msg: Message) -> Message:
     """Create array-key-mismatch error reasons."""
     return _handle_err(
         msg,
