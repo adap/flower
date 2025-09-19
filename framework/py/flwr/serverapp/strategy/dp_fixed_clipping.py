@@ -181,6 +181,13 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
         """Compute a string representation of the strategy."""
         return "Differential Privacy Strategy Wrapper (Server-Side Fixed Clipping)"
 
+    def summary(self) -> None:
+        """Log summary configuration of the strategy."""
+        log(INFO, "\t├──> DP settings:")
+        log(INFO, "\t│\t├── Noise multiplier: %s", self.noise_multiplier)
+        log(INFO, "\t│\t└── Clipping norm: %s", self.clipping_norm)
+        super().summary()
+
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
@@ -274,6 +281,13 @@ class DifferentialPrivacyClientSideFixedClipping(DifferentialPrivacyFixedClippin
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
         return "Differential Privacy Strategy Wrapper (Client-Side Fixed Clipping)"
+
+    def summary(self) -> None:
+        """Log summary configuration of the strategy."""
+        log(INFO, "\t├──> DP settings:")
+        log(INFO, "\t│\t├── Noise multiplier: %s", self.noise_multiplier)
+        log(INFO, "\t│\t└── Clipping norm: %s", self.clipping_norm)
+        super().summary()
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid

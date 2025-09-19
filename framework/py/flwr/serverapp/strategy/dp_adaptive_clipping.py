@@ -153,6 +153,15 @@ class DifferentialPrivacyServerSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
         """Compute a string representation of the strategy."""
         return "Differential Privacy Strategy Wrapper (Server-Side Adaptive Clipping)"
 
+    def summary(self) -> None:
+        """Log summary configuration of the strategy."""
+        log(INFO, "\t├──> DP settings:")
+        log(INFO, "\t│\t├── Noise multiplier: %s", self.noise_multiplier)
+        log(INFO, "\t│\t├── Clipping norm: %s", self.clipping_norm)
+        log(INFO, "\t│\t├── Target clipped quantile: %s", self.target_clipped_quantile)
+        log(INFO, "\t│\t└── Clip norm learning rate: %s", self.clip_norm_lr)
+        super().summary()
+
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
@@ -259,6 +268,15 @@ class DifferentialPrivacyClientSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
         return "Differential Privacy Strategy Wrapper (Client-Side Adaptive Clipping)"
+
+    def summary(self) -> None:
+        """Log summary configuration of the strategy."""
+        log(INFO, "\t├──> DP settings:")
+        log(INFO, "\t│\t├── Noise multiplier: %s", self.noise_multiplier)
+        log(INFO, "\t│\t├── Clipping norm: %s", self.clipping_norm)
+        log(INFO, "\t│\t├── Target clipped quantile: %s", self.target_clipped_quantile)
+        log(INFO, "\t│\t└── Clip norm learning rate: %s", self.clip_norm_lr)
+        super().summary()
 
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid

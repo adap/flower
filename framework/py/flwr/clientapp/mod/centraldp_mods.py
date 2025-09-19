@@ -20,17 +20,7 @@ from logging import INFO, WARN
 from typing import cast
 
 from flwr.client.typing import ClientAppCallable
-from flwr.common import (
-    Array,
-    ArrayRecord,
-    Context,
-    Message,
-    MessageType,
-    log,
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
-)
-from flwr.common import recorddict_compat as compat
+from flwr.common import Array, ArrayRecord, Context, Message, MessageType, log
 from flwr.common.differential_privacy import (
     compute_adaptive_clip_model_update,
     compute_clip_model_update,
@@ -170,44 +160,100 @@ def adaptiveclipping_mod(
     if msg.metadata.message_type != MessageType.TRAIN:
         return call_next(msg, ctxt)
 
-    fit_ins = compat.recorddict_to_fitins(msg.content, keep_input=True)
+    if len(msg.content.array_records) != 1:
+        log(
+            WARN,
+            "adaptiveclipping_mod is designed to work with a single ArrayRecord. "
+            "Skipping.",
+        )
+        return call_next(msg, ctxt)
 
-    if KEY_CLIPPING_NORM not in fit_ins.config:
+    if len(msg.content.config_records) != 1:
+        log(
+            WARN,
+            "adaptiveclipping_mod is designed to work with a single ConfigRecord. "
+            "Skipping.",
+        )
+        return call_next(msg, ctxt)
+
+    # Get keys in the single ConfigRecord
+    keys_in_config = set(next(iter(msg.content.config_records.values())).keys())
+    if KEY_CLIPPING_NORM not in keys_in_config:
         raise KeyError(
             f"The {KEY_CLIPPING_NORM} value is not supplied by the "
-            f"DifferentialPrivacyClientSideFixedClipping wrapper at"
+            f"`DifferentialPrivacyClientSideFixedClipping` wrapper at"
             f" the server side."
         )
-    if not isinstance(fit_ins.config[KEY_CLIPPING_NORM], float):
-        raise ValueError(f"{KEY_CLIPPING_NORM} should be a float value.")
-    clipping_norm = float(fit_ins.config[KEY_CLIPPING_NORM])
-    server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
+
+    # Record array record communicated to client and clipping norm
+    original_array_record = next(iter(msg.content.array_records.values()))
+    clipping_norm = cast(
+        float, next(iter(msg.content.config_records.values()))[KEY_CLIPPING_NORM]
+    )
 
     # Call inner app
     out_msg = call_next(msg, ctxt)
+
+    # Ensure there is a single ArrayRecord
+    if len(out_msg.content.array_records) != 1:
+        log(
+            WARN,
+            "adaptiveclipping_mod is designed to work with a single ArrayRecord. "
+            "Skipping.",
+        )
+        return out_msg
+
+    if len(out_msg.content.metric_records) != 1:
+        log(
+            WARN,
+            "adaptiveclipping_mod is designed to work with a single MetricRecord. "
+            "Skipping.",
+        )
+        return out_msg
 
     # Check if the msg has error
     if out_msg.has_error():
         return out_msg
 
-    fit_res = compat.recorddict_to_fitres(out_msg.content, keep_input=True)
+    new_array_record_key, client_to_server_arrecord = next(
+        iter(out_msg.content.array_records.items())
+    )
 
-    client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
+    # Ensure keys in returned ArrayRecord match those in the one sent from server
+    if set(original_array_record.keys()) != set(client_to_server_arrecord.keys()):
+        log(
+            WARN,
+            "adaptiveclipping_mod: Keys in ArrayRecord must match those from the model "
+            "that the ClientApp received. Skipping.",
+        )
+        return out_msg
 
+    client_to_server_ndarrays = client_to_server_arrecord.to_numpy_ndarrays()
     # Clip the client update
     norm_bit = compute_adaptive_clip_model_update(
-        client_to_server_params,
-        server_to_client_params,
+        client_to_server_ndarrays,
+        original_array_record.to_numpy_ndarrays(),
         clipping_norm,
     )
     log(
         INFO,
-        "adaptiveclipping_mod: parameters are clipped by value: %.4f.",
+        "adaptiveclipping_mod: ndarrays are clipped by value: %.4f.",
         clipping_norm,
     )
-
-    fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
-
-    fit_res.metrics[KEY_NORM_BIT] = norm_bit
-    out_msg.content = compat.fitres_to_recorddict(fit_res, keep_input=True)
+    # Replace outgoing ArrayRecord's Array while preserving their keys
+    out_msg.content.array_records[new_array_record_key] = ArrayRecord(
+        OrderedDict(
+            {
+                k: Array(v)
+                for k, v in zip(
+                    client_to_server_arrecord.keys(), client_to_server_ndarrays
+                )
+            }
+        )
+    )
+    # Add to the MetricRecords the norm bit (recall reply messages only contain
+    # one MetricRecord)
+    metric_record_key = list(out_msg.content.metric_records.keys())[0]
+    # We cast it to `int` because MetricRecord does not support `bool` values
+    out_msg.content.metric_records[metric_record_key][KEY_NORM_BIT] = int(norm_bit)
     return out_msg
