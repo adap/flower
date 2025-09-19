@@ -182,14 +182,15 @@ class DifferentialPrivacyServerSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
                 norm_bit = adaptive_clip_inputs_inplace(
                     model_update, self.clipping_norm
                 )
-                clipped_indicator_count += int(bool(norm_bit))
+                clipped_indicator_count += int(norm_bit)
+                # reconstruct array using clipped contribution from current round
                 restored = [c + u for c, u in zip(current_nd, model_update)]
                 reply.content[arr_name] = ArrayRecord(
                     OrderedDict({k: Array(v) for k, v in zip(record.keys(), restored)})
                 )
             log(
                 INFO,
-                "aggregate_fit: parameters are clipped by value: %.4f.",
+                "aggregate_train: arrays in `ArrayRecord` are clipped by value: %.4f.",
                 self.clipping_norm,
             )
 
