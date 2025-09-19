@@ -108,7 +108,7 @@ class FedTrimmedAvg(FedAvg):
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
         log(INFO, "\t├──> FedTrimmedAvg settings:")
-        log(INFO, "\t|\t└── beta: %s", self.beta)
+        log(INFO, "\t│\t└── beta: %s", self.beta)
         super().summary()
 
     def aggregate_train(
