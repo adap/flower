@@ -17,7 +17,7 @@
 
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from flwr.common.typing import Run
 
@@ -68,4 +68,14 @@ class ExecPlugin(ABC):
         run_id : int
            The ID of the run associated with the token, used for tracking or
            logging purposes.
+        """
+
+    # This method is optional to implement
+    def load_config(self, yaml_config: dict[str, Any]) -> None:
+        """Load configuration from a YAML dictionary.
+
+        Parameters
+        ----------
+        yaml_config : dict[str, Any]
+            A dictionary representing the YAML configuration.
         """
