@@ -19,8 +19,10 @@ from collections import OrderedDict
 from logging import INFO, WARN
 from typing import cast
 
+from flwr.app import Error
 from flwr.client.typing import ClientAppCallable
 from flwr.common import Array, ArrayRecord, Context, Message, MessageType, log
+from flwr.common.constant import ErrorCode
 from flwr.common.differential_privacy import (
     compute_adaptive_clip_model_update,
     compute_clip_model_update,
@@ -89,14 +91,20 @@ def fixedclipping_mod(
     if out_msg.has_error():
         return out_msg
 
-    # Ensure there is a single ArrayRecord
+    # Ensure reply has a single ArrayRecord
     if len(out_msg.content.array_records) != 1:
         log(
             WARN,
-            "fixedclipping_mod is designed to work with a single ArrayRecord. "
+            "adaptiveclipping_mod is designed to work with a single ArrayRecord. "
             "Skipping.",
         )
-        return out_msg
+        return msg.create_error_reply(
+            Error(
+                code=ErrorCode.MOD_MESSAGE_VALIDATION_FAILED,
+                reason="adaptiveclipping_mod is designed to work with a single "
+                f"ArrayRecord (but {len(out_msg.content.array_records)} were found).",
+            )
+        )
 
     new_array_record_key, client_to_server_arrecord = next(
         iter(out_msg.content.array_records.items())
@@ -108,7 +116,14 @@ def fixedclipping_mod(
             "fixedclipping_mod: Keys in ArrayRecord must match those from the model "
             "that the ClientApp received. Skipping.",
         )
-        return out_msg
+        return msg.create_error_reply(
+            Error(
+                code=ErrorCode.MOD_MESSAGE_VALIDATION_FAILED,
+                reason="adaptiveclipping_mod expects keys in ArrayRecord of the reply "
+                "message to match those from the ArrayRecord that the ClientApp "
+                "received.",
+            )
+        )
 
     client_to_server_ndarrays = client_to_server_arrecord.to_numpy_ndarrays()
     # Clip the client update
@@ -194,22 +209,35 @@ def adaptiveclipping_mod(
     # Call inner app
     out_msg = call_next(msg, ctxt)
 
-    # Ensure there is a single ArrayRecord
+    # Ensure reply has a single ArrayRecord
     if len(out_msg.content.array_records) != 1:
         log(
             WARN,
             "adaptiveclipping_mod is designed to work with a single ArrayRecord. "
             "Skipping.",
         )
-        return out_msg
+        return msg.create_error_reply(
+            Error(
+                code=ErrorCode.MOD_MESSAGE_VALIDATION_FAILED,
+                reason="adaptiveclipping_mod is designed to work with a single "
+                f"ArrayRecord (but {len(out_msg.content.array_records)} were found).",
+            )
+        )
 
+    # Ensure reply has a single MetricRecord
     if len(out_msg.content.metric_records) != 1:
         log(
             WARN,
             "adaptiveclipping_mod is designed to work with a single MetricRecord. "
             "Skipping.",
         )
-        return out_msg
+        return msg.create_error_reply(
+            Error(
+                code=ErrorCode.MOD_MESSAGE_VALIDATION_FAILED,
+                reason="adaptiveclipping_mod is designed to work with a single "
+                f"MetricRecord (but {len(out_msg.content.metric_records)} were found).",
+            )
+        )
 
     # Check if the msg has error
     if out_msg.has_error():
@@ -226,7 +254,14 @@ def adaptiveclipping_mod(
             "adaptiveclipping_mod: Keys in ArrayRecord must match those from the model "
             "that the ClientApp received. Skipping.",
         )
-        return out_msg
+        return msg.create_error_reply(
+            Error(
+                code=ErrorCode.MOD_MESSAGE_VALIDATION_FAILED,
+                reason="adaptiveclipping_mod expects keys in ArrayRecord of the reply "
+                "message to match those from the ArrayRecord that the ClientApp "
+                "received.",
+            )
+        )
 
     client_to_server_ndarrays = client_to_server_arrecord.to_numpy_ndarrays()
     # Clip the client update
