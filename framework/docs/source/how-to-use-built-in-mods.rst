@@ -76,15 +76,11 @@ order in which you provide the mods matters:
 .. code-block:: python
 
     app = fl.clientapp.ClientApp(
-        client_fn=client_fn,  # Not needed if using decorators
         mods=[
             example_mod_1,  # Application-wide Mod 1
             example_mod_2,  # Application-wide Mod 2
         ],
     )
-
-If you define functions to handle messages using decorators instead of ``client_fn``,
-e.g., ``@app.train()``, you do not need to pass the ``client_fn`` argument.
 
 2. Registering Function-specific Mods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
