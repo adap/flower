@@ -44,7 +44,7 @@ Next, activate your environment, then run:
 
 This example by default runs the Flower Simulation Engine, creating a federation of 10
 nodes using `FedAvg
-<https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_
+<https://flower.ai/docs/framework/ref-api/flwr.serverapp.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_
 as the aggregation strategy. The dataset will be partitioned using Flower Dataset's
 `IidPartitioner
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
