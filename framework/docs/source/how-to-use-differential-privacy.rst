@@ -30,6 +30,10 @@
 
 .. _adaptiveclipping_mod_link: ref-api/flwr.clientapp.mod.adaptiveclipping_mod.html
 
+.. |localdp_mod_link| replace:: ``LocalDpMod``
+
+.. _localdp_mod_link: ref-api/flwr.clientapp.mod.localdp_mod.html
+
 Use Differential Privacy
 ========================
 
@@ -140,9 +144,9 @@ Local Differential Privacy
 --------------------------
 
 To utilize local differential privacy (DP) and add noise to the client model parameters
-before transmitting them to the server in Flower, you can use the `LocalDpMod`. The
-following hyperparameters need to be set: clipping norm value, sensitivity, epsilon, and
-delta.
+before transmitting them to the server in Flower, you can use the |localdp_mod_link|_.
+The following hyperparameters need to be set: clipping norm value, sensitivity, epsilon,
+and delta.
 
 .. image:: ./_static/DP/localdp.png
     :align: center
