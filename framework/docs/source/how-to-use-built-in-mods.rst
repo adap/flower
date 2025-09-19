@@ -31,7 +31,7 @@ A typical mod function might look something like this:
 .. code-block:: python
 
     from flwr.app import Context, Message
-    from flwr.client_app import ClientAppCallable
+    from flwr.clientapp.typing import ClientAppCallable
 
 
     def example_mod(msg: Message, ctx: Context, call_next: ClientAppCallable) -> Message:
