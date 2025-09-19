@@ -121,11 +121,18 @@ class Krum(FedAvg):
         super().summary()
 
     def _compute_distances(self, records: list[ArrayRecord]) -> NDArray:
-        """Compute distances between vectors.
+        """Compute distances between ArrayRecords.
 
-        Input: weights - list of weights vectors
-        Output: distances - matrix distance_matrix of squared distances between the
-        vectors.
+        Parameters
+        ----------
+        records : list[ArrayRecord]
+            A list of ArrayRecords (weights)
+    
+        Returns
+        -------
+        NDArray
+            A 2D array representing the distance matrix of squared distances
+            between input ArrayRecords
         """
         flat_w = np.array(
             [
@@ -144,7 +151,7 @@ class Krum(FedAvg):
     def _krum(self, replies: list[RecordDict]) -> list[RecordDict]:
 
         # Construct list of ArrayRecord objects from replies
-        # Recall aggregate_train first ensures replies only containe on ArrayRecord
+        # Recall aggregate_train first ensures replies only contain one ArrayRecord
         array_records = [list(reply.array_records.values())[0] for reply in replies]
         distance_matrix = self._compute_distances(array_records)
 
