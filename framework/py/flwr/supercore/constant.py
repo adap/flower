@@ -12,16 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Built-in Mods."""
+"""Constants for Flower infrastructure."""
 
 
-from flwr.client.mod.comms_mods import arrays_size_mod, message_size_mod
-
-from .centraldp_mods import adaptiveclipping_mod, fixedclipping_mod
-
-__all__ = [
-    "adaptiveclipping_mod",
-    "arrays_size_mod",
-    "fixedclipping_mod",
-    "message_size_mod",
-]
+# Top-level key in YAML config for exec plugin settings
+EXEC_PLUGIN_SECTION = "exec_plugin"
