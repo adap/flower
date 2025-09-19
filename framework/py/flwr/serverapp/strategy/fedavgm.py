@@ -126,9 +126,9 @@ class FedAvgM(FedAvg):
         """Log summary configuration of the strategy."""
         opt_status = "ON" if self.server_opt else "OFF"
         log(INFO, "\t├──> FedAvgM settings:")
-        log(INFO, "\t|\t├── Server optimization: %s", opt_status)
-        log(INFO, "\t|\t├── Server learning rate: %s", self.server_learning_rate)
-        log(INFO, "\t|\t└── Server Momentum: %s", self.server_momentum)
+        log(INFO, "\t│\t├── Server optimization: %s", opt_status)
+        log(INFO, "\t│\t├── Server learning rate: %s", self.server_learning_rate)
+        log(INFO, "\t│\t└── Server Momentum: %s", self.server_momentum)
         super().summary()
 
     def configure_train(
