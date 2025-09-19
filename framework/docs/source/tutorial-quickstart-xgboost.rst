@@ -159,7 +159,9 @@ With default arguments, you will see output like this:
     INFO :              {1: {}, 2: {}, 3: {}}
     INFO :
     INFO :              Aggregated ClientApp-side Evaluate Metrics:
-    INFO :              {1: {'auc': '7.6775e-01'}, 2: {'auc': '7.7583e-01'}, 3: {'auc': '7.8117e-01'}}
+    INFO :              { 1: {'auc': '7.6775e-01'}, 
+    INFO :                2: {'auc': '7.7583e-01'}, 
+    INFO :                3: {'auc': '7.8117e-01'}}
     INFO :
     INFO :              ServerApp-side Evaluate Metrics:
     INFO :              {}
