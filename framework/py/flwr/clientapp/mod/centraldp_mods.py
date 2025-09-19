@@ -158,6 +158,10 @@ def adaptiveclipping_mod(
     # Call inner app
     out_msg = call_next(msg, ctxt)
 
+    # Check if the msg has error
+    if out_msg.has_error():
+        return out_msg
+
     # Ensure reply has a single ArrayRecord
     if len(out_msg.content.array_records) != 1:
         return _handle_multi_record_err("adaptiveclipping_mod", out_msg, ArrayRecord)
@@ -165,10 +169,6 @@ def adaptiveclipping_mod(
     # Ensure reply has a single MetricRecord
     if len(out_msg.content.metric_records) != 1:
         return _handle_multi_record_err("adaptiveclipping_mod", out_msg, MetricRecord)
-
-    # Check if the msg has error
-    if out_msg.has_error():
-        return out_msg
 
     new_array_record_key, client_to_server_arrecord = next(
         iter(out_msg.content.array_records.items())
