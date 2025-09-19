@@ -20,6 +20,10 @@
 
 .. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
 
+.. |fedxgbbagging_link| replace:: ``FedXgbBagging``
+
+.. _fedxgbbagging_link: ref-api/flwr.serverapp.strategy.FedXgbBagging.html
+
 .. |serverapp_link| replace:: ``ServerApp``
 
 .. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
@@ -46,9 +50,14 @@ virtual environment and run everything within a :doc:`virtualenv
 
 Let's use `flwr new` to create a complete Flower+XGBoost project. It will generate all
 the files needed to run, by default with the Simulation Engine, a federation of 10 nodes
-using bagging aggregation. The dataset will be partitioned using Flower Dataset's
-`IidPartitioner
+using |fedxgbbagging_link|_ strategy. The dataset will be partitioned using Flower
+Dataset's `IidPartitioner
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
+
+|fedxgbbagging_link|_ (bootstrap aggregation) is an ensemble method that improves
+stability and accuracy in machine learning, here applied to XGBoost in FL. Each client
+generates a bootstrap sample by subsampling its data and trains a tree per round, which
+is then aggregated by the server and added to the global model.
 
 Now that we have a rough idea of what this example is about, let's get started. First,
 install Flower in your new environment:
@@ -382,30 +391,6 @@ model is not locally trained, instead it is used to evaluate its performance on 
 locally held-out validation set; (2) including the model in the reply Message is no
 longer needed because it is not locally modified.
 
-.. code-block:: python
-
-    @app.evaluate()
-    def evaluate(msg: Message, context: Context):
-        """Evaluate the model on local data."""
-
-        # ... read config, instantiate model, load data
-
-        # Run evaluation
-        eval_results = bst.eval_set(
-            evals=[(valid_dmatrix, "valid")],
-            iteration=bst.num_boosted_rounds() - 1,
-        )
-        auc = float(eval_results.split("\t")[1].split(":")[1])
-
-        # Construct and return reply Message
-        metrics = {
-            "auc": auc,
-            "num-examples": num_val,
-        }
-        metric_record = MetricRecord(metrics)
-        content = RecordDict({"metrics": metric_record})
-        return Message(content=content, reply_to=msg)
-
 The ServerApp
 -------------
 
@@ -478,120 +463,6 @@ Note the ``start`` method of the strategy returns a |result_link|_ object. This 
 contains all the relevant information about the FL process, including the final model
 weights as an ``ArrayRecord``, and federated training and evaluation metrics as
 ``MetricRecords``.
-
-Tree-based Bagging Aggregation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You must be curious about how bagging aggregation works. Let's look into the details.
-
-In file ``flwr.serverapp.strategy.fedxgb_bagging.py``, we define ``FedXgbBagging``
-inherited from ``flwr.serverapp.strategy.FedAvg``. Then, we override the
-``configure_train`` and ``aggregate_train`` methods as follows:
-
-.. code-block:: python
-
-    class FedXgbBagging(FedAvg):
-        """Configurable FedXgbBagging strategy implementation."""
-
-        current_bst: Optional[bytes] = None
-
-        ...
-
-        def configure_train(
-            self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
-        ) -> Iterable[Message]:
-            """Configure the next round of federated training."""
-            self._ensure_single_array(arrays)
-            # Keep track of array record being communicated
-            self.current_bst = arrays["0"].numpy().tobytes()
-            return super().configure_train(server_round, arrays, config, grid)
-
-        def aggregate_train(
-            self,
-            server_round: int,
-            replies: Iterable[Message],
-        ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
-            """Aggregate ArrayRecords and MetricRecords in the received Messages."""
-            valid_replies, _ = self._check_and_log_replies(replies, is_train=True)
-
-            arrays, metrics = None, None
-            if valid_replies:
-                reply_contents = [msg.content for msg in valid_replies]
-                array_record_key = next(iter(reply_contents[0].array_records.keys()))
-
-                # Aggregate ArrayRecords
-                for content in reply_contents:
-                    self._ensure_single_array(cast(ArrayRecord, content[array_record_key]))
-                    bst = content[array_record_key]["0"].numpy().tobytes()  # type: ignore[union-attr]
-
-                    if self.current_bst is not None:
-                        self.current_bst = aggregate_bagging(self.current_bst, bst)
-
-                if self.current_bst is not None:
-                    arrays = ArrayRecord([np.frombuffer(self.current_bst, dtype=np.uint8)])
-
-                # Aggregate MetricRecords
-                metrics = self.train_metrics_aggr_fn(
-                    reply_contents,
-                    self.weighted_by_key,
-                )
-            return arrays, metrics
-
-In ``aggregate_train``, we sequentially aggregate the clients' XGBoost trees by calling
-``aggregate_bagging()`` function:
-
-.. code-block:: python
-
-    def aggregate_bagging(
-        bst_prev_org: bytes,
-        bst_curr_org: bytes,
-    ) -> bytes:
-        """Conduct bagging aggregation for given trees."""
-        if bst_prev_org == b"":
-            return bst_curr_org
-
-        # Get the tree numbers
-        tree_num_prev, _ = _get_tree_nums(bst_prev_org)
-        _, paral_tree_num_curr = _get_tree_nums(bst_curr_org)
-
-        bst_prev = json.loads(bytearray(bst_prev_org))
-        bst_curr = json.loads(bytearray(bst_curr_org))
-
-        previous_model = bst_prev["learner"]["gradient_booster"]["model"]
-        previous_model["gbtree_model_param"]["num_trees"] = str(
-            tree_num_prev + paral_tree_num_curr
-        )
-        iteration_indptr = previous_model["iteration_indptr"]
-        previous_model["iteration_indptr"].append(
-            iteration_indptr[-1] + paral_tree_num_curr
-        )
-
-        # Aggregate new trees
-        trees_curr = bst_curr["learner"]["gradient_booster"]["model"]["trees"]
-        for tree_count in range(paral_tree_num_curr):
-            trees_curr[tree_count]["id"] = tree_num_prev + tree_count
-            previous_model["trees"].append(trees_curr[tree_count])
-            previous_model["tree_info"].append(0)
-
-        bst_prev_bytes = bytes(json.dumps(bst_prev), "utf-8")
-
-        return bst_prev_bytes
-
-
-    def _get_tree_nums(xgb_model_org: bytes) -> tuple[int, int]:
-        xgb_model = json.loads(bytearray(xgb_model_org))
-
-        # Access model parameters
-        model_param = xgb_model["learner"]["gradient_booster"]["model"][
-            "gbtree_model_param"
-        ]
-        # Return the number of trees and the number of parallel trees
-        return int(model_param["num_trees"]), int(model_param["num_parallel_tree"])
-
-In this function, we first fetch the number of trees and the number of parallel trees
-for the current and previous model by calling ``_get_tree_nums``. Then, the fetched
-information will be aggregated. After that, the trees (containing model weights) are
-aggregated to generate a new tree model.
 
 Congratulations! You've successfully built and run your first federated learning system.
 
