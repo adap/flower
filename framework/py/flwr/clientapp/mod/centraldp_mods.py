@@ -100,7 +100,7 @@ def fixedclipping_mod(
         )
         return msg.create_error_reply(
             Error(
-                code=ErrorCode.MOD_MESSAGE_VALIDATION_FAILED,
+                code=ErrorCode.MOD_FAILED_PRECONDITION,
                 reason="adaptiveclipping_mod is designed to work with a single "
                 f"ArrayRecord (but {len(out_msg.content.array_records)} were found).",
             )
@@ -118,7 +118,7 @@ def fixedclipping_mod(
         )
         return msg.create_error_reply(
             Error(
-                code=ErrorCode.MOD_MESSAGE_VALIDATION_FAILED,
+                code=ErrorCode.MOD_FAILED_PRECONDITION,
                 reason="adaptiveclipping_mod expects keys in ArrayRecord of the reply "
                 "message to match those from the ArrayRecord that the ClientApp "
                 "received.",
@@ -218,7 +218,7 @@ def adaptiveclipping_mod(
         )
         return msg.create_error_reply(
             Error(
-                code=ErrorCode.MOD_MESSAGE_VALIDATION_FAILED,
+                code=ErrorCode.MOD_FAILED_PRECONDITION,
                 reason="adaptiveclipping_mod is designed to work with a single "
                 f"ArrayRecord (but {len(out_msg.content.array_records)} were found).",
             )
@@ -233,7 +233,7 @@ def adaptiveclipping_mod(
         )
         return msg.create_error_reply(
             Error(
-                code=ErrorCode.MOD_MESSAGE_VALIDATION_FAILED,
+                code=ErrorCode.MOD_FAILED_PRECONDITION,
                 reason="adaptiveclipping_mod is designed to work with a single "
                 f"MetricRecord (but {len(out_msg.content.metric_records)} were found).",
             )
@@ -256,7 +256,7 @@ def adaptiveclipping_mod(
         )
         return msg.create_error_reply(
             Error(
-                code=ErrorCode.MOD_MESSAGE_VALIDATION_FAILED,
+                code=ErrorCode.MOD_FAILED_PRECONDITION,
                 reason="adaptiveclipping_mod expects keys in ArrayRecord of the reply "
                 "message to match those from the ArrayRecord that the ClientApp "
                 "received.",
