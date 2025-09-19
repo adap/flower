@@ -33,11 +33,9 @@ from flwr.common.differential_privacy import (
     compute_adaptive_noise_params,
     compute_stdv,
 )
-from flwr.common.differential_privacy_constants import (
-    KEY_CLIPPING_NORM,
-    KEY_NORM_BIT,
-)
+from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM, KEY_NORM_BIT
 from flwr.server import Grid
+from flwr.serverapp.exception import AggregationError
 
 from .dp_fixed_clipping import validate_replies
 from .strategy import Strategy
@@ -277,6 +275,27 @@ class DifferentialPrivacyClientSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
             return None, None
 
         replies_list = list(replies)
+
+        # validate that KEY_NORM_BIT is present in all replies
+        for msg in replies_list:
+            found = False
+            for _, mrec in msg.content.metric_records.items():
+                if KEY_NORM_BIT in mrec:
+                    found = True
+                    break
+            if (
+                not found
+                and hasattr(msg.content, "metrics")
+                and isinstance(msg.content.metrics, dict)
+            ):
+                if KEY_NORM_BIT in msg.content.metrics:
+                    found = True
+            if not found:
+                raise AggregationError(
+                    f"KEY_NORM_BIT ('{KEY_NORM_BIT}') not found"
+                    f" in MetricRecord or metrics for reply"
+                )
+
         aggregated_arrays, aggregated_metrics = self.strategy.aggregate_train(
             server_round, replies_list
         )
@@ -293,19 +312,16 @@ class DifferentialPrivacyClientSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
         clipped_count = 0
 
         for msg in replies:
-            found = False
+            # KEY_NORM_BIT is guaranteed to be present
             for _, mrec in msg.content.metric_records.items():
                 if KEY_NORM_BIT in mrec:
                     clipped_count += int(bool(mrec[KEY_NORM_BIT]))
-                    found = True
                     break
-            if found:
-                continue
-
-            if hasattr(msg.content, "metrics") and isinstance(
-                msg.content.metrics, dict
-            ):
-                if KEY_NORM_BIT in msg.content.metrics:
+            else:
+                # Check fallback location
+                if hasattr(msg.content, "metrics") and isinstance(
+                    msg.content.metrics, dict
+                ):
                     clipped_count += int(bool(msg.content.metrics[KEY_NORM_BIT]))
 
         clipped_fraction = self._noisy_fraction(clipped_count, total)
