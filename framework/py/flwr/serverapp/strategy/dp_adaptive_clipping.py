@@ -222,7 +222,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
                 )
             log(
                 INFO,
-                "aggregate_fit: parameters are clipped by value: %.4f.",
+                "aggregate_train: arrays in `ArrayRecord` are clipped by value: %.4f.",
                 self.clipping_norm,
             )
 
