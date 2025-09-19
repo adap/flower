@@ -278,23 +278,12 @@ class DifferentialPrivacyClientSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
 
         # validate that KEY_NORM_BIT is present in all replies
         for msg in replies_list:
-            found = False
             for _, mrec in msg.content.metric_records.items():
-                if KEY_NORM_BIT in mrec:
-                    found = True
-                    break
-            if (
-                not found
-                and hasattr(msg.content, "metrics")
-                and isinstance(msg.content.metrics, dict)
-            ):
-                if KEY_NORM_BIT in msg.content.metrics:
-                    found = True
-            if not found:
-                raise AggregationError(
-                    f"KEY_NORM_BIT ('{KEY_NORM_BIT}') not found"
-                    f" in MetricRecord or metrics for reply"
-                )
+                if KEY_NORM_BIT not in mrec:
+                    raise AggregationError(
+                        f"KEY_NORM_BIT ('{KEY_NORM_BIT}') not found"
+                        f" in MetricRecord or metrics for reply."
+                    )
 
         aggregated_arrays, aggregated_metrics = self.strategy.aggregate_train(
             server_round, replies_list
