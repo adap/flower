@@ -132,9 +132,9 @@ class QFedAvg(FedAvg):
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
         log(INFO, "\t├──> q-FedAvg settings:")
-        log(INFO, "\t|\t├── client_learning_rate: %s", self.client_learning_rate)
-        log(INFO, "\t|\t├── q: %s", self.q)
-        log(INFO, "\t|\t└── train_loss_key: '%s'", self.train_loss_key)
+        log(INFO, "\t│\t├── client_learning_rate: %s", self.client_learning_rate)
+        log(INFO, "\t│\t├── q: %s", self.q)
+        log(INFO, "\t│\t└── train_loss_key: '%s'", self.train_loss_key)
         super().summary()
 
     def configure_train(
@@ -237,7 +237,7 @@ def compute_delta_and_h(
     """Compute delta and h used in q-FedAvg aggregation."""
     # Compute gradient_k = L * (w - w_k)
     for gw, lw in zip(global_weights, local_weights):
-        lw -= gw
+        np.subtract(gw, lw, out=lw)
         lw *= L
     grad = local_weights  # After in-place operations, local_weights is now grad
     # Compute ||w_k - w||^2
