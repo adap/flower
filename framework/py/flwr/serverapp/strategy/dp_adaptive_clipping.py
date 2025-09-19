@@ -21,7 +21,7 @@ import math
 from abc import ABC
 from collections import OrderedDict
 from collections.abc import Iterable
-from logging import INFO, WARNING
+from logging import INFO
 from typing import Optional
 
 import numpy as np
@@ -34,12 +34,12 @@ from flwr.common.differential_privacy import (
     compute_stdv,
 )
 from flwr.common.differential_privacy_constants import (
-    CLIENTS_DISCREPANCY_WARNING,
     KEY_CLIPPING_NORM,
     KEY_NORM_BIT,
 )
 from flwr.server import Grid
 
+from .dp_fixed_clipping import validate_replies
 from .strategy import Strategy
 
 
@@ -89,38 +89,6 @@ class DifferentialPrivacyAdaptiveBase(Strategy, ABC):
             num_sampled_clients,
             clipped_count_stddev,
         )
-
-    def _validate_replies(self, replies: Iterable[Message]) -> bool:
-        num_errors = 0
-        num_ok = 0
-        for msg in replies:
-            if msg.has_error():
-                log(
-                    INFO,
-                    "Received error in reply from node %d: %s",
-                    msg.metadata.src_node_id,
-                    msg.error,
-                )
-                num_errors += 1
-            else:
-                num_ok += 1
-
-        if num_errors:
-            log(
-                INFO,
-                "aggregate_train: Some clients reported errors. Skipping aggregation.",
-            )
-            return False
-
-        log(
-            INFO,
-            "aggregate_train: Received %s results and %s failures",
-            num_ok,
-            num_errors,
-        )
-        if num_ok != self.num_sampled_clients:
-            log(WARNING, CLIENTS_DISCREPANCY_WARNING, num_ok, self.num_sampled_clients)
-        return True
 
     def _add_noise_to_aggregated_arrays(self, aggregated: ArrayRecord) -> ArrayRecord:
         nds = aggregated.to_numpy_ndarrays()
@@ -198,7 +166,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
         self, server_round: int, replies: Iterable[Message]
     ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
-        if not self._validate_replies(replies):
+        if not validate_replies(replies, self.num_sampled_clients):
             return None, None
 
         current_nd = self.current_arrays.to_numpy_ndarrays()
@@ -304,7 +272,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
         self, server_round: int, replies: Iterable[Message]
     ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
-        if not self._validate_replies(replies):
+        if not validate_replies(replies, self.num_sampled_clients):
             return None, None
 
         replies_list = list(replies)
