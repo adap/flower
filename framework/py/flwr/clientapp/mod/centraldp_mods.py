@@ -19,7 +19,7 @@ from collections import OrderedDict
 from logging import INFO, WARN
 from typing import cast
 
-from flwr.clientapp import ClientAppCallable
+from flwr.clientapp.typing import ClientAppCallable
 from flwr.common import Array, ArrayRecord, Context, Message, MessageType, log
 from flwr.common.differential_privacy import (
     compute_adaptive_clip_model_update,
