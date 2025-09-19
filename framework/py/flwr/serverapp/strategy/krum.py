@@ -126,7 +126,7 @@ class Krum(FedAvg):
         Parameters
         ----------
         records : list[ArrayRecord]
-            A list of ArrayRecords (weights)
+            A list of ArrayRecords (arrays received in replies)
     
         Returns
         -------
