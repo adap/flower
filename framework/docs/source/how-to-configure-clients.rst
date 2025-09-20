@@ -10,6 +10,10 @@
 
 .. _configrecord_link: ref-api/flwr.app.ConfigRecord.html
 
+.. |arrayrecord_link| replace:: ``ArrayRecord``
+
+.. _arrayrecord_link: ref-api/flwr.app.ArrayRecord.html
+
 .. |clientapp_link| replace:: ``ClientApp``
 
 .. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
@@ -47,9 +51,7 @@ structures that need to be serialized. Let's see a few examples:
     from flwr.app import ConfigRecord
 
     # A config record can hold basic scalars
-    config = ConfigRecord(
-        {"learning-rate": 0.1, "max-local-steps": 20000, "loss-w": [0.1, 0.2]}
-    )
+    config = ConfigRecord({"lr": 0.1, "max-local-steps": 20000, "loss-w": [0.1, 0.2]})
 
     # It can also communicate strings and booleans
     config = ConfigRecord({"augment": True, "wandb-project-name": "awesome-flower-app"})
@@ -123,7 +125,7 @@ be federated as well the ``ConfigRecord`` containing the configurations that the
 .. tip::
 
     To learn more about how ``configure_train`` and other methods in the strategies
-    check the :doc:`Strategies Explainer <how-to-implement-strategies>`
+    check the :doc:`Strategies Explainer <how-to-implement-strategies>`.
 
 Let's create a new class inheriting from _|edavg_link|_ and override the
 ``configure_train`` method. We then use this new strategy in our ``ServerApp``.
@@ -149,11 +151,9 @@ Let's create a new class inheriting from _|edavg_link|_ and override the
             # Pass the updated config and the rest of arguments to the parent class
             return super().configure_train(server_round, arrays, config, grid)
 
-.. note::
-
-    In this how-to guide we have focused on how to define (when calling the ``start``
-    method of the strategy) and modify (by overriding the ``configure_train`` method) a
-    ``ConfigRecord`` to customize how ``ClientApps`` do training. You may follow
-    equivalent steps to define and customize the ``ConfigRecord`` for an evaluation
-    round. To do this use the ``evaluate_config`` in the startegy ``start`` method and
-    then override the ``configure_evaluate`` method.
+In this how-to guide we have focused on how to define (when calling the ``start`` method
+of the strategy) and modify (by overriding the ``configure_train`` method) a
+``ConfigRecord`` to customize how ``ClientApps`` do training. You may follow equivalent
+steps to define and customize the ``ConfigRecord`` for an evaluation round. To do this
+use the ``evaluate_config`` in the startegy ``start`` method and then override the
+``configure_evaluate`` method.
