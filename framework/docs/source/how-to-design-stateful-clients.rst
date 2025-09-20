@@ -31,23 +31,21 @@ each running a different ``ClientApp``.
 When a ``ClientApp`` is executed it receives a Context_. This context is unique for each
 ``ClientApp``, meaning that subsequent executions of the same ``ClientApp`` from the
 same node will receive the same ``Context`` object. In the ``Context``, the ``.state``
-attribute can be used to store information that you would like the ``ClientApp`` to have
-access to for the duration of the run. This could be anything from intermediate results
-such as the history of training losses (e.g. as a list of ``float`` values with a new
-entry appended each time the ``ClientApp`` is executed), certain parts of the model that
-should persist on the client side, or some other arbitrary Python objects. These items
-would need to be serialized before saving them into the context.
+attribute (of type RecordDict_) can be used to store information that you would like the
+``ClientApp`` to have access to for the duration of the run. This could be anything from
+intermediate results such as the history of training losses (e.g. as a list of ``float``
+values with a new entry appended each time the ``ClientApp`` is executed), certain parts
+of the model that should persist on the client side, or some other arbitrary Python
+objects. These items would need to be serialized before saving them into the context.
 
 Saving metrics to the context
 -----------------------------
 
 This section will demonstrate how to save metrics such as accuracy/loss values to the
-Context_ so they can be used in subsequent executions of the ``ClientApp``. If your
-``ClientApp`` makes use of NumPyClient_ then entire object is also re-created for each
-call to methods like ``fit()`` or ``evaluate()``.
+Context_ so they can be used in subsequent executions of the ``ClientApp``.
 
 Let's begin with a simple setting in which ``ClientApp`` is defined as follows. The
-``evaluate()`` method only generates a random number and prints it.
+``train()`` function only generates a random number and prints it.
 
 .. tip::
 
@@ -57,96 +55,81 @@ Let's begin with a simple setting in which ``ClientApp`` is defined as follows. 
 .. code-block:: python
 
     import random
-    from flwr.app import Context, ConfigRecord
-    from flwr.client import NumPyClient
-    from flwr.clientapp import ClientApp
+
+    # Flower ClientApp
+    app = ClientApp()
 
 
-    class SimpleClient(NumPyClient):
+    @app.train()
+    def train(msg: Message, context: Context):
+        """Train the model on local data."""
 
-        def __init__(self):
-            self.n_val = []
+        # Generate a random integer between 0 and 10
+        n = random.randint(0, 10)
+        print(n)
 
-        def evaluate(self, parameters, config):
-            n = random.randint(0, 10)  # Generate a random integer between 0 and 10
-            self.n_val.append(n)
-            # Even though in this line `n_val` has the value returned in the line
-            # above, self.n_val will be re-initialized to an empty list the next time
-            # this `ClientApp` runs
-            return float(0.0), 1, {}
+With the minimal ``ClientApp`` above, each time a ``Message`` is addresse to this
+``train`` function a new random integer will be generated and printed. Let's say we want
+to save that randomly generated integer and append it to a list that persists in the
+``Context`` so, each time this ``ClientApp`` function is executed, it prints the
+historic of random integers. Let's see how this looks in code:
 
+.. tip::
 
-    def client_fn(context: Context):
-        return SimpleClient().to_client()
-
-
-    # Finally, construct the ClientApp instance by means of the `client_fn` callback
-    app = ClientApp(client_fn=client_fn)
-
-Let's say we want to save that randomly generated integer and append it to a list that
-persists in the context. To do that, you'll need to do two key things:
-
-1. Make the ``context.state`` reachable within your client class
-2. Initialise the appropriate record type (in this example we use ConfigRecord_) and
-   save/read your entry when required.
+    Recall, the ``state`` attribute of a ``Context`` object is of type RecordDict_,
+    which is a special dictionary for different types of records available in Flower.
+    This means that you can save to it not just MetricRecord_ as in the example below,
+    but also ArrayRecord_ and ConfigRecord_ objects.
 
 .. code-block:: python
 
-    def SimpleClient(NumPyClient):
+    import random
 
-        def __init__(self, context: Context):
-            self.client_state = (
-                context.state
-            )  # add a reference to the state of your ClientApp
-            if "eval_metrics" not in self.client_state.config_records:
-                self.client_state.config_records["eval_metrics"] = ConfigRecord()
-
-            # Print content of the state
-            # You'll see it persists previous entries of `n_val`
-            print(self.client_state.config_records)
-
-        def evaluate(self, parameters, config):
-            n = random.randint(0, 10)  # Generate a random integer between 0 and 10
-            # Add results into a `ConfigRecord` object under the "n_val" key
-            # Note a `ConfigRecord` is a special type of python Dictionary
-            eval_metrics = self.client_state.config_records["eval_metrics"]
-            if "n_val" not in eval_metrics:
-                eval_metrics["n_val"] = [n]
-            else:
-                eval_metrics["n_val"].append(n)
-
-            return float(0.0), 1, {}
+    # Flower ClientApp
+    app = ClientApp()
 
 
-    def client_fn(context: Context):
-        return SimpleClient(context).to_client()  # Note we pass the context
+    @app.train()
+    def train(msg: Message, context: Context):
+        """Train the model on local data."""
 
+        # Generate a random integer between 0 and 10
+        n = random.randint(0, 10)
+        print(n)
 
-    # Finally, construct the ClientApp instance by means of the `client_fn` callback
-    app = ClientApp(client_fn=client_fn)
+        record_name = "random-metrics"
+        metric_name = "random-ints"
 
-If you run the app, you'll see an output similar to the one below. See how after each
-round the ``n_val`` entry in the context gets one additional integer ? Note that the
-order in which the ``ClientApp`` logs these messages might differ slightly between
-rounds.
+        # Append to list in context or initialize if it doesn't exist
+        if record_name not in context.state:
+            # Initialize MetricRecord in state
+            context.state[record_name] = MetricRecord({metric_name: [n]})
+        else:
+            # Append to record
+            context.state[record_name][metric_name].append(n)
+
+        # Print historic
+        print(context.state.metric_records)
+
+If you run a Flower App including the above logic in your ``ClientApp`` and having just
+two clients in your federation sampled in each round, you'll see an output similar to
+the one below. See how after each round the ``random-metrics`` record in the ``Context``
+gets one additional integer ? Note that the order in which the ``ClientApp`` logs these
+messages might differ slightly between rounds.
 
 .. code-block:: shell
 
-    # round 1 (.evaluate() hasn't been executed yet, so that's why it's empty)
-    config_records={'eval_metrics': {}}
-    config_records={'eval_metrics': {}}
+    # round 1
+    config_records={'random_metrics': {'random-ints': [2]}}
+    config_records={'random_metrics': {'random-ints': [7]}}
 
-    # round 2 (note `eval_metrics` has results added in round 1)
-    config_records={'eval_metrics': {'n_val': [2]}}
-    config_records={'eval_metrics': {'n_val': [8]}}
+    # round 2
+    config_records={'random_metrics': {'random-ints': [2, 5]}}
+    config_records={'random_metrics': {'random-ints': [7, 4]}}
 
-    # round 3 (note `eval_metrics` has results added in round 1&2)
-    config_records={'eval_metrics': {'n_val': [8, 2]}}
-    config_records={'eval_metrics': {'n_val': [2, 9]}}
-
-    # round 4 (note `eval_metrics` has results added in round 1&2&3)
-    config_records={'eval_metrics': {'n_val': [2, 9, 4]}}
-    config_records={'eval_metrics': {'n_val': [8, 2, 5]}}
+    # round 3
+    config_records={'random_metrics': {'random-ints': [2, 5, 1]}}
+    config_records={'random_metrics': {'random-ints': [7, 4, 2]}}
 
 Saving model parameters to the context
 --------------------------------------
