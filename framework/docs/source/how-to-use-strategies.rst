@@ -2,50 +2,91 @@
 .. meta::
     :description: Customize federated learning in Flower with built-in strategies, callbacks, and custom server-side implementations for maximum flexibility and control.
 
+.. |serverapp_link| replace:: ``ServerApp``
+
+.. _serverapp_link: ref-api/flwr.server.ServerApp.html
+
+.. |strategy_link| replace:: ``Strategy``
+
+.. _strategy_link: ref-api/flwr.serverapp.strategy.Strategy.html
+
+.. |strategy_start_link| replace:: ``start``
+
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
+
+.. |fedavg_link| replace:: ``FedAvg``
+
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
+
+.. |message_link| replace:: ``Message``
+
+.. _message_link: ref-api/flwr.app.Message.html
+
+.. |arrayrecord_link| replace:: ``ArrayRecord``
+
+.. _arrayrecord_link: ref-api/flwr.app.ArrayRecord.html
+
 Use strategies
 ==============
 
-Flower allows full customization of the learning process through the ``Strategy``
-abstraction. A number of built-in strategies are provided in the core framework.
+Flower allows full customization of the learning process through the |strategy_link|_
+abstraction. A number of built-in `strategies <ref-api/flwr.serverapp.strategy.html>`_
+are provided in the core framework.
 
-There are three ways to customize the way Flower orchestrates the learning process on
-the server side:
+There are four ways to customize the way Flower orchestrates the learning process on the
+server side:
 
 - Use an existing strategy, for example, ``FedAvg``
-- Customize an existing strategy with callback functions
-- Implement a novel strategy
+- Customize an existing strategy with callback functions to its ``start`` method
+- Customize an existing strategy by overriding one or more of it's methods.
+- Implement a novel strategy from scratch
 
 Use an existing strategy
 ------------------------
 
-Flower comes with a number of popular federated learning Strategies which can be
-instantiated as follows:
+Flower comes with a number of popular federated learning ``Strategies`` which can be
+instantiated as follows as part of a simle |serverapp_link|_:
 
 .. code-block:: python
 
-    from flwr.app import Context
-    from flwr.server.strategy import FedAvg
-    from flwr.server import ServerAppComponents, ServerConfig
-    from flwr.serverapp import ServerApp
+    # Create ServerApp
+    app = ServerApp()
 
 
-    def server_fn(context: Context):
-        # Optional context-based parameters specification
-        num_rounds = context.run_config["num-server-rounds"]
-        config = ServerConfig(num_rounds=num_rounds)
+    @app.main()
+    def main(grid: Grid, context: Context) -> None:
+        """Main entry point for the ServerApp."""
 
-        # Instantiate FedAvg strategy
-        strategy = FedAvg(
-            fraction_fit=context.run_config["fraction-fit"],
-            fraction_evaluate=1.0,
+        # Load global model
+        global_model = Net()
+        arrays = ArrayRecord(global_model.state_dict())
+
+        # Initialize FedAvg strategy with default settings
+        strategy = FedAvg()
+
+        # Start strategy, run FedAvg for `num_rounds`
+        result = strategy.start(
+            grid=grid,
+            initial_arrays=arrays,
         )
 
-        # Create and return ServerAppComponents
-        return ServerAppComponents(strategy=strategy, config=config)
+In the code above, instantiating ``FedAvg`` does not launch the logic built into the
+strategy (i.e. sampling nodes, communicating |message_link|_, perform aggregation, etc).
+In order to do so, we need to execute the |strategy_start_link|_ method.
+
+The above ``ServerApp`` is very minimal, makes use of the default settings for
+``FedAvg`` and only passes the required arguments to the ``start`` method. Let's see in
+a bit more detail what options do we have when instantiating strategies and when
+launching it.
+
+Parameterizing an existing strategy
+-----------------------------------
+
+.. code-block:: python
 
 
-    # Create ServerApp
-    app = ServerApp(server_fn=server_fn)
+Using the strategy's ``start`` method
+-------------------------------------
 
 To make the ``ServerApp`` use this strategy, pass a ``server_fn`` function to the
 ``ServerApp`` constructor. The ``server_fn`` function should return a
