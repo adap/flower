@@ -30,3 +30,4 @@ Information-oriented API reference and other reference material.
     ref-flower-network-communication
     ref-exit-codes-dir
     ref-faq
+    ref-api-fedmd
