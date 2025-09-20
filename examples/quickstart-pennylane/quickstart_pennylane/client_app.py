@@ -1,12 +1,12 @@
-"""Quantum Federated Learning Client with PennyLane and Flower."""
+"""quickstart-pennylane: A Flower / Pennylane Quantum Federated Learning app."""
 
 import torch
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 
-from pennylane_example.task import QuantumNet, load_data
-from pennylane_example.task import test as test_fn
-from pennylane_example.task import train as train_fn
+from quickstart_pennylane.task import QuantumNet, load_data
+from quickstart_pennylane.task import test as test_fn
+from quickstart_pennylane.task import train as train_fn
 
 # Flower ClientApp
 app = ClientApp()
@@ -16,8 +16,12 @@ app = ClientApp()
 def train(msg: Message, context: Context) -> Message:
     """Train the quantum neural network on local data."""
     
+    # Read quantum parameters from configuration
+    n_qubits = context.run_config.get("n-qubits", 4)
+    n_layers = context.run_config.get("n-layers", 3)
+    
     # Load the model and initialize it with the received weights
-    model = QuantumNet(num_classes=10)
+    model = QuantumNet(num_classes=10, n_qubits=n_qubits, n_layers=n_layers)
     model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -62,8 +66,12 @@ def train(msg: Message, context: Context) -> Message:
 def evaluate(msg: Message, context: Context) -> Message:
     """Evaluate the quantum neural network on local data."""
     
+    # Read quantum parameters from configuration
+    n_qubits = context.run_config.get("n-qubits", 4)
+    n_layers = context.run_config.get("n-layers", 3)
+    
     # Load the model and initialize it with the received weights
-    model = QuantumNet(num_classes=10)
+    model = QuantumNet(num_classes=10, n_qubits=n_qubits, n_layers=n_layers)
     model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)

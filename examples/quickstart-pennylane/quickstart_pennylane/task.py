@@ -1,4 +1,4 @@
-"""Quantum Federated Learning with PennyLane and Flower."""
+"""quickstart-pennylane: A Flower / Pennylane Quantum Federated Learning app."""
 
 from collections import OrderedDict
 from typing import Tuple, Dict
@@ -13,29 +13,28 @@ from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
 
-# Quantum circuit configuration
-N_QUBITS = 4
-N_LAYERS = 3
-WEIGHT_SHAPES = {"weights": (N_LAYERS, N_QUBITS)}
-
-# Create quantum device
-dev = qml.device("default.qubit", wires=N_QUBITS)
-
-
-
-@qml.qnode(dev, interface='torch')
-def quantum_circuit(inputs, weights):
-    """Quantum circuit for the QNN layer."""
-    qml.AngleEmbedding(inputs, wires=range(N_QUBITS))
-    qml.BasicEntanglerLayers(weights, wires=range(N_QUBITS))
-    return [qml.expval(qml.PauliZ(i)) for i in range(N_QUBITS)]
+def create_quantum_circuit(n_qubits: int):
+    """Create quantum device and circuit for the given number of qubits."""
+    dev = qml.device("default.qubit", wires=n_qubits)
+    
+    @qml.qnode(dev, interface='torch')
+    def quantum_circuit(inputs, weights):
+        """Quantum circuit for the QNN layer."""
+        qml.AngleEmbedding(inputs, wires=range(n_qubits))
+        qml.BasicEntanglerLayers(weights, wires=range(n_qubits))
+        return [qml.expval(qml.PauliZ(i)) for i in range(n_qubits)]
+    
+    return quantum_circuit
 
 
 class QuantumNet(nn.Module):
     """Quantum Neural Network combining CNN, classical and quantum layers."""
     
-    def __init__(self, num_classes: int = 10):
+    def __init__(self, num_classes: int = 10, n_qubits: int = 4, n_layers: int = 3):
         super(QuantumNet, self).__init__()
+        
+        self.n_qubits = n_qubits
+        self.n_layers = n_layers
         
         # CNN feature extraction layers
         self.conv1 = nn.Conv2d(3, 6, 5)
@@ -45,13 +44,15 @@ class QuantumNet(nn.Module):
         # Classical dense layers
         self.fc1 = nn.Linear(16 * 5 * 5, 120)
         self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, N_QUBITS)
+        self.fc3 = nn.Linear(84, n_qubits)
         
-        # Quantum layer
-        self.qnn = qml.qnn.TorchLayer(quantum_circuit, WEIGHT_SHAPES)
+        # Create quantum circuit and layer
+        quantum_circuit = create_quantum_circuit(n_qubits)
+        weight_shapes = {"weights": (n_layers, n_qubits)}
+        self.qnn = qml.qnn.TorchLayer(quantum_circuit, weight_shapes)
         
         # Classical post-processing
-        self.fc_out = nn.Linear(N_QUBITS, num_classes)
+        self.fc_out = nn.Linear(n_qubits, num_classes)
         
         # Dropout for regularization
         self.dropout = nn.Dropout(0.2)
@@ -123,8 +124,8 @@ def load_data(partition_id: int, num_partitions: int, batch_size: int = 32) -> T
     
 
     partition_train_test = partition_train_test.with_transform(apply_transforms)
-    trainloader = DataLoader(partition_train_test["train"], batch_size=batch_size, shuffle=True)
-    valloader = DataLoader(partition_train_test["test"], batch_size=batch_size)  # validation split
+    trainloader = DataLoader(partition_train_test["train"], batch_size=batch_size, shuffle=True, num_workers=0)
+    valloader = DataLoader(partition_train_test["test"], batch_size=batch_size, num_workers=0)  # validation split
     return trainloader, valloader
 
 
@@ -141,10 +142,10 @@ def train(
     net.train()
     
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
+    optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=1e-4)
     
     running_loss = 0.0
-    for epoch in range(epochs):
+    for _ in range(epochs):
         for batch_idx, batch in enumerate(trainloader):
             data = batch["img"].to(device)
             target = torch.as_tensor(batch["label"], dtype=torch.long, device=device)

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pennylane-flower-tutorial"
+name = "quickstart_pennylane"
 version = "1.0.0"
 description = "Quantum Federated Learning with PennyLane and Flower"
 license = "Apache-2.0"
@@ -16,21 +16,21 @@ authors = [
 dependencies = [
     "flwr[simulation]>=1.21.0",
     "flwr-datasets[vision]>=0.5.0",
-    "torch>=1.12.0",
-    "torchvision>=0.13.0",
+    "torch==2.8.0",
+    "torchvision==0.23.0",
     "pennylane==0.41.1",
     "autoray>=0.6,<0.7",
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["pennylane_example"]
+packages = ["."]
 
 [tool.flwr.app]
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "pennylane_example.server_app:app"
-clientapp = "pennylane_example.client_app:app"
+serverapp = "quickstart_pennylane.server_app:app"
+clientapp = "quickstart_pennylane.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 10
@@ -38,7 +38,11 @@ batch-size = 32
 local-epochs = 2
 learning-rate = 0.001
 fraction-fit = 1.0
-fraction-evaluate = 1.0
+fraction-evaluate = 0.5
+
+# Quantum circuit configuration
+n-qubits = 4
+n-layers = 3
 
 [tool.flwr.federations]
 default = "local-simulation"

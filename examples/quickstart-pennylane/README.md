@@ -16,16 +16,16 @@ Start by cloning the example project:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git _tmp \
-        && mv _tmp/examples/quantum-federated-learning . \
+        && mv _tmp/examples/quickstart-pennylane . \
         && rm -rf _tmp \
-        && cd quantum-federated-learning
+        && cd quickstart-pennylane
 ```
 
-This will create a new directory called `quantum-federated-learning` with the following structure:
+This will create a new directory called `quickstart-pennylane` with the following structure:
 
 ```shell
-quantum-federated-learning
-├── pennylane_example
+quickstart-pennylane
+├── quickstart_pennylane
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
@@ -36,7 +36,7 @@ quantum-federated-learning
 
 ### Install dependencies and project
 
-Install the dependencies defined in `pyproject.toml` as well as the `pennylane_example` package.
+Install the dependencies defined in `pyproject.toml` as well as the `quickstart_pennylane` package.
 
 ```bash
 pip install -e .
@@ -48,8 +48,8 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 ### Run with the Simulation Engine
 
-> [!NOTE]
-> Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
+> [!TIP]
+> This example might run slower due to quantum circuit simulation. If your system has a GPU, you can use the `local-simulation-gpu` federation for better performance. Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more.
 
 ```bash
 flwr run .
