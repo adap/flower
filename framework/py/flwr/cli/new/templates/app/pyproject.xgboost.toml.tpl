@@ -14,10 +14,9 @@ description = ""
 license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
-    "flwr[simulation]>=1.21.0",
-    "flwr-datasets[vision]>=0.5.0",
-    "torch==2.7.1",
-    "torchvision==0.22.1",
+    "flwr[simulation]>=1.22.0",
+    "flwr-datasets>=0.5.0",
+    "xgboost>=2.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -26,7 +25,6 @@ packages = ["."]
 [tool.flwr.app]
 publisher = "$username"
 
-# Point to your ServerApp and ClientApp objects
 [tool.flwr.app.components]
 serverapp = "$import_name.server_app:app"
 clientapp = "$import_name.client_app:app"
@@ -34,9 +32,19 @@ clientapp = "$import_name.client_app:app"
 # Custom config values accessible via `context.run_config`
 [tool.flwr.app.config]
 num-server-rounds = 3
-fraction-train = 0.5
+fraction-train = 0.1
+fraction-evaluate = 0.1
 local-epochs = 1
-lr = 0.01
+
+# XGBoost parameters
+params.objective = "binary:logistic"
+params.eta = 0.1 # Learning rate
+params.max-depth = 8
+params.eval-metric = "auc"
+params.nthread = 16
+params.num-parallel-tree = 1
+params.subsample = 1
+params.tree-method = "hist"
 
 # Default federation to use when running the app
 [tool.flwr.federations]

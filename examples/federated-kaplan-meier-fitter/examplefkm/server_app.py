@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from flwr.common import (
+    Context,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -25,9 +26,8 @@ from flwr.common import (
     Parameters,
     Scalar,
     parameters_to_ndarrays,
-    Context,
 )
-from flwr.server import ServerApp, ServerConfig, ServerAppComponents
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import Strategy

@@ -15,6 +15,10 @@
 """ServerApp strategies."""
 
 
+from .dp_adaptive_clipping import (
+    DifferentialPrivacyClientSideAdaptiveClipping,
+    DifferentialPrivacyServerSideAdaptiveClipping,
+)
 from .dp_fixed_clipping import (
     DifferentialPrivacyClientSideFixedClipping,
     DifferentialPrivacyServerSideFixedClipping,
@@ -22,17 +26,35 @@ from .dp_fixed_clipping import (
 from .fedadagrad import FedAdagrad
 from .fedadam import FedAdam
 from .fedavg import FedAvg
+from .fedavgm import FedAvgM
+from .fedmedian import FedMedian
+from .fedprox import FedProx
+from .fedtrimmedavg import FedTrimmedAvg
+from .fedxgb_bagging import FedXgbBagging
+from .fedxgb_cyclic import FedXgbCyclic
 from .fedyogi import FedYogi
+from .krum import Krum
+from .qfedavg import QFedAvg
 from .result import Result
 from .strategy import Strategy
 
 __all__ = [
+    "DifferentialPrivacyClientSideAdaptiveClipping",
     "DifferentialPrivacyClientSideFixedClipping",
+    "DifferentialPrivacyServerSideAdaptiveClipping",
     "DifferentialPrivacyServerSideFixedClipping",
     "FedAdagrad",
     "FedAdam",
     "FedAvg",
+    "FedAvgM",
+    "FedMedian",
+    "FedProx",
+    "FedTrimmedAvg",
+    "FedXgbBagging",
+    "FedXgbCyclic",
     "FedYogi",
+    "Krum",
+    "QFedAvg",
     "Result",
     "Strategy",
 ]

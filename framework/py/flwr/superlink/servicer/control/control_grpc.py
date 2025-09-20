@@ -31,6 +31,7 @@ from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.license_plugin import LicensePlugin
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.superlink.artifact_provider import ArtifactProvider
 
 from .control_event_log_interceptor import ControlEventLogInterceptor
 from .control_license_interceptor import ControlLicenseInterceptor
@@ -56,6 +57,7 @@ def run_control_api_grpc(
     auth_plugin: Optional[ControlAuthPlugin] = None,
     authz_plugin: Optional[ControlAuthzPlugin] = None,
     event_log_plugin: Optional[EventLogWriterPlugin] = None,
+    artifact_provider: Optional[ArtifactProvider] = None,
 ) -> grpc.Server:
     """Run Control API (gRPC, request-response)."""
     license_plugin: Optional[LicensePlugin] = get_license_plugin()
@@ -68,6 +70,7 @@ def run_control_api_grpc(
         objectstore_factory=objectstore_factory,
         is_simulation=is_simulation,
         auth_plugin=auth_plugin,
+        artifact_provider=artifact_provider,
     )
     interceptors: list[grpc.ServerInterceptor] = []
     if license_plugin is not None:
