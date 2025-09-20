@@ -20,7 +20,7 @@ import numpy as np
 from flwr.common import ArrayRecord
 
 from .fedmedian import FedMedian
-from .strategy_utils_tests import create_mock_reply
+from .strategy_utils_test import create_mock_reply
 
 
 def test_aggregate_fit() -> None:
