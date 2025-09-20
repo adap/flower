@@ -116,8 +116,8 @@ class Krum(FedAvg):
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
         log(INFO, "\t├──> Krum settings:")
-        log(INFO, "\t|\t├── Number of malicious nodes: %d", self.num_malicious_nodes)
-        log(INFO, "\t|\t└── Number of nodes to keep: %d", self.num_nodes_to_keep)
+        log(INFO, "\t│\t├── Number of malicious nodes: %d", self.num_malicious_nodes)
+        log(INFO, "\t│\t└── Number of nodes to keep: %d", self.num_nodes_to_keep)
         super().summary()
 
     def _compute_distances(self, records: list[ArrayRecord]) -> NDArray:
