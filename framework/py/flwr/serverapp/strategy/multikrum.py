@@ -179,10 +179,10 @@ def compute_distances(records: list[ArrayRecord]) -> NDArray:
     )  # shape: (n, d) with n number of records and d the dimension of model
 
     # Compute squared norms of each vector
-    norms = np.sum(flat_w**2, axis=1)  # shape (n,)
+    norms: NDArray = np.square(flat_w).sum(axis=1)  # shape (n,)
 
     # Use broadcasting to compute pairwise distances
-    distance_matrix = norms[:, None] + norms[None, :] - 2 * flat_w @ flat_w.T
+    distance_matrix: NDArray = norms[:, None] + norms[None, :] - 2 * flat_w @ flat_w.T
     return distance_matrix
 
 
