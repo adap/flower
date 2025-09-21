@@ -30,7 +30,6 @@ from flwr.common import (
     ArrayRecord,
     Message,
     MetricRecord,
-    NDArray,
     NDArrays,
     RecordDict,
     log,
