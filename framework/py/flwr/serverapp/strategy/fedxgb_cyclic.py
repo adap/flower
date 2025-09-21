@@ -52,7 +52,7 @@ class FedXgbCyclic(FedAvg):
         Minimum number of total nodes in the system.
     weighted_by_key : str (default: "num-examples")
         The key within each MetricRecord whose value is used as the weight when
-        computing weighted averages for both ArrayRecords and MetricRecords.
+        computing weighted averages for MetricRecords.
     arrayrecord_key : str (default: "arrays")
         Key used to store the ArrayRecord when constructing Messages.
     configrecord_key : str (default: "config")
