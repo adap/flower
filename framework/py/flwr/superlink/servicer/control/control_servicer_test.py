@@ -16,6 +16,7 @@
 
 
 import hashlib
+import tempfile
 import unittest
 from datetime import datetime
 from types import SimpleNamespace
@@ -60,13 +61,18 @@ class TestControlServicer(unittest.TestCase):
     def setUp(self) -> None:
         """Set up test fixtures."""
         self.store = Mock()
+        self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         self.servicer = ControlServicer(
             linkstate_factory=LinkStateFactory(":flwr-in-memory-state:"),
-            ffs_factory=FfsFactory("./tmp"),
+            ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(store=Mock(return_value=self.store)),
             is_simulation=False,
         )
         self.state = self.servicer.linkstate_factory.state()
+
+    def tearDown(self) -> None:
+        """Clean up after tests."""
+        self.tmp_dir.cleanup()
 
     def test_start_run(self) -> None:
         """Test StartRun method of ControlServicer."""
@@ -152,14 +158,19 @@ class TestControlServicerAuth(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
+        self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         self.servicer = ControlServicer(
             linkstate_factory=LinkStateFactory(":flwr-in-memory-state:"),
-            ffs_factory=FfsFactory("./tmp"),
+            ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(),
             is_simulation=False,
             auth_plugin=Mock(),
         )
         self.state = self.servicer.linkstate_factory.state()
+
+    def tearDown(self) -> None:
+        """Clean up after tests."""
+        self.tmp_dir.cleanup()
 
     def make_context(self) -> MagicMock:
         """Create a mock context."""

@@ -1,31 +1,41 @@
 """$project_name: A Flower / $framework_str app."""
 
-from flwr.common import Context, ndarrays_to_parameters
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
-from $import_name.task import MLP, get_params
+from flwr.app import ArrayRecord, Context
+from flwr.serverapp import Grid, ServerApp
+from flwr.serverapp.strategy import FedAvg
+
+from $import_name.task import MLP, get_params, set_params
+
+# Create ServerApp
+app = ServerApp()
 
 
-def server_fn(context: Context):
+@app.main()
+def main(grid: Grid, context: Context) -> None:
+    """Main entry point for the ServerApp."""
     # Read from config
     num_rounds = context.run_config["num-server-rounds"]
-
-    num_classes = 10
     num_layers = context.run_config["num-layers"]
     input_dim = context.run_config["input-dim"]
     hidden_dim = context.run_config["hidden-dim"]
 
     # Initialize global model
-    model = MLP(num_layers, input_dim, hidden_dim, num_classes)
+    model = MLP(num_layers, input_dim, hidden_dim, output_dim=10)
     params = get_params(model)
-    initial_parameters = ndarrays_to_parameters(params)
+    arrays = ArrayRecord(params)
 
-    # Define strategy
-    strategy = FedAvg(initial_parameters=initial_parameters)
-    config = ServerConfig(num_rounds=num_rounds)
+    # Initialize FedAvg strategy
+    strategy = FedAvg()
 
-    return ServerAppComponents(strategy=strategy, config=config)
+    # Start strategy, run FedAvg for `num_rounds`
+    result = strategy.start(
+        grid=grid,
+        initial_arrays=arrays,
+        num_rounds=num_rounds,
+    )
 
-
-# Create ServerApp
-app = ServerApp(server_fn=server_fn)
+    # Save final model to disk
+    print("\nSaving final model to disk...")
+    ndarrays = result.arrays.to_numpy_ndarrays()
+    set_params(model, ndarrays)
+    model.save_weights("final_model.npz")

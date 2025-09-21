@@ -2,8 +2,8 @@
 
 import torch
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
 from flwr.client.mod import fixedclipping_mod, secaggplus_mod
+from flwr.common import Context
 
 from fl_dp_sa.task import Net, get_weights, load_data, set_weights, test, train
 

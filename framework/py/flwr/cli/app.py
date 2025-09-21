@@ -25,6 +25,7 @@ from .log import log
 from .login import login
 from .ls import ls
 from .new import new
+from .pull import pull
 from .run import run
 from .stop import stop
 
@@ -46,6 +47,7 @@ app.command()(log)
 app.command()(ls)
 app.command()(stop)
 app.command()(login)
+app.command()(pull)
 
 typer_click_object = get_command(app)
 
