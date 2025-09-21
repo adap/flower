@@ -200,7 +200,7 @@ def aggregate_n_closest_weights(
 ) -> NDArrays:
     """Compute the element-wise mean of the `beta` closest weight arrays.
 
-    For each element (i-th coordinate), the output is the average of the 
+    For each element (i-th coordinate), the output is the average of the
     `beta` weight arrays that are closest to the reference weights.
 
     Parameters
@@ -215,7 +215,7 @@ def aggregate_n_closest_weights(
     Returns
     -------
     aggregated_weights : NDArrays
-        Element-wise average of the `beta` closest weight arrays to the 
+        Element-wise average of the `beta` closest weight arrays to the
         reference weights.
     """
     aggregated_weights = []
