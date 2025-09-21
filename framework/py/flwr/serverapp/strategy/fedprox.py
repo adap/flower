@@ -162,7 +162,7 @@ class FedProx(FedAvg):
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
         log(INFO, "\t├──> FedProx settings:")
-        log(INFO, "\t|\t└── Proximal mu: %s", self.proximal_mu)
+        log(INFO, "\t│\t└── Proximal mu: %s", self.proximal_mu)
         super().summary()
 
     def configure_train(
