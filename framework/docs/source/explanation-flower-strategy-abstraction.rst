@@ -93,7 +93,10 @@ implement several abstract methods:
 Creating a new strategy
 -----------------------
 
-You can customize an existing strategy (e.g. |fedavg_link|_) by overriding one or several of its methods. For full flexibility, you can also implement a strategy from scratch. To implement a brand new strategy, simply define a class that derives from ``Strategy`` and implement the abstract methods:
+You can customize an existing strategy (e.g., |fedavg_link|_) by overriding one or
+several of its methods. For full flexibility, you can also implement a strategy from
+scratch. To implement a brand new strategy, simply define a class that derives from
+``Strategy`` and implement the abstract methods:
 
 .. code-block:: python
 
