@@ -50,7 +50,7 @@ server side:
 
 - Use an existing strategy, for example, ``FedAvg``
 - Customize an existing strategy with callback functions to its ``start`` method
-- Customize an existing strategy by overriding one or more of it's methods.
+- Customize an existing strategy by overriding one or more of its methods.
 - Implement a novel strategy from scratch
 
 .. note::
@@ -66,7 +66,7 @@ Use an existing strategy
 ------------------------
 
 Flower comes with a number of popular federated learning ``Strategies`` which can be
-instantiated as follows as part of a simle |serverapp_link|_:
+instantiated as follows as part of a simple |serverapp_link|_:
 
 .. code-block:: python
 
@@ -103,10 +103,10 @@ launching it.
 Parameterizing an existing strategy
 -----------------------------------
 
-The constructor of strategies accepte different parameters based on, primarily, the
+The constructor of strategies accepts different parameters based on, primarily, the
 aggregation algorithm they implement. For example, |fedadam_link|_ accepts additional
-arguments (i.e. to apply momentum during aggregatio)n compared to to those that
-|fedavg_link| requires. Howerver, common to all strategies are settings to control how
+arguments (i.e. to apply momentum during aggregation) compared to those that
+|fedavg_link|_ requires. However, common to all strategies are settings to control how
 nodes that run ``ClientApp`` instances get sampled. Let's take a look at this set of
 arguments:
 
@@ -117,12 +117,12 @@ arguments:
     # Initialize FedAvg strategy
     strategy = FedAvg(
         fraction_train=0.5,  # fraction of nodes to involve in a round of training
-        fraction_evaluate=1.0,  # fractin of nodes to inovlve in a round of
+        fraction_evaluate=1.0,  # fraction of nodes to involve in a round of
         min_available_nodes=100,  # Nodes connected required before FL begins
     )
 
 For most applications specifying one or all of the arguments shown above is sufficient.
-A Flower strategy define like the one above would wait for 100 nodes to be connected
+A Flower strategy defined like the one above would wait for 100 nodes to be connected
 before any federated stage begins. Then, 50% of the connected nodes will be involved in
 a stage of federated training, followed by another stage of federated evaluation where
 all the connected nodes will participate. It is possible to set the ``min_train_nodes``
@@ -149,12 +149,12 @@ training and federated evaluation.
 - ``arrayrecord_key``: the ``Message`` communicated to the ``ClientApp`` will contain an
   ``ArrayRecord`` containing the arrays of the global model under this key. By default
   the key is ``"arrays"``.
-- ``configrecord_key``: the ``Message`` communicated to the ``ClientApp`` will contain
-  an ``ConfigRecord`` containing config settings. By default the key is ``"config"``.
+- ``configrecord_key``: the ``Message`` communicated to the ``ClientApp`` will contain a
+  ``ConfigRecord`` containing config settings. By default the key is ``"config"``.
 - ``weighted_by_key``: A key inside the |metricrecord_link|_ that the ``ClientApp``
   returns as part of its reply to the ``ServerApp``. The value under this key is used to
-  perfrom weighted aggregation of ``MetricRecords`` and, after a round of federated
-  traninig, ``ArrayRecords``. The default value is ``"num-examples"``.
+  perform weighted aggregation of ``MetricRecords`` and, after a round of federated
+  training, ``ArrayRecords``. The default value is ``"num-examples"``.
 
 With a strategy defined as in the code snippet above, the ``ClientApp`` should receive a
 ``Message`` with the following structure:
@@ -211,13 +211,13 @@ represents.
 
 .. tip::
 
-    Check the :docs: `how-to-implement-strategies` for a deepdive about how the
-    different stages implemented as part of the ``start`` method operate.
+    Check the :doc:`how-to-implement-strategies` for a deep dive about how the different
+    stages implemented as part of the ``start`` method operate.
 
 The only required arguments are the |grid_link|_ and an ``ArrayRecord``. The former is
 an object that will be used to interface with the nodes running the ``ClientApp`` to
 involve them in a round of train/evaluate/query or other. The latter contains the
-parameters of the model we want to federated. Therefore, a minimal execution of the
+parameters of the model we want to federate. Therefore, a minimal execution of the
 ``start`` method looks like this:
 
 .. code-block:: python
@@ -230,14 +230,14 @@ parameters of the model we want to federated. Therefore, a minimal execution of 
 
 In most settings, we want to customize how the ``start`` method is executed by passing
 also the number of rounds to execute and, a pair of ``ConfigRecord`` objects to be sent
-to the ``ClienApp`` during a step of training and evaluation respectively.
+to the ``ClientApp`` during a step of training and evaluation respectively.
 
 .. code-block:: python
     :emphasize-lines: 9,10,11
 
     # Define configs to send to ClientApp
     train_cfg = ConfigRecord({"lr": 0.1, "optim": "adam"})
-    eval_cfg = ConfigRecord({"msx-steps": 500, "local-checkpoint": True})
+    eval_cfg = ConfigRecord({"max-steps": 500, "local-checkpoint": True})
 
     # Start strategy
     result = strategy.start(
@@ -258,7 +258,7 @@ example, if we want to increase the timeout to 2 hours, we would do:
 
     # Define configs to send to ClientApp
     train_cfg = ConfigRecord({"lr": 0.1, "optim": "adam"})
-    eval_cfg = ConfigRecord({"msx-steps": 500, "local-checkpoint": True})
+    eval_cfg = ConfigRecord({"max-steps": 500, "local-checkpoint": True})
 
     # Start strategy
     result = strategy.start(
@@ -267,7 +267,7 @@ example, if we want to increase the timeout to 2 hours, we would do:
         train_config=train_cfg,
         evaluate_config=eval_cfg,
         num_rounds=100,
-        timeout=7200,  # 2h hours
+        timeout=7200,  # 2 hours
     )
 
 Finally, the last argument in ``start`` is named ``evaluate_fn`` and it allows passing
