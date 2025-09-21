@@ -118,7 +118,7 @@ arguments:
     strategy = FedAvg(
         fraction_train=0.5,  # fraction of nodes to involve in a round of training
         fraction_evaluate=1.0,  # fraction of nodes to involve in a round of evaluation
-        min_available_nodes=100,  # Minimum number of connected nodes required before FL begins
+        min_available_nodes=100,  # minimum connected nodes required before FL starts
     )
 
 For most applications specifying one or all of the arguments shown above is sufficient.
