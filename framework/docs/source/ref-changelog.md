@@ -16,7 +16,16 @@ We would like to give our special thanks to all the contributors who made the ne
 - **refactor(framework): Move logging and validation logic of** `FedAvg` **to a helper method** ([#5851](https://github.com/adap/flower/pull/5851))
 - **refactor(framework): Update the eval logic in** `configure_evaluate` **of FedAvg** ([#5867](https://github.com/adap/flower/pull/5867))
 - **refactor(framework): Update strategy handling of messages with errors** ([#5845](https://github.com/adap/flower/pull/5845))
+- **feat(framework): Add Message-based adaptive clipping strategies** ([#5905](https://github.com/adap/flower/pull/5905))
+- **feat(framework): Implement** `QFedAvg` **strategy for Message API** ([#5904](https://github.com/adap/flower/pull/5904))
+- **refactor(framework): Migrate** `Krum` **strategy to** `Message API` ([#5894](https://github.com/adap/flower/pull/5894))
+- **refactor(framework): Refactor** `Krum` **strategies** ([#5919](https://github.com/adap/flower/pull/5919))
+- **refactor(framework): Use** `│` **instead of** `|` **to ensure consistency and make it prettier** ([#5914](https://github.com/adap/flower/pull/5914))
+- **refactor(framework): Remove** `self.current_array = ...` **line in** `FedOpt` **subclasses for consistency** ([#5908](https://github.com/adap/flower/pull/5908))
 
+### Migrate DP mods
+- **refactor(framework): Generate** `Error` **reply if validation checks don't pass in DP mods** ([#5913](https://github.com/adap/flower/pull/5913))
+- **refactor(framework): Redefine** `ClientAppCallable` **in** `clientapp` **module** ([#5915](https://github.com/adap/flower/pull/5915))
 
 - **Migrate `flwr new` templates to Message API** ([#5901](https://github.com/adap/flower/pull/5901), [#5818](https://github.com/adap/flower/pull/5818), [#5893](https://github.com/adap/flower/pull/5893), [#5849](https://github.com/adap/flower/pull/5849), [#5883](https://github.com/adap/flower/pull/5883))
 
@@ -41,6 +50,9 @@ We would like to give our special thanks to all the contributors who made the ne
 - **refactor(examples): Update FlowerTune-LLM example** ([#5875](https://github.com/adap/flower/pull/5875))
 - **refactor(examples): Update FL tabular example** ([#5892](https://github.com/adap/flower/pull/5892))
 - **fix(examples): Update the import path in XGBoost quick-start example** ([#5876](https://github.com/adap/flower/pull/5876))
+- **fix(examples): Update readmes** ([#5911](https://github.com/adap/flower/pull/5911))
+- **refactor(examples): Migrate** `quickstart-monai` **to Message API** ([#5887](https://github.com/adap/flower/pull/5887))
+- **refactor(examples): Update FedRAG example** ([#5889](https://github.com/adap/flower/pull/5889))
 
 ### upgrade tutorial
 - **docs(framework): Update main tutorial to the** `Message API` ([#5861](https://github.com/adap/flower/pull/5861))
@@ -50,6 +62,14 @@ We would like to give our special thanks to all the contributors who made the ne
 - **docs(framework): Update** `MLX` **quickstart tutorials and fix that for** `PyTorch` ([#5862](https://github.com/adap/flower/pull/5862))
 - **docs(framework): Update quickstart Transformers tutorial** ([#5877](https://github.com/adap/flower/pull/5877))
 - **refactor(framework): Update** `quickstart-tensorflow` **tutorial to Message API** ([#5895](https://github.com/adap/flower/pull/5895))
+- **docs(framework): Update** `how-to-design-strategies` **guide to** `Message API` ([#5922](https://github.com/adap/flower/pull/5922))
+- **docs(framework): Update how to implement FedBN tutorial** ([#5927](https://github.com/adap/flower/pull/5927))
+- **docs(framework): Update XGBoost quick-start tutorial** ([#5906](https://github.com/adap/flower/pull/5906))
+- **docs(framework): Update how to save checkpoints tutorial** ([#5928](https://github.com/adap/flower/pull/5928))
+- **docs(framework): Update tutorial of how to aggregate eval results** ([#5921](https://github.com/adap/flower/pull/5921))
+- **docs(framework): Update** `how-to-configure-clients` **guide to** `Message API` ([#5923](https://github.com/adap/flower/pull/5923))
+- **docs(framework): Update tutorial of how to use built-in Mods** ([#5912](https://github.com/adap/flower/pull/5912))
+- **refactor(framework): Update quickstart-fastai tutorial to Message API** ([#5897](https://github.com/adap/flower/pull/5897))
 
 
 ### flwr pull
@@ -80,11 +100,9 @@ We would like to give our special thanks to all the contributors who made the ne
 - **refactor(framework): Rename test file** ([#5903](https://github.com/adap/flower/pull/5903))
 - **refactor(examples): Format examples** ([#5873](https://github.com/adap/flower/pull/5873))
 - **refactor(framework): Pass** `Context` **received from SuperLink to** `ServerApp` **in** `flwr-simulation` ([#5890](https://github.com/adap/flower/pull/5890))
+- **feat(framework): Add** `TypedDict.copy` **method** ([#5909](https://github.com/adap/flower/pull/5909))
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5918](https://github.com/adap/flower/pull/5918))
 
-
-### Unknown changes
-
-- **build(deps-dev): bump vite from 6.2.7 to 6.3.6 in /intelligence/ts** ([#5837](https://github.com/adap/flower/pull/5837))
 
 ## v1.21.0 (2025-09-10)
 
