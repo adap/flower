@@ -164,7 +164,7 @@ Below is a code example that shows how to use ``LocalDpMod``:
     evaluation), which is generally unnecessary and error-prone.
 
 .. code-block:: python
-    :emphasize-lines: 8,11
+    :emphasize-lines: 8,12
 
     from flwr.clientapp import ClientApp
     from flwr.clientapp.mod import LocalDpMod
