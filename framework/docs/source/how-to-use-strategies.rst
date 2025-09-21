@@ -38,6 +38,10 @@
 
 .. _metricrecord_link: ref-api/flwr.app.MetricRecord.html
 
+.. |strategy_explainer_link| replace:: Flower Strategy Abstraction
+
+.. _strategy_explainer_link: explanation-flower-strategy-abstraction.html#understand-start-method
+
 Use strategies
 ==============
 
@@ -211,8 +215,8 @@ represents.
 
 .. tip::
 
-    Check the :doc:`how-to-implement-strategies` for a deep dive into how the different
-    stages implemented as part of the ``start`` method operate.
+    Check the |strategy_explainer_link|_ explainer for a deep dive into how the
+    different stages implemented as part of the ``start`` method operate.
 
 The only required arguments are the |grid_link|_ and an ``ArrayRecord``. The former is
 an object that will be used to interface with the nodes running the ``ClientApp`` to
