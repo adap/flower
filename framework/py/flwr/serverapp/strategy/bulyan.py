@@ -178,7 +178,7 @@ class Bulyan(FedAvg):
         # Compute median
         median_ndarrays = [np.median(arr, axis=0) for arr in zip(*selected_ndarrays)]
 
-        # Aggregate beta-closest weights element-wisely
+        # Aggregate the beta closest weights element-wise
         aggregated_ndarrays = aggregate_n_closest_weights(
             median_ndarrays, selected_ndarrays, beta
         )
@@ -198,27 +198,26 @@ class Bulyan(FedAvg):
 
 def aggregate_n_closest_weights(
     ref_weights: NDArrays, weights_list: list[NDArrays], beta: int
-) -> list[NDArray]:
-    """Calculate element-wise mean of the `N` closest values.
+) -> NDArrays:
+    """Compute the element-wise mean of the `beta` closest weight arrays.
 
-    Note, each i-th coordinate of the result weight is the average of the beta_closest
-    -ith coordinates to the reference weights
-
+    For each element (i-th coordinate), the output is the average of the 
+    `beta` weight arrays that are closest to the reference weights.
 
     Parameters
     ----------
-    ref_weights: NDArrays
-        The weights from which the distances will be computed
-    weights_list: list[NDArrays]
-        The list of weights (from selected nodes).
-    beta: int
-        The number of the closest distance weights that will be averaged
+    ref_weights : NDArrays
+        Reference weights used to compute distances.
+    weights_list : list[NDArrays]
+        List of weight arrays (e.g., from selected nodes).
+    beta : int
+        Number of closest weight arrays to include in the averaging.
 
     Returns
     -------
-    aggregated_weights: NDArrays
-        Averaged (element-wise) beta weights that have the closest distance to
-         reference weights
+    aggregated_weights : NDArrays
+        Element-wise average of the `beta` closest weight arrays to the 
+        reference weights.
     """
     aggregated_weights = []
     for layer_id, ref_layer in enumerate(ref_weights):
