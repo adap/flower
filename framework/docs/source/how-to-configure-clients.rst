@@ -155,9 +155,9 @@ Let's create a new class inheriting from |fedavg_link|_ and override the
             # Pass the updated config and the rest of arguments to the parent class
             return super().configure_train(server_round, arrays, config, grid)
 
-In this how-to guide, we have shown how to define (when calling the ``start`` method
-of the strategy) and modify (by overriding the ``configure_train`` method) a
+In this how-to guide, we have shown how to define (when calling the ``start`` method of
+the strategy) and modify (by overriding the ``configure_train`` method) a
 ``ConfigRecord`` to customize how ``ClientApps`` perform training. You can follow
-equivalent steps to define and customize the ``ConfigRecord`` for an evaluation
-round. To do this, use the ``evaluate_config`` argument in the strategy's ``start``
-method and then optionally override the ``configure_evaluate`` method.
+equivalent steps to define and customize the ``ConfigRecord`` for an evaluation round.
+To do this, use the ``evaluate_config`` argument in the strategy's ``start`` method and
+then optionally override the ``configure_evaluate`` method.
