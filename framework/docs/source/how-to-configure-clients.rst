@@ -44,7 +44,9 @@ Make use of a |configrecord_link|_ to send configuration values in a |message_li
 from your |serverapp_link|_ to a |clientapp_link|_. A ``ConfigRecord`` is a special type
 of Python dictionary that allows communicating basic types such as ``int``, ``float``,
 ``string``, ``bool`` and also ``bytes`` if you need to communicate more complex data
-structures that need to be serialized. Let's see a few examples:
+structures that need to be serialized. Lists of these types are also supported.
+
+Let's see a few examples:
 
 .. code-block:: python
 
@@ -62,7 +64,7 @@ passing it to the |strategy_start_link|_ of your strategy of choice (e.g.
 |fedavg_link|_). Let's see how this looks in code:
 
 .. code-block:: python
-    :emphasize-lines: 18,24
+    :emphasize-lines: 15,21
 
     # Create ServerApp
     app = ServerApp()
@@ -146,15 +148,16 @@ Let's create a new class inheriting from |fedavg_link|_ and override the
         ) -> Iterable[Message]:
             """Configure the next round of federated training and maybe do LR decay."""
             # Decrease learning rate by a factor of 0.5 every 5 rounds
-            if server_round % 5 == 0 and server_round > 0:
+            # Note: server_round starts at 1, not 0
+            if server_round % 5 == 0:
                 config["lr"] *= 0.5
                 print("LR decreased to:", config["lr"])
             # Pass the updated config and the rest of arguments to the parent class
             return super().configure_train(server_round, arrays, config, grid)
 
-In this how-to guide we have focused on how to define (when calling the ``start`` method
+In this how-to guide, we have shown how to define (when calling the ``start`` method
 of the strategy) and modify (by overriding the ``configure_train`` method) a
-``ConfigRecord`` to customize how ``ClientApps`` do training. You may follow equivalent
-steps to define and customize the ``ConfigRecord`` for an evaluation round. To do this
-use the ``evaluate_config`` in the strategy ``start`` method and then override the
-``configure_evaluate`` method.
+``ConfigRecord`` to customize how ``ClientApps`` perform training. You can follow
+equivalent steps to define and customize the ``ConfigRecord`` for an evaluation
+round. To do this, use the ``evaluate_config`` argument in the strategy's ``start``
+method and then optionally override the ``configure_evaluate`` method.
