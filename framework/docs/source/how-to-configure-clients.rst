@@ -1,6 +1,6 @@
-:og:description: Configure Flower clients by sending parameters from the server to control client-side hyperparameters using configuration dictionaries and strategies.
+:og:description: Configure Flower clients by sending configurations from the strategy to the clients and control client-side hyperparameters dynamically.
 .. meta::
-    :description: Configure Flower clients by sending parameters from the server to control client-side hyperparameters using configuration dictionaries and strategies.
+    :description: Configure Flower clients by sending configurations from the strategy to the clients and control client-side hyperparameters dynamically.
 
 .. |message_link| replace:: ``Message``
 
@@ -30,15 +30,15 @@
 
 .. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
 
-Configure ``ClientApps``
-========================
+Configure a ``ClientApp``
+=========================
 
 Flower provides the ability to send configuration values to clients, allowing
 server-side control over client behavior. This feature enables flexible and dynamic
 adjustment of client-side hyperparameters, improving collaboration and experimentation.
 
-Sending ``ConfigRecords`` to ``ClientApps``
--------------------------------------------
+Sending ``ConfigRecords`` to a ``ClientApp``
+--------------------------------------------
 
 Make use of a |configrecord_link|_ to send configuration values in a |message_link|_
 from your |serverapp_link|_ to a |clientapp_link|_. A ``ConfigRecord`` is a special type
@@ -59,7 +59,7 @@ structures that need to be serialized. Let's see a few examples:
 When you use a Flower strategy, the easiest way to get your ``ConfigRecord``
 communicated as part of the ``Message`` that gets sent to the ``ClientApp`` is by
 passing it to the |strategy_start_link|_ of your strategy of choice (e.g.
-|fedavg_link|_). Let's see how this looks like in code:
+|fedavg_link|_). Let's see how this looks in code:
 
 .. code-block:: python
     :emphasize-lines: 18,24
@@ -89,7 +89,7 @@ passing it to the |strategy_start_link|_ of your strategy of choice (e.g.
         )
 
 Passing the above ``ConfigRecord`` to the strategy's ``start`` method ensures that the
-exact same ``ConfigRecord`` is received on the client side. But what if we'd like that
+exact same ``ConfigRecord`` is received on the client side. But what if we'd like the
 configuration to change during the course of the federated learning process or as rounds
 advance?
 
