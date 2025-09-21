@@ -1,46 +1,40 @@
 """monaiexample: A Flower / MONAI app."""
 
-from typing import List, Tuple
+import torch
+from flwr.app import ArrayRecord, Context
+from flwr.serverapp import Grid, ServerApp
+from flwr.serverapp.strategy import FedAvg
 
-from flwr.common import Context, Metrics, ndarrays_to_parameters
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
+from monaiexample.task import load_model
 
-from monaiexample.task import get_params, load_model
-
-
-# Define metric aggregation function
-def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
-    examples = [num_examples for num_examples, _ in metrics]
-
-    # Aggregate and return custom metric (weighted average)
-    return {"accuracy": sum(accuracies) / sum(examples)}
+# Create ServerApp
+app = ServerApp()
 
 
-def server_fn(context: Context):
+@app.main()
+def main(grid: Grid, context: Context) -> None:
+    """Main entry point for the ServerApp."""
 
-    # Init model
+    # Read run config
+    fraction_train: float = context.run_config["fraction-train"]
+    num_rounds: int = context.run_config["num-server-rounds"]
+
+    # Load global model
     model = load_model()
+    arrays = ArrayRecord(model.state_dict())
 
-    # Convert model parameters to flwr.common.Parameters
-    ndarrays = get_params(model)
-    global_model_init = ndarrays_to_parameters(ndarrays)
+    # Initialize FedAvg strategy
+    strategy = FedAvg(fraction_train=fraction_train)
 
-    # Define strategy
-    fraction_fit = context.run_config["fraction-fit"]
-    strategy = FedAvg(
-        fraction_fit=fraction_fit,
-        evaluate_metrics_aggregation_fn=weighted_average,
-        initial_parameters=global_model_init,
+    # Start strategy, run FedAvg for `num_rounds`
+    result = strategy.start(
+        grid=grid,
+        initial_arrays=arrays,
+        num_rounds=num_rounds,
     )
 
-    # Construct ServerConfig
-    num_rounds = context.run_config["num-server-rounds"]
-    config = ServerConfig(num_rounds=num_rounds)
-
-    return ServerAppComponents(strategy=strategy, config=config)
-
-
-app = ServerApp(server_fn=server_fn)
+    # Save final model to disk
+    final_model_name = "final_model.pt"
+    print(f"\nSaving {final_model_name} to disk...")
+    state_dict = result.arrays.to_torch_state_dict()
+    torch.save(state_dict, final_model_name)

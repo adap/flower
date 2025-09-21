@@ -18,7 +18,7 @@ It differs from the [xgboost-quickstart](https://github.com/adap/flower/tree/mai
 
 ## Training Strategies
 
-This example provides two training strategies, [**bagging aggregation**](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html#tree-based-bagging-aggregation) ([docs](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedXgbBagging.html)) and [**cyclic training**](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html#cyclic_training) ([docs](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedXgbCyclic.html)).
+This example provides two training strategies, [**bagging aggregation**](https://flower.ai/docs/framework/ref-api/flwr.serverapp.strategy.FedXgbBagging.html) and [**cyclic training**](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedXgbCyclic.html).
 
 ### Bagging Aggregation
 
@@ -97,10 +97,6 @@ flwr run . --run-config "train-method='bagging' num-server-rounds=5 centralised-
 # To run cyclic training with linear partitioner type evaluated on centralised test set:
 flwr run . --run-config "train-method='cyclic' partitioner-type='linear' centralised-eval-client=true"
 ```
-
-> [!TIP]
-> For a more detailed walk-through check our [XGBoost tutorial](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html).
-> To extend the aggregation strategy for saving, logging, or other functions, please refer to our [advanced-pytorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch) example.
 
 ### Run with the Deployment Engine
 

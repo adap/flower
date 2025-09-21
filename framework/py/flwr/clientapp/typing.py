@@ -12,16 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Built-in Mods."""
+"""Custom types for Flower clients."""
 
 
-from flwr.client.mod.comms_mods import arrays_size_mod, message_size_mod
+from typing import Callable
 
-from .centraldp_mods import adaptiveclipping_mod, fixedclipping_mod
+from flwr.common import Context, Message
 
-__all__ = [
-    "adaptiveclipping_mod",
-    "arrays_size_mod",
-    "fixedclipping_mod",
-    "message_size_mod",
-]
+ClientAppCallable = Callable[[Message, Context], Message]
