@@ -92,13 +92,13 @@ instantiated as follows as part of a simple |serverapp_link|_:
         )
 
 In the code above, instantiating ``FedAvg`` does not launch the logic built into the
-strategy (i.e. sampling nodes, communicating |message_link|_, perform aggregation, etc).
-In order to do so, we need to execute the |strategy_start_link|_ method.
+strategy (i.e. sampling nodes, communicating |message_link|_, performing aggregation,
+etc). In order to do so, we need to execute the |strategy_start_link|_ method.
 
 The above ``ServerApp`` is very minimal, makes use of the default settings for
 ``FedAvg`` and only passes the required arguments to the ``start`` method. Let's see in
-a bit more detail what options do we have when instantiating strategies and when
-launching it.
+a bit more detail what options we have when instantiating strategies and when launching
+it.
 
 Parameterizing an existing strategy
 -----------------------------------
@@ -117,16 +117,16 @@ arguments:
     # Initialize FedAvg strategy
     strategy = FedAvg(
         fraction_train=0.5,  # fraction of nodes to involve in a round of training
-        fraction_evaluate=1.0,  # fraction of nodes to involve in a round of
-        min_available_nodes=100,  # Nodes connected required before FL begins
+        fraction_evaluate=1.0,  # fraction of nodes to involve in a round of evaluation
+        min_available_nodes=100,  # minimum connected nodes required before FL starts
     )
 
 For most applications specifying one or all of the arguments shown above is sufficient.
 A Flower strategy defined like the one above would wait for 100 nodes to be connected
 before any federated stage begins. Then, 50% of the connected nodes will be involved in
 a stage of federated training, followed by another stage of federated evaluation where
-all the connected nodes will participate. It is possible to set the ``min_train_nodes``
-and ``min_evaluate_nodes`` arguments for finer control.
+all connected nodes will participate. It is possible to set the ``min_train_nodes`` and
+``min_evaluate_nodes`` arguments for finer control.
 
 In addition to arguments to customize how the strategy performs sampling, we can define
 at construction time which keys will be used to communicate different information
@@ -175,7 +175,7 @@ With a strategy defined as in the code snippet above, the ``ClientApp`` should r
     )
 
     # The reply Message should contain a MetricRecord and inside it
-    # an item associated to the key used to intialize the strategy
+    # an item associated with the key used to initialize the strategy
     reply_msg_content = RecordDict(
         {
             "locally-updated-params": ArrayRecord(...),
@@ -205,13 +205,13 @@ these callbacks.
 Using the strategy's ``start`` method
 -------------------------------------
 
-As mentioned earlier, it is the ``start`` method of the strategy what launches the
+As mentioned earlier, it is the ``start`` method of the strategy that launches the
 federated learning process. Let's see what each argument passed to this method
 represents.
 
 .. tip::
 
-    Check the :doc:`how-to-implement-strategies` for a deep dive about how the different
+    Check the :doc:`how-to-implement-strategies` for a deep dive into how the different
     stages implemented as part of the ``start`` method operate.
 
 The only required arguments are the |grid_link|_ and an ``ArrayRecord``. The former is
@@ -273,8 +273,8 @@ example, if we want to increase the timeout to 2 hours, we would do:
 Finally, the last argument in ``start`` is named ``evaluate_fn`` and it allows passing
 to it a callback function to evaluate the aggregated model on some local data that the
 ``ServerApp`` might have access to. This callback is also useful if you want to save the
-global model at the end of every round (or every N rounds). Let's see what's the
-signature of this callback and how to use it:
+global model at the end of every round (or every N rounds). Let's see what the signature
+of this callback is and how to use it:
 
 .. code-block:: python
 
