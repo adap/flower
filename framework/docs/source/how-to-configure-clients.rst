@@ -88,8 +88,8 @@ passing it to the |strategy_start_link|_ of your strategy of choice (e.g.
             num_rounds=10,
         )
 
-Passing the above ``ConfigRecord`` to the strategy's ``start`` method ensures that on
-the client side that exact same ``ConfigRecord`` arrives. But what if we'd like that
+Passing the above ``ConfigRecord`` to the strategy's ``start`` method ensures that the
+exact same ``ConfigRecord`` is received on the client side. But what if we'd like that
 configuration to change during the course of the federated learning process or as rounds
 advance?
 
