@@ -6,6 +6,10 @@
 
 .. _strategy_link: ref-api/flwr.serverapp.strategy.Strategy.html
 
+.. |fedavg_link| replace:: ``FedAvg``
+
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
+
 Flower Strategy Abstraction
 ===========================
 
