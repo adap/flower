@@ -45,7 +45,8 @@ This section will demonstrate how to save metrics such as accuracy/loss values t
 Context_ so they can be used in subsequent executions of the ``ClientApp``.
 
 Let's begin with a simple setting in which ``ClientApp`` is defined as follows. The
-``train()`` function only generates a random number, prints it, and return an empty message.
+``train()`` function only generates a random number, prints it, and return an empty
+message.
 
 .. tip::
 
@@ -55,6 +56,8 @@ Let's begin with a simple setting in which ``ClientApp`` is defined as follows. 
 .. code-block:: python
 
     import random
+    from flwr.app import Context, Message, RecordDict
+    from flwr.clientapp import ClientApp
 
     # Flower ClientApp
     app = ClientApp()
@@ -70,10 +73,10 @@ Let's begin with a simple setting in which ``ClientApp`` is defined as follows. 
         return Message(RecordDict(), reply_to=msg)
 
 With the minimal ``ClientApp`` above, each time a ``Message`` is addressed to this
-``train`` function, a new random integer will be generated and printed. Let's say we want
-to save that randomly generated integer and append it to a list that persists in the
-``Context``. This way, each time the function executes,, it prints the history
-of random integers. Let's see how this looks in code:
+``train`` function, a new random integer will be generated and printed. Let's say we
+want to save that randomly generated integer and append it to a list that persists in
+the ``Context``. This way, each time the function executes,, it prints the history of
+random integers. Let's see how this looks in code:
 
 .. tip::
 
@@ -85,6 +88,8 @@ of random integers. Let's see how this looks in code:
 .. code-block:: python
 
     import random
+    from flwr.app import Context, Message, RecordDict
+    from flwr.clientapp import ClientApp
 
     # Flower ClientApp
     app = ClientApp()
@@ -115,7 +120,8 @@ of random integers. Let's see how this looks in code:
 If you run a Flower App including the above logic in your ``ClientApp`` and having just
 two clients in your federation sampled in each round, you'll see an output similar to
 the one below. See how after each round the ``random-metrics`` record in the ``Context``
-gets one additional integer? Note that, in Simulation Runtime, the order of log messages may change each round due to the random ordering of simulated clients.
+gets one additional integer? Note that, in Simulation Runtime, the order of log messages
+may change each round due to the random ordering of simulated clients.
 
 .. code-block:: shell
 
