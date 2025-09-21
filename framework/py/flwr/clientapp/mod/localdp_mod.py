@@ -22,7 +22,6 @@ import numpy as np
 
 from flwr.clientapp.typing import ClientAppCallable
 from flwr.common import Array, ArrayRecord
-from flwr.common.constant import MessageType
 from flwr.common.context import Context
 from flwr.common.differential_privacy import (
     add_gaussian_noise_inplace,
