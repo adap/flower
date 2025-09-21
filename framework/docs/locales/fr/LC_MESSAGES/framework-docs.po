@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-09-19 00:07+0000\n"
+"POT-Creation-Date: 2025-09-20 00:07+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -6246,6 +6246,7 @@ msgstr ""
 #: flwr.server.strategy.strategy.Strategy.initialize_parameters
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping
 #: flwr.serverapp.strategy.fedadagrad.FedAdagrad
@@ -6255,7 +6256,8 @@ msgstr ""
 #: flwr.serverapp.strategy.fedprox.FedProx
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg
 #: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic
-#: flwr.serverapp.strategy.fedyogi.FedYogi
+#: flwr.serverapp.strategy.fedyogi.FedYogi flwr.serverapp.strategy.krum.Krum
+#: flwr.serverapp.strategy.qfedavg.QFedAvg
 #: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate
 #: flwr.serverapp.strategy.strategy.Strategy.aggregate_train
 #: flwr.serverapp.strategy.strategy.Strategy.configure_evaluate
@@ -16140,6 +16142,7 @@ msgstr ""
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:22
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:21
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:14
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:31
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:21
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:14
 #: of
@@ -16244,7 +16247,9 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.workflow.SecAggWorkflow.rst:15
 #: ../../source/ref-api/flwr.serverapp.Grid.rst:15
 #: ../../source/ref-api/flwr.serverapp.ServerApp.rst:15
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.rst:15
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.FedAdagrad.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.FedAdam.rst:15
@@ -16256,6 +16261,8 @@ msgstr ""
 #: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.FedXgbCyclic.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.FedYogi.rst:15
+#: ../../source/ref-api/flwr.serverapp.strategy.Krum.rst:15
+#: ../../source/ref-api/flwr.serverapp.strategy.QFedAvg.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.Result.rst:15
 #: ../../source/ref-api/flwr.serverapp.strategy.Strategy.rst:15
 #: ../../source/ref-api/flwr.simulation.SimulationIoConnection.rst:15
@@ -16341,21 +16348,21 @@ msgid "Slice Array data and construct a list of ArrayChunks."
 msgstr ""
 
 #: ../../source/ref-api/flwr.app.Array.rst:43
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:76
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:61
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:79
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:64
 #: ../../source/ref-api/flwr.app.Context.rst:25
 #: ../../source/ref-api/flwr.app.Error.rst:25
 #: ../../source/ref-api/flwr.app.Message.rst:43
 #: ../../source/ref-api/flwr.app.MessageType.rst:25
 #: ../../source/ref-api/flwr.app.Metadata.rst:25
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:61
-#: ../../source/ref-api/flwr.app.RecordDict.rst:58
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:64
+#: ../../source/ref-api/flwr.app.RecordDict.rst:61
 #: ../../source/ref-api/flwr.common.Array.rst:43
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:76
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:79
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:25
 #: ../../source/ref-api/flwr.common.Code.rst:19
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:61
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:61
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:64
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:64
 #: ../../source/ref-api/flwr.common.Context.rst:25
 #: ../../source/ref-api/flwr.common.DisconnectRes.rst:25
 #: ../../source/ref-api/flwr.common.Error.rst:25
@@ -16372,13 +16379,13 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.MessageType.rst:25
 #: ../../source/ref-api/flwr.common.MessageTypeLegacy.rst:25
 #: ../../source/ref-api/flwr.common.Metadata.rst:25
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:61
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:61
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:64
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:64
 #: ../../source/ref-api/flwr.common.Parameters.rst:25
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:76
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:79
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:25
-#: ../../source/ref-api/flwr.common.RecordDict.rst:58
-#: ../../source/ref-api/flwr.common.RecordSet.rst:58
+#: ../../source/ref-api/flwr.common.RecordDict.rst:61
+#: ../../source/ref-api/flwr.common.RecordSet.rst:61
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:25
 #: ../../source/ref-api/flwr.common.Status.rst:25
 #: ../../source/ref-api/flwr.server.Driver.rst:43
@@ -16680,60 +16687,81 @@ msgstr ""
 msgid "Initializing with a TensorFlow model weights (a list of NumPy arrays)::"
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`clear <flwr.app.ArrayRecord.clear>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`copy <flwr.app.ArrayRecord.copy>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
+#: flwr.common.record.typeddict.TypedDict.copy:1 of
+msgid "Return a shallow copy of the dictionary."
+msgstr ""
+
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`count_bytes <flwr.app.ArrayRecord.count_bytes>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.count_bytes:1
 #: flwr.common.record.configrecord.ConfigRecord.count_bytes:1
 #: flwr.common.record.metricrecord.MetricRecord.count_bytes:1 of
 msgid "Return number of Bytes stored in this object."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.app.ArrayRecord.deflate>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.deflate:1 of
 #, fuzzy
 msgid "Deflate the ArrayRecord."
 msgstr "Paramètres du modèle."
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_array_dict <flwr.app.ArrayRecord.from_array_dict>`\\ "
 "\\(array\\_dict\\, \\*\\[\\, keep\\_input\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.from_array_dict:1 of
 #, fuzzy
 msgid "Create ArrayRecord from a dictionary of :class:`Array`."
 msgstr "Convertit l'objet des paramètres en ndarrays NumPy."
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_numpy_ndarrays "
@@ -16741,15 +16769,15 @@ msgid ""
 "keep\\_input\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.from_numpy_ndarrays:1 of
 #, fuzzy
 msgid "Create ArrayRecord from a list of NumPy ``ndarray``."
 msgstr "Convertit l'objet des paramètres en ndarrays NumPy."
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_torch_state_dict "
@@ -16757,107 +16785,107 @@ msgid ""
 "\\*\\[\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.from_torch_state_dict:1 of
 #, fuzzy
 msgid "Create ArrayRecord from PyTorch ``state_dict``."
 msgstr "Convertit l'objet des paramètres en ndarrays NumPy."
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.app.ArrayRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.app.ArrayRecord.inflate>`\\ "
 "\\(object\\_content\\[\\, children\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.inflate:1 of
 #, fuzzy
 msgid "Inflate an ArrayRecord from bytes."
 msgstr "Désérialise le tableau numérique NumPy à partir d'octets."
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`items <flwr.app.ArrayRecord.items>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`keys <flwr.app.ArrayRecord.keys>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`pop <flwr.app.ArrayRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #: collections.abc.MutableMapping.pop:1 of
 msgid "If key is not found, d is returned if given, otherwise KeyError is raised."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.app.ArrayRecord.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #: collections.abc.MutableMapping.popitem:1 of
 msgid "as a 2-tuple; but raise KeyError if D is empty."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`setdefault <flwr.app.ArrayRecord.setdefault>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`to_numpy_ndarrays <flwr.app.ArrayRecord.to_numpy_ndarrays>`\\ "
 "\\(\\*\\[\\, keep\\_input\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.to_numpy_ndarrays:1 of
 #, fuzzy
 msgid "Return the ArrayRecord as a list of NumPy ``ndarray``."
 msgstr "renvoie le poids du modèle sous la forme d'une liste de ndarrays NumPy"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`to_torch_state_dict "
@@ -16865,31 +16893,31 @@ msgid ""
 "keep\\_input\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord.to_torch_state_dict:1 of
 #, fuzzy
 msgid "Return the ArrayRecord as a PyTorch ``state_dict``."
 msgstr "renvoie le poids du modèle sous la forme d'une liste de ndarrays NumPy"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`update <flwr.app.ArrayRecord.update>`\\ \\(\\[E\\, \\]\\*\\*F\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #: collections.abc.MutableMapping.update:1 of
 msgid ""
 "If E present and has a .keys() method, does:     for k in E: D[k] = E[k] "
@@ -16897,7 +16925,7 @@ msgid ""
 "v In either case, this is followed by: for k, v in F.items(): D[k] = v"
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`values <flwr.app.ArrayRecord.values>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
@@ -17016,33 +17044,38 @@ msgid ""
 "(bytes are allowed in a :code:`ConfigRecord`)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`clear <flwr.app.ConfigRecord.clear>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`copy <flwr.app.ConfigRecord.copy>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`count_bytes <flwr.app.ConfigRecord.count_bytes>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.app.ConfigRecord.deflate>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 #: flwr.common.record.configrecord.ConfigRecord.deflate:1
 #: flwr.common.record.metricrecord.MetricRecord.deflate:1 of
 msgid "Deflate object."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.app.ConfigRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
@@ -17050,53 +17083,53 @@ msgstr ""
 "config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), "
 "...)``"
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.app.ConfigRecord.inflate>`\\ "
 "\\(object\\_content\\[\\, children\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 #: flwr.common.record.configrecord.ConfigRecord.inflate:1 of
 msgid "Inflate a ConfigRecord from bytes."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`items <flwr.app.ConfigRecord.items>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`keys <flwr.app.ConfigRecord.keys>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`pop <flwr.app.ConfigRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.app.ConfigRecord.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.app.ConfigRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`update <flwr.app.ConfigRecord.update>`\\ \\(\\[E\\, \\]\\*\\*F\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`values <flwr.app.ConfigRecord.values>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
@@ -17757,73 +17790,78 @@ msgid ""
 ":code:`ArrayRecord`."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`clear <flwr.app.MetricRecord.clear>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`copy <flwr.app.MetricRecord.copy>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`count_bytes <flwr.app.MetricRecord.count_bytes>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.app.MetricRecord.deflate>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.app.MetricRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.app.MetricRecord.inflate>`\\ "
 "\\(object\\_content\\[\\, children\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 #: flwr.common.record.metricrecord.MetricRecord.inflate:1 of
 msgid "Inflate a MetricRecord from bytes."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`items <flwr.app.MetricRecord.items>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`keys <flwr.app.MetricRecord.keys>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`pop <flwr.app.MetricRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.app.MetricRecord.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.app.MetricRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`update <flwr.app.MetricRecord.update>`\\ \\(\\[E\\, \\]\\*\\*F\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`values <flwr.app.MetricRecord.values>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
@@ -17912,75 +17950,80 @@ msgid ""
 ":code:`MetricRecord` and :code:`ArrayRecord`."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`clear <flwr.app.RecordDict.clear>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`copy <flwr.app.RecordDict.copy>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.app.RecordDict.deflate>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #: flwr.common.record.recorddict.RecordDict.deflate:1 of
 #, fuzzy
 msgid "Deflate the RecordDict."
 msgstr "Paramètres du modèle."
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.app.RecordDict.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.app.RecordDict.inflate>`\\ "
 "\\(object\\_content\\[\\, children\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #: flwr.common.record.recorddict.RecordDict.inflate:1 of
 #, fuzzy
 msgid "Inflate an RecordDict from bytes."
 msgstr "Désérialise le tableau numérique NumPy à partir d'octets."
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`items <flwr.app.RecordDict.items>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`keys <flwr.app.RecordDict.keys>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`pop <flwr.app.RecordDict.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.app.RecordDict.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`setdefault <flwr.app.RecordDict.setdefault>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`update <flwr.app.RecordDict.update>`\\ \\(\\[E\\, \\]\\*\\*F\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.app.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`values <flwr.app.RecordDict.values>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
@@ -18579,7 +18622,9 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:1 of
+#: ../../source/ref-api/flwr.clientapp.mod.rst:20:<autosummary>:1
+#: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:1
+#: flwr.clientapp.mod.centraldp_mods.adaptiveclipping_mod:1 of
 #, fuzzy
 msgid "Client-side adaptive clipping modifier."
 msgstr "Logique côté client"
@@ -18591,7 +18636,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:20:<autosummary>:1
 #: flwr.client.mod.comms_mods.arrays_size_mod:1 of
 #, fuzzy
 msgid "Arrays size mod."
@@ -18604,7 +18649,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:20:<autosummary>:1
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:1
 #: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:1 of
 #, fuzzy
@@ -18628,7 +18673,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
-#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:20:<autosummary>:1
 #: flwr.client.mod.comms_mods.message_size_mod:1 of
 msgid "Message size mod."
 msgstr ""
@@ -18682,6 +18727,7 @@ msgstr ""
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:12
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:10
 #: flwr.client.mod.localdp_mod.LocalDpMod:6
+#: flwr.clientapp.mod.centraldp_mods.adaptiveclipping_mod:12
 #: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:10 of
 msgid "It operates on messages of type `MessageType.TRAIN`."
 msgstr ""
@@ -18719,10 +18765,12 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.adaptiveclipping_mod.rst:2
+#: ../../source/ref-api/flwr.clientapp.mod.adaptiveclipping_mod.rst:2
 msgid "adaptiveclipping\\_mod"
 msgstr ""
 
-#: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:3 of
+#: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:3
+#: flwr.clientapp.mod.centraldp_mods.adaptiveclipping_mod:3 of
 msgid ""
 "This mod needs to be used with the "
 "DifferentialPrivacyClientSideAdaptiveClipping server-side strategy "
@@ -18731,17 +18779,20 @@ msgstr ""
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:6
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:6
+#: flwr.clientapp.mod.centraldp_mods.adaptiveclipping_mod:6
 #: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:6 of
 msgid "The wrapper sends the clipping_norm value to the client."
 msgstr ""
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:8
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:8
+#: flwr.clientapp.mod.centraldp_mods.adaptiveclipping_mod:8
 #: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:8 of
 msgid "This mod clips the client model updates before sending them to the server."
 msgstr ""
 
-#: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:10 of
+#: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:10
+#: flwr.clientapp.mod.centraldp_mods.adaptiveclipping_mod:10 of
 msgid ""
 "It also sends KEY_NORM_BIT to the server for computing the new clipping "
 "value."
@@ -18749,6 +18800,7 @@ msgstr ""
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:15
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:13
+#: flwr.clientapp.mod.centraldp_mods.adaptiveclipping_mod:15
 #: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:13
 #: flwr.server.grid.grid.Grid.send_and_receive:18
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:54
@@ -18760,11 +18812,13 @@ msgstr "Aucun"
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:16
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:14
+#: flwr.clientapp.mod.centraldp_mods.adaptiveclipping_mod:16
 #: flwr.clientapp.mod.centraldp_mods.fixedclipping_mod:14 of
 msgid "Consider the order of mods when using multiple."
 msgstr ""
 
-#: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:18 of
+#: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:18
+#: flwr.clientapp.mod.centraldp_mods.adaptiveclipping_mod:18 of
 msgid "Typically, adaptiveclipping_mod should be the last to operate on params."
 msgstr ""
 
@@ -18982,20 +19036,28 @@ msgid ""
 "mods\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:20:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`adaptiveclipping_mod "
+"<flwr.clientapp.mod.adaptiveclipping_mod>`\\ \\(msg\\, ctxt\\, "
+"call\\_next\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.clientapp.mod.rst:20:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`arrays_size_mod <flwr.clientapp.mod.arrays_size_mod>`\\ "
 "\\(msg\\, ctxt\\, call\\_next\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:20:<autosummary>:1
 msgid ""
 ":py:obj:`fixedclipping_mod <flwr.clientapp.mod.fixedclipping_mod>`\\ "
 "\\(msg\\, ctxt\\, call\\_next\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.clientapp.mod.rst:19:<autosummary>:1
+#: ../../source/ref-api/flwr.clientapp.mod.rst:20:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`message_size_mod <flwr.clientapp.mod.message_size_mod>`\\ "
@@ -19510,29 +19572,34 @@ msgstr "serveur.stratégie.Stratégie"
 msgid ":py:obj:`data <flwr.common.Array.data>`\\"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`clear <flwr.common.ArrayRecord.clear>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`copy <flwr.common.ArrayRecord.copy>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`count_bytes <flwr.common.ArrayRecord.count_bytes>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.common.ArrayRecord.deflate>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_array_dict <flwr.common.ArrayRecord.from_array_dict>`\\ "
 "\\(array\\_dict\\, \\*\\[\\, keep\\_input\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_numpy_ndarrays "
@@ -19540,7 +19607,7 @@ msgid ""
 " keep\\_input\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_torch_state_dict "
@@ -19548,53 +19615,53 @@ msgid ""
 "\\*\\[\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.common.ArrayRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.common.ArrayRecord.inflate>`\\ "
 "\\(object\\_content\\[\\, children\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`items <flwr.common.ArrayRecord.items>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`keys <flwr.common.ArrayRecord.keys>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`pop <flwr.common.ArrayRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.ArrayRecord.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.common.ArrayRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`to_numpy_ndarrays <flwr.common.ArrayRecord.to_numpy_ndarrays>`\\"
 " \\(\\*\\[\\, keep\\_input\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`to_torch_state_dict "
@@ -19602,14 +19669,14 @@ msgid ""
 "keep\\_input\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`update <flwr.common.ArrayRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`values <flwr.common.ArrayRecord.values>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
@@ -19693,22 +19760,27 @@ msgstr ""
 msgid "Config"
 msgstr "Configurer les clients"
 
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`clear <flwr.common.ConfigRecord.clear>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`copy <flwr.common.ConfigRecord.copy>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`count_bytes <flwr.common.ConfigRecord.count_bytes>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.common.ConfigRecord.deflate>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.common.ConfigRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
@@ -19716,48 +19788,48 @@ msgstr ""
 "config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), "
 "...)``"
 
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.common.ConfigRecord.inflate>`\\ "
 "\\(object\\_content\\[\\, children\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`items <flwr.common.ConfigRecord.items>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`keys <flwr.common.ConfigRecord.keys>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`pop <flwr.common.ConfigRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.ConfigRecord.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.common.ConfigRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`update <flwr.common.ConfigRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`values <flwr.common.ConfigRecord.values>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
@@ -19815,20 +19887,25 @@ msgstr ""
 msgid "Updated usage::"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`copy <flwr.common.ConfigsRecord.copy>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.ConfigsRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.common.ConfigsRecord.deflate>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
@@ -19836,44 +19913,44 @@ msgstr ""
 "config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), "
 "...)``"
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.common.ConfigsRecord.inflate>`\\ "
 "\\(object\\_content\\[\\, children\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.ConfigsRecord.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.common.ConfigsRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.ConfigsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst:62:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
 msgstr ""
 
@@ -21104,68 +21181,73 @@ msgstr ""
 msgid ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`clear <flwr.common.MetricRecord.clear>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`copy <flwr.common.MetricRecord.copy>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`count_bytes <flwr.common.MetricRecord.count_bytes>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.common.MetricRecord.deflate>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.common.MetricRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.common.MetricRecord.inflate>`\\ "
 "\\(object\\_content\\[\\, children\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`items <flwr.common.MetricRecord.items>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`keys <flwr.common.MetricRecord.keys>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`pop <flwr.common.MetricRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.MetricRecord.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.common.MetricRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`update <flwr.common.MetricRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`values <flwr.common.MetricRecord.values>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
@@ -21211,62 +21293,67 @@ msgid ""
 "Use ``MetricRecord`` instead."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`copy <flwr.common.MetricsRecord.copy>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.MetricsRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.common.MetricsRecord.deflate>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.common.MetricsRecord.inflate>`\\ "
 "\\(object\\_content\\[\\, children\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.MetricsRecord.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.common.MetricsRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst:59:<autosummary>:1
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst:62:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.MetricsRecord.values>`\\ \\(\\)"
 msgstr ""
 
@@ -21323,20 +21410,25 @@ msgid ""
 "release. Use ``ArrayRecord`` instead."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 msgid ":py:obj:`clear <flwr.common.ParametersRecord.clear>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`copy <flwr.common.ParametersRecord.copy>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 msgid ":py:obj:`count_bytes <flwr.common.ParametersRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.common.ParametersRecord.deflate>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_array_dict "
@@ -21344,7 +21436,7 @@ msgid ""
 "\\*\\[\\, keep\\_input\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_numpy_ndarrays "
@@ -21352,7 +21444,7 @@ msgid ""
 "\\*\\[\\, keep\\_input\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`from_torch_state_dict "
@@ -21360,43 +21452,43 @@ msgid ""
 "\\(state\\_dict\\, \\*\\[\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.common.ParametersRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.common.ParametersRecord.inflate>`\\ "
 "\\(object\\_content\\[\\, children\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 msgid ":py:obj:`items <flwr.common.ParametersRecord.items>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 msgid ":py:obj:`keys <flwr.common.ParametersRecord.keys>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 msgid ":py:obj:`pop <flwr.common.ParametersRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.ParametersRecord.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.common.ParametersRecord.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`to_numpy_ndarrays "
@@ -21404,7 +21496,7 @@ msgid ""
 "keep\\_input\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`to_torch_state_dict "
@@ -21412,13 +21504,13 @@ msgid ""
 "keep\\_input\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 msgid ""
 ":py:obj:`update <flwr.common.ParametersRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst:74:<autosummary>:1
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst:77:<autosummary>:1
 msgid ":py:obj:`values <flwr.common.ParametersRecord.values>`\\ \\(\\)"
 msgstr ""
 
@@ -21451,63 +21543,68 @@ msgstr "Collecte centralisée des données"
 msgid ":py:obj:`seconds <flwr.common.ReconnectIns.seconds>`\\"
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`clear <flwr.common.RecordDict.clear>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`copy <flwr.common.RecordDict.copy>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.common.RecordDict.deflate>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.common.RecordDict.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.common.RecordDict.inflate>`\\ "
 "\\(object\\_content\\[\\, children\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`items <flwr.common.RecordDict.items>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`keys <flwr.common.RecordDict.keys>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`pop <flwr.common.RecordDict.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.RecordDict.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.common.RecordDict.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`update <flwr.common.RecordDict.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordDict.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordDict.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`values <flwr.common.RecordDict.values>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
@@ -21578,61 +21675,66 @@ msgid ""
 "``RecordDict`` instead."
 msgstr ""
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`clear <flwr.common.RecordSet.clear>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`copy <flwr.common.RecordSet.copy>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`deflate <flwr.common.RecordSet.deflate>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get <flwr.common.RecordSet.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`inflate <flwr.common.RecordSet.inflate>`\\ "
 "\\(object\\_content\\[\\, children\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`items <flwr.common.RecordSet.items>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`keys <flwr.common.RecordSet.keys>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`pop <flwr.common.RecordSet.pop>`\\ \\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`popitem <flwr.common.RecordSet.popitem>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`setdefault <flwr.common.RecordSet.setdefault>`\\ "
 "\\(k\\[\\,d\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`update <flwr.common.RecordSet.update>`\\ \\(\\[E\\, \\]\\*\\*F\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.common.RecordSet.rst:56:<autosummary>:1
+#: ../../source/ref-api/flwr.common.RecordSet.rst:59:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`values <flwr.common.RecordSet.values>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
@@ -22797,7 +22899,9 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:1
 #: of
 msgid "Strategy wrapper for central DP with client-side adaptive clipping."
 msgstr ""
@@ -22810,7 +22914,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:1
 #: of
@@ -22838,7 +22942,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:1
 #: of
@@ -22864,7 +22968,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.fedadagrad.FedAdagrad:1
 #: flwr.serverapp.strategy.fedadagrad.FedAdagrad:1 of
 #, fuzzy
@@ -22880,7 +22984,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.fedadam.FedAdam:1
 #: flwr.serverapp.strategy.fedadam.FedAdam:1 of
 msgid "FedAdam - Adaptive Federated Optimization using Adam."
@@ -22893,7 +22997,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.fedavg.FedAvg:1
 #: flwr.server.strategy.fedavg_android.FedAvgAndroid:1
 #: flwr.serverapp.strategy.fedavg.FedAvg:1 of
@@ -22914,7 +23018,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.fedavgm.FedAvgM:1
 #: flwr.serverapp.strategy.fedavgm.FedAvgM:1 of
 #, fuzzy
@@ -22952,7 +23056,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.fedprox.FedProx:1
 #: flwr.serverapp.strategy.fedprox.FedProx:1 of
 #, fuzzy
@@ -22966,7 +23070,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.fedtrimmedavg.FedTrimmedAvg:1
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg:1 of
 msgid "Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]."
@@ -22979,7 +23083,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging:1
 #: flwr.serverapp.strategy.fedxgb_bagging.FedXgbBagging:1 of
 msgid "Configurable FedXgbBagging strategy implementation."
@@ -22992,7 +23096,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.fedxgb_cyclic.FedXgbCyclic:1
 #: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic:1 of
 msgid "Configurable FedXgbCyclic strategy implementation."
@@ -23016,7 +23120,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.fedyogi.FedYogi:1
 #: flwr.serverapp.strategy.fedyogi.FedYogi:1 of
 msgid "FedYogi [Reddi et al., 2020] strategy."
@@ -23029,7 +23133,8 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: flwr.server.strategy.krum.Krum:1 of
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
+#: flwr.server.strategy.krum.Krum:1 flwr.serverapp.strategy.krum.Krum:1 of
 msgid "Krum [Blanchard et al., 2017] strategy."
 msgstr ""
 
@@ -23050,7 +23155,7 @@ msgid ":py:obj:`Strategy <flwr.server.strategy.Strategy>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
 #: ../../source/ref-api/flwr.server.strategy.rst:45:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.server.strategy.strategy.Strategy:1
 #: flwr.serverapp.strategy.strategy.Strategy:1 of
 msgid "Abstract base class for server strategy implementations."
@@ -23309,6 +23414,9 @@ msgstr ""
 #: flwr.server.strategy.qfedavg.QFedAvg.configure_fit:1
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: flwr.server.strategy.strategy.Strategy.configure_fit:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping.configure_train:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping.configure_train:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping.configure_train:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping.configure_train:1
@@ -23627,15 +23735,18 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.DifferentialPrivacyClientSideAdaptiveClipping.rst:2
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.rst:2
 msgid "DifferentialPrivacyClientSideAdaptiveClipping"
 msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:3
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:3
 #: of
 msgid "Use `adaptiveclipping_mod` modifier at the client side."
 msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:5
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:5
 #: of
 msgid ""
 "In comparison to `DifferentialPrivacyServerSideAdaptiveClipping`, which "
@@ -23649,6 +23760,7 @@ msgstr ""
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:3
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:10
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:3
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:11
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:10
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:3
 #: of
@@ -23657,6 +23769,7 @@ msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:12
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:5
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:13
 #: of
 msgid "The noise multiplier for the Gaussian mechanism for model updates."
 msgstr ""
@@ -23665,6 +23778,7 @@ msgstr ""
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:7
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:17
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:10
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:15
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:17
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:10
 #: of
@@ -23673,6 +23787,7 @@ msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:16
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:9
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:17
 #: of
 msgid ""
 "The initial value of clipping norm. Defaults to 0.1. Andrew et al. "
@@ -23681,12 +23796,14 @@ msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:19
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:12
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:20
 #: of
 msgid "The desired quantile of updates which should be clipped. Defaults to 0.5."
 msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:21
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:14
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:22
 #: of
 msgid ""
 "The learning rate for the clipping norm adaptation. Defaults to 0.2. "
@@ -23694,6 +23811,7 @@ msgid ""
 msgstr ""
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:24
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:25
 #: of
 msgid ""
 "The stddev of the noise added to the count of updates currently below the"
@@ -23704,6 +23822,7 @@ msgstr ""
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:23
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:22
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:15
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:32
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:22
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:15
 #: of
@@ -23712,6 +23831,7 @@ msgid "Create a strategy::"
 msgstr "stratégie.du.serveur"
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:34
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:36
 #: of
 #, fuzzy
 msgid ""
@@ -23720,6 +23840,7 @@ msgid ""
 msgstr "Confidentialité différentielle"
 
 #: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:40
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:42
 #: of
 msgid "On the client, add the `adaptiveclipping_mod` to the client-side mods::"
 msgstr ""
@@ -23884,6 +24005,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.DifferentialPrivacyServerSideAdaptiveClipping.rst:2
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.rst:2
 msgid "DifferentialPrivacyServerSideAdaptiveClipping"
 msgstr ""
 
@@ -25178,10 +25300,11 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.Krum.rst:2
+#: ../../source/ref-api/flwr.serverapp.strategy.Krum.rst:2
 msgid "Krum"
 msgstr ""
 
-#: flwr.server.strategy.krum.Krum:3 of
+#: flwr.server.strategy.krum.Krum:3 flwr.serverapp.strategy.krum.Krum:3 of
 msgid "Implementation based on https://arxiv.org/abs/1703.02757"
 msgstr ""
 
@@ -25250,6 +25373,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.strategy.QFedAvg.rst:2
+#: ../../source/ref-api/flwr.serverapp.strategy.QFedAvg.rst:2
 #, fuzzy
 msgid "QFedAvg"
 msgstr "DP-FedAvg"
@@ -25910,131 +26034,176 @@ msgstr "serveur.stratégie.Stratégie"
 msgid ":py:obj:`main <flwr.serverapp.ServerApp.main>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`DifferentialPrivacyClientSideAdaptiveClipping "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping>`\\"
+" \\(...\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 msgid ""
 ":py:obj:`DifferentialPrivacyClientSideFixedClipping "
 "<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping>`\\ "
 "\\(...\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`DifferentialPrivacyServerSideAdaptiveClipping "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping>`\\"
+" \\(...\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:1
+#: of
+msgid "Message-based central DP with server-side adaptive clipping."
+msgstr ""
+
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 msgid ""
 ":py:obj:`DifferentialPrivacyServerSideFixedClipping "
 "<flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping>`\\ "
 "\\(...\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FedAdagrad <flwr.serverapp.strategy.FedAdagrad>`\\ \\(\\*\\[\\, "
 "fraction\\_train\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FedAdam <flwr.serverapp.strategy.FedAdam>`\\ \\(\\*\\[\\, "
 "fraction\\_train\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FedAvg <flwr.serverapp.strategy.FedAvg>`\\ "
 "\\(\\[fraction\\_train\\, fraction\\_evaluate\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FedAvgM <flwr.serverapp.strategy.FedAvgM>`\\ "
 "\\(\\[fraction\\_train\\, fraction\\_evaluate\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FedMedian <flwr.serverapp.strategy.FedMedian>`\\ "
 "\\(\\[fraction\\_train\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.serverapp.strategy.fedmedian.FedMedian:1 of
 #, fuzzy
 msgid "Federated Median (FedMedian) strategy."
 msgstr "Stratégie de moyenne fédérée."
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FedProx <flwr.serverapp.strategy.FedProx>`\\ "
 "\\(\\[fraction\\_train\\, fraction\\_evaluate\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FedTrimmedAvg <flwr.serverapp.strategy.FedTrimmedAvg>`\\ "
 "\\(\\[fraction\\_train\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FedXgbBagging <flwr.serverapp.strategy.FedXgbBagging>`\\ "
 "\\(\\[fraction\\_train\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FedXgbCyclic <flwr.serverapp.strategy.FedXgbCyclic>`\\ "
 "\\(\\[fraction\\_train\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`FedYogi <flwr.serverapp.strategy.FedYogi>`\\ \\(\\*\\[\\, "
 "fraction\\_train\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`Krum <flwr.serverapp.strategy.Krum>`\\ \\(\\[fraction\\_train\\,"
+" fraction\\_evaluate\\, ...\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
+#, fuzzy
+msgid ""
+":py:obj:`QFedAvg <flwr.serverapp.strategy.QFedAvg>`\\ "
+"\\(client\\_learning\\_rate\\[\\, q\\, ...\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:1 of
+#, fuzzy
+msgid "Q-FedAvg strategy."
+msgstr "Stratégie de moyenne fédérée."
+
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`Result <flwr.serverapp.strategy.Result>`\\ \\(arrays\\, "
 "train\\_metrics\\_clientapp\\, ...\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #: flwr.serverapp.strategy.result.Result:1 of
 msgid "Data class carrying records generated during the execution of a strategy."
 msgstr ""
 
-#: ../../source/ref-api/flwr.serverapp.strategy.rst:35:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.strategy.rst:39:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Strategy <flwr.serverapp.strategy.Strategy>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:1
-#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping:1
 #: of
+#, fuzzy
 msgid ""
 "Bases: "
-":py:class:`~flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase`"
-msgstr ""
+":py:class:`~flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase`"
+msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
 #: of
 #, fuzzy
 msgid ""
 ":py:obj:`aggregate_evaluate "
-"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.aggregate_evaluate>`\\"
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.aggregate_evaluate>`\\"
 " \\(server\\_round\\, replies\\)"
 msgstr "serveur.stratégie.Stratégie"
 
 #: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst:41:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1
@@ -26044,16 +26213,19 @@ msgstr "serveur.stratégie.Stratégie"
 msgid "Aggregate MetricRecords in the received Messages."
 msgstr "Résultats globaux de l'évaluation."
 
-#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
 #: of
 #, fuzzy
 msgid ""
 ":py:obj:`aggregate_train "
-"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.aggregate_train>`\\"
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.aggregate_train>`\\"
 " \\(server\\_round\\, replies\\)"
 msgstr "serveur.stratégie.Stratégie"
 
 #: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst:41:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping.aggregate_train:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping.aggregate_train:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping.aggregate_train:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping.aggregate_train:1
@@ -26066,20 +26238,24 @@ msgstr "serveur.stratégie.Stratégie"
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg.aggregate_train:1
 #: flwr.serverapp.strategy.fedxgb_bagging.FedXgbBagging.aggregate_train:1
 #: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic.aggregate_train:1
-#: flwr.serverapp.strategy.fedyogi.FedYogi.aggregate_train:1 of
+#: flwr.serverapp.strategy.fedyogi.FedYogi.aggregate_train:1
+#: flwr.serverapp.strategy.krum.Krum.aggregate_train:1
+#: flwr.serverapp.strategy.qfedavg.QFedAvg.aggregate_train:1 of
 msgid "Aggregate ArrayRecords and MetricRecords in the received Messages."
 msgstr ""
 
-#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
 #: of
 #, fuzzy
 msgid ""
 ":py:obj:`configure_evaluate "
-"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.configure_evaluate>`\\"
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.configure_evaluate>`\\"
 " \\(server\\_round\\, arrays\\, ...\\)"
 msgstr "serveur.stratégie.Stratégie"
 
 #: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst:41:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.configure_evaluate:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.configure_evaluate:1
 #: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
@@ -26089,25 +26265,26 @@ msgstr "serveur.stratégie.Stratégie"
 msgid "Configure the next round of federated evaluation."
 msgstr "Configuration de l'évaluation côté serveur"
 
-#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
 #: of
 #, fuzzy
 msgid ""
 ":py:obj:`configure_train "
-"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.configure_train>`\\"
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.configure_train>`\\"
 " \\(server\\_round\\, arrays\\, ...\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
 #: of
 #, fuzzy
 msgid ""
 ":py:obj:`start "
-"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.start>`\\"
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.start>`\\"
 " \\(grid\\, initial\\_arrays\\[\\, num\\_rounds\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
 #: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst:41:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
@@ -26116,24 +26293,30 @@ msgstr "serveur.stratégie.Stratégie"
 msgid "Execute the federated learning strategy."
 msgstr "Stratégie de moyenne fédérée."
 
-#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
 #: of
 #, fuzzy
 msgid ""
 ":py:obj:`summary "
-"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.summary>`\\"
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.summary>`\\"
 " \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
 #: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst:41:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping.summary:1
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping.summary:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping.summary:1
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
-#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.summary:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping.summary:1
 #: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.fedavg.FedAvg.summary:1
 #: flwr.serverapp.strategy.fedavgm.FedAvgM.summary:1
 #: flwr.serverapp.strategy.fedopt.FedOpt.summary:1
 #: flwr.serverapp.strategy.fedprox.FedProx.summary:1
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg.summary:1
+#: flwr.serverapp.strategy.krum.Krum.summary:1
+#: flwr.serverapp.strategy.qfedavg.QFedAvg.summary:1
 #: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: flwr.serverapp.strategy.strategy.Strategy.summary:1 of
 msgid "Log summary configuration of the strategy."
@@ -26191,6 +26374,122 @@ msgid ""
 "evaluation metrics and global evaluation metrics (if provided) from all "
 "rounds."
 msgstr ""
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:1
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:1
+#: of
+msgid ""
+"Bases: "
+":py:class:`~flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase`"
+msgstr ""
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_evaluate "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.aggregate_evaluate>`\\"
+" \\(server\\_round\\, replies\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_train "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.aggregate_train>`\\"
+" \\(server\\_round\\, replies\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_evaluate "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.configure_evaluate>`\\"
+" \\(server\\_round\\, arrays\\, ...\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_train "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.configure_train>`\\"
+" \\(server\\_round\\, arrays\\, ...\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`start "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.start>`\\"
+" \\(grid\\, initial\\_arrays\\[\\, num\\_rounds\\, ...\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyFixedClippingBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`summary "
+"<flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.summary>`\\"
+" \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_evaluate "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.aggregate_evaluate>`\\"
+" \\(server\\_round\\, replies\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_train "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.aggregate_train>`\\"
+" \\(server\\_round\\, replies\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_evaluate "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.configure_evaluate>`\\"
+" \\(server\\_round\\, arrays\\, ...\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_train "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.configure_train>`\\"
+" \\(server\\_round\\, arrays\\, ...\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`start "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.start>`\\"
+" \\(grid\\, initial\\_arrays\\[\\, num\\_rounds\\, ...\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyAdaptiveBase.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`summary "
+"<flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.summary>`\\"
+" \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
 
 #: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:19
 #: of
@@ -26268,7 +26567,9 @@ msgstr "serveur.stratégie.Stratégie"
 #: flwr.serverapp.strategy.fedprox.FedProx:45
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg:5
 #: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic:3
-#: flwr.serverapp.strategy.fedyogi.FedYogi:6 of
+#: flwr.serverapp.strategy.fedyogi.FedYogi:6
+#: flwr.serverapp.strategy.krum.Krum:5
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:16 of
 msgid ""
 "Fraction of nodes used during training. In case `min_train_nodes` is "
 "larger than `fraction_train * total_connected_nodes`, `min_train_nodes` "
@@ -26282,7 +26583,9 @@ msgstr ""
 #: flwr.serverapp.strategy.fedprox.FedProx:49
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg:9
 #: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic:7
-#: flwr.serverapp.strategy.fedyogi.FedYogi:10 of
+#: flwr.serverapp.strategy.fedyogi.FedYogi:10
+#: flwr.serverapp.strategy.krum.Krum:9
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:20 of
 msgid ""
 "Fraction of nodes used during validation. In case `min_evaluate_nodes` is"
 " larger than `fraction_evaluate * total_connected_nodes`, "
@@ -26295,7 +26598,9 @@ msgstr ""
 #: flwr.serverapp.strategy.fedavgm.FedAvgM:13
 #: flwr.serverapp.strategy.fedprox.FedProx:53
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg:13
-#: flwr.serverapp.strategy.fedyogi.FedYogi:14 of
+#: flwr.serverapp.strategy.fedyogi.FedYogi:14
+#: flwr.serverapp.strategy.krum.Krum:13
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:24 of
 msgid "Minimum number of nodes used during training."
 msgstr ""
 
@@ -26305,7 +26610,9 @@ msgstr ""
 #: flwr.serverapp.strategy.fedavgm.FedAvgM:15
 #: flwr.serverapp.strategy.fedprox.FedProx:55
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg:15
-#: flwr.serverapp.strategy.fedyogi.FedYogi:16 of
+#: flwr.serverapp.strategy.fedyogi.FedYogi:16
+#: flwr.serverapp.strategy.krum.Krum:15
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:26 of
 msgid "Minimum number of nodes used during validation."
 msgstr ""
 
@@ -26316,7 +26623,9 @@ msgstr ""
 #: flwr.serverapp.strategy.fedprox.FedProx:57
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg:17
 #: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic:11
-#: flwr.serverapp.strategy.fedyogi.FedYogi:18 of
+#: flwr.serverapp.strategy.fedyogi.FedYogi:18
+#: flwr.serverapp.strategy.krum.Krum:17
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:28 of
 msgid "Minimum number of total nodes in the system."
 msgstr ""
 
@@ -26327,7 +26636,8 @@ msgstr ""
 #: flwr.serverapp.strategy.fedprox.FedProx:59
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg:19
 #: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic:13
-#: flwr.serverapp.strategy.fedyogi.FedYogi:20 of
+#: flwr.serverapp.strategy.fedyogi.FedYogi:20
+#: flwr.serverapp.strategy.krum.Krum:24 of
 msgid ""
 "The key within each MetricRecord whose value is used as the weight when "
 "computing weighted averages for both ArrayRecords and MetricRecords."
@@ -26340,7 +26650,9 @@ msgstr ""
 #: flwr.serverapp.strategy.fedprox.FedProx:62
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg:22
 #: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic:16
-#: flwr.serverapp.strategy.fedyogi.FedYogi:23 of
+#: flwr.serverapp.strategy.fedyogi.FedYogi:23
+#: flwr.serverapp.strategy.krum.Krum:27
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:33 of
 msgid "Key used to store the ArrayRecord when constructing Messages."
 msgstr ""
 
@@ -26351,7 +26663,9 @@ msgstr ""
 #: flwr.serverapp.strategy.fedprox.FedProx:64
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg:24
 #: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic:18
-#: flwr.serverapp.strategy.fedyogi.FedYogi:25 of
+#: flwr.serverapp.strategy.fedyogi.FedYogi:25
+#: flwr.serverapp.strategy.krum.Krum:29
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:35 of
 msgid "Key used to store the ConfigRecord when constructing Messages."
 msgstr ""
 
@@ -26370,7 +26684,10 @@ msgstr ""
 #: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic:20
 #: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic:25
 #: flwr.serverapp.strategy.fedyogi.FedYogi:27
-#: flwr.serverapp.strategy.fedyogi.FedYogi:32 of
+#: flwr.serverapp.strategy.fedyogi.FedYogi:32
+#: flwr.serverapp.strategy.krum.Krum:31 flwr.serverapp.strategy.krum.Krum:36
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:37
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:42 of
 msgid ""
 "Function with signature (list[RecordDict], str) -> MetricRecord, used to "
 "aggregate MetricRecords from training round replies. If `None`, defaults "
@@ -26421,7 +26738,8 @@ msgstr "serveur.stratégie.Stratégie"
 #: flwr.serverapp.strategy.fedopt.FedOpt.configure_train:1
 #: flwr.serverapp.strategy.fedprox.FedProx.configure_train:1
 #: flwr.serverapp.strategy.fedxgb_bagging.FedXgbBagging.configure_train:1
-#: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic.configure_train:1 of
+#: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic.configure_train:1
+#: flwr.serverapp.strategy.qfedavg.QFedAvg.configure_train:1 of
 #, fuzzy
 msgid "Configure the next round of federated training."
 msgstr "Configuration de l'évaluation côté serveur"
@@ -26550,7 +26868,9 @@ msgstr "serveur.stratégie.Stratégie"
 #: flwr.serverapp.strategy.fedprox.FedProx:1
 #: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg:1
 #: flwr.serverapp.strategy.fedxgb_bagging.FedXgbBagging:1
-#: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic:1 of
+#: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic:1
+#: flwr.serverapp.strategy.krum.Krum:1
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:1 of
 #, fuzzy
 msgid "Bases: :py:class:`~flwr.serverapp.strategy.fedavg.FedAvg`"
 msgstr "serveur.stratégie.Stratégie"
@@ -26961,6 +27281,146 @@ msgstr "serveur.stratégie.Stratégie"
 #: of
 #, fuzzy
 msgid ":py:obj:`summary <flwr.serverapp.strategy.FedYogi.summary>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.krum.Krum:19 of
+msgid "Number of malicious nodes in the system. Defaults to 0."
+msgstr ""
+
+#: flwr.serverapp.strategy.krum.Krum:21 of
+msgid ""
+"Number of nodes to keep before averaging (MultiKrum). Defaults to 0, in "
+"that case classical Krum is applied."
+msgstr ""
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_evaluate "
+"<flwr.serverapp.strategy.Krum.aggregate_evaluate>`\\ \\(server\\_round\\,"
+" replies\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_train "
+"<flwr.serverapp.strategy.Krum.aggregate_train>`\\ \\(server\\_round\\, "
+"replies\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_evaluate "
+"<flwr.serverapp.strategy.Krum.configure_evaluate>`\\ \\(server\\_round\\,"
+" arrays\\, ...\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_train "
+"<flwr.serverapp.strategy.Krum.configure_train>`\\ \\(server\\_round\\, "
+"arrays\\, ...\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`start <flwr.serverapp.strategy.Krum.start>`\\ \\(grid\\, "
+"initial\\_arrays\\[\\, num\\_rounds\\, ...\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ":py:obj:`summary <flwr.serverapp.strategy.Krum.summary>`\\ \\(\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:3 of
+msgid "Implementation based on openreview.net/pdf?id=ByexElSYDr"
+msgstr ""
+
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:5 of
+msgid ""
+"Local learning rate used by clients during training. This value is used "
+"by the strategy to approximate the base Lipschitz constant L, via L = 1 /"
+" client_learning_rate."
+msgstr ""
+
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:9 of
+msgid ""
+"The parameter q that controls the degree of fairness of the algorithm. "
+"Please tune this parameter based on your use case. When set to 0, "
+"q-FedAvg is equivalent to FedAvg."
+msgstr ""
+
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:13 of
+msgid ""
+"The key within the MetricRecord whose value is used as the training loss "
+"when aggregating ArrayRecords following q-FedAvg."
+msgstr ""
+
+#: flwr.serverapp.strategy.qfedavg.QFedAvg:30 of
+msgid ""
+"The key within each MetricRecord whose value is used as the weight when "
+"computing weighted averages for MetricRecords."
+msgstr ""
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_evaluate "
+"<flwr.serverapp.strategy.QFedAvg.aggregate_evaluate>`\\ "
+"\\(server\\_round\\, replies\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`aggregate_train "
+"<flwr.serverapp.strategy.QFedAvg.aggregate_train>`\\ \\(server\\_round\\,"
+" replies\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_evaluate "
+"<flwr.serverapp.strategy.QFedAvg.configure_evaluate>`\\ "
+"\\(server\\_round\\, arrays\\, ...\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`configure_train "
+"<flwr.serverapp.strategy.QFedAvg.configure_train>`\\ \\(server\\_round\\,"
+" arrays\\, ...\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ""
+":py:obj:`start <flwr.serverapp.strategy.QFedAvg.start>`\\ \\(grid\\, "
+"initial\\_arrays\\[\\, num\\_rounds\\, ...\\]\\)"
+msgstr "serveur.stratégie.Stratégie"
+
+#: flwr.serverapp.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
+#: of
+#, fuzzy
+msgid ":py:obj:`summary <flwr.serverapp.strategy.QFedAvg.summary>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
 #: ../../source/ref-api/flwr.serverapp.strategy.Result.rst:2
@@ -40181,9 +40641,10 @@ msgstr "et active l'environnement virtuel avec :"
 msgid ""
 "This example by default runs the Flower Simulation Engine, creating a "
 "federation of 10 nodes using `FedAvg <https://flower.ai/docs/framework"
-"/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_ "
-"as the aggregation strategy. The dataset will be partitioned using Flower"
-" Dataset's `IidPartitioner <https://flower.ai/docs/datasets/ref-"
+"/ref-"
+"api/flwr.serverapp.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_ as"
+" the aggregation strategy. The dataset will be partitioned using Flower "
+"Dataset's `IidPartitioner <https://flower.ai/docs/datasets/ref-"
 "api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_."
 " Let's run the project:"
 msgstr ""
@@ -40195,25 +40656,23 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:101
 #: ../../source/tutorial-quickstart-scikitlearn.rst:91
 #: ../../source/tutorial-quickstart-tensorflow.rst:93
-#: ../../source/tutorial-quickstart-xgboost.rst:496
 msgid "With default arguments you will see an output like this one:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-fastai.rst:102
+#: ../../source/tutorial-quickstart-fastai.rst:124
 #: ../../source/tutorial-quickstart-huggingface.rst:143
 #: ../../source/tutorial-quickstart-jax.rst:132
 #: ../../source/tutorial-quickstart-pytorch-lightning.rst:133
 #: ../../source/tutorial-quickstart-pytorch.rst:169
 #: ../../source/tutorial-quickstart-scikitlearn.rst:171
 #: ../../source/tutorial-quickstart-tensorflow.rst:160
-#: ../../source/tutorial-quickstart-xgboost.rst:541
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:622
 msgid ""
 "You can also override the parameters defined in the "
 "``[tool.flwr.app.config]`` section in ``pyproject.toml`` like this:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-fastai.rst:112
+#: ../../source/tutorial-quickstart-fastai.rst:134
 #, fuzzy
 msgid ""
 "Check the `source code <https://github.com/adap/flower/tree/main/examples"
@@ -40266,6 +40725,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:57
 #: ../../source/tutorial-quickstart-scikitlearn.rst:47
 #: ../../source/tutorial-quickstart-tensorflow.rst:49
+#: ../../source/tutorial-quickstart-xgboost.rst:62
 #, fuzzy
 msgid ""
 "Now that we have a rough idea of what this example is about, let's get "
@@ -40288,6 +40748,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:73
 #: ../../source/tutorial-quickstart-scikitlearn.rst:63
 #: ../../source/tutorial-quickstart-tensorflow.rst:65
+#: ../../source/tutorial-quickstart-xgboost.rst:78
 msgid ""
 "After running it you'll notice a new directory with your project name has"
 " been created. It should have the following structure:"
@@ -40299,6 +40760,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:87
 #: ../../source/tutorial-quickstart-scikitlearn.rst:77
 #: ../../source/tutorial-quickstart-tensorflow.rst:79
+#: ../../source/tutorial-quickstart-xgboost.rst:92
 msgid ""
 "If you haven't yet installed the project and its dependencies, you can do"
 " so by:"
@@ -40309,7 +40771,6 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:94
 #: ../../source/tutorial-quickstart-scikitlearn.rst:84
 #: ../../source/tutorial-quickstart-tensorflow.rst:86
-#: ../../source/tutorial-quickstart-xgboost.rst:489
 msgid "To run the project, do:"
 msgstr ""
 
@@ -40339,7 +40800,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:181
 #: ../../source/tutorial-quickstart-scikitlearn.rst:183
 #: ../../source/tutorial-quickstart-tensorflow.rst:169
-#: ../../source/tutorial-quickstart-xgboost.rst:93
+#: ../../source/tutorial-quickstart-xgboost.rst:213
 #, fuzzy
 msgid "The Data"
 msgstr "Chargement des données"
@@ -40409,7 +40870,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:290
 #: ../../source/tutorial-quickstart-scikitlearn.rst:223
 #: ../../source/tutorial-quickstart-tensorflow.rst:225
-#: ../../source/tutorial-quickstart-xgboost.rst:153
+#: ../../source/tutorial-quickstart-xgboost.rst:267
 #, fuzzy
 msgid "The ClientApp"
 msgstr "client"
@@ -40428,6 +40889,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:314
 #: ../../source/tutorial-quickstart-scikitlearn.rst:252
 #: ../../source/tutorial-quickstart-tensorflow.rst:250
+#: ../../source/tutorial-quickstart-xgboost.rst:295
 msgid ""
 "The rest of the functionality is directly inspired by the centralized "
 "case. The |clientapp_link|_ comes with three core methods (``train``, "
@@ -40444,6 +40906,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:322
 #: ../../source/tutorial-quickstart-scikitlearn.rst:260
 #: ../../source/tutorial-quickstart-tensorflow.rst:258
+#: ../../source/tutorial-quickstart-xgboost.rst:303
 msgid ""
 "Let's see how the ``train`` method can be implemented. It receives as "
 "input arguments a |message_link|_ from the ``ServerApp``. By default it "
@@ -40455,6 +40918,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:325
 #: ../../source/tutorial-quickstart-scikitlearn.rst:263
 #: ../../source/tutorial-quickstart-tensorflow.rst:261
+#: ../../source/tutorial-quickstart-xgboost.rst:306
 msgid ""
 "an ``ArrayRecord`` with the arrays of the model to federate. By default "
 "they can be retrieved with key ``\"arrays\"`` when accessing the message "
@@ -40466,6 +40930,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:327
 #: ../../source/tutorial-quickstart-scikitlearn.rst:265
 #: ../../source/tutorial-quickstart-tensorflow.rst:263
+#: ../../source/tutorial-quickstart-xgboost.rst:308
 msgid ""
 "a ``ConfigRecord`` with the configuration sent from the ``ServerApp``. By"
 " default it can be retrieved with key ``\"config\"`` when accessing the "
@@ -40488,6 +40953,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-jax.rst:295
 #: ../../source/tutorial-quickstart-pytorch.rst:381
 #: ../../source/tutorial-quickstart-tensorflow.rst:321
+#: ../../source/tutorial-quickstart-xgboost.rst:391
 msgid ""
 "The ``@app.evaluate()`` method would be near identical with two "
 "exceptions: (1) the model is not locally trained, instead it is used to "
@@ -40503,7 +40969,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:387
 #: ../../source/tutorial-quickstart-scikitlearn.rst:322
 #: ../../source/tutorial-quickstart-tensorflow.rst:327
-#: ../../source/tutorial-quickstart-xgboost.rst:273
+#: ../../source/tutorial-quickstart-xgboost.rst:397
 #, fuzzy
 msgid "The ServerApp"
 msgstr "serveur"
@@ -40524,6 +40990,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:392
 #: ../../source/tutorial-quickstart-scikitlearn.rst:327
 #: ../../source/tutorial-quickstart-tensorflow.rst:332
+#: ../../source/tutorial-quickstart-xgboost.rst:402
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:487
 msgid ""
 "a ``Grid`` object that will be used to interface with the nodes running "
@@ -40537,6 +41004,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:394
 #: ../../source/tutorial-quickstart-scikitlearn.rst:329
 #: ../../source/tutorial-quickstart-tensorflow.rst:334
+#: ../../source/tutorial-quickstart-xgboost.rst:404
 msgid "a ``Context`` object that provides access to the run configuration."
 msgstr ""
 
@@ -40555,6 +41023,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:401
 #: ../../source/tutorial-quickstart-scikitlearn.rst:336
 #: ../../source/tutorial-quickstart-tensorflow.rst:341
+#: ../../source/tutorial-quickstart-xgboost.rst:411
 msgid "the ``Grid`` object."
 msgstr ""
 
@@ -40982,14 +41451,17 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:92
+#: ../../source/tutorial-quickstart-xgboost.rst:99
 msgid "To run the project do:"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:99
+#: ../../source/tutorial-quickstart-xgboost.rst:106
 msgid "With default arguments, you will see output like this:"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:167
+#: ../../source/tutorial-quickstart-xgboost.rst:172
 msgid ""
 "You can also override the parameters defined in the "
 "``[tool.flwr.app.config]`` section in the ``pyproject.toml`` like this:"
@@ -41100,6 +41572,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:428
+#: ../../source/tutorial-quickstart-xgboost.rst:399
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:484
 msgid ""
 "To construct a |serverapp_link|_, we define its ``@app.main()`` method. "
@@ -41115,18 +41588,21 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:441
+#: ../../source/tutorial-quickstart-xgboost.rst:412
 msgid ""
 "an ``ArrayRecord`` carrying a randomly initialized model that will serve "
 "as the global"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:442
+#: ../../source/tutorial-quickstart-xgboost.rst:413
 #, fuzzy
 msgid "model to federate."
 msgstr "Paramètres du modèle."
 
 #: ../../source/tutorial-quickstart-mlx.rst:481
 #: ../../source/tutorial-quickstart-pytorch.rst:444
+#: ../../source/tutorial-quickstart-xgboost.rst:464
 msgid ""
 "Note the ``start`` method of the strategy returns a |result_link|_ "
 "object. This object contains all the relevant information about the FL "
@@ -41137,6 +41613,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-mlx.rst:486
 #: ../../source/tutorial-quickstart-pytorch.rst:449
 #: ../../source/tutorial-quickstart-tensorflow.rst:388
+#: ../../source/tutorial-quickstart-xgboost.rst:469
 msgid ""
 "Congratulations! You've successfully built and run your first federated "
 "learning system."
@@ -41258,6 +41735,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-pytorch.rst:330
+#: ../../source/tutorial-quickstart-xgboost.rst:311
 msgid ""
 "The ``train`` method also receives the |context_link|_, giving access to "
 "configs for your run and node. The run config hyperparameters are defined"
@@ -41552,445 +42030,143 @@ msgid ""
 "federated learning with Flower and XGBoost in this step-by-step tutorial."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:-1
-msgid ""
-"Check out this Federated Learning quickstart tutorial for using Flower "
-"with XGBoost to train classification models on trees."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:8
+#: ../../source/tutorial-quickstart-xgboost.rst:44
 msgid "Quickstart XGBoost"
 msgstr "Démarrage rapide XGBoost"
-
-#: ../../source/tutorial-quickstart-xgboost.rst:11
-msgid "XGBoost"
-msgstr "XGBoost"
-
-#: ../../source/tutorial-quickstart-xgboost.rst:13
-msgid ""
-"EXtreme Gradient Boosting (**XGBoost**) is a robust and efficient "
-"implementation of gradient-boosted decision tree (**GBDT**), that "
-"maximises the computational boundaries for boosted tree methods. It's "
-"primarily designed to enhance both the performance and computational "
-"speed of machine learning models. In XGBoost, trees are constructed "
-"concurrently, unlike the sequential approach taken by GBDT."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:19
-msgid ""
-"Often, for tabular data on medium-sized datasets with fewer than 10k "
-"training examples, XGBoost surpasses the results of deep learning "
-"techniques."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:23
-#, fuzzy
-msgid "Why Federated XGBoost?"
-msgstr "Qu'est-ce que l'apprentissage fédéré ?"
-
-#: ../../source/tutorial-quickstart-xgboost.rst:25
-msgid ""
-"As the demand for data privacy and decentralized learning grows, there's "
-"an increasing requirement to implement federated XGBoost systems for "
-"specialised applications, like survival analysis and financial fraud "
-"detection."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:29
-msgid ""
-"Federated learning ensures that raw data remains on the local device, "
-"making it an attractive approach for sensitive domains where data privacy"
-" is paramount. Given the robustness and efficiency of XGBoost, combining "
-"it with federated learning offers a promising solution for these specific"
-" challenges."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:35
-msgid "Environment Setup"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:37
-msgid ""
-"In this tutorial, we learn how to train a federated XGBoost model on the "
-"HIGGS dataset using Flower and the ``xgboost`` package to perform a "
-"binary classification task. We use a simple example (`full code xgboost-"
-"quickstart <https://github.com/adap/flower/tree/main/examples/xgboost-"
-"quickstart>`_) to demonstrate how federated XGBoost works, and then we "
-"dive into a more complex comprehensive example (`full code xgboost-"
-"comprehensive <https://github.com/adap/flower/tree/main/examples/xgboost-"
-"comprehensive>`_) to run various experiments."
-msgstr ""
 
 #: ../../source/tutorial-quickstart-xgboost.rst:46
 #, fuzzy
 msgid ""
-"It is recommended to create a virtual environment and run everything "
-"within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`."
+"In this federated learning tutorial, we will learn how to train a simple "
+"XGBoost classifier on Higgs dataset using Flower and XGBoost. It is "
+"recommended to create a virtual environment and run everything within a "
+":doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`."
 msgstr ""
-"Il est recommandé de créer un environnement virtuel et de tout exécuter "
-"dans ce `virtualenv <https://flower.ai/docs/recommended-env-"
-"setup.html>`_."
+"Tout d'abord, il est recommandé de créer un environnement virtuel et de "
+"tout exécuter au sein d'un `virtualenv <https://flower.ai/docs"
+"/recommended-env-setup.html>`_."
 
-#: ../../source/tutorial-quickstart-xgboost.rst:49
+#: ../../source/tutorial-quickstart-xgboost.rst:51
 msgid ""
-"We first need to install Flower and Flower Datasets. You can do this by "
-"running :"
+"Let's use `flwr new` to create a complete Flower+XGBoost project. It will"
+" generate all the files needed to run, by default with the Simulation "
+"Engine, a federation of 10 nodes using |fedxgbbagging_link|_ strategy. "
+"The dataset will be partitioned using Flower Dataset's `IidPartitioner "
+"<https://flower.ai/docs/datasets/ref-"
+"api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:56
-#, fuzzy
+#: ../../source/tutorial-quickstart-xgboost.rst:57
 msgid ""
-"Since we want to use ``xgboost`` package to build up XGBoost trees, let's"
-" go ahead and install ``xgboost``:"
-msgstr "Puisque nous voulons utiliser scikt-learn, allons-y et installons-le :"
+"|fedxgbbagging_link|_ (bootstrap aggregation) is an ensemble method that "
+"improves stability and accuracy in machine learning, here applied to "
+"XGBoost in FL. Each client generates a bootstrap sample by subsampling "
+"its data and trains a tree per round, which is then aggregated by the "
+"server and added to the global model."
+msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:64
+#: ../../source/tutorial-quickstart-xgboost.rst:70
+msgid ""
+"Then, run the command below. You will be prompted to select one of the "
+"available templates (choose ``XGBoost``), give a name to your project, "
+"and enter your developer name:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-xgboost.rst:180
+msgid ""
+"What follows is an explanation of each component in the project you just "
+"created: configurations, dataset partitioning, defining the "
+"``ClientApp``, and defining the ``ServerApp``."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-xgboost.rst:185
 #, fuzzy
 msgid "The Configurations"
 msgstr "Valeurs de configuration"
 
-#: ../../source/tutorial-quickstart-xgboost.rst:66
+#: ../../source/tutorial-quickstart-xgboost.rst:187
 msgid ""
 "We define all required configurations / hyper-parameters inside the "
 "``pyproject.toml`` file:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:88
+#: ../../source/tutorial-quickstart-xgboost.rst:208
 msgid ""
 "The ``local-epochs`` represents the number of iterations for local tree "
 "boost. We use CPU for the training in default. One can assign it to a GPU"
-" by setting ``tree_method`` to ``gpu_hist``. We use AUC as evaluation "
+" by setting ``tree-method`` to ``gpu_hist``. We use AUC as evaluation "
 "metric."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:95
+#: ../../source/tutorial-quickstart-xgboost.rst:215
 msgid ""
-"This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ "
-"to easily download and partition the `HIGGS` dataset."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:109
-msgid ""
-"In this example, we split the dataset into 20 partitions with uniform "
-"distribution (`IidPartitioner <https://flower.ai/docs/datasets/ref-"
-"api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_)."
-" Then, we load the partition for the given client based on "
-"``partition_id``."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:114
-msgid ""
-"Subsequently, we train/test split using the given partition (client's "
-"local data), and reformat data to DMatrix for the ``xgboost`` package."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:128
-msgid ""
-"The functions of ``train_test_split`` and "
-"``transform_dataset_to_dmatrix`` are defined as below:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:155
-msgid ""
-"*Clients* are responsible for generating individual weight-updates for "
-"the model based on their local datasets. Let's first see how we define "
-"Flower client for XGBoost. We follow the general rule to define "
-"``FlowerClient`` class inherited from ``fl.client.Client``."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:180
-msgid ""
-"All required parameters defined above are passed to ``FlowerClient``'s "
-"constructor."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:182
-msgid ""
-"Then, we override ``fit`` and ``evaluate`` methods insides "
-"``FlowerClient`` class as follows."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:221
-msgid ""
-"In ``fit``, at the first round, we call ``xgb.train()`` to build up the "
-"first set of trees. From the second round, we load the global model sent "
-"from server to new build Booster object, and then update model weights on"
-" local training data with function ``_local_boost`` as follows:"
+"We will use `Flower Datasets <https://flower.ai/docs/datasets/>`_ to "
+"easily download and partition the `Higgs` dataset. In this example, "
+"you'll make use of the `IidPartitioner <https://flower.ai/docs/datasets"
+"/ref-"
+"api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_"
+" to generate `num_partitions` partitions. You can choose from other "
+"`partitioners <https://flower.ai/docs/datasets/ref-"
+"api/flwr_datasets.partitioner.html>`_ available in Flower Datasets:"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-xgboost.rst:241
+msgid ""
+"We train/test split using the given partition (client's local data), and "
+"reformat data to DMatrix for the ``xgboost`` package. The functions of "
+"``train_test_split`` and ``transform_dataset_to_dmatrix`` are defined as "
+"below:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-xgboost.rst:269
+msgid ""
+"The main changes we have to make to use `XGBoost` with `Flower` have to "
+"do with converting the |arrayrecord_link|_ received in the "
+"|message_link|_ into a `XGBoost` loadable binary object, and vice versa "
+"when generating the reply ``Message`` from the ClientApp. We can make use"
+" of the following conversions:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-xgboost.rst:368
+msgid ""
+"At the first round, we call ``xgb.train()`` to build up the first set of "
+"trees. From the second round, we load the global model sent from server "
+"to new build Booster object, and then update model weights on local "
+"training data with function ``_local_boost`` as follows:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-xgboost.rst:388
 msgid ""
 "Given ``num_local_round``, we update trees by calling "
 "``bst_input.update`` method. After training, the last "
 "``N=num_local_round`` trees will be extracted to send to the server."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:269
+#: ../../source/tutorial-quickstart-xgboost.rst:406
 msgid ""
-"In ``evaluate``, after loading the global model, we call ``bst.eval_set``"
-" function to conduct evaluation on valid set. The AUC value will be "
-"returned."
+"In this example we use the ``FedXgbBagging`` strategy. Then, we "
+"initialize an empty global model as the XGBoost model will be initialized"
+" on client side in the first round. After that, the execution of the "
+"strategy is launched when invoking its |strategy_start_link|_ method. To "
+"it we pass:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-xgboost.rst:275
+#: ../../source/tutorial-quickstart-xgboost.rst:414
+msgid "the ``num_rounds`` parameter specifying how many rounds to perform."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-xgboost.rst:473
 #, fuzzy
 msgid ""
-"After the local training on clients, clients' model updates are sent to "
-"the *server*, which aggregates them to produce a better model. Finally, "
-"the *server* sends this improved model version back to each *client* to "
-"complete a federated round."
-msgstr ""
-"*Les clients* sont chargés de générer des mises à jour de poids "
-"individuelles pour le modèle en fonction de leurs ensembles de données "
-"locales. Ces mises à jour sont ensuite envoyées au *serveur* qui les "
-"agrège pour produire un meilleur modèle. Enfin, le *serveur* renvoie "
-"cette version améliorée du modèle à chaque *client*. Un cycle complet de "
-"mises à jour de poids s'appelle un *round*."
-
-#: ../../source/tutorial-quickstart-xgboost.rst:279
-msgid ""
-"In the file named ``server_app.py``, we define a strategy for XGBoost "
-"bagging aggregation:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:312
-msgid ""
-"An ``evaluate_metrics_aggregation`` function is defined to collect and "
-"wighted average the AUC values from clients. The ``config_func`` function"
-" is to return the current FL round number to client's ``fit()`` and "
-"``evaluate()`` methods."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:317
-msgid "Tree-based Bagging Aggregation"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:319
-msgid ""
-"You must be curious about how bagging aggregation works. Let's look into "
-"the details."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:321
-msgid ""
-"In file ``flwr.server.strategy.fedxgb_bagging.py``, we define "
-"``FedXgbBagging`` inherited from ``flwr.server.strategy.FedAvg``. Then, "
-"we override the ``aggregate_fit``, ``aggregate_evaluate`` and "
-"``evaluate`` methods as follows:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:418
-msgid ""
-"In ``aggregate_fit``, we sequentially aggregate the clients' XGBoost "
-"trees by calling ``aggregate()`` function:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:478
-msgid ""
-"In this function, we first fetch the number of trees and the number of "
-"parallel trees for the current and previous model by calling "
-"``_get_tree_nums``. Then, the fetched information will be aggregated. "
-"After that, the trees (containing model weights) are aggregated to "
-"generate a new tree model."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:483
-msgid ""
-"After traversal of all clients' models, a new global model is generated, "
-"followed by serialisation, and sending the global model back to each "
-"client."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:487
-msgid "Launch Federated XGBoost!"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:537
-msgid ""
-"Congratulations! You've successfully built and run your first federated "
-"XGBoost system. The AUC values can be checked in ``History (metrics, "
-"distributed, evaluate)``. One can see that the average AUC increases over"
-" FL rounds."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:551
-#, fuzzy
-msgid ""
-"Check the full `source code "
-"<https://github.com/adap/flower/blob/main/examples/xgboost-quickstart>`_ "
-"for this example in ``examples/xgboost-quickstart`` in the Flower GitHub "
-"repository."
+"Check the `source code <https://github.com/adap/flower/blob/main/examples"
+"/xgboost-quickstart>`_ of the extended version of this tutorial in "
+"``examples/xgboost-quickstart`` in the Flower GitHub repository."
 msgstr ""
 "Félicitations ! Tu as réussi à construire et à faire fonctionner ton "
 "premier système d'apprentissage fédéré. Le code source complet "
 "<https://github.com/adap/flower/blob/main/examples/quickstart-"
 "mxnet/client.py>`_ de cet exemple se trouve dans :code:`examples"
 "/quickstart-mxnet`."
-
-#: ../../source/tutorial-quickstart-xgboost.rst:556
-msgid "Comprehensive Federated XGBoost"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:558
-msgid ""
-"Now that you know how federated XGBoost works with Flower, it's time to "
-"run some more comprehensive experiments by customising the experimental "
-"settings. In the xgboost-comprehensive example (`full code "
-"<https://github.com/adap/flower/tree/main/examples/xgboost-"
-"comprehensive>`_), we provide more options to define various experimental"
-" setups, including aggregation strategies, data partitioning and "
-"centralised / distributed evaluation. Let's take a look!"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:566
-#, fuzzy
-msgid "Cyclic Training"
-msgstr "Formation centralisée"
-
-#: ../../source/tutorial-quickstart-xgboost.rst:568
-msgid ""
-"In addition to bagging aggregation, we offer a cyclic training scheme, "
-"which performs FL in a client-by-client fashion. Instead of aggregating "
-"multiple clients, there is only one single client participating in the "
-"training per round in the cyclic training scenario. The trained local "
-"XGBoost trees will be passed to the next client as an initialised model "
-"for next round's boosting."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:574
-msgid "To do this, we first customise a ``ClientManager`` in ``server_app.py``:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:614
-msgid ""
-"The customised ``ClientManager`` samples all available clients in each FL"
-" round based on the order of connection to the server. Then, we define a "
-"new strategy ``FedXgbCyclic`` in "
-"``flwr.server.strategy.fedxgb_cyclic.py``, in order to sequentially "
-"select only one client in given round and pass the received model to the "
-"next client."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:656
-msgid ""
-"Unlike the original ``FedAvg``, we don't perform aggregation here. "
-"Instead, we just make a copy of the received client model as global model"
-" by overriding ``aggregate_fit``."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:659
-msgid ""
-"Also, the customised ``configure_fit`` and ``configure_evaluate`` methods"
-" ensure the clients to be sequentially selected given FL round:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:689
-msgid "Customised Data Partitioning"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:691
-msgid ""
-"In ``task.py``, we use the ``instantiate_fds`` function to instantiate "
-"Flower Datasets and the data partitioner based on the given "
-"``partitioner_type`` and ``num_partitions``. Currently, we provide four "
-"supported partitioner type to simulate the uniformity/non-uniformity in "
-"data quantity (uniform, linear, square, exponential)."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:730
-#, fuzzy
-msgid "Customised Centralised / Distributed Evaluation"
-msgstr "Évaluation centralisée"
-
-#: ../../source/tutorial-quickstart-xgboost.rst:732
-msgid ""
-"To facilitate centralised evaluation, we define a function in "
-"``server_app.py``:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:763
-msgid ""
-"This function returns an evaluation function, which instantiates a "
-"``Booster`` object and loads the global model weights to it. The "
-"evaluation is conducted by calling ``eval_set()`` method, and the tested "
-"AUC value is reported."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:767
-msgid ""
-"As for distributed evaluation on the clients, it's same as the quick-"
-"start example by overriding the ``evaluate()`` method insides the "
-"``XgbClient`` class in ``client_app.py``."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:772
-#, fuzzy
-msgid "Arguments Explainer"
-msgstr "Amélioration de la documentation"
-
-#: ../../source/tutorial-quickstart-xgboost.rst:774
-msgid ""
-"We define all hyper-parameters under ``[tool.flwr.app.config]`` entry in "
-"``pyproject.toml``:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:803
-msgid ""
-"On the server side, we allow user to specify training strategies / FL "
-"rounds / participating clients / clients for evaluation, and evaluation "
-"fashion. Note that with ``centralised-eval = true``, the sever will do "
-"centralised evaluation and all functionalities for client evaluation will"
-" be disabled."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:808
-msgid ""
-"On the client side, we can define various options for client data "
-"partitioning. Besides, clients also have an option to conduct evaluation "
-"on centralised test set by setting ``centralised-eval = true``, as well "
-"as an option to perform scaled learning rate based on the number of "
-"clients by setting ``scaled-lr = true``."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:814
-#, fuzzy
-msgid "Example Commands"
-msgstr "Exemples de PyTorch"
-
-#: ../../source/tutorial-quickstart-xgboost.rst:816
-msgid "To run bagging aggregation for 5 rounds evaluated on centralised test set:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:822
-msgid ""
-"To run cyclic training with linear partitioner type evaluated on "
-"centralised test set:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-xgboost.rst:831
-#, fuzzy
-msgid ""
-"The full `code <https://github.com/adap/flower/blob/main/examples"
-"/xgboost-comprehensive/>`_ for this comprehensive example can be found in"
-" ``examples/xgboost-comprehensive`` in the Flower GitHub repository."
-msgstr ""
-"Félicitations ! Tu as réussi à construire et à faire fonctionner ton "
-"premier système d'apprentissage fédéré. Le code source complet "
-"<https://github.com/adap/flower/blob/main/examples/quickstart-"
-"mxnet/client.py>`_ de cet exemple se trouve dans :code:`examples"
-"/quickstart-mxnet`."
-
-#: ../../source/tutorial-quickstart-xgboost.rst:837
-#, fuzzy
-msgid "Video Tutorial"
-msgstr "Tutoriel"
-
-#: ../../source/tutorial-quickstart-xgboost.rst:841
-msgid ""
-"The video shown below shows how to setup a XGBoost + Flower project using"
-" our previously recommended APIs. A new video tutorial will be released "
-"that shows the new APIs (as the content above does)"
-msgstr ""
 
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:2
 #, fuzzy
@@ -68418,5 +68594,486 @@ msgstr ""
 #~ " we pass a randomly initialized model"
 #~ " that will serve as the global "
 #~ "model to federate."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This example by default runs the "
+#~ "Flower Simulation Engine, creating a "
+#~ "federation of 10 nodes using `FedAvg "
+#~ "<https://flower.ai/docs/framework/ref-"
+#~ "api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_"
+#~ " as the aggregation strategy. The "
+#~ "dataset will be partitioned using Flower"
+#~ " Dataset's `IidPartitioner "
+#~ "<https://flower.ai/docs/datasets/ref-"
+#~ "api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_."
+#~ " Let's run the project:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Check out this Federated Learning "
+#~ "quickstart tutorial for using Flower "
+#~ "with XGBoost to train classification "
+#~ "models on trees."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "EXtreme Gradient Boosting (**XGBoost**) is "
+#~ "a robust and efficient implementation of"
+#~ " gradient-boosted decision tree (**GBDT**),"
+#~ " that maximises the computational "
+#~ "boundaries for boosted tree methods. "
+#~ "It's primarily designed to enhance both"
+#~ " the performance and computational speed"
+#~ " of machine learning models. In "
+#~ "XGBoost, trees are constructed concurrently,"
+#~ " unlike the sequential approach taken "
+#~ "by GBDT."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Often, for tabular data on medium-"
+#~ "sized datasets with fewer than 10k "
+#~ "training examples, XGBoost surpasses the "
+#~ "results of deep learning techniques."
+#~ msgstr ""
+
+#~ msgid "Why Federated XGBoost?"
+#~ msgstr "Qu'est-ce que l'apprentissage fédéré ?"
+
+#~ msgid ""
+#~ "As the demand for data privacy and"
+#~ " decentralized learning grows, there's an"
+#~ " increasing requirement to implement "
+#~ "federated XGBoost systems for specialised "
+#~ "applications, like survival analysis and "
+#~ "financial fraud detection."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Federated learning ensures that raw data"
+#~ " remains on the local device, making"
+#~ " it an attractive approach for "
+#~ "sensitive domains where data privacy is"
+#~ " paramount. Given the robustness and "
+#~ "efficiency of XGBoost, combining it with"
+#~ " federated learning offers a promising "
+#~ "solution for these specific challenges."
+#~ msgstr ""
+
+#~ msgid "Environment Setup"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this tutorial, we learn how to"
+#~ " train a federated XGBoost model on"
+#~ " the HIGGS dataset using Flower and"
+#~ " the ``xgboost`` package to perform a"
+#~ " binary classification task. We use a"
+#~ " simple example (`full code xgboost-"
+#~ "quickstart <https://github.com/adap/flower/tree/main/examples"
+#~ "/xgboost-quickstart>`_) to demonstrate how "
+#~ "federated XGBoost works, and then we "
+#~ "dive into a more complex comprehensive"
+#~ " example (`full code xgboost-comprehensive"
+#~ " <https://github.com/adap/flower/tree/main/examples/xgboost-"
+#~ "comprehensive>`_) to run various experiments."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "It is recommended to create a "
+#~ "virtual environment and run everything "
+#~ "within a :doc:`virtualenv <contributor-how-"
+#~ "to-set-up-a-virtual-env>`."
+#~ msgstr ""
+#~ "Il est recommandé de créer un "
+#~ "environnement virtuel et de tout "
+#~ "exécuter dans ce `virtualenv "
+#~ "<https://flower.ai/docs/recommended-env-setup.html>`_."
+
+#~ msgid ""
+#~ "We first need to install Flower "
+#~ "and Flower Datasets. You can do "
+#~ "this by running :"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Since we want to use ``xgboost`` "
+#~ "package to build up XGBoost trees, "
+#~ "let's go ahead and install ``xgboost``:"
+#~ msgstr "Puisque nous voulons utiliser scikt-learn, allons-y et installons-le :"
+
+#~ msgid ""
+#~ "The ``local-epochs`` represents the "
+#~ "number of iterations for local tree "
+#~ "boost. We use CPU for the training"
+#~ " in default. One can assign it "
+#~ "to a GPU by setting ``tree_method`` "
+#~ "to ``gpu_hist``. We use AUC as "
+#~ "evaluation metric."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This tutorial uses `Flower Datasets "
+#~ "<https://flower.ai/docs/datasets/>`_ to easily "
+#~ "download and partition the `HIGGS` "
+#~ "dataset."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this example, we split the "
+#~ "dataset into 20 partitions with uniform"
+#~ " distribution (`IidPartitioner "
+#~ "<https://flower.ai/docs/datasets/ref-"
+#~ "api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_)."
+#~ " Then, we load the partition for "
+#~ "the given client based on "
+#~ "``partition_id``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Subsequently, we train/test split using "
+#~ "the given partition (client's local "
+#~ "data), and reformat data to DMatrix "
+#~ "for the ``xgboost`` package."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The functions of ``train_test_split`` and "
+#~ "``transform_dataset_to_dmatrix`` are defined as "
+#~ "below:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "*Clients* are responsible for generating "
+#~ "individual weight-updates for the model"
+#~ " based on their local datasets. Let's"
+#~ " first see how we define Flower "
+#~ "client for XGBoost. We follow the "
+#~ "general rule to define ``FlowerClient`` "
+#~ "class inherited from ``fl.client.Client``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "All required parameters defined above "
+#~ "are passed to ``FlowerClient``'s constructor."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Then, we override ``fit`` and "
+#~ "``evaluate`` methods insides ``FlowerClient`` "
+#~ "class as follows."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In ``fit``, at the first round, we"
+#~ " call ``xgb.train()`` to build up the"
+#~ " first set of trees. From the "
+#~ "second round, we load the global "
+#~ "model sent from server to new "
+#~ "build Booster object, and then update"
+#~ " model weights on local training data"
+#~ " with function ``_local_boost`` as follows:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In ``evaluate``, after loading the "
+#~ "global model, we call ``bst.eval_set`` "
+#~ "function to conduct evaluation on valid"
+#~ " set. The AUC value will be "
+#~ "returned."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "After the local training on clients, "
+#~ "clients' model updates are sent to "
+#~ "the *server*, which aggregates them to"
+#~ " produce a better model. Finally, the"
+#~ " *server* sends this improved model "
+#~ "version back to each *client* to "
+#~ "complete a federated round."
+#~ msgstr ""
+#~ "*Les clients* sont chargés de générer"
+#~ " des mises à jour de poids "
+#~ "individuelles pour le modèle en fonction"
+#~ " de leurs ensembles de données "
+#~ "locales. Ces mises à jour sont "
+#~ "ensuite envoyées au *serveur* qui les"
+#~ " agrège pour produire un meilleur "
+#~ "modèle. Enfin, le *serveur* renvoie "
+#~ "cette version améliorée du modèle à "
+#~ "chaque *client*. Un cycle complet de "
+#~ "mises à jour de poids s'appelle un"
+#~ " *round*."
+
+#~ msgid ""
+#~ "In the file named ``server_app.py``, we"
+#~ " define a strategy for XGBoost "
+#~ "bagging aggregation:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "An ``evaluate_metrics_aggregation`` function is "
+#~ "defined to collect and wighted average"
+#~ " the AUC values from clients. The "
+#~ "``config_func`` function is to return "
+#~ "the current FL round number to "
+#~ "client's ``fit()`` and ``evaluate()`` methods."
+#~ msgstr ""
+
+#~ msgid "Tree-based Bagging Aggregation"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You must be curious about how "
+#~ "bagging aggregation works. Let's look "
+#~ "into the details."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In file ``flwr.server.strategy.fedxgb_bagging.py``, "
+#~ "we define ``FedXgbBagging`` inherited from "
+#~ "``flwr.server.strategy.FedAvg``. Then, we override"
+#~ " the ``aggregate_fit``, ``aggregate_evaluate`` "
+#~ "and ``evaluate`` methods as follows:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In ``aggregate_fit``, we sequentially "
+#~ "aggregate the clients' XGBoost trees by"
+#~ " calling ``aggregate()`` function:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this function, we first fetch "
+#~ "the number of trees and the number"
+#~ " of parallel trees for the current"
+#~ " and previous model by calling "
+#~ "``_get_tree_nums``. Then, the fetched "
+#~ "information will be aggregated. After "
+#~ "that, the trees (containing model "
+#~ "weights) are aggregated to generate a"
+#~ " new tree model."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "After traversal of all clients' models,"
+#~ " a new global model is generated, "
+#~ "followed by serialisation, and sending "
+#~ "the global model back to each "
+#~ "client."
+#~ msgstr ""
+
+#~ msgid "Launch Federated XGBoost!"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Congratulations! You've successfully built and"
+#~ " run your first federated XGBoost "
+#~ "system. The AUC values can be "
+#~ "checked in ``History (metrics, distributed,"
+#~ " evaluate)``. One can see that the"
+#~ " average AUC increases over FL "
+#~ "rounds."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Check the full `source code "
+#~ "<https://github.com/adap/flower/blob/main/examples/xgboost-"
+#~ "quickstart>`_ for this example in "
+#~ "``examples/xgboost-quickstart`` in the Flower"
+#~ " GitHub repository."
+#~ msgstr ""
+#~ "Félicitations ! Tu as réussi à "
+#~ "construire et à faire fonctionner ton"
+#~ " premier système d'apprentissage fédéré. Le"
+#~ " code source complet "
+#~ "<https://github.com/adap/flower/blob/main/examples/quickstart-"
+#~ "mxnet/client.py>`_ de cet exemple se "
+#~ "trouve dans :code:`examples/quickstart-mxnet`."
+
+#~ msgid "Comprehensive Federated XGBoost"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Now that you know how federated "
+#~ "XGBoost works with Flower, it's time "
+#~ "to run some more comprehensive "
+#~ "experiments by customising the experimental"
+#~ " settings. In the xgboost-comprehensive "
+#~ "example (`full code "
+#~ "<https://github.com/adap/flower/tree/main/examples/xgboost-"
+#~ "comprehensive>`_), we provide more options "
+#~ "to define various experimental setups, "
+#~ "including aggregation strategies, data "
+#~ "partitioning and centralised / distributed "
+#~ "evaluation. Let's take a look!"
+#~ msgstr ""
+
+#~ msgid "Cyclic Training"
+#~ msgstr "Formation centralisée"
+
+#~ msgid ""
+#~ "In addition to bagging aggregation, we"
+#~ " offer a cyclic training scheme, "
+#~ "which performs FL in a client-"
+#~ "by-client fashion. Instead of aggregating"
+#~ " multiple clients, there is only one"
+#~ " single client participating in the "
+#~ "training per round in the cyclic "
+#~ "training scenario. The trained local "
+#~ "XGBoost trees will be passed to "
+#~ "the next client as an initialised "
+#~ "model for next round's boosting."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To do this, we first customise a"
+#~ " ``ClientManager`` in ``server_app.py``:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The customised ``ClientManager`` samples all"
+#~ " available clients in each FL round"
+#~ " based on the order of connection "
+#~ "to the server. Then, we define a"
+#~ " new strategy ``FedXgbCyclic`` in "
+#~ "``flwr.server.strategy.fedxgb_cyclic.py``, in order "
+#~ "to sequentially select only one client"
+#~ " in given round and pass the "
+#~ "received model to the next client."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Unlike the original ``FedAvg``, we don't"
+#~ " perform aggregation here. Instead, we "
+#~ "just make a copy of the received"
+#~ " client model as global model by "
+#~ "overriding ``aggregate_fit``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Also, the customised ``configure_fit`` and "
+#~ "``configure_evaluate`` methods ensure the "
+#~ "clients to be sequentially selected "
+#~ "given FL round:"
+#~ msgstr ""
+
+#~ msgid "Customised Data Partitioning"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In ``task.py``, we use the "
+#~ "``instantiate_fds`` function to instantiate "
+#~ "Flower Datasets and the data partitioner"
+#~ " based on the given ``partitioner_type``"
+#~ " and ``num_partitions``. Currently, we "
+#~ "provide four supported partitioner type "
+#~ "to simulate the uniformity/non-uniformity "
+#~ "in data quantity (uniform, linear, "
+#~ "square, exponential)."
+#~ msgstr ""
+
+#~ msgid "Customised Centralised / Distributed Evaluation"
+#~ msgstr "Évaluation centralisée"
+
+#~ msgid ""
+#~ "To facilitate centralised evaluation, we "
+#~ "define a function in ``server_app.py``:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This function returns an evaluation "
+#~ "function, which instantiates a ``Booster`` "
+#~ "object and loads the global model "
+#~ "weights to it. The evaluation is "
+#~ "conducted by calling ``eval_set()`` method,"
+#~ " and the tested AUC value is "
+#~ "reported."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "As for distributed evaluation on the "
+#~ "clients, it's same as the quick-"
+#~ "start example by overriding the "
+#~ "``evaluate()`` method insides the "
+#~ "``XgbClient`` class in ``client_app.py``."
+#~ msgstr ""
+
+#~ msgid "Arguments Explainer"
+#~ msgstr "Amélioration de la documentation"
+
+#~ msgid ""
+#~ "We define all hyper-parameters under "
+#~ "``[tool.flwr.app.config]`` entry in "
+#~ "``pyproject.toml``:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "On the server side, we allow user"
+#~ " to specify training strategies / FL"
+#~ " rounds / participating clients / "
+#~ "clients for evaluation, and evaluation "
+#~ "fashion. Note that with ``centralised-"
+#~ "eval = true``, the sever will do"
+#~ " centralised evaluation and all "
+#~ "functionalities for client evaluation will "
+#~ "be disabled."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "On the client side, we can define"
+#~ " various options for client data "
+#~ "partitioning. Besides, clients also have "
+#~ "an option to conduct evaluation on "
+#~ "centralised test set by setting "
+#~ "``centralised-eval = true``, as well "
+#~ "as an option to perform scaled "
+#~ "learning rate based on the number "
+#~ "of clients by setting ``scaled-lr "
+#~ "= true``."
+#~ msgstr ""
+
+#~ msgid "Example Commands"
+#~ msgstr "Exemples de PyTorch"
+
+#~ msgid ""
+#~ "To run bagging aggregation for 5 "
+#~ "rounds evaluated on centralised test "
+#~ "set:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To run cyclic training with linear "
+#~ "partitioner type evaluated on centralised "
+#~ "test set:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The full `code "
+#~ "<https://github.com/adap/flower/blob/main/examples/xgboost-"
+#~ "comprehensive/>`_ for this comprehensive "
+#~ "example can be found in ``examples"
+#~ "/xgboost-comprehensive`` in the Flower "
+#~ "GitHub repository."
+#~ msgstr ""
+#~ "Félicitations ! Tu as réussi à "
+#~ "construire et à faire fonctionner ton"
+#~ " premier système d'apprentissage fédéré. Le"
+#~ " code source complet "
+#~ "<https://github.com/adap/flower/blob/main/examples/quickstart-"
+#~ "mxnet/client.py>`_ de cet exemple se "
+#~ "trouve dans :code:`examples/quickstart-mxnet`."
+
+#~ msgid "Video Tutorial"
+#~ msgstr "Tutoriel"
+
+#~ msgid ""
+#~ "The video shown below shows how to"
+#~ " setup a XGBoost + Flower project "
+#~ "using our previously recommended APIs. A"
+#~ " new video tutorial will be released"
+#~ " that shows the new APIs (as "
+#~ "the content above does)"
 #~ msgstr ""
 
