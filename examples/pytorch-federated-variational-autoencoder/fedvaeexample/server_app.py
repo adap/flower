@@ -1,11 +1,11 @@
 """fedvaeexample: A Flower / PyTorch app for Federated Variational Autoencoder."""
 
 import torch
-from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
+from flwr.app import ArrayRecord, Context
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 
-from fedvaeexample.task import Net, get_weights
+from fedvaeexample.task import Net
 
 
 # Create ServerApp
