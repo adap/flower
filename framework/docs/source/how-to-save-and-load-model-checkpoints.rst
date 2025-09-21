@@ -18,20 +18,21 @@
 
 .. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
 
-Save and Load Model Checkpoints
+Save and load model checkpoints
 ===============================
 
-This how-to guide describes the steps to save (and load) model checkpoints in ClientApp
-and SeverApp.
+This how-to guide describes the steps to save (and load) model checkpoints in
+``ClientApp`` and ``ServerApp``.
 
-How to Save Model Checkpoints in ClientApp
-------------------------------------------
+How to save model checkpoints in ``ClientApp``
+----------------------------------------------
 
 The model updates are saved in |arrayrecord_link|_ and transmitted between
 |serverapp_link|_ and |clientapp_link|_. To save model checkpoints in |clientapp_link|_,
 you need to convert the |arrayrecord_link|_ into a format compatible with your ML
 framework (e.g., PyTorch, TensorFlow, or NumPy). Include the following code in your
-``train``, ``evaluate``, or ``query`` methods within the ClientApp:
+functions registered with the ``ClientApp`` (e.g., in your training function decorated
+with ``@app.train()``):
 
 PyTorch
 
@@ -70,8 +71,8 @@ How to Save Model Checkpoints in ServerApp
 ------------------------------------------
 
 To save model checkpoints in |serverapp_link|_ across different FL rounds, you can
-implement this in a customized ``evaluate_fn`` and pass it to the strategy’s
-|strategy_start_link|_ method. Here’s an example showing how to save the global PyTorch
+implement this in a customized ``evaluate_fn`` and pass it to the strategy's
+|strategy_start_link|_ method. Here's an example showing how to save the global PyTorch
 model:
 
 .. code-block:: python
