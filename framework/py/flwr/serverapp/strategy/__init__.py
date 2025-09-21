@@ -34,6 +34,7 @@ from .fedxgb_bagging import FedXgbBagging
 from .fedxgb_cyclic import FedXgbCyclic
 from .fedyogi import FedYogi
 from .krum import Krum
+from .multikrum import MultiKrum
 from .qfedavg import QFedAvg
 from .result import Result
 from .strategy import Strategy
@@ -54,6 +55,7 @@ __all__ = [
     "FedXgbCyclic",
     "FedYogi",
     "Krum",
+    "MultiKrum",
     "QFedAvg",
     "Result",
     "Strategy",
