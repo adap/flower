@@ -6,7 +6,6 @@ from flwr.clientapp import ClientApp
 
 from fedvaeexample.task import Net, load_data, test, trainer
 
-
 # Flower ClientApp
 app = ClientApp()
 

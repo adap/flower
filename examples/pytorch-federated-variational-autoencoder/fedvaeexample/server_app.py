@@ -7,7 +7,6 @@ from flwr.serverapp.strategy import FedAvg
 
 from fedvaeexample.task import Net
 
-
 # Create ServerApp
 app = ServerApp()
 
