@@ -20,15 +20,14 @@ import numpy as np
 from flwr.common import ArrayRecord
 
 from .krum import Krum
+from .multikrum import MultiKrum
 from .strategy_utils_test import create_mock_reply
 
 
 def test_aggregate_train_krum() -> None:
     """Tests if Krum is aggregating correctly."""
     # Prepare
-    strategy = Krum(
-        num_malicious_nodes=1,
-    )
+    strategy = Krum(num_malicious_nodes=1)
     reply_0 = create_mock_reply(
         ArrayRecord([np.array([0.2, 0.2, 0.2, 0.2])]), num_examples=5
     )
@@ -51,7 +50,7 @@ def test_aggregate_train_krum() -> None:
 def test_aggregate_train_multikrum() -> None:
     """Tests if multi-Krum is aggregating correctly."""
     # Prepare
-    strategy = Krum(num_malicious_nodes=1, num_nodes_to_keep=2)
+    strategy = MultiKrum(num_malicious_nodes=1, num_nodes_to_select=2)
     reply_0 = create_mock_reply(
         ArrayRecord([np.array([0.2, 0.2, 0.2, 0.2])]), num_examples=5
     )
