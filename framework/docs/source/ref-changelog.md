@@ -16,7 +16,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Migrate `flwr new` templates to Message API** ([#5901](https://github.com/adap/flower/pull/5901), [#5818](https://github.com/adap/flower/pull/5818), [#5893](https://github.com/adap/flower/pull/5893), [#5849](https://github.com/adap/flower/pull/5849), [#5883](https://github.com/adap/flower/pull/5883))
 
-  All `flwr new` templates have been updated to use the Message API. The PyTorch template based on the legacy API is retained and explicitly marked as legacy for those who prefer or require the older approach.
+  All `flwr new` templates have been updated to use the Message API. The PyTorch template based on the legacy API is retained and explicitly marked as legacy for those who prefer or require the older approach. A new template for `XGBoost` is introduced.
 
 - **Revamp main tutorials to use the Message API** ([#5861](https://github.com/adap/flower/pull/5861))
 
