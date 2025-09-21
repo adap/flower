@@ -22,7 +22,7 @@ Design stateful ClientApps
 .. _recorddict: ref-api/flwr.common.RecordDict.html#recorddict
 
 By design, ClientApp_ objects are stateless. This means that the ``ClientApp`` object is
-recreated each time a new ``Message`` is to be processed. This behaviour is identical
+recreated each time a new ``Message`` is to be processed. This behavior is identical
 with Flower's Simulation Engine and Deployment Engine. For the former, it allows us to
 simulate the running of a large number of nodes on a single machine or across multiple
 machines. For the latter, it enables each ``SuperNode`` to be part of multiple runs,
@@ -68,11 +68,11 @@ Let's begin with a simple setting in which ``ClientApp`` is defined as follows. 
         n = random.randint(0, 10)
         print(n)
 
-With the minimal ``ClientApp`` above, each time a ``Message`` is addresse to this
+With the minimal ``ClientApp`` above, each time a ``Message`` is addressed to this
 ``train`` function a new random integer will be generated and printed. Let's say we want
 to save that randomly generated integer and append it to a list that persists in the
-``Context`` so, each time this ``ClientApp`` function is executed, it prints the
-historic of random integers. Let's see how this looks in code:
+``Context`` so, each time this ``ClientApp`` function is executed, it prints the history
+of random integers. Let's see how this looks in code:
 
 .. tip::
 
@@ -108,13 +108,13 @@ historic of random integers. Let's see how this looks in code:
             # Append to record
             context.state[record_name][metric_name].append(n)
 
-        # Print historic
+        # Print history
         print(context.state.metric_records)
 
 If you run a Flower App including the above logic in your ``ClientApp`` and having just
 two clients in your federation sampled in each round, you'll see an output similar to
 the one below. See how after each round the ``random-metrics`` record in the ``Context``
-gets one additional integer ? Note that the order in which the ``ClientApp`` logs these
+gets one additional integer? Note that the order in which the ``ClientApp`` logs these
 messages might differ slightly between rounds.
 
 .. code-block:: shell
@@ -136,8 +136,8 @@ Saving model parameters to the context
 
 Using ConfigRecord_ or MetricRecord_ to save "simple" components is fine (e.g., float,
 integer, boolean, string, bytes, and lists of these types. Note that MetricRecord_ only
-supports float, integer, and lists of these types) Flower has a specific type of record,
-a ArrayRecord_, for storing model parameters or more generally data arrays.
+supports float, integer, and lists of these types). Flower has a specific type of
+record, an ArrayRecord_, for storing model parameters or more generally data arrays.
 
 Let's see a couple of examples of how to save NumPy arrays first and then how to save
 parameters of PyTorch and TensorFlow models.
@@ -194,7 +194,7 @@ Let's see how to use those functions to store a NumPy array into the context.
     # Then, it can be added to the state in the context
     context.state["some_parameters"] = arr_record
 
-To extract the data in a ``ArrayRecord``, you just need to deserialize the array if
+To extract the data in an ``ArrayRecord``, you just need to deserialize the array of
 interest. For example, following the example above:
 
 .. code-block:: python
@@ -249,8 +249,8 @@ Flower offers one-liner utilities to convert PyTorch model parameters to/from
     # Add to a context
     context.state["net_parameters"] = arr_record
 
-Let say now you want to apply the parameters stored in your context to a new instance of
-the model (as it happens each time a ``ClientApp`` is executed). You will need to:
+Let's say now you want to apply the parameters stored in your context to a new instance
+of the model (as it happens each time a ``ClientApp`` is executed). You will need to:
 
 1. Retrieve the ``ArrayRecord`` from the context
 2. Construct a ``state_dict`` and load it
@@ -306,5 +306,5 @@ new parameters to a model.
 
     ...
 
-    # Extract record from context and apply to the modele
+    # Extract record from context and apply to the model
     model.set_weights(context.state["model_weights"].to_numpy_ndarrays())
