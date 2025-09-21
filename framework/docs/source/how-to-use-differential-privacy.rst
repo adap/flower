@@ -178,7 +178,8 @@ Below is a code example that shows how to use ``LocalDpMod``:
 
     # Add the mod to your training function
     @app.train(mods=[local_dp_obj])
-    def train(message, context): ...
+    def train(message, context):
+        # Client-side training logic
 
 Please note that the order of mods, especially those that modify parameters, is
 important when using multiple modifiers. Typically, differential privacy (DP) modifiers
