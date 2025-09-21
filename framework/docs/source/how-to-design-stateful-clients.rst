@@ -114,7 +114,7 @@ of random integers. Let's see how this looks in code:
 If you run a Flower App including the above logic in your ``ClientApp`` and having just
 two clients in your federation sampled in each round, you'll see an output similar to
 the one below. See how after each round the ``random-metrics`` record in the ``Context``
-gets one additional integer? Note that the order in which the ``ClientApp`` logs these
+gets one additional integer? Note that the order in which the clients log these
 messages might differ slightly between rounds.
 
 .. code-block:: shell
@@ -243,7 +243,7 @@ Flower offers one-liner utilities to convert PyTorch model parameters to/from
     # Instantiate model as usual
     model = Net()
 
-    # Save the state_dict into a single RecordDict
+    # Save the state_dict into a single ArrayRecord
     arr_record = ArrayRecord(model.state_dict())
 
     # Add to a context
