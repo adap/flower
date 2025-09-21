@@ -6,112 +6,37 @@
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Charles Beauville`, `Chong Shen Ng`, `Copilot`, `Daniel J. Beutel`, `Heng Pan`, `Javier`, `Patrick Foley`, `William Lindskog`, `William Lindskog-Munzing`, `Yan Gao` <!---TOKEN_v1.22.0-->
+`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Heng Pan`, `Javier`, `Patrick Foley`, `William Lindskog`, `William Lindskog-Munzing`, `Yan Gao` <!---TOKEN_v1.22.0-->
 
+### What's new?
 
+- **Migrate and implement strategies for the Message API** ([#5845](https://github.com/adap/flower/pull/5845), [#5850](https://github.com/adap/flower/pull/5850), [#5851](https://github.com/adap/flower/pull/5851), [#5867](https://github.com/adap/flower/pull/5867), [#5884](https://github.com/adap/flower/pull/5884), [#5894](https://github.com/adap/flower/pull/5894), [#5904](https://github.com/adap/flower/pull/5904), [#5905](https://github.com/adap/flower/pull/5905), [#5908](https://github.com/adap/flower/pull/5908), [#5913](https://github.com/adap/flower/pull/5913), [#5914](https://github.com/adap/flower/pull/5914), [#5915](https://github.com/adap/flower/pull/5915), [#5917](https://github.com/adap/flower/pull/5917), [#5919](https://github.com/adap/flower/pull/5919), [#5920](https://github.com/adap/flower/pull/5920), [#5931](https://github.com/adap/flower/pull/5931))
 
-### migrate strategies
-- **feat(framework): Add** `FedAvgM` **,** `FedMedian` **, and** `FedTrimmedAvg` **strategies** ([#5850](https://github.com/adap/flower/pull/5850))
-- **refactor(framework): Migrate** `FedProx` **strategy to the** `Message API` ([#5884](https://github.com/adap/flower/pull/5884))
-- **refactor(framework): Move logging and validation logic of** `FedAvg` **to a helper method** ([#5851](https://github.com/adap/flower/pull/5851))
-- **refactor(framework): Update the eval logic in** `configure_evaluate` **of FedAvg** ([#5867](https://github.com/adap/flower/pull/5867))
-- **refactor(framework): Update strategy handling of messages with errors** ([#5845](https://github.com/adap/flower/pull/5845))
-- **feat(framework): Add Message-based adaptive clipping strategies** ([#5905](https://github.com/adap/flower/pull/5905))
-- **feat(framework): Implement** `QFedAvg` **strategy for Message API** ([#5904](https://github.com/adap/flower/pull/5904))
-- **refactor(framework): Migrate** `Krum` **strategy to** `Message API` ([#5894](https://github.com/adap/flower/pull/5894))
-- **refactor(framework): Refactor** `Krum` **strategies** ([#5919](https://github.com/adap/flower/pull/5919))
-- **refactor(framework): Use** `│` **instead of** `|` **to ensure consistency and make it prettier** ([#5914](https://github.com/adap/flower/pull/5914))
-- **refactor(framework): Remove** `self.current_array = ...` **line in** `FedOpt` **subclasses for consistency** ([#5908](https://github.com/adap/flower/pull/5908))
-- **refactor(framework): Generate** `Error` **reply if validation checks don't pass in DP mods** ([#5913](https://github.com/adap/flower/pull/5913))
-- **refactor(framework): Redefine** `ClientAppCallable` **in** `clientapp` **module** ([#5915](https://github.com/adap/flower/pull/5915))
-- **feat(framework): Implement Bulyan for Message API** ([#5920](https://github.com/adap/flower/pull/5920))
-- **refactor(framework): Avoid mentioning `ArrayRecord` in the docstring for `weighted_by_key` for `FedMedian` and `Krum`** ([#5931](https://github.com/adap/flower/pull/5931))
-- **refactor(framework): Migrate** `LocalDP` **mod to** `Message API` ([#5917](https://github.com/adap/flower/pull/5917))
+  Migrates and implements all federated learning strategies to support the new Message API. Strategies updated or introduced include FedAvg, FedOpt and its variants (FedAdam, FedYogi, FedAdagrad), FedProx, Krum, MultiKrum, FedAvgM, FedMedian, FedTrimmedAvg, QFedAvg, and Bulyan. Differential privacy strategies were also migrated, including both fixed and adaptive clipping mechanisms on the server and client sides.
 
 - **Migrate `flwr new` templates to Message API** ([#5901](https://github.com/adap/flower/pull/5901), [#5818](https://github.com/adap/flower/pull/5818), [#5893](https://github.com/adap/flower/pull/5893), [#5849](https://github.com/adap/flower/pull/5849), [#5883](https://github.com/adap/flower/pull/5883))
 
-	All `flwr new` templates have been updated to use the Message API. The PyTorch template based on the legacy API is retained and explicitly marked as legacy for those who prefer or require the older approach.
+  All `flwr new` templates have been updated to use the Message API. The PyTorch template based on the legacy API is retained and explicitly marked as legacy for those who prefer or require the older approach.
 
-### Migrate examples
-- **feat(examples): Update JAX example** ([#5869](https://github.com/adap/flower/pull/5869))
-- **feat(examples): Update custom mods example** ([#5879](https://github.com/adap/flower/pull/5879))
-- **refactor(examples): Update advanced examples to** `Message API` ([#5830](https://github.com/adap/flower/pull/5830))
-- **refactor(framework): Refactor a variable name for XGB quick-start example and template** ([#5907](https://github.com/adap/flower/pull/5907))
-- **refactor(examples): Add saving of final model for Hugging Face quickstart** ([#5888](https://github.com/adap/flower/pull/5888))
-- **refactor(examples): Migrate** `quickstart-mlx` **example to** `MessageAPI` ([#5833](https://github.com/adap/flower/pull/5833))
-- **refactor(examples): Update XGBoost comprehensive example** ([#5860](https://github.com/adap/flower/pull/5860))
-- **refactor(examples): Update FlowerTune-ViT example** ([#5880](https://github.com/adap/flower/pull/5880))
-- **refactor(examples): Migrate** `quickstart-fastai` **example to** `Message API` ([#5839](https://github.com/adap/flower/pull/5839))
-- **refactor(examples): Migrate** `quickstart-pytorch-lightning` **to** `Message API` ([#5834](https://github.com/adap/flower/pull/5834))
-- **refactor(examples): Migrate** `embedded-devices` **example to** `Message API` ([#5840](https://github.com/adap/flower/pull/5840))
-- **refactor(examples): Migrate** `quickstart-huggingface` **example to** `Message` **API** ([#5868](https://github.com/adap/flower/pull/5868))
-- **refactor(examples): Update XGBoost quick-start example** ([#5827](https://github.com/adap/flower/pull/5827))
-- **refactor(examples): Migrate** `flower-authentication` **example to the** `Message API` ([#5841](https://github.com/adap/flower/pull/5841))
-- **refactor(examples): Migrate** `quickstart-tensorflow` **to Message API** ([#5882](https://github.com/adap/flower/pull/5882))
-- **refactor(examples): Update FlowerTune-LLM example** ([#5875](https://github.com/adap/flower/pull/5875))
-- **refactor(examples): Update FL tabular example** ([#5892](https://github.com/adap/flower/pull/5892))
-- **fix(examples): Update the import path in XGBoost quick-start example** ([#5876](https://github.com/adap/flower/pull/5876))
-- **fix(examples): Update readmes** ([#5911](https://github.com/adap/flower/pull/5911))
-- **refactor(examples): Migrate** `quickstart-monai` **to Message API** ([#5887](https://github.com/adap/flower/pull/5887))
-- **refactor(examples): Update FedRAG example** ([#5889](https://github.com/adap/flower/pull/5889))
+- **Revamp main tutorials to use the Message API** ([#5861](https://github.com/adap/flower/pull/5861))
 
-### upgrade tutorial
-- **docs(framework): Update main tutorial to the** `Message API` ([#5861](https://github.com/adap/flower/pull/5861))
-- **docs(framework): Update quickstart JAX tutorial** ([#5896](https://github.com/adap/flower/pull/5896))
-- **docs(framework): Change docs sklearn example to Message API** ([#5891](https://github.com/adap/flower/pull/5891))
-- **docs(framework): Update quickstart PyTorch Lightning tutorial** ([#5898](https://github.com/adap/flower/pull/5898))
-- **docs(framework): Update** `MLX` **quickstart tutorials and fix that for** `PyTorch` ([#5862](https://github.com/adap/flower/pull/5862))
-- **docs(framework): Update quickstart Transformers tutorial** ([#5877](https://github.com/adap/flower/pull/5877))
-- **refactor(framework): Update** `quickstart-tensorflow` **tutorial to Message API** ([#5895](https://github.com/adap/flower/pull/5895))
-- **docs(framework): Update** `how-to-design-strategies` **guide to** `Message API` ([#5922](https://github.com/adap/flower/pull/5922))
-- **docs(framework): Update how to implement FedBN tutorial** ([#5927](https://github.com/adap/flower/pull/5927))
-- **docs(framework): Update XGBoost quick-start tutorial** ([#5906](https://github.com/adap/flower/pull/5906))
-- **docs(framework): Update how to save checkpoints tutorial** ([#5928](https://github.com/adap/flower/pull/5928))
-- **docs(framework): Update tutorial of how to aggregate eval results** ([#5921](https://github.com/adap/flower/pull/5921))
-- **docs(framework): Update** `how-to-configure-clients` **guide to** `Message API` ([#5923](https://github.com/adap/flower/pull/5923))
-- **docs(framework): Update tutorial of how to use built-in Mods** ([#5912](https://github.com/adap/flower/pull/5912))
-- **refactor(framework): Update quickstart-fastai tutorial to Message API** ([#5897](https://github.com/adap/flower/pull/5897))
-- **docs(framework): Migrate** `how-to` **do DP guide to** `Message API` ([#5916](https://github.com/adap/flower/pull/5916))
-- **docs(framework): Update** `how-to-design-stateful-clients` **guide to the** `Message API` ([#5924](https://github.com/adap/flower/pull/5924))
+  The primary tutorial series has been updated to showcase the Message API, providing new users with a modern and accurate starting point for developing federated learning applications. The revamped content improves alignment with recent architectural changes and enhances learning clarity. See the updated tutorial: [Get started with Flower](https://flower.ai/docs/framework/tutorial-series-get-started-with-flower-pytorch.html).
 
+- **Upgrade tutorials and how-to guides to the Message API** ([#5862](https://github.com/adap/flower/pull/5862), [#5877](https://github.com/adap/flower/pull/5877), [#5891](https://github.com/adap/flower/pull/5891), [#5895](https://github.com/adap/flower/pull/5895), [#5896](https://github.com/adap/flower/pull/5896), [#5897](https://github.com/adap/flower/pull/5897), [#5898](https://github.com/adap/flower/pull/5898), [#5906](https://github.com/adap/flower/pull/5906), [#5912](https://github.com/adap/flower/pull/5912), [#5916](https://github.com/adap/flower/pull/5916), [#5921](https://github.com/adap/flower/pull/5921), [#5922](https://github.com/adap/flower/pull/5922), [#5923](https://github.com/adap/flower/pull/5923), [#5924](https://github.com/adap/flower/pull/5924), [#5927](https://github.com/adap/flower/pull/5927), [#5928](https://github.com/adap/flower/pull/5928))
 
+  All framework tutorials and how-to guides have been fully migrated to the Message API. This includes quickstarts for JAX, TensorFlow, PyTorch Lightning, MLX, FastAI, Hugging Face Transformers, and XGBoost, along with comprehensive updates to guides covering strategy design, differential privacy, checkpointing, client configuration, evaluation aggregation, and stateful client implementation. These changes ensure all learning resources are up-to-date, aligned with the current architecture, and ready for developers building on the Message API.
 
-### flwr pull
-- **feat(framework): Introduce** `flwr pull` ([#5863](https://github.com/adap/flower/pull/5863))
+- **Migrate and update examples to support the Message API** ([#5827](https://github.com/adap/flower/pull/5827), [#5830](https://github.com/adap/flower/pull/5830), [#5833](https://github.com/adap/flower/pull/5833), [#5834](https://github.com/adap/flower/pull/5834), [#5839](https://github.com/adap/flower/pull/5839), [#5840](https://github.com/adap/flower/pull/5840), [#5841](https://github.com/adap/flower/pull/5841), [#5860](https://github.com/adap/flower/pull/5860), [#5868](https://github.com/adap/flower/pull/5868), [#5869](https://github.com/adap/flower/pull/5869), [#5875](https://github.com/adap/flower/pull/5875), [#5876](https://github.com/adap/flower/pull/5876), [#5879](https://github.com/adap/flower/pull/5879), [#5880](https://github.com/adap/flower/pull/5880), [#5882](https://github.com/adap/flower/pull/5882), [#5887](https://github.com/adap/flower/pull/5887), [#5888](https://github.com/adap/flower/pull/5888), [#5889](https://github.com/adap/flower/pull/5889), [#5892](https://github.com/adap/flower/pull/5892), [#5907](https://github.com/adap/flower/pull/5907), [#5911](https://github.com/adap/flower/pull/5911))
 
-### CI/CD
-- **ci(framework): Update CODEOWNERS** ([#5900](https://github.com/adap/flower/pull/5900))
-- **ci(examples): Fix** `isort` **behaviour in** `format.sh` **and** `test.sh` **for Flower Examples** ([#5856](https://github.com/adap/flower/pull/5856))
-- **ci(examples): Fail CI if any** `isort` **job fails** ([#5874](https://github.com/adap/flower/pull/5874))
-- **ci(examples): Fix** `isort` **for Flower Examples and make** `framework.yml` **run** `./dev/test.sh` **when** `examples/` **or** `benchmarks/` **changed** ([#5859](https://github.com/adap/flower/pull/5859))
-- **ci(:skip): Bump versions to** `v1.22.0` ([#5810](https://github.com/adap/flower/pull/5810))
-- **ci(:skip): Fix PR title check to avoid executing commands like** `echo 123` ([#5857](https://github.com/adap/flower/pull/5857))
-- **ci(:skip): Fix** `./dev/pyproject.toml` **format** ([#5858](https://github.com/adap/flower/pull/5858))
-- **ci(:skip): Add Pan as one of the owners of Flower Examples** ([#5854](https://github.com/adap/flower/pull/5854))
-- **ci(:skip): Ensure bootstrapping when examples are changed** ([#5865](https://github.com/adap/flower/pull/5865))
-- **ci(framework): Update CI tests to use** `flwr ls` **when checking for status of a run** ([#5843](https://github.com/adap/flower/pull/5843))
-- **ci(framework): Update E2E test for** `Control API` ([#5842](https://github.com/adap/flower/pull/5842))
+  Migrates a wide range of examples to the new Message API, ensuring consistency with recent framework updates. Examples updated include quickstarts (e.g., TensorFlow, PyTorch Lightning, Hugging Face, MONAI, FastAI, MLX), advanced use cases (e.g., FlowerTune for ViT and LLMs, FedRAG), and specialized scenarios (e.g., XGBoost, tabular data, embedded devices, authentication, and custom mods). Enhancements also include updated variable naming, model-saving logic, readme improvements, and import path corrections for better usability and alignment with the new API.
 
-### General improvements
-- **feat(framework): Allow YAML config for exec plugins** ([#5881](https://github.com/adap/flower/pull/5881))
-- **feat(framework): Use temporary directories in tests** ([#5844](https://github.com/adap/flower/pull/5844))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#5847](https://github.com/adap/flower/pull/5847))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#5886](https://github.com/adap/flower/pull/5886))
-- **docs(framework): Remove tutorial notebooks and update links in** `README.md` ([#5870](https://github.com/adap/flower/pull/5870))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#5872](https://github.com/adap/flower/pull/5872))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#5910](https://github.com/adap/flower/pull/5910))
-- **docs(framework): Correct highlight lines in "how to upgrade to Flower 1.13" guide** ([#5902](https://github.com/adap/flower/pull/5902))
-- **refactor(framework): Rename test file** ([#5903](https://github.com/adap/flower/pull/5903))
-- **refactor(examples): Format examples** ([#5873](https://github.com/adap/flower/pull/5873))
-- **refactor(framework): Pass** `Context` **received from SuperLink to** `ServerApp` **in** `flwr-simulation` ([#5890](https://github.com/adap/flower/pull/5890))
-- **feat(framework): Add** `TypedDict.copy` **method** ([#5909](https://github.com/adap/flower/pull/5909))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#5918](https://github.com/adap/flower/pull/5918))
+- **Introduce experimental `flwr pull` command** ([#5863](https://github.com/adap/flower/pull/5863))
 
+- **Improve CI/CD workflows** ([#5810](https://github.com/adap/flower/pull/5810), [#5842](https://github.com/adap/flower/pull/5842), [#5843](https://github.com/adap/flower/pull/5843), [#5854](https://github.com/adap/flower/pull/5854), [#5856](https://github.com/adap/flower/pull/5856), [#5857](https://github.com/adap/flower/pull/5857), [#5858](https://github.com/adap/flower/pull/5858), [#5859](https://github.com/adap/flower/pull/5859), [#5865](https://github.com/adap/flower/pull/5865), [#5874](https://github.com/adap/flower/pull/5874), [#5900](https://github.com/adap/flower/pull/5900), [#5815](https://github.com/adap/flower/pull/5815))
 
+- **General improvements** ([#5844](https://github.com/adap/flower/pull/5844), [#5870](https://github.com/adap/flower/pull/5870), [#5881](https://github.com/adap/flower/pull/5881), [#5890](https://github.com/adap/flower/pull/5890), [#5902](https://github.com/adap/flower/pull/5902), [#5903](https://github.com/adap/flower/pull/5903), [#5909](https://github.com/adap/flower/pull/5909), [#5873](https://github.com/adap/flower/pull/5873))
 
-### Unknown changes
-
-- **build(deps-dev): bump vite from 6.2.7 to 6.3.6 in /intelligence/ts** ([#5837](https://github.com/adap/flower/pull/5837))
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
 ## v1.21.0 (2025-09-10)
 
