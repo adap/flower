@@ -93,11 +93,11 @@ class LocalDpMod:
         Parameters
         ----------
         msg : Message
-            The message received from the server.
+            The message received from the ServerApp.
         ctxt : Context
-            The context of the client.
+            The context of the ClientApp.
         call_next : ClientAppCallable
-            The callable to call the next middleware in the chain.
+            The callable to call the next mod (or the ClientApp) in the chain.
 
         Returns
         -------
@@ -130,7 +130,7 @@ class LocalDpMod:
 
         # Ensure keys in returned ArrayRecord match those in the one sent from server
         if set(original_array_record.keys()) != set(client_to_server_arrecord.keys()):
-            return _handle_array_key_mismatch_err("adaptiveclipping_mod", out_msg)
+            return _handle_array_key_mismatch_err("LocalDpMod", out_msg)
 
         client_to_server_ndarrays = client_to_server_arrecord.to_numpy_ndarrays()
 
@@ -160,7 +160,7 @@ class LocalDpMod:
         )
 
         # Replace outgoing ArrayRecord's Array while preserving their keys
-        out_msg.content.array_records[new_array_record_key] = ArrayRecord(
+        out_msg.content[new_array_record_key] = ArrayRecord(
             OrderedDict(
                 {
                     k: Array(v)
