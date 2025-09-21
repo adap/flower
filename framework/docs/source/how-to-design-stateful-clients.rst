@@ -151,9 +151,9 @@ parameters of PyTorch and TensorFlow models.
 Saving NumPy arrays to the context
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Elements stored in a ``ArrayRecord`` are of type Array_, which is a data structure that
+Elements stored in an ``ArrayRecord`` are of type Array_, which is a data structure that
 holds ``bytes`` and metadata that can be used for deserialization. Let's see how to
-create an ``Array`` from a NumPy array and insert it into a ``ArrayRecord``.
+create an ``Array`` from a NumPy array and insert it into an ``ArrayRecord``.
 
 .. note::
 
@@ -182,7 +182,7 @@ Let's see how to use those functions to store a NumPy array into the context.
     # If we print it (note the binary data)
     # Array(dtype='float64', shape=[3, 3], stype='numpy.ndarray', data=b'\x93NUMPY\x01\x00v\x00...)
 
-    # It can be inserted in a ArrayRecord like this
+    # It can be inserted in an ArrayRecord like this
     arr_record = ArrayRecord()
     arr_record["my_array"] = arr
     # You can also do it via the constructor
@@ -273,7 +273,7 @@ of the model (as it happens each time a ``ClientApp`` is executed). You will nee
         assert torch.allclose(p, p_), "`state_dict`s do not match"
 
 And that's it! Recall that even though this example shows how to store the entire
-``state_dict`` in a ``ArrayRecord``, you can just save part of it. The process would be
+``state_dict`` in an ``ArrayRecord``, you can just save part of it. The process would be
 identical, but you might need to adjust how it is loaded into an existing model using
 PyTorch APIs.
 
