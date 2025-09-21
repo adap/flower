@@ -56,10 +56,10 @@ structures that need to be serialized. Let's see a few examples:
     # It can also communicate strings and booleans
     config = ConfigRecord({"augment": True, "wandb-project-name": "awesome-flower-app"})
 
-When you use a Flower strategy, the easieset way to get your ``ConfigRecord``
-communicate as part of the ``Message`` that gets sent to the ``ClientApp`` is by passing
-it to the |strategy_start_link|_ of your strategy of choice (e.g. |fedavg_link|_). Let's
-see how this looks like in code:
+When you use a Flower strategy, the easiest way to get your ``ConfigRecord``
+communicated as part of the ``Message`` that gets sent to the ``ClientApp`` is by
+passing it to the |strategy_start_link|_ of your strategy of choice (e.g.
+|fedavg_link|_). Let's see how this looks like in code:
 
 .. code-block:: python
     :emphasize-lines: 18,24
@@ -98,27 +98,28 @@ advance?
     Note that Flower strategies insert the current server round number into the
     ``ConfigRecord`` for you under the key ``server-round``. In this way, the
     ``ClientApp`` knows what's the current round of the federated learning process. Note
-    this is always even if no ``ConfigRecord`` is passed to the strategy ``start``
-    method. When that's the case, the only content of the ``ConfigRecord`` that arrive
-    to the ``ClientApp`` will be such key with the corresponding round number.
+    this is always inserted even if no ``ConfigRecord`` is passed to the strategy
+    ``start`` method. When that's the case, the only content of the ``ConfigRecord``
+    that arrives to the ``ClientApp`` will be such key with the corresponding round
+    number.
 
 Dynamic modification of ``ConfigRecord``
 ----------------------------------------
 
 Given a ``ConfigRecord`` passed upon starting the execution of a strategy (i.e. passed
-to the |strategy_start_link|_ method), the contents of in the ``ConfigRecord`` that
-arrive to the ``ClientApp`` won't change (With the exception of the value under the
+to the |strategy_start_link|_ method), the contents of the ``ConfigRecord`` that arrive
+to the ``ClientApp`` won't change (with the exception of the value under the
 ``server-round`` key).
 
-Howerver, some applications do benefit or even require certain dynamism in the
-configuration values that one might sent over to the ``ClientApps``. For example, the
+However, some applications do benefit or even require certain dynamism in the
+configuration values that one might send over to the ``ClientApps``. For example, the
 learning rate the local optimizers at the ``ClientApps`` make use of. As the federated
 learning rounds go by, it is often reasonable to reduce the learning rate. This dynamism
 can be introduced at the strategy by implementing a custom strategy that just overrides
 the ``configure_train`` method. This method is responsible for, among other aspects, to
 create the ``Messages`` that will be sent to the ``ClientApps``. These ``Messages``
 would typically include an |arrayrecord_link|_ carrying the parameters of the model to
-be federated as well the ``ConfigRecord`` containing the configurations that the
+be federated as well as the ``ConfigRecord`` containing the configurations that the
 ``ClientApp`` should use. Let's see how to design a custom strategy that alters the
 ``ConfigRecord`` passed to the ``start`` method.
 
@@ -127,7 +128,7 @@ be federated as well the ``ConfigRecord`` containing the configurations that the
     To learn more about how ``configure_train`` and other methods in the strategies
     check the :doc:`Strategies Explainer <how-to-implement-strategies>`.
 
-Let's create a new class inheriting from _|edavg_link|_ and override the
+Let's create a new class inheriting from |fedavg_link|_ and override the
 ``configure_train`` method. We then use this new strategy in our ``ServerApp``.
 
 .. code-block:: python
@@ -155,5 +156,5 @@ In this how-to guide we have focused on how to define (when calling the ``start`
 of the strategy) and modify (by overriding the ``configure_train`` method) a
 ``ConfigRecord`` to customize how ``ClientApps`` do training. You may follow equivalent
 steps to define and customize the ``ConfigRecord`` for an evaluation round. To do this
-use the ``evaluate_config`` in the startegy ``start`` method and then override the
+use the ``evaluate_config`` in the strategy ``start`` method and then override the
 ``configure_evaluate`` method.
