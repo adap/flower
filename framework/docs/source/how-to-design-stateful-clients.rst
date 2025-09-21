@@ -69,9 +69,9 @@ Let's begin with a simple setting in which ``ClientApp`` is defined as follows. 
         print(n)
 
 With the minimal ``ClientApp`` above, each time a ``Message`` is addressed to this
-``train`` function a new random integer will be generated and printed. Let's say we want
+``train`` function, a new random integer will be generated and printed. Let's say we want
 to save that randomly generated integer and append it to a list that persists in the
-``Context`` so, each time this ``ClientApp`` function is executed, it prints the history
+``Context``. This way, each time the function executes,, it prints the history
 of random integers. Let's see how this looks in code:
 
 .. tip::
@@ -103,10 +103,9 @@ of random integers. Let's see how this looks in code:
         # Append to list in context or initialize if it doesn't exist
         if record_name not in context.state:
             # Initialize MetricRecord in state
-            context.state[record_name] = MetricRecord({metric_name: [n]})
-        else:
-            # Append to record
-            context.state[record_name][metric_name].append(n)
+            context.state[record_name] = MetricRecord({metric_name: []})
+        # Append to record
+        context.state[record_name][metric_name].append(n)
 
         # Print history
         print(context.state.metric_records)
@@ -120,16 +119,16 @@ messages might differ slightly between rounds.
 .. code-block:: shell
 
     # round 1
-    config_records={'random_metrics': {'random-ints': [2]}}
-    config_records={'random_metrics': {'random-ints': [7]}}
+    config_records={'random-metrics': {'random-ints': [2]}}
+    config_records={'random-metrics': {'random-ints': [7]}}
 
     # round 2
-    config_records={'random_metrics': {'random-ints': [2, 5]}}
-    config_records={'random_metrics': {'random-ints': [7, 4]}}
+    config_records={'random-metrics': {'random-ints': [2, 5]}}
+    config_records={'random-metrics': {'random-ints': [7, 4]}}
 
     # round 3
-    config_records={'random_metrics': {'random-ints': [2, 5, 1]}}
-    config_records={'random_metrics': {'random-ints': [7, 4, 2]}}
+    config_records={'random-metrics': {'random-ints': [2, 5, 1]}}
+    config_records={'random-metrics': {'random-ints': [7, 4, 2]}}
 
 Saving model parameters to the context
 --------------------------------------
@@ -137,7 +136,7 @@ Saving model parameters to the context
 Using ConfigRecord_ or MetricRecord_ to save "simple" components is fine (e.g., float,
 integer, boolean, string, bytes, and lists of these types. Note that MetricRecord_ only
 supports float, integer, and lists of these types). Flower has a specific type of
-record, an ArrayRecord_, for storing model parameters or more generally data arrays.
+record, an ArrayRecord_, for storing model parameters, or more generally, data arrays.
 
 Let's see a couple of examples of how to save NumPy arrays first and then how to save
 parameters of PyTorch and TensorFlow models.
