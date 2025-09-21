@@ -155,16 +155,30 @@ and delta.
 
 Below is a code example that shows how to use ``LocalDpMod``:
 
+.. note::
+
+    Apply the mod only to the functions that require it. For example, to use local DP
+    during training, add the mod to the training function with
+    ``@app.train(mods=[your_mod])``. Avoid adding it directly to ``ClientApp`` with
+    ``ClientApp(mods=[your_mod])``, as this applies the mod to all functions (including
+    evaluation), which is generally unnecessary and error-prone.
+
 .. code-block:: python
+    :emphasize-lines: 8,11
 
     from flwr.clientapp import ClientApp
     from flwr.clientapp.mod import LocalDpMod
 
+    # Initialize the client app
+    app = ClientApp()
+
     # Create an instance of the mod with the required params
     local_dp_obj = LocalDpMod(cfg.clipping_norm, cfg.sensitivity, cfg.epsilon, cfg.delta)
 
-    # Add local_dp_obj to the client-side mods
-    app = ClientApp(mods=[local_dp_obj])
+
+    # Add the mod to your training function
+    @app.train(mods=[local_dp_obj])
+    def train(message, context): ...
 
 Please note that the order of mods, especially those that modify parameters, is
 important when using multiple modifiers. Typically, differential privacy (DP) modifiers
