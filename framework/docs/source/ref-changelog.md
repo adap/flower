@@ -25,6 +25,8 @@ We would like to give our special thanks to all the contributors who made the ne
 - **refactor(framework): Generate** `Error` **reply if validation checks don't pass in DP mods** ([#5913](https://github.com/adap/flower/pull/5913))
 - **refactor(framework): Redefine** `ClientAppCallable` **in** `clientapp` **module** ([#5915](https://github.com/adap/flower/pull/5915))
 - **feat(framework): Implement Bulyan for Message API** ([#5920](https://github.com/adap/flower/pull/5920))
+- **refactor(framework): Avoid mentioning `ArrayRecord` in the docstring for `weighted_by_key` for `FedMedian` and `Krum`** ([#5931](https://github.com/adap/flower/pull/5931))
+- **refactor(framework): Migrate** `LocalDP` **mod to** `Message API` ([#5917](https://github.com/adap/flower/pull/5917))
 
 - **Migrate `flwr new` templates to Message API** ([#5901](https://github.com/adap/flower/pull/5901), [#5818](https://github.com/adap/flower/pull/5818), [#5893](https://github.com/adap/flower/pull/5893), [#5849](https://github.com/adap/flower/pull/5849), [#5883](https://github.com/adap/flower/pull/5883))
 
@@ -70,6 +72,8 @@ We would like to give our special thanks to all the contributors who made the ne
 - **docs(framework): Update tutorial of how to use built-in Mods** ([#5912](https://github.com/adap/flower/pull/5912))
 - **refactor(framework): Update quickstart-fastai tutorial to Message API** ([#5897](https://github.com/adap/flower/pull/5897))
 - **docs(framework): Migrate** `how-to` **do DP guide to** `Message API` ([#5916](https://github.com/adap/flower/pull/5916))
+- **docs(framework): Update** `how-to-design-stateful-clients` **guide to the** `Message API` ([#5924](https://github.com/adap/flower/pull/5924))
+
 
 
 ### flwr pull
@@ -103,21 +107,6 @@ We would like to give our special thanks to all the contributors who made the ne
 - **feat(framework): Add** `TypedDict.copy` **method** ([#5909](https://github.com/adap/flower/pull/5909))
 - **docs(framework:skip): Update source texts for translations (auto)** ([#5918](https://github.com/adap/flower/pull/5918))
 
-
-
-### New features
-
-
-### Documentation improvements
-
-
-
-### Incompatible changes
-
-
-### Other changes
-
-- **refactor(framework): Migrate** `LocalDP` **mod to** `Message API` ([#5917](https://github.com/adap/flower/pull/5917))
 
 
 ### Unknown changes
