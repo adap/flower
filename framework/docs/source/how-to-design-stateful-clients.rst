@@ -103,18 +103,16 @@ random integers. Let's see how this looks in code:
         n = random.randint(0, 10)
         print(n)
 
-        record_name = "random-metrics"
-        metric_name = "random-ints"
-
         # Append to list in context or initialize if it doesn't exist
-        if record_name not in context.state:
+        if "random-metrics" not in context.state:
             # Initialize MetricRecord in state
-            context.state[record_name] = MetricRecord({metric_name: []})
+            context.state["random-metrics"] = MetricRecord({"random-ints": []})
+
         # Append to record
-        context.state[record_name][metric_name].append(n)
+        context.state["random-metrics"]["random-ints"].append(n)
 
         # Print history
-        print(context.state.metric_records)
+        print(context.state["random-metrics"])
         return Message(RecordDict(), reply_to=msg)
 
 If you run a Flower App including the above logic in your ``ClientApp`` and having just
