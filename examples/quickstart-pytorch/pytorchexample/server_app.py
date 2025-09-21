@@ -3,7 +3,7 @@
 import torch
 from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.serverapp import Grid, ServerApp
-from flwr.serverapp.strategy import FedAvg, Bulyan
+from flwr.serverapp.strategy import FedAvg
 
 from pytorchexample.task import Net, load_centralized_dataset, test
 
@@ -25,10 +25,7 @@ def main(grid: Grid, context: Context) -> None:
     arrays = ArrayRecord(global_model.state_dict())
 
     # Initialize FedAvg strategy
-    strategy = Bulyan(
-        fraction_evaluate=fraction_evaluate,
-        num_malicious_nodes=1,
-    )
+    strategy = FedAvg(fraction_evaluate=fraction_evaluate)
 
     # Start strategy, run FedAvg for `num_rounds`
     result = strategy.start(
