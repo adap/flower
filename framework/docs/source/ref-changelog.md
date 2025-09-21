@@ -22,10 +22,9 @@ We would like to give our special thanks to all the contributors who made the ne
 - **refactor(framework): Refactor** `Krum` **strategies** ([#5919](https://github.com/adap/flower/pull/5919))
 - **refactor(framework): Use** `│` **instead of** `|` **to ensure consistency and make it prettier** ([#5914](https://github.com/adap/flower/pull/5914))
 - **refactor(framework): Remove** `self.current_array = ...` **line in** `FedOpt` **subclasses for consistency** ([#5908](https://github.com/adap/flower/pull/5908))
-
-### Migrate DP mods
 - **refactor(framework): Generate** `Error` **reply if validation checks don't pass in DP mods** ([#5913](https://github.com/adap/flower/pull/5913))
 - **refactor(framework): Redefine** `ClientAppCallable` **in** `clientapp` **module** ([#5915](https://github.com/adap/flower/pull/5915))
+- **feat(framework): Implement Bulyan for Message API** ([#5920](https://github.com/adap/flower/pull/5920))
 
 - **Migrate `flwr new` templates to Message API** ([#5901](https://github.com/adap/flower/pull/5901), [#5818](https://github.com/adap/flower/pull/5818), [#5893](https://github.com/adap/flower/pull/5893), [#5849](https://github.com/adap/flower/pull/5849), [#5883](https://github.com/adap/flower/pull/5883))
 
@@ -70,6 +69,7 @@ We would like to give our special thanks to all the contributors who made the ne
 - **docs(framework): Update** `how-to-configure-clients` **guide to** `Message API` ([#5923](https://github.com/adap/flower/pull/5923))
 - **docs(framework): Update tutorial of how to use built-in Mods** ([#5912](https://github.com/adap/flower/pull/5912))
 - **refactor(framework): Update quickstart-fastai tutorial to Message API** ([#5897](https://github.com/adap/flower/pull/5897))
+- **docs(framework): Migrate** `how-to` **do DP guide to** `Message API` ([#5916](https://github.com/adap/flower/pull/5916))
 
 
 ### flwr pull
@@ -103,6 +103,26 @@ We would like to give our special thanks to all the contributors who made the ne
 - **feat(framework): Add** `TypedDict.copy` **method** ([#5909](https://github.com/adap/flower/pull/5909))
 - **docs(framework:skip): Update source texts for translations (auto)** ([#5918](https://github.com/adap/flower/pull/5918))
 
+
+
+### New features
+
+
+### Documentation improvements
+
+
+
+### Incompatible changes
+
+
+### Other changes
+
+- **refactor(framework): Migrate** `LocalDP` **mod to** `Message API` ([#5917](https://github.com/adap/flower/pull/5917))
+
+
+### Unknown changes
+
+- **build(deps-dev): bump vite from 6.2.7 to 6.3.6 in /intelligence/ts** ([#5837](https://github.com/adap/flower/pull/5837))
 
 ## v1.21.0 (2025-09-10)
 
