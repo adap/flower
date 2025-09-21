@@ -10,7 +10,7 @@ import tomli_w  # pip install tomli tomli-w
 # --- CONFIG TELEGRAM ---
 BOT_TOKEN = "8440783074:AAGBenk_eeglVRWIIvuNACUBCkhSxVJoAio"
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
-PROJECT_DIR = "/home/sarahfalco/IdeaProjects/flowerCrypto/examples/customCritptography"
+PROJECT_DIR = "/home/sarahfalco/IdeaProjects/flowerCrypto/examples/customCriptography"
 PYPROJECT_FILE = os.path.join(PROJECT_DIR, "pyproject.toml")
 VENV_DIR = "/home/sarahfalco/IdeaProjects/flowerCrypto/framework/py/flwr/venv"
 VENV_PYTHON = "/home/sarahfalco/IdeaProjects/flowerCrypto/framework/py/flwr/venv/bin/python3"
@@ -34,15 +34,6 @@ def send_file(chat_id, file_path):
     except Exception as e:
         send_message(chat_id, f"❌ Errore invio file: {e}")
 
-# --- MODIFICA TOML ---
-def update_pyproject(params: dict):
-    with open(PYPROJECT_FILE, "rb") as f:
-        toml_data = tomli.load(f)
-    config = toml_data.setdefault("tool", {}).setdefault("flwr", {}).setdefault("app", {}).setdefault("config", {})
-    for k, v in params.items():
-        config[k] = v
-    with open(PYPROJECT_FILE, "wb") as f:
-        tomli_w.dump(toml_data, f)
 
 # --- PARSING E RUN ---
 def parse_and_run(command: str, chat_id: int):
@@ -60,9 +51,8 @@ def parse_and_run(command: str, chat_id: int):
                 pass
             params[k] = v
 
-    if params:
-        send_message(chat_id, f"⚡ Aggiorno pyproject.toml con {params}")
-        update_pyproject(params)
+
+
 
     send_message(chat_id, f"🚀 Lancio Flower nella cartella {PROJECT_DIR} ...")
     try:

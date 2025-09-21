@@ -1,5 +1,7 @@
 """authexample: An authenticated Flower / PyTorch app."""
+import os
 
+import psutil
 import torch
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
@@ -26,11 +28,11 @@ class FlowerClient(NumPyClient):
         self.local_epochs = local_epochs
         self.lr = learning_rate
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
+        self.proc = psutil.Process(os.getpid())
     def fit(self, parameters, config):
         """Train the model with data of this client."""
-
         set_weights(self.net, parameters)
+        cpu_before = self.proc.cpu_percent(interval=None)
         results = train(
             self.net,
             self.trainloader,
@@ -39,6 +41,8 @@ class FlowerClient(NumPyClient):
             self.lr,
             self.device,
         )
+        cpu_after = self.proc.cpu_percent(interval=None)
+        print(f"[DEBUG] CPU percent complessiva durante fit: {cpu_after - cpu_before:.2f}%")
         return get_weights(self.net), len(self.trainloader.dataset), results
 
     def evaluate(self, parameters, config):
