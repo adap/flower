@@ -45,7 +45,7 @@ This section will demonstrate how to save metrics such as accuracy/loss values t
 Context_ so they can be used in subsequent executions of the ``ClientApp``.
 
 Let's begin with a simple setting in which ``ClientApp`` is defined as follows. The
-``train()`` function only generates a random number and prints it.
+``train()`` function only generates a random number, prints it, and return an empty message.
 
 .. tip::
 
@@ -67,6 +67,7 @@ Let's begin with a simple setting in which ``ClientApp`` is defined as follows. 
         # Generate a random integer between 0 and 10
         n = random.randint(0, 10)
         print(n)
+        return Message(RecordDict(), reply_to=msg)
 
 With the minimal ``ClientApp`` above, each time a ``Message`` is addressed to this
 ``train`` function, a new random integer will be generated and printed. Let's say we want
@@ -109,12 +110,12 @@ of random integers. Let's see how this looks in code:
 
         # Print history
         print(context.state.metric_records)
+        return Message(RecordDict(), reply_to=msg)
 
 If you run a Flower App including the above logic in your ``ClientApp`` and having just
 two clients in your federation sampled in each round, you'll see an output similar to
 the one below. See how after each round the ``random-metrics`` record in the ``Context``
-gets one additional integer? Note that the order in which the clients log these
-messages might differ slightly between rounds.
+gets one additional integer? Note that, in Simulation Runtime, the order of log messages may change each round due to the random ordering of simulated clients.
 
 .. code-block:: shell
 
