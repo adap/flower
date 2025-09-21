@@ -23,7 +23,7 @@ Aggregate evaluation results
 
 Flower strategies (e.g. |fedavg_link|_ and all that derive from it) automatically
 aggregate the metrics in the |metricrecord_link|_ in the ``Messages`` replied by the
-``ClientApps``. By default a weighted aggregation is performed for all metrics using as
+``ClientApps``. By default, a weighted aggregation is performed for all metrics using as
 weight the value assigned to the ``weighted_by_key`` attribute of a strategy.
 
 When constructing your strategy, you can set both the key used to perform weighted
