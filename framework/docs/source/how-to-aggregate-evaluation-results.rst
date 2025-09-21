@@ -53,8 +53,8 @@ received in the reply of an evaluation round.
 .. note::
 
     Note that Flower strategies also have a ``train_metrics_aggr_fn`` attribute that
-    allows you to define a custom aggregation function for received ``MetricRecord`` objects
-    in reply messages of a training round. By default, it performs weighted
+    allows you to define a custom aggregation function for received ``MetricRecord``
+    objects in reply messages of a training round. By default, it performs weighted
     averaging using the value assigned to the ``weighted_by_key`` exactly as the
     ``evaluate_metrics_aggr_fn`` presented earlier.
 
