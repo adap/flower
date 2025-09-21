@@ -104,9 +104,6 @@ class LocalDpMod:
         Message
             The modified message to be sent back to the server.
         """
-        if msg.metadata.message_type != MessageType.TRAIN:
-            return call_next(msg, ctxt)
-
         if len(msg.content.array_records) != 1:
             return _handle_multi_record_err("LocalDpMod", msg, ArrayRecord)
 
