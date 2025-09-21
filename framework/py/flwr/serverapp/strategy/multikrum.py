@@ -188,8 +188,8 @@ def compute_distances(records: list[ArrayRecord]) -> NDArray:
 
 def select_multikrum(
     contents: list[RecordDict],
-    num_malicious_nodes: int = 0,
-    num_nodes_to_select: int = 1,
+    num_malicious_nodes: int,
+    num_nodes_to_select: int,
 ) -> list[RecordDict]:
     """Select the set of RecordDicts to aggregate using the Krum or MultiKrum algorithm.
 
@@ -203,9 +203,9 @@ def select_multikrum(
     contents : list[RecordDict]
         List of contents from reply messages, where each content is a RecordDict
         containing an ArrayRecord of model parameters from a node (client).
-    num_malicious_nodes : int (default: 0)
-        Number of malicious nodes in the system. Defaults to 0.
-    num_nodes_to_select : int (default: 1)
+    num_malicious_nodes : int
+        Number of malicious nodes in the system.
+    num_nodes_to_select : int
         Number of client updates to select.
         - If 1, the algorithm reduces to classical Krum (selecting a single update).
         - If >1, Multi-Krum is applied (selecting multiple updates).
