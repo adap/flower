@@ -15,6 +15,7 @@
 """ServerApp strategies."""
 
 
+from .bulyan import Bulyan
 from .dp_adaptive_clipping import (
     DifferentialPrivacyClientSideAdaptiveClipping,
     DifferentialPrivacyServerSideAdaptiveClipping,
@@ -40,6 +41,7 @@ from .result import Result
 from .strategy import Strategy
 
 __all__ = [
+    "Bulyan",
     "DifferentialPrivacyClientSideAdaptiveClipping",
     "DifferentialPrivacyClientSideFixedClipping",
     "DifferentialPrivacyServerSideAdaptiveClipping",
