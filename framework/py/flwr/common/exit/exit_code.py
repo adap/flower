@@ -45,6 +45,7 @@ class ExitCode:
     SUPERNODE_NODE_AUTH_KEYS_INVALID = 302
 
     # SuperExec-specific exit codes (400-499)
+    SUPEREXEC_INVALID_PLUGIN_CONFIG = 400
 
     # Common exit codes (600-699)
     COMMON_ADDRESS_INVALID = 600
@@ -112,6 +113,9 @@ EXIT_CODE_HELP = {
         "file and try again."
     ),
     # SuperExec-specific exit codes (400-499)
+    ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (
+        "The YAML configuration for the SuperExec plugin is invalid."
+    ),
     # Common exit codes (600-699)
     ExitCode.COMMON_ADDRESS_INVALID: (
         "Please provide a valid URL, IPv4 or IPv6 address."

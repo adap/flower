@@ -155,6 +155,8 @@ PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
 # ControlServicer constants
 RUN_ID_NOT_FOUND_MESSAGE = "Run ID not found"
 NO_USER_AUTH_MESSAGE = "ControlServicer initialized without user authentication"
+NO_ARTIFACT_PROVIDER_MESSAGE = "ControlServicer initialized without artifact provider"
+PULL_UNFINISHED_RUN_MESSAGE = "Cannot pull artifacts for an unfinished run"
 
 
 class MessageType:
@@ -200,6 +202,7 @@ class ErrorCode:
     MESSAGE_UNAVAILABLE = 3
     REPLY_MESSAGE_UNAVAILABLE = 4
     NODE_UNAVAILABLE = 5
+    MOD_FAILED_PRECONDITION = 6
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""

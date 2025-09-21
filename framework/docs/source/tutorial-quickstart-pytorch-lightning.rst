@@ -44,12 +44,8 @@ Next, activate your environment, then run:
     $ pip install -e .
 
 By default, Flower Simulation Engine will be started and it will create a federation of
-4 nodes using `FedAvg
-<https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_
-as the aggregation strategy. The dataset will be partitioned using Flower Dataset's
-`IidPartitioner
-<https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
-To run the project, do:
+4 nodes using |fedavg|_ as the aggregation strategy. The dataset will be partitioned
+using Flower Dataset's |iidpartitioner|_. To run the project, do:
 
 .. code-block:: shell
 
@@ -62,36 +58,64 @@ With default arguments you will see an output like this one:
 
     Loading project configuration...
     Success
-    INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
+    INFO :      Starting FedAvg strategy:
+    INFO :          ├── Number of rounds: 3
+    INFO :          ├── ArrayRecord (0.39 MB)
+    INFO :          ├── ConfigRecord (train): (empty!)
+    INFO :          ├── ConfigRecord (evaluate): (empty!)
+    INFO :          ├──> Sampling:
+    INFO :          │       ├──Fraction: train (0.50) | evaluate ( 0.50)
+    INFO :          │       ├──Minimum nodes: train (2) | evaluate (2)
+    INFO :          │       └──Minimum available nodes: 2
+    INFO :          └──> Keys in records:
+    INFO :                  ├── Weighted by: 'num-examples'
+    INFO :                  ├── ArrayRecord key: 'arrays'
+    INFO :                  └── ConfigRecord key: 'config'
     INFO :
-    INFO :      [INIT]
-    INFO :      Using initial global parameters provided by strategy
-    INFO :      Starting evaluation of initial global parameters
-    INFO :      Evaluation returned no results (`None`)
     INFO :
-    INFO :      [ROUND 1]
-    INFO :      configure_fit: strategy sampled 2 clients (out of 4)
-    INFO :      aggregate_evaluate: received 2 results and 0 failures
-    WARNING :   No evaluate_metrics_aggregation_fn provided
+    INFO :      [ROUND 1/3]
+    INFO :      configure_train: Sampled 2 nodes (out of 4)
+    INFO :      aggregate_train: Received 2 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.0487}
+    INFO :      configure_evaluate: Sampled 2 nodes (out of 4)
+    INFO :      aggregate_evaluate: Received 2 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 0.0495}
     INFO :
-    INFO :      [ROUND 2]
-    INFO :      configure_fit: strategy sampled 2 clients (out of 4)
-    INFO :      aggregate_fit: received 2 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 2 clients (out of 4)
-    INFO :      aggregate_evaluate: received 2 results and 0 failures
+    INFO :      [ROUND 2/3]
+    INFO :      configure_train: Sampled 2 nodes (out of 4)
+    INFO :      aggregate_train: Received 2 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.0420}
+    INFO :      configure_evaluate: Sampled 2 nodes (out of 4)
+    INFO :      aggregate_evaluate: Received 2 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 0.0455}
     INFO :
-    INFO :      [ROUND 3]
-    INFO :      configure_fit: strategy sampled 2 clients (out of 4)
-    INFO :      aggregate_fit: received 2 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 2 clients (out of 4)
-    INFO :      aggregate_evaluate: received 2 results and 0 failures
+    INFO :      [ROUND 3/3]
+    INFO :      configure_train: Sampled 2 nodes (out of 4)
+    INFO :      aggregate_train: Received 2 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.05082}
+    INFO :      configure_evaluate: Sampled 2 nodes (out of 4)
+    INFO :      aggregate_evaluate: Received 2 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'eval_loss': 0.0441}
     INFO :
-    INFO :      [SUMMARY]
-    INFO :      Run finished 3 round(s) in 136.92s
-    INFO :          History (loss, distributed):
-    INFO :                  round 1: 0.04982871934771538
-    INFO :                  round 2: 0.046457378193736076
-    INFO :                  round 3: 0.04506748169660568
+    INFO :      Strategy execution finished in 159.24s
+    INFO :
+    INFO :      Final results:
+    INFO :
+    INFO :          Global Arrays:
+    INFO :                  ArrayRecord (0.389 MB)
+    INFO :
+    INFO :          Aggregated ClientApp-side Train Metrics:
+    INFO :          { 1: {'train_loss': '4.8696e-02'},
+    INFO :            2: {'train_loss': '4.1957e-02'},
+    INFO :            3: {'train_loss': '5.0818e-02'}}
+    INFO :
+    INFO :          Aggregated ClientApp-side Evaluate Metrics:
+    INFO :          { 1: {'eval_loss': '4.9516e-02'},
+    INFO :            2: {'eval_loss': '4.5510e-02'},
+    INFO :            3: {'eval_loss': '4.4052e-02'}}
+    INFO :
+    INFO :          ServerApp-side Evaluate Metrics:
+    INFO :          {}
     INFO :
 
 Each simulated `ClientApp` (two per round) will also log a summary of their local
@@ -120,3 +144,11 @@ in ``pyproject.toml`` like this:
     <https://github.com/adap/flower/tree/main/examples/quickstart-pytorch-lightning>`_
     of this tutorial in ``examples/quickstart-pytorch-lightning`` in the Flower GitHub
     repository.
+
+.. |fedavg| replace:: ``FedAvg``
+
+.. _fedavg: ref-api/flwr.serverapp.strategy.FedAvg.html
+
+.. |iidpartitioner| replace:: ``IidPartitioner``
+
+.. _iidpartitioner: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner
