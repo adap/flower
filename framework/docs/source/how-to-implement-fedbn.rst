@@ -16,8 +16,8 @@ Model
 -----
 
 A full introduction to federated learning with PyTorch and Flower can be found in
-:doc:`Quickstart PyTorch <tutorial-quickstart-pytorch>`. This how-to guide varies only a
-few details in ``task.py``. FedBN requires a model architecture (defined in class
+:doc:`Quickstart PyTorch <tutorial-quickstart-pytorch>`. This how-to guide changes only
+a few details in ``task.py``. FedBN requires a model architecture (defined in class
 ``Net()``) that uses Batch Normalization layers:
 
 .. code-block:: python
@@ -58,9 +58,9 @@ So far this should all look fairly familiar if you've used Flower with PyTorch b
 FedBN
 -----
 
-To adopt FedBN, we revise the ``train`` method in ClientApp. The batch normalization
-parameters are excluded from model parameter dict when sending to or receiving from the
-server:
+To adopt FedBN, we revise the ``train`` method in ``ClientApp``. The batch normalization
+parameters are excluded from model state dict when sending to or receiving from the
+``ServerApp``:
 
 .. code-block:: python
 
@@ -102,6 +102,6 @@ Your PyTorch project now runs federated learning with FedBN. Congratulations!
 Next Steps
 ----------
 
-The example is of course over-simplified since all clients load the exact same dataset.
-This isn't realistic. You now have the tools to explore this topic further. How about
-using different subsets of CIFAR-10 on each client? How about adding more clients?
+The example is certainly over-simplified since all ``ClientApp``\s load the exact same
+dataset. This isn't realistic. You now have the tools to explore this topic further. How
+about using different subsets of CIFAR-10 on each client? How about adding more clients?
