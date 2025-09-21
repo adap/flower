@@ -129,7 +129,7 @@ class LocalDpMod:
         )
 
         # Ensure keys in returned ArrayRecord match those in the one sent from server
-        if set(original_array_record.keys()) != set(client_to_server_arrecord.keys()):
+        if list(original_array_record.keys()) != list(client_to_server_arrecord.keys()):
             return _handle_array_key_mismatch_err("LocalDpMod", out_msg)
 
         client_to_server_ndarrays = client_to_server_arrecord.to_numpy_ndarrays()
