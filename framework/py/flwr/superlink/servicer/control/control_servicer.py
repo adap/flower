@@ -390,7 +390,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Call artifact provider
         download_url = self.artifact_provider.get_url(run_id)
-        return PullArtifactsResponse(url=download_url)
+        hyperlink = f"\033]8;;{download_url}\033\\here\033]8;;\033\\"
+        return PullArtifactsResponse(url=hyperlink)
 
 
 def _create_list_runs_response(
