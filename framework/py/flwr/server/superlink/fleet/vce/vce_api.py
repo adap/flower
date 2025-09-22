@@ -63,6 +63,7 @@ def _register_node_info_stores(
     node_info_store: dict[int, DeprecatedRunInfoStore] = {}
     for node_id, partition_id in nodes_mapping.items():
         data_path = os.environ.get("FLOWER_DATA_PATH", None)
+        print(f"{data_path = }")
         if data_path is None:
             raise ValueError(
                 "The `FLOWER_DATA_PATH` environment variable is not set. Ensure it is "
@@ -86,6 +87,7 @@ def _register_node_info_stores(
             run_id=run.run_id, run=run, app_dir=app_dir
         )
 
+    print(node_info_store)
     return node_info_store
 
 
