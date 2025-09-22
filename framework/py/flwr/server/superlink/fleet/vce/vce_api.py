@@ -86,7 +86,7 @@ def _register_node_info_stores(
         node_info_store[node_id].register_context(
             run_id=run.run_id, run=run, app_dir=app_dir
         )
-        print(node_info_store[node_id])
+        print(node_info_store[node_id].node_config)
 
     return node_info_store
 
