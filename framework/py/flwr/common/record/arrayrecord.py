@@ -147,7 +147,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         keep_input: bool = True,
     ) -> None: ...
 
-    # This is also required for Torch state dict because they are not strongly typed
+    # This is also required for PyTorch state dict because they are not strongly typed
     @overload
     def __init__(  # noqa: E704
         self,
