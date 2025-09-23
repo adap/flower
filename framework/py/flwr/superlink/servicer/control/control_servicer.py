@@ -67,6 +67,8 @@ from flwr.superlink.artifact_provider import ArtifactProvider
 
 from .control_user_auth_interceptor import shared_account_info
 
+MAX_NUM_RUNS_PER_USER = 5
+
 
 class ControlServicer(control_pb2_grpc.ControlServicer):
     """Control API servicer."""
@@ -107,6 +109,22 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
         fab_file = request.fab.content
+
+        # Check if too many runs are submitted from that user
+        submitted_run_ids = state.get_run_ids(flwr_aid)
+        submitted_run_statuses = state.get_run_status(submitted_run_ids)
+        non_finished_run_ids = {
+            run_id
+            for run_id, run_status in submitted_run_statuses.items()
+            if run_status.status != Status.FINISHED
+        }
+        if len(non_finished_run_ids) >= MAX_NUM_RUNS_PER_USER:
+            log(ERROR, "Maximum number of concurrent runs reached for user.")
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "⚠️ You already have 5 runs in progress. "
+                "Please wait until some finish before starting a new one.",
+            )
 
         try:
             # Check that num-supernodes is set
