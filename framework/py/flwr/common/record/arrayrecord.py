@@ -160,7 +160,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         self,
         *args: Any,
         numpy_ndarrays: list[NDArray] | None = None,
-        torch_state_dict: OrderedDict[str, torch.Tensor] | None = None,
+        torch_state_dict: OrderedDict[str, torch.Tensor] | dict[str, Any] | None = None,
         array_dict: OrderedDict[str, Array] | None = None,
         keep_input: bool = True,
     ) -> None:
