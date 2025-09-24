@@ -24,8 +24,9 @@ from time import sleep
 from typing import Optional
 from unittest import TestCase
 
-from flwr.client import Client, ClientApp, NumPyClient
-from flwr.client.client_app import LoadClientAppError
+from flwr.client import Client, NumPyClient
+from flwr.clientapp import ClientApp
+from flwr.clientapp.client_app import LoadClientAppError
 from flwr.common import (
     DEFAULT_TTL,
     Config,

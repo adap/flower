@@ -22,8 +22,8 @@ from unittest import TestCase
 import ray
 
 from flwr.client import Client, NumPyClient
-from flwr.client.client_app import ClientApp
 from flwr.client.run_info_store import DeprecatedRunInfoStore
+from flwr.clientapp import ClientApp
 from flwr.common import (
     DEFAULT_TTL,
     Config,

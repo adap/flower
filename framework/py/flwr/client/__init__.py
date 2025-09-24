@@ -24,7 +24,6 @@ from .typing import ClientFnExt as ClientFnExt
 
 __all__ = [
     "Client",
-    "ClientApp",
     "ClientFn",
     "ClientFnExt",
     "NumPyClient",
