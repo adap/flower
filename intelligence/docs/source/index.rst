@@ -3,8 +3,8 @@ Flower Intelligence
 
 .. note::
 
-    Flower Confidential Remote Compute is now **publicly available**! You can sign up directly
-    on the Flower Intelligence `page <https://flower.ai/intelligence>`_.
+    Flower Confidential Remote Compute is now **publicly available**! You can sign up
+    directly on the Flower Intelligence `page <https://flower.ai/intelligence>`_.
 
 Flower Intelligence is a cross-platform inference library that let's user seamlessly
 interact with Large-Language Models both locally and remotely in a secure and private
@@ -1044,8 +1044,8 @@ Embedding
 .. warning::
 
     This feature currently only works with Flower Confidential Remote Compute on the
-    TypeScript SDK. If you are interested in using Confidential Remote Compute, you 
-    can signup on the Flower Intelligence `page <https://flower.ai/intelligence>`_.
+    TypeScript SDK. If you are interested in using Confidential Remote Compute, you can
+    signup on the Flower Intelligence `page <https://flower.ai/intelligence>`_.
 
 You can embed some text or an array of texts using the ``embed`` method of the
 ``FlowerIntelligence`` obeject (currently this only works with the
