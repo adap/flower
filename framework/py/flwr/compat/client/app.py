@@ -28,7 +28,7 @@ from flwr.app.error import Error
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
-from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.clientapp.client_app import ClientApp, LoadClientAppError
 from flwr.client.message_handler.message_handler import handle_control_message
 from flwr.client.numpy_client import NumPyClient
 from flwr.client.run_info_store import DeprecatedRunInfoStore

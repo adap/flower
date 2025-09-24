@@ -18,7 +18,6 @@
 from ..compat.client.app import start_client as start_client  # Deprecated
 from ..compat.client.app import start_numpy_client as start_numpy_client  # Deprecated
 from .client import Client as Client
-from .client_app import ClientApp as ClientApp
 from .numpy_client import NumPyClient as NumPyClient
 from .typing import ClientFn as ClientFn
 from .typing import ClientFnExt as ClientFnExt

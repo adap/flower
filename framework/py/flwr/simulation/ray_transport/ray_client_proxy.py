@@ -21,7 +21,7 @@ from typing import Optional
 
 from flwr import common
 from flwr.client import ClientFnExt
-from flwr.client.client_app import ClientApp
+from flwr.clientapp.client_app import ClientApp
 from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordDict, now
 from flwr.common.constant import (
