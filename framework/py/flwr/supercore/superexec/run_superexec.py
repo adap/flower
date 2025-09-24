@@ -18,6 +18,7 @@
 import time
 from logging import WARN
 from typing import Any, Optional, Union
+import random
 
 from flwr.common.config import get_flwr_dir
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
@@ -127,9 +128,15 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
             message=f"Invalid plugin config: {e!r}",
         )
 
+    # One-time randomized startup delay (0–3s)
+    time.sleep(random.uniform(0, 3))
+
     # Start the main loop
     try:
         while True:
+            # Sleep for a while before checking again
+            time.sleep(random.expovariate(1/5))  # Average: 5s
+
             # Fetch suitable run IDs
             ls_req = ListAppsToLaunchRequest()
             ls_res = stub.ListAppsToLaunch(ls_req)
@@ -147,9 +154,6 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
                 # Launch the app if a token was granted; do nothing if not
                 if tk_res.token:
                     plugin.launch_app(token=tk_res.token, run_id=run_id)
-
-            # Sleep for a while before checking again
-            time.sleep(1)
     finally:
         channel.close()
 
