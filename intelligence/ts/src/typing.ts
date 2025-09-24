@@ -19,9 +19,9 @@ export type JsonValue =
   | string
   | number
   | boolean
-  | null
   | JsonValue[]
-  | { [key: string]: JsonValue };
+  | { [key: string]: JsonValue }
+  | null;
 
 /**
  * Represents a message in a chat session.
