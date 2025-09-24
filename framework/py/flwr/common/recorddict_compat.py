@@ -233,9 +233,11 @@ def recorddict_to_fitins(recorddict: RecordDict, keep_input: bool) -> FitIns:
 
 def fitins_to_recorddict(fitins: FitIns, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a FitIns object."""
-
+    recorddict = _fit_or_evaluate_ins_to_recorddict(fitins, keep_input)
+    from .crypto.utils import log_serialization_size
+    log_serialization_size(recorddict, tag="fitins", mtu=1500)
     #("Server serializza")
-    return _fit_or_evaluate_ins_to_recorddict(fitins, keep_input)
+    return recorddict
 
 
 def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
@@ -276,7 +278,8 @@ def fitres_to_recorddict(fitres: FitRes, keep_input: bool) -> RecordDict:
         fitres.parameters,
         keep_input,
     )
-
+    from .crypto.utils import log_serialization_size
+    log_serialization_size(recorddict, tag="fitres", mtu=1500)
     # status
     recorddict = _embed_status_into_recorddict(res_str, fitres.status, recorddict)
 
