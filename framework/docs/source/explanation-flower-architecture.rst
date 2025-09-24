@@ -31,10 +31,11 @@ This is sometimes called a hub-and-spoke topology:
 In a real-world deployment, we typically want to run different projects on such a
 federation. Each project could use different hyperparameters, different model
 architectures, different aggregation strategies, or even different machine learning
-frameworks like PyTorch and TensorFlow. This is why, in Flower, both the server side and
-the client side are split into two parts. One part is long-lived and responsible for
-communicating across the network, the other part is short-lived and executes
-task-specific code.
+frameworks like PyTorch and TensorFlow.
+
+This is why, in Flower, both the server side and the client side are split into two
+parts. One part is long-lived and responsible for communicating across the network, the
+other part is short-lived and executes task-specific code.
 
 A Flower *server* is composed of **SuperLink**, **SuperExec**, and ``ServerApp``:
 
