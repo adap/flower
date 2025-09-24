@@ -14,8 +14,8 @@
 # ==============================================================================
 """Control API servicer."""
 
-
 import hashlib
+import os
 import time
 from collections.abc import Generator
 from logging import ERROR, INFO
@@ -153,10 +153,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
             # Initialize node config
             node_config = {}
+            data_path = os.environ.get("FLOWER_DATA_PATH", None)
             if self.artifact_provider is not None:
                 node_config = {
                     "output_dir": self.artifact_provider.output_dir,
                     "tmp_dir": self.artifact_provider.tmp_dir,
+                    "pathmnist": f"{data_path}/pathmnist",
+                    "dermamnist": f"{data_path}/dermamnist",
+                    "organamnist": f"{data_path}/organamnist",
+                    "retinamnist": f"{data_path}/retinamnist",
+                    "bloodmnist": f"{data_path}/bloodmnist",
                 }
 
             # Create an empty context for the Run
