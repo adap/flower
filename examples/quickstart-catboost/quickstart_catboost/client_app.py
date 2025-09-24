@@ -3,7 +3,7 @@
 import json
 
 from catboost import CatBoostClassifier, Pool
-from flwr.client import ClientApp
+from flwr.clientapp import ClientApp
 from flwr.common import ConfigRecord, Context, Message, RecordDict
 
 from quickstart_catboost.task import (

@@ -5,7 +5,8 @@ from logging import INFO
 from pathlib import Path
 
 import torch
-from flwr.client import Client, ClientApp, NumPyClient
+from flwr.client import Client, NumPyClient
+from flwr.clientapp import ClientApp
 from flwr.common import Context
 from flwr.common.logger import log
 from transformers import logging
