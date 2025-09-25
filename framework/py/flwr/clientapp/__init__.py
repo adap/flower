@@ -15,9 +15,8 @@
 """Public Flower ClientApp APIs."""
 
 
-from flwr.client.client_app import ClientApp
-
 from . import mod
+from .client_app import ClientApp as ClientApp
 
 __all__ = [
     "ClientApp",

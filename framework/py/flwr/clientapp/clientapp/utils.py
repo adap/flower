@@ -19,7 +19,7 @@ from logging import DEBUG
 from pathlib import Path
 from typing import Callable, Optional
 
-from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.clientapp.client_app import ClientApp, LoadClientAppError
 from flwr.common.config import (
     get_flwr_dir,
     get_metadata_from_config,

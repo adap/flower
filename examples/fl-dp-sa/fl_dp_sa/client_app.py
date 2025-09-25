@@ -1,8 +1,9 @@
 """fl_dp_sa: Flower Example using Differential Privacy and Secure Aggregation."""
 
 import torch
-from flwr.client import ClientApp, NumPyClient
+from flwr.client import NumPyClient
 from flwr.client.mod import fixedclipping_mod, secaggplus_mod
+from flwr.clientapp import ClientApp
 from flwr.common import Context
 
 from fl_dp_sa.task import Net, get_weights, load_data, set_weights, test, train

@@ -4,7 +4,7 @@ import mlx.core as mx
 import mlx.nn as nn
 import mlx.optimizers as optim
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
-from flwr.client import ClientApp
+from flwr.clientapp import ClientApp
 
 from mlxexample.task import (
     MLP,

@@ -3,7 +3,8 @@
 import os
 
 import numpy as np
-from flwr.client import Client, ClientApp, NumPyClient
+from flwr.client import Client, NumPyClient
+from flwr.clientapp import ClientApp
 from flwr.common import Context
 
 from custommetrics_example.task import eval_learning, get_model, load_data
