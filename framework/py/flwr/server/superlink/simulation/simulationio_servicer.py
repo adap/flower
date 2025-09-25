@@ -110,6 +110,11 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         # Attempt to create a token for the provided run ID
         token = state.create_token(request.run_id)
 
+        # Update run status to STARTING if a token was created
+        if token:
+            log(INFO, "Starting run %d", request.run_id)
+            state.update_run_status(request.run_id, RunStatus(Status.STARTING, "", ""))
+
         # Return the token
         return RequestTokenResponse(token=token or "")
 
@@ -152,14 +157,11 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
                 if result := ffs.get(run.fab_hash):
                     fab = Fab(run.fab_hash, result[0])
             if run and fab and serverapp_ctxt:
-                # Update run status to STARTING
-                if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
-                    log(INFO, "Starting run %d", run_id)
-                    return PullAppInputsResponse(
-                        context=context_to_proto(serverapp_ctxt),
-                        run=run_to_proto(run),
-                        fab=fab_to_proto(fab),
-                    )
+                return PullAppInputsResponse(
+                    context=context_to_proto(serverapp_ctxt),
+                    run=run_to_proto(run),
+                    fab=fab_to_proto(fab),
+                )
 
         # Raise an exception if the Run or Fab is not found,
         # or if the status cannot be updated to STARTING
