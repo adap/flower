@@ -19,6 +19,7 @@ from .task import (
 )
 
 
+
 # Define Flower Client
 class FlowerClient(NumPyClient):
     def __init__(self, trainloader, valloader, local_epochs, learning_rate):
@@ -29,10 +30,16 @@ class FlowerClient(NumPyClient):
         self.lr = learning_rate
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.proc = psutil.Process(os.getpid())
+
+    def _cpu_time(self):
+        t = self.proc.cpu_times()
+        return t.user + t.system
     def fit(self, parameters, config):
-        """Train the model with data of this client."""
         set_weights(self.net, parameters)
-        cpu_before = self.proc.cpu_percent(interval=None)
+
+        # inizio misurazione CPU
+        start_cpu = self._cpu_time()
+
         results = train(
             self.net,
             self.trainloader,
@@ -41,9 +48,15 @@ class FlowerClient(NumPyClient):
             self.lr,
             self.device,
         )
-        cpu_after = self.proc.cpu_percent(interval=None)
-        print(f"[DEBUG] CPU percent complessiva durante fit: {cpu_after - cpu_before:.2f}%")
-        return get_weights(self.net), len(self.trainloader.dataset), results
+
+        # fine misurazione CPU
+        end_cpu = self._cpu_time()
+        cpu_time = end_cpu - start_cpu
+
+        print(f"[DEBUG] CPU time durante fit: {cpu_time:.3f} s")
+
+        return get_weights(self.net), len(self.trainloader.dataset), {"cpu_fit": cpu_time}
+
 
     def evaluate(self, parameters, config):
         """Evaluate the model on the data this client has."""

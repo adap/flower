@@ -31,7 +31,7 @@ for ((i=1; i<=NUM_CLIENTS; i++)); do
     LOG_FILE="$LOG_DIR/client_$i.log"
 
     flower-supernode \
-      --superlink 192.168.1.50:9092 \
+      --superlink 127.0.0.1:9092 \
       --clientappio-api-address 0.0.0.0:${PORT} \
       $TLS_FLAG \
       --node-config "dataset-path=\"$DATASET\"" \

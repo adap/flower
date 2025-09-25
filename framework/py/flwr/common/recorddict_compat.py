@@ -13,11 +13,14 @@
 # limitations under the License.
 # ==============================================================================
 """RecordDict utilities."""
+import os
 import sys
 
 from collections import OrderedDict
 from collections.abc import Mapping
 from typing import Union, cast, get_args
+
+import psutil
 
 from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 from .crypto.crypto_selector import encrypt, decrypt, add_integrity, check_integrity
@@ -67,6 +70,13 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
     parameters : Parameters
         The parameters in the legacy format Parameters.
     """
+    proc = psutil.Process(os.getpid())
+
+    # Wall-clock start
+    start_wall = time.perf_counter()
+    # CPU time start
+    start_cpu = proc.cpu_times().user + proc.cpu_times().system
+
     start_tot=time.perf_counter()
     parameters = Parameters(tensors=[], tensor_type="")
 
@@ -87,10 +97,18 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
 
         if not keep_input:
             del record[key]
+    end_wall = time.perf_counter()
+    end_cpu = proc.cpu_times().user + proc.cpu_times().system
+
+    wall_time = end_wall - start_wall
+    cpu_time = end_cpu - start_cpu
     end_tot = time.perf_counter();
     tot = end_tot - start_tot
-    log_time(f"[{time.strftime('%H:%M:%S')}.{int(time.time()*1e6)%1_000_000:06d}] "
-           f"Tempo totale deserializzazione: {(end_tot - start_tot):.5f} s")
+    log_time(
+        f"[{time.strftime('%H:%M:%S')}.{int(time.time()*1e6)%1_000_000:06d}] "
+        f"Tempo totale deserializzazione (wall): {wall_time:.5f} s | "
+        f"CPU time (decrypt+check): {cpu_time:.5f} s"
+    )
     return parameters
 
 
@@ -116,6 +134,9 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
     ArrayRecord
         The ArrayRecord containing the provided parameters.
     """
+    proc = psutil.Process(os.getpid())
+    start_wall = time.perf_counter()
+    start_cpu = proc.cpu_times().user + proc.cpu_times().system
     start_tot = time.perf_counter()
     tensor_type = parameters.tensor_type
 
@@ -143,9 +164,16 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
         )
     end_tot = time.perf_counter()
     tot = end_tot - start_tot
+    end_wall = time.perf_counter()
+    end_cpu = proc.cpu_times().user + proc.cpu_times().system
 
-    log_time(f"[{time.strftime('%H:%M:%S')}.{int(time.time()*1e6)%1_000_000:06d}] "
-          f"Tempo totale serializzazione: {tot:.5f} s")
+    wall_time = end_wall - start_wall
+    cpu_time = end_cpu - start_cpu
+    log_time(
+        f"[{time.strftime('%H:%M:%S')}.{int(time.time()*1e6)%1_000_000:06d}] "
+        f"Tempo totale serializzazione (wall): {wall_time:.5f}s | "
+        f"CPU time (encrypt+serialize): {cpu_time:.5f}s"
+    )
     return ArrayRecord(ordered_dict, keep_input=keep_input)
 
 
