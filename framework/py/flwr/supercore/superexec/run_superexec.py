@@ -128,8 +128,8 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
             message=f"Invalid plugin config: {e!r}",
         )
 
-    # One-time randomized startup delay (0–3s)
-    time.sleep(random.uniform(0, 3))
+    # One-time randomized startup delay (0–1s)
+    time.sleep(random.uniform(0, 1))
 
     # Start the main loop
     try:
@@ -144,7 +144,7 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
             # Allow the plugin to select a run ID
             run_id = None
             if ls_res.run_ids:
-                run_id = plugin.select_run_id(candidate_run_ids=ls_res.run_ids)
+                run_id = plugin.select_run_id(random.shuffle(ls_res.run_ids))
 
             # Apply for a token if a run ID was selected
             if run_id is not None:
@@ -155,8 +155,6 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
                 if tk_res.token:
                     plugin.launch_app(token=tk_res.token, run_id=run_id)
 
-            # Sleep for a while before checking again
-            time.sleep(random.expovariate(1 / 5))
     finally:
         channel.close()
 
