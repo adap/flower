@@ -15,6 +15,8 @@
 """Flower client."""
 
 
+from flwr.clientapp import ClientApp
+
 from ..compat.client.app import start_client as start_client  # Deprecated
 from ..compat.client.app import start_numpy_client as start_numpy_client  # Deprecated
 from .client import Client as Client
@@ -24,6 +26,7 @@ from .typing import ClientFnExt as ClientFnExt
 
 __all__ = [
     "Client",
+    "ClientApp",
     "ClientFn",
     "ClientFnExt",
     "NumPyClient",
