@@ -540,7 +540,9 @@ def run_fl(
     log_time("")  # riga vuota finale
     if log_file.CSV_PATH is not None:
         # costruisco percorso assoluto (directory + nome file generato)
-        base_dir = "/home/sarahfalco/IdeaProjects/flowerCrypto/examples/customCriptography"
+        #/home/ns/sarah_falco/flowerCrypto/examples/customCriptography
+        #/home/sarahfalco/IdeaProjects/flowerCrypto/examples/customCriptography
+        base_dir = "/home/ns/sarah_falco/flowerCrypto/examples/customCriptography"
         abs_path = os.path.join(base_dir, log_file.CSV_PATH)
 
         if os.path.exists(abs_path):
