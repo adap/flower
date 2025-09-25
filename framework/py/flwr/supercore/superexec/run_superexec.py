@@ -144,7 +144,8 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
             # Allow the plugin to select a run ID
             run_id = None
             if ls_res.run_ids:
-                run_id = plugin.select_run_id(random.shuffle(ls_res.run_ids))
+                random.shuffle(candidate_run_ids := list(ls_res.run_ids))
+                run_id = plugin.select_run_id(candidate_run_ids)
 
             # Apply for a token if a run ID was selected
             if run_id is not None:
