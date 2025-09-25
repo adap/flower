@@ -1,4 +1,5 @@
 """authexample: An authenticated Flower / PyTorch app."""
+import logging
 import os
 
 import psutil
@@ -20,8 +21,19 @@ from .task import (
 
 
 
+# Logger dedicato solo per CPU
+cpu_logger = logging.getLogger("cpu_logger")
+cpu_logger.setLevel(logging.INFO)
+file_handler = logging.FileHandler("cpu_usage.log", mode="a")
+formatter = logging.Formatter("%(asctime)s [INFO] Client %(pid)d CPU time durante fit: %(message)s s")
+file_handler.setFormatter(formatter)
+cpu_logger.addHandler(file_handler)
 # Define Flower Client
 class FlowerClient(NumPyClient):
+    import logging
+
+
+
     def __init__(self, trainloader, valloader, local_epochs, learning_rate):
         self.net = get_model(NET, num_classes=10, pretrained=False)
         self.trainloader = trainloader
@@ -52,8 +64,7 @@ class FlowerClient(NumPyClient):
         # fine misurazione CPU
         end_cpu = self._cpu_time()
         cpu_time = end_cpu - start_cpu
-
-        print(f"[DEBUG] CPU time durante fit: {cpu_time:.3f} s")
+        cpu_logger.info(f"{cpu_time:.3f}", extra={"pid": os.getpid()})
 
         return get_weights(self.net), len(self.trainloader.dataset), {"cpu_fit": cpu_time}
 
