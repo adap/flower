@@ -18,7 +18,7 @@
 import time
 from logging import WARN
 from typing import Any, Optional, Union
-
+import random
 from flwr.common.config import get_flwr_dir
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
@@ -149,7 +149,7 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
                     plugin.launch_app(token=tk_res.token, run_id=run_id)
 
             # Sleep for a while before checking again
-            time.sleep(1)
+            time.sleep(random.expovariate(1 / 5))
     finally:
         channel.close()
 

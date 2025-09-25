@@ -206,7 +206,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         list[tuple[str]]
             The list of all tables in the DB.
         """
-        self.conn = sqlite3.connect(self.database_path)
+        self.conn = sqlite3.connect(self.database_path, timeout=30.0)
         self.conn.execute("PRAGMA foreign_keys = ON;")
         self.conn.row_factory = dict_factory
         if log_queries:
