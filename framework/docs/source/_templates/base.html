@@ -91,6 +91,38 @@
 
     {# Custom JS #}
     <script src="https://unpkg.com/mermaid@9.4.0/dist/mermaid.min.js"></script>
+    <script>
+      function mermaidTheme() {
+        const t = document.body.dataset.theme || "auto";
+        if (t === "dark") return "dark";
+        if (t === "light") return "default";
+        // auto → follow system
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default";
+      }
+
+      function renderMermaid() {
+        const nodes = document.querySelectorAll(".mermaid, .language-mermaid");
+        nodes.forEach((el) => {
+          if (!el.dataset.mermaidSource) el.dataset.mermaidSource = el.textContent;
+          el.removeAttribute("data-processed");
+          el.textContent = el.dataset.mermaidSource;
+        });
+        mermaid.initialize({ startOnLoad: false, theme: mermaidTheme() });
+        mermaid.init(undefined, nodes);
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        renderMermaid();
+
+        // Re-render whenever the user clicks the theme toggle button
+        document.querySelectorAll(".theme-toggle").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            // wait a tick to let Furo update body[data-theme]
+            requestAnimationFrame(renderMermaid);
+          });
+        });
+      });
+    </script>
 
     {%- block regular_scripts -%}
     {% for path in script_files -%}
