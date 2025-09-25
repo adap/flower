@@ -217,6 +217,14 @@ def _extract_changelog_entry(
     """Extract the changelog entry from a pull request's body."""
     # Use regex search to find matches
     match = re.search(PATTERN, pr_info.title)
+
+    # Extract the topic label
+    topic = ""
+    for label in pr_info.labels:
+        if label.name not in ["Maintainer", "Contributor", "Bot", "General"]:
+            topic = label.name
+            break
+
     if match:
         # Extract components from the regex groups
         pr_type = match.group(1)
@@ -230,6 +238,7 @@ def _extract_changelog_entry(
             "project": pr_project,
             "scope": pr_scope,
             "subject": pr_subject,
+            "topic": topic,
         }
 
     return {
@@ -261,6 +270,7 @@ def _update_changelog(prs: set[PullRequest], tag: str, new_tag: str) -> bool:
             if content.find(section, unreleased_index, end_index) == -1:
                 content = content[:end_index] + f"\n{section}\n\n" + content[end_index:]
                 end_index = content.find(f"## {tag}", end_index)
+        topic_to_section = {}
 
         if unreleased_index == -1:
             print("Unreleased header not found in the changelog.")
@@ -269,17 +279,30 @@ def _update_changelog(prs: set[PullRequest], tag: str, new_tag: str) -> bool:
         for pr_info in prs:
             parsed_title = _extract_changelog_entry(pr_info)
 
+            # Create the topic if not found
+            if (topic := parsed_title["topic"]) and topic not in topic_to_section:
+                section = f"### {topic}"
+                if content.find(section, unreleased_index, end_index) == -1:
+                    content = (
+                        content[:end_index] + f"\n{section}\n\n" + content[end_index:]
+                    )
+                    end_index = content.find(f"## {tag}", end_index)
+                topic_to_section[topic] = section
+
             # Skip if the PR is already in changelog
             if f"#{pr_info.number}]" in content:
                 continue
-            
+
             # Skip Flower Intelligence PRs
             if parsed_title["project"] == "intelligence":
                 continue
 
             # Find section to insert
             pr_type = parsed_title.get("type", "unknown")
-            section = PR_TYPE_TO_SECTION.get(pr_type, "### Unknown changes")
+            if topic:
+                section = topic_to_section[topic]
+            else:
+                section = PR_TYPE_TO_SECTION.get(pr_type, "### Unknown changes")
             insert_index = content.find(section, unreleased_index, end_index)
 
             pr_reference = _format_pr_reference(
