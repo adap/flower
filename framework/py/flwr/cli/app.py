@@ -20,6 +20,7 @@ from typer.main import get_command
 from flwr.common.version import package_version
 
 from .build import build
+from .connect import connect
 from .install import install
 from .log import log
 from .login import login
@@ -48,6 +49,7 @@ app.command()(ls)
 app.command()(stop)
 app.command()(login)
 app.command()(pull)
+app.command()(connect)
 
 typer_click_object = get_command(app)
 
