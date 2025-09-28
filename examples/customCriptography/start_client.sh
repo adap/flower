@@ -14,11 +14,11 @@ if [ "$TLS" = "True" ]; then
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
-        >"$LOG_DIR/superlink.log" 2>&1 &
+        | tee "$LOG_DIR/superlink.log" &
     TLS_FLAG="--root-certificates certificates/ca.crt"
 else
     echo "[*] Avvio superlink in modalità INSECURE"
-    flower-superlink --insecure >"$LOG_DIR/superlink.log" 2>&1 &
+    flower-superlink --insecure | tee "$LOG_DIR/superlink.log" &
     TLS_FLAG="--insecure"
 fi
 
@@ -35,7 +35,7 @@ for ((i=1; i<=NUM_CLIENTS; i++)); do
       --clientappio-api-address 0.0.0.0:${PORT} \
       $TLS_FLAG \
       --node-config "dataset-path=\"$DATASET\"" \
-      >"$LOG_FILE" 2>&1 &
+      | tee "$LOG_FILE" &
 
     echo "[✓] Avviato client $i su porta $PORT con dataset $DATASET (log: $LOG_FILE)"
 done
