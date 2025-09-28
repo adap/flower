@@ -258,9 +258,29 @@ def recorddict_to_fitins(recorddict: RecordDict, keep_input: bool) -> FitIns:
 
     return FitIns(parameters=parameters, config=config)
 
-
+    log_time("CIAO")
+    log_time(f"Lunghezza della lista:  {len(fitins.parameters.tensors)}" )
+    log_time(f"tipo: {fitins.parameters.tensor_type}")
+    for i, tensor_bytes in enumerate(fitins.parameters.tensors):
+        n_bytes = len(tensor_bytes)
+        print(f"tipo tensore {tensor_bytes.dtype}" )
+    print(f"tipo tensore {tensor_bytes.dtype}" )
+    print(f"Tensore {i}: {n_bytes} byte")
 def fitins_to_recorddict(fitins: FitIns, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a FitIns object."""
+    import io
+    import numpy as np
+    log_time(f"config {fitins.config}")
+    total_bytes = 0
+    for i, tensor_bytes in enumerate(fitins.parameters.tensors):
+        # Deserializza il tensore NumPy
+        log_time(f"Numero tensors: {len(fitins.parameters.tensors)}")
+        tensor = np.load(io.BytesIO(tensor_bytes))
+        n_bytes = tensor.nbytes  # byte in memoria
+        total_bytes += n_bytes
+        log_time(f"Tensore {i}: dtype={tensor.dtype}, shape={tensor.shape}, byte in memoria={n_bytes}")
+
+    log_time(f"Totale byte modello (in memoria): {total_bytes} byte ({total_bytes/1024:.2f} KB)")
     recorddict = _fit_or_evaluate_ins_to_recorddict(fitins, keep_input)
     from .crypto.utils import log_serialization_size
     log_serialization_size(recorddict, tag="fitins", mtu=1500)
