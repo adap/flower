@@ -218,6 +218,7 @@ export class FlowerIntelligence {
       options.stream,
       options.onStreamEvent,
       options.tools,
+      options.toolChoice,
       options.encrypt,
       options.signal
     );
@@ -247,7 +248,8 @@ export class FlowerIntelligence {
 
   private async chooseLocalEngine(modelId: string): Promise<Result<Engine>> {
     const results = await Promise.all(
-      this.#availableLocalEngines.map(async (engine) => {
+      this.#localEngineLoaders.map(async (load) => {
+        const engine = await load();
         const supportResult = await engine.isSupported(modelId);
         return { engine, supportResult };
       })
