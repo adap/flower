@@ -46,13 +46,13 @@ service Control {
   // Pull artifacts generated during a run (flwr pull)
   rpc PullArtifacts(PullArtifactsRequest) returns (PullArtifactsResponse) {}
 
-  // Add Supernode
+  // Add SuperNode
   rpc AddNode(AddNodeRequest) returns (AddNodeResponse) {}
 
-  // Remove Supernode
+  // Remove SuperNode
   rpc RemoveNode(RemoveNodeRequest) returns (RemoveNodeResponse) {}
 
-  // List Supernodes
+  // List SuperNodes
   rpc ListNodes(ListNodesRequest) returns (ListNodesResponse) {}
 }
 
