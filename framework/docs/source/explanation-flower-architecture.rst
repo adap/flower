@@ -16,11 +16,15 @@ server.
 
 This is sometimes called a hub-and-spoke topology:
 
-.. figure:: ./_static/flower-architecture-hub-and-spoke.svg
-    :align: center
-    :width: 600
+.. image:: ./_static/flower-architecture-hub-and-spoke-light.svg
+    :width: 400
     :alt: Hub-and-spoke topology in federated learning
-    :class: no-scaled-link
+    :class: no-scaled-link only-light
+
+.. figure:: ./_static/flower-architecture-hub-and-spoke-dark.svg
+    :width: 400
+    :alt: Hub-and-spoke topology in federated learning (dark theme)
+    :class: no-scaled-link only-dark
 
     Hub-and-spoke topology in federated learning (one server, multiple clients).
 
@@ -63,11 +67,15 @@ stars of the show. They hold the training data and they run the actual training.
 why Flower decided to name them **SuperNode**. The **SuperLink** is then responsible for
 acting as the *missing link* among all those SuperNodes.
 
-.. figure:: ./_static/flower-architecture-basic-architecture.svg
-    :align: center
+.. image:: ./_static/flower-architecture-basic-architecture-light.svg
     :width: 600
     :alt: Basic Flower architecture
-    :class: no-scaled-link
+    :class: no-scaled-link only-light
+
+.. figure:: ./_static/flower-architecture-basic-architecture-dark.svg
+    :width: 600
+    :alt: Basic Flower architecture (dark theme)
+    :class: no-scaled-link only-dark
 
     The basic Flower architecture for federated learning.
 
@@ -87,11 +95,15 @@ SuperNodes. This capability is sometimes referred to as *multi-tenancy* or *mult
 As shown in the figure below, two Flower App projects, each consisting of a
 ``ServerApp`` and a ``ClientApp``, could share the same SuperLink and SuperNodes.
 
-.. figure:: ./_static/flower-architecture-multi-run.svg
-    :align: center
+.. image:: ./_static/flower-architecture-multi-run-light.svg
     :width: 600
     :alt: Multi-run federated learning architecture
-    :class: no-scaled-link
+    :class: no-scaled-link only-light
+
+.. figure:: ./_static/flower-architecture-multi-run-dark.svg
+    :width: 600
+    :alt: Multi-run federated learning architecture (dark theme)
+    :class: no-scaled-link only-dark
 
     Multi-run federated learning architecture with Flower
 
@@ -103,11 +115,15 @@ run.
 In ``[run 1]`` below, all the SuperNodes are selected and therefore run their
 corresponding ``ClientApp``\s:
 
-.. figure:: ./_static/flower-architecture-multi-run-1.svg
-    :align: center
+.. image:: ./_static/flower-architecture-multi-run-1-light.svg
     :width: 600
     :alt: Multi-tenancy federated learning architecture - Run 1
-    :class: no-scaled-link
+    :class: no-scaled-link only-light
+
+.. figure:: ./_static/flower-architecture-multi-run-1-dark.svg
+    :width: 600
+    :alt: Multi-tenancy federated learning architecture - Run 1 (dark theme)
+    :class: no-scaled-link only-dark
 
     Run 1 in a multi-run federated learning architecture with Flower. All SuperNodes
     participate in the training round.
@@ -115,11 +131,15 @@ corresponding ``ClientApp``\s:
 However, in ``[run 2]``, only the first and second SuperNodes are selected to
 participate in the training:
 
-.. figure:: ./_static/flower-architecture-multi-run-2.svg
-    :align: center
+.. image:: ./_static/flower-architecture-multi-run-2-light.svg
     :width: 600
     :alt: Multi-tenancy federated learning architecture - Run 2
-    :class: no-scaled-link
+    :class: no-scaled-link only-light
+
+.. figure:: ./_static/flower-architecture-multi-run-2-dark.svg
+    :width: 600
+    :alt: Multi-tenancy federated learning architecture - Run 2 (dark theme)
+    :class: no-scaled-link only-dark
 
     Run 2 in a multi-run federated learning architecture with Flower. Only the first and
     second SuperNodes are selected to participate in the training round.
