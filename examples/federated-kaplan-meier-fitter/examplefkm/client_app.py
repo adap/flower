@@ -1,8 +1,9 @@
 """examplefkm: A Flower / Lifelines app."""
 
-from examplefkm.task import load_partition
 from flwr.app import Array, ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
+
+from examplefkm.task import load_partition
 
 # Flower ClientApp
 app = ClientApp()
