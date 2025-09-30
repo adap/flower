@@ -22,11 +22,15 @@ from logging import ERROR, INFO
 from typing import Any, NoReturn
 
 from flwr.common import EventType, event
+from flwr.common.version import package_version
 
 from ..logger import log
 from .exit_code import EXIT_CODE_HELP
+from .exit_handler import trigger_exit_handlers
 
-HELP_PAGE_URL = "https://flower.ai/docs/framework/ref-exit-codes/"
+HELP_PAGE_URL = (
+    f"https://flower.ai/docs/framework/v{package_version}/en/ref-exit-codes/"
+)
 
 
 def flwr_exit(
@@ -76,6 +80,9 @@ def flwr_exit(
 
     # Log the exit message
     log(log_level, exit_message)
+
+    # Trigger exit handlers
+    trigger_exit_handlers()
 
     # Exit
     sys.exit(sys_exit_code)

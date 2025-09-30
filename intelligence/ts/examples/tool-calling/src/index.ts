@@ -1,7 +1,8 @@
 import { FlowerIntelligence } from '@flwr/flwr';
 
+const fi = FlowerIntelligence.instance;
+
 async function sendChatCompletion() {
-  const fi = FlowerIntelligence.instance;
   fi.remoteHandoff = true;
   fi.apiKey = process.env.FI_API_KEY ?? '';
 
@@ -179,6 +180,7 @@ Never invent information unless the user explicitly requests creative fiction.`,
         },
       },
     ],
+    toolChoice: 'auto',
   });
 
   if (!response.ok) {
@@ -187,6 +189,7 @@ Never invent information unless the user explicitly requests creative fiction.`,
   } else {
     console.log(response.message.content);
     console.log(response.message.toolCalls);
+    console.log(response.usage);
   }
 }
 

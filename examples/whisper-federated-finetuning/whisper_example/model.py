@@ -5,11 +5,10 @@ from typing import List
 
 import numpy as np
 import torch
+from flwr.common import NDArrays
 from torch.utils.data import WeightedRandomSampler
 from tqdm import tqdm
 from transformers import WhisperForConditionalGeneration
-
-from flwr.common import NDArrays
 
 
 def get_model(device, num_classes, compile: bool = True):

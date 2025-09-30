@@ -1,64 +1,87 @@
 """embeddedexample: A Flower / PyTorch app."""
 
 import torch
-from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 
-from embeddedexample.task import (
-    Net,
-    get_weights,
-    load_data_from_disk,
-    set_weights,
-    test,
-    train,
-)
+from embeddedexample.task import Net, load_data_from_disk
+from embeddedexample.task import test as test_fn
+from embeddedexample.task import train as train_fn
+
+app = ClientApp()
 
 
-# Define Flower Client
-class FlowerClient(NumPyClient):
-    def __init__(self, trainloader, valloader, local_epochs, learning_rate):
-        self.net = Net()
-        self.trainloader = trainloader
-        self.valloader = valloader
-        self.local_epochs = local_epochs
-        self.lr = learning_rate
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+@app.train()
+def train(msg: Message, context: Context):
+    """Train the model on local data."""
 
-    def fit(self, parameters, config):
-        """Train the model with data of this client."""
-        set_weights(self.net, parameters)
-        results = train(
-            self.net,
-            self.trainloader,
-            self.valloader,
-            self.local_epochs,
-            self.lr,
-            self.device,
-        )
-        return get_weights(self.net), len(self.trainloader.dataset), results
-
-    def evaluate(self, parameters, config):
-        """Evaluate the model on the data this client has."""
-        set_weights(self.net, parameters)
-        loss, accuracy = test(self.net, self.valloader, self.device)
-        return loss, len(self.valloader.dataset), {"accuracy": accuracy}
-
-
-def client_fn(context: Context):
-    """Construct a Client that will be run in a ClientApp."""
-
-    # Read the node_config to know where dataset is located
-    dataset_path = context.node_config["dataset-path"]
-
-    # Read run_config to fetch hyperparameters relevant to this run
-    batch_size = context.run_config["batch-size"]
-    trainloader, valloader = load_data_from_disk(dataset_path, batch_size)
+    # Read from run config
     local_epochs = context.run_config["local-epochs"]
     learning_rate = context.run_config["learning-rate"]
 
-    # Return Client instance
-    return FlowerClient(trainloader, valloader, local_epochs, learning_rate).to_client()
+    # Load the model and initialize it with the received weights
+    model = Net()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    # Load the data
+    # Read the node_config to know where dataset is located
+    dataset_path = context.node_config["dataset-path"]
+    # Read run_config to fetch hyperparameters relevant to this run
+    batch_size = context.run_config["batch-size"]
+    trainloader, _ = load_data_from_disk(dataset_path, batch_size)
+
+    # Call the training function
+    train_loss = train_fn(
+        model,
+        trainloader,
+        local_epochs,
+        learning_rate,
+        device,
+    )
+
+    # Construct and return reply Message
+    model_record = ArrayRecord(model.state_dict())
+    metrics = {
+        "train_loss": train_loss,
+        "num-examples": len(trainloader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)
 
 
-# Flower ClientApp
-app = ClientApp(client_fn)
+@app.evaluate()
+def evaluate(msg: Message, context: Context):
+    """Evaluate the model on local data."""
+
+    # Load the model and initialize it with the received weights
+    model = Net()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    # Load the data
+    # Read the node_config to know where dataset is located
+    dataset_path = context.node_config["dataset-path"]
+    # Read run_config to fetch hyperparameters relevant to this run
+    batch_size = context.run_config["batch-size"]
+    _, valloader = load_data_from_disk(dataset_path, batch_size)
+
+    # Call the evaluation function
+    eval_loss, eval_acc = test_fn(
+        model,
+        valloader,
+        device,
+    )
+
+    # Construct and return reply Message
+    metrics = {
+        "eval_loss": eval_loss,
+        "eval_acc": eval_acc,
+        "num-examples": len(valloader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
+    return Message(content=content, reply_to=msg)

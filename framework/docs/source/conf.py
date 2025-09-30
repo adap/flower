@@ -92,10 +92,10 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version of the next release, including alpha/beta/rc tags
-release = "1.21.0"
+release = "1.23.0"
 # The current released version
 rst_prolog = """
-.. |stable_flwr_version| replace:: 1.20.0
+.. |stable_flwr_version| replace:: 1.23.0
 .. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
 .. |ubuntu_version| replace:: 24.04
 .. |setuptools_version| replace:: 70.3.0
@@ -312,12 +312,12 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": (
-        "<a href='https://flower.ai/events/flower-ai-day-2025/'>"
-        "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
-        "for Flower AI Day 2025!<br />"
-        "September 25, 🇺🇸 San Francisco"
-    ),
+    # "announcement": (
+    #     "<a href='https://flower.ai/events/flower-ai-day-2025/'>"
+    #     "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
+    #     "for Flower AI Day 2025!<br />"
+    #     "September 25, 🇺🇸 San Francisco"
+    # ),
     "light_css_variables": {
         "color-announcement-background": "#292f36",
         "color-announcement-text": "#ffffff",

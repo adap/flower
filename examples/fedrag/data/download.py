@@ -1,7 +1,6 @@
 """fedrag: A Flower Federated RAG app."""
 
 import os
-
 from pathlib import Path
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))

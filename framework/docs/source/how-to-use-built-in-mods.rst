@@ -30,8 +30,8 @@ A typical mod function might look something like this:
 
 .. code-block:: python
 
-    from flwr.client.typing import ClientAppCallable
-    from flwr.common import Context, Message
+    from flwr.app import Context, Message
+    from flwr.clientapp.typing import ClientAppCallable
 
 
     def example_mod(msg: Message, ctx: Context, call_next: ClientAppCallable) -> Message:
@@ -65,7 +65,7 @@ Import the required mods
 .. code-block:: python
 
     import flwr as fl
-    from flwr.client.mod import example_mod_1, example_mod_2
+    from flwr.clientapp.mod import example_mod_1, example_mod_2
 
 Create the ``ClientApp`` with application-wide mods
 +++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -75,16 +75,12 @@ order in which you provide the mods matters:
 
 .. code-block:: python
 
-    app = fl.client.ClientApp(
-        client_fn=client_fn,  # Not needed if using decorators
+    app = fl.clientapp.ClientApp(
         mods=[
             example_mod_1,  # Application-wide Mod 1
             example_mod_2,  # Application-wide Mod 2
         ],
     )
-
-If you define functions to handle messages using decorators instead of ``client_fn``,
-e.g., ``@app.train()``, you do not need to pass the ``client_fn`` argument.
 
 2. Registering Function-specific Mods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,9 +91,9 @@ particular function:
 .. code-block:: python
 
     import flwr as fl
-    from flwr.client.mod import example_mod_3, example_mod_4
+    from flwr.clientapp.mod import example_mod_3, example_mod_4
 
-    app = fl.client.ClientApp()
+    app = fl.clientapp.ClientApp()
 
 
     @app.train(mods=[example_mod_3, example_mod_4])
@@ -138,17 +134,17 @@ Assuming the following registration:
 
 .. code-block:: python
 
-    app = fl.client.ClientApp(mods=[example_mod_1, example_mod_2])
+    app = fl.clientapp.ClientApp(mods=[example_mod_1, example_mod_2])
 
 
     @app.train(mods=[example_mod_3, example_mod_4])
     def train(msg, ctx):
-        return Message(fl.common.RecordDict(), reply_to=msg)
+        return Message(fl.app.RecordDict(), reply_to=msg)
 
 
     @app.evaluate()
     def evaluate(msg, ctx):
-        return Message(fl.common.RecordDict(), reply_to=msg)
+        return Message(fl.app.RecordDict(), reply_to=msg)
 
 The execution order for an incoming **train** message is as follows:
 

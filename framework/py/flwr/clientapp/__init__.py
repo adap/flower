@@ -13,3 +13,13 @@
 # limitations under the License.
 # ==============================================================================
 """Public Flower ClientApp APIs."""
+
+
+from flwr.client.client_app import ClientApp
+
+from . import mod
+
+__all__ = [
+    "ClientApp",
+    "mod",
+]

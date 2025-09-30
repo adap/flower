@@ -9,6 +9,6 @@
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@flwr/flwr": "^0.2.0"
+    "@flwr/flwr": "^0.2.4"
   }
 }

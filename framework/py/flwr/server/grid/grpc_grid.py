@@ -265,6 +265,8 @@ class GrpcGrid(Grid):
         # Construct Messages
         run_id = cast(Run, self._run).run_id
         message_ids: list[str] = []
+        if not messages:
+            return message_ids
         try:
             with no_object_id_recompute():
                 for msg in messages:
@@ -384,6 +386,7 @@ class GrpcGrid(Grid):
         """
         # Push messages
         msg_ids = set(self.push_messages(messages))
+        del messages
 
         # Pull messages
         end_time = time.time() + (timeout if timeout is not None else 0.0)

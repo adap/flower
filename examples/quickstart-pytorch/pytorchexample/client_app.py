@@ -1,58 +1,82 @@
 """pytorchexample: A Flower / PyTorch app."""
 
 import torch
-from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 
-from pytorchexample.task import Net, get_weights, load_data, set_weights, test, train
-
-
-# Define Flower Client
-class FlowerClient(NumPyClient):
-    def __init__(self, trainloader, valloader, local_epochs, learning_rate):
-        self.net = Net()
-        self.trainloader = trainloader
-        self.valloader = valloader
-        self.local_epochs = local_epochs
-        self.lr = learning_rate
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-    def fit(self, parameters, config):
-        """Train the model with data of this client."""
-        set_weights(self.net, parameters)
-        results = train(
-            self.net,
-            self.trainloader,
-            self.valloader,
-            self.local_epochs,
-            self.lr,
-            self.device,
-        )
-        return get_weights(self.net), len(self.trainloader.dataset), results
-
-    def evaluate(self, parameters, config):
-        """Evaluate the model on the data this client has."""
-        set_weights(self.net, parameters)
-        loss, accuracy = test(self.net, self.valloader, self.device)
-        return loss, len(self.valloader.dataset), {"accuracy": accuracy}
-
-
-def client_fn(context: Context):
-    """Construct a Client that will be run in a ClientApp."""
-
-    # Read the node_config to fetch data partition associated to this node
-    partition_id = context.node_config["partition-id"]
-    num_partitions = context.node_config["num-partitions"]
-
-    # Read run_config to fetch hyperparameters relevant to this run
-    batch_size = context.run_config["batch-size"]
-    trainloader, valloader = load_data(partition_id, num_partitions, batch_size)
-    local_epochs = context.run_config["local-epochs"]
-    learning_rate = context.run_config["learning-rate"]
-
-    # Return Client instance
-    return FlowerClient(trainloader, valloader, local_epochs, learning_rate).to_client()
-
+from pytorchexample.task import Net, load_data
+from pytorchexample.task import test as test_fn
+from pytorchexample.task import train as train_fn
 
 # Flower ClientApp
-app = ClientApp(client_fn)
+app = ClientApp()
+
+
+@app.train()
+def train(msg: Message, context: Context):
+    """Train the model on local data."""
+
+    # Load the model and initialize it with the received weights
+    model = Net()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    # Load the data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    batch_size = context.run_config["batch-size"]
+    trainloader, _ = load_data(partition_id, num_partitions, batch_size)
+
+    # Call the training function
+    train_loss = train_fn(
+        model,
+        trainloader,
+        context.run_config["local-epochs"],
+        msg.content["config"]["lr"],
+        device,
+    )
+
+    # Construct and return reply Message
+    model_record = ArrayRecord(model.state_dict())
+    metrics = {
+        "train_loss": train_loss,
+        "num-examples": len(trainloader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)
+
+
+@app.evaluate()
+def evaluate(msg: Message, context: Context):
+    """Evaluate the model on local data."""
+
+    # Load the model and initialize it with the received weights
+    model = Net()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    # Load the data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    batch_size = context.run_config["batch-size"]
+    _, valloader = load_data(partition_id, num_partitions, batch_size)
+
+    # Call the evaluation function
+    eval_loss, eval_acc = test_fn(
+        model,
+        valloader,
+        device,
+    )
+
+    # Construct and return reply Message
+    metrics = {
+        "eval_loss": eval_loss,
+        "eval_acc": eval_acc,
+        "num-examples": len(valloader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
+    return Message(content=content, reply_to=msg)

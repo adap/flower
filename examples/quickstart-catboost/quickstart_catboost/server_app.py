@@ -1,15 +1,16 @@
 """quickstart-catboost: A Flower / CatBoost app."""
 
-from catboost import CatBoostClassifier, sum_models
 import json
-from logging import INFO, WARN
 import random
+from logging import INFO, WARN
 from time import sleep
-from quickstart_catboost.task import convert_to_catboost, convert_to_model_dict
 
+from catboost import CatBoostClassifier, sum_models
 from flwr.common import ConfigRecord, Context, Message, MessageType, RecordDict
 from flwr.common.logger import log
 from flwr.server import Grid, ServerApp
+
+from quickstart_catboost.task import convert_to_catboost, convert_to_model_dict
 
 # Create ServerApp
 app = ServerApp()

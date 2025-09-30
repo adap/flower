@@ -22,16 +22,18 @@ import {
   StreamEvent,
   Tool,
   ToolCall,
+  ToolChoice,
+  Usage,
 } from '../../typing';
 import { CryptographyHandler } from './cryptoHandler';
 import { createChatRequestData, getHeaders, sendRequest } from './remoteUtils';
 import {
   ChatCompletionsResponse,
+  getServerSentEventData,
   isFinalChunk,
   isGenericError,
   isHTTPError,
   isPlatformHttpError,
-  isServerSentEvent,
   isStreamChunk,
 } from './typing';
 
@@ -47,6 +49,7 @@ export async function chatStream(
   maxCompletionTokens?: number,
   responseFormat?: ResponseFormat,
   tools?: Tool[],
+  toolChoice?: ToolChoice,
   onStreamEvent?: (event: StreamEvent) => void,
   signal?: AbortSignal
 ): Promise<ChatResponseResult> {
@@ -59,6 +62,7 @@ export async function chatStream(
     responseFormat,
     true,
     tools,
+    toolChoice,
     encrypt,
     cryptoHandler.encryptionId
   );
@@ -99,6 +103,7 @@ async function processStream(
   const reader = body.getReader();
   let accumulated = '';
   let finalTools: ToolCall[] | null = null;
+  let usage: Usage | undefined;
   const pendingToolCalls: Record<string, { name: string; buffer: string }> = {};
   let done = false;
   const abortListener = () => void reader.cancel();
@@ -115,6 +120,7 @@ async function processStream(
         const chunkResult = await processChunk(
           part,
           finalTools,
+          usage,
           pendingToolCalls,
           cryptoHandler,
           encrypt,
@@ -123,8 +129,14 @@ async function processStream(
         if (!chunkResult.ok) {
           return chunkResult;
         }
+        if (chunkResult.done) {
+          done = true;
+          usage = chunkResult.usage;
+          break;
+        }
         if (chunkResult.toolsUpdated && chunkResult.message.toolCalls) {
           finalTools = chunkResult.message.toolCalls;
+          usage = chunkResult.usage;
         }
         accumulated += chunkResult.message.content;
       }
@@ -138,6 +150,7 @@ async function processStream(
           content: '',
           toolCalls: finalTools,
         },
+        usage,
       };
     }
 
@@ -147,6 +160,7 @@ async function processStream(
         role: 'assistant',
         content: accumulated,
       },
+      usage,
     };
   } finally {
     signal?.removeEventListener('abort', abortListener);
@@ -154,28 +168,46 @@ async function processStream(
 }
 
 function splitJsonChunks(text: string): string[] {
-  return text.split(/(?<=})\s*(?={)/g).filter((s) => s.trim());
+  return text.trim().split(/\n\n+/).filter(Boolean);
 }
 
 async function processChunk(
   chunk: string,
   finalTools: ToolCall[] | null,
+  usage: Usage | undefined,
   pendingToolCalls: Record<string, { name: string; buffer: string }>,
   cryptoHandler: CryptographyHandler,
   encrypt: boolean,
   onStreamEvent?: (event: StreamEvent) => void
-): Promise<ChatResponseResult & { toolsUpdated?: boolean }> {
+): Promise<ChatResponseResult & { toolsUpdated?: boolean; done?: boolean }> {
+  const data = getServerSentEventData(chunk);
+  if (data === '[DONE]') {
+    return { ok: true, message: { role: 'assistant', content: '' }, usage, done: true };
+  }
+
   let parsed: unknown;
   try {
-    if (isServerSentEvent(chunk)) {
-      parsed = JSON.parse(chunk.data);
-    } else {
-      parsed = JSON.parse(chunk);
-    }
+    parsed = JSON.parse(data);
   } catch {
     return {
       ok: false,
       failure: { code: FailureCode.RemoteError, description: 'Invalid JSON chunk received.' },
+    };
+  }
+
+  if (isFinalChunk(parsed)) {
+    return {
+      ok: true,
+      message: {
+        role: 'assistant',
+        content: '',
+      },
+      usage: {
+        promptTokens: parsed.usage.prompt_tokens,
+        completionTokens: parsed.usage.completion_tokens,
+        totalTokens: parsed.usage.total_tokens,
+      },
+      done: true,
     };
   }
 
@@ -256,13 +288,14 @@ async function processChunk(
 
     return {
       ok: true,
-      message: { role: 'assistant', content: text, ...(finalTools && { toolCalls: finalTools }) },
+      message: {
+        role: 'assistant',
+        content: text,
+        ...(finalTools && { toolCalls: finalTools }),
+      },
+      usage,
       toolsUpdated,
     };
-  }
-
-  if (isFinalChunk(parsed)) {
-    return { ok: true, message: { role: 'assistant', content: '' } };
   }
 
   if (isPlatformHttpError(parsed)) {
@@ -344,5 +377,6 @@ export async function extractChatOutput(
       content: content,
       ...(toolCalls && { toolCalls: toolCalls }),
     },
+    usage: response.usage,
   };
 }

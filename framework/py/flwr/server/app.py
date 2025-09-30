@@ -37,7 +37,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
 from flwr.common.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
-from flwr.common.config import get_flwr_dir, parse_config_args
+from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
     AUTH_TYPE_YAML_KEY,
     AUTHZ_TYPE_YAML_KEY,
@@ -57,8 +57,7 @@ from flwr.common.constant import (
     ExecPluginType,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
-from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -70,8 +69,9 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.superlink.executor import load_executor
+from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
@@ -92,6 +92,7 @@ try:
         get_control_auth_plugins,
         get_control_authz_plugins,
         get_control_event_log_writer_plugins,
+        get_ee_artifact_provider,
         get_fleet_event_log_writer_plugins,
     )
 except ImportError:
@@ -114,6 +115,10 @@ except ImportError:
             "No event log writer plugins are currently supported."
         )
 
+    def get_ee_artifact_provider(config_path: str) -> ArtifactProvider:
+        """Return the EE artifact provider."""
+        raise NotImplementedError("No artifact provider is currently supported.")
+
     def get_fleet_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
         """Return all Fleet API event log writer plugins."""
         raise NotImplementedError(
@@ -134,6 +139,15 @@ def run_superlink() -> None:
     if args.flwr_dir is not None:
         log(
             WARN, "The `--flwr-dir` option is currently not in use and will be ignored."
+        )
+
+    # Detect if `--executor*` arguments were set
+    if args.executor or args.executor_dir or args.executor_config:
+        flwr_exit(
+            ExitCode.SUPERLINK_INVALID_ARGS,
+            "The arguments `--executor`, `--executor-dir`, and `--executor-config` are "
+            "deprecated and will be removed in a future release. To run SuperLink with "
+            "the SimulationIo API, please use `--simulation`.",
         )
 
     # Detect if both Control API and Exec API addresses were set explicitly
@@ -168,6 +182,9 @@ def run_superlink() -> None:
     serverappio_address, _, _ = _format_address(args.serverappio_api_address)
     control_address, _, _ = _format_address(args.control_api_address)
     simulationio_address, _, _ = _format_address(args.simulationio_api_address)
+    health_server_address = None
+    if args.health_server_address is not None:
+        health_server_address, _, _ = _format_address(args.health_server_address)
 
     # Obtain certificates
     certificates = try_obtain_server_certificates(args)
@@ -188,6 +205,12 @@ def run_superlink() -> None:
         if args.enable_event_log:
             event_log_plugin = _try_obtain_control_event_log_writer_plugin()
 
+    # Load artifact provider if the args.artifact_provider_config is provided
+    artifact_provider = None
+    if cfg_path := getattr(args, "artifact_provider_config", None):
+        log(WARN, "The `--artifact-provider-config` flag is highly experimental.")
+        artifact_provider = get_ee_artifact_provider(cfg_path)
+
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
 
@@ -198,26 +221,20 @@ def run_superlink() -> None:
     objectstore_factory = ObjectStoreFactory()
 
     # Start Control API
-    executor = load_executor(args)
+    is_simulation = args.simulation
     control_server: grpc.Server = run_control_api_grpc(
         address=control_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
-        executor=executor,
         certificates=certificates,
-        config=parse_config_args(
-            [args.executor_config] if args.executor_config else args.executor_config
-        ),
+        is_simulation=is_simulation,
         auth_plugin=auth_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
+        artifact_provider=artifact_provider,
     )
     grpc_servers = [control_server]
-
-    # Determine Exec plugin
-    # If simulation is used, don't start ServerAppIo and Fleet APIs
-    is_simulation = executor.__class__.__qualname__ == "SimulationEngine"
     bckg_threads: list[threading.Thread] = []
 
     if is_simulation:
@@ -351,8 +368,13 @@ def run_superlink() -> None:
         # pylint: disable-next=consider-using-with
         subprocess.Popen(command)
 
+    # Launch gRPC health server
+    if health_server_address is not None:
+        health_server = run_health_server_grpc_no_tls(health_server_address)
+        grpc_servers.append(health_server)
+
     # Graceful shutdown
-    register_exit_handlers(
+    register_signal_handlers(
         event_type=EventType.RUN_SUPERLINK_LEAVE,
         exit_message="SuperLink terminated gracefully.",
         grpc_servers=grpc_servers,
@@ -518,7 +540,9 @@ def _run_fleet_api_grpc_rere(  # pylint: disable=R0913, R0917
         interceptors=interceptors,
     )
 
-    log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
+    log(
+        INFO, "Flower Deployment Runtime: Starting Fleet API (gRPC-rere) on %s", address
+    )
     fleet_grpc_server.start()
 
     return fleet_grpc_server
@@ -546,7 +570,11 @@ def _run_fleet_api_grpc_adapter(
         certificates=certificates,
     )
 
-    log(INFO, "Flower ECE: Starting Fleet API (GrpcAdapter) on %s", address)
+    log(
+        INFO,
+        "Flower Deployment Runtime: Starting Fleet API (GrpcAdapter) on %s",
+        address,
+    )
     fleet_grpc_server.start()
 
     return fleet_grpc_server
@@ -603,6 +631,7 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     _add_args_fleet_api(parser=parser)
     _add_args_control_api(parser=parser)
     _add_args_simulationio_api(parser=parser)
+    add_args_health(parser=parser)
 
     return parser
 
@@ -741,20 +770,25 @@ def _add_args_control_api(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--executor",
-        help="For example: `deployment:exec` or `project.package.module:wrapper.exec`. "
-        "The default is `flwr.superexec.deployment:executor`",
-        default="flwr.superexec.deployment:executor",
+        help="This argument is deprecated and will be removed in a future release.",
+        default=None,
     )
     parser.add_argument(
         "--executor-dir",
-        help="The directory for the executor.",
-        default=".",
+        help="This argument is deprecated and will be removed in a future release.",
+        default=None,
     )
     parser.add_argument(
         "--executor-config",
-        help="Key-value pairs for the executor config, separated by spaces. "
-        "For example:\n\n`--executor-config 'verbose=true "
-        'root-certificates="certificates/superlink-ca.crt"\'`',
+        help="This argument is deprecated and will be removed in a future release.",
+        default=None,
+    )
+    parser.add_argument(
+        "--simulation",
+        action="store_true",
+        default=False,
+        help="Launch the SimulationIo API server in place of "
+        "the ServerAppIo API server.",
     )
 
 

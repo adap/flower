@@ -26,14 +26,13 @@ from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
-from flwr.common.typing import UserConfig
 from flwr.proto.control_pb2_grpc import add_ControlServicer_to_server
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.license_plugin import LicensePlugin
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.superlink.artifact_provider import ArtifactProvider
 
-from ...executor import Executor
 from .control_event_log_interceptor import ControlEventLogInterceptor
 from .control_license_interceptor import ControlLicenseInterceptor
 from .control_servicer import ControlServicer
@@ -50,19 +49,17 @@ except ImportError:
 # pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
 def run_control_api_grpc(
     address: str,
-    executor: Executor,
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
-    config: UserConfig,
+    is_simulation: bool,
     auth_plugin: Optional[ControlAuthPlugin] = None,
     authz_plugin: Optional[ControlAuthzPlugin] = None,
     event_log_plugin: Optional[EventLogWriterPlugin] = None,
+    artifact_provider: Optional[ArtifactProvider] = None,
 ) -> grpc.Server:
     """Run Control API (gRPC, request-response)."""
-    executor.set_config(config)
-
     license_plugin: Optional[LicensePlugin] = get_license_plugin()
     if license_plugin and not license_plugin.check_license():
         flwr_exit(ExitCode.SUPERLINK_LICENSE_INVALID)
@@ -71,8 +68,9 @@ def run_control_api_grpc(
         linkstate_factory=state_factory,
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
-        executor=executor,
+        is_simulation=is_simulation,
         auth_plugin=auth_plugin,
+        artifact_provider=artifact_provider,
     )
     interceptors: list[grpc.ServerInterceptor] = []
     if license_plugin is not None:
@@ -93,11 +91,11 @@ def run_control_api_grpc(
     )
 
     if auth_plugin is None:
-        log(INFO, "Flower Deployment Engine: Starting Control API on %s", address)
+        log(INFO, "Flower Deployment Runtime: Starting Control API on %s", address)
     else:
         log(
             INFO,
-            "Flower Deployment Engine: Starting Control API with user "
+            "Flower Deployment Runtime: Starting Control API with user "
             "authentication on %s",
             address,
         )
