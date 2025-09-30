@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""User auth plugin for ControlServicer."""
+"""Account auth plugin for ControlServicer."""
 
 
 from .auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
