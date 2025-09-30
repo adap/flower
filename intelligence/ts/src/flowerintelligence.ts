@@ -40,7 +40,7 @@ export class FlowerIntelligence {
   static #apiKey?: string;
 
   #remoteEngine?: RemoteEngine;
-  #localEngineLoaders: Array<() => Promise<Engine>> = isNode
+  #localEngineLoaders: (() => Promise<Engine>)[] = isNode
     ? [
         async () => {
           const { TransformersEngine } = await import('./engines/transformersEngine');
@@ -251,7 +251,7 @@ export class FlowerIntelligence {
     const trials = await Promise.all(
       this.#localEngineLoaders.map(async (load) => {
         try {
-          const engine = await load();                     // dynamic import happens here
+          const engine = await load(); // dynamic import happens here
           const supportResult = await engine.isSupported(modelId);
           return { engine, supportResult };
         } catch (err) {
@@ -281,13 +281,13 @@ export class FlowerIntelligence {
 
     // Mirror your previous "highest failure" logic
     const failures = trials
-      .filter((t): t is { engine: Engine; supportResult: { ok: false; failure: Failure } } => !t.supportResult.ok)
+      .filter(
+        (t): t is { engine: Engine; supportResult: { ok: false; failure: Failure } } =>
+          !t.supportResult.ok
+      )
       .map((t) => t.supportResult.failure);
 
-    const highestFailure = failures.reduce(
-      (max, f) => (f.code > max.code ? f : max),
-      failures[0]
-    );
+    const highestFailure = failures.reduce((max, f) => (f.code > max.code ? f : max), failures[0]);
 
     return { ok: false, failure: highestFailure };
   }
