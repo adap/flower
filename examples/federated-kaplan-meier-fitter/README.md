@@ -14,7 +14,7 @@ The aim of this example is to estimate the survival function using the
 lifelines library (see [KaplanMeierFitter](https://lifelines.readthedocs.io/en/stable/fitters/univariate/KaplanMeierFitter.html#lifelines.fitters.kaplan_meier_fitter.KaplanMeierFitter)). The distributed/federated aspect of this example
 is the data sending to the server. You can think of it as a federated analytics example. However, it's worth noting that this procedure violates privacy since the raw data is exchanged.
 
-Finally, many other estimators beyond KaplanMeierFitter can be used with the provided strategy:
+Finally, many other estimators beyond KaplanMeierFitter can be used:
 AalenJohansenFitter, GeneralizedGammaFitter, LogLogisticFitter,
 SplineFitter, and WeibullFitter.
 
@@ -69,7 +69,7 @@ flwr run .
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
+flwr run . --run-config "num-server-rounds=5"
 ```
 
 You can also check that the results match the centralized version.
