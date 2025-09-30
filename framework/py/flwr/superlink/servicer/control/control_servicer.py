@@ -401,21 +401,21 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     def AddNode(
         self, request: AddNodeRequest, context: grpc.ServicerContext
     ) -> AddNodeResponse:
-        """Add a node."""
+        """Add a SuperNode."""
         log(INFO, "ControlServicer.AddNode")
         return AddNodeResponse()
 
     def RemoveNode(
         self, request: RemoveNodeRequest, context: grpc.ServicerContext
     ) -> RemoveNodeResponse:
-        """Remove a node."""
+        """Remove a SuperNode."""
         log(INFO, "ControlServicer.RemoveNode")
         return RemoveNodeResponse()
 
     def ListNodes(
         self, request: ListNodesRequest, context: grpc.ServicerContext
     ) -> ListNodesResponse:
-        """List all nodes."""
+        """List all SuperNodes."""
         log(INFO, "ControlServicer.ListNodes")
         return ListNodesResponse()
 
