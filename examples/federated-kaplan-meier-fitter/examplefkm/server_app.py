@@ -55,30 +55,35 @@ def main(grid: Grid, context: Context) -> None:
         replies = grid.send_and_receive(messages)
         log(INFO, "Received %s/%s results", len(replies), len(messages))
 
-        # Use lifelines filter to fit the data
-        remote_times = []
-        remote_events = []
-        for reply in replies:
-            if reply.has_error():
-                continue
+        # Apply the fitter
+        apply_fitter(fitter, replies)
 
-            # Both `T` and `E` are `Array` objects, let's convert them to numpy
-            remote_times.append(reply.content["survival-data"]["T"].numpy())
-            remote_events.append(reply.content["survival-data"]["E"].numpy())
 
-        combined_times = remote_times[0]
-        combined_events = remote_events[0]
+def apply_fitter(fitter: KaplanMeierFitter, replies: list[Message]) -> None:
+    """Apply the lifelines fitter to the received data."""
+    # Use lifelines filter to fit the data
+    remote_times = []
+    remote_events = []
+    for reply in replies:
+        if reply.has_error():
+            continue
 
-        for t, e in zip(remote_times[1:], remote_events[1:]):
-            combined_times = np.concatenate((combined_times, t))
-            combined_events = np.concatenate((combined_events, e))
+        # Both `T` and `E` are `Array` objects, let's convert them to numpy
+        remote_times.append(reply.content["survival-data"]["T"].numpy())
+        remote_events.append(reply.content["survival-data"]["E"].numpy())
 
-        args_sorted = np.argsort(combined_times)
-        sorted_times = combined_times[args_sorted]
-        sorted_events = combined_events[args_sorted]
-        fitter.fit(sorted_times, sorted_events)
-        print("Survival function:")
-        print(fitter.survival_function_)
-        print("Mean survival time:")
-        print(fitter.median_survival_time_)
+    combined_times = remote_times[0]
+    combined_events = remote_events[0]
 
+    for t, e in zip(remote_times[1:], remote_events[1:]):
+        combined_times = np.concatenate((combined_times, t))
+        combined_events = np.concatenate((combined_events, e))
+
+    args_sorted = np.argsort(combined_times)
+    sorted_times = combined_times[args_sorted]
+    sorted_events = combined_events[args_sorted]
+    fitter.fit(sorted_times, sorted_events)
+    print("Survival function:")
+    print(fitter.survival_function_)
+    print("Mean survival time:")
+    print(fitter.median_survival_time_)
