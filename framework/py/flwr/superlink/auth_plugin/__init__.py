@@ -12,15 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Auth plugin components."""
+"""User auth plugin for ControlServicer."""
 
 
-from .auth_plugin import CliAuthPlugin as CliAuthPlugin
-from .auth_plugin import ControlAuthPlugin as ControlAuthPlugin
-from .auth_plugin import ControlAuthzPlugin as ControlAuthzPlugin
+from .auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
 
 __all__ = [
-    "CliAuthPlugin",
     "ControlAuthPlugin",
     "ControlAuthzPlugin",
 ]
