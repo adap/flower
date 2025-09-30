@@ -36,7 +36,6 @@ from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
-from flwr.common.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
     AUTH_TYPE_YAML_KEY,
@@ -71,6 +70,8 @@ from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.superlink.artifact_provider import ArtifactProvider
+from flwr.superlink.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
 from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
@@ -91,6 +92,7 @@ try:
         get_control_auth_plugins,
         get_control_authz_plugins,
         get_control_event_log_writer_plugins,
+        get_ee_artifact_provider,
         get_fleet_event_log_writer_plugins,
     )
 except ImportError:
@@ -112,6 +114,10 @@ except ImportError:
         raise NotImplementedError(
             "No event log writer plugins are currently supported."
         )
+
+    def get_ee_artifact_provider(config_path: str) -> ArtifactProvider:
+        """Return the EE artifact provider."""
+        raise NotImplementedError("No artifact provider is currently supported.")
 
     def get_fleet_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
         """Return all Fleet API event log writer plugins."""
@@ -199,6 +205,12 @@ def run_superlink() -> None:
         if args.enable_event_log:
             event_log_plugin = _try_obtain_control_event_log_writer_plugin()
 
+    # Load artifact provider if the args.artifact_provider_config is provided
+    artifact_provider = None
+    if cfg_path := getattr(args, "artifact_provider_config", None):
+        log(WARN, "The `--artifact-provider-config` flag is highly experimental.")
+        artifact_provider = get_ee_artifact_provider(cfg_path)
+
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
 
@@ -220,6 +232,7 @@ def run_superlink() -> None:
         auth_plugin=auth_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
+        artifact_provider=artifact_provider,
     )
     grpc_servers = [control_server]
     bckg_threads: list[threading.Thread] = []

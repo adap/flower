@@ -12,15 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Auth plugin components."""
+"""Constants for Flower infrastructure."""
 
 
-from .auth_plugin import CliAuthPlugin as CliAuthPlugin
-from .auth_plugin import ControlAuthPlugin as ControlAuthPlugin
-from .auth_plugin import ControlAuthzPlugin as ControlAuthzPlugin
-
-__all__ = [
-    "CliAuthPlugin",
-    "ControlAuthPlugin",
-    "ControlAuthzPlugin",
-]
+# Top-level key in YAML config for exec plugin settings
+EXEC_PLUGIN_SECTION = "exec_plugin"

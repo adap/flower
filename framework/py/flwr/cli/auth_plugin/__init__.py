@@ -15,9 +15,9 @@
 """Flower user auth plugins."""
 
 
-from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.constant import AuthType
 
+from .auth_plugin import CliAuthPlugin
 from .oidc_cli_plugin import OidcCliPlugin
 
 
@@ -27,5 +27,7 @@ def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
 
 
 __all__ = [
+    "CliAuthPlugin",
+    "OidcCliPlugin",
     "get_cli_auth_plugins",
 ]

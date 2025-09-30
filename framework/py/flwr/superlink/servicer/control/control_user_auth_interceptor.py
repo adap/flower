@@ -20,7 +20,6 @@ from typing import Any, Callable, Union
 
 import grpc
 
-from flwr.common.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
 from flwr.common.typing import AccountInfo
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
@@ -32,6 +31,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StreamLogsRequest,
     StreamLogsResponse,
 )
+from flwr.superlink.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
 
 Request = Union[
     StartRunRequest,

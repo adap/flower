@@ -29,12 +29,11 @@ and used when defining the `ClientApp` as:
 
 ```python
 app = ClientApp(
-    client_fn=client_fn,
     mods=[basic_mod],
 )
 ```
 
-The mods in this example do not modify the `Message` object that the `ClientApp` is communicating to the `ServerApp`. Instead, the mods only log the _metrics_ returned by the client's `fit()` method to Weight & Biases or into TensorBoard .
+The mods in this example do not modify the `Message` object that the `ClientApp` is communicating to the `ServerApp`. Instead, the mods only log the _metrics_ returned by the `ClientApp`'s `train()` method to Weight & Biases or into TensorBoard .
 
 ## Set up the project
 

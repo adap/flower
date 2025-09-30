@@ -20,7 +20,7 @@ import numpy as np
 from flwr.common import ArrayRecord, Message, NDArrays
 
 from .fedavgm import FedAvgM
-from .strategy_utils_tests import create_mock_reply
+from .strategy_utils_test import create_mock_reply
 
 
 def _prepare_strategy() -> tuple[FedAvgM, list[Message], NDArrays]:

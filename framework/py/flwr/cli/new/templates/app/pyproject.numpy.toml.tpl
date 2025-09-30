@@ -14,7 +14,7 @@ description = ""
 license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
-    "flwr[simulation]>=1.22.0",
+    "flwr[simulation]>=1.23.0",
     "numpy>=2.0.2",
 ]
 

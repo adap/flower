@@ -26,13 +26,13 @@ from typing import Any, Callable, Optional, Union, cast
 import grpc
 import typer
 
-from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
-from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.constant import (
     AUTH_TYPE_JSON_KEY,
     CREDENTIALS_DIR,
     FLWR_DIR,
+    NO_ARTIFACT_PROVIDER_MESSAGE,
     NO_USER_AUTH_MESSAGE,
+    PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
 )
 from flwr.common.grpc import (
@@ -41,7 +41,8 @@ from flwr.common.grpc import (
     on_channel_state_change,
 )
 
-from .auth_plugin import get_cli_auth_plugins
+from .auth_plugin import CliAuthPlugin, get_cli_auth_plugins
+from .cli_user_auth_interceptor import CliUserAuthInterceptor
 from .config_utils import validate_certificate_in_federation_config
 
 
@@ -319,6 +320,12 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
                     fg=typer.colors.RED,
                     bold=True,
                 )
+            elif e.details() == NO_ARTIFACT_PROVIDER_MESSAGE:  # pylint: disable=E1101
+                typer.secho(
+                    "❌ The SuperLink does not support `flwr pull` command.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
             else:
                 typer.secho(
                     "❌ The SuperLink cannot process this request. Please verify that "
@@ -356,4 +363,13 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
                 bold=True,
             )
             raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.FAILED_PRECONDITION:
+            if e.details() == PULL_UNFINISHED_RUN_MESSAGE:  # pylint: disable=E1101
+                typer.secho(
+                    "❌ Run is not finished yet. Artifacts can only be pulled after "
+                    "the run is finished. You can check the run status with `flwr ls`.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1) from None
         raise
