@@ -119,21 +119,21 @@ class ControlServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def AddNode(self, request, context):
-        """Add Supernode
+        """Add SuperNode
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def RemoveNode(self, request, context):
-        """Remove Supernode
+        """Remove SuperNode
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def ListNodes(self, request, context):
-        """List Supernodes
+        """List SuperNodes
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
