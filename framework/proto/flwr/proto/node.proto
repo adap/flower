@@ -22,6 +22,7 @@ message Node { uint64 node_id = 1; }
 message NodeInfo {
   uint64 node_id = 1;
   string owner = 2;
-  string created_at = 3;
-  optional string deleted_at = 4;
+  string registered_at = 3;
+  optional string last_connected_at = 4;
+  optional string deleted_at = 5;
 }

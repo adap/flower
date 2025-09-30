@@ -25,20 +25,26 @@ class NodeInfo(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NODE_ID_FIELD_NUMBER: builtins.int
     OWNER_FIELD_NUMBER: builtins.int
-    CREATED_AT_FIELD_NUMBER: builtins.int
+    REGISTERED_AT_FIELD_NUMBER: builtins.int
+    LAST_CONNECTED_AT_FIELD_NUMBER: builtins.int
     DELETED_AT_FIELD_NUMBER: builtins.int
     node_id: builtins.int
     owner: typing.Text
-    created_at: typing.Text
+    registered_at: typing.Text
+    last_connected_at: typing.Text
     deleted_at: typing.Text
     def __init__(self,
         *,
         node_id: builtins.int = ...,
         owner: typing.Text = ...,
-        created_at: typing.Text = ...,
+        registered_at: typing.Text = ...,
+        last_connected_at: typing.Optional[typing.Text] = ...,
         deleted_at: typing.Optional[typing.Text] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["_deleted_at",b"_deleted_at","deleted_at",b"deleted_at"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["_deleted_at",b"_deleted_at","created_at",b"created_at","deleted_at",b"deleted_at","node_id",b"node_id","owner",b"owner"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["_deleted_at",b"_deleted_at","_last_connected_at",b"_last_connected_at","deleted_at",b"deleted_at","last_connected_at",b"last_connected_at"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_deleted_at",b"_deleted_at","_last_connected_at",b"_last_connected_at","deleted_at",b"deleted_at","last_connected_at",b"last_connected_at","node_id",b"node_id","owner",b"owner","registered_at",b"registered_at"]) -> None: ...
+    @typing.overload
     def WhichOneof(self, oneof_group: typing_extensions.Literal["_deleted_at",b"_deleted_at"]) -> typing.Optional[typing_extensions.Literal["deleted_at"]]: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_last_connected_at",b"_last_connected_at"]) -> typing.Optional[typing_extensions.Literal["last_connected_at"]]: ...
 global___NodeInfo = NodeInfo
