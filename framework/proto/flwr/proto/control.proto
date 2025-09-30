@@ -98,10 +98,10 @@ message PullArtifactsRequest { uint64 run_id = 1; }
 message PullArtifactsResponse { optional string url = 1; }
 
 message AddNodeRequest { string pub_key = 1; }
-message AddNodeResponse { bool success = 1; }
+message AddNodeResponse { optional uint64 node_id = 1; }
 
-message RemoveNodeRequest { string pub_key = 1; }
-message RemoveNodeResponse { bool success = 1; }
+message RemoveNodeRequest { uint64 node_id = 1; }
+message RemoveNodeResponse {}
 
 message ListNodesRequest {}
 message ListNodesResponse {

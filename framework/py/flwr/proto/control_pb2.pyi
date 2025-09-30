@@ -249,35 +249,32 @@ global___AddNodeRequest = AddNodeRequest
 
 class AddNodeResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    SUCCESS_FIELD_NUMBER: builtins.int
-    success: builtins.bool
+    NODE_ID_FIELD_NUMBER: builtins.int
+    node_id: builtins.int
     def __init__(self,
         *,
-        success: builtins.bool = ...,
+        node_id: typing.Optional[builtins.int] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["success",b"success"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["_node_id",b"_node_id","node_id",b"node_id"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_node_id",b"_node_id","node_id",b"node_id"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_node_id",b"_node_id"]) -> typing.Optional[typing_extensions.Literal["node_id"]]: ...
 global___AddNodeResponse = AddNodeResponse
 
 class RemoveNodeRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    PUB_KEY_FIELD_NUMBER: builtins.int
-    pub_key: typing.Text
+    NODE_ID_FIELD_NUMBER: builtins.int
+    node_id: builtins.int
     def __init__(self,
         *,
-        pub_key: typing.Text = ...,
+        node_id: builtins.int = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["pub_key",b"pub_key"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node_id",b"node_id"]) -> None: ...
 global___RemoveNodeRequest = RemoveNodeRequest
 
 class RemoveNodeResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    SUCCESS_FIELD_NUMBER: builtins.int
-    success: builtins.bool
     def __init__(self,
-        *,
-        success: builtins.bool = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["success",b"success"]) -> None: ...
 global___RemoveNodeResponse = RemoveNodeResponse
 
 class ListNodesRequest(google.protobuf.message.Message):
