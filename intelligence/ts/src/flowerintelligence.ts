@@ -251,18 +251,16 @@ export class FlowerIntelligence {
     const trials = await Promise.all(
       this.#localEngineLoaders.map(async (load) => {
         try {
-          const engine = await load(); // dynamic import happens here
+          const engine = await load();
           const supportResult = await engine.isSupported(modelId);
           return { engine, supportResult };
         } catch (err) {
-          // If loading/constructing failed, synthesize a failure that can be compared below
           return {
             engine: null as unknown as Engine,
             supportResult: {
               ok: false as const,
               failure: {
-                // Pick the most appropriate FailureCode you already have in your enum
-                code: FailureCode.LocalError, // or FailureCode.UnknownError
+                code: FailureCode.LocalError,
                 description:
                   err instanceof Error ? err.message : 'Failed to initialize local engine.',
               },
@@ -275,11 +273,9 @@ export class FlowerIntelligence {
     const compatible = trials.filter((t) => t.supportResult.ok).map((t) => t.engine);
 
     if (compatible.length > 0) {
-      // Pick the first compatible local engine (same behavior as before)
       return { ok: true, value: compatible[0] };
     }
 
-    // Mirror your previous "highest failure" logic
     const failures = trials
       .filter(
         (t): t is { engine: Engine; supportResult: { ok: false; failure: Failure } } =>
