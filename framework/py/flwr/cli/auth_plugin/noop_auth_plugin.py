@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract classes for Flower User Auth Plugin."""
+"""Concrete NoOp implementation classes for Flower User Auth Plugin."""
 
 
 from collections.abc import Sequence
