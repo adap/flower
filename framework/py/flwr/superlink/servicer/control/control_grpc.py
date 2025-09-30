@@ -21,7 +21,6 @@ from typing import Optional
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.grpc import generic_create_grpc_server
@@ -32,6 +31,7 @@ from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.license_plugin import LicensePlugin
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.artifact_provider import ArtifactProvider
+from flwr.superlink.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
 
 from .control_event_log_interceptor import ControlEventLogInterceptor
 from .control_license_interceptor import ControlLicenseInterceptor

@@ -36,7 +36,6 @@ from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
-from flwr.common.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
     AUTH_TYPE_YAML_KEY,
@@ -72,6 +71,7 @@ from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.artifact_provider import ArtifactProvider
+from flwr.superlink.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
 from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
