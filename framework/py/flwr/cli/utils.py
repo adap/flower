@@ -26,8 +26,6 @@ from typing import Any, Callable, Optional, Union, cast
 import grpc
 import typer
 
-from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
-from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.constant import (
     AUTH_TYPE_JSON_KEY,
     CREDENTIALS_DIR,
@@ -43,7 +41,8 @@ from flwr.common.grpc import (
     on_channel_state_change,
 )
 
-from .auth_plugin import get_cli_auth_plugins
+from .auth_plugin import CliAuthPlugin, get_cli_auth_plugins
+from .cli_user_auth_interceptor import CliUserAuthInterceptor
 from .config_utils import validate_certificate_in_federation_config
 
 
