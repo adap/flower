@@ -5,6 +5,7 @@ isort:skip_file
 import builtins
 import google.protobuf.descriptor
 import google.protobuf.message
+import typing
 import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
@@ -19,3 +20,25 @@ class Node(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["node_id",b"node_id"]) -> None: ...
 global___Node = Node
+
+class NodeInfo(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_ID_FIELD_NUMBER: builtins.int
+    OWNER_FIELD_NUMBER: builtins.int
+    CREATED_AT_FIELD_NUMBER: builtins.int
+    DELETED_AT_FIELD_NUMBER: builtins.int
+    node_id: builtins.int
+    owner: typing.Text
+    created_at: typing.Text
+    deleted_at: typing.Text
+    def __init__(self,
+        *,
+        node_id: builtins.int = ...,
+        owner: typing.Text = ...,
+        created_at: typing.Text = ...,
+        deleted_at: typing.Optional[typing.Text] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["_deleted_at",b"_deleted_at","deleted_at",b"deleted_at"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_deleted_at",b"_deleted_at","created_at",b"created_at","deleted_at",b"deleted_at","node_id",b"node_id","owner",b"owner"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_deleted_at",b"_deleted_at"]) -> typing.Optional[typing_extensions.Literal["deleted_at"]]: ...
+global___NodeInfo = NodeInfo

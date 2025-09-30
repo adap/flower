@@ -21,6 +21,7 @@ import "flwr/proto/fab.proto";
 import "flwr/proto/transport.proto";
 import "flwr/proto/recorddict.proto";
 import "flwr/proto/run.proto";
+import "flwr/proto/node.proto";
 
 service Control {
   // Start run upon request
@@ -44,6 +45,15 @@ service Control {
 
   // Pull artifacts generated during a run (flwr pull)
   rpc PullArtifacts(PullArtifactsRequest) returns (PullArtifactsResponse) {}
+
+  // Add Supernode
+  rpc AddNode(AddNodeRequest) returns (AddNodeResponse) {}
+
+  // Remove Supernode
+  rpc RemoveNode(RemoveNodeRequest) returns (RemoveNodeResponse) {}
+
+  // List Supernodes
+  rpc ListNodes(ListNodesRequest) returns (ListNodesResponse) {}
 }
 
 message StartRunRequest {
@@ -86,3 +96,15 @@ message StopRunResponse { bool success = 1; }
 
 message PullArtifactsRequest { uint64 run_id = 1; }
 message PullArtifactsResponse { optional string url = 1; }
+
+message AddNodeRequest { string pub_key = 1; }
+message AddNodeResponse { bool success = 1; }
+
+message RemoveNodeRequest { string pub_key = 1; }
+message RemoveNodeResponse { bool success = 1; }
+
+message ListNodesRequest {}
+message ListNodesResponse {
+  map<uint64, NodeInfo> node_dict = 1;
+  string now = 2;
+}

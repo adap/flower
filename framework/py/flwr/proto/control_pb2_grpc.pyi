@@ -44,6 +44,21 @@ class ControlStub:
         flwr.proto.control_pb2.PullArtifactsResponse]
     """Pull artifacts generated during a run (flwr pull)"""
 
+    AddNode: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.AddNodeRequest,
+        flwr.proto.control_pb2.AddNodeResponse]
+    """Add Supernode"""
+
+    RemoveNode: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.RemoveNodeRequest,
+        flwr.proto.control_pb2.RemoveNodeResponse]
+    """Remove Supernode"""
+
+    ListNodes: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.ListNodesRequest,
+        flwr.proto.control_pb2.ListNodesResponse]
+    """List Supernodes"""
+
 
 class ControlServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -100,6 +115,30 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.control_pb2.PullArtifactsResponse:
         """Pull artifacts generated during a run (flwr pull)"""
+        pass
+
+    @abc.abstractmethod
+    def AddNode(self,
+        request: flwr.proto.control_pb2.AddNodeRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.control_pb2.AddNodeResponse:
+        """Add Supernode"""
+        pass
+
+    @abc.abstractmethod
+    def RemoveNode(self,
+        request: flwr.proto.control_pb2.RemoveNodeRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.control_pb2.RemoveNodeResponse:
+        """Remove Supernode"""
+        pass
+
+    @abc.abstractmethod
+    def ListNodes(self,
+        request: flwr.proto.control_pb2.ListNodesRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.control_pb2.ListNodesResponse:
+        """List Supernodes"""
         pass
 
 

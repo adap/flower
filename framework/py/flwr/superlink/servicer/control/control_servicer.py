@@ -45,14 +45,20 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    AddNodeRequest,
+    AddNodeResponse,
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
+    ListNodesRequest,
+    ListNodesResponse,
     ListRunsRequest,
     ListRunsResponse,
     PullArtifactsRequest,
     PullArtifactsResponse,
+    RemoveNodeRequest,
+    RemoveNodeResponse,
     StartRunRequest,
     StartRunResponse,
     StopRunRequest,
@@ -391,6 +397,27 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Call artifact provider
         download_url = self.artifact_provider.get_url(run_id)
         return PullArtifactsResponse(url=download_url)
+
+    def AddNode(
+        self, request: AddNodeRequest, context: grpc.ServicerContext
+    ) -> AddNodeResponse:
+        """Add a node."""
+        log(INFO, "ControlServicer.AddNode")
+        return AddNodeResponse()
+
+    def RemoveNode(
+        self, request: RemoveNodeRequest, context: grpc.ServicerContext
+    ) -> RemoveNodeResponse:
+        """Remove a node."""
+        log(INFO, "ControlServicer.RemoveNode")
+        return RemoveNodeResponse()
+
+    def ListNodes(
+        self, request: ListNodesRequest, context: grpc.ServicerContext
+    ) -> ListNodesResponse:
+        """List all nodes."""
+        log(INFO, "ControlServicer.ListNodes")
+        return ListNodesResponse()
 
 
 def _create_list_runs_response(

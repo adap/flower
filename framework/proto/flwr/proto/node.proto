@@ -18,3 +18,10 @@ syntax = "proto3";
 package flwr.proto;
 
 message Node { uint64 node_id = 1; }
+
+message NodeInfo {
+  uint64 node_id = 1;
+  string owner = 2;
+  string created_at = 3;
+  optional string deleted_at = 4;
+}

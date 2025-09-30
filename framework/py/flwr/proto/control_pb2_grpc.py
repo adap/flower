@@ -49,6 +49,21 @@ class ControlStub(object):
                 request_serializer=flwr_dot_proto_dot_control__pb2.PullArtifactsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_control__pb2.PullArtifactsResponse.FromString,
                 )
+        self.AddNode = channel.unary_unary(
+                '/flwr.proto.Control/AddNode',
+                request_serializer=flwr_dot_proto_dot_control__pb2.AddNodeRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.AddNodeResponse.FromString,
+                )
+        self.RemoveNode = channel.unary_unary(
+                '/flwr.proto.Control/RemoveNode',
+                request_serializer=flwr_dot_proto_dot_control__pb2.RemoveNodeRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.RemoveNodeResponse.FromString,
+                )
+        self.ListNodes = channel.unary_unary(
+                '/flwr.proto.Control/ListNodes',
+                request_serializer=flwr_dot_proto_dot_control__pb2.ListNodesRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.ListNodesResponse.FromString,
+                )
 
 
 class ControlServicer(object):
@@ -103,6 +118,27 @@ class ControlServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def AddNode(self, request, context):
+        """Add Supernode
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RemoveNode(self, request, context):
+        """Remove Supernode
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListNodes(self, request, context):
+        """List Supernodes
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ControlServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -140,6 +176,21 @@ def add_ControlServicer_to_server(servicer, server):
                     servicer.PullArtifacts,
                     request_deserializer=flwr_dot_proto_dot_control__pb2.PullArtifactsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_control__pb2.PullArtifactsResponse.SerializeToString,
+            ),
+            'AddNode': grpc.unary_unary_rpc_method_handler(
+                    servicer.AddNode,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.AddNodeRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.AddNodeResponse.SerializeToString,
+            ),
+            'RemoveNode': grpc.unary_unary_rpc_method_handler(
+                    servicer.RemoveNode,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.RemoveNodeRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.RemoveNodeResponse.SerializeToString,
+            ),
+            'ListNodes': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListNodes,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.ListNodesRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.ListNodesResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -267,5 +318,56 @@ class Control(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/PullArtifacts',
             flwr_dot_proto_dot_control__pb2.PullArtifactsRequest.SerializeToString,
             flwr_dot_proto_dot_control__pb2.PullArtifactsResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def AddNode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/AddNode',
+            flwr_dot_proto_dot_control__pb2.AddNodeRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.AddNodeResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RemoveNode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/RemoveNode',
+            flwr_dot_proto_dot_control__pb2.RemoveNodeRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.RemoveNodeResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ListNodes(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/ListNodes',
+            flwr_dot_proto_dot_control__pb2.ListNodesRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.ListNodesResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

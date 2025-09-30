@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x66lwr/proto/node.proto\x12\nflwr.proto\"\x17\n\x04Node\x12\x0f\n\x07node_id\x18\x01 \x01(\x04\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x66lwr/proto/node.proto\x12\nflwr.proto\"\x17\n\x04Node\x12\x0f\n\x07node_id\x18\x01 \x01(\x04\"f\n\x08NodeInfo\x12\x0f\n\x07node_id\x18\x01 \x01(\x04\x12\r\n\x05owner\x18\x02 \x01(\t\x12\x12\n\ncreated_at\x18\x03 \x01(\t\x12\x17\n\ndeleted_at\x18\x04 \x01(\tH\x00\x88\x01\x01\x42\r\n\x0b_deleted_atb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,4 +23,6 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _globals['_NODE']._serialized_start=37
   _globals['_NODE']._serialized_end=60
+  _globals['_NODEINFO']._serialized_start=62
+  _globals['_NODEINFO']._serialized_end=164
 # @@protoc_insertion_point(module_scope)
