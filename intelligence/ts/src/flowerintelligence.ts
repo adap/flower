@@ -218,7 +218,6 @@ export class FlowerIntelligence {
       options.stream,
       options.onStreamEvent,
       options.tools,
-      options.toolChoice,
       options.encrypt,
       options.signal
     );
@@ -247,45 +246,39 @@ export class FlowerIntelligence {
   }
 
   private async chooseLocalEngine(modelId: string): Promise<Result<Engine>> {
-    // Try each loader, but only instantiate/load a given engine when we need to
-    const trials = await Promise.all(
-      this.#localEngineLoaders.map(async (load) => {
-        try {
-          const engine = await load();
-          const supportResult = await engine.isSupported(modelId);
-          return { engine, supportResult };
-        } catch (err) {
-          return {
-            engine: null as unknown as Engine,
-            supportResult: {
-              ok: false as const,
-              failure: {
-                code: FailureCode.LocalError,
-                description:
-                  err instanceof Error ? err.message : 'Failed to initialize local engine.',
-              },
-            },
-          };
-        }
+    const results = await Promise.all(
+      this.#availableLocalEngines.map(async (engine) => {
+        const supportResult = await engine.isSupported(modelId);
+        return { engine, supportResult };
       })
     );
+    const compatibleEngines = results
+      .filter(({ supportResult }) => supportResult.ok)
+      .map(({ engine }) => engine);
 
-    const compatible = trials.filter((t) => t.supportResult.ok).map((t) => t.engine);
+    if (compatibleEngines.length > 0) {
+      // Currently we just select the first compatible localEngine without further check
+      return { ok: true, value: compatibleEngines[0] };
+    } else {
+      // We extract the failures from the results that didn't return a true `ok`
+      const failures = results
+        .filter(
+          (result): result is { engine: Engine; supportResult: { ok: false; failure: Failure } } =>
+            !result.supportResult.ok
+        )
+        .map(({ supportResult }) => supportResult.failure);
 
-    if (compatible.length > 0) {
-      return { ok: true, value: compatible[0] };
+      // We then compute which failure has the highest FailureCode
+      // usually corresponding to the most specific error
+      const highestFailure = failures.reduce(
+        (max, failure) => (failure.code > max.code ? failure : max),
+        failures[0]
+      );
+      return {
+        ok: false,
+        failure: highestFailure,
+      };
     }
-
-    const failures = trials
-      .filter(
-        (t): t is { engine: Engine; supportResult: { ok: false; failure: Failure } } =>
-          !t.supportResult.ok
-      )
-      .map((t) => t.supportResult.failure);
-
-    const highestFailure = failures.reduce((max, f) => (f.code > max.code ? f : max), failures[0]);
-
-    return { ok: false, failure: highestFailure };
   }
 
   private getOrCreateRemoteEngine(localFailure?: Result<Engine>): Result<Engine> {
