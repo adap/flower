@@ -26,4 +26,6 @@ message NodeInfo {
   optional string activated_at = 4;
   optional string deactivated_at = 5;
   optional string deleted_at = 6;
+  optional float online_until = 7;
+  optional float heartbeat_interval = 8;
 }

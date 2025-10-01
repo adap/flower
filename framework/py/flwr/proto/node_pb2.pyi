@@ -29,12 +29,16 @@ class NodeInfo(google.protobuf.message.Message):
     ACTIVATED_AT_FIELD_NUMBER: builtins.int
     DEACTIVATED_AT_FIELD_NUMBER: builtins.int
     DELETED_AT_FIELD_NUMBER: builtins.int
+    ONLINE_UNTIL_FIELD_NUMBER: builtins.int
+    HEARTBEAT_INTERVAL_FIELD_NUMBER: builtins.int
     node_id: builtins.int
     owner_aid: typing.Text
     registered_at: typing.Text
     activated_at: typing.Text
     deactivated_at: typing.Text
     deleted_at: typing.Text
+    online_until: builtins.float
+    heartbeat_interval: builtins.float
     def __init__(self,
         *,
         node_id: builtins.int = ...,
@@ -43,13 +47,19 @@ class NodeInfo(google.protobuf.message.Message):
         activated_at: typing.Optional[typing.Text] = ...,
         deactivated_at: typing.Optional[typing.Text] = ...,
         deleted_at: typing.Optional[typing.Text] = ...,
+        online_until: typing.Optional[builtins.float] = ...,
+        heartbeat_interval: typing.Optional[builtins.float] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["_activated_at",b"_activated_at","_deactivated_at",b"_deactivated_at","_deleted_at",b"_deleted_at","activated_at",b"activated_at","deactivated_at",b"deactivated_at","deleted_at",b"deleted_at"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["_activated_at",b"_activated_at","_deactivated_at",b"_deactivated_at","_deleted_at",b"_deleted_at","activated_at",b"activated_at","deactivated_at",b"deactivated_at","deleted_at",b"deleted_at","node_id",b"node_id","owner_aid",b"owner_aid","registered_at",b"registered_at"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["_activated_at",b"_activated_at","_deactivated_at",b"_deactivated_at","_deleted_at",b"_deleted_at","_heartbeat_interval",b"_heartbeat_interval","_online_until",b"_online_until","activated_at",b"activated_at","deactivated_at",b"deactivated_at","deleted_at",b"deleted_at","heartbeat_interval",b"heartbeat_interval","online_until",b"online_until"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_activated_at",b"_activated_at","_deactivated_at",b"_deactivated_at","_deleted_at",b"_deleted_at","_heartbeat_interval",b"_heartbeat_interval","_online_until",b"_online_until","activated_at",b"activated_at","deactivated_at",b"deactivated_at","deleted_at",b"deleted_at","heartbeat_interval",b"heartbeat_interval","node_id",b"node_id","online_until",b"online_until","owner_aid",b"owner_aid","registered_at",b"registered_at"]) -> None: ...
     @typing.overload
     def WhichOneof(self, oneof_group: typing_extensions.Literal["_activated_at",b"_activated_at"]) -> typing.Optional[typing_extensions.Literal["activated_at"]]: ...
     @typing.overload
     def WhichOneof(self, oneof_group: typing_extensions.Literal["_deactivated_at",b"_deactivated_at"]) -> typing.Optional[typing_extensions.Literal["deactivated_at"]]: ...
     @typing.overload
     def WhichOneof(self, oneof_group: typing_extensions.Literal["_deleted_at",b"_deleted_at"]) -> typing.Optional[typing_extensions.Literal["deleted_at"]]: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_heartbeat_interval",b"_heartbeat_interval"]) -> typing.Optional[typing_extensions.Literal["heartbeat_interval"]]: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_online_until",b"_online_until"]) -> typing.Optional[typing_extensions.Literal["online_until"]]: ...
 global___NodeInfo = NodeInfo
