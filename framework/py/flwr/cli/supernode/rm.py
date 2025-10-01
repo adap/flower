@@ -13,3 +13,29 @@
 # limitations under the License.
 # ==============================================================================
 """Flower command line interface `supernode rm` command."""
+
+from pathlib import Path
+from typing import Annotated, Optional
+
+import typer
+
+
+def rm(  # pylint: disable=R0914
+    app: Annotated[
+        Path,
+        typer.Argument(help="Path of the Flower project"),
+    ] = Path("."),
+    federation: Annotated[
+        Optional[str],
+        typer.Argument(help="Name of the federation"),
+    ] = None,
+    node_id: Annotated[
+        Path,
+        typer.Option(
+            "--node-id",
+            help="ID of the SuperNode to remove.",
+        ),
+    ] = None,
+) -> None:
+    """Remove a SuperNode from the federation."""
+    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)

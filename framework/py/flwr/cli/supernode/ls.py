@@ -13,3 +13,23 @@
 # limitations under the License.
 # ==============================================================================
 """Flower command line interface `supernode ls` command."""
+
+
+from pathlib import Path
+from typing import Annotated, Optional
+
+import typer
+
+
+def ls(  # pylint: disable=R0914
+    app: Annotated[
+        Path,
+        typer.Argument(help="Path of the Flower project"),
+    ] = Path("."),
+    federation: Annotated[
+        Optional[str],
+        typer.Argument(help="Name of the federation"),
+    ] = None,
+) -> None:
+    """List SuperNodes in the federation."""
+    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
