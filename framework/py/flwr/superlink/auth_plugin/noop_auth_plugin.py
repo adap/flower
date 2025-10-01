@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""No-op user auth plugins."""
+"""Concrete NoOp implementation for Servicer-side account authentication and
+authorization plugins."""
 
 
 from collections.abc import Sequence

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Concrete NoOp implementation classes for Flower User Auth Plugin."""
+"""Concrete NoOp implementation for CLI-side account authentication plugin."""
 
 
 from collections.abc import Sequence
@@ -36,10 +36,10 @@ class NoOpCliAuthPlugin(CliAuthPlugin):
         control_stub: ControlStub,
     ) -> UserAuthCredentials:
         """Warn that no authentication is being performed and return empty tokens."""
-        # Warn the user that no authentication is being performed
+        # Warn the account that no authentication is being performed
         typer.secho(
             "Warning: No authentication is being performed. "
-            "Proceeding without user authentication.",
+            "Proceeding without account authentication.",
             fg=typer.colors.YELLOW,
         )
         return UserAuthCredentials(
