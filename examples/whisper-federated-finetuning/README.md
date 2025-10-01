@@ -131,7 +131,7 @@ An overview of the FL pipeline built with Flower for this example is illustrated
 1. At the start of a round, the `ServerApp` communicates the weights of classification head to a fraction of the nodes.
 2. The `ClientApp` in each node, using a frozen pre-trained Whisper encoder, trains the classification head using its own data samples.
 3. Once on-site training is completed, each node sends back the (now updated) classification head to the `ServerApp`.
-4. The Flower `ServerApp` aggregates (via [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html) -- but you can [choose any other strategy](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.html), or implement your own!) the classification heads in order to obtain a new _global_ classification head. This head will be shared with nodes in the next round.
+4. The Flower `ServerApp` aggregates (via [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.serverapp.strategy.FedAvg.html) -- but you can [choose any other strategy](https://flower.ai/docs/framework/ref-api/flwr.serverapp.strategy.html), or implement your own!) the classification heads in order to obtain a new _global_ classification head. This head will be shared with nodes in the next round.
 
 You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 

@@ -1,7 +1,6 @@
 """whisper_example: A Flower / PyTorch app with OpenAi's Whisper."""
 
 import random
-from typing import List
 
 from datasets import Dataset, concatenate_datasets, load_from_disk
 from flwr_datasets import FederatedDataset
@@ -14,7 +13,7 @@ processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
 
 def load_data(
     partition_id: int,
-    remove_cols: List[str],
+    remove_cols: list[str],
 ):
     # Only initialize `FederatedDataset` once
     global fds

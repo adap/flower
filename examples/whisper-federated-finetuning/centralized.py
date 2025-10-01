@@ -1,8 +1,8 @@
 import argparse
 import random
 
-import torch
 from datasets import concatenate_datasets, load_dataset
+import torch
 from torch.utils.data import DataLoader
 from transformers import WhisperProcessor
 
