@@ -23,9 +23,9 @@ message NodeInfo {
   uint64 node_id = 1;
   string owner_aid = 2;
   string registered_at = 3;
-  optional string activated_at = 4;
-  optional string deactivated_at = 5;
-  optional string deleted_at = 6;
-  optional float online_until = 7;
-  optional float heartbeat_interval = 8;
+  string activated_at = 4;
+  string deactivated_at = 5;
+  string deleted_at = 6;
+  float online_until = 7;
+  float heartbeat_interval = 8;
 }

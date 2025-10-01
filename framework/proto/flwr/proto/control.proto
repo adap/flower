@@ -105,6 +105,6 @@ message RemoveNodeResponse {}
 
 message ListNodesRequest {}
 message ListNodesResponse {
-  repeated NodeInfo node_dict = 1;
+  repeated NodeInfo nodes_info = 1;
   string now = 2;
 }

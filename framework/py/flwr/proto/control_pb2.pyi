@@ -288,15 +288,15 @@ global___ListNodesRequest = ListNodesRequest
 
 class ListNodesResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    NODE_DICT_FIELD_NUMBER: builtins.int
+    NODES_INFO_FIELD_NUMBER: builtins.int
     NOW_FIELD_NUMBER: builtins.int
     @property
-    def node_dict(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.NodeInfo]: ...
+    def nodes_info(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.NodeInfo]: ...
     now: typing.Text
     def __init__(self,
         *,
-        node_dict: typing.Optional[typing.Iterable[flwr.proto.node_pb2.NodeInfo]] = ...,
+        nodes_info: typing.Optional[typing.Iterable[flwr.proto.node_pb2.NodeInfo]] = ...,
         now: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["node_dict",b"node_dict","now",b"now"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["nodes_info",b"nodes_info","now",b"now"]) -> None: ...
 global___ListNodesResponse = ListNodesResponse
