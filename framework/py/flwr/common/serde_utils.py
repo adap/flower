@@ -114,7 +114,7 @@ def record_value_dict_to_proto(
     Note: `bool` MUST be put in the front of allowd_types if it exists.
     """
     # Move bool to the front
-    if bool in allowed_types and allowed_types[0] != bool:
+    if bool in allowed_types and allowed_types[0] != bool:  # noqa: E721
         allowed_types.remove(bool)
         allowed_types.insert(0, bool)
 

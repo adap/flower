@@ -173,17 +173,17 @@ class RecordMaker:
     def get_value(self, dtype: Union[type[T], str]) -> T:
         """Create a value of a given type."""
         ret: Any = None
-        if dtype == bool:
+        if dtype == bool:  # noqa: E721
             ret = self.rng.random() < 0.5
-        elif dtype == str:
+        elif dtype == str:  # noqa: E721
             ret = self.get_str(self.rng.randint(10, 100))
-        elif dtype == int:
+        elif dtype == int:  # noqa: E721
             ret = self.rng.randint(-1 << 63, (1 << 63) - 1)
-        elif dtype == float:
+        elif dtype == float:  # noqa: E721
             ret = (self.rng.random() - 0.5) * (2.0 ** self.rng.randint(0, 50))
-        elif dtype == bytes:
+        elif dtype == bytes:  # noqa: E721
             ret = self.randbytes(self.rng.randint(10, 100))
-        elif dtype == "uint":
+        elif dtype == "uint":  # noqa: E721
             ret = self.rng.randint(0, (1 << 64) - 1)
         else:
             raise NotImplementedError(f"Unsupported dtype: {dtype}")
