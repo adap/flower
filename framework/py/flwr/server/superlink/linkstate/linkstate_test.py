@@ -54,7 +54,6 @@ from flwr.common.typing import RunStatus
 # pylint: disable=E0611
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata
-from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
 from flwr.server.superlink.linkstate import (
@@ -1413,7 +1412,6 @@ def create_ins_message(
             message_type="query",
             created_at=now().timestamp(),
         ),
-        content=ProtoRecordDict(),
     )
     proto.metadata.message_id = message_from_proto(proto).object_id
     return proto
