@@ -15,6 +15,14 @@
 
 import { ALLOWED_ROLES } from './constants';
 
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | JsonValue[]
+  | { [key: string]: JsonValue }
+  | null;
+
 /**
  * Represents a message in a chat session.
  */
@@ -69,7 +77,7 @@ export type ToolCall = Record<
     /**
      * The arguments passed to the tool as key-value pairs.
      */
-    arguments: Record<string, string>;
+    arguments: Record<string, JsonValue>;
   }
 >;
 

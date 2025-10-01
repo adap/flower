@@ -23,7 +23,6 @@ from typing import Any, Optional, Union
 
 import typer
 
-from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTH_TYPE_JSON_KEY,
@@ -36,6 +35,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
+
+from .auth_plugin import CliAuthPlugin
 
 
 class OidcCliPlugin(CliAuthPlugin):
