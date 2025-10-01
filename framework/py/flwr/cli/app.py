@@ -28,9 +28,9 @@ from .new import new
 from .pull import pull
 from .run import run
 from .stop import stop
-from .supernode.add import add as supernode_add
-from .supernode.ls import ls as supernode_ls
-from .supernode.rm import rm as supernode_rm
+from .supernode import add as supernode_add
+from .supernode import ls as supernode_ls
+from .supernode import rm as supernode_rm
 
 app = typer.Typer(
     help=typer.style(
