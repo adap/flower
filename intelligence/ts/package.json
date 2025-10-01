@@ -18,7 +18,7 @@
     "url": "git+https://github.com/adap/flower.git"
   },
   "author": "The Flower Authors <hello@flower.ai>",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "type": "module",
   "main": "./dist/flowerintelligence.cjs.js",
   "module": "./dist/flowerintelligence.es.js",
