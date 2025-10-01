@@ -22,6 +22,7 @@ from .client_manager import ClientManager
 from .server import Server
 from .server_config import ServerConfig
 from .strategy import Strategy
+from .client_results_strategy import ClientResultsStrategy
 
 
 @dataclass
@@ -40,6 +41,11 @@ class ServerAppComponents:  # pylint: disable=too-many-instance-attributes
         An implementation of the abstract base class
         `flwr.server.strategy.Strategy`. If no strategy is provided, then
         `flwr.server.strategy.FedAvg` will be used.
+    client_results_strategy : Optional[ClientResultsStrategy] (default: None)
+        An implementation of the abstract base class
+        `flwr.server.client_results_strategy.ClientResultsStrategy`. If no strategy
+        is provided, then `flwr.server.client_results_strategy.AlwaysTrustClientResults`
+        will be used.
     client_manager : Optional[ClientManager] (default: None)
         An implementation of the class `flwr.server.ClientManager`. If no
         implementation is provided, then `flwr.server.SimpleClientManager`
@@ -49,4 +55,5 @@ class ServerAppComponents:  # pylint: disable=too-many-instance-attributes
     server: Optional[Server] = None
     config: Optional[ServerConfig] = None
     strategy: Optional[Strategy] = None
+    client_results_strategy: Optional[ClientResultsStrategy] = None
     client_manager: Optional[ClientManager] = None
