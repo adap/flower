@@ -15,7 +15,6 @@ from flwr.app import (
 from flwr.clientapp import ClientApp
 from torch.utils.data import DataLoader
 
-
 from whisper_example.dataset import load_data
 from whisper_example.model import construct_balanced_sampler, get_model, train_one_epoch
 
@@ -59,17 +58,17 @@ def train(msg: Message, context: Context):
         partition_id=partition_id,
         remove_cols=context.run_config["remove-cols"],
     )
-    partition.with_format("torch", columns=["data", "targets"])
+    trainset = partition.with_format("torch", columns=["data", "targets"])
     torch.set_num_threads(og_threads)
 
     # construct sampler in order to have balanced batches
     sampler = None
-    if len(partition) > batch_size:
-        sampler = construct_balanced_sampler(partition)
+    if len(trainset) > batch_size:
+        sampler = construct_balanced_sampler(trainset)
 
     # Construct dataloader
     train_loader = DataLoader(
-        partition,
+        trainset,
         batch_size=batch_size,
         shuffle=False,
         num_workers=0,
@@ -81,11 +80,12 @@ def train(msg: Message, context: Context):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(classifier.parameters(), lr=0.001)
 
-    # Don't train if partition is very small
+    # Don't train if trainset is very small
     run_training = len(train_loader) > 1
     config_record = ConfigRecord(
         {"trained": run_training}
     )  # will be used for aggregation
+    train_metrics = {}
     if run_training:
         # Train
         avg_loss, avg_acc = train_one_epoch(
@@ -97,15 +97,15 @@ def train(msg: Message, context: Context):
             device,
             disable_tqdm=disable_tqdm,
         )
+        train_metrics = {
+            "train_loss": avg_loss,
+            "train_acc": avg_acc,
+            "num-examples": len(train_loader.dataset),
+        }
 
     # Construct and return reply Message
     model_record = ArrayRecord(classifier.state_dict())
-    metrics = {
-        "train_loss": avg_loss,
-        "train_acc": avg_acc,
-        "num-examples": len(train_loader.dataset),
-    }
-    metric_record = MetricRecord(metrics)
+    metric_record = MetricRecord(train_metrics)
     content = RecordDict(
         {"arrays": model_record, "metrics": metric_record, "config": config_record}
     )

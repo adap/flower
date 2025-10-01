@@ -1,6 +1,5 @@
 """whisper_example: A Flower / PyTorch app with OpenAi's Whisper."""
 
-
 import numpy as np
 import torch
 from torch.utils.data import WeightedRandomSampler
