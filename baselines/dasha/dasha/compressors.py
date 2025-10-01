@@ -1,4 +1,4 @@
-"""Defines compressors for the Dasha and Marina methods."""
+"""dasha: A Flower Baseline."""
 
 import numpy as np
 

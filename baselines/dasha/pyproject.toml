@@ -1,85 +1,50 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "dasha" # <----- Ensure it matches the name of your baseline directory containing all the source code
+[project]
+name = "dasha"
 version = "1.0.0"
-description = "DASHA: Distributed nonconvex optimization with communication compression and optimal oracle complexity"
+description = ""
 license = "Apache-2.0"
-authors = ["Alexander Tyurin <alexandertiurin@gmail.com>"]
-readme = "README.md"
-homepage = "https://flower.ai"
-repository = "https://github.com/adap/flower"
-documentation = "https://flower.ai"
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: MacOS :: MacOS X",
-    "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Software Development",
-    "Topic :: Software Development :: Libraries",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Typing :: Typed",
+dependencies = [
+    "flwr[simulation]>=1.18.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "torch==2.5.1",
+    "torchvision==0.20.1",
+    "scikit-learn==1.6.1",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.10.0, <3.11.0"  # don't change this
-flwr = { extras = ["simulation"], version = "1.5.0" }
-hydra-core = "1.3.2" # don't change this
-scikit-learn = "1.5.0"
-matplotlib = "3.7.1"
-# Installing Torch. TODO: Fix and install the relevant version of Torch based on the current system.
-torch = [{ url = "https://download.pytorch.org/whl/cu118/torch-2.0.0%2Bcu118-cp310-cp310-linux_x86_64.whl", markers="sys_platform == 'linux'"},
-         { url = "https://download.pytorch.org/whl/cpu/torch-2.0.0-cp39-none-macosx_11_0_arm64.whl", markers="sys_platform == 'darwin'"}]
-torchvision = [{ url = "https://download.pytorch.org/whl/cu118/torchvision-0.15.0%2Bcu118-cp310-cp310-linux_x86_64.whl", markers="sys_platform == 'linux'"},
-               { url = "https://download.pytorch.org/whl/cpu/torchvision-0.15.0-cp39-cp39-macosx_11_0_arm64.whl", markers="sys_platform == 'darwin'"}]
+[tool.hatch.metadata]
+allow-direct-references = true
 
-[tool.poetry.dev-dependencies]
-isort = "==5.13.2"
-black = "==24.2.0"
-docformatter = "==1.7.5"
-mypy = "==1.4.1"
-pylint = "==2.8.2"
-flake8 = "==3.9.2"
-pytest = "==6.2.4"
-pytest-watch = "==4.2.0"
-types-requests = "==2.27.7"
-py-spy = "==0.3.14"
-ruff = "==0.4.5"
-virtualenv = "==20.21.0"
+[project.optional-dependencies]
+dev = [
+    "isort==5.13.2",
+    "black==24.2.0",
+    "docformatter==1.7.5",
+    "mypy==1.8.0",
+    "pylint==3.2.6",
+    "flake8==5.0.4",
+    "pytest==6.2.4",
+    "pytest-watch==4.2.0",
+    "ruff==0.1.9",
+    "types-requests==2.31.0.20240125",
+]
 
 [tool.isort]
-line_length = 88
-indent = "    "
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
+profile = "black"
+known_first_party = ["flwr"]
+line_length = 79
 
 [tool.black]
-line-length = 88
+line-length = 79
 target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.pytest.ini_options]
 minversion = "6.2"
 addopts = "-qq"
-testpaths = [
-    "flwr_baselines",
-]
+testpaths = ["flwr_baselines"]
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -87,16 +52,19 @@ strict = false
 plugins = "numpy.typing.mypy_plugin"
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias,no-self-use,too-many-locals,too-many-instance-attributes"
-good-names = "i,j,k,_,x,y,X,Y"
-signature-mutators = "hydra.main.main"
-generated-members = "numpy.*, torch.*"
+disable = "duplicate-code,too-few-public-methods,useless-import-alias,wrong-import-order"
+good-names = "i,j,k,_,x,y,X,Y,K,N"
+max-args = 10
+max-attributes = 15
+max-locals = 36
+max-branches = 20
+max-statements = 55
+
+[tool.pylint.typecheck]
+generated-members = "numpy.*, torch.*, tensorflow.*"
 
 [[tool.mypy.overrides]]
-module = [
-    "importlib.metadata.*",
-    "importlib_metadata.*",
-]
+module = ["importlib.metadata.*", "importlib_metadata.*"]
 follow_imports = "skip"
 follow_imports_for_stubs = true
 disallow_untyped_calls = false
@@ -107,12 +75,12 @@ follow_imports = "skip"
 follow_imports_for_stubs = true
 
 [tool.docformatter]
-wrap-summaries = 88
-wrap-descriptions = 88
+wrap-summaries = 79
+wrap-descriptions = 79
 
 [tool.ruff]
 target-version = "py38"
-line-length = 88
+line-length = 79
 select = ["D", "E", "F", "W", "B", "ISC", "C4"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
 ignore = ["B024", "B027"]
@@ -142,3 +110,55 @@ exclude = [
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "maddox-j"
+
+[tool.flwr.app.components]
+serverapp = "dasha.server_app:app"
+clientapp = "dasha.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 10000
+num-clients = 5
+
+[tool.flwr.app.config.compressor]
+name = "RandKCompressor"
+number-of-coordinates = 1
+
+
+[tool.flwr.app.config.dataset]
+type = "libsvm"
+name = "mushrooms"
+train-url = "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/mushrooms"
+
+[tool.flwr.app.config.method]
+name = "dasha"
+step-size = 0.5
+device = "cpu"
+evaluate-accuracy = false
+send-gradient = false
+strict-load = true
+mega-batch-size = -1
+batch-size = -1
+stochastic-momentum = -1.0
+
+[tool.flwr.app.config.model]
+name = "linear_net_with_non_convex_loss"
+init-with-zeros = true
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 5
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.0
+
+[tool.flwr.federations.gpu-simulation]
+options.num-supernodes = 5
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.2
