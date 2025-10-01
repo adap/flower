@@ -14,12 +14,12 @@
 # ==============================================================================
 """Flower command line interface `supernode` command."""
 
-from .add import add as add
+from .create import create as create
+from .delete import delete as delete
 from .ls import ls as ls
-from .rm import rm as rm
 
 __all__ = [
-    "add",
+    "create",
+    "delete",
     "ls",
-    "rm",
 ]

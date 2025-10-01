@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `supernode ls` command."""
+"""Flower command line interface `supernode list` command."""
 
 
 from pathlib import Path

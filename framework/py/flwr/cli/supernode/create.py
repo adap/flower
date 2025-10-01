@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `supernode rm` command."""
+"""Flower command line interface `supernode create` command."""
 
 from pathlib import Path
 from typing import Annotated, Optional
@@ -28,11 +28,11 @@ from flwr.cli.config_utils import (
 from flwr.common.constant import FAB_CONFIG_FILE
 
 
-def rm(  # pylint: disable=R0914
-    node_id: Annotated[
-        int,
+def create(  # pylint: disable=R0914
+    pub_key: Annotated[
+        Path,
         typer.Argument(
-            help="ID of the SuperNode to remove.",
+            help="Path to the public key file.",
         ),
     ],
     app: Annotated[
@@ -44,7 +44,7 @@ def rm(  # pylint: disable=R0914
         typer.Argument(help="Name of the federation"),
     ] = None,
 ) -> None:
-    """Remove a SuperNode from the federation."""
+    """Add a SuperNode to the federation."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = app / FAB_CONFIG_FILE if app else None
@@ -53,6 +53,6 @@ def rm(  # pylint: disable=R0914
     federation, federation_config = validate_federation_in_project_config(
         federation, config
     )
-    exit_if_no_address(federation_config, "supernode rm")
+    exit_if_no_address(federation_config, "supernode add")
 
-    _ = node_id
+    _ = pub_key
