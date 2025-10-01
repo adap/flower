@@ -285,29 +285,14 @@ global___ListNodesRequest = ListNodesRequest
 
 class ListNodesResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    class NodeDictEntry(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        KEY_FIELD_NUMBER: builtins.int
-        VALUE_FIELD_NUMBER: builtins.int
-        key: builtins.int
-        @property
-        def value(self) -> flwr.proto.node_pb2.NodeInfo: ...
-        def __init__(self,
-            *,
-            key: builtins.int = ...,
-            value: typing.Optional[flwr.proto.node_pb2.NodeInfo] = ...,
-            ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
-
     NODE_DICT_FIELD_NUMBER: builtins.int
     NOW_FIELD_NUMBER: builtins.int
     @property
-    def node_dict(self) -> google.protobuf.internal.containers.MessageMap[builtins.int, flwr.proto.node_pb2.NodeInfo]: ...
+    def node_dict(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.NodeInfo]: ...
     now: typing.Text
     def __init__(self,
         *,
-        node_dict: typing.Optional[typing.Mapping[builtins.int, flwr.proto.node_pb2.NodeInfo]] = ...,
+        node_dict: typing.Optional[typing.Iterable[flwr.proto.node_pb2.NodeInfo]] = ...,
         now: typing.Text = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["node_dict",b"node_dict","now",b"now"]) -> None: ...
