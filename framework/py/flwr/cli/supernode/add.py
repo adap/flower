@@ -29,6 +29,12 @@ from flwr.common.constant import FAB_CONFIG_FILE
 
 
 def add(  # pylint: disable=R0914
+    pub_key: Annotated[
+        Path,
+        typer.Argument(
+            help="Path to the public key file.",
+        ),
+    ],
     app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project"),
@@ -37,13 +43,6 @@ def add(  # pylint: disable=R0914
         Optional[str],
         typer.Argument(help="Name of the federation"),
     ] = None,
-    pub_key: Annotated[
-        Path,
-        typer.Option(
-            "--pub-key",
-            help="Path to the public key file.",
-        ),
-    ] = Path(""),
 ) -> None:
     """Add a SuperNode to the federation."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)

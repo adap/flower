@@ -29,6 +29,12 @@ from flwr.common.constant import FAB_CONFIG_FILE
 
 
 def rm(  # pylint: disable=R0914
+    node_id: Annotated[
+        int,
+        typer.Argument(
+            help="ID of the SuperNode to remove.",
+        ),
+    ],
     app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project"),
@@ -36,13 +42,6 @@ def rm(  # pylint: disable=R0914
     federation: Annotated[
         Optional[str],
         typer.Argument(help="Name of the federation"),
-    ] = None,
-    node_id: Annotated[
-        Optional[int],
-        typer.Option(
-            "--node-id",
-            help="ID of the SuperNode to remove.",
-        ),
     ] = None,
 ) -> None:
     """Remove a SuperNode from the federation."""
