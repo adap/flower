@@ -2,10 +2,10 @@ import argparse
 from multiprocessing import Pool
 from time import time
 
-from datasets import load_dataset
 import tomli
-
 from whisper_example.dataset import load_data
+
+from datasets import load_dataset
 
 parser = argparse.ArgumentParser(description="Whisper preprocessing")
 

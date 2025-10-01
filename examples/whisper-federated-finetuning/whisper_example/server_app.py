@@ -3,15 +3,15 @@
 from logging import INFO
 from typing import Iterable, Optional
 
-from datasets import load_dataset
 import torch
-from torch.utils.data import DataLoader
-from transformers import WhisperProcessor
+from datasets import load_dataset
 from flwr.app import ArrayRecord, Context, Message, MetricRecord
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
+from torch.utils.data import DataLoader
+from transformers import WhisperProcessor
 
 from whisper_example.dataset import get_encoding_fn
 from whisper_example.model import eval_model, get_model

@@ -2,10 +2,11 @@
 
 import random
 
-from datasets import Dataset, concatenate_datasets, load_from_disk
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import GroupedNaturalIdPartitioner
 from transformers import WhisperProcessor
+
+from datasets import Dataset, concatenate_datasets, load_from_disk
 
 fds = None  # Cache FederatedDataset
 processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")

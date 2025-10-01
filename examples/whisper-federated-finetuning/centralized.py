@@ -1,8 +1,8 @@
 import argparse
 import random
 
-from datasets import concatenate_datasets, load_dataset
 import torch
+from datasets import concatenate_datasets, load_dataset
 from torch.utils.data import DataLoader
 from transformers import WhisperProcessor
 
@@ -13,6 +13,7 @@ from whisper_example.model import (
     get_model,
     train_one_epoch,
 )
+
 
 random.seed(1989)
 torch.set_float32_matmul_precision(
