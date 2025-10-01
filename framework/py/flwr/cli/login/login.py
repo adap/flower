@@ -35,7 +35,12 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 
-from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
+from ..utils import (
+    account_auth_enabled,
+    flwr_cli_grpc_exc_handler,
+    init_channel,
+    try_obtain_cli_auth_plugin,
+)
 
 
 def login(  # pylint: disable=R0914
@@ -68,11 +73,12 @@ def login(  # pylint: disable=R0914
     exit_if_no_address(federation_config, "login")
 
     # Check if `enable-user-auth` is set to `true`
-    if not federation_config.get("enable-user-auth", False):
+
+    if not account_auth_enabled(federation_config):
         typer.secho(
-            f"❌ User authentication is not enabled for the federation '{federation}'. "
-            "To enable it, set `enable-user-auth = true` in the federation "
-            "configuration.",
+            "❌ Account authentication is not enabled for the federation "
+            f"'{federation}'. To enable it, set `enable-account-auth = true` "
+            "in the federation configuration.",
             fg=typer.colors.RED,
             bold=True,
         )

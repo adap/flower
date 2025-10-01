@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract classes for Flower User Auth Plugin."""
+"""Abstract classes for Flower account auth plugins."""
 
 
 from abc import ABC, abstractmethod
@@ -23,8 +23,8 @@ from typing import Optional, Union
 from flwr.common.typing import AccountInfo, UserAuthCredentials, UserAuthLoginDetails
 
 
-class ControlAuthPlugin(ABC):
-    """Abstract Flower Auth Plugin class for ControlServicer.
+class ControlAuthnPlugin(ABC):
+    """Abstract Flower Authentication Plugin class for ControlServicer.
 
     Parameters
     ----------
@@ -83,5 +83,5 @@ class ControlAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
         """Abstract constructor."""
 
     @abstractmethod
-    def verify_user_authorization(self, account_info: AccountInfo) -> bool:
-        """Verify user authorization request."""
+    def authorize(self, account_info: AccountInfo) -> bool:
+        """Verify account authorization request."""

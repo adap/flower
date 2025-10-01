@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower CLI user auth plugin for OIDC."""
+"""Flower CLI account auth plugin for OIDC."""
 
 
 import json

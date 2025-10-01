@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract classes for Flower User Auth Plugin."""
+"""Abstract classes for Flower account auth plugin."""
 
 
 from abc import ABC, abstractmethod

@@ -23,7 +23,7 @@ from typing import Optional, Union
 from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID, AuthType
 from flwr.common.typing import AccountInfo, UserAuthCredentials, UserAuthLoginDetails
 
-from .auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
+from .auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 
 NOOP_ACCOUNT_INFO = AccountInfo(
     flwr_aid=NOOP_FLWR_AID,
@@ -31,7 +31,7 @@ NOOP_ACCOUNT_INFO = AccountInfo(
 )
 
 
-class NoOpControlAuthPlugin(ControlAuthPlugin):
+class NoOpControlAuthPlugin(ControlAuthnPlugin):
     """No-operation implementation of ControlAuthPlugin."""
 
     def __init__(
@@ -79,6 +79,6 @@ class NoOpControlAuthzPlugin(ControlAuthzPlugin):
     def __init__(self, user_auth_config_path: Path, verify_tls_cert: bool):
         pass
 
-    def verify_user_authorization(self, account_info: AccountInfo) -> bool:
+    def authorize(self, account_info: AccountInfo) -> bool:
         """Return True for no-op plugin."""
         return True

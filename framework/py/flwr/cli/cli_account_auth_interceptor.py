@@ -32,10 +32,10 @@ Request = Union[
 ]
 
 
-class CliUserAuthInterceptor(
+class CliAccountAuthInterceptor(
     grpc.UnaryUnaryClientInterceptor, grpc.UnaryStreamClientInterceptor  # type: ignore
 ):
-    """CLI interceptor for user authentication."""
+    """CLI interceptor for account authentication."""
 
     def __init__(self, auth_plugin: CliAuthPlugin):
         self.auth_plugin = auth_plugin
@@ -70,7 +70,7 @@ class CliUserAuthInterceptor(
         client_call_details: grpc.ClientCallDetails,
         request: Request,
     ) -> grpc.Call:
-        """Intercept a unary-unary call for user authentication.
+        """Intercept a unary-unary call for account authentication.
 
         This method intercepts a unary-unary RPC call initiated from the CLI and adds
         the required authentication tokens to the RPC metadata.
@@ -83,7 +83,7 @@ class CliUserAuthInterceptor(
         client_call_details: grpc.ClientCallDetails,
         request: Request,
     ) -> grpc.Call:
-        """Intercept a unary-stream call for user authentication.
+        """Intercept a unary-stream call for account authentication.
 
         This method intercepts a unary-stream RPC call initiated from the CLI and adds
         the required authentication tokens to the RPC metadata.

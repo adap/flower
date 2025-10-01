@@ -270,10 +270,10 @@ class InvalidRunStatusException(BaseException):
         self.message = message
 
 
-# OIDC user authentication types
+# OIDC account authentication types
 @dataclass
 class UserAuthLoginDetails:
-    """User authentication login details."""
+    """Account authentication login details."""
 
     auth_type: str
     device_code: str
@@ -284,7 +284,7 @@ class UserAuthLoginDetails:
 
 @dataclass
 class UserAuthCredentials:
-    """User authentication tokens."""
+    """Account authentication tokens."""
 
     access_token: str
     refresh_token: str
