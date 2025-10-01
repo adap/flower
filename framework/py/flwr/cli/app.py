@@ -56,8 +56,10 @@ app.command()(pull)
 supernode_app = typer.Typer(help="Manage SuperNodes")
 supernode_app.command()(supernode_create)
 supernode_app.command()(supernode_delete)
+# Make it appear as "list"
 supernode_app.command("list")(supernode_list)
-supernode_app.command("ls", hidden=True)(supernode_list)
+# Hide "ls" command (left as alias)
+supernode_app.command(hidden=True)(supernode_list)
 app.add_typer(supernode_app, name="supernode")
 
 typer_click_object = get_command(app)
