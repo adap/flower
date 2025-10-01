@@ -5,13 +5,13 @@ from typing import Iterable, Optional
 
 from datasets import load_dataset
 import torch
+from torch.utils.data import DataLoader
+from transformers import WhisperProcessor
 from flwr.app import ArrayRecord, Context, Message, MetricRecord
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
-from torch.utils.data import DataLoader
-from transformers import WhisperProcessor
 
 from whisper_example.dataset import get_encoding_fn
 from whisper_example.model import eval_model, get_model
@@ -50,7 +50,7 @@ def main(grid: Grid, context: Context) -> None:
         eval_fn = get_evaluate_fn(sc_val, sc_test, processor, context.run_config)
 
     # Initialize FedAvg strategy
-    strategy = FedAvg(fraction_train=fraction_train, fraction_evaluate=0.0)
+    strategy = ExclusiveFedAvg(fraction_train=fraction_train, fraction_evaluate=0.0)
 
     # Start strategy, run FedAvg for `num_rounds`
     result = strategy.start(
@@ -105,7 +105,7 @@ def get_evaluate_fn(
         criterion = torch.nn.CrossEntropyLoss()
         loss, accuracy = eval_model(encoder, classifier, criterion, val_loader, device)
 
-        return loss, {f"{prefix}_accuracy": accuracy}
+        return MetricRecord({f"{prefix}_loss": loss, f"{prefix}_accuracy": accuracy})
 
     return global_evaluate
 
@@ -125,7 +125,7 @@ class ExclusiveFedAvg(FedAvg):
         for reply in replies:
             if reply.has_content():
                 # Here the assumption is that there is only one config record in the reply
-                record_key = next(iter(reply.config_record.keys()))
+                record_key = next(iter(reply.content.config_records.keys()))
                 is_trained = reply.content[record_key]["trained"]
                 if not isinstance(is_trained, bool):
                     raise ValueError(
