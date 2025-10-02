@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `supernode list` command."""
 
+
 import io
 import json
 from datetime import datetime
@@ -169,7 +170,7 @@ def _to_table(nodes_info: list[_NodeListType]) -> Table:
     table.add_column(
         Text("Node ID", justify="center"), style="bright_white", overflow="fold"
     )
-    table.add_column(Text("Owner AID", justify="center"), style="dim white")
+    table.add_column(Text("Owner", justify="center"), style="dim white")
     table.add_column(Text("Created At", justify="center"))
     table.add_column(Text("Activated At", justify="center"))
     table.add_column(Text("Deactivated At", justify="center"))
