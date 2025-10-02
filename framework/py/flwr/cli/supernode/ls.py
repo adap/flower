@@ -19,7 +19,7 @@ import io
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Optional, cast
 
 import typer
 from rich.console import Console
@@ -68,7 +68,7 @@ def ls(  # pylint: disable=R0914
 ) -> None:
     """List SuperNodes in the federation."""
     # Resolve command used (list or ls)
-    command_name = ctx.command.name if ctx.command else "ls"
+    command_name = cast(str, ctx.command.name) if ctx.command else "ls"
 
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()

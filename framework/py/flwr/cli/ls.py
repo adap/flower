@@ -19,7 +19,7 @@ import io
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Optional, cast
 
 import typer
 from rich.console import Console
@@ -104,7 +104,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
     All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD HH:MM:SSZ``.
     """
     # Resolve command used (list or ls)
-    command_name = ctx.command.name if ctx.command else "list"
+    command_name = cast(str, ctx.command.name) if ctx.command else "list"
 
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
