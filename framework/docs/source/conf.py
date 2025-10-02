@@ -312,12 +312,12 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": (
-        "<a href='https://flower.ai/events/flower-ai-day-2025/'>"
-        "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
-        "for Flower AI Day 2025!<br />"
-        "September 25, 🇺🇸 San Francisco"
-    ),
+    # "announcement": (
+    #     "<a href='https://flower.ai/events/flower-ai-day-2025/'>"
+    #     "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
+    #     "for Flower AI Day 2025!<br />"
+    #     "September 25, 🇺🇸 San Francisco"
+    # ),
     "light_css_variables": {
         "color-announcement-background": "#292f36",
         "color-announcement-text": "#ffffff",

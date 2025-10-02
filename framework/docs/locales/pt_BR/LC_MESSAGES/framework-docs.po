@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-22 00:08+0000\n"
+"POT-Creation-Date: 2025-10-01 00:08+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -4781,17 +4781,21 @@ msgstr ""
 msgid "This is sometimes called a hub-and-spoke topology:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:25
+#: ../../source/explanation-flower-architecture.rst:-1
 msgid "Hub-and-spoke topology in federated learning"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:25
+#: ../../source/explanation-flower-architecture.rst:29
+msgid "Hub-and-spoke topology in federated learning (dark theme)"
+msgstr ""
+
+#: ../../source/explanation-flower-architecture.rst:29
 msgid ""
 "Hub-and-spoke topology in federated learning (one server, multiple "
 "clients)."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:27
+#: ../../source/explanation-flower-architecture.rst:31
 msgid ""
 "In a real-world deployment, we typically want to run different projects "
 "on such a federation. Each project could use different hyperparameters, "
@@ -4799,7 +4803,7 @@ msgid ""
 "different machine learning frameworks like PyTorch and TensorFlow."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:32
+#: ../../source/explanation-flower-architecture.rst:36
 msgid ""
 "This is why, in Flower, both the server side and the client side are "
 "split into two parts. One part is long-lived and responsible for "
@@ -4807,19 +4811,19 @@ msgid ""
 "executes task-specific code."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:36
+#: ../../source/explanation-flower-architecture.rst:40
 msgid ""
 "A Flower *server* is composed of **SuperLink**, **SuperExec**, and "
 "``ServerApp``:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:38
+#: ../../source/explanation-flower-architecture.rst:42
 msgid ""
 "**SuperLink**: A long-running process that forwards task instructions to "
 "clients (SuperNodes) and receives task results back."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:40
+#: ../../source/explanation-flower-architecture.rst:44
 msgid ""
 "**SuperExec**: A long-running process that schedules, launches, and "
 "manages multiple app processes (e.g., ``ServerApp``) on demand by "
@@ -4827,7 +4831,7 @@ msgid ""
 " by the SuperLink."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:43
+#: ../../source/explanation-flower-architecture.rst:47
 msgid ""
 "``ServerApp``: A short-lived app process containing project-specific code"
 " that customizes all server-side aspects of federated learning systems "
@@ -4836,20 +4840,20 @@ msgid ""
 "apps."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:48
+#: ../../source/explanation-flower-architecture.rst:52
 msgid ""
 "A Flower *client* is composed of **SuperNode**, **SuperExec**, and "
 "``ClientApp``:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:50
+#: ../../source/explanation-flower-architecture.rst:54
 msgid ""
 "**SuperNode**: A long-running process that connects to the SuperLink, "
 "requests tasks, executes them (for example, \"train this model on your "
 "local data\"), and returns the results to the SuperLink."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:53
+#: ../../source/explanation-flower-architecture.rst:57
 msgid ""
 "**SuperExec**: A long-running process that schedules, launches, and "
 "manages multiple application processes (e.g., ``ClientApp``) on demand by"
@@ -4857,7 +4861,7 @@ msgid ""
 "automatically by the SuperNode."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:56
+#: ../../source/explanation-flower-architecture.rst:60
 msgid ""
 "``ClientApp``: A short-lived app process containing project-specific code"
 " that customizes all client-side aspects of federated learning systems "
@@ -4866,7 +4870,7 @@ msgid ""
 "apps."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:61
+#: ../../source/explanation-flower-architecture.rst:65
 msgid ""
 "Why SuperNode and SuperLink? Well, in federated learning, the clients are"
 " the actual stars of the show. They hold the training data and they run "
@@ -4875,29 +4879,34 @@ msgid ""
 "*missing link* among all those SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:72
+#: ../../source/explanation-flower-architecture.rst:-1
 #, fuzzy
 msgid "Basic Flower architecture"
 msgstr "Arquitetura do Flower"
 
-#: ../../source/explanation-flower-architecture.rst:72
+#: ../../source/explanation-flower-architecture.rst:80
+#, fuzzy
+msgid "Basic Flower architecture (dark theme)"
+msgstr "Arquitetura do Flower"
+
+#: ../../source/explanation-flower-architecture.rst:80
 msgid "The basic Flower architecture for federated learning."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:74
+#: ../../source/explanation-flower-architecture.rst:82
 msgid ""
 "In a Flower app project, users will typically develop the ``ServerApp`` "
 "and the ``ClientApp``. All the network communication between *server* and"
 " *clients* is taken care of by the SuperLink and SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:80
+#: ../../source/explanation-flower-architecture.rst:88
 msgid ""
 "For more details, please refer to the |serverapp_link|_ and "
 "|clientapp_link|_ documentation."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:83
+#: ../../source/explanation-flower-architecture.rst:91
 msgid ""
 "With *multi-run*, multiple ``ServerApp``\\s and ``ClientApp``\\s can run "
 "within the same federation, which consists of a single long-running "
@@ -4905,22 +4914,26 @@ msgid ""
 "sometimes referred to as *multi-tenancy* or *multi-job*."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:87
+#: ../../source/explanation-flower-architecture.rst:95
 msgid ""
 "As shown in the figure below, two Flower App projects, each consisting of"
 " a ``ServerApp`` and a ``ClientApp``, could share the same SuperLink and "
 "SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:96
+#: ../../source/explanation-flower-architecture.rst:-1
 msgid "Multi-run federated learning architecture"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:96
+#: ../../source/explanation-flower-architecture.rst:108
+msgid "Multi-run federated learning architecture (dark theme)"
+msgstr ""
+
+#: ../../source/explanation-flower-architecture.rst:108
 msgid "Multi-run federated learning architecture with Flower"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:98
+#: ../../source/explanation-flower-architecture.rst:110
 msgid ""
 "To illustrate how multi-run works, consider one federated learning "
 "training run where a ``ServerApp`` and a ``ClientApp`` are participating "
@@ -4928,52 +4941,60 @@ msgid ""
 " is selected to participate in the training run."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:103
+#: ../../source/explanation-flower-architecture.rst:115
 msgid ""
 "In ``[run 1]`` below, all the SuperNodes are selected and therefore run "
 "their corresponding ``ClientApp``\\s:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:112
+#: ../../source/explanation-flower-architecture.rst:-1
 msgid "Multi-tenancy federated learning architecture - Run 1"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:112
+#: ../../source/explanation-flower-architecture.rst:128
+msgid "Multi-tenancy federated learning architecture - Run 1 (dark theme)"
+msgstr ""
+
+#: ../../source/explanation-flower-architecture.rst:128
 msgid ""
 "Run 1 in a multi-run federated learning architecture with Flower. All "
 "SuperNodes participate in the training round."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:115
+#: ../../source/explanation-flower-architecture.rst:131
 msgid ""
 "However, in ``[run 2]``, only the first and second SuperNodes are "
 "selected to participate in the training:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:124
+#: ../../source/explanation-flower-architecture.rst:-1
 msgid "Multi-tenancy federated learning architecture - Run 2"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:124
+#: ../../source/explanation-flower-architecture.rst:144
+msgid "Multi-tenancy federated learning architecture - Run 2 (dark theme)"
+msgstr ""
+
+#: ../../source/explanation-flower-architecture.rst:144
 msgid ""
 "Run 2 in a multi-run federated learning architecture with Flower. Only "
 "the first and second SuperNodes are selected to participate in the "
 "training round."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:127
+#: ../../source/explanation-flower-architecture.rst:147
 msgid ""
 "Therefore, with Flower multi-run, different Flower App projects can run "
 "on different sets of clients."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:132
+#: ../../source/explanation-flower-architecture.rst:152
 msgid ""
 "This explanation covers the Flower Deployment Runtime. An explanation "
 "covering the Flower Simulation Runtime will follow."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:137
+#: ../../source/explanation-flower-architecture.rst:157
 msgid ""
 "As we continue to enhance Flower at a rapid pace, we'll periodically "
 "update this explainer document. Feel free to share any feedback with us."
@@ -26277,9 +26298,9 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:11
 msgid ""
-"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Heng Pan`, "
-"`Javier`, `Patrick Foley`, `William Lindskog`, `William Lindskog-"
-"Munzing`, `Yan Gao` <!---TOKEN_v1.22.0-->"
+"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Dimitris "
+"Stripelis`, `Heng Pan`, `Javier`, `Mohammad Naseri`, `Patrick Foley`, "
+"`William Lindskog`, `Yan Gao` <!---TOKEN_v1.22.0-->"
 msgstr ""
 
 #: ../../source/ref-changelog.md:13 ../../source/ref-changelog.md:53
@@ -35614,21 +35635,21 @@ msgid ""
 "the SuperLink."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:34
+#: ../../source/ref-flower-network-communication.rst:68
 msgid ""
 "Click the buttons above to toggle between the network diagrams for "
 "isolation modes **subprocess** and **process**."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:38
+#: ../../source/ref-flower-network-communication.rst:72
 msgid "Mandatory Network Connections"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:40
+#: ../../source/ref-flower-network-communication.rst:74
 msgid "Deployed Flower systems have at least two types of network connections:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:42
+#: ../../source/ref-flower-network-communication.rst:76
 msgid ""
 "**CLI to SuperLink (Control API)**: The ``flwr`` `CLI command <ref-api-"
 "cli.html>`_, typically run on the users workstation, is used to interface"
@@ -35642,7 +35663,7 @@ msgid ""
 "supported for local testing."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:50
+#: ../../source/ref-flower-network-communication.rst:84
 msgid ""
 "**SuperNode to SuperLink (Fleet API)**: In Flower terminology, a Flower "
 "federation is a set of SuperNodes connected to the same SuperLink. From a"
@@ -35655,22 +35676,22 @@ msgid ""
 "more), but ``insecure`` mode is supported for local testing."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:60
+#: ../../source/ref-flower-network-communication.rst:94
 msgid "Optional Network Connections"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:62
+#: ../../source/ref-flower-network-communication.rst:96
 msgid ""
 "Depending on the SuperLink and SuperNode configuration, Flower systems "
 "can have/use a number of additional network connections."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:66
+#: ../../source/ref-flower-network-communication.rst:100
 #, fuzzy
 msgid "Flower Components APIs"
 msgstr "``FLWR_VERSION``"
 
-#: ../../source/ref-flower-network-communication.rst:68
+#: ../../source/ref-flower-network-communication.rst:102
 msgid ""
 "All Flower components — SuperLink, SuperNode, SuperExec, ``ServerApp`` "
 "process, and ``ClientApp`` process — expose APIs to interact with other "
@@ -35681,89 +35702,89 @@ msgid ""
 "as summarized in the table below."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:79
+#: ../../source/ref-flower-network-communication.rst:113
 msgid "Component"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:80
+#: ../../source/ref-flower-network-communication.rst:114
 msgid "Default Port"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:81
+#: ../../source/ref-flower-network-communication.rst:115
 msgid "API"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:82
+#: ../../source/ref-flower-network-communication.rst:116
 msgid "Purpose"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:83
+#: ../../source/ref-flower-network-communication.rst:117
 #, fuzzy
 msgid "SuperLink"
 msgstr "Construindo a imagem do servidor"
 
-#: ../../source/ref-flower-network-communication.rst:84
+#: ../../source/ref-flower-network-communication.rst:118
 msgid "9091"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:85
+#: ../../source/ref-flower-network-communication.rst:119
 #, fuzzy
 msgid "ServerAppIo API"
 msgstr "Construindo a imagem do servidor"
 
-#: ../../source/ref-flower-network-communication.rst:86
+#: ../../source/ref-flower-network-communication.rst:120
 msgid "Used by the SuperExec and the ``ServerApp`` processes"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:88
+#: ../../source/ref-flower-network-communication.rst:122
 msgid "9092"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:89
+#: ../../source/ref-flower-network-communication.rst:123
 msgid "Fleet API"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:90
+#: ../../source/ref-flower-network-communication.rst:124
 #, fuzzy
 msgid "Used by the SuperNodes"
 msgstr "Construindo a imagem do servidor"
 
-#: ../../source/ref-flower-network-communication.rst:92
+#: ../../source/ref-flower-network-communication.rst:126
 msgid "9093"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:93
+#: ../../source/ref-flower-network-communication.rst:127
 msgid "Control API"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:94
+#: ../../source/ref-flower-network-communication.rst:128
 msgid ""
 "Users interface with the SuperLink via this API using the `FlowerCLI "
 "<ref-api-cli.html>`_"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:96
+#: ../../source/ref-flower-network-communication.rst:130
 #, fuzzy
 msgid "SuperNode"
 msgstr "Construindo a imagem do servidor"
 
-#: ../../source/ref-flower-network-communication.rst:97
+#: ../../source/ref-flower-network-communication.rst:131
 msgid "9094"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:98
+#: ../../source/ref-flower-network-communication.rst:132
 msgid "ClientAppIo API"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:99
+#: ../../source/ref-flower-network-communication.rst:133
 msgid "Used by the SuperExec and the ``ClientApp`` processes"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:102
+#: ../../source/ref-flower-network-communication.rst:136
 msgid "Isolation Mode"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:104
+#: ../../source/ref-flower-network-communication.rst:138
 msgid ""
 "Both SuperLink and SuperNode can operate in different isolation modes. "
 "The **SuperExec** is responsible for scheduling, launching, and managing "
@@ -35771,7 +35792,7 @@ msgid ""
 "process."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:108
+#: ../../source/ref-flower-network-communication.rst:142
 msgid ""
 "The ``subprocess`` isolation mode configures the SuperLink/SuperNode to "
 "automatically run the SuperExec as a subprocess upon start. The "
@@ -35784,7 +35805,7 @@ msgid ""
 "understanding of how to use both modes."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:116
+#: ../../source/ref-flower-network-communication.rst:150
 msgid ""
 "When using the ``process`` isolation mode, additional network connections"
 " are necessary to allow the external process running the SuperExec, "
@@ -35792,7 +35813,7 @@ msgid ""
 "SuperNode:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:120
+#: ../../source/ref-flower-network-communication.rst:154
 msgid ""
 "**SuperExec/ServerApp process to SuperLink (ServerAppIO API)**: Both the "
 "SuperExec for ``ServerApp``\\s and the ``ServerApp`` processes act as "
@@ -35804,7 +35825,7 @@ msgid ""
 "SuperNodes (via the SuperLink)."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:126
+#: ../../source/ref-flower-network-communication.rst:160
 msgid ""
 "**SuperExec/ClientApp process to SuperNode (ClientAppIO API)**: Both the "
 "SuperExec for ``ClientApp``\\s and the ``ClientApp`` processes act as "
@@ -35816,50 +35837,50 @@ msgid ""
 "parameters) to the SuperNode."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:135
+#: ../../source/ref-flower-network-communication.rst:169
 msgid ""
 "In the current version of Flower, both of the connections above are "
 "insecure because Flower assumes that the following groups of processes "
 "run within the same trusted network:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:139
+#: ../../source/ref-flower-network-communication.rst:173
 msgid "SuperLink + SuperExec + ``ServerApp`` process"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:140
+#: ../../source/ref-flower-network-communication.rst:174
 msgid "SuperNode + SuperExec + ``ClientApp`` process"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:142
+#: ../../source/ref-flower-network-communication.rst:176
 msgid ""
 "Each group must remain inside a single trusted network. They should never"
 " communicate with each other over untrusted networks (e.g., the public "
 "internet)."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:146
+#: ../../source/ref-flower-network-communication.rst:180
 msgid "User Authentication"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:148
+#: ../../source/ref-flower-network-communication.rst:182
 msgid ""
 "When user authentication is enabled, Flower uses an OIDC-compatible "
 "server to authenticate requests:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:151
+#: ../../source/ref-flower-network-communication.rst:185
 msgid ""
 "**SuperLink to OIDC server**: A SuperLink can optionally be configured to"
 " only allow authenticated users to interact with it. In this setting, the"
 " Flower SuperLink acts as a REST client to the OIDC-compatible server."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:156
+#: ../../source/ref-flower-network-communication.rst:190
 msgid "Application-specific Connections"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:158
+#: ../../source/ref-flower-network-communication.rst:192
 msgid ""
 "Users who write Flower Apps (``ServerApp`` and ``ClientApp``) can also "
 "make additional network requests. This is, strictly speaking, not part of"
@@ -35869,12 +35890,12 @@ msgid ""
 "want to allow."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:164
+#: ../../source/ref-flower-network-communication.rst:198
 #, fuzzy
 msgid "Typical examples include:"
 msgstr "Exemplo"
 
-#: ../../source/ref-flower-network-communication.rst:166
+#: ../../source/ref-flower-network-communication.rst:200
 msgid ""
 "**ClientApp to Database**: ``ClientApp`` instances typically need to be "
 "able to access the data to perform the action they have been designed for"
@@ -35885,7 +35906,7 @@ msgid ""
 "likely be different to the illustration above."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:172
+#: ../../source/ref-flower-network-communication.rst:206
 msgid ""
 "**ServerApp to Database**: ``ServerApp`` instances might want to access "
 "the data to perform the action they have been designed for (e.g. evaluate"
@@ -35895,7 +35916,7 @@ msgid ""
 "the ``ServerApp`` components."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:177
+#: ../../source/ref-flower-network-communication.rst:211
 msgid ""
 "**ServerApp to metric logging service**: Metric logging services like "
 "TensorBoard, MLFlow and Weights & Biases are often used to track the "
@@ -35903,11 +35924,11 @@ msgid ""
 "acts as a client to the metric logging service."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:183
+#: ../../source/ref-flower-network-communication.rst:217
 msgid "Communication Model"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:185
+#: ../../source/ref-flower-network-communication.rst:219
 msgid ""
 "During real-world deployment, the push/pull communication model adopted "
 "by each component can influence decisions related to resource "
@@ -35916,14 +35937,14 @@ msgid ""
 "the Flower components:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:190
+#: ../../source/ref-flower-network-communication.rst:224
 msgid ""
 "**SuperLink ↔ SuperNode (Fleet API)**: The SuperNode pulls/pushes "
 "Messages from/to the SuperLink via the Fleet API. The SuperNode also "
 "pulls the FAB if a new run is being executed."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:193
+#: ../../source/ref-flower-network-communication.rst:227
 msgid ""
 "**SuperLink ↔ ServerApp (ServerAppIo API)**: The ``ServerApp`` process "
 "pulls/pushes Messages from/to the SuperLink via the ServerAppIo API. The "
@@ -35932,7 +35953,7 @@ msgid ""
 " to the SuperLink."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:197
+#: ../../source/ref-flower-network-communication.rst:231
 msgid ""
 "**SuperNode ↔ ClientApp (ClientAppIo API)**: The ``ClientApp`` process "
 "pulls/pushes Messages from/to the SuperNode via the ClientAppIo API. The "
@@ -63788,5 +63809,13 @@ msgstr ""
 #~ "Number of nodes to keep before "
 #~ "averaging (MultiKrum). Defaults to 0, in"
 #~ " that case classical Krum is applied."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "`Charles Beauville`, `Chong Shen Ng`, "
+#~ "`Daniel J. Beutel`, `Heng Pan`, "
+#~ "`Javier`, `Patrick Foley`, `William Lindskog`,"
+#~ " `William Lindskog-Munzing`, `Yan Gao` "
+#~ "<!---TOKEN_v1.22.0-->"
 #~ msgstr ""
 

@@ -290,7 +290,7 @@ You can add more SuperNodes and ClientApps by uncommenting their definitions in 
             RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
               && python -m pip install -U --no-cache-dir .
 
-            ENTRYPOINT ["flwr-superexec"]
+            ENTRYPOINT ["flower-superexec"]
         command:
           - --insecure
           - --plugin-type

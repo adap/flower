@@ -3,8 +3,8 @@
 import warnings
 
 import numpy as np
-from flwr.client import ClientApp
-from flwr.common import Context, Message, MetricRecord, RecordDict
+from flwr.app import Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
