@@ -23,7 +23,7 @@ from typing import Optional, Union
 from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID, AuthType
 from flwr.common.typing import AccountInfo, UserAuthCredentials, UserAuthLoginDetails
 
-from .auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
+from .auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
 
 NOOP_ACCOUNT_INFO = AccountInfo(
     flwr_aid=NOOP_FLWR_AID,
@@ -31,7 +31,7 @@ NOOP_ACCOUNT_INFO = AccountInfo(
 )
 
 
-class NoOpControlAuthPlugin(ControlAuthnPlugin):
+class NoOpControlAuthPlugin(ControlAuthPlugin):
     """No-operation implementation of ControlAuthPlugin."""
 
     def __init__(
@@ -43,6 +43,8 @@ class NoOpControlAuthPlugin(ControlAuthnPlugin):
 
     def get_login_details(self) -> Optional[UserAuthLoginDetails]:
         """Get the login details."""
+        # This allows the `flwr login` command to load the NoOp plugin accordingly,
+        # which then raises a LoginError when attempting to login.
         return UserAuthLoginDetails(
             auth_type=AuthType.NOOP,  # No operation auth type
             device_code="",
@@ -59,10 +61,7 @@ class NoOpControlAuthPlugin(ControlAuthnPlugin):
 
     def get_auth_tokens(self, device_code: str) -> Optional[UserAuthCredentials]:
         """Get authentication tokens."""
-        return UserAuthCredentials(
-            access_token="",
-            refresh_token="",
-        )
+        raise RuntimeError("NoOp plugin does not support getting auth tokens.")
 
     def refresh_tokens(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
@@ -79,6 +78,6 @@ class NoOpControlAuthzPlugin(ControlAuthzPlugin):
     def __init__(self, user_auth_config_path: Path, verify_tls_cert: bool):
         pass
 
-    def authorize(self, account_info: AccountInfo) -> bool:
+    def verify_user_authorization(self, account_info: AccountInfo) -> bool:
         """Return True for no-op plugin."""
         return True

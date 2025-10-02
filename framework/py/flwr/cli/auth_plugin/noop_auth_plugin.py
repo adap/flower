@@ -19,12 +19,10 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
-import typer
-
 from flwr.common.typing import UserAuthCredentials, UserAuthLoginDetails
 from flwr.proto.control_pb2_grpc import ControlStub
 
-from .auth_plugin import CliAuthPlugin
+from .auth_plugin import CliAuthPlugin, LoginError
 
 
 class NoOpCliAuthPlugin(CliAuthPlugin):
@@ -35,17 +33,8 @@ class NoOpCliAuthPlugin(CliAuthPlugin):
         login_details: UserAuthLoginDetails,
         control_stub: ControlStub,
     ) -> UserAuthCredentials:
-        """Warn that no authentication is being performed and return empty tokens."""
-        # Warn the account that no authentication is being performed
-        typer.secho(
-            "Warning: No authentication is being performed. "
-            "Proceeding without account authentication.",
-            fg=typer.colors.YELLOW,
-        )
-        return UserAuthCredentials(
-            access_token="",
-            refresh_token="",
-        )
+        """Raise LoginError as no-op plugin does not support login."""
+        raise LoginError("Account authentication is not enabled on this SuperLink.")
 
     def __init__(self, credentials_path: Path) -> None:
         pass
