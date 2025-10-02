@@ -16,12 +16,16 @@
 
 
 import hashlib
+import json
+import re
 import time
 from collections.abc import Generator
 from logging import ERROR, INFO
 from typing import Any, Optional, cast
 
 import grpc
+import requests
+import typer
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
@@ -42,6 +46,7 @@ from flwr.common.serde import (
     user_config_from_proto,
 )
 from flwr.common.typing import Fab, Run, RunStatus
+from flwr.common.version import package_version
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
@@ -66,6 +71,9 @@ from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthPlugin
 
 from .control_user_auth_interceptor import shared_account_info
+
+# PLATFORM_API_URL = "https://api.flower.ai"
+PLATFORM_API_URL = "http://0.0.0.0/v1"
 
 
 class ControlServicer(control_pb2_grpc.ControlServicer):
@@ -95,7 +103,23 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
         ffs = self.ffs_factory.ffs()
 
-        if len(request.fab.content) > FAB_MAX_SIZE:
+        if request.fab.content == b"":
+            identifier = request.fab.hash_str
+            m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", identifier)
+            if not m:
+                raise ValueError(
+                    "Invalid remote app ID. Expected format: '@user_name/app_name'."
+                )
+
+            # Request download link
+            url, verification = _request_download_link(identifier)
+
+            # Download FAB from FlowerHub
+            fab_file = _download_to_memory(url)
+        else:
+            fab_file = request.fab.content
+
+        if len(fab_file) > FAB_MAX_SIZE:
             log(
                 ERROR,
                 "FAB size exceeds maximum allowed size of %d bytes.",
@@ -106,7 +130,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = shared_account_info.get().flwr_aid if self.auth_plugin else None
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
-        fab_file = request.fab.content
 
         try:
             # Check that num-supernodes is set
@@ -436,3 +459,43 @@ def _check_flwr_aid_in_run(
             grpc.StatusCode.PERMISSION_DENIED,
             "⛔️ Run ID does not belong to the user",
         )
+
+
+def _request_download_link(identifier: str) -> [str, str]:
+    """Request download link from Flower platform API."""
+    url = f"{PLATFORM_API_URL}/hub/download-link"
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    body = {
+        "identifier": identifier,  # send raw string of identifier
+        "flwr_version": package_version,  # send flwr version
+    }
+
+    try:
+        resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
+    except requests.RequestException as e:
+        raise typer.BadParameter(f"Unable to connect to FlowerHub: {e}") from e
+
+    if resp.status_code == 404:
+        raise typer.BadParameter(f"'{identifier}' not found in FlowerHub")
+    if not resp.ok:
+        raise typer.BadParameter(
+            f"FlowerHub request failed with status {resp.status_code}. Details: {resp.text}"
+        )
+
+    data = resp.json()
+    if "url" not in data or "verification" not in data:
+        raise typer.BadParameter("Invalid response from FlowerHub")
+    return data["url"], data["verification"]
+
+
+def _download_to_memory(presigned_url: str) -> bytes:
+    """Download FAB file from FlowerHub to memory."""
+    try:
+        r = requests.get(presigned_url, timeout=60)
+        r.raise_for_status()
+    except requests.RequestException as e:
+        raise typer.BadParameter(f"FAB download failed: {e}") from e
+    return r.content

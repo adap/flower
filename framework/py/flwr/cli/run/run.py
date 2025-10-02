@@ -17,6 +17,7 @@
 
 import io
 import json
+import re
 import subprocess
 from pathlib import Path
 from typing import Annotated, Any, Optional
@@ -98,9 +99,27 @@ def run(
     try:
         if suppress_output:
             redirect_output(captured_output)
+
+        original_app_str = str(app) if app is not None else ""
+        remote_app_ref: Optional[str] = None  # "user_name/app_name" if given with "@"
+        app_path: Optional[Path] = app
+
+        if original_app_str.startswith("@"):
+            m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", original_app_str)
+            if not m:
+                raise typer.BadParameter(
+                    "Invalid remote app ID. Expected format: '@user_name/app_name'."
+                )
+            app_name = m.group("app")
+            user_name = m.group("user")
+
+            # Use local folder named {app_name} for pyproject lookup and downstream calls
+            app_path = Path(app_name)
+            remote_app_ref = f"{user_name}/{app_name}"
+
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-        pyproject_path = app / "pyproject.toml" if app else None
+        pyproject_path = app_path / "pyproject.toml" if app_path else None
         config, errors, warnings = load_and_validate(path=pyproject_path)
         config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
@@ -109,16 +128,17 @@ def run(
 
         if "address" in federation_config:
             _run_with_control_api(
-                app,
+                app_path,
                 federation,
                 federation_config,
                 run_config_overrides,
                 stream,
                 output_format,
+                remote_app_ref,
             )
         else:
             _run_without_control_api(
-                app, federation_config, run_config_overrides, federation
+                app_path, federation_config, run_config_overrides, federation
             )
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
         if suppress_output:
@@ -145,6 +165,7 @@ def _run_with_control_api(
     config_overrides: Optional[list[str]],
     stream: bool,
     output_format: str,
+    remote_app_ref: Optional[str] = None,
 ) -> None:
     channel = None
     try:
@@ -152,10 +173,15 @@ def _run_with_control_api(
         channel = init_channel(app, federation_config, auth_plugin)
         stub = ControlStub(channel)
 
-        fab_bytes, fab_hash, config = build_fab(app)
-        fab_id, fab_version = get_metadata_from_config(config)
-
-        fab = Fab(fab_hash, fab_bytes)
+        # Build fab only if not a remote reference
+        fab_id = fab_version = fab_hash = None
+        if remote_app_ref:
+            # Skip build; send a placeholder Fab containing the remote reference and empty bytes
+            fab = Fab(remote_app_ref, b"")
+        else:
+            fab_bytes, fab_hash, cfg = build_fab(app)
+            fab_id, fab_version = get_metadata_from_config(cfg)
+            fab = Fab(fab_hash, fab_bytes)
 
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
         fed_config = flatten_dict(federation_config.get("options", {}))
@@ -178,19 +204,24 @@ def _run_with_control_api(
             raise typer.Exit(code=1)
 
         if output_format == CliOutputFormat.JSON:
-            run_output = json.dumps(
-                {
-                    "success": res.HasField("run_id"),
-                    "run-id": res.run_id if res.HasField("run_id") else None,
-                    "fab-id": fab_id,
-                    "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
-                    "fab-version": fab_version,
-                    "fab-hash": fab_hash[:8],
-                    "fab-filename": get_fab_filename(config, fab_hash),
-                }
-            )
+            # Only include FAB metadata if we actually built a local FAB
+            payload: dict[str, Any] = {
+                "success": res.HasField("run_id"),
+                "run-id": res.run_id if res.HasField("run_id") else None,
+            }
+            if not remote_app_ref and fab_id and fab_version and fab_hash:
+                payload.update(
+                    {
+                        "fab-id": fab_id,
+                        "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
+                        "fab-version": fab_version,
+                        "fab-hash": fab_hash[:8],
+                        "fab-filename": get_fab_filename(cfg, fab_hash),  # type: ignore[name-defined]
+                    }
+                )
+
             restore_output()
-            Console().print_json(run_output)
+            Console().print_json(json.dumps(payload))
 
         if stream:
             start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)
