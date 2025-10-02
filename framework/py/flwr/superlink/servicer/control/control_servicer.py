@@ -424,8 +424,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # A node created (but not connected)
         nodes_info.append(
             NodeInfo(
-                node_id=1,
+                node_id=15390646978706312628,
                 owner_aid="owner_aid_1",
+                status="created",
                 created_at=(now()).isoformat(),
                 activated_at="",
                 deactivated_at="",
@@ -436,8 +437,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # A node created and connected
         nodes_info.append(
             NodeInfo(
-                node_id=2,
+                node_id=2941141058168602545,
                 owner_aid="owner_aid_2",
+                status="online",
                 created_at=(now()).isoformat(),
                 activated_at=(now() + timedelta(hours=0.5)).isoformat(),
                 deactivated_at="",
@@ -448,8 +450,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # A node created and deleted (never connected)
         nodes_info.append(
             NodeInfo(
-                node_id=3,
+                node_id=906971720890549292,
                 owner_aid="owner_aid_3",
+                status="deleted",
                 created_at=(now()).isoformat(),
                 activated_at="",
                 deactivated_at="",
@@ -460,8 +463,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # A node created, deactivate and then deleted
         nodes_info.append(
             NodeInfo(
-                node_id=4,
+                node_id=1781174086018058152,
                 owner_aid="owner_aid_4",
+                status="offline",
                 created_at=(now()).isoformat(),
                 activated_at=(now() + timedelta(hours=0.5)).isoformat(),
                 deactivated_at=(now() + timedelta(hours=1)).isoformat(),

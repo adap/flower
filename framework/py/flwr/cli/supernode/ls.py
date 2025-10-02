@@ -17,7 +17,7 @@
 
 import io
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Optional, cast
 
@@ -33,7 +33,7 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
 )
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
-from flwr.common.date import isoformat8601_utc
+from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListNodesCliRequest,
@@ -44,7 +44,7 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
-_NodeListType = tuple[int, str, str, str, str, str]
+_NodeListType = tuple[int, str, str, str, str, str, str]
 
 
 def ls(  # pylint: disable=R0914
@@ -134,19 +134,28 @@ def _format_nodes(
         dt = datetime.fromisoformat(dt_str) if dt_str else None
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
 
-    _ = now_isoformat
     formatted_nodes: list[_NodeListType] = []
     # Add rows
     for node in sorted(nodes_info, key=lambda x: datetime.fromisoformat(x.created_at)):
+
+        # Calculate elapsed times
+        elapsed_time_activated = timedelta()
+        if node.activated_at:
+            end_time = datetime.fromisoformat(now_isoformat)
+            elapsed_time_activated = end_time - datetime.fromisoformat(
+                node.activated_at
+            )
 
         formatted_nodes.append(
             (
                 node.node_id,
                 node.owner_aid,
+                node.status,
                 _format_datetime(node.created_at),
                 _format_datetime(node.activated_at),
                 _format_datetime(node.deactivated_at),
                 _format_datetime(node.deleted_at),
+                format_timedelta(elapsed_time_activated),
             )
         )
 
@@ -162,28 +171,43 @@ def _to_table(nodes_info: list[_NodeListType]) -> Table:
         Text("Node ID", justify="center"), style="bright_white", no_wrap=True
     )
     table.add_column(Text("Owner", justify="center"), style="dim white")
-    table.add_column(Text("Created At", justify="center"))
-    table.add_column(Text("Activated At", justify="center"))
-    table.add_column(Text("Deactivated At", justify="center"))
-    table.add_column(Text("Deleted At", justify="center"))
+    table.add_column(Text("Status", justify="center"))
+    table.add_column(Text("Status Changed @", justify="center"))
+    table.add_column(Text("Elapsed", justify="center"))
 
     for row in nodes_info:
         (
             node_id,
             owner_aid,
+            status,
             created_at,
             activated_at,
             deactivated_at,
             deleted_at,
+            elapse_activated,
         ) = row
+
+        if status == "online":
+            status_style = "green"
+            time_at = activated_at
+        elif status == "offline":
+            status_style = "bright_yellow"
+            time_at = deactivated_at
+        elif status == "deleted":
+            status_style = "red"
+            time_at = deleted_at
+        elif status == "created":
+            status_style = "yellow1"
+            time_at = created_at
+        else:
+            raise ValueError(f"Unexpected node status '{status}'")
 
         formatted_row = (
             f"[bold]{node_id}[/bold]",
             f"{owner_aid}",
-            created_at,
-            activated_at,
-            deactivated_at,
-            deleted_at,
+            f"[{status_style}]{status}",
+            time_at,
+            elapse_activated if status == "online" else "",
         )
         table.add_row(*formatted_row)
 
