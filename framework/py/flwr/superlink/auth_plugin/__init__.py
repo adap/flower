@@ -16,8 +16,11 @@
 
 
 from .auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
+from .noop_auth_plugin import NoOpControlAuthPlugin, NoOpControlAuthzPlugin
 
 __all__ = [
     "ControlAuthPlugin",
     "ControlAuthzPlugin",
+    "NoOpControlAuthPlugin",
+    "NoOpControlAuthzPlugin",
 ]

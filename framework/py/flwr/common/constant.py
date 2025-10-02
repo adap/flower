@@ -248,6 +248,7 @@ class CliOutputFormat:
 class AuthType:
     """User authentication types."""
 
+    NOOP = "noop"
     OIDC = "oidc"
 
     def __new__(cls) -> AuthType:
@@ -281,3 +282,8 @@ class ExecPluginType:
         """Return all SuperExec plugin types."""
         # Filter all constants (uppercase) of the class
         return [v for k, v in vars(ExecPluginType).items() if k.isupper()]
+
+
+# Constants for No-op auth plugins
+NOOP_FLWR_AID = "sys_noauth"
+NOOP_ACCOUNT_NAME = "sys_noauth"

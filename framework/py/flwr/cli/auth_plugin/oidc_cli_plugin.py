@@ -36,7 +36,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 
-from .auth_plugin import CliAuthPlugin
+from .auth_plugin import CliAuthPlugin, LoginError
 
 
 class OidcCliPlugin(CliAuthPlugin):
@@ -70,11 +70,6 @@ class OidcCliPlugin(CliAuthPlugin):
             refresh_token = res.refresh_token
 
             if access_token and refresh_token:
-                typer.secho(
-                    "✅ Login successful.",
-                    fg=typer.colors.GREEN,
-                    bold=False,
-                )
                 return UserAuthCredentials(
                     access_token=access_token,
                     refresh_token=refresh_token,
@@ -82,12 +77,7 @@ class OidcCliPlugin(CliAuthPlugin):
 
             time.sleep(login_details.interval)
 
-        typer.secho(
-            "❌ Timeout, failed to sign in.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+        raise LoginError("Process timed out.")
 
     def store_tokens(self, credentials: UserAuthCredentials) -> None:
         """Store authentication tokens to the `credentials_path`.
