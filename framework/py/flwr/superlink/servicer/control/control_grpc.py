@@ -95,7 +95,7 @@ def run_control_api_grpc(
     else:
         log(
             INFO,
-            "Flower Deployment Runtime: Starting Control API with user "
+            "Flower Deployment Runtime: Starting Control API with account "
             "authentication on %s",
             address,
         )

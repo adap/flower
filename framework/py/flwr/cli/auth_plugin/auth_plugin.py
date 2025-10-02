@@ -37,7 +37,7 @@ class CliAuthPlugin(ABC):
     Parameters
     ----------
     credentials_path : Path
-        Path to the user's authentication credentials file.
+        Path to the Flower account's authentication credentials file.
     """
 
     @staticmethod
@@ -46,7 +46,7 @@ class CliAuthPlugin(ABC):
         login_details: AccountAuthLoginDetails,
         control_stub: ControlStub,
     ) -> AccountAuthCredentials:
-        """Authenticate the user and retrieve authentication credentials.
+        """Authenticate the account and retrieve authentication credentials.
 
         Parameters
         ----------

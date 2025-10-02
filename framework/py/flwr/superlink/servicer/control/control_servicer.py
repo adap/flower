@@ -226,7 +226,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         if not request.HasField("run_id"):
             if self.auth_plugin:
                 # If no `run_id` is specified and account auth is enabled,
-                # return run IDs for the authenticated user
+                # return run IDs for the authenticated account
                 flwr_aid = shared_account_info.get().flwr_aid
                 if flwr_aid is None:
                     context.abort(
@@ -462,5 +462,5 @@ def _check_flwr_aid_in_run(
     if run_flwr_aid != flwr_aid:
         context.abort(
             grpc.StatusCode.PERMISSION_DENIED,
-            "⛔️ Run ID does not belong to the user",
+            "⛔️ Run ID does not belong to the account",
         )
