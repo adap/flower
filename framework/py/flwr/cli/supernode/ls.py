@@ -48,6 +48,7 @@ _NodeListType = tuple[int, str, str, str, str, str]
 
 
 def ls(  # pylint: disable=R0914
+    ctx: typer.Context,
     app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project"),
@@ -66,6 +67,9 @@ def ls(  # pylint: disable=R0914
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """List SuperNodes in the federation."""
+    # Resolve command used (list or ls)
+    command_name = ctx.command.name if ctx.command else "ls"
+
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:
@@ -79,7 +83,7 @@ def ls(  # pylint: disable=R0914
         federation, federation_config = validate_federation_in_project_config(
             federation, config
         )
-        exit_if_no_address(federation_config, "supernode list/ls")
+        exit_if_no_address(federation_config, f"supernode {command_name}")
         channel = None
         try:
             auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
@@ -126,7 +130,8 @@ def _format_nodes(
 ) -> list[_NodeListType]:
     """Format node information for display."""
 
-    def _format_datetime(dt: Optional[datetime]) -> str:
+    def _format_datetime(dt_str: Optional[str]) -> str:
+        dt = datetime.fromisoformat(dt_str) if dt_str else None
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
 
     _ = now_isoformat
@@ -134,28 +139,14 @@ def _format_nodes(
     # Add rows
     for node in sorted(nodes_info, key=lambda x: datetime.fromisoformat(x.created_at)):
 
-        # Convert isoformat to datetime
-        created_at = (
-            datetime.fromisoformat(node.created_at) if node.created_at else None
-        )
-        activated_at = (
-            datetime.fromisoformat(node.activated_at) if node.activated_at else None
-        )
-        deactivated_at = (
-            datetime.fromisoformat(node.deactivated_at) if node.deactivated_at else None
-        )
-        deleted_at = (
-            datetime.fromisoformat(node.deleted_at) if node.deleted_at else None
-        )
-
         formatted_nodes.append(
             (
                 node.node_id,
                 node.owner_aid,
-                _format_datetime(created_at),
-                _format_datetime(activated_at),
-                _format_datetime(deactivated_at),
-                _format_datetime(deleted_at),
+                _format_datetime(node.created_at),
+                _format_datetime(node.activated_at),
+                _format_datetime(node.deactivated_at),
+                _format_datetime(node.deleted_at),
             )
         )
 
@@ -168,7 +159,7 @@ def _to_table(nodes_info: list[_NodeListType]) -> Table:
 
     # Add columns
     table.add_column(
-        Text("Node ID", justify="center"), style="bright_white", overflow="fold"
+        Text("Node ID", justify="center"), style="bright_white", no_wrap=True
     )
     table.add_column(Text("Owner", justify="center"), style="dim white")
     table.add_column(Text("Created At", justify="center"))
