@@ -4,6 +4,7 @@ isort:skip_file
 """
 import builtins
 import flwr.proto.fab_pb2
+import flwr.proto.node_pb2
 import flwr.proto.recorddict_pb2
 import flwr.proto.run_pb2
 import flwr.proto.transport_pb2
@@ -234,3 +235,65 @@ class PullArtifactsResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["_url",b"_url","url",b"url"]) -> None: ...
     def WhichOneof(self, oneof_group: typing_extensions.Literal["_url",b"_url"]) -> typing.Optional[typing_extensions.Literal["url"]]: ...
 global___PullArtifactsResponse = PullArtifactsResponse
+
+class CreateNodeCliRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    PUBLIC_KEY_FIELD_NUMBER: builtins.int
+    public_key: typing.Text
+    def __init__(self,
+        *,
+        public_key: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["public_key",b"public_key"]) -> None: ...
+global___CreateNodeCliRequest = CreateNodeCliRequest
+
+class CreateNodeCliResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_ID_FIELD_NUMBER: builtins.int
+    node_id: builtins.int
+    def __init__(self,
+        *,
+        node_id: typing.Optional[builtins.int] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["_node_id",b"_node_id","node_id",b"node_id"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_node_id",b"_node_id","node_id",b"node_id"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_node_id",b"_node_id"]) -> typing.Optional[typing_extensions.Literal["node_id"]]: ...
+global___CreateNodeCliResponse = CreateNodeCliResponse
+
+class DeleteNodeCliRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_ID_FIELD_NUMBER: builtins.int
+    node_id: builtins.int
+    def __init__(self,
+        *,
+        node_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node_id",b"node_id"]) -> None: ...
+global___DeleteNodeCliRequest = DeleteNodeCliRequest
+
+class DeleteNodeCliResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___DeleteNodeCliResponse = DeleteNodeCliResponse
+
+class ListNodesCliRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___ListNodesCliRequest = ListNodesCliRequest
+
+class ListNodesCliResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODES_INFO_FIELD_NUMBER: builtins.int
+    NOW_FIELD_NUMBER: builtins.int
+    @property
+    def nodes_info(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.NodeInfo]: ...
+    now: typing.Text
+    def __init__(self,
+        *,
+        nodes_info: typing.Optional[typing.Iterable[flwr.proto.node_pb2.NodeInfo]] = ...,
+        now: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["nodes_info",b"nodes_info","now",b"now"]) -> None: ...
+global___ListNodesCliResponse = ListNodesCliResponse
