@@ -52,9 +52,9 @@ class OidcCliPlugin(CliAuthPlugin):
         login_details: AccountAuthLoginDetails,
         control_stub: ControlStub,
     ) -> AccountAuthCredentials:
-        """Authenticate the user and retrieve authentication credentials."""
+        """Authenticate the account and retrieve authentication credentials."""
         typer.secho(
-            "Please login with your user credentials here: "
+            "Please log into your Flower account here: "
             f"{login_details.verification_uri_complete}",
             fg=typer.colors.BLUE,
         )
