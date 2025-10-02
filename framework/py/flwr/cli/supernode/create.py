@@ -29,7 +29,7 @@ from flwr.common.constant import FAB_CONFIG_FILE
 
 
 def create(  # pylint: disable=R0914
-    pub_key: Annotated[
+    public_key: Annotated[
         Path,
         typer.Argument(
             help="Path to the public key file.",
@@ -55,4 +55,4 @@ def create(  # pylint: disable=R0914
     )
     exit_if_no_address(federation_config, "supernode add")
 
-    _ = pub_key
+    _ = public_key
