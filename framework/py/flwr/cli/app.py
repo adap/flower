@@ -48,6 +48,7 @@ app.command()(build)
 app.command()(install)
 app.command()(log)
 app.command()(ls)
+app.command("list", hidden=True)(ls)  # hidden alias for "ls"
 app.command()(stop)
 app.command()(login)
 app.command()(pull)
