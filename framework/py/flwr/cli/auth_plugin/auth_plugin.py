@@ -51,7 +51,7 @@ class CliAuthPlugin(ABC):
         Parameters
         ----------
         login_details : AccountAuthLoginDetails
-            An object containing the user's login details.
+            An object containing the account's login details.
         control_stub : ControlStub
             A stub for executing RPC calls to the server.
 
