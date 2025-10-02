@@ -18,6 +18,7 @@
 import hashlib
 import time
 from collections.abc import Generator
+from datetime import timedelta
 from logging import ERROR, INFO
 from typing import Any, Optional, cast
 
@@ -65,6 +66,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StreamLogsRequest,
     StreamLogsResponse,
 )
+from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
@@ -417,7 +419,57 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> ListNodesCliResponse:
         """List all SuperNodes."""
         log(INFO, "ControlServicer.ListNodesCli")
-        return ListNodesCliResponse()
+
+        nodes_info = []
+        # A node created (but not connected)
+        nodes_info.append(
+            NodeInfo(
+                node_id=1,
+                owner_aid="owner_aid_1",
+                created_at=(now()).isoformat(),
+                activated_at="",
+                deactivated_at="",
+                deleted_at="",
+            )
+        )
+
+        # A node created and connected
+        nodes_info.append(
+            NodeInfo(
+                node_id=2,
+                owner_aid="owner_aid_2",
+                created_at=(now()).isoformat(),
+                activated_at=(now() - timedelta(hours=0.5)).isoformat(),
+                deactivated_at="",
+                deleted_at="",
+            )
+        )
+
+        # A node created and deleted (never connected)
+        nodes_info.append(
+            NodeInfo(
+                node_id=3,
+                owner_aid="owner_aid_3",
+                created_at=(now()).isoformat(),
+                activated_at="",
+                deactivated_at="",
+                deleted_at=(now() - timedelta(hours=1)).isoformat(),
+            )
+        )
+
+        # A node created, deactivate and then deleted
+        nodes_info.append(
+            NodeInfo(
+                node_id=4,
+                owner_aid="owner_aid_4",
+                created_at=(now()).isoformat(),
+                activated_at=(now() - timedelta(hours=0.5)).isoformat(),
+                deactivated_at=(now() - timedelta(hours=1)).isoformat(),
+                deleted_at=(now() - timedelta(hours=1.5)).isoformat(),
+            )
+        )
+
+        return ListNodesCliResponse(nodes_info=nodes_info, now=now().isoformat())
 
 
 def _create_list_runs_response(
