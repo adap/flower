@@ -221,19 +221,23 @@ def _to_json(nodes_info: list[_NodeListType]) -> str:
         (
             node_id,
             owner_aid,
+            status,
             created_at,
             activated_at,
             deactivated_at,
             deleted_at,
+            elapse_activated,
         ) = row
 
         nodes_list.append(
             {
                 "node-id": node_id,
                 "owner-aid": owner_aid,
+                "status": status,
                 "created-at": created_at,
-                "activated-at": activated_at,
-                "deactivated-at": deactivated_at,
+                "online-at": activated_at,
+                "online-elapsed": elapse_activated,
+                "offline-at": deactivated_at,
                 "deleted-at": deleted_at,
             }
         )
