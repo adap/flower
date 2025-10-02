@@ -40,7 +40,7 @@ class NoOpControlAuthnPlugin(ControlAuthnPlugin):
 
     def __init__(
         self,
-        user_auth_config_path: Path,
+        account_auth_config_path: Path,
         verify_tls_cert: bool,
     ):
         pass
@@ -79,7 +79,7 @@ class NoOpControlAuthnPlugin(ControlAuthnPlugin):
 class NoOpControlAuthzPlugin(ControlAuthzPlugin):
     """No-operation implementation of ControlAuthzPlugin."""
 
-    def __init__(self, user_auth_config_path: Path, verify_tls_cert: bool):
+    def __init__(self, account_auth_config_path: Path, verify_tls_cert: bool):
         pass
 
     def authorize(self, account_info: AccountInfo) -> bool:

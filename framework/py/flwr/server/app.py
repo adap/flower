@@ -89,7 +89,7 @@ P = TypeVar("P", ControlAuthnPlugin, ControlAuthzPlugin)
 try:
     from flwr.ee import (
         add_ee_args_superlink,
-        get_control_auth_plugins,
+        get_control_authn_plugins,
         get_control_authz_plugins,
         get_control_event_log_writer_plugins,
         get_ee_artifact_provider,
@@ -101,7 +101,7 @@ except ImportError:
     def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
         """Add EE-specific arguments to the parser."""
 
-    def get_control_auth_plugins() -> dict[str, type[ControlAuthnPlugin]]:
+    def get_control_authn_plugins() -> dict[str, type[ControlAuthnPlugin]]:
         """Return all Control API authentication plugins."""
         raise NotImplementedError("No authentication plugins are currently supported.")
 
@@ -196,8 +196,15 @@ def run_superlink() -> None:
     auth_plugin: Optional[ControlAuthnPlugin] = None
     authz_plugin: Optional[ControlAuthzPlugin] = None
     event_log_plugin: Optional[EventLogWriterPlugin] = None
-    # Load the auth plugin if the args.user_auth_config is provided
+    # Load the auth plugin if the args.account_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
+        log(
+            WARN,
+            "The `--user-auth-config` flag is deprecated and will be removed in a "
+            "future release. Please use `--account-auth-config` instead.",
+        )
+        args.account_auth_config = cfg_path
+    if cfg_path := getattr(args, "account_auth_config", None):
         auth_plugin, authz_plugin = _try_obtain_control_auth_plugins(
             Path(cfg_path), verify_tls_cert
         )
@@ -459,7 +466,7 @@ def _try_obtain_control_auth_plugins(
             plugins: dict[str, type[P]] = loader()
             plugin_cls: type[P] = plugins[auth_plugin_name]
             return plugin_cls(
-                user_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
+                account_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
             )
         except KeyError:
             if auth_plugin_name:
@@ -475,7 +482,7 @@ def _try_obtain_control_auth_plugins(
     auth_plugin = _load_plugin(
         section="authentication",
         yaml_key=AUTH_TYPE_YAML_KEY,
-        loader=get_control_auth_plugins,
+        loader=get_control_authn_plugins,
     )
 
     # Load authorization plugin

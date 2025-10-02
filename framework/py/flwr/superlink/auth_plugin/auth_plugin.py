@@ -32,7 +32,7 @@ class ControlAuthnPlugin(ABC):
 
     Parameters
     ----------
-    user_auth_config_path : Path
+    account_auth_config_path : Path
         Path to the YAML file containing the authentication configuration.
     verify_tls_cert : bool
         Boolean indicating whether to verify the TLS certificate
@@ -42,7 +42,7 @@ class ControlAuthnPlugin(ABC):
     @abstractmethod
     def __init__(
         self,
-        user_auth_config_path: Path,
+        account_auth_config_path: Path,
         verify_tls_cert: bool,
     ):
         """Abstract constructor."""
@@ -75,7 +75,7 @@ class ControlAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
 
     Parameters
     ----------
-    user_auth_config_path : Path
+    account_auth_config_path : Path
         Path to the YAML file containing the authorization configuration.
     verify_tls_cert : bool
         Boolean indicating whether to verify the TLS certificate
@@ -83,7 +83,7 @@ class ControlAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
     """
 
     @abstractmethod
-    def __init__(self, user_auth_config_path: Path, verify_tls_cert: bool):
+    def __init__(self, account_auth_config_path: Path, verify_tls_cert: bool):
         """Abstract constructor."""
 
     @abstractmethod
