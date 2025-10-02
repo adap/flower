@@ -17,17 +17,20 @@
 
 from flwr.common.constant import AuthType
 
-from .auth_plugin import CliAuthPlugin
+from .auth_plugin import CliAuthPlugin, LoginError
+from .noop_auth_plugin import NoOpCliAuthPlugin
 from .oidc_cli_plugin import OidcCliPlugin
 
 
 def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
     """Return all CLI authentication plugins."""
-    return {AuthType.OIDC: OidcCliPlugin}
+    return {AuthType.NOOP: NoOpCliAuthPlugin, AuthType.OIDC: OidcCliPlugin}
 
 
 __all__ = [
     "CliAuthPlugin",
+    "LoginError",
+    "NoOpCliAuthPlugin",
     "OidcCliPlugin",
     "get_cli_auth_plugins",
 ]

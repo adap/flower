@@ -18,3 +18,14 @@ syntax = "proto3";
 package flwr.proto;
 
 message Node { uint64 node_id = 1; }
+
+message NodeInfo {
+  uint64 node_id = 1;
+  string owner_aid = 2;
+  string created_at = 3;
+  string activated_at = 4;
+  string deactivated_at = 5;
+  string deleted_at = 6;
+  float online_until = 7;
+  float heartbeat_interval = 8;
+}
