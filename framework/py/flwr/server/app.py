@@ -38,7 +38,7 @@ from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
-    AUTH_TYPE_YAML_KEY,
+    AUTHN_TYPE_YAML_KEY,
     AUTHZ_TYPE_YAML_KEY,
     CLIENT_OCTET,
     CONTROL_API_DEFAULT_SERVER_ADDRESS,
@@ -481,7 +481,7 @@ def _try_obtain_control_auth_plugins(
     # Load authentication plugin
     auth_plugin = _load_plugin(
         section="authentication",
-        yaml_key=AUTH_TYPE_YAML_KEY,
+        yaml_key=AUTHN_TYPE_YAML_KEY,
         loader=get_control_authn_plugins,
     )
 

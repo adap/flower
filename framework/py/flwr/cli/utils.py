@@ -27,7 +27,7 @@ import grpc
 import typer
 
 from flwr.common.constant import (
-    AUTH_TYPE_JSON_KEY,
+    AUTHN_TYPE_JSON_KEY,
     CREDENTIALS_DIR,
     FLWR_DIR,
     NO_ACCOUNT_AUTH_MESSAGE,
@@ -249,7 +249,7 @@ def try_obtain_cli_auth_plugin(
         try:
             with config_path.open("r", encoding="utf-8") as file:
                 json_file = json.load(file)
-            auth_type = json_file[AUTH_TYPE_JSON_KEY]
+            auth_type = json_file[AUTHN_TYPE_JSON_KEY]
         except (FileNotFoundError, KeyError):
             typer.secho(
                 "❌ Missing or invalid credentials for account authentication. "
