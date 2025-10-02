@@ -483,7 +483,8 @@ def _try_obtain_control_auth_plugins(
         log(
             WARN,
             "The `auth_type` key in the authentication configuration is deprecated. "
-            "Use `authn_type` instead.",
+            "Use `%s` instead.",
+            AUTHN_TYPE_YAML_KEY,
         )
         authn_type = config["authentication"].pop("auth_type")
         config["authentication"][AUTHN_TYPE_YAML_KEY] = authn_type
