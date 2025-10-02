@@ -272,7 +272,7 @@ class InvalidRunStatusException(BaseException):
 
 # OIDC account authentication types
 @dataclass
-class UserAuthLoginDetails:
+class AccountAuthLoginDetails:
     """Account authentication login details."""
 
     auth_type: str
@@ -283,7 +283,7 @@ class UserAuthLoginDetails:
 
 
 @dataclass
-class UserAuthCredentials:
+class AccountAuthCredentials:
     """Account authentication tokens."""
 
     access_token: str

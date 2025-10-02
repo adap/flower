@@ -29,7 +29,7 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
 )
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
-from flwr.common.typing import UserAuthLoginDetails
+from flwr.common.typing import AccountAuthLoginDetails
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
@@ -116,7 +116,7 @@ def login(  # pylint: disable=R0914
         raise typer.Exit(code=1)
 
     # Login
-    details = UserAuthLoginDetails(
+    details = AccountAuthLoginDetails(
         auth_type=login_response.auth_type,
         device_code=login_response.device_code,
         verification_uri_complete=login_response.verification_uri_complete,

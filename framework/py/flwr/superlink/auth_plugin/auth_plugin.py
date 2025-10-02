@@ -20,7 +20,11 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
-from flwr.common.typing import AccountInfo, UserAuthCredentials, UserAuthLoginDetails
+from flwr.common.typing import (
+    AccountAuthCredentials,
+    AccountAuthLoginDetails,
+    AccountInfo,
+)
 
 
 class ControlAuthnPlugin(ABC):
@@ -44,7 +48,7 @@ class ControlAuthnPlugin(ABC):
         """Abstract constructor."""
 
     @abstractmethod
-    def get_login_details(self) -> Optional[UserAuthLoginDetails]:
+    def get_login_details(self) -> Optional[AccountAuthLoginDetails]:
         """Get the login details."""
 
     @abstractmethod
@@ -54,7 +58,7 @@ class ControlAuthnPlugin(ABC):
         """Validate authentication tokens in the provided metadata."""
 
     @abstractmethod
-    def get_auth_tokens(self, device_code: str) -> Optional[UserAuthCredentials]:
+    def get_auth_tokens(self, device_code: str) -> Optional[AccountAuthCredentials]:
         """Get authentication tokens."""
 
     @abstractmethod

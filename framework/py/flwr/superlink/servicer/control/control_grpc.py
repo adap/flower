@@ -33,10 +33,10 @@ from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 
+from .control_account_auth_interceptor import ControlAccountAuthInterceptor
 from .control_event_log_interceptor import ControlEventLogInterceptor
 from .control_license_interceptor import ControlLicenseInterceptor
 from .control_servicer import ControlServicer
-from .control_user_auth_interceptor import ControlAccountAuthInterceptor
 
 try:
     from flwr.ee import get_license_plugin

@@ -65,7 +65,7 @@ from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin
 
-from .control_user_auth_interceptor import shared_account_info
+from .control_account_auth_interceptor import shared_account_info
 
 
 class ControlServicer(control_pb2_grpc.ControlServicer):

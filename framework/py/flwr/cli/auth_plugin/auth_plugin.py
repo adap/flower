@@ -20,7 +20,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
-from flwr.common.typing import UserAuthCredentials, UserAuthLoginDetails
+from flwr.common.typing import AccountAuthCredentials, AccountAuthLoginDetails
 from flwr.proto.control_pb2_grpc import ControlStub
 
 
@@ -43,21 +43,21 @@ class CliAuthPlugin(ABC):
     @staticmethod
     @abstractmethod
     def login(
-        login_details: UserAuthLoginDetails,
+        login_details: AccountAuthLoginDetails,
         control_stub: ControlStub,
-    ) -> UserAuthCredentials:
+    ) -> AccountAuthCredentials:
         """Authenticate the user and retrieve authentication credentials.
 
         Parameters
         ----------
-        login_details : UserAuthLoginDetails
+        login_details : AccountAuthLoginDetails
             An object containing the user's login details.
         control_stub : ControlStub
             A stub for executing RPC calls to the server.
 
         Returns
         -------
-        UserAuthCredentials
+        AccountAuthCredentials
             The authentication credentials obtained after login.
 
         Raises
@@ -71,7 +71,7 @@ class CliAuthPlugin(ABC):
         """Abstract constructor."""
 
     @abstractmethod
-    def store_tokens(self, credentials: UserAuthCredentials) -> None:
+    def store_tokens(self, credentials: AccountAuthCredentials) -> None:
         """Store authentication tokens to the `credentials_path`.
 
         The credentials, including tokens, will be saved as a JSON file
@@ -91,5 +91,5 @@ class CliAuthPlugin(ABC):
     @abstractmethod
     def read_tokens_from_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Optional[UserAuthCredentials]:
+    ) -> Optional[AccountAuthCredentials]:
         """Read authentication tokens from the provided metadata."""

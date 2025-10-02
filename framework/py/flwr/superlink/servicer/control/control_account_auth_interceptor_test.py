@@ -39,14 +39,14 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StreamLogsRequest,
 )
 
-from .control_user_auth_interceptor import (
+from .control_account_auth_interceptor import (
     ControlAccountAuthInterceptor,
     shared_account_info,
 )
 
 
-class TestControlUserAuthInterceptor(unittest.TestCase):
-    """Test the ControlUserAuthInterceptor authentication logic."""
+class TestControlAccountAuthInterceptor(unittest.TestCase):
+    """Test the ControlAccountAuthInterceptor authentication logic."""
 
     def setUp(self) -> None:
         """Set up test fixtures."""
