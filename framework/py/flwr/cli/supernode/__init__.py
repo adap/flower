@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Account auth plugin for ControlServicer."""
+"""Flower command line interface `supernode` command."""
 
-
-from .auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
-from .noop_auth_plugin import NoOpControlAuthPlugin, NoOpControlAuthzPlugin
+from .create import create as create
+from .delete import delete as delete
+from .ls import ls as ls
 
 __all__ = [
-    "ControlAuthPlugin",
-    "ControlAuthzPlugin",
-    "NoOpControlAuthPlugin",
-    "NoOpControlAuthzPlugin",
+    "create",
+    "delete",
+    "ls",
 ]
