@@ -49,20 +49,20 @@ class ControlStub(object):
                 request_serializer=flwr_dot_proto_dot_control__pb2.PullArtifactsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_control__pb2.PullArtifactsResponse.FromString,
                 )
-        self.AddNode = channel.unary_unary(
-                '/flwr.proto.Control/AddNode',
-                request_serializer=flwr_dot_proto_dot_control__pb2.AddNodeRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_control__pb2.AddNodeResponse.FromString,
+        self.CreateNodeCli = channel.unary_unary(
+                '/flwr.proto.Control/CreateNodeCli',
+                request_serializer=flwr_dot_proto_dot_control__pb2.CreateNodeCliRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.CreateNodeCliResponse.FromString,
                 )
-        self.RemoveNode = channel.unary_unary(
-                '/flwr.proto.Control/RemoveNode',
-                request_serializer=flwr_dot_proto_dot_control__pb2.RemoveNodeRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_control__pb2.RemoveNodeResponse.FromString,
+        self.DeleteNodeCli = channel.unary_unary(
+                '/flwr.proto.Control/DeleteNodeCli',
+                request_serializer=flwr_dot_proto_dot_control__pb2.DeleteNodeCliRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.DeleteNodeCliResponse.FromString,
                 )
-        self.ListNodes = channel.unary_unary(
-                '/flwr.proto.Control/ListNodes',
-                request_serializer=flwr_dot_proto_dot_control__pb2.ListNodesRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_control__pb2.ListNodesResponse.FromString,
+        self.ListNodesCli = channel.unary_unary(
+                '/flwr.proto.Control/ListNodesCli',
+                request_serializer=flwr_dot_proto_dot_control__pb2.ListNodesCliRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.ListNodesCliResponse.FromString,
                 )
 
 
@@ -118,21 +118,21 @@ class ControlServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def AddNode(self, request, context):
+    def CreateNodeCli(self, request, context):
         """Add SuperNode
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def RemoveNode(self, request, context):
+    def DeleteNodeCli(self, request, context):
         """Remove SuperNode
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ListNodes(self, request, context):
+    def ListNodesCli(self, request, context):
         """List SuperNodes
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -177,20 +177,20 @@ def add_ControlServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_control__pb2.PullArtifactsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_control__pb2.PullArtifactsResponse.SerializeToString,
             ),
-            'AddNode': grpc.unary_unary_rpc_method_handler(
-                    servicer.AddNode,
-                    request_deserializer=flwr_dot_proto_dot_control__pb2.AddNodeRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_control__pb2.AddNodeResponse.SerializeToString,
+            'CreateNodeCli': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateNodeCli,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.CreateNodeCliRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.CreateNodeCliResponse.SerializeToString,
             ),
-            'RemoveNode': grpc.unary_unary_rpc_method_handler(
-                    servicer.RemoveNode,
-                    request_deserializer=flwr_dot_proto_dot_control__pb2.RemoveNodeRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_control__pb2.RemoveNodeResponse.SerializeToString,
+            'DeleteNodeCli': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteNodeCli,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.DeleteNodeCliRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.DeleteNodeCliResponse.SerializeToString,
             ),
-            'ListNodes': grpc.unary_unary_rpc_method_handler(
-                    servicer.ListNodes,
-                    request_deserializer=flwr_dot_proto_dot_control__pb2.ListNodesRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_control__pb2.ListNodesResponse.SerializeToString,
+            'ListNodesCli': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListNodesCli,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.ListNodesCliRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.ListNodesCliResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -322,7 +322,7 @@ class Control(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def AddNode(request,
+    def CreateNodeCli(request,
             target,
             options=(),
             channel_credentials=None,
@@ -332,14 +332,14 @@ class Control(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/AddNode',
-            flwr_dot_proto_dot_control__pb2.AddNodeRequest.SerializeToString,
-            flwr_dot_proto_dot_control__pb2.AddNodeResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/CreateNodeCli',
+            flwr_dot_proto_dot_control__pb2.CreateNodeCliRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.CreateNodeCliResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def RemoveNode(request,
+    def DeleteNodeCli(request,
             target,
             options=(),
             channel_credentials=None,
@@ -349,14 +349,14 @@ class Control(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/RemoveNode',
-            flwr_dot_proto_dot_control__pb2.RemoveNodeRequest.SerializeToString,
-            flwr_dot_proto_dot_control__pb2.RemoveNodeResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/DeleteNodeCli',
+            flwr_dot_proto_dot_control__pb2.DeleteNodeCliRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.DeleteNodeCliResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def ListNodes(request,
+    def ListNodesCli(request,
             target,
             options=(),
             channel_credentials=None,
@@ -366,8 +366,8 @@ class Control(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/ListNodes',
-            flwr_dot_proto_dot_control__pb2.ListNodesRequest.SerializeToString,
-            flwr_dot_proto_dot_control__pb2.ListNodesResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/ListNodesCli',
+            flwr_dot_proto_dot_control__pb2.ListNodesCliRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.ListNodesCliResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

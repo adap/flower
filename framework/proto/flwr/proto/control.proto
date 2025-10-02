@@ -47,13 +47,13 @@ service Control {
   rpc PullArtifacts(PullArtifactsRequest) returns (PullArtifactsResponse) {}
 
   // Add SuperNode
-  rpc AddNode(AddNodeRequest) returns (AddNodeResponse) {}
+  rpc CreateNodeCli(CreateNodeCliRequest) returns (CreateNodeCliResponse) {}
 
   // Remove SuperNode
-  rpc RemoveNode(RemoveNodeRequest) returns (RemoveNodeResponse) {}
+  rpc DeleteNodeCli(DeleteNodeCliRequest) returns (DeleteNodeCliResponse) {}
 
   // List SuperNodes
-  rpc ListNodes(ListNodesRequest) returns (ListNodesResponse) {}
+  rpc ListNodesCli(ListNodesCliRequest) returns (ListNodesCliResponse) {}
 }
 
 message StartRunRequest {
@@ -97,14 +97,14 @@ message StopRunResponse { bool success = 1; }
 message PullArtifactsRequest { uint64 run_id = 1; }
 message PullArtifactsResponse { optional string url = 1; }
 
-message AddNodeRequest { string pub_key = 1; }
-message AddNodeResponse { optional uint64 node_id = 1; }
+message CreateNodeCliRequest { string pub_key = 1; }
+message CreateNodeCliResponse { optional uint64 node_id = 1; }
 
-message RemoveNodeRequest { uint64 node_id = 1; }
-message RemoveNodeResponse {}
+message DeleteNodeCliRequest { uint64 node_id = 1; }
+message DeleteNodeCliResponse {}
 
-message ListNodesRequest {}
-message ListNodesResponse {
+message ListNodesCliRequest {}
+message ListNodesCliResponse {
   repeated NodeInfo nodes_info = 1;
   string now = 2;
 }

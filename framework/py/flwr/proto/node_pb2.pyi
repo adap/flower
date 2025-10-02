@@ -25,7 +25,7 @@ class NodeInfo(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NODE_ID_FIELD_NUMBER: builtins.int
     OWNER_AID_FIELD_NUMBER: builtins.int
-    REGISTERED_AT_FIELD_NUMBER: builtins.int
+    CREATED_AT_FIELD_NUMBER: builtins.int
     ACTIVATED_AT_FIELD_NUMBER: builtins.int
     DEACTIVATED_AT_FIELD_NUMBER: builtins.int
     DELETED_AT_FIELD_NUMBER: builtins.int
@@ -33,7 +33,7 @@ class NodeInfo(google.protobuf.message.Message):
     HEARTBEAT_INTERVAL_FIELD_NUMBER: builtins.int
     node_id: builtins.int
     owner_aid: typing.Text
-    registered_at: typing.Text
+    created_at: typing.Text
     activated_at: typing.Text
     deactivated_at: typing.Text
     deleted_at: typing.Text
@@ -43,12 +43,12 @@ class NodeInfo(google.protobuf.message.Message):
         *,
         node_id: builtins.int = ...,
         owner_aid: typing.Text = ...,
-        registered_at: typing.Text = ...,
+        created_at: typing.Text = ...,
         activated_at: typing.Text = ...,
         deactivated_at: typing.Text = ...,
         deleted_at: typing.Text = ...,
         online_until: builtins.float = ...,
         heartbeat_interval: builtins.float = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["activated_at",b"activated_at","deactivated_at",b"deactivated_at","deleted_at",b"deleted_at","heartbeat_interval",b"heartbeat_interval","node_id",b"node_id","online_until",b"online_until","owner_aid",b"owner_aid","registered_at",b"registered_at"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["activated_at",b"activated_at","created_at",b"created_at","deactivated_at",b"deactivated_at","deleted_at",b"deleted_at","heartbeat_interval",b"heartbeat_interval","node_id",b"node_id","online_until",b"online_until","owner_aid",b"owner_aid"]) -> None: ...
 global___NodeInfo = NodeInfo
