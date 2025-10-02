@@ -109,14 +109,14 @@ LOG_UPLOAD_INTERVAL = 0.2  # Minimum interval between two log uploads
 # Retry configurations
 MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 
-# Constants for user authentication
+# Constants for account authentication
 CREDENTIALS_DIR = ".credentials"
 AUTH_TYPE_JSON_KEY = "auth-type"  # For key name in JSON file
 AUTH_TYPE_YAML_KEY = "auth_type"  # For key name in YAML file
 ACCESS_TOKEN_KEY = "flwr-oidc-access-token"
 REFRESH_TOKEN_KEY = "flwr-oidc-refresh-token"
 
-# Constants for user authorization
+# Constants for account authorization
 AUTHZ_TYPE_YAML_KEY = "authz_type"  # For key name in YAML file
 
 # Constants for node authentication
@@ -154,7 +154,7 @@ PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
 
 # ControlServicer constants
 RUN_ID_NOT_FOUND_MESSAGE = "Run ID not found"
-NO_USER_AUTH_MESSAGE = "ControlServicer initialized without user authentication"
+NO_ACCOUNT_AUTH_MESSAGE = "ControlServicer initialized without account authentication"
 NO_ARTIFACT_PROVIDER_MESSAGE = "ControlServicer initialized without artifact provider"
 PULL_UNFINISHED_RUN_MESSAGE = "Cannot pull artifacts for an unfinished run"
 
@@ -246,7 +246,7 @@ class CliOutputFormat:
 
 
 class AuthType:
-    """User authentication types."""
+    """Account authentication types."""
 
     NOOP = "noop"
     OIDC = "oidc"
