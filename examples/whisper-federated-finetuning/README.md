@@ -6,7 +6,7 @@ framework: [transformers, whisper]
 
 # On-device Federated Finetuning for Speech Classification
 
-This example demonstrates how to, from a pre-trained [Whisper](https://openai.com/research/whisper) model, finetune it for the downstream task of keyword spotting. We'll be implementing a federated downstream finetuning pipeline using Flower involving a total of 100 clients. As for the downstream dataset, we'll be using the [Google Speech Commands](https://huggingface.co/datasets/speech_commands) dataset for keyword spotting. We'll take the encoder part of the [Whisper-tiny](https://huggingface.co/openai/whisper-tiny) model, freeze its parameters, and learn a lightweight classification (\<800K parameters !!) head to correctly classify a spoken word.
+This example demonstrates how to, from a pre-trained [Whisper](https://openai.com/research/whisper) model, finetune it for the downstream task of keyword spotting. We'll be implementing a federated downstream finetuning pipeline using Flower involving a total of 100 clients. As for the downstream dataset, we'll be using the [Google Speech Commands](https://huggingface.co/datasets/google/speech_commands) dataset for keyword spotting. We'll take the encoder part of the [Whisper-tiny](https://huggingface.co/openai/whisper-tiny) model, freeze its parameters, and learn a lightweight classification (\<800K parameters !!) head to correctly classify a spoken word.
 
 ![Keyword Spotting with Whisper overview](_static/keyword_spotting_overview.png)
 
@@ -51,7 +51,7 @@ whisper-federated-finetuning
 
 ### Install dependencies and project
 
-In a new Python environment the dependencies defined in `pyproject.toml` as well as the `whisper_example` package.
+In a new Python environment, install the dependencies defined in `pyproject.toml` as well as the `whisper_example` package.
 
 ```bash
 pip install -e .
@@ -233,7 +233,7 @@ def client_fn(context: Context):
 
 You will need to copy the generated directory in step 1 to the machine that will run the `SuperNode`. You can use, for example, the [`scp`](https://linuxize.com/post/how-to-use-scp-command-to-securely-transfer-files/) in order to do that.
 
-With steps 1-3 completed, you are ready to run Federated Wishper finetuning with Flower's Deployment Eninge. To connect a `SuperNode` to an existing federation (i.e. a running `SuperLink`) you'd do it like this assuming all the python dependencies (i.e. `flwr`, `transformers`, `torch` are installed -- see `pyproject.toml`) in the Python environment of the machine where you are launching the `SuperNode` from:
+With steps 1-3 completed, you are ready to run Federated Whisper finetuning with Flower's Deployment Eninge. To connect a `SuperNode` to an existing federation (i.e. a running `SuperLink`) you'd do it like this assuming all the python dependencies (i.e. `flwr`, `transformers`, `torch` are installed -- see `pyproject.toml`) in the Python environment of the machine where you are launching the `SuperNode` from:
 
 ```shell
 flower-supernode --superlink="<SUPERLINK-IP>:9092" \
