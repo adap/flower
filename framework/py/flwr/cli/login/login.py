@@ -20,6 +20,7 @@ from typing import Annotated, Optional
 
 import typer
 
+from flwr.cli.auth_plugin import LoginError
 from flwr.cli.config_utils import (
     exit_if_no_address,
     get_insecure_flag,
@@ -116,8 +117,21 @@ def login(  # pylint: disable=R0914
         expires_in=login_response.expires_in,
         interval=login_response.interval,
     )
-    with flwr_cli_grpc_exc_handler():
-        credentials = auth_plugin.login(details, stub)
+    try:
+        with flwr_cli_grpc_exc_handler():
+            credentials = auth_plugin.login(details, stub)
+        typer.secho(
+            "✅ Login successful.",
+            fg=typer.colors.GREEN,
+            bold=False,
+        )
+    except LoginError as e:
+        typer.secho(
+            f"❌ Login failed: {e.message}",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from None
 
     # Store the tokens
     auth_plugin.store_tokens(credentials)

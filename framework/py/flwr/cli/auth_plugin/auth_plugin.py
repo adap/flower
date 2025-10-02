@@ -24,6 +24,13 @@ from flwr.common.typing import UserAuthCredentials, UserAuthLoginDetails
 from flwr.proto.control_pb2_grpc import ControlStub
 
 
+class LoginError(Exception):
+    """Login error exception."""
+
+    def __init__(self, message: str):
+        self.message = message
+
+
 class CliAuthPlugin(ABC):
     """Abstract Flower Auth Plugin class for CLI.
 
@@ -52,6 +59,11 @@ class CliAuthPlugin(ABC):
         -------
         UserAuthCredentials
             The authentication credentials obtained after login.
+
+        Raises
+        ------
+        LoginError
+            If the login process fails.
         """
 
     @abstractmethod
