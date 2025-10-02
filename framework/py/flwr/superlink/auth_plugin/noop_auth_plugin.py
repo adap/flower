@@ -43,6 +43,8 @@ class NoOpControlAuthPlugin(ControlAuthPlugin):
 
     def get_login_details(self) -> Optional[UserAuthLoginDetails]:
         """Get the login details."""
+        # This allows the `flwr login` command to load the NoOp plugin accordingly,
+        # which then raises a LoginError when attempting to login.
         return UserAuthLoginDetails(
             auth_type=AuthType.NOOP,  # No operation auth type
             device_code="",
@@ -59,10 +61,7 @@ class NoOpControlAuthPlugin(ControlAuthPlugin):
 
     def get_auth_tokens(self, device_code: str) -> Optional[UserAuthCredentials]:
         """Get authentication tokens."""
-        return UserAuthCredentials(
-            access_token="",
-            refresh_token="",
-        )
+        raise RuntimeError("NoOp plugin does not support getting auth tokens.")
 
     def refresh_tokens(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
