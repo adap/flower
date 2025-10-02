@@ -44,20 +44,20 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
-    AddNodeRequest,
-    AddNodeResponse,
+    CreateNodeCliRequest,
+    CreateNodeCliResponse,
+    DeleteNodeCliRequest,
+    DeleteNodeCliResponse,
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
-    ListNodesRequest,
-    ListNodesResponse,
+    ListNodesCliRequest,
+    ListNodesCliResponse,
     ListRunsRequest,
     ListRunsResponse,
     PullArtifactsRequest,
     PullArtifactsResponse,
-    RemoveNodeRequest,
-    RemoveNodeResponse,
     StartRunRequest,
     StartRunResponse,
     StopRunRequest,
@@ -398,26 +398,26 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         download_url = self.artifact_provider.get_url(run_id)
         return PullArtifactsResponse(url=download_url)
 
-    def AddNode(
-        self, request: AddNodeRequest, context: grpc.ServicerContext
-    ) -> AddNodeResponse:
+    def CreateNodeCli(
+        self, request: CreateNodeCliRequest, context: grpc.ServicerContext
+    ) -> CreateNodeCliResponse:
         """Add a SuperNode."""
-        log(INFO, "ControlServicer.AddNode")
-        return AddNodeResponse()
+        log(INFO, "ControlServicer.CreateNodeCli")
+        return CreateNodeCliResponse()
 
-    def RemoveNode(
-        self, request: RemoveNodeRequest, context: grpc.ServicerContext
-    ) -> RemoveNodeResponse:
+    def DeleteNodeCli(
+        self, request: DeleteNodeCliRequest, context: grpc.ServicerContext
+    ) -> DeleteNodeCliResponse:
         """Remove a SuperNode."""
         log(INFO, "ControlServicer.RemoveNode")
-        return RemoveNodeResponse()
+        return DeleteNodeCliResponse()
 
-    def ListNodes(
-        self, request: ListNodesRequest, context: grpc.ServicerContext
-    ) -> ListNodesResponse:
+    def ListNodesCli(
+        self, request: ListNodesCliRequest, context: grpc.ServicerContext
+    ) -> ListNodesCliResponse:
         """List all SuperNodes."""
-        log(INFO, "ControlServicer.ListNodes")
-        return ListNodesResponse()
+        log(INFO, "ControlServicer.ListNodesCli")
+        return ListNodesCliResponse()
 
 
 def _create_list_runs_response(
