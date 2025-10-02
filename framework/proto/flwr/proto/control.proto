@@ -100,7 +100,7 @@ message PullArtifactsResponse { optional string url = 1; }
 message AddNodeRequest { string pub_key = 1; }
 message AddNodeResponse { optional uint64 node_id = 1; }
 
-message RemoveNodeRequest { Node node = 1; }
+message RemoveNodeRequest { uint64 node_id = 1; }
 message RemoveNodeResponse {}
 
 message ListNodesRequest {}

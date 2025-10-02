@@ -262,15 +262,13 @@ global___AddNodeResponse = AddNodeResponse
 
 class RemoveNodeRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    NODE_FIELD_NUMBER: builtins.int
-    @property
-    def node(self) -> flwr.proto.node_pb2.Node: ...
+    NODE_ID_FIELD_NUMBER: builtins.int
+    node_id: builtins.int
     def __init__(self,
         *,
-        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
+        node_id: builtins.int = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["node",b"node"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node_id",b"node_id"]) -> None: ...
 global___RemoveNodeRequest = RemoveNodeRequest
 
 class RemoveNodeResponse(google.protobuf.message.Message):
