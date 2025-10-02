@@ -19,7 +19,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
-from flwr.common.typing import UserAuthCredentials, UserAuthLoginDetails
+from flwr.common.typing import AccountAuthCredentials, AccountAuthLoginDetails
 from flwr.proto.control_pb2_grpc import ControlStub
 
 from .auth_plugin import CliAuthPlugin, LoginError
@@ -30,16 +30,16 @@ class NoOpCliAuthPlugin(CliAuthPlugin):
 
     @staticmethod
     def login(
-        login_details: UserAuthLoginDetails,
+        login_details: AccountAuthLoginDetails,
         control_stub: ControlStub,
-    ) -> UserAuthCredentials:
+    ) -> AccountAuthCredentials:
         """Raise LoginError as no-op plugin does not support login."""
         raise LoginError("Account authentication is not enabled on this SuperLink.")
 
     def __init__(self, credentials_path: Path) -> None:
         pass
 
-    def store_tokens(self, credentials: UserAuthCredentials) -> None:
+    def store_tokens(self, credentials: AccountAuthCredentials) -> None:
         """Do nothing."""
 
     def load_tokens(self) -> None:
@@ -53,6 +53,6 @@ class NoOpCliAuthPlugin(CliAuthPlugin):
 
     def read_tokens_from_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Optional[UserAuthCredentials]:
+    ) -> Optional[AccountAuthCredentials]:
         """Return None."""
         return None

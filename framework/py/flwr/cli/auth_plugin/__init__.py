@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower user auth plugins."""
+"""Flower account auth plugins."""
 
 
 from flwr.common.constant import AuthType
