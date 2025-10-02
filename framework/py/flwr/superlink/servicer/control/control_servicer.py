@@ -439,7 +439,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 node_id=2,
                 owner_aid="owner_aid_2",
                 created_at=(now()).isoformat(),
-                activated_at=(now() - timedelta(hours=0.5)).isoformat(),
+                activated_at=(now() + timedelta(hours=0.5)).isoformat(),
                 deactivated_at="",
                 deleted_at="",
             )
@@ -453,7 +453,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 created_at=(now()).isoformat(),
                 activated_at="",
                 deactivated_at="",
-                deleted_at=(now() - timedelta(hours=1)).isoformat(),
+                deleted_at=(now() + timedelta(hours=1)).isoformat(),
             )
         )
 
@@ -463,9 +463,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 node_id=4,
                 owner_aid="owner_aid_4",
                 created_at=(now()).isoformat(),
-                activated_at=(now() - timedelta(hours=0.5)).isoformat(),
-                deactivated_at=(now() - timedelta(hours=1)).isoformat(),
-                deleted_at=(now() - timedelta(hours=1.5)).isoformat(),
+                activated_at=(now() + timedelta(hours=0.5)).isoformat(),
+                deactivated_at=(now() + timedelta(hours=1)).isoformat(),
+                deleted_at=(now() + timedelta(hours=1.5)).isoformat(),
             )
         )
 
