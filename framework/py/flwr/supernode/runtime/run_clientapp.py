@@ -23,8 +23,8 @@ import grpc
 
 from flwr.app.error import Error
 from flwr.cli.install import install_from_fab
-from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.client.clientapp.utils import get_load_client_app_fn
+from flwr.clientapp.client_app import ClientApp, LoadClientAppError
+from flwr.clientapp.utils import get_load_client_app_fn
 from flwr.common import Context, Message
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import ErrorCode
