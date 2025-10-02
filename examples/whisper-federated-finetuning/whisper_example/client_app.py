@@ -4,7 +4,8 @@ import time
 
 time.sleep(5)
 import torch
-from flwr.client import ClientApp, NumPyClient
+from flwr.client import NumPyClient
+from flwr.clientapp import ClientApp
 from flwr.common import Context
 from torch.utils.data import DataLoader
 
