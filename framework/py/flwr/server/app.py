@@ -38,7 +38,7 @@ from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
-    AUTH_TYPE_YAML_KEY,
+    AUTHN_TYPE_YAML_KEY,
     AUTHZ_TYPE_YAML_KEY,
     CLIENT_OCTET,
     CONTROL_API_DEFAULT_SERVER_ADDRESS,
@@ -193,7 +193,7 @@ def run_superlink() -> None:
     # provided
     verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", None)
 
-    auth_plugin: Optional[ControlAuthnPlugin] = None
+    authn_plugin: Optional[ControlAuthnPlugin] = None
     authz_plugin: Optional[ControlAuthzPlugin] = None
     event_log_plugin: Optional[EventLogWriterPlugin] = None
     # Load the auth plugin if the args.account_auth_config is provided
@@ -205,7 +205,7 @@ def run_superlink() -> None:
         )
         args.account_auth_config = cfg_path
     if cfg_path := getattr(args, "account_auth_config", None):
-        auth_plugin, authz_plugin = _try_obtain_control_auth_plugins(
+        authn_plugin, authz_plugin = _try_obtain_control_auth_plugins(
             Path(cfg_path), verify_tls_cert
         )
         # Enable event logging if the args.enable_event_log is True
@@ -236,7 +236,7 @@ def run_superlink() -> None:
         objectstore_factory=objectstore_factory,
         certificates=certificates,
         is_simulation=is_simulation,
-        auth_plugin=auth_plugin,
+        authn_plugin=authn_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
         artifact_provider=artifact_provider,
@@ -478,10 +478,21 @@ def _try_obtain_control_auth_plugins(
         except NotImplementedError:
             sys.exit(f"No {section} plugins are currently supported.")
 
+    # Warn deprecated authn_type key
+    if "authn_type" in config["authentication"]:
+        log(
+            WARN,
+            "The `authn_type` key in the authentication configuration is deprecated. "
+            "Use `%s` instead.",
+            AUTHN_TYPE_YAML_KEY,
+        )
+        authn_type = config["authentication"].pop("authn_type")
+        config["authentication"][AUTHN_TYPE_YAML_KEY] = authn_type
+
     # Load authentication plugin
-    auth_plugin = _load_plugin(
+    authn_plugin = _load_plugin(
         section="authentication",
-        yaml_key=AUTH_TYPE_YAML_KEY,
+        yaml_key=AUTHN_TYPE_YAML_KEY,
         loader=get_control_authn_plugins,
     )
 
@@ -492,7 +503,7 @@ def _try_obtain_control_auth_plugins(
         loader=get_control_authz_plugins,
     )
 
-    return auth_plugin, authz_plugin
+    return authn_plugin, authz_plugin
 
 
 def _try_obtain_control_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]:
