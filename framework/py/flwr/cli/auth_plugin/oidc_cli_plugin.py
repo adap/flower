@@ -25,9 +25,9 @@ import typer
 
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
-    AUTH_TYPE_JSON_KEY,
+    AUTHN_TYPE_JSON_KEY,
     REFRESH_TOKEN_KEY,
-    AuthType,
+    AuthnType,
 )
 from flwr.common.typing import AccountAuthCredentials, AccountAuthLoginDetails
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
@@ -88,7 +88,7 @@ class OidcCliPlugin(CliAuthPlugin):
         self.access_token = credentials.access_token
         self.refresh_token = credentials.refresh_token
         json_dict = {
-            AUTH_TYPE_JSON_KEY: AuthType.OIDC,
+            AUTHN_TYPE_JSON_KEY: AuthnType.OIDC,
             ACCESS_TOKEN_KEY: credentials.access_token,
             REFRESH_TOKEN_KEY: credentials.refresh_token,
         }

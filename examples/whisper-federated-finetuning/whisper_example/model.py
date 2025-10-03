@@ -1,11 +1,7 @@
 """whisper_example: A Flower / PyTorch app with OpenAi's Whisper."""
 
-from collections import OrderedDict
-from typing import List
-
 import numpy as np
 import torch
-from flwr.common import NDArrays
 from torch.utils.data import WeightedRandomSampler
 from tqdm import tqdm
 from transformers import WhisperForConditionalGeneration
@@ -29,17 +25,6 @@ def get_model(device, num_classes, compile: bool = True):
         torch.nn.Linear(128 * 384, num_classes),
     ).to(device)
     return encoder, classifier
-
-
-def set_params(model: torch.nn.ModuleList, params: List[NDArrays]):
-    """Set model weights from a list of NumPy ndarrays."""
-    params_dict = zip(model.state_dict().keys(), params)
-    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-    model.load_state_dict(state_dict, strict=True)
-
-
-def get_params(module: torch.nn.ModuleList):
-    return [val.cpu().numpy() for _, val in module.state_dict().items()]
 
 
 class RunningAvg:

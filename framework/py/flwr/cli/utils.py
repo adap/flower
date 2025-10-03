@@ -27,7 +27,7 @@ import grpc
 import typer
 
 from flwr.common.constant import (
-    AUTH_TYPE_JSON_KEY,
+    AUTHN_TYPE_JSON_KEY,
     CREDENTIALS_DIR,
     FLWR_DIR,
     NO_ACCOUNT_AUTH_MESSAGE,
@@ -234,22 +234,22 @@ def try_obtain_cli_auth_plugin(
     root_dir: Path,
     federation: str,
     federation_config: dict[str, Any],
-    auth_type: Optional[str] = None,
+    authn_type: Optional[str] = None,
 ) -> Optional[CliAuthPlugin]:
-    """Load the CLI-side account auth plugin for the given auth type."""
+    """Load the CLI-side account auth plugin for the given authn type."""
     # Check if account auth is enabled
     if not account_auth_enabled(federation_config):
         return None
 
     config_path = get_account_auth_config_path(root_dir, federation)
 
-    # Get the auth type from the config if not provided
-    # auth_type will be None for all CLI commands except login
-    if auth_type is None:
+    # Get the authn type from the config if not provided
+    # authn_type will be None for all CLI commands except login
+    if authn_type is None:
         try:
             with config_path.open("r", encoding="utf-8") as file:
                 json_file = json.load(file)
-            auth_type = json_file[AUTH_TYPE_JSON_KEY]
+            authn_type = json_file[AUTHN_TYPE_JSON_KEY]
         except (FileNotFoundError, KeyError):
             typer.secho(
                 "❌ Missing or invalid credentials for account authentication. "
@@ -262,10 +262,10 @@ def try_obtain_cli_auth_plugin(
     # Retrieve auth plugin class and instantiate it
     try:
         all_plugins: dict[str, type[CliAuthPlugin]] = get_cli_auth_plugins()
-        auth_plugin_class = all_plugins[auth_type]
+        auth_plugin_class = all_plugins[authn_type]
         return auth_plugin_class(config_path)
     except KeyError:
-        typer.echo(f"❌ Unknown account authentication type: {auth_type}")
+        typer.echo(f"❌ Unknown account authentication type: {authn_type}")
         raise typer.Exit(code=1) from None
     except ImportError:
         typer.echo("❌ No authentication plugins are currently supported.")
