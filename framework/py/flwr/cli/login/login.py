@@ -40,7 +40,7 @@ from ..utils import (
     account_auth_enabled,
     flwr_cli_grpc_exc_handler,
     init_channel,
-    try_obtain_cli_auth_plugin,
+    load_cli_auth_plugin,
 )
 
 
@@ -104,16 +104,7 @@ def login(  # pylint: disable=R0914
 
     # Get the auth plugin
     auth_type = login_response.auth_type
-    auth_plugin = try_obtain_cli_auth_plugin(
-        app, federation, federation_config, auth_type
-    )
-    if auth_plugin is None:
-        typer.secho(
-            f'❌ Authentication type "{auth_type}" not found',
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+    auth_plugin = load_cli_auth_plugin(app, federation, federation_config, auth_type)
 
     # Login
     details = AccountAuthLoginDetails(

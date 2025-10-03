@@ -34,6 +34,7 @@ from flwr.common.constant import (
     NO_ARTIFACT_PROVIDER_MESSAGE,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
+    AuthType,
 )
 from flwr.common.grpc import (
     GRPC_MAX_MESSAGE_LENGTH,
@@ -41,7 +42,7 @@ from flwr.common.grpc import (
     on_channel_state_change,
 )
 
-from .auth_plugin import CliAuthPlugin, get_cli_auth_plugins
+from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
 from .config_utils import validate_certificate_in_federation_config
 
@@ -230,71 +231,54 @@ def account_auth_enabled(federation_config: dict[str, Any]) -> bool:
     return enabled
 
 
-def try_obtain_cli_auth_plugin(
+def retrieve_auth_type(config_path: Path) -> str:
+    """Retrieve the auth type from the config file or return NOOP if not found."""
+    try:
+        with config_path.open("r", encoding="utf-8") as file:
+            json_file = json.load(file)
+        auth_type: str = json_file[AUTH_TYPE_JSON_KEY]
+        return auth_type
+    except (FileNotFoundError, KeyError):
+        return AuthType.NOOP
+
+
+def load_cli_auth_plugin(
     root_dir: Path,
     federation: str,
     federation_config: dict[str, Any],
     auth_type: Optional[str] = None,
-) -> Optional[CliAuthPlugin]:
+) -> CliAuthPlugin:
     """Load the CLI-side account auth plugin for the given auth type."""
-    # Check if account auth is enabled
-    if not account_auth_enabled(federation_config):
-        return None
-
+    # Find the path to the account auth config file
     config_path = get_account_auth_config_path(root_dir, federation)
 
-    # Get the auth type from the config if not provided
-    # auth_type will be None for all CLI commands except login
+    # Determine the auth type if not provided
+    # Only `flwr login` command can provide `auth_type` explicitly, as it can query the
+    # SuperLink for the auth type.
     if auth_type is None:
-        try:
-            with config_path.open("r", encoding="utf-8") as file:
-                json_file = json.load(file)
-            auth_type = json_file[AUTH_TYPE_JSON_KEY]
-        except (FileNotFoundError, KeyError):
-            typer.secho(
-                "❌ Missing or invalid credentials for account authentication. "
-                "Please run `flwr login` to authenticate.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1) from None
+        auth_type = AuthType.NOOP
+        if account_auth_enabled(federation_config):
+            auth_type = retrieve_auth_type(config_path)
 
     # Retrieve auth plugin class and instantiate it
     try:
-        all_plugins: dict[str, type[CliAuthPlugin]] = get_cli_auth_plugins()
-        auth_plugin_class = all_plugins[auth_type]
+        auth_plugin_class = get_cli_plugin_class(auth_type)
         return auth_plugin_class(config_path)
-    except KeyError:
+    except ValueError:
         typer.echo(f"❌ Unknown account authentication type: {auth_type}")
-        raise typer.Exit(code=1) from None
-    except ImportError:
-        typer.echo("❌ No authentication plugins are currently supported.")
         raise typer.Exit(code=1) from None
 
 
 def init_channel(
-    app: Path, federation_config: dict[str, Any], auth_plugin: Optional[CliAuthPlugin]
+    app: Path, federation_config: dict[str, Any], auth_plugin: CliAuthPlugin
 ) -> grpc.Channel:
     """Initialize gRPC channel to the Control API."""
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
         app, federation_config
     )
 
-    # Initialize the CLI-side account auth interceptor
-    interceptors: list[grpc.UnaryUnaryClientInterceptor] = []
-    if auth_plugin is not None:
-        # Check if TLS is enabled. If not, raise an error
-        if insecure:
-            typer.secho(
-                "❌ Account authentication requires TLS to be enabled. "
-                "Remove `insecure = true` from the federation configuration.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-
-        auth_plugin.load_tokens()
-        interceptors.append(CliAccountAuthInterceptor(auth_plugin))
+    # Load tokens
+    auth_plugin.load_tokens()
 
     # Create the gRPC channel
     channel = create_channel(
@@ -302,7 +286,7 @@ def init_channel(
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=interceptors or None,
+        interceptors=[CliAccountAuthInterceptor(auth_plugin)],
     )
     channel.subscribe(on_channel_state_change)
     return channel
