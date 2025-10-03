@@ -327,7 +327,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             return GetLoginDetailsResponse()
 
         return GetLoginDetailsResponse(
-            auth_type=details.auth_type,
+            authn_type=details.authn_type,
             device_code=details.device_code,
             verification_uri_complete=details.verification_uri_complete,
             expires_in=details.expires_in,

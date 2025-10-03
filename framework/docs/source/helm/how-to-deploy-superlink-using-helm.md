@@ -172,9 +172,9 @@ stringData:
   license-key: <YOUR_FLWR_LICENSE_KEY>
 ```
 
-## Enable User Authentication
+## Enable Account Authentication
 
-User authentication can be enabled if you're using the Flower Enterprise Edition (EE) Docker images.
+Account authentication can be enabled if you're using the Flower Enterprise Edition (EE) Docker images.
 This is configured in the `global.userAuth` section of your `values.yml` file.
 
 ### Example: Enabling OpenID Connect (OIDC) Authentication
@@ -185,7 +185,7 @@ global:
     enabled: true
     config:
       authentication:
-        auth_type: oidc
+        authn_type: oidc
         auth_url: https://<domain>/auth/device
         token_url: https://<domain>/token
         validate_url: https://<domain>/userinfo
@@ -195,16 +195,16 @@ global:
 
 Explanation of Parameters:
 
-- `auth_type`: The authentication mechanism being used (e.g., oidc).
+- `authn_type`: The authentication mechanism being used (e.g., oidc).
 - `auth_url`: The OpenID Connect authentication endpoint where users authenticate.
 - `token_url`: The URL for retrieving access tokens.
-- `validate_url`: The endpoint for validating user authentication.
+- `validate_url`: The endpoint for validating account authentication.
 - `oidc_client_id`: The client ID issued by the authentication provider.
 - `oidc_client_secret`: The secret key associated with the client ID.
 
 ### Use an Existing Secret
 
-To use an existing secret that contains the user authentication configuration, set `existingSecret`
+To use an existing secret that contains the account authentication configuration, set `existingSecret`
 to the name of the existing secret:
 
 ```yaml
@@ -212,18 +212,18 @@ global:
   userAuth:
     enabled: true
     config: {}
-    existingSecret: "existing-user-auth-config"
+    existingSecret: "existing-account-auth-config"
 ```
 
-Note that the existing secret must contain the key `user-auth-config.yml`:
+Note that the existing secret must contain the key `account-auth-config.yml`:
 
 ```yaml
 kind: Secret
 stringData:
-  user-auth-config.yml: |
+  account-auth-config.yml: |
     authentication:
-      auth_type: oidc
-      auth_url: https://<domain>/auth/device
+      authn_type: oidc
+      authn_url: https://<domain>/auth/device
       token_url: https://<domain>/token
       validate_url: https://<domain>/userinfo
       oidc_client_id: <client_id>
@@ -708,9 +708,9 @@ global:
 | `global.affinity.nodeAffinity.matchExpressions`      | Default match expressions for node affinity                       | `[]`               |
 | `global.nodeAuth.enabled`                            | Enables or Disables Node-Authentication SuperLink \<-> SuperNode  | `false`            |
 | `global.nodeAuth.authListPublicKeys`                 | A list of ecdsa-sha2-nistp384 SuperNode keys                      | `[]`               |
-| `global.userAuth.enabled`                            | Enables or disables the user authentication plugin.               | `false`            |
-| `global.userAuth.config`                             | Set the user authentication configuration.                        | `{}`               |
-| `global.userAuth.existingSecret`                     | Existing secret with user authentication configuration.           | `""`               |
+| `global.userAuth.enabled`                            | Enables or disables the account authentication plugin.            | `false`            |
+| `global.userAuth.config`                             | Set the account authentication configuration.                     | `{}`               |
+| `global.userAuth.existingSecret`                     | Existing secret with account authentication configuration.        | `""`               |
 | `global.license.enabled`                             | Enables or disables the configuration of the EE license.          | `true`             |
 | `global.license.key`                                 | The EE license key.                                               | `""`               |
 | `global.license.secretKey`                           | The name of the key inside the Kubernetes Secret                  | `FLWR_LICENSE_KEY` |

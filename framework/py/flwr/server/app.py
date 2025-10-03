@@ -478,15 +478,15 @@ def _try_obtain_control_auth_plugins(
         except NotImplementedError:
             sys.exit(f"No {section} plugins are currently supported.")
 
-    # Warn deprecated auth_type key
-    if "auth_type" in config["authentication"]:
+    # Warn deprecated authn_type key
+    if "authn_type" in config["authentication"]:
         log(
             WARN,
-            "The `auth_type` key in the authentication configuration is deprecated. "
+            "The `authn_type` key in the authentication configuration is deprecated. "
             "Use `%s` instead.",
             AUTHN_TYPE_YAML_KEY,
         )
-        authn_type = config["authentication"].pop("auth_type")
+        authn_type = config["authentication"].pop("authn_type")
         config["authentication"][AUTHN_TYPE_YAML_KEY] = authn_type
 
     # Load authentication plugin

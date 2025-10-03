@@ -50,7 +50,7 @@ class NoOpControlAuthnPlugin(ControlAuthnPlugin):
         # This allows the `flwr login` command to load the NoOp plugin accordingly,
         # which then raises a LoginError when attempting to login.
         return AccountAuthLoginDetails(
-            auth_type=AuthnType.NOOP,  # No operation auth type
+            authn_type=AuthnType.NOOP,  # No operation authn type
             device_code="",
             verification_uri_complete="",
             expires_in=0,
