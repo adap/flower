@@ -44,7 +44,7 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
-_NodeListType = tuple[int, str, str, str, str, str, str]
+_NodeListType = tuple[int, str, str, str, str, str, str, str]
 
 
 def ls(  # pylint: disable=R0914
@@ -180,7 +180,7 @@ def _to_table(nodes_info: list[_NodeListType]) -> Table:
             node_id,
             owner_aid,
             status,
-            created_at,
+            _,
             activated_at,
             deactivated_at,
             deleted_at,
@@ -203,7 +203,7 @@ def _to_table(nodes_info: list[_NodeListType]) -> Table:
             f"[bold]{node_id}[/bold]",
             f"{owner_aid}",
             f"[{status_style}]{status}",
-            elapse_activated if status == "online" else "",
+            f"[cyan]{elapse_activated}[/cyan]" if status == "online" else "",
             time_at,
         )
         table.add_row(*formatted_row)
