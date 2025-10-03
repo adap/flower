@@ -186,7 +186,7 @@ global:
     config:
       authentication:
         authn_type: oidc
-        auth_url: https://<domain>/auth/device
+        authn_url: https://<domain>/auth/device
         token_url: https://<domain>/token
         validate_url: https://<domain>/userinfo
         oidc_client_id: <client_id>
