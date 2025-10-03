@@ -109,8 +109,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
         ffs = self.ffs_factory.ffs()
 
+        verification = None
         if request.fab.content == b"":
-            identifier = request.fab.hash_str
+            identifier = request.fab.meta["identifier"]
             m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", identifier)
             if not m:
                 raise ValueError(
@@ -145,8 +146,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 )
 
             # Create run
-            fab = Fab(hashlib.sha256(fab_file).hexdigest(), fab_file)
-            fab_hash = ffs.put(fab.content, {})
+            fab = Fab(hashlib.sha256(fab_file).hexdigest(), fab_file, {"verification": json.dumps(verification)})
+            fab_hash = ffs.put(fab.content, fab.meta)
             if fab_hash != fab.hash_str:
                 raise RuntimeError(
                     f"FAB ({fab.hash_str}) hash from request doesn't match contents"

@@ -176,8 +176,8 @@ def _run_with_control_api(
         # Build fab only if not a remote reference
         fab_id = fab_version = fab_hash = None
         if remote_app_ref:
-            # Skip build; send a placeholder Fab containing the remote reference and empty bytes
-            fab = Fab(remote_app_ref, b"")
+            # Skip build; send a placeholder Fab containing the remote reference
+            fab = Fab("", b"", {"identifier": remote_app_ref})
         else:
             fab_bytes, fab_hash, cfg = build_fab(app)
             fab_id, fab_version = get_metadata_from_config(cfg)

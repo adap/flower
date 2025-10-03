@@ -294,7 +294,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
             # Pull and store the FAB
             fab = get_fab(run_info.fab_hash, run_id)
-            ffs.put(fab.content, {})
+            ffs.put(fab.content, fab.meta)
 
             # Initialize the context
             run_cfg = get_fused_config_from_fab(fab.content, run_info)
