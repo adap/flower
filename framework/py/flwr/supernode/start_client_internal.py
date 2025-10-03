@@ -86,6 +86,7 @@ def start_client_internal(
     isolation: str = ISOLATION_MODE_SUBPROCESS,
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     health_server_address: Optional[str] = None,
+    trust_entity: Optional[list] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -137,6 +138,9 @@ def start_client_internal(
     health_server_address : Optional[str] (default: None)
         The address of the health server. If `None` is provided, the health server will
         NOT be started.
+    trust_entity : Optional[list] (default: None)
+        A list of trusted entities. Only apps verified by at least one of these
+        entities can run on a supernode.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -224,6 +228,7 @@ def start_client_internal(
                 get_fab=get_fab,
                 pull_object=pull_object,
                 confirm_message_received=confirm_message_received,
+                trust_entity=trust_entity,
             )
 
             # No message has been pulled therefore we can skip the push stage.
@@ -250,6 +255,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     get_fab: Callable[[str, int], Fab],
     pull_object: Callable[[int, str], bytes],
     confirm_message_received: Callable[[int, str], None],
+    trust_entity: Optional[list],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
@@ -295,6 +301,9 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             # Pull and store the FAB
             fab = get_fab(run_info.fab_hash, run_id)
             ffs.put(fab.content, fab.meta)
+
+            # Verify the received FAB
+            #########################
 
             # Initialize the context
             run_cfg = get_fused_config_from_fab(fab.content, run_info)

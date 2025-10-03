@@ -81,6 +81,7 @@ def flower_supernode() -> None:
         isolation=args.isolation,
         clientappio_api_address=args.clientappio_api_address,
         health_server_address=args.health_server_address,
+        trust_entity=args.trust_entity,
     )
 
 
@@ -119,6 +120,16 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         default=CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
         help="ClientAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
         f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
+    )
+    parser.add_argument(
+        "--trust-entity",
+        nargs="+",
+        default=[],
+        metavar="ENTITY",
+        help=(
+            "One or more trusted entities. "
+            "Only apps verified by at least one of these entities can run on a supernode."
+        ),
     )
     add_args_health(parser)
 
