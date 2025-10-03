@@ -52,9 +52,9 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
+    AuthType,
     EventLogWriterType,
     ExecPluginType,
-    AuthType,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
@@ -72,7 +72,12 @@ from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.artifact_provider import ArtifactProvider
-from flwr.superlink.auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
+from flwr.superlink.auth_plugin import (
+    ControlAuthnPlugin,
+    ControlAuthzPlugin,
+    NoOpControlAuthnPlugin,
+    NoOpControlAuthzPlugin,
+)
 from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
@@ -81,7 +86,6 @@ from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInte
 from .superlink.linkstate import LinkStateFactory
 from .superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
-from flwr.superlink.auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
@@ -105,11 +109,11 @@ except ImportError:
 
     def get_control_authn_plugins() -> dict[str, type[ControlAuthnPlugin]]:
         """Return all Control API authentication plugins."""
-        return {AuthType.NOOP: ControlAuthnPlugin}
+        return {AuthType.NOOP: NoOpControlAuthnPlugin}
 
     def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
         """Return all Control API authorization plugins."""
-        return {AuthType.NOOP: ControlAuthzPlugin}
+        return {AuthType.NOOP: NoOpControlAuthzPlugin}
 
     def get_control_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
         """Return all Control API event log writer plugins."""
@@ -206,10 +210,9 @@ def run_superlink() -> None:
             "future release. Please use `--account-auth-config` instead.",
         )
         args.account_auth_config = cfg_path
-    if cfg_path := getattr(args, "account_auth_config", None):
-        auth_plugin, authz_plugin = _load_control_auth_plugins(
-            Path(cfg_path), verify_tls_cert
-        )
+    cfg_path: Optional[str] = getattr(args, "account_auth_config", None)
+    auth_plugin, authz_plugin = _load_control_auth_plugins(cfg_path, verify_tls_cert)
+    if cfg_path is not None:
         # Enable event logging if the args.enable_event_log is True
         if args.enable_event_log:
             event_log_plugin = _try_obtain_control_event_log_writer_plugin()
@@ -452,12 +455,20 @@ def _try_load_public_keys_node_authentication(
 
 
 def _load_control_auth_plugins(
-    config_path: Optional[Path], verify_tls_cert: bool
+    config_path: Optional[str], verify_tls_cert: bool
 ) -> tuple[ControlAuthnPlugin, ControlAuthzPlugin]:
     """Obtain Control API authentication and authorization plugins."""
+    # Load NoOp plugins if no config path is provided
+    if config_path is None:
+        config_path = ""
+        config = {
+            "authentication": {AUTH_TYPE_YAML_KEY: AuthType.NOOP},
+            "authorization": {AUTHZ_TYPE_YAML_KEY: AuthType.NOOP},
+        }
     # Load YAML file
-    with config_path.open("r", encoding="utf-8") as file:
-        config: dict[str, Any] = yaml.safe_load(file)
+    else:
+        with Path(config_path).open("r", encoding="utf-8") as file:
+            config: dict[str, Any] = yaml.safe_load(file)
 
     def _load_plugin(
         section: str, yaml_key: str, loader: Callable[[], dict[str, type[P]]]
@@ -467,9 +478,7 @@ def _load_control_auth_plugins(
         try:
             plugins: dict[str, type[P]] = loader()
             plugin_cls: type[P] = plugins[auth_plugin_name]
-            return plugin_cls(
-                account_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
-            )
+            return plugin_cls(Path(config_path), verify_tls_cert)
         except KeyError:
             if auth_plugin_name:
                 sys.exit(
