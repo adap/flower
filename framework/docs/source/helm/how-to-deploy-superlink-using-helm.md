@@ -708,9 +708,9 @@ global:
 | `global.affinity.nodeAffinity.matchExpressions`      | Default match expressions for node affinity                       | `[]`               |
 | `global.nodeAuth.enabled`                            | Enables or Disables Node-Authentication SuperLink \<-> SuperNode  | `false`            |
 | `global.nodeAuth.authListPublicKeys`                 | A list of ecdsa-sha2-nistp384 SuperNode keys                      | `[]`               |
-| `global.userAuth.enabled`                            | Enables or disables the account authentication plugin.            | `false`            |
-| `global.userAuth.config`                             | Set the account authentication configuration.                     | `{}`               |
-| `global.userAuth.existingSecret`                     | Existing secret with account authentication configuration.        | `""`               |
+| `global.userAuth.enabled`                            | Enables or disables the user authentication plugin.               | `false`            |
+| `global.userAuth.config`                             | Set the user authentication configuration.                        | `{}`               |
+| `global.userAuth.existingSecret`                     | Existing secret with user authentication configuration.           | `""`               |
 | `global.license.enabled`                             | Enables or disables the configuration of the EE license.          | `true`             |
 | `global.license.key`                                 | The EE license key.                                               | `""`               |
 | `global.license.secretKey`                           | The name of the key inside the Kubernetes Secret                  | `FLWR_LICENSE_KEY` |
