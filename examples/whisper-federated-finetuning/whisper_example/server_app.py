@@ -1,21 +1,69 @@
 """whisper_example: A Flower / PyTorch app with OpenAi's Whisper."""
 
 from logging import INFO
-from typing import List, Tuple
+from typing import Iterable, Optional
 
 import torch
 from datasets import load_dataset
-from flwr.common import Context, FitRes, Metrics, NDArrays, ndarrays_to_parameters
+from flwr.app import ArrayRecord, Context, Message, MetricRecord
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.client_proxy import ClientProxy
-from flwr.server.strategy import FedAvg
+from flwr.serverapp import Grid, ServerApp
+from flwr.serverapp.strategy import FedAvg
 from torch.utils.data import DataLoader
 from transformers import WhisperProcessor
 
 from whisper_example.dataset import get_encoding_fn
-from whisper_example.model import eval_model, get_model, get_params, set_params
+from whisper_example.model import eval_model, get_model
+
+# Create ServerApp
+app = ServerApp()
+
+
+@app.main()
+def main(grid: Grid, context: Context) -> None:
+    """Main entry point for the ServerApp."""
+
+    # Read run config
+    num_rounds = context.run_config["num-server-rounds"]
+    num_classes = context.run_config["num-classes"]
+    fraction_train = context.run_config["fraction-train"]
+
+    # Initialize global model parameters. Recall we are
+    # only federating the classification head
+    _, classifier = get_model("cpu", num_classes, False)
+    arrays = ArrayRecord(classifier.state_dict())
+
+    eval_fn = None
+    if context.run_config["central-eval"]:
+        # The ServerApp will use the validation set to assess the performance of the global
+        # model after each round. Then, the test set will be used for evaluating the global
+        # model after the last round
+        sc_val = load_dataset(
+            "speech_commands", "v0.02", split="validation", token=False
+        )
+        sc_test = load_dataset("speech_commands", "v0.02", split="test", token=False)
+
+        # Processor
+        processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
+
+        eval_fn = get_evaluate_fn(sc_val, sc_test, processor, context.run_config)
+
+    # Initialize FedAvg strategy
+    strategy = ExclusiveFedAvg(fraction_train=fraction_train, fraction_evaluate=0.0)
+
+    # Start strategy, run FedAvg for `num_rounds`
+    result = strategy.start(
+        grid=grid,
+        initial_arrays=arrays,
+        num_rounds=num_rounds,
+        evaluate_fn=eval_fn,
+    )
+
+    # Save final model to disk
+    print("\nSaving final model to disk...")
+    state_dict = result.arrays.to_torch_state_dict()
+    torch.save(state_dict, "final_model.pt")
 
 
 def get_evaluate_fn(
@@ -23,8 +71,8 @@ def get_evaluate_fn(
 ):
     """Return a callback that the strategy will call after models are aggregated."""
 
-    def evaluate(server_round: int, parameters: NDArrays, config):
-        """Evaluate global model on a centralized dataset."""
+    def global_evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
+        """Evaluate model on central data."""
 
         num_rounds = run_config["num-server-rounds"]
         num_classes = run_config["num-classes"]
@@ -36,8 +84,7 @@ def get_evaluate_fn(
 
         # prepare model
         encoder, classifier = get_model(device, num_classes)
-        set_params(classifier, parameters)
-        classifier.to(device)
+        classifier.load_state_dict(arrays.to_torch_state_dict())
 
         # prepare dataset
         og_threads = torch.get_num_threads()
@@ -58,96 +105,37 @@ def get_evaluate_fn(
         criterion = torch.nn.CrossEntropyLoss()
         loss, accuracy = eval_model(encoder, classifier, criterion, val_loader, device)
 
-        return loss, {f"{prefix}_accuracy": accuracy}
+        return MetricRecord({f"{prefix}_loss": loss, f"{prefix}_accuracy": accuracy})
 
-    return evaluate
-
-
-def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    # Multiply accuracy of each client by number of examples used
-    accuracies = [
-        num_examples * m["accuracy"] for num_examples, m in metrics if m["trained"]
-    ]
-    losses = [num_examples * m["loss"] for num_examples, m in metrics if m["trained"]]
-    examples = [num_examples for num_examples, _ in metrics]
-
-    # Aggregate and return custom metric (weighted average)
-    return {
-        "train_accuracy": sum(accuracies) / sum(examples),
-        "train_loss": sum(losses) / sum(examples),
-    }
+    return global_evaluate
 
 
 class ExclusiveFedAvg(FedAvg):
 
-    def aggregate_fit(
+    def aggregate_train(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy | FitRes]],
-        failures: List[Tuple[ClientProxy | FitRes] | BaseException],
-    ):
+        replies: Iterable[Message],
+    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         # Clients with not enough training examples to have a single full batch
         # didn't train the classification head. We need to exclude it from aggregation
 
-        trained_results = []
-        for cp, res in results:
-            if res.metrics["trained"]:
-                trained_results.append((cp, res))
+        filtered_replies = []
+
+        for reply in replies:
+            if reply.has_content():
+                # Here the assumption is that there is only one config record in the reply
+                record_key = next(iter(reply.content.config_records.keys()))
+                is_trained = reply.content[record_key]["trained"]
+                if not isinstance(is_trained, bool):
+                    raise ValueError(
+                        f"Expected 'trained' to be of type bool, but got {type(is_trained)}"
+                    )
+                if is_trained:
+                    filtered_replies.append(reply)
         log(
             INFO,
-            f"{len(trained_results)}/{len(results)} models included for aggregation.",
+            f"{len(filtered_replies)}/{len(replies)} models included for aggregation.",
         )
 
-        return super().aggregate_fit(server_round, trained_results, failures)
-
-
-def server_fn(context: Context):
-    """Construct components that set the ServerApp behaviour."""
-
-    # Read from config
-    num_rounds = context.run_config["num-server-rounds"]
-    num_classes = context.run_config["num-classes"]
-    fraction_fit = context.run_config["fraction-fit"]
-
-    # Initialize global model parameters. Recall we are
-    # only federating the classification head
-    _, classifier = get_model("cpu", num_classes, False)
-    ndarrays = get_params(classifier)
-    parameters = ndarrays_to_parameters(ndarrays)
-
-    eval_fn = None
-    if context.run_config["central-eval"]:
-        # The ServerApp will use the validation set to assess the performance of the global
-        # model after each round. Then, the test set will be used for evaluating the global
-        # model after the last round
-        sc_val = load_dataset(
-            "speech_commands", "v0.02", split="validation", token=False
-        )
-        sc_test = load_dataset("speech_commands", "v0.02", split="test", token=False)
-
-        # Processor
-        processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
-
-        # Prepare evaluation function
-        eval_fn = get_evaluate_fn(
-            val_set=sc_val,
-            test_set=sc_test,
-            processor=processor,
-            run_config=context.run_config,
-        )
-
-    # Define the strategy
-    strategy = ExclusiveFedAvg(
-        fraction_fit=fraction_fit,
-        fraction_evaluate=0.0,
-        fit_metrics_aggregation_fn=weighted_average,
-        evaluate_fn=eval_fn,
-        initial_parameters=parameters,
-    )
-    config = ServerConfig(num_rounds=num_rounds)
-
-    return ServerAppComponents(strategy=strategy, config=config)
-
-
-# Create ServerApp
-app = ServerApp(server_fn=server_fn)
+        return super().aggregate_train(server_round, filtered_replies)

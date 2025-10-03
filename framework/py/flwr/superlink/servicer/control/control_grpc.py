@@ -31,12 +31,12 @@ from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.license_plugin import LicensePlugin
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.artifact_provider import ArtifactProvider
-from flwr.superlink.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
+from flwr.superlink.auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 
+from .control_account_auth_interceptor import ControlAccountAuthInterceptor
 from .control_event_log_interceptor import ControlEventLogInterceptor
 from .control_license_interceptor import ControlLicenseInterceptor
 from .control_servicer import ControlServicer
-from .control_user_auth_interceptor import ControlUserAuthInterceptor
 
 try:
     from flwr.ee import get_license_plugin
@@ -54,7 +54,7 @@ def run_control_api_grpc(
     objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     is_simulation: bool,
-    auth_plugin: Optional[ControlAuthPlugin] = None,
+    auth_plugin: Optional[ControlAuthnPlugin] = None,
     authz_plugin: Optional[ControlAuthzPlugin] = None,
     event_log_plugin: Optional[EventLogWriterPlugin] = None,
     artifact_provider: Optional[ArtifactProvider] = None,
@@ -76,8 +76,8 @@ def run_control_api_grpc(
     if license_plugin is not None:
         interceptors.append(ControlLicenseInterceptor(license_plugin))
     if auth_plugin is not None and authz_plugin is not None:
-        interceptors.append(ControlUserAuthInterceptor(auth_plugin, authz_plugin))
-    # Event log interceptor must be added after user auth interceptor
+        interceptors.append(ControlAccountAuthInterceptor(auth_plugin, authz_plugin))
+    # Event log interceptor must be added after account auth interceptor
     if event_log_plugin is not None:
         interceptors.append(ControlEventLogInterceptor(event_log_plugin))
         log(INFO, "Flower event logging enabled")
@@ -95,7 +95,7 @@ def run_control_api_grpc(
     else:
         log(
             INFO,
-            "Flower Deployment Runtime: Starting Control API with user "
+            "Flower Deployment Runtime: Starting Control API with account "
             "authentication on %s",
             address,
         )

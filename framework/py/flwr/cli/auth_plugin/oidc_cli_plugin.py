@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower CLI user auth plugin for OIDC."""
+"""Flower CLI account auth plugin for OIDC."""
 
 
 import json
@@ -29,14 +29,14 @@ from flwr.common.constant import (
     REFRESH_TOKEN_KEY,
     AuthType,
 )
-from flwr.common.typing import UserAuthCredentials, UserAuthLoginDetails
+from flwr.common.typing import AccountAuthCredentials, AccountAuthLoginDetails
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetAuthTokensResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 
-from .auth_plugin import CliAuthPlugin
+from .auth_plugin import CliAuthPlugin, LoginError
 
 
 class OidcCliPlugin(CliAuthPlugin):
@@ -49,12 +49,12 @@ class OidcCliPlugin(CliAuthPlugin):
 
     @staticmethod
     def login(
-        login_details: UserAuthLoginDetails,
+        login_details: AccountAuthLoginDetails,
         control_stub: ControlStub,
-    ) -> UserAuthCredentials:
-        """Authenticate the user and retrieve authentication credentials."""
+    ) -> AccountAuthCredentials:
+        """Authenticate the account and retrieve authentication credentials."""
         typer.secho(
-            "Please login with your user credentials here: "
+            "Please log into your Flower account here: "
             f"{login_details.verification_uri_complete}",
             fg=typer.colors.BLUE,
         )
@@ -70,26 +70,16 @@ class OidcCliPlugin(CliAuthPlugin):
             refresh_token = res.refresh_token
 
             if access_token and refresh_token:
-                typer.secho(
-                    "✅ Login successful.",
-                    fg=typer.colors.GREEN,
-                    bold=False,
-                )
-                return UserAuthCredentials(
+                return AccountAuthCredentials(
                     access_token=access_token,
                     refresh_token=refresh_token,
                 )
 
             time.sleep(login_details.interval)
 
-        typer.secho(
-            "❌ Timeout, failed to sign in.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+        raise LoginError("Process timed out.")
 
-    def store_tokens(self, credentials: UserAuthCredentials) -> None:
+    def store_tokens(self, credentials: AccountAuthCredentials) -> None:
         """Store authentication tokens to the `credentials_path`.
 
         The credentials, including tokens, will be saved as a JSON file
@@ -136,14 +126,14 @@ class OidcCliPlugin(CliAuthPlugin):
 
     def read_tokens_from_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Optional[UserAuthCredentials]:
+    ) -> Optional[AccountAuthCredentials]:
         """Read authentication tokens from the provided metadata."""
         metadata_dict = dict(metadata)
         access_token = metadata_dict.get(ACCESS_TOKEN_KEY)
         refresh_token = metadata_dict.get(REFRESH_TOKEN_KEY)
 
         if isinstance(access_token, str) and isinstance(refresh_token, str):
-            return UserAuthCredentials(
+            return AccountAuthCredentials(
                 access_token=access_token,
                 refresh_token=refresh_token,
             )

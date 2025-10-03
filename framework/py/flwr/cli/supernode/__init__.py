@@ -12,4 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower AppIO service."""
+"""Flower command line interface `supernode` command."""
+
+from .create import create as create
+from .delete import delete as delete
+from .ls import ls as ls
+
+__all__ = [
+    "create",
+    "delete",
+    "ls",
+]

@@ -12,80 +12,76 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract classes for Flower account auth plugins."""
+"""Concrete NoOp implementation for Servicer-side account authentication and
+authorization plugins."""
 
 
-from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
+from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID, AuthType
 from flwr.common.typing import (
     AccountAuthCredentials,
     AccountAuthLoginDetails,
     AccountInfo,
 )
 
+from .auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 
-class ControlAuthnPlugin(ABC):
-    """Abstract Flower Authentication Plugin class for ControlServicer.
+NOOP_ACCOUNT_INFO = AccountInfo(
+    flwr_aid=NOOP_FLWR_AID,
+    account_name=NOOP_ACCOUNT_NAME,
+)
 
-    Parameters
-    ----------
-    account_auth_config_path : Path
-        Path to the YAML file containing the authentication configuration.
-    verify_tls_cert : bool
-        Boolean indicating whether to verify the TLS certificate
-        when making requests to the server.
-    """
 
-    @abstractmethod
+class NoOpControlAuthnPlugin(ControlAuthnPlugin):
+    """No-operation implementation of ControlAuthnPlugin."""
+
     def __init__(
         self,
         account_auth_config_path: Path,
         verify_tls_cert: bool,
     ):
-        """Abstract constructor."""
+        pass
 
-    @abstractmethod
     def get_login_details(self) -> Optional[AccountAuthLoginDetails]:
         """Get the login details."""
+        # This allows the `flwr login` command to load the NoOp plugin accordingly,
+        # which then raises a LoginError when attempting to login.
+        return AccountAuthLoginDetails(
+            auth_type=AuthType.NOOP,  # No operation auth type
+            device_code="",
+            verification_uri_complete="",
+            expires_in=0,
+            interval=0,
+        )
 
-    @abstractmethod
     def validate_tokens_in_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> tuple[bool, Optional[AccountInfo]]:
-        """Validate authentication tokens in the provided metadata."""
+        """Return valid for no-op plugin."""
+        return True, NOOP_ACCOUNT_INFO
 
-    @abstractmethod
     def get_auth_tokens(self, device_code: str) -> Optional[AccountAuthCredentials]:
         """Get authentication tokens."""
+        raise RuntimeError("NoOp plugin does not support getting auth tokens.")
 
-    @abstractmethod
     def refresh_tokens(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> tuple[
         Optional[Sequence[tuple[str, Union[str, bytes]]]], Optional[AccountInfo]
     ]:
         """Refresh authentication tokens in the provided metadata."""
+        return metadata, NOOP_ACCOUNT_INFO
 
 
-class ControlAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
-    """Abstract Flower Authorization Plugin class for ControlServicer.
+class NoOpControlAuthzPlugin(ControlAuthzPlugin):
+    """No-operation implementation of ControlAuthzPlugin."""
 
-    Parameters
-    ----------
-    account_auth_config_path : Path
-        Path to the YAML file containing the authorization configuration.
-    verify_tls_cert : bool
-        Boolean indicating whether to verify the TLS certificate
-        when making requests to the server.
-    """
-
-    @abstractmethod
     def __init__(self, account_auth_config_path: Path, verify_tls_cert: bool):
-        """Abstract constructor."""
+        pass
 
-    @abstractmethod
     def authorize(self, account_info: AccountInfo) -> bool:
-        """Verify account authorization request."""
+        """Return True for no-op plugin."""
+        return True

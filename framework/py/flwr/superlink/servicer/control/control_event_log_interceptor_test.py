@@ -32,8 +32,8 @@ from flwr.common.dummy_grpc_handlers_test import (
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.typing import AccountInfo, Actor, Event, LogEntry
 
+from .control_account_auth_interceptor import shared_account_info
 from .control_event_log_interceptor import ControlEventLogInterceptor
-from .control_user_auth_interceptor import shared_account_info
 
 
 class DummyLogPlugin(EventLogWriterPlugin):
