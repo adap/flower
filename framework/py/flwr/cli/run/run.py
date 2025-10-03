@@ -113,7 +113,8 @@ def run(
             app_name = m.group("app")
             user_name = m.group("user")
 
-            # Use local folder named {app_name} for pyproject lookup and downstream calls
+            # Use local folder named {app_name} for pyproject lookup
+            # and downstream calls
             app_path = Path(app_name)
             remote_app_ref = f"{user_name}/{app_name}"
 

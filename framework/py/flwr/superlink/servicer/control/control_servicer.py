@@ -146,7 +146,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 )
 
             # Create run
-            fab = Fab(hashlib.sha256(fab_file).hexdigest(), fab_file, {"verification": json.dumps(verification)})
+            fab = Fab(
+                hashlib.sha256(fab_file).hexdigest(),
+                fab_file,
+                {"verification": json.dumps(verification)},
+            )
             fab_hash = ffs.put(fab.content, fab.meta)
             if fab_hash != fab.hash_str:
                 raise RuntimeError(
@@ -510,7 +514,8 @@ def _request_download_link(identifier: str) -> [str, str]:
         raise typer.BadParameter(f"'{identifier}' not found in FlowerHub")
     if not resp.ok:
         raise typer.BadParameter(
-            f"FlowerHub request failed with status {resp.status_code}. Details: {resp.text}"
+            f"FlowerHub request failed with status {resp.status_code}. "
+            f"Details: {resp.text}"
         )
 
     data = resp.json()
