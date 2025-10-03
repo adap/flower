@@ -20,7 +20,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
-from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID, AuthType
+from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID, AuthnType
 from flwr.common.typing import (
     AccountAuthCredentials,
     AccountAuthLoginDetails,
@@ -50,7 +50,7 @@ class NoOpControlAuthnPlugin(ControlAuthnPlugin):
         # This allows the `flwr login` command to load the NoOp plugin accordingly,
         # which then raises a LoginError when attempting to login.
         return AccountAuthLoginDetails(
-            auth_type=AuthType.NOOP,  # No operation auth type
+            auth_type=AuthnType.NOOP,  # No operation auth type
             device_code="",
             verification_uri_complete="",
             expires_in=0,

@@ -245,13 +245,13 @@ class CliOutputFormat:
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
 
-class AuthType:
+class AuthnType:
     """Account authentication types."""
 
     NOOP = "noop"
     OIDC = "oidc"
 
-    def __new__(cls) -> AuthType:
+    def __new__(cls) -> AuthnType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
