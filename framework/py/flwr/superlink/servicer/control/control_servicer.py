@@ -83,14 +83,14 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
         is_simulation: bool,
-        auth_plugin: Optional[ControlAuthnPlugin] = None,
+        authn_plugin: Optional[ControlAuthnPlugin] = None,
         artifact_provider: Optional[ArtifactProvider] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
         self.is_simulation = is_simulation
-        self.auth_plugin = auth_plugin
+        self.authn_plugin = authn_plugin
         self.artifact_provider = artifact_provider
 
     def StartRun(  # pylint: disable=too-many-locals
@@ -109,7 +109,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
             return StartRunResponse()
 
-        flwr_aid = shared_account_info.get().flwr_aid if self.auth_plugin else None
+        flwr_aid = shared_account_info.get().flwr_aid if self.authn_plugin else None
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
         fab_file = request.fab.content
@@ -184,7 +184,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
 
         # If account auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
-        if self.auth_plugin:
+        if self.authn_plugin:
             flwr_aid = shared_account_info.get().flwr_aid
             _check_flwr_aid_in_run(
                 flwr_aid=flwr_aid, run=cast(Run, run), context=context
@@ -224,7 +224,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Build a set of run IDs for `flwr ls --runs`
         if not request.HasField("run_id"):
-            if self.auth_plugin:
+            if self.authn_plugin:
                 # If no `run_id` is specified and account auth is enabled,
                 # return run IDs for the authenticated account
                 flwr_aid = shared_account_info.get().flwr_aid
@@ -250,7 +250,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
             # If account auth is enabled,
             # check if `flwr_aid` matches the run's `flwr_aid`
-            if self.auth_plugin:
+            if self.authn_plugin:
                 flwr_aid = shared_account_info.get().flwr_aid
                 _check_flwr_aid_in_run(
                     flwr_aid=flwr_aid, run=cast(Run, run), context=context
@@ -278,7 +278,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
 
         # If account auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
-        if self.auth_plugin:
+        if self.authn_plugin:
             flwr_aid = shared_account_info.get().flwr_aid
             _check_flwr_aid_in_run(
                 flwr_aid=flwr_aid, run=cast(Run, run), context=context
@@ -312,7 +312,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> GetLoginDetailsResponse:
         """Start login."""
         log(INFO, "ControlServicer.GetLoginDetails")
-        if self.auth_plugin is None:
+        if self.authn_plugin is None:
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
                 NO_ACCOUNT_AUTH_MESSAGE,
@@ -320,7 +320,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             raise grpc.RpcError()  # This line is unreachable
 
         # Get login details
-        details = self.auth_plugin.get_login_details()
+        details = self.authn_plugin.get_login_details()
 
         # Return empty response if details is None
         if details is None:
@@ -339,7 +339,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> GetAuthTokensResponse:
         """Get auth token."""
         log(INFO, "ControlServicer.GetAuthTokens")
-        if self.auth_plugin is None:
+        if self.authn_plugin is None:
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
                 NO_ACCOUNT_AUTH_MESSAGE,
@@ -347,7 +347,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             raise grpc.RpcError()  # This line is unreachable
 
         # Get auth tokens
-        credentials = self.auth_plugin.get_auth_tokens(request.device_code)
+        credentials = self.authn_plugin.get_auth_tokens(request.device_code)
 
         # Return empty response if credentials is None
         if credentials is None:
@@ -391,7 +391,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
 
         # Check if `flwr_aid` matches the run's `flwr_aid` when account auth is enabled
-        if self.auth_plugin:
+        if self.authn_plugin:
             flwr_aid = shared_account_info.get().flwr_aid
             _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
