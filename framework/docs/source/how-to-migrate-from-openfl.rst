@@ -410,7 +410,27 @@ The code can be mostly pasted in unmodified! There are a few references  to clea
 Migrating the Data Loaders
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TBD
+Unlike OpenFL, Flower does not require that you use their own Dataloaders when developing your application. This means 
+you can simply DataLoaders in the same way that you would for PyTorch, Tensorflow, or any other framework. For research and
+experimentation purposes, a single dataset can be sharded into multiple partitions. This information is passed to each ``ClientApp``
+through the ``Context``:
+
+.. code-block:: python
+
+    # In client_app.py
+    @app.train()
+    def train(msg: Message, context: Context):
+        ...
+        
+        # Load the data
+        partition_id = context.node_config["partition-id"]
+        num_partitions = context.node_config["num-partitions"]
+        trainloader, _ = load_data(partition_id, num_partitions) 
+
+Flower also has it's own library for partitioning single datasets in distributions
+representative of what can be expected in real world settings. For more information, see
+the `flwr-datasets <https://flower.ai/docs/datasets/>`_ documentation for details.  
+
 
 Client-side Code
 ~~~~~~~~~~~~~~~~
