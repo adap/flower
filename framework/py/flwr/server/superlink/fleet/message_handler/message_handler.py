@@ -208,7 +208,7 @@ def get_fab(
         raise InvalidRunStatusException(abort_msg)
 
     if result := ffs.get(request.hash_str):
-        fab = Fab(request.hash_str, result[0])
+        fab = Fab(request.hash_str, result[0], result[1])
         return GetFabResponse(fab=fab_to_proto(fab))
 
     raise ValueError(f"Found no FAB with hash: {request.hash_str}")

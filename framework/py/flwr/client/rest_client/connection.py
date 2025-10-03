@@ -392,11 +392,12 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Send the request
         res = _request(req, GetFabResponse, PATH_GET_FAB)
         if res is None:
-            return Fab("", b"")
+            return Fab("", b"", {})
 
         return Fab(
             res.fab.hash_str,
             res.fab.content,
+            res.fab.meta,
         )
 
     def pull_object(run_id: int, object_id: str) -> bytes:
