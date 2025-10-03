@@ -54,6 +54,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     EventLogWriterType,
     ExecPluginType,
+    AuthType,
 )
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
@@ -80,6 +81,7 @@ from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInte
 from .superlink.linkstate import LinkStateFactory
 from .superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
+from flwr.superlink.auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
@@ -103,11 +105,11 @@ except ImportError:
 
     def get_control_authn_plugins() -> dict[str, type[ControlAuthnPlugin]]:
         """Return all Control API authentication plugins."""
-        raise NotImplementedError("No authentication plugins are currently supported.")
+        return {AuthType.NOOP: ControlAuthnPlugin}
 
     def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
         """Return all Control API authorization plugins."""
-        raise NotImplementedError("No authorization plugins are currently supported.")
+        return {AuthType.NOOP: ControlAuthzPlugin}
 
     def get_control_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
         """Return all Control API event log writer plugins."""
@@ -205,7 +207,7 @@ def run_superlink() -> None:
         )
         args.account_auth_config = cfg_path
     if cfg_path := getattr(args, "account_auth_config", None):
-        auth_plugin, authz_plugin = _try_obtain_control_auth_plugins(
+        auth_plugin, authz_plugin = _load_control_auth_plugins(
             Path(cfg_path), verify_tls_cert
         )
         # Enable event logging if the args.enable_event_log is True
@@ -449,8 +451,8 @@ def _try_load_public_keys_node_authentication(
     return node_public_keys
 
 
-def _try_obtain_control_auth_plugins(
-    config_path: Path, verify_tls_cert: bool
+def _load_control_auth_plugins(
+    config_path: Optional[Path], verify_tls_cert: bool
 ) -> tuple[ControlAuthnPlugin, ControlAuthzPlugin]:
     """Obtain Control API authentication and authorization plugins."""
     # Load YAML file
