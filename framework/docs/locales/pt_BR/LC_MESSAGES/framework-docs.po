@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-01 00:08+0000\n"
+"POT-Creation-Date: 2025-10-03 00:07+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -6031,14 +6031,14 @@ msgstr ""
 #: flwr.app.metadata.Metadata flwr.client.client.Client.evaluate
 #: flwr.client.client.Client.fit flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
 #: flwr.client.mod.localdp_mod.LocalDpMod
 #: flwr.client.numpy_client.NumPyClient.evaluate
 #: flwr.client.numpy_client.NumPyClient.fit
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
 #: flwr.clientapp.mod.localdp_mod.LocalDpMod flwr.common.context.Context
 #: flwr.common.message.Message flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
@@ -14602,7 +14602,8 @@ msgstr ""
 msgid "Arguments"
 msgstr "Argumento de compilação"
 
-#: ../../flwr install:1 log:1 login:1 ls:1 new:1 pull:1 run:1 stop:1
+#: ../../flwr create:1 delete:1 install:1 list:1 log:1 login:1 ls:1 new:1
+#: pull:1 run:1 stop:1 supernode
 #, fuzzy
 msgid "Optional argument"
 msgstr "Argumento de compilação"
@@ -14648,7 +14649,7 @@ msgstr ""
 msgid "``True``"
 msgstr ""
 
-#: ../../flwr log:1 stop:1
+#: ../../flwr create:1 delete:1 log:1 stop:1 supernode
 #, fuzzy
 msgid "Required argument"
 msgstr "Argumento de compilação"
@@ -14750,12 +14751,12 @@ msgstr ""
 msgid "``'default'``"
 msgstr "``FLWR_VERSION``"
 
-#: ../../flwr ls:1 stop:1
+#: ../../flwr create:1 delete:1 list:1 ls:1 stop:1 supernode
 #, fuzzy
 msgid "Path of the Flower project"
 msgstr "O nome do repositório da imagem base."
 
-#: ../../flwr ls:1 stop:1
+#: ../../flwr create:1 delete:1 list:1 ls:1 stop:1 supernode
 msgid "Name of the federation"
 msgstr ""
 
@@ -14839,6 +14840,35 @@ msgstr ""
 #: ../../flwr stop:1
 msgid "The Flower run ID to stop"
 msgstr ""
+
+#: ../../flwr supernode:1
+#, fuzzy
+msgid "Manage SuperNodes"
+msgstr "Construindo a imagem do servidor"
+
+#: ../../flwr create:1 supernode
+#, fuzzy
+msgid "Add a SuperNode to the federation."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr create:1 supernode
+msgid "Path to the public key file."
+msgstr ""
+
+#: ../../flwr delete:1 supernode
+#, fuzzy
+msgid "Remove a SuperNode from the federation."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr delete:1 supernode
+#, fuzzy
+msgid "ID of the SuperNode to remove."
+msgstr "Construindo a imagem do servidor"
+
+#: ../../flwr list:1 supernode
+#, fuzzy
+msgid "List SuperNodes in the federation."
+msgstr "``FLWR_VERSION``"
 
 #: ../../source/ref-api-cli.rst:19
 #, fuzzy
@@ -15138,12 +15168,12 @@ msgid ""
 "will be derived automatically from it."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp:4
-#: flwr.client.client_app.ClientApp.evaluate:12
-#: flwr.client.client_app.ClientApp.lifespan:7
-#: flwr.client.client_app.ClientApp.query:12
-#: flwr.client.client_app.ClientApp.train:12
 #: flwr.client.mod.localdp_mod.LocalDpMod:22
+#: flwr.clientapp.client_app.ClientApp:4
+#: flwr.clientapp.client_app.ClientApp.evaluate:12
+#: flwr.clientapp.client_app.ClientApp.lifespan:7
+#: flwr.clientapp.client_app.ClientApp.query:12
+#: flwr.clientapp.client_app.ClientApp.train:12
 #: flwr.clientapp.mod.localdp_mod.LocalDpMod:22
 #: flwr.common.record.array.Array:35
 #: flwr.common.record.arrayrecord.ArrayRecord:36
@@ -15500,13 +15530,13 @@ msgstr ""
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
 #: flwr.client.numpy_client.NumPyClient.evaluate
 #: flwr.client.numpy_client.NumPyClient.fit
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
 #: flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
 #: flwr.common.record.array.Array.inflate
@@ -15547,11 +15577,11 @@ msgstr ""
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
 #: flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
 #: flwr.common.record.array.Array.inflate
@@ -16174,7 +16204,8 @@ msgid "Context"
 msgstr ""
 
 #: flwr.app.error.Error:1 flwr.app.metadata.Metadata:1
-#: flwr.client.client_app.ClientApp:1 flwr.client.mod.localdp_mod.LocalDpMod:1
+#: flwr.client.mod.localdp_mod.LocalDpMod:1
+#: flwr.clientapp.client_app.ClientApp:1
 #: flwr.clientapp.mod.localdp_mod.LocalDpMod:1
 #: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
 #: flwr.common.context.Context:1 flwr.common.typing.ClientMessage:1
@@ -17079,7 +17110,7 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
 #: ../../source/ref-api/flwr.clientapp.rst:22:<autosummary>:1
-#: flwr.client.client_app.ClientApp:1 of
+#: flwr.clientapp.client_app.ClientApp:1 of
 msgid "Flower ClientApp."
 msgstr ""
 
@@ -17204,114 +17235,114 @@ msgstr ""
 msgid "The current client properties."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp:5 of
+#: flwr.clientapp.client_app.ClientApp:5 of
 msgid ""
 "Assuming a typical ``Client`` implementation named ``FlowerClient``, you "
 "can wrap it in a ``ClientApp`` as follows::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\[action\\, "
 "mods\\]\\)"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid "Register an evaluate function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`lifespan <flwr.client.ClientApp.lifespan>`\\ \\(\\)"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
-#: flwr.client.client_app.ClientApp.lifespan:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.clientapp.client_app.ClientApp.lifespan:1 of
 msgid "Return a decorator that registers the lifespan fn with the client app."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\[action\\, mods\\]\\)"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
-#: flwr.client.client_app.ClientApp.query:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.clientapp.client_app.ClientApp.query:1 of
 msgid "Register a query function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\[action\\, mods\\]\\)"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
-#: flwr.client.client_app.ClientApp.train:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.clientapp.client_app.ClientApp.train:1 of
 msgid "Register a train function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:3
-#: flwr.client.client_app.ClientApp.query:3
-#: flwr.client.client_app.ClientApp.train:3 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:3
+#: flwr.clientapp.client_app.ClientApp.query:3
+#: flwr.clientapp.client_app.ClientApp.train:3 of
 msgid "The action name used to route messages. Defaults to \"default\"."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:5
-#: flwr.client.client_app.ClientApp.query:5
-#: flwr.client.client_app.ClientApp.train:5 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:5
+#: flwr.clientapp.client_app.ClientApp.query:5
+#: flwr.clientapp.client_app.ClientApp.train:5 of
 msgid "A list of function-specific modifiers."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:8 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:8 of
 msgid "A decorator that registers an evaluate function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:13 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:13 of
 msgid "Registering an evaluate function::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:23 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:23 of
 msgid "Registering an evaluate function with a custom action name::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:34 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:34 of
 msgid "Registering an evaluate function with a function-specific Flower Mod::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.lifespan:3
+#: flwr.clientapp.client_app.ClientApp.lifespan:3
 #: flwr.server.server_app.ServerApp.lifespan:3 of
 msgid ""
 "The decorated function should accept a `Context` object and use `yield` "
 "to define enter and exit behavior."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.query:8 of
+#: flwr.clientapp.client_app.ClientApp.query:8 of
 msgid "A decorator that registers a query function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.query:13 of
+#: flwr.clientapp.client_app.ClientApp.query:13 of
 msgid "Registering a query function::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.query:23 of
+#: flwr.clientapp.client_app.ClientApp.query:23 of
 msgid "Registering a query function with a custom action name::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.query:34 of
+#: flwr.clientapp.client_app.ClientApp.query:34 of
 msgid "Registering a query function with a function-specific Flower Mod::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.train:8 of
+#: flwr.clientapp.client_app.ClientApp.train:8 of
 msgid "A decorator that registers a train function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.train:13 of
+#: flwr.clientapp.client_app.ClientApp.train:13 of
 msgid "Registering a train function::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.train:23 of
+#: flwr.clientapp.client_app.ClientApp.train:23 of
 msgid "Registering a train function with a custom action name::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.train:34 of
+#: flwr.clientapp.client_app.ClientApp.train:34 of
 msgid "Registering a train function with a function-specific Flower Mod::"
 msgstr ""
 
@@ -17855,23 +17886,23 @@ msgstr ""
 msgid ":py:obj:`flwr.clientapp.mod <flwr.clientapp.mod>`\\"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`evaluate <flwr.clientapp.ClientApp.evaluate>`\\ \\(\\[action\\, "
 "mods\\]\\)"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`lifespan <flwr.clientapp.ClientApp.lifespan>`\\ \\(\\)"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`query <flwr.clientapp.ClientApp.query>`\\ \\(\\[action\\, "
 "mods\\]\\)"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`train <flwr.clientapp.ClientApp.train>`\\ \\(\\[action\\, "
 "mods\\]\\)"

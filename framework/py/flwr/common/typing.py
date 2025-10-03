@@ -275,7 +275,7 @@ class InvalidRunStatusException(BaseException):
 class AccountAuthLoginDetails:
     """Account authentication login details."""
 
-    auth_type: str
+    authn_type: str
     device_code: str
     verification_uri_complete: str
     expires_in: int
