@@ -172,8 +172,8 @@ def _to_table(nodes_info: list[_NodeListType]) -> Table:
     )
     table.add_column(Text("Owner", justify="center"), style="dim white")
     table.add_column(Text("Status", justify="center"))
-    table.add_column(Text("Status Changed @", justify="center"))
     table.add_column(Text("Elapsed", justify="center"))
+    table.add_column(Text("Status Changed @", justify="center"), style="dim white")
 
     for row in nodes_info:
         (
@@ -196,9 +196,6 @@ def _to_table(nodes_info: list[_NodeListType]) -> Table:
         elif status == "deleted":
             status_style = "red"
             time_at = deleted_at
-        elif status == "created":
-            status_style = "yellow1"
-            time_at = created_at
         else:
             raise ValueError(f"Unexpected node status '{status}'")
 
@@ -206,8 +203,8 @@ def _to_table(nodes_info: list[_NodeListType]) -> Table:
             f"[bold]{node_id}[/bold]",
             f"{owner_aid}",
             f"[{status_style}]{status}",
-            time_at,
             elapse_activated if status == "online" else "",
+            time_at,
         )
         table.add_row(*formatted_row)
 

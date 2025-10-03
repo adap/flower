@@ -426,7 +426,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             NodeInfo(
                 node_id=15390646978706312628,
                 owner_aid="owner_aid_1",
-                status="created",
+                status="offline",
                 created_at=(now()).isoformat(),
                 activated_at="",
                 deactivated_at="",
