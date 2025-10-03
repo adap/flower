@@ -1115,6 +1115,18 @@ You will need to enable ``remoteHandoff`` and to provide a valid API key via the
 
             await main().then().catch();
 
+How-to guides
+-------------
+
+Below you will find some simple guides to get you started.
+
+.. toctree::
+    :maxdepth: 1
+    :glob:
+    :caption: How-to
+
+    how-to-use-crc.rst
+
 References
 ----------
 
