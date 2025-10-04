@@ -79,7 +79,6 @@ def global_evaluate(server_round: int, arrays: ArrayRecord, n_qubits: int, n_lay
     # Evaluate the global model on the test set
     test_loss, test_accuracy = test(model, testloader, device)
     
-    print(f"Global evaluation round {server_round}: Loss: {test_loss:.4f}, Accuracy: {test_accuracy:.2f}%")
     
     # Return the evaluation metrics
     return MetricRecord({"accuracy": test_accuracy, "loss": test_loss})
