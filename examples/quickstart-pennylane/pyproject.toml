@@ -37,7 +37,7 @@ num-server-rounds = 10
 batch-size = 32
 local-epochs = 2
 learning-rate = 0.001
-fraction-fit = 1.0
+fraction-train = 1.0
 fraction-evaluate = 0.5
 
 # Quantum circuit configuration

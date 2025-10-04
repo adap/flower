@@ -32,9 +32,10 @@ def train(msg: Message, context: Context) -> Message:
     batch_size = context.run_config["batch-size"]
     trainloader, valloader = load_data(partition_id, num_partitions, batch_size)
     
-    print(f"Client {partition_id}/{num_partitions} starting training...")
-    print(f"Training data size: {len(trainloader.dataset)}")
-    print(f"Validation data size: {len(valloader.dataset)}")
+    # uncomment to print the training and validation data size
+    # print(f"Client {partition_id}/{num_partitions} starting training...")
+    # print(f"Training data size: {len(trainloader.dataset)}")
+    # print(f"Validation data size: {len(valloader.dataset)}")
     
     # Call the training function
     results = train_fn(
@@ -80,12 +81,10 @@ def evaluate(msg: Message, context: Context) -> Message:
     batch_size = context.run_config["batch-size"]
     _, valloader = load_data(partition_id, num_partitions, batch_size)
     
-    print("Starting local evaluation...")
     
     # Call the evaluation function
     eval_loss, eval_accuracy = test_fn(model, valloader, device)
     
-    print(f"Evaluation completed. Loss: {eval_loss:.4f}, Accuracy: {eval_accuracy:.2f}%")
     
     # Construct and return reply Message
     metrics = {

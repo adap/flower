@@ -83,20 +83,6 @@ class QuantumNet(nn.Module):
         return x
 
 
-def get_weights(net: nn.Module) -> list:
-    """Extract model weights as a list of numpy arrays."""
-    return [val.cpu().numpy() for _, val in net.state_dict().items()]
-
-
-def set_weights(net: nn.Module, parameters: list) -> None:
-    """Set model weights from a list of numpy arrays."""
-    params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    net.load_state_dict(state_dict, strict=True)
-
-
-
-
 def load_data(partition_id: int, num_partitions: int, batch_size: int = 32) -> Tuple[DataLoader, DataLoader]:
     """Load and partition the dataset for federated learning."""
 
@@ -142,7 +128,7 @@ def train(
     net.train()
     
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=1e-4)
+    optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
     
     running_loss = 0.0
     for _ in range(epochs):
