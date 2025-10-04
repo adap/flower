@@ -46,8 +46,6 @@ def train(msg: Message, context: Context) -> Message:
         device,
     )
     
-    print(f"Training completed. Train loss: {results['train_loss']:.4f}, "
-          f"Val accuracy: {results['val_accuracy']:.2f}%")
     
     # Construct and return reply Message
     model_record = ArrayRecord(model.state_dict())
