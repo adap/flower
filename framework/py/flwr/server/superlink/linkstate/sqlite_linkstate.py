@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS node(
     node_id         INTEGER UNIQUE,
     online_until    REAL,
     heartbeat_interval   REAL,
-    public_key      BLOB
+    public_key      BLOB UNIQUE
 );
 """
 
@@ -597,7 +597,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return {row["message_id"] for row in rows}
 
-    def create_node(self, heartbeat_interval: float) -> int:
+    def create_node(self, public_key: bytes, heartbeat_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random uint64 as node_id
         uint64_node_id = generate_rand_int_from_bytes(
@@ -621,10 +621,13 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                     sint64_node_id,
                     time.time() + heartbeat_interval,
                     heartbeat_interval,
-                    b"",  # Initialize with an empty public key
+                    public_key,
                 ),
             )
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as e:
+            if "UNIQUE constraint failed: node.public_key" in str(e):
+                raise ValueError("Public key already in use.") from None
+            # Must be node ID conflict, almost impossible unless system is compromised
             log(ERROR, "Unexpected node registration failure.")
             return 0
 

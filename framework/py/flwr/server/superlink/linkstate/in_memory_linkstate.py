@@ -330,7 +330,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.message_res_store)
 
-    def create_node(self, heartbeat_interval: float) -> int:
+    def create_node(self, public_key: bytes, heartbeat_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id = generate_rand_int_from_bytes(
@@ -341,12 +341,16 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             if node_id in self.node_ids:
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
+            if public_key in self.public_key_to_node_id:
+                raise ValueError("Public key already in use")
 
             # Mark the node online until time.time() + heartbeat_interval
             self.node_ids[node_id] = (
                 time.time() + heartbeat_interval,
                 heartbeat_interval,
             )
+            self.public_key_to_node_id[public_key] = node_id
+            self.node_id_to_public_key[node_id] = public_key
             return node_id
 
     def delete_node(self, node_id: int) -> None:

@@ -146,6 +146,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         self.ffs = ffs_factory.ffs()
         objectstore_factory = ObjectStoreFactory()
         self.store = objectstore_factory.store()
+        self.node_pk = b"fake public key"
 
         self.status_to_msg = _STATUS_TO_MSG
 
@@ -275,7 +276,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     def test_successful_push_messages_if_running(self) -> None:
         """Test `PushMessages` success."""
         # Prepare
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         message_ins = create_ins_message(
             src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
@@ -336,7 +337,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     ) -> None:
         """Test `PushInsMessages` not successful if RunStatus is not running."""
         # Prepare
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         message_ins = create_ins_message(
             src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
@@ -361,7 +362,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         """Test `PullMessages` success if objects are registered in ObjectStore."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         # Transition status to running. PullAppMessagesRequest is only
         # allowed in running status.
         self._transition_run_status(run_id, 2)
@@ -426,7 +427,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     ) -> None:
         """Test `PullMessages` deletes messages from LinkState."""
         # Prepare
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
 
         # Transition status to running.
@@ -500,7 +501,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         """Test that the servicer correctly handles the registration in the ObjectStore
         of an Error message created by the LinkState due to an expired TTL."""
         # Prepare
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
 
         # Transition status to running.
@@ -835,7 +836,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     def test_confirm_message_received_successful(self) -> None:
         """Test `ConfirmMessageReceived` success."""
         # Prepare
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         self._transition_run_status(run_id, 2)
         proto = create_ins_message(

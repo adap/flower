@@ -80,6 +80,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         self.ffs = ffs_factory.ffs()
         objectstore_factory = ObjectStoreFactory()
         self.store = objectstore_factory.store()
+        self.node_pk = b"fake public key"
 
         self.status_to_msg = _STATUS_TO_MSG
 
@@ -144,7 +145,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_push_messages_if_running(self) -> None:
         """Test `PushMessages` success."""
         # Prepare
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PushMessages RPC is only allowed in
         # running status.
@@ -210,7 +211,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `PushMessages` not successful if RunStatus is not running."""
         # Prepare
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         self._transition_run_status(run_id, num_transitions)
 
@@ -229,7 +230,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `PullMessages` success if objects are registered in ObjectStore."""
         # Prepare
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
 
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PullMessagesRequest is only
@@ -278,7 +279,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_get_run_if_running(self) -> None:
         """Test `GetRun` success."""
         # Prepare
-        self.state.create_node(heartbeat_interval=30)
+        self.state.create_node(self.node_pk, heartbeat_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. GetRun RPC is only allowed in running status.
         self._transition_run_status(run_id, 2)
@@ -320,7 +321,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_get_fab_if_running(self) -> None:
         """Test `GetFab` success."""
         # Prepare
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         fab_content = b"content"
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
         run_id = self.state.create_run("", "", fab_hash, {}, ConfigRecord(), "")
@@ -362,7 +363,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_get_fab_not_successful_if_not_running(self, num_transitions: int) -> None:
         """Test `GetFab` not successful if RunStatus is not running."""
         # Prepare
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         fab_content = b"content"
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
         run_id = self.state.create_run("", "", fab_hash, {}, ConfigRecord(), "")
@@ -376,7 +377,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PushObject`."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
         self._transition_run_status(run_id, 2)
@@ -407,7 +408,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Prepare
         self._transition_run_status(run_id, 2)
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 
@@ -445,7 +446,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         self._transition_run_status(run_id, 2)
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 
@@ -486,7 +487,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Attempt pulling object that doesn't exist
         self._transition_run_status(run_id, 2)
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         req = PullObjectRequest(
             node=Node(node_id=node_id), run_id=run_id, object_id="1234"
         )
@@ -497,7 +498,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_confirm_message_received_successful(self) -> None:
         """Test `ConfirmMessageReceived` functionality."""
         # Prepare
-        node_id = self.state.create_node(heartbeat_interval=30)
+        node_id = self.state.create_node(self.node_pk, heartbeat_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         self._transition_run_status(run_id, 2)
 

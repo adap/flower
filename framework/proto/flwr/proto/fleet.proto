@@ -56,9 +56,9 @@ service Fleet {
 }
 
 // CreateNode messages
-message CreateNodeRequest { 
-  double heartbeat_interval = 1;
-  bytes public_key = 2;
+message CreateNodeRequest {
+  bytes public_key = 1;
+  double heartbeat_interval = 2;
 }
 message CreateNodeResponse { Node node = 1; }
 

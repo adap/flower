@@ -16,7 +16,7 @@
 
 
 import datetime
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, cast
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -33,11 +33,8 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_public_key,
     verify_signature,
 )
-from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    CreateNodeResponse,
-)
-from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.proto.fleet_pb2 import CreateNodeRequest  # pylint: disable=E0611
+from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
 MIN_TIMESTAMP_DIFF = -SYSTEM_TIME_TOLERANCE
 MAX_TIMESTAMP_DIFF = TIMESTAMP_TOLERANCE + SYSTEM_TIME_TOLERANCE
@@ -113,50 +110,33 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         if not MIN_TIMESTAMP_DIFF < time_diff.total_seconds() < MAX_TIMESTAMP_DIFF:
             return _unary_unary_rpc_terminator("Invalid timestamp")
 
-        # Continue the RPC call
-        expected_node_id = state.get_node_id(node_pk_bytes)
-        if not handler_call_details.method.endswith("CreateNode"):
-            # All calls, except for `CreateNode`, must provide a public key that is
-            # already mapped to a `node_id` (in `LinkState`)
-            if expected_node_id is None:
-                return _unary_unary_rpc_terminator("Invalid node ID")
-        # One of the method handlers in
+        # Continue the RPC call: One of the method handlers in
         # `flwr.server.superlink.fleet.grpc_rere.fleet_server.FleetServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
-        return self._wrap_method_handler(
-            method_handler, expected_node_id, node_pk_bytes
-        )
+        return self._wrap_method_handler(method_handler, node_pk_bytes, state)
 
     def _wrap_method_handler(
         self,
         method_handler: grpc.RpcMethodHandler,
-        expected_node_id: Optional[int],
-        node_public_key: bytes,
+        expected_public_key: bytes,
+        state: LinkState,
     ) -> grpc.RpcMethodHandler:
         def _generic_method_handler(
             request: GrpcMessage,
             context: grpc.ServicerContext,
         ) -> GrpcMessage:
-            # Verify the node ID
-            if not isinstance(request, CreateNodeRequest):
-                try:
-                    if request.node.node_id != expected_node_id:  # type: ignore
-                        raise ValueError
-                except (AttributeError, ValueError):
-                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid node ID")
+            # Retrieve the public key
+            if isinstance(request, CreateNodeRequest):
+                actual_public_key = request.public_key
+            else:
+                actual_public_key = state.get_node_public_key(
+                    request.node.node_id  # type: ignore
+                )
+            # Verify the public key
+            if actual_public_key != expected_public_key:
+                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid public key")
 
             response: GrpcMessage = method_handler.unary_unary(request, context)
-
-            # Set the public key after a successful CreateNode request
-            if isinstance(response, CreateNodeResponse):
-                state = self.state_factory.state()
-                try:
-                    state.set_node_public_key(response.node.node_id, node_public_key)
-                except ValueError as e:
-                    # Remove newly created node if setting the public key fails
-                    state.delete_node(response.node.node_id)
-                    context.abort(grpc.StatusCode.UNAUTHENTICATED, str(e))
-
             return response
 
         return grpc.unary_unary_rpc_method_handler(

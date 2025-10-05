@@ -16,14 +16,14 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 class CreateNodeRequest(google.protobuf.message.Message):
     """CreateNode messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    HEARTBEAT_INTERVAL_FIELD_NUMBER: builtins.int
     PUBLIC_KEY_FIELD_NUMBER: builtins.int
-    heartbeat_interval: builtins.float
+    HEARTBEAT_INTERVAL_FIELD_NUMBER: builtins.int
     public_key: builtins.bytes
+    heartbeat_interval: builtins.float
     def __init__(self,
         *,
-        heartbeat_interval: builtins.float = ...,
         public_key: builtins.bytes = ...,
+        heartbeat_interval: builtins.float = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["heartbeat_interval",b"heartbeat_interval","public_key",b"public_key"]) -> None: ...
 global___CreateNodeRequest = CreateNodeRequest

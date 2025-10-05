@@ -76,6 +76,11 @@ class StateTest(CoreStateTest):
         """Provide state implementation to test."""
         raise NotImplementedError()
 
+    def create_public_key(self) -> bytes:
+        """Create a P-384 public key for node creation."""
+        _, public_key = generate_key_pairs()
+        return public_key_to_bytes(public_key)
+
     def test_create_and_get_run(self) -> None:
         """Test if create_run and get_run work correctly."""
         # Prepare
@@ -349,7 +354,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state = self.state_factory()
         dt = datetime.now(tz=timezone.utc)
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         msg = message_from_proto(
             create_ins_message(
@@ -378,7 +383,7 @@ class StateTest(CoreStateTest):
         """Test store_message_ins with invalid node_id."""
         # Prepare
         state = self.state_factory()
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         invalid_node_id = 61016 if node_id != 61016 else 61017
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         # A message for a node that doesn't exist
@@ -402,7 +407,7 @@ class StateTest(CoreStateTest):
         """Test delete_message."""
         # Prepare
         state = self.state_factory()
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         msg0 = message_from_proto(
             create_ins_message(
@@ -477,7 +482,7 @@ class StateTest(CoreStateTest):
         """Test get_message_ids_from_run_id."""
         # Prepare
         state = self.state_factory()
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         run_id_0 = state.create_run(None, None, "8g13kl7", {}, ConfigRecord(), "i1r9f")
         # Insert Message with the same run_id
         msg0 = message_from_proto(
@@ -536,7 +541,7 @@ class StateTest(CoreStateTest):
         """Store identity Message and retrieve it."""
         # Prepare
         state = self.state_factory()
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         msg = message_from_proto(
             create_ins_message(
@@ -559,7 +564,7 @@ class StateTest(CoreStateTest):
         """Fail retrieving delivered message."""
         # Prepare
         state = self.state_factory()
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         msg = message_from_proto(
             create_ins_message(
@@ -630,7 +635,7 @@ class StateTest(CoreStateTest):
 
         # Execute
         for _ in range(10):
-            node_ids.append(state.create_node(heartbeat_interval=10))
+            node_ids.append(state.create_node(self.create_public_key(), 10))
         retrieved_node_ids = state.get_nodes(run_id)
 
         # Assert
@@ -645,8 +650,7 @@ class StateTest(CoreStateTest):
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
 
         # Execute
-        node_id = state.create_node(heartbeat_interval=10)
-        state.set_node_public_key(node_id, public_key)
+        node_id = state.create_node(public_key, heartbeat_interval=10)
         retrieved_node_ids = state.get_nodes(run_id)
         retrieved_node_id = state.get_node_id(public_key)
 
@@ -660,17 +664,11 @@ class StateTest(CoreStateTest):
         state: LinkState = self.state_factory()
         public_key = b"mock"
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_id = state.create_node(heartbeat_interval=10)
-        state.set_node_public_key(node_id, public_key)
+        node_id = state.create_node(public_key, heartbeat_interval=10)
 
         # Execute
-        new_node_id = state.create_node(heartbeat_interval=10)
-        try:
-            state.set_node_public_key(new_node_id, public_key)
-        except ValueError:
-            state.delete_node(new_node_id)
-        else:
-            raise AssertionError("Should have raised ValueError")
+        with self.assertRaises(ValueError):
+            state.create_node(public_key, heartbeat_interval=10)
         retrieved_node_ids = state.get_nodes(run_id)
         retrieved_node_id = state.get_node_id(public_key)
 
@@ -688,7 +686,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_id = state.create_node(heartbeat_interval=10)
+        node_id = state.create_node(self.create_public_key(), heartbeat_interval=10)
 
         # Execute
         state.delete_node(node_id)
@@ -703,8 +701,7 @@ class StateTest(CoreStateTest):
         state: LinkState = self.state_factory()
         public_key = b"mock"
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_id = state.create_node(heartbeat_interval=10)
-        state.set_node_public_key(node_id, public_key)
+        node_id = state.create_node(public_key, heartbeat_interval=10)
 
         # Execute
         state.delete_node(node_id)
@@ -724,13 +721,12 @@ class StateTest(CoreStateTest):
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
 
         # Execute
-        node_id = state.create_node(heartbeat_interval=10)
-        state.set_node_public_key(node_id, public_key)
+        node_id = state.create_node(public_key, heartbeat_interval=10)
         retrieved_node_ids = state.get_nodes(run_id)
         retrieved_node_id = state.get_node_id(wrong_public_key)
 
         # Assert
-        assert len(retrieved_node_ids) == 1
+        assert retrieved_node_ids == {node_id}
         assert retrieved_node_id is None
 
     def test_get_nodes_invalid_run_id(self) -> None:
@@ -739,7 +735,7 @@ class StateTest(CoreStateTest):
         state: LinkState = self.state_factory()
         state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         invalid_run_id = 61016
-        state.create_node(heartbeat_interval=10)
+        state.create_node(self.create_public_key(), heartbeat_interval=10)
 
         # Execute
         retrieved_node_ids = state.get_nodes(invalid_run_id)
@@ -751,7 +747,7 @@ class StateTest(CoreStateTest):
         """Test if num_message_ins returns correct number of not delivered Messages."""
         # Prepare
         state: LinkState = self.state_factory()
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         msg0 = message_from_proto(
             create_ins_message(
@@ -784,7 +780,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
 
         msg0 = message_from_proto(
             create_ins_message(
@@ -877,7 +873,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_ids = [state.create_node(heartbeat_interval=10) for _ in range(100)]
+        node_ids = [state.create_node(self.create_public_key(), 10) for _ in range(100)]
         for node_id in node_ids[:70]:
             state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
         for node_id in node_ids[70:]:
@@ -953,8 +949,8 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_id_0 = state.create_node(heartbeat_interval=10)
-        node_id_1 = state.create_node(heartbeat_interval=10)
+        node_id_0 = state.create_node(self.create_public_key(), heartbeat_interval=10)
+        node_id_1 = state.create_node(self.create_public_key(), heartbeat_interval=10)
 
         # Run acknowledge heartbeat
         state.acknowledge_node_heartbeat(node_id_0, heartbeat_interval=90)
@@ -1013,7 +1009,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         # Create and store a message
         msg = message_from_proto(
             create_ins_message(
@@ -1074,7 +1070,7 @@ class StateTest(CoreStateTest):
             run_id = state.create_run(
                 None, None, "9f86d08", {}, ConfigRecord(), "i1r9f"
             )
-            node_id = state.create_node(1e3)
+            node_id = state.create_node(self.create_public_key(), 1e3)
 
             # Create message, tweak created_at and store
             msg = message_from_proto(
@@ -1105,7 +1101,7 @@ class StateTest(CoreStateTest):
         """Test get_message_ins not to return expired Messages."""
         # Prepare
         state = self.state_factory()
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         # Create message, tweak created_at, ttl and store
         msg = message_from_proto(
@@ -1129,7 +1125,7 @@ class StateTest(CoreStateTest):
         expired."""
         # Prepare
         state = self.state_factory()
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
 
         # A message that will expire before it gets pulled
@@ -1154,7 +1150,7 @@ class StateTest(CoreStateTest):
         """Test get_message_res to return nothing since reply Message isn't present."""
         # Prepare
         state = self.state_factory()
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
 
         msg = message_from_proto(
@@ -1190,7 +1186,7 @@ class StateTest(CoreStateTest):
         """Test get_message_res returns correct Message."""
         # Prepare
         state = self.state_factory()
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
 
         msg = message_from_proto(
@@ -1224,7 +1220,7 @@ class StateTest(CoreStateTest):
         of orginal Message and the src_node_id of the reply Message."""
         # Prepare
         state = self.state_factory()
-        node_id = state.create_node(1e3)
+        node_id = state.create_node(self.create_public_key(), 1e3)
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
 
         msg = message_from_proto(
@@ -1481,7 +1477,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 17
+        assert len(result) == 18
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1506,7 +1502,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 17
+        assert len(result) == 18
 
 
 if __name__ == "__main__":

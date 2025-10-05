@@ -76,7 +76,9 @@ from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
-from .superlink.fleet.grpc_rere.node_auth_server_interceptor import NodeAuthServerInterceptor
+from .superlink.fleet.grpc_rere.node_auth_server_interceptor import (
+    NodeAuthServerInterceptor,
+)
 from .superlink.linkstate import LinkStateFactory
 from .superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc

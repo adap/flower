@@ -199,25 +199,25 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_create_node(self, metadata: list[Any]) -> Any:
         """Test CreateNode."""
         return self._create_node.with_call(
-            request=CreateNodeRequest(),
+            request=CreateNodeRequest(public_key=public_key_to_bytes(self.node_pk)),
             metadata=metadata,
         )
 
     def _test_delete_node(self, metadata: list[Any]) -> Any:
         """Test DeleteNode."""
-        node_id = self._create_node_and_set_public_key()
+        node_id = self._create_node_in_linkstate()
         req = DeleteNodeRequest(node=Node(node_id=node_id))
         return self._delete_node.with_call(request=req, metadata=metadata)
 
     def _test_pull_messages(self, metadata: list[Any]) -> Any:
         """Test PullMessages."""
-        node_id = self._create_node_and_set_public_key()
+        node_id = self._create_node_in_linkstate()
         req = PullMessagesRequest(node=Node(node_id=node_id))
         return self._pull_messages.with_call(request=req, metadata=metadata)
 
     def _test_push_messages(self, metadata: list[Any]) -> Any:
         """Test PushMessages."""
-        node_id = self._create_node_and_set_public_key()
+        node_id = self._create_node_in_linkstate()
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PushMessages is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
@@ -230,7 +230,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def _test_pull_object(self, metadata: list[Any]) -> Any:
         """Test PullObject."""
-        node_id = self._create_node_and_set_public_key()
+        node_id = self._create_node_in_linkstate()
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PushMessages is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
@@ -242,7 +242,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def _test_push_object(self, metadata: list[Any]) -> Any:
         """Test PushObject."""
-        node_id = self._create_node_and_set_public_key()
+        node_id = self._create_node_in_linkstate()
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. PushMessages is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
@@ -257,7 +257,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def _test_get_run(self, metadata: list[Any]) -> Any:
         """Test GetRun."""
-        node_id = self._create_node_and_set_public_key()
+        node_id = self._create_node_in_linkstate()
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. GetRun is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
@@ -267,14 +267,14 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def _test_send_node_heartbeat(self, metadata: list[Any]) -> Any:
         """Test SendNodeHeartbeat."""
-        node_id = self._create_node_and_set_public_key()
+        node_id = self._create_node_in_linkstate()
         req = SendNodeHeartbeatRequest(node=Node(node_id=node_id))
         return self._send_node_heartbeat.with_call(request=req, metadata=metadata)
 
     def _test_get_fab(self, metadata: list[Any]) -> Any:
         """Test GetFab."""
         fab_hash = self.ffs.put(b"mock fab content", {})
-        node_id = self._create_node_and_set_public_key()
+        node_id = self._create_node_in_linkstate()
         run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
         # Transition status to running. GetFabRequest is only allowed in running status.
         self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
@@ -286,11 +286,9 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         )
         return self._get_fab.with_call(request=req, metadata=metadata)
 
-    def _create_node_and_set_public_key(self) -> int:
-        node_id = self.state.create_node(heartbeat_interval=30)
+    def _create_node_in_linkstate(self) -> int:
         pk_bytes = public_key_to_bytes(self.node_pk)
-        self.state.set_node_public_key(node_id, pk_bytes)
-        return node_id
+        return self.state.create_node(public_key=pk_bytes, heartbeat_interval=30)
 
     @parameterized.expand(
         [
