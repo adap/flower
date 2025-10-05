@@ -113,13 +113,12 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         # Continue the RPC call: One of the method handlers in
         # `flwr.server.superlink.fleet.grpc_rere.fleet_server.FleetServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
-        return self._wrap_method_handler(method_handler, node_pk_bytes, state)
+        return self._wrap_method_handler(method_handler, node_pk_bytes)
 
     def _wrap_method_handler(
         self,
         method_handler: grpc.RpcMethodHandler,
         expected_public_key: bytes,
-        state: LinkState,
     ) -> grpc.RpcMethodHandler:
         def _generic_method_handler(
             request: GrpcMessage,
@@ -129,7 +128,9 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             if isinstance(request, CreateNodeRequest):
                 actual_public_key = request.public_key
             else:
-                actual_public_key = state.get_node_public_key(
+                # Note: This function runs in a different thread 
+                # than the `intercept_service` function.
+                actual_public_key = self.state_factory.state().get_node_public_key(
                     request.node.node_id  # type: ignore
                 )
             # Verify the public key
