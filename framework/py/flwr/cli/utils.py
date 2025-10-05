@@ -34,7 +34,7 @@ from flwr.common.constant import (
     NO_ARTIFACT_PROVIDER_MESSAGE,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
-    AuthType,
+    AuthnType,
 )
 from flwr.common.grpc import (
     GRPC_MAX_MESSAGE_LENGTH,
@@ -231,15 +231,15 @@ def account_auth_enabled(federation_config: dict[str, Any]) -> bool:
     return enabled
 
 
-def retrieve_auth_type(config_path: Path) -> str:
+def retrieve_authn_type(config_path: Path) -> str:
     """Retrieve the auth type from the config file or return NOOP if not found."""
     try:
         with config_path.open("r", encoding="utf-8") as file:
             json_file = json.load(file)
-        auth_type: str = json_file[AUTH_TYPE_JSON_KEY]
-        return auth_type
+        authn_type: str = json_file[AUTHN_TYPE_JSON_KEY]
+        return authn_type
     except (FileNotFoundError, KeyError):
-        return AuthType.NOOP
+        return AuthnType.NOOP
 
 
 def load_cli_auth_plugin(
@@ -256,9 +256,9 @@ def load_cli_auth_plugin(
     # Only `flwr login` command can provide `authn_type` explicitly, as it can query the
     # SuperLink for the auth type.
     if authn_type is None:
-        authn_type = AuthType.NOOP
+        authn_type = AuthnType.NOOP
         if account_auth_enabled(federation_config):
-            authn_type = retrieve_auth_type(config_path)
+            authn_type = retrieve_authn_type(config_path)
 
     # Retrieve auth plugin class and instantiate it
     try:

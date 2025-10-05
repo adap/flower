@@ -256,6 +256,17 @@ class AuthnType:
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
 
+class AuthzType:
+    """Account authorization types."""
+
+    NOOP = "noop"
+    FPGA = "fpga"
+
+    def __new__(cls) -> AuthzType:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
 class EventLogWriterType:
     """Event log writer types."""
 

@@ -20,7 +20,7 @@ from typing import Annotated, Optional
 
 import typer
 
-from flwr.cli.auth_plugin import LoginError
+from flwr.cli.auth_plugin import LoginError, NoOpCliAuthPlugin
 from flwr.cli.config_utils import (
     exit_if_no_address,
     get_insecure_flag,
@@ -95,7 +95,7 @@ def login(  # pylint: disable=R0914
         )
         raise typer.Exit(code=1)
 
-    channel = init_channel(app, federation_config, None)
+    channel = init_channel(app, federation_config, NoOpCliAuthPlugin(Path()))
     stub = ControlStub(channel)
 
     login_request = GetLoginDetailsRequest()

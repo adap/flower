@@ -76,7 +76,7 @@ def run_control_api_grpc(
         authn_plugin=authn_plugin,
         artifact_provider=artifact_provider,
     )
-    interceptors = [ControlAccountAuthInterceptor(auth_plugin, authz_plugin)]
+    interceptors = [ControlAccountAuthInterceptor(authn_plugin, authz_plugin)]
     if license_plugin is not None:
         interceptors.append(ControlLicenseInterceptor(license_plugin))
     # Event log interceptor must be added after account auth interceptor
@@ -92,7 +92,7 @@ def run_control_api_grpc(
         interceptors=interceptors or None,
     )
 
-    if isinstance(auth_plugin, NoOpControlAuthnPlugin):
+    if isinstance(authn_plugin, NoOpControlAuthnPlugin):
         log(INFO, "Flower Deployment Runtime: Starting Control API on %s", address)
     else:
         log(
