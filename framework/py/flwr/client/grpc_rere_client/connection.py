@@ -59,7 +59,7 @@ from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
-from .node_auth_interceptor import NodeAuthClientInterceptor
+from .node_auth_client_interceptor import NodeAuthClientInterceptor
 from .grpc_adapter import GrpcAdapter
 
 

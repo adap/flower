@@ -53,7 +53,7 @@ def _unary_unary_rpc_terminator(
     return grpc.unary_unary_rpc_method_handler(terminate)
 
 
-class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
+class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Server interceptor for node authentication.
 
     Parameters

@@ -69,7 +69,7 @@ from flwr.server.superlink.linkstate.linkstate_test import create_res_message
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 
-from .server_interceptor import AuthenticateServerInterceptor
+from .node_auth_server_interceptor import NodeAuthServerInterceptor
 
 
 class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
@@ -88,7 +88,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state.store_node_public_keys({public_key_to_bytes(self.node_pk)})
         self.store = objectstore_factory.store()
 
-        self._server_interceptor = AuthenticateServerInterceptor(state_factory)
+        self._server_interceptor = NodeAuthServerInterceptor(state_factory)
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
