@@ -134,7 +134,7 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 )
             # Verify the public key
             if actual_public_key != expected_public_key:
-                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid public key")
+                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid node ID")
 
             response: GrpcMessage = method_handler.unary_unary(request, context)
             return response
