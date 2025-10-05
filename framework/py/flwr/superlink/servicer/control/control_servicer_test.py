@@ -172,7 +172,7 @@ class TestControlServicerAuth(unittest.TestCase):
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(),
             is_simulation=False,
-            auth_plugin=Mock(),
+            authn_plugin=Mock(),
         )
         self.state = self.servicer.linkstate_factory.state()
 

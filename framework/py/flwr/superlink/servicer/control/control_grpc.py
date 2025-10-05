@@ -58,7 +58,7 @@ def run_control_api_grpc(
     objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     is_simulation: bool,
-    auth_plugin: ControlAuthnPlugin,
+    authn_plugin: ControlAuthnPlugin,
     authz_plugin: ControlAuthzPlugin,
     event_log_plugin: Optional[EventLogWriterPlugin] = None,
     artifact_provider: Optional[ArtifactProvider] = None,
@@ -73,7 +73,7 @@ def run_control_api_grpc(
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
         is_simulation=is_simulation,
-        auth_plugin=auth_plugin,
+        authn_plugin=authn_plugin,
         artifact_provider=artifact_provider,
     )
     interceptors = [ControlAccountAuthInterceptor(auth_plugin, authz_plugin)]

@@ -27,7 +27,7 @@ import grpc
 import typer
 
 from flwr.common.constant import (
-    AUTH_TYPE_JSON_KEY,
+    AUTHN_TYPE_JSON_KEY,
     CREDENTIALS_DIR,
     FLWR_DIR,
     NO_ACCOUNT_AUTH_MESSAGE,
@@ -246,26 +246,26 @@ def load_cli_auth_plugin(
     root_dir: Path,
     federation: str,
     federation_config: dict[str, Any],
-    auth_type: Optional[str] = None,
+    authn_type: Optional[str] = None,
 ) -> CliAuthPlugin:
-    """Load the CLI-side account auth plugin for the given auth type."""
+    """Load the CLI-side account auth plugin for the given authn type."""
     # Find the path to the account auth config file
     config_path = get_account_auth_config_path(root_dir, federation)
 
     # Determine the auth type if not provided
-    # Only `flwr login` command can provide `auth_type` explicitly, as it can query the
+    # Only `flwr login` command can provide `authn_type` explicitly, as it can query the
     # SuperLink for the auth type.
-    if auth_type is None:
-        auth_type = AuthType.NOOP
+    if authn_type is None:
+        authn_type = AuthType.NOOP
         if account_auth_enabled(federation_config):
-            auth_type = retrieve_auth_type(config_path)
+            authn_type = retrieve_auth_type(config_path)
 
     # Retrieve auth plugin class and instantiate it
     try:
-        auth_plugin_class = get_cli_plugin_class(auth_type)
+        auth_plugin_class = get_cli_plugin_class(authn_type)
         return auth_plugin_class(config_path)
     except ValueError:
-        typer.echo(f"❌ Unknown account authentication type: {auth_type}")
+        typer.echo(f"❌ Unknown account authentication type: {authn_type}")
         raise typer.Exit(code=1) from None
 
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-03 00:07+0000\n"
+"POT-Creation-Date: 2025-10-04 00:08+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -2295,7 +2295,7 @@ msgstr "成为贡献者"
 #: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:22
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:17
 #: ../../source/docker/tutorial-quickstart-docker.rst:15
-#: ../../source/how-to-authenticate-users.rst:26
+#: ../../source/how-to-authenticate-accounts.rst:26
 #: ../../source/how-to-configure-audit-logging.rst:78
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:22
 msgid "Prerequisites"
@@ -6025,14 +6025,14 @@ msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:175
 #, fuzzy
-msgid "Enable User Authentication"
+msgid "Enable Account Authentication"
 msgstr "验证安装"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:177
 msgid ""
-"User authentication can be enabled if you're using the Flower Enterprise "
-"Edition (EE) Docker images. This is configured in the `global.userAuth` "
-"section of your `values.yml` file."
+"Account authentication can be enabled if you're using the Flower "
+"Enterprise Edition (EE) Docker images. This is configured in the "
+"`global.userAuth` section of your `values.yml` file."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:180
@@ -6046,7 +6046,7 @@ msgid "Explanation of Parameters:"
 msgstr "更新模型参数"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:198
-msgid "`auth_type`: The authentication mechanism being used (e.g., oidc)."
+msgid "`authn_type`: The authentication mechanism being used (e.g., oidc)."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:199
@@ -6060,7 +6060,7 @@ msgid "`token_url`: The URL for retrieving access tokens."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:201
-msgid "`validate_url`: The endpoint for validating user authentication."
+msgid "`validate_url`: The endpoint for validating account authentication."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:202
@@ -6078,12 +6078,14 @@ msgstr "使用现有策略"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:207
 msgid ""
-"To use an existing secret that contains the user authentication "
+"To use an existing secret that contains the account authentication "
 "configuration, set `existingSecret` to the name of the existing secret:"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:218
-msgid "Note that the existing secret must contain the key `user-auth-config.yml`:"
+msgid ""
+"Note that the existing secret must contain the key `account-auth-"
+"config.yml`:"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:233
@@ -9457,6 +9459,151 @@ msgid ""
 "|message_link|_:"
 msgstr ""
 
+#: ../../source/how-to-authenticate-accounts.rst:-1
+msgid ""
+"Configure SuperLink for account authentication and authorization. "
+"Private-by-default runs securely with OpenID Connect and OpenFGA."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:6
+#, fuzzy
+msgid "Authenticate Accounts via OpenID Connect"
+msgstr "验证超级节点"
+
+#: ../../source/how-to-authenticate-accounts.rst:10
+msgid ""
+"OpenID Connect Authentication is a Flower Enterprise feature. See `Flower"
+" Enterprise <https://flower.ai/enterprise>`_ for details."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:13
+msgid ""
+"In this guide, you'll learn how to configure SuperLink with account-level"
+" authentication and authorization, and how to log in using the ``flwr`` "
+"CLI. Once logged in, any Flower accounts that are authorized on the "
+"SuperLink can run Flower CLI commands that interact with the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:20
+msgid ""
+"With account authentication and authorization enabled, only accounts that"
+" have submitted the ``flwr run`` command can view and interact with their"
+" runs. This means that your runs are **private by default**, ensuring "
+"that only authorized accounts can access them."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:28
+msgid ""
+"To enable account authentication and authorization, the SuperLink must be"
+" deployed with an `OpenID Connect (OIDC) <https://openid.net/developers"
+"/how-connect-works/>`_ provider and an `OpenFGA <https://openfga.dev/>`_ "
+"server. The OIDC provider is used for account authentication, while "
+"OpenFGA is used for fine-grained access control. This means an "
+"authenticated account can only run ``flwr`` CLI commands on the SuperLink"
+" if they have been granted the necessary permissions by the SuperLink "
+"administrator. When enabled, both account authentication and "
+"authorization must be configured on the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:37
+#, fuzzy
+msgid "Enable Account Authentication and Authorization on the SuperLink"
+msgstr "在 :code:`SuperLink` 中启用节点验证"
+
+#: ../../source/how-to-authenticate-accounts.rst:39
+#, fuzzy
+msgid "Create a YAML configuration file with the following content:"
+msgstr "创建包含以下更改的拉取请求："
+
+#: ../../source/how-to-authenticate-accounts.rst:63
+msgid ""
+"Save this file as ``account-auth-config.yaml``. Then pass it to the "
+"SuperLink via the ``--account-auth-config`` flag when deploying the "
+"SuperLink:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:74
+msgid ""
+"To authorize an account, the SuperLink administrator must add the "
+"account's OIDC ``sub`` claim to the OpenFGA store with the appropriate "
+"relation."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:79
+msgid ""
+"Starting with Flower ``v1.23.0``, the following options/keys have been "
+"renamed:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:81
+msgid "``auth_type`` → ``authn_type`` (in YAML configuration)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:82
+msgid "``auth_url`` → ``authn_url`` (in YAML configuration)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:83
+msgid "``--user-auth-config`` → ``--account-auth-config`` (in SuperLink CLI)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:86
+#, fuzzy
+msgid "Login to the SuperLink"
+msgstr "flower-superlink"
+
+#: ../../source/how-to-authenticate-accounts.rst:88
+msgid ""
+"Once a SuperLink with account authentication and authorization is up and "
+"running, an account can interface with it after installing the ``flwr`` "
+"PyPI package via the Flower CLI. Then, ensure that the ``enable-account-"
+"auth`` field is set to ``true`` in the federation section in the "
+"``pyproject.toml`` of the Flower app you want to run:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:105
+#, fuzzy
+msgid ""
+"Account authentication and authorization is only supported with TLS "
+"connections."
+msgstr "在 :code:`SuperLink` 中启用节点验证"
+
+#: ../../source/how-to-authenticate-accounts.rst:107
+msgid ""
+"Now, you need to login first before other CLI commands can be executed. "
+"Upon executing ``flwr login``, a URL will be returned by the "
+"authentication plugin in the SuperLink. Click on it and authenticate "
+"directly against the OIDC provider."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:121
+msgid ""
+"Once the login is successful, the credentials returned by the OIDC "
+"provider via the SuperLink will be saved to the app's directory under "
+"``.flwr/.credentials/<federation-name>.json``. The tokens stored in this "
+"file will be sent transparently with each subsequent ``flwr`` CLI request"
+" to the SuperLink, and it will relay them to OIDC provider to perform the"
+" authentication checks."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:128
+msgid "Run authorized ``flwr`` CLI commands"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:130
+msgid ""
+"With the above steps completed, you can now run ``flwr`` CLI commands "
+"against a SuperLink setup with account authentication and authorization. "
+"For example, as an authorized account, you can run the ``flwr run`` "
+"command to start a Flower app:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:142
+msgid ""
+"If the account does not have the necessary permissions to run the "
+"command, an error will be returned:"
+msgstr ""
+
 #: ../../source/how-to-authenticate-supernodes.rst:-1
 msgid ""
 "Enable authentication for SuperNodes and SuperLink in Flower with public "
@@ -9676,131 +9823,6 @@ msgid ""
 "federation where each component runs in its own Docker container. You can"
 " make use of TLS and other security features in Flower such as implement "
 "a SuperNode authentication mechanism."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:-1
-msgid ""
-"Configure SuperLink for user authentication and authorization. Private-"
-"by-default runs securely with OpenID Connect and OpenFGA."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:6
-#, fuzzy
-msgid "Authenticate Users via OpenID Connect"
-msgstr "验证超级节点"
-
-#: ../../source/how-to-authenticate-users.rst:10
-msgid ""
-"OpenID Connect Authentication is a Flower Enterprise feature. See `Flower"
-" Enterprise <https://flower.ai/enterprise>`_ for details."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:13
-msgid ""
-"In this guide, you'll learn how to configure SuperLink with user-level "
-"authentication and authorization, and how to log in using the ``flwr`` "
-"CLI. Once logged in, any users that are authorized on the SuperLink can "
-"run Flower CLI commands that interact with the SuperLink."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:20
-msgid ""
-"With user authentication and authorization enabled, only users that have "
-"submitted the ``flwr run`` command can view and interact with their runs."
-" This means that your runs are **private by default**, ensuring that only"
-" authorized users can access them."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:28
-msgid ""
-"To enable user authentication and authorization, the SuperLink must be "
-"deployed with an `OpenID Connect (OIDC) <https://openid.net/developers"
-"/how-connect-works/>`_ provider and an `OpenFGA <https://openfga.dev/>`_ "
-"server. The OIDC provider is used for user authentication, while OpenFGA "
-"is used for fine-grained access control. This means an authenticated user"
-" can only run ``flwr`` CLI commands on the SuperLink if they have been "
-"granted the necessary permissions by the SuperLink administrator. When "
-"enabled, both user authentication and authorization must be configured on"
-" the SuperLink."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:37
-#, fuzzy
-msgid "Enable User Authentication and Authorization on the SuperLink"
-msgstr "在 :code:`SuperLink` 中启用节点验证"
-
-#: ../../source/how-to-authenticate-users.rst:39
-#, fuzzy
-msgid "Create a YAML configuration file with the following content:"
-msgstr "创建包含以下更改的拉取请求："
-
-#: ../../source/how-to-authenticate-users.rst:63
-msgid ""
-"Save this file as ``user-auth-config.yaml``. Then pass it to the "
-"SuperLink via the ``--user-auth-config`` flag when deploying the "
-"SuperLink:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:74
-msgid ""
-"To authorize a user, the SuperLink administrator must add the user's OIDC"
-" ``sub`` claim to the OpenFGA store with the appropriate relation."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:78
-#, fuzzy
-msgid "Login to the SuperLink"
-msgstr "flower-superlink"
-
-#: ../../source/how-to-authenticate-users.rst:80
-msgid ""
-"Once a SuperLink with user authentication and authorization is up and "
-"running, a user can interface with it after installing the ``flwr`` PyPI "
-"package via the Flower CLI. Then, ensure that the ``enable-user-auth`` "
-"field is set to ``true`` in the federation section in the "
-"``pyproject.toml`` of the Flower app you want to run:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:97
-msgid ""
-"User authentication and authorization is only supported with TLS "
-"connections."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:99
-msgid ""
-"Now, you need to login first before other CLI commands can be executed. "
-"Upon executing ``flwr login``, a URL will be returned by the "
-"authentication plugin in the SuperLink. Click on it and authenticate "
-"directly against the OIDC provider."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:113
-msgid ""
-"Once the login is successful, the credentials returned by the OIDC "
-"provider via the SuperLink will be saved to the app's directory under "
-"``.flwr/.credentials/<federation-name>.json``. The tokens stored in this "
-"file will be sent transparently with each subsequent ``flwr`` CLI request"
-" to the SuperLink, and it will relay them to OIDC provider to perform the"
-" authentication checks."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:120
-msgid "Run authorized ``flwr`` CLI commands"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:122
-msgid ""
-"With the above steps completed, you can now run ``flwr`` CLI commands "
-"against a SuperLink setup with user authentication and authorization. For"
-" example, as an authorized user, you can run the ``flwr run`` command to "
-"start a Flower app:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:134
-msgid ""
-"If the user does not have the necessary permissions to run the command, "
-"an error will be returned:"
 msgstr ""
 
 #: ../../source/how-to-configure-audit-logging.rst:-1
@@ -42174,12 +42196,12 @@ msgstr ""
 
 #: ../../source/ref-flower-network-communication.rst:180
 #, fuzzy
-msgid "User Authentication"
+msgid "Account Authentication"
 msgstr "验证安装"
 
 #: ../../source/ref-flower-network-communication.rst:182
 msgid ""
-"When user authentication is enabled, Flower uses an OIDC-compatible "
+"When account authentication is enabled, Flower uses an OIDC-compatible "
 "server to authenticate requests:"
 msgstr ""
 
@@ -64626,4 +64648,131 @@ msgstr ""
 #~ "`Javier`, `Mahdi`, `Steven Hé (Sīchàng)`, "
 #~ "`Taner Topal`, `achiverram28`, `danielnugraha`, "
 #~ "`eunchung`, `ruthgal` <!---TOKEN_v1.5.0-->"
+
+#~ msgid ""
+#~ "User authentication can be enabled if"
+#~ " you're using the Flower Enterprise "
+#~ "Edition (EE) Docker images. This is "
+#~ "configured in the `global.userAuth` section"
+#~ " of your `values.yml` file."
+#~ msgstr ""
+
+#~ msgid "`auth_type`: The authentication mechanism being used (e.g., oidc)."
+#~ msgstr ""
+
+#~ msgid "`validate_url`: The endpoint for validating user authentication."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To use an existing secret that "
+#~ "contains the user authentication "
+#~ "configuration, set `existingSecret` to the "
+#~ "name of the existing secret:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note that the existing secret must "
+#~ "contain the key `user-auth-config.yml`:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Configure SuperLink for user authentication"
+#~ " and authorization. Private-by-default "
+#~ "runs securely with OpenID Connect and"
+#~ " OpenFGA."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this guide, you'll learn how to"
+#~ " configure SuperLink with user-level "
+#~ "authentication and authorization, and how "
+#~ "to log in using the ``flwr`` CLI."
+#~ " Once logged in, any users that "
+#~ "are authorized on the SuperLink can "
+#~ "run Flower CLI commands that interact"
+#~ " with the SuperLink."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "With user authentication and authorization "
+#~ "enabled, only users that have submitted"
+#~ " the ``flwr run`` command can view"
+#~ " and interact with their runs. This"
+#~ " means that your runs are **private"
+#~ " by default**, ensuring that only "
+#~ "authorized users can access them."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To enable user authentication and "
+#~ "authorization, the SuperLink must be "
+#~ "deployed with an `OpenID Connect (OIDC)"
+#~ " <https://openid.net/developers/how-connect-works/>`_"
+#~ " provider and an `OpenFGA "
+#~ "<https://openfga.dev/>`_ server. The OIDC "
+#~ "provider is used for user "
+#~ "authentication, while OpenFGA is used "
+#~ "for fine-grained access control. This"
+#~ " means an authenticated user can only"
+#~ " run ``flwr`` CLI commands on the "
+#~ "SuperLink if they have been granted "
+#~ "the necessary permissions by the "
+#~ "SuperLink administrator. When enabled, both"
+#~ " user authentication and authorization must"
+#~ " be configured on the SuperLink."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Save this file as ``user-auth-"
+#~ "config.yaml``. Then pass it to the "
+#~ "SuperLink via the ``--user-auth-config``"
+#~ " flag when deploying the SuperLink:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To authorize a user, the SuperLink "
+#~ "administrator must add the user's OIDC"
+#~ " ``sub`` claim to the OpenFGA store"
+#~ " with the appropriate relation."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Once a SuperLink with user "
+#~ "authentication and authorization is up "
+#~ "and running, a user can interface "
+#~ "with it after installing the ``flwr``"
+#~ " PyPI package via the Flower CLI. "
+#~ "Then, ensure that the ``enable-user-"
+#~ "auth`` field is set to ``true`` in"
+#~ " the federation section in the "
+#~ "``pyproject.toml`` of the Flower app you"
+#~ " want to run:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "User authentication and authorization is "
+#~ "only supported with TLS connections."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "With the above steps completed, you "
+#~ "can now run ``flwr`` CLI commands "
+#~ "against a SuperLink setup with user "
+#~ "authentication and authorization. For example,"
+#~ " as an authorized user, you can "
+#~ "run the ``flwr run`` command to "
+#~ "start a Flower app:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the user does not have the "
+#~ "necessary permissions to run the "
+#~ "command, an error will be returned:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "When user authentication is enabled, "
+#~ "Flower uses an OIDC-compatible server"
+#~ " to authenticate requests:"
+#~ msgstr ""
 

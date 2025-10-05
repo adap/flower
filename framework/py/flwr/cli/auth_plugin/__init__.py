@@ -15,20 +15,20 @@
 """Flower account auth plugins."""
 
 
-from flwr.common.constant import AuthType
+from flwr.common.constant import AuthnType
 
 from .auth_plugin import CliAuthPlugin, LoginError
 from .noop_auth_plugin import NoOpCliAuthPlugin
 from .oidc_cli_plugin import OidcCliPlugin
 
 
-def get_cli_plugin_class(auth_type: str) -> type[CliAuthPlugin]:
+def get_cli_plugin_class(authn_type: str) -> type[CliAuthPlugin]:
     """Return all CLI authentication plugins."""
-    if auth_type == AuthType.NOOP:
+    if authn_type == AuthnType.NOOP:
         return NoOpCliAuthPlugin
-    if auth_type == AuthType.OIDC:
+    if authn_type == AuthnType.OIDC:
         return OidcCliPlugin
-    raise ValueError(f"Unsupported auth type: {auth_type}")
+    raise ValueError(f"Unsupported authentication type: {authn_type}")
 
 
 __all__ = [

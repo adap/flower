@@ -83,14 +83,14 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
         is_simulation: bool,
-        auth_plugin: ControlAuthnPlugin,
+        authn_plugin: ControlAuthnPlugin,
         artifact_provider: Optional[ArtifactProvider] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
         self.is_simulation = is_simulation
-        self.auth_plugin = auth_plugin
+        self.authn_plugin = authn_plugin
         self.artifact_provider = artifact_provider
 
     def StartRun(  # pylint: disable=too-many-locals
@@ -299,7 +299,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> GetLoginDetailsResponse:
         """Start login."""
         log(INFO, "ControlServicer.GetLoginDetails")
-        if self.auth_plugin is None:
+        if self.authn_plugin is None:
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
                 NO_ACCOUNT_AUTH_MESSAGE,
@@ -307,14 +307,14 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             raise grpc.RpcError()  # This line is unreachable
 
         # Get login details
-        details = self.auth_plugin.get_login_details()
+        details = self.authn_plugin.get_login_details()
 
         # Return empty response if details is None
         if details is None:
             return GetLoginDetailsResponse()
 
         return GetLoginDetailsResponse(
-            auth_type=details.auth_type,
+            authn_type=details.authn_type,
             device_code=details.device_code,
             verification_uri_complete=details.verification_uri_complete,
             expires_in=details.expires_in,
@@ -326,7 +326,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> GetAuthTokensResponse:
         """Get auth token."""
         log(INFO, "ControlServicer.GetAuthTokens")
-        if self.auth_plugin is None:
+        if self.authn_plugin is None:
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
                 NO_ACCOUNT_AUTH_MESSAGE,
@@ -334,7 +334,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             raise grpc.RpcError()  # This line is unreachable
 
         # Get auth tokens
-        credentials = self.auth_plugin.get_auth_tokens(request.device_code)
+        credentials = self.authn_plugin.get_auth_tokens(request.device_code)
 
         # Return empty response if credentials is None
         if credentials is None:

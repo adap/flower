@@ -73,7 +73,7 @@ def login(  # pylint: disable=R0914
     )
     exit_if_no_address(federation_config, "login")
 
-    # Check if `enable-user-auth` is set to `true`
+    # Check if `enable-account-auth` is set to `true`
 
     if not account_auth_enabled(federation_config):
         typer.secho(
@@ -103,12 +103,12 @@ def login(  # pylint: disable=R0914
         login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
 
     # Get the auth plugin
-    auth_type = login_response.auth_type
-    auth_plugin = load_cli_auth_plugin(app, federation, federation_config, auth_type)
+    authn_type = login_response.authn_type
+    auth_plugin = load_cli_auth_plugin(app, federation, federation_config, authn_type)
 
     # Login
     details = AccountAuthLoginDetails(
-        auth_type=login_response.auth_type,
+        authn_type=login_response.authn_type,
         device_code=login_response.device_code,
         verification_uri_complete=login_response.verification_uri_complete,
         expires_in=login_response.expires_in,

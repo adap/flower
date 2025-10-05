@@ -19,7 +19,7 @@ import io
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Optional, cast
 
 import typer
 from rich.console import Console
@@ -50,6 +50,7 @@ _RunListType = tuple[int, str, str, str, str, str, str, str, str]
 
 
 def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
+    ctx: typer.Context,
     app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project"),
@@ -102,6 +103,9 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
 
     All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD HH:MM:SSZ``.
     """
+    # Resolve command used (list or ls)
+    command_name = cast(str, ctx.command.name) if ctx.command else "list"
+
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:
@@ -116,7 +120,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         federation, federation_config = validate_federation_in_project_config(
             federation, config, federation_config_overrides
         )
-        exit_if_no_address(federation_config, "ls")
+        exit_if_no_address(federation_config, command_name)
         channel = None
         try:
             if runs and run_id is not None:
@@ -216,7 +220,7 @@ def _to_table(run_list: list[_RunListType]) -> Table:
 
     # Add columns
     table.add_column(
-        Text("Run ID", justify="center"), style="bright_white", overflow="fold"
+        Text("Run ID", justify="center"), style="bright_white", no_wrap=True
     )
     table.add_column(Text("FAB", justify="center"), style="dim white")
     table.add_column(Text("Status", justify="center"))

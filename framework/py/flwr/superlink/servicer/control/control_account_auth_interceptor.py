@@ -55,10 +55,10 @@ class ControlAccountAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
 
     def __init__(
         self,
-        auth_plugin: ControlAuthnPlugin,
+        authn_plugin: ControlAuthnPlugin,
         authz_plugin: ControlAuthzPlugin,
     ):
-        self.auth_plugin = auth_plugin
+        self.authn_plugin = authn_plugin
         self.authz_plugin = authz_plugin
 
     def intercept_service(
@@ -97,7 +97,7 @@ class ControlAccountAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 return call(request, context)  # type: ignore
 
             # For other requests, check if the account is authenticated
-            valid_tokens, account_info = self.auth_plugin.validate_tokens_in_metadata(
+            valid_tokens, account_info = self.authn_plugin.validate_tokens_in_metadata(
                 metadata
             )
             if valid_tokens:
@@ -120,7 +120,7 @@ class ControlAccountAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
                 return call(request, context)  # type: ignore
 
             # If the account is not authenticated, refresh tokens
-            tokens, account_info = self.auth_plugin.refresh_tokens(metadata)
+            tokens, account_info = self.authn_plugin.refresh_tokens(metadata)
             if tokens is not None:
                 if account_info is None:
                     context.abort(
