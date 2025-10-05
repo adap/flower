@@ -2,7 +2,7 @@ Use Flower Confidential Remote Compute
 ======================================
 
 To use Flower Confidential Remote Compute you must first subscribe from the
-`Intelligence page <https://flower.ai/intelligence>`_.
+`Flower Intelligence page <https://flower.ai/intelligence>`_.
 
 Obtain your API key
 -------------------
