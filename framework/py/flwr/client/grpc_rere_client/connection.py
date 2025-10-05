@@ -59,7 +59,7 @@ from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
-from .client_interceptor import AuthenticateClientInterceptor
+from .node_auth_interceptor import NodeAuthClientInterceptor
 from .grpc_adapter import GrpcAdapter
 
 
@@ -140,7 +140,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     # Always configure auth interceptor, with either user-provided or generated keys
     interceptors: Sequence[grpc.UnaryUnaryClientInterceptor] = [
-        AuthenticateClientInterceptor(*authentication_keys),
+        NodeAuthClientInterceptor(*authentication_keys),
     ]
     channel = create_channel(
         server_address=server_address,

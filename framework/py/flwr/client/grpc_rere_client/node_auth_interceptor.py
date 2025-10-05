@@ -29,8 +29,8 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 )
 
 
-class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
-    """Client interceptor for client authentication."""
+class NodeAuthClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
+    """Client interceptor for node authentication."""
 
     def __init__(
         self,
