@@ -200,6 +200,7 @@ redirects = {
     "apiref-binaries": "ref-api-cli.html",
     "fedbn-example-pytorch-from-centralized-to-federated": "example-fedbn-pytorch-from-centralized-to-federated.html",
     "how-to-use-built-in-middleware-layers": "how-to-use-built-in-mods.html",
+    "how-to-authenticate-users": "how-to-authenticate-accounts.html",
     # Restructuring: tutorials
     "tutorial/Flower-0-What-is-FL": "tutorial-series-what-is-federated-learning.html",
     "tutorial/Flower-1-Intro-to-FL-PyTorch": "tutorial-series-get-started-with-flower-pytorch.html",

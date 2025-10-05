@@ -176,10 +176,10 @@ communicate with the SuperLink or SuperNode:
     Each group must remain inside a single trusted network. They should never
     communicate with each other over untrusted networks (e.g., the public internet).
 
-User Authentication
-~~~~~~~~~~~~~~~~~~~
+Account Authentication
+~~~~~~~~~~~~~~~~~~~~~~
 
-When user authentication is enabled, Flower uses an OIDC-compatible server to
+When account authentication is enabled, Flower uses an OIDC-compatible server to
 authenticate requests:
 
 - **SuperLink to OIDC server**: A SuperLink can optionally be configured to only allow
