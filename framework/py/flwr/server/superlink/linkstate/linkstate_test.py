@@ -678,7 +678,7 @@ class StateTest(CoreStateTest):
 
         # Assert node_ids and public_key_to_node_id are synced
         if isinstance(state, InMemoryLinkState):
-            assert len(state.node_ids) == 1
+            assert len(state.nodes) == 1
             assert len(state.public_key_to_node_id) == 1
 
     def test_delete_node(self) -> None:

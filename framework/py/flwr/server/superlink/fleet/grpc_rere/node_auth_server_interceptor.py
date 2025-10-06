@@ -34,7 +34,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     verify_signature,
 )
 from flwr.proto.fleet_pb2 import CreateNodeRequest  # pylint: disable=E0611
-from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 MIN_TIMESTAMP_DIFF = -SYSTEM_TIME_TOLERANCE
 MAX_TIMESTAMP_DIFF = TIMESTAMP_TOLERANCE + SYSTEM_TIME_TOLERANCE
@@ -128,7 +128,7 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             if isinstance(request, CreateNodeRequest):
                 actual_public_key = request.public_key
             else:
-                # Note: This function runs in a different thread 
+                # Note: This function runs in a different thread
                 # than the `intercept_service` function.
                 actual_public_key = self.state_factory.state().get_node_public_key(
                     request.node.node_id  # type: ignore
