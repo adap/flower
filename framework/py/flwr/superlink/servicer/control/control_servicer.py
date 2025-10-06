@@ -224,11 +224,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # If no `run_id` is specified and account auth is enabled,
             # return run IDs for the authenticated account
             flwr_aid = shared_account_info.get().flwr_aid
-            if flwr_aid is None:
-                context.abort(
-                    grpc.StatusCode.PERMISSION_DENIED,
-                    "️⛔️ Account authentication is enabled, but `flwr_aid` is None",
-                )
             run_ids = state.get_run_ids(flwr_aid=flwr_aid)
         # Build a set of run IDs for `flwr ls --run-id <run_id>`
         else:
@@ -431,8 +426,8 @@ def _check_flwr_aid_in_run(
     # `flwr_aid` must not be None. Abort if it is None.
     if flwr_aid is None:
         context.abort(
-            grpc.StatusCode.PERMISSION_DENIED,
-            "️⛔️ Account authentication is enabled, but `flwr_aid` is None",
+            grpc.StatusCode.INTERNAL,
+            "Flower account is not available. This should never happen.",
         )
 
     # `run.flwr_aid` must not be an empty string. Abort if it is empty.
@@ -440,8 +435,7 @@ def _check_flwr_aid_in_run(
     if not run_flwr_aid:
         context.abort(
             grpc.StatusCode.PERMISSION_DENIED,
-            "⛔️ Account authentication is enabled, but the run is not associated "
-            "with a `flwr_aid`.",
+            "⛔️ Run is not associated with a `flwr_aid`.",
         )
 
     # Exit if `flwr_aid` does not match the run's `flwr_aid`
