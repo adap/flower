@@ -43,11 +43,10 @@
 OpenFL Migration Guide
 ======================
 
-The Open Federated Learning project (formerly known as OpenFL) is no longer being developed or maintained.  
+It was `recently announced <https://github.com/securefederatedai/openfederatedlearning>`_ that the The Open Federated Learning project 
+(formerly known as OpenFL) is no longer being developed or maintained.  
 This guide, written in collaboration with the OpenFL developers, aims to create an easy path for OpenFL
-users to bring their workloads into Flower. While we expect this guide should be sufficient for
-most workloads, if you need help you can always reach us at hello@flower.ai or on the `Flower slack channel  
-<https://flower.ai/join-slack/>`_
+users to bring their workloads into Flower. 
 
 
 Creating a Flower App for OpenFL code
@@ -116,8 +115,9 @@ Migrate your model
 The model is very straightforward to port from OpenFL to Flower. If you are working with a PyTorch model,
 OpenFL has a ``PyTorchTaskRunner`` that inherits from ``nn.module`` (in ``taskrunner.py``) - and includes other things like the 
 ``train`` and ``validate`` functions. Flower assumes you bring a standard PyTorch model, so it's as easy as moving the model definition
-to ``task.py`` in the ``flower_tutorial`` directory, and changing the inheritance of the Net back to ``nn.module``. For a concrete example,
- see the following OpenFL TaskRunner code snippet:
+to ``task.py`` in the ``flower_tutorial`` directory, and changing the inheritance of the Net back to ``nn.module``. For a concrete example, 
+see the following OpenFL TaskRunner code snippet:
+
 
 .. code-block:: python
    :emphasize-lines: 2,50-58
