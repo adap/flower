@@ -17,6 +17,7 @@
 
 import tempfile
 import unittest
+from datetime import timedelta
 from typing import Optional
 from unittest.mock import patch
 
@@ -29,6 +30,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.date import now
 from flwr.common.inflatable import (
     get_all_nested_objects,
     get_object_id,
@@ -517,12 +519,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
 
         # Simulate situation where the message has expired in the LinkState
         # This will trigger the creation of an Error message
-        with patch(
-            "time.time",
-            side_effect=lambda: message_ins.metadata.created_at
-            + message_ins.metadata.ttl
-            + 0.1,
-        ):  # over TTL limit
+        future_dt = now() + timedelta(seconds=message_ins.metadata.ttl + 0.1)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = future_dt  # over TTL limit
 
             request = PullAppMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
 
