@@ -69,6 +69,7 @@ def ls(  # pylint: disable=R0914
         bool,
         typer.Option(
             "--verbose",
+            "-v",
             help="Enable verbose output",
         ),
     ] = False,
