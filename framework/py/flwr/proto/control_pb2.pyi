@@ -144,25 +144,25 @@ global___GetLoginDetailsRequest = GetLoginDetailsRequest
 
 class GetLoginDetailsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    AUTH_TYPE_FIELD_NUMBER: builtins.int
+    AUTHN_TYPE_FIELD_NUMBER: builtins.int
     DEVICE_CODE_FIELD_NUMBER: builtins.int
     VERIFICATION_URI_COMPLETE_FIELD_NUMBER: builtins.int
     EXPIRES_IN_FIELD_NUMBER: builtins.int
     INTERVAL_FIELD_NUMBER: builtins.int
-    auth_type: typing.Text
+    authn_type: typing.Text
     device_code: typing.Text
     verification_uri_complete: typing.Text
     expires_in: builtins.int
     interval: builtins.int
     def __init__(self,
         *,
-        auth_type: typing.Text = ...,
+        authn_type: typing.Text = ...,
         device_code: typing.Text = ...,
         verification_uri_complete: typing.Text = ...,
         expires_in: builtins.int = ...,
         interval: builtins.int = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["auth_type",b"auth_type","device_code",b"device_code","expires_in",b"expires_in","interval",b"interval","verification_uri_complete",b"verification_uri_complete"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["authn_type",b"authn_type","device_code",b"device_code","expires_in",b"expires_in","interval",b"interval","verification_uri_complete",b"verification_uri_complete"]) -> None: ...
 global___GetLoginDetailsResponse = GetLoginDetailsResponse
 
 class GetAuthTokensRequest(google.protobuf.message.Message):

@@ -20,10 +20,14 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
-from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID, AuthType
-from flwr.common.typing import AccountInfo, UserAuthCredentials, UserAuthLoginDetails
+from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID, AuthnType
+from flwr.common.typing import (
+    AccountAuthCredentials,
+    AccountAuthLoginDetails,
+    AccountInfo,
+)
 
-from .auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
+from .auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 
 NOOP_ACCOUNT_INFO = AccountInfo(
     flwr_aid=NOOP_FLWR_AID,
@@ -31,22 +35,22 @@ NOOP_ACCOUNT_INFO = AccountInfo(
 )
 
 
-class NoOpControlAuthPlugin(ControlAuthPlugin):
-    """No-operation implementation of ControlAuthPlugin."""
+class NoOpControlAuthnPlugin(ControlAuthnPlugin):
+    """No-operation implementation of ControlAuthnPlugin."""
 
     def __init__(
         self,
-        user_auth_config_path: Path,
+        account_auth_config_path: Path,
         verify_tls_cert: bool,
     ):
         pass
 
-    def get_login_details(self) -> Optional[UserAuthLoginDetails]:
+    def get_login_details(self) -> Optional[AccountAuthLoginDetails]:
         """Get the login details."""
         # This allows the `flwr login` command to load the NoOp plugin accordingly,
         # which then raises a LoginError when attempting to login.
-        return UserAuthLoginDetails(
-            auth_type=AuthType.NOOP,  # No operation auth type
+        return AccountAuthLoginDetails(
+            authn_type=AuthnType.NOOP,  # No operation authn type
             device_code="",
             verification_uri_complete="",
             expires_in=0,
@@ -59,7 +63,7 @@ class NoOpControlAuthPlugin(ControlAuthPlugin):
         """Return valid for no-op plugin."""
         return True, NOOP_ACCOUNT_INFO
 
-    def get_auth_tokens(self, device_code: str) -> Optional[UserAuthCredentials]:
+    def get_auth_tokens(self, device_code: str) -> Optional[AccountAuthCredentials]:
         """Get authentication tokens."""
         raise RuntimeError("NoOp plugin does not support getting auth tokens.")
 
@@ -75,9 +79,9 @@ class NoOpControlAuthPlugin(ControlAuthPlugin):
 class NoOpControlAuthzPlugin(ControlAuthzPlugin):
     """No-operation implementation of ControlAuthzPlugin."""
 
-    def __init__(self, user_auth_config_path: Path, verify_tls_cert: bool):
+    def __init__(self, account_auth_config_path: Path, verify_tls_cert: bool):
         pass
 
-    def verify_user_authorization(self, account_info: AccountInfo) -> bool:
+    def authorize(self, account_info: AccountInfo) -> bool:
         """Return True for no-op plugin."""
         return True

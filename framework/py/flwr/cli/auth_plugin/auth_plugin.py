@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract classes for Flower User Auth Plugin."""
+"""Abstract classes for Flower account auth plugin."""
 
 
 from abc import ABC, abstractmethod
@@ -20,7 +20,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
-from flwr.common.typing import UserAuthCredentials, UserAuthLoginDetails
+from flwr.common.typing import AccountAuthCredentials, AccountAuthLoginDetails
 from flwr.proto.control_pb2_grpc import ControlStub
 
 
@@ -37,27 +37,27 @@ class CliAuthPlugin(ABC):
     Parameters
     ----------
     credentials_path : Path
-        Path to the user's authentication credentials file.
+        Path to the Flower account's authentication credentials file.
     """
 
     @staticmethod
     @abstractmethod
     def login(
-        login_details: UserAuthLoginDetails,
+        login_details: AccountAuthLoginDetails,
         control_stub: ControlStub,
-    ) -> UserAuthCredentials:
-        """Authenticate the user and retrieve authentication credentials.
+    ) -> AccountAuthCredentials:
+        """Authenticate the account and retrieve authentication credentials.
 
         Parameters
         ----------
-        login_details : UserAuthLoginDetails
-            An object containing the user's login details.
+        login_details : AccountAuthLoginDetails
+            An object containing the account's login details.
         control_stub : ControlStub
             A stub for executing RPC calls to the server.
 
         Returns
         -------
-        UserAuthCredentials
+        AccountAuthCredentials
             The authentication credentials obtained after login.
 
         Raises
@@ -71,7 +71,7 @@ class CliAuthPlugin(ABC):
         """Abstract constructor."""
 
     @abstractmethod
-    def store_tokens(self, credentials: UserAuthCredentials) -> None:
+    def store_tokens(self, credentials: AccountAuthCredentials) -> None:
         """Store authentication tokens to the `credentials_path`.
 
         The credentials, including tokens, will be saved as a JSON file
@@ -91,5 +91,5 @@ class CliAuthPlugin(ABC):
     @abstractmethod
     def read_tokens_from_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Optional[UserAuthCredentials]:
+    ) -> Optional[AccountAuthCredentials]:
         """Read authentication tokens from the provided metadata."""

@@ -78,7 +78,7 @@ message ListRunsResponse {
 
 message GetLoginDetailsRequest {}
 message GetLoginDetailsResponse {
-  string auth_type = 1;
+  string authn_type = 1;
   string device_code = 2;
   string verification_uri_complete = 3;
   int64 expires_in = 4;

@@ -39,14 +39,14 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StreamLogsRequest,
 )
 
-from .control_user_auth_interceptor import (
-    ControlUserAuthInterceptor,
+from .control_account_auth_interceptor import (
+    ControlAccountAuthInterceptor,
     shared_account_info,
 )
 
 
-class TestControlUserAuthInterceptor(unittest.TestCase):
-    """Test the ControlUserAuthInterceptor authentication logic."""
+class TestControlAccountAuthInterceptor(unittest.TestCase):
+    """Test the ControlAccountAuthInterceptor authentication logic."""
 
     def setUp(self) -> None:
         """Set up test fixtures."""
@@ -75,18 +75,18 @@ class TestControlUserAuthInterceptor(unittest.TestCase):
         # Prepare
         dummy_request = request
         dummy_context = MagicMock()
-        dummy_auth_plugin = MagicMock()
+        dummy_authn_plugin = MagicMock()
         dummy_authz_plugin = MagicMock()
         handler_call_details = MagicMock()
 
         # Set up validate_tokens_in_metadata to return a tuple indicating invalid tokens
-        dummy_auth_plugin.validate_tokens_in_metadata.return_value = (False, None)
-        # Set up validate user authorization to return True. The return value is
-        # irrelevant because no user authentication is required for requests of type
+        dummy_authn_plugin.validate_tokens_in_metadata.return_value = (False, None)
+        # Set up validate account authorization to return True. The return value is
+        # irrelevant because no account authentication is required for requests of type
         # GetLoginDetailsRequest and GetAuthTokensRequest.
-        dummy_authz_plugin.verify_user_authorization.return_value = True
-        interceptor = ControlUserAuthInterceptor(
-            auth_plugin=dummy_auth_plugin, authz_plugin=dummy_authz_plugin
+        dummy_authz_plugin.authorize.return_value = True
+        interceptor = ControlAccountAuthInterceptor(
+            authn_plugin=dummy_authn_plugin, authz_plugin=dummy_authz_plugin
         )
         intercepted_handler = interceptor.intercept_service(
             get_noop_unary_unary_handler, handler_call_details
@@ -118,19 +118,19 @@ class TestControlUserAuthInterceptor(unittest.TestCase):
         # Prepare
         dummy_request = request
         dummy_context = MagicMock()
-        dummy_auth_plugin = MagicMock()
+        dummy_authn_plugin = MagicMock()
         dummy_authz_plugin = MagicMock()
         handler_call_details = MagicMock()
 
         # Set up validate_tokens_in_metadata to return a tuple indicating invalid tokens
-        dummy_auth_plugin.validate_tokens_in_metadata.return_value = (False, None)
-        dummy_auth_plugin.refresh_tokens.return_value = (None, None)
-        # Set up verify user authorization to return True. The return value is
+        dummy_authn_plugin.validate_tokens_in_metadata.return_value = (False, None)
+        dummy_authn_plugin.refresh_tokens.return_value = (None, None)
+        # Set up `authorize` to return True. The return value is
         # irrelevant because the authentication will fail and the authorization
         # plugin will not be called.
-        dummy_authz_plugin.verify_user_authorization.return_value = True
-        interceptor = ControlUserAuthInterceptor(
-            auth_plugin=dummy_auth_plugin, authz_plugin=dummy_authz_plugin
+        dummy_authz_plugin.authorize.return_value = True
+        interceptor = ControlAccountAuthInterceptor(
+            authn_plugin=dummy_authn_plugin, authz_plugin=dummy_authz_plugin
         )
         continuation: Union[
             Callable[[Any], NoOpUnaryUnaryHandler],
@@ -167,21 +167,21 @@ class TestControlUserAuthInterceptor(unittest.TestCase):
         # Prepare
         dummy_request = request
         dummy_context = MagicMock()
-        dummy_auth_plugin = MagicMock()
+        dummy_authn_plugin = MagicMock()
         dummy_authz_plugin = MagicMock()
         handler_call_details = MagicMock()
 
         # Set up validate_tokens_in_metadata to return a tuple indicating valid tokens
-        dummy_auth_plugin.validate_tokens_in_metadata.return_value = (
+        dummy_authn_plugin.validate_tokens_in_metadata.return_value = (
             True,
             self.expected_account_info,
         )
-        # Set up verify user authorization to return True. The return value must be True
-        # because the authorization plugin is expected to be called after a successful
-        # token validation.
-        dummy_authz_plugin.verify_user_authorization.return_value = True
-        interceptor = ControlUserAuthInterceptor(
-            auth_plugin=dummy_auth_plugin, authz_plugin=dummy_authz_plugin
+        # Set up `authorize` to return True. The return value must
+        # be True because the authorization plugin is expected to be called after a
+        # successful token validation.
+        dummy_authz_plugin.authorize.return_value = True
+        interceptor = ControlAccountAuthInterceptor(
+            authn_plugin=dummy_authn_plugin, authz_plugin=dummy_authz_plugin
         )
         continuation: Union[
             Callable[[Any], NoOpUnaryUnaryHandler],
@@ -230,25 +230,25 @@ class TestControlUserAuthInterceptor(unittest.TestCase):
         # Prepare
         dummy_request = request
         dummy_context = MagicMock()
-        dummy_auth_plugin = MagicMock()
+        dummy_authn_plugin = MagicMock()
         dummy_authz_plugin = MagicMock()
         handler_call_details = MagicMock()
 
         # Set up validate_tokens_in_metadata to return a tuple indicating invalid tokens
-        dummy_auth_plugin.validate_tokens_in_metadata.return_value = (False, None)
+        dummy_authn_plugin.validate_tokens_in_metadata.return_value = (False, None)
         # Set up refresh tokens
         expected_refresh_tokens_value = [("new-token", "value")]
-        dummy_auth_plugin.refresh_tokens.return_value = (
+        dummy_authn_plugin.refresh_tokens.return_value = (
             expected_refresh_tokens_value,
             self.default_account_info,
         )
-        # Set up verify user authorization to return True. The return value must be True
+        # Set up `authorize` to return True. The return value must be True
         # because the authorization plugin is expected to be called after a successful
         # token refresh.
-        dummy_authz_plugin.verify_user_authorization.return_value = True
+        dummy_authz_plugin.authorize.return_value = True
 
-        interceptor = ControlUserAuthInterceptor(
-            auth_plugin=dummy_auth_plugin, authz_plugin=dummy_authz_plugin
+        interceptor = ControlAccountAuthInterceptor(
+            authn_plugin=dummy_authn_plugin, authz_plugin=dummy_authz_plugin
         )
         continuation: Union[
             Callable[[Any], NoOpUnaryUnaryHandler],
@@ -296,8 +296,8 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
         self.authz_plugin = MagicMock()
 
         # A dummy authentication plugin that always validates tokens
-        self.auth_plugin = MagicMock()
-        self.auth_plugin.validate_tokens_in_metadata.return_value = (
+        self.authn_plugin = MagicMock()
+        self.authn_plugin.validate_tokens_in_metadata.return_value = (
             True,
             self.expected_account_info,
         )
@@ -323,10 +323,10 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
         handler_call_details = MagicMock()
 
         # Authorization approves
-        self.authz_plugin.verify_user_authorization.return_value = True
+        self.authz_plugin.authorize.return_value = True
 
-        interceptor = ControlUserAuthInterceptor(
-            auth_plugin=self.auth_plugin, authz_plugin=self.authz_plugin
+        interceptor = ControlAccountAuthInterceptor(
+            authn_plugin=self.authn_plugin, authz_plugin=self.authz_plugin
         )
 
         # Pick correct continuation for unary vs stream
@@ -347,9 +347,7 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
             result = intercepted.unary_unary(request, dummy_context)
             self.assertEqual(result, "dummy_response")
         # Authz plugin should have been called once
-        self.authz_plugin.verify_user_authorization.assert_called_once_with(
-            self.expected_account_info
-        )
+        self.authz_plugin.authorize.assert_called_once_with(self.expected_account_info)
 
     @parameterized.expand(
         [
@@ -368,10 +366,10 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
         handler_call_details = MagicMock()
 
         # Authorization denies
-        self.authz_plugin.verify_user_authorization.return_value = False
+        self.authz_plugin.authorize.return_value = False
 
-        interceptor = ControlUserAuthInterceptor(
-            auth_plugin=self.auth_plugin, authz_plugin=self.authz_plugin
+        interceptor = ControlAccountAuthInterceptor(
+            authn_plugin=self.authn_plugin, authz_plugin=self.authz_plugin
         )
 
         continuation: Union[
@@ -394,5 +392,5 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
         # Ensure abort was called with PERMISSION_DENIED
         dummy_context.abort.assert_called_once_with(
             grpc.StatusCode.PERMISSION_DENIED,
-            "❗️ User not authorized. Please contact the SuperLink administrator.",
+            "❗️ Account not authorized. Please contact the SuperLink administrator.",
         )
