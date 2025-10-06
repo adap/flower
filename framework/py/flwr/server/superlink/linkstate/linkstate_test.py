@@ -16,6 +16,7 @@
 # pylint: disable=invalid-name, too-many-lines, R0904, R0913
 
 import tempfile
+import time
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timedelta, timezone
@@ -1336,7 +1337,10 @@ class StateTest(CoreStateTest):
         log_entry_1 = "Log entry 1"
         log_entry_2 = "Log entry 2"
         state.add_serverapp_log(run_id, log_entry_1)
+        # Add trivial delays to avoid random failure due to same timestamp
+        time.sleep(1e-6)
         timestamp = now().timestamp()
+        time.sleep(1e-6)
         state.add_serverapp_log(run_id, log_entry_2)
 
         # Execute
