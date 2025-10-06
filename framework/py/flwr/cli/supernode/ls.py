@@ -100,7 +100,7 @@ def ls(  # pylint: disable=R0914
             formatted_nodes = _list_nodes(stub)
             restore_output()
             if output_format == CliOutputFormat.JSON:
-                Console().print_json(_to_json(formatted_nodes))
+                Console().print_json(_to_json(formatted_nodes, verbose=verbose))
             else:
                 Console().print(_to_table(formatted_nodes, verbose=verbose))
 
@@ -223,7 +223,7 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
     return table
 
 
-def _to_json(nodes_info: list[_NodeListType]) -> str:
+def _to_json(nodes_info: list[_NodeListType], verbose: bool) -> str:
     """Format node list to a JSON formatted string."""
     nodes_list = []
     for row in nodes_info:
@@ -237,6 +237,9 @@ def _to_json(nodes_info: list[_NodeListType]) -> str:
             deleted_at,
             elapse_activated,
         ) = row
+
+        if status == "deleted" and not verbose:
+            continue
 
         nodes_list.append(
             {
