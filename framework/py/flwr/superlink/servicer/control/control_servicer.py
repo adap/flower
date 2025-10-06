@@ -121,7 +121,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Request download link
             url, verification = _request_download_link(identifier)
 
-            # Download FAB from FlowerHub
+            # Download FAB from Hub
             fab_file = _download_to_memory(url)
         else:
             fab_file = request.fab.content
@@ -509,24 +509,24 @@ def _request_download_link(identifier: str) -> [str, str]:
     try:
         resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
     except requests.RequestException as e:
-        raise typer.BadParameter(f"Unable to connect to FlowerHub: {e}") from e
+        raise typer.BadParameter(f"Unable to connect to Hub: {e}") from e
 
     if resp.status_code == 404:
-        raise typer.BadParameter(f"'{identifier}' not found in FlowerHub")
+        raise typer.BadParameter(f"'{identifier}' not found in Hub")
     if not resp.ok:
         raise typer.BadParameter(
-            f"FlowerHub request failed with status {resp.status_code}. "
+            f"Hub request failed with status {resp.status_code}. "
             f"Details: {resp.text}"
         )
 
     data = resp.json()
     if "url" not in data or "verification" not in data:
-        raise typer.BadParameter("Invalid response from FlowerHub")
+        raise typer.BadParameter("Invalid response from Hub")
     return data["url"], data["verification"]
 
 
 def _download_to_memory(presigned_url: str) -> bytes:
-    """Download FAB file from FlowerHub to memory."""
+    """Download FAB file from Hub to memory."""
     try:
         r = requests.get(presigned_url, timeout=60)
         r.raise_for_status()
