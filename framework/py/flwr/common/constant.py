@@ -157,6 +157,7 @@ RUN_ID_NOT_FOUND_MESSAGE = "Run ID not found"
 NO_ACCOUNT_AUTH_MESSAGE = "ControlServicer initialized without account authentication"
 NO_ARTIFACT_PROVIDER_MESSAGE = "ControlServicer initialized without artifact provider"
 PULL_UNFINISHED_RUN_MESSAGE = "Cannot pull artifacts for an unfinished run"
+NODE_AUTH_DISABLED_MESSAGE = "SuperLink initialized with node authentication disabled"
 
 
 class MessageType:

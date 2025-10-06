@@ -31,6 +31,7 @@ from flwr.common.constant import (
     LOG_STREAM_INTERVAL,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
+    NODE_AUTH_DISABLED_MESSAGE,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
     Status,
@@ -85,6 +86,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
         is_simulation: bool,
+        disable_node_auth: bool,
         authn_plugin: Optional[ControlAuthnPlugin] = None,
         artifact_provider: Optional[ArtifactProvider] = None,
     ) -> None:
@@ -92,6 +94,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
         self.is_simulation = is_simulation
+        self.disable_node_auth = disable_node_auth
         self.authn_plugin = authn_plugin
         self.artifact_provider = artifact_provider
 
@@ -406,6 +409,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> CreateNodeCliResponse:
         """Add a SuperNode."""
         log(INFO, "ControlServicer.CreateNodeCli")
+        if self.disable_node_auth:
+            context.abort(grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE)
+
         return CreateNodeCliResponse()
 
     def DeleteNodeCli(
@@ -413,6 +419,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> DeleteNodeCliResponse:
         """Remove a SuperNode."""
         log(INFO, "ControlServicer.RemoveNode")
+        if self.disable_node_auth:
+            context.abort(grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE)
         return DeleteNodeCliResponse()
 
     def ListNodesCli(
@@ -420,6 +428,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> ListNodesCliResponse:
         """List all SuperNodes."""
         log(INFO, "ControlServicer.ListNodesCli")
+        if self.disable_node_auth:
+            context.abort(grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE)
 
         nodes_info = []
         # A node created (but not connected)
