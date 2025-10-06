@@ -27,8 +27,8 @@ class NodeInfo(google.protobuf.message.Message):
     OWNER_AID_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
     CREATED_AT_FIELD_NUMBER: builtins.int
-    ACTIVATED_AT_FIELD_NUMBER: builtins.int
-    DEACTIVATED_AT_FIELD_NUMBER: builtins.int
+    LAST_ACTIVATED_AT_FIELD_NUMBER: builtins.int
+    LAST_DEACTIVATED_AT_FIELD_NUMBER: builtins.int
     DELETED_AT_FIELD_NUMBER: builtins.int
     ONLINE_UNTIL_FIELD_NUMBER: builtins.int
     HEARTBEAT_INTERVAL_FIELD_NUMBER: builtins.int
@@ -36,8 +36,8 @@ class NodeInfo(google.protobuf.message.Message):
     owner_aid: typing.Text
     status: typing.Text
     created_at: typing.Text
-    activated_at: typing.Text
-    deactivated_at: typing.Text
+    last_activated_at: typing.Text
+    last_deactivated_at: typing.Text
     deleted_at: typing.Text
     online_until: builtins.float
     heartbeat_interval: builtins.float
@@ -47,11 +47,11 @@ class NodeInfo(google.protobuf.message.Message):
         owner_aid: typing.Text = ...,
         status: typing.Text = ...,
         created_at: typing.Text = ...,
-        activated_at: typing.Text = ...,
-        deactivated_at: typing.Text = ...,
+        last_activated_at: typing.Text = ...,
+        last_deactivated_at: typing.Text = ...,
         deleted_at: typing.Text = ...,
         online_until: builtins.float = ...,
         heartbeat_interval: builtins.float = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["activated_at",b"activated_at","created_at",b"created_at","deactivated_at",b"deactivated_at","deleted_at",b"deleted_at","heartbeat_interval",b"heartbeat_interval","node_id",b"node_id","online_until",b"online_until","owner_aid",b"owner_aid","status",b"status"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["created_at",b"created_at","deleted_at",b"deleted_at","heartbeat_interval",b"heartbeat_interval","last_activated_at",b"last_activated_at","last_deactivated_at",b"last_deactivated_at","node_id",b"node_id","online_until",b"online_until","owner_aid",b"owner_aid","status",b"status"]) -> None: ...
 global___NodeInfo = NodeInfo

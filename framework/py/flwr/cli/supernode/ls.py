@@ -148,10 +148,10 @@ def _format_nodes(
 
         # Calculate elapsed times
         elapsed_time_activated = timedelta()
-        if node.activated_at:
+        if node.last_activated_at:
             end_time = datetime.fromisoformat(now_isoformat)
             elapsed_time_activated = end_time - datetime.fromisoformat(
-                node.activated_at
+                node.last_activated_at
             )
 
         formatted_nodes.append(
@@ -160,8 +160,8 @@ def _format_nodes(
                 node.owner_aid,
                 node.status,
                 _format_datetime(node.created_at),
-                _format_datetime(node.activated_at),
-                _format_datetime(node.deactivated_at),
+                _format_datetime(node.last_activated_at),
+                _format_datetime(node.last_deactivated_at),
                 _format_datetime(node.deleted_at),
                 format_timedelta(elapsed_time_activated),
             )
@@ -189,18 +189,18 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
             owner_aid,
             status,
             _,
-            activated_at,
-            deactivated_at,
+            last_activated_at,
+            last_deactivated_at,
             deleted_at,
             elapse_activated,
         ) = row
 
         if status == "online":
             status_style = "green"
-            time_at = activated_at
+            time_at = last_activated_at
         elif status == "offline":
             status_style = "bright_yellow"
-            time_at = deactivated_at
+            time_at = last_deactivated_at
         elif status == "deleted":
             if not verbose:
                 continue
