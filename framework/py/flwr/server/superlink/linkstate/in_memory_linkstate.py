@@ -625,7 +625,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 )
                 info.heartbeat_interval = heartbeat_interval
                 return True
-        return False
+            return False
 
     def acknowledge_app_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
         """Acknowledge a heartbeat received from a ServerApp for a given run.

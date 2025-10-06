@@ -874,16 +874,16 @@ class StateTest(CoreStateTest):
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         node_ids = [state.create_node(self.create_public_key(), 10) for _ in range(100)]
         for node_id in node_ids[:70]:
-            state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
+            assert state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
         for node_id in node_ids[70:]:
-            state.acknowledge_node_heartbeat(node_id, heartbeat_interval=90)
+            assert state.acknowledge_node_heartbeat(node_id, heartbeat_interval=90)
 
         # Execute
-        # Test with current_time + 70s
+        # Test with current_time + 90s
         # node_ids[:70] are online until current_time + 60s (HEARTBEAT_PATIENCE * 30s)
         # node_ids[70:] are online until current_time + 180s (HEARTBEAT_PATIENCE * 90s)
         # As a result, only node_ids[70:] will be returned by get_nodes().
-        future_dt = now() + timedelta(seconds=70)
+        future_dt = now() + timedelta(seconds=90)
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = future_dt
             actual_node_ids = state.get_nodes(run_id)
