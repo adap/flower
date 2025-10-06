@@ -260,7 +260,6 @@ class AuthzType:
     """Account authorization types."""
 
     NOOP = "noop"
-    FPGA = "fpga"
 
     def __new__(cls) -> AuthzType:
         """Prevent instantiation."""
