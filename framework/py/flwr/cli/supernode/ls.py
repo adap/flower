@@ -65,6 +65,13 @@ def ls(  # pylint: disable=R0914
             help="Format output using 'default' view or 'json'",
         ),
     ] = CliOutputFormat.DEFAULT,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            "--verbose",
+            help="Enable verbose output",
+        ),
+    ] = False,
 ) -> None:
     """List SuperNodes in the federation."""
     # Resolve command used (list or ls)
@@ -95,7 +102,7 @@ def ls(  # pylint: disable=R0914
             if output_format == CliOutputFormat.JSON:
                 Console().print_json(_to_json(formatted_nodes))
             else:
-                Console().print(_to_table(formatted_nodes))
+                Console().print(_to_table(formatted_nodes, verbose=verbose))
 
         finally:
             if channel:
@@ -162,7 +169,7 @@ def _format_nodes(
     return formatted_nodes
 
 
-def _to_table(nodes_info: list[_NodeListType]) -> Table:
+def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
     """Format the provided node list to a rich Table."""
     table = Table(header_style="bold cyan", show_lines=True)
 
@@ -194,8 +201,13 @@ def _to_table(nodes_info: list[_NodeListType]) -> Table:
             status_style = "bright_yellow"
             time_at = deactivated_at
         elif status == "deleted":
+            if not verbose:
+                continue
             status_style = "red"
             time_at = deleted_at
+        elif status == "created":
+            status_style = "blue"
+            time_at = "N/A"
         else:
             raise ValueError(f"Unexpected node status '{status}'")
 
