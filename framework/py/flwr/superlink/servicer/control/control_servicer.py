@@ -110,6 +110,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             return StartRunResponse()
 
         flwr_aid = shared_account_info.get().flwr_aid
+        _check_flwr_aid_exists(flwr_aid, context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
         fab_file = request.fab.content
@@ -224,6 +225,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # If no `run_id` is specified and account auth is enabled,
             # return run IDs for the authenticated account
             flwr_aid = shared_account_info.get().flwr_aid
+            _check_flwr_aid_exists(flwr_aid, context)
             run_ids = state.get_run_ids(flwr_aid=flwr_aid)
         # Build a set of run IDs for `flwr ls --run-id <run_id>`
         else:
@@ -419,17 +421,23 @@ def _create_list_runs_response(
     )
 
 
+def _check_flwr_aid_exists(
+    flwr_aid: Optional[str], context: grpc.ServicerContext
+) -> None:
+    """Guard clause to check if `flwr_aid` exists."""
+    if flwr_aid is None:
+        context.abort(
+            grpc.StatusCode.PERMISSION_DENIED,
+            "️⛔️ Failed to fetch the account information.",
+        )
+        raise RuntimeError  # This line is unreachable
+
+
 def _check_flwr_aid_in_run(
     flwr_aid: Optional[str], run: Run, context: grpc.ServicerContext
 ) -> None:
     """Guard clause to check if `flwr_aid` matches the run's `flwr_aid`."""
-    # `flwr_aid` must not be None. Abort if it is None.
-    if flwr_aid is None:
-        context.abort(
-            grpc.StatusCode.INTERNAL,
-            "Flower account is not available. This should never happen.",
-        )
-
+    _check_flwr_aid_exists(flwr_aid, context)
     # `run.flwr_aid` must not be an empty string. Abort if it is empty.
     run_flwr_aid = run.flwr_aid
     if not run_flwr_aid:
