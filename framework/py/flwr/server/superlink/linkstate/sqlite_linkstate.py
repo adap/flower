@@ -21,7 +21,6 @@ import json
 import re
 import secrets
 import sqlite3
-import time
 from collections.abc import Sequence
 from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
@@ -451,7 +450,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         ret: dict[str, Message] = {}
 
         # Verify Message IDs
-        current = time.time()
+        current = now().timestamp()
         query = f"""
             SELECT *
             FROM message_ins
@@ -613,13 +612,13 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             "VALUES (?, ?, ?, ?)"
         )
 
-        # Mark the node online util time.time() + heartbeat_interval
+        # Mark the node online until now().timestamp() + heartbeat_interval
         try:
             self.query(
                 query,
                 (
                     sint64_node_id,
-                    time.time() + heartbeat_interval,
+                    now().timestamp() + heartbeat_interval,
                     heartbeat_interval,
                     public_key,
                 ),
@@ -671,7 +670,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Get nodes
         query = "SELECT node_id FROM node WHERE online_until > ?;"
-        rows = self.query(query, (time.time(),))
+        rows = self.query(query, (now().timestamp(),))
 
         # Convert sint64 node_ids to uint64
         result: set[int] = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
@@ -1013,7 +1012,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         self.query(
             query,
             (
-                time.time() + HEARTBEAT_PATIENCE * heartbeat_interval,
+                now().timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval,
                 heartbeat_interval,
                 sint64_node_id,
             ),
@@ -1143,7 +1142,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         message_ins = rows[0]
         created_at = message_ins["created_at"]
         ttl = message_ins["ttl"]
-        current_time = time.time()
+        current_time = now().timestamp()
 
         # Check if Message is expired
         if ttl is not None and created_at + ttl <= current_time:

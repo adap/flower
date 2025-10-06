@@ -17,7 +17,6 @@
 
 import secrets
 import threading
-import time
 from bisect import bisect_right
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -137,7 +136,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Find Message for node_id that were not delivered yet
         message_ins_list: list[Message] = []
-        current_time = time.time()
+        current_time = now().timestamp()
         with self.lock:
             for _, msg_ins in self.message_ins_store.items():
                 if (
@@ -191,7 +190,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return None
 
             ins_metadata = msg_ins.metadata
-            if ins_metadata.created_at + ins_metadata.ttl <= time.time():
+            if ins_metadata.created_at + ins_metadata.ttl <= now().timestamp():
                 log(
                     ERROR,
                     "Failed to store Message: the message it is replying to "
@@ -239,7 +238,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         ret: dict[str, Message] = {}
 
         with self.lock:
-            current = time.time()
+            current = now().timestamp()
 
             # Verify Message IDs
             ret = verify_message_ids(

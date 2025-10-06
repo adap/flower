@@ -16,7 +16,6 @@
 # pylint: disable=invalid-name, too-many-lines, R0904, R0913
 
 import tempfile
-import time
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timedelta, timezone
@@ -880,12 +879,13 @@ class StateTest(CoreStateTest):
             state.acknowledge_node_heartbeat(node_id, heartbeat_interval=90)
 
         # Execute
-        current_time = time.time()
         # Test with current_time + 70s
         # node_ids[:70] are online until current_time + 60s (HEARTBEAT_PATIENCE * 30s)
         # node_ids[70:] are online until current_time + 180s (HEARTBEAT_PATIENCE * 90s)
         # As a result, only node_ids[70:] will be returned by get_nodes().
-        with patch("time.time", side_effect=lambda: current_time + 70):
+        future_dt = now() + timedelta(seconds=70)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = future_dt
             actual_node_ids = state.get_nodes(run_id)
 
         # Assert
@@ -982,18 +982,21 @@ class StateTest(CoreStateTest):
         # Create and store reply Messages
         res_message_0 = Message(content=RecordDict(), reply_to=in_message_0)
         # pylint: disable-next=W0212
-        res_message_0.metadata._message_id = str(uuid4())  # type: ignore
-        state.store_message_res(res_message_0)
+        res_message_0.metadata._message_id = res_message_0.object_id  # type: ignore
+        assert state.store_message_res(res_message_0) is not None
 
         # Execute
-        current_time = time.time()
         # Test with current_time + 100s
         # node_id_0 remain online until current_time + 180s (HEARTBEAT_PATIENCE * 90s)
         # node_id_1 remain online until current_time + 60s (HEARTBEAT_PATIENCE * 30s)
         # As a result, a reply message with NODE_UNAVAILABLE
         # error will generate for node_id_1.
-        with patch("time.time", side_effect=lambda: current_time + 100):
+        future_dt = now() + timedelta(seconds=100)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = future_dt
             res_message_list = state.get_message_res({message_id_0, message_id_1})
+            print(res_message_list[0])
+            print(f"{node_id_0=}, {node_id_1=}")
 
         # Assert
         assert len(res_message_list) == 2
@@ -1021,13 +1024,12 @@ class StateTest(CoreStateTest):
         msg_to_reply_to = state.get_message_ins(node_id=node_id, limit=2)[0]
         reply_msg = Message(RecordDict(), reply_to=msg_to_reply_to)
 
+        # Execute
         # This patch respresents a very slow communication/ClientApp execution
         # that triggers TTL
-        with patch(
-            "time.time",
-            side_effect=lambda: msg.metadata.created_at + msg.metadata.ttl + 0.1,
-        ):  # Expired by 0.1 seconds
-            # Execute
+        future_dt = now() + timedelta(seconds=msg.metadata.ttl)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = future_dt
             result = state.store_message_res(reply_msg)
 
         # Assert
@@ -1038,7 +1040,7 @@ class StateTest(CoreStateTest):
     # pylint: disable=W0212
     def test_store_message_res_limit_ttl(self) -> None:
         """Test store_message_res regarding the TTL in reply Message."""
-        current_time = time.time()
+        current_time = now().timestamp()
 
         test_cases = [
             (
@@ -1109,14 +1111,16 @@ class StateTest(CoreStateTest):
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
             )
         )
-        msg.metadata.created_at = time.time() - 5
+        msg.metadata.created_at = now().timestamp() - 5
         msg.metadata.ttl = 5.1
 
         # Execute
         state.store_message_ins(message=msg)
 
         # Assert
-        with patch("time.time", side_effect=lambda: msg.metadata.created_at + 6.1):
+        future_dt = now() + timedelta(seconds=1.1)  # over TTL limit by 1 second
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = future_dt
             message_list = state.get_message_ins(node_id=2, limit=None)
             assert len(message_list) == 0
 
@@ -1137,11 +1141,10 @@ class StateTest(CoreStateTest):
         ins_msg1_id = state.store_message_ins(msg1)
         assert ins_msg1_id
         assert state.num_message_ins() == 1
-        with patch(
-            "time.time",
-            side_effect=lambda: msg1.metadata.created_at + msg1.metadata.ttl + 0.1,
-        ):  # over TTL limit
 
+        future_dt = now() + timedelta(seconds=msg1.metadata.ttl + 0.1)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = future_dt  # over TTL limit
             res_msg = state.get_message_res({ins_msg1_id})[0]
             assert res_msg.has_error()
             assert res_msg.error.code == ErrorCode.MESSAGE_UNAVAILABLE
