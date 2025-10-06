@@ -305,6 +305,16 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             # Verify the received FAB
             #########################
 
+            verified_fab_hash = hashlib.sha256(fab.content).hexdigest()
+            if verified_fab_hash != fab.hash_string:
+                flwr_exit(
+                    ExitCode.SUPERNODE_FAB_HASH_MISMATCH,
+                    f"The SHA256 hash computed on the FAB ({fab_hash_computed}) did not",
+                    f" match the expected hash ({fab.hash_string})",
+                )
+            
+            # Logic to verify signatures over the FAB if needed
+
             # Initialize the context
             run_cfg = get_fused_config_from_fab(fab.content, run_info)
             run_ctx = Context(

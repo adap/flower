@@ -43,6 +43,7 @@ class ExitCode:
     SUPERNODE_REST_ADDRESS_INVALID = 300
     SUPERNODE_NODE_AUTH_KEYS_REQUIRED = 301
     SUPERNODE_NODE_AUTH_KEYS_INVALID = 302
+    SUPERNODE_FAB_HASH_MISMATCH = 303
 
     # SuperExec-specific exit codes (400-499)
     SUPEREXEC_INVALID_PLUGIN_CONFIG = 400
@@ -112,6 +113,10 @@ EXIT_CODE_HELP = {
         "Please ensure that the file path points to a valid private/public key "
         "file and try again."
     ),
+    ExitCode.SUPERNODE_FAB_HASH_MISMATCH: (
+        "The received Flower application bundle (FAB) did not match the expected 
+         version."
+    ), 
     # SuperExec-specific exit codes (400-499)
     ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (
         "The YAML configuration for the SuperExec plugin is invalid."
