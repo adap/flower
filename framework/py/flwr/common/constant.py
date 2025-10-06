@@ -111,8 +111,8 @@ MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 
 # Constants for account authentication
 CREDENTIALS_DIR = ".credentials"
-AUTH_TYPE_JSON_KEY = "auth-type"  # For key name in JSON file
-AUTH_TYPE_YAML_KEY = "auth_type"  # For key name in YAML file
+AUTHN_TYPE_JSON_KEY = "authn-type"  # For key name in JSON file
+AUTHN_TYPE_YAML_KEY = "authn_type"  # For key name in YAML file
 ACCESS_TOKEN_KEY = "flwr-oidc-access-token"
 REFRESH_TOKEN_KEY = "flwr-oidc-refresh-token"
 
@@ -245,13 +245,13 @@ class CliOutputFormat:
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
 
-class AuthType:
+class AuthnType:
     """Account authentication types."""
 
     NOOP = "noop"
     OIDC = "oidc"
 
-    def __new__(cls) -> AuthType:
+    def __new__(cls) -> AuthnType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
