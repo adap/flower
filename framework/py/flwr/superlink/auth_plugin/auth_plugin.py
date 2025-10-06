@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract classes for Flower User Auth Plugin."""
+"""Abstract classes for Flower account auth plugins."""
 
 
 from abc import ABC, abstractmethod
@@ -20,15 +20,19 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional, Union
 
-from flwr.common.typing import AccountInfo, UserAuthCredentials, UserAuthLoginDetails
+from flwr.common.typing import (
+    AccountAuthCredentials,
+    AccountAuthLoginDetails,
+    AccountInfo,
+)
 
 
-class ControlAuthPlugin(ABC):
-    """Abstract Flower Auth Plugin class for ControlServicer.
+class ControlAuthnPlugin(ABC):
+    """Abstract Flower Authentication Plugin class for ControlServicer.
 
     Parameters
     ----------
-    user_auth_config_path : Path
+    account_auth_config_path : Path
         Path to the YAML file containing the authentication configuration.
     verify_tls_cert : bool
         Boolean indicating whether to verify the TLS certificate
@@ -38,13 +42,13 @@ class ControlAuthPlugin(ABC):
     @abstractmethod
     def __init__(
         self,
-        user_auth_config_path: Path,
+        account_auth_config_path: Path,
         verify_tls_cert: bool,
     ):
         """Abstract constructor."""
 
     @abstractmethod
-    def get_login_details(self) -> Optional[UserAuthLoginDetails]:
+    def get_login_details(self) -> Optional[AccountAuthLoginDetails]:
         """Get the login details."""
 
     @abstractmethod
@@ -54,7 +58,7 @@ class ControlAuthPlugin(ABC):
         """Validate authentication tokens in the provided metadata."""
 
     @abstractmethod
-    def get_auth_tokens(self, device_code: str) -> Optional[UserAuthCredentials]:
+    def get_auth_tokens(self, device_code: str) -> Optional[AccountAuthCredentials]:
         """Get authentication tokens."""
 
     @abstractmethod
@@ -71,7 +75,7 @@ class ControlAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
 
     Parameters
     ----------
-    user_auth_config_path : Path
+    account_auth_config_path : Path
         Path to the YAML file containing the authorization configuration.
     verify_tls_cert : bool
         Boolean indicating whether to verify the TLS certificate
@@ -79,9 +83,9 @@ class ControlAuthzPlugin(ABC):  # pylint: disable=too-few-public-methods
     """
 
     @abstractmethod
-    def __init__(self, user_auth_config_path: Path, verify_tls_cert: bool):
+    def __init__(self, account_auth_config_path: Path, verify_tls_cert: bool):
         """Abstract constructor."""
 
     @abstractmethod
-    def verify_user_authorization(self, account_info: AccountInfo) -> bool:
-        """Verify user authorization request."""
+    def authorize(self, account_info: AccountInfo) -> bool:
+        """Verify account authorization request."""

@@ -27,11 +27,11 @@ import grpc
 import typer
 
 from flwr.common.constant import (
-    AUTH_TYPE_JSON_KEY,
+    AUTHN_TYPE_JSON_KEY,
     CREDENTIALS_DIR,
     FLWR_DIR,
+    NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
-    NO_USER_AUTH_MESSAGE,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
 )
@@ -42,7 +42,7 @@ from flwr.common.grpc import (
 )
 
 from .auth_plugin import CliAuthPlugin, get_cli_auth_plugins
-from .cli_user_auth_interceptor import CliUserAuthInterceptor
+from .cli_account_auth_interceptor import CliAccountAuthInterceptor
 from .config_utils import validate_certificate_in_federation_config
 
 
@@ -165,8 +165,8 @@ def get_sha256_hash(file_path_or_int: Union[Path, int]) -> str:
     return sha256.hexdigest()
 
 
-def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
-    """Return the path to the user auth config file.
+def get_account_auth_config_path(root_dir: Path, federation: str) -> Path:
+    """Return the path to the account auth config file.
 
     Additionally, a `.gitignore` file will be created in the Flower directory to
     include the `.credentials` folder to be excluded from git. If the `.gitignore`
@@ -216,29 +216,43 @@ def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
     return credentials_dir / f"{federation}.json"
 
 
+def account_auth_enabled(federation_config: dict[str, Any]) -> bool:
+    """Check if account authentication is enabled in the federation config."""
+    enabled: bool = federation_config.get("enable-user-auth", False)
+    enabled |= federation_config.get("enable-account-auth", False)
+    if "enable-user-auth" in federation_config:
+        typer.secho(
+            "`enable-user-auth` is deprecated and will be removed in a future "
+            "release. Please use `enable-account-auth` instead.",
+            fg=typer.colors.YELLOW,
+            bold=True,
+        )
+    return enabled
+
+
 def try_obtain_cli_auth_plugin(
     root_dir: Path,
     federation: str,
     federation_config: dict[str, Any],
-    auth_type: Optional[str] = None,
+    authn_type: Optional[str] = None,
 ) -> Optional[CliAuthPlugin]:
-    """Load the CLI-side user auth plugin for the given auth type."""
-    # Check if user auth is enabled
-    if not federation_config.get("enable-user-auth", False):
+    """Load the CLI-side account auth plugin for the given authn type."""
+    # Check if account auth is enabled
+    if not account_auth_enabled(federation_config):
         return None
 
-    config_path = get_user_auth_config_path(root_dir, federation)
+    config_path = get_account_auth_config_path(root_dir, federation)
 
-    # Get the auth type from the config if not provided
-    # auth_type will be None for all CLI commands except login
-    if auth_type is None:
+    # Get the authn type from the config if not provided
+    # authn_type will be None for all CLI commands except login
+    if authn_type is None:
         try:
             with config_path.open("r", encoding="utf-8") as file:
                 json_file = json.load(file)
-            auth_type = json_file[AUTH_TYPE_JSON_KEY]
+            authn_type = json_file[AUTHN_TYPE_JSON_KEY]
         except (FileNotFoundError, KeyError):
             typer.secho(
-                "❌ Missing or invalid credentials for user authentication. "
+                "❌ Missing or invalid credentials for account authentication. "
                 "Please run `flwr login` to authenticate.",
                 fg=typer.colors.RED,
                 bold=True,
@@ -248,10 +262,10 @@ def try_obtain_cli_auth_plugin(
     # Retrieve auth plugin class and instantiate it
     try:
         all_plugins: dict[str, type[CliAuthPlugin]] = get_cli_auth_plugins()
-        auth_plugin_class = all_plugins[auth_type]
+        auth_plugin_class = all_plugins[authn_type]
         return auth_plugin_class(config_path)
     except KeyError:
-        typer.echo(f"❌ Unknown user authentication type: {auth_type}")
+        typer.echo(f"❌ Unknown account authentication type: {authn_type}")
         raise typer.Exit(code=1) from None
     except ImportError:
         typer.echo("❌ No authentication plugins are currently supported.")
@@ -266,13 +280,13 @@ def init_channel(
         app, federation_config
     )
 
-    # Initialize the CLI-side user auth interceptor
+    # Initialize the CLI-side account auth interceptor
     interceptors: list[grpc.UnaryUnaryClientInterceptor] = []
     if auth_plugin is not None:
         # Check if TLS is enabled. If not, raise an error
         if insecure:
             typer.secho(
-                "❌ User authentication requires TLS to be enabled. "
+                "❌ Account authentication requires TLS to be enabled. "
                 "Remove `insecure = true` from the federation configuration.",
                 fg=typer.colors.RED,
                 bold=True,
@@ -280,7 +294,7 @@ def init_channel(
             raise typer.Exit(code=1)
 
         auth_plugin.load_tokens()
-        interceptors.append(CliUserAuthInterceptor(auth_plugin))
+        interceptors.append(CliAccountAuthInterceptor(auth_plugin))
 
     # Create the gRPC channel
     channel = create_channel(
@@ -314,9 +328,9 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
             )
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.UNIMPLEMENTED:
-            if e.details() == NO_USER_AUTH_MESSAGE:  # pylint: disable=E1101
+            if e.details() == NO_ACCOUNT_AUTH_MESSAGE:  # pylint: disable=E1101
                 typer.secho(
-                    "❌ User authentication is not enabled on this SuperLink.",
+                    "❌ Account authentication is not enabled on this SuperLink.",
                     fg=typer.colors.RED,
                     bold=True,
                 )

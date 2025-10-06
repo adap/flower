@@ -38,7 +38,7 @@ from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
-    AUTH_TYPE_YAML_KEY,
+    AUTHN_TYPE_YAML_KEY,
     AUTHZ_TYPE_YAML_KEY,
     CLIENT_OCTET,
     CONTROL_API_DEFAULT_SERVER_ADDRESS,
@@ -71,7 +71,7 @@ from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.artifact_provider import ArtifactProvider
-from flwr.superlink.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
+from flwr.superlink.auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
@@ -83,13 +83,13 @@ from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
-P = TypeVar("P", ControlAuthPlugin, ControlAuthzPlugin)
+P = TypeVar("P", ControlAuthnPlugin, ControlAuthzPlugin)
 
 
 try:
     from flwr.ee import (
         add_ee_args_superlink,
-        get_control_auth_plugins,
+        get_control_authn_plugins,
         get_control_authz_plugins,
         get_control_event_log_writer_plugins,
         get_ee_artifact_provider,
@@ -101,7 +101,7 @@ except ImportError:
     def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
         """Add EE-specific arguments to the parser."""
 
-    def get_control_auth_plugins() -> dict[str, type[ControlAuthPlugin]]:
+    def get_control_authn_plugins() -> dict[str, type[ControlAuthnPlugin]]:
         """Return all Control API authentication plugins."""
         raise NotImplementedError("No authentication plugins are currently supported.")
 
@@ -189,16 +189,23 @@ def run_superlink() -> None:
     # Obtain certificates
     certificates = try_obtain_server_certificates(args)
 
-    # Disable the user auth TLS check if args.disable_oidc_tls_cert_verification is
+    # Disable the account auth TLS check if args.disable_oidc_tls_cert_verification is
     # provided
     verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", None)
 
-    auth_plugin: Optional[ControlAuthPlugin] = None
+    authn_plugin: Optional[ControlAuthnPlugin] = None
     authz_plugin: Optional[ControlAuthzPlugin] = None
     event_log_plugin: Optional[EventLogWriterPlugin] = None
-    # Load the auth plugin if the args.user_auth_config is provided
+    # Load the auth plugin if the args.account_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
-        auth_plugin, authz_plugin = _try_obtain_control_auth_plugins(
+        log(
+            WARN,
+            "The `--user-auth-config` flag is deprecated and will be removed in a "
+            "future release. Please use `--account-auth-config` instead.",
+        )
+        args.account_auth_config = cfg_path
+    if cfg_path := getattr(args, "account_auth_config", None):
+        authn_plugin, authz_plugin = _try_obtain_control_auth_plugins(
             Path(cfg_path), verify_tls_cert
         )
         # Enable event logging if the args.enable_event_log is True
@@ -229,7 +236,7 @@ def run_superlink() -> None:
         objectstore_factory=objectstore_factory,
         certificates=certificates,
         is_simulation=is_simulation,
-        auth_plugin=auth_plugin,
+        authn_plugin=authn_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
         artifact_provider=artifact_provider,
@@ -444,7 +451,7 @@ def _try_load_public_keys_node_authentication(
 
 def _try_obtain_control_auth_plugins(
     config_path: Path, verify_tls_cert: bool
-) -> tuple[ControlAuthPlugin, ControlAuthzPlugin]:
+) -> tuple[ControlAuthnPlugin, ControlAuthzPlugin]:
     """Obtain Control API authentication and authorization plugins."""
     # Load YAML file
     with config_path.open("r", encoding="utf-8") as file:
@@ -459,7 +466,7 @@ def _try_obtain_control_auth_plugins(
             plugins: dict[str, type[P]] = loader()
             plugin_cls: type[P] = plugins[auth_plugin_name]
             return plugin_cls(
-                user_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
+                account_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
             )
         except KeyError:
             if auth_plugin_name:
@@ -471,11 +478,22 @@ def _try_obtain_control_auth_plugins(
         except NotImplementedError:
             sys.exit(f"No {section} plugins are currently supported.")
 
+    # Warn deprecated authn_type key
+    if "authn_type" in config["authentication"]:
+        log(
+            WARN,
+            "The `authn_type` key in the authentication configuration is deprecated. "
+            "Use `%s` instead.",
+            AUTHN_TYPE_YAML_KEY,
+        )
+        authn_type = config["authentication"].pop("authn_type")
+        config["authentication"][AUTHN_TYPE_YAML_KEY] = authn_type
+
     # Load authentication plugin
-    auth_plugin = _load_plugin(
+    authn_plugin = _load_plugin(
         section="authentication",
-        yaml_key=AUTH_TYPE_YAML_KEY,
-        loader=get_control_auth_plugins,
+        yaml_key=AUTHN_TYPE_YAML_KEY,
+        loader=get_control_authn_plugins,
     )
 
     # Load authorization plugin
@@ -485,7 +503,7 @@ def _try_obtain_control_auth_plugins(
         loader=get_control_authz_plugins,
     )
 
-    return auth_plugin, authz_plugin
+    return authn_plugin, authz_plugin
 
 
 def _try_obtain_control_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]:

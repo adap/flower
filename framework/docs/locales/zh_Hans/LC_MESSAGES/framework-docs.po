@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-01 00:08+0000\n"
+"POT-Creation-Date: 2025-10-04 00:08+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -2295,7 +2295,7 @@ msgstr "成为贡献者"
 #: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:22
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:17
 #: ../../source/docker/tutorial-quickstart-docker.rst:15
-#: ../../source/how-to-authenticate-users.rst:26
+#: ../../source/how-to-authenticate-accounts.rst:26
 #: ../../source/how-to-configure-audit-logging.rst:78
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:22
 msgid "Prerequisites"
@@ -6025,14 +6025,14 @@ msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:175
 #, fuzzy
-msgid "Enable User Authentication"
+msgid "Enable Account Authentication"
 msgstr "验证安装"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:177
 msgid ""
-"User authentication can be enabled if you're using the Flower Enterprise "
-"Edition (EE) Docker images. This is configured in the `global.userAuth` "
-"section of your `values.yml` file."
+"Account authentication can be enabled if you're using the Flower "
+"Enterprise Edition (EE) Docker images. This is configured in the "
+"`global.userAuth` section of your `values.yml` file."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:180
@@ -6046,7 +6046,7 @@ msgid "Explanation of Parameters:"
 msgstr "更新模型参数"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:198
-msgid "`auth_type`: The authentication mechanism being used (e.g., oidc)."
+msgid "`authn_type`: The authentication mechanism being used (e.g., oidc)."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:199
@@ -6060,7 +6060,7 @@ msgid "`token_url`: The URL for retrieving access tokens."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:201
-msgid "`validate_url`: The endpoint for validating user authentication."
+msgid "`validate_url`: The endpoint for validating account authentication."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:202
@@ -6078,12 +6078,14 @@ msgstr "使用现有策略"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:207
 msgid ""
-"To use an existing secret that contains the user authentication "
+"To use an existing secret that contains the account authentication "
 "configuration, set `existingSecret` to the name of the existing secret:"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:218
-msgid "Note that the existing secret must contain the key `user-auth-config.yml`:"
+msgid ""
+"Note that the existing secret must contain the key `account-auth-"
+"config.yml`:"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:233
@@ -6500,14 +6502,14 @@ msgstr ""
 #: flwr.app.metadata.Metadata flwr.client.client.Client.evaluate
 #: flwr.client.client.Client.fit flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
 #: flwr.client.mod.localdp_mod.LocalDpMod
 #: flwr.client.numpy_client.NumPyClient.evaluate
 #: flwr.client.numpy_client.NumPyClient.fit
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
 #: flwr.clientapp.mod.localdp_mod.LocalDpMod flwr.common.context.Context
 #: flwr.common.message.Message flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
@@ -9457,6 +9459,151 @@ msgid ""
 "|message_link|_:"
 msgstr ""
 
+#: ../../source/how-to-authenticate-accounts.rst:-1
+msgid ""
+"Configure SuperLink for account authentication and authorization. "
+"Private-by-default runs securely with OpenID Connect and OpenFGA."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:6
+#, fuzzy
+msgid "Authenticate Accounts via OpenID Connect"
+msgstr "验证超级节点"
+
+#: ../../source/how-to-authenticate-accounts.rst:10
+msgid ""
+"OpenID Connect Authentication is a Flower Enterprise feature. See `Flower"
+" Enterprise <https://flower.ai/enterprise>`_ for details."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:13
+msgid ""
+"In this guide, you'll learn how to configure SuperLink with account-level"
+" authentication and authorization, and how to log in using the ``flwr`` "
+"CLI. Once logged in, any Flower accounts that are authorized on the "
+"SuperLink can run Flower CLI commands that interact with the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:20
+msgid ""
+"With account authentication and authorization enabled, only accounts that"
+" have submitted the ``flwr run`` command can view and interact with their"
+" runs. This means that your runs are **private by default**, ensuring "
+"that only authorized accounts can access them."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:28
+msgid ""
+"To enable account authentication and authorization, the SuperLink must be"
+" deployed with an `OpenID Connect (OIDC) <https://openid.net/developers"
+"/how-connect-works/>`_ provider and an `OpenFGA <https://openfga.dev/>`_ "
+"server. The OIDC provider is used for account authentication, while "
+"OpenFGA is used for fine-grained access control. This means an "
+"authenticated account can only run ``flwr`` CLI commands on the SuperLink"
+" if they have been granted the necessary permissions by the SuperLink "
+"administrator. When enabled, both account authentication and "
+"authorization must be configured on the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:37
+#, fuzzy
+msgid "Enable Account Authentication and Authorization on the SuperLink"
+msgstr "在 :code:`SuperLink` 中启用节点验证"
+
+#: ../../source/how-to-authenticate-accounts.rst:39
+#, fuzzy
+msgid "Create a YAML configuration file with the following content:"
+msgstr "创建包含以下更改的拉取请求："
+
+#: ../../source/how-to-authenticate-accounts.rst:63
+msgid ""
+"Save this file as ``account-auth-config.yaml``. Then pass it to the "
+"SuperLink via the ``--account-auth-config`` flag when deploying the "
+"SuperLink:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:74
+msgid ""
+"To authorize an account, the SuperLink administrator must add the "
+"account's OIDC ``sub`` claim to the OpenFGA store with the appropriate "
+"relation."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:79
+msgid ""
+"Starting with Flower ``v1.23.0``, the following options/keys have been "
+"renamed:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:81
+msgid "``auth_type`` → ``authn_type`` (in YAML configuration)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:82
+msgid "``auth_url`` → ``authn_url`` (in YAML configuration)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:83
+msgid "``--user-auth-config`` → ``--account-auth-config`` (in SuperLink CLI)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:86
+#, fuzzy
+msgid "Login to the SuperLink"
+msgstr "flower-superlink"
+
+#: ../../source/how-to-authenticate-accounts.rst:88
+msgid ""
+"Once a SuperLink with account authentication and authorization is up and "
+"running, an account can interface with it after installing the ``flwr`` "
+"PyPI package via the Flower CLI. Then, ensure that the ``enable-account-"
+"auth`` field is set to ``true`` in the federation section in the "
+"``pyproject.toml`` of the Flower app you want to run:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:105
+#, fuzzy
+msgid ""
+"Account authentication and authorization is only supported with TLS "
+"connections."
+msgstr "在 :code:`SuperLink` 中启用节点验证"
+
+#: ../../source/how-to-authenticate-accounts.rst:107
+msgid ""
+"Now, you need to login first before other CLI commands can be executed. "
+"Upon executing ``flwr login``, a URL will be returned by the "
+"authentication plugin in the SuperLink. Click on it and authenticate "
+"directly against the OIDC provider."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:121
+msgid ""
+"Once the login is successful, the credentials returned by the OIDC "
+"provider via the SuperLink will be saved to the app's directory under "
+"``.flwr/.credentials/<federation-name>.json``. The tokens stored in this "
+"file will be sent transparently with each subsequent ``flwr`` CLI request"
+" to the SuperLink, and it will relay them to OIDC provider to perform the"
+" authentication checks."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:128
+msgid "Run authorized ``flwr`` CLI commands"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:130
+msgid ""
+"With the above steps completed, you can now run ``flwr`` CLI commands "
+"against a SuperLink setup with account authentication and authorization. "
+"For example, as an authorized account, you can run the ``flwr run`` "
+"command to start a Flower app:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:142
+msgid ""
+"If the account does not have the necessary permissions to run the "
+"command, an error will be returned:"
+msgstr ""
+
 #: ../../source/how-to-authenticate-supernodes.rst:-1
 msgid ""
 "Enable authentication for SuperNodes and SuperLink in Flower with public "
@@ -9676,131 +9823,6 @@ msgid ""
 "federation where each component runs in its own Docker container. You can"
 " make use of TLS and other security features in Flower such as implement "
 "a SuperNode authentication mechanism."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:-1
-msgid ""
-"Configure SuperLink for user authentication and authorization. Private-"
-"by-default runs securely with OpenID Connect and OpenFGA."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:6
-#, fuzzy
-msgid "Authenticate Users via OpenID Connect"
-msgstr "验证超级节点"
-
-#: ../../source/how-to-authenticate-users.rst:10
-msgid ""
-"OpenID Connect Authentication is a Flower Enterprise feature. See `Flower"
-" Enterprise <https://flower.ai/enterprise>`_ for details."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:13
-msgid ""
-"In this guide, you'll learn how to configure SuperLink with user-level "
-"authentication and authorization, and how to log in using the ``flwr`` "
-"CLI. Once logged in, any users that are authorized on the SuperLink can "
-"run Flower CLI commands that interact with the SuperLink."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:20
-msgid ""
-"With user authentication and authorization enabled, only users that have "
-"submitted the ``flwr run`` command can view and interact with their runs."
-" This means that your runs are **private by default**, ensuring that only"
-" authorized users can access them."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:28
-msgid ""
-"To enable user authentication and authorization, the SuperLink must be "
-"deployed with an `OpenID Connect (OIDC) <https://openid.net/developers"
-"/how-connect-works/>`_ provider and an `OpenFGA <https://openfga.dev/>`_ "
-"server. The OIDC provider is used for user authentication, while OpenFGA "
-"is used for fine-grained access control. This means an authenticated user"
-" can only run ``flwr`` CLI commands on the SuperLink if they have been "
-"granted the necessary permissions by the SuperLink administrator. When "
-"enabled, both user authentication and authorization must be configured on"
-" the SuperLink."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:37
-#, fuzzy
-msgid "Enable User Authentication and Authorization on the SuperLink"
-msgstr "在 :code:`SuperLink` 中启用节点验证"
-
-#: ../../source/how-to-authenticate-users.rst:39
-#, fuzzy
-msgid "Create a YAML configuration file with the following content:"
-msgstr "创建包含以下更改的拉取请求："
-
-#: ../../source/how-to-authenticate-users.rst:63
-msgid ""
-"Save this file as ``user-auth-config.yaml``. Then pass it to the "
-"SuperLink via the ``--user-auth-config`` flag when deploying the "
-"SuperLink:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:74
-msgid ""
-"To authorize a user, the SuperLink administrator must add the user's OIDC"
-" ``sub`` claim to the OpenFGA store with the appropriate relation."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:78
-#, fuzzy
-msgid "Login to the SuperLink"
-msgstr "flower-superlink"
-
-#: ../../source/how-to-authenticate-users.rst:80
-msgid ""
-"Once a SuperLink with user authentication and authorization is up and "
-"running, a user can interface with it after installing the ``flwr`` PyPI "
-"package via the Flower CLI. Then, ensure that the ``enable-user-auth`` "
-"field is set to ``true`` in the federation section in the "
-"``pyproject.toml`` of the Flower app you want to run:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:97
-msgid ""
-"User authentication and authorization is only supported with TLS "
-"connections."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:99
-msgid ""
-"Now, you need to login first before other CLI commands can be executed. "
-"Upon executing ``flwr login``, a URL will be returned by the "
-"authentication plugin in the SuperLink. Click on it and authenticate "
-"directly against the OIDC provider."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:113
-msgid ""
-"Once the login is successful, the credentials returned by the OIDC "
-"provider via the SuperLink will be saved to the app's directory under "
-"``.flwr/.credentials/<federation-name>.json``. The tokens stored in this "
-"file will be sent transparently with each subsequent ``flwr`` CLI request"
-" to the SuperLink, and it will relay them to OIDC provider to perform the"
-" authentication checks."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:120
-msgid "Run authorized ``flwr`` CLI commands"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:122
-msgid ""
-"With the above steps completed, you can now run ``flwr`` CLI commands "
-"against a SuperLink setup with user authentication and authorization. For"
-" example, as an authorized user, you can run the ``flwr run`` command to "
-"start a Flower app:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:134
-msgid ""
-"If the user does not have the necessary permissions to run the command, "
-"an error will be returned:"
 msgstr ""
 
 #: ../../source/how-to-configure-audit-logging.rst:-1
@@ -15531,7 +15553,8 @@ msgstr ""
 msgid "Arguments"
 msgstr "构建文档"
 
-#: ../../flwr install:1 log:1 login:1 ls:1 new:1 pull:1 run:1 stop:1
+#: ../../flwr create:1 delete:1 install:1 list:1 log:1 login:1 ls:1 new:1
+#: pull:1 run:1 stop:1 supernode
 #, fuzzy
 msgid "Optional argument"
 msgstr "可选的改进措施"
@@ -15579,7 +15602,7 @@ msgstr "工作流程"
 msgid "``True``"
 msgstr ""
 
-#: ../../flwr log:1 stop:1
+#: ../../flwr create:1 delete:1 log:1 stop:1 supernode
 #, fuzzy
 msgid "Required argument"
 msgstr "构建文档"
@@ -15685,12 +15708,12 @@ msgstr ""
 msgid "``'default'``"
 msgstr "工作流程"
 
-#: ../../flwr ls:1 stop:1
+#: ../../flwr create:1 delete:1 list:1 ls:1 stop:1 supernode
 #, fuzzy
 msgid "Path of the Flower project"
 msgstr "基础镜像的存储库名称。"
 
-#: ../../flwr ls:1 stop:1
+#: ../../flwr create:1 delete:1 list:1 ls:1 stop:1 supernode
 msgid "Name of the federation"
 msgstr ""
 
@@ -15779,6 +15802,35 @@ msgstr ""
 #, fuzzy
 msgid "The Flower run ID to stop"
 msgstr "加入 Flower 社区"
+
+#: ../../flwr supernode:1
+#, fuzzy
+msgid "Manage SuperNodes"
+msgstr "验证超级节点"
+
+#: ../../flwr create:1 supernode
+#, fuzzy
+msgid "Add a SuperNode to the federation."
+msgstr "flower-superlink"
+
+#: ../../flwr create:1 supernode
+msgid "Path to the public key file."
+msgstr ""
+
+#: ../../flwr delete:1 supernode
+#, fuzzy
+msgid "Remove a SuperNode from the federation."
+msgstr "flower-superlink"
+
+#: ../../flwr delete:1 supernode
+#, fuzzy
+msgid "ID of the SuperNode to remove."
+msgstr "然后，我们启动服务器："
+
+#: ../../flwr list:1 supernode
+#, fuzzy
+msgid "List SuperNodes in the federation."
+msgstr "flower-superlink"
 
 #: ../../source/ref-api-cli.rst:19
 #, fuzzy
@@ -16126,12 +16178,12 @@ msgid ""
 "will be derived automatically from it."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp:4
-#: flwr.client.client_app.ClientApp.evaluate:12
-#: flwr.client.client_app.ClientApp.lifespan:7
-#: flwr.client.client_app.ClientApp.query:12
-#: flwr.client.client_app.ClientApp.train:12
 #: flwr.client.mod.localdp_mod.LocalDpMod:22
+#: flwr.clientapp.client_app.ClientApp:4
+#: flwr.clientapp.client_app.ClientApp.evaluate:12
+#: flwr.clientapp.client_app.ClientApp.lifespan:7
+#: flwr.clientapp.client_app.ClientApp.query:12
+#: flwr.clientapp.client_app.ClientApp.train:12
 #: flwr.clientapp.mod.localdp_mod.LocalDpMod:22
 #: flwr.common.record.array.Array:35
 #: flwr.common.record.arrayrecord.ArrayRecord:36
@@ -16509,13 +16561,13 @@ msgstr ""
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
 #: flwr.client.numpy_client.NumPyClient.evaluate
 #: flwr.client.numpy_client.NumPyClient.fit
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
 #: flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
 #: flwr.common.record.array.Array.inflate
@@ -16556,11 +16608,11 @@ msgstr ""
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
 #: flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
 #: flwr.common.record.array.Array.inflate
@@ -17260,7 +17312,8 @@ msgid "Context"
 msgstr "背景"
 
 #: flwr.app.error.Error:1 flwr.app.metadata.Metadata:1
-#: flwr.client.client_app.ClientApp:1 flwr.client.mod.localdp_mod.LocalDpMod:1
+#: flwr.client.mod.localdp_mod.LocalDpMod:1
+#: flwr.clientapp.client_app.ClientApp:1
 #: flwr.clientapp.mod.localdp_mod.LocalDpMod:1
 #: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
 #: flwr.common.context.Context:1 flwr.common.typing.ClientMessage:1
@@ -18322,7 +18375,7 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
 #: ../../source/ref-api/flwr.clientapp.rst:22:<autosummary>:1
-#: flwr.client.client_app.ClientApp:1 of
+#: flwr.clientapp.client_app.ClientApp:1 of
 #, fuzzy
 msgid "Flower ClientApp."
 msgstr "Flower 客户端。"
@@ -18457,136 +18510,136 @@ msgstr "从服务器接收的获取属性指令包含配置值字典。"
 msgid "The current client properties."
 msgstr "当前客户端属性。"
 
-#: flwr.client.client_app.ClientApp:5 of
+#: flwr.clientapp.client_app.ClientApp:5 of
 #, fuzzy
 msgid ""
 "Assuming a typical ``Client`` implementation named ``FlowerClient``, you "
 "can wrap it in a ``ClientApp`` as follows::"
 msgstr "假定有一个名为 `FlowerClient` 的典型 `Client` 实现，可以将其封装在一个 `ClientApp` 中，如下所示："
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\[action\\, "
 "mods\\]\\)"
 msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid "Register an evaluate function with the ``ClientApp``."
 msgstr "使用评估函数评估模型参数。"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`lifespan <flwr.client.ClientApp.lifespan>`\\ \\(\\)"
 msgstr ":py:obj:`Client <flwr.client.Client>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
-#: flwr.client.client_app.ClientApp.lifespan:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.clientapp.client_app.ClientApp.lifespan:1 of
 #, fuzzy
 msgid "Return a decorator that registers the lifespan fn with the client app."
 msgstr "返回一个向客户端应用程序注册查询 fn 的装饰器。"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\[action\\, mods\\]\\)"
 msgstr ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
-#: flwr.client.client_app.ClientApp.query:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.clientapp.client_app.ClientApp.query:1 of
 #, fuzzy
 msgid "Register a query function with the ``ClientApp``."
 msgstr "返回一个向客户端应用程序注册查询 fn 的装饰器。"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\[action\\, mods\\]\\)"
 msgstr "server.strategy.Strategy"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
-#: flwr.client.client_app.ClientApp.train:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.clientapp.client_app.ClientApp.train:1 of
 #, fuzzy
 msgid "Register a train function with the ``ClientApp``."
 msgstr "返回一个装饰器，用于在客户端应用程序中注册火车 fn。"
 
-#: flwr.client.client_app.ClientApp.evaluate:3
-#: flwr.client.client_app.ClientApp.query:3
-#: flwr.client.client_app.ClientApp.train:3 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:3
+#: flwr.clientapp.client_app.ClientApp.query:3
+#: flwr.clientapp.client_app.ClientApp.train:3 of
 #, fuzzy
 msgid "The action name used to route messages. Defaults to \"default\"."
 msgstr "用于配置训练的功能。默认为 \"无\"。"
 
-#: flwr.client.client_app.ClientApp.evaluate:5
-#: flwr.client.client_app.ClientApp.query:5
-#: flwr.client.client_app.ClientApp.train:5 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:5
+#: flwr.clientapp.client_app.ClientApp.query:5
+#: flwr.clientapp.client_app.ClientApp.train:5 of
 #, fuzzy
 msgid "A list of function-specific modifiers."
 msgstr "运行模拟"
 
-#: flwr.client.client_app.ClientApp.evaluate:8 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:8 of
 #, fuzzy
 msgid "A decorator that registers an evaluate function with the ``ClientApp``."
 msgstr "返回一个装饰器，用于向客户端程序注册评估 fn。"
 
-#: flwr.client.client_app.ClientApp.evaluate:13 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:13 of
 #, fuzzy
 msgid "Registering an evaluate function::"
 msgstr "使用评估函数评估模型参数。"
 
-#: flwr.client.client_app.ClientApp.evaluate:23 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:23 of
 #, fuzzy
 msgid "Registering an evaluate function with a custom action name::"
 msgstr "使用评估函数评估模型参数。"
 
-#: flwr.client.client_app.ClientApp.evaluate:34 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:34 of
 #, fuzzy
 msgid "Registering an evaluate function with a function-specific Flower Mod::"
 msgstr "使用评估函数评估模型参数。"
 
-#: flwr.client.client_app.ClientApp.lifespan:3
+#: flwr.clientapp.client_app.ClientApp.lifespan:3
 #: flwr.server.server_app.ServerApp.lifespan:3 of
 msgid ""
 "The decorated function should accept a `Context` object and use `yield` "
 "to define enter and exit behavior."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.query:8 of
+#: flwr.clientapp.client_app.ClientApp.query:8 of
 #, fuzzy
 msgid "A decorator that registers a query function with the ``ClientApp``."
 msgstr "返回一个向客户端应用程序注册查询 fn 的装饰器。"
 
-#: flwr.client.client_app.ClientApp.query:13 of
+#: flwr.clientapp.client_app.ClientApp.query:13 of
 #, fuzzy
 msgid "Registering a query function::"
 msgstr "使用评估函数评估模型参数。"
 
-#: flwr.client.client_app.ClientApp.query:23 of
+#: flwr.clientapp.client_app.ClientApp.query:23 of
 #, fuzzy
 msgid "Registering a query function with a custom action name::"
 msgstr "使用评估函数评估模型参数。"
 
-#: flwr.client.client_app.ClientApp.query:34 of
+#: flwr.clientapp.client_app.ClientApp.query:34 of
 #, fuzzy
 msgid "Registering a query function with a function-specific Flower Mod::"
 msgstr "使用评估函数评估模型参数。"
 
-#: flwr.client.client_app.ClientApp.train:8 of
+#: flwr.clientapp.client_app.ClientApp.train:8 of
 #, fuzzy
 msgid "A decorator that registers a train function with the ``ClientApp``."
 msgstr "返回一个装饰器，用于在客户端应用程序中注册火车 fn。"
 
-#: flwr.client.client_app.ClientApp.train:13 of
+#: flwr.clientapp.client_app.ClientApp.train:13 of
 #, fuzzy
 msgid "Registering a train function::"
 msgstr "使用评估函数评估模型参数。"
 
-#: flwr.client.client_app.ClientApp.train:23 of
+#: flwr.clientapp.client_app.ClientApp.train:23 of
 #, fuzzy
 msgid "Registering a train function with a custom action name::"
 msgstr "使用评估函数评估模型参数。"
 
-#: flwr.client.client_app.ClientApp.train:34 of
+#: flwr.clientapp.client_app.ClientApp.train:34 of
 #, fuzzy
 msgid "Registering a train function with a function-specific Flower Mod::"
 msgstr "使用评估函数评估模型参数。"
@@ -19205,26 +19258,26 @@ msgstr ""
 msgid ":py:obj:`flwr.clientapp.mod <flwr.clientapp.mod>`\\"
 msgstr ":py:obj:`flwr.client <flwr.client>`\\"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.clientapp.ClientApp.evaluate>`\\ \\(\\[action\\, "
 "mods\\]\\)"
 msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`lifespan <flwr.clientapp.ClientApp.lifespan>`\\ \\(\\)"
 msgstr ":py:obj:`Client <flwr.client.Client>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ""
 ":py:obj:`query <flwr.clientapp.ClientApp.query>`\\ \\(\\[action\\, "
 "mods\\]\\)"
 msgstr ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ""
 ":py:obj:`train <flwr.clientapp.ClientApp.train>`\\ \\(\\[action\\, "
@@ -42143,12 +42196,12 @@ msgstr ""
 
 #: ../../source/ref-flower-network-communication.rst:180
 #, fuzzy
-msgid "User Authentication"
+msgid "Account Authentication"
 msgstr "验证安装"
 
 #: ../../source/ref-flower-network-communication.rst:182
 msgid ""
-"When user authentication is enabled, Flower uses an OIDC-compatible "
+"When account authentication is enabled, Flower uses an OIDC-compatible "
 "server to authenticate requests:"
 msgstr ""
 
@@ -64595,4 +64648,131 @@ msgstr ""
 #~ "`Javier`, `Mahdi`, `Steven Hé (Sīchàng)`, "
 #~ "`Taner Topal`, `achiverram28`, `danielnugraha`, "
 #~ "`eunchung`, `ruthgal` <!---TOKEN_v1.5.0-->"
+
+#~ msgid ""
+#~ "User authentication can be enabled if"
+#~ " you're using the Flower Enterprise "
+#~ "Edition (EE) Docker images. This is "
+#~ "configured in the `global.userAuth` section"
+#~ " of your `values.yml` file."
+#~ msgstr ""
+
+#~ msgid "`auth_type`: The authentication mechanism being used (e.g., oidc)."
+#~ msgstr ""
+
+#~ msgid "`validate_url`: The endpoint for validating user authentication."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To use an existing secret that "
+#~ "contains the user authentication "
+#~ "configuration, set `existingSecret` to the "
+#~ "name of the existing secret:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note that the existing secret must "
+#~ "contain the key `user-auth-config.yml`:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Configure SuperLink for user authentication"
+#~ " and authorization. Private-by-default "
+#~ "runs securely with OpenID Connect and"
+#~ " OpenFGA."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this guide, you'll learn how to"
+#~ " configure SuperLink with user-level "
+#~ "authentication and authorization, and how "
+#~ "to log in using the ``flwr`` CLI."
+#~ " Once logged in, any users that "
+#~ "are authorized on the SuperLink can "
+#~ "run Flower CLI commands that interact"
+#~ " with the SuperLink."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "With user authentication and authorization "
+#~ "enabled, only users that have submitted"
+#~ " the ``flwr run`` command can view"
+#~ " and interact with their runs. This"
+#~ " means that your runs are **private"
+#~ " by default**, ensuring that only "
+#~ "authorized users can access them."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To enable user authentication and "
+#~ "authorization, the SuperLink must be "
+#~ "deployed with an `OpenID Connect (OIDC)"
+#~ " <https://openid.net/developers/how-connect-works/>`_"
+#~ " provider and an `OpenFGA "
+#~ "<https://openfga.dev/>`_ server. The OIDC "
+#~ "provider is used for user "
+#~ "authentication, while OpenFGA is used "
+#~ "for fine-grained access control. This"
+#~ " means an authenticated user can only"
+#~ " run ``flwr`` CLI commands on the "
+#~ "SuperLink if they have been granted "
+#~ "the necessary permissions by the "
+#~ "SuperLink administrator. When enabled, both"
+#~ " user authentication and authorization must"
+#~ " be configured on the SuperLink."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Save this file as ``user-auth-"
+#~ "config.yaml``. Then pass it to the "
+#~ "SuperLink via the ``--user-auth-config``"
+#~ " flag when deploying the SuperLink:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To authorize a user, the SuperLink "
+#~ "administrator must add the user's OIDC"
+#~ " ``sub`` claim to the OpenFGA store"
+#~ " with the appropriate relation."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Once a SuperLink with user "
+#~ "authentication and authorization is up "
+#~ "and running, a user can interface "
+#~ "with it after installing the ``flwr``"
+#~ " PyPI package via the Flower CLI. "
+#~ "Then, ensure that the ``enable-user-"
+#~ "auth`` field is set to ``true`` in"
+#~ " the federation section in the "
+#~ "``pyproject.toml`` of the Flower app you"
+#~ " want to run:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "User authentication and authorization is "
+#~ "only supported with TLS connections."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "With the above steps completed, you "
+#~ "can now run ``flwr`` CLI commands "
+#~ "against a SuperLink setup with user "
+#~ "authentication and authorization. For example,"
+#~ " as an authorized user, you can "
+#~ "run the ``flwr run`` command to "
+#~ "start a Flower app:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the user does not have the "
+#~ "necessary permissions to run the "
+#~ "command, an error will be returned:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "When user authentication is enabled, "
+#~ "Flower uses an OIDC-compatible server"
+#~ " to authenticate requests:"
+#~ msgstr ""
 
