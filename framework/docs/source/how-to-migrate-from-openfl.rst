@@ -385,6 +385,7 @@ Here is the corresponding evaluation function, with the highlighted area represe
 the migrated code from OpenFL:
 
 .. code-block:: python
+    :emphasize-lines: 17-32
 
     @app.evaluate()
     def evaluate(msg: Message, context: Context):
