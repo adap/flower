@@ -29,12 +29,13 @@ from flwr.common.constant import (
     TIMESTAMP_HEADER,
     TIMESTAMP_TOLERANCE,
 )
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+from flwr.supercore.primitives.asymmetric import (
     bytes_to_public_key,
     verify_signature,
 )
 from flwr.proto.fleet_pb2 import CreateNodeRequest  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.supercore.primitives.asymmetric import bytes_to_public_key, verify_signature
 
 MIN_TIMESTAMP_DIFF = -SYSTEM_TIME_TOLERANCE
 MAX_TIMESTAMP_DIFF = TIMESTAMP_TOLERANCE + SYSTEM_TIME_TOLERANCE

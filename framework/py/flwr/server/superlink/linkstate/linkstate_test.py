@@ -44,10 +44,6 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    generate_key_pairs,
-    public_key_to_bytes,
-)
 from flwr.common.serde import message_from_proto, message_to_proto
 from flwr.common.typing import RunStatus
 
@@ -63,6 +59,7 @@ from flwr.server.superlink.linkstate import (
     SqliteLinkState,
 )
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
+from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 
 
 class StateTest(CoreStateTest):
