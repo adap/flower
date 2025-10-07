@@ -127,7 +127,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         default=[],
         metavar="ENTITY",
         help=(
-            "One or more trusted entities. "
+            "A list of trusted entities. "
             "Only apps verified by at least one of these entities "
             "can run on a supernode."
         ),

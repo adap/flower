@@ -114,14 +114,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         verification = None
         if request.fab.content == b"":
             identifier = request.fab.meta["identifier"]
-            m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", identifier)
+            m = re.match(r"^(?P<user>[^/]+)/(?P<app>[^/]+)$", identifier)
             if not m:
                 raise ValueError(
-                    "Invalid remote app ID. Expected format: '@user_name/app_name'."
+                    "Invalid remote app ID. Expected format: 'user_name/app_name'."
                 )
 
             # Request download link
-            url, verification = _request_download_link(identifier)
+            # url, verification = _request_download_link(identifier)
+            url = "https://flowerhub-test.s3.amazonaws.com/flwrlabs/app-numpy/v1/flwrlabs.app-numpy.1-0-0.f7fece39.fab?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA356SJNXRDWUQI6NG%2F20251007%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20251007T103722Z&X-Amz-Expires=14400&X-Amz-SignedHeaders=host&X-Amz-Signature=030e7ab6b1c6f4003dc2fbac07ba81e3ffc9f8dbf17ceaf74345c66b640b7f7d"
+            verification = {"sig": "1234"}
 
             # Download FAB from Hub
             fab_file = _download_to_memory(url)
@@ -151,7 +153,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             fab = Fab(
                 hashlib.sha256(fab_file).hexdigest(),
                 fab_file,
-                {"verification": json.dumps(verification)},
+                verification,
             )
             fab_hash = ffs.put(fab.content, fab.meta)
             if fab_hash != fab.hash_str:

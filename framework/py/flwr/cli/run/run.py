@@ -27,6 +27,7 @@ from rich.console import Console
 
 from flwr.cli.build import build_fab, get_fab_filename
 from flwr.cli.config_utils import (
+    load,
     load_and_validate,
     process_loaded_project_config,
     validate_federation_in_project_config,
@@ -121,8 +122,9 @@ def run(
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
         pyproject_path = app_path / "pyproject.toml" if app_path else None
-        config, errors, warnings = load_and_validate(path=pyproject_path)
-        config = process_loaded_project_config(config, errors, warnings)
+        config = load(pyproject_path)
+        # config, errors, warnings = load_and_validate(path=pyproject_path)
+        # config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
             federation, config, federation_config_overrides
         )
