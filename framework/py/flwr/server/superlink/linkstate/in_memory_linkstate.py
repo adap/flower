@@ -69,10 +69,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def __init__(self) -> None:
 
-        # Map node_id to (online_until, heartbeat_interval)
+        # Map node_id to NodeInfo
         self.nodes: dict[int, NodeInfo] = {}
-        self.public_key_to_node_id: dict[bytes, int] = {}
-        self.node_id_to_public_key: dict[int, bytes] = {}
+        self.registered_node_public_keys: set[bytes] = set()
+        self.owner_to_node_ids: dict[str, set[int]] = {}  # Quick lookup
 
         # Map run_id to RunRecord
         self.run_ids: dict[int, RunRecord] = {}
@@ -330,7 +330,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.message_res_store)
 
-    def create_node(self, public_key: bytes, heartbeat_interval: float) -> int:
+    def create_node(
+        self, owner_aid: str, public_key: bytes, heartbeat_interval: float
+    ) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id = generate_rand_int_from_bytes(
@@ -341,14 +343,14 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             if node_id in self.nodes:
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
-            if public_key in self.public_key_to_node_id:
+            if public_key in self.registered_node_public_keys:
                 raise ValueError("Public key already in use")
 
             # Mark the node online until now().timestamp() + heartbeat_interval
             current = now()
             self.nodes[node_id] = NodeInfo(
                 node_id=node_id,
-                owner_aid="",  # Unused for now
+                owner_aid=owner_aid,  # Unused for now
                 status="created",  # Unused for now
                 created_at=current.isoformat(),  # Unused for now
                 last_activated_at=current.isoformat(),  # Unused for now
@@ -356,9 +358,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 deleted_at="",  # Unused for now
                 online_until=current.timestamp() + heartbeat_interval,
                 heartbeat_interval=heartbeat_interval,
+                public_key=public_key,
             )
-            self.public_key_to_node_id[public_key] = node_id
-            self.node_id_to_public_key[node_id] = public_key
+            self.registered_node_public_keys.add(public_key)
+            self.owner_to_node_ids.setdefault(owner_aid, set()).add(node_id)
             return node_id
 
     def delete_node(self, node_id: int) -> None:
@@ -367,11 +370,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             if node_id not in self.nodes:
                 raise ValueError(f"Node {node_id} not found")
 
-            # Remove node ID <> public key mappings
-            if pk := self.node_id_to_public_key.pop(node_id, None):
-                del self.public_key_to_node_id[pk]
-
-            del self.nodes[node_id]
+            node = self.nodes.pop(node_id)
+            self.registered_node_public_keys.discard(node.public_key)
 
     def get_nodes(self, run_id: int) -> set[int]:
         """Return all available nodes.
@@ -391,29 +391,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 if info.online_until > current_time
             }
 
-    def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
-        """Set `public_key` for the specified `node_id`."""
-        with self.lock:
-            if node_id not in self.nodes:
-                raise ValueError(f"Node {node_id} not found")
-
-            if public_key in self.public_key_to_node_id:
-                raise ValueError("Public key already in use")
-
-            self.public_key_to_node_id[public_key] = node_id
-            self.node_id_to_public_key[node_id] = public_key
-
     def get_node_public_key(self, node_id: int) -> Optional[bytes]:
         """Get `public_key` for the specified `node_id`."""
         with self.lock:
-            if node_id not in self.nodes:
-                raise ValueError(f"Node {node_id} not found")
+            if (node := self.nodes.get(node_id)) is None:
+                return None
 
-            return self.node_id_to_public_key.get(node_id)
-
-    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `node_public_keys`."""
-        return self.public_key_to_node_id.get(node_public_key)
+            return node.public_key
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(

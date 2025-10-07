@@ -128,7 +128,9 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """Get all instruction Message IDs for the given run_id."""
 
     @abc.abstractmethod
-    def create_node(self, public_key: bytes, heartbeat_interval: float) -> int:
+    def create_node(
+        self, owner_aid: str, public_key: bytes, heartbeat_interval: float
+    ) -> int:
         """Create, store in the link state, and return `node_id`."""
 
     @abc.abstractmethod
@@ -146,16 +148,20 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
-        """Set `public_key` for the specified `node_id`."""
-
-    @abc.abstractmethod
     def get_node_public_key(self, node_id: int) -> Optional[bytes]:
-        """Get `public_key` for the specified `node_id`."""
+        """Get `public_key` for the specified `node_id`.
 
-    @abc.abstractmethod
-    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `node_public_keys`."""
+        Parameters
+        ----------
+        node_id : int
+            The identifier of the node whose public key is to be retrieved.
+
+        Returns
+        -------
+        Optional[bytes]
+            The public key associated with the specified `node_id`, or `None` if
+            the `node_id` does not exist.
+        """
 
     @abc.abstractmethod
     def create_run(  # pylint: disable=too-many-arguments,too-many-positional-arguments

@@ -602,7 +602,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return {row["message_id"] for row in rows}
 
-    def create_node(self, public_key: bytes, heartbeat_interval: float) -> int:
+    def create_node(
+        self, owner_aid: str, public_key: bytes, heartbeat_interval: float
+    ) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random uint64 as node_id
         uint64_node_id = generate_rand_int_from_bytes(
@@ -626,7 +628,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 query,
                 (
                     sint64_node_id,  # node_id
-                    "",  # owner_aid, unused for now
+                    owner_aid,  # owner_aid, unused for now
                     "created",  # status, unused for now
                     now().isoformat(),  # created_at, unused for now
                     now().isoformat(),  # last_activated_at, unused for now
@@ -690,25 +692,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: set[int] = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
         return result
 
-    def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
-        """Set `public_key` for the specified `node_id`."""
-        # Convert the uint64 value to sint64 for SQLite
-        sint64_node_id = convert_uint64_to_sint64(node_id)
-
-        # Check if the node exists in the `node` table
-        query = "SELECT 1 FROM node WHERE node_id = ?"
-        if not self.query(query, (sint64_node_id,)):
-            raise ValueError(f"Node {node_id} not found")
-
-        # Check if the public key is already in use in the `node` table
-        query = "SELECT 1 FROM node WHERE public_key = ?"
-        if self.query(query, (public_key,)):
-            raise ValueError("Public key already in use")
-
-        # Update the `node` table to set the public key for the given node ID
-        query = "UPDATE node SET public_key = ? WHERE node_id = ?"
-        self.query(query, (public_key, sint64_node_id))
-
     def get_node_public_key(self, node_id: int) -> Optional[bytes]:
         """Get `public_key` for the specified `node_id`."""
         # Convert the uint64 value to sint64 for SQLite
@@ -720,23 +703,10 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # If no result is found, return None
         if not rows:
-            raise ValueError(f"Node {node_id} not found")
+            return None
 
-        # Return the public key if it is not empty, otherwise return None
+        # Return the public key
         return rows[0]["public_key"] or None
-
-    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `node_public_keys`."""
-        query = "SELECT node_id FROM node WHERE public_key = :public_key;"
-        row = self.query(query, {"public_key": node_public_key})
-        if len(row) > 0:
-            node_id: int = row[0]["node_id"]
-
-            # Convert the sint64 value to uint64 after reading from SQLite
-            uint64_node_id = convert_sint64_to_uint64(node_id)
-
-            return uint64_node_id
-        return None
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(
