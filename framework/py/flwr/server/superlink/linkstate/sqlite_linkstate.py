@@ -94,6 +94,10 @@ SQL_CREATE_INDEX_ONLINE_UNTIL = """
 CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 """
 
+SQL_CREATE_INDEX_OWNER_AID = """
+CREATE INDEX IF NOT EXISTS idx_node_owner_aid ON node(owner_aid);
+"""
+
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
     run_id                INTEGER UNIQUE,
@@ -228,6 +232,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_TABLE_TOKEN_STORE)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
+        cur.execute(SQL_CREATE_INDEX_OWNER_AID)
         res = cur.execute("SELECT name FROM sqlite_schema;")
         return res.fetchall()
 
