@@ -25,6 +25,7 @@ from datetime import datetime, timedelta, timezone
 from itertools import product
 from typing import Optional
 from unittest.mock import patch
+from flwr.supercore.constant import NodeStatus
 from uuid import uuid4
 
 from parameterized import parameterized
@@ -674,6 +675,106 @@ class StateTest(CoreStateTest):
         if isinstance(state, InMemoryLinkState):
             assert len(state.nodes) == 1
             assert len(state.registered_node_public_keys) == 1
+
+    def test_get_node_info_no_filters(self) -> None:
+        """Test get_node_info returns all nodes when no filters are provided."""
+        state: LinkState = self.state_factory()
+
+        # Prepare: create several nodes
+        node_ids = [create_dummy_node(state) for _ in range(5)]
+
+        # Execute
+        infos = state.get_node_info()
+
+        # Assert
+        returned_ids = [info.node_id for info in infos]
+        self.assertSetEqual(set(returned_ids), set(node_ids))
+
+
+    def test_get_node_info_filter_by_node_ids(self) -> None:
+        """Test get_node_info filters correctly by node_ids."""
+        state: LinkState = self.state_factory()
+        node_ids = [create_dummy_node(state) for _ in range(5)]
+
+        # Execute: only query the first two
+        infos = state.get_node_info(node_ids=node_ids[:2])
+
+        # Assert
+        returned_ids = [info.node_id for info in infos]
+        self.assertSetEqual(set(returned_ids), set(node_ids[:2]))
+
+
+    def test_get_node_info_filter_by_owner_aids(self) -> None:
+        """Test get_node_info filters correctly by owner_aids."""
+        state: LinkState = self.state_factory()
+        node1 = create_dummy_node(state, owner_aid="alice")
+        node2 = create_dummy_node(state, owner_aid="bob")
+
+        infos = state.get_node_info(owner_aids=["alice"])
+        returned_ids = [info.node_id for info in infos]
+
+        self.assertEqual(returned_ids, [node1])
+
+
+    def test_get_node_info_no_filters(self) -> None:
+        """Test get_node_info returns all nodes when no filters are provided."""
+        state: LinkState = self.state_factory()
+
+        # Prepare: create several nodes
+        node_ids = [create_dummy_node(state) for _ in range(5)]
+
+        # Execute
+        infos = state.get_node_info()
+
+        # Assert
+        returned_ids = [info.node_id for info in infos]
+        self.assertSetEqual(set(returned_ids), set(node_ids))
+
+
+    def test_get_node_info_filter_by_node_ids(self) -> None:
+        """Test get_node_info filters correctly by node_ids."""
+        state: LinkState = self.state_factory()
+        node_ids = [create_dummy_node(state) for _ in range(5)]
+
+        # Execute: only query the first two
+        infos = state.get_node_info(node_ids=node_ids[:2])
+
+        # Assert
+        returned_ids = [info.node_id for info in infos]
+        self.assertSetEqual(set(returned_ids), set(node_ids[:2]))
+
+
+    def test_get_node_info_filter_by_owner_aids(self) -> None:
+        """Test get_node_info filters correctly by owner_aids."""
+        state: LinkState = self.state_factory()
+        node1 = create_dummy_node(state, owner_aid="alice")
+        node2 = create_dummy_node(state, owner_aid="bob")
+
+        infos = state.get_node_info(owner_aids=["alice"])
+        returned_ids = [info.node_id for info in infos]
+
+        self.assertEqual(returned_ids, [node1])
+
+
+    def test_get_node_info_filter_by_status(self) -> None:
+        """Test get_node_info filters correctly by statuses."""
+        state: LinkState = self.state_factory()
+        node_created = create_dummy_node(state)
+        node_activated = create_dummy_node(state)
+        node_deleted = create_dummy_node(state)
+
+        # Transition nodes
+        state.acknowledge_node_heartbeat(node_activated, heartbeat_interval=30)
+        state.delete_node(node_deleted)
+
+        # Execute
+        infos = state.get_node_info(statuses=[NodeStatus.CREATED, NodeStatus.ACTIVATED])
+        returned_statuses = {info.status for info in infos}
+
+        # Assert: should only contain CREATED and ACTIVATED
+        self.assertTrue(NodeStatus.CREATED in returned_statuses)
+        self.assertTrue(NodeStatus.ACTIVATED in returned_statuses)
+        self.assertFalse(NodeStatus.DELETED in returned_statuses)
 
     def test_delete_node(self) -> None:
         """Test deleting a client node."""

@@ -46,10 +46,12 @@ from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
 from flwr.proto.error_pb2 import Error as ProtoError
+from flwr.proto.node_pb2 import NodeInfo
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
 from flwr.server.utils.validator import validate_message
+from flwr.supercore.constant import NodeStatus
 
 from .linkstate import LinkState
 from .utils import (
@@ -633,13 +635,13 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 query,
                 (
                     sint64_node_id,  # node_id
-                    owner_aid,  # owner_aid, unused for now
-                    "created",  # status, unused for now
-                    now().isoformat(),  # created_at, unused for now
-                    now().isoformat(),  # last_activated_at, unused for now
-                    "",  # last_deactivated_at, unused for now
-                    "",  # deleted_at, unused for now
-                    now().timestamp() + heartbeat_interval,  # online_until
+                    owner_aid,  # owner_aid
+                    NodeStatus.CREATED,  # status
+                    now().isoformat(),  # created_at
+                    "",  # last_activated_at
+                    "",  # last_deactivated_at
+                    "",  # deleted_at
+                    0.0,  # online_until, initialized with offline status
                     heartbeat_interval,  # heartbeat_interval
                     public_key,  # public_key
                 ),
@@ -656,22 +658,24 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
     def delete_node(self, node_id: int) -> None:
         """Delete a node."""
-        # Convert the uint64 value to sint64 for SQLite
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
-        query = "DELETE FROM node WHERE node_id = ?"
-        params = (sint64_node_id,)
+        query = """
+            UPDATE node
+            SET status = ?, deleted_at = ?
+            WHERE node_id = ? AND status != ?
+            RETURNING node_id
+        """
+        params = (
+            NodeStatus.DELETED,
+            now().isoformat(),
+            sint64_node_id,
+            NodeStatus.DELETED,
+        )
 
-        if self.conn is None:
-            raise AttributeError("LinkState is not initialized.")
-
-        try:
-            with self.conn:
-                rows = self.conn.execute(query, params)
-                if rows.rowcount < 1:
-                    raise ValueError(f"Node {node_id} not found")
-        except KeyError as exc:
-            log(ERROR, {"query": query, "data": params, "exception": exc})
+        row = self.query(query, params)
+        if not row:
+            raise ValueError(f"Node {node_id} already deleted or does not exist")
 
     def get_nodes(self, run_id: int) -> set[int]:
         """Retrieve all currently stored node IDs as a set.
@@ -681,20 +685,84 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
+        if self.conn is None:
+            raise AttributeError("LinkState not initialized")
+
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
 
-        # Validate run ID
-        query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
-        if self.query(query, (sint64_run_id,))[0]["COUNT(*)"] == 0:
-            return set()
+        # Start the transaction
+        with self.conn:
+            # Validate run ID
+            query = "SELECT COUNT(*) FROM run WHERE run_id = ?"
+            cur = self.conn.execute(query, (sint64_run_id,))
+            if cur.fetchone()["COUNT(*)"] == 0:
+                return set()
 
-        # Get nodes
-        query = "SELECT node_id FROM node WHERE online_until > ?;"
-        rows = self.query(query, (now().timestamp(),))
+            # Check and tag deactivated nodes
+            current_dt = now()
+            query = """
+                UPDATE node SET status = ?, last_deactivated_at = ?
+                WHERE online_until <= ? AND status == ?
+            """
+            params = (
+                NodeStatus.DEACTIVATED,
+                current_dt.isoformat(),
+                current_dt.timestamp(),
+                NodeStatus.ACTIVATED,
+            )
+            self.conn.execute(query, params)
+
+            # Find all activated nodes
+            query = "SELECT node_id FROM node WHERE status == ?"
+            cur = self.conn.execute(query, (NodeStatus.ACTIVATED,))
+            rows = cur.fetchall()
 
         # Convert sint64 node_ids to uint64
         result: set[int] = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
+        return result
+
+    def get_node_info(
+        self,
+        *,
+        node_ids: Optional[Sequence[int]] = None,
+        owner_aids: Optional[Sequence[str]] = None,
+        statuses: Optional[Sequence[str]] = None,
+    ) -> Sequence[NodeInfo]:
+        """Retrieve information about nodes based on the specified filters."""
+        conditions = []
+        params: list[Any] = []
+
+        # Build the WHERE clause based on provided filters
+        if node_ids:
+            sint64_node_ids = [
+                convert_uint64_to_sint64(node_id) for node_id in node_ids
+            ]
+            placeholders = ",".join(["?"] * len(sint64_node_ids))
+            conditions.append(f"node_id IN ({placeholders})")
+            params.extend(sint64_node_ids)
+        if owner_aids:
+            placeholders = ",".join(["?"] * len(owner_aids))
+            conditions.append(f"owner_aid IN ({placeholders})")
+            params.extend(owner_aids)
+        if statuses:
+            placeholders = ",".join(["?"] * len(statuses))
+            conditions.append(f"status IN ({placeholders})")
+            params.extend(statuses)
+
+        # Construct the final query
+        query = "SELECT * FROM node"
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+
+        rows = self.query(query, params)
+
+        result: list[NodeInfo] = []
+        for row in rows:
+            # Convert sint64 node_id to uint64
+            row["node_id"] = convert_sint64_to_uint64(row["node_id"])
+            result.append(NodeInfo(**row))
+
         return result
 
     def get_node_public_key(self, node_id: int) -> Optional[bytes]:
@@ -987,26 +1055,38 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before
         the node is marked as offline.
         """
+        if self.conn is None:
+            raise AttributeError("LinkState not initialized")
+
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
-        # Check if the node exists in the `node` table
-        query = "SELECT 1 FROM node WHERE node_id = ?"
-        if not self.query(query, (sint64_node_id,)):
-            return False
+        with self.conn:
+            # Check if node exists and not deleted
+            query = "SELECT status FROM node WHERE node_id = ? AND status != ?"
+            row = self.conn.execute(
+                query, (sint64_node_id, NodeStatus.DELETED)
+            ).fetchone()
+            if row is None:
+                return False
 
-        # Update `online_until` and `heartbeat_interval` for the given `node_id`
-        query = (
-            "UPDATE node SET online_until = ?, heartbeat_interval = ? WHERE node_id = ?"
-        )
-        self.query(
-            query,
-            (
-                now().timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval,
+            # Construct query and params
+            current_dt = now()
+            query = "UPDATE node SET online_until = ?, heartbeat_interval = ?"
+            params: list[Any] = [
+                current_dt.timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval,
                 heartbeat_interval,
-                sint64_node_id,
-            ),
-        )
-        return True
+            ]
+
+            # Set timestamp if the status changes
+            if row["status"] != NodeStatus.ACTIVATED:
+                query += ", status = ?, last_activated_at = ?"
+                params += [NodeStatus.ACTIVATED, current_dt.isoformat()]
+
+            # Execute the query, refreshing `online_until` and `heartbeat_interval`
+            query += " WHERE node_id = ?"
+            params += [sint64_node_id]
+            self.conn.execute(query, params)
+            return True
 
     def acknowledge_app_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
         """Acknowledge a heartbeat received from a ServerApp for a given run.

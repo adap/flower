@@ -15,5 +15,20 @@
 """Constants for Flower infrastructure."""
 
 
+from __future__ import annotations
+
 # Top-level key in YAML config for exec plugin settings
 EXEC_PLUGIN_SECTION = "exec_plugin"
+
+
+class NodeStatus:
+    """Event log writer types."""
+
+    CREATED = "created"
+    ACTIVATED = "activated"
+    DEACTIVATED = "deactivated"
+    DELETED = "deleted"
+
+    def __new__(cls) -> NodeStatus:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
