@@ -37,6 +37,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     CreateNodeCliResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
+from flwr.supercore.primitives.asymmetric import public_key_to_bytes
 
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
@@ -168,7 +169,4 @@ def try_load_public_key(public_key_path: Path) -> bytes:
                 bold=True,
             )
             raise typer.Exit(code=1)
-    return public_key.public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo,
-    )
+    return public_key_to_bytes(public_key)
