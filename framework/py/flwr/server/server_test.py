@@ -40,11 +40,8 @@ from flwr.common import (
     Status,
     ndarray_to_bytes,
 )
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    generate_key_pairs,
-    public_key_to_bytes,
-)
 from flwr.server.client_manager import SimpleClientManager
+from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 
 from .app import _try_load_public_keys_node_authentication
 from .client_proxy import ClientProxy
