@@ -439,7 +439,7 @@ Client-side Code
 ~~~~~~~~~~~~~~~~
 
 In OpenFL, the client side code was known as a Collaborator. In Flower, the application that data owners
-operate is referred to as a ``ClientApp``. Each of the files referred to so far (``client_app.py``,``task.py``) 
+operate is referred to as a ``ClientApp``. Each of the files referred to so far (``client_app.py``, ``task.py``) 
 are launched by the clients using the `flwr run` command. Beyond the code that is defined, Flower has the ability
 to insert dynamic changes through a configuration file, called ``pyproject.toml``. This can include application specific
 changes like hyperparameters, but also other information like ServerApp address, etc. Importantly, this file is shared
