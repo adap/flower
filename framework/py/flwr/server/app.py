@@ -76,8 +76,8 @@ from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import (
     ControlAuthnPlugin,
     ControlAuthzPlugin,
-    NoOpControlAuthnPlugin,
-    NoOpControlAuthzPlugin,
+    get_control_authn_plugins,
+    get_control_authz_plugins,
 )
 from flwr.superlink.servicer.control import run_control_api_grpc
 
@@ -96,8 +96,6 @@ P = TypeVar("P", ControlAuthnPlugin, ControlAuthzPlugin)
 try:
     from flwr.ee import (
         add_ee_args_superlink,
-        get_control_authn_plugins,
-        get_control_authz_plugins,
         get_control_event_log_writer_plugins,
         get_ee_artifact_provider,
         get_fleet_event_log_writer_plugins,
@@ -107,14 +105,6 @@ except ImportError:
     # pylint: disable-next=unused-argument
     def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
         """Add EE-specific arguments to the parser."""
-
-    def get_control_authn_plugins() -> dict[str, type[ControlAuthnPlugin]]:
-        """Return all Control API authentication plugins."""
-        return {AuthnType.NOOP: NoOpControlAuthnPlugin}
-
-    def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
-        """Return all Control API authorization plugins."""
-        return {AuthzType.NOOP: NoOpControlAuthzPlugin}
 
     def get_control_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
         """Return all Control API event log writer plugins."""
