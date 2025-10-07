@@ -69,7 +69,7 @@ We also specify a username (``flwrlabs``) for the project:
 
 .. code-block:: shell
 
-    $ flwr new flower-destination --framework pytorch --username flwrlabs
+    $ flwr new flower-tutorial --framework pytorch --username flwrlabs
 
 After running the command, a new directory called ``flower-tutorial`` will be created.
 Here is a comparison between it and the relevant files in a typical ``openfl-example``
