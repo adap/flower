@@ -302,7 +302,7 @@ some initialization that must be handled by user code. The good news is that thi
 and quite reusable across examples. Let's see how the relevant OpenFL ``train_`` function fits into Flower:
 
 .. code-block:: python
-   :emphasize-lines:21-37
+   :emphasize-lines: 21-37
     
     # client_app.py
 
