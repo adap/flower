@@ -35,14 +35,9 @@ from flwr.common.constant import MessageType
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    bytes_to_private_key,
-    bytes_to_public_key,
     decrypt,
     encrypt,
-    generate_key_pairs,
     generate_shared_key,
-    private_key_to_bytes,
-    public_key_to_bytes,
 )
 from flwr.common.secure_aggregation.ndarrays_arithmetic import (
     factor_combine,
@@ -64,6 +59,13 @@ from flwr.common.secure_aggregation.secaggplus_utils import (
     share_keys_plaintext_separate,
 )
 from flwr.common.typing import ConfigRecordValues
+from flwr.supercore.primitives.asymmetric import (
+    bytes_to_private_key,
+    bytes_to_public_key,
+    generate_key_pairs,
+    private_key_to_bytes,
+    public_key_to_bytes,
+)
 
 
 @dataclass

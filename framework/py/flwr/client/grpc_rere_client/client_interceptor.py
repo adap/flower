@@ -23,10 +23,7 @@ from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common import now
 from flwr.common.constant import PUBLIC_KEY_HEADER, SIGNATURE_HEADER, TIMESTAMP_HEADER
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    public_key_to_bytes,
-    sign_message,
-)
+from flwr.supercore.primitives.asymmetric import public_key_to_bytes, sign_message
 
 
 class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
