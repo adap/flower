@@ -15,14 +15,9 @@
 """Symmetric encryption tests."""
 
 
-from .symmetric_encryption import (
-    compute_hmac,
-    generate_key_pairs,
-    generate_shared_key,
-    sign_message,
-    verify_hmac,
-    verify_signature,
-)
+from flwr.supercore.primitives.asymmetric import generate_key_pairs
+
+from .symmetric_encryption import compute_hmac, generate_shared_key, verify_hmac
 
 
 def test_generate_shared_key() -> None:
@@ -102,31 +97,3 @@ def test_wrong_message_hmac() -> None:
 
     # Assert
     assert verify_hmac(server_shared_secret, message, client_compute_hmac) is False
-
-
-def test_sign_and_verify_success() -> None:
-    """Test signing and verifying a message successfully."""
-    # Prepare
-    private_key, public_key = generate_key_pairs()
-    message = b"Test message"
-
-    # Execute
-    signature = sign_message(private_key, message)
-
-    # Assert
-    assert verify_signature(public_key, message, signature)
-
-
-def test_sign_and_verify_failure() -> None:
-    """Test signing and verifying a message with incorrect keys or data."""
-    # Prepare
-    private_key, public_key = generate_key_pairs()
-    another_public_key = generate_key_pairs()[1]
-    message = b"Test message"
-
-    # Execute
-    signature = sign_message(private_key, message)
-
-    # Assert
-    assert not verify_signature(another_public_key, message, signature)
-    assert not verify_signature(public_key, b"Another message", signature)
