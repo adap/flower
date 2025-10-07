@@ -15,13 +15,14 @@
 """Main loop for Flower SuperNode."""
 
 
+import hashlib
 import os
 import subprocess
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from functools import partial
-from logging import INFO
+from logging import INFO, WARN
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -59,6 +60,7 @@ from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
+from flwr.supercore.primitives.asymmetric import verify_signature
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 
@@ -307,14 +309,34 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
             verified_fab_hash = hashlib.sha256(fab.content).hexdigest()
             if verified_fab_hash != fab.hash_string:
-                flwr_exit(
-                    ExitCode.SUPERNODE_FAB_HASH_MISMATCH,
-                    f"The SHA256 hash computed on the FAB ({fab_hash_computed}) did not",
-                    f" match the expected hash ({fab.hash_string})",
+                log(
+                    WARN,
+                    f"The SHA256 hash computed on the FAB ({verified_fab_hash}) did",
+                    f" not match the expected hash ({fab.hash_string})",
+                    " Experiment will not execute",
                 )
-            
-            # TODO: Logic to verify signatures over the FAB if needed
-          
+                return None
+
+            # FAB must be signed if trust entity provided
+            if trust_entity:
+                fab_verified = False
+                for public_key_id, signature in fab.meta:
+                    if public_key_id in trust_entity:
+                        verifier_public_key = trust_entity[public_key_id]
+                        if verify_signature(
+                            verifier_public_key,
+                            hashlib.sha256(fab.content).digest(),
+                            signature,
+                        ):
+                            fab_verified = True
+                            break
+                if not fab_verified:
+                    log(
+                        WARN,
+                        "The FAB could not be verified by provided ",
+                        "trusted entities.",
+                    )
+                    return None
 
             # Initialize the context
             run_cfg = get_fused_config_from_fab(fab.content, run_info)
