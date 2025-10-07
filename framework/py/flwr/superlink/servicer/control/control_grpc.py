@@ -54,7 +54,7 @@ def run_control_api_grpc(
     objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     is_simulation: bool,
-    disable_node_auth: bool,
+    enable_supernode_auth: bool,
     authn_plugin: Optional[ControlAuthnPlugin] = None,
     authz_plugin: Optional[ControlAuthzPlugin] = None,
     event_log_plugin: Optional[EventLogWriterPlugin] = None,
@@ -70,7 +70,7 @@ def run_control_api_grpc(
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
         is_simulation=is_simulation,
-        disable_node_auth=disable_node_auth,
+        enable_supernode_auth=enable_supernode_auth,
         authn_plugin=authn_plugin,
         artifact_provider=artifact_provider,
     )

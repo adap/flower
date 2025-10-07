@@ -216,12 +216,12 @@ def run_superlink() -> None:
         log(WARN, "The `--artifact-provider-config` flag is highly experimental.")
         artifact_provider = get_ee_artifact_provider(cfg_path)
 
-    # If node authentication is disabled, warn users
-    disable_node_auth: bool = args.disable_node_auth
-    if disable_node_auth:
+    # If supernode authentication is disabled, warn users
+    enable_supernode_auth: bool = args.enable_supernode_auth
+    if not enable_supernode_auth:
         log(
             WARN,
-            "Node authentication is disabled. The SuperLink will accept "
+            "SuperNode authentication is disabled. The SuperLink will accept "
             "connections from any SuperNode.",
         )
 
@@ -243,7 +243,7 @@ def run_superlink() -> None:
         objectstore_factory=objectstore_factory,
         certificates=certificates,
         is_simulation=is_simulation,
-        disable_node_auth=disable_node_auth,
+        enable_supernode_auth=enable_supernode_auth,
         authn_plugin=authn_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
@@ -427,16 +427,16 @@ def _try_load_public_keys_node_authentication(
             "authentication no longer requires these arguments.",
         )
 
-    if not args.auth_list_public_keys:
+    if not args.enable_supernode_auth:
         return None
 
-    node_keys_file_path = Path(args.auth_list_public_keys)
+    node_keys_file_path = Path(args.enable_supernode_auth)
     if not node_keys_file_path.exists():
         sys.exit(
             "The provided path to the known public keys CSV file does not exist: "
             f"{node_keys_file_path}. "
             "Please provide the CSV file path containing known public keys "
-            "to '--auth-list-public-keys'."
+            "to '--enable-supernode-auth'."
         )
 
     node_public_keys: set[bytes] = set()
@@ -729,7 +729,7 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         default=BASE_DIR,
     )
     parser.add_argument(
-        "--auth-list-public-keys",
+        "--enable-supernode-auth",
         type=str,
         help="A CSV file (as a path str) containing a list of known public "
         "keys to enable authentication.",
@@ -815,14 +815,6 @@ def _add_args_control_api(parser: argparse.ArgumentParser) -> None:
         default=False,
         help="Launch the SimulationIo API server in place of "
         "the ServerAppIo API server.",
-    )
-    parser.add_argument(
-        "--disable-node-auth",
-        action="store_true",
-        default=False,
-        help="When set, the Control API will not accept `flwr supernode` commands."
-        " This means SuperNodes will be able to connect to the SuperLink without"
-        " being associated to an account.",
     )
 
 
