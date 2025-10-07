@@ -203,7 +203,13 @@ def _run_with_control_api(
                 f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN
             )
         else:
-            typer.secho("❌ Failed to start run", fg=typer.colors.RED)
+            if remote_app_ref:
+                typer.secho(
+                    "❌ Failed to start run. Please check that the provided "
+                    "app identifier (@user_name/app_name) is correct.",
+                    fg=typer.colors.RED)
+            else:
+                typer.secho("❌ Failed to start run", fg=typer.colors.RED)
             raise typer.Exit(code=1)
 
         if output_format == CliOutputFormat.JSON:
