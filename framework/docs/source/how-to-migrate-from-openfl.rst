@@ -140,7 +140,7 @@ the inheritance of the Net back to ``nn.module``. For a concrete example, see th
 following OpenFL TaskRunner code snippet:
 
 .. code-block:: python
-    :emphasize-lines: 2,50-58
+    :emphasize-lines: 2,50-60
 
     # OpenFL PyTorch TaskRunner
     class PyTorchCNN(PyTorchTaskRunner):
@@ -538,9 +538,10 @@ snippets:
         state_dict = result.arrays.to_torch_state_dict()
         torch.save(state_dict, "final_model.pt")
 
-You'll notice that this each ``ServerApp`` should have specific logic for working with a
+You'll notice that most ``ServerApp`` examples have specific logic for working with a
 given deep learning framework (in this case PyTorch) due to the saving of a final model.
-This change requires only a few lines of modifications, and Flower has support for an
+This functionality is optional, but mirrors the automatic saving of a model at the end of an OpenFL experiment.
+This ``ServerApp`` change requires only a few lines of modifications, and Flower has support for an
 extensive set of deep learning frameworks in it's `examples
 <https://github.com/adap/flower/tree/main/examples>`_ (Tensorflow, FastAI, Huggingface,
 etc.) should you need reference code.
@@ -548,7 +549,9 @@ etc.) should you need reference code.
 Further help
 ------------
 
-While we expect this guide will help most users get migrated quickly to the Flower
+For a complete PyTorch example that goes into depth on various Flower components, see the
+`Get started with Flower <https://flower.ai/docs/framework/tutorial-series-get-started-with-flower-pytorch.html>`_
+tutorial. While we expect this guide will help most users get migrated quickly to the Flower
 ecosystem, certain complex OpenFL workloads may require more clarification or help. If
 you have further questions, `join the Flower Slack <https://flower.ai/join-slack/>`_
 (and use the channel ``#questions``) or join our `OpenFL Continuity Program
