@@ -637,16 +637,16 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         with self.lock:
             if (node := self.nodes.get(node_id)) and node.status != NodeStatus.DELETED:
-                current_time = now().timestamp()
+                current_dt = now()
 
                 # Set timestamp if the status changes
                 if node.status != NodeStatus.ACTIVATED:  # deactivated or created
                     node.status = NodeStatus.ACTIVATED
-                    node.last_activated_at = current_time
+                    node.last_activated_at = current_dt.isoformat()
 
                 # Refresh `online_until` and `heartbeat_interval`
                 node.online_until = (
-                    current_time + HEARTBEAT_PATIENCE * heartbeat_interval
+                    current_dt.timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval
                 )
                 node.heartbeat_interval = heartbeat_interval
                 return True

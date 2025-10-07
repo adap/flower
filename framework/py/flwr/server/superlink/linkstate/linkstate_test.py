@@ -681,7 +681,7 @@ class StateTest(CoreStateTest):
         state: LinkState = self.state_factory()
 
         # Prepare: create several nodes
-        node_ids = [create_dummy_node(state) for _ in range(5)]
+        node_ids = [create_dummy_node(state, activate=False) for _ in range(5)]
 
         # Execute
         infos = state.get_node_info()
@@ -694,7 +694,7 @@ class StateTest(CoreStateTest):
     def test_get_node_info_filter_by_node_ids(self) -> None:
         """Test get_node_info filters correctly by node_ids."""
         state: LinkState = self.state_factory()
-        node_ids = [create_dummy_node(state) for _ in range(5)]
+        node_ids = [create_dummy_node(state, activate=False) for _ in range(5)]
 
         # Execute: only query the first two
         infos = state.get_node_info(node_ids=node_ids[:2])
@@ -703,68 +703,25 @@ class StateTest(CoreStateTest):
         returned_ids = [info.node_id for info in infos]
         self.assertSetEqual(set(returned_ids), set(node_ids[:2]))
 
-
     def test_get_node_info_filter_by_owner_aids(self) -> None:
         """Test get_node_info filters correctly by owner_aids."""
         state: LinkState = self.state_factory()
-        node1 = create_dummy_node(state, owner_aid="alice")
-        node2 = create_dummy_node(state, owner_aid="bob")
+        node_id1 = create_dummy_node(state, owner_aid="alice", activate=False)
+        node_id2 = create_dummy_node(state, owner_aid="bob", activate=False)
 
         infos = state.get_node_info(owner_aids=["alice"])
         returned_ids = [info.node_id for info in infos]
 
-        self.assertEqual(returned_ids, [node1])
-
-
-    def test_get_node_info_no_filters(self) -> None:
-        """Test get_node_info returns all nodes when no filters are provided."""
-        state: LinkState = self.state_factory()
-
-        # Prepare: create several nodes
-        node_ids = [create_dummy_node(state) for _ in range(5)]
-
-        # Execute
-        infos = state.get_node_info()
-
-        # Assert
-        returned_ids = [info.node_id for info in infos]
-        self.assertSetEqual(set(returned_ids), set(node_ids))
-
-
-    def test_get_node_info_filter_by_node_ids(self) -> None:
-        """Test get_node_info filters correctly by node_ids."""
-        state: LinkState = self.state_factory()
-        node_ids = [create_dummy_node(state) for _ in range(5)]
-
-        # Execute: only query the first two
-        infos = state.get_node_info(node_ids=node_ids[:2])
-
-        # Assert
-        returned_ids = [info.node_id for info in infos]
-        self.assertSetEqual(set(returned_ids), set(node_ids[:2]))
-
-
-    def test_get_node_info_filter_by_owner_aids(self) -> None:
-        """Test get_node_info filters correctly by owner_aids."""
-        state: LinkState = self.state_factory()
-        node1 = create_dummy_node(state, owner_aid="alice")
-        node2 = create_dummy_node(state, owner_aid="bob")
-
-        infos = state.get_node_info(owner_aids=["alice"])
-        returned_ids = [info.node_id for info in infos]
-
-        self.assertEqual(returned_ids, [node1])
-
+        self.assertEqual(returned_ids, [node_id1])
 
     def test_get_node_info_filter_by_status(self) -> None:
         """Test get_node_info filters correctly by statuses."""
         state: LinkState = self.state_factory()
-        node_created = create_dummy_node(state)
+        node_created = create_dummy_node(state, activate=False)
         node_activated = create_dummy_node(state)
         node_deleted = create_dummy_node(state)
 
         # Transition nodes
-        state.acknowledge_node_heartbeat(node_activated, heartbeat_interval=30)
         state.delete_node(node_deleted)
 
         # Execute
@@ -775,6 +732,30 @@ class StateTest(CoreStateTest):
         self.assertTrue(NodeStatus.CREATED in returned_statuses)
         self.assertTrue(NodeStatus.ACTIVATED in returned_statuses)
         self.assertFalse(NodeStatus.DELETED in returned_statuses)
+
+    def test_get_node_info_multiple_filters(self) -> None:
+        """Test get_node_info applies AND logic across filters."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        node1 = create_dummy_node(state, owner_aid="alice")
+        node2 = create_dummy_node(state, owner_aid="bob")
+        node3 = create_dummy_node(state, owner_aid="bob", activate=False)
+
+        # Query: owner_aid=alice AND status=ACTIVATED
+        infos = state.get_node_info(
+            owner_aids=["alice"], statuses=[NodeStatus.ACTIVATED]
+        )
+        returned_ids = [info.node_id for info in infos]
+
+        self.assertEqual(returned_ids, [node1])
+
+    def test_get_node_info_empty_list_filters(self) -> None:
+        """Test get_node_info with empty list filters returns no results."""
+        state: LinkState = self.state_factory()
+        create_dummy_node(state)
+
+        infos = state.get_node_info(node_ids=[])
+        self.assertEqual(infos, [])
 
     def test_delete_node(self) -> None:
         """Test deleting a client node."""
@@ -1532,11 +1513,19 @@ def transition_run_status(state: LinkState, run_id: int, num_transitions: int) -
         )
 
 
-def create_dummy_node(state: LinkState, heartbeat_interval: int = 1000) -> int:
+def create_dummy_node(
+    state: LinkState, 
+    heartbeat_interval: int = 1000, 
+    owner_aid: str = "mock_flwr_aid",
+    activate: bool = True
+) -> int:
     """Create a dummy node."""
-    return state.create_node(
-        "mock_flwr_aid", secrets.token_bytes(32), heartbeat_interval
+    node_id = state.create_node(
+        owner_aid, secrets.token_bytes(32), heartbeat_interval
     )
+    if activate:
+        state.acknowledge_node_heartbeat(node_id, heartbeat_interval)
+    return node_id
 
 
 class InMemoryStateTest(StateTest):
