@@ -59,9 +59,6 @@ from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    public_key_to_bytes,
-)
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -70,6 +67,7 @@ from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.primitives.asymmetric import public_key_to_bytes
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 from flwr.superlink.servicer.control import run_control_api_grpc
