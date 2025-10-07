@@ -109,8 +109,8 @@ go through these in depth in later sections of the guide:
   For Flower, you'll find these in ``client_app.py`` and identified beneath the ``@app.train()`` and ``@app.evaluate`` decorators. 
 
 - **Aggregation Functions**: In OpenFL, most examples use the ``WeightedAverage()`` aggregation algorithm by default. If you're using a different 
-  aggregation algorithm, you'll find it in ``plan.yaml`` by searching for `aggregation_type`.
-   In Flower, the aggregation algorithm is defined as a |strategy_link|_.
+  aggregation algorithm, you'll find it in ``plan.yaml`` by searching for `aggregation_type`. In Flower, the
+  aggregation algorithm is defined as a |strategy_link|_.
 
 Migrate your model
 ~~~~~~~~~~~~~~~~~~
