@@ -15,14 +15,13 @@
 """Symmetric encryption tests."""
 
 
-from .symmetric_encryption import (
-    compute_hmac,
+from flwr.supercore.primitives.asymmetric import (
     generate_key_pairs,
-    generate_shared_key,
     sign_message,
-    verify_hmac,
     verify_signature,
 )
+
+from .symmetric_encryption import compute_hmac, generate_shared_key, verify_hmac
 
 
 def test_generate_shared_key() -> None:

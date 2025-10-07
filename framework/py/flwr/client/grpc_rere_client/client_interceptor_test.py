@@ -33,11 +33,6 @@ from flwr.common.logger import log
 from flwr.common.message import Message
 from flwr.common.record import RecordDict
 from flwr.common.retry_invoker import RetryInvoker, exponential
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    generate_key_pairs,
-    public_key_to_bytes,
-    verify_signature,
-)
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -54,6 +49,11 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.supercore.primitives.asymmetric import (
+    generate_key_pairs,
+    public_key_to_bytes,
+    verify_signature,
+)
 
 
 class _MockServicer:
