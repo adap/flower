@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for asymmetric encryption utilities."""
+"""Tests for asymmetric cryptography utilities."""
 
 
 from .asymmetric import generate_key_pairs, sign_message, verify_signature
