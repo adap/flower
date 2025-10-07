@@ -238,7 +238,7 @@ from the function. To make migration easy, see the highlighted blocks that can c
 over directly to the Flower ``client_app.py`` file:
 
 .. code-block:: python
-    :emphasize-lines: 32-41,59-73
+    :emphasize-lines: 33-42,60-74
 
     from openfl.federated import PyTorchTaskRunner
     from openfl.utilities import Metric
@@ -323,7 +323,7 @@ setup is standard and quite reusable across examples. Let's see how the relevant
 ``train_`` function fits into Flower:
 
 .. code-block:: python
-    :emphasize-lines: 21-37
+    :emphasize-lines: 22-38
 
     # client_app.py
 
