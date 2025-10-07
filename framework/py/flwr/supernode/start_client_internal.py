@@ -313,7 +313,8 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                     f" match the expected hash ({fab.hash_string})",
                 )
             
-            # Logic to verify signatures over the FAB if needed
+            # TODO: Logic to verify signatures over the FAB if needed
+          
 
             # Initialize the context
             run_cfg = get_fused_config_from_fab(fab.content, run_info)
