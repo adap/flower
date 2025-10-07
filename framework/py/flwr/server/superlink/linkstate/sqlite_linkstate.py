@@ -71,10 +71,16 @@ from .utils import (
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
-    node_id         INTEGER UNIQUE,
-    online_until    REAL,
-    heartbeat_interval   REAL,
-    public_key      BLOB UNIQUE
+    node_id                 INTEGER UNIQUE,
+    owner_aid               TEXT,
+    status                  TEXT,
+    created_at              TEXT,
+    last_activated_at       TEXT,
+    last_deactivated_at     TEXT,
+    deleted_at              TEXT,
+    online_until            REAL,
+    heartbeat_interval      REAL,
+    public_key              BLOB UNIQUE
 );
 """
 
@@ -606,21 +612,29 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Convert the uint64 value to sint64 for SQLite
         sint64_node_id = convert_uint64_to_sint64(uint64_node_id)
 
-        query = (
-            "INSERT INTO node "
-            "(node_id, online_until, heartbeat_interval, public_key) "
-            "VALUES (?, ?, ?, ?)"
-        )
+        query = """
+            INSERT INTO node
+            (node_id, owner_aid, status, created_at, last_activated_at,
+            last_deactivated_at, deleted_at, online_until, heartbeat_interval,
+            public_key)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """
 
         # Mark the node online until now().timestamp() + heartbeat_interval
         try:
             self.query(
                 query,
                 (
-                    sint64_node_id,
-                    now().timestamp() + heartbeat_interval,
-                    heartbeat_interval,
-                    public_key,
+                    sint64_node_id,  # node_id
+                    "",  # owner_aid, unused for now
+                    "created",  # status, unused for now
+                    now().isoformat(),  # created_at, unused for now
+                    now().isoformat(),  # last_activated_at, unused for now
+                    "",  # last_deactivated_at, unused for now
+                    "",  # deleted_at, unused for now
+                    now().timestamp() + heartbeat_interval,  # online_until
+                    heartbeat_interval,  # heartbeat_interval
+                    public_key,  # public_key
                 ),
             )
         except sqlite3.IntegrityError as e:
