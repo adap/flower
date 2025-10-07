@@ -19,6 +19,7 @@ import hashlib
 import json
 import re
 import time
+import typer
 from collections.abc import Generator
 from datetime import timedelta
 from logging import ERROR, INFO
@@ -26,7 +27,6 @@ from typing import Any, Optional, cast
 
 import grpc
 import requests
-import typer
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
@@ -121,12 +121,19 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 )
 
             # Request download link
-            # url, verification = _request_download_link(identifier)
+            # url, verification = _request_download_link(identifier, context)
             url = "https://flowerhub-test.s3.amazonaws.com/flwrlabs/app-numpy/v1/flwrlabs.app-numpy.1-0-0.f7fece39.fab?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA356SJNXRDWUQI6NG%2F20251007%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20251007T103722Z&X-Amz-Expires=14400&X-Amz-SignedHeaders=host&X-Amz-Signature=030e7ab6b1c6f4003dc2fbac07ba81e3ffc9f8dbf17ceaf74345c66b640b7f7d"
             verification = {"sig": "1234"}
+            # url = "https://flowerhub-test"
 
             # Download FAB from Hub
-            fab_file = _download_to_memory(url)
+            try:
+                r = requests.get(url, timeout=60)
+                r.raise_for_status()
+            except requests.RequestException as e:
+                log(ERROR, "FAB download failed: %s", str(e))
+                return StartRunResponse()
+            fab_file = r.content
         else:
             fab_file = request.fab.content
 
@@ -552,7 +559,7 @@ def _check_flwr_aid_in_run(
         )
 
 
-def _request_download_link(identifier: str) -> [str, str]:
+def _request_download_link(identifier: str, context: grpc.ServicerContext) -> [str, str]:
     """Request download link from Flower platform API."""
     url = f"{PLATFORM_API_URL}/hub/download-link"
     headers = {
@@ -567,27 +574,28 @@ def _request_download_link(identifier: str) -> [str, str]:
     try:
         resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
     except requests.RequestException as e:
-        raise typer.BadParameter(f"Unable to connect to Hub: {e}") from e
+        context.abort(
+            grpc.StatusCode.UNAVAILABLE,
+            f"Unable to connect to Hub: {e}",
+        )
+        raise grpc.RpcError()  # This line is unreachable
 
     if resp.status_code == 404:
-        raise typer.BadParameter(f"'{identifier}' not found in Hub")
+        context.abort(
+            grpc.StatusCode.NOT_FOUND,
+            f"'{identifier}' not found in Hub",
+        )
     if not resp.ok:
-        raise typer.BadParameter(
+        context.abort(
+            grpc.StatusCode.UNAVAILABLE,
             f"Hub request failed with status {resp.status_code}. "
-            f"Details: {resp.text}"
+            f"Details: {resp.text}",
         )
 
     data = resp.json()
     if "url" not in data or "verification" not in data:
-        raise typer.BadParameter("Invalid response from Hub")
+        context.abort(
+            grpc.StatusCode.DATA_LOSS,
+            "Invalid response from Hub",
+        )
     return data["url"], data["verification"]
-
-
-def _download_to_memory(presigned_url: str) -> bytes:
-    """Download FAB file from Hub to memory."""
-    try:
-        r = requests.get(presigned_url, timeout=60)
-        r.raise_for_status()
-    except requests.RequestException as e:
-        raise typer.BadParameter(f"FAB download failed: {e}") from e
-    return r.content
