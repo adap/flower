@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-04 00:08+0000\n"
+"POT-Creation-Date: 2025-10-07 00:08+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -15540,8 +15540,8 @@ msgstr ""
 msgid "Arguments"
 msgstr "빌드 전달인자"
 
-#: ../../flwr create:1 delete:1 install:1 list:1 log:1 login:1 ls:1 new:1
-#: pull:1 run:1 stop:1 supernode
+#: ../../flwr create:1 delete:1 install:1 list:1 log:1 login:1 new:1 pull:1
+#: run:1 stop:1 supernode
 #, fuzzy
 msgid "Optional argument"
 msgstr "선택적 개선 사항"
@@ -15550,24 +15550,72 @@ msgstr "선택적 개선 사항"
 msgid "The source FAB file to install."
 msgstr ""
 
-#: ../../flwr log:1
-msgid "Get logs from a Flower project run."
+#: ../../flwr list:1
+msgid ""
+"List the details of one provided run ID or all runs in a Flower "
+"federation."
 msgstr ""
 
-#: ../../flwr log:1 login:1 ls:1 pull:1 run:1 stop:1
+#: ../../flwr list:1
+msgid "The following details are displayed:"
+msgstr ""
+
+#: ../../flwr list:1
+#, fuzzy
+msgid "**Run ID:** Unique identifier for the run."
+msgstr "현재 실행에 대한 식별자입니다."
+
+#: ../../flwr list:1
+#, python-brace-format
+msgid ""
+"**FAB:** Name of the FAB associated with the run (``{FAB_ID} "
+"(v{FAB_VERSION})``)."
+msgstr ""
+
+#: ../../flwr list:1
+msgid ""
+"**Status:** Current status of the run (pending, starting, running, "
+"finished)."
+msgstr ""
+
+#: ../../flwr list:1
+msgid "**Elapsed:** Time elapsed since the run started (``HH:MM:SS``)."
+msgstr ""
+
+#: ../../flwr list:1
+#, fuzzy
+msgid "**Created At:** Timestamp when the run was created."
+msgstr "메시지가 생성된 때의 Unix timestamp입니다."
+
+#: ../../flwr list:1
+#, fuzzy
+msgid "**Running At:** Timestamp when the run started running."
+msgstr "메시지가 생성된 때의 Unix timestamp입니다."
+
+#: ../../flwr list:1
+msgid "**Finished At:** Timestamp when the run finished."
+msgstr ""
+
+#: ../../flwr list:1
+msgid ""
+"All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD "
+"HH:MM:SSZ``."
+msgstr ""
+
+#: ../../flwr list:1 log:1 login:1 pull:1 run:1 stop:1
 #, fuzzy
 msgid ""
 "Override federation configuration values using one of the following "
 "formats:"
 msgstr "다음 명령을 실행하여 가상 환경을 활성화합니다:"
 
-#: ../../flwr log:1 login:1 ls:1 pull:1 run:1 stop:1
+#: ../../flwr list:1 log:1 login:1 pull:1 run:1 stop:1
 msgid ""
 "--federation-config '<k1>=<v1> <k2>=<v2>' | --federation-config "
 "'<k1>=<v1>' --federation-config '<k2>=<v2>'"
 msgstr ""
 
-#: ../../flwr log:1 login:1 ls:1 pull:1 run:1 stop:1
+#: ../../flwr list:1 log:1 login:1 pull:1 run:1 stop:1
 msgid ""
 "When providing key-value pairs, values can be of any type supported by "
 "TOML (e.g., bool, int, float, string). The specified keys (<k1> and <k2> "
@@ -15576,12 +15624,47 @@ msgid ""
 "to be overridden."
 msgstr ""
 
-#: ../../flwr log:1
-msgid "Flag to stream or print logs from the Flower run"
+#: ../../flwr list:1
+msgid "List all runs"
 msgstr ""
 
-#: ../../flwr log ls run stop
+#: ../../flwr list log run stop supernode
 msgid "default"
+msgstr ""
+
+#: ../../flwr list:1 run:1 supernode
+#, fuzzy
+msgid "``False``"
+msgstr "``flwr/base``"
+
+#: ../../flwr list:1
+msgid "Specific run ID to display"
+msgstr ""
+
+#: ../../flwr list:1 run:1 stop:1 supernode
+msgid "Format output using 'default' view or 'json'"
+msgstr ""
+
+#: ../../flwr list:1 run:1 stop:1 supernode
+#, fuzzy
+msgid "``'default'``"
+msgstr "``flwr/base``"
+
+#: ../../flwr create:1 delete:1 list:1 stop:1 supernode
+#, fuzzy
+msgid "Path of the Flower project"
+msgstr "Flower 기본 이미지의 태그."
+
+#: ../../flwr create:1 delete:1 list:1 stop:1 supernode
+msgid "Name of the federation"
+msgstr ""
+
+#: ../../flwr log:1
+msgid "Get logs from a Flower project run."
+msgstr ""
+
+#: ../../flwr log:1
+msgid "Flag to stream or print logs from the Flower run"
 msgstr ""
 
 #: ../../flwr log:1
@@ -15619,89 +15702,6 @@ msgstr "Flower 기본 이미지의 태그."
 
 #: ../../flwr login:1
 msgid "Name of the federation to login into."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid ""
-"List the details of one provided run ID or all runs in a Flower "
-"federation."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "The following details are displayed:"
-msgstr ""
-
-#: ../../flwr ls:1
-#, fuzzy
-msgid "**Run ID:** Unique identifier for the run."
-msgstr "현재 실행에 대한 식별자입니다."
-
-#: ../../flwr ls:1
-#, python-brace-format
-msgid ""
-"**FAB:** Name of the FAB associated with the run (``{FAB_ID} "
-"(v{FAB_VERSION})``)."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid ""
-"**Status:** Current status of the run (pending, starting, running, "
-"finished)."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "**Elapsed:** Time elapsed since the run started (``HH:MM:SS``)."
-msgstr ""
-
-#: ../../flwr ls:1
-#, fuzzy
-msgid "**Created At:** Timestamp when the run was created."
-msgstr "메시지가 생성된 때의 Unix timestamp입니다."
-
-#: ../../flwr ls:1
-#, fuzzy
-msgid "**Running At:** Timestamp when the run started running."
-msgstr "메시지가 생성된 때의 Unix timestamp입니다."
-
-#: ../../flwr ls:1
-msgid "**Finished At:** Timestamp when the run finished."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid ""
-"All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD "
-"HH:MM:SSZ``."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "List all runs"
-msgstr ""
-
-#: ../../flwr ls:1 run:1
-#, fuzzy
-msgid "``False``"
-msgstr "``flwr/base``"
-
-#: ../../flwr ls:1
-msgid "Specific run ID to display"
-msgstr ""
-
-#: ../../flwr ls:1 run:1 stop:1
-msgid "Format output using 'default' view or 'json'"
-msgstr ""
-
-#: ../../flwr ls:1 run:1 stop:1
-#, fuzzy
-msgid "``'default'``"
-msgstr "``flwr/base``"
-
-#: ../../flwr create:1 delete:1 list:1 ls:1 stop:1 supernode
-#, fuzzy
-msgid "Path of the Flower project"
-msgstr "Flower 기본 이미지의 태그."
-
-#: ../../flwr create:1 delete:1 list:1 ls:1 stop:1 supernode
-msgid "Name of the federation"
 msgstr ""
 
 #: ../../flwr new:1
@@ -15818,6 +15818,11 @@ msgstr "서버(SuperLink)"
 #, fuzzy
 msgid "List SuperNodes in the federation."
 msgstr "flower 초연결"
+
+#: ../../flwr list:1 supernode
+#, fuzzy
+msgid "Enable verbose output"
+msgstr "예시"
 
 #: ../../source/ref-api-cli.rst:19
 #, fuzzy
