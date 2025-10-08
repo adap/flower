@@ -32,6 +32,7 @@ from flwr.common.constant import (
     LOG_STREAM_INTERVAL,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
+    NODE_NOT_FOUND_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
@@ -448,6 +449,15 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> DeleteNodeCliResponse:
         """Remove a SuperNode."""
         log(INFO, "ControlServicer.RemoveNode")
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        try:
+            state.delete_node(request.node_id)
+        except ValueError:
+            context.abort(grpc.StatusCode.NOT_FOUND, NODE_NOT_FOUND_MESSAGE)
+
         return DeleteNodeCliResponse()
 
     def ListNodesCli(
