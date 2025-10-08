@@ -391,11 +391,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 if info.online_until > current_time
             }
 
-    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
+    def get_node_public_key(self, node_id: int) -> bytes:
         """Get `public_key` for the specified `node_id`."""
         with self.lock:
             if (node := self.nodes.get(node_id)) is None:
-                return None
+                raise ValueError(f"Node {node_id} not found")
 
             return node.public_key
 

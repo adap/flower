@@ -697,7 +697,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: set[int] = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
         return result
 
-    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
+    def get_node_public_key(self, node_id: int) -> bytes:
         """Get `public_key` for the specified `node_id`."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_node_id = convert_uint64_to_sint64(node_id)
@@ -708,10 +708,10 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # If no result is found, return None
         if not rows:
-            return None
+            raise ValueError(f"Node ID {node_id} not found")
 
         # Return the public key
-        return rows[0]["public_key"] or None
+        return cast(bytes, rows[0]["public_key"])
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(

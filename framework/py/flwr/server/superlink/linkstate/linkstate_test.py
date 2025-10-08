@@ -700,11 +700,11 @@ class StateTest(CoreStateTest):
         # Execute
         state.delete_node(node_id)
         retrieved_node_ids = state.get_nodes(run_id)
-        retrieved_public_key = state.get_node_public_key(node_id)
+        with self.assertRaises(ValueError):
+            _ = state.get_node_public_key(node_id)
 
         # Assert
         assert len(retrieved_node_ids) == 0
-        assert retrieved_public_key is None
 
     def test_get_nodes_invalid_run_id(self) -> None:
         """Test retrieving all node_ids with invalid run_id."""

@@ -148,7 +148,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
+    def get_node_public_key(self, node_id: int) -> bytes:
         """Get `public_key` for the specified `node_id`.
 
         Parameters
@@ -158,9 +158,13 @@ class LinkState(CoreState):  # pylint: disable=R0904
 
         Returns
         -------
-        Optional[bytes]
-            The public key associated with the specified `node_id`, or `None` if
-            the `node_id` does not exist.
+        bytes
+            The public key associated with the specified `node_id`.
+        
+        Raises
+        ------
+        ValueError
+            If the specified `node_id` does not exist in the link state.
         """
 
     @abc.abstractmethod
