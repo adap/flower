@@ -1,6 +1,5 @@
 """huggingface_example: A Flower / Hugging Face app."""
 
-from collections import OrderedDict
 from typing import Any
 
 import torch
@@ -64,17 +63,7 @@ def get_model(model_name):
     return AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
 
 
-def get_params(model):
-    return [val.cpu().numpy() for _, val in model.state_dict().items()]
-
-
-def set_params(model, parameters) -> None:
-    params_dict = zip(model.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-    model.load_state_dict(state_dict, strict=True)
-
-
-def train(net, trainloader, epochs, device) -> None:
+def train_fn(net, trainloader, epochs, device) -> None:
     optimizer = AdamW(net.parameters(), lr=5e-5)
     net.train()
     for _ in range(epochs):
@@ -87,7 +76,7 @@ def train(net, trainloader, epochs, device) -> None:
             optimizer.zero_grad()
 
 
-def test(net, testloader, device) -> tuple[Any | float, Any]:
+def test_fn(net, testloader, device) -> tuple[Any | float, Any]:
     metric = load_metric("accuracy")
     loss = 0
     net.eval()

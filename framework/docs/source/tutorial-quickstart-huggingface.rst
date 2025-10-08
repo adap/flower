@@ -68,40 +68,67 @@ With default arguments you will see an output like this one:
 
     Loading project configuration...
     Success
-    INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
+    INFO :      Starting FedAvg strategy:
+    INFO :          ├── Number of rounds: 3
+    INFO :          ├── ArrayRecord (16.74 MB)
+    INFO :          ├── ConfigRecord (train): (empty!)
+    INFO :          ├── ConfigRecord (evaluate): (empty!)
+    INFO :          ├──> Sampling:
+    INFO :          │       ├──Fraction: train (0.50) | evaluate ( 1.00)
+    INFO :          │       ├──Minimum nodes: train (2) | evaluate (2)
+    INFO :          │       └──Minimum available nodes: 2
+    INFO :          └──> Keys in records:
+    INFO :                  ├── Weighted by: 'num-examples'
+    INFO :                  ├── ArrayRecord key: 'arrays'
+    INFO :                  └── ConfigRecord key: 'config'
     INFO :
-    INFO :      [INIT]
-    INFO :      Using initial global parameters provided by strategy
-    INFO :      Starting evaluation of initial global parameters
-    INFO :      Evaluation returned no results (`None`)
     INFO :
-    INFO :      [ROUND 1]
-    INFO :      configure_fit: strategy sampled 2 clients (out of 10)
-    INFO :      aggregate_fit: received 2 results and 0 failures
-    WARNING :   No fit_metrics_aggregation_fn provided
-    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_evaluate: received 10 results and 0 failures
-    WARNING :   No evaluate_metrics_aggregation_fn provided
+    INFO :      [ROUND 1/3]
+    INFO :      configure_train: Sampled 5 nodes (out of 10)
+    INFO :      aggregate_train: Received 5 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.6974}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'val_loss': 0.0223, 'val_accuracy': 0.5024}
     INFO :
-    INFO :      [ROUND 2]
-    INFO :      configure_fit: strategy sampled 5 clients (out of 10)
-    INFO :      aggregate_fit: received 5 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_evaluate: received 10 results and 0 failures
+    INFO :      [ROUND 2/3]
+    INFO :      configure_train: Sampled 5 nodes (out of 10)
+    INFO :      aggregate_train: Received 5 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.7019}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'val_loss': 0.0221, 'val_accuracy': 0.5176}
     INFO :
-    INFO :      [ROUND 3]
-    INFO :      configure_fit: strategy sampled 5 clients (out of 10)
-    INFO :      aggregate_fit: received 5 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_evaluate: received 10 results and 0 failures
+    INFO :      [ROUND 3/3]
+    INFO :      configure_train: Sampled 5 nodes (out of 10)
+    INFO :      aggregate_train: Received 5 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.6845}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'val_loss': 0.0221, 'val_accuracy': 0.5042}
     INFO :
-    INFO :      [SUMMARY]
-    INFO :      Run finished 3 round(s) in 249.11s
-    INFO :          History (loss, distributed):
-    INFO :                  round 1: 0.02111011856794357
-    INFO :                  round 2: 0.019722302150726317
-    INFO :                  round 3: 0.018227258533239362
+    INFO :      Strategy execution finished in 151.02s
     INFO :
+    INFO :      Final results:
+    INFO :
+    INFO :          Global Arrays:
+    INFO :                  ArrayRecord (16.737 MB)
+    INFO :
+    INFO :          Aggregated ClientApp-side Train Metrics:
+    INFO :          { 1: {'train_loss': '6.9738e-01'},
+    INFO :            2: {'train_loss': '7.0191e-01'},
+    INFO :            3: {'train_loss': '6.8449e-01'}}
+    INFO :
+    INFO :          Aggregated ClientApp-side Evaluate Metrics:
+    INFO :          { 1: {'val_accuracy': '5.0240e-01', 'val_loss': '2.2265e-02'},
+    INFO :            2: {'val_accuracy': '5.1760e-01', 'val_loss': '2.2134e-02'},
+    INFO :            3: {'val_accuracy': '5.0420e-01', 'val_loss': '2.2124e-02'}}
+    INFO :
+    INFO :          ServerApp-side Evaluate Metrics:
+    INFO :          {}
+    INFO :
+
+    Saving final model to disk...
 
 You can also run the project with GPU as follows:
 
@@ -110,7 +137,7 @@ You can also run the project with GPU as follows:
     # Run with default arguments
     $ flwr run . localhost-gpu
 
-This will use the default arguments where each ``ClientApp`` will use 2 CPUs and at most
+This will use the default arguments where each ``ClientApp`` will use 4 CPUs and at most
 4 ``ClientApp``\s will run in a given GPU.
 
 You can also override the parameters defined in the ``[tool.flwr.app.config]`` section
@@ -119,7 +146,7 @@ in ``pyproject.toml`` like this:
 .. code-block:: shell
 
     # Override some arguments
-    $ flwr run . --run-config "num-server-rounds=5 fraction-fit=0.2"
+    $ flwr run . --run-config "num-server-rounds=5 fraction-train=0.2"
 
 What follows is an explanation of each component in the project you just created:
 dataset partition, the model, defining the ``ClientApp`` and defining the ``ServerApp``.
@@ -231,75 +258,65 @@ use standard training/testing functions to perform local training or evaluation:
 The ClientApp
 -------------
 
-The main changes we have to make to use 🤗 Hugging Face with Flower will be found in the
-``get_weights()`` and ``set_weights()`` functions. Under the hood, the ``transformers``
-library uses PyTorch, which means we can reuse the ``get_weights()`` and
-``set_weights()`` code that we defined in the :doc:`Quickstart PyTorch
-<tutorial-quickstart-pytorch>` tutorial. As a reminder, in ``get_weights()``, PyTorch
-model parameters are extracted and represented as a list of NumPy arrays. The
-``set_weights()`` function that's the opposite: given a list of NumPy arrays it applies
-them to an existing PyTorch model. Doing this in fairly easy in PyTorch.
-
-.. note::
-
-    The specific implementation of ``get_weights()`` and ``set_weights()`` depends on
-    the type of models you use. The ones shown below work for a wide range of PyTorch
-    models but you might need to adjust them if you have more exotic model
-    architectures.
+The main changes we have to make to use 🤗 Hugging Face with Flower have to do with
+converting the |arrayrecord_link|_ received in the |message_link|_ into a PyTorch
+``state_dict`` and vice versa when generating the reply ``Message`` from the ClientApp.
+We can make use of the built-in methods in the ``ArrayRecord`` to make these
+conversions:
 
 .. code-block:: python
 
-    def get_weights(net):
-        return [val.cpu().numpy() for _, val in net.state_dict().items()]
+    # Load the model
+    net = AutoModelForSequenceClassification.from_pretrained(
+        model_name, num_labels=num_labels
+    )
 
+    # Extract ArrayRecord from Message and convert to PyTorch state_dict,
+    state_dict = msg.content["arrays"].to_torch_state_dict()
+    # Load state_dict into the model
+    net.load_state_dict(state_dict)
 
-    def set_weights(net, parameters):
-        params_dict = zip(net.state_dict().keys(), parameters)
-        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        net.load_state_dict(state_dict, strict=True)
+    # ... do some training
+
+    # Convert state_dict back into an ArrayRecord
+    model_record = ArrayRecord(net.state_dict())
 
 The rest of the functionality is directly inspired by the centralized case. The
-``fit()`` method in the client trains the model using the local dataset. Similarly, the
-``evaluate()`` method is used to evaluate the model received on a held-out validation
-set that the client might have:
+|clientapp_link|_ comes with three core methods (``train``, ``evaluate``, and ``query``)
+that we can implement for different purposes. For example: ``train`` to train the
+received model using the local data; ``evaluate`` to assess its performance of the
+received model on a validation set; and ``query`` to retrieve information about the node
+executing the ``ClientApp``. In this tutorial we will only make use of ``train`` and
+``evaluate``.
+
+Let's see how the ``train`` method can be implemented. It receives as input arguments a
+|message_link|_ from the ``ServerApp``. By default it carries:
+
+- an ``ArrayRecord`` with the arrays of the model to federate. By default they can be
+  retrieved with key ``"arrays"`` when accessing the message content.
+- a ``ConfigRecord`` with the configuration sent from the ``ServerApp``. By default it
+  can be retrieved with key ``"config"`` when accessing the message content.
+
+The ``train`` method also receives the ``Context``, giving access to configs for your
+run and node. The run config hyperparameters are defined in the ``pyproject.toml`` of
+your Flower App. The node config can only be set when running Flower with the Deployment
+Runtime and is not directly configurable during simulations.
 
 .. code-block:: python
 
-    class FlowerClient(NumPyClient):
-        def __init__(self, net, trainloader, testloader, local_epochs):
-            self.net = net
-            self.trainloader = trainloader
-            self.testloader = testloader
-            self.local_epochs = local_epochs
-            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-            self.net.to(self.device)
+    # Flower ClientApp
+    app = ClientApp()
 
-        def fit(self, parameters, config):
-            set_weights(self.net, parameters)
-            train(self.net, self.trainloader, epochs=self.local_epochs, device=self.device)
-            return get_weights(self.net), len(self.trainloader), {}
 
-        def evaluate(self, parameters, config):
-            set_weights(self.net, parameters)
-            loss, accuracy = test(self.net, self.testloader, self.device)
-            return float(loss), len(self.testloader), {"accuracy": accuracy}
-
-Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` defined above by
-means of a ``client_fn()`` callback. Note that the `context` enables you to get access
-to hyperparemeters defined in your ``pyproject.toml`` to configure the run. In this
-tutorial we access the ``local-epochs`` setting to control the number of epochs a
-``ClientApp`` will perform when running the ``fit()`` method. You could define
-additional hyperparameters in ``pyproject.toml`` and access them here.
-
-.. code-block:: python
-
-    def client_fn(context: Context):
+    @app.train()
+    def train(msg: Message, context: Context):
+        """Train the model on local data."""
 
         # Get this client's dataset partition
         partition_id = context.node_config["partition-id"]
         num_partitions = context.node_config["num-partitions"]
         model_name = context.run_config["model-name"]
-        trainloader, valloader = load_data(partition_id, num_partitions, model_name)
+        trainloader, _ = load_data(partition_id, num_partitions, model_name)
 
         # Load model
         num_labels = context.run_config["num-labels"]
@@ -307,31 +324,70 @@ additional hyperparameters in ``pyproject.toml`` and access them here.
             model_name, num_labels=num_labels
         )
 
-        local_epochs = context.run_config["local-epochs"]
+        # Initialize it with the received weights
+        net.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        net.to(device)
 
-        # Return Client instance
-        return FlowerClient(net, trainloader, valloader, local_epochs).to_client()
+        # Train the model on local data
+        train_loss = train_fn(
+            net,
+            trainloader,
+            context.run_config["local-steps"],
+            device,
+        )
 
+        # Construct and return reply Message
+        model_record = ArrayRecord(net.state_dict())
+        metrics = {
+            "train_loss": train_loss,
+            "num-examples": len(trainloader.dataset),
+        }
+        metric_record = MetricRecord(metrics)
+        content = RecordDict({"arrays": model_record, "metrics": metric_record})
+        return Message(content=content, reply_to=msg)
 
-    # Flower ClientApp
-    app = ClientApp(client_fn)
+The ``@app.evaluate()`` method would be near identical with two exceptions: (1) the
+model is not locally trained, instead it is used to evaluate its performance on the
+locally held-out validation set; (2) including the model in the reply Message is no
+longer needed because it is not locally modified.
 
 The ServerApp
 -------------
 
-To construct a ``ServerApp`` we define a ``server_fn()`` callback with an identical
-signature to that of ``client_fn()`` but the return type is |serverappcomponents|_ as
-opposed to a |client|_ In this example we use the `FedAvg` strategy. To it we pass a
-randomly initialized model that will server as the global model to federated. Note that
-the value of ``fraction_fit`` is read from the run config. You can find the default
-value defined in the ``pyproject.toml``.
+To construct a |serverapp_link|_ we define its ``@app.main()`` method. This method
+receive as input arguments:
+
+- a ``Grid`` object that will be used to interface with the nodes running the
+  ``ClientApp`` to involve them in a round of train/evaluate/query or other.
+- a ``Context`` object that provides access to the run configuration.
+
+In this example we use the |fedavg|_ and configure it with a specific value of
+``fraction_train`` which is read from the run config. You can find the default value
+defined in the ``pyproject.toml``. Then, the execution of the strategy is launched when
+invoking its |strategy_start_link|_ method. To it we pass:
+
+- the ``Grid`` object.
+- an ``ArrayRecord`` carrying a randomly initialized model that will serve as the global
+  model to be federated.
+- a ``ConfigRecord`` with the training hyperparameters to be sent to the clients. The
+  strategy will also insert the current round number in this config before sending it to
+  the participating nodes.
+- the ``num_rounds`` parameter specifying how many rounds of ``FedAvg`` to perform.
 
 .. code-block:: python
 
-    def server_fn(context: Context):
+    # Create ServerApp
+    app = ServerApp()
+
+
+    @app.main()
+    def main(grid: Grid, context: Context) -> None:
+        """Main entry point for the ServerApp."""
+
         # Read from config
         num_rounds = context.run_config["num-server-rounds"]
-        fraction_fit = context.run_config["fraction-fit"]
+        fraction_train = context.run_config["fraction-train"]
 
         # Initialize global model
         model_name = context.run_config["model-name"]
@@ -339,23 +395,29 @@ value defined in the ``pyproject.toml``.
         net = AutoModelForSequenceClassification.from_pretrained(
             model_name, num_labels=num_labels
         )
+        arrays = ArrayRecord(net.state_dict())
 
-        weights = get_weights(net)
-        initial_parameters = ndarrays_to_parameters(weights)
+        # Initialize FedAvg strategy
+        strategy = FedAvg(fraction_train=fraction_train)
 
-        # Define strategy
-        strategy = FedAvg(
-            fraction_fit=fraction_fit,
-            fraction_evaluate=1.0,
-            initial_parameters=initial_parameters,
+        # Start strategy, run FedAvg for `num_rounds`
+        result = strategy.start(
+            grid=grid,
+            initial_arrays=arrays,
+            num_rounds=num_rounds,
         )
-        config = ServerConfig(num_rounds=num_rounds)
 
-        return ServerAppComponents(strategy=strategy, config=config)
+        # Save final model to disk
+        print("\nSaving final model to disk...")
+        state_dict = result.arrays.to_torch_state_dict()
+        torch.save(state_dict, "final_model.pt")
 
-
-    # Create ServerApp
-    app = ServerApp(server_fn=server_fn)
+Note the ``start`` method of the strategy returns a result object. This object contains
+all the relevant information about the FL process, including the final model weights as
+an ``ArrayRecord``, and federated training and evaluation metrics as ``MetricRecords``.
+You can easily log the metrics using Python's `pprint
+<https://docs.python.org/3/library/pprint.html>`_ and save the global model `state_dict`
+using ``torch.save``.
 
 Congratulations! You've successfully built and run your first federated learning system
 for an LLM.
@@ -377,19 +439,13 @@ for an LLM.
 
 .. |berttiny| replace:: ``bert-tiny``
 
-.. |serverappcomponents| replace:: ``ServerAppComponents``
-
-.. |client| replace:: ``Client``
-
 .. |flowerdatasets| replace:: Flower Datasets
 
 .. |flowertune| replace:: FlowerTune LLM
 
 .. _berttiny: https://huggingface.co/prajjwal1/bert-tiny
 
-.. _client: ref-api/flwr.client.Client.html#client
-
-.. _fedavg: ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg
+.. _fedavg: ref-api/flwr.serverapp.strategy.FedAvg.html
 
 .. _flowerdatasets: https://flower.ai/docs/datasets/
 
@@ -401,4 +457,22 @@ for an LLM.
 
 .. _quickstart_hf_link: https://github.com/adap/flower/tree/main/examples/quickstart-huggingface
 
-.. _serverappcomponents: ref-api/flwr.server.ServerAppComponents.html#serverappcomponents
+.. |arrayrecord_link| replace:: ``ArrayRecord``
+
+.. _arrayrecord_link: ref-api/flwr.app.ArrayRecord.html
+
+.. |message_link| replace:: ``Message``
+
+.. _message_link: ref-api/flwr.app.Message.html
+
+.. |clientapp_link| replace:: ``ClientApp``
+
+.. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
+
+.. |serverapp_link| replace:: ``ServerApp``
+
+.. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
+
+.. |strategy_start_link| replace:: ``start``
+
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start

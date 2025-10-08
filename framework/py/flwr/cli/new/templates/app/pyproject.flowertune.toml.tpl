@@ -14,7 +14,7 @@ description = ""
 license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
-    "flwr[simulation]>=1.22.0",
+    "flwr[simulation]>=1.23.0",
     "flwr-datasets>=0.5.0",
     "torch==2.4.0",
     "trl==0.8.1",
@@ -61,7 +61,7 @@ train.training-arguments.save-steps = 1000
 train.training-arguments.save-total-limit = 10
 train.training-arguments.gradient-checkpointing = true
 train.training-arguments.lr-scheduler-type = "constant"
-strategy.fraction-fit = $fraction_fit
+strategy.fraction-train = $fraction_train
 strategy.fraction-evaluate = 0.0
 num-server-rounds = 200
 

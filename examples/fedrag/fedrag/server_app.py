@@ -8,8 +8,8 @@ from itertools import cycle
 from time import sleep
 
 import numpy as np
-from flwr.common import ConfigRecord, Context, Message, MessageType, RecordDict
-from flwr.server import Grid, ServerApp
+from flwr.app import ConfigRecord, Context, Message, MessageType, RecordDict
+from flwr.serverapp import Grid, ServerApp
 from sklearn.metrics import accuracy_score
 
 from fedrag.llm_querier import LLMQuerier

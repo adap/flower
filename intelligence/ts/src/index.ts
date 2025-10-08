@@ -21,6 +21,7 @@ export type {
   Failure,
   JsonSchema,
   JsonSchemaPayload,
+  JsonValue,
   Message,
   Progress,
   ResponseFormat,

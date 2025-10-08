@@ -1,49 +1,29 @@
 """vitexample: A Flower / PyTorch app with Vision Transformers."""
 
+import warnings
+
 import torch
-from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 from torch.utils.data import DataLoader
 
 from vitexample.task import (
     apply_train_transforms,
     get_dataset_partition,
     get_model,
-    get_params,
-    set_params,
-    train,
+    trainer,
 )
 
-
-class FedViTClient(NumPyClient):
-    def __init__(self, trainloader, learning_rate, num_classes):
-        self.trainloader = trainloader
-        self.learning_rate = learning_rate
-        self.model = get_model(num_classes)
-
-        # Determine device
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.model.to(self.device)  # send model to device
-
-    def fit(self, parameters, config):
-        set_params(self.model, parameters)
-
-        # Set optimizer
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        # Train locally
-        avg_train_loss = train(
-            self.model, self.trainloader, optimizer, epochs=1, device=self.device
-        )
-        # Return locally-finetuned part of the model
-        return (
-            get_params(self.model),
-            len(self.trainloader.dataset),
-            {"train_loss": avg_train_loss},
-        )
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
-def client_fn(context: Context):
-    """Return a FedViTClient."""
+# Flower ClientApp
+app = ClientApp()
+
+
+@app.train()
+def train(msg: Message, context: Context):
+    """Train the model on local data."""
 
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]
@@ -54,13 +34,32 @@ def client_fn(context: Context):
     batch_size = context.run_config["batch-size"]
     lr = context.run_config["learning-rate"]
     num_classes = context.run_config["num-classes"]
-    trainset = trainpartition.with_transform(apply_train_transforms)
 
+    # Load dataset
+    trainset = trainpartition.with_transform(apply_train_transforms)
     trainloader = DataLoader(
         trainset, batch_size=batch_size, num_workers=2, shuffle=True
     )
 
-    return FedViTClient(trainloader, lr, num_classes).to_client()
+    # Load model
+    model = get_model(num_classes)
+    finetune_layers = model.heads
+    finetune_layers.load_state_dict(
+        msg.content["arrays"].to_torch_state_dict(), strict=True
+    )
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+    # Set optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    # Train locally
+    avg_train_loss = trainer(model, trainloader, optimizer, epochs=1, device=device)
 
-app = ClientApp(client_fn=client_fn)
+    # Construct and return reply Message
+    model_record = ArrayRecord(finetune_layers.state_dict())
+    metrics = {
+        "train_loss": avg_train_loss,
+        "num-examples": len(trainloader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)

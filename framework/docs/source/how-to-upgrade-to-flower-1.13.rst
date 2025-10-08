@@ -117,7 +117,7 @@ project both in the traditional (now deprecated) way and in the new (recommended
   ``start_client()``. Here's an example:
 
 .. code-block:: python
-    :emphasize-lines: 6,10
+    :emphasize-lines: 7,11
 
     from flwr.app import Context
     from flwr.client import start_client
@@ -154,7 +154,7 @@ project both in the traditional (now deprecated) way and in the new (recommended
   ``start_server()``. Here's an example:
 
 .. code-block:: python
-    :emphasize-lines: 7,13
+    :emphasize-lines: 8,14
 
     from flwr.app import Context
     from flwr.server import ServerAppComponents, ServerConfig, start_server
@@ -260,7 +260,7 @@ respectively. There is no need to use ``start_simulation()`` anymore. Here's an 
     |flower_how_to_run_simulations_link|_ guide.
 
 .. code-block:: python
-    :emphasize-lines: 9,15,19,22,28
+    :emphasize-lines: 10,16,20,23,29
 
     from flwr.app import Context
     from flwr.clientapp import ClientApp

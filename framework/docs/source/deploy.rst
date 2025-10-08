@@ -20,7 +20,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-run-flower-on-gcp
     how-to-run-flower-on-azure
     how-to-run-flower-on-red-hat-openshift
-    how-to-authenticate-users
+    how-to-authenticate-accounts
     how-to-configure-audit-logging
     docker/index
     helm/index

@@ -84,53 +84,6 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
         self.clipping_norm = clipping_norm
         self.num_sampled_clients = num_sampled_clients
 
-    def _validate_replies(self, replies: Iterable[Message]) -> bool:
-        """Validate replies and log errors/warnings.
-
-        Returns
-        -------
-        bool
-            True if replies are valid for aggregation, False otherwise.
-        """
-        num_errors = 0
-        num_replies_with_content = 0
-        for msg in replies:
-            if msg.has_error():
-                log(
-                    INFO,
-                    "Received error in reply from node %d: %s",
-                    msg.metadata.src_node_id,
-                    msg.error,
-                )
-                num_errors += 1
-            else:
-                num_replies_with_content += 1
-
-        # Errors are not allowed
-        if num_errors:
-            log(
-                INFO,
-                "aggregate_train: Some clients reported errors. Skipping aggregation.",
-            )
-            return False
-
-        log(
-            INFO,
-            "aggregate_train: Received %s results and %s failures",
-            num_replies_with_content,
-            num_errors,
-        )
-
-        if num_replies_with_content != self.num_sampled_clients:
-            log(
-                WARNING,
-                CLIENTS_DISCREPANCY_WARNING,
-                num_replies_with_content,
-                self.num_sampled_clients,
-            )
-
-        return True
-
     def _add_noise_to_aggregated_arrays(
         self, aggregated_arrays: ArrayRecord
     ) -> ArrayRecord:
@@ -228,6 +181,13 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
         """Compute a string representation of the strategy."""
         return "Differential Privacy Strategy Wrapper (Server-Side Fixed Clipping)"
 
+    def summary(self) -> None:
+        """Log summary configuration of the strategy."""
+        log(INFO, "\t├──> DP settings:")
+        log(INFO, "\t│\t├── Noise multiplier: %s", self.noise_multiplier)
+        log(INFO, "\t│\t└── Clipping norm: %s", self.clipping_norm)
+        super().summary()
+
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
@@ -241,7 +201,7 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
         replies: Iterable[Message],
     ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
-        if not self._validate_replies(replies):
+        if not validate_replies(replies, self.num_sampled_clients):
             return None, None
 
         # Clip arrays in replies
@@ -322,6 +282,13 @@ class DifferentialPrivacyClientSideFixedClipping(DifferentialPrivacyFixedClippin
         """Compute a string representation of the strategy."""
         return "Differential Privacy Strategy Wrapper (Client-Side Fixed Clipping)"
 
+    def summary(self) -> None:
+        """Log summary configuration of the strategy."""
+        log(INFO, "\t├──> DP settings:")
+        log(INFO, "\t│\t├── Noise multiplier: %s", self.noise_multiplier)
+        log(INFO, "\t│\t└── Clipping norm: %s", self.clipping_norm)
+        super().summary()
+
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
@@ -337,7 +304,7 @@ class DifferentialPrivacyClientSideFixedClipping(DifferentialPrivacyFixedClippin
         replies: Iterable[Message],
     ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
-        if not self._validate_replies(replies):
+        if not validate_replies(replies, self.num_sampled_clients):
             return None, None
 
         # Aggregate
@@ -350,3 +317,58 @@ class DifferentialPrivacyClientSideFixedClipping(DifferentialPrivacyFixedClippin
             aggregated_arrays = self._add_noise_to_aggregated_arrays(aggregated_arrays)
 
         return aggregated_arrays, aggregated_metrics
+
+
+def validate_replies(replies: Iterable[Message], num_sampled_clients: int) -> bool:
+    """Validate replies and log errors/warnings.
+
+    Arguments
+    ----------
+    replies : Iterable[Message]
+        The replies to validate.
+    num_sampled_clients : int
+        The expected number of sampled clients.
+
+    Returns
+    -------
+    bool
+        True if replies are valid for aggregation, False otherwise.
+    """
+    num_errors = 0
+    num_replies_with_content = 0
+    for msg in replies:
+        if msg.has_error():
+            log(
+                INFO,
+                "Received error in reply from node %d: %s",
+                msg.metadata.src_node_id,
+                msg.error,
+            )
+            num_errors += 1
+        else:
+            num_replies_with_content += 1
+
+    # Errors are not allowed
+    if num_errors:
+        log(
+            INFO,
+            "aggregate_train: Some clients reported errors. Skipping aggregation.",
+        )
+        return False
+
+    log(
+        INFO,
+        "aggregate_train: Received %s results and %s failures",
+        num_replies_with_content,
+        num_errors,
+    )
+
+    if num_replies_with_content != num_sampled_clients:
+        log(
+            WARNING,
+            CLIENTS_DISCREPANCY_WARNING,
+            num_replies_with_content,
+            num_sampled_clients,
+        )
+
+    return True

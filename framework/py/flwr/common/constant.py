@@ -109,14 +109,14 @@ LOG_UPLOAD_INTERVAL = 0.2  # Minimum interval between two log uploads
 # Retry configurations
 MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 
-# Constants for user authentication
+# Constants for account authentication
 CREDENTIALS_DIR = ".credentials"
-AUTH_TYPE_JSON_KEY = "auth-type"  # For key name in JSON file
-AUTH_TYPE_YAML_KEY = "auth_type"  # For key name in YAML file
+AUTHN_TYPE_JSON_KEY = "authn-type"  # For key name in JSON file
+AUTHN_TYPE_YAML_KEY = "authn_type"  # For key name in YAML file
 ACCESS_TOKEN_KEY = "flwr-oidc-access-token"
 REFRESH_TOKEN_KEY = "flwr-oidc-refresh-token"
 
-# Constants for user authorization
+# Constants for account authorization
 AUTHZ_TYPE_YAML_KEY = "authz_type"  # For key name in YAML file
 
 # Constants for node authentication
@@ -154,7 +154,9 @@ PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
 
 # ControlServicer constants
 RUN_ID_NOT_FOUND_MESSAGE = "Run ID not found"
-NO_USER_AUTH_MESSAGE = "ControlServicer initialized without user authentication"
+NO_ACCOUNT_AUTH_MESSAGE = "ControlServicer initialized without account authentication"
+NO_ARTIFACT_PROVIDER_MESSAGE = "ControlServicer initialized without artifact provider"
+PULL_UNFINISHED_RUN_MESSAGE = "Cannot pull artifacts for an unfinished run"
 
 
 class MessageType:
@@ -200,6 +202,7 @@ class ErrorCode:
     MESSAGE_UNAVAILABLE = 3
     REPLY_MESSAGE_UNAVAILABLE = 4
     NODE_UNAVAILABLE = 5
+    MOD_FAILED_PRECONDITION = 6
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
@@ -242,12 +245,13 @@ class CliOutputFormat:
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
 
-class AuthType:
-    """User authentication types."""
+class AuthnType:
+    """Account authentication types."""
 
+    NOOP = "noop"
     OIDC = "oidc"
 
-    def __new__(cls) -> AuthType:
+    def __new__(cls) -> AuthnType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
@@ -278,3 +282,8 @@ class ExecPluginType:
         """Return all SuperExec plugin types."""
         # Filter all constants (uppercase) of the class
         return [v for k, v in vars(ExecPluginType).items() if k.isupper()]
+
+
+# Constants for No-op auth plugins
+NOOP_FLWR_AID = "sys_noauth"
+NOOP_ACCOUNT_NAME = "sys_noauth"
