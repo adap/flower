@@ -292,6 +292,7 @@ def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
     """Derive FitRes from a RecordDict object."""
     #log_time("Server deserializza")
     ins_str = "fitres"
+
     parameters = arrayrecord_to_parameters(
         recorddict.array_records[f"{ins_str}.parameters"], keep_input=keep_input
     )
@@ -312,6 +313,20 @@ def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
 def fitres_to_recorddict(fitres: FitRes, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a FitRes object."""
   #  log_time("Client serializza")
+    import io
+    import numpy as np
+
+    total_bytes = 0
+    for i, tensor_bytes in enumerate(fitres.parameters.tensors):
+        # Deserializza il tensore NumPy
+        log_time(f"Numero tensors: {len(fitres.parameters.tensors)}")
+        tensor = np.load(io.BytesIO(tensor_bytes))
+        n_bytes = tensor.nbytes  # byte in memoria
+        total_bytes += n_bytes
+        log_time(f"Tensore {i}: dtype={tensor.dtype}, shape={tensor.shape}, byte in memoria={n_bytes}")
+
+
+
     recorddict = RecordDict()
 
     res_str = "fitres"
