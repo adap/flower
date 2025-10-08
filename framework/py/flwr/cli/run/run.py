@@ -123,8 +123,11 @@ def run(
 
         pyproject_path = app_path / "pyproject.toml" if app_path else None
         config = load(pyproject_path)
+
+        # Disable the validation due to the local empty project (for demo only)
         # config, errors, warnings = load_and_validate(path=pyproject_path)
         # config = process_loaded_project_config(config, errors, warnings)
+
         federation, federation_config = validate_federation_in_project_config(
             federation, config, federation_config_overrides
         )
@@ -137,6 +140,7 @@ def run(
                 run_config_overrides,
                 stream,
                 output_format,
+                original_app_str,
                 remote_app_ref,
             )
         else:
@@ -168,6 +172,7 @@ def _run_with_control_api(
     config_overrides: Optional[list[str]],
     stream: bool,
     output_format: str,
+    original_app_str: str,
     remote_app_ref: Optional[str] = None,
 ) -> None:
     channel = None
@@ -180,7 +185,7 @@ def _run_with_control_api(
         fab_id = fab_version = fab_hash = None
         if remote_app_ref:
             # Skip build; send a placeholder Fab containing the remote reference
-            fab = Fab("", b"", {"identifier": remote_app_ref})
+            fab = Fab("", b"", {"identifier": original_app_str})
         else:
             fab_bytes, fab_hash, cfg = build_fab(app)
             fab_id, fab_version = get_metadata_from_config(cfg)

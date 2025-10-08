@@ -114,11 +114,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         verification = None
         if request.fab.content == b"":
             identifier = request.fab.meta["identifier"]
-            m = re.match(r"^(?P<user>[^/]+)/(?P<app>[^/]+)$", identifier)
+            m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", identifier)
             if not m:
-                raise ValueError(
-                    "Invalid remote app ID. Expected format: 'user_name/app_name'."
+                log(
+                    ERROR,
+                    "Invalid remote app ID. Expected format: '@user_name/app_name'.",
                 )
+                return StartRunResponse()
 
             # Request download link
             url, verification = _request_download_link(identifier, context)
