@@ -21,7 +21,7 @@ from typing import Annotated, Optional
 
 import typer
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives.asymmetric import ec
 from rich.console import Console
 
 from flwr.cli.config_utils import (
@@ -41,7 +41,10 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     CreateNodeCliResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.supercore.primitives.asymmetric import public_key_to_bytes
+from flwr.supercore.primitives.asymmetric import (
+    check_public_key_is_nist_ec,
+    public_key_to_bytes,
+)
 
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
@@ -50,7 +53,7 @@ def create(  # pylint: disable=R0914
     public_key: Annotated[
         Path,
         typer.Argument(
-            help="Path to the public key file.",
+            help="Path to a P-384 (or any other NIST EC curve) public key file.",
         ),
     ],
     app: Annotated[
@@ -167,12 +170,23 @@ def try_load_public_key(public_key_path: Path) -> bytes:
         raise typer.Exit(code=1)
 
     with open(public_key_path, "rb") as key_file:
-        public_key = serialization.load_ssh_public_key(key_file.read())
-        if not isinstance(public_key, ed25519.Ed25519PublicKey):
+        try:
+            public_key = serialization.load_pem_public_key(key_file.read())
+
+            if not isinstance(public_key, ec.EllipticCurvePublicKey):
+                raise ValueError(f"Not an EC public key, got {type(public_key)}")
+
+            # Verify it's one of the approved NIST curves
+            if not check_public_key_is_nist_ec(public_key):
+                raise ValueError(
+                    f"EC curve {public_key.curve.name} is not an approved NIST curve"
+                )
+
+        except ValueError as err:
             typer.secho(
-                "❌ The provided key is not an Ed25519 public key.",
+                f"❌ Unable to load public key from '{public_key_path}': {err}",
                 fg=typer.colors.RED,
                 bold=True,
             )
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from err
     return public_key_to_bytes(public_key)

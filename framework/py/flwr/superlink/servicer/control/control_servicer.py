@@ -32,6 +32,7 @@ from flwr.common.constant import (
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
+    PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
     Status,
@@ -71,6 +72,10 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
+from flwr.supercore.primitives.asymmetric import (
+    bytes_to_public_key,
+    check_public_key_is_nist_ec,
+)
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin
 
@@ -407,6 +412,18 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> CreateNodeCliResponse:
         """Add a SuperNode."""
         log(INFO, "ControlServicer.CreateNodeCli")
+
+        # Verify public key
+        try:
+            # Attempt to deserialize public key
+            pub_key = bytes_to_public_key(request.public_key)
+            # Check if it's a NIST EC curve public key
+            if not check_public_key_is_nist_ec(pub_key):
+                log(ERROR, "The provided public key is not a NIST EC curve public key.")
+                raise ValueError()
+        except (ValueError, AttributeError):
+            log(ERROR, "The provided public key could not be deserialized.")
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_NOT_VALID)
 
         # Init link state
         state = self.linkstate_factory.state()

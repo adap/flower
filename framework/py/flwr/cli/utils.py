@@ -33,6 +33,7 @@ from flwr.common.constant import (
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
+    PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
 )
@@ -393,6 +394,14 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
                 typer.secho(
                     "❌ The provided public key is already assigned to another "
                     "supernode.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1) from None
+            if e.details() == PUBLIC_KEY_NOT_VALID:  # pylint: disable=E1101
+                typer.secho(
+                    "❌ The provided public key is not valid. Please provide a valid "
+                    "NIST EC public key.",
                     fg=typer.colors.RED,
                     bold=True,
                 )
