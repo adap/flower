@@ -182,7 +182,39 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
+    def get_node_info(
+        self,
+        *,
+        node_ids: Optional[Sequence[int]] = None,
+        owner_aids: Optional[Sequence[str]] = None,
+        statuses: Optional[Sequence[str]] = None,
+    ) -> Sequence[NodeInfo]:
+        """Retrieve information about nodes based on the specified filters.
+
+        If a filter is set to None, it is ignored.
+        If multiple filters are provided, they are combined using AND logic.
+
+        Parameters
+        ----------
+        node_ids : Optional[Sequence[int]] (default: None)
+            Sequence of node IDs to filter by. If a sequence is provided,
+            it is treated as an OR condition.
+        owner_aids : Optional[Sequence[str]] (default: None)
+            Sequence of owner account IDs to filter by. If a sequence is provided,
+            it is treated as an OR condition.
+        statuses : Optional[Sequence[str]] (default: None)
+            Sequence of node status values (e.g., "created", "activated")
+            to filter by. If a sequence is provided, it is treated as an OR condition.
+
+        Returns
+        -------
+        Sequence[NodeInfo]
+            A sequence of NodeInfo objects representing the nodes matching
+            the specified filters.
+        """
+
+    @abc.abstractmethod
+    def get_node_public_key(self, node_id: int) -> bytes:
         """Get `public_key` for the specified `node_id`.
 
         Parameters
@@ -192,9 +224,13 @@ class LinkState(CoreState):  # pylint: disable=R0904
 
         Returns
         -------
-        Optional[bytes]
-            The public key associated with the specified `node_id`, or `None` if
-            the `node_id` does not exist.
+        bytes
+            The public key associated with the specified `node_id`.
+
+        Raises
+        ------
+        ValueError
+            If the specified `node_id` does not exist in the link state.
         """
 
     @abc.abstractmethod

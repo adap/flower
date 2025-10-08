@@ -26,7 +26,6 @@ from flwr.common import ConfigRecord, Message, RecordDict, now
 from flwr.common.constant import (
     HEARTBEAT_MAX_INTERVAL,
     NODE_ID_NUM_BYTES,
-    NOOP_FLWR_AID,
     SUPERLINK_NODE_ID,
     Status,
 )
@@ -47,10 +46,11 @@ def push_messages(grid: InMemoryGrid, num_nodes: int) -> tuple[Iterable[str], in
     """Help push messages to state."""
     for _ in range(num_nodes):
         node_id = grid.state.create_node(
-            NOOP_FLWR_AID,
+            "mock_owner",
             secrets.token_bytes(32),
-            heartbeat_interval=HEARTBEAT_MAX_INTERVAL,
+            heartbeat_interval=0,  # This field has no effect
         )
+        grid.state.acknowledge_node_heartbeat(node_id, HEARTBEAT_MAX_INTERVAL)
     num_messages = 3
     msgs = [Message(RecordDict(), node_id, "query") for _ in range(num_messages)]
 
