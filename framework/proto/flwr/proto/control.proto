@@ -97,10 +97,7 @@ message StopRunResponse { bool success = 1; }
 message PullArtifactsRequest { uint64 run_id = 1; }
 message PullArtifactsResponse { optional string url = 1; }
 
-message CreateNodeCliRequest {
-  bytes public_key = 1;
-  double heartbeat_interval = 2;
-}
+message CreateNodeCliRequest { bytes public_key = 1; }
 message CreateNodeCliResponse { optional uint64 node_id = 1; }
 
 message DeleteNodeCliRequest { uint64 node_id = 1; }

@@ -28,6 +28,7 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
 from flwr.common.constant import (
     FAB_MAX_SIZE,
+    HEARTBEAT_DEFAULT_INTERVAL,
     LOG_STREAM_INTERVAL,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
@@ -72,10 +73,7 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
-from flwr.supercore.primitives.asymmetric import (
-    bytes_to_public_key,
-    check_public_key_is_nist_ec,
-)
+from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin
 
@@ -418,7 +416,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Attempt to deserialize public key
             pub_key = bytes_to_public_key(request.public_key)
             # Check if it's a NIST EC curve public key
-            if not check_public_key_is_nist_ec(pub_key):
+            if not uses_nist_ec_curve(pub_key):
                 log(ERROR, "The provided public key is not a NIST EC curve public key.")
                 raise ValueError()
         except (ValueError, AttributeError):
@@ -431,7 +429,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # TODO: Use flwr_aid in create_node
             node_id = state.create_node(
                 public_key=request.public_key,
-                heartbeat_interval=request.heartbeat_interval,
+                heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
             )
 
         except ValueError:

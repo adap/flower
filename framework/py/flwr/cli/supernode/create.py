@@ -31,21 +31,14 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
-from flwr.common.constant import (
-    FAB_CONFIG_FILE,
-    HEARTBEAT_DEFAULT_INTERVAL,
-    CliOutputFormat,
-)
+from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     CreateNodeCliRequest,
     CreateNodeCliResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.supercore.primitives.asymmetric import (
-    check_public_key_is_nist_ec,
-    public_key_to_bytes,
-)
+from flwr.supercore.primitives.asymmetric import public_key_to_bytes, uses_nist_ec_curve
 
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
@@ -139,9 +132,7 @@ def _create_node(stub: ControlStub, public_key: bytes, output_format: str) -> No
     """Create a node."""
     with flwr_cli_grpc_exc_handler():
         response: CreateNodeCliResponse = stub.CreateNodeCli(
-            request=CreateNodeCliRequest(
-                public_key=public_key, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
-            )
+            request=CreateNodeCliRequest(public_key=public_key)
         )
     if response.node_id:
         typer.secho(
@@ -178,7 +169,7 @@ def try_load_public_key(public_key_path: Path) -> bytes:
                 raise ValueError(f"Not an EC public key, got {type(public_key)}")
 
             # Verify it's one of the approved NIST curves
-            if not check_public_key_is_nist_ec(public_key):
+            if not uses_nist_ec_curve(public_key):
                 raise ValueError(
                     f"EC curve {public_key.curve.name} is not an approved NIST curve"
                 )
