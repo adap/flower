@@ -90,6 +90,7 @@ def start_client_internal(
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     health_server_address: Optional[str] = None,
     trust_entity: Optional[dict[str, str]] = None,
+    enable_entity_verification: Optional[bool] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -144,6 +145,8 @@ def start_client_internal(
     trust_entity : Optional[dict[str, str]] (default: None)
         A list of trusted entities. Only apps verified by at least one of these
         entities can run on a supernode.
+    enable_entity_verification : Optional[bool] (default: None)
+        Perform entity app verification using the trust_entity list.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -232,6 +235,7 @@ def start_client_internal(
                 pull_object=pull_object,
                 confirm_message_received=confirm_message_received,
                 trust_entity=trust_entity,
+                enable_trusted_verification=enable_trusted_verification,
             )
 
             # No message has been pulled therefore we can skip the push stage.
@@ -259,6 +263,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     pull_object: Callable[[int, str], bytes],
     confirm_message_received: Callable[[int, str], None],
     trust_entity: Optional[dict[str, str]],
+    enable_trusted_verification: Optional[bool],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
@@ -309,7 +314,13 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             #########################
 
             # FAB must be signed if trust entity provided
-            if trust_entity:
+            if enable_entity_verification:
+                if len(trust_entity) == 0:
+                   log(
+                       WARN,
+                       f"Entity verification is enabled, but no trusted entities were provided.",
+                       f" The Flower SuperNode should be restarted with a trusted entities list",
+                   ) 
                 fab_verified = False
                 for public_key_id, signature in fab.meta:
                     if public_key_id in trust_entity:
