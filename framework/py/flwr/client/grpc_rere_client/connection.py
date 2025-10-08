@@ -55,10 +55,10 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.supercore.primitives.asymmetric import generate_key_pairs
+from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 
-from .client_interceptor import AuthenticateClientInterceptor
 from .grpc_adapter import GrpcAdapter
+from .node_auth_client_interceptor import NodeAuthClientInterceptor
 
 
 @contextmanager
@@ -138,8 +138,9 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     # Always configure auth interceptor, with either user-provided or generated keys
     interceptors: Sequence[grpc.UnaryUnaryClientInterceptor] = [
-        AuthenticateClientInterceptor(*authentication_keys),
+        NodeAuthClientInterceptor(*authentication_keys),
     ]
+    node_pk = public_key_to_bytes(authentication_keys[1])
     channel = create_channel(
         server_address=server_address,
         insecure=insecure,
@@ -199,7 +200,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         """Set create_node."""
         # Call FleetAPI
         create_node_request = CreateNodeRequest(
-            heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
+            public_key=node_pk,
+            heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
         )
         create_node_response = stub.CreateNode(request=create_node_request)
 

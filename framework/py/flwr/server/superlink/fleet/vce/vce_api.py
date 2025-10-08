@@ -16,6 +16,7 @@
 
 
 import json
+import secrets
 import threading
 import time
 import traceback
@@ -53,7 +54,12 @@ def _register_nodes(
     nodes_mapping: NodeToPartitionMapping = {}
     state = state_factory.state()
     for i in range(num_nodes):
-        node_id = state.create_node(heartbeat_interval=HEARTBEAT_MAX_INTERVAL)
+        node_id = state.create_node(
+            # No node authentication in simulation;
+            # use random bytes instead
+            secrets.token_bytes(32),
+            heartbeat_interval=HEARTBEAT_MAX_INTERVAL,
+        )
         nodes_mapping[node_id] = i
     log(DEBUG, "Registered %i nodes", len(nodes_mapping))
     return nodes_mapping

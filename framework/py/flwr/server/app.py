@@ -81,7 +81,9 @@ from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
-from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
+from .superlink.fleet.grpc_rere.node_auth_server_interceptor import (
+    NodeAuthServerInterceptor,
+)
 from .superlink.linkstate import LinkStateFactory
 from .superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
@@ -322,7 +324,7 @@ def run_superlink() -> None:
             else:
                 log(DEBUG, "Automatic node authentication enabled")
 
-            interceptors = [AuthenticateServerInterceptor(state_factory, auto_auth)]
+            interceptors = [NodeAuthServerInterceptor(state_factory, auto_auth)]
             if getattr(args, "enable_event_log", None):
                 fleet_log_plugin = _try_obtain_fleet_event_log_writer_plugin()
                 if fleet_log_plugin is not None:
