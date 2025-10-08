@@ -417,16 +417,17 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             pub_key = bytes_to_public_key(request.public_key)
             # Check if it's a NIST EC curve public key
             if not uses_nist_ec_curve(pub_key):
-                log(ERROR, "The provided public key is not a NIST EC curve public key.")
-                raise ValueError()
-        except (ValueError, AttributeError):
-            log(ERROR, "The provided public key could not be deserialized.")
+                err_msg = "The provided public key is not a NIST EC curve public key."
+                log(ERROR, "%s", err_msg)
+                raise ValueError(err_msg)
+        except (ValueError, AttributeError) as err:
+            log(ERROR, "%s", err)
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_NOT_VALID)
 
         # Init link state
         state = self.linkstate_factory.state()
+        node_id = 0
         try:
-            # TODO: Use flwr_aid in create_node
             node_id = state.create_node(
                 public_key=request.public_key,
                 heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
