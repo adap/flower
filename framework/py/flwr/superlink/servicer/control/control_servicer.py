@@ -19,7 +19,6 @@ import hashlib
 import json
 import re
 import time
-import typer
 from collections.abc import Generator
 from datetime import timedelta
 from logging import ERROR, INFO
@@ -47,7 +46,6 @@ from flwr.common.serde import (
     user_config_from_proto,
 )
 from flwr.common.typing import Fab, Run, RunStatus
-from flwr.common.version import package_version
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     CreateNodeCliRequest,
@@ -81,7 +79,8 @@ from flwr.superlink.auth_plugin import ControlAuthnPlugin
 from .control_account_auth_interceptor import shared_account_info
 
 # PLATFORM_API_URL = "https://api.flower.ai"
-PLATFORM_API_URL = "http://0.0.0.0/v1"
+# PLATFORM_API_URL = "http://0.0.0.0/v1"
+PLATFORM_API_URL = "https://api.flower.blue/v1"
 
 
 class ControlServicer(control_pb2_grpc.ControlServicer):
@@ -123,7 +122,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 return StartRunResponse()
 
             # Request download link
-            url, verification = _request_download_link(identifier, context)
+            _, url, verification = _request_download_link(identifier, context)
 
             # Download FAB from Hub
             try:
@@ -560,14 +559,13 @@ def _check_flwr_aid_in_run(
 
 def _request_download_link(identifier: str, context: grpc.ServicerContext) -> [str, str]:
     """Request download link from Flower platform API."""
-    url = f"{PLATFORM_API_URL}/hub/download-link"
+    url = f"{PLATFORM_API_URL}/hub/fetch"
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
     body = {
         "identifier": identifier,  # send raw string of identifier
-        "flwr_version": package_version,  # send flwr version
     }
 
     try:
@@ -592,9 +590,9 @@ def _request_download_link(identifier: str, context: grpc.ServicerContext) -> [s
         )
 
     data = resp.json()
-    if "url" not in data or "verification" not in data:
+    if "fab_url" not in data or "verifications" not in data:
         context.abort(
             grpc.StatusCode.DATA_LOSS,
             "Invalid response from Hub",
         )
-    return data["url"], data["verification"]
+    return data["app_id"], data["fab_url"], data["verifications"]
