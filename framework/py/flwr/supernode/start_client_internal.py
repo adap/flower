@@ -86,7 +86,7 @@ def start_client_internal(
     isolation: str = ISOLATION_MODE_SUBPROCESS,
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     health_server_address: Optional[str] = None,
-    trust_entity: Optional[list] = None,
+    trust_entity: Optional[dict[str, str]] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -138,7 +138,7 @@ def start_client_internal(
     health_server_address : Optional[str] (default: None)
         The address of the health server. If `None` is provided, the health server will
         NOT be started.
-    trust_entity : Optional[list] (default: None)
+    trust_entity : Optional[dict[str, str]] (default: None)
         A list of trusted entities. Only apps verified by at least one of these
         entities can run on a supernode.
     """
@@ -255,7 +255,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     get_fab: Callable[[str, int], Fab],
     pull_object: Callable[[int, str], bytes],
     confirm_message_received: Callable[[int, str], None],
-    trust_entity: Optional[list],
+    trust_entity: Optional[dict[str, str]],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 

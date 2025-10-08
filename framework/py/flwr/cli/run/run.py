@@ -103,7 +103,7 @@ def run(
 
         original_app_str = str(app) if app is not None else ""
         remote_app_ref: Optional[str] = None  # "user_name/app_name" if given with "@"
-        app_path: Optional[Path] = app
+        app_path: Path = app
 
         if original_app_str.startswith("@"):
             m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", original_app_str)
@@ -121,16 +121,16 @@ def run(
 
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-        pyproject_path = app_path / "pyproject.toml" if app_path else None
-        config = load(pyproject_path)
-
         # Disable the validation due to the local empty project
-        if not remote_app_ref:
+        if remote_app_ref:
+            config = load(app_path / "pyproject.toml")
+        else:
+            pyproject_path = app_path / "pyproject.toml" if app_path else None
             config, errors, warnings = load_and_validate(path=pyproject_path)
             config = process_loaded_project_config(config, errors, warnings)
 
         federation, federation_config = validate_federation_in_project_config(
-            federation, config, federation_config_overrides
+            federation, config, federation_config_overrides  # type: ignore[arg-type]
         )
 
         if "address" in federation_config:
@@ -190,7 +190,7 @@ def _run_with_control_api(
         else:
             fab_bytes, fab_hash, cfg = build_fab(app)
             fab_id, fab_version = get_metadata_from_config(cfg)
-            fab = Fab(fab_hash, fab_bytes)
+            fab = Fab(fab_hash, fab_bytes, {})
 
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
         fed_config = flatten_dict(federation_config.get("options", {}))
@@ -232,7 +232,7 @@ def _run_with_control_api(
                         "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
                         "fab-version": fab_version,
                         "fab-hash": fab_hash[:8],
-                        "fab-filename": get_fab_filename(cfg, fab_hash),  # type: ignore[name-defined]
+                        "fab-filename": get_fab_filename(cfg, fab_hash),
                     }
                 )
 

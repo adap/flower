@@ -158,7 +158,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             fab = Fab(
                 hashlib.sha256(fab_file).hexdigest(),
                 fab_file,
-                verification,
+                {"verification": json.dumps(verification)},
             )
             fab_hash = ffs.put(fab.content, fab.meta)
             if fab_hash != fab.hash_str:
@@ -559,7 +559,7 @@ def _check_flwr_aid_in_run(
 
 def _request_download_link(
     identifier: str, context: grpc.ServicerContext
-) -> [str, str]:
+) -> tuple[str, str, list[tuple[str, str]]]:
     """Request download link from Flower platform API."""
     url = f"{PLATFORM_API_URL}/hub/fetch"
     headers = {
@@ -577,23 +577,23 @@ def _request_download_link(
             grpc.StatusCode.UNAVAILABLE,
             f"Unable to connect to Hub: {e}",
         )
-    else:
-        if resp.status_code == 404:
-            context.abort(
-                grpc.StatusCode.NOT_FOUND,
-                f"'{identifier}' not found in Hub",
-            )
-        if not resp.ok:
-            context.abort(
-                grpc.StatusCode.UNAVAILABLE,
-                f"Hub request failed with status {resp.status_code}. "
-                f"Details: {resp.text}",
-            )
 
-        data = resp.json()
-        if "fab_url" not in data or "verifications" not in data:
-            context.abort(
-                grpc.StatusCode.DATA_LOSS,
-                "Invalid response from Hub",
-            )
-        return data["app_id"], data["fab_url"], data["verifications"]
+    if resp.status_code == 404:
+        context.abort(
+            grpc.StatusCode.NOT_FOUND,
+            f"'{identifier}' not found in Hub",
+        )
+    if not resp.ok:
+        context.abort(
+            grpc.StatusCode.UNAVAILABLE,
+            f"Hub request failed with status {resp.status_code}. "
+            f"Details: {resp.text}",
+        )
+
+    data = resp.json()
+    if "fab_url" not in data or "verifications" not in data:
+        context.abort(
+            grpc.StatusCode.DATA_LOSS,
+            "Invalid response from Hub",
+        )
+    return data["app_id"], data["fab_url"], data["verifications"]
