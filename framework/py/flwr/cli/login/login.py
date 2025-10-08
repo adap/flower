@@ -20,7 +20,7 @@ from typing import Annotated, Optional
 
 import typer
 
-from flwr.cli.auth_plugin import LoginError
+from flwr.cli.auth_plugin import LoginError, NoOpCliAuthPlugin
 from flwr.cli.config_utils import (
     exit_if_no_address,
     get_insecure_flag,
@@ -40,7 +40,7 @@ from ..utils import (
     account_auth_enabled,
     flwr_cli_grpc_exc_handler,
     init_channel,
-    try_obtain_cli_auth_plugin,
+    load_cli_auth_plugin,
 )
 
 
@@ -95,7 +95,7 @@ def login(  # pylint: disable=R0914
         )
         raise typer.Exit(code=1)
 
-    channel = init_channel(app, federation_config, None)
+    channel = init_channel(app, federation_config, NoOpCliAuthPlugin(Path()))
     stub = ControlStub(channel)
 
     login_request = GetLoginDetailsRequest()
@@ -104,16 +104,7 @@ def login(  # pylint: disable=R0914
 
     # Get the auth plugin
     authn_type = login_response.authn_type
-    auth_plugin = try_obtain_cli_auth_plugin(
-        app, federation, federation_config, authn_type
-    )
-    if auth_plugin is None:
-        typer.secho(
-            f'❌ Authentication type "{authn_type}" not found',
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+    auth_plugin = load_cli_auth_plugin(app, federation, federation_config, authn_type)
 
     # Login
     details = AccountAuthLoginDetails(
