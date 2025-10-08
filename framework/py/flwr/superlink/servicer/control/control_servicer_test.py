@@ -29,6 +29,7 @@ from parameterized import parameterized
 
 from flwr.common import ConfigRecord, now
 from flwr.common.constant import (
+    NODE_NOT_FOUND_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
     Status,
@@ -37,6 +38,7 @@ from flwr.common.constant import (
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     CreateNodeCliRequest,
+    DeleteNodeCliRequest,
     ListRunsRequest,
     StartRunRequest,
     StopRunRequest,
@@ -197,6 +199,40 @@ class TestControlServicer(unittest.TestCase):
             )
         else:
             assert node_id
+
+    @parameterized.expand(
+        [
+            (True,),  # PASSES, uses registered node ID
+            (False),  # FAILS, uses unregistered node ID
+        ]
+    )  # type: ignore
+    def test_delete_node_cli(self, real_node_id: bool) -> None:
+        """Test DeleteNodeCli method of ControlServicer."""
+        # Prepare
+        pub_key = public_key_to_bytes(generate_key_pairs()[1])
+        node_id = self.state.create_node(public_key=pub_key, heartbeat_interval=10)
+
+        # Execute
+        req = DeleteNodeCliRequest(node_id=node_id if real_node_id else node_id + 1)
+        ctx = Mock()
+        self.servicer.DeleteNodeCli(req, ctx)
+        if not real_node_id:
+            ctx.abort.assert_called_once_with(
+                grpc.StatusCode.NOT_FOUND, NODE_NOT_FOUND_MESSAGE
+            )
+
+    def test_create_delete_create_node_cli(self) -> None:
+        """Test CreateNodeCli and DeleteNodeCli method of ControlServicer."""
+        # Prepare
+        pub_key = public_key_to_bytes(generate_key_pairs()[1])
+        node_id = self.state.create_node(public_key=pub_key, heartbeat_interval=10)
+
+        # Execute
+        # Delete node
+        self.servicer.DeleteNodeCli(DeleteNodeCliRequest(node_id=node_id), Mock())
+
+        # Try to add node with same public key again
+        self.servicer.CreateNodeCli(CreateNodeCliRequest(public_key=pub_key), Mock())
 
 
 class TestControlServicerAuth(unittest.TestCase):
