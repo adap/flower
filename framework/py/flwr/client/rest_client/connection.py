@@ -15,6 +15,7 @@
 """Contextmanager for a REST request-response channel to the Flower server."""
 
 
+import secrets
 from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import ERROR, WARN
@@ -292,7 +293,12 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     def create_node() -> Optional[int]:
         """Set create_node."""
-        req = CreateNodeRequest(heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL)
+        req = CreateNodeRequest(
+            # REST does not support node authentication;
+            # random bytes are used instead
+            public_key=secrets.token_bytes(32),
+            heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
+        )
 
         # Send the request
         res = _request(req, CreateNodeResponse, PATH_CREATE_NODE)
