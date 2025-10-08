@@ -400,7 +400,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
                 raise typer.Exit(code=1) from None
             if e.details() == PUBLIC_KEY_NOT_VALID:  # pylint: disable=E1101
                 typer.secho(
-                    "❌ The provided public key is not valid. Please provide a valid "
+                    "❌ The provided public key is invalid. Please provide a valid "
                     "NIST EC public key.",
                     fg=typer.colors.RED,
                     bold=True,
