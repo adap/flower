@@ -392,7 +392,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
                 e.details() == PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
             ):  # pylint: disable=E1101
                 typer.secho(
-                    "❌ The provided public key is already assigned to another "
+                    "❌ The provided public key is already in use by another "
                     "supernode.",
                     fg=typer.colors.RED,
                     bold=True,
