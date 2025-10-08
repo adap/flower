@@ -311,7 +311,7 @@ def init_channel(
 
 
 @contextmanager
-def flwr_cli_grpc_exc_handler() -> Iterator[None]:
+def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-branches
     """Context manager to handle specific gRPC errors.
 
     It catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED,

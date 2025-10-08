@@ -165,31 +165,30 @@ class TestControlServicer(unittest.TestCase):
             (
                 "",
                 False,
-                (lambda kp: (kp[0], public_key_to_bytes(kp[1])))(generate_key_pairs()),
+                public_key_to_bytes(generate_key_pairs()[1]),
             ),  # PASSES, true EC keys used once
             (
                 PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
                 True,
-                (lambda kp: (kp[0], public_key_to_bytes(kp[1])))(generate_key_pairs()),
+                public_key_to_bytes(generate_key_pairs()[1]),
             ),  # FAILS, true EC keys but already in use
             (
                 PUBLIC_KEY_NOT_VALID,
                 False,
-                (os.urandom(32), os.urandom(32)),
+                os.urandom(32),
             ),  # FAILS, fake EC keys
         ]
     )  # type: ignore
     def test_create_node_cli(
-        self, error_msg: str, pre_register_key: bool, key_pair: tuple[bytes, bytes]
+        self, error_msg: str, pre_register_key: bool, pub_key: bytes
     ) -> None:
         """Test CreateNodeCli method of ControlServicer."""
         # Prepare
-        _, public_key = key_pair
         if pre_register_key:
-            self.state.create_node(public_key=public_key, heartbeat_interval=10)
+            self.state.create_node(public_key=pub_key, heartbeat_interval=10)
 
         # Execute
-        req = CreateNodeCliRequest(public_key=public_key)
+        req = CreateNodeCliRequest(public_key=pub_key)
         ctx = Mock()
         node_id = self.servicer.CreateNodeCli(req, ctx)
         if error_msg:
