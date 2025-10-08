@@ -557,7 +557,9 @@ def _check_flwr_aid_in_run(
         )
 
 
-def _request_download_link(identifier: str, context: grpc.ServicerContext) -> [str, str]:
+def _request_download_link(
+    identifier: str, context: grpc.ServicerContext
+) -> [str, str]:
     """Request download link from Flower platform API."""
     url = f"{PLATFORM_API_URL}/hub/fetch"
     headers = {
@@ -575,24 +577,23 @@ def _request_download_link(identifier: str, context: grpc.ServicerContext) -> [s
             grpc.StatusCode.UNAVAILABLE,
             f"Unable to connect to Hub: {e}",
         )
-        raise grpc.RpcError()  # This line is unreachable
+    else:
+        if resp.status_code == 404:
+            context.abort(
+                grpc.StatusCode.NOT_FOUND,
+                f"'{identifier}' not found in Hub",
+            )
+        if not resp.ok:
+            context.abort(
+                grpc.StatusCode.UNAVAILABLE,
+                f"Hub request failed with status {resp.status_code}. "
+                f"Details: {resp.text}",
+            )
 
-    if resp.status_code == 404:
-        context.abort(
-            grpc.StatusCode.NOT_FOUND,
-            f"'{identifier}' not found in Hub",
-        )
-    if not resp.ok:
-        context.abort(
-            grpc.StatusCode.UNAVAILABLE,
-            f"Hub request failed with status {resp.status_code}. "
-            f"Details: {resp.text}",
-        )
-
-    data = resp.json()
-    if "fab_url" not in data or "verifications" not in data:
-        context.abort(
-            grpc.StatusCode.DATA_LOSS,
-            "Invalid response from Hub",
-        )
-    return data["app_id"], data["fab_url"], data["verifications"]
+        data = resp.json()
+        if "fab_url" not in data or "verifications" not in data:
+            context.abort(
+                grpc.StatusCode.DATA_LOSS,
+                "Invalid response from Hub",
+            )
+        return data["app_id"], data["fab_url"], data["verifications"]

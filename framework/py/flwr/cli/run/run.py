@@ -213,7 +213,8 @@ def _run_with_control_api(
                 typer.secho(
                     "❌ Failed to start run. Please check that the provided "
                     "app identifier (@user_name/app_name) is correct.",
-                    fg=typer.colors.RED)
+                    fg=typer.colors.RED,
+                )
             else:
                 typer.secho("❌ Failed to start run", fg=typer.colors.RED)
             raise typer.Exit(code=1)

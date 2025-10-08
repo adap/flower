@@ -126,7 +126,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "--trust-entity",
         type=json.loads,
         default={},
-        metavar='JSON',
+        metavar="JSON",
         help=(
             "Trusted entities. "
             "Only apps verified by at least one of these entities "
