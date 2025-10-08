@@ -16,13 +16,13 @@
 
 
 import abc
+from collections.abc import Sequence
 from typing import Optional
 
-from collections.abc import Sequence
-from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.common import Context, Message
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.corestate import CoreState
 
 

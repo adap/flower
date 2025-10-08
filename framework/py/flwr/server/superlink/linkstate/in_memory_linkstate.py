@@ -19,10 +19,12 @@ import secrets
 import threading
 from bisect import bisect_right
 from collections import defaultdict
+from collections.abc import Sequence
 from dataclasses import dataclass, field
+from datetime import datetime
 from logging import ERROR, WARNING
 from typing import Optional
-from collections.abc import Sequence
+
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     FLWR_APP_TOKEN_LENGTH,
@@ -42,7 +44,6 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
 from flwr.supercore.constant import NodeStatus
-from datetime import datetime
 
 from .utils import (
     check_node_availability_for_in_message,
@@ -422,7 +423,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 if node.status == NodeStatus.ACTIVATED:
                     if node.online_until <= current_ts:
                         node.status = NodeStatus.DEACTIVATED
-                        node.last_deactivated_at = datetime.fromtimestamp(node.online_until).isoformat()
+                        node.last_deactivated_at = datetime.fromtimestamp(
+                            node.online_until
+                        ).isoformat()
 
     def get_node_public_key(self, node_id: int) -> Optional[bytes]:
         """Get `public_key` for the specified `node_id`."""

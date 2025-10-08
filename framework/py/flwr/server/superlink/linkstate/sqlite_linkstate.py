@@ -24,7 +24,7 @@ import sqlite3
 from collections.abc import Sequence
 from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
-from datetime import datetime
+
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     FLWR_APP_TOKEN_LENGTH,
@@ -691,36 +691,16 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
 
-        # Start the transaction
-        with self.conn:
-            # Validate run ID
-            query = "SELECT COUNT(*) FROM run WHERE run_id = ?"
-            cur = self.conn.execute(query, (sint64_run_id,))
-            if cur.fetchone()["COUNT(*)"] == 0:
-                return set()
+        # Validate run ID
+        query = "SELECT COUNT(*) FROM run WHERE run_id = ?"
+        rows = self.query(query, (sint64_run_id,))
+        if rows[0]["COUNT(*)"] == 0:
+            return set()
 
-            # Check and tag deactivated nodes
-            current_dt = now()
-            query = """
-                UPDATE node SET status = ?, last_deactivated_at = ?
-                WHERE online_until <= ? AND status == ?
-            """
-            params = (
-                NodeStatus.DEACTIVATED,
-                current_dt.isoformat(),
-                current_dt.timestamp(),
-                NodeStatus.ACTIVATED,
-            )
-            self.conn.execute(query, params)
-
-            # Find all activated nodes
-            query = "SELECT node_id FROM node WHERE status == ?"
-            cur = self.conn.execute(query, (NodeStatus.ACTIVATED,))
-            rows = cur.fetchall()
-
-        # Convert sint64 node_ids to uint64
-        result: set[int] = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
-        return result
+        # Retrieve all activated nodes
+        return {
+            node.node_id for node in self.get_node_info(statuses=[NodeStatus.ACTIVATED])
+        }
 
     def get_node_info(
         self,
@@ -730,39 +710,41 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         statuses: Optional[Sequence[str]] = None,
     ) -> Sequence[NodeInfo]:
         """Retrieve information about nodes based on the specified filters."""
+        if self.conn is None:
+            raise AttributeError("LinkState is not initialized.")
+
         with self.conn:
             # Check and tag deactivated nodes
             current_dt = now()
+            # strftime will convert POSIX timestamp to ISO format
             query = """
                 UPDATE node SET status = ?,
-                last_deactivated_at = strftime("%Y-%m-%dT%H:%M:%f+00:00", ?)
-                WHERE online_until <= ? AND status == ? RETURNING node_id, last_activated_at, last_deactivated_at
+                last_deactivated_at =
+                strftime("%Y-%m-%dT%H:%M:%f+00:00", online_until, "unixepoch")
+                WHERE online_until <= ? AND status == ?
             """
-            params = (
+            params: list[Any] = [
                 NodeStatus.DEACTIVATED,
-                current_dt,
                 current_dt.timestamp(),
                 NodeStatus.ACTIVATED,
-            )
-            rows = self.conn.execute(query, params).fetchall()
-            for row in rows:
-                print(row)
+            ]
+            self.conn.execute(query, params)
 
             # Build the WHERE clause based on provided filters
             conditions = []
-            params: list[Any] = []
-            if node_ids:
+            params = []
+            if node_ids is not None:
                 sint64_node_ids = [
                     convert_uint64_to_sint64(node_id) for node_id in node_ids
                 ]
                 placeholders = ",".join(["?"] * len(sint64_node_ids))
                 conditions.append(f"node_id IN ({placeholders})")
                 params.extend(sint64_node_ids)
-            if owner_aids:
+            if owner_aids is not None:
                 placeholders = ",".join(["?"] * len(owner_aids))
                 conditions.append(f"owner_aid IN ({placeholders})")
                 params.extend(owner_aids)
-            if statuses:
+            if statuses is not None:
                 placeholders = ",".join(["?"] * len(statuses))
                 conditions.append(f"status IN ({placeholders})")
                 params.extend(statuses)

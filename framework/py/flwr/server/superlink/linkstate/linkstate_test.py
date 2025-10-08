@@ -25,7 +25,6 @@ from datetime import datetime, timedelta, timezone
 from itertools import product
 from typing import Optional
 from unittest.mock import patch
-from flwr.supercore.constant import NodeStatus
 from uuid import uuid4
 
 from parameterized import parameterized
@@ -61,6 +60,7 @@ from flwr.server.superlink.linkstate import (
     LinkState,
     SqliteLinkState,
 )
+from flwr.supercore.constant import NodeStatus
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 
@@ -691,7 +691,6 @@ class StateTest(CoreStateTest):
         returned_ids = [info.node_id for info in infos]
         self.assertSetEqual(set(returned_ids), set(node_ids))
 
-
     def test_get_node_info_filter_by_node_ids(self) -> None:
         """Test get_node_info filters correctly by node_ids."""
         state: LinkState = self.state_factory()
@@ -708,7 +707,7 @@ class StateTest(CoreStateTest):
         """Test get_node_info filters correctly by owner_aids."""
         state: LinkState = self.state_factory()
         node_id1 = create_dummy_node(state, owner_aid="alice", activate=False)
-        node_id2 = create_dummy_node(state, owner_aid="bob", activate=False)
+        _ = create_dummy_node(state, owner_aid="bob", activate=False)
 
         infos = state.get_node_info(owner_aids=["alice"])
         returned_ids = [info.node_id for info in infos]
@@ -718,8 +717,8 @@ class StateTest(CoreStateTest):
     def test_get_node_info_filter_by_status(self) -> None:
         """Test get_node_info filters correctly by statuses."""
         state: LinkState = self.state_factory()
-        node_created = create_dummy_node(state, activate=False)
-        node_activated = create_dummy_node(state)
+        _ = create_dummy_node(state, activate=False)
+        _ = create_dummy_node(state)
         node_deleted = create_dummy_node(state)
 
         # Transition nodes
@@ -739,8 +738,8 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         node1 = create_dummy_node(state, owner_aid="alice")
-        node2 = create_dummy_node(state, owner_aid="bob")
-        node3 = create_dummy_node(state, owner_aid="bob", activate=False)
+        _ = create_dummy_node(state, owner_aid="bob")
+        _ = create_dummy_node(state, owner_aid="bob", activate=False)
 
         # Query: owner_aid=alice AND status=ACTIVATED
         infos = state.get_node_info(
@@ -942,13 +941,14 @@ class StateTest(CoreStateTest):
             }
 
         # Assert
+        # Allow up to 1 decimmal place difference, considering file-based sqlite DB
         self.assertSetEqual(activated_node_ids, set(node_ids[70:]))
         for node in nodes:
             actual = datetime.fromisoformat(node.last_activated_at).timestamp()
-            self.assertAlmostEqual(actual, expected_activated_at, 2)
+            self.assertAlmostEqual(actual, expected_activated_at, 1)
             if node.status == NodeStatus.DEACTIVATED:
                 actual = datetime.fromisoformat(node.last_deactivated_at).timestamp()
-                self.assertAlmostEqual(actual, expected_deactivated_at, 2)
+                self.assertAlmostEqual(actual, expected_deactivated_at, 1)
 
     def test_acknowledge_app_heartbeat(self) -> None:
         """Test if acknowledge_app_heartbeat works."""
@@ -1513,15 +1513,13 @@ def transition_run_status(state: LinkState, run_id: int, num_transitions: int) -
 
 
 def create_dummy_node(
-    state: LinkState, 
-    heartbeat_interval: int = 1000, 
+    state: LinkState,
+    heartbeat_interval: int = 1000,
     owner_aid: str = "mock_flwr_aid",
-    activate: bool = True
+    activate: bool = True,
 ) -> int:
     """Create a dummy node."""
-    node_id = state.create_node(
-        owner_aid, secrets.token_bytes(32), heartbeat_interval
-    )
+    node_id = state.create_node(owner_aid, secrets.token_bytes(32), heartbeat_interval)
     if activate:
         state.acknowledge_node_heartbeat(node_id, heartbeat_interval)
     return node_id
