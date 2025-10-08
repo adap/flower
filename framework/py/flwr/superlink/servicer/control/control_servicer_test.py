@@ -38,6 +38,10 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
+from flwr.superlink.auth_plugin import NoOpControlAuthnPlugin
+from flwr.superlink.servicer.control.control_account_auth_interceptor import (
+    shared_account_info,
+)
 
 from .control_servicer import ControlServicer
 
@@ -67,7 +71,12 @@ class TestControlServicer(unittest.TestCase):
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(store=Mock(return_value=self.store)),
             is_simulation=False,
+            authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
         )
+        account_info = authn_plugin.validate_tokens_in_metadata([])[1]
+        assert account_info is not None
+        self.aid = account_info.flwr_aid
+        shared_account_info.set(account_info)
         self.state = self.servicer.linkstate_factory.state()
 
     def tearDown(self) -> None:
@@ -105,7 +114,7 @@ class TestControlServicer(unittest.TestCase):
         run_ids = set()
         for _ in range(3):
             run_id = self.state.create_run(
-                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord(), "user123"
+                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord(), self.aid
             )
             run_ids.add(run_id)
 
@@ -122,7 +131,7 @@ class TestControlServicer(unittest.TestCase):
         # Prepare
         for _ in range(3):
             run_id = self.state.create_run(
-                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord(), "user123"
+                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord(), self.aid
             )
 
         # Execute
@@ -137,7 +146,7 @@ class TestControlServicer(unittest.TestCase):
         """Test StopRun method of ControlServicer."""
         # Prepare
         run_id = self.state.create_run(
-            "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigRecord(), "user123"
+            "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigRecord(), self.aid
         )
         expected_run_status = RunStatus(Status.FINISHED, SubStatus.STOPPED, "")
 
