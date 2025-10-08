@@ -160,7 +160,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         -------
         bytes
             The public key associated with the specified `node_id`.
-        
+
         Raises
         ------
         ValueError
