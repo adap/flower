@@ -16,6 +16,7 @@
 
 
 import argparse
+import json
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
@@ -123,13 +124,14 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--trust-entity",
-        nargs="+",
-        default=[],
-        metavar="ENTITY",
+        type=json.loads,
+        default={},
+        metavar="JSON",
         help=(
-            "One or more trusted entities. "
+            "Trusted entities. "
             "Only apps verified by at least one of these entities "
             "can run on a supernode."
+            'Example: \'{"key-id1": "pubkey1", "key-id2": "pubkey2"}\' '
         ),
     )
     add_args_health(parser)

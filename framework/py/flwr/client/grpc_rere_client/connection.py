@@ -36,9 +36,6 @@ from flwr.common.inflatable_protobuf_utils import (
 from flwr.common.logger import log
 from flwr.common.message import Message, remove_content_from_message
 from flwr.common.retry_invoker import RetryInvoker, _wrap_stub
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    generate_key_pairs,
-)
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -58,6 +55,7 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.supercore.primitives.asymmetric import generate_key_pairs
 
 from .client_interceptor import AuthenticateClientInterceptor
 from .grpc_adapter import GrpcAdapter
@@ -292,7 +290,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         return Fab(
             get_fab_response.fab.hash_str,
             get_fab_response.fab.content,
-            get_fab_response.fab.meta,
+            dict(get_fab_response.fab.meta),
         )
 
     def pull_object(run_id: int, object_id: str) -> bytes:

@@ -27,6 +27,7 @@ from rich.console import Console
 
 from flwr.cli.build import build_fab, get_fab_filename
 from flwr.cli.config_utils import (
+    load,
     load_and_validate,
     process_loaded_project_config,
     validate_federation_in_project_config,
@@ -102,7 +103,7 @@ def run(
 
         original_app_str = str(app) if app is not None else ""
         remote_app_ref: Optional[str] = None  # "user_name/app_name" if given with "@"
-        app_path: Optional[Path] = app
+        app_path: Path = app
 
         if original_app_str.startswith("@"):
             m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", original_app_str)
@@ -120,11 +121,16 @@ def run(
 
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-        pyproject_path = app_path / "pyproject.toml" if app_path else None
-        config, errors, warnings = load_and_validate(path=pyproject_path)
-        config = process_loaded_project_config(config, errors, warnings)
+        # Disable the validation due to the local empty project
+        if remote_app_ref:
+            config = load(app_path / "pyproject.toml")
+        else:
+            pyproject_path = app_path / "pyproject.toml" if app_path else None
+            config, errors, warnings = load_and_validate(path=pyproject_path)
+            config = process_loaded_project_config(config, errors, warnings)
+
         federation, federation_config = validate_federation_in_project_config(
-            federation, config, federation_config_overrides
+            federation, config, federation_config_overrides  # type: ignore[arg-type]
         )
 
         if "address" in federation_config:
@@ -135,6 +141,7 @@ def run(
                 run_config_overrides,
                 stream,
                 output_format,
+                original_app_str,
                 remote_app_ref,
             )
         else:
@@ -166,6 +173,7 @@ def _run_with_control_api(
     config_overrides: Optional[list[str]],
     stream: bool,
     output_format: str,
+    original_app_str: str,
     remote_app_ref: Optional[str] = None,
 ) -> None:
     channel = None
@@ -178,11 +186,11 @@ def _run_with_control_api(
         fab_id = fab_version = fab_hash = None
         if remote_app_ref:
             # Skip build; send a placeholder Fab containing the remote reference
-            fab = Fab("", b"", {"identifier": remote_app_ref})
+            fab = Fab("", b"", {"identifier": original_app_str})
         else:
             fab_bytes, fab_hash, cfg = build_fab(app)
             fab_id, fab_version = get_metadata_from_config(cfg)
-            fab = Fab(fab_hash, fab_bytes)
+            fab = Fab(fab_hash, fab_bytes, {})
 
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
         fed_config = flatten_dict(federation_config.get("options", {}))
@@ -201,7 +209,14 @@ def _run_with_control_api(
                 f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN
             )
         else:
-            typer.secho("❌ Failed to start run", fg=typer.colors.RED)
+            if remote_app_ref:
+                typer.secho(
+                    "❌ Failed to start run. Please check that the provided "
+                    "app identifier (@user_name/app_name) is correct.",
+                    fg=typer.colors.RED,
+                )
+            else:
+                typer.secho("❌ Failed to start run", fg=typer.colors.RED)
             raise typer.Exit(code=1)
 
         if output_format == CliOutputFormat.JSON:
@@ -217,7 +232,7 @@ def _run_with_control_api(
                         "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
                         "fab-version": fab_version,
                         "fab-hash": fab_hash[:8],
-                        "fab-filename": get_fab_filename(cfg, fab_hash),  # type: ignore[name-defined]
+                        "fab-filename": get_fab_filename(cfg, fab_hash),
                     }
                 )
 

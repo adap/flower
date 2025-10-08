@@ -20,12 +20,12 @@ import json
 import re
 import time
 from collections.abc import Generator
+from datetime import timedelta
 from logging import ERROR, INFO
 from typing import Any, Optional, cast
 
 import grpc
 import requests
-import typer
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
@@ -46,7 +46,6 @@ from flwr.common.serde import (
     user_config_from_proto,
 )
 from flwr.common.typing import Fab, Run, RunStatus
-from flwr.common.version import package_version
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     CreateNodeCliRequest,
@@ -70,6 +69,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StreamLogsRequest,
     StreamLogsResponse,
 )
+from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
@@ -79,7 +79,8 @@ from flwr.superlink.auth_plugin import ControlAuthnPlugin
 from .control_account_auth_interceptor import shared_account_info
 
 # PLATFORM_API_URL = "https://api.flower.ai"
-PLATFORM_API_URL = "http://0.0.0.0/v1"
+# PLATFORM_API_URL = "http://0.0.0.0/v1"
+PLATFORM_API_URL = "https://api.flower.blue/v1"
 
 
 class ControlServicer(control_pb2_grpc.ControlServicer):
@@ -114,15 +115,23 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             identifier = request.fab.meta["identifier"]
             m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", identifier)
             if not m:
-                raise ValueError(
-                    "Invalid remote app ID. Expected format: '@user_name/app_name'."
+                log(
+                    ERROR,
+                    "Invalid remote app ID. Expected format: '@user_name/app_name'.",
                 )
+                return StartRunResponse()
 
             # Request download link
-            url, verification = _request_download_link(identifier)
+            _, url, verification = _request_download_link(identifier, context)
 
-            # Download FAB from FlowerHub
-            fab_file = _download_to_memory(url)
+            # Download FAB from Hub
+            try:
+                r = requests.get(url, timeout=60)
+                r.raise_for_status()
+            except requests.RequestException as e:
+                log(ERROR, "FAB download failed: %s", str(e))
+                return StartRunResponse()
+            fab_file = r.content
         else:
             fab_file = request.fab.content
 
@@ -446,7 +455,61 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> ListNodesCliResponse:
         """List all SuperNodes."""
         log(INFO, "ControlServicer.ListNodesCli")
-        return ListNodesCliResponse()
+
+        nodes_info = []
+        # A node created (but not connected)
+        nodes_info.append(
+            NodeInfo(
+                node_id=15390646978706312628,
+                owner_aid="owner_aid_1",
+                status="created",
+                created_at=(now()).isoformat(),
+                last_activated_at="",
+                last_deactivated_at="",
+                deleted_at="",
+            )
+        )
+
+        # A node created and connected
+        nodes_info.append(
+            NodeInfo(
+                node_id=2941141058168602545,
+                owner_aid="owner_aid_2",
+                status="online",
+                created_at=(now()).isoformat(),
+                last_activated_at=(now() + timedelta(hours=0.5)).isoformat(),
+                last_deactivated_at="",
+                deleted_at="",
+            )
+        )
+
+        # A node created and deleted (never connected)
+        nodes_info.append(
+            NodeInfo(
+                node_id=906971720890549292,
+                owner_aid="owner_aid_3",
+                status="deleted",
+                created_at=(now()).isoformat(),
+                last_activated_at="",
+                last_deactivated_at="",
+                deleted_at=(now() + timedelta(hours=1)).isoformat(),
+            )
+        )
+
+        # A node created, deactivate and then deleted
+        nodes_info.append(
+            NodeInfo(
+                node_id=1781174086018058152,
+                owner_aid="owner_aid_4",
+                status="offline",
+                created_at=(now()).isoformat(),
+                last_activated_at=(now() + timedelta(hours=0.5)).isoformat(),
+                last_deactivated_at=(now() + timedelta(hours=1)).isoformat(),
+                deleted_at=(now() + timedelta(hours=1.5)).isoformat(),
+            )
+        )
+
+        return ListNodesCliResponse(nodes_info=nodes_info, now=now().isoformat())
 
 
 def _create_list_runs_response(
@@ -494,42 +557,43 @@ def _check_flwr_aid_in_run(
         )
 
 
-def _request_download_link(identifier: str) -> [str, str]:
+def _request_download_link(
+    identifier: str, context: grpc.ServicerContext
+) -> tuple[str, str, list[tuple[str, str]]]:
     """Request download link from Flower platform API."""
-    url = f"{PLATFORM_API_URL}/hub/download-link"
+    url = f"{PLATFORM_API_URL}/hub/fetch"
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
     body = {
         "identifier": identifier,  # send raw string of identifier
-        "flwr_version": package_version,  # send flwr version
     }
 
     try:
         resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
     except requests.RequestException as e:
-        raise typer.BadParameter(f"Unable to connect to FlowerHub: {e}") from e
+        context.abort(
+            grpc.StatusCode.UNAVAILABLE,
+            f"Unable to connect to Hub: {e}",
+        )
 
     if resp.status_code == 404:
-        raise typer.BadParameter(f"'{identifier}' not found in FlowerHub")
+        context.abort(
+            grpc.StatusCode.NOT_FOUND,
+            f"'{identifier}' not found in Hub",
+        )
     if not resp.ok:
-        raise typer.BadParameter(
-            f"FlowerHub request failed with status {resp.status_code}. "
-            f"Details: {resp.text}"
+        context.abort(
+            grpc.StatusCode.UNAVAILABLE,
+            f"Hub request failed with status {resp.status_code}. "
+            f"Details: {resp.text}",
         )
 
     data = resp.json()
-    if "url" not in data or "verification" not in data:
-        raise typer.BadParameter("Invalid response from FlowerHub")
-    return data["url"], data["verification"]
-
-
-def _download_to_memory(presigned_url: str) -> bytes:
-    """Download FAB file from FlowerHub to memory."""
-    try:
-        r = requests.get(presigned_url, timeout=60)
-        r.raise_for_status()
-    except requests.RequestException as e:
-        raise typer.BadParameter(f"FAB download failed: {e}") from e
-    return r.content
+    if "fab_url" not in data or "verifications" not in data:
+        context.abort(
+            grpc.StatusCode.DATA_LOSS,
+            "Invalid response from Hub",
+        )
+    return data["app_id"], data["fab_url"], data["verifications"]
