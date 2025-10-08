@@ -42,6 +42,7 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
 from flwr.supercore.constant import NodeStatus
+from datetime import datetime
 
 from .utils import (
     check_node_availability_for_in_message,
@@ -416,12 +417,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def _check_and_tag_deactivated_nodes(self) -> None:
         with self.lock:
             # Set all nodes of "activated" status to "deactivated" if they've offline
+            current_ts = now().timestamp()
             for node in self.nodes.values():
-                current_dt = now()
                 if node.status == NodeStatus.ACTIVATED:
-                    if node.online_until <= current_dt.timestamp():
+                    if node.online_until <= current_ts:
                         node.status = NodeStatus.DEACTIVATED
-                        node.last_deactivated_at = current_dt.isoformat()
+                        node.last_deactivated_at = datetime.fromtimestamp(node.online_until).isoformat()
 
     def get_node_public_key(self, node_id: int) -> Optional[bytes]:
         """Get `public_key` for the specified `node_id`."""

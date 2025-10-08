@@ -622,7 +622,7 @@ class StateTest(CoreStateTest):
         assert len(retrieved_node_ids) == 0
 
     def test_create_node_and_get_nodes(self) -> None:
-        """Test creating a client node."""
+        """Test creating nodes and get activated nodes."""
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
@@ -642,33 +642,34 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
 
         # Execute
-        node_id = state.create_node("fake_aid", public_key, heartbeat_interval=10)
-        retrieved_node_ids = state.get_nodes(run_id)
-        retrieved_public_key = state.get_node_public_key(node_id)
+        expected_created_at = now().timestamp()
+        node_id = state.create_node("fake_aid", public_key, 10)
+        node = state.get_node_info(node_ids=[node_id])[0]
+        actual_created_at = datetime.fromisoformat(node.created_at).timestamp()
 
         # Assert
-        assert len(retrieved_node_ids) == 1
-        assert retrieved_public_key == public_key
+        assert node.node_id == node_id
+        assert node.public_key == public_key
+        self.assertAlmostEqual(actual_created_at, expected_created_at, 2)
 
     def test_create_node_public_key_twice(self) -> None:
         """Test creating a client node with same public key twice."""
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_id = state.create_node("fake_aid", public_key, heartbeat_interval=10)
+        node_id = state.create_node("fake_aid", public_key, 10)
 
         # Execute
         with self.assertRaises(ValueError):
-            state.create_node("fake_aid2", public_key, heartbeat_interval=10)
-        retrieved_node_ids = state.get_nodes(run_id)
+            state.create_node("fake_aid2", public_key, 10)
+        retrieved_nodes = state.get_node_info()
         retrieved_public_key = state.get_node_public_key(node_id)
 
         # Assert
-        assert len(retrieved_node_ids) == 1
+        assert len(retrieved_nodes) == 1
+        assert retrieved_nodes[0].node_id == node_id
         assert retrieved_public_key == public_key
 
         # Assert node_ids and public_key_to_node_id are synced
@@ -761,32 +762,20 @@ class StateTest(CoreStateTest):
         """Test deleting a client node."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         node_id = create_dummy_node(state)
 
         # Execute
+        expected_deleted_at = now().timestamp()
         state.delete_node(node_id)
-        retrieved_node_ids = state.get_nodes(run_id)
+        retrieved_nodes = state.get_node_info(node_ids=[node_id])
+        assert len(retrieved_nodes) == 1
+        node = retrieved_nodes[0]
+        actual_deleted_at = datetime.fromisoformat(node.deleted_at).timestamp()
 
         # Assert
-        assert len(retrieved_node_ids) == 0
-
-    def test_delete_node_public_key(self) -> None:
-        """Test deleting a client node with public key."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_id = state.create_node("fake_aid", public_key, heartbeat_interval=10)
-
-        # Execute
-        state.delete_node(node_id)
-        retrieved_node_ids = state.get_nodes(run_id)
-        retrieved_public_key = state.get_node_public_key(node_id)
-
-        # Assert
-        assert len(retrieved_node_ids) == 0
-        assert retrieved_public_key is None
+        assert len(retrieved_nodes) == 1
+        assert retrieved_nodes[0].status == NodeStatus.DELETED
+        self.assertAlmostEqual(actual_deleted_at, expected_deleted_at, 2)
 
     def test_get_nodes_invalid_run_id(self) -> None:
         """Test retrieving all node_ids with invalid run_id."""
@@ -931,8 +920,9 @@ class StateTest(CoreStateTest):
         """
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_ids = [create_dummy_node(state) for _ in range(100)]
+        node_ids = [create_dummy_node(state, activate=False) for _ in range(100)]
+        expected_activated_at = now().timestamp()
+        expected_deactivated_at = (now() + timedelta(seconds=60)).timestamp()
         for node_id in node_ids[:70]:
             assert state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
         for node_id in node_ids[70:]:
@@ -946,10 +936,19 @@ class StateTest(CoreStateTest):
         future_dt = now() + timedelta(seconds=90)
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = future_dt
-            actual_node_ids = state.get_nodes(run_id)
+            nodes = state.get_node_info(node_ids=node_ids)
+            activated_node_ids = {
+                node.node_id for node in nodes if node.status == NodeStatus.ACTIVATED
+            }
 
         # Assert
-        self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
+        self.assertSetEqual(activated_node_ids, set(node_ids[70:]))
+        for node in nodes:
+            actual = datetime.fromisoformat(node.last_activated_at).timestamp()
+            self.assertAlmostEqual(actual, expected_activated_at, 2)
+            if node.status == NodeStatus.DEACTIVATED:
+                actual = datetime.fromisoformat(node.last_deactivated_at).timestamp()
+                self.assertAlmostEqual(actual, expected_deactivated_at, 2)
 
     def test_acknowledge_app_heartbeat(self) -> None:
         """Test if acknowledge_app_heartbeat works."""

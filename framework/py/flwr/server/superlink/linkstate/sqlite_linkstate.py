@@ -24,7 +24,7 @@ import sqlite3
 from collections.abc import Sequence
 from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
-
+from datetime import datetime
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     FLWR_APP_TOKEN_LENGTH,
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS node(
     last_activated_at       TEXT,
     last_deactivated_at     TEXT,
     deleted_at              TEXT,
-    online_until            REAL,
+    online_until            TIMESTAMP,
     heartbeat_interval      REAL,
     public_key              BLOB UNIQUE
 );
@@ -730,40 +730,57 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         statuses: Optional[Sequence[str]] = None,
     ) -> Sequence[NodeInfo]:
         """Retrieve information about nodes based on the specified filters."""
-        conditions = []
-        params: list[Any] = []
+        with self.conn:
+            # Check and tag deactivated nodes
+            current_dt = now()
+            query = """
+                UPDATE node SET status = ?,
+                last_deactivated_at = strftime("%Y-%m-%dT%H:%M:%f+00:00", ?)
+                WHERE online_until <= ? AND status == ? RETURNING node_id, last_activated_at, last_deactivated_at
+            """
+            params = (
+                NodeStatus.DEACTIVATED,
+                current_dt,
+                current_dt.timestamp(),
+                NodeStatus.ACTIVATED,
+            )
+            rows = self.conn.execute(query, params).fetchall()
+            for row in rows:
+                print(row)
 
-        # Build the WHERE clause based on provided filters
-        if node_ids:
-            sint64_node_ids = [
-                convert_uint64_to_sint64(node_id) for node_id in node_ids
-            ]
-            placeholders = ",".join(["?"] * len(sint64_node_ids))
-            conditions.append(f"node_id IN ({placeholders})")
-            params.extend(sint64_node_ids)
-        if owner_aids:
-            placeholders = ",".join(["?"] * len(owner_aids))
-            conditions.append(f"owner_aid IN ({placeholders})")
-            params.extend(owner_aids)
-        if statuses:
-            placeholders = ",".join(["?"] * len(statuses))
-            conditions.append(f"status IN ({placeholders})")
-            params.extend(statuses)
+            # Build the WHERE clause based on provided filters
+            conditions = []
+            params: list[Any] = []
+            if node_ids:
+                sint64_node_ids = [
+                    convert_uint64_to_sint64(node_id) for node_id in node_ids
+                ]
+                placeholders = ",".join(["?"] * len(sint64_node_ids))
+                conditions.append(f"node_id IN ({placeholders})")
+                params.extend(sint64_node_ids)
+            if owner_aids:
+                placeholders = ",".join(["?"] * len(owner_aids))
+                conditions.append(f"owner_aid IN ({placeholders})")
+                params.extend(owner_aids)
+            if statuses:
+                placeholders = ",".join(["?"] * len(statuses))
+                conditions.append(f"status IN ({placeholders})")
+                params.extend(statuses)
 
-        # Construct the final query
-        query = "SELECT * FROM node"
-        if conditions:
-            query += " WHERE " + " AND ".join(conditions)
+            # Construct the final query
+            query = "SELECT * FROM node"
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
 
-        rows = self.query(query, params)
+            rows = self.conn.execute(query, params).fetchall()
 
-        result: list[NodeInfo] = []
-        for row in rows:
-            # Convert sint64 node_id to uint64
-            row["node_id"] = convert_sint64_to_uint64(row["node_id"])
-            result.append(NodeInfo(**row))
+            result: list[NodeInfo] = []
+            for row in rows:
+                # Convert sint64 node_id to uint64
+                row["node_id"] = convert_sint64_to_uint64(row["node_id"])
+                result.append(NodeInfo(**row))
 
-        return result
+            return result
 
     def get_node_public_key(self, node_id: int) -> Optional[bytes]:
         """Get `public_key` for the specified `node_id`."""
