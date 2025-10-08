@@ -51,7 +51,6 @@ from flwr.superlink.servicer.control.control_account_auth_interceptor import (
     shared_account_info,
 )
 
-
 from .control_servicer import ControlServicer
 
 FLWR_AID_MISMATCH_CASES = (
