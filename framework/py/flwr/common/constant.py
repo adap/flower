@@ -157,6 +157,7 @@ RUN_ID_NOT_FOUND_MESSAGE = "Run ID not found"
 NO_ACCOUNT_AUTH_MESSAGE = "ControlServicer initialized without account authentication"
 NO_ARTIFACT_PROVIDER_MESSAGE = "ControlServicer initialized without artifact provider"
 PULL_UNFINISHED_RUN_MESSAGE = "Cannot pull artifacts for an unfinished run"
+PUBLIC_KEY_ALREADY_IN_USE_MESSAGE = "Public key already in use"
 
 
 class MessageType:

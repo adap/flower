@@ -32,6 +32,7 @@ from flwr.common.constant import (
     FLWR_DIR,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
+    PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
 )
@@ -382,6 +383,16 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
                 typer.secho(
                     "❌ Run is not finished yet. Artifacts can only be pulled after "
                     "the run is finished. You can check the run status with `flwr ls`.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1) from None
+            if (
+                e.details() == PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
+            ):  # pylint: disable=E1101
+                typer.secho(
+                    "❌ The provided public key is already assigned to another "
+                    "supernode.",
                     fg=typer.colors.RED,
                     bold=True,
                 )

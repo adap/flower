@@ -21,7 +21,7 @@ from typing import Annotated, Optional
 
 import typer
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import ed25519
 from rich.console import Console
 
 from flwr.cli.config_utils import (
@@ -30,7 +30,11 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
-from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
+from flwr.common.constant import (
+    FAB_CONFIG_FILE,
+    HEARTBEAT_DEFAULT_INTERVAL,
+    CliOutputFormat,
+)
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     CreateNodeCliRequest,
@@ -131,7 +135,9 @@ def _create_node(stub: ControlStub, public_key: bytes, output_format: str) -> No
     """Create a node."""
     with flwr_cli_grpc_exc_handler():
         response: CreateNodeCliResponse = stub.CreateNodeCli(
-            request=CreateNodeCliRequest(public_key=public_key)
+            request=CreateNodeCliRequest(
+                public_key=public_key, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
+            )
         )
     if response.node_id:
         typer.secho(
@@ -162,9 +168,9 @@ def try_load_public_key(public_key_path: Path) -> bytes:
 
     with open(public_key_path, "rb") as key_file:
         public_key = serialization.load_ssh_public_key(key_file.read())
-        if not isinstance(public_key, ec.EllipticCurvePublicKey):
+        if not isinstance(public_key, ed25519.Ed25519PublicKey):
             typer.secho(
-                "❌ The provided key is not an Elliptic Curve public key.",
+                "❌ The provided key is not an Ed25519 public key.",
                 fg=typer.colors.RED,
                 bold=True,
             )

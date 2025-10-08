@@ -31,6 +31,7 @@ from flwr.common.constant import (
     LOG_STREAM_INTERVAL,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
+    PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
     Status,
@@ -406,7 +407,25 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> CreateNodeCliResponse:
         """Add a SuperNode."""
         log(INFO, "ControlServicer.CreateNodeCli")
-        return CreateNodeCliResponse()
+
+        # Init link state
+        state = self.linkstate_factory.state()
+        try:
+            # TODO: Use flwr_aid in create_node
+            node_id = state.create_node(
+                public_key=request.public_key,
+                heartbeat_interval=request.heartbeat_interval,
+            )
+
+        except ValueError:
+            # Public key already in use
+            log(ERROR, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE)
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
+            )
+        log(INFO, "[ControlServicer.CreateNodeCli] Created node_id=%s", node_id)
+
+        return CreateNodeCliResponse(node_id=node_id)
 
     def DeleteNodeCli(
         self, request: DeleteNodeCliRequest, context: grpc.ServicerContext
