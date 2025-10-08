@@ -94,7 +94,6 @@ def stop(  # pylint: disable=R0914
             stub = ControlStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
             typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
-            print("sdfsfs")
             _stop_run(stub=stub, run_id=run_id, output_format=output_format)
 
         except ValueError as err:
