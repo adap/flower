@@ -673,8 +673,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             NodeStatus.DELETED,
         )
 
-        row = self.query(query, params)
-        if not row:
+        rows = self.query(query, params)
+        if not rows:
             raise ValueError(f"Node {node_id} already deleted or does not exist")
 
     def get_nodes(self, run_id: int) -> set[int]:
