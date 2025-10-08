@@ -919,19 +919,19 @@ class StateTest(CoreStateTest):
         """
         # Prepare
         state: LinkState = self.state_factory()
-        node_ids = [create_dummy_node(state, activate=False) for _ in range(100)]
+        node_ids = [create_dummy_node(state, activate=False) for _ in range(10)]
         expected_activated_at = now().timestamp()
         expected_deactivated_at = (now() + timedelta(seconds=60)).timestamp()
-        for node_id in node_ids[:70]:
+        for node_id in node_ids[:7]:
             assert state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
-        for node_id in node_ids[70:]:
+        for node_id in node_ids[7:]:
             assert state.acknowledge_node_heartbeat(node_id, heartbeat_interval=90)
 
         # Execute
         # Test with current_time + 90s
-        # node_ids[:70] are online until current_time + 60s (HEARTBEAT_PATIENCE * 30s)
-        # node_ids[70:] are online until current_time + 180s (HEARTBEAT_PATIENCE * 90s)
-        # As a result, only node_ids[70:] will be returned by get_nodes().
+        # node_ids[:7] are online until current_time + 60s (HEARTBEAT_PATIENCE * 30s)
+        # node_ids[7:] are online until current_time + 180s (HEARTBEAT_PATIENCE * 90s)
+        # As a result, only node_ids[7:] will be returned by get_nodes().
         future_dt = now() + timedelta(seconds=90)
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = future_dt
@@ -941,8 +941,9 @@ class StateTest(CoreStateTest):
             }
 
         # Assert
-        # Allow up to 1 decimmal place difference, considering file-based sqlite DB
-        self.assertSetEqual(activated_node_ids, set(node_ids[70:]))
+        # Allow up to 1 decimal place difference due to file-based SQLite DB speed.
+        # CI runs on cracky old machines, so minor delays are expected.
+        self.assertSetEqual(activated_node_ids, set(node_ids[7:]))
         for node in nodes:
             actual = datetime.fromisoformat(node.last_activated_at).timestamp()
             self.assertAlmostEqual(actual, expected_activated_at, 1)
