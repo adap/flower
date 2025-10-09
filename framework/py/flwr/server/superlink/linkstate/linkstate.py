@@ -136,7 +136,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """Create, store in the link state, and return `node_id`."""
 
     @abc.abstractmethod
-    def delete_node(self, node_id: int) -> None:
+    def delete_node(self, owner_aid: str, node_id: int) -> None:
         """Remove `node_id` from the link state."""
 
     @abc.abstractmethod

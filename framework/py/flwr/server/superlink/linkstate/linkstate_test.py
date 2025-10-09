@@ -727,7 +727,7 @@ class StateTest(CoreStateTest):
         node_deleted = create_dummy_node(state)
 
         # Transition nodes
-        state.delete_node(node_deleted)
+        state.delete_node("mock_flwr_aid", node_deleted)
 
         # Execute
         infos = state.get_node_info(statuses=[NodeStatus.CREATED, NodeStatus.ACTIVATED])
@@ -770,7 +770,7 @@ class StateTest(CoreStateTest):
 
         # Execute
         expected_deleted_at = now().timestamp()
-        state.delete_node(node_id)
+        state.delete_node("mock_flwr_aid", node_id)
         retrieved_nodes = state.get_node_info(node_ids=[node_id])
         assert len(retrieved_nodes) == 1
         node = retrieved_nodes[0]
@@ -780,6 +780,34 @@ class StateTest(CoreStateTest):
         assert len(retrieved_nodes) == 1
         assert retrieved_nodes[0].status == NodeStatus.DELETED
         self.assertAlmostEqual(actual_deleted_at, expected_deleted_at, 2)
+
+    def test_delete_node_owner_mismatch(self) -> None:
+        """Test deleting a client node with owner mismatch."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        _ = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        node_id = create_dummy_node(state)
+
+        # Execute
+        with self.assertRaises(ValueError):
+            state.delete_node("wrong_owner_aid", node_id)
+
+    def test_delete_node_public_key(self) -> None:
+        """Test deleting a client node with public key."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        public_key = b"mock"
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        node_id = state.create_node("fake_aid", public_key, heartbeat_interval=10)
+
+        # Execute
+        state.delete_node("fake_aid", node_id)
+        retrieved_node_ids = state.get_nodes(run_id)
+        with self.assertRaises(ValueError):
+            _ = state.get_node_public_key(node_id)
+
+        # Assert
+        assert len(retrieved_node_ids) == 0
 
     def test_get_nodes_invalid_run_id(self) -> None:
         """Test retrieving all node_ids with invalid run_id."""

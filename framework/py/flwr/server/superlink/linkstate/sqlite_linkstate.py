@@ -656,14 +656,14 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Note: we need to return the uint64 value of the node_id
         return uint64_node_id
 
-    def delete_node(self, node_id: int) -> None:
+    def delete_node(self, owner_aid: str, node_id: int) -> None:
         """Delete a node."""
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
         query = """
             UPDATE node
             SET status = ?, deleted_at = ?
-            WHERE node_id = ? AND status != ?
+            WHERE node_id = ? AND status != ? AND owner_aid = ?
             RETURNING node_id
         """
         params = (
@@ -671,11 +671,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             now().isoformat(),
             sint64_node_id,
             NodeStatus.DELETED,
+            owner_aid,
         )
 
         rows = self.query(query, params)
         if not rows:
-            raise ValueError(f"Node {node_id} already deleted or does not exist")
+            raise ValueError(
+                f"Node {node_id} already deleted, not found or unauthorized "
+                "deletion attempt."
+            )
 
     def get_nodes(self, run_id: int) -> set[int]:
         """Retrieve all currently stored node IDs as a set.
