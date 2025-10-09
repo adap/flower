@@ -32,8 +32,11 @@ from flwr.common.constant import (
     FLWR_DIR,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
+    PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
+    PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
+    AuthnType,
 )
 from flwr.common.grpc import (
     GRPC_MAX_MESSAGE_LENGTH,
@@ -41,7 +44,7 @@ from flwr.common.grpc import (
     on_channel_state_change,
 )
 
-from .auth_plugin import CliAuthPlugin, get_cli_auth_plugins
+from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
 from .config_utils import validate_certificate_in_federation_config
 
@@ -230,71 +233,54 @@ def account_auth_enabled(federation_config: dict[str, Any]) -> bool:
     return enabled
 
 
-def try_obtain_cli_auth_plugin(
+def retrieve_authn_type(config_path: Path) -> str:
+    """Retrieve the auth type from the config file or return NOOP if not found."""
+    try:
+        with config_path.open("r", encoding="utf-8") as file:
+            json_file = json.load(file)
+        authn_type: str = json_file[AUTHN_TYPE_JSON_KEY]
+        return authn_type
+    except (FileNotFoundError, KeyError):
+        return AuthnType.NOOP
+
+
+def load_cli_auth_plugin(
     root_dir: Path,
     federation: str,
     federation_config: dict[str, Any],
     authn_type: Optional[str] = None,
-) -> Optional[CliAuthPlugin]:
+) -> CliAuthPlugin:
     """Load the CLI-side account auth plugin for the given authn type."""
-    # Check if account auth is enabled
-    if not account_auth_enabled(federation_config):
-        return None
-
+    # Find the path to the account auth config file
     config_path = get_account_auth_config_path(root_dir, federation)
 
-    # Get the authn type from the config if not provided
-    # authn_type will be None for all CLI commands except login
+    # Determine the auth type if not provided
+    # Only `flwr login` command can provide `authn_type` explicitly, as it can query the
+    # SuperLink for the auth type.
     if authn_type is None:
-        try:
-            with config_path.open("r", encoding="utf-8") as file:
-                json_file = json.load(file)
-            authn_type = json_file[AUTHN_TYPE_JSON_KEY]
-        except (FileNotFoundError, KeyError):
-            typer.secho(
-                "❌ Missing or invalid credentials for account authentication. "
-                "Please run `flwr login` to authenticate.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1) from None
+        authn_type = AuthnType.NOOP
+        if account_auth_enabled(federation_config):
+            authn_type = retrieve_authn_type(config_path)
 
     # Retrieve auth plugin class and instantiate it
     try:
-        all_plugins: dict[str, type[CliAuthPlugin]] = get_cli_auth_plugins()
-        auth_plugin_class = all_plugins[authn_type]
+        auth_plugin_class = get_cli_plugin_class(authn_type)
         return auth_plugin_class(config_path)
-    except KeyError:
+    except ValueError:
         typer.echo(f"❌ Unknown account authentication type: {authn_type}")
-        raise typer.Exit(code=1) from None
-    except ImportError:
-        typer.echo("❌ No authentication plugins are currently supported.")
         raise typer.Exit(code=1) from None
 
 
 def init_channel(
-    app: Path, federation_config: dict[str, Any], auth_plugin: Optional[CliAuthPlugin]
+    app: Path, federation_config: dict[str, Any], auth_plugin: CliAuthPlugin
 ) -> grpc.Channel:
     """Initialize gRPC channel to the Control API."""
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
         app, federation_config
     )
 
-    # Initialize the CLI-side account auth interceptor
-    interceptors: list[grpc.UnaryUnaryClientInterceptor] = []
-    if auth_plugin is not None:
-        # Check if TLS is enabled. If not, raise an error
-        if insecure:
-            typer.secho(
-                "❌ Account authentication requires TLS to be enabled. "
-                "Remove `insecure = true` from the federation configuration.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-
-        auth_plugin.load_tokens()
-        interceptors.append(CliAccountAuthInterceptor(auth_plugin))
+    # Load tokens
+    auth_plugin.load_tokens()
 
     # Create the gRPC channel
     channel = create_channel(
@@ -302,14 +288,14 @@ def init_channel(
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=interceptors or None,
+        interceptors=[CliAccountAuthInterceptor(auth_plugin)],
     )
     channel.subscribe(on_channel_state_change)
     return channel
 
 
 @contextmanager
-def flwr_cli_grpc_exc_handler() -> Iterator[None]:
+def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-branches
     """Context manager to handle specific gRPC errors.
 
     It catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED,
@@ -382,6 +368,24 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
                 typer.secho(
                     "❌ Run is not finished yet. Artifacts can only be pulled after "
                     "the run is finished. You can check the run status with `flwr ls`.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1) from None
+            if (
+                e.details() == PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
+            ):  # pylint: disable=E1101
+                typer.secho(
+                    "❌ The provided public key is already in use by another "
+                    "SuperNode.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1) from None
+            if e.details() == PUBLIC_KEY_NOT_VALID:  # pylint: disable=E1101
+                typer.secho(
+                    "❌ The provided public key is invalid. Please provide a valid "
+                    "NIST EC public key.",
                     fg=typer.colors.RED,
                     bold=True,
                 )
