@@ -76,6 +76,11 @@ class StateTest(CoreStateTest):
         """Provide state implementation to test."""
         raise NotImplementedError()
 
+    def create_public_key(self) -> bytes:
+        """Create a P-384 public key for node creation."""
+        _, public_key = generate_key_pairs()
+        return public_key_to_bytes(public_key)
+
     def test_create_and_get_run(self) -> None:
         """Test if create_run and get_run work correctly."""
         # Prepare
