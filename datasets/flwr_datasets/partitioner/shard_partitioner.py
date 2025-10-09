@@ -85,8 +85,8 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         samples assignment to partitions.
     seed: int
         Seed used for initializing the random number generator (RNG),
-        which affects dataset shuffling (if `shuffle` is True)
-        and randomly assigning shards to partitions.
+        which affects the random assignment of shards to partitions
+        and dataset shuffling (if `shuffle` is True).
 
     Examples
     --------

@@ -58,9 +58,9 @@ class ContinuousPartitioner(
     shuffle : bool
         Whether to shuffle the indices within each partition (default: True).
     seed : Optional[int]
-        Random seed for reproducibility. Used for initializing the random number generator (RNG)
-        which affects dataset shuffling (if `shuffle` is True) and generating the Gaussian noise
-        (related to the `strictness` parameter).
+        Random seed for reproducibility. Used for initializing the random number generator (RNG),
+        which affects the generation of the Gaussian noise (related to the `strictness` parameter)
+        and dataset shuffling (if `shuffle` is True).
         
 
     Examples

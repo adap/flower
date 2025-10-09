@@ -64,8 +64,8 @@ class DirichletPartitioner(Partitioner):
         samples assignment to partitions.
     seed: int
         Seed used for initializing the random number generator (RNG),
-        which affects dataset shuffling (if `shuffle` is True)
-        and sampling from the Dirichlet distribution.
+        which affects sampling from the Dirichlet distribution
+        and dataset shuffling (if `shuffle` is True).
 
     Examples
     --------

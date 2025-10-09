@@ -74,8 +74,8 @@ class PathologicalPartitioner(Partitioner):
         samples assignment to partitions.
     seed: int
         Seed used for initializing the random number generator (RNG),
-        which affects dataset shuffling (if `shuffle` is True)
-        and assigning labels/classes to partitions.
+        which affects the ranodm assignment of labels/classes to partitions
+        and dataset shuffling (if `shuffle` is True).
 
     Examples
     --------
