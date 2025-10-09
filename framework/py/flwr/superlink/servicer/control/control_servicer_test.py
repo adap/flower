@@ -221,7 +221,9 @@ class TestControlServicer(unittest.TestCase):
         """Test DeleteNodeCli method of ControlServicer."""
         # Prepare
         pub_key = public_key_to_bytes(generate_key_pairs()[1])
-        node_id = self.state.create_node(public_key=pub_key, heartbeat_interval=10)
+        node_id = self.state.create_node(
+            owner_aid="fake_aid", public_key=pub_key, heartbeat_interval=10
+        )
 
         # Execute
         req = DeleteNodeCliRequest(node_id=node_id if real_node_id else node_id + 1)
@@ -236,7 +238,9 @@ class TestControlServicer(unittest.TestCase):
         """Test CreateNodeCli and DeleteNodeCli method of ControlServicer."""
         # Prepare
         pub_key = public_key_to_bytes(generate_key_pairs()[1])
-        node_id = self.state.create_node(public_key=pub_key, heartbeat_interval=10)
+        node_id = self.state.create_node(
+            owner_aid="fake_aid", public_key=pub_key, heartbeat_interval=10
+        )
 
         # Execute
         # Delete node

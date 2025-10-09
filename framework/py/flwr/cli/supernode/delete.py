@@ -34,7 +34,7 @@ from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import DeleteNodeCliRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
 
-from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
+from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 
 
 def delete(  # pylint: disable=R0914
@@ -82,7 +82,7 @@ def delete(  # pylint: disable=R0914
 
         channel = None
         try:
-            auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
+            auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
             channel = init_channel(app, federation_config, auth_plugin)
             stub = ControlStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
