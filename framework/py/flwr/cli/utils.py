@@ -377,7 +377,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
             ):  # pylint: disable=E1101
                 typer.secho(
                     "❌ The provided public key is already in use by another "
-                    "supernode.",
+                    "SuperNode.",
                     fg=typer.colors.RED,
                     bold=True,
                 )
