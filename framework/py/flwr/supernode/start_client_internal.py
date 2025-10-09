@@ -235,7 +235,7 @@ def start_client_internal(
                 pull_object=pull_object,
                 confirm_message_received=confirm_message_received,
                 trust_entity=trust_entity,
-                enable_trusted_verification=enable_trusted_verification,
+                enable_entity_verification=enable_entity_verification,
             )
 
             # No message has been pulled therefore we can skip the push stage.
@@ -263,7 +263,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     pull_object: Callable[[int, str], bytes],
     confirm_message_received: Callable[[int, str], None],
     trust_entity: Optional[dict[str, str]],
-    enable_trusted_verification: Optional[bool],
+    enable_entity_verification: Optional[bool],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
