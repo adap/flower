@@ -73,7 +73,9 @@ class PathologicalPartitioner(Partitioner):
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to partitions.
     seed: int
-        Seed used for dataset shuffling. It has no effect if `shuffle` is False.
+        Seed used for initializing the random number generator (RNG),
+        which affects dataset shuffling (if `shuffle` is True)
+        and assigning labels/classes to partitions.
 
     Examples
     --------
