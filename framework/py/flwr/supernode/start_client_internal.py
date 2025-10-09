@@ -61,7 +61,7 @@ from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
-from flwr.supercore.primitives.asymmetric_ed25519 import verify_signature
+from flwr.supercore.primitives.asymmetric_ed25519 import verify_signature, create_signed_message
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 
@@ -322,7 +322,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                        f" The Flower SuperNode should be restarted with a trusted entities list",
                    ) 
                 fab_verified = False
-                for public_key_id, signature in fab.meta:
+                for public_key_id, signature, timestamp in fab.meta:
                     if public_key_id in trust_entity:
                         # TODO: Refactor all ed25519 crypto into flwr.supercore.primitives.asymmetric package
                         verifier_public_key = serialization.load_pem_public_key(trust_entity[public_key_id])
@@ -333,9 +333,10 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                                 f"trusted entity {public_key_id} is not Ed25519"
                             )
                             continue
+                        signed_message = create_signed_message(hashlib.sha256(fab.content).digest(), timestamp)
                         if verify_signature(
                             verifier_public_key,
-                            hashlib.sha256(fab.content).digest(),
+                            signed_message,
                             signature,
                         ):
                             fab_verified = True

@@ -140,3 +140,7 @@ def verify_signature(public_key: ed25519.Ed25519PublicKey, message: bytes, signa
     except InvalidSignature:
         return False
 
+def create_signed_message(fab_digest: bytes, timestamp: int) -> bytes:
+    # Create a canonical message: timestamp (8 bytes big-endian) + fab_digest
+    timestamp_bytes = timestamp.to_bytes(8, byteorder="big")
+    return timestamp_bytes + fab_digest
