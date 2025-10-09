@@ -288,7 +288,9 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def _create_node_in_linkstate(self) -> int:
         pk_bytes = public_key_to_bytes(self.node_pk)
-        return self.state.create_node(public_key=pk_bytes, heartbeat_interval=30)
+        return self.state.create_node(
+            "mock_owner", public_key=pk_bytes, heartbeat_interval=30
+        )
 
     @parameterized.expand(
         [
