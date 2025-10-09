@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
 import grpc
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from grpc import RpcError
