@@ -410,8 +410,12 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
         node_id = 0
+
+        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         try:
             node_id = state.create_node(
+                owner_aid=flwr_aid,
                 public_key=request.public_key,
                 heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
             )
@@ -514,7 +518,7 @@ def _create_list_runs_response(
 
 def _check_flwr_aid_exists(
     flwr_aid: Optional[str], context: grpc.ServicerContext
-) -> None:
+) -> str:
     """Guard clause to check if `flwr_aid` exists."""
     if flwr_aid is None:
         context.abort(
@@ -522,6 +526,7 @@ def _check_flwr_aid_exists(
             "️⛔️ Failed to fetch the account information.",
         )
         raise RuntimeError  # This line is unreachable
+    return flwr_aid
 
 
 def _check_flwr_aid_in_run(

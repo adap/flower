@@ -194,7 +194,9 @@ class TestControlServicer(unittest.TestCase):
         """Test CreateNodeCli method of ControlServicer."""
         # Prepare
         if pre_register_key:
-            self.state.create_node(public_key=pub_key, heartbeat_interval=10)
+            self.state.create_node(
+                owner_aid="fake_aid", public_key=pub_key, heartbeat_interval=10
+            )
 
         # Execute
         req = CreateNodeCliRequest(public_key=pub_key)
