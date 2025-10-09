@@ -29,4 +29,5 @@ message NodeInfo {
   string deleted_at = 7;
   double online_until = 8;
   double heartbeat_interval = 9;
+  bytes public_key = 10;
 }
