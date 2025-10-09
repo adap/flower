@@ -16,6 +16,7 @@
 
 
 import hashlib
+import os
 import tempfile
 import unittest
 from datetime import datetime
@@ -27,9 +28,15 @@ import grpc
 from parameterized import parameterized
 
 from flwr.common import ConfigRecord, now
-from flwr.common.constant import Status, SubStatus
+from flwr.common.constant import (
+    PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
+    PUBLIC_KEY_NOT_VALID,
+    Status,
+    SubStatus,
+)
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    CreateNodeCliRequest,
     ListRunsRequest,
     StartRunRequest,
     StopRunRequest,
@@ -38,6 +45,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.auth_plugin import NoOpControlAuthnPlugin
 from flwr.superlink.servicer.control.control_account_auth_interceptor import (
     shared_account_info,
@@ -160,6 +168,46 @@ class TestControlServicer(unittest.TestCase):
         if run_state is not None:
             self.assertEqual(run_state.status, expected_run_status)
         self.store.delete_objects_in_run.assert_called_once_with(run_id)
+
+    @parameterized.expand(
+        [
+            (
+                "",
+                False,
+                public_key_to_bytes(generate_key_pairs()[1]),
+            ),  # PASSES, true EC keys used once
+            (
+                PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
+                True,
+                public_key_to_bytes(generate_key_pairs()[1]),
+            ),  # FAILS, true EC keys but already in use
+            (
+                PUBLIC_KEY_NOT_VALID,
+                False,
+                os.urandom(32),
+            ),  # FAILS, fake EC keys
+        ]
+    )  # type: ignore
+    def test_create_node_cli(
+        self, error_msg: str, pre_register_key: bool, pub_key: bytes
+    ) -> None:
+        """Test CreateNodeCli method of ControlServicer."""
+        # Prepare
+        if pre_register_key:
+            self.state.create_node(
+                owner_aid="fake_aid", public_key=pub_key, heartbeat_interval=10
+            )
+
+        # Execute
+        req = CreateNodeCliRequest(public_key=pub_key)
+        ctx = Mock()
+        node_id = self.servicer.CreateNodeCli(req, ctx)
+        if error_msg:
+            ctx.abort.assert_called_once_with(
+                grpc.StatusCode.FAILED_PRECONDITION, error_msg
+            )
+        else:
+            assert node_id
 
 
 class TestControlServicerAuth(unittest.TestCase):

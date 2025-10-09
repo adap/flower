@@ -239,10 +239,10 @@ global___PullArtifactsResponse = PullArtifactsResponse
 class CreateNodeCliRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PUBLIC_KEY_FIELD_NUMBER: builtins.int
-    public_key: typing.Text
+    public_key: builtins.bytes
     def __init__(self,
         *,
-        public_key: typing.Text = ...,
+        public_key: builtins.bytes = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["public_key",b"public_key"]) -> None: ...
 global___CreateNodeCliRequest = CreateNodeCliRequest
