@@ -559,7 +559,7 @@ def _check_flwr_aid_in_run(
 
 def _request_download_link(
     identifier: str, context: grpc.ServicerContext
-) -> tuple[str, str, list[tuple[str, str]]]:
+) -> tuple[str, str, list[dict[str, str]]]:
     """Request download link from Flower platform API."""
     url = f"{PLATFORM_API_URL}/hub/fetch"
     headers = {
