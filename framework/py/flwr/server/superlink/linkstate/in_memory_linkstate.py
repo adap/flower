@@ -434,9 +434,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def get_node_public_key(self, node_id: int) -> bytes:
         """Get `public_key` for the specified `node_id`."""
         with self.lock:
-            if (node := self.nodes.get(node_id)) is None:
+            if (
+                node := self.nodes.get(node_id)
+            ) is None or node.status == NodeStatus.DELETED:
                 raise ValueError(f"Node ID {node_id} not found")
-
             return node.public_key
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments

@@ -774,8 +774,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
         # Query the public key for the given node_id
-        query = "SELECT public_key FROM node WHERE node_id = ?"
-        rows = self.query(query, (sint64_node_id,))
+        query = "SELECT public_key FROM node WHERE node_id = ? AND status != ?;"
+        rows = self.query(query, (sint64_node_id, NodeStatus.DELETED))
 
         # If no result is found, return None
         if not rows:
