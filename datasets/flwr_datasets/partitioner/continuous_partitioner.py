@@ -61,7 +61,7 @@ class ContinuousPartitioner(
         Random seed for reproducibility. Used for initializing the random number generator (RNG),
         which affects the generation of the Gaussian noise (related to the `strictness` parameter)
         and dataset shuffling (if `shuffle` is True).
-        
+
 
     Examples
     --------
