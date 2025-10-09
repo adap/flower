@@ -364,11 +364,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             self.owner_to_node_ids.setdefault(owner_aid, set()).add(node_id)
             return node_id
 
-    def delete_node(self, node_id: int) -> None:
+    def delete_node(self, owner_aid: str, node_id: int) -> None:
         """Delete a node."""
         with self.lock:
-            if node_id not in self.nodes:
-                raise ValueError(f"Node {node_id} not found")
+            if node_id not in self.nodes or owner_aid != self.nodes[node_id].owner_aid:
+                raise ValueError(
+                    f"Node ID {node_id} not found or unauthorized deletion attempt."
+                )
 
             node = self.nodes.pop(node_id)
             self.registered_node_public_keys.discard(node.public_key)
