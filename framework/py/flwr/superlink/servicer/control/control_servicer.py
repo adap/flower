@@ -440,6 +440,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
+        flwr_aid = shared_account_info.get().flwr_aid
+        _check_flwr_aid_exists(flwr_aid, context)
         try:
             state.delete_node(request.node_id)
         except ValueError:
