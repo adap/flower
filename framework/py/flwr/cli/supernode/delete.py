@@ -124,7 +124,7 @@ def _delete_node(
     """Delete a SuperNode from the federation."""
     with flwr_cli_grpc_exc_handler():
         stub.DeleteNodeCli(request=DeleteNodeCliRequest(node_id=node_id))
-    typer.secho(f"✅ Node {node_id} deleted successfully.", fg=typer.colors.GREEN)
+    typer.secho(f"✅ SuperNode {node_id} deleted successfully.", fg=typer.colors.GREEN)
     if output_format == CliOutputFormat.JSON:
         run_output = json.dumps(
             {
