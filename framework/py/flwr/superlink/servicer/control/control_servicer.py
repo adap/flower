@@ -28,9 +28,13 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
 from flwr.common.constant import (
     FAB_MAX_SIZE,
+    HEARTBEAT_DEFAULT_INTERVAL,
     LOG_STREAM_INTERVAL,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
+    NODE_NOT_FOUND_MESSAGE,
+    PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
+    PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
     Status,
@@ -70,6 +74,7 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
+from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin
 
@@ -389,13 +394,59 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> CreateNodeCliResponse:
         """Add a SuperNode."""
         log(INFO, "ControlServicer.CreateNodeCli")
-        return CreateNodeCliResponse()
+
+        # Verify public key
+        try:
+            # Attempt to deserialize public key
+            pub_key = bytes_to_public_key(request.public_key)
+            # Check if it's a NIST EC curve public key
+            if not uses_nist_ec_curve(pub_key):
+                err_msg = "The provided public key is not a NIST EC curve public key."
+                log(ERROR, "%s", err_msg)
+                raise ValueError(err_msg)
+        except (ValueError, AttributeError) as err:
+            log(ERROR, "%s", err)
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_NOT_VALID)
+
+        # Init link state
+        state = self.linkstate_factory.state()
+        node_id = 0
+
+        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        try:
+            node_id = state.create_node(
+                owner_aid=flwr_aid,
+                public_key=request.public_key,
+                heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
+            )
+
+        except ValueError:
+            # Public key already in use
+            log(ERROR, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE)
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
+            )
+        log(INFO, "[ControlServicer.CreateNodeCli] Created node_id=%s", node_id)
+
+        return CreateNodeCliResponse(node_id=node_id)
 
     def DeleteNodeCli(
         self, request: DeleteNodeCliRequest, context: grpc.ServicerContext
     ) -> DeleteNodeCliResponse:
         """Remove a SuperNode."""
         log(INFO, "ControlServicer.RemoveNode")
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = shared_account_info.get().flwr_aid
+        _check_flwr_aid_exists(flwr_aid, context)
+        try:
+            state.delete_node(request.node_id)
+        except ValueError:
+            context.abort(grpc.StatusCode.NOT_FOUND, NODE_NOT_FOUND_MESSAGE)
+
         return DeleteNodeCliResponse()
 
     def ListNodesCli(
@@ -479,7 +530,7 @@ def _create_list_runs_response(
 
 def _check_flwr_aid_exists(
     flwr_aid: Optional[str], context: grpc.ServicerContext
-) -> None:
+) -> str:
     """Guard clause to check if `flwr_aid` exists."""
     if flwr_aid is None:
         context.abort(
@@ -487,6 +538,7 @@ def _check_flwr_aid_exists(
             "️⛔️ Failed to fetch the account information.",
         )
         raise RuntimeError  # This line is unreachable
+    return flwr_aid
 
 
 def _check_flwr_aid_in_run(

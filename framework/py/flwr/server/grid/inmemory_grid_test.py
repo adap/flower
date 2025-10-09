@@ -46,8 +46,11 @@ def push_messages(grid: InMemoryGrid, num_nodes: int) -> tuple[Iterable[str], in
     """Help push messages to state."""
     for _ in range(num_nodes):
         node_id = grid.state.create_node(
-            secrets.token_bytes(32), heartbeat_interval=HEARTBEAT_MAX_INTERVAL
+            "mock_owner",
+            secrets.token_bytes(32),
+            heartbeat_interval=0,  # This field has no effect
         )
+        grid.state.acknowledge_node_heartbeat(node_id, HEARTBEAT_MAX_INTERVAL)
     num_messages = 3
     msgs = [Message(RecordDict(), node_id, "query") for _ in range(num_messages)]
 

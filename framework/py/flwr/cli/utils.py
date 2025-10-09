@@ -32,6 +32,8 @@ from flwr.common.constant import (
     FLWR_DIR,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
+    PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
+    PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
     AuthnType,
@@ -293,7 +295,7 @@ def init_channel(
 
 
 @contextmanager
-def flwr_cli_grpc_exc_handler() -> Iterator[None]:
+def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-branches
     """Context manager to handle specific gRPC errors.
 
     It catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED,
@@ -366,6 +368,24 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:
                 typer.secho(
                     "❌ Run is not finished yet. Artifacts can only be pulled after "
                     "the run is finished. You can check the run status with `flwr ls`.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1) from None
+            if (
+                e.details() == PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
+            ):  # pylint: disable=E1101
+                typer.secho(
+                    "❌ The provided public key is already in use by another "
+                    "SuperNode.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1) from None
+            if e.details() == PUBLIC_KEY_NOT_VALID:  # pylint: disable=E1101
+                typer.secho(
+                    "❌ The provided public key is invalid. Please provide a valid "
+                    "NIST EC public key.",
                     fg=typer.colors.RED,
                     bold=True,
                 )
