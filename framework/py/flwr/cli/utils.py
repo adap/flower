@@ -32,6 +32,7 @@ from flwr.common.constant import (
     FLWR_DIR,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
+    NODE_NOT_FOUND_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
@@ -353,16 +354,21 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                 bold=True,
             )
             raise typer.Exit(code=1) from None
-        if (
-            e.code() == grpc.StatusCode.NOT_FOUND
-            and e.details() == RUN_ID_NOT_FOUND_MESSAGE  # pylint: disable=E1101
-        ):
-            typer.secho(
-                "❌ Run ID not found.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1) from None
+        if e.code() == grpc.StatusCode.NOT_FOUND:
+            if e.details() == RUN_ID_NOT_FOUND_MESSAGE:  # pylint: disable=E1101
+                typer.secho(
+                    "❌ Run ID not found.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1) from None
+            if e.details() == NODE_NOT_FOUND_MESSAGE:  # pylint: disable=E1101
+                typer.secho(
+                    "❌ Node ID not found for this account.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.FAILED_PRECONDITION:
             if e.details() == PULL_UNFINISHED_RUN_MESSAGE:  # pylint: disable=E1101
                 typer.secho(

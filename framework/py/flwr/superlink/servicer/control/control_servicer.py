@@ -441,9 +441,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
 
         flwr_aid = shared_account_info.get().flwr_aid
-        _check_flwr_aid_exists(flwr_aid, context)
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         try:
-            state.delete_node(request.node_id)
+            state.delete_node(owner_aid=flwr_aid, node_id=request.node_id)
         except ValueError:
             context.abort(grpc.StatusCode.NOT_FOUND, NODE_NOT_FOUND_MESSAGE)
 
