@@ -654,13 +654,13 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Note: we need to return the uint64 value of the node_id
         return uint64_node_id
 
-    def delete_node(self, node_id: int) -> None:
+    def delete_node(self, owner_aid: str, node_id: int) -> None:
         """Delete a node."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
-        query = "DELETE FROM node WHERE node_id = ?"
-        params = (sint64_node_id,)
+        query = "DELETE FROM node WHERE node_id = ? AND owner_aid = ?"
+        params = (sint64_node_id, owner_aid)
 
         if self.conn is None:
             raise AttributeError("LinkState is not initialized.")
@@ -669,7 +669,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             with self.conn:
                 rows = self.conn.execute(query, params)
                 if rows.rowcount < 1:
-                    raise ValueError(f"Node {node_id} not found")
+                    raise ValueError(
+                        f"Node ID {node_id} not found or unauthorized deletion attempt."
+                    )
         except KeyError as exc:
             log(ERROR, {"query": query, "data": params, "exception": exc})
 
