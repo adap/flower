@@ -47,7 +47,7 @@ from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
 
 from ..log import start_stream
-from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
+from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -178,7 +178,7 @@ def _run_with_control_api(
 ) -> None:
     channel = None
     try:
-        auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
+        auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
         channel = init_channel(app, federation_config, auth_plugin)
         stub = ControlStub(channel)
 

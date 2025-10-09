@@ -15,9 +15,10 @@
 """Validators."""
 
 
+import time
+
 from flwr.common import Message
 from flwr.common.constant import SUPERLINK_NODE_ID
-from flwr.common.date import now
 
 
 # pylint: disable-next=too-many-branches
@@ -43,7 +44,7 @@ def validate_message(message: Message, is_reply_message: bool) -> list[str]:
         validation_errors.append("`metadata.ttl` must be higher than zero")
 
     # Verify TTL and created_at time
-    current_time = now().timestamp()
+    current_time = time.time()
     if metadata.created_at + metadata.ttl <= current_time:
         validation_errors.append("Message TTL has expired")
 

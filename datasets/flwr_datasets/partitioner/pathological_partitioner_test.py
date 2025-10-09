@@ -118,7 +118,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
             if isinstance(dataset[partition_by][0], int)
             else [str(i) for i in range(10)]
         )
-        actual_classes: set[int] = set()
+        actual_classes = set()
         for pid in range(10):
             partition = partitioner.load_partition(pid)
             actual_classes.update(np.unique(partition["labels"]))

@@ -22,13 +22,9 @@ from .noop_auth_plugin import NoOpCliAuthPlugin
 from .oidc_cli_plugin import OidcCliPlugin
 
 
-def get_cli_plugin_class(authn_type: str) -> type[CliAuthPlugin]:
+def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
     """Return all CLI authentication plugins."""
-    if authn_type == AuthnType.NOOP:
-        return NoOpCliAuthPlugin
-    if authn_type == AuthnType.OIDC:
-        return OidcCliPlugin
-    raise ValueError(f"Unsupported authentication type: {authn_type}")
+    return {AuthnType.NOOP: NoOpCliAuthPlugin, AuthnType.OIDC: OidcCliPlugin}
 
 
 __all__ = [
@@ -36,5 +32,5 @@ __all__ = [
     "LoginError",
     "NoOpCliAuthPlugin",
     "OidcCliPlugin",
-    "get_cli_plugin_class",
+    "get_cli_auth_plugins",
 ]

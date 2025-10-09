@@ -21,6 +21,7 @@ import json
 import re
 import secrets
 import sqlite3
+import time
 from collections.abc import Sequence
 from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
@@ -71,16 +72,10 @@ from .utils import (
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
-    node_id                 INTEGER UNIQUE,
-    owner_aid               TEXT,
-    status                  TEXT,
-    created_at              TEXT,
-    last_activated_at       TEXT,
-    last_deactivated_at     TEXT,
-    deleted_at              TEXT,
-    online_until            REAL,
-    heartbeat_interval      REAL,
-    public_key              BLOB UNIQUE
+    node_id         INTEGER UNIQUE,
+    online_until    REAL,
+    heartbeat_interval   REAL,
+    public_key      BLOB
 );
 """
 
@@ -92,10 +87,6 @@ CREATE TABLE IF NOT EXISTS public_key(
 
 SQL_CREATE_INDEX_ONLINE_UNTIL = """
 CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
-"""
-
-SQL_CREATE_INDEX_OWNER_AID = """
-CREATE INDEX IF NOT EXISTS idx_node_owner_aid ON node(owner_aid);
 """
 
 SQL_CREATE_TABLE_RUN = """
@@ -232,7 +223,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_TABLE_TOKEN_STORE)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
-        cur.execute(SQL_CREATE_INDEX_OWNER_AID)
         res = cur.execute("SELECT name FROM sqlite_schema;")
         return res.fetchall()
 
@@ -461,7 +451,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         ret: dict[str, Message] = {}
 
         # Verify Message IDs
-        current = now().timestamp()
+        current = time.time()
         query = f"""
             SELECT *
             FROM message_ins
@@ -607,9 +597,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         return {row["message_id"] for row in rows}
 
-    def create_node(
-        self, owner_aid: str, public_key: bytes, heartbeat_interval: float
-    ) -> int:
+    def create_node(self, heartbeat_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random uint64 as node_id
         uint64_node_id = generate_rand_int_from_bytes(
@@ -619,48 +607,37 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Convert the uint64 value to sint64 for SQLite
         sint64_node_id = convert_uint64_to_sint64(uint64_node_id)
 
-        query = """
-            INSERT INTO node
-            (node_id, owner_aid, status, created_at, last_activated_at,
-            last_deactivated_at, deleted_at, online_until, heartbeat_interval,
-            public_key)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """
+        query = (
+            "INSERT INTO node "
+            "(node_id, online_until, heartbeat_interval, public_key) "
+            "VALUES (?, ?, ?, ?)"
+        )
 
-        # Mark the node online until now().timestamp() + heartbeat_interval
+        # Mark the node online util time.time() + heartbeat_interval
         try:
             self.query(
                 query,
                 (
-                    sint64_node_id,  # node_id
-                    owner_aid,  # owner_aid, unused for now
-                    "created",  # status, unused for now
-                    now().isoformat(),  # created_at, unused for now
-                    now().isoformat(),  # last_activated_at, unused for now
-                    "",  # last_deactivated_at, unused for now
-                    "",  # deleted_at, unused for now
-                    now().timestamp() + heartbeat_interval,  # online_until
-                    heartbeat_interval,  # heartbeat_interval
-                    public_key,  # public_key
+                    sint64_node_id,
+                    time.time() + heartbeat_interval,
+                    heartbeat_interval,
+                    b"",  # Initialize with an empty public key
                 ),
             )
-        except sqlite3.IntegrityError as e:
-            if "UNIQUE constraint failed: node.public_key" in str(e):
-                raise ValueError("Public key already in use.") from None
-            # Must be node ID conflict, almost impossible unless system is compromised
+        except sqlite3.IntegrityError:
             log(ERROR, "Unexpected node registration failure.")
             return 0
 
         # Note: we need to return the uint64 value of the node_id
         return uint64_node_id
 
-    def delete_node(self, owner_aid: str, node_id: int) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Delete a node."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
-        query = "DELETE FROM node WHERE node_id = ? AND owner_aid = ?"
-        params = (sint64_node_id, owner_aid)
+        query = "DELETE FROM node WHERE node_id = ?"
+        params = (sint64_node_id,)
 
         if self.conn is None:
             raise AttributeError("LinkState is not initialized.")
@@ -669,9 +646,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             with self.conn:
                 rows = self.conn.execute(query, params)
                 if rows.rowcount < 1:
-                    raise ValueError(
-                        f"Node ID {node_id} not found or unauthorized deletion attempt."
-                    )
+                    raise ValueError(f"Node {node_id} not found")
         except KeyError as exc:
             log(ERROR, {"query": query, "data": params, "exception": exc})
 
@@ -693,13 +668,32 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Get nodes
         query = "SELECT node_id FROM node WHERE online_until > ?;"
-        rows = self.query(query, (now().timestamp(),))
+        rows = self.query(query, (time.time(),))
 
         # Convert sint64 node_ids to uint64
         result: set[int] = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
         return result
 
-    def get_node_public_key(self, node_id: int) -> bytes:
+    def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Set `public_key` for the specified `node_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_node_id = convert_uint64_to_sint64(node_id)
+
+        # Check if the node exists in the `node` table
+        query = "SELECT 1 FROM node WHERE node_id = ?"
+        if not self.query(query, (sint64_node_id,)):
+            raise ValueError(f"Node {node_id} not found")
+
+        # Check if the public key is already in use in the `node` table
+        query = "SELECT 1 FROM node WHERE public_key = ?"
+        if self.query(query, (public_key,)):
+            raise ValueError("Public key already in use")
+
+        # Update the `node` table to set the public key for the given node ID
+        query = "UPDATE node SET public_key = ? WHERE node_id = ?"
+        self.query(query, (public_key, sint64_node_id))
+
+    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
         """Get `public_key` for the specified `node_id`."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_node_id = convert_uint64_to_sint64(node_id)
@@ -710,10 +704,23 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # If no result is found, return None
         if not rows:
-            raise ValueError(f"Node ID {node_id} not found")
+            raise ValueError(f"Node {node_id} not found")
 
-        # Return the public key
-        return cast(bytes, rows[0]["public_key"])
+        # Return the public key if it is not empty, otherwise return None
+        return rows[0]["public_key"] or None
+
+    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `node_public_keys`."""
+        query = "SELECT node_id FROM node WHERE public_key = :public_key;"
+        row = self.query(query, {"public_key": node_public_key})
+        if len(row) > 0:
+            node_id: int = row[0]["node_id"]
+
+            # Convert the sint64 value to uint64 after reading from SQLite
+            uint64_node_id = convert_sint64_to_uint64(node_id)
+
+            return uint64_node_id
+        return None
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(
@@ -1003,7 +1010,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         self.query(
             query,
             (
-                now().timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval,
+                time.time() + HEARTBEAT_PATIENCE * heartbeat_interval,
                 heartbeat_interval,
                 sint64_node_id,
             ),
@@ -1133,7 +1140,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         message_ins = rows[0]
         created_at = message_ins["created_at"]
         ttl = message_ins["ttl"]
-        current_time = now().timestamp()
+        current_time = time.time()
 
         # Check if Message is expired
         if ttl is not None and created_at + ttl <= current_time:

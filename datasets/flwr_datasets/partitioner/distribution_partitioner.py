@@ -97,10 +97,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to nodes.
     seed : int, default=42
-        Seed used for initializing the random number generator (RNG),
-        which affects dataset shuffling (if `shuffle` is True)
-        and random assignment of any unassigned samples that resulted from
-        rounding errors during label rescaling (if `rescale` is True).
+        Seed used for dataset shuffling. It has no effect if `shuffle` is False.
 
     Examples
     --------

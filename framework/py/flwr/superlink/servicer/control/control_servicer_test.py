@@ -16,7 +16,6 @@
 
 
 import hashlib
-import os
 import tempfile
 import unittest
 from datetime import datetime
@@ -28,17 +27,9 @@ import grpc
 from parameterized import parameterized
 
 from flwr.common import ConfigRecord, now
-from flwr.common.constant import (
-    NODE_NOT_FOUND_MESSAGE,
-    PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
-    PUBLIC_KEY_NOT_VALID,
-    Status,
-    SubStatus,
-)
+from flwr.common.constant import Status, SubStatus
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
-    CreateNodeCliRequest,
-    DeleteNodeCliRequest,
     ListRunsRequest,
     StartRunRequest,
     StopRunRequest,
@@ -47,11 +38,6 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
-from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
-from flwr.superlink.auth_plugin import NoOpControlAuthnPlugin
-from flwr.superlink.servicer.control.control_account_auth_interceptor import (
-    shared_account_info,
-)
 
 from .control_servicer import ControlServicer
 
@@ -81,12 +67,7 @@ class TestControlServicer(unittest.TestCase):
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(store=Mock(return_value=self.store)),
             is_simulation=False,
-            authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
         )
-        account_info = authn_plugin.validate_tokens_in_metadata([])[1]
-        assert account_info is not None
-        self.aid = account_info.flwr_aid
-        shared_account_info.set(account_info)
         self.state = self.servicer.linkstate_factory.state()
 
     def tearDown(self) -> None:
@@ -124,7 +105,7 @@ class TestControlServicer(unittest.TestCase):
         run_ids = set()
         for _ in range(3):
             run_id = self.state.create_run(
-                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord(), self.aid
+                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord(), "user123"
             )
             run_ids.add(run_id)
 
@@ -141,7 +122,7 @@ class TestControlServicer(unittest.TestCase):
         # Prepare
         for _ in range(3):
             run_id = self.state.create_run(
-                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord(), self.aid
+                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord(), "user123"
             )
 
         # Execute
@@ -156,7 +137,7 @@ class TestControlServicer(unittest.TestCase):
         """Test StopRun method of ControlServicer."""
         # Prepare
         run_id = self.state.create_run(
-            "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigRecord(), self.aid
+            "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigRecord(), "user123"
         )
         expected_run_status = RunStatus(Status.FINISHED, SubStatus.STOPPED, "")
 
@@ -170,84 +151,6 @@ class TestControlServicer(unittest.TestCase):
         if run_state is not None:
             self.assertEqual(run_state.status, expected_run_status)
         self.store.delete_objects_in_run.assert_called_once_with(run_id)
-
-    @parameterized.expand(
-        [
-            (
-                "",
-                False,
-                public_key_to_bytes(generate_key_pairs()[1]),
-            ),  # PASSES, true EC keys used once
-            (
-                PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
-                True,
-                public_key_to_bytes(generate_key_pairs()[1]),
-            ),  # FAILS, true EC keys but already in use
-            (
-                PUBLIC_KEY_NOT_VALID,
-                False,
-                os.urandom(32),
-            ),  # FAILS, fake EC keys
-        ]
-    )  # type: ignore
-    def test_create_node_cli(
-        self, error_msg: str, pre_register_key: bool, pub_key: bytes
-    ) -> None:
-        """Test CreateNodeCli method of ControlServicer."""
-        # Prepare
-        if pre_register_key:
-            self.state.create_node(
-                owner_aid="fake_aid", public_key=pub_key, heartbeat_interval=10
-            )
-
-        # Execute
-        req = CreateNodeCliRequest(public_key=pub_key)
-        ctx = Mock()
-        node_id = self.servicer.CreateNodeCli(req, ctx)
-        if error_msg:
-            ctx.abort.assert_called_once_with(
-                grpc.StatusCode.FAILED_PRECONDITION, error_msg
-            )
-        else:
-            assert node_id
-
-    @parameterized.expand(
-        [
-            (True,),  # PASSES, uses registered node ID
-            (False),  # FAILS, uses unregistered node ID
-        ]
-    )  # type: ignore
-    def test_delete_node_cli(self, real_node_id: bool) -> None:
-        """Test DeleteNodeCli method of ControlServicer."""
-        # Prepare
-        pub_key = public_key_to_bytes(generate_key_pairs()[1])
-        node_id = self.state.create_node(
-            owner_aid="fake_aid", public_key=pub_key, heartbeat_interval=10
-        )
-
-        # Execute
-        req = DeleteNodeCliRequest(node_id=node_id if real_node_id else node_id + 1)
-        ctx = Mock()
-        self.servicer.DeleteNodeCli(req, ctx)
-        if not real_node_id:
-            ctx.abort.assert_called_once_with(
-                grpc.StatusCode.NOT_FOUND, NODE_NOT_FOUND_MESSAGE
-            )
-
-    def test_create_delete_create_node_cli(self) -> None:
-        """Test CreateNodeCli and DeleteNodeCli method of ControlServicer."""
-        # Prepare
-        pub_key = public_key_to_bytes(generate_key_pairs()[1])
-        node_id = self.state.create_node(
-            owner_aid="fake_aid", public_key=pub_key, heartbeat_interval=10
-        )
-
-        # Execute
-        # Delete node
-        self.servicer.DeleteNodeCli(DeleteNodeCliRequest(node_id=node_id), Mock())
-
-        # Try to add node with same public key again
-        self.servicer.CreateNodeCli(CreateNodeCliRequest(public_key=pub_key), Mock())
 
 
 class TestControlServicerAuth(unittest.TestCase):

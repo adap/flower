@@ -26,7 +26,7 @@ from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Callable, Optional, TypeVar, cast
+from typing import Any, Callable, Optional, TypeVar
 
 import grpc
 import yaml
@@ -52,8 +52,6 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
-    AuthnType,
-    AuthzType,
     EventLogWriterType,
     ExecPluginType,
 )
@@ -71,19 +69,12 @@ from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_n
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import public_key_to_bytes
 from flwr.superlink.artifact_provider import ArtifactProvider
-from flwr.superlink.auth_plugin import (
-    ControlAuthnPlugin,
-    ControlAuthzPlugin,
-    get_control_authn_plugins,
-    get_control_authz_plugins,
-)
+from flwr.superlink.auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
-from .superlink.fleet.grpc_rere.node_auth_server_interceptor import (
-    NodeAuthServerInterceptor,
-)
+from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.linkstate import LinkStateFactory
 from .superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
@@ -96,6 +87,8 @@ P = TypeVar("P", ControlAuthnPlugin, ControlAuthzPlugin)
 try:
     from flwr.ee import (
         add_ee_args_superlink,
+        get_control_authn_plugins,
+        get_control_authz_plugins,
         get_control_event_log_writer_plugins,
         get_ee_artifact_provider,
         get_fleet_event_log_writer_plugins,
@@ -105,6 +98,14 @@ except ImportError:
     # pylint: disable-next=unused-argument
     def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
         """Add EE-specific arguments to the parser."""
+
+    def get_control_authn_plugins() -> dict[str, type[ControlAuthnPlugin]]:
+        """Return all Control API authentication plugins."""
+        raise NotImplementedError("No authentication plugins are currently supported.")
+
+    def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
+        """Return all Control API authorization plugins."""
+        raise NotImplementedError("No authorization plugins are currently supported.")
 
     def get_control_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
         """Return all Control API event log writer plugins."""
@@ -201,9 +202,10 @@ def run_superlink() -> None:
             "future release. Please use `--account-auth-config` instead.",
         )
         args.account_auth_config = cfg_path
-    cfg_path = getattr(args, "account_auth_config", None)
-    authn_plugin, authz_plugin = _load_control_auth_plugins(cfg_path, verify_tls_cert)
-    if cfg_path is not None:
+    if cfg_path := getattr(args, "account_auth_config", None):
+        authn_plugin, authz_plugin = _try_obtain_control_auth_plugins(
+            Path(cfg_path), verify_tls_cert
+        )
         # Enable event logging if the args.enable_event_log is True
         if args.enable_event_log:
             event_log_plugin = _try_obtain_control_event_log_writer_plugin()
@@ -324,7 +326,7 @@ def run_superlink() -> None:
             else:
                 log(DEBUG, "Automatic node authentication enabled")
 
-            interceptors = [NodeAuthServerInterceptor(state_factory, auto_auth)]
+            interceptors = [AuthenticateServerInterceptor(state_factory, auto_auth)]
             if getattr(args, "enable_event_log", None):
                 fleet_log_plugin = _try_obtain_fleet_event_log_writer_plugin()
                 if fleet_log_plugin is not None:
@@ -445,21 +447,13 @@ def _try_load_public_keys_node_authentication(
     return node_public_keys
 
 
-def _load_control_auth_plugins(
-    config_path: Optional[str], verify_tls_cert: bool
+def _try_obtain_control_auth_plugins(
+    config_path: Path, verify_tls_cert: bool
 ) -> tuple[ControlAuthnPlugin, ControlAuthzPlugin]:
     """Obtain Control API authentication and authorization plugins."""
-    # Load NoOp plugins if no config path is provided
-    if config_path is None:
-        config_path = ""
-        config = {
-            "authentication": {AUTHN_TYPE_YAML_KEY: AuthnType.NOOP},
-            "authorization": {AUTHZ_TYPE_YAML_KEY: AuthzType.NOOP},
-        }
     # Load YAML file
-    else:
-        with Path(config_path).open("r", encoding="utf-8") as file:
-            config = yaml.safe_load(file)
+    with config_path.open("r", encoding="utf-8") as file:
+        config: dict[str, Any] = yaml.safe_load(file)
 
     def _load_plugin(
         section: str, yaml_key: str, loader: Callable[[], dict[str, type[P]]]
@@ -469,7 +463,9 @@ def _load_control_auth_plugins(
         try:
             plugins: dict[str, type[P]] = loader()
             plugin_cls: type[P] = plugins[auth_plugin_name]
-            return plugin_cls(Path(cast(str, config_path)), verify_tls_cert)
+            return plugin_cls(
+                account_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
+            )
         except KeyError:
             if auth_plugin_name:
                 sys.exit(
@@ -477,15 +473,18 @@ def _load_control_auth_plugins(
                     f"Please provide a valid {section} type in the configuration."
                 )
             sys.exit(f"No {section} type is provided in the configuration.")
+        except NotImplementedError:
+            sys.exit(f"No {section} plugins are currently supported.")
 
-    # Warn deprecated auth_type key
-    if authn_type := config["authentication"].pop("auth_type", None):
+    # Warn deprecated authn_type key
+    if "authn_type" in config["authentication"]:
         log(
             WARN,
-            "The `auth_type` key in the authentication configuration is deprecated. "
+            "The `authn_type` key in the authentication configuration is deprecated. "
             "Use `%s` instead.",
             AUTHN_TYPE_YAML_KEY,
         )
+        authn_type = config["authentication"].pop("authn_type")
         config["authentication"][AUTHN_TYPE_YAML_KEY] = authn_type
 
     # Load authentication plugin

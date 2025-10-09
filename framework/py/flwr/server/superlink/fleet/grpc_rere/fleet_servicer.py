@@ -78,14 +78,10 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             request.heartbeat_interval,
         )
         log(DEBUG, "[Fleet.CreateNode] Request: %s", MessageToDict(request))
-        try:
-            response = message_handler.create_node(
-                request=request,
-                state=self.state_factory.state(),
-            )
-        except ValueError as e:
-            # Public key already in use
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+        response = message_handler.create_node(
+            request=request,
+            state=self.state_factory.state(),
+        )
         log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)
         log(DEBUG, "[Fleet.CreateNode] Response: %s", MessageToDict(response))
         return response

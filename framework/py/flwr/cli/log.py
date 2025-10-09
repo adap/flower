@@ -35,7 +35,7 @@ from flwr.common.logger import log as logger
 from flwr.proto.control_pb2 import StreamLogsRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
 
-from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
+from .utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
 
 
 class AllLogsRetrieved(BaseException):
@@ -186,7 +186,7 @@ def _log_with_control_api(
     run_id: int,
     stream: bool,
 ) -> None:
-    auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
+    auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
     channel = init_channel(app, federation_config, auth_plugin)
 
     if stream:

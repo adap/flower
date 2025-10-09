@@ -27,7 +27,6 @@ message NodeInfo {
   string last_activated_at = 5;
   string last_deactivated_at = 6;
   string deleted_at = 7;
-  double online_until = 8;
-  double heartbeat_interval = 9;
-  bytes public_key = 10;
+  float online_until = 8;
+  float heartbeat_interval = 9;
 }
