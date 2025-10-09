@@ -16,6 +16,7 @@
 
 
 import json
+import secrets
 import threading
 import time
 import traceback
@@ -27,9 +28,9 @@ from typing import Callable, Optional
 from uuid import uuid4
 
 from flwr.app.error import Error
-from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
-from flwr.client.clientapp.utils import get_load_client_app_fn
 from flwr.client.run_info_store import DeprecatedRunInfoStore
+from flwr.clientapp.client_app import ClientApp, ClientAppException, LoadClientAppError
+from flwr.clientapp.utils import get_load_client_app_fn
 from flwr.common import Message
 from flwr.common.constant import (
     HEARTBEAT_MAX_INTERVAL,
@@ -53,7 +54,12 @@ def _register_nodes(
     nodes_mapping: NodeToPartitionMapping = {}
     state = state_factory.state()
     for i in range(num_nodes):
-        node_id = state.create_node(heartbeat_interval=HEARTBEAT_MAX_INTERVAL)
+        node_id = state.create_node(
+            # No node authentication in simulation;
+            # use random bytes instead
+            secrets.token_bytes(32),
+            heartbeat_interval=HEARTBEAT_MAX_INTERVAL,
+        )
         nodes_mapping[node_id] = i
     log(DEBUG, "Registered %i nodes", len(nodes_mapping))
     return nodes_mapping

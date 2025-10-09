@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-22 00:08+0000\n"
+"POT-Creation-Date: 2025-10-07 00:08+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -2281,7 +2281,7 @@ msgstr "기여자로 시작하기"
 #: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:22
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:17
 #: ../../source/docker/tutorial-quickstart-docker.rst:15
-#: ../../source/how-to-authenticate-users.rst:26
+#: ../../source/how-to-authenticate-accounts.rst:26
 #: ../../source/how-to-configure-audit-logging.rst:78
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:22
 msgid "Prerequisites"
@@ -5170,18 +5170,23 @@ msgstr ""
 msgid "This is sometimes called a hub-and-spoke topology:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:25
+#: ../../source/explanation-flower-architecture.rst:-1
 #, fuzzy
 msgid "Hub-and-spoke topology in federated learning"
 msgstr "연합 학습이란 무엇입니까?"
 
-#: ../../source/explanation-flower-architecture.rst:25
+#: ../../source/explanation-flower-architecture.rst:29
+#, fuzzy
+msgid "Hub-and-spoke topology in federated learning (dark theme)"
+msgstr "연합 학습이란 무엇입니까?"
+
+#: ../../source/explanation-flower-architecture.rst:29
 msgid ""
 "Hub-and-spoke topology in federated learning (one server, multiple "
 "clients)."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:27
+#: ../../source/explanation-flower-architecture.rst:31
 msgid ""
 "In a real-world deployment, we typically want to run different projects "
 "on such a federation. Each project could use different hyperparameters, "
@@ -5189,7 +5194,7 @@ msgid ""
 "different machine learning frameworks like PyTorch and TensorFlow."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:32
+#: ../../source/explanation-flower-architecture.rst:36
 msgid ""
 "This is why, in Flower, both the server side and the client side are "
 "split into two parts. One part is long-lived and responsible for "
@@ -5197,19 +5202,19 @@ msgid ""
 "executes task-specific code."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:36
+#: ../../source/explanation-flower-architecture.rst:40
 msgid ""
 "A Flower *server* is composed of **SuperLink**, **SuperExec**, and "
 "``ServerApp``:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:38
+#: ../../source/explanation-flower-architecture.rst:42
 msgid ""
 "**SuperLink**: A long-running process that forwards task instructions to "
 "clients (SuperNodes) and receives task results back."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:40
+#: ../../source/explanation-flower-architecture.rst:44
 msgid ""
 "**SuperExec**: A long-running process that schedules, launches, and "
 "manages multiple app processes (e.g., ``ServerApp``) on demand by "
@@ -5217,7 +5222,7 @@ msgid ""
 " by the SuperLink."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:43
+#: ../../source/explanation-flower-architecture.rst:47
 msgid ""
 "``ServerApp``: A short-lived app process containing project-specific code"
 " that customizes all server-side aspects of federated learning systems "
@@ -5226,20 +5231,20 @@ msgid ""
 "apps."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:48
+#: ../../source/explanation-flower-architecture.rst:52
 msgid ""
 "A Flower *client* is composed of **SuperNode**, **SuperExec**, and "
 "``ClientApp``:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:50
+#: ../../source/explanation-flower-architecture.rst:54
 msgid ""
 "**SuperNode**: A long-running process that connects to the SuperLink, "
 "requests tasks, executes them (for example, \"train this model on your "
 "local data\"), and returns the results to the SuperLink."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:53
+#: ../../source/explanation-flower-architecture.rst:57
 msgid ""
 "**SuperExec**: A long-running process that schedules, launches, and "
 "manages multiple application processes (e.g., ``ClientApp``) on demand by"
@@ -5247,7 +5252,7 @@ msgid ""
 "automatically by the SuperNode."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:56
+#: ../../source/explanation-flower-architecture.rst:60
 msgid ""
 "``ClientApp``: A short-lived app process containing project-specific code"
 " that customizes all client-side aspects of federated learning systems "
@@ -5256,7 +5261,7 @@ msgid ""
 "apps."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:61
+#: ../../source/explanation-flower-architecture.rst:65
 msgid ""
 "Why SuperNode and SuperLink? Well, in federated learning, the clients are"
 " the actual stars of the show. They hold the training data and they run "
@@ -5265,29 +5270,34 @@ msgid ""
 "*missing link* among all those SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:72
+#: ../../source/explanation-flower-architecture.rst:-1
 #, fuzzy
 msgid "Basic Flower architecture"
 msgstr "Flower 아키텍처"
 
-#: ../../source/explanation-flower-architecture.rst:72
+#: ../../source/explanation-flower-architecture.rst:80
+#, fuzzy
+msgid "Basic Flower architecture (dark theme)"
+msgstr "Flower 아키텍처"
+
+#: ../../source/explanation-flower-architecture.rst:80
 msgid "The basic Flower architecture for federated learning."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:74
+#: ../../source/explanation-flower-architecture.rst:82
 msgid ""
 "In a Flower app project, users will typically develop the ``ServerApp`` "
 "and the ``ClientApp``. All the network communication between *server* and"
 " *clients* is taken care of by the SuperLink and SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:80
+#: ../../source/explanation-flower-architecture.rst:88
 msgid ""
 "For more details, please refer to the |serverapp_link|_ and "
 "|clientapp_link|_ documentation."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:83
+#: ../../source/explanation-flower-architecture.rst:91
 msgid ""
 "With *multi-run*, multiple ``ServerApp``\\s and ``ClientApp``\\s can run "
 "within the same federation, which consists of a single long-running "
@@ -5295,24 +5305,29 @@ msgid ""
 "sometimes referred to as *multi-tenancy* or *multi-job*."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:87
+#: ../../source/explanation-flower-architecture.rst:95
 msgid ""
 "As shown in the figure below, two Flower App projects, each consisting of"
 " a ``ServerApp`` and a ``ClientApp``, could share the same SuperLink and "
 "SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:96
+#: ../../source/explanation-flower-architecture.rst:-1
 #, fuzzy
 msgid "Multi-run federated learning architecture"
 msgstr "연합 학습"
 
-#: ../../source/explanation-flower-architecture.rst:96
+#: ../../source/explanation-flower-architecture.rst:108
+#, fuzzy
+msgid "Multi-run federated learning architecture (dark theme)"
+msgstr "연합 학습"
+
+#: ../../source/explanation-flower-architecture.rst:108
 #, fuzzy
 msgid "Multi-run federated learning architecture with Flower"
 msgstr "연합 학습"
 
-#: ../../source/explanation-flower-architecture.rst:98
+#: ../../source/explanation-flower-architecture.rst:110
 msgid ""
 "To illustrate how multi-run works, consider one federated learning "
 "training run where a ``ServerApp`` and a ``ClientApp`` are participating "
@@ -5320,52 +5335,62 @@ msgid ""
 " is selected to participate in the training run."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:103
+#: ../../source/explanation-flower-architecture.rst:115
 msgid ""
 "In ``[run 1]`` below, all the SuperNodes are selected and therefore run "
 "their corresponding ``ClientApp``\\s:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:112
+#: ../../source/explanation-flower-architecture.rst:-1
 msgid "Multi-tenancy federated learning architecture - Run 1"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:112
+#: ../../source/explanation-flower-architecture.rst:128
+#, fuzzy
+msgid "Multi-tenancy federated learning architecture - Run 1 (dark theme)"
+msgstr "연합 학습"
+
+#: ../../source/explanation-flower-architecture.rst:128
 msgid ""
 "Run 1 in a multi-run federated learning architecture with Flower. All "
 "SuperNodes participate in the training round."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:115
+#: ../../source/explanation-flower-architecture.rst:131
 msgid ""
 "However, in ``[run 2]``, only the first and second SuperNodes are "
 "selected to participate in the training:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:124
+#: ../../source/explanation-flower-architecture.rst:-1
 msgid "Multi-tenancy federated learning architecture - Run 2"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:124
+#: ../../source/explanation-flower-architecture.rst:144
+#, fuzzy
+msgid "Multi-tenancy federated learning architecture - Run 2 (dark theme)"
+msgstr "연합 학습"
+
+#: ../../source/explanation-flower-architecture.rst:144
 msgid ""
 "Run 2 in a multi-run federated learning architecture with Flower. Only "
 "the first and second SuperNodes are selected to participate in the "
 "training round."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:127
+#: ../../source/explanation-flower-architecture.rst:147
 msgid ""
 "Therefore, with Flower multi-run, different Flower App projects can run "
 "on different sets of clients."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:132
+#: ../../source/explanation-flower-architecture.rst:152
 msgid ""
 "This explanation covers the Flower Deployment Runtime. An explanation "
 "covering the Flower Simulation Runtime will follow."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:137
+#: ../../source/explanation-flower-architecture.rst:157
 #, fuzzy
 msgid ""
 "As we continue to enhance Flower at a rapid pace, we'll periodically "
@@ -5987,14 +6012,14 @@ msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:175
 #, fuzzy
-msgid "Enable User Authentication"
+msgid "Enable Account Authentication"
 msgstr "설치 확인"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:177
 msgid ""
-"User authentication can be enabled if you're using the Flower Enterprise "
-"Edition (EE) Docker images. This is configured in the `global.userAuth` "
-"section of your `values.yml` file."
+"Account authentication can be enabled if you're using the Flower "
+"Enterprise Edition (EE) Docker images. This is configured in the "
+"`global.userAuth` section of your `values.yml` file."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:180
@@ -6008,7 +6033,7 @@ msgid "Explanation of Parameters:"
 msgstr "모델 매개변수."
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:198
-msgid "`auth_type`: The authentication mechanism being used (e.g., oidc)."
+msgid "`authn_type`: The authentication mechanism being used (e.g., oidc)."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:199
@@ -6022,7 +6047,7 @@ msgid "`token_url`: The URL for retrieving access tokens."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:201
-msgid "`validate_url`: The endpoint for validating user authentication."
+msgid "`validate_url`: The endpoint for validating account authentication."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:202
@@ -6040,12 +6065,14 @@ msgstr "기존 전략 사용"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:207
 msgid ""
-"To use an existing secret that contains the user authentication "
+"To use an existing secret that contains the account authentication "
 "configuration, set `existingSecret` to the name of the existing secret:"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:218
-msgid "Note that the existing secret must contain the key `user-auth-config.yml`:"
+msgid ""
+"Note that the existing secret must contain the key `account-auth-"
+"config.yml`:"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:233
@@ -6462,14 +6489,14 @@ msgstr ""
 #: flwr.app.metadata.Metadata flwr.client.client.Client.evaluate
 #: flwr.client.client.Client.fit flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
 #: flwr.client.mod.localdp_mod.LocalDpMod
 #: flwr.client.numpy_client.NumPyClient.evaluate
 #: flwr.client.numpy_client.NumPyClient.fit
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
 #: flwr.clientapp.mod.localdp_mod.LocalDpMod flwr.common.context.Context
 #: flwr.common.message.Message flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
@@ -9410,6 +9437,151 @@ msgid ""
 "|message_link|_:"
 msgstr ""
 
+#: ../../source/how-to-authenticate-accounts.rst:-1
+msgid ""
+"Configure SuperLink for account authentication and authorization. "
+"Private-by-default runs securely with OpenID Connect and OpenFGA."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:6
+#, fuzzy
+msgid "Authenticate Accounts via OpenID Connect"
+msgstr "SuperNodes 인증하기"
+
+#: ../../source/how-to-authenticate-accounts.rst:10
+msgid ""
+"OpenID Connect Authentication is a Flower Enterprise feature. See `Flower"
+" Enterprise <https://flower.ai/enterprise>`_ for details."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:13
+msgid ""
+"In this guide, you'll learn how to configure SuperLink with account-level"
+" authentication and authorization, and how to log in using the ``flwr`` "
+"CLI. Once logged in, any Flower accounts that are authorized on the "
+"SuperLink can run Flower CLI commands that interact with the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:20
+msgid ""
+"With account authentication and authorization enabled, only accounts that"
+" have submitted the ``flwr run`` command can view and interact with their"
+" runs. This means that your runs are **private by default**, ensuring "
+"that only authorized accounts can access them."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:28
+msgid ""
+"To enable account authentication and authorization, the SuperLink must be"
+" deployed with an `OpenID Connect (OIDC) <https://openid.net/developers"
+"/how-connect-works/>`_ provider and an `OpenFGA <https://openfga.dev/>`_ "
+"server. The OIDC provider is used for account authentication, while "
+"OpenFGA is used for fine-grained access control. This means an "
+"authenticated account can only run ``flwr`` CLI commands on the SuperLink"
+" if they have been granted the necessary permissions by the SuperLink "
+"administrator. When enabled, both account authentication and "
+"authorization must be configured on the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:37
+#, fuzzy
+msgid "Enable Account Authentication and Authorization on the SuperLink"
+msgstr ":code:`SuperLink`에서 노드 인증 활성화"
+
+#: ../../source/how-to-authenticate-accounts.rst:39
+#, fuzzy
+msgid "Create a YAML configuration file with the following content:"
+msgstr "다음 변경 사항이 포함된 pull request를 만듭니다:"
+
+#: ../../source/how-to-authenticate-accounts.rst:63
+msgid ""
+"Save this file as ``account-auth-config.yaml``. Then pass it to the "
+"SuperLink via the ``--account-auth-config`` flag when deploying the "
+"SuperLink:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:74
+msgid ""
+"To authorize an account, the SuperLink administrator must add the "
+"account's OIDC ``sub`` claim to the OpenFGA store with the appropriate "
+"relation."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:79
+msgid ""
+"Starting with Flower ``v1.23.0``, the following options/keys have been "
+"renamed:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:81
+msgid "``auth_type`` → ``authn_type`` (in YAML configuration)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:82
+msgid "``auth_url`` → ``authn_url`` (in YAML configuration)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:83
+msgid "``--user-auth-config`` → ``--account-auth-config`` (in SuperLink CLI)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:86
+#, fuzzy
+msgid "Login to the SuperLink"
+msgstr "flower 초연결"
+
+#: ../../source/how-to-authenticate-accounts.rst:88
+msgid ""
+"Once a SuperLink with account authentication and authorization is up and "
+"running, an account can interface with it after installing the ``flwr`` "
+"PyPI package via the Flower CLI. Then, ensure that the ``enable-account-"
+"auth`` field is set to ``true`` in the federation section in the "
+"``pyproject.toml`` of the Flower app you want to run:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:105
+#, fuzzy
+msgid ""
+"Account authentication and authorization is only supported with TLS "
+"connections."
+msgstr ":code:`SuperLink`에서 노드 인증 활성화"
+
+#: ../../source/how-to-authenticate-accounts.rst:107
+msgid ""
+"Now, you need to login first before other CLI commands can be executed. "
+"Upon executing ``flwr login``, a URL will be returned by the "
+"authentication plugin in the SuperLink. Click on it and authenticate "
+"directly against the OIDC provider."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:121
+msgid ""
+"Once the login is successful, the credentials returned by the OIDC "
+"provider via the SuperLink will be saved to the app's directory under "
+"``.flwr/.credentials/<federation-name>.json``. The tokens stored in this "
+"file will be sent transparently with each subsequent ``flwr`` CLI request"
+" to the SuperLink, and it will relay them to OIDC provider to perform the"
+" authentication checks."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:128
+msgid "Run authorized ``flwr`` CLI commands"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:130
+msgid ""
+"With the above steps completed, you can now run ``flwr`` CLI commands "
+"against a SuperLink setup with account authentication and authorization. "
+"For example, as an authorized account, you can run the ``flwr run`` "
+"command to start a Flower app:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:142
+msgid ""
+"If the account does not have the necessary permissions to run the "
+"command, an error will be returned:"
+msgstr ""
+
 #: ../../source/how-to-authenticate-supernodes.rst:-1
 msgid ""
 "Enable authentication for SuperNodes and SuperLink in Flower with public "
@@ -9628,131 +9800,6 @@ msgid ""
 "federation where each component runs in its own Docker container. You can"
 " make use of TLS and other security features in Flower such as implement "
 "a SuperNode authentication mechanism."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:-1
-msgid ""
-"Configure SuperLink for user authentication and authorization. Private-"
-"by-default runs securely with OpenID Connect and OpenFGA."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:6
-#, fuzzy
-msgid "Authenticate Users via OpenID Connect"
-msgstr "SuperNodes 인증하기"
-
-#: ../../source/how-to-authenticate-users.rst:10
-msgid ""
-"OpenID Connect Authentication is a Flower Enterprise feature. See `Flower"
-" Enterprise <https://flower.ai/enterprise>`_ for details."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:13
-msgid ""
-"In this guide, you'll learn how to configure SuperLink with user-level "
-"authentication and authorization, and how to log in using the ``flwr`` "
-"CLI. Once logged in, any users that are authorized on the SuperLink can "
-"run Flower CLI commands that interact with the SuperLink."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:20
-msgid ""
-"With user authentication and authorization enabled, only users that have "
-"submitted the ``flwr run`` command can view and interact with their runs."
-" This means that your runs are **private by default**, ensuring that only"
-" authorized users can access them."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:28
-msgid ""
-"To enable user authentication and authorization, the SuperLink must be "
-"deployed with an `OpenID Connect (OIDC) <https://openid.net/developers"
-"/how-connect-works/>`_ provider and an `OpenFGA <https://openfga.dev/>`_ "
-"server. The OIDC provider is used for user authentication, while OpenFGA "
-"is used for fine-grained access control. This means an authenticated user"
-" can only run ``flwr`` CLI commands on the SuperLink if they have been "
-"granted the necessary permissions by the SuperLink administrator. When "
-"enabled, both user authentication and authorization must be configured on"
-" the SuperLink."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:37
-#, fuzzy
-msgid "Enable User Authentication and Authorization on the SuperLink"
-msgstr ":code:`SuperLink`에서 노드 인증 활성화"
-
-#: ../../source/how-to-authenticate-users.rst:39
-#, fuzzy
-msgid "Create a YAML configuration file with the following content:"
-msgstr "다음 변경 사항이 포함된 pull request를 만듭니다:"
-
-#: ../../source/how-to-authenticate-users.rst:63
-msgid ""
-"Save this file as ``user-auth-config.yaml``. Then pass it to the "
-"SuperLink via the ``--user-auth-config`` flag when deploying the "
-"SuperLink:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:74
-msgid ""
-"To authorize a user, the SuperLink administrator must add the user's OIDC"
-" ``sub`` claim to the OpenFGA store with the appropriate relation."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:78
-#, fuzzy
-msgid "Login to the SuperLink"
-msgstr "flower 초연결"
-
-#: ../../source/how-to-authenticate-users.rst:80
-msgid ""
-"Once a SuperLink with user authentication and authorization is up and "
-"running, a user can interface with it after installing the ``flwr`` PyPI "
-"package via the Flower CLI. Then, ensure that the ``enable-user-auth`` "
-"field is set to ``true`` in the federation section in the "
-"``pyproject.toml`` of the Flower app you want to run:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:97
-msgid ""
-"User authentication and authorization is only supported with TLS "
-"connections."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:99
-msgid ""
-"Now, you need to login first before other CLI commands can be executed. "
-"Upon executing ``flwr login``, a URL will be returned by the "
-"authentication plugin in the SuperLink. Click on it and authenticate "
-"directly against the OIDC provider."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:113
-msgid ""
-"Once the login is successful, the credentials returned by the OIDC "
-"provider via the SuperLink will be saved to the app's directory under "
-"``.flwr/.credentials/<federation-name>.json``. The tokens stored in this "
-"file will be sent transparently with each subsequent ``flwr`` CLI request"
-" to the SuperLink, and it will relay them to OIDC provider to perform the"
-" authentication checks."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:120
-msgid "Run authorized ``flwr`` CLI commands"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:122
-msgid ""
-"With the above steps completed, you can now run ``flwr`` CLI commands "
-"against a SuperLink setup with user authentication and authorization. For"
-" example, as an authorized user, you can run the ``flwr run`` command to "
-"start a Flower app:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:134
-msgid ""
-"If the user does not have the necessary permissions to run the command, "
-"an error will be returned:"
 msgstr ""
 
 #: ../../source/how-to-configure-audit-logging.rst:-1
@@ -15493,7 +15540,8 @@ msgstr ""
 msgid "Arguments"
 msgstr "빌드 전달인자"
 
-#: ../../flwr install:1 log:1 login:1 ls:1 new:1 pull:1 run:1 stop:1
+#: ../../flwr create:1 delete:1 install:1 list:1 log:1 login:1 new:1 pull:1
+#: run:1 stop:1 supernode
 #, fuzzy
 msgid "Optional argument"
 msgstr "선택적 개선 사항"
@@ -15502,24 +15550,72 @@ msgstr "선택적 개선 사항"
 msgid "The source FAB file to install."
 msgstr ""
 
-#: ../../flwr log:1
-msgid "Get logs from a Flower project run."
+#: ../../flwr list:1
+msgid ""
+"List the details of one provided run ID or all runs in a Flower "
+"federation."
 msgstr ""
 
-#: ../../flwr log:1 login:1 ls:1 pull:1 run:1 stop:1
+#: ../../flwr list:1
+msgid "The following details are displayed:"
+msgstr ""
+
+#: ../../flwr list:1
+#, fuzzy
+msgid "**Run ID:** Unique identifier for the run."
+msgstr "현재 실행에 대한 식별자입니다."
+
+#: ../../flwr list:1
+#, python-brace-format
+msgid ""
+"**FAB:** Name of the FAB associated with the run (``{FAB_ID} "
+"(v{FAB_VERSION})``)."
+msgstr ""
+
+#: ../../flwr list:1
+msgid ""
+"**Status:** Current status of the run (pending, starting, running, "
+"finished)."
+msgstr ""
+
+#: ../../flwr list:1
+msgid "**Elapsed:** Time elapsed since the run started (``HH:MM:SS``)."
+msgstr ""
+
+#: ../../flwr list:1
+#, fuzzy
+msgid "**Created At:** Timestamp when the run was created."
+msgstr "메시지가 생성된 때의 Unix timestamp입니다."
+
+#: ../../flwr list:1
+#, fuzzy
+msgid "**Running At:** Timestamp when the run started running."
+msgstr "메시지가 생성된 때의 Unix timestamp입니다."
+
+#: ../../flwr list:1
+msgid "**Finished At:** Timestamp when the run finished."
+msgstr ""
+
+#: ../../flwr list:1
+msgid ""
+"All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD "
+"HH:MM:SSZ``."
+msgstr ""
+
+#: ../../flwr list:1 log:1 login:1 pull:1 run:1 stop:1
 #, fuzzy
 msgid ""
 "Override federation configuration values using one of the following "
 "formats:"
 msgstr "다음 명령을 실행하여 가상 환경을 활성화합니다:"
 
-#: ../../flwr log:1 login:1 ls:1 pull:1 run:1 stop:1
+#: ../../flwr list:1 log:1 login:1 pull:1 run:1 stop:1
 msgid ""
 "--federation-config '<k1>=<v1> <k2>=<v2>' | --federation-config "
 "'<k1>=<v1>' --federation-config '<k2>=<v2>'"
 msgstr ""
 
-#: ../../flwr log:1 login:1 ls:1 pull:1 run:1 stop:1
+#: ../../flwr list:1 log:1 login:1 pull:1 run:1 stop:1
 msgid ""
 "When providing key-value pairs, values can be of any type supported by "
 "TOML (e.g., bool, int, float, string). The specified keys (<k1> and <k2> "
@@ -15528,12 +15624,47 @@ msgid ""
 "to be overridden."
 msgstr ""
 
-#: ../../flwr log:1
-msgid "Flag to stream or print logs from the Flower run"
+#: ../../flwr list:1
+msgid "List all runs"
 msgstr ""
 
-#: ../../flwr log ls run stop
+#: ../../flwr list log run stop supernode
 msgid "default"
+msgstr ""
+
+#: ../../flwr list:1 run:1 supernode
+#, fuzzy
+msgid "``False``"
+msgstr "``flwr/base``"
+
+#: ../../flwr list:1
+msgid "Specific run ID to display"
+msgstr ""
+
+#: ../../flwr list:1 run:1 stop:1 supernode
+msgid "Format output using 'default' view or 'json'"
+msgstr ""
+
+#: ../../flwr list:1 run:1 stop:1 supernode
+#, fuzzy
+msgid "``'default'``"
+msgstr "``flwr/base``"
+
+#: ../../flwr create:1 delete:1 list:1 stop:1 supernode
+#, fuzzy
+msgid "Path of the Flower project"
+msgstr "Flower 기본 이미지의 태그."
+
+#: ../../flwr create:1 delete:1 list:1 stop:1 supernode
+msgid "Name of the federation"
+msgstr ""
+
+#: ../../flwr log:1
+msgid "Get logs from a Flower project run."
+msgstr ""
+
+#: ../../flwr log:1
+msgid "Flag to stream or print logs from the Flower run"
 msgstr ""
 
 #: ../../flwr log:1
@@ -15541,7 +15672,7 @@ msgstr ""
 msgid "``True``"
 msgstr "``DISTRO``"
 
-#: ../../flwr log:1 stop:1
+#: ../../flwr create:1 delete:1 log:1 stop:1 supernode
 #, fuzzy
 msgid "Required argument"
 msgstr "빌드 전달인자"
@@ -15571,89 +15702,6 @@ msgstr "Flower 기본 이미지의 태그."
 
 #: ../../flwr login:1
 msgid "Name of the federation to login into."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid ""
-"List the details of one provided run ID or all runs in a Flower "
-"federation."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "The following details are displayed:"
-msgstr ""
-
-#: ../../flwr ls:1
-#, fuzzy
-msgid "**Run ID:** Unique identifier for the run."
-msgstr "현재 실행에 대한 식별자입니다."
-
-#: ../../flwr ls:1
-#, python-brace-format
-msgid ""
-"**FAB:** Name of the FAB associated with the run (``{FAB_ID} "
-"(v{FAB_VERSION})``)."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid ""
-"**Status:** Current status of the run (pending, starting, running, "
-"finished)."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "**Elapsed:** Time elapsed since the run started (``HH:MM:SS``)."
-msgstr ""
-
-#: ../../flwr ls:1
-#, fuzzy
-msgid "**Created At:** Timestamp when the run was created."
-msgstr "메시지가 생성된 때의 Unix timestamp입니다."
-
-#: ../../flwr ls:1
-#, fuzzy
-msgid "**Running At:** Timestamp when the run started running."
-msgstr "메시지가 생성된 때의 Unix timestamp입니다."
-
-#: ../../flwr ls:1
-msgid "**Finished At:** Timestamp when the run finished."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid ""
-"All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD "
-"HH:MM:SSZ``."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "List all runs"
-msgstr ""
-
-#: ../../flwr ls:1 run:1
-#, fuzzy
-msgid "``False``"
-msgstr "``flwr/base``"
-
-#: ../../flwr ls:1
-msgid "Specific run ID to display"
-msgstr ""
-
-#: ../../flwr ls:1 run:1 stop:1
-msgid "Format output using 'default' view or 'json'"
-msgstr ""
-
-#: ../../flwr ls:1 run:1 stop:1
-#, fuzzy
-msgid "``'default'``"
-msgstr "``flwr/base``"
-
-#: ../../flwr ls:1 stop:1
-#, fuzzy
-msgid "Path of the Flower project"
-msgstr "Flower 기본 이미지의 태그."
-
-#: ../../flwr ls:1 stop:1
-msgid "Name of the federation"
 msgstr ""
 
 #: ../../flwr new:1
@@ -15741,6 +15789,40 @@ msgstr ""
 #, fuzzy
 msgid "The Flower run ID to stop"
 msgstr "Flower 커뮤니티 가입하기"
+
+#: ../../flwr supernode:1
+#, fuzzy
+msgid "Manage SuperNodes"
+msgstr "SuperNodes 인증하기"
+
+#: ../../flwr create:1 supernode
+#, fuzzy
+msgid "Add a SuperNode to the federation."
+msgstr "flower 초연결"
+
+#: ../../flwr create:1 supernode
+msgid "Path to the public key file."
+msgstr ""
+
+#: ../../flwr delete:1 supernode
+#, fuzzy
+msgid "Remove a SuperNode from the federation."
+msgstr "flower 초연결"
+
+#: ../../flwr delete:1 supernode
+#, fuzzy
+msgid "ID of the SuperNode to remove."
+msgstr "서버(SuperLink)"
+
+#: ../../flwr list:1 supernode
+#, fuzzy
+msgid "List SuperNodes in the federation."
+msgstr "flower 초연결"
+
+#: ../../flwr list:1 supernode
+#, fuzzy
+msgid "Enable verbose output"
+msgstr "예시"
 
 #: ../../source/ref-api-cli.rst:19
 #, fuzzy
@@ -16083,12 +16165,12 @@ msgid ""
 "will be derived automatically from it."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp:4
-#: flwr.client.client_app.ClientApp.evaluate:12
-#: flwr.client.client_app.ClientApp.lifespan:7
-#: flwr.client.client_app.ClientApp.query:12
-#: flwr.client.client_app.ClientApp.train:12
 #: flwr.client.mod.localdp_mod.LocalDpMod:22
+#: flwr.clientapp.client_app.ClientApp:4
+#: flwr.clientapp.client_app.ClientApp.evaluate:12
+#: flwr.clientapp.client_app.ClientApp.lifespan:7
+#: flwr.clientapp.client_app.ClientApp.query:12
+#: flwr.clientapp.client_app.ClientApp.train:12
 #: flwr.clientapp.mod.localdp_mod.LocalDpMod:22
 #: flwr.common.record.array.Array:35
 #: flwr.common.record.arrayrecord.ArrayRecord:36
@@ -16461,13 +16543,13 @@ msgstr ""
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
 #: flwr.client.numpy_client.NumPyClient.evaluate
 #: flwr.client.numpy_client.NumPyClient.fit
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
 #: flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
 #: flwr.common.record.array.Array.inflate
@@ -16508,11 +16590,11 @@ msgstr ""
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
 #: flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
 #: flwr.common.record.array.Array.inflate
@@ -17207,7 +17289,8 @@ msgid "Context"
 msgstr "컨텍스트"
 
 #: flwr.app.error.Error:1 flwr.app.metadata.Metadata:1
-#: flwr.client.client_app.ClientApp:1 flwr.client.mod.localdp_mod.LocalDpMod:1
+#: flwr.client.mod.localdp_mod.LocalDpMod:1
+#: flwr.clientapp.client_app.ClientApp:1
 #: flwr.clientapp.mod.localdp_mod.LocalDpMod:1
 #: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
 #: flwr.common.context.Context:1 flwr.common.typing.ClientMessage:1
@@ -18239,7 +18322,7 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
 #: ../../source/ref-api/flwr.clientapp.rst:22:<autosummary>:1
-#: flwr.client.client_app.ClientApp:1 of
+#: flwr.clientapp.client_app.ClientApp:1 of
 msgid "Flower ClientApp."
 msgstr "Flower ClientApp."
 
@@ -18365,7 +18448,7 @@ msgstr "구성 값 dictionary이 포함된 서버로부터 받은 속성 가져�
 msgid "The current client properties."
 msgstr "현재 클라이언트 속성입니다."
 
-#: flwr.client.client_app.ClientApp:5 of
+#: flwr.clientapp.client_app.ClientApp:5 of
 #, fuzzy
 msgid ""
 "Assuming a typical ``Client`` implementation named ``FlowerClient``, you "
@@ -18374,128 +18457,128 @@ msgstr ""
 "일반적인 `Client` 구현의 이름이 `FlowerClient`라고 가정하면, 다음과 같이 `ClientApp`으로 래핑할 수 "
 "있습니다:"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\[action\\, "
 "mods\\]\\)"
 msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid "Register an evaluate function with the ``ClientApp``."
 msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`lifespan <flwr.client.ClientApp.lifespan>`\\ \\(\\)"
 msgstr ":py:obj:`Client <flwr.client.Client>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
-#: flwr.client.client_app.ClientApp.lifespan:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.clientapp.client_app.ClientApp.lifespan:1 of
 #, fuzzy
 msgid "Return a decorator that registers the lifespan fn with the client app."
 msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\[action\\, mods\\]\\)"
 msgstr ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
-#: flwr.client.client_app.ClientApp.query:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.clientapp.client_app.ClientApp.query:1 of
 #, fuzzy
 msgid "Register a query function with the ``ClientApp``."
 msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\[action\\, mods\\]\\)"
 msgstr ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
-#: flwr.client.client_app.ClientApp.train:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.clientapp.client_app.ClientApp.train:1 of
 #, fuzzy
 msgid "Register a train function with the ``ClientApp``."
 msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.evaluate:3
-#: flwr.client.client_app.ClientApp.query:3
-#: flwr.client.client_app.ClientApp.train:3 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:3
+#: flwr.clientapp.client_app.ClientApp.query:3
+#: flwr.clientapp.client_app.ClientApp.train:3 of
 msgid "The action name used to route messages. Defaults to \"default\"."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:5
-#: flwr.client.client_app.ClientApp.query:5
-#: flwr.client.client_app.ClientApp.train:5 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:5
+#: flwr.clientapp.client_app.ClientApp.query:5
+#: flwr.clientapp.client_app.ClientApp.train:5 of
 #, fuzzy
 msgid "A list of function-specific modifiers."
 msgstr "CLI 시뮬레이션"
 
-#: flwr.client.client_app.ClientApp.evaluate:8 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:8 of
 #, fuzzy
 msgid "A decorator that registers an evaluate function with the ``ClientApp``."
 msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.evaluate:13 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:13 of
 #, fuzzy
 msgid "Registering an evaluate function::"
 msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.evaluate:23 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:23 of
 #, fuzzy
 msgid "Registering an evaluate function with a custom action name::"
 msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.evaluate:34 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:34 of
 #, fuzzy
 msgid "Registering an evaluate function with a function-specific Flower Mod::"
 msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.lifespan:3
+#: flwr.clientapp.client_app.ClientApp.lifespan:3
 #: flwr.server.server_app.ServerApp.lifespan:3 of
 msgid ""
 "The decorated function should accept a `Context` object and use `yield` "
 "to define enter and exit behavior."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.query:8 of
+#: flwr.clientapp.client_app.ClientApp.query:8 of
 #, fuzzy
 msgid "A decorator that registers a query function with the ``ClientApp``."
 msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.query:13 of
+#: flwr.clientapp.client_app.ClientApp.query:13 of
 #, fuzzy
 msgid "Registering a query function::"
 msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.query:23 of
+#: flwr.clientapp.client_app.ClientApp.query:23 of
 #, fuzzy
 msgid "Registering a query function with a custom action name::"
 msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.query:34 of
+#: flwr.clientapp.client_app.ClientApp.query:34 of
 #, fuzzy
 msgid "Registering a query function with a function-specific Flower Mod::"
 msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.train:8 of
+#: flwr.clientapp.client_app.ClientApp.train:8 of
 #, fuzzy
 msgid "A decorator that registers a train function with the ``ClientApp``."
 msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.train:13 of
+#: flwr.clientapp.client_app.ClientApp.train:13 of
 #, fuzzy
 msgid "Registering a train function::"
 msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.train:23 of
+#: flwr.clientapp.client_app.ClientApp.train:23 of
 #, fuzzy
 msgid "Registering a train function with a custom action name::"
 msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
-#: flwr.client.client_app.ClientApp.train:34 of
+#: flwr.clientapp.client_app.ClientApp.train:34 of
 #, fuzzy
 msgid "Registering a train function with a function-specific Flower Mod::"
 msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
@@ -19112,26 +19195,26 @@ msgstr ""
 msgid ":py:obj:`flwr.clientapp.mod <flwr.clientapp.mod>`\\"
 msgstr ":py:obj:`flwr.client.mod <flwr.client.mod>`\\"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.clientapp.ClientApp.evaluate>`\\ \\(\\[action\\, "
 "mods\\]\\)"
 msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`lifespan <flwr.clientapp.ClientApp.lifespan>`\\ \\(\\)"
 msgstr ":py:obj:`Client <flwr.client.Client>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ""
 ":py:obj:`query <flwr.clientapp.ClientApp.query>`\\ \\(\\[action\\, "
 "mods\\]\\)"
 msgstr ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\)"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ""
 ":py:obj:`train <flwr.clientapp.ClientApp.train>`\\ \\(\\[action\\, "
@@ -28288,9 +28371,9 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:11
 msgid ""
-"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Heng Pan`, "
-"`Javier`, `Patrick Foley`, `William Lindskog`, `William Lindskog-"
-"Munzing`, `Yan Gao` <!---TOKEN_v1.22.0-->"
+"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Dimitris "
+"Stripelis`, `Heng Pan`, `Javier`, `Mohammad Naseri`, `Patrick Foley`, "
+"`William Lindskog`, `Yan Gao` <!---TOKEN_v1.22.0-->"
 msgstr ""
 
 #: ../../source/ref-changelog.md:13 ../../source/ref-changelog.md:53
@@ -37633,22 +37716,22 @@ msgid ""
 "the SuperLink."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:34
+#: ../../source/ref-flower-network-communication.rst:68
 msgid ""
 "Click the buttons above to toggle between the network diagrams for "
 "isolation modes **subprocess** and **process**."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:38
+#: ../../source/ref-flower-network-communication.rst:72
 #, fuzzy
 msgid "Mandatory Network Connections"
 msgstr "보안 연결을 위한 SSL 사용 설정"
 
-#: ../../source/ref-flower-network-communication.rst:40
+#: ../../source/ref-flower-network-communication.rst:74
 msgid "Deployed Flower systems have at least two types of network connections:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:42
+#: ../../source/ref-flower-network-communication.rst:76
 msgid ""
 "**CLI to SuperLink (Control API)**: The ``flwr`` `CLI command <ref-api-"
 "cli.html>`_, typically run on the users workstation, is used to interface"
@@ -37662,7 +37745,7 @@ msgid ""
 "supported for local testing."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:50
+#: ../../source/ref-flower-network-communication.rst:84
 msgid ""
 "**SuperNode to SuperLink (Fleet API)**: In Flower terminology, a Flower "
 "federation is a set of SuperNodes connected to the same SuperLink. From a"
@@ -37675,23 +37758,23 @@ msgid ""
 "more), but ``insecure`` mode is supported for local testing."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:60
+#: ../../source/ref-flower-network-communication.rst:94
 #, fuzzy
 msgid "Optional Network Connections"
 msgstr "SSL 연결 사용"
 
-#: ../../source/ref-flower-network-communication.rst:62
+#: ../../source/ref-flower-network-communication.rst:96
 msgid ""
 "Depending on the SuperLink and SuperNode configuration, Flower systems "
 "can have/use a number of additional network connections."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:66
+#: ../../source/ref-flower-network-communication.rst:100
 #, fuzzy
 msgid "Flower Components APIs"
 msgstr "Flower ClientApp."
 
-#: ../../source/ref-flower-network-communication.rst:68
+#: ../../source/ref-flower-network-communication.rst:102
 msgid ""
 "All Flower components — SuperLink, SuperNode, SuperExec, ``ServerApp`` "
 "process, and ``ClientApp`` process — expose APIs to interact with other "
@@ -37702,95 +37785,95 @@ msgid ""
 "as summarized in the table below."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:79
+#: ../../source/ref-flower-network-communication.rst:113
 #, fuzzy
 msgid "Component"
 msgstr "공통"
 
-#: ../../source/ref-flower-network-communication.rst:80
+#: ../../source/ref-flower-network-communication.rst:114
 msgid "Default Port"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:81
+#: ../../source/ref-flower-network-communication.rst:115
 msgid "API"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:82
+#: ../../source/ref-flower-network-communication.rst:116
 msgid "Purpose"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:83
+#: ../../source/ref-flower-network-communication.rst:117
 #, fuzzy
 msgid "SuperLink"
 msgstr "flower 초연결"
 
-#: ../../source/ref-flower-network-communication.rst:84
+#: ../../source/ref-flower-network-communication.rst:118
 msgid "9091"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:85
+#: ../../source/ref-flower-network-communication.rst:119
 #, fuzzy
 msgid "ServerAppIo API"
 msgstr "Flower 서버앱"
 
-#: ../../source/ref-flower-network-communication.rst:86
+#: ../../source/ref-flower-network-communication.rst:120
 #, fuzzy
 msgid "Used by the SuperExec and the ``ServerApp`` processes"
 msgstr "서버(SuperLink)"
 
-#: ../../source/ref-flower-network-communication.rst:88
+#: ../../source/ref-flower-network-communication.rst:122
 msgid "9092"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:89
+#: ../../source/ref-flower-network-communication.rst:123
 msgid "Fleet API"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:90
+#: ../../source/ref-flower-network-communication.rst:124
 #, fuzzy
 msgid "Used by the SuperNodes"
 msgstr "서버(SuperLink)"
 
-#: ../../source/ref-flower-network-communication.rst:92
+#: ../../source/ref-flower-network-communication.rst:126
 msgid "9093"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:93
+#: ../../source/ref-flower-network-communication.rst:127
 #, fuzzy
 msgid "Control API"
 msgstr "클라이언트앱"
 
-#: ../../source/ref-flower-network-communication.rst:94
+#: ../../source/ref-flower-network-communication.rst:128
 msgid ""
 "Users interface with the SuperLink via this API using the `FlowerCLI "
 "<ref-api-cli.html>`_"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:96
+#: ../../source/ref-flower-network-communication.rst:130
 #, fuzzy
 msgid "SuperNode"
 msgstr "run\\_supernode"
 
-#: ../../source/ref-flower-network-communication.rst:97
+#: ../../source/ref-flower-network-communication.rst:131
 msgid "9094"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:98
+#: ../../source/ref-flower-network-communication.rst:132
 #, fuzzy
 msgid "ClientAppIo API"
 msgstr "클라이언트앱"
 
-#: ../../source/ref-flower-network-communication.rst:99
+#: ../../source/ref-flower-network-communication.rst:133
 #, fuzzy
 msgid "Used by the SuperExec and the ``ClientApp`` processes"
 msgstr "서버(SuperLink)"
 
-#: ../../source/ref-flower-network-communication.rst:102
+#: ../../source/ref-flower-network-communication.rst:136
 #, fuzzy
 msgid "Isolation Mode"
 msgstr "해결법"
 
-#: ../../source/ref-flower-network-communication.rst:104
+#: ../../source/ref-flower-network-communication.rst:138
 msgid ""
 "Both SuperLink and SuperNode can operate in different isolation modes. "
 "The **SuperExec** is responsible for scheduling, launching, and managing "
@@ -37798,7 +37881,7 @@ msgid ""
 "process."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:108
+#: ../../source/ref-flower-network-communication.rst:142
 msgid ""
 "The ``subprocess`` isolation mode configures the SuperLink/SuperNode to "
 "automatically run the SuperExec as a subprocess upon start. The "
@@ -37811,7 +37894,7 @@ msgid ""
 "understanding of how to use both modes."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:116
+#: ../../source/ref-flower-network-communication.rst:150
 msgid ""
 "When using the ``process`` isolation mode, additional network connections"
 " are necessary to allow the external process running the SuperExec, "
@@ -37819,7 +37902,7 @@ msgid ""
 "SuperNode:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:120
+#: ../../source/ref-flower-network-communication.rst:154
 msgid ""
 "**SuperExec/ServerApp process to SuperLink (ServerAppIO API)**: Both the "
 "SuperExec for ``ServerApp``\\s and the ``ServerApp`` processes act as "
@@ -37831,7 +37914,7 @@ msgid ""
 "SuperNodes (via the SuperLink)."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:126
+#: ../../source/ref-flower-network-communication.rst:160
 msgid ""
 "**SuperExec/ClientApp process to SuperNode (ClientAppIO API)**: Both the "
 "SuperExec for ``ClientApp``\\s and the ``ClientApp`` processes act as "
@@ -37843,52 +37926,52 @@ msgid ""
 "parameters) to the SuperNode."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:135
+#: ../../source/ref-flower-network-communication.rst:169
 msgid ""
 "In the current version of Flower, both of the connections above are "
 "insecure because Flower assumes that the following groups of processes "
 "run within the same trusted network:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:139
+#: ../../source/ref-flower-network-communication.rst:173
 msgid "SuperLink + SuperExec + ``ServerApp`` process"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:140
+#: ../../source/ref-flower-network-communication.rst:174
 msgid "SuperNode + SuperExec + ``ClientApp`` process"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:142
+#: ../../source/ref-flower-network-communication.rst:176
 msgid ""
 "Each group must remain inside a single trusted network. They should never"
 " communicate with each other over untrusted networks (e.g., the public "
 "internet)."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:146
+#: ../../source/ref-flower-network-communication.rst:180
 #, fuzzy
-msgid "User Authentication"
+msgid "Account Authentication"
 msgstr "설치 확인"
 
-#: ../../source/ref-flower-network-communication.rst:148
+#: ../../source/ref-flower-network-communication.rst:182
 msgid ""
-"When user authentication is enabled, Flower uses an OIDC-compatible "
+"When account authentication is enabled, Flower uses an OIDC-compatible "
 "server to authenticate requests:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:151
+#: ../../source/ref-flower-network-communication.rst:185
 msgid ""
 "**SuperLink to OIDC server**: A SuperLink can optionally be configured to"
 " only allow authenticated users to interact with it. In this setting, the"
 " Flower SuperLink acts as a REST client to the OIDC-compatible server."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:156
+#: ../../source/ref-flower-network-communication.rst:190
 #, fuzzy
 msgid "Application-specific Connections"
 msgstr "CLI 시뮬레이션"
 
-#: ../../source/ref-flower-network-communication.rst:158
+#: ../../source/ref-flower-network-communication.rst:192
 msgid ""
 "Users who write Flower Apps (``ServerApp`` and ``ClientApp``) can also "
 "make additional network requests. This is, strictly speaking, not part of"
@@ -37898,12 +37981,12 @@ msgid ""
 "want to allow."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:164
+#: ../../source/ref-flower-network-communication.rst:198
 #, fuzzy
 msgid "Typical examples include:"
 msgstr "예시:"
 
-#: ../../source/ref-flower-network-communication.rst:166
+#: ../../source/ref-flower-network-communication.rst:200
 msgid ""
 "**ClientApp to Database**: ``ClientApp`` instances typically need to be "
 "able to access the data to perform the action they have been designed for"
@@ -37914,7 +37997,7 @@ msgid ""
 "likely be different to the illustration above."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:172
+#: ../../source/ref-flower-network-communication.rst:206
 msgid ""
 "**ServerApp to Database**: ``ServerApp`` instances might want to access "
 "the data to perform the action they have been designed for (e.g. evaluate"
@@ -37924,7 +38007,7 @@ msgid ""
 "the ``ServerApp`` components."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:177
+#: ../../source/ref-flower-network-communication.rst:211
 msgid ""
 "**ServerApp to metric logging service**: Metric logging services like "
 "TensorBoard, MLFlow and Weights & Biases are often used to track the "
@@ -37932,12 +38015,12 @@ msgid ""
 "acts as a client to the metric logging service."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:183
+#: ../../source/ref-flower-network-communication.rst:217
 #, fuzzy
 msgid "Communication Model"
 msgstr "해결법"
 
-#: ../../source/ref-flower-network-communication.rst:185
+#: ../../source/ref-flower-network-communication.rst:219
 msgid ""
 "During real-world deployment, the push/pull communication model adopted "
 "by each component can influence decisions related to resource "
@@ -37946,14 +38029,14 @@ msgid ""
 "the Flower components:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:190
+#: ../../source/ref-flower-network-communication.rst:224
 msgid ""
 "**SuperLink ↔ SuperNode (Fleet API)**: The SuperNode pulls/pushes "
 "Messages from/to the SuperLink via the Fleet API. The SuperNode also "
 "pulls the FAB if a new run is being executed."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:193
+#: ../../source/ref-flower-network-communication.rst:227
 msgid ""
 "**SuperLink ↔ ServerApp (ServerAppIo API)**: The ``ServerApp`` process "
 "pulls/pushes Messages from/to the SuperLink via the ServerAppIo API. The "
@@ -37962,7 +38045,7 @@ msgid ""
 " to the SuperLink."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:197
+#: ../../source/ref-flower-network-communication.rst:231
 msgid ""
 "**SuperNode ↔ ClientApp (ClientAppIo API)**: The ``ClientApp`` process "
 "pulls/pushes Messages from/to the SuperNode via the ClientAppIo API. The "
@@ -59801,5 +59884,140 @@ msgstr ""
 #~ "Number of nodes to keep before "
 #~ "averaging (MultiKrum). Defaults to 0, in"
 #~ " that case classical Krum is applied."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "`Charles Beauville`, `Chong Shen Ng`, "
+#~ "`Daniel J. Beutel`, `Heng Pan`, "
+#~ "`Javier`, `Patrick Foley`, `William Lindskog`,"
+#~ " `William Lindskog-Munzing`, `Yan Gao` "
+#~ "<!---TOKEN_v1.22.0-->"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "User authentication can be enabled if"
+#~ " you're using the Flower Enterprise "
+#~ "Edition (EE) Docker images. This is "
+#~ "configured in the `global.userAuth` section"
+#~ " of your `values.yml` file."
+#~ msgstr ""
+
+#~ msgid "`auth_type`: The authentication mechanism being used (e.g., oidc)."
+#~ msgstr ""
+
+#~ msgid "`validate_url`: The endpoint for validating user authentication."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To use an existing secret that "
+#~ "contains the user authentication "
+#~ "configuration, set `existingSecret` to the "
+#~ "name of the existing secret:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note that the existing secret must "
+#~ "contain the key `user-auth-config.yml`:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Configure SuperLink for user authentication"
+#~ " and authorization. Private-by-default "
+#~ "runs securely with OpenID Connect and"
+#~ " OpenFGA."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this guide, you'll learn how to"
+#~ " configure SuperLink with user-level "
+#~ "authentication and authorization, and how "
+#~ "to log in using the ``flwr`` CLI."
+#~ " Once logged in, any users that "
+#~ "are authorized on the SuperLink can "
+#~ "run Flower CLI commands that interact"
+#~ " with the SuperLink."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "With user authentication and authorization "
+#~ "enabled, only users that have submitted"
+#~ " the ``flwr run`` command can view"
+#~ " and interact with their runs. This"
+#~ " means that your runs are **private"
+#~ " by default**, ensuring that only "
+#~ "authorized users can access them."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To enable user authentication and "
+#~ "authorization, the SuperLink must be "
+#~ "deployed with an `OpenID Connect (OIDC)"
+#~ " <https://openid.net/developers/how-connect-works/>`_"
+#~ " provider and an `OpenFGA "
+#~ "<https://openfga.dev/>`_ server. The OIDC "
+#~ "provider is used for user "
+#~ "authentication, while OpenFGA is used "
+#~ "for fine-grained access control. This"
+#~ " means an authenticated user can only"
+#~ " run ``flwr`` CLI commands on the "
+#~ "SuperLink if they have been granted "
+#~ "the necessary permissions by the "
+#~ "SuperLink administrator. When enabled, both"
+#~ " user authentication and authorization must"
+#~ " be configured on the SuperLink."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Save this file as ``user-auth-"
+#~ "config.yaml``. Then pass it to the "
+#~ "SuperLink via the ``--user-auth-config``"
+#~ " flag when deploying the SuperLink:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To authorize a user, the SuperLink "
+#~ "administrator must add the user's OIDC"
+#~ " ``sub`` claim to the OpenFGA store"
+#~ " with the appropriate relation."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Once a SuperLink with user "
+#~ "authentication and authorization is up "
+#~ "and running, a user can interface "
+#~ "with it after installing the ``flwr``"
+#~ " PyPI package via the Flower CLI. "
+#~ "Then, ensure that the ``enable-user-"
+#~ "auth`` field is set to ``true`` in"
+#~ " the federation section in the "
+#~ "``pyproject.toml`` of the Flower app you"
+#~ " want to run:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "User authentication and authorization is "
+#~ "only supported with TLS connections."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "With the above steps completed, you "
+#~ "can now run ``flwr`` CLI commands "
+#~ "against a SuperLink setup with user "
+#~ "authentication and authorization. For example,"
+#~ " as an authorized user, you can "
+#~ "run the ``flwr run`` command to "
+#~ "start a Flower app:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the user does not have the "
+#~ "necessary permissions to run the "
+#~ "command, an error will be returned:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "When user authentication is enabled, "
+#~ "Flower uses an OIDC-compatible server"
+#~ " to authenticate requests:"
 #~ msgstr ""
 

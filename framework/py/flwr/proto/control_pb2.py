@@ -16,9 +16,10 @@ from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
 from flwr.proto import transport_pb2 as flwr_dot_proto_dot_transport__pb2
 from flwr.proto import recorddict_pb2 as flwr_dot_proto_dot_recorddict__pb2
 from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
+from flwr.proto import node_pb2 as flwr_dot_proto_dot_node__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18\x66lwr/proto/control.proto\x12\nflwr.proto\x1a\x14\x66lwr/proto/fab.proto\x1a\x1a\x66lwr/proto/transport.proto\x1a\x1b\x66lwr/proto/recorddict.proto\x1a\x14\x66lwr/proto/run.proto\"\xfa\x01\n\x0fStartRunRequest\x12\x1c\n\x03\x66\x61\x62\x18\x01 \x01(\x0b\x32\x0f.flwr.proto.Fab\x12H\n\x0foverride_config\x18\x02 \x03(\x0b\x32/.flwr.proto.StartRunRequest.OverrideConfigEntry\x12\x34\n\x12\x66\x65\x64\x65ration_options\x18\x03 \x01(\x0b\x32\x18.flwr.proto.ConfigRecord\x1aI\n\x13OverrideConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\"2\n\x10StartRunResponse\x12\x13\n\x06run_id\x18\x01 \x01(\x04H\x00\x88\x01\x01\x42\t\n\x07_run_id\"<\n\x11StreamLogsRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12\x17\n\x0f\x61\x66ter_timestamp\x18\x02 \x01(\x01\"B\n\x12StreamLogsResponse\x12\x12\n\nlog_output\x18\x01 \x01(\t\x12\x18\n\x10latest_timestamp\x18\x02 \x01(\x01\"1\n\x0fListRunsRequest\x12\x13\n\x06run_id\x18\x01 \x01(\x04H\x00\x88\x01\x01\x42\t\n\x07_run_id\"\x9d\x01\n\x10ListRunsResponse\x12;\n\x08run_dict\x18\x01 \x03(\x0b\x32).flwr.proto.ListRunsResponse.RunDictEntry\x12\x0b\n\x03now\x18\x02 \x01(\t\x1a?\n\x0cRunDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\x04\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.flwr.proto.Run:\x02\x38\x01\"\x18\n\x16GetLoginDetailsRequest\"\x8a\x01\n\x17GetLoginDetailsResponse\x12\x11\n\tauth_type\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_code\x18\x02 \x01(\t\x12!\n\x19verification_uri_complete\x18\x03 \x01(\t\x12\x12\n\nexpires_in\x18\x04 \x01(\x03\x12\x10\n\x08interval\x18\x05 \x01(\x03\"+\n\x14GetAuthTokensRequest\x12\x13\n\x0b\x64\x65vice_code\x18\x01 \x01(\t\"D\n\x15GetAuthTokensResponse\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\t\x12\x15\n\rrefresh_token\x18\x02 \x01(\t\" \n\x0eStopRunRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\"\"\n\x0fStopRunResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"&\n\x14PullArtifactsRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\"1\n\x15PullArtifactsResponse\x12\x10\n\x03url\x18\x01 \x01(\tH\x00\x88\x01\x01\x42\x06\n\x04_url2\xc0\x04\n\x07\x43ontrol\x12G\n\x08StartRun\x12\x1b.flwr.proto.StartRunRequest\x1a\x1c.flwr.proto.StartRunResponse\"\x00\x12\x44\n\x07StopRun\x12\x1a.flwr.proto.StopRunRequest\x1a\x1b.flwr.proto.StopRunResponse\"\x00\x12O\n\nStreamLogs\x12\x1d.flwr.proto.StreamLogsRequest\x1a\x1e.flwr.proto.StreamLogsResponse\"\x00\x30\x01\x12G\n\x08ListRuns\x12\x1b.flwr.proto.ListRunsRequest\x1a\x1c.flwr.proto.ListRunsResponse\"\x00\x12\\\n\x0fGetLoginDetails\x12\".flwr.proto.GetLoginDetailsRequest\x1a#.flwr.proto.GetLoginDetailsResponse\"\x00\x12V\n\rGetAuthTokens\x12 .flwr.proto.GetAuthTokensRequest\x1a!.flwr.proto.GetAuthTokensResponse\"\x00\x12V\n\rPullArtifacts\x12 .flwr.proto.PullArtifactsRequest\x1a!.flwr.proto.PullArtifactsResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18\x66lwr/proto/control.proto\x12\nflwr.proto\x1a\x14\x66lwr/proto/fab.proto\x1a\x1a\x66lwr/proto/transport.proto\x1a\x1b\x66lwr/proto/recorddict.proto\x1a\x14\x66lwr/proto/run.proto\x1a\x15\x66lwr/proto/node.proto\"\xfa\x01\n\x0fStartRunRequest\x12\x1c\n\x03\x66\x61\x62\x18\x01 \x01(\x0b\x32\x0f.flwr.proto.Fab\x12H\n\x0foverride_config\x18\x02 \x03(\x0b\x32/.flwr.proto.StartRunRequest.OverrideConfigEntry\x12\x34\n\x12\x66\x65\x64\x65ration_options\x18\x03 \x01(\x0b\x32\x18.flwr.proto.ConfigRecord\x1aI\n\x13OverrideConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\"2\n\x10StartRunResponse\x12\x13\n\x06run_id\x18\x01 \x01(\x04H\x00\x88\x01\x01\x42\t\n\x07_run_id\"<\n\x11StreamLogsRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12\x17\n\x0f\x61\x66ter_timestamp\x18\x02 \x01(\x01\"B\n\x12StreamLogsResponse\x12\x12\n\nlog_output\x18\x01 \x01(\t\x12\x18\n\x10latest_timestamp\x18\x02 \x01(\x01\"1\n\x0fListRunsRequest\x12\x13\n\x06run_id\x18\x01 \x01(\x04H\x00\x88\x01\x01\x42\t\n\x07_run_id\"\x9d\x01\n\x10ListRunsResponse\x12;\n\x08run_dict\x18\x01 \x03(\x0b\x32).flwr.proto.ListRunsResponse.RunDictEntry\x12\x0b\n\x03now\x18\x02 \x01(\t\x1a?\n\x0cRunDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\x04\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.flwr.proto.Run:\x02\x38\x01\"\x18\n\x16GetLoginDetailsRequest\"\x8b\x01\n\x17GetLoginDetailsResponse\x12\x12\n\nauthn_type\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_code\x18\x02 \x01(\t\x12!\n\x19verification_uri_complete\x18\x03 \x01(\t\x12\x12\n\nexpires_in\x18\x04 \x01(\x03\x12\x10\n\x08interval\x18\x05 \x01(\x03\"+\n\x14GetAuthTokensRequest\x12\x13\n\x0b\x64\x65vice_code\x18\x01 \x01(\t\"D\n\x15GetAuthTokensResponse\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\t\x12\x15\n\rrefresh_token\x18\x02 \x01(\t\" \n\x0eStopRunRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\"\"\n\x0fStopRunResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"&\n\x14PullArtifactsRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\"1\n\x15PullArtifactsResponse\x12\x10\n\x03url\x18\x01 \x01(\tH\x00\x88\x01\x01\x42\x06\n\x04_url\"*\n\x14\x43reateNodeCliRequest\x12\x12\n\npublic_key\x18\x01 \x01(\t\"9\n\x15\x43reateNodeCliResponse\x12\x14\n\x07node_id\x18\x01 \x01(\x04H\x00\x88\x01\x01\x42\n\n\x08_node_id\"\'\n\x14\x44\x65leteNodeCliRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\x04\"\x17\n\x15\x44\x65leteNodeCliResponse\"\x15\n\x13ListNodesCliRequest\"M\n\x14ListNodesCliResponse\x12(\n\nnodes_info\x18\x01 \x03(\x0b\x32\x14.flwr.proto.NodeInfo\x12\x0b\n\x03now\x18\x02 \x01(\t2\xc5\x06\n\x07\x43ontrol\x12G\n\x08StartRun\x12\x1b.flwr.proto.StartRunRequest\x1a\x1c.flwr.proto.StartRunResponse\"\x00\x12\x44\n\x07StopRun\x12\x1a.flwr.proto.StopRunRequest\x1a\x1b.flwr.proto.StopRunResponse\"\x00\x12O\n\nStreamLogs\x12\x1d.flwr.proto.StreamLogsRequest\x1a\x1e.flwr.proto.StreamLogsResponse\"\x00\x30\x01\x12G\n\x08ListRuns\x12\x1b.flwr.proto.ListRunsRequest\x1a\x1c.flwr.proto.ListRunsResponse\"\x00\x12\\\n\x0fGetLoginDetails\x12\".flwr.proto.GetLoginDetailsRequest\x1a#.flwr.proto.GetLoginDetailsResponse\"\x00\x12V\n\rGetAuthTokens\x12 .flwr.proto.GetAuthTokensRequest\x1a!.flwr.proto.GetAuthTokensResponse\"\x00\x12V\n\rPullArtifacts\x12 .flwr.proto.PullArtifactsRequest\x1a!.flwr.proto.PullArtifactsResponse\"\x00\x12V\n\rCreateNodeCli\x12 .flwr.proto.CreateNodeCliRequest\x1a!.flwr.proto.CreateNodeCliResponse\"\x00\x12V\n\rDeleteNodeCli\x12 .flwr.proto.DeleteNodeCliRequest\x1a!.flwr.proto.DeleteNodeCliResponse\"\x00\x12S\n\x0cListNodesCli\x12\x1f.flwr.proto.ListNodesCliRequest\x1a .flwr.proto.ListNodesCliResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -29,38 +30,50 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_STARTRUNREQUEST_OVERRIDECONFIGENTRY']._serialized_options = b'8\001'
   _globals['_LISTRUNSRESPONSE_RUNDICTENTRY']._options = None
   _globals['_LISTRUNSRESPONSE_RUNDICTENTRY']._serialized_options = b'8\001'
-  _globals['_STARTRUNREQUEST']._serialized_start=142
-  _globals['_STARTRUNREQUEST']._serialized_end=392
-  _globals['_STARTRUNREQUEST_OVERRIDECONFIGENTRY']._serialized_start=319
-  _globals['_STARTRUNREQUEST_OVERRIDECONFIGENTRY']._serialized_end=392
-  _globals['_STARTRUNRESPONSE']._serialized_start=394
-  _globals['_STARTRUNRESPONSE']._serialized_end=444
-  _globals['_STREAMLOGSREQUEST']._serialized_start=446
-  _globals['_STREAMLOGSREQUEST']._serialized_end=506
-  _globals['_STREAMLOGSRESPONSE']._serialized_start=508
-  _globals['_STREAMLOGSRESPONSE']._serialized_end=574
-  _globals['_LISTRUNSREQUEST']._serialized_start=576
-  _globals['_LISTRUNSREQUEST']._serialized_end=625
-  _globals['_LISTRUNSRESPONSE']._serialized_start=628
-  _globals['_LISTRUNSRESPONSE']._serialized_end=785
-  _globals['_LISTRUNSRESPONSE_RUNDICTENTRY']._serialized_start=722
-  _globals['_LISTRUNSRESPONSE_RUNDICTENTRY']._serialized_end=785
-  _globals['_GETLOGINDETAILSREQUEST']._serialized_start=787
-  _globals['_GETLOGINDETAILSREQUEST']._serialized_end=811
-  _globals['_GETLOGINDETAILSRESPONSE']._serialized_start=814
-  _globals['_GETLOGINDETAILSRESPONSE']._serialized_end=952
-  _globals['_GETAUTHTOKENSREQUEST']._serialized_start=954
-  _globals['_GETAUTHTOKENSREQUEST']._serialized_end=997
-  _globals['_GETAUTHTOKENSRESPONSE']._serialized_start=999
-  _globals['_GETAUTHTOKENSRESPONSE']._serialized_end=1067
-  _globals['_STOPRUNREQUEST']._serialized_start=1069
-  _globals['_STOPRUNREQUEST']._serialized_end=1101
-  _globals['_STOPRUNRESPONSE']._serialized_start=1103
-  _globals['_STOPRUNRESPONSE']._serialized_end=1137
-  _globals['_PULLARTIFACTSREQUEST']._serialized_start=1139
-  _globals['_PULLARTIFACTSREQUEST']._serialized_end=1177
-  _globals['_PULLARTIFACTSRESPONSE']._serialized_start=1179
-  _globals['_PULLARTIFACTSRESPONSE']._serialized_end=1228
-  _globals['_CONTROL']._serialized_start=1231
-  _globals['_CONTROL']._serialized_end=1807
+  _globals['_STARTRUNREQUEST']._serialized_start=165
+  _globals['_STARTRUNREQUEST']._serialized_end=415
+  _globals['_STARTRUNREQUEST_OVERRIDECONFIGENTRY']._serialized_start=342
+  _globals['_STARTRUNREQUEST_OVERRIDECONFIGENTRY']._serialized_end=415
+  _globals['_STARTRUNRESPONSE']._serialized_start=417
+  _globals['_STARTRUNRESPONSE']._serialized_end=467
+  _globals['_STREAMLOGSREQUEST']._serialized_start=469
+  _globals['_STREAMLOGSREQUEST']._serialized_end=529
+  _globals['_STREAMLOGSRESPONSE']._serialized_start=531
+  _globals['_STREAMLOGSRESPONSE']._serialized_end=597
+  _globals['_LISTRUNSREQUEST']._serialized_start=599
+  _globals['_LISTRUNSREQUEST']._serialized_end=648
+  _globals['_LISTRUNSRESPONSE']._serialized_start=651
+  _globals['_LISTRUNSRESPONSE']._serialized_end=808
+  _globals['_LISTRUNSRESPONSE_RUNDICTENTRY']._serialized_start=745
+  _globals['_LISTRUNSRESPONSE_RUNDICTENTRY']._serialized_end=808
+  _globals['_GETLOGINDETAILSREQUEST']._serialized_start=810
+  _globals['_GETLOGINDETAILSREQUEST']._serialized_end=834
+  _globals['_GETLOGINDETAILSRESPONSE']._serialized_start=837
+  _globals['_GETLOGINDETAILSRESPONSE']._serialized_end=976
+  _globals['_GETAUTHTOKENSREQUEST']._serialized_start=978
+  _globals['_GETAUTHTOKENSREQUEST']._serialized_end=1021
+  _globals['_GETAUTHTOKENSRESPONSE']._serialized_start=1023
+  _globals['_GETAUTHTOKENSRESPONSE']._serialized_end=1091
+  _globals['_STOPRUNREQUEST']._serialized_start=1093
+  _globals['_STOPRUNREQUEST']._serialized_end=1125
+  _globals['_STOPRUNRESPONSE']._serialized_start=1127
+  _globals['_STOPRUNRESPONSE']._serialized_end=1161
+  _globals['_PULLARTIFACTSREQUEST']._serialized_start=1163
+  _globals['_PULLARTIFACTSREQUEST']._serialized_end=1201
+  _globals['_PULLARTIFACTSRESPONSE']._serialized_start=1203
+  _globals['_PULLARTIFACTSRESPONSE']._serialized_end=1252
+  _globals['_CREATENODECLIREQUEST']._serialized_start=1254
+  _globals['_CREATENODECLIREQUEST']._serialized_end=1296
+  _globals['_CREATENODECLIRESPONSE']._serialized_start=1298
+  _globals['_CREATENODECLIRESPONSE']._serialized_end=1355
+  _globals['_DELETENODECLIREQUEST']._serialized_start=1357
+  _globals['_DELETENODECLIREQUEST']._serialized_end=1396
+  _globals['_DELETENODECLIRESPONSE']._serialized_start=1398
+  _globals['_DELETENODECLIRESPONSE']._serialized_end=1421
+  _globals['_LISTNODESCLIREQUEST']._serialized_start=1423
+  _globals['_LISTNODESCLIREQUEST']._serialized_end=1444
+  _globals['_LISTNODESCLIRESPONSE']._serialized_start=1446
+  _globals['_LISTNODESCLIRESPONSE']._serialized_end=1523
+  _globals['_CONTROL']._serialized_start=1526
+  _globals['_CONTROL']._serialized_end=2363
 # @@protoc_insertion_point(module_scope)

@@ -12,20 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower user auth plugins."""
+"""Flower account auth plugins."""
 
 
-from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.constant import AuthType
+from flwr.common.constant import AuthnType
 
+from .auth_plugin import CliAuthPlugin, LoginError
+from .noop_auth_plugin import NoOpCliAuthPlugin
 from .oidc_cli_plugin import OidcCliPlugin
 
 
-def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
+def get_cli_plugin_class(authn_type: str) -> type[CliAuthPlugin]:
     """Return all CLI authentication plugins."""
-    return {AuthType.OIDC: OidcCliPlugin}
+    if authn_type == AuthnType.NOOP:
+        return NoOpCliAuthPlugin
+    if authn_type == AuthnType.OIDC:
+        return OidcCliPlugin
+    raise ValueError(f"Unsupported authentication type: {authn_type}")
 
 
 __all__ = [
-    "get_cli_auth_plugins",
+    "CliAuthPlugin",
+    "LoginError",
+    "NoOpCliAuthPlugin",
+    "OidcCliPlugin",
+    "get_cli_plugin_class",
 ]

@@ -200,6 +200,7 @@ redirects = {
     "apiref-binaries": "ref-api-cli.html",
     "fedbn-example-pytorch-from-centralized-to-federated": "example-fedbn-pytorch-from-centralized-to-federated.html",
     "how-to-use-built-in-middleware-layers": "how-to-use-built-in-mods.html",
+    "how-to-authenticate-users": "how-to-authenticate-accounts.html",
     # Restructuring: tutorials
     "tutorial/Flower-0-What-is-FL": "tutorial-series-what-is-federated-learning.html",
     "tutorial/Flower-1-Intro-to-FL-PyTorch": "tutorial-series-get-started-with-flower-pytorch.html",
@@ -312,12 +313,12 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": (
-        "<a href='https://flower.ai/events/flower-ai-day-2025/'>"
-        "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
-        "for Flower AI Day 2025!<br />"
-        "September 25, 🇺🇸 San Francisco"
-    ),
+    # "announcement": (
+    #     "<a href='https://flower.ai/events/flower-ai-day-2025/'>"
+    #     "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
+    #     "for Flower AI Day 2025!<br />"
+    #     "September 25, 🇺🇸 San Francisco"
+    # ),
     "light_css_variables": {
         "color-announcement-background": "#292f36",
         "color-announcement-text": "#ffffff",

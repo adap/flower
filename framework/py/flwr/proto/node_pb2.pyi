@@ -5,6 +5,7 @@ isort:skip_file
 import builtins
 import google.protobuf.descriptor
 import google.protobuf.message
+import typing
 import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
@@ -19,3 +20,38 @@ class Node(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["node_id",b"node_id"]) -> None: ...
 global___Node = Node
+
+class NodeInfo(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_ID_FIELD_NUMBER: builtins.int
+    OWNER_AID_FIELD_NUMBER: builtins.int
+    STATUS_FIELD_NUMBER: builtins.int
+    CREATED_AT_FIELD_NUMBER: builtins.int
+    LAST_ACTIVATED_AT_FIELD_NUMBER: builtins.int
+    LAST_DEACTIVATED_AT_FIELD_NUMBER: builtins.int
+    DELETED_AT_FIELD_NUMBER: builtins.int
+    ONLINE_UNTIL_FIELD_NUMBER: builtins.int
+    HEARTBEAT_INTERVAL_FIELD_NUMBER: builtins.int
+    node_id: builtins.int
+    owner_aid: typing.Text
+    status: typing.Text
+    created_at: typing.Text
+    last_activated_at: typing.Text
+    last_deactivated_at: typing.Text
+    deleted_at: typing.Text
+    online_until: builtins.float
+    heartbeat_interval: builtins.float
+    def __init__(self,
+        *,
+        node_id: builtins.int = ...,
+        owner_aid: typing.Text = ...,
+        status: typing.Text = ...,
+        created_at: typing.Text = ...,
+        last_activated_at: typing.Text = ...,
+        last_deactivated_at: typing.Text = ...,
+        deleted_at: typing.Text = ...,
+        online_until: builtins.float = ...,
+        heartbeat_interval: builtins.float = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["created_at",b"created_at","deleted_at",b"deleted_at","heartbeat_interval",b"heartbeat_interval","last_activated_at",b"last_activated_at","last_deactivated_at",b"last_deactivated_at","node_id",b"node_id","online_until",b"online_until","owner_aid",b"owner_aid","status",b"status"]) -> None: ...
+global___NodeInfo = NodeInfo

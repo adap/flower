@@ -70,7 +70,7 @@ def create_node(
 ) -> CreateNodeResponse:
     """."""
     # Create node
-    node_id = state.create_node(heartbeat_interval=request.heartbeat_interval)
+    node_id = state.create_node(request.public_key, request.heartbeat_interval)
     return CreateNodeResponse(node=Node(node_id=node_id))
 
 

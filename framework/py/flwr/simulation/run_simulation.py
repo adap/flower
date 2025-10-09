@@ -30,7 +30,7 @@ from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
-from flwr.client import ClientApp
+from flwr.clientapp import ClientApp
 from flwr.common import Context, EventType, RecordDict, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
 from flwr.common.constant import RUN_ID_NUM_BYTES, Status
