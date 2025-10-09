@@ -445,6 +445,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         try:
             state.delete_node(owner_aid=flwr_aid, node_id=request.node_id)
         except ValueError:
+            log(ERROR, NODE_NOT_FOUND_MESSAGE)
             context.abort(grpc.StatusCode.NOT_FOUND, NODE_NOT_FOUND_MESSAGE)
 
         return DeleteNodeCliResponse()
