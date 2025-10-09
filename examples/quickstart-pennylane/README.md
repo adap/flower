@@ -1,8 +1,6 @@
----
-tags: [quantum, vision, fds]
-dataset: [CIFAR-10]
-framework: [pennylane, torch, torchvision]
----
+______________________________________________________________________
+
+## tags: [quantum, vision, fds] dataset: [CIFAR-10] framework: [pennylane, torch, torchvision]
 
 # Quantum Federated Learning with PennyLane and Flower
 
