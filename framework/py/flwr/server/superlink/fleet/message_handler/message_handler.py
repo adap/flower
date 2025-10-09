@@ -83,7 +83,7 @@ def delete_node(request: DeleteNodeRequest, state: LinkState) -> DeleteNodeRespo
         return DeleteNodeResponse()
 
     # Update state
-    state.delete_node(node_id=request.node.node_id)
+    state.delete_node(NOOP_FLWR_AID, node_id=request.node.node_id)
     return DeleteNodeResponse()
 
 
