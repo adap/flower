@@ -316,12 +316,6 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
             # FAB must be signed if trust entity provided
             if enable_entity_verification:
-                if len(trust_entity) == 0:
-                   log(
-                       WARN,
-                       f"Entity verification is enabled, but no trusted entities were provided.",
-                       f" The Flower SuperNode should be restarted with a trusted entities list",
-                   ) 
                 fab_verified = False
                 for public_key_id, signature, timestamp in fab.meta:
                     if public_key_id in trust_entity:

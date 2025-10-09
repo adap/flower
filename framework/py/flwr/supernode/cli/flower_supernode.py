@@ -17,7 +17,7 @@
 
 import argparse
 import json
-from logging import DEBUG, INFO, WARN
+from logging import DEBUG, INFO, WARN, ERROR
 from pathlib import Path
 from typing import Optional
 
@@ -61,6 +61,9 @@ def flower_supernode() -> None:
             "Both `--flwr-dir` and `--isolation` were specified. "
             "Ignoring `--flwr-dir`.",
         )
+
+    if args.enable_entity_verification and not args.trust_entity:
+        flwr_exit(ExitCode.SUPERNODE_TRUST_ENTITY_REQUIRED)
 
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     authentication_keys = _try_setup_client_authentication(args)
