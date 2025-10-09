@@ -26,6 +26,7 @@ from parameterized import parameterized
 from flwr.common import ConfigRecord, now
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
+    NOOP_FLWR_AID,
     PUBLIC_KEY_HEADER,
     SIGNATURE_HEADER,
     SUPERLINK_NODE_ID,
@@ -289,7 +290,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _create_node_in_linkstate(self) -> int:
         pk_bytes = public_key_to_bytes(self.node_pk)
         return self.state.create_node(
-            "mock_owner", public_key=pk_bytes, heartbeat_interval=30
+            NOOP_FLWR_AID, public_key=pk_bytes, heartbeat_interval=30
         )
 
     @parameterized.expand(
