@@ -32,6 +32,7 @@ from flwr.common import Context, RecordDict, now
 from flwr.common.constant import (
     FAB_MAX_SIZE,
     LOG_STREAM_INTERVAL,
+    PLATFORM_API_URL,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     PULL_UNFINISHED_RUN_MESSAGE,
@@ -77,10 +78,6 @@ from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin
 
 from .control_account_auth_interceptor import shared_account_info
-
-# PLATFORM_API_URL = "https://api.flower.ai"
-# PLATFORM_API_URL = "http://0.0.0.0/v1"
-PLATFORM_API_URL = "https://api.flower.blue/v1"
 
 
 class ControlServicer(control_pb2_grpc.ControlServicer):
