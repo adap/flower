@@ -48,7 +48,7 @@ class ExitCode:
     SUPEREXEC_INVALID_PLUGIN_CONFIG = 400
 
     # FlowerCLI-specific exit codes (500-599)
-    NODE_AUTH_PUBLIC_KEY_INVALID = 500
+    FLWRCLI_NODE_AUTH_PUBLIC_KEY_INVALID = 500
 
     # Common exit codes (600-699)
     COMMON_ADDRESS_INVALID = 600

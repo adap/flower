@@ -1,5 +1,5 @@
-[500] NODE_AUTH_PUBLIC_KEY_INVALID
-==================================
+[500] FLWRCLI_NODE_AUTH_PUBLIC_KEY_INVALID
+==========================================
 
 Description
 -----------
