@@ -16,6 +16,7 @@
 
 
 import hashlib
+import json
 import os
 import subprocess
 import time
@@ -313,14 +314,17 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
             # Verify the received FAB
             #########################
+            verification = json.loads(fab.meta["verification"])
 
             # FAB must be signed if trust entity provided
             if enable_entity_verification:
                 fab_verified = False
-                for public_key_id, signature, timestamp in fab.meta:
+                for entity in verification:
+                    public_key_id = entity["public_key_id"]
                     if public_key_id in trust_entity:
                         # TODO: Refactor all ed25519 crypto into flwr.supercore.primitives.asymmetric package
-                        verifier_public_key = serialization.load_pem_public_key(trust_entity[public_key_id])
+                        verifier_public_key = serialization.load_pem_public_key(
+                            trust_entity[public_key_id].encode("utf-8"))
                         if not isinstance(verifier_public_key, ed25519.Ed25519PublicKey):
                             log(
                                 WARN,
@@ -328,18 +332,21 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                                 f"trusted entity {public_key_id} is not Ed25519"
                             )
                             continue
-                        signed_message = create_signed_message(hashlib.sha256(fab.content).digest(), timestamp)
+                        signed_message = create_signed_message(
+                            hashlib.sha256(fab.content).digest(),
+                            entity["signed_at"],
+                        )
                         if verify_signature(
                             verifier_public_key,
                             signed_message,
-                            signature,
+                            entity["signature"].encode("utf-8"),
                         ):
                             fab_verified = True
                             break
                 if not fab_verified:
                     log(
                         WARN,
-                        "The FAB could not be verified by provided ",
+                        "The FAB could not be verified by provided "
                         "trusted entities.",
                     )
                     return None
