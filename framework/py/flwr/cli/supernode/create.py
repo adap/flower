@@ -178,7 +178,7 @@ def try_load_public_key(public_key_path: Path) -> bytes:
 
         except (ValueError, UnsupportedAlgorithm) as err:
             flwr_exit(
-                ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID,
+                ExitCode.NODE_AUTH_PUBLIC_KEY_INVALID,
                 str(err),
             )
     return public_key_to_bytes(public_key)

@@ -47,6 +47,9 @@ class ExitCode:
     # SuperExec-specific exit codes (400-499)
     SUPEREXEC_INVALID_PLUGIN_CONFIG = 400
 
+    # FlowerCLI-specific exit codes (500-599)
+    NODE_AUTH_PUBLIC_KEY_INVALID = 500
+
     # Common exit codes (600-699)
     COMMON_ADDRESS_INVALID = 600
     COMMON_MISSING_EXTRA_REST = 601
@@ -115,6 +118,12 @@ EXIT_CODE_HELP = {
     # SuperExec-specific exit codes (400-499)
     ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (
         "The YAML configuration for the SuperExec plugin is invalid."
+    ),
+    # FlowerCLI-specific exit codes (500-599)
+    ExitCode.NODE_AUTH_PUBLIC_KEY_INVALID: (
+        "Node authentication requires a valid elliptic curve public key. "
+        "Please ensure that the file path points to a valid public key "
+        "file and try again."
     ),
     # Common exit codes (600-699)
     ExitCode.COMMON_ADDRESS_INVALID: (
