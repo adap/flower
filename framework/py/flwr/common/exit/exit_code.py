@@ -120,7 +120,7 @@ EXIT_CODE_HELP = {
         "The YAML configuration for the SuperExec plugin is invalid."
     ),
     # FlowerCLI-specific exit codes (500-599)
-    ExitCode.NODE_AUTH_PUBLIC_KEY_INVALID: (
+    ExitCode.FLWRCLI_NODE_AUTH_PUBLIC_KEY_INVALID: (
         "Node authentication requires a valid elliptic curve public key in the "
         "SSH format and following a NIST standard elliptic curve (e.g. SECP384R1). "
         "Please ensure that the file path points to a valid public key "
