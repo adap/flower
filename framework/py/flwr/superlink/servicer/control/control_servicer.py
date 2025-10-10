@@ -465,9 +465,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             raise grpc.RpcError()  # This line is unreachable
 
         nodes_info: Sequence[NodeInfo] = []
-        # If smoke test is enabled, create dummy NodeInfo data
-        if request.smoke_test:
-            nodes_info = _create_list_nodeif_for_smoke_test()
+        # If dry run is enabled, create dummy NodeInfo data
+        if request.dry_run:
+            nodes_info = _create_list_nodeif_for_dry_run()
 
         else:
             # Init link state
@@ -481,8 +481,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         return ListNodesCliResponse(nodes_info=nodes_info, now=now().isoformat())
 
 
-def _create_list_nodeif_for_smoke_test() -> Sequence[NodeInfo]:
-    """Create a list of NodeInfo for smoke testing."""
+def _create_list_nodeif_for_dry_run() -> Sequence[NodeInfo]:
+    """Create a list of NodeInfo for dry run testing."""
     nodes_info: list[NodeInfo] = []
     # A node created (but not connected)
     nodes_info.append(
