@@ -73,6 +73,14 @@ def ls(  # pylint: disable=R0914
             help="Enable verbose output",
         ),
     ] = False,
+    smoke: Annotated[
+        bool,
+        typer.Option(
+            "--smoke-test",
+            "-st",
+            help="Enable smoke testing",
+        ),
+    ] = False,
 ) -> None:
     """List SuperNodes in the federation."""
     # Resolve command used (list or ls)
@@ -98,7 +106,7 @@ def ls(  # pylint: disable=R0914
             channel = init_channel(app, federation_config, auth_plugin)
             stub = ControlStub(channel)
             typer.echo("📄 Listing all nodes...")
-            formatted_nodes = _list_nodes(stub)
+            formatted_nodes = _list_nodes(stub, smoke_test=smoke)
             restore_output()
             if output_format == CliOutputFormat.JSON:
                 Console().print_json(_to_json(formatted_nodes, verbose=verbose))
@@ -125,10 +133,12 @@ def ls(  # pylint: disable=R0914
         captured_output.close()
 
 
-def _list_nodes(stub: ControlStub) -> list[_NodeListType]:
+def _list_nodes(stub: ControlStub, smoke_test: bool) -> list[_NodeListType]:
     """List all nodes."""
     with flwr_cli_grpc_exc_handler():
-        res: ListNodesCliResponse = stub.ListNodesCli(ListNodesCliRequest())
+        res: ListNodesCliResponse = stub.ListNodesCli(
+            ListNodesCliRequest(smoke_test=smoke_test)
+        )
 
     return _format_nodes(list(res.nodes_info), res.now)
 

@@ -103,7 +103,7 @@ message CreateNodeCliResponse { optional uint64 node_id = 1; }
 message DeleteNodeCliRequest { uint64 node_id = 1; }
 message DeleteNodeCliResponse {}
 
-message ListNodesCliRequest {}
+message ListNodesCliRequest { bool smoke_test = 1; }
 message ListNodesCliResponse {
   repeated NodeInfo nodes_info = 1;
   string now = 2;

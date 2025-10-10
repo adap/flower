@@ -279,8 +279,13 @@ global___DeleteNodeCliResponse = DeleteNodeCliResponse
 
 class ListNodesCliRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    SMOKE_TEST_FIELD_NUMBER: builtins.int
+    smoke_test: builtins.bool
     def __init__(self,
+        *,
+        smoke_test: builtins.bool = ...,
         ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["smoke_test",b"smoke_test"]) -> None: ...
 global___ListNodesCliRequest = ListNodesCliRequest
 
 class ListNodesCliResponse(google.protobuf.message.Message):
