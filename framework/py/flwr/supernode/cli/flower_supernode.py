@@ -17,7 +17,7 @@
 
 import argparse
 import json
-from logging import DEBUG, INFO, WARN
+from logging import DEBUG, INFO, WARN, ERROR
 from pathlib import Path
 from typing import Optional
 
@@ -62,6 +62,9 @@ def flower_supernode() -> None:
             "Ignoring `--flwr-dir`.",
         )
 
+    if args.enable_entity_verification and not args.trust_entity:
+        flwr_exit(ExitCode.SUPERNODE_TRUST_ENTITY_REQUIRED)
+
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     authentication_keys = _try_setup_client_authentication(args)
 
@@ -83,6 +86,7 @@ def flower_supernode() -> None:
         clientappio_api_address=args.clientappio_api_address,
         health_server_address=args.health_server_address,
         trust_entity=args.trust_entity,
+        enable_entity_verification=args.enable_entity_verification,
     )
 
 
@@ -134,6 +138,13 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
             'Example: \'{"key-id1": "pubkey1", "key-id2": "pubkey2"}\' '
         ),
     )
+    parser.add_argument(
+        "--enable-entity-verification",
+        action="store_true",
+        help="If this flag is set, all apps must be signed by a trusted"
+        f" entity. If set, at least one trusted entity must be provided.",
+    )
+ 
     add_args_health(parser)
 
     return parser

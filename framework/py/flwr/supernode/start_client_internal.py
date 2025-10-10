@@ -15,18 +15,22 @@
 """Main loop for Flower SuperNode."""
 
 
+import hashlib
+import json
 import os
 import subprocess
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from functools import partial
-from logging import INFO
+from logging import INFO, WARN
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
 import grpc
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import ed25519
 from grpc import RpcError
 
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
@@ -59,6 +63,7 @@ from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
+from flwr.supercore.primitives.asymmetric_ed25519 import verify_signature, create_signed_message, decode_base64url
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 
@@ -87,6 +92,7 @@ def start_client_internal(
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     health_server_address: Optional[str] = None,
     trust_entity: Optional[dict[str, str]] = None,
+    enable_entity_verification: Optional[bool] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -141,6 +147,8 @@ def start_client_internal(
     trust_entity : Optional[dict[str, str]] (default: None)
         A list of trusted entities. Only apps verified by at least one of these
         entities can run on a supernode.
+    enable_entity_verification : Optional[bool] (default: None)
+        Perform entity app verification using the trust_entity list.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -229,6 +237,7 @@ def start_client_internal(
                 pull_object=pull_object,
                 confirm_message_received=confirm_message_received,
                 trust_entity=trust_entity,
+                enable_entity_verification=enable_entity_verification,
             )
 
             # No message has been pulled therefore we can skip the push stage.
@@ -256,6 +265,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     pull_object: Callable[[int, str], bytes],
     confirm_message_received: Callable[[int, str], None],
     trust_entity: Optional[dict[str, str]],
+    enable_entity_verification: Optional[bool],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
@@ -304,6 +314,42 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
             # Verify the received FAB
             #########################
+            verification = json.loads(fab.meta["verification"])
+
+            # FAB must be signed if trust entity provided
+            if enable_entity_verification:
+                fab_verified = False
+                for entity in verification:
+                    public_key_id = entity["public_key_id"]
+                    if public_key_id in trust_entity:
+                        # TODO: Refactor all ed25519 crypto into flwr.supercore.primitives.asymmetric package
+                        verifier_public_key = serialization.load_pem_public_key(
+                            trust_entity[public_key_id].encode("utf-8"))
+                        if not isinstance(verifier_public_key, ed25519.Ed25519PublicKey):
+                            log(
+                                WARN,
+                                f"The provided public key associated with",
+                                f"trusted entity {public_key_id} is not Ed25519"
+                            )
+                            continue
+                        signed_message = create_signed_message(
+                            hashlib.sha256(fab.content).digest(),
+                            entity["signed_at"],
+                        )
+                        if verify_signature(
+                            verifier_public_key,
+                            signed_message,
+                            decode_base64url(entity["signature"]),
+                        ):
+                            fab_verified = True
+                            break
+                if not fab_verified:
+                    log(
+                        WARN,
+                        "The FAB could not be verified by provided "
+                        "trusted entities.",
+                    )
+                    return None
 
             # Initialize the context
             run_cfg = get_fused_config_from_fab(fab.content, run_info)
