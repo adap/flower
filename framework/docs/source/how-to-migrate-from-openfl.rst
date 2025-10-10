@@ -454,7 +454,7 @@ information is passed to each ``ClientApp`` through the ``Context``:
         num_partitions = context.node_config["num-partitions"]
         trainloader, _ = load_data(partition_id, num_partitions)
 
-Flower also has it's own library for partitioning single datasets in distributions
+Flower also has its own library for partitioning single datasets in distributions
 representative of what can be expected in real world settings. For more information, see
 the `flwr-datasets <https://flower.ai/docs/datasets/>`_ documentation for details.
 
