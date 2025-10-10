@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
+from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from rich.console import Console
@@ -32,6 +33,7 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
 )
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     CreateNodeCliRequest,
@@ -163,7 +165,7 @@ def try_load_public_key(public_key_path: Path) -> bytes:
 
     with open(public_key_path, "rb") as key_file:
         try:
-            public_key = serialization.load_pem_public_key(key_file.read())
+            public_key = serialization.load_ssh_public_key(key_file.read())
 
             if not isinstance(public_key, ec.EllipticCurvePublicKey):
                 raise ValueError(f"Not an EC public key, got {type(public_key)}")
@@ -174,11 +176,9 @@ def try_load_public_key(public_key_path: Path) -> bytes:
                     f"EC curve {public_key.curve.name} is not an approved NIST curve"
                 )
 
-        except ValueError as err:
-            typer.secho(
-                f"❌ Unable to load public key from '{public_key_path}': {err}",
-                fg=typer.colors.RED,
-                bold=True,
+        except (ValueError, UnsupportedAlgorithm) as err:
+            flwr_exit(
+                ExitCode.FLWRCLI_NODE_AUTH_PUBLIC_KEY_INVALID,
+                str(err),
             )
-            raise typer.Exit(code=1) from err
     return public_key_to_bytes(public_key)
