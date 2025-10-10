@@ -18,7 +18,7 @@ from logging import ERROR
 from typing import Optional
 
 from flwr.common import Message, log
-from flwr.common.constant import Status
+from flwr.common.constant import NOOP_FLWR_AID, Status
 from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.serde import (
     fab_to_proto,
@@ -70,7 +70,9 @@ def create_node(
 ) -> CreateNodeResponse:
     """."""
     # Create node
-    node_id = state.create_node(request.public_key, request.heartbeat_interval)
+    node_id = state.create_node(
+        NOOP_FLWR_AID, request.public_key, request.heartbeat_interval
+    )
     return CreateNodeResponse(node=Node(node_id=node_id))
 
 
@@ -81,7 +83,7 @@ def delete_node(request: DeleteNodeRequest, state: LinkState) -> DeleteNodeRespo
         return DeleteNodeResponse()
 
     # Update state
-    state.delete_node(node_id=request.node.node_id)
+    state.delete_node(NOOP_FLWR_AID, node_id=request.node.node_id)
     return DeleteNodeResponse()
 
 
