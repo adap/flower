@@ -121,7 +121,8 @@ EXIT_CODE_HELP = {
     ),
     # FlowerCLI-specific exit codes (500-599)
     ExitCode.NODE_AUTH_PUBLIC_KEY_INVALID: (
-        "Node authentication requires a valid elliptic curve public key. "
+        "Node authentication requires a valid elliptic curve public key in the "
+        "SSH format and following a NIST standard elliptic curve (e.g. SECP384R1). "
         "Please ensure that the file path points to a valid public key "
         "file and try again."
     ),
