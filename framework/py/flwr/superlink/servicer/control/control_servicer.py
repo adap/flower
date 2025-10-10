@@ -17,7 +17,7 @@
 
 import hashlib
 import time
-from collections.abc import Generator
+from collections.abc import Generator, Sequence
 from datetime import timedelta
 from logging import ERROR, INFO
 from typing import Any, Optional, cast
@@ -464,7 +464,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
             raise grpc.RpcError()  # This line is unreachable
 
-        nodes_info: list[NodeInfo] = []
+        nodes_info: Sequence[NodeInfo] = []
         # If smoke test is enabled, create dummy NodeInfo data
         if request.smoke_test:
             nodes_info = _create_list_nodeif_for_smoke_test()
@@ -481,7 +481,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         return ListNodesCliResponse(nodes_info=nodes_info, now=now().isoformat())
 
 
-def _create_list_nodeif_for_smoke_test() -> list[NodeInfo]:
+def _create_list_nodeif_for_smoke_test() -> Sequence[NodeInfo]:
     """Create a list of NodeInfo for smoke testing."""
     nodes_info: list[NodeInfo] = []
     # A node created (but not connected)

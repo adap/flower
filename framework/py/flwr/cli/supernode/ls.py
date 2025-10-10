@@ -47,7 +47,7 @@ from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugi
 _NodeListType = tuple[int, str, str, str, str, str, str, str]
 
 
-def ls(  # pylint: disable=R0914
+def ls(  # pylint: disable=R0914, R0913, R0917
     ctx: typer.Context,
     app: Annotated[
         Path,
