@@ -10,6 +10,7 @@
 # ==============================================================================
 """Ed25519-only asymmetric cryptography utilities."""
 
+import base64
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
@@ -140,7 +141,14 @@ def verify_signature(public_key: ed25519.Ed25519PublicKey, message: bytes, signa
     except InvalidSignature:
         return False
 
+
 def create_signed_message(fab_digest: bytes, timestamp: int) -> bytes:
     # Create a canonical message: timestamp (8 bytes big-endian) + fab_digest
     timestamp_bytes = timestamp.to_bytes(8, byteorder="big")
     return timestamp_bytes + fab_digest
+
+
+def decode_base64url(s: str) -> bytes:
+    # add missing padding (=) to a multiple of 4
+    pad = (-len(s)) % 4
+    return base64.urlsafe_b64decode(s + ("=" * pad))
