@@ -44,7 +44,7 @@ OpenFL Migration Guide
 ======================
 
 It was `recently announced
-<https://github.com/securefederatedai/openfederatedlearning>`_ that the The Open
+<https://github.com/securefederatedai/openfederatedlearning>`_ that The Open
 Federated Learning project (formerly known as OpenFL) is no longer being developed or
 maintained. This guide, written in collaboration with the OpenFL developers, aims to
 create an easy path for OpenFL users to bring their workloads into Flower.
