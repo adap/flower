@@ -150,7 +150,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
             fab = None
             if run and run.fab_hash:
                 if result := ffs.get(run.fab_hash):
-                    fab = Fab(run.fab_hash, result[0])
+                    fab = Fab(run.fab_hash, result[0], {})
             if run and fab and serverapp_ctxt:
                 # Update run status to STARTING
                 if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
