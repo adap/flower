@@ -77,7 +77,6 @@ def ls(  # pylint: disable=R0914, R0913, R0917
         bool,
         typer.Option(
             "--dry-run",
-            "-dr",
             help="Simulate the command without contacting any SuperNodes",
         ),
     ] = False,
