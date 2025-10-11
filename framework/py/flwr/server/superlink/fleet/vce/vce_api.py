@@ -63,6 +63,9 @@ def _register_nodes(
             secrets.token_bytes(32),
             heartbeat_interval=HEARTBEAT_MAX_INTERVAL,
         )
+        state.acknowledge_node_heartbeat(
+            node_id=node_id, heartbeat_interval=HEARTBEAT_MAX_INTERVAL
+        )
         nodes_mapping[node_id] = i
     log(DEBUG, "Registered %i nodes", len(nodes_mapping))
     return nodes_mapping
