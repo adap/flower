@@ -442,9 +442,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> DeleteNodeCliResponse:
         """Remove a SuperNode."""
         log(INFO, "ControlServicer.RemoveNode")
-        if not self.enable_supernode_auth:
-            context.abort(grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE)
-            raise grpc.RpcError()  # This line is unreachable
 
         # Init link state
         state = self.linkstate_factory.state()
@@ -464,9 +461,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> ListNodesCliResponse:
         """List all SuperNodes."""
         log(INFO, "ControlServicer.ListNodesCli")
-        if not self.enable_supernode_auth:
-            context.abort(grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE)
-            raise grpc.RpcError()  # This line is unreachable
 
         if self.is_simulation:
             log(ERROR, "ListNodesCli is not available in simulation mode.")

@@ -331,8 +331,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
             elif e.details() == NODE_AUTH_DISABLED_MESSAGE:  # pylint: disable=E1101
                 typer.secho(
                     "❌ Node authentication is disabled on this SuperLink. "
-                    "Creating, deleting and listing nodes via the Flower CLI is not "
-                    "available.",
+                    "Creating a SuperNode via the Flower CLI is not available.",
                     fg=typer.colors.RED,
                     bold=True,
                 )

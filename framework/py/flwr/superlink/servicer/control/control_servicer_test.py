@@ -324,31 +324,6 @@ class TestControlServicerNoNodeAuth(unittest.TestCase):
                 grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE
             )
 
-    def test_delete_node_cli_auth_disabled(self) -> None:
-        """Test DeleteNodeCli method of ControlServicer when supernode auth is
-        disabled."""
-        # Execute
-        req = DeleteNodeCliRequest(node_id=1234)
-        ctx = Mock()
-        try:
-            self.servicer.DeleteNodeCli(req, ctx)
-        except grpc.RpcError:
-            ctx.abort.assert_called_once_with(
-                grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE
-            )
-
-    def test_list_nodes_cli_auth_disabled(self) -> None:
-        """Test ListNodesCli method of ControlServicer when supernode auth is
-        disabled."""
-        # Execute
-        ctx = Mock()
-        try:
-            self.servicer.ListNodesCli(Mock(), ctx)
-        except grpc.RpcError:
-            ctx.abort.assert_called_once_with(
-                grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE
-            )
-
 
 class TestControlServicerAuth(unittest.TestCase):
     """Test ControlServicer methods with authentication plugin and flwr_aid checking."""
