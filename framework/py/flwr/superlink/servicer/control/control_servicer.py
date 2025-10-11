@@ -399,6 +399,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, "ControlServicer.CreateNodeCli")
         if not self.enable_supernode_auth:
             context.abort(grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE)
+            raise grpc.RpcError()  # This line is unreachable
 
         # Verify public key
         try:
@@ -443,6 +444,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, "ControlServicer.RemoveNode")
         if not self.enable_supernode_auth:
             context.abort(grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE)
+            raise grpc.RpcError()  # This line is unreachable
 
         # Init link state
         state = self.linkstate_factory.state()
@@ -464,6 +466,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, "ControlServicer.ListNodesCli")
         if not self.enable_supernode_auth:
             context.abort(grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE)
+            raise grpc.RpcError()  # This line is unreachable
 
         nodes_info = []
         # A node created (but not connected)

@@ -29,6 +29,7 @@ from parameterized import parameterized
 
 from flwr.common import ConfigRecord, now
 from flwr.common.constant import (
+    NODE_AUTH_DISABLED_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
@@ -81,6 +82,7 @@ class TestControlServicer(unittest.TestCase):
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(store=Mock(return_value=self.store)),
             is_simulation=False,
+            enable_supernode_auth=True,
             authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
         )
         account_info = authn_plugin.validate_tokens_in_metadata([])[1]
@@ -250,6 +252,68 @@ class TestControlServicer(unittest.TestCase):
         self.servicer.CreateNodeCli(CreateNodeCliRequest(public_key=pub_key), Mock())
 
 
+class TestControlServicerNoNodeAuth(unittest.TestCase):
+    """Test the Control API servicer when supernode auth is disabled."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.store = Mock()
+        self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        self.servicer = ControlServicer(
+            linkstate_factory=LinkStateFactory(":flwr-in-memory-state:"),
+            ffs_factory=FfsFactory(self.tmp_dir.name),
+            objectstore_factory=Mock(store=Mock(return_value=self.store)),
+            is_simulation=False,
+            enable_supernode_auth=False,
+            authn_plugin=NoOpControlAuthnPlugin(Mock(), False),
+        )
+
+    def tearDown(self) -> None:
+        """Clean up after tests."""
+        self.tmp_dir.cleanup()
+
+    def test_create_node_cli_auth_disabled(self) -> None:
+        """Test CreateNodeCli method of ControlServicer when supernode auth is
+        disabled."""
+        # Prepare
+        pub_key = public_key_to_bytes(generate_key_pairs()[1])
+
+        # Execute
+        req = CreateNodeCliRequest(public_key=pub_key)
+        ctx = Mock()
+        try:
+            self.servicer.CreateNodeCli(req, ctx)
+        except grpc.RpcError:
+            ctx.abort.assert_called_once_with(
+                grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE
+            )
+
+    def test_delete_node_cli_auth_disabled(self) -> None:
+        """Test DeleteNodeCli method of ControlServicer when supernode auth is
+        disabled."""
+        # Execute
+        req = DeleteNodeCliRequest(node_id=1234)
+        ctx = Mock()
+        try:
+            self.servicer.DeleteNodeCli(req, ctx)
+        except grpc.RpcError:
+            ctx.abort.assert_called_once_with(
+                grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE
+            )
+
+    def test_list_nodes_cli_auth_disabled(self) -> None:
+        """Test ListNodesCli method of ControlServicer when supernode auth is
+        disabled."""
+        # Execute
+        ctx = Mock()
+        try:
+            self.servicer.ListNodesCli(Mock(), ctx)
+        except grpc.RpcError:
+            ctx.abort.assert_called_once_with(
+                grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE
+            )
+
+
 class TestControlServicerAuth(unittest.TestCase):
     """Test ControlServicer methods with authentication plugin and flwr_aid checking."""
 
@@ -261,6 +325,7 @@ class TestControlServicerAuth(unittest.TestCase):
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(),
             is_simulation=False,
+            enable_supernode_auth=True,
             authn_plugin=Mock(),
         )
         self.state = self.servicer.linkstate_factory.state()
