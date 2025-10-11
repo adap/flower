@@ -8,8 +8,6 @@ def init_csv():
     global CSV_PATH, CSV_INITIALIZED
     if CSV_INITIALIZED:
         return CSV_PATH
-
-    # Nome fisso per questa esecuzione
     base_name = f"serialization_times_{ENCRYPTION_METHOD}.csv" if ENCRYPTION_ENABLED else "serialization_times_noCritto.csv"
     CSV_PATH = base_name
 

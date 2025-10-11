@@ -270,11 +270,12 @@ def fitins_to_recorddict(fitins: FitIns, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a FitIns object."""
     import io
     import numpy as np
-    log_time(f"config {fitins.config}")
+
     total_bytes = 0
+    log_time(f"Numero tensors: {len(fitins.parameters.tensors)}")
     for i, tensor_bytes in enumerate(fitins.parameters.tensors):
         # Deserializza il tensore NumPy
-        log_time(f"Numero tensors: {len(fitins.parameters.tensors)}")
+
         tensor = np.load(io.BytesIO(tensor_bytes))
         n_bytes = tensor.nbytes  # byte in memoria
         total_bytes += n_bytes

@@ -35,7 +35,6 @@ def get_model(model_name: str, num_classes=10, pretrained=False):
                 x = F.relu(self.fc1(x))
                 x = F.relu(self.fc2(x))
                 return self.fc3(x)
-
         return CustomCNN()
 
     elif model_name == "resnet18":
