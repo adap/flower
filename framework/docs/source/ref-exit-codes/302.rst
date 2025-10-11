@@ -18,15 +18,15 @@ How to Resolve
 1. Ensure that the file paths provided for the private and public key options are
    correct.
 
-2. Verify that both files exist and contain valid elliptic curve keys. - The private key
-file should be in a format compatible with elliptic curve cryptography. - The public key
-file should match the private key.
+2. Verify that both files exist and contain valid elliptic curve ssh keys. - The private
+key file should be in a format compatible with elliptic curve cryptography. - The public
+key file should match the private key.
 
 3. If the files are corrupted or not in the correct format, regenerate the elliptic
-curve key pair and update the file paths accordingly. For example, in Linux/MacOS, **for
-rapid prototyping only** (not production; follow company procedures for key management):
+curve ssh key pair and update the file paths accordingly. For example, in Linux/MacOS,
+**for rapid prototyping only** (not production; follow company procedures for key
+management):
 
 .. code-block:: bash
 
-    openssl ecparam-genkey -name secp384r1 -out private_key.pem
-    openssl ec -in private_key.pem -pubout -out public_key.pem
+    ssh-keygen -t ecdsa -b 384 -N "" -f id_ecdsa_nistp384
