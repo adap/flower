@@ -47,7 +47,7 @@ from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugi
 _NodeListType = tuple[int, str, str, str, str, str, str, str]
 
 
-def ls(  # pylint: disable=R0914
+def ls(  # pylint: disable=R0914, R0913, R0917
     ctx: typer.Context,
     app: Annotated[
         Path,
@@ -71,6 +71,13 @@ def ls(  # pylint: disable=R0914
             "--verbose",
             "-v",
             help="Enable verbose output",
+        ),
+    ] = False,
+    dry_run: Annotated[
+        bool,
+        typer.Option(
+            "--dry-run",
+            help="Simulate the command without contacting any SuperNodes",
         ),
     ] = False,
 ) -> None:
@@ -98,7 +105,7 @@ def ls(  # pylint: disable=R0914
             channel = init_channel(app, federation_config, auth_plugin)
             stub = ControlStub(channel)
             typer.echo("📄 Listing all nodes...")
-            formatted_nodes = _list_nodes(stub)
+            formatted_nodes = _list_nodes(stub, dry_run=dry_run)
             restore_output()
             if output_format == CliOutputFormat.JSON:
                 Console().print_json(_to_json(formatted_nodes, verbose=verbose))
@@ -125,10 +132,12 @@ def ls(  # pylint: disable=R0914
         captured_output.close()
 
 
-def _list_nodes(stub: ControlStub) -> list[_NodeListType]:
+def _list_nodes(stub: ControlStub, dry_run: bool) -> list[_NodeListType]:
     """List all nodes."""
     with flwr_cli_grpc_exc_handler():
-        res: ListNodesCliResponse = stub.ListNodesCli(ListNodesCliRequest())
+        res: ListNodesCliResponse = stub.ListNodesCli(
+            ListNodesCliRequest(dry_run=dry_run)
+        )
 
     return _format_nodes(list(res.nodes_info), res.now)
 

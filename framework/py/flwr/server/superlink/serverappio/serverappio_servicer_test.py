@@ -150,6 +150,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         self.store = objectstore_factory.store()
         self.node_pk = b"fake public key"
         self.node_id = self.state.create_node("mock_owner", self.node_pk, 30)
+        self.state.acknowledge_node_heartbeat(self.node_id, 1e3)
 
         self.status_to_msg = _STATUS_TO_MSG
 
