@@ -77,10 +77,10 @@ CREATE TABLE IF NOT EXISTS node(
     owner_aid               TEXT,
     status                  TEXT,
     created_at              TEXT,
-    last_activated_at       TEXT,
-    last_deactivated_at     TEXT,
-    deleted_at              TEXT,
-    online_until            TIMESTAMP,
+    last_activated_at       TEXT NULL,
+    last_deactivated_at     TEXT NULL,
+    deleted_at              TEXT NULL,
+    online_until            TIMESTAMP NULL,
     heartbeat_interval      REAL,
     public_key              BLOB UNIQUE
 );
@@ -638,10 +638,10 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                     owner_aid,  # owner_aid
                     NodeStatus.CREATED,  # status
                     now().isoformat(),  # created_at
-                    "",  # last_activated_at
-                    "",  # last_deactivated_at
-                    "",  # deleted_at
-                    0.0,  # online_until, initialized with offline status
+                    None,  # last_activated_at
+                    None,  # last_deactivated_at
+                    None,  # deleted_at
+                    None,  # online_until, initialized with offline status
                     heartbeat_interval,  # heartbeat_interval
                     public_key,  # public_key
                 ),
