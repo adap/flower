@@ -425,16 +425,16 @@ def _try_load_public_keys_node_authentication(
             "authentication no longer requires these arguments.",
         )
 
-    if not args.enable_supernode_auth:
+    if not args.auth_list_public_keys:
         return None
 
-    node_keys_file_path = Path(args.enable_supernode_auth)
+    node_keys_file_path = Path(args.auth_list_public_keys)
     if not node_keys_file_path.exists():
         sys.exit(
             "The provided path to the known public keys CSV file does not exist: "
             f"{node_keys_file_path}. "
             "Please provide the CSV file path containing known public keys "
-            "to '--enable-supernode-auth'."
+            "to '--auth-list-public-keys'."
         )
 
     node_public_keys: set[bytes] = set()
@@ -730,10 +730,15 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         default=BASE_DIR,
     )
     parser.add_argument(
-        "--enable-supernode-auth",
+        "--auth-list-public-keys",
         type=str,
         help="A CSV file (as a path str) containing a list of known public "
         "keys to enable authentication.",
+    )
+    parser.add_argument(
+        "--enable-supernode-auth",
+        action="store_true",
+        help="Enable supernode authentication.",
     )
     parser.add_argument(
         "--auth-superlink-private-key",

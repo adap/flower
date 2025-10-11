@@ -219,7 +219,7 @@ def test_setup_node_auth() -> None:  # pylint: disable=R0914
 
         # Mock argparse with `require-node-authentication`` flag
         mock_args = argparse.Namespace(
-            enable_supernode_auth=str(node_keys_file_path),
+            auth_list_public_keys=str(node_keys_file_path),
             auth_superlink_private_key="",
             auth_superlink_public_key="",
         )

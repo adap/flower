@@ -42,7 +42,7 @@ case "$2" in
     server_address="127.0.0.1:9092"
     server_app_address="127.0.0.1:9091"
     db_arg="--database :flwr-in-memory-state:"
-    server_auth="--enable-supernode-auth keys/client_public_keys.csv"
+    server_auth="--auth-list-public-keys keys/client_public_keys.csv"
     client_auth_1="--auth-supernode-private-key keys/client_credentials_1 --auth-supernode-public-key keys/client_credentials_1.pub"
     client_auth_2="--auth-supernode-private-key keys/client_credentials_2 --auth-supernode-public-key keys/client_credentials_2.pub"
     ;;
