@@ -395,7 +395,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return set()
             return {
                 node.node_id
-                for node in self.get_node_info(statuses=[NodeStatus.ACTIVATED])
+                for node in self.get_node_info(statuses=[NodeStatus.ONLINE])
             }
 
     def get_node_info(
@@ -421,12 +421,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def _check_and_tag_deactivated_nodes(self) -> None:
         with self.lock:
-            # Set all nodes of "activated" status to "deactivated" if they've offline
+            # Set all nodes of "online" status to "offline" if they've offline
             current_ts = now().timestamp()
             for node in self.nodes.values():
-                if node.status == NodeStatus.ACTIVATED:
+                if node.status == NodeStatus.ONLINE:
                     if node.online_until <= current_ts:
-                        node.status = NodeStatus.DEACTIVATED
+                        node.status = NodeStatus.OFFLINE
                         node.last_deactivated_at = datetime.fromtimestamp(
                             node.online_until
                         ).isoformat()
@@ -649,8 +649,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 current_dt = now()
 
                 # Set timestamp if the status changes
-                if node.status != NodeStatus.ACTIVATED:  # deactivated or created
-                    node.status = NodeStatus.ACTIVATED
+                if node.status != NodeStatus.ONLINE:  # offline or created
+                    node.status = NodeStatus.ONLINE
                     node.last_activated_at = current_dt.isoformat()
 
                 # Refresh `online_until` and `heartbeat_interval`

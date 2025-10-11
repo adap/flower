@@ -25,8 +25,8 @@ class NodeStatus:
     """Event log writer types."""
 
     CREATED = "created"
-    ACTIVATED = "activated"
-    DEACTIVATED = "deactivated"
+    ONLINE = "online"
+    OFFLINE = "offline"
     DELETED = "deleted"
 
     def __new__(cls) -> NodeStatus:

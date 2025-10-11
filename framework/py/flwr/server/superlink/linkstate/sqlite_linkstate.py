@@ -701,9 +701,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if rows[0]["COUNT(*)"] == 0:
             return set()
 
-        # Retrieve all activated nodes
+        # Retrieve all online nodes
         return {
-            node.node_id for node in self.get_node_info(statuses=[NodeStatus.ACTIVATED])
+            node.node_id for node in self.get_node_info(statuses=[NodeStatus.ONLINE])
         }
 
     def get_node_info(
@@ -718,7 +718,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             raise AttributeError("LinkState is not initialized.")
 
         with self.conn:
-            # Check and tag deactivated nodes
+            # Check and tag offline nodes
             current_dt = now()
             # strftime will convert POSIX timestamp to ISO format
             query = """
@@ -728,9 +728,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 WHERE online_until <= ? AND status == ?
             """
             params: list[Any] = [
-                NodeStatus.DEACTIVATED,
+                NodeStatus.OFFLINE,
                 current_dt.timestamp(),
-                NodeStatus.ACTIVATED,
+                NodeStatus.ONLINE,
             ]
             self.conn.execute(query, params)
 
@@ -1081,9 +1081,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             ]
 
             # Set timestamp if the status changes
-            if row["status"] != NodeStatus.ACTIVATED:
+            if row["status"] != NodeStatus.ONLINE:
                 query += ", status = ?, last_activated_at = ?"
-                params += [NodeStatus.ACTIVATED, current_dt.isoformat()]
+                params += [NodeStatus.ONLINE, current_dt.isoformat()]
 
             # Execute the query, refreshing `online_until` and `heartbeat_interval`
             query += " WHERE node_id = ?"

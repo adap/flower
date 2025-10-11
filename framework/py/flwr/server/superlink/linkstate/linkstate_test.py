@@ -730,12 +730,12 @@ class StateTest(CoreStateTest):
         state.delete_node("mock_flwr_aid", node_deleted)
 
         # Execute
-        infos = state.get_node_info(statuses=[NodeStatus.CREATED, NodeStatus.ACTIVATED])
+        infos = state.get_node_info(statuses=[NodeStatus.CREATED, NodeStatus.ONLINE])
         returned_statuses = {info.status for info in infos}
 
-        # Assert: should only contain CREATED and ACTIVATED
+        # Assert: should only contain CREATED and ONLINE
         self.assertTrue(NodeStatus.CREATED in returned_statuses)
-        self.assertTrue(NodeStatus.ACTIVATED in returned_statuses)
+        self.assertTrue(NodeStatus.ONLINE in returned_statuses)
         self.assertFalse(NodeStatus.DELETED in returned_statuses)
 
     def test_get_node_info_multiple_filters(self) -> None:
@@ -746,10 +746,8 @@ class StateTest(CoreStateTest):
         _ = create_dummy_node(state, owner_aid="bob")
         _ = create_dummy_node(state, owner_aid="bob", activate=False)
 
-        # Query: owner_aid=alice AND status=ACTIVATED
-        infos = state.get_node_info(
-            owner_aids=["alice"], statuses=[NodeStatus.ACTIVATED]
-        )
+        # Query: owner_aid=alice AND status=ONLINE
+        infos = state.get_node_info(owner_aids=["alice"], statuses=[NodeStatus.ONLINE])
         returned_ids = [info.node_id for info in infos]
 
         self.assertEqual(returned_ids, [node1])
@@ -969,18 +967,18 @@ class StateTest(CoreStateTest):
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = future_dt
             nodes = state.get_node_info(node_ids=node_ids)
-            activated_node_ids = {
-                node.node_id for node in nodes if node.status == NodeStatus.ACTIVATED
+            online_node_ids = {
+                node.node_id for node in nodes if node.status == NodeStatus.ONLINE
             }
 
         # Assert
         # Allow up to 1 decimal place difference due to file-based SQLite DB speed.
         # CI runs on cracky old machines, so minor delays are expected.
-        self.assertSetEqual(activated_node_ids, set(node_ids[7:]))
+        self.assertSetEqual(online_node_ids, set(node_ids[7:]))
         for node in nodes:
             actual = datetime.fromisoformat(node.last_activated_at).timestamp()
             self.assertAlmostEqual(actual, expected_activated_at, 1)
-            if node.status == NodeStatus.DEACTIVATED:
+            if node.status == NodeStatus.OFFLINE:
                 actual = datetime.fromisoformat(node.last_deactivated_at).timestamp()
                 self.assertAlmostEqual(actual, expected_deactivated_at, 1)
 
