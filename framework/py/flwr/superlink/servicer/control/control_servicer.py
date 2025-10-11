@@ -17,7 +17,7 @@
 
 import hashlib
 import time
-from collections.abc import Generator
+from collections.abc import Generator, Sequence
 from datetime import timedelta
 from logging import ERROR, INFO
 from typing import Any, Optional, cast
@@ -456,60 +456,86 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         """List all SuperNodes."""
         log(INFO, "ControlServicer.ListNodesCli")
 
-        nodes_info = []
-        # A node created (but not connected)
-        nodes_info.append(
-            NodeInfo(
-                node_id=15390646978706312628,
-                owner_aid="owner_aid_1",
-                status="created",
-                created_at=(now()).isoformat(),
-                last_activated_at="",
-                last_deactivated_at="",
-                deleted_at="",
+        if self.is_simulation:
+            log(ERROR, "ListNodesCli is not available in simulation mode.")
+            context.abort(
+                grpc.StatusCode.UNIMPLEMENTED,
+                "ListNodesCli is not available in simulation mode.",
             )
-        )
+            raise grpc.RpcError()  # This line is unreachable
 
-        # A node created and connected
-        nodes_info.append(
-            NodeInfo(
-                node_id=2941141058168602545,
-                owner_aid="owner_aid_2",
-                status="online",
-                created_at=(now()).isoformat(),
-                last_activated_at=(now() + timedelta(hours=0.5)).isoformat(),
-                last_deactivated_at="",
-                deleted_at="",
-            )
-        )
+        nodes_info: Sequence[NodeInfo] = []
+        # If dry run is enabled, create dummy NodeInfo data
+        if request.dry_run:
+            nodes_info = _create_list_nodeif_for_dry_run()
 
-        # A node created and deleted (never connected)
-        nodes_info.append(
-            NodeInfo(
-                node_id=906971720890549292,
-                owner_aid="owner_aid_3",
-                status="deleted",
-                created_at=(now()).isoformat(),
-                last_activated_at="",
-                last_deactivated_at="",
-                deleted_at=(now() + timedelta(hours=1)).isoformat(),
-            )
-        )
+        else:
+            # Init link state
+            state = self.linkstate_factory.state()
 
-        # A node created, deactivate and then deleted
-        nodes_info.append(
-            NodeInfo(
-                node_id=1781174086018058152,
-                owner_aid="owner_aid_4",
-                status="offline",
-                created_at=(now()).isoformat(),
-                last_activated_at=(now() + timedelta(hours=0.5)).isoformat(),
-                last_deactivated_at=(now() + timedelta(hours=1)).isoformat(),
-                deleted_at=(now() + timedelta(hours=1.5)).isoformat(),
-            )
-        )
+            flwr_aid = shared_account_info.get().flwr_aid
+            flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+            # Retrieve all nodes for the account
+            nodes_info = state.get_node_info(owner_aids=[flwr_aid])
 
         return ListNodesCliResponse(nodes_info=nodes_info, now=now().isoformat())
+
+
+def _create_list_nodeif_for_dry_run() -> Sequence[NodeInfo]:
+    """Create a list of NodeInfo for dry run testing."""
+    nodes_info: list[NodeInfo] = []
+    # A node created (but not connected)
+    nodes_info.append(
+        NodeInfo(
+            node_id=15390646978706312628,
+            owner_aid="owner_aid_1",
+            status="created",
+            created_at=(now()).isoformat(),
+            last_activated_at="",
+            last_deactivated_at="",
+            deleted_at="",
+        )
+    )
+
+    # A node created and connected
+    nodes_info.append(
+        NodeInfo(
+            node_id=2941141058168602545,
+            owner_aid="owner_aid_2",
+            status="online",
+            created_at=(now()).isoformat(),
+            last_activated_at=(now() + timedelta(hours=0.5)).isoformat(),
+            last_deactivated_at="",
+            deleted_at="",
+        )
+    )
+
+    # A node created and deleted (never connected)
+    nodes_info.append(
+        NodeInfo(
+            node_id=906971720890549292,
+            owner_aid="owner_aid_3",
+            status="deleted",
+            created_at=(now()).isoformat(),
+            last_activated_at="",
+            last_deactivated_at="",
+            deleted_at=(now() + timedelta(hours=1)).isoformat(),
+        )
+    )
+
+    # A node created, deactivate and then deleted
+    nodes_info.append(
+        NodeInfo(
+            node_id=1781174086018058152,
+            owner_aid="owner_aid_4",
+            status="offline",
+            created_at=(now()).isoformat(),
+            last_activated_at=(now() + timedelta(hours=0.5)).isoformat(),
+            last_deactivated_at=(now() + timedelta(hours=1)).isoformat(),
+            deleted_at=(now() + timedelta(hours=1.5)).isoformat(),
+        )
+    )
+    return nodes_info
 
 
 def _create_list_runs_response(

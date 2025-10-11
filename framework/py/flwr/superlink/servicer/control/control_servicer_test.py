@@ -39,6 +39,8 @@ from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     CreateNodeCliRequest,
     DeleteNodeCliRequest,
+    ListNodesCliRequest,
+    ListNodesCliResponse,
     ListRunsRequest,
     StartRunRequest,
     StopRunRequest,
@@ -248,6 +250,40 @@ class TestControlServicer(unittest.TestCase):
 
         # Try to add node with same public key again
         self.servicer.CreateNodeCli(CreateNodeCliRequest(public_key=pub_key), Mock())
+
+    @parameterized.expand(
+        [
+            ("fake_aid", True),  # One NodeId is retrieved
+            ("another_fake_aid", False),  # Zero NodeId are retrieved
+        ]
+    )  # type: ignore
+    def test_list_nodes_cli(self, flwr_aid_retrieving: str, expected: bool) -> None:
+        """Test ListNodesCli method of ControlServicer."""
+        # Prepare
+        pub_key = public_key_to_bytes(generate_key_pairs()[1])
+        node_id = self.state.create_node(
+            owner_aid="fake_aid", public_key=pub_key, heartbeat_interval=10
+        )
+
+        # Execute
+        with patch(
+            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
+            new=SimpleNamespace(
+                get=lambda: SimpleNamespace(flwr_aid=flwr_aid_retrieving)
+            ),
+        ):
+            res: ListNodesCliResponse = self.servicer.ListNodesCli(
+                ListNodesCliRequest(), Mock()
+            )
+
+        # Assert
+        if expected:
+            self.assertEqual(len(res.nodes_info), 1)
+            self.assertEqual(res.nodes_info[0].node_id, node_id)
+            self.assertEqual(res.nodes_info[0].owner_aid, "fake_aid")
+            self.assertEqual(res.nodes_info[0].public_key, pub_key)
+        else:
+            self.assertEqual(len(res.nodes_info), 0)
 
 
 class TestControlServicerAuth(unittest.TestCase):
