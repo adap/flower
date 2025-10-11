@@ -214,6 +214,15 @@ def run_superlink() -> None:
         log(WARN, "The `--artifact-provider-config` flag is highly experimental.")
         artifact_provider = get_ee_artifact_provider(cfg_path)
 
+    # If supernode authentication is disabled, warn users
+    enable_supernode_auth: bool = args.enable_supernode_auth
+    if not enable_supernode_auth:
+        log(
+            WARN,
+            "SuperNode authentication is disabled. The SuperLink will accept "
+            "connections from any SuperNode.",
+        )
+
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
 
@@ -232,6 +241,7 @@ def run_superlink() -> None:
         objectstore_factory=objectstore_factory,
         certificates=certificates,
         is_simulation=is_simulation,
+        enable_supernode_auth=enable_supernode_auth,
         authn_plugin=authn_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
@@ -724,6 +734,11 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         type=str,
         help="A CSV file (as a path str) containing a list of known public "
         "keys to enable authentication.",
+    )
+    parser.add_argument(
+        "--enable-supernode-auth",
+        action="store_true",
+        help="Enable supernode authentication.",
     )
     parser.add_argument(
         "--auth-superlink-private-key",
