@@ -28,10 +28,14 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
 from flwr.common.constant import (
     FAB_MAX_SIZE,
+    HEARTBEAT_DEFAULT_INTERVAL,
     LOG_STREAM_INTERVAL,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_AUTH_DISABLED_MESSAGE,
+    NODE_NOT_FOUND_MESSAGE,
+    PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
+    PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
     Status,
@@ -71,6 +75,7 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
+from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin
 
@@ -87,7 +92,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         objectstore_factory: ObjectStoreFactory,
         is_simulation: bool,
         enable_supernode_auth: bool,
-        authn_plugin: Optional[ControlAuthnPlugin] = None,
+        authn_plugin: ControlAuthnPlugin,
         artifact_provider: Optional[ArtifactProvider] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
@@ -114,7 +119,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
             return StartRunResponse()
 
-        flwr_aid = shared_account_info.get().flwr_aid if self.authn_plugin else None
+        flwr_aid = shared_account_info.get().flwr_aid
+        _check_flwr_aid_exists(flwr_aid, context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
         fab_file = request.fab.content
@@ -188,12 +194,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         if not run:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
 
-        # If account auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
-        if self.authn_plugin:
-            flwr_aid = shared_account_info.get().flwr_aid
-            _check_flwr_aid_in_run(
-                flwr_aid=flwr_aid, run=cast(Run, run), context=context
-            )
+        # Check if `flwr_aid` matches the run's `flwr_aid`
+        flwr_aid = shared_account_info.get().flwr_aid
+        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=cast(Run, run), context=context)
 
         after_timestamp = request.after_timestamp + 1e-6
         while context.is_active():
@@ -229,20 +232,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Build a set of run IDs for `flwr ls --runs`
         if not request.HasField("run_id"):
-            if self.authn_plugin:
-                # If no `run_id` is specified and account auth is enabled,
-                # return run IDs for the authenticated account
-                flwr_aid = shared_account_info.get().flwr_aid
-                if flwr_aid is None:
-                    context.abort(
-                        grpc.StatusCode.PERMISSION_DENIED,
-                        "️⛔️ Account authentication is enabled, but `flwr_aid` is None",
-                    )
-                run_ids = state.get_run_ids(flwr_aid=flwr_aid)
-            else:
-                # If no `run_id` is specified and no account auth is enabled,
-                # return all run IDs
-                run_ids = state.get_run_ids(None)
+            # If no `run_id` is specified and account auth is enabled,
+            # return run IDs for the authenticated account
+            flwr_aid = shared_account_info.get().flwr_aid
+            _check_flwr_aid_exists(flwr_aid, context)
+            run_ids = state.get_run_ids(flwr_aid=flwr_aid)
         # Build a set of run IDs for `flwr ls --run-id <run_id>`
         else:
             # Retrieve run ID and run
@@ -252,14 +246,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Exit if `run_id` not found
             if not run:
                 context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+                raise grpc.RpcError()  # This line is unreachable
 
-            # If account auth is enabled,
-            # check if `flwr_aid` matches the run's `flwr_aid`
-            if self.authn_plugin:
-                flwr_aid = shared_account_info.get().flwr_aid
-                _check_flwr_aid_in_run(
-                    flwr_aid=flwr_aid, run=cast(Run, run), context=context
-                )
+            # Check if `flwr_aid` matches the run's `flwr_aid`
+            flwr_aid = shared_account_info.get().flwr_aid
+            _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
             run_ids = {run_id}
 
@@ -281,13 +272,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Exit if `run_id` not found
         if not run:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+            raise grpc.RpcError()  # This line is unreachable
 
-        # If account auth is enabled, check if `flwr_aid` matches the run's `flwr_aid`
-        if self.authn_plugin:
-            flwr_aid = shared_account_info.get().flwr_aid
-            _check_flwr_aid_in_run(
-                flwr_aid=flwr_aid, run=cast(Run, run), context=context
-            )
+        # Check if `flwr_aid` matches the run's `flwr_aid`
+        flwr_aid = shared_account_info.get().flwr_aid
+        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
         run_status = state.get_run_status({run_id})[run_id]
         if run_status.status == Status.FINISHED:
@@ -395,10 +384,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 grpc.StatusCode.FAILED_PRECONDITION, PULL_UNFINISHED_RUN_MESSAGE
             )
 
-        # Check if `flwr_aid` matches the run's `flwr_aid` when account auth is enabled
-        if self.authn_plugin:
-            flwr_aid = shared_account_info.get().flwr_aid
-            _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
+        # Check if `flwr_aid` matches the run's `flwr_aid`
+        flwr_aid = shared_account_info.get().flwr_aid
+        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
         # Call artifact provider
         download_url = self.artifact_provider.get_url(run_id)
@@ -412,7 +400,41 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         if not self.enable_supernode_auth:
             context.abort(grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE)
 
-        return CreateNodeCliResponse()
+        # Verify public key
+        try:
+            # Attempt to deserialize public key
+            pub_key = bytes_to_public_key(request.public_key)
+            # Check if it's a NIST EC curve public key
+            if not uses_nist_ec_curve(pub_key):
+                err_msg = "The provided public key is not a NIST EC curve public key."
+                log(ERROR, "%s", err_msg)
+                raise ValueError(err_msg)
+        except (ValueError, AttributeError) as err:
+            log(ERROR, "%s", err)
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_NOT_VALID)
+
+        # Init link state
+        state = self.linkstate_factory.state()
+        node_id = 0
+
+        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        try:
+            node_id = state.create_node(
+                owner_aid=flwr_aid,
+                public_key=request.public_key,
+                heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
+            )
+
+        except ValueError:
+            # Public key already in use
+            log(ERROR, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE)
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
+            )
+        log(INFO, "[ControlServicer.CreateNodeCli] Created node_id=%s", node_id)
+
+        return CreateNodeCliResponse(node_id=node_id)
 
     def DeleteNodeCli(
         self, request: DeleteNodeCliRequest, context: grpc.ServicerContext
@@ -421,6 +443,18 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, "ControlServicer.RemoveNode")
         if not self.enable_supernode_auth:
             context.abort(grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE)
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        try:
+            state.delete_node(owner_aid=flwr_aid, node_id=request.node_id)
+        except ValueError:
+            log(ERROR, NODE_NOT_FOUND_MESSAGE)
+            context.abort(grpc.StatusCode.NOT_FOUND, NODE_NOT_FOUND_MESSAGE)
+
         return DeleteNodeCliResponse()
 
     def ListNodesCli(
@@ -504,24 +538,30 @@ def _create_list_runs_response(
     )
 
 
+def _check_flwr_aid_exists(
+    flwr_aid: Optional[str], context: grpc.ServicerContext
+) -> str:
+    """Guard clause to check if `flwr_aid` exists."""
+    if flwr_aid is None:
+        context.abort(
+            grpc.StatusCode.PERMISSION_DENIED,
+            "️⛔️ Failed to fetch the account information.",
+        )
+        raise RuntimeError  # This line is unreachable
+    return flwr_aid
+
+
 def _check_flwr_aid_in_run(
     flwr_aid: Optional[str], run: Run, context: grpc.ServicerContext
 ) -> None:
     """Guard clause to check if `flwr_aid` matches the run's `flwr_aid`."""
-    # `flwr_aid` must not be None. Abort if it is None.
-    if flwr_aid is None:
-        context.abort(
-            grpc.StatusCode.PERMISSION_DENIED,
-            "️⛔️ Account authentication is enabled, but `flwr_aid` is None",
-        )
-
+    _check_flwr_aid_exists(flwr_aid, context)
     # `run.flwr_aid` must not be an empty string. Abort if it is empty.
     run_flwr_aid = run.flwr_aid
     if not run_flwr_aid:
         context.abort(
             grpc.StatusCode.PERMISSION_DENIED,
-            "⛔️ Account authentication is enabled, but the run is not associated "
-            "with a `flwr_aid`.",
+            "⛔️ Run is not associated with a `flwr_aid`.",
         )
 
     # Exit if `flwr_aid` does not match the run's `flwr_aid`

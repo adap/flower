@@ -31,7 +31,11 @@ from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.license_plugin import LicensePlugin
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.artifact_provider import ArtifactProvider
-from flwr.superlink.auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
+from flwr.superlink.auth_plugin import (
+    ControlAuthnPlugin,
+    ControlAuthzPlugin,
+    NoOpControlAuthnPlugin,
+)
 
 from .control_account_auth_interceptor import ControlAccountAuthInterceptor
 from .control_event_log_interceptor import ControlEventLogInterceptor
@@ -55,8 +59,8 @@ def run_control_api_grpc(
     certificates: Optional[tuple[bytes, bytes, bytes]],
     is_simulation: bool,
     enable_supernode_auth: bool,
-    authn_plugin: Optional[ControlAuthnPlugin] = None,
-    authz_plugin: Optional[ControlAuthzPlugin] = None,
+    authn_plugin: ControlAuthnPlugin,
+    authz_plugin: ControlAuthzPlugin,
     event_log_plugin: Optional[EventLogWriterPlugin] = None,
     artifact_provider: Optional[ArtifactProvider] = None,
 ) -> grpc.Server:
@@ -74,11 +78,9 @@ def run_control_api_grpc(
         authn_plugin=authn_plugin,
         artifact_provider=artifact_provider,
     )
-    interceptors: list[grpc.ServerInterceptor] = []
+    interceptors = [ControlAccountAuthInterceptor(authn_plugin, authz_plugin)]
     if license_plugin is not None:
         interceptors.append(ControlLicenseInterceptor(license_plugin))
-    if authn_plugin is not None and authz_plugin is not None:
-        interceptors.append(ControlAccountAuthInterceptor(authn_plugin, authz_plugin))
     # Event log interceptor must be added after account auth interceptor
     if event_log_plugin is not None:
         interceptors.append(ControlEventLogInterceptor(event_log_plugin))
@@ -92,7 +94,7 @@ def run_control_api_grpc(
         interceptors=interceptors or None,
     )
 
-    if authn_plugin is None:
+    if isinstance(authn_plugin, NoOpControlAuthnPlugin):
         log(INFO, "Flower Deployment Runtime: Starting Control API on %s", address)
     else:
         log(

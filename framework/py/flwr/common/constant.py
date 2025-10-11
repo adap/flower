@@ -158,6 +158,9 @@ NO_ACCOUNT_AUTH_MESSAGE = "ControlServicer initialized without account authentic
 NO_ARTIFACT_PROVIDER_MESSAGE = "ControlServicer initialized without artifact provider"
 PULL_UNFINISHED_RUN_MESSAGE = "Cannot pull artifacts for an unfinished run"
 NODE_AUTH_DISABLED_MESSAGE = "SuperLink initialized with node authentication disabled"
+PUBLIC_KEY_ALREADY_IN_USE_MESSAGE = "Public key already in use"
+PUBLIC_KEY_NOT_VALID = "The provided public key is not valid"
+NODE_NOT_FOUND_MESSAGE = "Node ID not found for account"
 
 
 class MessageType:
@@ -253,6 +256,16 @@ class AuthnType:
     OIDC = "oidc"
 
     def __new__(cls) -> AuthnType:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class AuthzType:
+    """Account authorization types."""
+
+    NOOP = "noop"
+
+    def __new__(cls) -> AuthzType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
