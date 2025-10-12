@@ -104,11 +104,11 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
     cpu_time = end_cpu - start_cpu
     end_tot = time.perf_counter();
     tot = end_tot - start_tot
-    log_time(
-        f"[{time.strftime('%H:%M:%S')}.{int(time.time()*1e6)%1_000_000:06d}] "
-        f"Tempo totale deserializzazione (wall): {wall_time:.5f} s | "
-        f"CPU time (decrypt+check): {cpu_time:.5f} s"
-    )
+    # log_time(
+    #     f"[{time.strftime('%H:%M:%S')}.{int(time.time()*1e6)%1_000_000:06d}] "
+    #     f"Tempo totale deserializzazione (wall): {wall_time:.5f} s | "
+    #     f"CPU time (decrypt+check): {cpu_time:.5f} s"
+    # )
     return parameters
 
 
@@ -169,11 +169,11 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
 
     wall_time = end_wall - start_wall
     cpu_time = end_cpu - start_cpu
-    log_time(
-        f"[{time.strftime('%H:%M:%S')}.{int(time.time()*1e6)%1_000_000:06d}] "
-        f"Tempo totale serializzazione (wall): {wall_time:.5f}s | "
-        f"CPU time (encrypt+serialize): {cpu_time:.5f}s"
-    )
+    # log_time(
+    #     f"[{time.strftime('%H:%M:%S')}.{int(time.time()*1e6)%1_000_000:06d}] "
+    #     f"Tempo totale serializzazione (wall): {wall_time:.5f}s | "
+    #     f"CPU time (encrypt+serialize): {cpu_time:.5f}s"
+    # )
     return ArrayRecord(ordered_dict, keep_input=keep_input)
 
 
@@ -272,16 +272,16 @@ def fitins_to_recorddict(fitins: FitIns, keep_input: bool) -> RecordDict:
     import numpy as np
 
     total_bytes = 0
-    log_time(f"Numero tensors: {len(fitins.parameters.tensors)}")
-    for i, tensor_bytes in enumerate(fitins.parameters.tensors):
-        # Deserializza il tensore NumPy
-
-        tensor = np.load(io.BytesIO(tensor_bytes))
-        n_bytes = tensor.nbytes  # byte in memoria
-        total_bytes += n_bytes
-        log_time(f"Tensore {i}: dtype={tensor.dtype}, shape={tensor.shape}, byte in memoria={n_bytes}")
-
-    log_time(f"Totale byte modello (in memoria): {total_bytes} byte ({total_bytes/1024:.2f} KB)")
+    # log_time(f"Numero tensors: {len(fitins.parameters.tensors)}")
+    # for i, tensor_bytes in enumerate(fitins.parameters.tensors):
+    #     # Deserializza il tensore NumPy
+    #
+    #     tensor = np.load(io.BytesIO(tensor_bytes))
+    #     n_bytes = tensor.nbytes  # byte in memoria
+    #     total_bytes += n_bytes
+    #     log_time(f"Tensore {i}: dtype={tensor.dtype}, shape={tensor.shape}, byte in memoria={n_bytes}")
+    #
+    # log_time(f"Totale byte modello (in memoria): {total_bytes} byte ({total_bytes/1024:.2f} KB)")
     recorddict = _fit_or_evaluate_ins_to_recorddict(fitins, keep_input)
     from .crypto.utils import log_serialization_size
     log_serialization_size(recorddict, tag="fitins", mtu=1500)
@@ -317,15 +317,15 @@ def fitres_to_recorddict(fitres: FitRes, keep_input: bool) -> RecordDict:
     import io
     import numpy as np
 
-    total_bytes = 0
-    for i, tensor_bytes in enumerate(fitres.parameters.tensors):
-        # Deserializza il tensore NumPy
-        log_time(f"Numero tensors: {len(fitres.parameters.tensors)}")
-        tensor = np.load(io.BytesIO(tensor_bytes))
-        n_bytes = tensor.nbytes  # byte in memoria
-        total_bytes += n_bytes
-        log_time(f"Tensore {i}: dtype={tensor.dtype}, shape={tensor.shape}, byte in memoria={n_bytes}")
-
+    # total_bytes = 0
+    # for i, tensor_bytes in enumerate(fitres.parameters.tensors):
+    #     # Deserializza il tensore NumPy
+    #     log_time(f"Numero tensors: {len(fitres.parameters.tensors)}")
+    #     tensor = np.load(io.BytesIO(tensor_bytes))
+    #     n_bytes = tensor.nbytes  # byte in memoria
+    #     total_bytes += n_bytes
+    #     log_time(f"Tensore {i}: dtype={tensor.dtype}, shape={tensor.shape}, byte in memoria={n_bytes}")
+    #
 
 
     recorddict = RecordDict()
