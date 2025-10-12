@@ -75,8 +75,12 @@ def load_data_from_disk(path: str, batch_size: int, resize=None):
     transforms_list = []
     if resize is not None:
         transforms_list.append(Resize(resize))
-    transforms_list.extend([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-
+    #transforms_list.extend([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    transforms_list.extend([
+        ToTensor(),
+        Normalize(mean=[0.4914, 0.4822, 0.4465],
+                  std=[0.2470, 0.2435, 0.2616])
+    ])
     pytorch_transforms = Compose(transforms_list)
 
     def apply_transforms(batch):
