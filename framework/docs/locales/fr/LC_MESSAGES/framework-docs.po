@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-10-07 00:08+0000\n"
+"POT-Creation-Date: 2025-10-12 00:08+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -400,8 +400,8 @@ msgstr "Amélioration de la documentation"
 #: ../../source/ref-exit-codes/202.rst:5 ../../source/ref-exit-codes/3.rst:5
 #: ../../source/ref-exit-codes/300.rst:5 ../../source/ref-exit-codes/301.rst:5
 #: ../../source/ref-exit-codes/302.rst:5 ../../source/ref-exit-codes/400.rst:5
-#: ../../source/ref-exit-codes/600.rst:5 ../../source/ref-exit-codes/601.rst:5
-#: ../../source/ref-exit-codes/602.rst:5
+#: ../../source/ref-exit-codes/500.rst:5 ../../source/ref-exit-codes/600.rst:5
+#: ../../source/ref-exit-codes/601.rst:5 ../../source/ref-exit-codes/602.rst:5
 #, fuzzy
 msgid "Description"
 msgstr "Dépréciations"
@@ -11144,6 +11144,286 @@ msgstr ""
 "Pour les simulations qui utilisent le moteur de client virtuel, ``flwr-"
 "nightly`` doit être installé avec l'option ``simulation``: :"
 
+#: ../../source/how-to-migrate-from-openfl.rst:-1
+msgid "Migrate your OpenFL workloads to Flower in this step-by-step tutorial"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:44
+#, fuzzy
+msgid "OpenFL Migration Guide"
+msgstr "Valeurs de configuration"
+
+#: ../../source/how-to-migrate-from-openfl.rst:46
+msgid ""
+"It was `recently announced "
+"<https://github.com/securefederatedai/openfederatedlearning>`_ that The "
+"Open Federated Learning project (formerly known as OpenFL) is no longer "
+"being developed or maintained. This guide, written in collaboration with "
+"the OpenFL developers, aims to create an easy path for OpenFL users to "
+"bring their workloads into Flower."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:53
+msgid "Creating a Flower App for OpenFL code"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:55
+msgid ""
+"Let's start by creating a Flower app where the OpenFL code can be "
+"migrated to."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:58
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:75
+#, fuzzy
+msgid "Install dependencies"
+msgstr "Installation des dépendances"
+
+#: ../../source/how-to-migrate-from-openfl.rst:60
+#: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:57
+#: ../../source/tutorial-series-customize-the-client-pytorch.rst:61
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:77
+#: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:66
+#, fuzzy
+msgid "First, we install the Flower package ``flwr``:"
+msgstr "Tout d'abord, nous installons les paquets nécessaires :"
+
+#: ../../source/how-to-migrate-from-openfl.rst:67
+#: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:64
+#: ../../source/tutorial-series-customize-the-client-pytorch.rst:68
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:84
+#: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:73
+msgid ""
+"Then, we create a new Flower app called ``flower-tutorial`` using the "
+"PyTorch template. We also specify a username (``flwrlabs``) for the "
+"project:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:74
+msgid ""
+"After running the command, a new directory called ``flower-tutorial`` "
+"will be created. Here is a comparison between it and the relevant files "
+"in a typical ``openfl-example`` folder:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:80
+#, fuzzy
+msgid "OpenFL Example"
+msgstr "Exemples de PyTorch"
+
+#: ../../source/how-to-migrate-from-openfl.rst:103
+#, fuzzy
+msgid "Flower Tutorial"
+msgstr "Tutoriel"
+
+#: ../../source/how-to-migrate-from-openfl.rst:117
+msgid ""
+"Let's start with an overview of which areas of OpenFL and Flower "
+"directory structures you'll want to focus on. We will go through these in"
+" depth in later sections of the guide:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:121
+msgid ""
+"**Model**: In OpenFL, the model is usually defined in ``taskrunner.py``. "
+"In Flower, the model definition is usually located in ``task.py``."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:123
+msgid ""
+"**Train and Evaluate Functions**: In OpenFL, these are part of the "
+"`TaskRunner` subclass in ``taskrunner.py``. For Flower, you'll find these"
+" in ``client_app.py`` and identified beneath the ``@app.train()`` and "
+"``@app.evaluate`` decorators."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:126
+msgid ""
+"**Aggregation Functions**: In OpenFL, most examples use the "
+"``WeightedAverage()`` aggregation algorithm by default. If you're using a"
+" different aggregation algorithm, you'll find it in ``plan.yaml`` by "
+"searching for `aggregation_type`. In Flower, the aggregation algorithm is"
+" defined as a |strategy_link|_."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:132
+msgid "Migrate your model"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:134
+msgid ""
+"The model is very straightforward to port from OpenFL to Flower. If you "
+"are working with a PyTorch model, OpenFL has a ``PyTorchTaskRunner`` that"
+" inherits from ``nn.module`` (in ``taskrunner.py``) - and includes other "
+"things like the ``train`` and ``validate`` functions. Flower assumes you "
+"bring a standard PyTorch model, so it's as easy as moving the model "
+"definition to ``task.py`` in the ``flower_tutorial`` directory, and "
+"changing the inheritance of the Net back to ``nn.module``. For a concrete"
+" example, see the following OpenFL TaskRunner code snippet:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:206
+msgid "And the corresponding PyTorch model used by Flower:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:232
+#, fuzzy
+msgid "Migrate your training and test functions"
+msgstr "Poursuivons avec les fonctions habituelles de formation et de test :"
+
+#: ../../source/how-to-migrate-from-openfl.rst:234
+msgid ""
+"Recent versions of OpenFL had a simple way of defining training and "
+"evaluation functions. The setting and extraction of model weights was "
+"hidden from users, and a list of ``Metric`` values resulting from "
+"training or validation could be explicitly returned from the function. To"
+" make migration easy, see the highlighted blocks that can carry over "
+"directly to the Flower ``client_app.py`` file:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:319
+msgid ""
+"In Flower more control is given to users by default. With the "
+"introduction of the Message API, the training and validation functions "
+"are assumed to be stateless, so there is some initialization that must be"
+" handled by user code. The good news is that this setup is standard and "
+"quite reusable across examples. Let's see how the relevant OpenFL "
+"``train_`` function fits into Flower:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:377
+msgid ""
+"Notice the model is reininitialized, the dataloader is initialized and "
+"configured, and hyperparameters are each set before the core training "
+"operation begins. At the conclusion of the training, the model weights "
+"are extracted and packed into an ``ArrayRecord`` and the model metrics "
+"are captured in a ``MetricRecord``. It's necessary to also send the `num-"
+"examples` as a metric, as this is needed for capturing the weight to give"
+" to the model parameters for ``FedAvg``."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:384
+msgid ""
+"Here is the corresponding evaluation function, with the highlighted area "
+"representing the migrated code from OpenFL:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:432
+msgid ""
+"The code can be mostly pasted in unmodified! There are a few references "
+"to cleanup (i.e. changing `self` to `model`) to fit with the Flower "
+"variables, but the logic remains the same."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:437
+msgid "Migrating the Data Loaders"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:439
+msgid ""
+"Unlike OpenFL, Flower does not require that you use their own Dataloaders"
+" when developing your application. This means you can simply DataLoaders "
+"in the same way that you would for PyTorch, Tensorflow, or any other "
+"framework. For research and experimentation purposes, a single dataset "
+"can be sharded into multiple partitions. This information is passed to "
+"each ``ClientApp`` through the ``Context``:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:457
+msgid ""
+"Flower also has its own library for partitioning single datasets in "
+"distributions representative of what can be expected in real world "
+"settings. For more information, see the `flwr-datasets "
+"<https://flower.ai/docs/datasets/>`_ documentation for details."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:462
+#, fuzzy
+msgid "Client-side Code"
+msgstr "Logique côté client"
+
+#: ../../source/how-to-migrate-from-openfl.rst:464
+msgid ""
+"In OpenFL, the client side code was known as a Collaborator. In Flower, "
+"the application that data owners operate is referred to as a "
+"``ClientApp``. Each of the files referred to so far (``client_app.py``, "
+"``task.py``) are launched by the clients using the `flwr run` command. "
+"Beyond the code that is defined, Flower has the ability to insert dynamic"
+" changes through a configuration file, called ``pyproject.toml``. This "
+"can include application specific changes like hyperparameters, but also "
+"other information like ServerApp address, etc. Importantly, this file is "
+"shared between parties operating the ``ClientApp`` and ``ServerApp``. "
+"This concept directly maps to the Federated Learning Plan (FLPlan) "
+"concept in OpenFL captured in the ``plan.yaml`` file of every workspace."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:490
+#, fuzzy
+msgid "Server-side Code"
+msgstr "Logique côté serveur"
+
+#: ../../source/how-to-migrate-from-openfl.rst:492
+msgid ""
+"In OpenFL, all of the aggregator-side code is configured via the "
+"`plan.yaml` file through the specification of different arguments. In "
+"Flower, the exact tasks performed by the server are more configurable "
+"through code. For example, aggregation algorithms are added through a "
+"``Strategy``, and the logic to save models is added explictly. Here is a "
+"``ServerApp`` (akin to an OpenFL Aggregator) compatible with the prior "
+"code snippets:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:542
+msgid ""
+"You'll notice that most ``ServerApp`` examples have specific logic for "
+"working with a given deep learning framework (in this case PyTorch) due "
+"to the saving of a final model. This functionality is optional, but "
+"mirrors the automatic saving of a model at the end of an OpenFL "
+"experiment. This ``ServerApp`` change requires only a few lines of "
+"modifications, and Flower has support for an extensive set of deep "
+"learning frameworks in it's `examples "
+"<https://github.com/adap/flower/tree/main/examples>`_ (Tensorflow, "
+"FastAI, Huggingface, etc.) should you need reference code."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:551
+#: ../../source/how-to-upgrade-to-flower-1.0.rst:134
+#: ../../source/how-to-upgrade-to-flower-1.13.rst:458
+msgid "Further help"
+msgstr "Aide supplémentaire"
+
+#: ../../source/how-to-migrate-from-openfl.rst:553
+msgid ""
+"For a complete PyTorch example that goes into depth on various Flower "
+"components, see the `Get started with Flower "
+"<https://flower.ai/docs/framework/tutorial-series-get-started-with-"
+"flower-pytorch.html>`_ tutorial. While we expect this guide will help "
+"most users get migrated quickly to the Flower ecosystem, certain complex "
+"OpenFL workloads may require more clarification or help. If you have "
+"further questions, `join the Flower Slack <https://flower.ai/join-"
+"slack/>`_ (and use the channel ``#questions``) or join our `OpenFL "
+"Continuity Program "
+"<https://docs.google.com/forms/d/e/1FAIpQLScprGGX_jFRoEUv4HbJkkhkg6O7e5eCiq7uP95_0xK5Qnt1gA/viewform>`_"
+" to get in touch with our team!"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:564
+#: ../../source/how-to-upgrade-to-flower-1.13.rst:467
+#, fuzzy
+msgid "Important"
+msgstr "Changements importants :"
+
+#: ../../source/how-to-migrate-from-openfl.rst:566
+msgid ""
+"As we work with the OpenFL community, we'll be periodically updating this"
+" guide. Please feel free to share any feedback with us!"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:569
+#: ../../source/how-to-upgrade-to-flower-1.13.rst:472
+msgid "Happy migrating! 🚀"
+msgstr ""
+
 #: ../../source/how-to-run-flower-on-azure.rst:18
 #, fuzzy
 msgid "Run Flower on Azure"
@@ -13956,11 +14236,6 @@ msgstr ""
 "``start_simulation(..., config=flwr.server.ServerConfig(num_rounds=3, "
 "round_timeout=600.0), ...)``"
 
-#: ../../source/how-to-upgrade-to-flower-1.0.rst:134
-#: ../../source/how-to-upgrade-to-flower-1.13.rst:458
-msgid "Further help"
-msgstr "Aide supplémentaire"
-
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:136
 msgid ""
 "Most official `Flower code examples "
@@ -14226,19 +14501,10 @@ msgstr ""
 "Flower <https://flower.ai/join-slack/>`_ et utilise le canal "
 "``#questions``."
 
-#: ../../source/how-to-upgrade-to-flower-1.13.rst:467
-#, fuzzy
-msgid "Important"
-msgstr "Changements importants :"
-
 #: ../../source/how-to-upgrade-to-flower-1.13.rst:469
 msgid ""
 "As we continuously enhance Flower at a rapid pace, we'll be periodically "
 "updating this guide. Please feel free to share any feedback with us!"
-msgstr ""
-
-#: ../../source/how-to-upgrade-to-flower-1.13.rst:472
-msgid "Happy migrating! 🚀"
 msgstr ""
 
 #: ../../source/how-to-upgrade-to-message-api.rst:-1
@@ -15671,7 +15937,7 @@ msgstr ""
 msgid "List all runs"
 msgstr ""
 
-#: ../../flwr list log run stop supernode
+#: ../../flwr create delete list log run stop supernode
 #, fuzzy
 msgid "default"
 msgstr "Flux de travail"
@@ -15684,11 +15950,11 @@ msgstr ""
 msgid "Specific run ID to display"
 msgstr ""
 
-#: ../../flwr list:1 run:1 stop:1 supernode
+#: ../../flwr create:1 delete:1 list:1 run:1 stop:1 supernode
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
-#: ../../flwr list:1 run:1 stop:1 supernode
+#: ../../flwr create:1 delete:1 list:1 run:1 stop:1 supernode
 #, fuzzy
 msgid "``'default'``"
 msgstr "Flux de travail"
@@ -15843,7 +16109,7 @@ msgid "Add a SuperNode to the federation."
 msgstr "flower-superlink"
 
 #: ../../flwr create:1 supernode
-msgid "Path to the public key file."
+msgid "Path to a P-384 (or any other NIST EC curve) public key file."
 msgstr ""
 
 #: ../../flwr delete:1 supernode
@@ -15865,6 +16131,10 @@ msgstr "flower-superlink"
 #, fuzzy
 msgid "Enable verbose output"
 msgstr "Exemples de PyTorch"
+
+#: ../../flwr list:1 supernode
+msgid "Simulate the command without contacting any SuperNodes"
+msgstr ""
 
 #: ../../source/ref-api-cli.rst:19
 #, fuzzy
@@ -39650,6 +39920,7 @@ msgstr ""
 #: ../../source/ref-exit-codes/301.rst:16
 #: ../../source/ref-exit-codes/302.rst:16
 #: ../../source/ref-exit-codes/400.rst:11
+#: ../../source/ref-exit-codes/500.rst:14
 #: ../../source/ref-exit-codes/600.rst:11
 #: ../../source/ref-exit-codes/601.rst:10
 #: ../../source/ref-exit-codes/602.rst:14
@@ -39963,17 +40234,18 @@ msgstr ""
 
 #: ../../source/ref-exit-codes/302.rst:21
 msgid ""
-"2. Verify that both files exist and contain valid elliptic curve keys. - "
-"The private key file should be in a format compatible with elliptic curve"
-" cryptography. - The public key file should match the private key."
+"2. Verify that both files exist and contain valid elliptic curve ssh "
+"keys. - The private key file should be in a format compatible with "
+"elliptic curve cryptography. - The public key file should match the "
+"private key."
 msgstr ""
 
 #: ../../source/ref-exit-codes/302.rst:25
 msgid ""
 "3. If the files are corrupted or not in the correct format, regenerate "
-"the elliptic curve key pair and update the file paths accordingly. For "
-"example, in Linux/MacOS, **for rapid prototyping only** (not production; "
-"follow company procedures for key management):"
+"the elliptic curve ssh key pair and update the file paths accordingly. "
+"For example, in Linux/MacOS, **for rapid prototyping only** (not "
+"production; follow company procedures for key management):"
 msgstr ""
 
 #: ../../source/ref-exit-codes/400.rst:2
@@ -40006,6 +40278,42 @@ msgstr ""
 msgid ""
 "Review the accompanying error message for details on the invalid portion,"
 " and correct any syntax or structural issues."
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:2
+msgid "[500] FLWRCLI_NODE_AUTH_PUBLIC_KEY_INVALID"
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:7
+msgid ""
+"The provided public key file is invalid. Authentication requires a valid "
+"elliptic curve public key in the ssh format. This error occurs when "
+"either:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:10
+msgid ""
+"The public key file specified passed to `flwr supernode create` is "
+"invalid or unreadable."
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:16
+msgid "Ensure that the file path provided for the public key option is correct."
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:17
+msgid ""
+"Verify that the file exists and contains a valid ECDSA public key in SSH "
+"format with a standard elliptic curve following the NIST specifications "
+"(e.g. SECP384R1)."
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:20
+msgid ""
+"3. If the files are corrupted or not in the correct format, regenerate "
+"the elliptic curve key pair and update the file paths accordingly. For "
+"example, in Linux/MacOS, **for rapid prototyping only** (not production; "
+"follow company procedures for key management):"
 msgstr ""
 
 #: ../../source/ref-exit-codes/600.rst:2
@@ -42865,24 +43173,6 @@ msgid ""
 "``pyproject.toml`` file and install it in your environment."
 msgstr ""
 
-#: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:57
-#: ../../source/tutorial-series-customize-the-client-pytorch.rst:61
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:77
-#: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:66
-#, fuzzy
-msgid "First, we install the Flower package ``flwr``:"
-msgstr "Tout d'abord, nous installons les paquets nécessaires :"
-
-#: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:64
-#: ../../source/tutorial-series-customize-the-client-pytorch.rst:68
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:84
-#: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:73
-msgid ""
-"Then, we create a new Flower app called ``flower-tutorial`` using the "
-"PyTorch template. We also specify a username (``flwrlabs``) for the "
-"project:"
-msgstr ""
-
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:71
 #: ../../source/tutorial-series-customize-the-client-pytorch.rst:75
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:91
@@ -43345,11 +43635,6 @@ msgid ""
 msgstr ""
 "Avant de commencer à coder, assurons-nous que nous disposons de tout ce "
 "dont nous avons besoin."
-
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:75
-#, fuzzy
-msgid "Install dependencies"
-msgstr "Installation des dépendances"
 
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:106
 msgid ""
@@ -70888,5 +71173,18 @@ msgstr ""
 #~ "When user authentication is enabled, "
 #~ "Flower uses an OIDC-compatible server"
 #~ " to authenticate requests:"
+#~ msgstr ""
+
+#~ msgid "Path to the public key file."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "2. Verify that both files exist "
+#~ "and contain valid elliptic curve keys."
+#~ " - The private key file should "
+#~ "be in a format compatible with "
+#~ "elliptic curve cryptography. - The "
+#~ "public key file should match the "
+#~ "private key."
 #~ msgstr ""
 
