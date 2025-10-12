@@ -38,7 +38,7 @@ def get_model(model_name: str, num_classes=10, pretrained=False):
         return CustomCNN()
 
     elif model_name == "resnet18":
-        model = resnet18(pretrained=True)
+        model = resnet18(pretrained=pretrained)
         model.fc = nn.Linear(model.fc.in_features, num_classes)
         return model
     elif model_name == "resnet34":
