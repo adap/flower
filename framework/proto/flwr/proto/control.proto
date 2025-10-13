@@ -97,13 +97,13 @@ message StopRunResponse { bool success = 1; }
 message PullArtifactsRequest { uint64 run_id = 1; }
 message PullArtifactsResponse { optional string url = 1; }
 
-message CreateNodeCliRequest { string public_key = 1; }
+message CreateNodeCliRequest { bytes public_key = 1; }
 message CreateNodeCliResponse { optional uint64 node_id = 1; }
 
 message DeleteNodeCliRequest { uint64 node_id = 1; }
 message DeleteNodeCliResponse {}
 
-message ListNodesCliRequest {}
+message ListNodesCliRequest { bool dry_run = 1; }
 message ListNodesCliResponse {
   repeated NodeInfo nodes_info = 1;
   string now = 2;

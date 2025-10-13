@@ -26,8 +26,8 @@ from flwr.common.constant import PUBLIC_KEY_HEADER, SIGNATURE_HEADER, TIMESTAMP_
 from flwr.supercore.primitives.asymmetric import public_key_to_bytes, sign_message
 
 
-class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
-    """Client interceptor for client authentication."""
+class NodeAuthClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
+    """Client interceptor for node authentication."""
 
     def __init__(
         self,

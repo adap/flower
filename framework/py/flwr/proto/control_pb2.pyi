@@ -239,10 +239,10 @@ global___PullArtifactsResponse = PullArtifactsResponse
 class CreateNodeCliRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PUBLIC_KEY_FIELD_NUMBER: builtins.int
-    public_key: typing.Text
+    public_key: builtins.bytes
     def __init__(self,
         *,
-        public_key: typing.Text = ...,
+        public_key: builtins.bytes = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["public_key",b"public_key"]) -> None: ...
 global___CreateNodeCliRequest = CreateNodeCliRequest
@@ -279,8 +279,13 @@ global___DeleteNodeCliResponse = DeleteNodeCliResponse
 
 class ListNodesCliRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    DRY_RUN_FIELD_NUMBER: builtins.int
+    dry_run: builtins.bool
     def __init__(self,
+        *,
+        dry_run: builtins.bool = ...,
         ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dry_run",b"dry_run"]) -> None: ...
 global___ListNodesCliRequest = ListNodesCliRequest
 
 class ListNodesCliResponse(google.protobuf.message.Message):

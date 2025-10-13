@@ -16,11 +16,13 @@
 
 
 import abc
+from collections.abc import Sequence
 from typing import Optional
 
 from flwr.common import Context, Message
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.corestate import CoreState
 
 
@@ -128,11 +130,13 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """Get all instruction Message IDs for the given run_id."""
 
     @abc.abstractmethod
-    def create_node(self, heartbeat_interval: float) -> int:
+    def create_node(
+        self, owner_aid: str, public_key: bytes, heartbeat_interval: float
+    ) -> int:
         """Create, store in the link state, and return `node_id`."""
 
     @abc.abstractmethod
-    def delete_node(self, node_id: int) -> None:
+    def delete_node(self, owner_aid: str, node_id: int) -> None:
         """Remove `node_id` from the link state."""
 
     @abc.abstractmethod
@@ -146,16 +150,56 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
-        """Set `public_key` for the specified `node_id`."""
+    def get_node_info(
+        self,
+        *,
+        node_ids: Optional[Sequence[int]] = None,
+        owner_aids: Optional[Sequence[str]] = None,
+        statuses: Optional[Sequence[str]] = None,
+    ) -> Sequence[NodeInfo]:
+        """Retrieve information about nodes based on the specified filters.
+
+        If a filter is set to None, it is ignored.
+        If multiple filters are provided, they are combined using AND logic.
+
+        Parameters
+        ----------
+        node_ids : Optional[Sequence[int]] (default: None)
+            Sequence of node IDs to filter by. If a sequence is provided,
+            it is treated as an OR condition.
+        owner_aids : Optional[Sequence[str]] (default: None)
+            Sequence of owner account IDs to filter by. If a sequence is provided,
+            it is treated as an OR condition.
+        statuses : Optional[Sequence[str]] (default: None)
+            Sequence of node status values (e.g., "created", "activated")
+            to filter by. If a sequence is provided, it is treated as an OR condition.
+
+        Returns
+        -------
+        Sequence[NodeInfo]
+            A sequence of NodeInfo objects representing the nodes matching
+            the specified filters.
+        """
 
     @abc.abstractmethod
-    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
-        """Get `public_key` for the specified `node_id`."""
+    def get_node_public_key(self, node_id: int) -> bytes:
+        """Get `public_key` for the specified `node_id`.
 
-    @abc.abstractmethod
-    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `node_public_keys`."""
+        Parameters
+        ----------
+        node_id : int
+            The identifier of the node whose public key is to be retrieved.
+
+        Returns
+        -------
+        bytes
+            The public key associated with the specified `node_id`.
+
+        Raises
+        ------
+        ValueError
+            If the specified `node_id` does not exist in the link state.
+        """
 
     @abc.abstractmethod
     def create_run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
