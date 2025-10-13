@@ -66,7 +66,7 @@ def bytes_to_private_key(private_key_bytes: bytes) -> ed25519.Ed25519PrivateKey:
     Ed25519PrivateKey
         Deserialized private key.
     """
-    return serialization.load_pem_private_key(private_key_bytes, password=None)
+    return serialization.load_pem_private_key(private_key_bytes, password=None)  # type: ignore[return-value]
 
 
 def public_key_to_bytes(public_key: ed25519.Ed25519PublicKey) -> bytes:
@@ -101,7 +101,7 @@ def bytes_to_public_key(public_key_bytes: bytes) -> ed25519.Ed25519PublicKey:
     Ed25519PublicKey
         Deserialized public key.
     """
-    return serialization.load_pem_public_key(public_key_bytes)
+    return serialization.load_pem_public_key(public_key_bytes)  # type: ignore[return-value]
 
 
 def sign_message(private_key: ed25519.Ed25519PrivateKey, message: bytes) -> bytes:

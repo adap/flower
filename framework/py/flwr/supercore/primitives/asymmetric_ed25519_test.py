@@ -15,13 +15,13 @@
 """Tests for asymmetric ed25519 specific cryptography utilities."""
 
 
-from .asymmetric_ed25519 import generate_key_pairs, sign_message, verify_signature
+from .asymmetric_ed25519 import generate_key_pair, sign_message, verify_signature
 
 
 def test_sign_and_verify_success() -> None:
     """Test signing and verifying a message successfully."""
     # Prepare
-    private_key, public_key = generate_key_pairs()
+    private_key, public_key = generate_key_pair()
     message = b"Test message"
 
     # Execute
@@ -34,8 +34,8 @@ def test_sign_and_verify_success() -> None:
 def test_sign_and_verify_failure() -> None:
     """Test signing and verifying a message with incorrect keys or data."""
     # Prepare
-    private_key, public_key = generate_key_pairs()
-    another_public_key = generate_key_pairs()[1]
+    private_key, public_key = generate_key_pair()
+    another_public_key = generate_key_pair()[1]
     message = b"Test message"
 
     # Execute

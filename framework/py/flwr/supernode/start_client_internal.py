@@ -320,7 +320,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             verification = json.loads(fab.meta["verification"])
 
             # FAB must be signed if trust entity provided
-            if enable_entity_verification:
+            if enable_entity_verification and trust_entity:
                 fab_verified = False
                 for entity in verification:
                     public_key_id = entity["public_key_id"]
