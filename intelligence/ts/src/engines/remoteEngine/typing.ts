@@ -124,7 +124,9 @@ export function isPlatformHttpError(o: unknown): o is PlatformHttpError {
 }
 
 export function getServerSentEventData(o: unknown): string {
-  return (o as string).slice(6).trim();
+  // Skips 'data: ' prefix
+  const prefix = 'data: ';
+  return (o as string).slice(prefix.length).trim();
 }
 
 export function isStreamChunk(o: unknown): o is StreamChunk {
