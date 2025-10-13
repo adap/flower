@@ -29,8 +29,7 @@ from typing import Callable, Optional, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 from grpc import RpcError
 
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
@@ -63,7 +62,11 @@ from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
-from flwr.supercore.primitives.asymmetric_ed25519 import verify_signature, create_signed_message, decode_base64url
+from flwr.supercore.primitives.asymmetric_ed25519 import (
+    create_signed_message,
+    decode_base64url,
+    verify_signature,
+)
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 
@@ -322,14 +325,18 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                 for entity in verification:
                     public_key_id = entity["public_key_id"]
                     if public_key_id in trust_entity:
-                        # TODO: Refactor all ed25519 crypto into flwr.supercore.primitives.asymmetric package
+                        # TODO: Refactor all ed25519 crypto into
+                        #  flwr.supercore.primitives.asymmetric package
                         verifier_public_key = serialization.load_pem_public_key(
-                            trust_entity[public_key_id].encode("utf-8"))
-                        if not isinstance(verifier_public_key, ed25519.Ed25519PublicKey):
+                            trust_entity[public_key_id].encode("utf-8")
+                        )
+                        if not isinstance(
+                            verifier_public_key, ed25519.Ed25519PublicKey
+                        ):
                             log(
                                 WARN,
-                                f"The provided public key associated with",
-                                f"trusted entity {public_key_id} is not Ed25519"
+                                "The provided public key associated with",
+                                f"trusted entity {public_key_id} is not Ed25519",
                             )
                             continue
                         signed_message = create_signed_message(

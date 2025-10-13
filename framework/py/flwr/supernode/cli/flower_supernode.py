@@ -17,7 +17,7 @@
 
 import argparse
 import json
-from logging import DEBUG, INFO, WARN, ERROR
+from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
 
@@ -142,9 +142,9 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "--enable-entity-verification",
         action="store_true",
         help="If this flag is set, all apps must be signed by a trusted"
-        f" entity. If set, at least one trusted entity must be provided.",
+        " entity. If set, at least one trusted entity must be provided.",
     )
- 
+
     add_args_health(parser)
 
     return parser

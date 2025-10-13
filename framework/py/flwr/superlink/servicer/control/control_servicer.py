@@ -32,9 +32,9 @@ from flwr.common import Context, RecordDict, now
 from flwr.common.constant import (
     FAB_MAX_SIZE,
     LOG_STREAM_INTERVAL,
-    PLATFORM_API_URL,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
+    PLATFORM_API_URL,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
     Status,

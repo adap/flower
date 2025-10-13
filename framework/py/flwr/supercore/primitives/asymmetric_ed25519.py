@@ -1,6 +1,10 @@
 # Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -11,13 +15,13 @@
 """Ed25519-only asymmetric cryptography utilities."""
 
 import base64
+
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
-from typing import Tuple
 
 
-def generate_key_pair() -> Tuple[ed25519.Ed25519PrivateKey, ed25519.Ed25519PublicKey]:
+def generate_key_pair() -> tuple[ed25519.Ed25519PrivateKey, ed25519.Ed25519PublicKey]:
     """Generate an Ed25519 private/public key pair.
 
     Returns
@@ -118,7 +122,9 @@ def sign_message(private_key: ed25519.Ed25519PrivateKey, message: bytes) -> byte
     return private_key.sign(message)
 
 
-def verify_signature(public_key: ed25519.Ed25519PublicKey, message: bytes, signature: bytes) -> bool:
+def verify_signature(
+    public_key: ed25519.Ed25519PublicKey, message: bytes, signature: bytes
+) -> bool:
     """Verify a signature using an Ed25519 public key.
 
     Parameters
@@ -143,12 +149,15 @@ def verify_signature(public_key: ed25519.Ed25519PublicKey, message: bytes, signa
 
 
 def create_signed_message(fab_digest: bytes, timestamp: int) -> bytes:
-    # Create a canonical message: timestamp (8 bytes big-endian) + fab_digest
+    """Create a canonical message:
+    timestamp (8 bytes big-endian) + fab_digest.
+    """
     timestamp_bytes = timestamp.to_bytes(8, byteorder="big")
     return timestamp_bytes + fab_digest
 
 
-def decode_base64url(s: str) -> bytes:
+def decode_base64url(sig: str) -> bytes:
+    """Convert signature to b64 format."""
     # add missing padding (=) to a multiple of 4
-    pad = (-len(s)) % 4
-    return base64.urlsafe_b64decode(s + ("=" * pad))
+    pad = (-len(sig)) % 4
+    return base64.urlsafe_b64decode(sig + ("=" * pad))
