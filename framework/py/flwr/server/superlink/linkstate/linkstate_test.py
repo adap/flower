@@ -910,52 +910,6 @@ class StateTest(CoreStateTest):
         # Assert
         assert num == 2
 
-    def test_clear_supernode_auth_keys_and_credentials(self) -> None:
-        """Test clear_supernode_auth_keys_and_credentials from linkstate."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        key_pairs = [generate_key_pairs() for _ in range(3)]
-        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
-
-        # Execute (store)
-        state.store_node_public_keys(public_keys)
-
-        # Execute (clear)
-        state.clear_supernode_auth_keys()
-        node_public_keys = state.get_node_public_keys()
-
-        # Assert
-        assert node_public_keys == set()
-
-    def test_node_public_keys(self) -> None:
-        """Test store_node_public_keys and get_node_public_keys from state."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        key_pairs = [generate_key_pairs() for _ in range(3)]
-        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
-
-        # Execute
-        state.store_node_public_keys(public_keys)
-        node_public_keys = state.get_node_public_keys()
-
-        # Assert
-        assert node_public_keys == public_keys
-
-    def test_node_public_key(self) -> None:
-        """Test store_node_public_key and get_node_public_keys from state."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        key_pairs = [generate_key_pairs() for _ in range(3)]
-        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
-
-        # Execute
-        for public_key in public_keys:
-            state.store_node_public_key(public_key)
-        node_public_keys = state.get_node_public_keys()
-
-        # Assert
-        assert node_public_keys == public_keys
-
     def test_acknowledge_node_heartbeat(self) -> None:
         """Test if acknowledge_ping works and get_nodes return online nodes.
 

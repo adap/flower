@@ -314,22 +314,6 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def clear_supernode_auth_keys(self) -> None:
-        """Clear stored `node_public_keys` in the link state if any."""
-
-    @abc.abstractmethod
-    def store_node_public_keys(self, public_keys: set[bytes]) -> None:
-        """Store a set of `node_public_keys` in the link state."""
-
-    @abc.abstractmethod
-    def store_node_public_key(self, public_key: bytes) -> None:
-        """Store a `node_public_key` in the link state."""
-
-    @abc.abstractmethod
-    def get_node_public_keys(self) -> set[bytes]:
-        """Retrieve all currently stored `node_public_keys` as a set."""
-
-    @abc.abstractmethod
     def acknowledge_node_heartbeat(
         self, node_id: int, heartbeat_interval: float
     ) -> bool:

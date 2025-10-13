@@ -16,22 +16,19 @@
 
 
 import argparse
-import csv
 import importlib.util
 import os
 import subprocess
 import sys
 import threading
 from collections.abc import Sequence
-from logging import DEBUG, INFO, WARN
+from logging import INFO, WARN
 from pathlib import Path
 from time import sleep
 from typing import Callable, Optional, TypeVar, cast
 
 import grpc
 import yaml
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
@@ -69,7 +66,6 @@ from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.supercore.primitives.asymmetric import public_key_to_bytes
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import (
     ControlAuthnPlugin,
@@ -318,22 +314,8 @@ def run_superlink() -> None:
             fleet_thread.start()
             bckg_threads.append(fleet_thread)
         elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
-            node_public_keys = _try_load_public_keys_node_authentication(args)
-            auto_auth = True
-            if node_public_keys is not None:
-                auto_auth = False
-                state = state_factory.state()
-                state.clear_supernode_auth_keys()
-                state.store_node_public_keys(node_public_keys)
-                log(
-                    INFO,
-                    "Node authentication enabled with %d known public keys",
-                    len(node_public_keys),
-                )
-            else:
-                log(DEBUG, "Automatic node authentication enabled")
 
-            interceptors = [NodeAuthServerInterceptor(state_factory, auto_auth)]
+            interceptors = [NodeAuthServerInterceptor(state_factory)]
             if getattr(args, "enable_event_log", None):
                 fleet_log_plugin = _try_obtain_fleet_event_log_writer_plugin()
                 if fleet_log_plugin is not None:
@@ -412,48 +394,6 @@ def _format_address(address: str) -> tuple[str, str, int]:
         )
     host, port, is_v6 = parsed_address
     return (f"[{host}]:{port}" if is_v6 else f"{host}:{port}", host, port)
-
-
-def _try_load_public_keys_node_authentication(
-    args: argparse.Namespace,
-) -> Optional[set[bytes]]:
-    """Return a set of node public keys."""
-    if args.auth_superlink_private_key or args.auth_superlink_public_key:
-        log(
-            WARN,
-            "The `--auth-superlink-private-key` and `--auth-superlink-public-key` "
-            "arguments are deprecated and will be removed in a future release. Node "
-            "authentication no longer requires these arguments.",
-        )
-
-    if not args.auth_list_public_keys:
-        return None
-
-    node_keys_file_path = Path(args.auth_list_public_keys)
-    if not node_keys_file_path.exists():
-        sys.exit(
-            "The provided path to the known public keys CSV file does not exist: "
-            f"{node_keys_file_path}. "
-            "Please provide the CSV file path containing known public keys "
-            "to '--auth-list-public-keys'."
-        )
-
-    node_public_keys: set[bytes] = set()
-
-    with open(node_keys_file_path, newline="", encoding="utf-8") as csvfile:
-        reader = csv.reader(csvfile)
-        for row in reader:
-            for element in row:
-                public_key = load_ssh_public_key(element.encode())
-                if isinstance(public_key, ec.EllipticCurvePublicKey):
-                    node_public_keys.add(public_key_to_bytes(public_key))
-                else:
-                    sys.exit(
-                        "Error: Unable to parse the public keys in the CSV "
-                        "file. Please ensure that the CSV file path points to a valid "
-                        "known SSH public keys files and try again."
-                    )
-    return node_public_keys
 
 
 def _load_control_auth_plugins(
@@ -734,12 +674,6 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "--storage-dir",
         help="The base directory to store the objects for the Flower File System.",
         default=BASE_DIR,
-    )
-    parser.add_argument(
-        "--auth-list-public-keys",
-        type=str,
-        help="A CSV file (as a path str) containing a list of known public "
-        "keys to enable authentication.",
     )
     parser.add_argument(
         "--enable-supernode-auth",

@@ -491,26 +491,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def clear_supernode_auth_keys(self) -> None:
-        """Clear stored `node_public_keys` in the link state if any."""
-        with self.lock:
-            self.node_public_keys.clear()
-
-    def store_node_public_keys(self, public_keys: set[bytes]) -> None:
-        """Store a set of `node_public_keys` in the link state."""
-        with self.lock:
-            self.node_public_keys.update(public_keys)
-
-    def store_node_public_key(self, public_key: bytes) -> None:
-        """Store a `node_public_key` in the link state."""
-        with self.lock:
-            self.node_public_keys.add(public_key)
-
-    def get_node_public_keys(self) -> set[bytes]:
-        """Retrieve all currently stored `node_public_keys` as a set."""
-        with self.lock:
-            return self.node_public_keys.copy()
-
     def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
         """Retrieve all run IDs if `flwr_aid` is not specified.
 
