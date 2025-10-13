@@ -80,7 +80,7 @@ sl_pid=$(pgrep -f "flower-superlink")
 sleep 2
 
 if [ "$2" = "client-auth" ]; then
-  # Create SuperNodes using the Flower CLI
+  # Create two SuperNodes using the Flower CLI
   flwr supernode create ../keys/client_credentials_1.pub
   flwr supernode create ../keys/client_credentials_2.pub
 fi
