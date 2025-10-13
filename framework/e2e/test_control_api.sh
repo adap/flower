@@ -19,7 +19,7 @@ esac
 # Set authentication parameters
 case "$2" in
     client-auth)
-      server_auth='---enable-supernode-auth'
+      server_auth='--enable-supernode-auth'
       client_auth_1='--auth-supernode-private-key ../keys/client_credentials_1 
                      --auth-supernode-public-key  ../keys/client_credentials_1.pub'
       client_auth_2='--auth-supernode-private-key ../keys/client_credentials_2 
@@ -81,8 +81,8 @@ sleep 2
 
 if [ "$2" = "client-auth" ]; then
   # Create two SuperNodes using the Flower CLI
-  flwr supernode create ../keys/client_credentials_1.pub
-  flwr supernode create ../keys/client_credentials_2.pub
+  flwr supernode create keys/client_credentials_1.pub
+  flwr supernode create keys/client_credentials_2.pub
 fi
 
 if [ "$3" = "deployment-engine" ]; then
