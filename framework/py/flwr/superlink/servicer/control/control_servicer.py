@@ -32,7 +32,6 @@ from flwr.common.constant import (
     LOG_STREAM_INTERVAL,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
-    NODE_AUTH_DISABLED_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
@@ -91,7 +90,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
         is_simulation: bool,
-        enable_supernode_auth: bool,
         authn_plugin: ControlAuthnPlugin,
         artifact_provider: Optional[ArtifactProvider] = None,
     ) -> None:
@@ -99,7 +97,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
         self.is_simulation = is_simulation
-        self.enable_supernode_auth = enable_supernode_auth
         self.authn_plugin = authn_plugin
         self.artifact_provider = artifact_provider
 
@@ -397,9 +394,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> CreateNodeCliResponse:
         """Add a SuperNode."""
         log(INFO, "ControlServicer.CreateNodeCli")
-        if not self.enable_supernode_auth:
-            context.abort(grpc.StatusCode.UNIMPLEMENTED, NODE_AUTH_DISABLED_MESSAGE)
-            raise grpc.RpcError()  # This line is unreachable
 
         # Verify public key
         try:

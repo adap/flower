@@ -32,7 +32,6 @@ from flwr.common.constant import (
     FLWR_DIR,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
-    NODE_AUTH_DISABLED_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
@@ -325,13 +324,6 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
             elif e.details() == NO_ARTIFACT_PROVIDER_MESSAGE:  # pylint: disable=E1101
                 typer.secho(
                     "❌ The SuperLink does not support `flwr pull` command.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                )
-            elif e.details() == NODE_AUTH_DISABLED_MESSAGE:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ Node authentication is disabled on this SuperLink. "
-                    "Creating a SuperNode via the Flower CLI is not available.",
                     fg=typer.colors.RED,
                     bold=True,
                 )
