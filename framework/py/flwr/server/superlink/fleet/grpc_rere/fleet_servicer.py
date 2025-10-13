@@ -20,6 +20,7 @@ from logging import DEBUG, INFO
 import grpc
 from google.protobuf.json_format import MessageToDict
 
+from flwr.common.constant import NODE_NOT_CREATED_FROM_CLI_MESSAGE
 from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
@@ -47,6 +48,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectRequest,
     PushObjectResponse,
 )
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
@@ -63,10 +65,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         state_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
+        enable_supernode_auth: bool,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
+        self.enable_supernode_auth = enable_supernode_auth
 
     def CreateNode(
         self, request: CreateNodeRequest, context: grpc.ServicerContext
@@ -79,10 +83,27 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         )
         log(DEBUG, "[Fleet.CreateNode] Request: %s", MessageToDict(request))
         try:
-            response = message_handler.create_node(
-                request=request,
-                state=self.state_factory.state(),
-            )
+
+            state = self.state_factory.state()
+
+            # Check if public key is already in use
+            if node_info := state.get_node_info_by_public_key(request.public_key):
+                # Prepare response with existing node_id
+                response = CreateNodeResponse(node=Node(node_id=node_info.node_id))
+            else:
+                if self.enable_supernode_auth:
+                    # SuperNode authentication is enabled,
+                    # only SuperNodes created from the CLI are allowed to
+                    # stablish a connection with the Fleet API
+                    raise ValueError(NODE_NOT_CREATED_FROM_CLI_MESSAGE)
+
+                # SuperNode authentication is disabled, auto-auth
+                # allows creating a new node
+                response = message_handler.create_node(
+                    request=request,
+                    state=state,
+                )
+
         except ValueError as e:
             # Public key already in use
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
@@ -96,6 +117,10 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """."""
         log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
         log(DEBUG, "[Fleet.DeleteNode] Request: %s", MessageToDict(request))
+        if self.enable_supernode_auth:
+            # SuperNodes can only be deleted from the CLI
+            return DeleteNodeResponse()
+
         return message_handler.delete_node(
             request=request,
             state=self.state_factory.state(),

@@ -150,6 +150,21 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def get_node_info_by_public_key(self, public_key: bytes) -> Optional[NodeInfo]:
+        """Get `NodeInfo` for the specified `public_key`.
+
+        Parameters
+        ----------
+        public_key : bytes
+            The public key of the node whose information is to be retrieved.
+
+        Returns
+        -------
+        Optional[NodeInfo]
+            The `NodeInfo` associated with the specified `public_key`.
+        """
+
+    @abc.abstractmethod
     def get_node_info(
         self,
         *,

@@ -89,6 +89,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             state_factory,
             ffs_factory,
             objectstore_factory,
+            True,
             None,
             None,
         )

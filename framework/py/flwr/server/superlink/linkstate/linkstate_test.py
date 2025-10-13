@@ -680,7 +680,7 @@ class StateTest(CoreStateTest):
         # Assert node_ids and public_key_to_node_id are synced
         if isinstance(state, InMemoryLinkState):
             assert len(state.nodes) == 1
-            assert len(state.registered_node_public_keys) == 1
+            assert len(state.node_public_keys_to_node_info.keys()) == 1
 
     def test_get_node_info_no_filters(self) -> None:
         """Test get_node_info returns all nodes when no filters are provided."""
@@ -820,6 +820,21 @@ class StateTest(CoreStateTest):
 
         # Assert
         assert len(retrieved_node_ids) == 0
+
+    def test_get_node_info_by_public_key(self) -> None:
+        """Test get_node_info_by_public_key."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        public_key = b"mock"
+        node_id = state.create_node("fake_aid", public_key, 10)
+
+        # Execute
+        retrieved_node = state.get_node_info_by_public_key(public_key)
+
+        # Assert
+        assert retrieved_node is not None
+        assert retrieved_node.node_id == node_id
+        assert retrieved_node.public_key == public_key
 
     def test_num_message_ins(self) -> None:
         """Test if num_message_ins returns correct number of not delivered Messages."""
