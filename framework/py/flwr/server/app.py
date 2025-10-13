@@ -219,6 +219,15 @@ def run_superlink() -> None:
             "connections from any SuperNode.",
         )
 
+    if args.auth_list_public_keys:
+        flwr_exit(
+            ExitCode.SUPERLINK_INVALID_ARGS,
+            "The `--auth-list-public-keys` "
+            "argument is no longer supported. To enable SuperNode authentication,  "
+            "use the `--enable-supernode-auth` flag and use the Flower CLI to register "
+            "SuperNodes by supplying their public keys.",
+        )
+
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
 
@@ -676,19 +685,14 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         default=BASE_DIR,
     )
     parser.add_argument(
+        "--auth-list-public-keys",
+        type=str,
+        help="This argument is deprecated and will be removed in a future release.",
+    )
+    parser.add_argument(
         "--enable-supernode-auth",
         action="store_true",
         help="Enable supernode authentication.",
-    )
-    parser.add_argument(
-        "--auth-superlink-private-key",
-        type=str,
-        help="This argument is deprecated and will be removed in a future release.",
-    )
-    parser.add_argument(
-        "--auth-superlink-public-key",
-        type=str,
-        help="This argument is deprecated and will be removed in a future release.",
     )
 
 
