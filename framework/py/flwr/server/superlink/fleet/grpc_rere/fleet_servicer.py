@@ -15,7 +15,7 @@
 """Fleet API gRPC request-response servicer."""
 
 
-from logging import DEBUG, INFO
+from logging import DEBUG, ERROR, INFO
 
 import grpc
 from google.protobuf.json_format import MessageToDict
@@ -95,6 +95,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                     # SuperNode authentication is enabled,
                     # only SuperNodes created from the CLI are allowed to
                     # stablish a connection with the Fleet API
+                    log(ERROR, NODE_NOT_CREATED_FROM_CLI_MESSAGE)
                     raise ValueError(NODE_NOT_CREATED_FROM_CLI_MESSAGE)
 
                 # SuperNode authentication is disabled, auto-auth

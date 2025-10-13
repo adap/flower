@@ -21,7 +21,7 @@ from bisect import bisect_right
 from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from logging import ERROR, WARNING
 from typing import Optional
 
@@ -428,7 +428,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     if node.online_until <= current_ts:
                         node.status = NodeStatus.OFFLINE
                         node.last_deactivated_at = datetime.fromtimestamp(
-                            node.online_until
+                            node.online_until, tz=timezone.utc
                         ).isoformat()
 
     def get_node_public_key(self, node_id: int) -> bytes:
