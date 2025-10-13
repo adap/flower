@@ -26,7 +26,7 @@ from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Any, Callable, Optional, TypeVar
+from typing import Callable, Optional, TypeVar, cast
 
 import grpc
 import yaml
@@ -36,10 +36,9 @@ from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
-from flwr.common.auth_plugin import ControlAuthPlugin, ControlAuthzPlugin
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
-    AUTH_TYPE_YAML_KEY,
+    AUTHN_TYPE_YAML_KEY,
     AUTHZ_TYPE_YAML_KEY,
     CLIENT_OCTET,
     CONTROL_API_DEFAULT_SERVER_ADDRESS,
@@ -53,6 +52,8 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
+    AuthnType,
+    AuthzType,
     EventLogWriterType,
     ExecPluginType,
 )
@@ -60,9 +61,6 @@ from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    public_key_to_bytes,
-)
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -71,26 +69,35 @@ from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.primitives.asymmetric import public_key_to_bytes
+from flwr.superlink.artifact_provider import ArtifactProvider
+from flwr.superlink.auth_plugin import (
+    ControlAuthnPlugin,
+    ControlAuthzPlugin,
+    get_control_authn_plugins,
+    get_control_authz_plugins,
+)
 from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
-from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
+from .superlink.fleet.grpc_rere.node_auth_server_interceptor import (
+    NodeAuthServerInterceptor,
+)
 from .superlink.linkstate import LinkStateFactory
 from .superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
-P = TypeVar("P", ControlAuthPlugin, ControlAuthzPlugin)
+P = TypeVar("P", ControlAuthnPlugin, ControlAuthzPlugin)
 
 
 try:
     from flwr.ee import (
         add_ee_args_superlink,
-        get_control_auth_plugins,
-        get_control_authz_plugins,
         get_control_event_log_writer_plugins,
+        get_ee_artifact_provider,
         get_fleet_event_log_writer_plugins,
     )
 except ImportError:
@@ -99,19 +106,15 @@ except ImportError:
     def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
         """Add EE-specific arguments to the parser."""
 
-    def get_control_auth_plugins() -> dict[str, type[ControlAuthPlugin]]:
-        """Return all Control API authentication plugins."""
-        raise NotImplementedError("No authentication plugins are currently supported.")
-
-    def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
-        """Return all Control API authorization plugins."""
-        raise NotImplementedError("No authorization plugins are currently supported.")
-
     def get_control_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
         """Return all Control API event log writer plugins."""
         raise NotImplementedError(
             "No event log writer plugins are currently supported."
         )
+
+    def get_ee_artifact_provider(config_path: str) -> ArtifactProvider:
+        """Return the EE artifact provider."""
+        raise NotImplementedError("No artifact provider is currently supported.")
 
     def get_fleet_event_log_writer_plugins() -> dict[str, type[EventLogWriterPlugin]]:
         """Return all Fleet API event log writer plugins."""
@@ -183,21 +186,33 @@ def run_superlink() -> None:
     # Obtain certificates
     certificates = try_obtain_server_certificates(args)
 
-    # Disable the user auth TLS check if args.disable_oidc_tls_cert_verification is
+    # Disable the account auth TLS check if args.disable_oidc_tls_cert_verification is
     # provided
     verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", None)
 
-    auth_plugin: Optional[ControlAuthPlugin] = None
+    authn_plugin: Optional[ControlAuthnPlugin] = None
     authz_plugin: Optional[ControlAuthzPlugin] = None
     event_log_plugin: Optional[EventLogWriterPlugin] = None
-    # Load the auth plugin if the args.user_auth_config is provided
+    # Load the auth plugin if the args.account_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
-        auth_plugin, authz_plugin = _try_obtain_control_auth_plugins(
-            Path(cfg_path), verify_tls_cert
+        log(
+            WARN,
+            "The `--user-auth-config` flag is deprecated and will be removed in a "
+            "future release. Please use `--account-auth-config` instead.",
         )
+        args.account_auth_config = cfg_path
+    cfg_path = getattr(args, "account_auth_config", None)
+    authn_plugin, authz_plugin = _load_control_auth_plugins(cfg_path, verify_tls_cert)
+    if cfg_path is not None:
         # Enable event logging if the args.enable_event_log is True
         if args.enable_event_log:
             event_log_plugin = _try_obtain_control_event_log_writer_plugin()
+
+    # Load artifact provider if the args.artifact_provider_config is provided
+    artifact_provider = None
+    if cfg_path := getattr(args, "artifact_provider_config", None):
+        log(WARN, "The `--artifact-provider-config` flag is highly experimental.")
+        artifact_provider = get_ee_artifact_provider(cfg_path)
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -217,9 +232,10 @@ def run_superlink() -> None:
         objectstore_factory=objectstore_factory,
         certificates=certificates,
         is_simulation=is_simulation,
-        auth_plugin=auth_plugin,
+        authn_plugin=authn_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
+        artifact_provider=artifact_provider,
     )
     grpc_servers = [control_server]
     bckg_threads: list[threading.Thread] = []
@@ -308,7 +324,7 @@ def run_superlink() -> None:
             else:
                 log(DEBUG, "Automatic node authentication enabled")
 
-            interceptors = [AuthenticateServerInterceptor(state_factory, auto_auth)]
+            interceptors = [NodeAuthServerInterceptor(state_factory, auto_auth)]
             if getattr(args, "enable_event_log", None):
                 fleet_log_plugin = _try_obtain_fleet_event_log_writer_plugin()
                 if fleet_log_plugin is not None:
@@ -429,13 +445,21 @@ def _try_load_public_keys_node_authentication(
     return node_public_keys
 
 
-def _try_obtain_control_auth_plugins(
-    config_path: Path, verify_tls_cert: bool
-) -> tuple[ControlAuthPlugin, ControlAuthzPlugin]:
+def _load_control_auth_plugins(
+    config_path: Optional[str], verify_tls_cert: bool
+) -> tuple[ControlAuthnPlugin, ControlAuthzPlugin]:
     """Obtain Control API authentication and authorization plugins."""
+    # Load NoOp plugins if no config path is provided
+    if config_path is None:
+        config_path = ""
+        config = {
+            "authentication": {AUTHN_TYPE_YAML_KEY: AuthnType.NOOP},
+            "authorization": {AUTHZ_TYPE_YAML_KEY: AuthzType.NOOP},
+        }
     # Load YAML file
-    with config_path.open("r", encoding="utf-8") as file:
-        config: dict[str, Any] = yaml.safe_load(file)
+    else:
+        with Path(config_path).open("r", encoding="utf-8") as file:
+            config = yaml.safe_load(file)
 
     def _load_plugin(
         section: str, yaml_key: str, loader: Callable[[], dict[str, type[P]]]
@@ -445,9 +469,7 @@ def _try_obtain_control_auth_plugins(
         try:
             plugins: dict[str, type[P]] = loader()
             plugin_cls: type[P] = plugins[auth_plugin_name]
-            return plugin_cls(
-                user_auth_config_path=config_path, verify_tls_cert=verify_tls_cert
-            )
+            return plugin_cls(Path(cast(str, config_path)), verify_tls_cert)
         except KeyError:
             if auth_plugin_name:
                 sys.exit(
@@ -455,14 +477,22 @@ def _try_obtain_control_auth_plugins(
                     f"Please provide a valid {section} type in the configuration."
                 )
             sys.exit(f"No {section} type is provided in the configuration.")
-        except NotImplementedError:
-            sys.exit(f"No {section} plugins are currently supported.")
+
+    # Warn deprecated auth_type key
+    if authn_type := config["authentication"].pop("auth_type", None):
+        log(
+            WARN,
+            "The `auth_type` key in the authentication configuration is deprecated. "
+            "Use `%s` instead.",
+            AUTHN_TYPE_YAML_KEY,
+        )
+        config["authentication"][AUTHN_TYPE_YAML_KEY] = authn_type
 
     # Load authentication plugin
-    auth_plugin = _load_plugin(
+    authn_plugin = _load_plugin(
         section="authentication",
-        yaml_key=AUTH_TYPE_YAML_KEY,
-        loader=get_control_auth_plugins,
+        yaml_key=AUTHN_TYPE_YAML_KEY,
+        loader=get_control_authn_plugins,
     )
 
     # Load authorization plugin
@@ -472,7 +502,7 @@ def _try_obtain_control_auth_plugins(
         loader=get_control_authz_plugins,
     )
 
-    return auth_plugin, authz_plugin
+    return authn_plugin, authz_plugin
 
 
 def _try_obtain_control_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]:

@@ -1,12 +1,11 @@
 """app-pytorch: A Flower / PyTorch app."""
 
-from pprint import pprint
-
 import torch
-from app_pytorch.task import Net, load_centralized_dataset, test
-from flwr.common import ArrayRecord, ConfigRecord, Context, MetricRecord
-from flwr.server import Grid, ServerApp
+from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
+from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
+
+from app_pytorch.task import Net, load_centralized_dataset, test
 
 # Create ServerApp
 app = ServerApp()
@@ -35,14 +34,6 @@ def main(grid: Grid, context: Context) -> None:
         num_rounds=num_rounds,
         evaluate_fn=global_evaluate,
     )
-
-    # Log resulting metrics
-    print("\nDistributed train metrics:")
-    pprint(result.train_metrics_clientapp)
-    print("\nDistributed evaluate metrics:")
-    pprint(result.evaluate_metrics_clientapp)
-    print("\nGlobal evaluate metrics:")
-    pprint(result.evaluate_metrics_serverapp)
 
     # Save final model to disk
     print("\nSaving final model to disk...")

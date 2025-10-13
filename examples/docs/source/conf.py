@@ -29,7 +29,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.21.0"
+release = "1.23.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -71,6 +71,9 @@ redirects = {
     "simulation-pytorch": "quickstart-pytorch.html",
     "simulation-tensorflow": "quickstart-tensorflow.html",
     "quickstart-mlcube": "index.html",
+    "custom-metrics": "index.html",
+    "sklearn-logreg-mnist": "index.html",
+    "pytorch-from-centralized-to-federated": "index.html",
 }
 
 

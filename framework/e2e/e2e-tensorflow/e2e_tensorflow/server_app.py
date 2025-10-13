@@ -31,7 +31,7 @@ def record_state_metrics(metrics):
     return {STATE_VAR: states}
 
 
-app = fl.server.ServerApp()
+app = fl.serverapp.ServerApp()
 
 
 @app.main()

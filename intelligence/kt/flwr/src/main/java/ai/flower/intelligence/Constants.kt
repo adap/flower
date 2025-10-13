@@ -21,6 +21,6 @@ internal object Constants {
   const val ENCRYPTION_PUBLIC_KEY_PATH = "encryption/public-key"
   const val ENCRYPTION_SERVER_PUBLIC_KEY_PATH = "encryption/server-public-key"
   const val SDK = "KT"
-  const val VERSION = "0.2.3"
+  const val VERSION = "0.2.6"
   val ALLOWED_ROLES = setOf("user", "system", "assistant")
 }

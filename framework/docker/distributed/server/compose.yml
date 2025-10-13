@@ -1,6 +1,6 @@
 services:
   superlink:
-    image: flwr/superlink:${FLWR_VERSION:-1.21.0}
+    image: flwr/superlink:${FLWR_VERSION:-1.23.0}
     command:
       - --isolation
       - process
@@ -21,21 +21,23 @@ services:
       - 9092:9092
       - 9093:9093
 
-  serverapp:
+  superexec-serverapp:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/serverapp:${FLWR_VERSION:-1.21.0}
+        FROM flwr/superexec:${FLWR_VERSION:-1.23.0}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
-        ENTRYPOINT ["flwr-serverapp"]
+        ENTRYPOINT ["flower-superexec"]
     command:
       - --insecure
-      - --serverappio-api-address
+      - --plugin-type
+      - serverapp
+      - --appio-api-address
       - superlink:9091
     depends_on:
       - superlink

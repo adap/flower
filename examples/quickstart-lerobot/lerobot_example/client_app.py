@@ -5,6 +5,12 @@ from logging import INFO
 from pathlib import Path
 
 import torch
+from flwr.client import Client, NumPyClient
+from flwr.clientapp import ClientApp
+from flwr.common import Context
+from flwr.common.logger import log
+from transformers import logging
+
 from lerobot_example.task import (
     get_model,
     get_params,
@@ -13,12 +19,6 @@ from lerobot_example.task import (
     test,
     train,
 )
-from transformers import logging
-
-from flwr.client import Client, ClientApp, NumPyClient
-from flwr.common import Context
-from flwr.common.logger import log
-
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 

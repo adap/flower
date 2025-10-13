@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Federated Learning with Tensorflow/Keras and Flower (Advanced Example)"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.20.0",
+    "flwr[simulation]>=1.22.0",
     "flwr-datasets[vision]>=0.5.0",
     "tensorflow-cpu>=2.9.1, != 2.11.1 ; platform_machine == \"x86_64\"",
     "tensorflow-macos>=2.9.1, != 2.11.1 ; sys_platform == \"darwin\" and platform_machine == \"arm64\"",
@@ -25,12 +25,11 @@ serverapp = "tensorflow_example.server_app:app"
 clientapp = "tensorflow_example.client_app:app"
 
 [tool.flwr.app.config]
-num-server-rounds = 5
+num-server-rounds = 10
 local-epochs = 1
 batch-size = 32
-fraction-fit = 0.25
+fraction-train = 0.25
 fraction-evaluate = 0.5
-use-wandb = true
 
 [tool.flwr.federations]
 default = "local-sim"

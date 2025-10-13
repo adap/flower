@@ -6,31 +6,39 @@
 
 .. |message_link| replace:: ``Message``
 
-.. _message_link: ref-api/flwr.common.Message.html
+.. _message_link: ref-api/flwr.app.Message.html
 
 .. |arrayrecord_link| replace:: ``ArrayRecord``
 
-.. _arrayrecord_link: ref-api/flwr.common.ArrayRecord.html
+.. _arrayrecord_link: ref-api/flwr.app.ArrayRecord.html
+
+.. |context_link| replace:: ``Context``
+
+.. _context_link: ref-api/flwr.app.Context.html
 
 .. |clientapp_link| replace:: ``ClientApp``
 
-.. _clientapp_link: ref-api/flwr.client.ClientApp.html
+.. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
 
 .. |fedavg_link| replace:: ``FedAvg``
 
-.. _fedavg_link: ref-api/flwr.serverapp.FedAvg.html
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
 
 .. |serverapp_link| replace:: ``ServerApp``
 
-.. _serverapp_link: ref-api/flwr.server.ServerApp.html
+.. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
 
 .. |strategy_start_link| replace:: ``start``
 
-.. _strategy_start_link: ref-api/flwr.serverapp.Strategy.html#flwr.serverapp.Strategy.start
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
 
 .. |strategy_link| replace:: ``Strategy``
 
-.. _strategy_link: ref-api/flwr.serverapp.Strategy.html
+.. _strategy_link: ref-api/flwr.serverapp.strategy.Strategy.html
+
+.. |result_link| replace:: ``Result``
+
+.. _result_link: ref-api/flwr.serverapp.strategy.Result.html
 
 Quickstart PyTorch
 ==================
@@ -42,8 +50,8 @@ environment and run everything within a :doc:`virtualenv
 
 Let's use `flwr new` to create a complete Flower+PyTorch project. It will generate all
 the files needed to run, by default with the Flower Simulation Engine, a federation of
-10 nodes using `FedAvg <ref-api/flwr.serverapp.FedAvg.html>`_. The dataset will be
-partitioned using Flower Dataset's `IidPartitioner
+10 nodes using |fedavg_link|_. The dataset will be partitioned using Flower Dataset's
+`IidPartitioner
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
 
 Now that we have a rough idea of what this example is about, let's get started. First,
@@ -55,8 +63,8 @@ install Flower in your new environment:
     $ pip install flwr
 
 Then, run the command below. You will be prompted to select one of the available
-templates (choose ``PyTorch (Message API)``), give a name to your project, and type in
-your developer name:
+templates (choose ``PyTorch``), give a name to your project, and type in your developer
+name:
 
 .. code-block:: shell
 
@@ -137,15 +145,24 @@ With default arguments you will see an output like this one:
     INFO :
     INFO :      Strategy execution finished in 16.56s
     INFO :
-    Distributed train metrics:
-    {1: {'train_loss': 2.149280443954468},
-    2: {'train_loss': 2.109740121269226},
-    3: {'train_loss': 1.947683771133423}}
-
-    Distributed evaluate metrics:
-    {1: {'eval_loss': 2.313199865818024, 'eval_acc': 0.1004},
-    2: {'eval_loss': 2.2529619082808496, 'eval_acc': 0.1420000002},
-    3: {'eval_loss': 1.9190230954438452, 'eval_acc': 0.2974000005}}
+    INFO :      Final results:
+    INFO :
+    INFO :          Global Arrays:
+    INFO :                  ArrayRecord (0.238 MB)
+    INFO :
+    INFO :          Aggregated Client-side Train Metrics:
+    INFO :          { 1: {'train_loss': '2.1839e+00'},
+    INFO :            2: {'train_loss': '2.0512e+00'},
+    INFO :            3: {'train_loss': '1.9784e+00'}}
+    INFO :
+    INFO :          Aggregated Client-side Evaluate Metrics:
+    INFO :          { 1: {'eval_acc': '1.0770e-01', 'eval_loss': '2.2858e+00'},
+    INFO :            2: {'eval_acc': '2.1810e-01', 'eval_loss': '1.9734e+00'},
+    INFO :            3: {'eval_acc': '2.7140e-01', 'eval_loss': '1.9069e+00'}}
+    INFO :
+    INFO :          Server-side Evaluate Metrics:
+    INFO :          {}
+    INFO :
 
     Saving final model to disk...
 
@@ -310,10 +327,10 @@ Let's see how the ``train`` method can be implemented. It receives as input argu
 - a ``ConfigRecord`` with the configuration sent from the ``ServerApp``. By default it
   can be retrieved with key ``"config"`` when accessing the message content.
 
-The ``train`` method also receives the ``Context``, giving access to configs for your
-run and node. The run config hyperparameters are defined in the ``pyproject.toml`` of
-your Flower App. The node config can only be set when running Flower with the Deployment
-Runtime and is not directly configurable during simulations.
+The ``train`` method also receives the |context_link|_, giving access to configs for
+your run and node. The run config hyperparameters are defined in the ``pyproject.toml``
+of your Flower App. The node config can only be set when running Flower with the
+Deployment Runtime and is not directly configurable during simulations.
 
 .. code-block:: python
 
@@ -419,23 +436,15 @@ invoking its |strategy_start_link|_ method. To it we pass:
             num_rounds=num_rounds,
         )
 
-        # Log resulting metrics
-        print("\nDistributed train metrics:")
-        pprint(result.train_metrics_clientapp)
-        print("\nDistributed evaluate metrics:")
-        pprint(result.evaluate_metrics_clientapp)
-
         # Save final model to disk
         print("\nSaving final model to disk...")
         state_dict = result.arrays.to_torch_state_dict()
         torch.save(state_dict, "final_model.pt")
 
-Note the ``start`` method of the strategy returns a result object. This object contains
-all the relevant information about the FL process, including the final model weights as
-an ``ArrayRecord``, and federated training and evaluation metrics as ``MetricRecords``.
-You can easily log the metrics using Python's `pprint
-<https://docs.python.org/3/library/pprint.html>`_ and save the global model `state_dict`
-using ``torch.save``.
+Note the ``start`` method of the strategy returns a |result_link|_ object. This object
+contains all the relevant information about the FL process, including the final model
+weights as an ``ArrayRecord``, and federated training and evaluation metrics as
+``MetricRecords``.
 
 Congratulations! You've successfully built and run your first federated learning system.
 

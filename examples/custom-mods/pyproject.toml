@@ -8,12 +8,12 @@ version = "1.0.0"
 description = "Custom Flower Mods in Flower Apps"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.20.0",
+    "flwr[simulation]>=1.22.0",
     "flwr-datasets[vision]>=0.5.0",
-    "torch==2.6.0",
-    "torchvision==0.21.0",
-    "tensorboard==2.18.0",
-    "wandb==0.19.8",
+    "torch>=2.8.0",
+    "torchvision>=0.23.0",
+    "tensorboard>=2.20.0",
+    "wandb>=0.21.4",
 ]
 [tool.hatch.build.targets.wheel]
 packages = ["."]
@@ -31,6 +31,7 @@ local-epochs = 1
 batch-size = 32
 learning-rate = 0.005
 verbose = false
+fraction-evaluate = 0.4
 
 [tool.flwr.federations]
 default = "local-simulation"

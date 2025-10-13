@@ -309,7 +309,7 @@ jobs:
     needs: [changes, wheel]
     strategy:
       matrix:
-        framework: ["numpy", "pytorch", "tensorflow", "jax", "sklearn"]
+        framework: ["numpy", "pytorch", "PyTorch (Legacy API, deprecated)","tensorflow", "jax", "sklearn"]
 
     name: Template / ${{ matrix.framework }}
 
@@ -330,15 +330,17 @@ jobs:
       - name: Create project and install it
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
-          cd tmp-${{ matrix.framework }}
+          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
+          flwr new tmp-${CLEAN_FRAMEWORK} --framework="${{ matrix.framework }}" --username gh_ci
+          cd tmp-${CLEAN_FRAMEWORK}
           sed -i 's/"flwr\[[^]]*\][^"]*", *//g' pyproject.toml
           pip install flwr[simulation]
           pip install .
       - name: Run project
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          cd tmp-${{ matrix.framework }}
+          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
+          cd tmp-${CLEAN_FRAMEWORK}
           flwr run --run-config num-server-rounds=1 2>&1 | tee flwr_output.log 
           if grep -q "ERROR" flwr_output.log; then
             exit 1
@@ -378,8 +380,9 @@ jobs:
       - name: Create project, build, and install it
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
-          cd tmp-${{ matrix.framework }}
+          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
+          flwr new tmp-${CLEAN_FRAMEWORK} --framework ${{ matrix.framework }} --username gh_ci
+          cd tmp-${CLEAN_FRAMEWORK}
           flwr build
           flwr install *.fab
 

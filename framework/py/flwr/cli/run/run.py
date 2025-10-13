@@ -30,7 +30,7 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
-from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
+from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE, RUN_CONFIG_HELP_MESSAGE
 from flwr.common.config import (
     flatten_dict,
     get_metadata_from_config,
@@ -45,7 +45,7 @@ from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
 
 from ..log import start_stream
-from ..utils import flwr_cli_grpc_exc_handler, init_channel, try_obtain_cli_auth_plugin
+from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -65,11 +65,7 @@ def run(
         typer.Option(
             "--run-config",
             "-c",
-            help="Override run configuration values in the format:\n\n"
-            "`--run-config 'key1=value1 key2=value2' --run-config 'key3=value3'`\n\n"
-            "Values can be of any type supported in TOML, such as bool, int, "
-            "float, or string. Ensure that the keys (`key1`, `key2`, `key3` "
-            "in this example) exist in `pyproject.toml` for proper overriding.",
+            help=RUN_CONFIG_HELP_MESSAGE,
         ),
     ] = None,
     federation_config_overrides: Annotated[
@@ -152,7 +148,7 @@ def _run_with_control_api(
 ) -> None:
     channel = None
     try:
-        auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
+        auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
         channel = init_channel(app, federation_config, auth_plugin)
         stub = ControlStub(channel)
 

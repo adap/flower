@@ -67,41 +67,67 @@ With default arguments you will see an output like this one:
 
     Loading project configuration...
     Success
-    INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
+    INFO :      Starting FedAvg strategy:
+    INFO :          ├── Number of rounds: 3
+    INFO :          ├── ArrayRecord (0.00 MB)
+    INFO :          ├── ConfigRecord (train): (empty!)
+    INFO :          ├── ConfigRecord (evaluate): (empty!)
+    INFO :          ├──> Sampling:
+    INFO :          │       ├──Fraction: train (1.00) | evaluate ( 1.00)
+    INFO :          │       ├──Minimum nodes: train (2) | evaluate (2)
+    INFO :          │       └──Minimum available nodes: 2
+    INFO :          └──> Keys in records:
+    INFO :                  ├── Weighted by: 'num-examples'
+    INFO :                  ├── ArrayRecord key: 'arrays'
+    INFO :                  └── ConfigRecord key: 'config'
     INFO :
-    INFO :      [INIT]
-    INFO :      Requesting initial parameters from one random client
-    INFO :      Received initial parameters from one random client
-    INFO :      Starting evaluation of initial global parameters
-    INFO :      Evaluation returned no results (`None`)
     INFO :
-    INFO :      [ROUND 1]
-    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_fit: received 10 results and 0 failures
-    WARNING :   No fit_metrics_aggregation_fn provided
-    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_evaluate: received 10 results and 0 failures
-    WARNING :   No evaluate_metrics_aggregation_fn provided
+    INFO :      [ROUND 1/3]
+    INFO :      configure_train: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_train: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 1.2003}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'test_loss': 1.5446}
     INFO :
-    INFO :      [ROUND 2]
-    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_fit: received 10 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_evaluate: received 10 results and 0 failures
+    INFO :      [ROUND 2/3]
+    INFO :      configure_train: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_train: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 0.0005}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'test_loss': 2.2913e-07}
     INFO :
-    INFO :      [ROUND 3]
-    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_fit: received 10 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_evaluate: received 10 results and 0 failures
+    INFO :      [ROUND 3/3]
+    INFO :      configure_train: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_train: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'train_loss': 2.1887e-07}
+    INFO :      configure_evaluate: Sampled 10 nodes (out of 10)
+    INFO :      aggregate_evaluate: Received 10 results and 0 failures
+    INFO :          └──> Aggregated MetricRecord: {'test_loss': 5.3860e-14}
     INFO :
-    INFO :      [SUMMARY]
-    INFO :      Run finished 3 round(s) in 6.07s
-    INFO :          History (loss, distributed):
-    INFO :                  round 1: 0.29372873306274416
-    INFO :                  round 2: 5.820648354415425e-08
-    INFO :                  round 3: 1.526226667528834e-14
+    INFO :      Strategy execution finished in 10.16s
     INFO :
+    INFO :      Final results:
+    INFO :
+    INFO :          Global Arrays:
+    INFO :                  ArrayRecord (0.000 MB)
+    INFO :
+    INFO :          Aggregated ClientApp-side Train Metrics:
+    INFO :          { 1: {'train_loss': '1.2003e+00'},
+    INFO :            2: {'train_loss': '5.4981e-04'},
+    INFO :            3: {'train_loss': '2.1888e-07'}}
+    INFO :
+    INFO :          Aggregated ClientApp-side Evaluate Metrics:
+    INFO :          { 1: {'test_loss': '1.5446e+00'},
+    INFO :            2: {'test_loss': '2.2914e-07'},
+    INFO :            3: {'test_loss': '5.3860e-14'}}
+    INFO :
+    INFO :          ServerApp-side Evaluate Metrics:
+    INFO :          {}
+    INFO :
+
+    Saving final model to disk...
 
 You can also override the parameters defined in the ``[tool.flwr.app.config]`` section
 in ``pyproject.toml`` like this:
@@ -173,17 +199,14 @@ the above model.
 The ClientApp
 -------------
 
-The main changes we have to make to use JAX with Flower will be found in the
-``get_params()`` and ``set_params()`` functions. In ``get_params()``, JAX model
-parameters are extracted and represented as a list of NumPy arrays. The ``set_params()``
-function is the opposite: given a list of NumPy arrays it applies them to an existing
-JAX model.
-
-.. note::
-
-    The ``get_params()`` and ``set_params()`` functions here are conceptually similar to
-    the ``get_weights()`` and ``set_weights()`` functions that we defined in the
-    :doc:`QuickStart PyTorch <tutorial-quickstart-pytorch>` tutorial.
+The main changes we have to make to use JAX with Flower have to do with converting the
+|arrayrecord_link|_ received in the |message_link|_ into NumPy arrays and vice versa
+when generating the reply ``Message`` from the ClientApp. We also have to introduce the
+``get_params()`` and ``set_params()`` functions for setting parameter values for the JAX
+model. In ``get_params()``, JAX model parameters are extracted and represented as a list
+of NumPy arrays. The ``set_params()`` function is the opposite: given a list of NumPy
+arrays it applies them to an existing JAX model. We will combine these functions with
+the built-in methods in the ``ArrayRecord`` to make these conversions:
 
 .. code-block:: python
 
@@ -198,84 +221,146 @@ JAX model.
         for key, value in list(zip(local_params.keys(), global_params)):
             local_params[key] = value
 
+.. code-block:: python
+
+    # Load the model
+    model = load_model((input_dim,))
+
+    # Extract ArrayRecord from Message and convert to NumPy arrays
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    # Set JAX model parameters using the converted NumPy arrays
+    set_params(model, ndarrays)
+
+    # ... do some training
+
+    # Extract NumPy arrays from the JAX model and convert back into an ArrayRecord
+    model_record = ArrayRecord(get_params(model))
+
 The rest of the functionality is directly inspired by the centralized case. The
-``fit()`` method in the client trains the model using the local dataset. Similarly, the
-``evaluate()`` method is used to evaluate the model received on a held-out validation
-set that the client might have:
+|clientapp_link|_ comes with three core methods (``train``, ``evaluate``, and ``query``)
+that we can implement for different purposes. For example: ``train`` to train the
+received model using the local data; ``evaluate`` to assess its performance of the
+received model on a validation set; and ``query`` to retrieve information about the node
+executing the ``ClientApp``. In this tutorial we will only make use of ``train`` and
+``evaluate``.
+
+Let's see how the ``train`` method can be implemented. It receives as input arguments a
+|message_link|_ from the ``ServerApp``. By default it carries:
+
+- an ``ArrayRecord`` with the arrays of the model to federate. By default they can be
+  retrieved with key ``"arrays"`` when accessing the message content.
+- a ``ConfigRecord`` with the configuration sent from the ``ServerApp``. By default it
+  can be retrieved with key ``"config"`` when accessing the message content.
+
+The ``train`` method also receives the ``Context``, giving access to configs for your
+run and node. The run config hyperparameters are defined in the ``pyproject.toml`` of
+your Flower App. The node config can only be set when running Flower with the Deployment
+Runtime and is not directly configurable during simulations.
 
 .. code-block:: python
-
-    class FlowerClient(NumPyClient):
-        def __init__(self, input_dim):
-            self.train_x, self.train_y, self.test_x, self.test_y = load_data()
-            self.grad_fn = jax.grad(loss_fn)
-            model_shape = self.train_x.shape[1:]
-
-            self.params = load_model(model_shape)
-
-        def fit(self, parameters, config):
-            set_params(self.params, parameters)
-            self.params, loss, num_examples = train(
-                self.params, self.grad_fn, self.train_x, self.train_y
-            )
-            parameters = get_params({})
-            return parameters, num_examples, {"loss": float(loss)}
-
-        def evaluate(self, parameters, config):
-            set_params(self.params, parameters)
-            loss, num_examples = evaluation(
-                self.params, self.grad_fn, self.test_x, self.test_y
-            )
-            return float(loss), num_examples, {"loss": float(loss)}
-
-Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` defined above by
-means of a ``client_fn()`` callback. Note that the `context` enables you to get access
-to hyperparemeters defined in your ``pyproject.toml`` to configure the run. In this
-tutorial we access the ``local-epochs`` setting to control the number of epochs a
-``ClientApp`` will perform when running the ``fit()`` method. You could define
-additioinal hyperparameters in ``pyproject.toml`` and access them here.
-
-.. code-block:: python
-
-    def client_fn(context: Context):
-        input_dim = context.run_config["input-dim"]
-        # Return Client instance
-        return FlowerClient(input_dim).to_client()
-
 
     # Flower ClientApp
-    app = ClientApp(client_fn)
+    app = ClientApp()
+
+
+    @app.train()
+    def train(msg: Message, context: Context):
+        """Train the model on local data."""
+
+        # Read from config
+        input_dim = context.run_config["input-dim"]
+
+        # Load data and model
+        train_x, train_y, _, _ = load_data()
+        model = load_model((input_dim,))
+        grad_fn = jax.grad(loss_fn)
+
+        # Set model parameters
+        ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+        set_params(model, ndarrays)
+
+        # Train the model on local data
+        model, loss, num_examples = train_fn(model, grad_fn, train_x, train_y)
+
+        # Construct and return reply Message
+        model_record = ArrayRecord(get_params(model))
+        metrics = {
+            "train_loss": float(loss),
+            "num-examples": num_examples,
+        }
+        metric_record = MetricRecord(metrics)
+        content = RecordDict({"arrays": model_record, "metrics": metric_record})
+        return Message(content=content, reply_to=msg)
+
+The ``@app.evaluate()`` method would be near identical with two exceptions: (1) the
+model is not locally trained, instead it is used to evaluate its performance on the
+locally held-out validation set; (2) including the model in the reply Message is no
+longer needed because it is not locally modified.
 
 The ServerApp
 -------------
 
-To construct a ``ServerApp`` we define a ``server_fn()`` callback with an identical
-signature to that of ``client_fn()`` but the return type is |serverappcomponents|_ as
-opposed to a |client|_ In this example we use the ``FedAvg`` strategy. To it we pass a
-randomly initialized model that will server as the global model to federated. Note that
-the value of ``input_dim`` is read from the run config. You can find the default value
-defined in the ``pyproject.toml``.
+To construct a |serverapp_link|_ we define its ``@app.main()`` method. This method
+receive as input arguments:
+
+- a ``Grid`` object that will be used to interface with the nodes running the
+  ``ClientApp`` to involve them in a round of train/evaluate/query or other.
+- a ``Context`` object that provides access to the run configuration.
+
+In this example we use the |fedavg|_ and configure it with a specific value of
+``input_dim`` which is read from the run config. You can find the default value defined
+in the ``pyproject.toml``. Then, the execution of the strategy is launched when invoking
+its |strategy_start_link|_ method. To it we pass:
+
+- the ``Grid`` object.
+- an ``ArrayRecord`` carrying a randomly initialized model that will serve as the global
+  model to be federated.
+- the ``num_rounds`` parameter specifying how many rounds of ``FedAvg`` to perform.
+
+You may also pass a ``ConfigRecord`` with the training hyperparameters to be sent to the
+clients. The strategy will also insert the current round number in this config before
+sending it to the participating nodes. An example where a ``ConfigRecord`` is passed can
+be found in the :doc:`Quickstart PyTorch <tutorial-quickstart-pytorch>` tutorial.
 
 .. code-block:: python
 
-    def server_fn(context: Context):
+    # Create ServerApp
+    app = ServerApp()
+
+
+    @app.main()
+    def main(grid: Grid, context: Context) -> None:
+        """Main entry point for the ServerApp."""
+
         # Read from config
         num_rounds = context.run_config["num-server-rounds"]
         input_dim = context.run_config["input-dim"]
 
-        # Initialize global model
-        params = get_params(load_model((input_dim,)))
-        initial_parameters = ndarrays_to_parameters(params)
+        # Load global model
+        model = load_model((input_dim,))
+        arrays = ArrayRecord(get_params(model))
 
-        # Define strategy
-        strategy = FedAvg(initial_parameters=initial_parameters)
-        config = ServerConfig(num_rounds=num_rounds)
+        # Initialize FedAvg strategy
+        strategy = FedAvg()
 
-        return ServerAppComponents(strategy=strategy, config=config)
+        # Start strategy, run FedAvg for `num_rounds`
+        result = strategy.start(
+            grid=grid,
+            initial_arrays=arrays,
+            num_rounds=num_rounds,
+        )
 
+        # Save final model to disk
+        print("\nSaving final model to disk...")
+        ndarrays = result.arrays.to_numpy_ndarrays()
+        np.savez("final_model.npz", *ndarrays)
 
-    # Create ServerApp
-    app = ServerApp(server_fn=server_fn)
+Note the ``start`` method of the strategy returns a result object. This object contains
+all the relevant information about the FL process, including the final model weights as
+an ``ArrayRecord``, and federated training and evaluation metrics as ``MetricRecords``.
+You can easily log the metrics using Python's `pprint
+<https://docs.python.org/3/library/pprint.html>`_ and save the global model NumPy arrays
+using ``np.savez()`` as shown above.
 
 Congratulations! You've successfully built and run your first federated learning system
 for JAX with Flower!
@@ -285,25 +370,38 @@ for JAX with Flower!
     Check the source code of the extended version of this tutorial in
     |quickstart_jax_link|_ in the Flower GitHub repository.
 
-.. |client| replace:: ``Client``
-
 .. |fedavg| replace:: ``FedAvg``
+
+.. _fedavg: ref-api/flwr.serverapp.strategy.FedAvg.html
 
 .. |makeregression| replace:: ``make_regression()``
 
-.. |quickstart_jax_link| replace:: ``examples/quickstart-jax``
-
-.. |serverappcomponents| replace:: ``ServerAppComponents``
-
-.. _client: ref-api/flwr.client.Client.html#client
-
-.. _fedavg: ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg
-
 .. _makeregression: https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_regression.html
+
+.. |quickstart_jax_link| replace:: ``examples/quickstart-jax``
 
 .. _quickstart_jax_link: https://github.com/adap/flower/tree/main/examples/quickstart-jax
 
-.. _serverappcomponents: ref-api/flwr.server.ServerAppComponents.html#serverappcomponents
+.. |message_link| replace:: ``Message``
 
-.. meta::
-    :description: Check out this Federated Learning quickstart tutorial for using Flower with Jax to train a linear regression model on a scikit-learn dataset.
+.. _message_link: ref-api/flwr.app.Message.html
+
+.. |arrayrecord_link| replace:: ``ArrayRecord``
+
+.. _arrayrecord_link: ref-api/flwr.app.ArrayRecord.html
+
+.. |clientapp_link| replace:: ``ClientApp``
+
+.. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
+
+.. |serverapp_link| replace:: ``ServerApp``
+
+.. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
+
+.. |strategy_start_link| replace:: ``start``
+
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
+
+.. |strategy_link| replace:: ``Strategy``
+
+.. _strategy_link: ref-api/flwr.serverapp.Strategy.html

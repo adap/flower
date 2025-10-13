@@ -2,15 +2,12 @@
 
 import os
 import warnings
-from typing import Dict, Tuple
 
-import torch
-from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 from flwr.common.config import unflatten_dict
-from flwr.common.typing import NDArrays, Scalar
 from omegaconf import DictConfig
-
+from peft import get_peft_model_state_dict, set_peft_model_state_dict
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
@@ -19,12 +16,7 @@ from flowertune_llm.dataset import (
     load_data,
     replace_keys,
 )
-from flowertune_llm.models import (
-    cosine_annealing,
-    get_model,
-    set_parameters,
-    get_parameters,
-)
+from flowertune_llm.models import cosine_annealing, get_model
 
 # Avoid warnings
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
@@ -32,95 +24,63 @@ os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = "1"
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-# pylint: disable=too-many-arguments
-# pylint: disable=too-many-instance-attributes
-class FlowerClient(NumPyClient):
-    """Standard Flower client for CNN training."""
-
-    def __init__(
-        self,
-        model_cfg: DictConfig,
-        train_cfg: DictConfig,
-        trainset,
-        tokenizer,
-        formatting_prompts_func,
-        data_collator,
-        num_rounds,
-    ):  # pylint: disable=too-many-arguments
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.train_cfg = train_cfg
-        self.training_arguments = TrainingArguments(**train_cfg.training_arguments)
-        self.tokenizer = tokenizer
-        self.formatting_prompts_func = formatting_prompts_func
-        self.data_collator = data_collator
-        self.num_rounds = num_rounds
-        self.trainset = trainset
-
-        # instantiate model
-        self.model = get_model(model_cfg)
-
-    def fit(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[NDArrays, int, Dict]:
-        """Implement distributed fit function for a given client."""
-        set_parameters(self.model, parameters)
-
-        new_lr = cosine_annealing(
-            int(config["current_round"]),
-            self.num_rounds,
-            self.train_cfg.learning_rate_max,
-            self.train_cfg.learning_rate_min,
-        )
-
-        self.training_arguments.learning_rate = new_lr
-        self.training_arguments.output_dir = config["save_path"]
-
-        # Construct trainer
-        trainer = SFTTrainer(
-            model=self.model,
-            tokenizer=self.tokenizer,
-            args=self.training_arguments,
-            max_seq_length=self.train_cfg.seq_length,
-            train_dataset=self.trainset,
-            formatting_func=self.formatting_prompts_func,
-            data_collator=self.data_collator,
-        )
-
-        # Do local training
-        results = trainer.train()
-
-        return (
-            get_parameters(self.model),
-            len(self.trainset),
-            {"train_loss": results.training_loss},
-        )
+# Flower ClientApp
+app = ClientApp()
 
 
-def client_fn(context: Context) -> FlowerClient:
-    """Create a Flower client representing a single organization."""
+@app.train()
+def train(msg: Message, context: Context):
+    """Train the model on local data."""
+    # Parse config
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
     num_rounds = context.run_config["num-server-rounds"]
     cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
+    training_arguments = TrainingArguments(**cfg.train.training_arguments)
 
     # Let's get the client partition
-    client_trainset = load_data(partition_id, num_partitions, cfg.dataset.name)
+    trainset = load_data(partition_id, num_partitions, cfg.dataset.name)
     (
         tokenizer,
         data_collator,
         formatting_prompts_func,
     ) = get_tokenizer_and_data_collator_and_propt_formatting(cfg.model.name)
 
-    return FlowerClient(
-        cfg.model,
-        cfg.train,
-        client_trainset,
-        tokenizer,
-        formatting_prompts_func,
-        data_collator,
+    # Load the model and initialize it with the received weights
+    model = get_model(cfg.model)
+    set_peft_model_state_dict(model, msg.content["arrays"].to_torch_state_dict())
+
+    # Set learning rate for current round
+    new_lr = cosine_annealing(
+        msg.content["config"]["server-round"],
         num_rounds,
-    ).to_client()
+        cfg.train.learning_rate_max,
+        cfg.train.learning_rate_min,
+    )
 
+    training_arguments.learning_rate = new_lr
+    training_arguments.output_dir = msg.content["config"]["save_path"]
 
-# Flower ClientApp
-app = ClientApp(client_fn)
+    # Construct trainer
+    trainer = SFTTrainer(
+        model=model,
+        tokenizer=tokenizer,
+        args=training_arguments,
+        max_seq_length=cfg.train.seq_length,
+        train_dataset=trainset,
+        formatting_func=formatting_prompts_func,
+        data_collator=data_collator,
+    )
+
+    # Do local training
+    results = trainer.train()
+
+    # Construct and return reply Message
+    model_record = ArrayRecord(get_peft_model_state_dict(model))
+    metrics = {
+        "train_loss": results.training_loss,
+        "num-examples": len(trainset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)

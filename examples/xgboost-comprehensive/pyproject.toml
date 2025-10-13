@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Federated Learning with XGBoost and Flower (Comprehensive Example)"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.20.0",
+    "flwr[simulation]>=1.22.0",
     "flwr-datasets>=0.5.0",
     "xgboost>=2.0.0",
 ]
@@ -24,20 +24,19 @@ serverapp = "xgboost_comprehensive.server_app:app"
 clientapp = "xgboost_comprehensive.client_app:app"
 
 [tool.flwr.app.config]
-# ServerApp
 train-method = "bagging" # Choose from [bagging, cyclic]
 num-server-rounds = 3
-fraction-fit = 1.0
+fraction-train = 1.0
 fraction-evaluate = 1.0
 centralised-eval = false
-
-# ClientApp
 partitioner-type = "uniform" # Choose from [uniform, linear, square, exponential]
 test-fraction = 0.2
 seed = 42
 centralised-eval-client = false
 local-epochs = 1
 scaled-lr = false
+
+# XGBoost parameters
 params.objective = "binary:logistic"
 params.eta = 0.1 # Learning rate
 params.max-depth = 8

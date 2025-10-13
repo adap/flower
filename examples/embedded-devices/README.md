@@ -118,7 +118,9 @@ flower-superlink --insecure
 
 ### Connecting Flower `SuperNodes`
 
-With the `SuperLink` up and running, now let's launch a `SuperNode` on each embedded device. In order to do this ensure you know what the IP of the machine running the `SuperLink` is and that you have copied the data to the device. Note with `--node-config` we set a key named `dataset-path`. That's the one expected by the `client_fn()` in [client_app.py](embeddedexample/client_app.py). This file will be automatically delivered to the `SuperNode` so it knows how to execute the `ClientApp` logic.
+With the `SuperLink` up and running, we can now launch a `SuperNode` on each embedded device. To do this, make sure you know the IP address of the machine running the `SuperLink` and that the necessary data has been copied to the device.
+
+When using `--node-config`, note that we set a key named `dataset-path`. This key is required by the `ClientApp` defined in [client_app.py](embeddedexample/client_app.py). The configuration file will be automatically delivered to the `SuperNode`, ensuring it can execute the `ClientApp` logic correctly.
 
 > [!NOTE]
 > You don't need to clone this example to your embedded devices running as Flower `SuperNodes`. The code they will execute (in [embeddedexamples/client_app.py](embeddedexamples/client_app.py)) will automatically be delivered.

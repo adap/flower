@@ -1,0 +1,14 @@
+[201] SERVERAPP_EXCEPTION
+=========================
+
+Description
+-----------
+
+An unhandled exception was raised during the execution of your ServerApp code.
+
+How to Resolve
+--------------
+
+This error indicates that your ServerApp code failed with an unhandled exception. Check
+the logged exception details in the logs, review your code carefully, and fix the
+underlying issue causing the error.

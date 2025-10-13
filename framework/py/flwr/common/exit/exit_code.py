@@ -36,6 +36,7 @@ class ExitCode:
 
     # ServerApp-specific exit codes (200-299)
     SERVERAPP_STRATEGY_PRECONDITION_UNMET = 200
+    SERVERAPP_EXCEPTION = 201
     SERVERAPP_STRATEGY_AGGREGATION_ERROR = 202
 
     # SuperNode-specific exit codes (300-399)
@@ -44,6 +45,10 @@ class ExitCode:
     SUPERNODE_NODE_AUTH_KEYS_INVALID = 302
 
     # SuperExec-specific exit codes (400-499)
+    SUPEREXEC_INVALID_PLUGIN_CONFIG = 400
+
+    # FlowerCLI-specific exit codes (500-599)
+    FLWRCLI_NODE_AUTH_PUBLIC_KEY_INVALID = 500
 
     # Common exit codes (600-699)
     COMMON_ADDRESS_INVALID = 600
@@ -90,6 +95,7 @@ EXIT_CODE_HELP = {
         "perform weighted average (e.g. in FedAvg) please ensure the returned "
         "MetricRecord from ClientApps do include this key."
     ),
+    ExitCode.SERVERAPP_EXCEPTION: "An unhandled exception occurred in the ServerApp.",
     ExitCode.SERVERAPP_STRATEGY_AGGREGATION_ERROR: (
         "The strategy encountered an error during aggregation. Please check the logs "
         "for more details."
@@ -110,6 +116,16 @@ EXIT_CODE_HELP = {
         "file and try again."
     ),
     # SuperExec-specific exit codes (400-499)
+    ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (
+        "The YAML configuration for the SuperExec plugin is invalid."
+    ),
+    # FlowerCLI-specific exit codes (500-599)
+    ExitCode.FLWRCLI_NODE_AUTH_PUBLIC_KEY_INVALID: (
+        "Node authentication requires a valid elliptic curve public key in the "
+        "SSH format and following a NIST standard elliptic curve (e.g. SECP384R1). "
+        "Please ensure that the file path points to a valid public key "
+        "file and try again."
+    ),
     # Common exit codes (600-699)
     ExitCode.COMMON_ADDRESS_INVALID: (
         "Please provide a valid URL, IPv4 or IPv6 address."

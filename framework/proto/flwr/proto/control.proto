@@ -21,6 +21,7 @@ import "flwr/proto/fab.proto";
 import "flwr/proto/transport.proto";
 import "flwr/proto/recorddict.proto";
 import "flwr/proto/run.proto";
+import "flwr/proto/node.proto";
 
 service Control {
   // Start run upon request
@@ -41,6 +42,18 @@ service Control {
 
   // Get auth tokens upon request
   rpc GetAuthTokens(GetAuthTokensRequest) returns (GetAuthTokensResponse) {}
+
+  // Pull artifacts generated during a run (flwr pull)
+  rpc PullArtifacts(PullArtifactsRequest) returns (PullArtifactsResponse) {}
+
+  // Add SuperNode
+  rpc CreateNodeCli(CreateNodeCliRequest) returns (CreateNodeCliResponse) {}
+
+  // Remove SuperNode
+  rpc DeleteNodeCli(DeleteNodeCliRequest) returns (DeleteNodeCliResponse) {}
+
+  // List SuperNodes
+  rpc ListNodesCli(ListNodesCliRequest) returns (ListNodesCliResponse) {}
 }
 
 message StartRunRequest {
@@ -65,7 +78,7 @@ message ListRunsResponse {
 
 message GetLoginDetailsRequest {}
 message GetLoginDetailsResponse {
-  string auth_type = 1;
+  string authn_type = 1;
   string device_code = 2;
   string verification_uri_complete = 3;
   int64 expires_in = 4;
@@ -80,3 +93,18 @@ message GetAuthTokensResponse {
 
 message StopRunRequest { uint64 run_id = 1; }
 message StopRunResponse { bool success = 1; }
+
+message PullArtifactsRequest { uint64 run_id = 1; }
+message PullArtifactsResponse { optional string url = 1; }
+
+message CreateNodeCliRequest { bytes public_key = 1; }
+message CreateNodeCliResponse { optional uint64 node_id = 1; }
+
+message DeleteNodeCliRequest { uint64 node_id = 1; }
+message DeleteNodeCliResponse {}
+
+message ListNodesCliRequest { bool dry_run = 1; }
+message ListNodesCliResponse {
+  repeated NodeInfo nodes_info = 1;
+  string now = 2;
+}

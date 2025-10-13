@@ -14,7 +14,7 @@ description = ""
 license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
-    "flwr[simulation]>=1.21.0",
+    "flwr[simulation]>=1.23.0",
     "jax==0.4.30",
     "jaxlib==0.4.30",
     "scikit-learn==1.6.1",

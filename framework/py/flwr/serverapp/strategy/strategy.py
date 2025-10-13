@@ -15,6 +15,7 @@
 """Flower message-based strategy."""
 
 
+import io
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
@@ -22,11 +23,10 @@ from logging import INFO
 from typing import Callable, Optional
 
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, log
-from flwr.common.exit import ExitCode, flwr_exit
 from flwr.server import Grid
 
 from .result import Result
-from .strategy_utils import InconsistentMessageReplies, log_strategy_start_info
+from .strategy_utils import log_strategy_start_info
 
 
 class Strategy(ABC):
@@ -140,7 +140,9 @@ class Strategy(ABC):
         timeout: float = 3600,
         train_config: Optional[ConfigRecord] = None,
         evaluate_config: Optional[ConfigRecord] = None,
-        evaluate_fn: Optional[Callable[[int, ArrayRecord], MetricRecord]] = None,
+        evaluate_fn: Optional[
+            Callable[[int, ArrayRecord], Optional[MetricRecord]]
+        ] = None,
     ) -> Result:
         """Execute the federated learning strategy.
 
@@ -164,11 +166,11 @@ class Strategy(ABC):
         evaluate_config : ConfigRecord, optional
             Configuration to be sent to nodes during evaluation rounds.
             If unset, an empty ConfigRecord will be used.
-        evaluate_fn : Callable[[int, ArrayRecord], MetricRecord], optional
+        evaluate_fn : Callable[[int, ArrayRecord], Optional[MetricRecord]], optional
             Optional function for centralized evaluation of the global model. Takes
-            server round number and array record, returns a MetricRecord. If provided,
-            will be called before the first round and after each round. Defaults to
-            None.
+            server round number and array record, returns a MetricRecord or None. If
+            provided, will be called before the first round and after each round.
+            Defaults to None.
 
         Returns
         -------
@@ -193,7 +195,8 @@ class Strategy(ABC):
         if evaluate_fn:
             res = evaluate_fn(0, initial_arrays)
             log(INFO, "Initial global evaluation results: %s", res)
-            result.evaluate_metrics_serverapp[0] = res
+            if res is not None:
+                result.evaluate_metrics_serverapp[0] = res
 
         arrays = initial_arrays
 
@@ -202,7 +205,7 @@ class Strategy(ABC):
             log(INFO, "[ROUND %s/%s]", current_round, num_rounds)
 
             # -----------------------------------------------------------------
-            # --- TRAINING ----------------------------------------------------
+            # --- TRAINING (CLIENTAPP-SIDE) -----------------------------------
             # -----------------------------------------------------------------
 
             # Call strategy to configure training round
@@ -218,15 +221,10 @@ class Strategy(ABC):
             )
 
             # Aggregate train
-            try:
-                agg_arrays, agg_train_metrics = self.aggregate_train(
-                    current_round,
-                    train_replies,
-                )
-            except InconsistentMessageReplies as e:
-                flwr_exit(
-                    ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET, message=str(e)
-                )
+            agg_arrays, agg_train_metrics = self.aggregate_train(
+                current_round,
+                train_replies,
+            )
 
             # Log training metrics and append to history
             if agg_arrays is not None:
@@ -237,7 +235,7 @@ class Strategy(ABC):
                 result.train_metrics_clientapp[current_round] = agg_train_metrics
 
             # -----------------------------------------------------------------
-            # --- EVALUATION (LOCAL) ------------------------------------------
+            # --- EVALUATION (CLIENTAPP-SIDE) ---------------------------------
             # -----------------------------------------------------------------
 
             # Call strategy to configure evaluation round
@@ -253,15 +251,10 @@ class Strategy(ABC):
             )
 
             # Aggregate evaluate
-            try:
-                agg_evaluate_metrics = self.aggregate_evaluate(
-                    current_round,
-                    evaluate_replies,
-                )
-            except InconsistentMessageReplies as e:
-                flwr_exit(
-                    ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET, message=str(e)
-                )
+            agg_evaluate_metrics = self.aggregate_evaluate(
+                current_round,
+                evaluate_replies,
+            )
 
             # Log training metrics and append to history
             if agg_evaluate_metrics is not None:
@@ -269,7 +262,7 @@ class Strategy(ABC):
                 result.evaluate_metrics_clientapp[current_round] = agg_evaluate_metrics
 
             # -----------------------------------------------------------------
-            # --- EVALUATION (GLOBAL) -----------------------------------------
+            # --- EVALUATION (SERVERAPP-SIDE) ---------------------------------
             # -----------------------------------------------------------------
 
             # Centralized evaluation
@@ -277,10 +270,16 @@ class Strategy(ABC):
                 log(INFO, "Global evaluation")
                 res = evaluate_fn(current_round, arrays)
                 log(INFO, "\t└──> MetricRecord: %s", res)
-                result.evaluate_metrics_serverapp[current_round] = res
+                if res is not None:
+                    result.evaluate_metrics_serverapp[current_round] = res
 
         log(INFO, "")
         log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)
+        log(INFO, "")
+        log(INFO, "Final results:")
+        log(INFO, "")
+        for line in io.StringIO(str(result)):
+            log(INFO, "\t%s", line.strip("\n"))
         log(INFO, "")
 
         return result

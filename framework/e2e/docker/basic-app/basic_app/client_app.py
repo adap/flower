@@ -2,8 +2,9 @@
 
 from basic_app.task import get_dummy_model
 
-from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
+from flwr.app import Context
+from flwr.client import NumPyClient
+from flwr.clientapp import ClientApp
 
 
 class FlowerClient(NumPyClient):

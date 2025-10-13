@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Callable
 
+from datasets import Dataset
 from lerobot.common.datasets.lerobot_dataset import (
     CODEBASE_VERSION,
     DATA_DIR,
@@ -15,8 +16,6 @@ from lerobot.common.datasets.utils import (
     load_videos,
     reset_episode_index,
 )
-
-from datasets import Dataset
 
 
 class FilteredLeRobotDataset(LeRobotDataset):

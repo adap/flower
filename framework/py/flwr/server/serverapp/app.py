@@ -21,6 +21,7 @@ from pathlib import Path
 from queue import Queue
 from typing import Optional
 
+from flwr.app.exception import AppExitException
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.cli.utils import get_sha256_hash
@@ -37,7 +38,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.exit import ExitCode, flwr_exit
+from flwr.common.exit import ExitCode, add_exit_handler, flwr_exit
 from flwr.common.heartbeat import HeartbeatSender, get_grpc_app_heartbeat_fn
 from flwr.common.logger import (
     log,
@@ -133,12 +134,34 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     # Resolve directory where FABs are installed
     flwr_dir_ = get_flwr_dir(flwr_dir)
     log_uploader = None
-    success = True
     hash_run_id = None
     run_status = None
     heartbeat_sender = None
     grid = None
     context = None
+    exit_code = ExitCode.SUCCESS
+
+    def on_exit() -> None:
+        # Stop heartbeat sender
+        if heartbeat_sender:
+            heartbeat_sender.stop()
+
+        # Stop log uploader for this run and upload final logs
+        if log_uploader:
+            stop_log_uploader(log_queue, log_uploader)
+
+        # Update run status
+        if run_status and grid:
+            run_status_proto = run_status_to_proto(run_status)
+            grid._stub.UpdateRunStatus(
+                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
+            )
+
+        # Close the Grpc connection
+        if grid:
+            grid.close()
+
+    add_exit_handler(on_exit)
 
     try:
         # Initialize the GrpcGrid
@@ -229,43 +252,33 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         _ = grid._stub.PushAppOutputs(out_req)
 
         run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+
+    # Raised when the run is already stopped by the user
     except RunNotRunningException:
         log(INFO, "")
         log(INFO, "Run ID %s stopped.", run.run_id)
         log(INFO, "")
         run_status = None
-        success = False
+        # No need to update the exit code since this is expected behavior
 
     except Exception as ex:  # pylint: disable=broad-exception-caught
         exc_entity = "ServerApp"
         log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
         run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
-        success = False
 
-    finally:
-        # Stop heartbeat sender
-        if heartbeat_sender:
-            heartbeat_sender.stop()
+        # Set exit code
+        exit_code = ExitCode.SERVERAPP_EXCEPTION  # General exit code
+        if isinstance(ex, AppExitException):
+            exit_code = ex.exit_code
 
-        # Stop log uploader for this run and upload final logs
-        if log_uploader:
-            stop_log_uploader(log_queue, log_uploader)
-
-        # Update run status
-        if run_status and grid:
-            run_status_proto = run_status_to_proto(run_status)
-            grid._stub.UpdateRunStatus(
-                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
-            )
-
-        # Close the Grpc connection
-        if grid:
-            grid.close()
-
-        event(
-            EventType.FLWR_SERVERAPP_RUN_LEAVE,
-            event_details={"run-id-hash": hash_run_id, "success": success},
-        )
+    flwr_exit(
+        code=exit_code,
+        event_type=EventType.FLWR_SERVERAPP_RUN_LEAVE,
+        event_details={
+            "run-id-hash": hash_run_id,
+            "success": exit_code == ExitCode.SUCCESS,
+        },
+    )
 
 
 def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:

@@ -2,17 +2,17 @@
 
 import os
 
+import numpy as np
 import tensorflow as tf
 import tensorflow_privacy
-from flwr.client import ClientApp, NumPyClient
+from flwr.client import NumPyClient
+from flwr.clientapp import ClientApp
+from flwr.common import Context
 from tensorflow_privacy.privacy.analysis.compute_dp_sgd_privacy_lib import (
     compute_dp_sgd_privacy_statement,
 )
-from flwr.common import Context
 
 from tf_privacy.task import load_data, load_model
-import numpy as np
-
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"

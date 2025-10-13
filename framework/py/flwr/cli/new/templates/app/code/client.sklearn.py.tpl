@@ -2,10 +2,16 @@
 
 import warnings
 
-from sklearn.metrics import log_loss
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    log_loss,
+    precision_score,
+    recall_score,
+)
 
-from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
 from $import_name.task import (
     get_model,
     get_model_params,
@@ -14,39 +20,52 @@ from $import_name.task import (
     set_model_params,
 )
 
-
-class FlowerClient(NumPyClient):
-    def __init__(self, model, X_train, X_test, y_train, y_test):
-        self.model = model
-        self.X_train = X_train
-        self.X_test = X_test
-        self.y_train = y_train
-        self.y_test = y_test
-
-    def fit(self, parameters, config):
-        set_model_params(self.model, parameters)
-
-        # Ignore convergence failure due to low local epochs
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            self.model.fit(self.X_train, self.y_train)
-
-        return get_model_params(self.model), len(self.X_train), {}
-
-    def evaluate(self, parameters, config):
-        set_model_params(self.model, parameters)
-
-        loss = log_loss(self.y_test, self.model.predict_proba(self.X_test))
-        accuracy = self.model.score(self.X_test, self.y_test)
-
-        return loss, len(self.X_test), {"accuracy": accuracy}
+# Flower ClientApp
+app = ClientApp()
 
 
-def client_fn(context: Context):
+@app.train()
+def train(msg: Message, context: Context):
+    """Train the model on local data."""
+
+    # Create LogisticRegression Model
+    penalty = context.run_config["penalty"]
+    local_epochs = context.run_config["local-epochs"]
+    model = get_model(penalty, local_epochs)
+    # Setting initial parameters, akin to model.compile for keras models
+    set_initial_params(model)
+
+    # Apply received pararameters
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    set_model_params(model, ndarrays)
+
+    # Load the data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
+    X_train, _, y_train, _ = load_data(partition_id, num_partitions)
 
-    X_train, X_test, y_train, y_test = load_data(partition_id, num_partitions)
+    # Ignore convergence failure due to low local epochs
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        # Train the model on local data
+        model.fit(X_train, y_train)
+
+    # Let's compute train loss
+    y_train_pred_proba = model.predict_proba(X_train)
+    train_logloss = log_loss(y_train, y_train_pred_proba)
+
+    # Construct and return reply Message
+    ndarrays = get_model_params(model)
+    model_record = ArrayRecord(ndarrays)
+    metrics = {"num-examples": len(X_train), "train_logloss": train_logloss}
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)
+
+
+@app.evaluate()
+def evaluate(msg: Message, context: Context):
+    """Evaluate the model on test data."""
 
     # Create LogisticRegression Model
     penalty = context.run_config["penalty"]
@@ -56,8 +75,34 @@ def client_fn(context: Context):
     # Setting initial parameters, akin to model.compile for keras models
     set_initial_params(model)
 
-    return FlowerClient(model, X_train, X_test, y_train, y_test).to_client()
+    # Apply received pararameters
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    set_model_params(model, ndarrays)
 
+    # Load the data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    _, X_test, _, y_test = load_data(partition_id, num_partitions)
 
-# Flower ClientApp
-app = ClientApp(client_fn=client_fn)
+    # Evaluate the model on local data
+    y_train_pred = model.predict(X_test)
+    y_train_pred_proba = model.predict_proba(X_test)
+
+    accuracy = accuracy_score(y_test, y_train_pred)
+    loss = log_loss(y_test, y_train_pred_proba)
+    precision = precision_score(y_test, y_train_pred, average="macro", zero_division=0)
+    recall = recall_score(y_test, y_train_pred, average="macro", zero_division=0)
+    f1 = f1_score(y_test, y_train_pred, average="macro", zero_division=0)
+
+    # Construct and return reply Message
+    metrics = {
+        "num-examples": len(X_test),
+        "test_logloss": loss,
+        "accuracy": accuracy,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
+    return Message(content=content, reply_to=msg)

@@ -16,12 +16,15 @@ README.md @jafermarq @tanertopal @danieljanes
 /datasets @jafermarq @tanertopal @danieljanes
 
 # Flower Examples
-/examples @chongshenng @jafermarq @tanertopal @danieljanes
+/examples @panh99 @chongshenng @jafermarq @tanertopal @danieljanes
 
 # Flower Intelligence
 /intelligence/dev @charlesbvll @tanertopal @danieljanes
 /intelligence/docs @charlesbvll @tanertopal @danieljanes
 /intelligence/ts @charlesbvll @tanertopal @danieljanes
+
+# Flower Framework Docs
+/framework/docs @panh99 @tanertopal @danieljanes
 
 # Flower Templates
 /framework/py/flwr/cli/new/templates @jafermarq @tanertopal @danieljanes
@@ -33,20 +36,21 @@ README.md @jafermarq @tanertopal @danieljanes
 /framework/docs/locales @charlesbvll @tanertopal @danieljanes
 
 # GitHub Actions and Workflows
-/.github/workflows @Robert-Steiner @tanertopal @danieljanes
 /.github/actions @Robert-Steiner @tanertopal @danieljanes
+/.github/workflows @Robert-Steiner @tanertopal @danieljanes
 
 # Docker-related files
-/.devcontainer @Robert-Steiner @Moep90 @tanertopal @danieljanes
-**/Dockerfile @Robert-Steiner @Moep90 @tanertopal @danieljanes
 **/*.Dockerfile @Robert-Steiner @Moep90 @tanertopal @danieljanes
+**/Dockerfile @Robert-Steiner @Moep90 @tanertopal @danieljanes
+/.devcontainer @Robert-Steiner @Moep90 @tanertopal @danieljanes
 /framework/docker @Robert-Steiner @Moep90 @tanertopal @danieljanes
 
 # Flower Framework Infrastructure
+/framework/py/flwr/supercore/ @panh99 @tanertopal @danieljanes
 /framework/py/flwr/superlink/ @panh99 @tanertopal @danieljanes
 /framework/py/flwr/supernode/ @panh99 @tanertopal @danieljanes
-/framework/py/flwr/supercore/ @panh99 @tanertopal @danieljanes
 
 # Override for CLI
+/framework/py/flwr/supercore/cli/ @tanertopal @danieljanes
 /framework/py/flwr/superlink/cli/ @tanertopal @danieljanes
 /framework/py/flwr/supernode/cli/ @tanertopal @danieljanes

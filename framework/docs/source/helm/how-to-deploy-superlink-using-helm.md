@@ -32,11 +32,10 @@ superlink:
   enabled: false
 ```
 
-## Enable the ServerApp component
+## Enable the SuperExec component
 
 ```yaml
-serverapp:
-  name: serverapp
+superexec:
   enabled: true
 ```
 
@@ -47,11 +46,8 @@ For more details, visit: [Run simulations](../how-to-run-simulations.rst#run-sim
 ```yaml
 superlink:
   enabled: true
-  executor:
-    plugin: flwr.superexec.simulation:executor
-    config:
-      num-supernodes: 2
-      [...]
+  simulation:
+    enabled: true
 ```
 
 ## Change Log Verbosity Level
@@ -176,9 +172,9 @@ stringData:
   license-key: <YOUR_FLWR_LICENSE_KEY>
 ```
 
-## Enable User Authentication
+## Enable Account Authentication
 
-User authentication can be enabled if you're using the Flower Enterprise Edition (EE) Docker images.
+Account authentication can be enabled if you're using the Flower Enterprise Edition (EE) Docker images.
 This is configured in the `global.userAuth` section of your `values.yml` file.
 
 ### Example: Enabling OpenID Connect (OIDC) Authentication
@@ -189,8 +185,8 @@ global:
     enabled: true
     config:
       authentication:
-        auth_type: oidc
-        auth_url: https://<domain>/auth/device
+        authn_type: oidc
+        authn_url: https://<domain>/auth/device
         token_url: https://<domain>/token
         validate_url: https://<domain>/userinfo
         oidc_client_id: <client_id>
@@ -199,16 +195,16 @@ global:
 
 Explanation of Parameters:
 
-- `auth_type`: The authentication mechanism being used (e.g., oidc).
+- `authn_type`: The authentication mechanism being used (e.g., oidc).
 - `auth_url`: The OpenID Connect authentication endpoint where users authenticate.
 - `token_url`: The URL for retrieving access tokens.
-- `validate_url`: The endpoint for validating user authentication.
+- `validate_url`: The endpoint for validating account authentication.
 - `oidc_client_id`: The client ID issued by the authentication provider.
 - `oidc_client_secret`: The secret key associated with the client ID.
 
 ### Use an Existing Secret
 
-To use an existing secret that contains the user authentication configuration, set `existingSecret`
+To use an existing secret that contains the account authentication configuration, set `existingSecret`
 to the name of the existing secret:
 
 ```yaml
@@ -216,18 +212,18 @@ global:
   userAuth:
     enabled: true
     config: {}
-    existingSecret: "existing-user-auth-config"
+    existingSecret: "existing-account-auth-config"
 ```
 
-Note that the existing secret must contain the key `user-auth-config.yml`:
+Note that the existing secret must contain the key `account-auth-config.yml`:
 
 ```yaml
 kind: Secret
 stringData:
-  user-auth-config.yml: |
+  account-auth-config.yml: |
     authentication:
-      auth_type: oidc
-      auth_url: https://<domain>/auth/device
+      authn_type: oidc
+      authn_url: https://<domain>/auth/device
       token_url: https://<domain>/token
       validate_url: https://<domain>/userinfo
       oidc_client_id: <client_id>
@@ -347,7 +343,7 @@ authorization:
 
 ## Change Isolation Mode
 
-The isolation mode determines how the SuperLink manages the ServerApp process execution.
+The isolation mode determines how the SuperLink manages the SuperExec process execution.
 This setting can be adjusted using the `superlink.isolationMode` parameter:
 
 **Example: Changing Isolation Mode**
@@ -356,42 +352,32 @@ This setting can be adjusted using the `superlink.isolationMode` parameter:
 superlink:
   isolationMode: process
 
-# Don’t forget to enable the serverapp if you don’t
+# Don’t forget to enable the superexec if you don’t
 # plan to use an existing one.
-serverapp:
+superexec:
   enabled: true
 ```
 
-## Deploy Flower Framework without TLS
-
-By default, the Flower Framework is deployed without TLS. This means `global.insecure` is
-set to `true`.
-
-In this mode, the chart does not create any `cert-manager` `Issuer` or `Certificate` resources,
-and any TLS-related configuration on the `Ingress` resource is ignored.
-
-```yaml
-global:
-  insecure: true
-```
-
 ## Deploy Flower Framework with TLS
+
+By default, the Flower Framework is deployed with TLS enabled. This means `tls.enabled` is
+set to `true`.
 
 If `cert-manager` is installed in your Kubernetes cluster, this chart can be used to set up TLS in
 several ways. By default, it creates both a self-signed `Issuer` and a `Certificate`, but you can
 also choose to create only an `Issuer` or create a `Certificate` from an existing
 `Issuer`/`ClusterIssuer`.
 
-Regardless of the option you choose, TLS is only enabled when you set `global.insecure: false`.
+Regardless of the option you choose, TLS is only enabled when you set `tls.enabled: true`.
 
 ### Default Behavior (self-signed Issuer + Certificate)
 
 ```yaml
 global:
-  insecure: false
   domain: example.com
 
 tls:
+  enabled: true
   issuer:
     enabled: true
   certificate:
@@ -419,10 +405,10 @@ and you want the chart to create the `Certificate`.
 
 ```yaml
 global:
-  insecure: false
   domain: example.com
 
 tls:
+  enabled: true
   issuer:
     enabled: false
   certificate:
@@ -450,10 +436,8 @@ This is useful if you want `cert-manager` to automatically generate certificates
 based on `Ingress` annotations.
 
 ```yaml
-global:
-  insecure: false
-
 tls:
+  enabled: true
   issuer:
     enabled: true
   certificate:
@@ -477,10 +461,9 @@ If both `tls.existingSecret` and `tls.certificate.enabled` are set, the `tls.exi
 will be ignored and a new `Certificate` will be issued.
 
 ```yaml
-global:
-  insecure: false
 
 tls:
+  enabled: true
   certificate:
     enabled: false
   existingSecret: my-custom-tls-secret
@@ -497,8 +480,8 @@ By default, the TLS-related flags use the following paths when TLS is enabled:
 These paths can be overridden by specifying the flags in the `extraArgs`, as shown below:
 
 ```yaml
-global:
-  insecure: false
+tls:
+  enabled: true
 superlink:
   enabled: true
   extraArgs:
@@ -510,6 +493,17 @@ superlink:
     - /mount/cert/tls.key
 ```
 
+## Deploy Flower Framework without TLS
+
+You might want to disable TLS for testing or internal use. In this mode, the chart does not create
+any `cert-manager` `Issuer` or `Certificate` resources, and any TLS-related configuration on
+the `Ingress` resource is ignored.
+
+```yaml
+tls:
+  enabled: false
+```
+
 ## Ingress Configuration
 
 ### Generate a Certificate via Ingress Annotations
@@ -517,17 +511,15 @@ superlink:
 If you prefer to let `cert-manager` generate a `Certificate` through `Ingress` annotations,
 you can disable the chart’s built-in certificate management.
 To do this, set `tls.certificate.enabled` to `false` and leave `tls.existingSecret` empty.
-Also ensure `global.insecure` is set to `false`.
+Also ensure `tls.enabled` is set to `true`.
 
 The annotations you specify under `superlink.ingress.annotations` will be passed directly to the
 `Ingress` resource. For supported annotation keys, refer to the `cert-manager`
 [documentation](https://cert-manager.io/docs/usage/ingress/).
 
 ```yaml
-global:
-  insecure: false
-
 tls:
+  enabled: true
   certificate:
     enabled: false
   existingSecret: ""
@@ -583,7 +575,7 @@ By default, when `cert-manager` issues a `Certificate` it only includes the DNS 
 `commonName`, which is derived from `global.domain`.
 
 In some deployments, the server and client charts may run inside the same Kubernetes cluster,
-while the Exec API is exposed publicly over the internet. In this scenario, the SuperNodes
+while the Control API is exposed publicly over the internet. In this scenario, the SuperNodes
 need to connect to the SuperLink using its internal service URL
 (e.g., `<superlink>.<namespace>.svc.cluster.local`).
 
@@ -594,10 +586,8 @@ The example below shows how to configure the `Ingress` so that the generated `Ce
 both the external hostname and the internal service name:
 
 ```yaml
-global:
-  insecure: false
-
 tls:
+  enabled: true
   certificate:
     enabled: false
   existingSecret: ""
@@ -611,10 +601,10 @@ superlink:
       nginx.ingress.kubernetes.io/ssl-passthrough: "false"
       nginx.ingress.kubernetes.io/ssl-redirect: "false"
       cert-manager.io/cluster-issuer: cert-manager-selfsigned
-      cert-manager.io/common-name: api.example.com
-    api:
+      cert-manager.io/common-name: control.example.com
+    control:
       enabled: true
-      hostname: api.example.com
+      hostname: control.example.com
     extraHosts:
       - name: <superlink_name>.<namespace>.svc.cluster.local
         pathType: ImplementationSpecific
@@ -637,10 +627,8 @@ the Ingress forwards TLS traffic directly to the SuperLink container,
 which then handles certificate validation and encryption.
 
 ```yaml
-global:
-  insecure: false
-
 tls:
+  enabled: true
   certificate:
     enabled: true
 
@@ -654,9 +642,9 @@ superlink:
       nginx.ingress.kubernetes.io/ssl-redirect: "false"
     ingressClassName: nginx
     tls: false
-    api:
+    control:
       enabled: true
-      hostname: exec-api.example.com
+      hostname: control.example.com
       path: /
       pathType: ImplementationSpecific
     fleet:
@@ -664,9 +652,9 @@ superlink:
       hostname: fleet.example.com
       path: /
       pathType: ImplementationSpecific
-    driver:
+    serverAppIo:
       enabled: true
-      hostname: driver.example.com
+      hostname: serverappio.example.com
       path: /
       pathType: ImplementationSpecific
 ```
@@ -675,19 +663,14 @@ superlink:
 
 ```yaml
 global:
-  insecure: false
   nodeAuth:
     enabled: true
     authListPublicKeys:
       - ecdsa-sha2-nistp384 [...]
       - ecdsa-sha2-nistp384 [...]
-superlink:
+
+tls:
   enabled: true
-  superlink:
-    executor:
-      plugin: flwr.superexec.deployment:executor
-      config:
-        root-certificates: '"/app/cert/ca.crt"'
 ```
 
 Public keys can include comments at the end of the key data:
@@ -716,7 +699,6 @@ global:
 | `global.labels`                                      | Default Labels                                                    | `{}`               |
 | `global.podLabels`                                   | Default PodLabels                                                 | `{}`               |
 | `global.domain`                                      | Default Domain                                                    | `example.com`      |
-| `global.insecure`                                    | Decide if you deploy the Flower Framework with TLS                | `true`             |
 | `global.ingressClassName`                            | Default IngressClass                                              | `""`               |
 | `global.nodeSelector`                                | Default node selector for all components                          | `{}`               |
 | `global.tolerations`                                 | Default tolerations for all components                            | `[]`               |
@@ -748,6 +730,7 @@ global:
 
 | Name                                 | Description                                                         | Value             |
 | ------------------------------------ | ------------------------------------------------------------------- | ----------------- |
+| `tls.enabled`                        | Enable TLS configuration for the Flower Framework.                  | `true`            |
 | `tls.issuer.enabled`                 | Enable automatic creation of a cert-manager Issuer.                 | `true`            |
 | `tls.issuer.name`                    | Name of the Issuer resource to use.                                 | `""`              |
 | `tls.issuer.spec`                    | The contents of the `.spec` block for the cert-manager Issuer.      | `{}`              |
@@ -766,141 +749,166 @@ global:
 
 ### Component SuperLink
 
-| Name                                                           | Description                                                                                                             | Value                                |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| `superlink.name`                                               | Name of the SuperLink                                                                                                   | `superlink`                          |
-| `superlink.enabled`                                            | Enable or Disable SuperLink                                                                                             | `true`                               |
-| `superlink.resources`                                          | Set container requests and limits for different resources like CPU or memory (essential for production workloads)       | `{}`                                 |
-| `superlink.volumes`                                            | Specify a list of volumes for the SuperLink pod(s)                                                                      | `[]`                                 |
-| `superlink.volumeMounts`                                       | Allows to specify additional VolumeMounts                                                                               | `[]`                                 |
-| `superlink.executor.plugin`                                    | The executer plugin of the SuperLink                                                                                    | `flwr.superexec.deployment:executor` |
-| `superlink.executor.config`                                    | Set executor config arguments                                                                                           | `{}`                                 |
-| `superlink.isolationMode`                                      | The isolation mode of the SuperLink                                                                                     | `subprocess`                         |
-| `superlink.automountServiceAccountToken`                       | Automount SA-Token into the pod.                                                                                        | `true`                               |
-| `superlink.serviceAccount.enabled`                             | Enabled a service account for the application controller                                                                | `true`                               |
-| `superlink.serviceAccount.annotations`                         | Annotations applied to enabled service account                                                                          | `{}`                                 |
-| `superlink.serviceAccount.labels`                              | Labels applied to enabled service account                                                                               | `{}`                                 |
-| `superlink.serviceAccount.automountServiceAccountToken`        | Automount SA-Token                                                                                                      | `true`                               |
-| `superlink.service.servicePortApiName`                         | Prefix of the SuperLink API port                                                                                        | `api`                                |
-| `superlink.service.servicePortApi`                             | Port to expose for the SuperLink API                                                                                    | `9093`                               |
-| `superlink.service.nodePortApi`                                | Node port for SuperLink API                                                                                             | `""`                                 |
-| `superlink.service.type`                                       | Valid are ClusterIP, NodePort or Loadbalancer                                                                           | `ClusterIP`                          |
-| `superlink.service.servicePortDriverName`                      | Prefix of the SuperLink Driver API port                                                                                 | `driver`                             |
-| `superlink.service.servicePortDriver`                          | Port to expose for the SuperLink Driver API                                                                             | `9091`                               |
-| `superlink.service.nodePortDriver`                             | Node port for SuperLink Driver API                                                                                      | `""`                                 |
-| `superlink.service.servicePortFleetName`                       | Prefix of the SuperLink Fleet API port                                                                                  | `fleet`                              |
-| `superlink.service.servicePortFleet`                           | Port to expose for the SuperLink Fleet API                                                                              | `9092`                               |
-| `superlink.service.nodePortFleet`                              | Node port for SuperLink Fleet API                                                                                       | `""`                                 |
-| `superlink.service.servicePortSimulationIoName`                | Prefix of the SuperLink SimulationIo API port                                                                           | `simulationio`                       |
-| `superlink.service.servicePortSimulationIo`                    | Port to expose for the SuperLink SimulationIo API                                                                       | `9096`                               |
-| `superlink.service.nodePortSimulationIo`                       | Node port for SuperLink SimulationIo API                                                                                | `""`                                 |
-| `superlink.containerPorts.api`                                 | Container port for SuperLink Exec API                                                                                   | `9093`                               |
-| `superlink.containerPorts.driver`                              | Container port for SuperLink Driver API                                                                                 | `9091`                               |
-| `superlink.containerPorts.fleet`                               | Container port for SuperLink Fleet API                                                                                  | `9092`                               |
-| `superlink.containerPorts.simulationIo`                        | Container port for SuperLink SimulationIo API                                                                           | `9096`                               |
-| `superlink.replicaCount`                                       | The number of SuperLink pods to run                                                                                     | `1`                                  |
-| `superlink.labels`                                             | Extra labels for SuperLink pods                                                                                         | `{}`                                 |
-| `superlink.extraArgs`                                          | Add extra arguments to the default arguments for the SuperLink                                                          | `[]`                                 |
-| `superlink.nodeSelector`                                       | Node labels for SuperLink pods which merges with global.nodeSelector                                                    | `{}`                                 |
-| `superlink.tolerations`                                        | Node tolerations for SuperLink pods which merges with global.tolerations                                                | `[]`                                 |
-| `superlink.updateStrategy.type`                                | SuperLink deployment strategy type                                                                                      | `RollingUpdate`                      |
-| `superlink.updateStrategy.rollingUpdate`                       | SuperLink deployment rolling update configuration parameters                                                            | `{}`                                 |
-| `superlink.affinity`                                           | Node affinity for SuperLink pods which merges with global.affinity                                                      | `{}`                                 |
-| `superlink.env`                                                | Array with extra environment variables to add to SuperLink nodes which merges with global.env                           | `[]`                                 |
-| `superlink.podSecurityContext`                                 | Security settings that for the SuperLink Pods                                                                           | `{}`                                 |
-| `superlink.securityContext`                                    | Security settings that for the SuperLink                                                                                | `{}`                                 |
-| `superlink.ingress.enabled`                                    | Enable the ingress resource                                                                                             | `false`                              |
-| `superlink.ingress.annotations`                                | Additional annotations for the ingress                                                                                  | `{}`                                 |
-| `superlink.ingress.ingressClassName`                           | Defines which ingress controller which implement the resource                                                           | `""`                                 |
-| `superlink.ingress.tls.enabled`                                | Enable TLS termination at the Ingress level.                                                                            | `false`                              |
-| `superlink.ingress.tls.secretName`                             | Name of the Kubernetes Secret that will contain the                                                                     | `""`                                 |
-| `superlink.ingress.api.enabled`                                | Enable an ingress resource for SuperLink API                                                                            | `false`                              |
-| `superlink.ingress.api.hostname`                               | Ingress hostname for the SuperLink API ingress                                                                          | `exec-api.example.com`               |
-| `superlink.ingress.api.path`                                   | SuperLink API ingress path                                                                                              | `/`                                  |
-| `superlink.ingress.api.pathType`                               | Ingress path type. One of Exact, Prefix or ImplementationSpecific                                                       | `ImplementationSpecific`             |
-| `superlink.ingress.fleet.enabled`                              | Enable an ingress resource for SuperLink Fleet API                                                                      | `false`                              |
-| `superlink.ingress.fleet.hostname`                             | Ingress hostname for the SuperLink Fleet API ingress                                                                    | `fleet.example.com`                  |
-| `superlink.ingress.fleet.path`                                 | SuperLink Fleet API ingress path                                                                                        | `/`                                  |
-| `superlink.ingress.fleet.pathType`                             | Ingress path type. One of Exact, Prefix or ImplementationSpecific                                                       | `ImplementationSpecific`             |
-| `superlink.ingress.driver.enabled`                             | Enable an ingress resource for SuperLink Driver API                                                                     | `false`                              |
-| `superlink.ingress.driver.hostname`                            | Ingress hostname for the SuperLink Driver API ingress                                                                   | `driver.example.com`                 |
-| `superlink.ingress.driver.path`                                | SuperLink Driver API ingress path                                                                                       | `/`                                  |
-| `superlink.ingress.driver.pathType`                            | Ingress path type. One of Exact, Prefix or ImplementationSpecific                                                       | `ImplementationSpecific`             |
-| `superlink.ingress.simulationIo.enabled`                       | Enable an ingress resource for SuperLink SimulationIo API                                                               | `false`                              |
-| `superlink.ingress.simulationIo.hostname`                      | Ingress hostname for the SuperLink SimulationIo API ingress                                                             | `simulation.example.com`             |
-| `superlink.ingress.simulationIo.path`                          | SuperLink SimulationIo API ingress path                                                                                 | `/`                                  |
-| `superlink.ingress.simulationIo.pathType`                      | Ingress path type. One of Exact, Prefix or ImplementationSpecific                                                       | `ImplementationSpecific`             |
-| `superlink.ingress.extraHosts`                                 | An array with additional hostname(s) to be covered with the ingress record                                              | `[]`                                 |
-| `superlink.ingress.extraTls`                                   | TLS configuration for additional hostname(s) to be covered with this ingress record                                     | `[]`                                 |
-| `superlink.ingress.extraRules`                                 | Additional rules to be covered with this ingress record                                                                 | `[]`                                 |
-| `superlink.lifecycle`                                          | SuperLink container(s) to automate configuration before or after startup                                                | `{}`                                 |
-| `superlink.annotations`                                        | Additional custom annotations for SuperLink                                                                             | `{}`                                 |
-| `superlink.selectorLabels`                                     | Extra selectorLabels for SuperLink pods                                                                                 | `{}`                                 |
-| `superlink.podAnnotations`                                     | Annotations for SuperLink pods                                                                                          | `{}`                                 |
-| `superlink.podLabels`                                          | Extra podLabels for SuperLink pods                                                                                      | `{}`                                 |
-| `superlink.imagePullSecrets`                                   | SuperLink image pull secrets which overrides global.imagePullSecrets                                                    | `[]`                                 |
-| `superlink.image.registry`                                     | SuperLink image registry                                                                                                | `registry.hub.docker.com`            |
-| `superlink.image.repository`                                   | SuperLink image repository                                                                                              | `flwr/superlink-ee`                  |
-| `superlink.image.tag`                                          | SuperLink image tag                                                                                                     | `1.20.0-ubuntu`                      |
-| `superlink.image.digest`                                       | SuperLink image digest                                                                                                  | `""`                                 |
-| `superlink.image.pullPolicy`                                   | SuperLink image pullPolicy which Components image pullPolicy                                                            | `IfNotPresent`                       |
-| `superlink.networkPolicy.enabled`                              | Specifies whether a NetworkPolicy should be created                                                                     | `true`                               |
-| `superlink.networkPolicy.allowExternal`                        | Allow external ingress traffic                                                                                          | `true`                               |
-| `superlink.networkPolicy.allowExternalEgress`                  | Allow unrestricted egress traffic                                                                                       | `true`                               |
-| `superlink.networkPolicy.extraIngress`                         | Add extra ingress rules to the NetworkPolicy                                                                            | `[]`                                 |
-| `superlink.networkPolicy.extraEgress`                          | Add extra ingress rules to the NetworkPolicy (ignored if allowExternalEgress=true)                                      | `[]`                                 |
-| `superlink.networkPolicy.driver.ingressPodMatchLabels`         | Labels to match to allow traffic from other pods. Ignored if `superlink.networkPolicy.allowExternal` is true.           | `{}`                                 |
-| `superlink.networkPolicy.driver.ingressNSMatchLabels`          | Labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true.     | `{}`                                 |
-| `superlink.networkPolicy.driver.ingressNSPodMatchLabels`       | Pod labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true. | `{}`                                 |
-| `superlink.networkPolicy.fleet.ingressPodMatchLabels`          | Labels to match to allow traffic from other pods. Ignored if `superlink.networkPolicy.allowExternal` is true.           | `{}`                                 |
-| `superlink.networkPolicy.fleet.ingressNSMatchLabels`           | Labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true.     | `{}`                                 |
-| `superlink.networkPolicy.fleet.ingressNSPodMatchLabels`        | Pod labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true. | `{}`                                 |
-| `superlink.networkPolicy.api.ingressPodMatchLabels`            | Labels to match to allow traffic from other pods. Ignored if `superlink.networkPolicy.allowExternal` is true.           | `{}`                                 |
-| `superlink.networkPolicy.api.ingressNSMatchLabels`             | Labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true.     | `{}`                                 |
-| `superlink.networkPolicy.api.ingressNSPodMatchLabels`          | Pod labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true. | `{}`                                 |
-| `superlink.networkPolicy.simulationIo.ingressPodMatchLabels`   | Labels to match to allow traffic from other pods. Ignored if `superlink.networkPolicy.allowExternal` is true.           | `{}`                                 |
-| `superlink.networkPolicy.simulationIo.ingressNSMatchLabels`    | Labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true.     | `{}`                                 |
-| `superlink.networkPolicy.simulationIo.ingressNSPodMatchLabels` | Pod labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true. | `{}`                                 |
+| Name                                                           | Description                                                                                                             | Value                     |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `superlink.name`                                               | Name of the SuperLink                                                                                                   | `superlink`               |
+| `superlink.enabled`                                            | Enable or Disable SuperLink                                                                                             | `true`                    |
+| `superlink.resources`                                          | Set container requests and limits for different resources like CPU or memory (essential for production workloads)       | `{}`                      |
+| `superlink.volumes`                                            | Specify a list of volumes for the SuperLink pod(s)                                                                      | `[]`                      |
+| `superlink.volumeMounts`                                       | Allows to specify additional VolumeMounts                                                                               | `[]`                      |
+| `superlink.simulation.enabled`                                 | Launch the SimulationIo API server in place of the                                                                      | `false`                   |
+| `superlink.isolationMode`                                      | The isolation mode of the SuperLink                                                                                     | `subprocess`              |
+| `superlink.automountServiceAccountToken`                       | Automount SA-Token into the pod.                                                                                        | `true`                    |
+| `superlink.serviceAccount.enabled`                             | Enabled a service account for the application controller                                                                | `true`                    |
+| `superlink.serviceAccount.annotations`                         | Annotations applied to enabled service account                                                                          | `{}`                      |
+| `superlink.serviceAccount.labels`                              | Labels applied to enabled service account                                                                               | `{}`                      |
+| `superlink.serviceAccount.automountServiceAccountToken`        | Automount SA-Token                                                                                                      | `true`                    |
+| `superlink.service.type`                                       | Valid are ClusterIP, NodePort or Loadbalancer                                                                           | `ClusterIP`               |
+| `superlink.service.servicePortControlName`                     | Prefix of the SuperLink Control API port                                                                                | `control`                 |
+| `superlink.service.servicePortControl`                         | Port to expose for the SuperLink Control API                                                                            | `9093`                    |
+| `superlink.service.nodePortControl`                            | Node port for SuperLink Control API                                                                                     | `""`                      |
+| `superlink.service.servicePortServerAppIoName`                 | Prefix of the SuperLink ServerAppIo API port                                                                            | `serverappio`             |
+| `superlink.service.servicePortServerAppIo`                     | Port to expose for the SuperLink ServerAppIo API                                                                        | `9091`                    |
+| `superlink.service.nodePortServerAppIo`                        | Node port for SuperLink ServerAppIo API                                                                                 | `""`                      |
+| `superlink.service.servicePortFleetName`                       | Prefix of the SuperLink Fleet API port                                                                                  | `fleet`                   |
+| `superlink.service.servicePortFleet`                           | Port to expose for the SuperLink Fleet API                                                                              | `9092`                    |
+| `superlink.service.nodePortFleet`                              | Node port for SuperLink Fleet API                                                                                       | `""`                      |
+| `superlink.service.servicePortSimulationIoName`                | Prefix of the SuperLink SimulationIo API port                                                                           | `simulationio`            |
+| `superlink.service.servicePortSimulationIo`                    | Port to expose for the SuperLink SimulationIo API                                                                       | `9096`                    |
+| `superlink.service.nodePortSimulationIo`                       | Node port for SuperLink SimulationIo API                                                                                | `""`                      |
+| `superlink.containerPorts.control`                             | Container port for SuperLink Control API                                                                                | `9093`                    |
+| `superlink.containerPorts.serverAppIo`                         | Container port for SuperLink ServerAppIo API                                                                            | `9091`                    |
+| `superlink.containerPorts.fleet`                               | Container port for SuperLink Fleet API                                                                                  | `9092`                    |
+| `superlink.containerPorts.simulationIo`                        | Container port for SuperLink SimulationIo API                                                                           | `9096`                    |
+| `superlink.containerPorts.health`                              | Container port for SuperLink Health API                                                                                 | `8081`                    |
+| `superlink.replicaCount`                                       | The number of SuperLink pods to run                                                                                     | `1`                       |
+| `superlink.labels`                                             | Extra labels for SuperLink pods                                                                                         | `{}`                      |
+| `superlink.extraArgs`                                          | Add extra arguments to the default arguments for the SuperLink                                                          | `[]`                      |
+| `superlink.nodeSelector`                                       | Node labels for SuperLink pods which merges with global.nodeSelector                                                    | `{}`                      |
+| `superlink.tolerations`                                        | Node tolerations for SuperLink pods which merges with global.tolerations                                                | `[]`                      |
+| `superlink.updateStrategy.type`                                | SuperLink deployment strategy type                                                                                      | `RollingUpdate`           |
+| `superlink.updateStrategy.rollingUpdate`                       | SuperLink deployment rolling update configuration parameters                                                            | `{}`                      |
+| `superlink.affinity`                                           | Node affinity for SuperLink pods which merges with global.affinity                                                      | `{}`                      |
+| `superlink.env`                                                | Array with extra environment variables to add to SuperLink nodes which merges with global.env                           | `[]`                      |
+| `superlink.podSecurityContext`                                 | Security settings that for the SuperLink Pods                                                                           | `{}`                      |
+| `superlink.securityContext`                                    | Security settings that for the SuperLink                                                                                | `{}`                      |
+| `superlink.livenessProbe.enabled`                              | Enable livenessProbe on SuperLink containers                                                                            | `true`                    |
+| `superlink.livenessProbe.initialDelaySeconds`                  | Initial delay seconds for livenessProbe                                                                                 | `0`                       |
+| `superlink.livenessProbe.periodSeconds`                        | Period seconds for livenessProbe                                                                                        | `10`                      |
+| `superlink.livenessProbe.timeoutSeconds`                       | Timeout seconds for livenessProbe                                                                                       | `1`                       |
+| `superlink.livenessProbe.failureThreshold`                     | Failure threshold for livenessProbe                                                                                     | `3`                       |
+| `superlink.livenessProbe.successThreshold`                     | Success threshold for livenessProbe                                                                                     | `1`                       |
+| `superlink.readinessProbe.enabled`                             | Enable readinessProbe on SuperLink containers                                                                           | `true`                    |
+| `superlink.readinessProbe.initialDelaySeconds`                 | Initial delay seconds for readinessProbe                                                                                | `0`                       |
+| `superlink.readinessProbe.periodSeconds`                       | Period seconds for readinessProbe                                                                                       | `10`                      |
+| `superlink.readinessProbe.timeoutSeconds`                      | Timeout seconds for readinessProbe                                                                                      | `1`                       |
+| `superlink.readinessProbe.failureThreshold`                    | Failure threshold for readinessProbe                                                                                    | `3`                       |
+| `superlink.readinessProbe.successThreshold`                    | Success threshold for readinessProbe                                                                                    | `1`                       |
+| `superlink.ingress.enabled`                                    | Enable the ingress resource                                                                                             | `false`                   |
+| `superlink.ingress.annotations`                                | Additional annotations for the ingress                                                                                  | `{}`                      |
+| `superlink.ingress.ingressClassName`                           | Defines which ingress controller which implement the resource                                                           | `""`                      |
+| `superlink.ingress.tls.enabled`                                | Enable TLS termination at the Ingress level.                                                                            | `false`                   |
+| `superlink.ingress.tls.secretName`                             | Name of the Kubernetes Secret that will contain the                                                                     | `""`                      |
+| `superlink.ingress.control.enabled`                            | Enable an ingress resource for SuperLink API                                                                            | `false`                   |
+| `superlink.ingress.control.hostname`                           | Ingress hostname for the SuperLink API ingress                                                                          | `control.example.com`     |
+| `superlink.ingress.control.path`                               | SuperLink API ingress path                                                                                              | `/`                       |
+| `superlink.ingress.control.pathType`                           | Ingress path type. One of Exact, Prefix or ImplementationSpecific                                                       | `ImplementationSpecific`  |
+| `superlink.ingress.fleet.enabled`                              | Enable an ingress resource for SuperLink Fleet API                                                                      | `false`                   |
+| `superlink.ingress.fleet.hostname`                             | Ingress hostname for the SuperLink Fleet API ingress                                                                    | `fleet.example.com`       |
+| `superlink.ingress.fleet.path`                                 | SuperLink Fleet API ingress path                                                                                        | `/`                       |
+| `superlink.ingress.fleet.pathType`                             | Ingress path type. One of Exact, Prefix or ImplementationSpecific                                                       | `ImplementationSpecific`  |
+| `superlink.ingress.serverAppIo.enabled`                        | Enable an ingress resource for SuperLink ServerAppIo API                                                                | `false`                   |
+| `superlink.ingress.serverAppIo.hostname`                       | Ingress hostname for the SuperLink ServerAppIo API ingress                                                              | `serverappio.example.com` |
+| `superlink.ingress.serverAppIo.path`                           | SuperLink ServerAppIo API ingress path                                                                                  | `/`                       |
+| `superlink.ingress.serverAppIo.pathType`                       | Ingress path type. One of Exact, Prefix or ImplementationSpecific                                                       | `ImplementationSpecific`  |
+| `superlink.ingress.simulationIo.enabled`                       | Enable an ingress resource for SuperLink SimulationIo API                                                               | `false`                   |
+| `superlink.ingress.simulationIo.hostname`                      | Ingress hostname for the SuperLink SimulationIo API ingress                                                             | `simulation.example.com`  |
+| `superlink.ingress.simulationIo.path`                          | SuperLink SimulationIo API ingress path                                                                                 | `/`                       |
+| `superlink.ingress.simulationIo.pathType`                      | Ingress path type. One of Exact, Prefix or ImplementationSpecific                                                       | `ImplementationSpecific`  |
+| `superlink.ingress.extraHosts`                                 | An array with additional hostname(s) to be covered with the ingress record                                              | `[]`                      |
+| `superlink.ingress.extraTls`                                   | TLS configuration for additional hostname(s) to be covered with this ingress record                                     | `[]`                      |
+| `superlink.ingress.extraRules`                                 | Additional rules to be covered with this ingress record                                                                 | `[]`                      |
+| `superlink.lifecycle`                                          | SuperLink container(s) to automate configuration before or after startup                                                | `{}`                      |
+| `superlink.annotations`                                        | Additional custom annotations for SuperLink                                                                             | `{}`                      |
+| `superlink.selectorLabels`                                     | Extra selectorLabels for SuperLink pods                                                                                 | `{}`                      |
+| `superlink.podAnnotations`                                     | Annotations for SuperLink pods                                                                                          | `{}`                      |
+| `superlink.podLabels`                                          | Extra podLabels for SuperLink pods                                                                                      | `{}`                      |
+| `superlink.imagePullSecrets`                                   | SuperLink image pull secrets which overrides global.imagePullSecrets                                                    | `[]`                      |
+| `superlink.image.registry`                                     | SuperLink image registry                                                                                                | `registry.hub.docker.com` |
+| `superlink.image.repository`                                   | SuperLink image repository                                                                                              | `flwr/superlink-ee`       |
+| `superlink.image.tag`                                          | SuperLink image tag                                                                                                     | `1.21.0-ubuntu`           |
+| `superlink.image.digest`                                       | SuperLink image digest                                                                                                  | `""`                      |
+| `superlink.image.pullPolicy`                                   | SuperLink image pullPolicy which Components image pullPolicy                                                            | `IfNotPresent`            |
+| `superlink.networkPolicy.enabled`                              | Specifies whether a NetworkPolicy should be created                                                                     | `true`                    |
+| `superlink.networkPolicy.allowExternal`                        | Allow external ingress traffic                                                                                          | `true`                    |
+| `superlink.networkPolicy.allowExternalEgress`                  | Allow unrestricted egress traffic                                                                                       | `true`                    |
+| `superlink.networkPolicy.extraIngress`                         | Add extra ingress rules to the NetworkPolicy                                                                            | `[]`                      |
+| `superlink.networkPolicy.extraEgress`                          | Add extra ingress rules to the NetworkPolicy (ignored if allowExternalEgress=true)                                      | `[]`                      |
+| `superlink.networkPolicy.serverAppIo.ingressPodMatchLabels`    | Labels to match to allow traffic from other pods. Ignored if `superlink.networkPolicy.allowExternal` is true.           | `{}`                      |
+| `superlink.networkPolicy.serverAppIo.ingressNSMatchLabels`     | Labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true.     | `{}`                      |
+| `superlink.networkPolicy.serverAppIo.ingressNSPodMatchLabels`  | Pod labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true. | `{}`                      |
+| `superlink.networkPolicy.fleet.ingressPodMatchLabels`          | Labels to match to allow traffic from other pods. Ignored if `superlink.networkPolicy.allowExternal` is true.           | `{}`                      |
+| `superlink.networkPolicy.fleet.ingressNSMatchLabels`           | Labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true.     | `{}`                      |
+| `superlink.networkPolicy.fleet.ingressNSPodMatchLabels`        | Pod labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true. | `{}`                      |
+| `superlink.networkPolicy.control.ingressPodMatchLabels`        | Labels to match to allow traffic from other pods. Ignored if `superlink.networkPolicy.allowExternal` is true.           | `{}`                      |
+| `superlink.networkPolicy.control.ingressNSMatchLabels`         | Labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true.     | `{}`                      |
+| `superlink.networkPolicy.control.ingressNSPodMatchLabels`      | Pod labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true. | `{}`                      |
+| `superlink.networkPolicy.simulationIo.ingressPodMatchLabels`   | Labels to match to allow traffic from other pods. Ignored if `superlink.networkPolicy.allowExternal` is true.           | `{}`                      |
+| `superlink.networkPolicy.simulationIo.ingressNSMatchLabels`    | Labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true.     | `{}`                      |
+| `superlink.networkPolicy.simulationIo.ingressNSPodMatchLabels` | Pod labels to match to allow traffic from other namespaces. Ignored if `superlink.networkPolicy.allowExternal` is true. | `{}`                      |
 
-### Component ServerApp
+### Component SuperExec
 
 | Name                                                    | Description                                                                                                       | Value                       |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| `serverapp.name`                                        | Name of the ServerApp                                                                                             | `serverapp`                 |
-| `serverapp.enabled`                                     | Enable or disable ServerApp                                                                                       | `false`                     |
-| `serverapp.resources`                                   | Set container requests and limits for different resources like CPU or memory (essential for production workloads) | `{}`                        |
-| `serverapp.superlink`                                   | Address of the SuperLink the ServerApp should connect to                                                          | `{}`                        |
-| `serverapp.volumes`                                     | Optionally specify list of volumes for the ServerApp pod(s)                                                       | `[]`                        |
-| `serverapp.volumeMounts`                                | Allows to specify additional VolumeMounts                                                                         | `[]`                        |
-| `serverapp.automountServiceAccountToken`                | Automount SA-Token into the pod.                                                                                  | `true`                      |
-| `serverapp.serviceAccount.enabled`                      | Enable a service account for this component                                                                       | `true`                      |
-| `serverapp.serviceAccount.annotations`                  | Annotations applied to enabled service account                                                                    | `{}`                        |
-| `serverapp.serviceAccount.labels`                       | Labels applied to enabled service account                                                                         | `{}`                        |
-| `serverapp.serviceAccount.automountServiceAccountToken` | Automount SA-Token                                                                                                | `true`                      |
-| `serverapp.podSecurityContext`                          | Security settings that for the SuperLink Pods                                                                     | `{}`                        |
-| `serverapp.replicas`                                    | The number of ServerApp pods to run                                                                               | `1`                         |
-| `serverapp.labels`                                      | Extra labels for ServerApp pods                                                                                   | `{}`                        |
-| `serverapp.extraArgs`                                   | Add extra arguments to the default arguments for the ServerApp                                                    | `[]`                        |
-| `serverapp.nodeSelector`                                | Node labels for ServerApp pods which merges with global.nodeSelector                                              | `{}`                        |
-| `serverapp.tolerations`                                 | Node tolerations for ServerApp pods which merges with global.tolerations                                          | `[]`                        |
-| `serverapp.updateStrategy.type`                         | ServerApp deployment strategy type                                                                                | `RollingUpdate`             |
-| `serverapp.updateStrategy.rollingUpdate`                | ServerApp deployment rolling update configuration parameters                                                      | `{}`                        |
-| `serverapp.affinity`                                    | Node affinity for ServerApp pods which merges with global.affinity                                                | `{}`                        |
-| `serverapp.env`                                         | Array with extra environment variables to add to ServerApp nodes which merges with global.env                     | `[]`                        |
-| `serverapp.lifecycle`                                   | ServerApp container(s) to automate configuration before or after startup                                          | `{}`                        |
-| `serverapp.annotations`                                 | Additional custom annotations for ServerApp                                                                       | `{}`                        |
-| `serverapp.selectorLabels`                              | Extra selectorLabels for ServerApp pods                                                                           | `{}`                        |
-| `serverapp.podAnnotations`                              | Annotations for ServerApp pods                                                                                    | `{}`                        |
-| `serverapp.podLabels`                                   | Extra podLabels for ServerApp pods                                                                                | `{}`                        |
-| `serverapp.imagePullSecrets`                            | ServerApp image pull secrets which overrides global.imagePullSecrets                                              | `[]`                        |
-| `serverapp.image.registry`                              | ServerApp image registry                                                                                          | `registry.hub.docker.com`   |
-| `serverapp.image.repository`                            | ServerApp image repository                                                                                        | `flwr/serverapp`            |
-| `serverapp.image.tag`                                   | Image tag of ServerApp                                                                                            | `1.20.0-py3.11-ubuntu24.04` |
-| `serverapp.image.digest`                                | Image digest of ServerApp                                                                                         | `""`                        |
-| `serverapp.image.pullPolicy`                            | Components image pullPolicy                                                                                       | `Always`                    |
-| `serverapp.networkPolicy.enabled`                       | Specifies whether a NetworkPolicy should be created                                                               | `true`                      |
-| `serverapp.networkPolicy.allowExternalEgress`           | Allow unrestricted egress traffic                                                                                 | `true`                      |
-| `serverapp.networkPolicy.extraEgress`                   | Add extra ingress rules to the NetworkPolicy (ignored if allowExternalEgress=true)                                | `[]`                        |
+| `superexec.name`                                        | Name of the SuperExec                                                                                             | `superexec-serverapp`       |
+| `superexec.enabled`                                     | Enable or disable SuperExec                                                                                       | `false`                     |
+| `superexec.superlink`                                   | Address of the SuperLink the SuperExec should connect to                                                          | `{}`                        |
+| `superexec.resources`                                   | Set container requests and limits for different resources like CPU or memory (essential for production workloads) | `{}`                        |
+| `superexec.volumes`                                     | Optionally specify list of volumes for the SuperExec pod(s)                                                       | `[]`                        |
+| `superexec.volumeMounts`                                | Allows to specify additional VolumeMounts                                                                         | `[]`                        |
+| `superexec.automountServiceAccountToken`                | Automount SA-Token into the pod.                                                                                  | `true`                      |
+| `superexec.serviceAccount.enabled`                      | Enable a service account for this component                                                                       | `true`                      |
+| `superexec.serviceAccount.annotations`                  | Annotations applied to enabled service account                                                                    | `{}`                        |
+| `superexec.serviceAccount.labels`                       | Labels applied to enabled service account                                                                         | `{}`                        |
+| `superexec.serviceAccount.automountServiceAccountToken` | Automount SA-Token                                                                                                | `true`                      |
+| `superexec.containerPorts.health`                       | Container port for SuperExec Health API                                                                           | `8081`                      |
+| `superexec.podSecurityContext`                          | Security settings that for the SuperExec Pods                                                                     | `{}`                        |
+| `superexec.livenessProbe.enabled`                       | Enable livenessProbe on SuperExec containers                                                                      | `true`                      |
+| `superexec.livenessProbe.initialDelaySeconds`           | Initial delay seconds for livenessProbe                                                                           | `0`                         |
+| `superexec.livenessProbe.periodSeconds`                 | Period seconds for livenessProbe                                                                                  | `10`                        |
+| `superexec.livenessProbe.timeoutSeconds`                | Timeout seconds for livenessProbe                                                                                 | `1`                         |
+| `superexec.livenessProbe.failureThreshold`              | Failure threshold for livenessProbe                                                                               | `3`                         |
+| `superexec.livenessProbe.successThreshold`              | Success threshold for livenessProbe                                                                               | `1`                         |
+| `superexec.readinessProbe.enabled`                      | Enable readinessProbe on SuperExec containers                                                                     | `true`                      |
+| `superexec.readinessProbe.initialDelaySeconds`          | Initial delay seconds for readinessProbe                                                                          | `0`                         |
+| `superexec.readinessProbe.periodSeconds`                | Period seconds for readinessProbe                                                                                 | `10`                        |
+| `superexec.readinessProbe.timeoutSeconds`               | Timeout seconds for readinessProbe                                                                                | `1`                         |
+| `superexec.readinessProbe.failureThreshold`             | Failure threshold for readinessProbe                                                                              | `3`                         |
+| `superexec.readinessProbe.successThreshold`             | Success threshold for readinessProbe                                                                              | `1`                         |
+| `superexec.replicas`                                    | The number of SuperExec pods to run                                                                               | `1`                         |
+| `superexec.labels`                                      | Extra labels for SuperExec pods                                                                                   | `{}`                        |
+| `superexec.extraArgs`                                   | Add extra arguments to the default arguments for the SuperExec                                                    | `[]`                        |
+| `superexec.nodeSelector`                                | Node labels for SuperExec pods which merges with global.nodeSelector                                              | `{}`                        |
+| `superexec.tolerations`                                 | Node tolerations for SuperExec pods which merges with global.tolerations                                          | `[]`                        |
+| `superexec.updateStrategy.type`                         | SuperExec deployment strategy type                                                                                | `RollingUpdate`             |
+| `superexec.updateStrategy.rollingUpdate`                | SuperExec deployment rolling update configuration parameters                                                      | `{}`                        |
+| `superexec.affinity`                                    | Node affinity for SuperExec pods which merges with global.affinity                                                | `{}`                        |
+| `superexec.env`                                         | Array with extra environment variables to add to SuperExec nodes which merges with global.env                     | `[]`                        |
+| `superexec.lifecycle`                                   | SuperExec container(s) to automate configuration before or after startup                                          | `{}`                        |
+| `superexec.annotations`                                 | Additional custom annotations for SuperExec                                                                       | `{}`                        |
+| `superexec.selectorLabels`                              | Extra selectorLabels for SuperExec pods                                                                           | `{}`                        |
+| `superexec.podAnnotations`                              | Annotations for SuperExec pods                                                                                    | `{}`                        |
+| `superexec.podLabels`                                   | Extra podLabels for SuperExec pods                                                                                | `{}`                        |
+| `superexec.imagePullSecrets`                            | SuperExec image pull secrets which overrides global.imagePullSecrets                                              | `[]`                        |
+| `superexec.image.registry`                              | SuperExec image registry                                                                                          | `registry.hub.docker.com`   |
+| `superexec.image.repository`                            | SuperExec image repository                                                                                        | `flwr/superexec`            |
+| `superexec.image.tag`                                   | Image tag of SuperExec                                                                                            | `1.21.0-py3.11-ubuntu24.04` |
+| `superexec.image.digest`                                | Image digest of SuperExec                                                                                         | `""`                        |
+| `superexec.image.pullPolicy`                            | Components image pullPolicy                                                                                       | `Always`                    |
+| `superexec.networkPolicy.enabled`                       | Specifies whether a NetworkPolicy should be created                                                               | `true`                      |
+| `superexec.networkPolicy.allowExternalEgress`           | Allow unrestricted egress traffic                                                                                 | `true`                      |
+| `superexec.networkPolicy.extraEgress`                   | Add extra ingress rules to the NetworkPolicy (ignored if allowExternalEgress=true)                                | `[]`                        |
 
 ### Component OpenFGA
 

@@ -3,8 +3,9 @@ import os
 import tensorflow as tf
 import tensorflow_datasets as tfds
 
-from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import Context
+from flwr.app import Context
+from flwr.client import NumPyClient, start_client
+from flwr.clientapp import ClientApp
 
 # Set subset sizes
 TRAIN_SUBSET_SIZE = 100

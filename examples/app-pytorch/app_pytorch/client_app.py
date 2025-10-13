@@ -1,11 +1,12 @@
 """app-pytorch: A Flower / PyTorch app."""
 
 import torch
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
+
 from app_pytorch.task import Net, load_data
 from app_pytorch.task import test as test_fn
 from app_pytorch.task import train as train_fn
-from flwr.client import ClientApp
-from flwr.common import ArrayRecord, Context, Message, MetricRecord, RecordDict
 
 # Flower ClientApp
 app = ClientApp()

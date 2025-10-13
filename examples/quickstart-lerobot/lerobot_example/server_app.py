@@ -3,11 +3,11 @@
 from datetime import datetime
 from pathlib import Path
 
-from lerobot_example.task import get_dataset, get_model, get_params, set_params
-
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
+
+from lerobot_example.task import get_dataset, get_model, get_params, set_params
 
 
 def get_evaluate_fn_callback(save_path: Path):

@@ -21,7 +21,7 @@ from typing import Callable, Optional, Union
 
 import ray
 
-from flwr.client.client_app import ClientApp
+from flwr.clientapp.client_app import ClientApp
 from flwr.common.constant import PARTITION_ID_KEY
 from flwr.common.context import Context
 from flwr.common.logger import log

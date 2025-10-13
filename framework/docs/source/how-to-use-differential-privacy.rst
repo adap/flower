@@ -2,6 +2,38 @@
 .. meta::
     :description: Apply differential privacy in Flower with server-side/client-side clipping or local DP techniques to enhance data security in federated learning.
 
+.. |fedavg_link| replace:: ``FedAvg``
+
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
+
+.. |dpserverfix_link| replace:: ``DifferentialPrivacyServerSideFixedClipping``
+
+.. _dpserverfix_link: ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.html
+
+.. |dpserveradapt_link| replace:: ``DifferentialPrivacyServerSideAdaptiveClipping``
+
+.. _dpserveradapt_link: ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.html
+
+.. |dpclientfix_link| replace:: ``DifferentialPrivacyClientSideFixedClipping``
+
+.. _dpclientfix_link: ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.html
+
+.. |dpclientadapt_link| replace:: ``DifferentialPrivacyClientSideAdaptiveClipping``
+
+.. _dpclientadapt_link: ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.html
+
+.. |fixedclipping_mod_link| replace:: ``fixedclipping_mod``
+
+.. _fixedclipping_mod_link: ref-api/flwr.clientapp.mod.fixedclipping_mod.html
+
+.. |adaptiveclipping_mod_link| replace:: ``adaptiveclipping_mod``
+
+.. _adaptiveclipping_mod_link: ref-api/flwr.clientapp.mod.adaptiveclipping_mod.html
+
+.. |localdp_mod_link| replace:: ``LocalDpMod``
+
+.. _localdp_mod_link: ref-api/flwr.clientapp.mod.localdp_mod.html
+
 Use Differential Privacy
 ========================
 
@@ -35,9 +67,9 @@ Server-side Clipping
 ~~~~~~~~~~~~~~~~~~~~
 
 For central DP with server-side clipping, there are two ``Strategy`` classes that act as
-wrappers around the actual ``Strategy`` instance (for example, ``FedAvg``). The two
-wrapper classes are ``DifferentialPrivacyServerSideFixedClipping`` and
-``DifferentialPrivacyServerSideAdaptiveClipping`` for fixed and adaptive clipping.
+wrappers around the actual ``Strategy`` instance (for example, |fedavg_link|_). The two
+wrapper classes are |dpserverfix_link|_ and |dpserveradapt_link|_ for fixed and adaptive
+clipping.
 
 .. image:: ./_static/DP/serversideCDP.png
     :align: center
@@ -51,7 +83,7 @@ the corresponding input parameters.
 
 .. code-block:: python
 
-    from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping, FedAvg
+    from flwr.serverapp.strategy import DifferentialPrivacyClientSideFixedClipping, FedAvg
 
     # Create the strategy
     strategy = FedAvg(...)
@@ -70,9 +102,8 @@ Client-side Clipping
 For central DP with client-side clipping, the server sends the clipping value to
 selected clients on each round. Clients can use existing Flower ``Mods`` to perform the
 clipping. Two mods are available for fixed and adaptive client-side clipping:
-``fixedclipping_mod`` and ``adaptiveclipping_mod`` with corresponding server-side
-wrappers ``DifferentialPrivacyClientSideFixedClipping`` and
-``DifferentialPrivacyClientSideAdaptiveClipping``.
+|fixedclipping_mod_link|_ and |adaptiveclipping_mod_link|_ with corresponding
+server-side wrappers |dpclientfix_link|_ and |dpclientadapt_link|_.
 
 .. image:: ./_static/DP/clientsideCDP.png
     :align: center
@@ -85,7 +116,7 @@ wrapper class and, on the client, ``fixedclipping_mod``:
 
 .. code-block:: python
 
-    from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping, FedAvg
+    from flwr.serverapp.strategy import DifferentialPrivacyClientSideFixedClipping, FedAvg
 
     # Create the strategy
     strategy = FedAvg(...)
@@ -103,24 +134,19 @@ the matching ``fixedclipping_mod`` to perform the client-side clipping:
 
 .. code-block:: python
 
-    from flwr.client import ClientApp
-    from flwr.client.mod import fixedclipping_mod
+    from flwr.clientapp import ClientApp
+    from flwr.clientapp.mod import fixedclipping_mod
 
     # Add fixedclipping_mod to the client-side mods
-    app = ClientApp(
-        client_fn=client_fn,
-        mods=[
-            fixedclipping_mod,
-        ],
-    )
+    app = ClientApp(mods=[fixedclipping_mod])
 
 Local Differential Privacy
 --------------------------
 
 To utilize local differential privacy (DP) and add noise to the client model parameters
-before transmitting them to the server in Flower, you can use the `LocalDpMod`. The
-following hyperparameters need to be set: clipping norm value, sensitivity, epsilon, and
-delta.
+before transmitting them to the server in Flower, you can use the |localdp_mod_link|_.
+The following hyperparameters need to be set: clipping norm value, sensitivity, epsilon,
+and delta.
 
 .. image:: ./_static/DP/localdp.png
     :align: center
@@ -129,21 +155,32 @@ delta.
 
 Below is a code example that shows how to use ``LocalDpMod``:
 
-.. code-block:: python
+.. note::
 
-    from flwr.client import ClientApp
-    from flwr.client.mod import LocalDpMod
+    Apply the mod only to the functions that require it. For example, to use local DP
+    during training, add the mod to the training function with
+    ``@app.train(mods=[your_mod])``. Avoid adding it directly to ``ClientApp`` with
+    ``ClientApp(mods=[your_mod])``, as this applies the mod to all functions (including
+    evaluation), which is generally unnecessary and error-prone.
+
+.. code-block:: python
+    :emphasize-lines: 8,12
+
+    from flwr.clientapp import ClientApp
+    from flwr.clientapp.mod import LocalDpMod
+
+    # Initialize the client app
+    app = ClientApp()
 
     # Create an instance of the mod with the required params
     local_dp_obj = LocalDpMod(cfg.clipping_norm, cfg.sensitivity, cfg.epsilon, cfg.delta)
 
-    # Add local_dp_obj to the client-side mods
-    app = ClientApp(
-        client_fn=client_fn,
-        mods=[
-            local_dp_obj,
-        ],
-    )
+
+    # Add the mod to your training function
+    @app.train(mods=[local_dp_obj])
+    def train(message, context):
+        # Client-side training logic
+        ...
 
 Please note that the order of mods, especially those that modify parameters, is
 important when using multiple modifiers. Typically, differential privacy (DP) modifiers

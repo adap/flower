@@ -245,7 +245,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
             run=run,
             enable_tf_gpu_growth=enable_tf_gpu_growth,
             verbose_logging=verbose,
-            server_app_run_config=fused_config,
+            server_app_context=context,
             is_app=True,
             exit_event=EventType.FLWR_SIMULATION_RUN_LEAVE,
         )
