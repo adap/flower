@@ -20,7 +20,7 @@ from logging import DEBUG, ERROR, INFO
 import grpc
 from google.protobuf.json_format import MessageToDict
 
-from flwr.common.constant import NODE_NOT_CREATED_FROM_CLI_MESSAGE
+from flwr.common.constant import SUPERNODE_NOT_CREATED_FROM_CLI_MESSAGE
 from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
@@ -95,8 +95,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                     # SuperNode authentication is enabled,
                     # only SuperNodes created from the CLI are allowed to
                     # stablish a connection with the Fleet API
-                    log(ERROR, NODE_NOT_CREATED_FROM_CLI_MESSAGE)
-                    raise ValueError(NODE_NOT_CREATED_FROM_CLI_MESSAGE)
+                    log(ERROR, SUPERNODE_NOT_CREATED_FROM_CLI_MESSAGE)
+                    raise ValueError(SUPERNODE_NOT_CREATED_FROM_CLI_MESSAGE)
 
                 # SuperNode authentication is disabled, auto-auth
                 # allows creating a new node
