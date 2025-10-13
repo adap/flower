@@ -14,7 +14,7 @@ from torchvision.models import resnet18, resnet34
 # ----------------------
 # MODELLI
 # ----------------------
-def get_model(model_name: str, num_classes=10, pretrained=False):
+def get_model(model_name: str, num_classes=10, pretrained=True):
     """Restituisce il modello scelto."""
     if model_name == "custom_cnn":
         class CustomCNN(nn.Module):
@@ -36,7 +36,52 @@ def get_model(model_name: str, num_classes=10, pretrained=False):
                 x = F.relu(self.fc2(x))
                 return self.fc3(x)
         return CustomCNN()
+    elif model_name == "tiny_cnn":
+        class TinyCNN(nn.Module):
+            """Tiny-CNN (dal paper 'Tiny-CNN: Structuring CNNs for Accurate Classification of Rice Leaf Diseases')"""
+            def __init__(self):
+                super().__init__()
+                self.features = nn.Sequential(
+                    nn.Conv2d(3, 64, kernel_size=3, padding=1),
+                    nn.ReLU(inplace=True),
+                    nn.Conv2d(64, 64, kernel_size=3, padding=1),
+                    nn.ReLU(inplace=True),
+                    nn.MaxPool2d(2, 2),
+                    nn.Dropout(0.4),
 
+                    nn.Conv2d(64, 128, kernel_size=3, padding=1),
+                    nn.ReLU(inplace=True),
+                    nn.Conv2d(128, 128, kernel_size=3, padding=1),
+                    nn.ReLU(inplace=True),
+                    nn.MaxPool2d(2, 2),
+                    nn.Dropout(0.3),
+
+                    nn.Conv2d(128, 256, kernel_size=3, padding=1),
+                    nn.ReLU(inplace=True),
+                    nn.MaxPool2d(2, 2),
+
+                    nn.Conv2d(256, 256, kernel_size=3, padding=1),
+                    nn.ReLU(inplace=True),
+                )
+
+                # Global Average Pooling
+                self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
+
+                self.classifier = nn.Sequential(
+                    nn.Flatten(),
+                    nn.Linear(256, 512),
+                    nn.ReLU(inplace=True),
+                    nn.Dropout(0.3),
+                    nn.Linear(512, num_classes)
+                )
+
+            def forward(self, x):
+                x = self.features(x)
+                x = self.global_avg_pool(x)
+                x = self.classifier(x)
+                return x
+
+        return TinyCNN()
     elif model_name == "resnet18":
         model = resnet18(pretrained=pretrained)
         model.fc = nn.Linear(model.fc.in_features, num_classes)

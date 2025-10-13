@@ -31,11 +31,8 @@ cpu_logger.addHandler(file_handler)
 # Define Flower Client
 class FlowerClient(NumPyClient):
     import logging
-
-
-
     def __init__(self, trainloader, valloader, local_epochs, learning_rate):
-        self.net = get_model(NET, num_classes=10, pretrained=False)
+        self.net = get_model(NET, num_classes=10, pretrained=True)
         self.trainloader = trainloader
         self.valloader = valloader
         self.local_epochs = local_epochs
