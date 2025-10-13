@@ -49,12 +49,21 @@ class NodeInfo(google.protobuf.message.Message):
         owner_aid: typing.Text = ...,
         status: typing.Text = ...,
         created_at: typing.Text = ...,
-        last_activated_at: typing.Text = ...,
-        last_deactivated_at: typing.Text = ...,
-        deleted_at: typing.Text = ...,
-        online_until: builtins.float = ...,
+        last_activated_at: typing.Optional[typing.Text] = ...,
+        last_deactivated_at: typing.Optional[typing.Text] = ...,
+        deleted_at: typing.Optional[typing.Text] = ...,
+        online_until: typing.Optional[builtins.float] = ...,
         heartbeat_interval: builtins.float = ...,
         public_key: builtins.bytes = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["created_at",b"created_at","deleted_at",b"deleted_at","heartbeat_interval",b"heartbeat_interval","last_activated_at",b"last_activated_at","last_deactivated_at",b"last_deactivated_at","node_id",b"node_id","online_until",b"online_until","owner_aid",b"owner_aid","public_key",b"public_key","status",b"status"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["_deleted_at",b"_deleted_at","_last_activated_at",b"_last_activated_at","_last_deactivated_at",b"_last_deactivated_at","_online_until",b"_online_until","deleted_at",b"deleted_at","last_activated_at",b"last_activated_at","last_deactivated_at",b"last_deactivated_at","online_until",b"online_until"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_deleted_at",b"_deleted_at","_last_activated_at",b"_last_activated_at","_last_deactivated_at",b"_last_deactivated_at","_online_until",b"_online_until","created_at",b"created_at","deleted_at",b"deleted_at","heartbeat_interval",b"heartbeat_interval","last_activated_at",b"last_activated_at","last_deactivated_at",b"last_deactivated_at","node_id",b"node_id","online_until",b"online_until","owner_aid",b"owner_aid","public_key",b"public_key","status",b"status"]) -> None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_deleted_at",b"_deleted_at"]) -> typing.Optional[typing_extensions.Literal["deleted_at"]]: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_last_activated_at",b"_last_activated_at"]) -> typing.Optional[typing_extensions.Literal["last_activated_at"]]: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_last_deactivated_at",b"_last_deactivated_at"]) -> typing.Optional[typing_extensions.Literal["last_deactivated_at"]]: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_online_until",b"_online_until"]) -> typing.Optional[typing_extensions.Literal["online_until"]]: ...
 global___NodeInfo = NodeInfo

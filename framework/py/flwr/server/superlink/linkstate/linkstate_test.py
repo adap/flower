@@ -60,6 +60,7 @@ from flwr.server.superlink.linkstate import (
     LinkState,
     SqliteLinkState,
 )
+from flwr.supercore.constant import NodeStatus
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 
@@ -626,7 +627,7 @@ class StateTest(CoreStateTest):
         assert len(retrieved_node_ids) == 0
 
     def test_create_node_and_get_nodes(self) -> None:
-        """Test creating a client node."""
+        """Test creating nodes and get activated nodes."""
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
@@ -646,33 +647,34 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
 
         # Execute
-        node_id = state.create_node("fake_aid", public_key, heartbeat_interval=10)
-        retrieved_node_ids = state.get_nodes(run_id)
-        retrieved_public_key = state.get_node_public_key(node_id)
+        expected_created_at = now().timestamp()
+        node_id = state.create_node("fake_aid", public_key, 10)
+        node = state.get_node_info(node_ids=[node_id])[0]
+        actual_created_at = datetime.fromisoformat(node.created_at).timestamp()
 
         # Assert
-        assert len(retrieved_node_ids) == 1
-        assert retrieved_public_key == public_key
+        assert node.node_id == node_id
+        assert node.public_key == public_key
+        self.assertAlmostEqual(actual_created_at, expected_created_at, 2)
 
     def test_create_node_public_key_twice(self) -> None:
         """Test creating a client node with same public key twice."""
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_id = state.create_node("fake_aid", public_key, heartbeat_interval=10)
+        node_id = state.create_node("fake_aid", public_key, 10)
 
         # Execute
         with self.assertRaises(ValueError):
-            state.create_node("fake_aid2", public_key, heartbeat_interval=10)
-        retrieved_node_ids = state.get_nodes(run_id)
+            state.create_node("fake_aid2", public_key, 10)
+        retrieved_nodes = state.get_node_info()
         retrieved_public_key = state.get_node_public_key(node_id)
 
         # Assert
-        assert len(retrieved_node_ids) == 1
+        assert len(retrieved_nodes) == 1
+        assert retrieved_nodes[0].node_id == node_id
         assert retrieved_public_key == public_key
 
         # Assert node_ids and public_key_to_node_id are synced
@@ -680,19 +682,113 @@ class StateTest(CoreStateTest):
             assert len(state.nodes) == 1
             assert len(state.registered_node_public_keys) == 1
 
+    def test_get_node_info_no_filters(self) -> None:
+        """Test get_node_info returns all nodes when no filters are provided."""
+        state: LinkState = self.state_factory()
+
+        # Prepare: create several nodes
+        node_ids = [create_dummy_node(state, activate=False) for _ in range(5)]
+
+        # Execute
+        infos = state.get_node_info()
+
+        # Assert
+        returned_ids = [info.node_id for info in infos]
+        self.assertSetEqual(set(returned_ids), set(node_ids))
+
+    def test_get_node_info_filter_by_node_ids(self) -> None:
+        """Test get_node_info filters correctly by node_ids."""
+        state: LinkState = self.state_factory()
+        node_ids = [create_dummy_node(state, activate=False) for _ in range(5)]
+
+        # Execute: only query the first two
+        infos = state.get_node_info(node_ids=node_ids[:2])
+
+        # Assert
+        returned_ids = [info.node_id for info in infos]
+        self.assertSetEqual(set(returned_ids), set(node_ids[:2]))
+
+    def test_get_node_info_filter_by_owner_aids(self) -> None:
+        """Test get_node_info filters correctly by owner_aids."""
+        state: LinkState = self.state_factory()
+        node_id1 = create_dummy_node(state, owner_aid="alice", activate=False)
+        _ = create_dummy_node(state, owner_aid="bob", activate=False)
+
+        infos = state.get_node_info(owner_aids=["alice"])
+        returned_ids = [info.node_id for info in infos]
+
+        self.assertEqual(returned_ids, [node_id1])
+
+    def test_get_node_info_filter_by_status(self) -> None:
+        """Test get_node_info filters correctly by statuses."""
+        state: LinkState = self.state_factory()
+        _ = create_dummy_node(state, activate=False)
+        _ = create_dummy_node(state)
+        node_deleted = create_dummy_node(state)
+
+        # Transition nodes
+        state.delete_node("mock_flwr_aid", node_deleted)
+
+        # Execute
+        infos = state.get_node_info(statuses=[NodeStatus.CREATED, NodeStatus.ONLINE])
+        returned_statuses = {info.status for info in infos}
+
+        # Assert: should only contain CREATED and ONLINE
+        self.assertTrue(NodeStatus.CREATED in returned_statuses)
+        self.assertTrue(NodeStatus.ONLINE in returned_statuses)
+        self.assertFalse(NodeStatus.DELETED in returned_statuses)
+
+    def test_get_node_info_multiple_filters(self) -> None:
+        """Test get_node_info applies AND logic across filters."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        node1 = create_dummy_node(state, owner_aid="alice")
+        _ = create_dummy_node(state, owner_aid="bob")
+        _ = create_dummy_node(state, owner_aid="bob", activate=False)
+
+        # Query: owner_aid=alice AND status=ONLINE
+        infos = state.get_node_info(owner_aids=["alice"], statuses=[NodeStatus.ONLINE])
+        returned_ids = [info.node_id for info in infos]
+
+        self.assertEqual(returned_ids, [node1])
+
+    def test_get_node_info_empty_list_filters(self) -> None:
+        """Test get_node_info with empty list filters returns no results."""
+        state: LinkState = self.state_factory()
+        create_dummy_node(state)
+
+        infos = state.get_node_info(node_ids=[])
+        self.assertEqual(infos, [])
+
     def test_delete_node(self) -> None:
         """Test deleting a client node."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         node_id = create_dummy_node(state)
 
         # Execute
-        state.delete_node(node_id)
-        retrieved_node_ids = state.get_nodes(run_id)
+        expected_deleted_at = now().timestamp()
+        state.delete_node("mock_flwr_aid", node_id)
+        retrieved_nodes = state.get_node_info(node_ids=[node_id])
+        assert len(retrieved_nodes) == 1
+        node = retrieved_nodes[0]
+        actual_deleted_at = datetime.fromisoformat(node.deleted_at).timestamp()
 
         # Assert
-        assert len(retrieved_node_ids) == 0
+        assert len(retrieved_nodes) == 1
+        assert retrieved_nodes[0].status == NodeStatus.DELETED
+        self.assertAlmostEqual(actual_deleted_at, expected_deleted_at, 2)
+
+    def test_delete_node_owner_mismatch(self) -> None:
+        """Test deleting a client node with owner mismatch."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        _ = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        node_id = create_dummy_node(state)
+
+        # Execute
+        with self.assertRaises(ValueError):
+            state.delete_node("wrong_owner_aid", node_id)
 
     def test_delete_node_public_key(self) -> None:
         """Test deleting a client node with public key."""
@@ -703,7 +799,7 @@ class StateTest(CoreStateTest):
         node_id = state.create_node("fake_aid", public_key, heartbeat_interval=10)
 
         # Execute
-        state.delete_node(node_id)
+        state.delete_node("fake_aid", node_id)
         retrieved_node_ids = state.get_nodes(run_id)
         with self.assertRaises(ValueError):
             _ = state.get_node_public_key(node_id)
@@ -854,25 +950,37 @@ class StateTest(CoreStateTest):
         """
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_ids = [create_dummy_node(state) for _ in range(100)]
-        for node_id in node_ids[:70]:
+        node_ids = [create_dummy_node(state, activate=False) for _ in range(10)]
+        expected_activated_at = now().timestamp()
+        expected_deactivated_at = (now() + timedelta(seconds=60)).timestamp()
+        for node_id in node_ids[:7]:
             assert state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
-        for node_id in node_ids[70:]:
+        for node_id in node_ids[7:]:
             assert state.acknowledge_node_heartbeat(node_id, heartbeat_interval=90)
 
         # Execute
         # Test with current_time + 90s
-        # node_ids[:70] are online until current_time + 60s (HEARTBEAT_PATIENCE * 30s)
-        # node_ids[70:] are online until current_time + 180s (HEARTBEAT_PATIENCE * 90s)
-        # As a result, only node_ids[70:] will be returned by get_nodes().
+        # node_ids[:7] are online until current_time + 60s (HEARTBEAT_PATIENCE * 30s)
+        # node_ids[7:] are online until current_time + 180s (HEARTBEAT_PATIENCE * 90s)
+        # As a result, only node_ids[7:] will be returned by get_nodes().
         future_dt = now() + timedelta(seconds=90)
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = future_dt
-            actual_node_ids = state.get_nodes(run_id)
+            nodes = state.get_node_info(node_ids=node_ids)
+            online_node_ids = {
+                node.node_id for node in nodes if node.status == NodeStatus.ONLINE
+            }
 
         # Assert
-        self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
+        # Allow up to 1 decimal place difference due to file-based SQLite DB speed.
+        # CI runs on cracky old machines, so minor delays are expected.
+        self.assertSetEqual(online_node_ids, set(node_ids[7:]))
+        for node in nodes:
+            actual = datetime.fromisoformat(node.last_activated_at).timestamp()
+            self.assertAlmostEqual(actual, expected_activated_at, 1)
+            if node.status == NodeStatus.OFFLINE:
+                actual = datetime.fromisoformat(node.last_deactivated_at).timestamp()
+                self.assertAlmostEqual(actual, expected_deactivated_at, 1)
 
     def test_acknowledge_app_heartbeat(self) -> None:
         """Test if acknowledge_app_heartbeat works."""
@@ -1436,11 +1544,17 @@ def transition_run_status(state: LinkState, run_id: int, num_transitions: int) -
         )
 
 
-def create_dummy_node(state: LinkState, heartbeat_interval: int = 1000) -> int:
+def create_dummy_node(
+    state: LinkState,
+    heartbeat_interval: int = 1000,
+    owner_aid: str = "mock_flwr_aid",
+    activate: bool = True,
+) -> int:
     """Create a dummy node."""
-    return state.create_node(
-        "mock_flwr_aid", secrets.token_bytes(32), heartbeat_interval
-    )
+    node_id = state.create_node(owner_aid, secrets.token_bytes(32), heartbeat_interval)
+    if activate:
+        state.acknowledge_node_heartbeat(node_id, heartbeat_interval)
+    return node_id
 
 
 class InMemoryStateTest(StateTest):
