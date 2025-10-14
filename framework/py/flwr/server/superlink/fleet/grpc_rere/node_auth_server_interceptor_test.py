@@ -88,7 +88,6 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         ffs_factory = FfsFactory(self.tmp_dir.name)
         self.ffs = ffs_factory.ffs()
         objectstore_factory = ObjectStoreFactory()
-        self.state.store_node_public_keys({public_key_to_bytes(self.node_pk)})
         self.store = objectstore_factory.store()
 
         self._server_interceptor = NodeAuthServerInterceptor(state_factory)
