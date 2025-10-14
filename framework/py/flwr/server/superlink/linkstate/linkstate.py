@@ -151,8 +151,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def get_node_id_by_public_key(self, public_key: bytes) -> Optional[int]:
-        """Get `node_id` for the specified `public_key` if it exists and is not
-        deleted.
+        """Get `node_id` for the specified `public_key` if it exists and is not deleted.
 
         Parameters
         ----------

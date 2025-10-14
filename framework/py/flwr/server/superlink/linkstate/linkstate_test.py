@@ -849,7 +849,6 @@ class StateTest(CoreStateTest):
         # Assert
         assert retrieved_node_id is None
 
-
     def test_num_message_ins(self) -> None:
         """Test if num_message_ins returns correct number of not delivered Messages."""
         # Prepare
