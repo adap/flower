@@ -680,7 +680,7 @@ class StateTest(CoreStateTest):
         # Assert node_ids and public_key_to_node_id are synced
         if isinstance(state, InMemoryLinkState):
             assert len(state.nodes) == 1
-            assert len(state.node_public_keys_to_node_id.keys()) == 1
+            assert len(state.node_public_key_to_node_id) == 1
 
     def test_get_node_info_no_filters(self) -> None:
         """Test get_node_info returns all nodes when no filters are provided."""
