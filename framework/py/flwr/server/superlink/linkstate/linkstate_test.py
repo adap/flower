@@ -835,6 +835,21 @@ class StateTest(CoreStateTest):
         assert retrieved_node_id is not None
         assert retrieved_node_id == node_id
 
+    def test_get_node_id_by_public_key_of_deleted_node(self) -> None:
+        """Test get_node_id_by_public_key of a deleted node."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        public_key = b"mock"
+        node_id = state.create_node("fake_aid", public_key, 10)
+
+        # Execute
+        state.delete_node("fake_aid", node_id)
+        retrieved_node_id = state.get_node_id_by_public_key(public_key)
+
+        # Assert
+        assert retrieved_node_id is None
+
+
     def test_num_message_ins(self) -> None:
         """Test if num_message_ins returns correct number of not delivered Messages."""
         # Prepare
