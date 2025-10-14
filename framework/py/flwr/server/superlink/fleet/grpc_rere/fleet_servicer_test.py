@@ -169,13 +169,17 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_create_node_without_pre_registration(self) -> None:
         """Create a node without pre-registration."""
+        # Prepare
         request = CreateNodeRequest(public_key=self.node_pk)
+
+        # Execute and assert: node authentication enabled
         if self.enable_node_auth:
             with self.assertRaises(grpc.RpcError) as cm:
                 self._create_node.with_call(request=request)
             assert cm.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
             return 0
 
+        # Execute and assert: node authentication disabled
         response, call = self._create_node.with_call(request=request)
         assert isinstance(response, CreateNodeResponse)
         assert grpc.StatusCode.OK == call.code()
@@ -183,10 +187,14 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_create_node_with_pre_registration(self) -> int:
         """Create a node with pre-registration."""
+        # Prepare
         node_id = self._create_dummy_node()
         request = CreateNodeRequest(public_key=self.node_pk)
 
+        # Execute
         response, call = self._create_node.with_call(request=request)
+
+        # Assert
         assert isinstance(response, CreateNodeResponse)
         assert grpc.StatusCode.OK == call.code()
         assert response.node.node_id == node_id
