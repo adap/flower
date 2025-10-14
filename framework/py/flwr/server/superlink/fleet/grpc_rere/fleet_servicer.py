@@ -87,9 +87,9 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             state = self.state_factory.state()
 
             # Check if public key is already in use
-            if node_info := state.get_node_info_by_public_key(request.public_key):
+            if node_id := state.get_node_id_by_public_key(request.public_key):
                 # Prepare response with existing node_id
-                response = CreateNodeResponse(node=Node(node_id=node_info.node_id))
+                response = CreateNodeResponse(node=Node(node_id=node_id))
             else:
                 if self.enable_supernode_auth:
                     # SuperNode authentication is enabled,
@@ -118,14 +118,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """."""
         log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
         log(DEBUG, "[Fleet.DeleteNode] Request: %s", MessageToDict(request))
-        if self.enable_supernode_auth:
-            # SuperNodes can only be deleted from the CLI
-            return DeleteNodeResponse()
-
-        return message_handler.delete_node(
-            request=request,
-            state=self.state_factory.state(),
-        )
+        return DeleteNodeResponse()
 
     def SendNodeHeartbeat(
         self, request: SendNodeHeartbeatRequest, context: grpc.ServicerContext

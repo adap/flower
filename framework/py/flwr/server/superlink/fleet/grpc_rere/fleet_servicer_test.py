@@ -38,6 +38,10 @@ from flwr.common.serde import message_from_proto
 from flwr.common.typing import RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    CreateNodeRequest,
+    CreateNodeResponse,
+    DeleteNodeRequest,
+    DeleteNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -68,6 +72,8 @@ from flwr.supercore.object_store import ObjectStoreFactory
 class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     """FleetServicer tests for allowed RunStatuses."""
 
+    enable_node_auth = False
+
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
         # Create a temporary directory
@@ -89,12 +95,22 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             state_factory,
             ffs_factory,
             objectstore_factory,
-            True,
+            self.enable_node_auth,
             None,
             None,
         )
 
         self._channel = grpc.insecure_channel("localhost:9092")
+        self._create_node = self._channel.unary_unary(
+            "/flwr.proto.Fleet/CreateNode",
+            request_serializer=CreateNodeRequest.SerializeToString,
+            response_deserializer=CreateNodeResponse.FromString,
+        )
+        self._delete_node = self._channel.unary_unary(
+            "/flwr.proto.Fleet/DeleteNode",
+            request_serializer=DeleteNodeRequest.SerializeToString,
+            response_deserializer=DeleteNodeResponse.FromString,
+        )
         self._push_messages = self._channel.unary_unary(
             "/flwr.proto.Fleet/PushMessages",
             request_serializer=PushMessagesRequest.SerializeToString,
@@ -148,6 +164,50 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
         if num_transitions > 2:
             _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+
+    def test_create_node_without_pre_registration(self) -> None:
+        """Create a node without pre-registration."""
+        # Prepare
+        request = CreateNodeRequest(public_key=self.node_pk)
+
+        # Execute and assert: node authentication enabled
+        if self.enable_node_auth:
+            with self.assertRaises(grpc.RpcError) as cm:
+                self._create_node.with_call(request=request)
+            assert cm.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
+            return
+
+        # Execute and assert: node authentication disabled
+        response, call = self._create_node.with_call(request=request)
+        assert isinstance(response, CreateNodeResponse)
+        assert grpc.StatusCode.OK == call.code()
+        assert response.node.node_id > 0
+
+    def test_create_node_with_pre_registration(self) -> None:
+        """Create a node with pre-registration."""
+        # Prepare
+        node_id = self._create_dummy_node()
+        request = CreateNodeRequest(public_key=self.node_pk)
+
+        # Execute
+        response, call = self._create_node.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, CreateNodeResponse)
+        assert grpc.StatusCode.OK == call.code()
+        assert response.node.node_id == node_id
+
+    def test_delete_node(self) -> None:
+        """Test `DeleteNode`."""
+        # Prepare
+        request = DeleteNodeRequest(node=Node(node_id=1234))
+
+        # Execute
+        response, call = self._delete_node.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, DeleteNodeResponse)
+        assert grpc.StatusCode.OK == call.code()
 
     def test_successful_push_messages_if_running(self) -> None:
         """Test `PushMessages` success."""
@@ -537,3 +597,9 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Assert: Message is removed from ObjectStore
         assert len(self.store) == 0
+
+
+class TestFleetServicerWithNodeAuthEnabled(TestFleetServicer):  # pylint: disable=R0902
+    """FleetServicer tests for allowed RunStatuses."""
+
+    enable_node_auth = True

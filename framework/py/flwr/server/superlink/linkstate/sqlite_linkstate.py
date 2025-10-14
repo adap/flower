@@ -784,9 +784,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Return the public key
         return cast(bytes, rows[0]["public_key"])
 
-    def get_node_info_by_public_key(self, public_key: bytes) -> Optional[NodeInfo]:
-        """Get `NodeInfo` for the specified `public_key`."""
-        query = "SELECT * FROM node WHERE public_key = ? AND status != ?;"
+    def get_node_id_by_public_key(self, public_key: bytes) -> Optional[int]:
+        """Get `node_id` for the specified `public_key`."""
+        query = "SELECT node_id FROM node WHERE public_key = ? AND status != ?;"
         rows = self.query(query, (public_key, NodeStatus.DELETED))
 
         # If no result is found, return None
@@ -794,10 +794,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
 
         # Convert sint64 node_id to uint64
-        rows[0]["node_id"] = convert_sint64_to_uint64(rows[0]["node_id"])
-
-        # Return the NodeInfo
-        return NodeInfo(**rows[0])
+        node_id = convert_sint64_to_uint64(rows[0]["node_id"])
+        return node_id
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(
