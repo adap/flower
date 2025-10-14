@@ -103,19 +103,17 @@ addition to the TLS certificate.
         --superlink 127.0.0.1:9092 \
         --clientappio-api-address 0.0.0.0:9094 \
         --node-config="partition-id=0 num-partitions=2" \
-        --auth-supernode-private-key keys/client_credentials_1 \
-        --auth-supernode-public-key keys/client_credentials_1.pub
+        --auth-supernode-private-key keys/client_credentials_1
 
 .. dropdown:: Understand the command
 
     * ``--auth-supernode-private-key``: the private key of this SuperNode.
-    * | ``--auth-supernode-public-key``: the public key of this SuperNode (which should be the same that was added to othe CSV used by the SuperLink).
 
 Follow the same procedure to launch the second SuperNode by passing its corresponding
 key pair:
 
 .. code-block:: bash
-    :emphasize-lines: 6, 7
+    :emphasize-lines: 6
 
     $ flower-supernode \
         --root-certificates certificates/ca.crt \

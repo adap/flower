@@ -216,7 +216,7 @@ def _try_setup_client_authentication(
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
         flwr_exit(
-            ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID,
+            ExitCode.SUPERNODE_NODE_AUTH_KEY_INVALID,
             "Unable to parse the private key file.",
         )
 
