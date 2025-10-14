@@ -201,7 +201,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def test_delete_node(self) -> None:
         """Test `DeleteNode`."""
-        """Test `DeleteNode`."""
         # Prepare
         node_id = self._create_dummy_node()
         request = DeleteNodeRequest(node=Node(node_id=node_id))
