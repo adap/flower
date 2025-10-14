@@ -73,8 +73,10 @@ from flwr.supercore.primitives.asymmetric import (
 from .node_auth_server_interceptor import NodeAuthServerInterceptor
 
 
-class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
-    """Server interceptor tests."""
+class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
+    """Node authentication server interceptor tests."""
+
+    enable_node_auth = True
 
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
@@ -95,7 +97,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             state_factory,
             ffs_factory,
             objectstore_factory,
-            False,
+            self.enable_node_auth,
             None,
             [self._server_interceptor],
         )
@@ -200,16 +202,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def _test_create_node(self, metadata: list[Any]) -> Any:
         """Test CreateNode."""
-        return self._create_node.with_call(
-            request=CreateNodeRequest(public_key=public_key_to_bytes(self.node_pk)),
-            metadata=metadata,
-        )
-
-    def _test_create_node_auth(self, metadata: list[Any]) -> Any:
-        """Test CreateNode request when node exists."""
-        # Create node
         self._create_node_in_linkstate()
-        # Execute
         return self._create_node.with_call(
             request=CreateNodeRequest(public_key=public_key_to_bytes(self.node_pk)),
             metadata=metadata,
@@ -307,7 +300,6 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     @parameterized.expand(
         [
             (_test_create_node,),
-            (_test_create_node_auth,),
             (_test_delete_node,),
             (_test_pull_messages,),
             (_test_push_messages,),
@@ -331,7 +323,6 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     @parameterized.expand(
         [
             (_test_create_node,),
-            (_test_create_node_auth,),
             (_test_delete_node,),
             (_test_pull_messages,),
             (_test_push_messages,),
@@ -354,7 +345,6 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     @parameterized.expand(
         [
             (_test_create_node,),
-            (_test_create_node_auth,),
             (_test_delete_node,),
             (_test_pull_messages,),
             (_test_push_messages,),
@@ -377,7 +367,6 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     @parameterized.expand(
         [
             (_test_create_node,),
-            (_test_create_node_auth,),
             (_test_delete_node,),
             (_test_pull_messages,),
             (_test_push_messages,),
@@ -398,75 +387,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert cm.exception.code() == grpc.StatusCode.UNAUTHENTICATED
 
 
-class TestServerInterceptorWithNodeAuth(unittest.TestCase):  # pylint: disable=R0902
-    """Server interceptor tests."""
+class TestNodeAuthServerInterceptorNoNodeAuth(TestNodeAuthServerInterceptor):
+    """Node authentication server interceptor tests with node auth disabled."""
 
-    def setUp(self) -> None:
-        """Initialize mock stub and server interceptor with node authentication
-        enabled."""
-        self.node_sk, self.node_pk = generate_key_pairs()
-
-        state_factory = LinkStateFactory(":flwr-in-memory-state:")
-        self.state = state_factory.state()
-        self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
-        ffs_factory = FfsFactory(self.tmp_dir.name)
-        self.ffs = ffs_factory.ffs()
-        objectstore_factory = ObjectStoreFactory()
-        self.state.store_node_public_keys({public_key_to_bytes(self.node_pk)})
-        self.store = objectstore_factory.store()
-
-        self._server_interceptor = NodeAuthServerInterceptor(state_factory)
-        self._server: grpc.Server = _run_fleet_api_grpc_rere(
-            FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
-            state_factory,
-            ffs_factory,
-            objectstore_factory,
-            True,
-            None,
-            [self._server_interceptor],
-        )
-
-        self._channel = grpc.insecure_channel("localhost:9092")
-        self._create_node = self._channel.unary_unary(
-            "/flwr.proto.Fleet/CreateNode",
-            request_serializer=CreateNodeRequest.SerializeToString,
-            response_deserializer=CreateNodeResponse.FromString,
-        )
-
-    def tearDown(self) -> None:
-        """Clean up grpc server."""
-        self._server.stop(None)
-        # Cleanup the temp directory
-        self.tmp_dir.cleanup()
-
-    def _make_metadata(self) -> list[Any]:
-        """Create metadata with signature and timestamp."""
-        timestamp = now().isoformat()
-        signature = sign_message(self.node_sk, timestamp.encode("ascii"))
-        return [
-            (PUBLIC_KEY_HEADER, public_key_to_bytes(self.node_pk)),
-            (SIGNATURE_HEADER, signature),
-            (TIMESTAMP_HEADER, timestamp),
-        ]
-
-    def test_create_node(self) -> None:
-        """Test `CreateNode` request with and without prior node registration."""
-        # Execute (no pre-registration)
-        with self.assertRaises(grpc.RpcError) as cm:
-            self._create_node.with_call(
-                request=CreateNodeRequest(public_key=public_key_to_bytes(self.node_pk)),
-                metadata=self._make_metadata(),
-            )
-        assert cm.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-
-        # Execute (with pre-registration)
-        pk_bytes = public_key_to_bytes(self.node_pk)
-        self.state.create_node(
-            NOOP_FLWR_AID, public_key=pk_bytes, heartbeat_interval=30
-        )
-        _, call = self._create_node.with_call(
-            request=CreateNodeRequest(public_key=public_key_to_bytes(self.node_pk)),
-            metadata=self._make_metadata(),
-        )
-        # Assert
-        assert call.code() == grpc.StatusCode.OK
+    enable_node_auth = False
