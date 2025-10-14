@@ -98,7 +98,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                     log(ERROR, SUPERNODE_NOT_CREATED_FROM_CLI_MESSAGE)
                     raise ValueError(SUPERNODE_NOT_CREATED_FROM_CLI_MESSAGE)
 
-                # SuperNode authentication is disabled, auto-auth
+                # When SuperNode authentication is disabled, auto-auth
                 # allows creating a new node
                 response = message_handler.create_node(
                     request=request,
