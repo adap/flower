@@ -74,9 +74,9 @@ from .node_auth_server_interceptor import NodeAuthServerInterceptor
 
 
 class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
-    """Node authentication server interceptor tests."""
+    """Node authentication server interceptor tests with node auth disabled."""
 
-    enable_node_auth = True
+    enable_node_auth = False
 
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
@@ -387,7 +387,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert cm.exception.code() == grpc.StatusCode.UNAUTHENTICATED
 
 
-class TestNodeAuthServerInterceptorNoNodeAuth(TestNodeAuthServerInterceptor):
-    """Node authentication server interceptor tests with node auth disabled."""
+class TestNodeAuthServerInterceptorWithNodeAuthEnabled(TestNodeAuthServerInterceptor):
+    """Node authentication server interceptor tests with node auth enabled."""
 
-    enable_node_auth = False
+    enable_node_auth = True
