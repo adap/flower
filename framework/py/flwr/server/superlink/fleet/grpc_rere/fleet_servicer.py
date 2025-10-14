@@ -102,6 +102,11 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
                 # Prepare response with existing node_id
                 response = CreateNodeResponse(node=Node(node_id=node_id))
+                # Awknowledge heartbeat to mark node as online
+                state.acknowledge_node_heartbeat(
+                    node_id=node_id,
+                    heartbeat_interval=request.heartbeat_interval,
+                )
             else:
                 if self.enable_supernode_auth:
                     # When SuperNode authentication is enabled,
