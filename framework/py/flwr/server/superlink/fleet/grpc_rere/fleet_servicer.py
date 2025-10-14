@@ -53,6 +53,7 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_grpc_context
+from flwr.supercore.constant import NodeStatus
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 
@@ -88,6 +89,17 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
             # Check if public key is already in use
             if node_id := state.get_node_id_by_public_key(request.public_key):
+
+                node_info = state.get_node_info(node_ids=[node_id])[0]
+                if node_info.status == NodeStatus.ONLINE:
+                    # Node is already active
+                    log(
+                        ERROR,
+                        "Public key already in use (node_id=%s)",
+                        node_id,
+                    )
+                    raise ValueError("Public key already in use by an active SuperNode")
+
                 # Prepare response with existing node_id
                 response = CreateNodeResponse(node=Node(node_id=node_id))
             else:
