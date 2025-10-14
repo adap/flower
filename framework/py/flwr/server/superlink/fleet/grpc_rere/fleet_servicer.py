@@ -118,7 +118,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """."""
         log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
         log(DEBUG, "[Fleet.DeleteNode] Request: %s", MessageToDict(request))
-        # This shall be refactored when renaming `Fleet.Create/DeleteNode` to `Fleet.Activate/DeactivateNode`
+        # This shall be refactored when renaming `Fleet.Create/DeleteNode`
+        # to `Fleet.Activate/DeactivateNode`
         return DeleteNodeResponse()
 
     def SendNodeHeartbeat(
