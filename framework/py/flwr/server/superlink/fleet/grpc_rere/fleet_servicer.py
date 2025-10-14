@@ -120,7 +120,20 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         log(DEBUG, "[Fleet.DeleteNode] Request: %s", MessageToDict(request))
         # This shall be refactored when renaming `Fleet.Create/DeleteNode`
         # to `Fleet.Activate/DeactivateNode`
-        return DeleteNodeResponse()
+        if self.enable_supernode_auth:
+            # SuperNodes can only be deleted from the CLI
+            # We simply acknowledge the heartbeat with interval 0
+            # to mark the node as offline
+            state = self.state_factory.state()
+            state.acknowledge_node_heartbeat(
+                node_id=request.node.node_id, heartbeat_interval=0
+            )
+            return DeleteNodeResponse()
+
+        return message_handler.delete_node(
+            request=request,
+            state=self.state_factory.state(),
+        )
 
     def SendNodeHeartbeat(
         self, request: SendNodeHeartbeatRequest, context: grpc.ServicerContext
