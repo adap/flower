@@ -92,7 +92,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 response = CreateNodeResponse(node=Node(node_id=node_id))
             else:
                 if self.enable_supernode_auth:
-                    # SuperNode authentication is enabled,
+                    # When SuperNode authentication is enabled,
                     # only SuperNodes created from the CLI are allowed to
                     # stablish a connection with the Fleet API
                     log(ERROR, SUPERNODE_NOT_CREATED_FROM_CLI_MESSAGE)
