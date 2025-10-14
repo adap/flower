@@ -125,6 +125,20 @@ other clusters can connect to it. You should see output similar to this:
     Waiting for status...
     Site "superlink-interconnect" is ready.
 
+Finally, repeat the steps above to create a Skupper site in the second OpenShift cluster
+(where SuperNode is deployed). Log in to the second cluster, switch to the correct
+namespace, and create the Skupper site:
+
+.. code-block:: shell
+
+    oc login --server=<your-openshift-api-endpoint> --web
+    oc project <your-namespace>
+    skupper site create supernode-1-interconnect
+
+Note that the namespace can be different from the first cluster and depends on the *project name*
+you created in the second cluster when you deployed SuperNode. Note also that we do not use the ``--enable-link-access`` option in the Skupper command because this site
+only needs to connect *to* the SuperLink site.
+
 References
 ----------
 
