@@ -441,7 +441,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             return node.public_key
 
     def get_node_id_by_public_key(self, public_key: bytes) -> Optional[int]:
-        """Get `NodeInfo` for the specified `public_key`."""
+        """Get `node_id` for the specified `public_key`."""
         with self.lock:
             return self.node_public_key_to_node_id.get(public_key)
 
