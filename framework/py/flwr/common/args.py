@@ -17,11 +17,12 @@
 
 import argparse
 import sys
-import yaml
 from logging import DEBUG, ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
 from typing import Optional, Union
+
+import yaml
 
 from flwr.common.constant import TRANSPORT_TYPE_REST
 from flwr.common.logger import log
@@ -152,16 +153,17 @@ def try_obtain_server_certificates(
     sys.exit(1)
 
 
-def try_obtain_trust_entities(trust_entities_path: Path | None):
+def try_obtain_trust_entities(
+    trust_entities_path: Path | None,
+) -> Optional[dict[str, str]]:
     """Validate and return the trust entities."""
     if not trust_entities_path:
         return None
-    else:
-        if not trust_entities_path.is_file():
-            sys.exit("Path argument `--trust-entities` does not point to a file.")
-        try:
-            with trust_entities_path.open("r", encoding="utf-8") as f:
-                trust_entities = yaml.safe_load(f) or {}
-        except Exception as e:
-            sys.exit(f"Failed to read YAML file '{trust_entities_path}': {e}")
-        return trust_entities
+    if not trust_entities_path.is_file():
+        sys.exit("Path argument `--trust-entities` does not point to a file.")
+    try:
+        with trust_entities_path.open("r", encoding="utf-8") as f:
+            trust_entities = yaml.safe_load(f) or {}
+    except yaml.YAMLError as e:
+        sys.exit(f"Failed to read YAML file '{trust_entities_path}': {e}")
+    return trust_entities

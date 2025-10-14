@@ -16,7 +16,6 @@
 
 
 import argparse
-import yaml
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
@@ -134,7 +133,8 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         metavar="YAML_FILE",
         help=(
             "Path to a YAML file defining trusted entities. "
-            "Only apps verified by at least one of these entities can run on a supernode.\n\n"
+            "Only apps verified by at least one of these "
+            "entities can run on a supernode.\n\n"
             "Example YAML file:\n"
             "  entity1: |\n"
             "    -----BEGIN PUBLIC KEY-----\n"

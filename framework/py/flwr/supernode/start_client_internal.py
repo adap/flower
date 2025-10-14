@@ -325,8 +325,6 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                 for entity in verification:
                     public_key_id = entity["public_key_id"]
                     if public_key_id in trust_entities:
-                        # TODO: Refactor all ed25519 crypto into
-                        #  flwr.supercore.primitives.asymmetric package
                         verifier_public_key = serialization.load_pem_public_key(
                             trust_entities[public_key_id].encode("utf-8")
                         )
