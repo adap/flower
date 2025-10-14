@@ -170,6 +170,12 @@ From your local system and in the namespace of the SuperLink cluster, generate a
     skupper link generate > superlink-interconnect-link.yaml \
         --namespace flower-openshift-demo
 
+.. tip::
+
+    For more information about the concepts of sites and links, please refer to the
+    `Skupper Link concepts
+    <https://skupperproject.github.io/refdog/concepts/link.html>`_.
+
 This command generates a ``Link`` resource and saves it to the file
 ``superlink-interconnect-link.yaml``. The ``--namespace`` option specifies the namespace
 of the SuperLink cluster.
@@ -252,7 +258,7 @@ The ``<name>`` is the name of the listener resource, and will be the default rou
 and host if the ``--routing-key`` and ``--host`` options are not specified. In our case,
 the ``<name>`` must match the name of the connector we created in the SuperLink cluster,
 which is ``fleet-api``. The ``<port>`` is the port number that the listener will listen
-on, which must also match the port number of the connector (``9092``).
+on, which must also match the port number of the connector (``9092``):
 
 .. code-block:: shell
 
@@ -333,8 +339,8 @@ Now, when you check the logs of the SuperLink pod in the first OpenShift cluster
 should see that the SuperNode has successfully connected to it from the remote cluster.
 
 Congratulations! You have successfully deployed and run SuperLink and SuperNode in
-different OpenShift clusters. You can explore deploying additional SuperNodes in other
-clusters by repeating the steps above.
+different OpenShift clusters. You can further extend your federation by deploying
+additional SuperNodes in other clusters by repeating the steps above.
 
 This deployment pattern allows you to scale your Flower deployment across multiple
 clusters where secure deployment platforms like OpenShift are required, making it
