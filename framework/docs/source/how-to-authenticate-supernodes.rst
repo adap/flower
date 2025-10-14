@@ -121,7 +121,7 @@ key pair:
         --clientappio-api-address 0.0.0.0:9095 \
         --node-config="partition-id=1 num-partitions=2" \
         --auth-supernode-private-key keys/client_credentials_2 \
-        --auth-supernode-public-key keys/client_credentials_2.pub
+       --auth-supernode-private-key keys/client_credentials_2
 
 Security notice
 ---------------
