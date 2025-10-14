@@ -4,8 +4,8 @@
 Description
 -----------
 
-The provided key file is invalid. Authentication requires a valid elliptic curve private
-key. This error occurs when the **private key** file specified in
+Authentication requires a valid elliptic curve private
+key. This error occurs when the provided private key file specified in
 ``--auth-supernode-private-key`` is invalid or unreadable.
 
 How to Resolve
