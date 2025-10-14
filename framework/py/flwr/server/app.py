@@ -58,7 +58,7 @@ from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
-from flwr.common.version import _check_package
+from flwr.common.version import package_version
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -221,8 +221,7 @@ def run_superlink() -> None:
         )
 
     if args.auth_list_public_keys:
-        _, v = _check_package("flwr")
-        url_v = f"https://flower.ai/docs/framework/v{v}/en/"
+        url_v = f"https://flower.ai/docs/framework/v{package_version}/en/"
         page = "how-to-authenticate-supernodes.html"
         flwr_exit(
             ExitCode.SUPERLINK_INVALID_ARGS,
