@@ -87,9 +87,9 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             state = self.state_factory.state()
 
             # Check if public key is already in use
-            if node_info := state.get_node_info_by_public_key(request.public_key):
+            if node_id := state.get_node_id_by_public_key(request.public_key):
                 # Prepare response with existing node_id
-                response = CreateNodeResponse(node=Node(node_id=node_info.node_id))
+                response = CreateNodeResponse(node=Node(node_id=node_id))
             else:
                 if self.enable_supernode_auth:
                     # SuperNode authentication is enabled,
