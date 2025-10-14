@@ -32,9 +32,11 @@ outgoing requests via the interconnect.
 Pre-requisites
 --------------
 
-Install the Skupper CLI on your local system by following the instructions `on the
-Skupper website
-<https://skupper.io/docs/install/index.html#installing-the-skupper-cli>`_.
+- Install the Skupper CLI on your local system by following the instructions `on the
+  Skupper website
+  <https://skupper.io/docs/install/index.html#installing-the-skupper-cli>`_.
+- Install Kubectl tools on your local system by following the instructions `on the
+  Kubernetes website <https://kubernetes.io/docs/tasks/tools/>`_.
 
 Create Red Hat OpenShift Clusters on AWS
 ----------------------------------------
@@ -135,9 +137,61 @@ namespace, and create the Skupper site:
     oc project <your-namespace>
     skupper site create supernode-1-interconnect
 
-Note that the namespace can be different from the first cluster and depends on the *project name*
-you created in the second cluster when you deployed SuperNode. Note also that we do not use the ``--enable-link-access`` option in the Skupper command because this site
-only needs to connect *to* the SuperLink site.
+Note that the namespace can be different from the first cluster and depends on the
+*project name* you created in the second cluster when you deployed SuperNode. Note also
+that we do not use the ``--enable-link-access`` option in the Skupper command because
+this site only needs to connect *to* the SuperLink site.
+
+Link the Skupper Sites using the ``Link`` resource
+--------------------------------------------------
+
+Now that we have created Skupper sites in both clusters, we will link the sites to form
+an application network.
+
+From your local system and in the namespace of the SuperLink cluster, generate a
+``Link`` resource as follows:
+
+.. code-block:: shell
+
+    skupper link generate > superlink-interconnect-link.yaml \
+        --namespace flower-openshift-demo
+
+This command generates a ``Link`` resource and saves it to the file
+``superlink-interconnect-link.yaml``. The ``--namespace`` option specifies the namespace
+of the SuperLink cluster.
+
+With the ``Link`` resource generated, switch to the namespace of the SuperNode cluster,
+and apply the resource in it:
+
+.. code-block:: shell
+
+    kubectl apply -f superlink-interconnect-link.yaml
+
+You should see output similar to this:
+
+.. code-block:: shell
+
+    ➜ kubectl apply -f superlink-interconnect-link.yaml
+    link.skupper.io/link-superlink-interconnect-skupper-router created
+    secret/link-superlink-interconnect created
+
+To verify the status of the link, run the following command:
+
+.. code-block:: shell
+
+    skupper link status
+
+You might need to issue the command multiple times before the link is ready: 
+
+.. code-block:: shell
+
+    ➜ skupper link status
+    NAME                                            STATUS  COST    MESSAGE
+    link-superlink-interconnect-skupper-router      Pending 1       Not Operational
+
+    ➜ skupper link status
+    NAME                                            STATUS  COST    MESSAGE
+    link-superlink-interconnect-skupper-router      Ready   1       OK
 
 References
 ----------
