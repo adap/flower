@@ -84,8 +84,7 @@ It should have the following structure:
     │   ├── client_app.py   # Defines your ClientApp
     │   ├── server_app.py   # Defines your ServerApp
     │   └── task.py         # Defines your model, training and data loading
-    ├── pyproject.toml      # Project metadata like dependencies and configs
-    └── README.md
+    └── pyproject.toml      # Project metadata like dependencies and configs
 
 Next, we install the project and its dependencies, which are specified in the
 ``pyproject.toml`` file:
