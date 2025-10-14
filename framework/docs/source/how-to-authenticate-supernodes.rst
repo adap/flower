@@ -120,8 +120,7 @@ key pair:
         --superlink 127.0.0.1:9092 \
         --clientappio-api-address 0.0.0.0:9095 \
         --node-config="partition-id=1 num-partitions=2" \
-        --auth-supernode-private-key keys/client_credentials_2 \
-       --auth-supernode-private-key keys/client_credentials_2
+        --auth-supernode-private-key keys/client_credentials_2
 
 Security notice
 ---------------
