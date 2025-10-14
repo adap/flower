@@ -277,6 +277,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     This behavior will change in the future to return None after
     completing transition to the `NodeState`-based SuperNode.
     """
+    # pylint: disable=too-many-nested-blocks
     message = None
     try:
         # Pull message
@@ -317,16 +318,13 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
             # Verify the received FAB
             #########################
-            verification = json.loads(fab.meta["verification"])
-
             # FAB must be signed if trust entity provided
             if enable_entity_verification and trust_entity:
+                verification = json.loads(fab.meta["verification"])
                 fab_verified = False
                 for entity in verification:
                     public_key_id = entity["public_key_id"]
                     if public_key_id in trust_entity:
-                        # TODO: Refactor all ed25519 crypto into
-                        #  flwr.supercore.primitives.asymmetric package
                         verifier_public_key = serialization.load_pem_public_key(
                             trust_entity[public_key_id].encode("utf-8")
                         )
@@ -335,8 +333,9 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                         ):
                             log(
                                 WARN,
-                                "The provided public key associated with",
-                                f"trusted entity {public_key_id} is not Ed25519",
+                                "The provided public key associated with "
+                                "trusted entity %s is not Ed25519.",
+                                public_key_id,
                             )
                             continue
                         signed_message = create_signed_message(
