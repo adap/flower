@@ -73,8 +73,10 @@ from flwr.supercore.primitives.asymmetric import (
 from .node_auth_server_interceptor import NodeAuthServerInterceptor
 
 
-class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
-    """Server interceptor tests."""
+class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
+    """Node authentication server interceptor tests with node auth disabled."""
+
+    enable_node_auth = False
 
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
@@ -95,6 +97,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             state_factory,
             ffs_factory,
             objectstore_factory,
+            self.enable_node_auth,
             None,
             [self._server_interceptor],
         )
@@ -199,6 +202,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def _test_create_node(self, metadata: list[Any]) -> Any:
         """Test CreateNode."""
+        self._create_node_in_linkstate()
         return self._create_node.with_call(
             request=CreateNodeRequest(public_key=public_key_to_bytes(self.node_pk)),
             metadata=metadata,
@@ -381,3 +385,9 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         with self.assertRaises(grpc.RpcError) as cm:
             rpc(self, self._make_metadata_with_invalid_timestamp())
         assert cm.exception.code() == grpc.StatusCode.UNAUTHENTICATED
+
+
+class TestNodeAuthServerInterceptorWithNodeAuthEnabled(TestNodeAuthServerInterceptor):
+    """Node authentication server interceptor tests with node auth enabled."""
+
+    enable_node_auth = True
