@@ -94,8 +94,8 @@ def start_client_internal(
     isolation: str = ISOLATION_MODE_SUBPROCESS,
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     health_server_address: Optional[str] = None,
-    trust_entity: Optional[dict[str, str]] = None,
-    enable_entity_verification: Optional[bool] = None,
+    trust_entities: Optional[dict[str, str]] = None,
+    enable_entities_verification: Optional[bool] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -147,11 +147,11 @@ def start_client_internal(
     health_server_address : Optional[str] (default: None)
         The address of the health server. If `None` is provided, the health server will
         NOT be started.
-    trust_entity : Optional[dict[str, str]] (default: None)
+    trust_entities : Optional[dict[str, str]] (default: None)
         A list of trusted entities. Only apps verified by at least one of these
         entities can run on a supernode.
-    enable_entity_verification : Optional[bool] (default: None)
-        Perform entity app verification using the trust_entity list.
+    enable_entities_verification : Optional[bool] (default: None)
+        Perform entities app verification using the trust_entities list.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -239,8 +239,8 @@ def start_client_internal(
                 get_fab=get_fab,
                 pull_object=pull_object,
                 confirm_message_received=confirm_message_received,
-                trust_entity=trust_entity,
-                enable_entity_verification=enable_entity_verification,
+                trust_entities=trust_entities,
+                enable_entities_verification=enable_entities_verification,
             )
 
             # No message has been pulled therefore we can skip the push stage.
@@ -267,8 +267,8 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     get_fab: Callable[[str, int], Fab],
     pull_object: Callable[[int, str], bytes],
     confirm_message_received: Callable[[int, str], None],
-    trust_entity: Optional[dict[str, str]],
-    enable_entity_verification: Optional[bool],
+    trust_entities: Optional[dict[str, str]],
+    enable_entities_verification: Optional[bool],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
@@ -318,15 +318,17 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
             # Verify the received FAB
             #########################
-            # FAB must be signed if trust entity provided
-            if enable_entity_verification and trust_entity:
+            # FAB must be signed if trust entities provided
+            if enable_entities_verification and trust_entities:
                 verification = json.loads(fab.meta["verification"])
                 fab_verified = False
                 for entity in verification:
                     public_key_id = entity["public_key_id"]
-                    if public_key_id in trust_entity:
+                    if public_key_id in trust_entities:
+                        # TODO: Refactor all ed25519 crypto into
+                        #  flwr.supercore.primitives.asymmetric package
                         verifier_public_key = serialization.load_pem_public_key(
-                            trust_entity[public_key_id].encode("utf-8")
+                            trust_entities[public_key_id].encode("utf-8")
                         )
                         if not isinstance(
                             verifier_public_key, ed25519.Ed25519PublicKey
