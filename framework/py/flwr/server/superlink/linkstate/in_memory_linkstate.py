@@ -74,7 +74,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Map node_id to NodeInfo
         self.nodes: dict[int, NodeInfo] = {}
-        self.node_public_keys_to_node_id: dict[bytes, int] = {}
+        self.node_public_key_to_node_id: dict[bytes, int] = {}
         self.owner_to_node_ids: dict[str, set[int]] = {}  # Quick lookup
 
         # Map run_id to RunRecord
@@ -346,7 +346,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             if node_id in self.nodes:
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
-            if public_key in self.node_public_keys_to_node_id:
+            if public_key in self.node_public_key_to_node_id:
                 raise ValueError("Public key already in use")
 
             # The node is not activated upon creation
@@ -362,7 +362,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 heartbeat_interval=heartbeat_interval,
                 public_key=public_key,
             )
-            self.node_public_keys_to_node_id[public_key] = node_id
+            self.node_public_key_to_node_id[public_key] = node_id
             self.owner_to_node_ids.setdefault(owner_aid, set()).add(node_id)
             return node_id
 
@@ -441,9 +441,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             return node.public_key
 
     def get_node_id_by_public_key(self, public_key: bytes) -> Optional[int]:
-        """Get `NodeInfo` for the specified `public_key`."""
+        """Get `node_id` for the specified `public_key`."""
         with self.lock:
-            return self.node_public_keys_to_node_id.get(public_key)
+            return self.node_public_key_to_node_id.get(public_key)
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(

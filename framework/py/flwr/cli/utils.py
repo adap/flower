@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional, Union, cast
 
 import grpc
+
 import typer
 
 from flwr.common.constant import (

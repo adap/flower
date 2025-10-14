@@ -92,13 +92,13 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 response = CreateNodeResponse(node=Node(node_id=node_id))
             else:
                 if self.enable_supernode_auth:
-                    # SuperNode authentication is enabled,
+                    # When SuperNode authentication is enabled,
                     # only SuperNodes created from the CLI are allowed to
                     # stablish a connection with the Fleet API
                     log(ERROR, SUPERNODE_NOT_CREATED_FROM_CLI_MESSAGE)
                     raise ValueError(SUPERNODE_NOT_CREATED_FROM_CLI_MESSAGE)
 
-                # SuperNode authentication is disabled, auto-auth
+                # When SuperNode authentication is disabled, auto-auth
                 # allows creating a new node
                 response = message_handler.create_node(
                     request=request,
@@ -118,7 +118,22 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """."""
         log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
         log(DEBUG, "[Fleet.DeleteNode] Request: %s", MessageToDict(request))
-        return DeleteNodeResponse()
+        # This shall be refactored when renaming `Fleet.Create/DeleteNode`
+        # to `Fleet.Activate/DeactivateNode`
+        if self.enable_supernode_auth:
+            # SuperNodes can only be deleted from the CLI
+            # We simply acknowledge the heartbeat with interval 0
+            # to mark the node as offline
+            state = self.state_factory.state()
+            state.acknowledge_node_heartbeat(
+                node_id=request.node.node_id, heartbeat_interval=0
+            )
+            return DeleteNodeResponse()
+
+        return message_handler.delete_node(
+            request=request,
+            state=self.state_factory.state(),
+        )
 
     def SendNodeHeartbeat(
         self, request: SendNodeHeartbeatRequest, context: grpc.ServicerContext
