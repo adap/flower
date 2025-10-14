@@ -599,7 +599,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert len(self.store) == 0
 
 
-class TestFleetServicerWithNodeAuthEnabled(TestFleetServicer): 
+class TestFleetServicerWithNodeAuthEnabled(TestFleetServicer):
     """FleetServicer tests for allowed RunStatuses."""
 
     enable_node_auth = True
