@@ -46,7 +46,7 @@ else()
   set(FLWR_SOURCE_ROOT "${flwr_repo_SOURCE_DIR}")
 endif()
 
-set(FLWR_SDK_PATH "${FLWR_SOURCE_ROOT}/src/cc/flwr")
+set(FLWR_SDK_PATH "${FLWR_SOURCE_ROOT}/framework/cc/flwr")
 
 file(GLOB FLWR_SRCS "${FLWR_SDK_PATH}/src/*.cc")
 file(GLOB FLWR_PROTO_SRCS "${FLWR_SDK_PATH}/include/flwr/proto/*.cc")
