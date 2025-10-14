@@ -167,7 +167,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         if num_transitions > 2:
             _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
 
-    def test_create_node_without_pre_registration(self) -> int:
+    def test_create_node_without_pre_registration(self) -> None:
         """Create a node without pre-registration."""
         request = CreateNodeRequest(public_key=self.node_pk)
         if self.enable_node_auth:
