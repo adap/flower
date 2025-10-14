@@ -24,7 +24,6 @@ from parameterized import parameterized
 from flwr.common import ConfigRecord
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
-    NOOP_FLWR_AID,
     SUPERLINK_NODE_ID,
     Status,
 )
@@ -66,7 +65,6 @@ from flwr.server.superlink.linkstate.linkstate_test import (
     create_res_message,
 )
 from flwr.server.superlink.utils import _STATUS_TO_MSG
-from flwr.supercore.constant import NodeStatus
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 
@@ -156,7 +154,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def _create_dummy_node(self) -> int:
         """Create a dummy node."""
         return self.state.create_node(
-            NOOP_FLWR_AID, self.node_pk, heartbeat_interval=30
+            "mock_flwr_aid", self.node_pk, heartbeat_interval=30
         )
 
     def _transition_run_status(self, run_id: int, num_transitions: int) -> None:
@@ -177,7 +175,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             with self.assertRaises(grpc.RpcError) as cm:
                 self._create_node.with_call(request=request)
             assert cm.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-            return 0
+            return
 
         # Execute and assert: node authentication disabled
         response, call = self._create_node.with_call(request=request)
@@ -185,7 +183,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
         assert response.node.node_id > 0
 
-    def test_create_node_with_pre_registration(self) -> int:
+    def test_create_node_with_pre_registration(self) -> None:
         """Create a node with pre-registration."""
         # Prepare
         node_id = self._create_dummy_node()
@@ -202,8 +200,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_delete_node(self) -> None:
         """Test `DeleteNode`."""
         # Prepare
-        node_id = self._create_dummy_node()
-        request = DeleteNodeRequest(node=Node(node_id=node_id))
+        request = DeleteNodeRequest(node=Node(node_id=1234))
 
         # Execute
         response, call = self._delete_node.with_call(request=request)
@@ -211,15 +208,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert isinstance(response, DeleteNodeResponse)
         assert grpc.StatusCode.OK == call.code()
-        # Assert: Node is deleted
-        node_info = self.state.get_node_info(node_ids=[node_id])[0]
-        if self.enable_node_auth:
-            # status remains CREATED since node was never connected
-            # and can only be deleted via the Flower CLi
-            assert node_info.status == NodeStatus.CREATED
-        else:
-            # Status changed to Deleted
-            assert node_info.status == NodeStatus.DELETED
 
     def test_successful_push_messages_if_running(self) -> None:
         """Test `PushMessages` success."""

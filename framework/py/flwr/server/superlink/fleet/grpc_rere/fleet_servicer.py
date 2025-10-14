@@ -118,14 +118,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """."""
         log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
         log(DEBUG, "[Fleet.DeleteNode] Request: %s", MessageToDict(request))
-        if self.enable_supernode_auth:
-            # SuperNodes can only be deleted from the CLI
-            return DeleteNodeResponse()
-
-        return message_handler.delete_node(
-            request=request,
-            state=self.state_factory.state(),
-        )
+        return DeleteNodeResponse()
 
     def SendNodeHeartbeat(
         self, request: SendNodeHeartbeatRequest, context: grpc.ServicerContext
