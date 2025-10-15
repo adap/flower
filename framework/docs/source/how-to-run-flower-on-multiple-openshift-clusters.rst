@@ -93,9 +93,9 @@ one with SuperLink deployed):
 
 If successful, you should see a message similar to this:
 
-.. code-block:: shell
+.. code-block:: console
 
-    ➜ oc login --server=<your-openshift-api-endpoint> --web
+    $ oc login --server=<your-openshift-api-endpoint> --web
     Opening login URL in the default browser: [...]
     Login successful.
 
@@ -113,9 +113,9 @@ SuperLink:
 In our `previous guide <how-to-run-flower-on-red-hat-openshift>`_, we used the project
 name ``flower-openshift-demo``, so let's do that:
 
-.. code-block:: shell
+.. code-block:: console
 
-    ➜ oc project flower-openshift-demo
+    $ oc project flower-openshift-demo
     Now using project "flower-openshift-demo" on server "<your-openshift-api-endpoint>".
 
 .. tip::
@@ -135,9 +135,9 @@ This command creates a Skupper site named ``superlink-interconnect`` and the
 this option is necessary for the site where SuperLink is deployed so that SuperNodes in
 other clusters can connect to it. You should see output similar to this:
 
-.. code-block:: shell
+.. code-block:: console
 
-    ➜ skupper site create superlink-interconnect --enable-link-access
+    $ skupper site create superlink-interconnect --enable-link-access
     Waiting for status...
     Site "superlink-interconnect" is ready.
 
@@ -189,9 +189,9 @@ and apply the resource in it:
 
 You should see output similar to this:
 
-.. code-block:: shell
+.. code-block:: console
 
-    ➜ kubectl apply -f superlink-interconnect-link.yaml
+    $ kubectl apply -f superlink-interconnect-link.yaml
     link.skupper.io/link-superlink-interconnect-skupper-router created
     secret/link-superlink-interconnect created
 
@@ -203,13 +203,13 @@ To verify the status of the link, run the following command:
 
 You might need to issue the command multiple times before the link is ready:
 
-.. code-block:: shell
+.. code-block:: console
 
-    ➜ skupper link status
+    $ skupper link status
     NAME                                            STATUS  COST    MESSAGE
     link-superlink-interconnect-skupper-router      Pending 1       Not Operational
 
-    ➜ skupper link status
+    $ skupper link status
     NAME                                            STATUS  COST    MESSAGE
     link-superlink-interconnect-skupper-router      Ready   1       OK
 
@@ -236,9 +236,9 @@ In our deployment, SuperLink listens on port ``9092`` corresponding to the Fleet
 <ref-flower-network-communication.rst#flower-components-apis>`_). Since we have given
 the SuperLink deployment the name ``superlink``, we will use that as the workload name:
 
-.. code-block:: shell
+.. code-block:: console
 
-    ➜ skupper connector create fleet-api 9092 --workload deployment/superlink
+    $ skupper connector create fleet-api 9092 --workload deployment/superlink
     Waiting for create to complete...
     Connector "fleet-api" is configured.
 
@@ -260,9 +260,9 @@ the ``<name>`` must match the name of the connector we created in the SuperLink 
 which is ``fleet-api``. The ``<port>`` is the port number that the listener will listen
 on, which must also match the port number of the connector (``9092``):
 
-.. code-block:: shell
+.. code-block:: console
 
-    ➜ skupper listener create fleet-api 9092
+    $ skupper listener create fleet-api 9092
     Waiting for create to complete...
     Listener "fleet-api" is configured.
 
