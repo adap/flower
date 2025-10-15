@@ -505,7 +505,7 @@ class FlowerProvenance:
         faulty_client_set = set(faulty_responsible)
 
         for idx, prov_r in enumerate(input2prov):
-            traced_client = str(prov_r["traced_client"])
+            traced_client = prov_r["traced_client"]  # Keep as integer
             client2prov = prov_r["client2prov"]
 
             target_l = (
@@ -524,7 +524,7 @@ class FlowerProvenance:
                     res_c_string,
                 )
 
-                if traced_client in faulty_client_set:
+                if str(traced_client) in faulty_client_set:
                     logging.info(
                         "     Traced Client: c%s || Tracing = Correct",
                         traced_client,
