@@ -76,10 +76,10 @@ CREATE TABLE IF NOT EXISTS node(
     node_id                 INTEGER UNIQUE,
     owner_aid               TEXT,
     status                  TEXT,
-    registered_at              TEXT,
+    registered_at           TEXT,
     last_activated_at       TEXT NULL,
     last_deactivated_at     TEXT NULL,
-    unregistered_at              TEXT NULL,
+    unregistered_at         TEXT NULL,
     online_until            TIMESTAMP NULL,
     heartbeat_interval      REAL,
     public_key              BLOB UNIQUE

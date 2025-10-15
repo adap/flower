@@ -29,7 +29,8 @@ from .pull import pull
 from .run import run
 from .stop import stop
 from .supernode import ls as supernode_list
-from .supernode import register, unregister
+from .supernode import register as supernode_register
+from .supernode import unregister as supernode_unregister
 
 app = typer.Typer(
     help=typer.style(
