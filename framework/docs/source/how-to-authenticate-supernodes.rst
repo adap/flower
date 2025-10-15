@@ -2,6 +2,10 @@
 .. meta::
     :description: Enable authentication for SuperNodes and SuperLink in Flower with public key authentication, securing federated learning via TLS connections.
 
+.. |flower_cli_supernode_link| replace:: ``Flower CLI``
+
+.. _flower_cli_supernode_link: ref-api-cli.html#flwr-supernode
+
 Authenticate SuperNodes
 =======================
 
@@ -41,7 +45,6 @@ node's identity and is only available when encrypted connections (SSL/TLS) are e
     Checkout the `Flower Authentication
     <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_ example
     for a complete self-contained example on how to setup TLS and node authentication.
-
 
 Generate authentication keys
 ----------------------------
@@ -83,11 +86,48 @@ that the authentication feature can only be enabled in the presence of TLS.
 
 .. dropdown:: Understand the command
 
-    * ``--enable-supernode-auth``: Enables SuperNode authentication. 
-
+    * ``--enable-supernode-auth``: Enables SuperNode authentication therefore only Supernodes that are first register on the SuperLink will be able to establish a connection.
 
 Register SuperNodes
 -------------------
+
+With a SuperLink already running, we can proceed to register the SuperNodes that will be
+allowed to connect to it. This is done via the |flower_cli_supernode_link|_ using the
+public keys generated earlier for each SuperNode that we want to eventually connect to
+the SuperLink. Let's see how to this looks in code:
+
+.. code-block:: bash
+
+    # flwr supernode register <supernode-pub-key> <app> <federation>
+    $ flwr supernode register keys/client_credentials_1.pub . local-deployment
+
+Let's proceed and also register the second SuperNode:
+
+.. code-block:: bash
+
+    $ flwr supernode register keys/client_credentials_2.pub . local-deployment
+
+You can list the registered SuperNodes using the following command:
+
+.. code-block:: bash
+
+    $ flwr supernode list . local-deployment
+
+which should display the IDs of the SuperNodes you just registered as well as their
+status. You should see a table similar to the following:
+
+.. code-block:: bash
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃       Node ID        ┃   Owner    ┃   Status   ┃ Elapsed  ┃   Status Changed @   ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+    │ 16019329408659850374 │ sys_noauth │ registered │          │ N/A                  │
+    ├──────────────────────┼────────────┼────────────┼──────────┼──────────────────────┤
+    │ 8392976743692794070  │ sys_noauth │ registered │          │ N/A                  │
+    └──────────────────────┴────────────┴────────────┴──────────┴──────────────────────┘
+
+The status of the SuperNodes will change after they connect to the SuperLink. Let's
+proceed and laucnh the SuperNodes.
 
 Enable node authentication in SuperNode
 ---------------------------------------
