@@ -71,6 +71,10 @@ OperatorHub:
 
     Search for Red Hat Service Interconnect Operator on OperatorHub.
 
+.. raw:: html
+
+    <div style="margin-top: 1.75em;"></div>
+
 .. figure:: ./_static/rhos/rhos_install_popup_service_interconnect_operator.png
     :align: center
     :width: 90%
