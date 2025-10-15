@@ -376,7 +376,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             ):
                 raise ValueError(
                     f"Node ID {node_id} already unregistered, not found or "
-                    "unauthorized deletion attempt."
+                    "the request was unauthorized."
                 )
 
             node.status = NodeStatus.UNREGISTERED

@@ -54,8 +54,8 @@ app.command()(pull)
 
 # Create supernode command group
 supernode_app = typer.Typer(help="Manage SuperNodes")
-supernode_app.command()(register)
-supernode_app.command()(unregister)
+supernode_app.command()(supernode_register)
+supernode_app.command()(supernode_unregister)
 # Make it appear as "list"
 supernode_app.command("list")(supernode_list)
 # Hide "ls" command (left as alias)
