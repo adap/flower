@@ -151,7 +151,7 @@ def start_client_internal(
             "Insecure connection is enabled, but the SuperNode's private key is "
             "provided for authentication. SuperNode authentication requires a "
             "secure TLS connection with the SuperLink. Please enable TLS by "
-            "providing the certificate  via `--root-certificates`. Please refer "
+            "providing the certificate via `--root-certificates`. Please refer "
             f"to the Flower documentation for more information: {url_v}{page}",
         )
 
