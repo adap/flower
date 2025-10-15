@@ -15,10 +15,11 @@ tracefl.dataset='mnist' \
 tracefl.model='resnet18' \
 tracefl.num-clients=10 \
 tracefl.dirichlet-alpha=${ALPHA} \
-tracefl.max-per-client-data-size=1000 \
-tracefl.max-server-data-size=500 \
+tracefl.max-per-client-data-size=2048 \
+tracefl.max-server-data-size=2048 \
 tracefl.batch-size=32 \
-tracefl.provenance-rounds='1,2'"
+tracefl.provenance-rounds='1,2' \
+fraction-train=0.4"
 
   echo "Running TraceFL baseline with Dirichlet alpha=${ALPHA}..."
   flwr run . --run-config "$RUN_CONFIG"
