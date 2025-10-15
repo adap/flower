@@ -41,10 +41,10 @@ flwr run .
 cd .. # so you are in the `flower/baselines` directory
 
 # Run the formatting script (it will auto-correct issues if possible)
-./dev/format-baseline.sh tracefl-baseline
+./dev/format-baseline.sh tracefl
 
 # Then, if the above is all good, run the tests.
-./dev/test-baseline.sh tracefl-baseline
+./dev/test-baseline.sh tracefl
 ```
 
 > [!IMPORTANT]

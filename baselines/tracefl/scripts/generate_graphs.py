@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from tracefl.plotting import plot_accuracy_curves
 
@@ -51,6 +51,7 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: Sequence[str] | None = None) -> None:
+    """Generate graphs from experiment results."""
     args = _parse_args(argv)
 
     results_dir: Path = args.results_dir

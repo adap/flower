@@ -4,14 +4,14 @@ They are not directly relevant to the other (more FL specific) python modules. F
 example, you may define here things like: loading a model from a checkpoint, saving
 results, plotting.
 """
-from sklearn import metrics
+
 import numpy as np
 import torch
+from sklearn import metrics
 
 
 def compute_importance(n_elements, decay_factor=0.9):
-    """
-    Compute importance weights for a sequence of elements using a decay factor.
+    """Compute importance weights for a sequence of elements using a decay factor.
 
     Parameters
     ----------
@@ -31,8 +31,7 @@ def compute_importance(n_elements, decay_factor=0.9):
 
 
 def get_prov_eval_metrics(labels, predicted_labels):
-    """
-    Compute evaluation metrics for provenance by comparing true and predicted labels.
+    """Compute evaluation metrics for provenance by comparing true and predicted labels.
 
     Parameters
     ----------
@@ -47,7 +46,7 @@ def get_prov_eval_metrics(labels, predicted_labels):
         A dictionary containing evaluation metrics such as "Accuracy".
     """
     accuracy = metrics.accuracy_score(labels, predicted_labels)
-    answer = {    
+    answer = {
         "Accuracy": accuracy,
     }
 
@@ -55,16 +54,15 @@ def get_prov_eval_metrics(labels, predicted_labels):
 
 
 def softmax_normalize(tensor, dim=0):
-    """
-    Apply softmax normalization to a tensor along a specified dimension.
-    
+    """Apply softmax normalization to a tensor along a specified dimension.
+
     Parameters
     ----------
     tensor : torch.Tensor
         Input tensor to normalize.
     dim : int, optional
         Dimension along which to apply softmax (default is 0).
-        
+
     Returns
     -------
     torch.Tensor
@@ -74,14 +72,13 @@ def softmax_normalize(tensor, dim=0):
 
 
 def normalize_contributions(contributions):
-    """
-    Normalize client contributions to sum to 1.
-    
+    """Normalize client contributions to sum to 1.
+
     Parameters
     ----------
     contributions : dict
         Dictionary mapping client IDs to their contributions.
-        
+
     Returns
     -------
     dict
@@ -92,5 +89,5 @@ def normalize_contributions(contributions):
         # If total is 0, distribute equally
         n_clients = len(contributions)
         return {client_id: 1.0 / n_clients for client_id in contributions.keys()}
-    
+
     return {client_id: contrib / total for client_id, contrib in contributions.items()}

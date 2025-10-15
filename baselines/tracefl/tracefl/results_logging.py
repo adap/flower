@@ -10,9 +10,10 @@ generate paper-style figures and tables.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any
 
 import pandas as pd
 
@@ -24,9 +25,8 @@ def _sanitize_component(component: str) -> str:
     dependency here by performing a conservative replacement which retains
     alphanumeric characters, ``-`` and ``_``.
     """
-
     allowed = {"-", "_"}
-    sanitized_chars: List[str] = []
+    sanitized_chars: list[str] = []
     for ch in component:
         if ch.isalnum() or ch in allowed:
             sanitized_chars.append(ch)
@@ -39,7 +39,7 @@ def _sanitize_component(component: str) -> str:
     return sanitized.strip("-") or "value"
 
 
-def _format_label_map(label_map: Dict[int, int]) -> str:
+def _format_label_map(label_map: dict[int, int]) -> str:
     if not label_map:
         return "none"
     pairs = [f"{int(k)}to{int(v)}" for k, v in sorted(label_map.items())]
@@ -55,7 +55,6 @@ def _format_faulty_clients(clients: Iterable[int]) -> str:
 
 def _build_experiment_key(cfg: Any) -> str:
     """Construct a descriptive experiment key based on the configuration."""
-
     dist = getattr(cfg, "data_dist", None)
     if dist is None:
         return "tracefl_experiment"
@@ -65,7 +64,7 @@ def _build_experiment_key(cfg: Any) -> str:
         f"model-{getattr(dist, 'model_name', 'unknown')}",
         f"clients-{getattr(dist, 'num_clients', 'n')}",
         f"alpha-{getattr(dist, 'dirichlet_alpha', 'a')}",
-        f"rounds-{'-'.join(str(r) for r in sorted(getattr(cfg, 'provenance_rounds', [])))}",
+        f"rounds-{'-'.join(str(r) for r in sorted(getattr(cfg, 'provenance_rounds', [])))}",  # noqa: E501
     ]
 
     noise = getattr(cfg, "noise_multiplier", None)
@@ -94,11 +93,14 @@ class ExperimentResultLogger:
 
     cfg: Any
     results_dir: Path = Path("results_csvs")
-    _records: List[Dict[str, Any]] = field(default_factory=list, init=False)
+    _records: list[dict[str, Any]] = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:
+        """Initialize the results logger after object creation."""
         self.results_dir.mkdir(parents=True, exist_ok=True)
-        self._file_path = self.results_dir / f"prov_{_build_experiment_key(self.cfg)}.csv"
+        self._file_path = (
+            self.results_dir / f"prov_{_build_experiment_key(self.cfg)}.csv"
+        )
         if self._file_path.exists():
             try:
                 existing = pd.read_csv(self._file_path)
@@ -112,16 +114,16 @@ class ExperimentResultLogger:
 
     @property
     def file_path(self) -> Path:
+        """Get the file path for the results CSV."""
         return self._file_path
 
-    def record_round(self, round_id: int, results: Dict[str, Any]) -> None:
-        """Append the latest provenance results and flush them to disk."""
-
+    def record_round(self, round_id: int, results: dict[str, Any]) -> None:
+        """Record results for a specific round."""
         eval_metrics = results.get("eval_metrics", {})
         accuracy = eval_metrics.get("Accuracy")
         contribution = results.get("client_contributions", {})
 
-        record: Dict[str, Any] = {
+        record: dict[str, Any] = {
             "round": int(round_id),
             "samples_analyzed": int(results.get("samples_analyzed", 0)),
             "Accuracy": float(accuracy) if accuracy is not None else None,
@@ -136,10 +138,11 @@ class ExperimentResultLogger:
             record[f"client_{client_id}_contribution"] = contribution[client_id]
 
         # Deduplicate the record for the same round to support re-runs.
-        self._records = [r for r in self._records if int(r.get("round", -1)) != round_id]
+        self._records = [
+            r for r in self._records if int(r.get("round", -1)) != round_id
+        ]
         self._records.append(record)
         self._records.sort(key=lambda r: int(r.get("round", 0)))
 
         df = pd.DataFrame(self._records)
         df.to_csv(self._file_path, index=False)
-

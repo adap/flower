@@ -1,48 +1,50 @@
 """Configuration helper for TraceFL baseline."""
 
-from types import SimpleNamespace
-import logging
 import ast
-from typing import Any, Dict, Iterable, List, Sequence
+from collections.abc import Iterable, Sequence
+from types import SimpleNamespace
+from typing import Any
 
 
 def _detect_model_architecture(model_name):
-    """
-    Detect the architecture type of a model based on its name.
-    
+    """Detect the architecture type of a model based on its name.
+
     Parameters
     ----------
     model_name : str
         The name of the model
-        
+
     Returns
     -------
     str
         The architecture type: 'cnn', 'resnet', 'densenet', 'transformer'
     """
-    if model_name in ['squeezebert/squeezebert-uncased', 'openai-community/openai-gpt', 
-                      "Intel/dynamic_tinybert", "google-bert/bert-base-cased", 
-                      'microsoft/MiniLM-L12-H384-uncased', 'distilbert/distilbert-base-uncased']:
+    if model_name in [
+        "squeezebert/squeezebert-uncased",
+        "openai-community/openai-gpt",
+        "Intel/dynamic_tinybert",
+        "google-bert/bert-base-cased",
+        "microsoft/MiniLM-L12-H384-uncased",
+        "distilbert/distilbert-base-uncased",
+    ]:
         return "transformer"
-    elif model_name.startswith("resnet"):
+    if model_name.startswith("resnet"):
         return "resnet"
-    elif model_name.startswith("densenet"):
+    if model_name.startswith("densenet"):
         return "densenet"
-    elif model_name == "cnn":
+    if model_name == "cnn":
         return "cnn"
-    else:
-        return "unknown"
+    return "unknown"
 
 
 def _validate_model_dataset_compatibility(data_dist):
-    """
-    Validate that the model and dataset are compatible.
-    
+    """Validate that the model and dataset are compatible.
+
     Parameters
     ----------
     data_dist : SimpleNamespace
         Dataset configuration object
-        
+
     Raises
     ------
     ValueError
@@ -50,20 +52,32 @@ def _validate_model_dataset_compatibility(data_dist):
     """
     dataset_arch = data_dist.architecture
     model_arch = data_dist.model_architecture
-    
+
     # Check compatibility
     if dataset_arch == "text" and model_arch != "transformer":
-        raise ValueError(f"Incompatible combination: Text dataset '{data_dist.dname}' requires transformer model, but got '{data_dist.model_name}'")
-    
+        raise ValueError(
+            f"Incompatible combination: Text dataset '{data_dist.dname}' "
+            f"requires transformer model, but got '{data_dist.model_name}'"
+        )
+
     if dataset_arch in ["vision", "medical"] and model_arch == "transformer":
-        raise ValueError(f"Incompatible combination: Vision/Medical dataset '{data_dist.dname}' requires CNN/ResNet/DenseNet model, but got transformer '{data_dist.model_name}'")
-    
+        raise ValueError(
+            f"Incompatible combination: Vision/Medical dataset '{data_dist.dname}' "
+            f"requires CNN/ResNet/DenseNet model, but got transformer "
+            f"'{data_dist.model_name}'"
+        )
+
     # Log compatibility info
-    print(f"✅ Model-Dataset Compatibility: {model_arch} model + {dataset_arch} dataset")
-    
+    print(
+        f"✅ Model-Dataset Compatibility: {model_arch} model + {dataset_arch} dataset"
+    )
+
     # Log channel adaptation info
     if dataset_arch == "medical" and model_arch in ["resnet", "densenet"]:
-        print(f"🔧 Channel Adaptation: {data_dist.channels}-channel input for {model_arch} model")
+        print(
+            f"🔧 Channel Adaptation: {data_dist.channels}-channel input "
+            f"for {model_arch} model"
+        )
 
 
 def _normalize_run_config_value(value: Any) -> Any:
@@ -76,7 +90,6 @@ def _normalize_run_config_value(value: Any) -> Any:
     :func:`ast.literal_eval`.  When parsing fails we simply strip matching outer
     quotes so commands such as ``tracefl.dataset='mnist'`` remain usable.
     """
-
     if isinstance(value, str):
         stripped = value.strip()
         if stripped == "":
@@ -84,7 +97,7 @@ def _normalize_run_config_value(value: Any) -> Any:
         try:
             return ast.literal_eval(stripped)
         except (ValueError, SyntaxError):
-            if (stripped.startswith("\"") and stripped.endswith("\"")) or (
+            if (stripped.startswith('"') and stripped.endswith('"')) or (
                 stripped.startswith("'") and stripped.endswith("'")
             ):
                 return stripped[1:-1]
@@ -137,11 +150,11 @@ def _as_str(value: Any, default: str) -> str:
     return str(normalized)
 
 
-def _as_int_list(value: Any, default: Sequence[int]) -> List[int]:
+def _as_int_list(value: Any, default: Sequence[int]) -> list[int]:
     normalized = _normalize_run_config_value(value)
     if normalized is None:
         return list(default)
-    if isinstance(normalized, Iterable) and not isinstance(normalized, (str, bytes)):
+    if isinstance(normalized, Iterable) and not isinstance(normalized, str | bytes):
         try:
             return [int(v) for v in normalized]
         except (TypeError, ValueError):
@@ -157,12 +170,12 @@ def _as_int_list(value: Any, default: Sequence[int]) -> List[int]:
     return list(default)
 
 
-def _as_label_map(value: Any) -> Dict[int, int]:
+def _as_label_map(value: Any) -> dict[int, int]:
     normalized = _normalize_run_config_value(value)
     if normalized in (None, "", {}):
         return {}
     if isinstance(normalized, dict):
-        result: Dict[int, int] = {}
+        result: dict[int, int] = {}
         for k, v in normalized.items():
             try:
                 result[int(k)] = int(v)
@@ -173,37 +186,42 @@ def _as_label_map(value: Any) -> Dict[int, int]:
 
 
 def create_tracefl_config(context):
-    """
-    Create TraceFL configuration from Flower context.
-    
+    """Create TraceFL configuration from Flower context.
+
     Parameters
     ----------
     context : Context
         Flower context containing run_config
-        
+
     Returns
     -------
     SimpleNamespace
         TraceFL configuration object
     """
     # Configuration loaded successfully
-    
+
     # Extract TraceFL config directly from run_config
     run_cfg = context.run_config
 
     data_dist = SimpleNamespace()
     data_dist.dname = _as_str(run_cfg.get("tracefl.dataset"), "cifar10")
-    data_dist.dist_type = _as_str(run_cfg.get("tracefl.data-distribution"), "non_iid_dirichlet")
+    data_dist.dist_type = _as_str(
+        run_cfg.get("tracefl.data-distribution"), "non_iid_dirichlet"
+    )
     data_dist.num_clients = _as_int(run_cfg.get("tracefl.num-clients"), 3)
     data_dist.dirichlet_alpha = _as_float(run_cfg.get("tracefl.dirichlet-alpha"), 0.5)
-    data_dist.max_per_client_data_size = _as_int(run_cfg.get("tracefl.max-per-client-data-size"), 1000)
-    data_dist.max_server_data_size = _as_int(run_cfg.get("tracefl.max-server-data-size"), 500)
+    data_dist.max_per_client_data_size = _as_int(
+        run_cfg.get("tracefl.max-per-client-data-size"), 1000
+    )
+    data_dist.max_server_data_size = _as_int(
+        run_cfg.get("tracefl.max-server-data-size"), 500
+    )
     data_dist.batch_size = _as_int(run_cfg.get("tracefl.batch-size"), 32)
 
     # Add model configuration
     model_name = _as_str(run_cfg.get("tracefl.model"), "cnn")
     data_dist.model_name = model_name
-    
+
     # Set dataset-specific properties based on dataset name
     if data_dist.dname in ["cifar10", "cifar100"]:
         data_dist.num_classes = 10 if data_dist.dname == "cifar10" else 100
@@ -222,13 +240,13 @@ def create_tracefl_config(context):
         data_dist.num_classes = 10
         data_dist.channels = 3
         data_dist.architecture = "vision"
-    
+
     # Auto-detect model architecture compatibility
     data_dist.model_architecture = _detect_model_architecture(model_name)
-    
+
     # Validate model-dataset compatibility
     _validate_model_dataset_compatibility(data_dist)
-    
+
     # Create main config
     cfg = SimpleNamespace()
     cfg.data_dist = data_dist
@@ -236,7 +254,9 @@ def create_tracefl_config(context):
     cfg.enable_beta = _as_bool(run_cfg.get("tracefl.enable-beta"), True)
 
     # Parse provenance rounds from string to list
-    cfg.provenance_rounds = _as_int_list(run_cfg.get("tracefl.provenance-rounds"), [1, 2, 3])
+    cfg.provenance_rounds = _as_int_list(
+        run_cfg.get("tracefl.provenance-rounds"), [1, 2, 3]
+    )
 
     cfg.client_weights_normalization = _as_bool(
         run_cfg.get("tracefl.client-weights-normalization"), True

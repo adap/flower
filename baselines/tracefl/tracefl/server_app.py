@@ -1,14 +1,15 @@
 """tracefl-baseline: A Flower Baseline."""
 
 import logging
+
 import torch
 from flwr.app import ArrayRecord, Context
 from flwr.serverapp import Grid, ServerApp
 
-from tracefl.model import initialize_model
-from tracefl.dataset import get_clients_server_data
 from tracefl.config import create_tracefl_config
-from tracefl.strategy import TraceFL_Strategy
+from tracefl.dataset import get_clients_server_data
+from tracefl.model import initialize_model
+from tracefl.strategy import TraceFLStrategy
 
 # Configure logging
 logging.basicConfig(
@@ -21,14 +22,14 @@ logging.basicConfig(
 app = ServerApp()
 
 # Global variable to store server data
-_server_data = None
-_client2class = None
+_SERVER_DATA = None
+_CLIENT2CLASS = None
 
 
 def _load_server_data(context):
     """Load server test data and client label mappings using TraceFL preparation."""
-    global _server_data, _client2class
-    if _server_data is None or _client2class is None:
+    global _SERVER_DATA, _CLIENT2CLASS  # pylint: disable=global-statement
+    if _SERVER_DATA is None or _CLIENT2CLASS is None:
         # Create TraceFL config from Flower context
         cfg = create_tracefl_config(context)
 
@@ -36,34 +37,41 @@ def _load_server_data(context):
         ds_dict = get_clients_server_data(cfg)
 
         # Store server test data
-        _server_data = ds_dict["server_testdata"]
-        _client2class = ds_dict.get("client2class", {})
+        _SERVER_DATA = ds_dict["server_testdata"]
+        _CLIENT2CLASS = ds_dict.get("client2class", {})
 
-        print(f"📊 Server loaded {len(_server_data)} test samples")
+        print(f"📊 Server loaded {len(_SERVER_DATA)} test samples")
 
-    return _server_data, _client2class
+    return _SERVER_DATA, _CLIENT2CLASS
 
 
 @app.main()
 def main(grid: Grid, context: Context) -> None:
-    """Main entry point for the ServerApp."""
-
+    """Run main entry point for the ServerApp."""
     # Read from config
-    num_rounds = context.run_config["num-server-rounds"]
-    fraction_train = context.run_config["fraction-train"]
+    num_rounds = int(context.run_config["num-server-rounds"])
+    fraction_train = float(context.run_config["fraction-train"])
 
     # Load TraceFL server data
     server_data, client2class = _load_server_data(context)
-    
+
     # Get TraceFL config
     cfg = create_tracefl_config(context)
-    
+
     # Log architecture detection results
-    print(f"🔧 Architecture Detection:")
+    print("🔧 Architecture Detection:")
     print(f"   📊 Dataset: {cfg.data_dist.dname} ({cfg.data_dist.architecture})")
-    print(f"   🤖 Model: {cfg.data_dist.model_name} ({cfg.data_dist.model_architecture})")
-    print(f"   📐 Classes: {cfg.data_dist.num_classes}, Channels: {cfg.data_dist.channels}")
-    print(f"   ✅ Compatibility: {cfg.data_dist.model_architecture} + {cfg.data_dist.architecture}")
+    print(
+        f"   🤖 Model: {cfg.data_dist.model_name} ({cfg.data_dist.model_architecture})"
+    )
+    print(
+        f"   📐 Classes: {cfg.data_dist.num_classes}, "
+        f"Channels: {cfg.data_dist.channels}"
+    )
+    print(
+        f"   ✅ Compatibility: {cfg.data_dist.model_architecture} + "
+        f"{cfg.data_dist.architecture}"
+    )
 
     # Load global model
     # Initialize model based on configuration
@@ -72,7 +80,7 @@ def main(grid: Grid, context: Context) -> None:
     arrays = ArrayRecord(global_model.state_dict())
 
     # Initialize TraceFL strategy
-    strategy = TraceFL_Strategy(
+    strategy = TraceFLStrategy(
         fraction_train=fraction_train,
         fraction_evaluate=1.0,
         min_available_nodes=2,
@@ -81,7 +89,7 @@ def main(grid: Grid, context: Context) -> None:
         client_weights_normalization=cfg.client_weights_normalization,
         cfg=cfg,
     )
-    
+
     # Set server test data for provenance analysis
     strategy.set_server_test_data(server_data)
     strategy.set_client2class(client2class)
@@ -97,9 +105,9 @@ def main(grid: Grid, context: Context) -> None:
     print("\nSaving final model to disk...")
     state_dict = result.arrays.to_torch_state_dict()
     torch.save(state_dict, "final_model.pt")
-    
+
     # Print TraceFL configuration info
-    print(f"\n🎯 TraceFL Configuration:")
+    print("\n🎯 TraceFL Configuration:")
     print(f"📊 Dataset: {cfg.data_dist.dname}")
     print(f"👥 Clients: {cfg.data_dist.num_clients}")
     print(f"📈 Distribution: {cfg.data_dist.dist_type}")

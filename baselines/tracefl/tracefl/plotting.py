@@ -11,9 +11,9 @@ under ``tracefl-baseline/scripts``.
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional, Sequence
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -28,18 +28,21 @@ class PlotArtefacts:
 
     @property
     def png_dir(self) -> Path:
+        """Get the PNG directory path."""
         path = self.base_dir / "png"
         path.mkdir(parents=True, exist_ok=True)
         return path
 
     @property
     def pdf_dir(self) -> Path:
+        """Get the PDF directory path."""
         path = self.base_dir / "pdf"
         path.mkdir(parents=True, exist_ok=True)
         return path
 
     @property
     def tables_dir(self) -> Path:
+        """Get the tables directory path."""
         path = self.base_dir / "tables"
         path.mkdir(parents=True, exist_ok=True)
         return path
@@ -47,7 +50,6 @@ class PlotArtefacts:
 
 def _scale_to_percentage(series: pd.Series) -> pd.Series:
     """Return a percentage representation while guarding against NaNs."""
-
     if series is None:
         return pd.Series(dtype=float)
 
@@ -76,8 +78,9 @@ def _derive_run_label(path: Path) -> str:
     return name.replace("_", " ")
 
 
-def load_results(paths: Iterable[Path]) -> List[pd.DataFrame]:
-    frames: List[pd.DataFrame] = []
+def load_results(paths: Iterable[Path]) -> list[pd.DataFrame]:
+    """Load results from CSV files."""
+    frames: list[pd.DataFrame] = []
     for path in paths:
         df = pd.read_csv(path)
         if "round" not in df:
@@ -94,9 +97,9 @@ def plot_accuracy_curves(
     csv_paths: Sequence[Path],
     output_dir: Path,
     smoothing_window: int = 5,
-    title: Optional[str] = None,
+    title: str | None = None,
     include_test_accuracy: bool = True,
-) -> List[Path]:
+) -> list[Path]:
     """Generate per-run and aggregated accuracy plots.
 
     Parameters
@@ -113,7 +116,6 @@ def plot_accuracy_curves(
         Whether to plot the aggregated FL test accuracy alongside TraceFL's
         localization accuracy.
     """
-
     if not csv_paths:
         raise ValueError("No provenance CSV files matched the provided pattern")
 
@@ -121,7 +123,7 @@ def plot_accuracy_curves(
     frames = load_results(csv_paths)
 
     combined = []
-    for frame, path in zip(frames, csv_paths):
+    for frame, path in zip(frames, csv_paths, strict=False):
         frame = frame.sort_values("round")
         frame["TraceFL Accuracy (Smoothed)"] = _smooth(
             frame["TraceFL Accuracy (%)"], smoothing_window
@@ -184,7 +186,7 @@ def _plot_single_run(
 def _plot_combined_runs(
     combined_df: pd.DataFrame,
     artefacts: PlotArtefacts,
-    title: Optional[str],
+    title: str | None,
     include_test_accuracy: bool,
 ) -> None:
     fig, ax = plt.subplots(figsize=(6.8, 4.2))
@@ -226,7 +228,6 @@ def _plot_combined_runs(
 
 def export_summary_table(combined_df: pd.DataFrame, artefacts: PlotArtefacts) -> Path:
     """Write a summary table aggregating per-run statistics."""
-
     summary = (
         combined_df.groupby("Run")
         .agg(
