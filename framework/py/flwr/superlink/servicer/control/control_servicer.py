@@ -53,22 +53,22 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
-    ListNodesCliRequest,
-    ListNodesCliResponse,
+    ListNodesRequest,
+    ListNodesResponse,
     ListRunsRequest,
     ListRunsResponse,
     PullArtifactsRequest,
     PullArtifactsResponse,
-    RegisterNodeCliRequest,
-    RegisterNodeCliResponse,
+    RegisterNodeRequest,
+    RegisterNodeResponse,
     StartRunRequest,
     StartRunResponse,
     StopRunRequest,
     StopRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
-    UnregisterNodeCliRequest,
-    UnregisterNodeCliResponse,
+    UnregisterNodeRequest,
+    UnregisterNodeResponse,
 )
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
@@ -389,11 +389,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         download_url = self.artifact_provider.get_url(run_id)
         return PullArtifactsResponse(url=download_url)
 
-    def RegisterNodeCli(
-        self, request: RegisterNodeCliRequest, context: grpc.ServicerContext
-    ) -> RegisterNodeCliResponse:
+    def RegisterNode(
+        self, request: RegisterNodeRequest, context: grpc.ServicerContext
+    ) -> RegisterNodeResponse:
         """Add a SuperNode."""
-        log(INFO, "ControlServicer.RegisterNodeCli")
+        log(INFO, "ControlServicer.RegisterNode")
 
         # Verify public key
         try:
@@ -429,13 +429,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
         log(INFO, "[ControlServicer.RegisterNodeCli] Created node_id=%s", node_id)
 
-        return RegisterNodeCliResponse(node_id=node_id)
+        return RegisterNodeResponse(node_id=node_id)
 
-    def UnregisterNodeCli(
-        self, request: UnregisterNodeCliRequest, context: grpc.ServicerContext
-    ) -> UnregisterNodeCliResponse:
+    def UnregisterNode(
+        self, request: UnregisterNodeRequest, context: grpc.ServicerContext
+    ) -> UnregisterNodeResponse:
         """Remove a SuperNode."""
-        log(INFO, "ControlServicer.UnregisterNodeCli")
+        log(INFO, "ControlServicer.UnregisterNode")
 
         # Init link state
         state = self.linkstate_factory.state()
@@ -448,19 +448,19 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             log(ERROR, NODE_NOT_FOUND_MESSAGE)
             context.abort(grpc.StatusCode.NOT_FOUND, NODE_NOT_FOUND_MESSAGE)
 
-        return UnregisterNodeCliResponse()
+        return UnregisterNodeResponse()
 
-    def ListNodesCli(
-        self, request: ListNodesCliRequest, context: grpc.ServicerContext
-    ) -> ListNodesCliResponse:
+    def ListNodes(
+        self, request: ListNodesRequest, context: grpc.ServicerContext
+    ) -> ListNodesResponse:
         """List all SuperNodes."""
-        log(INFO, "ControlServicer.ListNodesCli")
+        log(INFO, "ControlServicer.ListNodes")
 
         if self.is_simulation:
-            log(ERROR, "ListNodesCli is not available in simulation mode.")
+            log(ERROR, "ListNodes is not available in simulation mode.")
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
-                "ListNodesCli is not available in simulation mode.",
+                "ListNodesis not available in simulation mode.",
             )
             raise grpc.RpcError()  # This line is unreachable
 
@@ -478,7 +478,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Retrieve all nodes for the account
             nodes_info = state.get_node_info(owner_aids=[flwr_aid])
 
-        return ListNodesCliResponse(nodes_info=nodes_info, now=now().isoformat())
+        return ListNodesResponse(nodes_info=nodes_info, now=now().isoformat())
 
 
 def _create_list_nodeif_for_dry_run() -> Sequence[NodeInfo]:

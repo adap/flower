@@ -36,8 +36,8 @@ from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
-    RegisterNodeCliRequest,
-    RegisterNodeCliResponse,
+    RegisterNodeRequest,
+    RegisterNodeResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.supercore.primitives.asymmetric import public_key_to_bytes, uses_nist_ec_curve
@@ -133,8 +133,8 @@ def register(  # pylint: disable=R0914
 def _register_node(stub: ControlStub, public_key: bytes, output_format: str) -> None:
     """Register a node."""
     with flwr_cli_grpc_exc_handler():
-        response: RegisterNodeCliResponse = stub.RegisterNodeCli(
-            request=RegisterNodeCliRequest(public_key=public_key)
+        response: RegisterNodeResponse = stub.RegisterNode(
+            request=RegisterNodeRequest(public_key=public_key)
         )
     if response.node_id:
         typer.secho(

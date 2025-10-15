@@ -37,15 +37,15 @@ from flwr.common.constant import (
 )
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
-    ListNodesCliRequest,
-    ListNodesCliResponse,
+    ListNodesRequest,
+    ListNodesResponse,
     ListRunsRequest,
-    RegisterNodeCliRequest,
+    RegisterNodeRequest,
     StartRunRequest,
     StopRunRequest,
     StreamLogsRequest,
     StreamLogsResponse,
-    UnregisterNodeCliRequest,
+    UnregisterNodeRequest,
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
@@ -203,9 +203,9 @@ class TestControlServicer(unittest.TestCase):
             )
 
         # Execute
-        req = RegisterNodeCliRequest(public_key=pub_key)
+        req = RegisterNodeRequest(public_key=pub_key)
         ctx = Mock()
-        node_id = self.servicer.RegisterNodeCli(req, ctx)
+        node_id = self.servicer.RegisterNode(req, ctx)
         if error_msg:
             ctx.abort.assert_called_once_with(
                 grpc.StatusCode.FAILED_PRECONDITION, error_msg
@@ -228,9 +228,9 @@ class TestControlServicer(unittest.TestCase):
         )
 
         # Execute
-        req = UnregisterNodeCliRequest(node_id=node_id if real_node_id else node_id + 1)
+        req = UnregisterNodeRequest(node_id=node_id if real_node_id else node_id + 1)
         ctx = Mock()
-        self.servicer.UnregisterNodeCli(req, ctx)
+        self.servicer.UnregisterNode(req, ctx)
         if not real_node_id:
             ctx.abort.assert_called_once_with(
                 grpc.StatusCode.NOT_FOUND, NODE_NOT_FOUND_MESSAGE
@@ -246,14 +246,10 @@ class TestControlServicer(unittest.TestCase):
 
         # Execute
         # Unregister node
-        self.servicer.UnregisterNodeCli(
-            UnregisterNodeCliRequest(node_id=node_id), Mock()
-        )
+        self.servicer.UnregisterNode(UnregisterNodeRequest(node_id=node_id), Mock())
 
         # Try to add node with same public key again
-        self.servicer.RegisterNodeCli(
-            RegisterNodeCliRequest(public_key=pub_key), Mock()
-        )
+        self.servicer.RegisterNode(RegisterNodeRequest(public_key=pub_key), Mock())
 
     @parameterized.expand(
         [
@@ -276,9 +272,7 @@ class TestControlServicer(unittest.TestCase):
                 get=lambda: SimpleNamespace(flwr_aid=flwr_aid_retrieving)
             ),
         ):
-            res: ListNodesCliResponse = self.servicer.ListNodesCli(
-                ListNodesCliRequest(), Mock()
-            )
+            res: ListNodesResponse = self.servicer.ListNodes(ListNodesRequest(), Mock())
 
         # Assert
         if expected:

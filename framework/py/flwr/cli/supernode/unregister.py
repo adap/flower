@@ -31,7 +31,7 @@ from flwr.cli.config_utils import (
 )
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
-from flwr.proto.control_pb2 import UnregisterNodeCliRequest  # pylint: disable=E0611
+from flwr.proto.control_pb2 import UnregisterNodeRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
 
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
@@ -123,7 +123,7 @@ def _unregister_node(
 ) -> None:
     """Unregister a SuperNode from the federation."""
     with flwr_cli_grpc_exc_handler():
-        stub.UnregisterNodeCli(request=UnregisterNodeCliRequest(node_id=node_id))
+        stub.UnregisterNode(request=UnregisterNodeRequest(node_id=node_id))
     typer.secho(
         f"✅ SuperNode {node_id} unregistered successfully.", fg=typer.colors.GREEN
     )

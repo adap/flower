@@ -36,8 +36,8 @@ from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
-    ListNodesCliRequest,
-    ListNodesCliResponse,
+    ListNodesRequest,
+    ListNodesResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
@@ -135,9 +135,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917
 def _list_nodes(stub: ControlStub, dry_run: bool) -> list[_NodeListType]:
     """List all nodes."""
     with flwr_cli_grpc_exc_handler():
-        res: ListNodesCliResponse = stub.ListNodesCli(
-            ListNodesCliRequest(dry_run=dry_run)
-        )
+        res: ListNodesResponse = stub.ListNodes(ListNodesRequest(dry_run=dry_run))
 
     return _format_nodes(list(res.nodes_info), res.now)
 

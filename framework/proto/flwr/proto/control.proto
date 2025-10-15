@@ -47,15 +47,13 @@ service Control {
   rpc PullArtifacts(PullArtifactsRequest) returns (PullArtifactsResponse) {}
 
   // Register SuperNode
-  rpc RegisterNodeCli(RegisterNodeCliRequest)
-      returns (RegisterNodeCliResponse) {}
+  rpc RegisterNode(RegisterNodeRequest) returns (RegisterNodeResponse) {}
 
   // Unregister SuperNode
-  rpc UnregisterNodeCli(UnregisterNodeCliRequest)
-      returns (UnregisterNodeCliResponse) {}
+  rpc UnregisterNode(UnregisterNodeRequest) returns (UnregisterNodeResponse) {}
 
   // List SuperNodes
-  rpc ListNodesCli(ListNodesCliRequest) returns (ListNodesCliResponse) {}
+  rpc ListNodes(ListNodesRequest) returns (ListNodesResponse) {}
 }
 
 message StartRunRequest {
@@ -99,14 +97,14 @@ message StopRunResponse { bool success = 1; }
 message PullArtifactsRequest { uint64 run_id = 1; }
 message PullArtifactsResponse { optional string url = 1; }
 
-message RegisterNodeCliRequest { bytes public_key = 1; }
-message RegisterNodeCliResponse { optional uint64 node_id = 1; }
+message RegisterNodeRequest { bytes public_key = 1; }
+message RegisterNodeResponse { optional uint64 node_id = 1; }
 
-message UnregisterNodeCliRequest { uint64 node_id = 1; }
-message UnregisterNodeCliResponse {}
+message UnregisterNodeRequest { uint64 node_id = 1; }
+message UnregisterNodeResponse {}
 
-message ListNodesCliRequest { bool dry_run = 1; }
-message ListNodesCliResponse {
+message ListNodesRequest { bool dry_run = 1; }
+message ListNodesResponse {
   repeated NodeInfo nodes_info = 1;
   string now = 2;
 }
