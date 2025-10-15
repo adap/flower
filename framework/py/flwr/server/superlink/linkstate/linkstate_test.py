@@ -680,7 +680,7 @@ class StateTest(CoreStateTest):
         # Assert node_ids and public_key_to_node_id are synced
         if isinstance(state, InMemoryLinkState):
             assert len(state.nodes) == 1
-            assert len(state.registered_node_public_keys) == 1
+            assert len(state.node_public_key_to_node_id) == 1
 
     def test_get_node_info_no_filters(self) -> None:
         """Test get_node_info returns all nodes when no filters are provided."""
@@ -821,6 +821,20 @@ class StateTest(CoreStateTest):
         # Assert
         assert len(retrieved_node_ids) == 0
 
+    def test_get_node_id_by_public_key(self) -> None:
+        """Test get_node_id_by_public_key."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        public_key = b"mock"
+        node_id = state.create_node("fake_aid", public_key, 10)
+
+        # Execute
+        retrieved_node_id = state.get_node_id_by_public_key(public_key)
+
+        # Assert
+        assert retrieved_node_id is not None
+        assert retrieved_node_id == node_id
+
     def test_num_message_ins(self) -> None:
         """Test if num_message_ins returns correct number of not delivered Messages."""
         # Prepare
@@ -894,52 +908,6 @@ class StateTest(CoreStateTest):
 
         # Assert
         assert num == 2
-
-    def test_clear_supernode_auth_keys_and_credentials(self) -> None:
-        """Test clear_supernode_auth_keys_and_credentials from linkstate."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        key_pairs = [generate_key_pairs() for _ in range(3)]
-        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
-
-        # Execute (store)
-        state.store_node_public_keys(public_keys)
-
-        # Execute (clear)
-        state.clear_supernode_auth_keys()
-        node_public_keys = state.get_node_public_keys()
-
-        # Assert
-        assert node_public_keys == set()
-
-    def test_node_public_keys(self) -> None:
-        """Test store_node_public_keys and get_node_public_keys from state."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        key_pairs = [generate_key_pairs() for _ in range(3)]
-        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
-
-        # Execute
-        state.store_node_public_keys(public_keys)
-        node_public_keys = state.get_node_public_keys()
-
-        # Assert
-        assert node_public_keys == public_keys
-
-    def test_node_public_key(self) -> None:
-        """Test store_node_public_key and get_node_public_keys from state."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        key_pairs = [generate_key_pairs() for _ in range(3)]
-        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
-
-        # Execute
-        for public_key in public_keys:
-            state.store_node_public_key(public_key)
-        node_public_keys = state.get_node_public_keys()
-
-        # Assert
-        assert node_public_keys == public_keys
 
     def test_acknowledge_node_heartbeat(self) -> None:
         """Test if acknowledge_ping works and get_nodes return online nodes.

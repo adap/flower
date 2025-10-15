@@ -150,6 +150,21 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def get_node_id_by_public_key(self, public_key: bytes) -> Optional[int]:
+        """Get `node_id` for the specified `public_key`.
+
+        Parameters
+        ----------
+        public_key : bytes
+            The public key of the node whose information is to be retrieved.
+
+        Returns
+        -------
+        Optional[int]
+            The `node_id` associated with the specified `public_key`.
+        """
+
+    @abc.abstractmethod
     def get_node_info(
         self,
         *,
@@ -297,22 +312,6 @@ class LinkState(CoreState):  # pylint: disable=R0904
         Optional[ConfigRecord]
             The federation options for the run if it exists; None otherwise.
         """
-
-    @abc.abstractmethod
-    def clear_supernode_auth_keys(self) -> None:
-        """Clear stored `node_public_keys` in the link state if any."""
-
-    @abc.abstractmethod
-    def store_node_public_keys(self, public_keys: set[bytes]) -> None:
-        """Store a set of `node_public_keys` in the link state."""
-
-    @abc.abstractmethod
-    def store_node_public_key(self, public_key: bytes) -> None:
-        """Store a `node_public_key` in the link state."""
-
-    @abc.abstractmethod
-    def get_node_public_keys(self) -> set[bytes]:
-        """Retrieve all currently stored `node_public_keys` as a set."""
 
     @abc.abstractmethod
     def acknowledge_node_heartbeat(

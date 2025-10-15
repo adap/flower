@@ -784,6 +784,19 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Return the public key
         return cast(bytes, rows[0]["public_key"])
 
+    def get_node_id_by_public_key(self, public_key: bytes) -> Optional[int]:
+        """Get `node_id` for the specified `public_key`."""
+        query = "SELECT node_id FROM node WHERE public_key = ? AND status != ?;"
+        rows = self.query(query, (public_key, NodeStatus.DELETED))
+
+        # If no result is found, return None
+        if not rows:
+            return None
+
+        # Convert sint64 node_id to uint64
+        node_id = convert_sint64_to_uint64(rows[0]["node_id"])
+        return node_id
+
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(
         self,
@@ -834,28 +847,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
-
-    def clear_supernode_auth_keys(self) -> None:
-        """Clear stored `node_public_keys` in the link state if any."""
-        self.query("DELETE FROM public_key;")
-
-    def store_node_public_keys(self, public_keys: set[bytes]) -> None:
-        """Store a set of `node_public_keys` in the link state."""
-        query = "INSERT INTO public_key (public_key) VALUES (?)"
-        data = [(key,) for key in public_keys]
-        self.query(query, data)
-
-    def store_node_public_key(self, public_key: bytes) -> None:
-        """Store a `node_public_key` in the link state."""
-        query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
-        self.query(query, {"public_key": public_key})
-
-    def get_node_public_keys(self) -> set[bytes]:
-        """Retrieve all currently stored `node_public_keys` as a set."""
-        query = "SELECT public_key FROM public_key"
-        rows = self.query(query)
-        result: set[bytes] = {row["public_key"] for row in rows}
-        return result
 
     def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
         """Retrieve all run IDs if `flwr_aid` is not specified.
