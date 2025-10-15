@@ -166,6 +166,21 @@ key pair:
         --auth-supernode-private-key keys/client_credentials_2 \
         --auth-supernode-public-key keys/client_credentials_2.pub
 
+After connecting both SuperNodes, you can check the status of the SuperNodes again. You
+will notice their status is now ``online``:
+
+.. code-block:: bash
+
+    $ flwr supernode list . local-deployment
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+    │ 16019329408659850374 │ sys_noauth │ online  │ 00:00:30 │ 2025-10-13 13:40:47Z │
+    ├──────────────────────┼────────────┼─────────┼──────────┼──────────────────────┤
+    │ 8392976743692794070  │ sys_noauth │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
+    └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
+
 Security notice
 ---------------
 
