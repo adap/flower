@@ -111,6 +111,7 @@ You can list the registered SuperNodes using the following command:
 
 .. code-block:: bash
 
+    # flwr supernode list <app> <federation>
     $ flwr supernode list . local-deployment
 
 which should display the IDs of the SuperNodes you just registered as well as their
@@ -180,6 +181,50 @@ will notice their status is now ``online``:
     ├──────────────────────┼────────────┼─────────┼──────────┼──────────────────────┤
     │ 8392976743692794070  │ sys_noauth │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
     └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
+
+Unregister SuperNodes
+---------------------
+
+At anypoint you can unregister a SuperNode from the SuperLink (even if it has never
+connected). This will prevent the SuperNode from making future request to the SuperLink.
+In other words, it will no longer be authorized to pull/send, or participate in ongoing
+or future runs. Unregistering a SuperNode can be done via the
+|flower_cli_supernode_link|_ as follows:
+
+.. code-block:: bash
+
+    # flwr supernode unregister <node-id> <app> <federation>
+    $ flwr supernode unregister 16019329408659850374 . local-deployment
+
+The above command unregistered the first SuperNode. You can verify this by listing the
+SuperNodes again:
+
+.. code-block:: bash
+
+    $ flwr supernode list . local-deployment
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+    │ 8392976743692794070  │ sys_noauth │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
+    └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
+
+If you pass the ``--verbose`` flag to the previous command you'll see that the status of
+the unregistered SuperNode has changed to ``unregistered``. By default unregistered
+SuperNodes aren't shown becuase they can no longer particpate or reconnect. That's
+right, **if you wish to connect a second SuperNode a new EC key pair is needed.**
+
+.. code-block:: bash
+
+    $ flwr supernode list . local-deployment --verbose
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃       Node ID        ┃   Owner    ┃    Status   ┃ Elapsed  ┃   Status Changed @   ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+    │ 16019329408659850374 │ sys_noauth │    online   │ 00:00:30 │ 2025-10-13 13:40:47Z │
+    ├──────────────────────┼────────────┼─────────────┼──────────┼──────────────────────┤
+    │ 8392976743692794070  │ sys_noauth │ unregisterd │ 00:00:22 │ 2025-10-13 13:52:21Z │
+    └──────────────────────┴────────────┴─────────────┴──────────┴──────────────────────┘
 
 Security notice
 ---------------
