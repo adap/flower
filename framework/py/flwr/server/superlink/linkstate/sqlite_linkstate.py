@@ -189,7 +189,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
 
     def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Connect to the DB, enable FK support, and create tables if needed."""
-        return super().initialize(
+        return self._ensure_initialized(
             SQL_CREATE_TABLE_RUN,
             SQL_CREATE_TABLE_LOGS,
             SQL_CREATE_TABLE_CONTEXT,

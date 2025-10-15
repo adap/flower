@@ -17,6 +17,7 @@
 
 import re
 import sqlite3
+from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from logging import DEBUG, ERROR
 from typing import Any, Optional, Union
@@ -26,7 +27,7 @@ from flwr.common.logger import log
 DictOrTuple = Union[tuple[Any, ...], dict[str, Any]]
 
 
-class SqliteMixin:
+class SqliteMixin(ABC):
     """Mixin providing common SQLite connection and initialization logic."""
 
     def __init__(self, database_path: str) -> None:
@@ -40,14 +41,46 @@ class SqliteMixin:
             raise AttributeError("Database not initialized. Call initialize() first.")
         return self._conn
 
+    @abstractmethod
     def initialize(
+        self,
+        log_queries: bool = False,
+    ) -> list[tuple[str]]:
+        """Connect to the DB, enable FK support, and create tables if needed.
+
+        Parameters
+        ----------
+        log_queries : bool
+            Log each query which is executed.
+
+        Returns
+        -------
+        list[tuple[str]]
+            The list of all tables in the DB.
+
+        Examples
+        --------
+        Implement in subclass:
+
+        .. code:: python
+
+            def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
+                return self._ensure_initialized(
+                    SQL_CREATE_TABLE_FOO,
+                    SQL_CREATE_TABLE_BAR,
+                    log_queries=log_queries
+                )
+        """
+
+    def _ensure_initialized(
         self,
         *create_statements: str,
         log_queries: bool = False,
     ) -> list[tuple[str]]:
         """Connect to the DB, enable FK support, and create tables if needed.
 
-        Subclasses should call this with their own CREATE TABLE/INDEX statements.
+        Subclasses should call this with their own CREATE TABLE/INDEX statements in
+        their `.initialize()` methods.
 
         Parameters
         ----------
@@ -60,14 +93,6 @@ class SqliteMixin:
         -------
         list[tuple[str]]
             The list of all tables in the DB.
-
-        Examples
-        --------
-        Override in subclass:
-
-        .. code:: python
-
-            super().initialize(SQL_CREATE_TABLE_FOO, SQL_CREATE_TABLE_BAR)
         """
         self._conn = sqlite3.connect(self.database_path)
         self._conn.execute("PRAGMA foreign_keys = ON;")
