@@ -42,9 +42,6 @@ node's identity and is only available when encrypted connections (SSL/TLS) are e
     <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_ example
     for a complete self-contained example on how to setup TLS and node authentication.
 
-.. note::
-
-    This guide covers a preview feature that might change in future versions of Flower.
 
 Generate authentication keys
 ----------------------------
@@ -82,11 +79,15 @@ that the authentication feature can only be enabled in the presence of TLS.
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
-        --auth-list-public-keys keys/client_public_keys.csv
+        --enable-supernode-auth
 
 .. dropdown:: Understand the command
 
-    * ``--auth-list-public-keys``: Specify the path to a CSV file storing the public keys of all SuperNodes that should be allowed to connect with the SuperLink. A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas. Refer to the code sample, which contains a CSV file with two known node public keys.
+    * ``--enable-supernode-auth``: Enables SuperNode authentication. 
+
+
+Register SuperNodes
+-------------------
 
 Enable node authentication in SuperNode
 ---------------------------------------
