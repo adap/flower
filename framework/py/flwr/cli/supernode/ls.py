@@ -151,7 +151,9 @@ def _format_nodes(
 
     formatted_nodes: list[_NodeListType] = []
     # Add rows
-    for node in sorted(nodes_info, key=lambda x: datetime.fromisoformat(x.created_at)):
+    for node in sorted(
+        nodes_info, key=lambda x: datetime.fromisoformat(x.registered_at)
+    ):
 
         # Calculate elapsed times
         elapsed_time_activated = timedelta()
@@ -166,10 +168,10 @@ def _format_nodes(
                 node.node_id,
                 node.owner_aid,
                 node.status,
-                _format_datetime(node.created_at),
+                _format_datetime(node.registered_at),
                 _format_datetime(node.last_activated_at),
                 _format_datetime(node.last_deactivated_at),
-                _format_datetime(node.deleted_at),
+                _format_datetime(node.unregistered_at),
                 format_timedelta(elapsed_time_activated),
             )
         )
@@ -198,7 +200,7 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
             _,
             last_activated_at,
             last_deactivated_at,
-            deleted_at,
+            unregistered_at,
             elapse_activated,
         ) = row
 
@@ -208,12 +210,12 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
         elif status == "offline":
             status_style = "bright_yellow"
             time_at = last_deactivated_at
-        elif status == "deleted":
+        elif status == "unregistered":
             if not verbose:
                 continue
             status_style = "red"
-            time_at = deleted_at
-        elif status == "created":
+            time_at = unregistered_at
+        elif status == "registered":
             status_style = "blue"
             time_at = "N/A"
         else:

@@ -353,11 +353,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             self.nodes[node_id] = NodeInfo(
                 node_id=node_id,
                 owner_aid=owner_aid,
-                status=NodeStatus.CREATED,
-                created_at=now().isoformat(),
+                status=NodeStatus.REGISTERED,
+                registered_at=now().isoformat(),
                 last_activated_at=None,
                 last_deactivated_at=None,
-                deleted_at=None,
+                unregistered_at=None,
                 online_until=None,
                 heartbeat_interval=heartbeat_interval,
                 public_key=public_key,
@@ -371,16 +371,16 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             if (
                 not (node := self.nodes.get(node_id))
-                or node.status == NodeStatus.DELETED
+                or node.status == NodeStatus.UNREGISTERED
                 or owner_aid != self.nodes[node_id].owner_aid
             ):
                 raise ValueError(
-                    f"Node ID {node_id} already deleted, not found or unauthorized "
-                    "deletion attempt."
+                    f"Node ID {node_id} already unregistered, not found or "
+                    "unauthorized deletion attempt."
                 )
 
-            node.status = NodeStatus.DELETED
-            node.deleted_at = now().isoformat()
+            node.status = NodeStatus.UNREGISTERED
+            node.unregistered_at = now().isoformat()
 
     def get_nodes(self, run_id: int) -> set[int]:
         """Return all available nodes.
@@ -436,7 +436,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             if (
                 node := self.nodes.get(node_id)
-            ) is None or node.status == NodeStatus.DELETED:
+            ) is None or node.status == NodeStatus.UNREGISTERED:
                 raise ValueError(f"Node ID {node_id} not found")
             return node.public_key
 
@@ -630,11 +630,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         the node is marked as offline.
         """
         with self.lock:
-            if (node := self.nodes.get(node_id)) and node.status != NodeStatus.DELETED:
+            if (
+                node := self.nodes.get(node_id)
+            ) and node.status != NodeStatus.UNREGISTERED:
                 current_dt = now()
 
                 # Set timestamp if the status changes
-                if node.status != NodeStatus.ONLINE:  # offline or created
+                if node.status != NodeStatus.ONLINE:  # offline or registered
                     node.status = NodeStatus.ONLINE
                     node.last_activated_at = current_dt.isoformat()
 
