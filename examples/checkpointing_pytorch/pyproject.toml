@@ -1,0 +1,20 @@
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry]
+name = "checkpointing_pytorch"
+version = "0.1.0"
+description = "Federated checkpointing with PyTorch"
+authors = [
+    "Akis Linardos",
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+flwr = "^1.0.0"
+torch = "^1.12.0"
+torchvision = "^0.13.0"
+numpy = "^1.21.2"
+tqdm = "^4.63.0"
