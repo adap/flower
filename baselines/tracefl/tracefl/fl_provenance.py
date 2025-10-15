@@ -51,6 +51,8 @@ class FlowerProvenance:
         self.client2model = client2model
         self.client2num_examples = client2num_examples
         self.client2class = self._normalize_client2class(client2class)
+        logging.debug("Original client2class: %s", client2class)
+        logging.debug("Normalized client2class: %s", self.client2class)
         self.device = cfg.device
 
         self.faulty_clients_ids = [
@@ -490,8 +492,9 @@ class FlowerProvenance:
                         label.item() if hasattr(label, "item") else label
                     )
 
+        # Use the normalized client2class instead of creating a new one
         client2class = {
-            c: self.ALLROUNDSCLIENTS2CLASS.get(c, {}) for c in self.client2model
+            c: self.client2class.get(c, {}) for c in self.client2model
         }
 
         logging.debug("client2class: %s", client2class)
