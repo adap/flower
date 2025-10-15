@@ -236,7 +236,7 @@ class PullArtifactsResponse(google.protobuf.message.Message):
     def WhichOneof(self, oneof_group: typing_extensions.Literal["_url",b"_url"]) -> typing.Optional[typing_extensions.Literal["url"]]: ...
 global___PullArtifactsResponse = PullArtifactsResponse
 
-class CreateNodeCliRequest(google.protobuf.message.Message):
+class RegisterNodeCliRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PUBLIC_KEY_FIELD_NUMBER: builtins.int
     public_key: builtins.bytes
@@ -245,9 +245,9 @@ class CreateNodeCliRequest(google.protobuf.message.Message):
         public_key: builtins.bytes = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["public_key",b"public_key"]) -> None: ...
-global___CreateNodeCliRequest = CreateNodeCliRequest
+global___RegisterNodeCliRequest = RegisterNodeCliRequest
 
-class CreateNodeCliResponse(google.protobuf.message.Message):
+class RegisterNodeCliResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NODE_ID_FIELD_NUMBER: builtins.int
     node_id: builtins.int
@@ -258,9 +258,9 @@ class CreateNodeCliResponse(google.protobuf.message.Message):
     def HasField(self, field_name: typing_extensions.Literal["_node_id",b"_node_id","node_id",b"node_id"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["_node_id",b"_node_id","node_id",b"node_id"]) -> None: ...
     def WhichOneof(self, oneof_group: typing_extensions.Literal["_node_id",b"_node_id"]) -> typing.Optional[typing_extensions.Literal["node_id"]]: ...
-global___CreateNodeCliResponse = CreateNodeCliResponse
+global___RegisterNodeCliResponse = RegisterNodeCliResponse
 
-class DeleteNodeCliRequest(google.protobuf.message.Message):
+class UnregisterNodeCliRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NODE_ID_FIELD_NUMBER: builtins.int
     node_id: builtins.int
@@ -269,13 +269,13 @@ class DeleteNodeCliRequest(google.protobuf.message.Message):
         node_id: builtins.int = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["node_id",b"node_id"]) -> None: ...
-global___DeleteNodeCliRequest = DeleteNodeCliRequest
+global___UnregisterNodeCliRequest = UnregisterNodeCliRequest
 
-class DeleteNodeCliResponse(google.protobuf.message.Message):
+class UnregisterNodeCliResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
-global___DeleteNodeCliResponse = DeleteNodeCliResponse
+global___UnregisterNodeCliResponse = UnregisterNodeCliResponse
 
 class ListNodesCliRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor

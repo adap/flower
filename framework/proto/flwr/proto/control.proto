@@ -46,11 +46,13 @@ service Control {
   // Pull artifacts generated during a run (flwr pull)
   rpc PullArtifacts(PullArtifactsRequest) returns (PullArtifactsResponse) {}
 
-  // Add SuperNode
-  rpc CreateNodeCli(CreateNodeCliRequest) returns (CreateNodeCliResponse) {}
+  // Register SuperNode
+  rpc RegisterNodeCli(RegisterNodeCliRequest)
+      returns (RegisterNodeCliResponse) {}
 
-  // Remove SuperNode
-  rpc DeleteNodeCli(DeleteNodeCliRequest) returns (DeleteNodeCliResponse) {}
+  // Unregister SuperNode
+  rpc UnregisterNodeCli(UnregisterNodeCliRequest)
+      returns (UnregisterNodeCliResponse) {}
 
   // List SuperNodes
   rpc ListNodesCli(ListNodesCliRequest) returns (ListNodesCliResponse) {}
@@ -97,11 +99,11 @@ message StopRunResponse { bool success = 1; }
 message PullArtifactsRequest { uint64 run_id = 1; }
 message PullArtifactsResponse { optional string url = 1; }
 
-message CreateNodeCliRequest { bytes public_key = 1; }
-message CreateNodeCliResponse { optional uint64 node_id = 1; }
+message RegisterNodeCliRequest { bytes public_key = 1; }
+message RegisterNodeCliResponse { optional uint64 node_id = 1; }
 
-message DeleteNodeCliRequest { uint64 node_id = 1; }
-message DeleteNodeCliResponse {}
+message UnregisterNodeCliRequest { uint64 node_id = 1; }
+message UnregisterNodeCliResponse {}
 
 message ListNodesCliRequest { bool dry_run = 1; }
 message ListNodesCliResponse {

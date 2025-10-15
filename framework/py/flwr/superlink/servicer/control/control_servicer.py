@@ -49,10 +49,6 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
-    CreateNodeCliRequest,
-    CreateNodeCliResponse,
-    DeleteNodeCliRequest,
-    DeleteNodeCliResponse,
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
@@ -63,12 +59,16 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListRunsResponse,
     PullArtifactsRequest,
     PullArtifactsResponse,
+    RegisterNodeCliRequest,
+    RegisterNodeCliResponse,
     StartRunRequest,
     StartRunResponse,
     StopRunRequest,
     StopRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
+    UnregisterNodeCliRequest,
+    UnregisterNodeCliResponse,
 )
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
@@ -389,11 +389,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         download_url = self.artifact_provider.get_url(run_id)
         return PullArtifactsResponse(url=download_url)
 
-    def CreateNodeCli(
-        self, request: CreateNodeCliRequest, context: grpc.ServicerContext
-    ) -> CreateNodeCliResponse:
+    def RegisterNodeCli(
+        self, request: RegisterNodeCliRequest, context: grpc.ServicerContext
+    ) -> RegisterNodeCliResponse:
         """Add a SuperNode."""
-        log(INFO, "ControlServicer.CreateNodeCli")
+        log(INFO, "ControlServicer.RegisterNodeCli")
 
         # Verify public key
         try:
@@ -427,15 +427,15 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
             )
-        log(INFO, "[ControlServicer.CreateNodeCli] Created node_id=%s", node_id)
+        log(INFO, "[ControlServicer.RegisterNodeCli] Created node_id=%s", node_id)
 
-        return CreateNodeCliResponse(node_id=node_id)
+        return RegisterNodeCliResponse(node_id=node_id)
 
-    def DeleteNodeCli(
-        self, request: DeleteNodeCliRequest, context: grpc.ServicerContext
-    ) -> DeleteNodeCliResponse:
+    def UnregisterNodeCli(
+        self, request: UnregisterNodeCliRequest, context: grpc.ServicerContext
+    ) -> UnregisterNodeCliResponse:
         """Remove a SuperNode."""
-        log(INFO, "ControlServicer.RemoveNode")
+        log(INFO, "ControlServicer.UnregisterNodeCli")
 
         # Init link state
         state = self.linkstate_factory.state()
@@ -448,7 +448,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             log(ERROR, NODE_NOT_FOUND_MESSAGE)
             context.abort(grpc.StatusCode.NOT_FOUND, NODE_NOT_FOUND_MESSAGE)
 
-        return DeleteNodeCliResponse()
+        return UnregisterNodeCliResponse()
 
     def ListNodesCli(
         self, request: ListNodesCliRequest, context: grpc.ServicerContext

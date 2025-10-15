@@ -49,15 +49,15 @@ class ControlStub(object):
                 request_serializer=flwr_dot_proto_dot_control__pb2.PullArtifactsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_control__pb2.PullArtifactsResponse.FromString,
                 )
-        self.CreateNodeCli = channel.unary_unary(
-                '/flwr.proto.Control/CreateNodeCli',
-                request_serializer=flwr_dot_proto_dot_control__pb2.CreateNodeCliRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_control__pb2.CreateNodeCliResponse.FromString,
+        self.RegisterNodeCli = channel.unary_unary(
+                '/flwr.proto.Control/RegisterNodeCli',
+                request_serializer=flwr_dot_proto_dot_control__pb2.RegisterNodeCliRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.RegisterNodeCliResponse.FromString,
                 )
-        self.DeleteNodeCli = channel.unary_unary(
-                '/flwr.proto.Control/DeleteNodeCli',
-                request_serializer=flwr_dot_proto_dot_control__pb2.DeleteNodeCliRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_control__pb2.DeleteNodeCliResponse.FromString,
+        self.UnregisterNodeCli = channel.unary_unary(
+                '/flwr.proto.Control/UnregisterNodeCli',
+                request_serializer=flwr_dot_proto_dot_control__pb2.UnregisterNodeCliRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.UnregisterNodeCliResponse.FromString,
                 )
         self.ListNodesCli = channel.unary_unary(
                 '/flwr.proto.Control/ListNodesCli',
@@ -118,15 +118,15 @@ class ControlServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def CreateNodeCli(self, request, context):
-        """Add SuperNode
+    def RegisterNodeCli(self, request, context):
+        """Register SuperNode
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def DeleteNodeCli(self, request, context):
-        """Remove SuperNode
+    def UnregisterNodeCli(self, request, context):
+        """Unregister SuperNode
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -177,15 +177,15 @@ def add_ControlServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_control__pb2.PullArtifactsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_control__pb2.PullArtifactsResponse.SerializeToString,
             ),
-            'CreateNodeCli': grpc.unary_unary_rpc_method_handler(
-                    servicer.CreateNodeCli,
-                    request_deserializer=flwr_dot_proto_dot_control__pb2.CreateNodeCliRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_control__pb2.CreateNodeCliResponse.SerializeToString,
+            'RegisterNodeCli': grpc.unary_unary_rpc_method_handler(
+                    servicer.RegisterNodeCli,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.RegisterNodeCliRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.RegisterNodeCliResponse.SerializeToString,
             ),
-            'DeleteNodeCli': grpc.unary_unary_rpc_method_handler(
-                    servicer.DeleteNodeCli,
-                    request_deserializer=flwr_dot_proto_dot_control__pb2.DeleteNodeCliRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_control__pb2.DeleteNodeCliResponse.SerializeToString,
+            'UnregisterNodeCli': grpc.unary_unary_rpc_method_handler(
+                    servicer.UnregisterNodeCli,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.UnregisterNodeCliRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.UnregisterNodeCliResponse.SerializeToString,
             ),
             'ListNodesCli': grpc.unary_unary_rpc_method_handler(
                     servicer.ListNodesCli,
@@ -322,7 +322,7 @@ class Control(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def CreateNodeCli(request,
+    def RegisterNodeCli(request,
             target,
             options=(),
             channel_credentials=None,
@@ -332,14 +332,14 @@ class Control(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/CreateNodeCli',
-            flwr_dot_proto_dot_control__pb2.CreateNodeCliRequest.SerializeToString,
-            flwr_dot_proto_dot_control__pb2.CreateNodeCliResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/RegisterNodeCli',
+            flwr_dot_proto_dot_control__pb2.RegisterNodeCliRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.RegisterNodeCliResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def DeleteNodeCli(request,
+    def UnregisterNodeCli(request,
             target,
             options=(),
             channel_credentials=None,
@@ -349,9 +349,9 @@ class Control(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/DeleteNodeCli',
-            flwr_dot_proto_dot_control__pb2.DeleteNodeCliRequest.SerializeToString,
-            flwr_dot_proto_dot_control__pb2.DeleteNodeCliResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/UnregisterNodeCli',
+            flwr_dot_proto_dot_control__pb2.UnregisterNodeCliRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.UnregisterNodeCliResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

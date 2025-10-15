@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `supernode create` command."""
+"""Flower command line interface `supernode unregister` command."""
 
 
 import io
@@ -21,9 +21,6 @@ from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
-from cryptography.exceptions import UnsupportedAlgorithm
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import ec
 from rich.console import Console
 
 from flwr.cli.config_utils import (
@@ -33,23 +30,18 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
 )
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
-from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import print_json_error, redirect_output, restore_output
-from flwr.proto.control_pb2 import (  # pylint: disable=E0611
-    CreateNodeCliRequest,
-    CreateNodeCliResponse,
-)
+from flwr.proto.control_pb2 import UnregisterNodeCliRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.supercore.primitives.asymmetric import public_key_to_bytes, uses_nist_ec_curve
 
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 
 
-def create(  # pylint: disable=R0914
-    public_key: Annotated[
-        Path,
+def unregister(  # pylint: disable=R0914
+    node_id: Annotated[
+        int,
         typer.Argument(
-            help="Path to a P-384 (or any other NIST EC curve) public key file.",
+            help="ID of the SuperNode to remove.",
         ),
     ],
     app: Annotated[
@@ -69,13 +61,9 @@ def create(  # pylint: disable=R0914
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """Add a SuperNode to the federation."""
+    """Unregister a SuperNode from the federation."""
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
-
-    # Load public key
-    public_key_path = Path(public_key)
-    public_key_bytes = try_load_public_key(public_key_path)
 
     try:
         if suppress_output:
@@ -90,7 +78,7 @@ def create(  # pylint: disable=R0914
         federation, federation_config = validate_federation_in_project_config(
             federation, config
         )
-        exit_if_no_address(federation_config, "supernode create")
+        exit_if_no_address(federation_config, "supernode unregister")
 
         channel = None
         try:
@@ -98,9 +86,7 @@ def create(  # pylint: disable=R0914
             channel = init_channel(app, federation_config, auth_plugin)
             stub = ControlStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
-            _create_node(
-                stub=stub, public_key=public_key_bytes, output_format=output_format
-            )
+            _unregister_node(stub=stub, node_id=node_id, output_format=output_format)
 
         except ValueError as err:
             typer.secho(
@@ -130,55 +116,23 @@ def create(  # pylint: disable=R0914
         captured_output.close()
 
 
-def _create_node(stub: ControlStub, public_key: bytes, output_format: str) -> None:
-    """Create a node."""
+def _unregister_node(
+    stub: ControlStub,
+    node_id: int,
+    output_format: str,
+) -> None:
+    """Unregister a SuperNode from the federation."""
     with flwr_cli_grpc_exc_handler():
-        response: CreateNodeCliResponse = stub.CreateNodeCli(
-            request=CreateNodeCliRequest(public_key=public_key)
+        stub.UnregisterNodeCli(request=UnregisterNodeCliRequest(node_id=node_id))
+    typer.secho(
+        f"✅ SuperNode {node_id} unregistered successfully.", fg=typer.colors.GREEN
+    )
+    if output_format == CliOutputFormat.JSON:
+        run_output = json.dumps(
+            {
+                "success": True,
+                "node-id": node_id,
+            }
         )
-    if response.node_id:
-        typer.secho(
-            f"✅ Node {response.node_id} created successfully.", fg=typer.colors.GREEN
-        )
-        if output_format == CliOutputFormat.JSON:
-            run_output = json.dumps(
-                {
-                    "success": True,
-                    "node-id": response.node_id,
-                }
-            )
-            restore_output()
-            Console().print_json(run_output)
-    else:
-        typer.secho("❌ Node couldn't be created.", fg=typer.colors.RED)
-
-
-def try_load_public_key(public_key_path: Path) -> bytes:
-    """Try to load a public key from a file."""
-    if not public_key_path.exists():
-        typer.secho(
-            f"❌ Public key file '{public_key_path}' does not exist.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
-    with open(public_key_path, "rb") as key_file:
-        try:
-            public_key = serialization.load_ssh_public_key(key_file.read())
-
-            if not isinstance(public_key, ec.EllipticCurvePublicKey):
-                raise ValueError(f"Not an EC public key, got {type(public_key)}")
-
-            # Verify it's one of the approved NIST curves
-            if not uses_nist_ec_curve(public_key):
-                raise ValueError(
-                    f"EC curve {public_key.curve.name} is not an approved NIST curve"
-                )
-
-        except (ValueError, UnsupportedAlgorithm) as err:
-            flwr_exit(
-                ExitCode.FLWRCLI_NODE_AUTH_PUBLIC_KEY_INVALID,
-                str(err),
-            )
-    return public_key_to_bytes(public_key)
+        restore_output()
+        Console().print_json(run_output)

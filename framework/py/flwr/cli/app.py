@@ -28,9 +28,8 @@ from .new import new
 from .pull import pull
 from .run import run
 from .stop import stop
-from .supernode import create as supernode_create
-from .supernode import delete as supernode_delete
 from .supernode import ls as supernode_list
+from .supernode import register, unregister
 
 app = typer.Typer(
     help=typer.style(
@@ -55,8 +54,8 @@ app.command()(pull)
 
 # Create supernode command group
 supernode_app = typer.Typer(help="Manage SuperNodes")
-supernode_app.command()(supernode_create)
-supernode_app.command()(supernode_delete)
+supernode_app.command()(register)
+supernode_app.command()(unregister)
 # Make it appear as "list"
 supernode_app.command("list")(supernode_list)
 # Hide "ls" command (left as alias)
