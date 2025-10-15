@@ -116,8 +116,8 @@ You can list the registered SuperNodes using the following command:
     # flwr supernode list <app> <federation>
     $ flwr supernode list . local-deployment
 
-This will display the IDs of the SuperNodes you just registered as well as their
-status. You should see a table similar to the following:
+This will display the IDs of the SuperNodes you just registered as well as their status.
+You should see a table similar to the following:
 
 .. code-block:: bash
 
