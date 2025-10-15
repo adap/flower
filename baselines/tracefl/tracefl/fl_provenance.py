@@ -101,8 +101,8 @@ class FlowerProvenance:
                     count_int = int(count)
                 except (TypeError, ValueError):
                     continue
-                label_str = str(label.item() if hasattr(label, "item") else label)
-                normalized_counts[label_str] = count_int
+                label_int = int(label.item() if hasattr(label, "item") else label)
+                normalized_counts[label_int] = count_int
 
             normalized[client_id] = normalized_counts
 
@@ -513,7 +513,6 @@ class FlowerProvenance:
                 if idx < len(target_labels)
                 else idx % self.cfg.data_dist.num_classes
             )
-            target_l_str = str(target_l)
 
             if self._faulty_mode:
                 responsible_clients = faulty_responsible
@@ -541,10 +540,10 @@ class FlowerProvenance:
                     predicted_labels.append(0)
                     true_labels.append(1)
             else:
+                # Normal mode: Find responsible clients (those who have the target label)
                 responsible_clients = [
-                    cid
-                    for cid, c_labels in client2class.items()
-                    if target_l_str in c_labels
+                    cid for cid, c_labels in client2class.items() 
+                    if target_l in c_labels
                 ]
                 res_c_string = ",".join(
                     map(str, [f"c{c}" for c in responsible_clients])
@@ -557,11 +556,8 @@ class FlowerProvenance:
                     res_c_string,
                 )
 
-                normalized_client_counts = client2class.get(traced_client)
-                if (
-                    normalized_client_counts
-                    and target_l_str in normalized_client_counts
-                ):
+                # Check if traced client has the target label (matching TraceFL-main logic)
+                if target_l in client2class[traced_client]:
                     logging.info(
                         "     Traced Client: c%s || Tracing = Correct",
                         traced_client,
@@ -578,7 +574,7 @@ class FlowerProvenance:
                     true_labels.append(1)
 
             c2nk_label = {
-                f"c{c}": client2class.get(c, {}).get(target_l_str, 0)  # type: ignore
+                f"c{c}": client2class.get(c, {}).get(target_l, 0)  # type: ignore
                 for c in client2prov.keys()
             }
             c2nk_label = {c: v for c, v in c2nk_label.items() if v > 0}

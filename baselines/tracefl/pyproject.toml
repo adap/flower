@@ -151,7 +151,7 @@ local-epochs = 1
 [tool.flwr.app.config.tracefl]
 dataset = "cifar10"  # Options: cifar10, cifar100, pathmnist, organamnist, dbpedia_14, yahoo_answers_topics
 model = "resnet18"  # Options: cnn, resnet18, resnet34, resnet50, resnet101, resnet152, densenet121, distilbert/distilbert-base-uncased
-num-clients = 2
+num-clients = 10
 data-distribution = "non_iid_dirichlet"
 dirichlet-alpha = 0.5
 device = "cpu"
@@ -172,6 +172,6 @@ default = "local-simulation"
 
 # Local simulation federation with 10 virtual SuperNodes
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 2
+options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 0.0

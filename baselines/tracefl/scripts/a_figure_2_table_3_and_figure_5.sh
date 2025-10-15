@@ -15,10 +15,11 @@ tracefl.dataset='mnist' \
 tracefl.model='resnet18' \
 tracefl.num-clients=10 \
 tracefl.dirichlet-alpha=0.3 \
-tracefl.max-per-client-data-size=1000 \
-tracefl.max-server-data-size=500 \
+tracefl.max-per-client-data-size=2048 \
+tracefl.max-server-data-size=2048 \
 tracefl.batch-size=32 \
-tracefl.provenance-rounds='1,2'"
+tracefl.provenance-rounds='1,2' \
+fraction-train=0.4"
 
 echo "Running TraceFL baseline localization experiment..."
 flwr run . --run-config "$RUN_CONFIG"
