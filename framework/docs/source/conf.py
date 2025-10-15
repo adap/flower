@@ -288,11 +288,12 @@ redirects = {
 #
 html_theme = "furo"
 html_title = "Flower Framework"
-html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.ai/docs/framework/"
 
 html_theme_options = {
+    "light_logo": "flower-framework-logo-light-mode.png",
+    "dark_logo": "flower-framework-logo-dark-mode.png",
     #
     # Sphinx Book Theme
     #
