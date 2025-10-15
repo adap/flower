@@ -428,7 +428,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
             )
-        log(INFO, "[ControlServicer.RegisterNodeCli] Created node_id=%s", node_id)
+        log(INFO, "[ControlServicer.RegisterNode] Created node_id=%s", node_id)
 
         return RegisterNodeResponse(node_id=node_id)
 
