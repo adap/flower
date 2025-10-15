@@ -91,17 +91,19 @@ that the authentication feature can only be enabled in the presence of TLS.
 Register SuperNodes
 -------------------
 
-With a SuperLink already running, we can proceed to register the SuperNodes that will be
-allowed to connect to it. This is done via the |flower_cli_supernode_link|_ using the
-public keys generated earlier for each SuperNode that we want to eventually connect to
-the SuperLink. Let's see how to this looks in code:
+Once your SuperLink is running, the next step is to register the SuperNodes that will be
+allowed to connect to it. This process is handled through the
+|flower_cli_supernode_link|_ using the public keys previously generated for each
+SuperNode you plan to connect to the SuperLink.
+
+Here's how this looks in code:
 
 .. code-block:: bash
 
     # flwr supernode register <supernode-pub-key> <app> <federation>
     $ flwr supernode register keys/client_credentials_1.pub . local-deployment
 
-Let's proceed and also register the second SuperNode:
+Next, let’s register the second SuperNode as well:
 
 .. code-block:: bash
 
@@ -114,7 +116,7 @@ You can list the registered SuperNodes using the following command:
     # flwr supernode list <app> <federation>
     $ flwr supernode list . local-deployment
 
-which should display the IDs of the SuperNodes you just registered as well as their
+This will display the IDs of the SuperNodes you just registered as well as their
 status. You should see a table similar to the following:
 
 .. code-block:: bash
@@ -185,6 +187,11 @@ will notice their status is now ``online``:
 Unregister SuperNodes
 ---------------------
 
+.. warning::
+
+    This is a destructive operation. Unregistering a SuperNode is permanent and cannot
+    be undone. If you wish to connect a SuperNode again, a new key pair is needed.
+
 At anypoint you can unregister a SuperNode from the SuperLink (even if it has never
 connected). This will prevent the SuperNode from making future request to the SuperLink.
 In other words, it will no longer be authorized to pull/send, or participate in ongoing
@@ -196,7 +203,7 @@ or future runs. Unregistering a SuperNode can be done via the
     # flwr supernode unregister <node-id> <app> <federation>
     $ flwr supernode unregister 16019329408659850374 . local-deployment
 
-The above command unregistered the first SuperNode. You can verify this by listing the
+The above command unregisters the first SuperNode. You can verify this by listing the
 SuperNodes again:
 
 .. code-block:: bash
@@ -210,8 +217,8 @@ SuperNodes again:
     └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
 
 If you pass the ``--verbose`` flag to the previous command you'll see that the status of
-the unregistered SuperNode has changed to ``unregistered``. By default unregistered
-SuperNodes aren't shown becuase they can no longer particpate or reconnect. That's
+the unregistered SuperNode has changed to ``unregistered``. By default, unregistered
+SuperNodes are hidden because they can no longer reconnect to the SuperLink. That's
 right, **if you wish to connect a second SuperNode a new EC key pair is needed.**
 
 .. code-block:: bash
