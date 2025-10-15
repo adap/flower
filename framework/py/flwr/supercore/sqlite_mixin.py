@@ -17,9 +17,9 @@
 
 import re
 import sqlite3
+from collections.abc import Sequence
 from logging import DEBUG, ERROR
 from typing import Any, Optional, Union
-from collections.abc import Sequence
 
 from flwr.common.logger import log
 
