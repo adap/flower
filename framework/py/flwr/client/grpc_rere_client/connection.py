@@ -289,7 +289,11 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         get_fab_request = GetFabRequest(node=node, hash_str=fab_hash, run_id=run_id)
         get_fab_response: GetFabResponse = stub.GetFab(request=get_fab_request)
 
-        return Fab(get_fab_response.fab.hash_str, get_fab_response.fab.content)
+        return Fab(
+            get_fab_response.fab.hash_str,
+            get_fab_response.fab.content,
+            dict(get_fab_response.fab.meta),
+        )
 
     def pull_object(run_id: int, object_id: str) -> bytes:
         """Pull the object from the SuperLink."""

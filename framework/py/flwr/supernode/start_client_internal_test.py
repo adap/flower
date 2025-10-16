@@ -61,6 +61,8 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
             get_fab=self.mock_get_fab,
             pull_object=self.mock_pull_object,
             confirm_message_received=self.mock_confirm_message_received,
+            trust_entities={},
+            enable_entities_verification=None,
         )
 
         # Assert
@@ -131,6 +133,8 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
             get_fab=self.mock_get_fab,
             pull_object=self.mock_pull_object,
             confirm_message_received=self.mock_confirm_message_received,
+            trust_entities={},
+            enable_entities_verification=None,
         )
 
         # Assert
@@ -154,6 +158,7 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
         fab = Fab(
             hash_str="abc123",
             content=b"test_fab_content",
+            meta={"abc123": "abc123"},
         )
         mock_run = Mock(
             run_id=self.run_id,
@@ -179,6 +184,8 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
                 get_fab=self.mock_get_fab,
                 pull_object=self.mock_pull_object,
                 confirm_message_received=self.mock_confirm_message_received,
+                trust_entities={},
+                enable_entities_verification=None,
             )
 
         # Assert

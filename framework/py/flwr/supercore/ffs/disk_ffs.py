@@ -52,10 +52,11 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
             The key (sha256hex hash) of the content.
         """
         content_hash = hashlib.sha256(content).hexdigest()
+        meta_dict = dict(meta)
 
         self.base_dir.mkdir(exist_ok=True, parents=True)
         (self.base_dir / content_hash).write_bytes(content)
-        (self.base_dir / f"{content_hash}.META").write_text(json.dumps(meta))
+        (self.base_dir / f"{content_hash}.META").write_text(json.dumps(meta_dict))
 
         return content_hash
 
