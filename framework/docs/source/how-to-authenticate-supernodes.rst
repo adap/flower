@@ -96,7 +96,7 @@ passing two additional arguments (i.e. the public and private keys of the SuperN
 addition to the TLS certificate.
 
 .. code-block:: bash
-    :emphasize-lines: 6, 7
+    :emphasize-lines: 6
 
     $ flower-supernode \
         --root-certificates certificates/ca.crt \
