@@ -23,7 +23,7 @@ import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from functools import partial
-from logging import ERROR, INFO, WARN
+from logging import INFO, WARN
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -34,7 +34,7 @@ from grpc import RpcError
 
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Error, Message, RecordDict
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Message, RecordDict
 from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir, get_fused_config_from_fab
 from flwr.common.constant import (
@@ -44,17 +44,11 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
-    ErrorCode,
     ExecPluginType,
 )
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
-from flwr.common.inflatable import (
-    get_all_nested_objects,
-    get_object_tree,
-    iterate_object_tree,
-    no_object_id_recompute,
-)
+from flwr.common.inflatable import iterate_object_tree
 from flwr.common.inflatable_utils import (
     pull_objects,
     push_object_contents_from_iterable,
@@ -77,9 +71,6 @@ from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
-
-
-FAB_VERIFICATION_ERROR = Error(ErrorCode.INVALID_FAB, "The FAB could not be verified.")
 
 
 # pylint: disable=import-outside-toplevel
@@ -266,22 +257,6 @@ def start_client_internal(
             )
 
 
-def _insert_message(msg: Message, state: NodeState, store: ObjectStore) -> None:
-    """Insert a message into the NodeState and ObjectStore."""
-    with no_object_id_recompute():
-        # Store message in state
-        msg.metadata.__dict__["_message_id"] = msg.object_id  # Set message_id
-        state.store_message(msg)
-
-        # Preregister objects in ObjectStore
-        store.preregister(msg.metadata.run_id, get_object_tree(msg))
-
-        # Store all objects in ObjectStore
-        all_objects = get_all_nested_objects(msg)
-        for obj_id, obj in all_objects.items():
-            store.put(obj_id, obj.deflate())
-
-
 def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     state: NodeState,
     ffs: Ffs,
@@ -335,9 +310,11 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
         if (run_info := state.get_run(run_id)) is None:
             # Pull run info from SuperLink
             run_info = get_run(run_id)
+            state.store_run(run_info)
 
             # Pull and store the FAB
             fab = get_fab(run_info.fab_hash, run_id)
+            ffs.put(fab.content, fab.meta)
 
             # Verify the received FAB
             #########################
@@ -373,15 +350,12 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                             fab_verified = True
                             break
                 if not fab_verified:
-                    # Insert an error message in the state when FAB verfication fails
                     log(
-                        ERROR,
-                        "FAB verification failed: the provided trusted entities could "
-                        "not verify the FAB. An error reply has been generated.",
+                        WARN,
+                        "The FAB could not be verified by provided "
+                        "trusted entities.",
                     )
-                    reply = Message(FAB_VERIFICATION_ERROR, reply_to=message)
-                    _insert_message(reply, state, object_store)
-                    return run_id
+                    return None
 
             # Initialize the context
             run_cfg = get_fused_config_from_fab(fab.content, run_info)
@@ -392,11 +366,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                 state=RecordDict(),
                 run_config=run_cfg,
             )
-
-            # Store in the state
             state.store_context(run_ctx)
-            state.store_run(run_info)
-            ffs.put(fab.content, fab.meta)
 
         # Preregister the object tree of the message
         obj_ids_to_pull = object_store.preregister(run_id, object_tree)
@@ -444,7 +414,6 @@ def _push_messages(
     # This is to ensure that only one message is processed at a time
     # Wait until a reply message is available
     while not (reply_messages := state.get_messages(is_reply=True)):
-        print("Waiting for the reply...")
         time.sleep(0.5)
 
     for message in reply_messages:

@@ -207,8 +207,7 @@ class ErrorCode:
     REPLY_MESSAGE_UNAVAILABLE = 4
     NODE_UNAVAILABLE = 5
     MOD_FAILED_PRECONDITION = 6
-    INVALID_FAB = 7
-    
+
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
