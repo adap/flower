@@ -43,6 +43,7 @@ class ExitCode:
     SUPERNODE_REST_ADDRESS_INVALID = 300
     SUPERNODE_NODE_AUTH_KEYS_REQUIRED = 301
     SUPERNODE_NODE_AUTH_KEYS_INVALID = 302
+    SUPERNODE_INVALID_ARGS = 303
 
     # SuperExec-specific exit codes (400-499)
     SUPEREXEC_INVALID_PLUGIN_CONFIG = 400
@@ -114,6 +115,10 @@ EXIT_CODE_HELP = {
         "Node authentication requires elliptic curve private and public key pair. "
         "Please ensure that the file path points to a valid private/public key "
         "file and try again."
+    ),
+    ExitCode.SUPERNODE_INVALID_ARGS: (
+        "Invalid arguments provided to SuperNode. Use `--help` check for the correct "
+        "usage. Alternatively, check the documentation."
     ),
     # SuperExec-specific exit codes (400-499)
     ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (

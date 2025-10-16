@@ -1,0 +1,13 @@
+[303] SUPERNODE_INVALID_ARGS
+============================
+
+Description
+-----------
+
+The SuperNode was started with invalid arguments.
+
+How to Resolve
+--------------
+
+Some of the arguments passed to the SuperNode are incompatible with each other. Check
+the SuperNode logs for additional help on how to resolve the issue.
