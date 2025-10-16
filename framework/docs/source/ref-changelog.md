@@ -1,6 +1,124 @@
 # Changelog
 
-## Unreleased
+## v1.23.0 (2025-10-16)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Adam Tupper`, `Alan Yi`, `Alireza Ghasemi`, `Charles Beauville`, `Chong Shen Ng`, `Copilot`, `Daniel Anoruo`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Heng Pan`, `Javier`, `Patrick Foley`, `Rohat Bozyil`, `combe4259`, `han97901`, `rohboz` <!---TOKEN_v1.23.0-->
+
+### New features
+
+- **feat(framework): Bump** `licensecheck` **from** `2024` **to** `2025.1.0` ([#5944](https://github.com/adap/flower/pull/5944))
+
+- **feat(framework): Implement dummy behaviour** `flwr supernode list/ls` ([#5968](https://github.com/adap/flower/pull/5968))
+
+- **feat(examples): Add quantum federated learning example with PennyLane** ([#5852](https://github.com/adap/flower/pull/5852))
+
+- **feat(framework): Add** `ArrayRecord` **constructor for state dict** ([#5939](https://github.com/adap/flower/pull/5939))
+
+### Documentation improvements
+
+- **docs(framework): Fix typo in the Advanced PyTorch example README** ([#5956](https://github.com/adap/flower/pull/5956))
+
+- **docs(framework): Introduce migration guide for OpenFL to Flower** ([#5975](https://github.com/adap/flower/pull/5975))
+
+- **docs(framework:skip): Fix typo in SuperLink image for** `1.22.0` ([#5936](https://github.com/adap/flower/pull/5936))
+
+- **docs(framework): Make dark mode better** ([#5943](https://github.com/adap/flower/pull/5943))
+
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5972](https://github.com/adap/flower/pull/5972))
+
+- **docs(framework:skip): Remove Flower AI Day 2025 banner** ([#5949](https://github.com/adap/flower/pull/5949))
+
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5983](https://github.com/adap/flower/pull/5983))
+
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5976](https://github.com/adap/flower/pull/5976))
+
+- **docs(framework:skip): Update source texts for translations (auto)** ([#6010](https://github.com/adap/flower/pull/6010))
+
+- **docs(framework): Add Flower deployment guide for multiple OpenShift clusters** ([#6001](https://github.com/adap/flower/pull/6001))
+
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5996](https://github.com/adap/flower/pull/5996))
+
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5958](https://github.com/adap/flower/pull/5958))
+
+- **docs(framework:skip): Update source texts for translations (auto)** ([#5937](https://github.com/adap/flower/pull/5937))
+
+### Incompatible changes
+
+- **break(framework): Rename user auth to account auth** ([#5965](https://github.com/adap/flower/pull/5965))
+
+### Other changes
+
+- **refactor(datasets): Clarify seed parameter impact in partitioners** ([#5948](https://github.com/adap/flower/pull/5948))
+
+- **refactor(examples): Bump** `monai` **version in quickstart example** ([#5964](https://github.com/adap/flower/pull/5964))
+
+- **refactor(framework): Update** `SuperNode` **authentication behaviour in** `SuperLink` ([#5980](https://github.com/adap/flower/pull/5980))
+
+- **fix(framework): Correct superexec docker entrypoint** ([#5959](https://github.com/adap/flower/pull/5959))
+
+- **refactor(datasets): Fix** `mypy` **for** `PathologicalPartitioner` **test** ([#5989](https://github.com/adap/flower/pull/5989))
+
+- **refactor(examples): Remove obsolete or long-deprecated examples** ([#5951](https://github.com/adap/flower/pull/5951))
+
+- **refactor(framework): Migrate client_app.py into new directory structure** ([#5942](https://github.com/adap/flower/pull/5942))
+
+- **refactor(framework): Move asymmetric encryption utilities to supercore** ([#5984](https://github.com/adap/flower/pull/5984))
+
+- **refactor(framework): Implement** `flwr supernode create` **functionality** ([#5981](https://github.com/adap/flower/pull/5981))
+
+- **refactor(framework): Improve** `flwr ls` **and introduce** `flwr list` **alias** ([#5973](https://github.com/adap/flower/pull/5973))
+
+- **fix(framework): Fix instructions to solve error** `302` ([#5992](https://github.com/adap/flower/pull/5992))
+
+- **fix(framework): Fix the list of contributors in changelog** ([#5938](https://github.com/adap/flower/pull/5938))
+
+- **fix(examples): Correct C++ SDK path in quickstart-cpp** ([#5979](https://github.com/adap/flower/pull/5979))
+
+- **ci(:skip): Bump versions to v1.23.0** ([#5932](https://github.com/adap/flower/pull/5932))
+
+### Unknown changes
+
+### Migrate to MessageAPI
+
+- **refactor(examples): Update imports for** `quickstar-pandas` **example** ([#5963](https://github.com/adap/flower/pull/5963))
+
+- **refactor(examples): Migrate** `federated-kaplan-meier-fitter` **example to** `Message API` ([#5957](https://github.com/adap/flower/pull/5957))
+
+- **docs(framework): Update** `30-minute` **Flower tutorial to** `Message API` ([#5950](https://github.com/adap/flower/pull/5950))
+
+- **refactor(examples): Migrate** `whisper` **example to** `Message API` ([#5966](https://github.com/adap/flower/pull/5966))
+
+### Dynamic Add/Remove SuperNodes
+
+- **refactor(framework): Move** `AuthPugin` **classes** ([#5954](https://github.com/adap/flower/pull/5954))
+
+- **refactor(framework): Check for** `ssh` **public key upon** `flwr supernode create` ([#5991](https://github.com/adap/flower/pull/5991))
+
+- **feat(framework): Introduce flwr supernode xyz commands** ([#5962](https://github.com/adap/flower/pull/5962))
+
+- **refactor(framework): Check for** `flwr_aid` **before deleting a node** ([#5988](https://github.com/adap/flower/pull/5988))
+
+- **refactor(framework): Remove** `CSV` **-based node auth in** `SuperLink` ([#5997](https://github.com/adap/flower/pull/5997))
+
+- **feat(framework): Add** `LinkState.get_node_info` **and ensure node statuses updated** ([#5986](https://github.com/adap/flower/pull/5986))
+
+- **feat(framework): Add** `NoOpPlugin` **s** ([#5955](https://github.com/adap/flower/pull/5955))
+
+- **feat(framework): Merge** `Linkstate.create_node` **and** `Linkstate.set_node_public_key` ([#5977](https://github.com/adap/flower/pull/5977))
+
+- **feat(framework): Add** `public_key` **field to** `NodeInfo` **and require** `owner_aid` **for node creation** ([#5985](https://github.com/adap/flower/pull/5985))
+
+- **refactor(framework): Implement** `flwr supernode delete` **functionality** ([#5987](https://github.com/adap/flower/pull/5987))
+
+- **break(framework): Rename the yaml key to** `authn_type` **from** `auth_type` **and rename user auth to account auth for consistency** ([#5969](https://github.com/adap/flower/pull/5969))
+
+- **feat(framework): Use** `NoOpPlugin` **by default** ([#5974](https://github.com/adap/flower/pull/5974))
+
+- **feat(framework): Introduce new** `RPCs` **for** `flwr supernode` ([#5953](https://github.com/adap/flower/pull/5953))
 
 ## v1.22.0 (2025-09-21)
 
