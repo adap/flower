@@ -110,7 +110,7 @@ addition to the TLS certificate.
     * ``--auth-supernode-private-key``: the private key of this SuperNode.
 
 Follow the same procedure to launch the second SuperNode by passing its corresponding
-key pair:
+private key:
 
 .. code-block:: bash
     :emphasize-lines: 6
