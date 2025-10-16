@@ -16,20 +16,27 @@ authenticate SuperNodes that connect to a running SuperLink:
 
 - **Automatic authentication**: In this mode, the SuperLink checks the timestamp-based
   signature in each request from SuperNodes to prevent impersonation and replay attacks.
-- **CSV-based authentication**: This mode functions similarly to automatic
-  authentication but requires the SuperLink to be provided with a list of authorized
-  public keys, allowing only those SuperNodes to connect.
+  The goal of this mode is to confirm the identity of connected SuperNodes; however, it
+  does **not** restrict which SuperNodes can connect to the SuperLink. Consequently, any
+  SuperNode is allowed to connect to the SuperLink.
+- **CLI-managed authentication**: This mode operates similarly to automatic
+  authentication but requires starting the SuperLink with the
+``--enable-supernode-auth`` flag. To connect a SuperNode to the SuperLink, its public
+  key must first be registered using the |flower_cli_supernode_link|_. Only registered
+  SuperNodes are permitted to connect to the SuperLink, making this mode more secure by
+  restricting connections to authorized SuperNodes only.
 
 The automatic authentication mode works out of the box and therefore requires no
-configuration. On the other hand, CSV-based authentication mode is more sophisticated
+configuration. On the other hand, CLI-managed authentication mode is more sophisticated
 and how it works and how it can be used is presented reminder of this guide. Flower's
-CSV-based node authentication leverages a signature-based mechanism to verify each
-node's identity and is only available when encrypted connections (SSL/TLS) are enabled:
+CLI-managed SuperNode authentication leverages a signature-based mechanism to verify
+each SuperNode's identity and is only available when encrypted connections (SSL/TLS) are
+enabled:
 
 - Each SuperNode must already possess a unique Elliptic Curve (EC) public/private key
   pair.
 - The SuperLink (server) maintains a whitelist of EC public keys for all trusted
-  SuperNodes (clients).
+  SuperNodes (clients), managed through the Flower CLI.
 - A SuperNode signs a timestamp with its private key and sends the signed timestamp to
   the SuperLink.
 - The SuperLink verifies the signature and timestamp using the SuperNode's public key.
