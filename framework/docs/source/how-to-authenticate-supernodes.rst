@@ -92,8 +92,8 @@ Enable node authentication in SuperNode
 ---------------------------------------
 
 Connecting a SuperNode to a SuperLink that has node authentication enabled requires
-passing one additional argument (i.e. the private key of the SuperNode) in
-addition to the TLS certificate.
+passing one additional argument (i.e. the private key of the SuperNode) in addition to
+the TLS certificate.
 
 .. code-block:: bash
     :emphasize-lines: 6
