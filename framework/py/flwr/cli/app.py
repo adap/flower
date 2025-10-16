@@ -28,6 +28,9 @@ from .new import new
 from .pull import pull
 from .run import run
 from .stop import stop
+from .supernode import create as supernode_create
+from .supernode import delete as supernode_delete
+from .supernode import ls as supernode_list
 
 app = typer.Typer(
     help=typer.style(
@@ -44,10 +47,21 @@ app.command()(run)
 app.command()(build)
 app.command()(install)
 app.command()(log)
-app.command()(ls)
+app.command("list")(ls)
+app.command(hidden=True)(ls)
 app.command()(stop)
 app.command()(login)
 app.command()(pull)
+
+# Create supernode command group
+supernode_app = typer.Typer(help="Manage SuperNodes")
+supernode_app.command()(supernode_create)
+supernode_app.command()(supernode_delete)
+# Make it appear as "list"
+supernode_app.command("list")(supernode_list)
+# Hide "ls" command (left as alias)
+supernode_app.command(hidden=True)(supernode_list)
+app.add_typer(supernode_app, name="supernode")
 
 typer_click_object = get_command(app)
 

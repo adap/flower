@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-09-22 00:08+0000\n"
+"POT-Creation-Date: 2025-10-13 00:08+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -400,8 +400,8 @@ msgstr "Amélioration de la documentation"
 #: ../../source/ref-exit-codes/202.rst:5 ../../source/ref-exit-codes/3.rst:5
 #: ../../source/ref-exit-codes/300.rst:5 ../../source/ref-exit-codes/301.rst:5
 #: ../../source/ref-exit-codes/302.rst:5 ../../source/ref-exit-codes/400.rst:5
-#: ../../source/ref-exit-codes/600.rst:5 ../../source/ref-exit-codes/601.rst:5
-#: ../../source/ref-exit-codes/602.rst:5
+#: ../../source/ref-exit-codes/500.rst:5 ../../source/ref-exit-codes/600.rst:5
+#: ../../source/ref-exit-codes/601.rst:5 ../../source/ref-exit-codes/602.rst:5
 #, fuzzy
 msgid "Description"
 msgstr "Dépréciations"
@@ -2493,7 +2493,7 @@ msgstr "Devenez un·e contributeur·ice"
 #: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:22
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:17
 #: ../../source/docker/tutorial-quickstart-docker.rst:15
-#: ../../source/how-to-authenticate-users.rst:26
+#: ../../source/how-to-authenticate-accounts.rst:26
 #: ../../source/how-to-configure-audit-logging.rst:78
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:22
 msgid "Prerequisites"
@@ -5312,18 +5312,23 @@ msgstr ""
 msgid "This is sometimes called a hub-and-spoke topology:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:25
+#: ../../source/explanation-flower-architecture.rst:-1
 #, fuzzy
 msgid "Hub-and-spoke topology in federated learning"
 msgstr "Qu'est-ce que l'apprentissage fédéré ?"
 
-#: ../../source/explanation-flower-architecture.rst:25
+#: ../../source/explanation-flower-architecture.rst:29
+#, fuzzy
+msgid "Hub-and-spoke topology in federated learning (dark theme)"
+msgstr "Qu'est-ce que l'apprentissage fédéré ?"
+
+#: ../../source/explanation-flower-architecture.rst:29
 msgid ""
 "Hub-and-spoke topology in federated learning (one server, multiple "
 "clients)."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:27
+#: ../../source/explanation-flower-architecture.rst:31
 msgid ""
 "In a real-world deployment, we typically want to run different projects "
 "on such a federation. Each project could use different hyperparameters, "
@@ -5331,7 +5336,7 @@ msgid ""
 "different machine learning frameworks like PyTorch and TensorFlow."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:32
+#: ../../source/explanation-flower-architecture.rst:36
 msgid ""
 "This is why, in Flower, both the server side and the client side are "
 "split into two parts. One part is long-lived and responsible for "
@@ -5339,19 +5344,19 @@ msgid ""
 "executes task-specific code."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:36
+#: ../../source/explanation-flower-architecture.rst:40
 msgid ""
 "A Flower *server* is composed of **SuperLink**, **SuperExec**, and "
 "``ServerApp``:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:38
+#: ../../source/explanation-flower-architecture.rst:42
 msgid ""
 "**SuperLink**: A long-running process that forwards task instructions to "
 "clients (SuperNodes) and receives task results back."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:40
+#: ../../source/explanation-flower-architecture.rst:44
 msgid ""
 "**SuperExec**: A long-running process that schedules, launches, and "
 "manages multiple app processes (e.g., ``ServerApp``) on demand by "
@@ -5359,7 +5364,7 @@ msgid ""
 " by the SuperLink."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:43
+#: ../../source/explanation-flower-architecture.rst:47
 msgid ""
 "``ServerApp``: A short-lived app process containing project-specific code"
 " that customizes all server-side aspects of federated learning systems "
@@ -5368,20 +5373,20 @@ msgid ""
 "apps."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:48
+#: ../../source/explanation-flower-architecture.rst:52
 msgid ""
 "A Flower *client* is composed of **SuperNode**, **SuperExec**, and "
 "``ClientApp``:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:50
+#: ../../source/explanation-flower-architecture.rst:54
 msgid ""
 "**SuperNode**: A long-running process that connects to the SuperLink, "
 "requests tasks, executes them (for example, \"train this model on your "
 "local data\"), and returns the results to the SuperLink."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:53
+#: ../../source/explanation-flower-architecture.rst:57
 msgid ""
 "**SuperExec**: A long-running process that schedules, launches, and "
 "manages multiple application processes (e.g., ``ClientApp``) on demand by"
@@ -5389,7 +5394,7 @@ msgid ""
 "automatically by the SuperNode."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:56
+#: ../../source/explanation-flower-architecture.rst:60
 msgid ""
 "``ClientApp``: A short-lived app process containing project-specific code"
 " that customizes all client-side aspects of federated learning systems "
@@ -5398,7 +5403,7 @@ msgid ""
 "apps."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:61
+#: ../../source/explanation-flower-architecture.rst:65
 msgid ""
 "Why SuperNode and SuperLink? Well, in federated learning, the clients are"
 " the actual stars of the show. They hold the training data and they run "
@@ -5407,30 +5412,35 @@ msgid ""
 "*missing link* among all those SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:72
+#: ../../source/explanation-flower-architecture.rst:-1
 #, fuzzy
 msgid "Basic Flower architecture"
 msgstr "Architecture florale"
 
-#: ../../source/explanation-flower-architecture.rst:72
+#: ../../source/explanation-flower-architecture.rst:80
+#, fuzzy
+msgid "Basic Flower architecture (dark theme)"
+msgstr "Architecture florale"
+
+#: ../../source/explanation-flower-architecture.rst:80
 #, fuzzy
 msgid "The basic Flower architecture for federated learning."
 msgstr "Qu'est-ce que l'apprentissage fédéré ?"
 
-#: ../../source/explanation-flower-architecture.rst:74
+#: ../../source/explanation-flower-architecture.rst:82
 msgid ""
 "In a Flower app project, users will typically develop the ``ServerApp`` "
 "and the ``ClientApp``. All the network communication between *server* and"
 " *clients* is taken care of by the SuperLink and SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:80
+#: ../../source/explanation-flower-architecture.rst:88
 msgid ""
 "For more details, please refer to the |serverapp_link|_ and "
 "|clientapp_link|_ documentation."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:83
+#: ../../source/explanation-flower-architecture.rst:91
 msgid ""
 "With *multi-run*, multiple ``ServerApp``\\s and ``ClientApp``\\s can run "
 "within the same federation, which consists of a single long-running "
@@ -5438,24 +5448,29 @@ msgid ""
 "sometimes referred to as *multi-tenancy* or *multi-job*."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:87
+#: ../../source/explanation-flower-architecture.rst:95
 msgid ""
 "As shown in the figure below, two Flower App projects, each consisting of"
 " a ``ServerApp`` and a ``ClientApp``, could share the same SuperLink and "
 "SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:96
+#: ../../source/explanation-flower-architecture.rst:-1
 #, fuzzy
 msgid "Multi-run federated learning architecture"
 msgstr "Stratégie de moyenne fédérée."
 
-#: ../../source/explanation-flower-architecture.rst:96
+#: ../../source/explanation-flower-architecture.rst:108
+#, fuzzy
+msgid "Multi-run federated learning architecture (dark theme)"
+msgstr "Stratégie de moyenne fédérée."
+
+#: ../../source/explanation-flower-architecture.rst:108
 #, fuzzy
 msgid "Multi-run federated learning architecture with Flower"
 msgstr "Étape 2 : Apprentissage fédéré avec Flower"
 
-#: ../../source/explanation-flower-architecture.rst:98
+#: ../../source/explanation-flower-architecture.rst:110
 msgid ""
 "To illustrate how multi-run works, consider one federated learning "
 "training run where a ``ServerApp`` and a ``ClientApp`` are participating "
@@ -5463,54 +5478,64 @@ msgid ""
 " is selected to participate in the training run."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:103
+#: ../../source/explanation-flower-architecture.rst:115
 msgid ""
 "In ``[run 1]`` below, all the SuperNodes are selected and therefore run "
 "their corresponding ``ClientApp``\\s:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:112
+#: ../../source/explanation-flower-architecture.rst:-1
 #, fuzzy
 msgid "Multi-tenancy federated learning architecture - Run 1"
 msgstr "Stratégie de moyenne fédérée."
 
-#: ../../source/explanation-flower-architecture.rst:112
+#: ../../source/explanation-flower-architecture.rst:128
+#, fuzzy
+msgid "Multi-tenancy federated learning architecture - Run 1 (dark theme)"
+msgstr "Stratégie de moyenne fédérée."
+
+#: ../../source/explanation-flower-architecture.rst:128
 msgid ""
 "Run 1 in a multi-run federated learning architecture with Flower. All "
 "SuperNodes participate in the training round."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:115
+#: ../../source/explanation-flower-architecture.rst:131
 msgid ""
 "However, in ``[run 2]``, only the first and second SuperNodes are "
 "selected to participate in the training:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:124
+#: ../../source/explanation-flower-architecture.rst:-1
 #, fuzzy
 msgid "Multi-tenancy federated learning architecture - Run 2"
 msgstr "Stratégie de moyenne fédérée."
 
-#: ../../source/explanation-flower-architecture.rst:124
+#: ../../source/explanation-flower-architecture.rst:144
+#, fuzzy
+msgid "Multi-tenancy federated learning architecture - Run 2 (dark theme)"
+msgstr "Stratégie de moyenne fédérée."
+
+#: ../../source/explanation-flower-architecture.rst:144
 msgid ""
 "Run 2 in a multi-run federated learning architecture with Flower. Only "
 "the first and second SuperNodes are selected to participate in the "
 "training round."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:127
+#: ../../source/explanation-flower-architecture.rst:147
 msgid ""
 "Therefore, with Flower multi-run, different Flower App projects can run "
 "on different sets of clients."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:132
+#: ../../source/explanation-flower-architecture.rst:152
 msgid ""
 "This explanation covers the Flower Deployment Runtime. An explanation "
 "covering the Flower Simulation Runtime will follow."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:137
+#: ../../source/explanation-flower-architecture.rst:157
 msgid ""
 "As we continue to enhance Flower at a rapid pace, we'll periodically "
 "update this explainer document. Feel free to share any feedback with us."
@@ -6139,14 +6164,14 @@ msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:175
 #, fuzzy
-msgid "Enable User Authentication"
+msgid "Enable Account Authentication"
 msgstr "Vérifie l'installation"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:177
 msgid ""
-"User authentication can be enabled if you're using the Flower Enterprise "
-"Edition (EE) Docker images. This is configured in the `global.userAuth` "
-"section of your `values.yml` file."
+"Account authentication can be enabled if you're using the Flower "
+"Enterprise Edition (EE) Docker images. This is configured in the "
+"`global.userAuth` section of your `values.yml` file."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:180
@@ -6160,7 +6185,7 @@ msgid "Explanation of Parameters:"
 msgstr "Mise à jour des paramètres du modèle"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:198
-msgid "`auth_type`: The authentication mechanism being used (e.g., oidc)."
+msgid "`authn_type`: The authentication mechanism being used (e.g., oidc)."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:199
@@ -6174,7 +6199,7 @@ msgid "`token_url`: The URL for retrieving access tokens."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:201
-msgid "`validate_url`: The endpoint for validating user authentication."
+msgid "`validate_url`: The endpoint for validating account authentication."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:202
@@ -6192,12 +6217,14 @@ msgstr "Utilise une stratégie existante"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:207
 msgid ""
-"To use an existing secret that contains the user authentication "
+"To use an existing secret that contains the account authentication "
 "configuration, set `existingSecret` to the name of the existing secret:"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:218
-msgid "Note that the existing secret must contain the key `user-auth-config.yml`:"
+msgid ""
+"Note that the existing secret must contain the key `account-auth-"
+"config.yml`:"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:233
@@ -6614,14 +6641,14 @@ msgstr ""
 #: flwr.app.metadata.Metadata flwr.client.client.Client.evaluate
 #: flwr.client.client.Client.fit flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
 #: flwr.client.mod.localdp_mod.LocalDpMod
 #: flwr.client.numpy_client.NumPyClient.evaluate
 #: flwr.client.numpy_client.NumPyClient.fit
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
 #: flwr.clientapp.mod.localdp_mod.LocalDpMod flwr.common.context.Context
 #: flwr.common.message.Message flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
@@ -9563,6 +9590,148 @@ msgid ""
 "|message_link|_:"
 msgstr ""
 
+#: ../../source/how-to-authenticate-accounts.rst:-1
+msgid ""
+"Configure SuperLink for account authentication and authorization. "
+"Private-by-default runs securely with OpenID Connect and OpenFGA."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:6
+msgid "Authenticate Accounts via OpenID Connect"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:10
+msgid ""
+"OpenID Connect Authentication is a Flower Enterprise feature. See `Flower"
+" Enterprise <https://flower.ai/enterprise>`_ for details."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:13
+msgid ""
+"In this guide, you'll learn how to configure SuperLink with account-level"
+" authentication and authorization, and how to log in using the ``flwr`` "
+"CLI. Once logged in, any Flower accounts that are authorized on the "
+"SuperLink can run Flower CLI commands that interact with the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:20
+msgid ""
+"With account authentication and authorization enabled, only accounts that"
+" have submitted the ``flwr run`` command can view and interact with their"
+" runs. This means that your runs are **private by default**, ensuring "
+"that only authorized accounts can access them."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:28
+msgid ""
+"To enable account authentication and authorization, the SuperLink must be"
+" deployed with an `OpenID Connect (OIDC) <https://openid.net/developers"
+"/how-connect-works/>`_ provider and an `OpenFGA <https://openfga.dev/>`_ "
+"server. The OIDC provider is used for account authentication, while "
+"OpenFGA is used for fine-grained access control. This means an "
+"authenticated account can only run ``flwr`` CLI commands on the SuperLink"
+" if they have been granted the necessary permissions by the SuperLink "
+"administrator. When enabled, both account authentication and "
+"authorization must be configured on the SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:37
+msgid "Enable Account Authentication and Authorization on the SuperLink"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:39
+#, fuzzy
+msgid "Create a YAML configuration file with the following content:"
+msgstr "Crée une demande de pull qui contient les modifications suivantes :"
+
+#: ../../source/how-to-authenticate-accounts.rst:63
+msgid ""
+"Save this file as ``account-auth-config.yaml``. Then pass it to the "
+"SuperLink via the ``--account-auth-config`` flag when deploying the "
+"SuperLink:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:74
+msgid ""
+"To authorize an account, the SuperLink administrator must add the "
+"account's OIDC ``sub`` claim to the OpenFGA store with the appropriate "
+"relation."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:79
+msgid ""
+"Starting with Flower ``v1.23.0``, the following options/keys have been "
+"renamed:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:81
+msgid "``auth_type`` → ``authn_type`` (in YAML configuration)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:82
+msgid "``auth_url`` → ``authn_url`` (in YAML configuration)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:83
+msgid "``--user-auth-config`` → ``--account-auth-config`` (in SuperLink CLI)"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:86
+#, fuzzy
+msgid "Login to the SuperLink"
+msgstr "flower-superlink"
+
+#: ../../source/how-to-authenticate-accounts.rst:88
+msgid ""
+"Once a SuperLink with account authentication and authorization is up and "
+"running, an account can interface with it after installing the ``flwr`` "
+"PyPI package via the Flower CLI. Then, ensure that the ``enable-account-"
+"auth`` field is set to ``true`` in the federation section in the "
+"``pyproject.toml`` of the Flower app you want to run:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:105
+msgid ""
+"Account authentication and authorization is only supported with TLS "
+"connections."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:107
+msgid ""
+"Now, you need to login first before other CLI commands can be executed. "
+"Upon executing ``flwr login``, a URL will be returned by the "
+"authentication plugin in the SuperLink. Click on it and authenticate "
+"directly against the OIDC provider."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:121
+msgid ""
+"Once the login is successful, the credentials returned by the OIDC "
+"provider via the SuperLink will be saved to the app's directory under "
+"``.flwr/.credentials/<federation-name>.json``. The tokens stored in this "
+"file will be sent transparently with each subsequent ``flwr`` CLI request"
+" to the SuperLink, and it will relay them to OIDC provider to perform the"
+" authentication checks."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:128
+msgid "Run authorized ``flwr`` CLI commands"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:130
+msgid ""
+"With the above steps completed, you can now run ``flwr`` CLI commands "
+"against a SuperLink setup with account authentication and authorization. "
+"For example, as an authorized account, you can run the ``flwr run`` "
+"command to start a Flower app:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:142
+msgid ""
+"If the account does not have the necessary permissions to run the "
+"command, an error will be returned:"
+msgstr ""
+
 #: ../../source/how-to-authenticate-supernodes.rst:-1
 msgid ""
 "Enable authentication for SuperNodes and SuperLink in Flower with public "
@@ -9768,129 +9937,6 @@ msgid ""
 "federation where each component runs in its own Docker container. You can"
 " make use of TLS and other security features in Flower such as implement "
 "a SuperNode authentication mechanism."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:-1
-msgid ""
-"Configure SuperLink for user authentication and authorization. Private-"
-"by-default runs securely with OpenID Connect and OpenFGA."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:6
-msgid "Authenticate Users via OpenID Connect"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:10
-msgid ""
-"OpenID Connect Authentication is a Flower Enterprise feature. See `Flower"
-" Enterprise <https://flower.ai/enterprise>`_ for details."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:13
-msgid ""
-"In this guide, you'll learn how to configure SuperLink with user-level "
-"authentication and authorization, and how to log in using the ``flwr`` "
-"CLI. Once logged in, any users that are authorized on the SuperLink can "
-"run Flower CLI commands that interact with the SuperLink."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:20
-msgid ""
-"With user authentication and authorization enabled, only users that have "
-"submitted the ``flwr run`` command can view and interact with their runs."
-" This means that your runs are **private by default**, ensuring that only"
-" authorized users can access them."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:28
-msgid ""
-"To enable user authentication and authorization, the SuperLink must be "
-"deployed with an `OpenID Connect (OIDC) <https://openid.net/developers"
-"/how-connect-works/>`_ provider and an `OpenFGA <https://openfga.dev/>`_ "
-"server. The OIDC provider is used for user authentication, while OpenFGA "
-"is used for fine-grained access control. This means an authenticated user"
-" can only run ``flwr`` CLI commands on the SuperLink if they have been "
-"granted the necessary permissions by the SuperLink administrator. When "
-"enabled, both user authentication and authorization must be configured on"
-" the SuperLink."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:37
-msgid "Enable User Authentication and Authorization on the SuperLink"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:39
-#, fuzzy
-msgid "Create a YAML configuration file with the following content:"
-msgstr "Crée une demande de pull qui contient les modifications suivantes :"
-
-#: ../../source/how-to-authenticate-users.rst:63
-msgid ""
-"Save this file as ``user-auth-config.yaml``. Then pass it to the "
-"SuperLink via the ``--user-auth-config`` flag when deploying the "
-"SuperLink:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:74
-msgid ""
-"To authorize a user, the SuperLink administrator must add the user's OIDC"
-" ``sub`` claim to the OpenFGA store with the appropriate relation."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:78
-#, fuzzy
-msgid "Login to the SuperLink"
-msgstr "flower-superlink"
-
-#: ../../source/how-to-authenticate-users.rst:80
-msgid ""
-"Once a SuperLink with user authentication and authorization is up and "
-"running, a user can interface with it after installing the ``flwr`` PyPI "
-"package via the Flower CLI. Then, ensure that the ``enable-user-auth`` "
-"field is set to ``true`` in the federation section in the "
-"``pyproject.toml`` of the Flower app you want to run:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:97
-msgid ""
-"User authentication and authorization is only supported with TLS "
-"connections."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:99
-msgid ""
-"Now, you need to login first before other CLI commands can be executed. "
-"Upon executing ``flwr login``, a URL will be returned by the "
-"authentication plugin in the SuperLink. Click on it and authenticate "
-"directly against the OIDC provider."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:113
-msgid ""
-"Once the login is successful, the credentials returned by the OIDC "
-"provider via the SuperLink will be saved to the app's directory under "
-"``.flwr/.credentials/<federation-name>.json``. The tokens stored in this "
-"file will be sent transparently with each subsequent ``flwr`` CLI request"
-" to the SuperLink, and it will relay them to OIDC provider to perform the"
-" authentication checks."
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:120
-msgid "Run authorized ``flwr`` CLI commands"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:122
-msgid ""
-"With the above steps completed, you can now run ``flwr`` CLI commands "
-"against a SuperLink setup with user authentication and authorization. For"
-" example, as an authorized user, you can run the ``flwr run`` command to "
-"start a Flower app:"
-msgstr ""
-
-#: ../../source/how-to-authenticate-users.rst:134
-msgid ""
-"If the user does not have the necessary permissions to run the command, "
-"an error will be returned:"
 msgstr ""
 
 #: ../../source/how-to-configure-audit-logging.rst:-1
@@ -11097,6 +11143,286 @@ msgid ""
 msgstr ""
 "Pour les simulations qui utilisent le moteur de client virtuel, ``flwr-"
 "nightly`` doit être installé avec l'option ``simulation``: :"
+
+#: ../../source/how-to-migrate-from-openfl.rst:-1
+msgid "Migrate your OpenFL workloads to Flower in this step-by-step tutorial"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:44
+#, fuzzy
+msgid "OpenFL Migration Guide"
+msgstr "Valeurs de configuration"
+
+#: ../../source/how-to-migrate-from-openfl.rst:46
+msgid ""
+"It was `recently announced "
+"<https://github.com/securefederatedai/openfederatedlearning>`_ that The "
+"Open Federated Learning project (formerly known as OpenFL) is no longer "
+"being developed or maintained. This guide, written in collaboration with "
+"the OpenFL developers, aims to create an easy path for OpenFL users to "
+"bring their workloads into Flower."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:53
+msgid "Creating a Flower App for OpenFL code"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:55
+msgid ""
+"Let's start by creating a Flower app where the OpenFL code can be "
+"migrated to."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:58
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:75
+#, fuzzy
+msgid "Install dependencies"
+msgstr "Installation des dépendances"
+
+#: ../../source/how-to-migrate-from-openfl.rst:60
+#: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:57
+#: ../../source/tutorial-series-customize-the-client-pytorch.rst:61
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:77
+#: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:66
+#, fuzzy
+msgid "First, we install the Flower package ``flwr``:"
+msgstr "Tout d'abord, nous installons les paquets nécessaires :"
+
+#: ../../source/how-to-migrate-from-openfl.rst:67
+#: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:64
+#: ../../source/tutorial-series-customize-the-client-pytorch.rst:68
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:84
+#: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:73
+msgid ""
+"Then, we create a new Flower app called ``flower-tutorial`` using the "
+"PyTorch template. We also specify a username (``flwrlabs``) for the "
+"project:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:74
+msgid ""
+"After running the command, a new directory called ``flower-tutorial`` "
+"will be created. Here is a comparison between it and the relevant files "
+"in a typical ``openfl-example`` folder:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:80
+#, fuzzy
+msgid "OpenFL Example"
+msgstr "Exemples de PyTorch"
+
+#: ../../source/how-to-migrate-from-openfl.rst:103
+#, fuzzy
+msgid "Flower Tutorial"
+msgstr "Tutoriel"
+
+#: ../../source/how-to-migrate-from-openfl.rst:117
+msgid ""
+"Let's start with an overview of which areas of OpenFL and Flower "
+"directory structures you'll want to focus on. We will go through these in"
+" depth in later sections of the guide:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:121
+msgid ""
+"**Model**: In OpenFL, the model is usually defined in ``taskrunner.py``. "
+"In Flower, the model definition is usually located in ``task.py``."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:123
+msgid ""
+"**Train and Evaluate Functions**: In OpenFL, these are part of the "
+"`TaskRunner` subclass in ``taskrunner.py``. For Flower, you'll find these"
+" in ``client_app.py`` and identified beneath the ``@app.train()`` and "
+"``@app.evaluate`` decorators."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:126
+msgid ""
+"**Aggregation Functions**: In OpenFL, most examples use the "
+"``WeightedAverage()`` aggregation algorithm by default. If you're using a"
+" different aggregation algorithm, you'll find it in ``plan.yaml`` by "
+"searching for `aggregation_type`. In Flower, the aggregation algorithm is"
+" defined as a |strategy_link|_."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:132
+msgid "Migrate your model"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:134
+msgid ""
+"The model is very straightforward to port from OpenFL to Flower. If you "
+"are working with a PyTorch model, OpenFL has a ``PyTorchTaskRunner`` that"
+" inherits from ``nn.module`` (in ``taskrunner.py``) - and includes other "
+"things like the ``train`` and ``validate`` functions. Flower assumes you "
+"bring a standard PyTorch model, so it's as easy as moving the model "
+"definition to ``task.py`` in the ``flower_tutorial`` directory, and "
+"changing the inheritance of the Net back to ``nn.module``. For a concrete"
+" example, see the following OpenFL TaskRunner code snippet:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:206
+msgid "And the corresponding PyTorch model used by Flower:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:232
+#, fuzzy
+msgid "Migrate your training and test functions"
+msgstr "Poursuivons avec les fonctions habituelles de formation et de test :"
+
+#: ../../source/how-to-migrate-from-openfl.rst:234
+msgid ""
+"Recent versions of OpenFL had a simple way of defining training and "
+"evaluation functions. The setting and extraction of model weights was "
+"hidden from users, and a list of ``Metric`` values resulting from "
+"training or validation could be explicitly returned from the function. To"
+" make migration easy, see the highlighted blocks that can carry over "
+"directly to the Flower ``client_app.py`` file:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:319
+msgid ""
+"In Flower more control is given to users by default. With the "
+"introduction of the Message API, the training and validation functions "
+"are assumed to be stateless, so there is some initialization that must be"
+" handled by user code. The good news is that this setup is standard and "
+"quite reusable across examples. Let's see how the relevant OpenFL "
+"``train_`` function fits into Flower:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:377
+msgid ""
+"Notice the model is reininitialized, the dataloader is initialized and "
+"configured, and hyperparameters are each set before the core training "
+"operation begins. At the conclusion of the training, the model weights "
+"are extracted and packed into an ``ArrayRecord`` and the model metrics "
+"are captured in a ``MetricRecord``. It's necessary to also send the `num-"
+"examples` as a metric, as this is needed for capturing the weight to give"
+" to the model parameters for ``FedAvg``."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:384
+msgid ""
+"Here is the corresponding evaluation function, with the highlighted area "
+"representing the migrated code from OpenFL:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:432
+msgid ""
+"The code can be mostly pasted in unmodified! There are a few references "
+"to cleanup (i.e. changing `self` to `model`) to fit with the Flower "
+"variables, but the logic remains the same."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:437
+msgid "Migrating the Data Loaders"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:439
+msgid ""
+"Unlike OpenFL, Flower does not require that you use their own Dataloaders"
+" when developing your application. This means you can simply DataLoaders "
+"in the same way that you would for PyTorch, Tensorflow, or any other "
+"framework. For research and experimentation purposes, a single dataset "
+"can be sharded into multiple partitions. This information is passed to "
+"each ``ClientApp`` through the ``Context``:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:457
+msgid ""
+"Flower also has its own library for partitioning single datasets in "
+"distributions representative of what can be expected in real world "
+"settings. For more information, see the `flwr-datasets "
+"<https://flower.ai/docs/datasets/>`_ documentation for details."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:462
+#, fuzzy
+msgid "Client-side Code"
+msgstr "Logique côté client"
+
+#: ../../source/how-to-migrate-from-openfl.rst:464
+msgid ""
+"In OpenFL, the client side code was known as a Collaborator. In Flower, "
+"the application that data owners operate is referred to as a "
+"``ClientApp``. Each of the files referred to so far (``client_app.py``, "
+"``task.py``) are launched by the clients using the `flwr run` command. "
+"Beyond the code that is defined, Flower has the ability to insert dynamic"
+" changes through a configuration file, called ``pyproject.toml``. This "
+"can include application specific changes like hyperparameters, but also "
+"other information like ServerApp address, etc. Importantly, this file is "
+"shared between parties operating the ``ClientApp`` and ``ServerApp``. "
+"This concept directly maps to the Federated Learning Plan (FLPlan) "
+"concept in OpenFL captured in the ``plan.yaml`` file of every workspace."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:490
+#, fuzzy
+msgid "Server-side Code"
+msgstr "Logique côté serveur"
+
+#: ../../source/how-to-migrate-from-openfl.rst:492
+msgid ""
+"In OpenFL, all of the aggregator-side code is configured via the "
+"`plan.yaml` file through the specification of different arguments. In "
+"Flower, the exact tasks performed by the server are more configurable "
+"through code. For example, aggregation algorithms are added through a "
+"``Strategy``, and the logic to save models is added explictly. Here is a "
+"``ServerApp`` (akin to an OpenFL Aggregator) compatible with the prior "
+"code snippets:"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:542
+msgid ""
+"You'll notice that most ``ServerApp`` examples have specific logic for "
+"working with a given deep learning framework (in this case PyTorch) due "
+"to the saving of a final model. This functionality is optional, but "
+"mirrors the automatic saving of a model at the end of an OpenFL "
+"experiment. This ``ServerApp`` change requires only a few lines of "
+"modifications, and Flower has support for an extensive set of deep "
+"learning frameworks in it's `examples "
+"<https://github.com/adap/flower/tree/main/examples>`_ (Tensorflow, "
+"FastAI, Huggingface, etc.) should you need reference code."
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:551
+#: ../../source/how-to-upgrade-to-flower-1.0.rst:134
+#: ../../source/how-to-upgrade-to-flower-1.13.rst:458
+msgid "Further help"
+msgstr "Aide supplémentaire"
+
+#: ../../source/how-to-migrate-from-openfl.rst:553
+msgid ""
+"For a complete PyTorch example that goes into depth on various Flower "
+"components, see the `Get started with Flower "
+"<https://flower.ai/docs/framework/tutorial-series-get-started-with-"
+"flower-pytorch.html>`_ tutorial. While we expect this guide will help "
+"most users get migrated quickly to the Flower ecosystem, certain complex "
+"OpenFL workloads may require more clarification or help. If you have "
+"further questions, `join the Flower Slack <https://flower.ai/join-"
+"slack/>`_ (and use the channel ``#questions``) or join our `OpenFL "
+"Continuity Program "
+"<https://docs.google.com/forms/d/e/1FAIpQLScprGGX_jFRoEUv4HbJkkhkg6O7e5eCiq7uP95_0xK5Qnt1gA/viewform>`_"
+" to get in touch with our team!"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:564
+#: ../../source/how-to-upgrade-to-flower-1.13.rst:467
+#, fuzzy
+msgid "Important"
+msgstr "Changements importants :"
+
+#: ../../source/how-to-migrate-from-openfl.rst:566
+msgid ""
+"As we work with the OpenFL community, we'll be periodically updating this"
+" guide. Please feel free to share any feedback with us!"
+msgstr ""
+
+#: ../../source/how-to-migrate-from-openfl.rst:569
+#: ../../source/how-to-upgrade-to-flower-1.13.rst:472
+msgid "Happy migrating! 🚀"
+msgstr ""
 
 #: ../../source/how-to-run-flower-on-azure.rst:18
 #, fuzzy
@@ -13910,11 +14236,6 @@ msgstr ""
 "``start_simulation(..., config=flwr.server.ServerConfig(num_rounds=3, "
 "round_timeout=600.0), ...)``"
 
-#: ../../source/how-to-upgrade-to-flower-1.0.rst:134
-#: ../../source/how-to-upgrade-to-flower-1.13.rst:458
-msgid "Further help"
-msgstr "Aide supplémentaire"
-
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:136
 msgid ""
 "Most official `Flower code examples "
@@ -14180,19 +14501,10 @@ msgstr ""
 "Flower <https://flower.ai/join-slack/>`_ et utilise le canal "
 "``#questions``."
 
-#: ../../source/how-to-upgrade-to-flower-1.13.rst:467
-#, fuzzy
-msgid "Important"
-msgstr "Changements importants :"
-
 #: ../../source/how-to-upgrade-to-flower-1.13.rst:469
 msgid ""
 "As we continuously enhance Flower at a rapid pace, we'll be periodically "
 "updating this guide. Please feel free to share any feedback with us!"
-msgstr ""
-
-#: ../../source/how-to-upgrade-to-flower-1.13.rst:472
-msgid "Happy migrating! 🚀"
 msgstr ""
 
 #: ../../source/how-to-upgrade-to-message-api.rst:-1
@@ -15540,7 +15852,8 @@ msgstr ""
 msgid "Arguments"
 msgstr "Amélioration de la documentation"
 
-#: ../../flwr install:1 log:1 login:1 ls:1 new:1 pull:1 run:1 stop:1
+#: ../../flwr create:1 delete:1 install:1 list:1 log:1 login:1 new:1 pull:1
+#: run:1 stop:1 supernode
 #, fuzzy
 msgid "Optional argument"
 msgstr "Améliorations facultatives"
@@ -15549,24 +15862,69 @@ msgstr "Améliorations facultatives"
 msgid "The source FAB file to install."
 msgstr ""
 
-#: ../../flwr log:1
-msgid "Get logs from a Flower project run."
+#: ../../flwr list:1
+msgid ""
+"List the details of one provided run ID or all runs in a Flower "
+"federation."
 msgstr ""
 
-#: ../../flwr log:1 login:1 ls:1 pull:1 run:1 stop:1
+#: ../../flwr list:1
+msgid "The following details are displayed:"
+msgstr ""
+
+#: ../../flwr list:1
+msgid "**Run ID:** Unique identifier for the run."
+msgstr ""
+
+#: ../../flwr list:1
+#, python-brace-format
+msgid ""
+"**FAB:** Name of the FAB associated with the run (``{FAB_ID} "
+"(v{FAB_VERSION})``)."
+msgstr ""
+
+#: ../../flwr list:1
+msgid ""
+"**Status:** Current status of the run (pending, starting, running, "
+"finished)."
+msgstr ""
+
+#: ../../flwr list:1
+msgid "**Elapsed:** Time elapsed since the run started (``HH:MM:SS``)."
+msgstr ""
+
+#: ../../flwr list:1
+msgid "**Created At:** Timestamp when the run was created."
+msgstr ""
+
+#: ../../flwr list:1
+msgid "**Running At:** Timestamp when the run started running."
+msgstr ""
+
+#: ../../flwr list:1
+msgid "**Finished At:** Timestamp when the run finished."
+msgstr ""
+
+#: ../../flwr list:1
+msgid ""
+"All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD "
+"HH:MM:SSZ``."
+msgstr ""
+
+#: ../../flwr list:1 log:1 login:1 pull:1 run:1 stop:1
 #, fuzzy
 msgid ""
 "Override federation configuration values using one of the following "
 "formats:"
 msgstr "Active la virtualenv en exécutant la commande suivante :"
 
-#: ../../flwr log:1 login:1 ls:1 pull:1 run:1 stop:1
+#: ../../flwr list:1 log:1 login:1 pull:1 run:1 stop:1
 msgid ""
 "--federation-config '<k1>=<v1> <k2>=<v2>' | --federation-config "
 "'<k1>=<v1>' --federation-config '<k2>=<v2>'"
 msgstr ""
 
-#: ../../flwr log:1 login:1 ls:1 pull:1 run:1 stop:1
+#: ../../flwr list:1 log:1 login:1 pull:1 run:1 stop:1
 msgid ""
 "When providing key-value pairs, values can be of any type supported by "
 "TOML (e.g., bool, int, float, string). The specified keys (<k1> and <k2> "
@@ -15575,20 +15933,54 @@ msgid ""
 "to be overridden."
 msgstr ""
 
-#: ../../flwr log:1
-msgid "Flag to stream or print logs from the Flower run"
+#: ../../flwr list:1
+msgid "List all runs"
 msgstr ""
 
-#: ../../flwr log ls run stop
+#: ../../flwr create delete list log run stop supernode
 #, fuzzy
 msgid "default"
 msgstr "Flux de travail"
+
+#: ../../flwr list:1 run:1 supernode
+msgid "``False``"
+msgstr ""
+
+#: ../../flwr list:1
+msgid "Specific run ID to display"
+msgstr ""
+
+#: ../../flwr create:1 delete:1 list:1 run:1 stop:1 supernode
+msgid "Format output using 'default' view or 'json'"
+msgstr ""
+
+#: ../../flwr create:1 delete:1 list:1 run:1 stop:1 supernode
+#, fuzzy
+msgid "``'default'``"
+msgstr "Flux de travail"
+
+#: ../../flwr create:1 delete:1 list:1 stop:1 supernode
+#, fuzzy
+msgid "Path of the Flower project"
+msgstr "Chargement des données"
+
+#: ../../flwr create:1 delete:1 list:1 stop:1 supernode
+msgid "Name of the federation"
+msgstr ""
+
+#: ../../flwr log:1
+msgid "Get logs from a Flower project run."
+msgstr ""
+
+#: ../../flwr log:1
+msgid "Flag to stream or print logs from the Flower run"
+msgstr ""
 
 #: ../../flwr log:1
 msgid "``True``"
 msgstr ""
 
-#: ../../flwr log:1 stop:1
+#: ../../flwr create:1 delete:1 log:1 stop:1 supernode
 #, fuzzy
 msgid "Required argument"
 msgstr "Amélioration de la documentation"
@@ -15618,85 +16010,6 @@ msgstr "Chargement des données"
 
 #: ../../flwr login:1
 msgid "Name of the federation to login into."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid ""
-"List the details of one provided run ID or all runs in a Flower "
-"federation."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "The following details are displayed:"
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "**Run ID:** Unique identifier for the run."
-msgstr ""
-
-#: ../../flwr ls:1
-#, python-brace-format
-msgid ""
-"**FAB:** Name of the FAB associated with the run (``{FAB_ID} "
-"(v{FAB_VERSION})``)."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid ""
-"**Status:** Current status of the run (pending, starting, running, "
-"finished)."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "**Elapsed:** Time elapsed since the run started (``HH:MM:SS``)."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "**Created At:** Timestamp when the run was created."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "**Running At:** Timestamp when the run started running."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "**Finished At:** Timestamp when the run finished."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid ""
-"All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD "
-"HH:MM:SSZ``."
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "List all runs"
-msgstr ""
-
-#: ../../flwr ls:1 run:1
-msgid "``False``"
-msgstr ""
-
-#: ../../flwr ls:1
-msgid "Specific run ID to display"
-msgstr ""
-
-#: ../../flwr ls:1 run:1 stop:1
-msgid "Format output using 'default' view or 'json'"
-msgstr ""
-
-#: ../../flwr ls:1 run:1 stop:1
-#, fuzzy
-msgid "``'default'``"
-msgstr "Flux de travail"
-
-#: ../../flwr ls:1 stop:1
-#, fuzzy
-msgid "Path of the Flower project"
-msgstr "Chargement des données"
-
-#: ../../flwr ls:1 stop:1
-msgid "Name of the federation"
 msgstr ""
 
 #: ../../flwr new:1
@@ -15784,6 +16097,44 @@ msgstr ""
 #, fuzzy
 msgid "The Flower run ID to stop"
 msgstr "Rejoignez la communauté de Flower"
+
+#: ../../flwr supernode:1
+#, fuzzy
+msgid "Manage SuperNodes"
+msgstr "flower-superlink"
+
+#: ../../flwr create:1 supernode
+#, fuzzy
+msgid "Add a SuperNode to the federation."
+msgstr "flower-superlink"
+
+#: ../../flwr create:1 supernode
+msgid "Path to a P-384 (or any other NIST EC curve) public key file."
+msgstr ""
+
+#: ../../flwr delete:1 supernode
+#, fuzzy
+msgid "Remove a SuperNode from the federation."
+msgstr "flower-superlink"
+
+#: ../../flwr delete:1 supernode
+#, fuzzy
+msgid "ID of the SuperNode to remove."
+msgstr "Démarrer le serveur"
+
+#: ../../flwr list:1 supernode
+#, fuzzy
+msgid "List SuperNodes in the federation."
+msgstr "flower-superlink"
+
+#: ../../flwr list:1 supernode
+#, fuzzy
+msgid "Enable verbose output"
+msgstr "Exemples de PyTorch"
+
+#: ../../flwr list:1 supernode
+msgid "Simulate the command without contacting any SuperNodes"
+msgstr ""
 
 #: ../../source/ref-api-cli.rst:19
 #, fuzzy
@@ -16114,12 +16465,12 @@ msgid ""
 "will be derived automatically from it."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp:4
-#: flwr.client.client_app.ClientApp.evaluate:12
-#: flwr.client.client_app.ClientApp.lifespan:7
-#: flwr.client.client_app.ClientApp.query:12
-#: flwr.client.client_app.ClientApp.train:12
 #: flwr.client.mod.localdp_mod.LocalDpMod:22
+#: flwr.clientapp.client_app.ClientApp:4
+#: flwr.clientapp.client_app.ClientApp.evaluate:12
+#: flwr.clientapp.client_app.ClientApp.lifespan:7
+#: flwr.clientapp.client_app.ClientApp.query:12
+#: flwr.clientapp.client_app.ClientApp.train:12
 #: flwr.clientapp.mod.localdp_mod.LocalDpMod:22
 #: flwr.common.record.array.Array:35
 #: flwr.common.record.arrayrecord.ArrayRecord:36
@@ -16495,13 +16846,13 @@ msgstr ""
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
 #: flwr.client.numpy_client.NumPyClient.evaluate
 #: flwr.client.numpy_client.NumPyClient.fit
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
 #: flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
 #: flwr.common.record.array.Array.inflate
@@ -16543,11 +16894,11 @@ msgstr ""
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
 #: flwr.client.client.Client.get_properties
-#: flwr.client.client_app.ClientApp.evaluate
-#: flwr.client.client_app.ClientApp.query
-#: flwr.client.client_app.ClientApp.train
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
 #: flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
 #: flwr.common.record.array.Array.inflate
@@ -17225,7 +17576,8 @@ msgid "Context"
 msgstr ""
 
 #: flwr.app.error.Error:1 flwr.app.metadata.Metadata:1
-#: flwr.client.client_app.ClientApp:1 flwr.client.mod.localdp_mod.LocalDpMod:1
+#: flwr.client.mod.localdp_mod.LocalDpMod:1
+#: flwr.clientapp.client_app.ClientApp:1
 #: flwr.clientapp.mod.localdp_mod.LocalDpMod:1
 #: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
 #: flwr.common.context.Context:1 flwr.common.typing.ClientMessage:1
@@ -18213,7 +18565,7 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:32:<autosummary>:1
 #: ../../source/ref-api/flwr.clientapp.rst:22:<autosummary>:1
-#: flwr.client.client_app.ClientApp:1 of
+#: flwr.clientapp.client_app.ClientApp:1 of
 #, fuzzy
 msgid "Flower ClientApp."
 msgstr "Flower ClientApp."
@@ -18344,119 +18696,119 @@ msgstr ""
 msgid "The current client properties."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp:5 of
+#: flwr.clientapp.client_app.ClientApp:5 of
 msgid ""
 "Assuming a typical ``Client`` implementation named ``FlowerClient``, you "
 "can wrap it in a ``ClientApp`` as follows::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\[action\\, "
 "mods\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.client.client_app.ClientApp.evaluate:1
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid "Register an evaluate function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`lifespan <flwr.client.ClientApp.lifespan>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
-#: flwr.client.client_app.ClientApp.lifespan:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.clientapp.client_app.ClientApp.lifespan:1 of
 msgid "Return a decorator that registers the lifespan fn with the client app."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\[action\\, mods\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
-#: flwr.client.client_app.ClientApp.query:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.clientapp.client_app.ClientApp.query:1 of
 msgid "Register a query function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\[action\\, mods\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
-#: flwr.client.client_app.ClientApp.train:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1
+#: flwr.clientapp.client_app.ClientApp.train:1 of
 msgid "Register a train function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:3
-#: flwr.client.client_app.ClientApp.query:3
-#: flwr.client.client_app.ClientApp.train:3 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:3
+#: flwr.clientapp.client_app.ClientApp.query:3
+#: flwr.clientapp.client_app.ClientApp.train:3 of
 msgid "The action name used to route messages. Defaults to \"default\"."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:5
-#: flwr.client.client_app.ClientApp.query:5
-#: flwr.client.client_app.ClientApp.train:5 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:5
+#: flwr.clientapp.client_app.ClientApp.query:5
+#: flwr.clientapp.client_app.ClientApp.train:5 of
 #, fuzzy
 msgid "A list of function-specific modifiers."
 msgstr "Simulation de moniteur"
 
-#: flwr.client.client_app.ClientApp.evaluate:8 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:8 of
 msgid "A decorator that registers an evaluate function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:13 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:13 of
 msgid "Registering an evaluate function::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:23 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:23 of
 msgid "Registering an evaluate function with a custom action name::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.evaluate:34 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:34 of
 msgid "Registering an evaluate function with a function-specific Flower Mod::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.lifespan:3
+#: flwr.clientapp.client_app.ClientApp.lifespan:3
 #: flwr.server.server_app.ServerApp.lifespan:3 of
 msgid ""
 "The decorated function should accept a `Context` object and use `yield` "
 "to define enter and exit behavior."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.query:8 of
+#: flwr.clientapp.client_app.ClientApp.query:8 of
 msgid "A decorator that registers a query function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.query:13 of
+#: flwr.clientapp.client_app.ClientApp.query:13 of
 msgid "Registering a query function::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.query:23 of
+#: flwr.clientapp.client_app.ClientApp.query:23 of
 msgid "Registering a query function with a custom action name::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.query:34 of
+#: flwr.clientapp.client_app.ClientApp.query:34 of
 msgid "Registering a query function with a function-specific Flower Mod::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.train:8 of
+#: flwr.clientapp.client_app.ClientApp.train:8 of
 msgid "A decorator that registers a train function with the ``ClientApp``."
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.train:13 of
+#: flwr.clientapp.client_app.ClientApp.train:13 of
 msgid "Registering a train function::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.train:23 of
+#: flwr.clientapp.client_app.ClientApp.train:23 of
 msgid "Registering a train function with a custom action name::"
 msgstr ""
 
-#: flwr.client.client_app.ClientApp.train:34 of
+#: flwr.clientapp.client_app.ClientApp.train:34 of
 msgid "Registering a train function with a function-specific Flower Mod::"
 msgstr ""
 
@@ -19022,26 +19374,26 @@ msgstr "serveur.stratégie.Stratégie"
 msgid ":py:obj:`flwr.clientapp.mod <flwr.clientapp.mod>`\\"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.clientapp.ClientApp.evaluate>`\\ \\(\\[action\\, "
 "mods\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ":py:obj:`lifespan <flwr.clientapp.ClientApp.lifespan>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ""
 ":py:obj:`query <flwr.clientapp.ClientApp.query>`\\ \\(\\[action\\, "
 "mods\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
+#: flwr.clientapp.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 #, fuzzy
 msgid ""
 ":py:obj:`train <flwr.clientapp.ClientApp.train>`\\ \\(\\[action\\, "
@@ -28052,9 +28404,9 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:11
 msgid ""
-"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Heng Pan`, "
-"`Javier`, `Patrick Foley`, `William Lindskog`, `William Lindskog-"
-"Munzing`, `Yan Gao` <!---TOKEN_v1.22.0-->"
+"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Dimitris "
+"Stripelis`, `Heng Pan`, `Javier`, `Mohammad Naseri`, `Patrick Foley`, "
+"`William Lindskog`, `Yan Gao` <!---TOKEN_v1.22.0-->"
 msgstr ""
 
 #: ../../source/ref-changelog.md:13 ../../source/ref-changelog.md:53
@@ -39568,6 +39920,7 @@ msgstr ""
 #: ../../source/ref-exit-codes/301.rst:16
 #: ../../source/ref-exit-codes/302.rst:16
 #: ../../source/ref-exit-codes/400.rst:11
+#: ../../source/ref-exit-codes/500.rst:14
 #: ../../source/ref-exit-codes/600.rst:11
 #: ../../source/ref-exit-codes/601.rst:10
 #: ../../source/ref-exit-codes/602.rst:14
@@ -39881,17 +40234,18 @@ msgstr ""
 
 #: ../../source/ref-exit-codes/302.rst:21
 msgid ""
-"2. Verify that both files exist and contain valid elliptic curve keys. - "
-"The private key file should be in a format compatible with elliptic curve"
-" cryptography. - The public key file should match the private key."
+"2. Verify that both files exist and contain valid elliptic curve ssh "
+"keys. - The private key file should be in a format compatible with "
+"elliptic curve cryptography. - The public key file should match the "
+"private key."
 msgstr ""
 
 #: ../../source/ref-exit-codes/302.rst:25
 msgid ""
 "3. If the files are corrupted or not in the correct format, regenerate "
-"the elliptic curve key pair and update the file paths accordingly. For "
-"example, in Linux/MacOS, **for rapid prototyping only** (not production; "
-"follow company procedures for key management):"
+"the elliptic curve ssh key pair and update the file paths accordingly. "
+"For example, in Linux/MacOS, **for rapid prototyping only** (not "
+"production; follow company procedures for key management):"
 msgstr ""
 
 #: ../../source/ref-exit-codes/400.rst:2
@@ -39924,6 +40278,42 @@ msgstr ""
 msgid ""
 "Review the accompanying error message for details on the invalid portion,"
 " and correct any syntax or structural issues."
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:2
+msgid "[500] FLWRCLI_NODE_AUTH_PUBLIC_KEY_INVALID"
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:7
+msgid ""
+"The provided public key file is invalid. Authentication requires a valid "
+"elliptic curve public key in the ssh format. This error occurs when "
+"either:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:10
+msgid ""
+"The public key file specified passed to `flwr supernode create` is "
+"invalid or unreadable."
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:16
+msgid "Ensure that the file path provided for the public key option is correct."
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:17
+msgid ""
+"Verify that the file exists and contains a valid ECDSA public key in SSH "
+"format with a standard elliptic curve following the NIST specifications "
+"(e.g. SECP384R1)."
+msgstr ""
+
+#: ../../source/ref-exit-codes/500.rst:20
+msgid ""
+"3. If the files are corrupted or not in the correct format, regenerate "
+"the elliptic curve key pair and update the file paths accordingly. For "
+"example, in Linux/MacOS, **for rapid prototyping only** (not production; "
+"follow company procedures for key management):"
 msgstr ""
 
 #: ../../source/ref-exit-codes/600.rst:2
@@ -40182,22 +40572,22 @@ msgid ""
 "the SuperLink."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:34
+#: ../../source/ref-flower-network-communication.rst:68
 msgid ""
 "Click the buttons above to toggle between the network diagrams for "
 "isolation modes **subprocess** and **process**."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:38
+#: ../../source/ref-flower-network-communication.rst:72
 #, fuzzy
 msgid "Mandatory Network Connections"
 msgstr "Collecte centralisée des données"
 
-#: ../../source/ref-flower-network-communication.rst:40
+#: ../../source/ref-flower-network-communication.rst:74
 msgid "Deployed Flower systems have at least two types of network connections:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:42
+#: ../../source/ref-flower-network-communication.rst:76
 msgid ""
 "**CLI to SuperLink (Control API)**: The ``flwr`` `CLI command <ref-api-"
 "cli.html>`_, typically run on the users workstation, is used to interface"
@@ -40211,7 +40601,7 @@ msgid ""
 "supported for local testing."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:50
+#: ../../source/ref-flower-network-communication.rst:84
 msgid ""
 "**SuperNode to SuperLink (Fleet API)**: In Flower terminology, a Flower "
 "federation is a set of SuperNodes connected to the same SuperLink. From a"
@@ -40224,23 +40614,23 @@ msgid ""
 "more), but ``insecure`` mode is supported for local testing."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:60
+#: ../../source/ref-flower-network-communication.rst:94
 #, fuzzy
 msgid "Optional Network Connections"
 msgstr "Collecte centralisée des données"
 
-#: ../../source/ref-flower-network-communication.rst:62
+#: ../../source/ref-flower-network-communication.rst:96
 msgid ""
 "Depending on the SuperLink and SuperNode configuration, Flower systems "
 "can have/use a number of additional network connections."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:66
+#: ../../source/ref-flower-network-communication.rst:100
 #, fuzzy
 msgid "Flower Components APIs"
 msgstr "Flower ClientApp."
 
-#: ../../source/ref-flower-network-communication.rst:68
+#: ../../source/ref-flower-network-communication.rst:102
 msgid ""
 "All Flower components — SuperLink, SuperNode, SuperExec, ``ServerApp`` "
 "process, and ``ClientApp`` process — expose APIs to interact with other "
@@ -40251,96 +40641,96 @@ msgid ""
 "as summarized in the table below."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:79
+#: ../../source/ref-flower-network-communication.rst:113
 #, fuzzy
 msgid "Component"
 msgstr "commun"
 
-#: ../../source/ref-flower-network-communication.rst:80
+#: ../../source/ref-flower-network-communication.rst:114
 #, fuzzy
 msgid "Default Port"
 msgstr "Flux de travail"
 
-#: ../../source/ref-flower-network-communication.rst:81
+#: ../../source/ref-flower-network-communication.rst:115
 msgid "API"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:82
+#: ../../source/ref-flower-network-communication.rst:116
 msgid "Purpose"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:83
+#: ../../source/ref-flower-network-communication.rst:117
 #, fuzzy
 msgid "SuperLink"
 msgstr "flower-superlink"
 
-#: ../../source/ref-flower-network-communication.rst:84
+#: ../../source/ref-flower-network-communication.rst:118
 msgid "9091"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:85
+#: ../../source/ref-flower-network-communication.rst:119
 #, fuzzy
 msgid "ServerAppIo API"
 msgstr "serveur"
 
-#: ../../source/ref-flower-network-communication.rst:86
+#: ../../source/ref-flower-network-communication.rst:120
 #, fuzzy
 msgid "Used by the SuperExec and the ``ServerApp`` processes"
 msgstr "Démarrer le serveur"
 
-#: ../../source/ref-flower-network-communication.rst:88
+#: ../../source/ref-flower-network-communication.rst:122
 msgid "9092"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:89
+#: ../../source/ref-flower-network-communication.rst:123
 msgid "Fleet API"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:90
+#: ../../source/ref-flower-network-communication.rst:124
 #, fuzzy
 msgid "Used by the SuperNodes"
 msgstr "Démarrer le serveur"
 
-#: ../../source/ref-flower-network-communication.rst:92
+#: ../../source/ref-flower-network-communication.rst:126
 msgid "9093"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:93
+#: ../../source/ref-flower-network-communication.rst:127
 #, fuzzy
 msgid "Control API"
 msgstr "client"
 
-#: ../../source/ref-flower-network-communication.rst:94
+#: ../../source/ref-flower-network-communication.rst:128
 msgid ""
 "Users interface with the SuperLink via this API using the `FlowerCLI "
 "<ref-api-cli.html>`_"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:96
+#: ../../source/ref-flower-network-communication.rst:130
 #, fuzzy
 msgid "SuperNode"
 msgstr "flower-superlink"
 
-#: ../../source/ref-flower-network-communication.rst:97
+#: ../../source/ref-flower-network-communication.rst:131
 msgid "9094"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:98
+#: ../../source/ref-flower-network-communication.rst:132
 #, fuzzy
 msgid "ClientAppIo API"
 msgstr "client"
 
-#: ../../source/ref-flower-network-communication.rst:99
+#: ../../source/ref-flower-network-communication.rst:133
 #, fuzzy
 msgid "Used by the SuperExec and the ``ClientApp`` processes"
 msgstr "Démarrer le serveur"
 
-#: ../../source/ref-flower-network-communication.rst:102
+#: ../../source/ref-flower-network-communication.rst:136
 #, fuzzy
 msgid "Isolation Mode"
 msgstr "Solution"
 
-#: ../../source/ref-flower-network-communication.rst:104
+#: ../../source/ref-flower-network-communication.rst:138
 msgid ""
 "Both SuperLink and SuperNode can operate in different isolation modes. "
 "The **SuperExec** is responsible for scheduling, launching, and managing "
@@ -40348,7 +40738,7 @@ msgid ""
 "process."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:108
+#: ../../source/ref-flower-network-communication.rst:142
 msgid ""
 "The ``subprocess`` isolation mode configures the SuperLink/SuperNode to "
 "automatically run the SuperExec as a subprocess upon start. The "
@@ -40361,7 +40751,7 @@ msgid ""
 "understanding of how to use both modes."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:116
+#: ../../source/ref-flower-network-communication.rst:150
 msgid ""
 "When using the ``process`` isolation mode, additional network connections"
 " are necessary to allow the external process running the SuperExec, "
@@ -40369,7 +40759,7 @@ msgid ""
 "SuperNode:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:120
+#: ../../source/ref-flower-network-communication.rst:154
 msgid ""
 "**SuperExec/ServerApp process to SuperLink (ServerAppIO API)**: Both the "
 "SuperExec for ``ServerApp``\\s and the ``ServerApp`` processes act as "
@@ -40381,7 +40771,7 @@ msgid ""
 "SuperNodes (via the SuperLink)."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:126
+#: ../../source/ref-flower-network-communication.rst:160
 msgid ""
 "**SuperExec/ClientApp process to SuperNode (ClientAppIO API)**: Both the "
 "SuperExec for ``ClientApp``\\s and the ``ClientApp`` processes act as "
@@ -40393,52 +40783,52 @@ msgid ""
 "parameters) to the SuperNode."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:135
+#: ../../source/ref-flower-network-communication.rst:169
 msgid ""
 "In the current version of Flower, both of the connections above are "
 "insecure because Flower assumes that the following groups of processes "
 "run within the same trusted network:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:139
+#: ../../source/ref-flower-network-communication.rst:173
 msgid "SuperLink + SuperExec + ``ServerApp`` process"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:140
+#: ../../source/ref-flower-network-communication.rst:174
 msgid "SuperNode + SuperExec + ``ClientApp`` process"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:142
+#: ../../source/ref-flower-network-communication.rst:176
 msgid ""
 "Each group must remain inside a single trusted network. They should never"
 " communicate with each other over untrusted networks (e.g., the public "
 "internet)."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:146
+#: ../../source/ref-flower-network-communication.rst:180
 #, fuzzy
-msgid "User Authentication"
+msgid "Account Authentication"
 msgstr "Vérifie l'installation"
 
-#: ../../source/ref-flower-network-communication.rst:148
+#: ../../source/ref-flower-network-communication.rst:182
 msgid ""
-"When user authentication is enabled, Flower uses an OIDC-compatible "
+"When account authentication is enabled, Flower uses an OIDC-compatible "
 "server to authenticate requests:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:151
+#: ../../source/ref-flower-network-communication.rst:185
 msgid ""
 "**SuperLink to OIDC server**: A SuperLink can optionally be configured to"
 " only allow authenticated users to interact with it. In this setting, the"
 " Flower SuperLink acts as a REST client to the OIDC-compatible server."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:156
+#: ../../source/ref-flower-network-communication.rst:190
 #, fuzzy
 msgid "Application-specific Connections"
 msgstr "Simulation de moniteur"
 
-#: ../../source/ref-flower-network-communication.rst:158
+#: ../../source/ref-flower-network-communication.rst:192
 msgid ""
 "Users who write Flower Apps (``ServerApp`` and ``ClientApp``) can also "
 "make additional network requests. This is, strictly speaking, not part of"
@@ -40448,12 +40838,12 @@ msgid ""
 "want to allow."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:164
+#: ../../source/ref-flower-network-communication.rst:198
 #, fuzzy
 msgid "Typical examples include:"
 msgstr "Voici quelques exemples :"
 
-#: ../../source/ref-flower-network-communication.rst:166
+#: ../../source/ref-flower-network-communication.rst:200
 msgid ""
 "**ClientApp to Database**: ``ClientApp`` instances typically need to be "
 "able to access the data to perform the action they have been designed for"
@@ -40464,7 +40854,7 @@ msgid ""
 "likely be different to the illustration above."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:172
+#: ../../source/ref-flower-network-communication.rst:206
 msgid ""
 "**ServerApp to Database**: ``ServerApp`` instances might want to access "
 "the data to perform the action they have been designed for (e.g. evaluate"
@@ -40474,7 +40864,7 @@ msgid ""
 "the ``ServerApp`` components."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:177
+#: ../../source/ref-flower-network-communication.rst:211
 msgid ""
 "**ServerApp to metric logging service**: Metric logging services like "
 "TensorBoard, MLFlow and Weights & Biases are often used to track the "
@@ -40482,12 +40872,12 @@ msgid ""
 "acts as a client to the metric logging service."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:183
+#: ../../source/ref-flower-network-communication.rst:217
 #, fuzzy
 msgid "Communication Model"
 msgstr "Solution"
 
-#: ../../source/ref-flower-network-communication.rst:185
+#: ../../source/ref-flower-network-communication.rst:219
 msgid ""
 "During real-world deployment, the push/pull communication model adopted "
 "by each component can influence decisions related to resource "
@@ -40496,14 +40886,14 @@ msgid ""
 "the Flower components:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:190
+#: ../../source/ref-flower-network-communication.rst:224
 msgid ""
 "**SuperLink ↔ SuperNode (Fleet API)**: The SuperNode pulls/pushes "
 "Messages from/to the SuperLink via the Fleet API. The SuperNode also "
 "pulls the FAB if a new run is being executed."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:193
+#: ../../source/ref-flower-network-communication.rst:227
 msgid ""
 "**SuperLink ↔ ServerApp (ServerAppIo API)**: The ``ServerApp`` process "
 "pulls/pushes Messages from/to the SuperLink via the ServerAppIo API. The "
@@ -40512,7 +40902,7 @@ msgid ""
 " to the SuperLink."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:197
+#: ../../source/ref-flower-network-communication.rst:231
 msgid ""
 "**SuperNode ↔ ClientApp (ClientAppIo API)**: The ``ClientApp`` process "
 "pulls/pushes Messages from/to the SuperNode via the ClientAppIo API. The "
@@ -42783,24 +43173,6 @@ msgid ""
 "``pyproject.toml`` file and install it in your environment."
 msgstr ""
 
-#: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:57
-#: ../../source/tutorial-series-customize-the-client-pytorch.rst:61
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:77
-#: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:66
-#, fuzzy
-msgid "First, we install the Flower package ``flwr``:"
-msgstr "Tout d'abord, nous installons les paquets nécessaires :"
-
-#: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:64
-#: ../../source/tutorial-series-customize-the-client-pytorch.rst:68
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:84
-#: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:73
-msgid ""
-"Then, we create a new Flower app called ``flower-tutorial`` using the "
-"PyTorch template. We also specify a username (``flwrlabs``) for the "
-"project:"
-msgstr ""
-
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:71
 #: ../../source/tutorial-series-customize-the-client-pytorch.rst:75
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:91
@@ -43263,11 +43635,6 @@ msgid ""
 msgstr ""
 "Avant de commencer à coder, assurons-nous que nous disposons de tout ce "
 "dont nous avons besoin."
-
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:75
-#, fuzzy
-msgid "Install dependencies"
-msgstr "Installation des dépendances"
 
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:106
 msgid ""
@@ -70665,5 +71032,159 @@ msgstr ""
 #~ "Number of nodes to keep before "
 #~ "averaging (MultiKrum). Defaults to 0, in"
 #~ " that case classical Krum is applied."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "`Charles Beauville`, `Chong Shen Ng`, "
+#~ "`Daniel J. Beutel`, `Heng Pan`, "
+#~ "`Javier`, `Patrick Foley`, `William Lindskog`,"
+#~ " `William Lindskog-Munzing`, `Yan Gao` "
+#~ "<!---TOKEN_v1.22.0-->"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "User authentication can be enabled if"
+#~ " you're using the Flower Enterprise "
+#~ "Edition (EE) Docker images. This is "
+#~ "configured in the `global.userAuth` section"
+#~ " of your `values.yml` file."
+#~ msgstr ""
+
+#~ msgid "`auth_type`: The authentication mechanism being used (e.g., oidc)."
+#~ msgstr ""
+
+#~ msgid "`validate_url`: The endpoint for validating user authentication."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To use an existing secret that "
+#~ "contains the user authentication "
+#~ "configuration, set `existingSecret` to the "
+#~ "name of the existing secret:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note that the existing secret must "
+#~ "contain the key `user-auth-config.yml`:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Configure SuperLink for user authentication"
+#~ " and authorization. Private-by-default "
+#~ "runs securely with OpenID Connect and"
+#~ " OpenFGA."
+#~ msgstr ""
+
+#~ msgid "Authenticate Users via OpenID Connect"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this guide, you'll learn how to"
+#~ " configure SuperLink with user-level "
+#~ "authentication and authorization, and how "
+#~ "to log in using the ``flwr`` CLI."
+#~ " Once logged in, any users that "
+#~ "are authorized on the SuperLink can "
+#~ "run Flower CLI commands that interact"
+#~ " with the SuperLink."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "With user authentication and authorization "
+#~ "enabled, only users that have submitted"
+#~ " the ``flwr run`` command can view"
+#~ " and interact with their runs. This"
+#~ " means that your runs are **private"
+#~ " by default**, ensuring that only "
+#~ "authorized users can access them."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To enable user authentication and "
+#~ "authorization, the SuperLink must be "
+#~ "deployed with an `OpenID Connect (OIDC)"
+#~ " <https://openid.net/developers/how-connect-works/>`_"
+#~ " provider and an `OpenFGA "
+#~ "<https://openfga.dev/>`_ server. The OIDC "
+#~ "provider is used for user "
+#~ "authentication, while OpenFGA is used "
+#~ "for fine-grained access control. This"
+#~ " means an authenticated user can only"
+#~ " run ``flwr`` CLI commands on the "
+#~ "SuperLink if they have been granted "
+#~ "the necessary permissions by the "
+#~ "SuperLink administrator. When enabled, both"
+#~ " user authentication and authorization must"
+#~ " be configured on the SuperLink."
+#~ msgstr ""
+
+#~ msgid "Enable User Authentication and Authorization on the SuperLink"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Save this file as ``user-auth-"
+#~ "config.yaml``. Then pass it to the "
+#~ "SuperLink via the ``--user-auth-config``"
+#~ " flag when deploying the SuperLink:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To authorize a user, the SuperLink "
+#~ "administrator must add the user's OIDC"
+#~ " ``sub`` claim to the OpenFGA store"
+#~ " with the appropriate relation."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Once a SuperLink with user "
+#~ "authentication and authorization is up "
+#~ "and running, a user can interface "
+#~ "with it after installing the ``flwr``"
+#~ " PyPI package via the Flower CLI. "
+#~ "Then, ensure that the ``enable-user-"
+#~ "auth`` field is set to ``true`` in"
+#~ " the federation section in the "
+#~ "``pyproject.toml`` of the Flower app you"
+#~ " want to run:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "User authentication and authorization is "
+#~ "only supported with TLS connections."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "With the above steps completed, you "
+#~ "can now run ``flwr`` CLI commands "
+#~ "against a SuperLink setup with user "
+#~ "authentication and authorization. For example,"
+#~ " as an authorized user, you can "
+#~ "run the ``flwr run`` command to "
+#~ "start a Flower app:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the user does not have the "
+#~ "necessary permissions to run the "
+#~ "command, an error will be returned:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "When user authentication is enabled, "
+#~ "Flower uses an OIDC-compatible server"
+#~ " to authenticate requests:"
+#~ msgstr ""
+
+#~ msgid "Path to the public key file."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "2. Verify that both files exist "
+#~ "and contain valid elliptic curve keys."
+#~ " - The private key file should "
+#~ "be in a format compatible with "
+#~ "elliptic curve cryptography. - The "
+#~ "public key file should match the "
+#~ "private key."
 #~ msgstr ""
 
