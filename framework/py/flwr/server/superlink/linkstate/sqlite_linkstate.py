@@ -785,7 +785,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         return cast(bytes, rows[0]["public_key"])
 
     def get_node_id_by_public_key(self, public_key: bytes) -> Optional[int]:
-        """Get `node_id` for the specified `public_key`."""
+        """Get `node_id` for the specified `public_key` if it exists and is not
+        deleted."""
         query = "SELECT node_id FROM node WHERE public_key = ? AND status != ?;"
         rows = self.query(query, (public_key, NodeStatus.DELETED))
 
