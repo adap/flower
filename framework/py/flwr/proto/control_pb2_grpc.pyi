@@ -44,19 +44,19 @@ class ControlStub:
         flwr.proto.control_pb2.PullArtifactsResponse]
     """Pull artifacts generated during a run (flwr pull)"""
 
-    CreateNodeCli: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.control_pb2.CreateNodeCliRequest,
-        flwr.proto.control_pb2.CreateNodeCliResponse]
-    """Add SuperNode"""
+    RegisterNode: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.RegisterNodeRequest,
+        flwr.proto.control_pb2.RegisterNodeResponse]
+    """Register SuperNode"""
 
-    DeleteNodeCli: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.control_pb2.DeleteNodeCliRequest,
-        flwr.proto.control_pb2.DeleteNodeCliResponse]
-    """Remove SuperNode"""
+    UnregisterNode: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.UnregisterNodeRequest,
+        flwr.proto.control_pb2.UnregisterNodeResponse]
+    """Unregister SuperNode"""
 
-    ListNodesCli: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.control_pb2.ListNodesCliRequest,
-        flwr.proto.control_pb2.ListNodesCliResponse]
+    ListNodes: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.ListNodesRequest,
+        flwr.proto.control_pb2.ListNodesResponse]
     """List SuperNodes"""
 
 
@@ -118,26 +118,26 @@ class ControlServicer(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def CreateNodeCli(self,
-        request: flwr.proto.control_pb2.CreateNodeCliRequest,
+    def RegisterNode(self,
+        request: flwr.proto.control_pb2.RegisterNodeRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.control_pb2.CreateNodeCliResponse:
-        """Add SuperNode"""
+    ) -> flwr.proto.control_pb2.RegisterNodeResponse:
+        """Register SuperNode"""
         pass
 
     @abc.abstractmethod
-    def DeleteNodeCli(self,
-        request: flwr.proto.control_pb2.DeleteNodeCliRequest,
+    def UnregisterNode(self,
+        request: flwr.proto.control_pb2.UnregisterNodeRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.control_pb2.DeleteNodeCliResponse:
-        """Remove SuperNode"""
+    ) -> flwr.proto.control_pb2.UnregisterNodeResponse:
+        """Unregister SuperNode"""
         pass
 
     @abc.abstractmethod
-    def ListNodesCli(self,
-        request: flwr.proto.control_pb2.ListNodesCliRequest,
+    def ListNodes(self,
+        request: flwr.proto.control_pb2.ListNodesRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.control_pb2.ListNodesCliResponse:
+    ) -> flwr.proto.control_pb2.ListNodesResponse:
         """List SuperNodes"""
         pass
 

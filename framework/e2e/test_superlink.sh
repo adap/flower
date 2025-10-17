@@ -78,9 +78,9 @@ sl_pid=$(pgrep -f "flower-superlink")
 sleep 3
 
 if [ "$2" = "client-auth" ]; then
-  # Create two SuperNodes using the Flower CLI
-  flwr supernode create keys/client_credentials_1.pub "." e2e
-  flwr supernode create keys/client_credentials_2.pub "." e2e
+  # Register two SuperNodes using the Flower CLI
+  flwr supernode register keys/client_credentials_1.pub "." e2e
+  flwr supernode register keys/client_credentials_2.pub "." e2e
 fi
 
 timeout 5m flower-supernode $client_arg $rest_arg_supernode \
