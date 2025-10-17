@@ -199,6 +199,26 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
         assert response.node.node_id == node_id
 
+    def test_create_node_with_existing_active_key(self) -> None:
+        """Create a node with an existing active public key."""
+        # Prepare
+        node_id = self._create_dummy_node()
+        request = CreateNodeRequest(public_key=self.node_pk)
+
+        # Execute first time
+        response, call = self._create_node.with_call(request=request)
+        assert isinstance(response, CreateNodeResponse)
+        assert grpc.StatusCode.OK == call.code()
+        assert response.node.node_id == node_id
+        # Set node status as ONLINE
+        self.state.acknowledge_node_heartbeat(node_id=node_id, heartbeat_interval=10)
+
+        # Execute second time - should fail since there is already
+        # an active SuperNode with the same public key
+        with self.assertRaises(grpc.RpcError) as cm:
+            self._create_node.with_call(request=request)
+        assert cm.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
+
     def test_delete_node(self) -> None:
         """Test `DeleteNode`."""
         # Prepare
