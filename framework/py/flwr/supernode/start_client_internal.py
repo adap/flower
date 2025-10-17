@@ -444,7 +444,6 @@ def _push_messages(
     # This is to ensure that only one message is processed at a time
     # Wait until a reply message is available
     while not (reply_messages := state.get_messages(is_reply=True)):
-        print("Waiting for the reply...")
         time.sleep(0.5)
 
     for message in reply_messages:
