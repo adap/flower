@@ -2,6 +2,10 @@
 .. meta::
     :description: Enable authentication for SuperNodes and SuperLink in Flower with public key authentication, securing federated learning via TLS connections.
 
+.. |flower_cli_supernode_link| replace:: ``Flower CLI``
+
+.. _flower_cli_supernode_link: ref-api-cli.html#flwr-supernode
+
 Authenticate SuperNodes
 =======================
 
@@ -42,10 +46,6 @@ node's identity and is only available when encrypted connections (SSL/TLS) are e
     <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_ example
     for a complete self-contained example on how to setup TLS and node authentication.
 
-.. note::
-
-    This guide covers a preview feature that might change in future versions of Flower.
-
 Generate authentication keys
 ----------------------------
 
@@ -82,11 +82,55 @@ that the authentication feature can only be enabled in the presence of TLS.
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
-        --auth-list-public-keys keys/client_public_keys.csv
+        --enable-supernode-auth
 
 .. dropdown:: Understand the command
 
-    * ``--auth-list-public-keys``: Specify the path to a CSV file storing the public keys of all SuperNodes that should be allowed to connect with the SuperLink. A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas. Refer to the code sample, which contains a CSV file with two known node public keys.
+    * ``--enable-supernode-auth``: Enables SuperNode authentication therefore only Supernodes that are first register on the SuperLink will be able to establish a connection.
+
+Register SuperNodes
+-------------------
+
+Once your SuperLink is running, the next step is to register the SuperNodes that will be
+allowed to connect to it. This process is handled through the
+|flower_cli_supernode_link|_ using the public keys previously generated for each
+SuperNode you plan to connect to the SuperLink.
+
+Here's how this looks in code:
+
+.. code-block:: bash
+
+    # flwr supernode register <supernode-pub-key> <app> <federation>
+    $ flwr supernode register keys/client_credentials_1.pub . local-deployment
+
+Next, let’s register the second SuperNode as well:
+
+.. code-block:: bash
+
+    $ flwr supernode register keys/client_credentials_2.pub . local-deployment
+
+You can list the registered SuperNodes using the following command:
+
+.. code-block:: bash
+
+    # flwr supernode list <app> <federation>
+    $ flwr supernode list . local-deployment
+
+This will display the IDs of the SuperNodes you just registered as well as their status.
+You should see a table similar to the following:
+
+.. code-block:: bash
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃       Node ID        ┃   Owner    ┃   Status   ┃ Elapsed  ┃   Status Changed @   ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+    │ 16019329408659850374 │ sys_noauth │ registered │          │ N/A                  │
+    ├──────────────────────┼────────────┼────────────┼──────────┼──────────────────────┤
+    │ 8392976743692794070  │ sys_noauth │ registered │          │ N/A                  │
+    └──────────────────────┴────────────┴────────────┴──────────┴──────────────────────┘
+
+The status of the SuperNodes will change after they connect to the SuperLink. Let's
+proceed and laucnh the SuperNodes.
 
 Enable node authentication in SuperNode
 ---------------------------------------
@@ -121,6 +165,70 @@ private key:
         --clientappio-api-address 0.0.0.0:9095 \
         --node-config="partition-id=1 num-partitions=2" \
         --auth-supernode-private-key keys/client_credentials_2
+
+After connecting both SuperNodes, you can check the status of the SuperNodes again. You
+will notice their status is now ``online``:
+
+.. code-block:: bash
+
+    $ flwr supernode list . local-deployment
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+    │ 16019329408659850374 │ sys_noauth │ online  │ 00:00:30 │ 2025-10-13 13:40:47Z │
+    ├──────────────────────┼────────────┼─────────┼──────────┼──────────────────────┤
+    │ 8392976743692794070  │ sys_noauth │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
+    └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
+
+Unregister SuperNodes
+---------------------
+
+.. warning::
+
+    This is a destructive operation. Unregistering a SuperNode is permanent and cannot
+    be undone. If you wish to connect a SuperNode again, a new key pair is needed.
+
+At anypoint you can unregister a SuperNode from the SuperLink (even if it has never
+connected). This will prevent the SuperNode from making future request to the SuperLink.
+In other words, it will no longer be authorized to pull/send, or participate in ongoing
+or future runs. Unregistering a SuperNode can be done via the
+|flower_cli_supernode_link|_ as follows:
+
+.. code-block:: bash
+
+    # flwr supernode unregister <node-id> <app> <federation>
+    $ flwr supernode unregister 16019329408659850374 . local-deployment
+
+The above command unregisters the first SuperNode. You can verify this by listing the
+SuperNodes again:
+
+.. code-block:: bash
+
+    $ flwr supernode list . local-deployment
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+    │ 8392976743692794070  │ sys_noauth │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
+    └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
+
+If you pass the ``--verbose`` flag to the previous command you'll see that the status of
+the unregistered SuperNode has changed to ``unregistered``. By default, unregistered
+SuperNodes are hidden because they can no longer reconnect to the SuperLink. That's
+right, **if you wish to connect a second SuperNode a new EC key pair is needed.**
+
+.. code-block:: bash
+
+    $ flwr supernode list . local-deployment --verbose
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃       Node ID        ┃   Owner    ┃    Status   ┃ Elapsed  ┃   Status Changed @   ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+    │ 16019329408659850374 │ sys_noauth │    online   │ 00:00:30 │ 2025-10-13 13:40:47Z │
+    ├──────────────────────┼────────────┼─────────────┼──────────┼──────────────────────┤
+    │ 8392976743692794070  │ sys_noauth │ unregisterd │ 00:00:22 │ 2025-10-13 13:52:21Z │
+    └──────────────────────┴────────────┴─────────────┴──────────┴──────────────────────┘
 
 Security notice
 ---------------
