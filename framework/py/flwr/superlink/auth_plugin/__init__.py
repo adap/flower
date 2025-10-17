@@ -15,41 +15,12 @@
 """Account auth plugin for ControlServicer."""
 
 
-from flwr.common.constant import AuthnType, AuthzType
-
 from .auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 from .noop_auth_plugin import NoOpControlAuthnPlugin, NoOpControlAuthzPlugin
-
-try:
-    from flwr.ee import get_control_authn_ee_plugins, get_control_authz_ee_plugins
-except ImportError:
-
-    def get_control_authn_ee_plugins() -> dict[str, type[ControlAuthnPlugin]]:
-        """Return all Control API authentication plugins for EE."""
-        return {}
-
-    def get_control_authz_ee_plugins() -> dict[str, type[ControlAuthzPlugin]]:
-        """Return all Control API authorization plugins for EE."""
-        return {}
-
-
-def get_control_authn_plugins() -> dict[str, type[ControlAuthnPlugin]]:
-    """Return all Control API authentication plugins."""
-    ee_dict: dict[str, type[ControlAuthnPlugin]] = get_control_authn_ee_plugins()
-    return ee_dict | {AuthnType.NOOP: NoOpControlAuthnPlugin}
-
-
-def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
-    """Return all Control API authorization plugins."""
-    ee_dict: dict[str, type[ControlAuthzPlugin]] = get_control_authz_ee_plugins()
-    return ee_dict | {AuthzType.NOOP: NoOpControlAuthzPlugin}
-
 
 __all__ = [
     "ControlAuthnPlugin",
     "ControlAuthzPlugin",
     "NoOpControlAuthnPlugin",
     "NoOpControlAuthzPlugin",
-    "get_control_authn_plugins",
-    "get_control_authz_plugins",
 ]
