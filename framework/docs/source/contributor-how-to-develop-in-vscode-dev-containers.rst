@@ -1,9 +1,11 @@
-Develop in VSCode Dev Containers
+Develop in Dev Containers
 ================================
 
 When working on the Flower framework we want to ensure that all contributors use the
 same developer environment to format code or run tests. For this purpose we are using
-the VSCode Remote Containers extension. What is it? Read the following quote:
+`Development Containers
+<https://containers.dev/>`_ in combination with the VSCode Remote Containers extension.
+What is it? Read the following quote:
 
     The Visual Studio Code Remote - Containers extension lets you use a Docker container
     as a fully-featured development environment. It allows you to open any folder inside
@@ -22,11 +24,16 @@ the VSCode Remote Containers extension. What is it? Read the following quote:
 Source: `Official VSCode documentation
 <https://code.visualstudio.com/docs/devcontainers/containers>`_
 
+Support for Dev Containers is not limited to VS Code alone, but is also being offered by
+other editors as well. An official list of supporting tools and services can be found
+`here
+<https://containers.dev/supporting>`_.
+
 Getting started
 ---------------
 
 Configuring and setting up the ``Dockerfile`` as well the configuration for the
-devcontainer can be a bit more involved. The good thing is you don't have to do it.
+dev container can be a bit more involved. The good thing is you don't have to do it.
 Usually it should be enough to install `Docker
 <https://docs.docker.com/engine/install/>`_ on your system and ensure its available on
 your command line. Additionally, install the `VSCode Containers Extension
