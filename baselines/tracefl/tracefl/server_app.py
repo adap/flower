@@ -83,8 +83,8 @@ def main(grid: Grid, context: Context) -> None:
         seed = int(context.run_config.get("tracefl.random-seed", 42))
         _set_random_seed(seed)
         logging.info("🎲 Deterministic mode enabled with seed: %s", seed)
-        # Force fraction_train to 0 for deterministic sampling
-        fraction_train = 0.0
+        # Keep fraction_train as configured, but ensure min_train_nodes is used
+        # Don't force fraction_train to 0.0 as it skips training entirely
     else:
         logging.info("🎲 Random mode enabled (non-deterministic)")
 
