@@ -34,6 +34,7 @@ class TraceFLStrategy(FedAvg):
         enable_beta: bool = True,
         client_weights_normalization: bool = True,
         cfg: Any | None = None,
+        output_dir: Any | None = None,
     ) -> None:
         """Initialize TraceFL strategy.
 
@@ -90,6 +91,7 @@ class TraceFLStrategy(FedAvg):
         self.enable_beta = enable_beta
         self.client_weights_normalization = client_weights_normalization
         self.cfg = cfg
+        self.output_dir = output_dir
 
         # Storage for client models and metadata
         # round_id -> {client_id -> model_state_dict}
@@ -381,5 +383,8 @@ class TraceFLStrategy(FedAvg):
         if self._result_logger is None and self.cfg is not None:
             from .results_logging import ExperimentResultLogger
 
-            self._result_logger = ExperimentResultLogger(self.cfg)
+            self._result_logger = ExperimentResultLogger(
+                cfg=self.cfg,
+                output_dir=self.output_dir,
+            )
         return self._result_logger

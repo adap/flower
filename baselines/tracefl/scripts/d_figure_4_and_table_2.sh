@@ -22,6 +22,7 @@ tracefl.noise-multiplier=0.001 \
 tracefl.clipping-norm=15 \
 tracefl.use-deterministic-sampling=true \
 tracefl.random-seed=42 \
+tracefl.output-dir='results/experiment_d' \
 min-train-nodes=4 \
 fraction-train=0.4"
 
@@ -30,5 +31,6 @@ flwr run . --run-config "$RUN_CONFIG"
 
 echo "Generating plots for differential privacy analysis..."
 python -m scripts.generate_graphs \
-  --pattern "prov_dataset-mnist_model-resnet18_clients-10_alpha-0-3*.csv" \
+  --output-dir "results/experiment_d/graphs" \
+  --pattern "results/experiment_d/prov_*.csv" \
   --title "TraceFL with Differential Privacy"

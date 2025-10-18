@@ -20,6 +20,7 @@ tracefl.batch-size=32 \
 tracefl.provenance-rounds='1,2' \
 tracefl.use-deterministic-sampling=true \
 tracefl.random-seed=42 \
+tracefl.output-dir='results/experiment_a' \
 min-train-nodes=4 \
 fraction-train=0.4"
 
@@ -28,5 +29,6 @@ flwr run . --run-config "$RUN_CONFIG"
 
 echo "Generating accuracy plots..."
 python -m scripts.generate_graphs \
-  --pattern "prov_dataset-mnist_model-resnet18_clients-10_alpha-0-3*.csv" \
+  --output-dir "results/experiment_a/graphs" \
+  --pattern "results/experiment_a/prov_*.csv" \
   --title "TraceFL Localization Accuracy (MNIST, 10 Clients, α=0.3)"

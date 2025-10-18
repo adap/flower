@@ -93,13 +93,16 @@ class ExperimentResultLogger:
 
     cfg: Any
     results_dir: Path = Path("results_csvs")
+    output_dir: Path | None = None
     _records: list[dict[str, Any]] = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:
         """Initialize the results logger after object creation."""
-        self.results_dir.mkdir(parents=True, exist_ok=True)
+        # Use output_dir if provided, otherwise fall back to results_dir
+        target_dir = self.output_dir if self.output_dir else self.results_dir
+        target_dir.mkdir(parents=True, exist_ok=True)
         self._file_path = (
-            self.results_dir / f"prov_{_build_experiment_key(self.cfg)}.csv"
+            target_dir / f"prov_{_build_experiment_key(self.cfg)}.csv"
         )
         if self._file_path.exists():
             try:

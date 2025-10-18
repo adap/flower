@@ -54,15 +54,26 @@ def main(argv: Sequence[str] | None = None) -> None:
     """Generate graphs from experiment results."""
     args = _parse_args(argv)
 
-    results_dir: Path = args.results_dir
-    if not results_dir.exists():
-        raise SystemExit(f"Results directory '{results_dir}' does not exist")
+    # Check if pattern includes a path (e.g., "results/experiment_a/prov_*.csv")
+    pattern_path = Path(args.pattern)
+    if pattern_path.parent != Path("."):
+        # Pattern includes directory, use it directly
+        csv_paths = sorted(Path(".").glob(args.pattern))
+        if not csv_paths:
+            raise SystemExit(
+                f"No provenance CSVs matching '{args.pattern}' found"
+            )
+    else:
+        # Pattern is just a filename pattern, use results_dir
+        results_dir: Path = args.results_dir
+        if not results_dir.exists():
+            raise SystemExit(f"Results directory '{results_dir}' does not exist")
 
-    csv_paths = sorted(results_dir.glob(args.pattern))
-    if not csv_paths:
-        raise SystemExit(
-            f"No provenance CSVs matching '{args.pattern}' found in {results_dir}"
-        )
+        csv_paths = sorted(results_dir.glob(args.pattern))
+        if not csv_paths:
+            raise SystemExit(
+                f"No provenance CSVs matching '{args.pattern}' found in {results_dir}"
+            )
 
     artefacts = plot_accuracy_curves(
         csv_paths,

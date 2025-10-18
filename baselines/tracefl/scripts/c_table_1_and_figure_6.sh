@@ -22,6 +22,7 @@ tracefl.faulty-clients-ids='[0]' \
 tracefl.label2flip='{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0,13:0}' \
 tracefl.use-deterministic-sampling=true \
 tracefl.random-seed=42 \
+tracefl.output-dir='results/experiment_c' \
 min-train-nodes=10 \
 fraction-train=1.0"
 
@@ -30,5 +31,6 @@ flwr run . --run-config "$RUN_CONFIG"
 
 echo "Generating plots for faulty client detection..."
 python -m scripts.generate_graphs \
-  --pattern "prov_dataset-mnist_model-resnet18_clients-10_alpha-0-7*.csv" \
+  --output-dir "results/experiment_c/graphs" \
+  --pattern "results/experiment_c/prov_*.csv" \
   --title "TraceFL Faulty Client Detection"

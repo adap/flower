@@ -112,6 +112,11 @@ def main(grid: Grid, context: Context) -> None:
         f"{cfg.data_dist.architecture}"
     )
 
+    # Parse output directory from config
+    output_dir_str = context.run_config.get("tracefl.output-dir", "results")
+    output_dir = Path(output_dir_str)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     # Load global model
     # Initialize model based on configuration
     model_dict = initialize_model(cfg.data_dist.model_name, cfg.data_dist)
@@ -128,6 +133,7 @@ def main(grid: Grid, context: Context) -> None:
         enable_beta=cfg.enable_beta,
         client_weights_normalization=cfg.client_weights_normalization,
         cfg=cfg,
+        output_dir=output_dir,
     )
 
     # Set server test data for provenance analysis BEFORE applying DP wrapper
@@ -175,7 +181,9 @@ def main(grid: Grid, context: Context) -> None:
     # Save final model to disk
     print("\nSaving final model to disk...")
     state_dict = result.arrays.to_torch_state_dict()
-    torch.save(state_dict, "final_model.pt")
+    model_path = output_dir / "final_model.pt"
+    torch.save(state_dict, model_path)
+    print(f"Model saved to: {model_path}")
 
     # Print TraceFL configuration info
     print("\n🎯 TraceFL Configuration:")
