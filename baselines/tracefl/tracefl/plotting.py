@@ -76,7 +76,7 @@ def _derive_run_label(path: Path) -> str:
     name = path.stem
     if name.startswith("prov_"):
         name = name[5:]
-    
+
     # Create cleaner labels for common experiment patterns
     if "experiment_a" in name:
         return "Localization Accuracy (α=0.3)"
@@ -190,7 +190,7 @@ def _plot_single_run(
     ax.set_xlabel("Communication Rounds")
     ax.set_ylabel("Accuracy (%)")
     ax.set_ylim(0, 105)
-    
+
     # Create a cleaner title by truncating long run labels
     if len(run_label) > 50:
         title = run_label[:47] + "..."
@@ -241,7 +241,7 @@ def _plot_combined_runs(
     ax.set_ylim(0, 105)
     if title:
         ax.set_title(title, fontsize=14, pad=20)
-    ax.legend(title="Run", bbox_to_anchor=(1.05, 1), loc='upper left')
+    ax.legend(title="Run", bbox_to_anchor=(1.05, 1), loc="upper left")
     fig.tight_layout()
 
     fig.savefig(artefacts.png_dir / "combined_accuracy.png", dpi=300)

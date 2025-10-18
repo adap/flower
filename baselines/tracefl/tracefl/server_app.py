@@ -102,9 +102,7 @@ def main(grid: Grid, context: Context) -> None:
     # Log architecture detection results
     print("🔧 Architecture Detection:")
     print(f"   Dataset: {cfg.data_dist.dname} ({cfg.data_dist.architecture})")
-    print(
-        f"   Model: {cfg.data_dist.model_name} ({cfg.data_dist.model_architecture})"
-    )
+    print(f"   Model: {cfg.data_dist.model_name} ({cfg.data_dist.model_architecture})")
     print(
         f"   Classes: {cfg.data_dist.num_classes}, "
         f"Channels: {cfg.data_dist.channels}"
