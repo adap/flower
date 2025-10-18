@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# TraceFL baseline: Single alpha=0.3 experiment (matches TraceFL-main)
+# TraceFL baseline: Single alpha=0.3 experiment (matches original TraceFL)
 
 set -euo pipefail
 

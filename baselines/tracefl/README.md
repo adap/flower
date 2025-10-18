@@ -248,11 +248,11 @@ Based on the paper and our replication:
 - **Reproducible**: Deterministic sampling with configurable random seeds ensures consistent results
 - **Efficient**: Runs on standard hardware (CPU-only mode supported)
 
-## Comparison with TraceFL-main
+## Comparison with Original TraceFL Implementation
 
 This Flower baseline differs from the [original TraceFL implementation](https://github.com/SEED-VT/TraceFL) in the following ways:
 
-| Aspect | TraceFL-main | This Flower Baseline |
+| Aspect | Original TraceFL | This Flower Baseline |
 | ------ | ------------ | -------------------- |
 | **FL Framework** | Custom Flower 1.9.0 | Flower 1.22.0+ (latest) |
 | **Configuration** | Hydra + YAML files | Flower's `pyproject.toml` + run-config |

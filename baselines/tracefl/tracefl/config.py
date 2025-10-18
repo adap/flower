@@ -1,4 +1,14 @@
-"""Configuration helper for TraceFL baseline."""
+"""Configuration helper for TraceFL baseline.
+
+This module handles:
+1. Parsing Flower's run_config into TraceFL configuration
+2. Detecting model architecture (CNN/ResNet/Transformer) from model name
+3. Validating model-dataset compatibility (e.g., transformers for text)
+4. Normalizing configuration values from CLI string overrides
+
+The main entry point is create_tracefl_config() which returns a 
+SimpleNamespace object matching original TraceFL's configuration structure.
+"""
 
 import ast
 from collections.abc import Iterable, Sequence
@@ -262,7 +272,7 @@ def create_tracefl_config(context):
         run_cfg.get("tracefl.client-weights-normalization"), True
     )
 
-    # Differential privacy parameters (defaults match TraceFL-main)
+    # Differential privacy parameters (defaults match original TraceFL)
     cfg.noise_multiplier = _as_float(run_cfg.get("tracefl.noise-multiplier"), -1.0)
     cfg.clipping_norm = _as_float(run_cfg.get("tracefl.clipping-norm"), -1.0)
 

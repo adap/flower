@@ -293,7 +293,7 @@ def test(net, testloader, device, model_type="cnn"):
 
 def test_neural_network(arch, global_net_dict, server_testdata, batch_size=32):
     """Evaluate the global model on the server test data using the appropriate method.
-    This function provides the same interface as TraceFL-main for compatibility.
+    This function provides the same interface as original TraceFL for compatibility.
 
     Parameters
     ----------
@@ -362,7 +362,7 @@ def test_neural_network(arch, global_net_dict, server_testdata, batch_size=32):
                     else:
                         incorrect_indices.append(idx)
 
-        # Convert to numpy arrays then to tensors (matching TraceFL-main)
+        # Convert to numpy arrays then to tensors (matching original TraceFL)
         all_predictions = np.array(all_predictions)
         all_labels = np.array(all_labels)
         correct_indices = torch.from_numpy(np.array(correct_indices))
@@ -425,7 +425,7 @@ def test_neural_network(arch, global_net_dict, server_testdata, batch_size=32):
                     else:
                         incorrect_indices.append(idx)
 
-        # Convert to numpy arrays then to tensors (matching TraceFL-main)
+        # Convert to numpy arrays then to tensors (matching original TraceFL)
         all_predictions = np.array(all_predictions)
         all_labels = np.array(all_labels)
         correct_indices = torch.from_numpy(np.array(correct_indices))

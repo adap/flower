@@ -16,7 +16,7 @@ except ImportError:
 
 
 def _get_all_layers_in_neural_network(net):
-    """Retrieve all relevant layers from the neural network. Matches TraceFL-main's
+    """Retrieve all relevant layers from the neural network. Matches original TraceFL's
     layer selection logic.
 
     Parameters
@@ -32,7 +32,7 @@ def _get_all_layers_in_neural_network(net):
     """
     layers = []
     for layer in net.children():
-        # Match TraceFL-main's layer selection
+        # Match original TraceFL's layer selection
         layer_types = [torch.nn.Linear, torch.nn.Conv2d, torch.nn.LayerNorm]
 
         # Add transformers-specific layers if available

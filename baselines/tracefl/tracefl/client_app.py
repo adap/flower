@@ -40,9 +40,17 @@ def _load_client_data(context):
         # Get client ID from context (partition-id)
         client_id = context.node_config.get("partition-id", "0")
 
-        # Debug: Print available client IDs
-        print(f"🔍 Available client IDs: {list(ds_dict['client2data'].keys())}")
-        print(f"🔍 Requested client ID: {client_id} (type: {type(client_id)})")
+        # Client ID resolution (with fallback for robustness)
+        # Log available clients to help diagnose partition mismatches
+        logging.debug(
+            "Available client IDs: %s",
+            list(ds_dict['client2data'].keys())
+        )
+        logging.debug(
+            "Requested client ID: %s (type: %s)",
+            client_id,
+            type(client_id)
+        )
 
         # Check if client ID exists (handle both string and int types)
         if str(client_id) not in [str(k) for k in ds_dict["client2data"].keys()]:

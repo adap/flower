@@ -1,6 +1,6 @@
 """Custom Differential Privacy wrapper for TraceFLStrategy.
 
-This implementation replicates TraceFL-main's DP logic from Flower 1.9.0 while being
+This implementation replicates the original TraceFL's DP logic from Flower 1.9.0 while being
 compatible with Flower 1.22.0 and TraceFLStrategy.
 """
 
@@ -21,7 +21,7 @@ class TraceFLWithDP(Strategy):
     2. TraceFLStrategy's custom aggregation
     3. Full provenance analysis support
 
-    DP Algorithm (matching TraceFL-main):
+    DP Algorithm (matching original TraceFL):
     1. Store current global model
     2. Let TraceFLStrategy aggregate client updates (weighted)
     3. Compute aggregated update: new_model - old_model
@@ -29,7 +29,7 @@ class TraceFLWithDP(Strategy):
     5. Add calibrated Gaussian noise
     6. Return clipped+noisy model
 
-    This provides the same DP guarantee as TraceFL-main while preserving
+    This provides the same DP guarantee as the original TraceFL while preserving
     all provenance analysis functionality.
     """
 
@@ -47,9 +47,9 @@ class TraceFLWithDP(Strategy):
         strategy : Strategy
             The underlying TraceFLStrategy instance
         noise_multiplier : float
-            Noise multiplier for Gaussian mechanism (matches TraceFL-main)
+            Noise multiplier for Gaussian mechanism (matches original TraceFL)
         clipping_norm : float
-            L2 norm bound for gradient clipping (matches TraceFL-main)
+            L2 norm bound for gradient clipping (matches original TraceFL)
         num_sampled_clients : int
             Number of clients sampled per round (for noise calibration)
         """
@@ -101,6 +101,15 @@ class TraceFLWithDP(Strategy):
         This matches Flower 1.9.0's aggregate_fit logic but adapted for
         post-aggregation clipping (which is mathematically equivalent when
         using weighted aggregation).
+        
+        IMPORTANT TIMING:
+        TraceFLStrategy.aggregate_train() extracts client models BEFORE calling
+        super().aggregate_train(), so provenance analysis gets access to 
+        ORIGINAL client models. Only the final aggregated global model gets
+        DP noise applied, not the stored client models.
+        
+        This design preserves full provenance accuracy while still providing
+        DP guarantees for the global model.
         """
         # Let TraceFLStrategy handle aggregation and provenance analysis
         # This includes:

@@ -25,7 +25,10 @@ logging.basicConfig(
 # Create ServerApp
 app = ServerApp()
 
-# Global variable to store server data
+# Global variables for caching server data across strategy initialization
+# _SERVER_DATA: Test dataset used for provenance analysis (loaded once)
+# _CLIENT2CLASS: Mapping {client_id: {label: count}} for localization accuracy
+# These are cached to avoid redundant loading when strategy is initialized
 _SERVER_DATA = None
 _CLIENT2CLASS = None
 
@@ -82,12 +85,18 @@ def main(grid: Grid, context: Context) -> None:
     use_deterministic = str(use_deterministic).lower() == "true"
 
     if use_deterministic:
+        # Deterministic mode: Fix random seed for reproducibility
+        # This ensures the same clients are selected in each round
+        # Critical for comparing results across runs (e.g., original TraceFL vs baseline)
         seed = int(context.run_config.get("tracefl.random-seed", 42))
         _set_random_seed(seed)
         logging.info("Deterministic mode enabled with seed: %s", seed)
-        # Keep fraction_train as configured, but ensure min_train_nodes is used
-        # Don't force fraction_train to 0.0 as it skips training entirely
+        
+        # Note: fraction_train still applies, but min_train_nodes ensures
+        # at least N clients participate (prevents empty training rounds)
     else:
+        # Random mode: Clients are sampled randomly each round
+        # Useful for testing generalization across different client sets
         logging.info("Random mode enabled (non-deterministic)")
 
     # Get minimum training nodes (for deterministic mode)
@@ -135,7 +144,10 @@ def main(grid: Grid, context: Context) -> None:
         output_dir=output_dir,
     )
 
-    # Set server test data for provenance analysis BEFORE applying DP wrapper
+    # CRITICAL: Set server test data BEFORE applying DP wrapper
+    # The DP wrapper delegates attribute access to the underlying strategy,
+    # so these methods must be called on the base TraceFLStrategy instance
+    # before it gets wrapped. Calling them after wrapping would fail.
     strategy.set_server_test_data(server_data)
     strategy.set_client2class(client2class)
 
@@ -143,7 +155,7 @@ def main(grid: Grid, context: Context) -> None:
     if cfg.noise_multiplier > 0 and cfg.clipping_norm > 0:
         logging.info(">> Running DP FL")
 
-        # Wrap TraceFLStrategy with DP (matching TraceFL-main's approach)
+        # Wrap TraceFLStrategy with DP (matching original TraceFL implementation)
         dp_strategy = TraceFLWithDP(
             strategy,
             noise_multiplier=cfg.noise_multiplier,

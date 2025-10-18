@@ -187,12 +187,12 @@ def _initialize_medical_dataset(cfg, dat_partitioner_func, fetch_only_test_data)
     def apply_medical_transform(example):
         transform = Compose(
             [
-                Resize((32, 32)),  # Match TraceFL-main size
+                Resize((32, 32)),  # Match original TraceFL size
                 ToTensor(),
                 Normalize((0.5,), (0.5,)),  # Grayscale normalization
             ]
         )
-        # Convert PIL to tensor - batched mode processing (matches TraceFL-main)
+        # Convert PIL to tensor - batched mode processing (matches original TraceFL)
         example["pixel_values"] = [
             transform(img.convert("L")) for img in example["img"]
         ]
@@ -203,7 +203,7 @@ def _initialize_medical_dataset(cfg, dat_partitioner_func, fetch_only_test_data)
     # For medical datasets, use simple partitioning instead of FederatedDataset
     # This avoids the DatasetDict issue with FederatedDataset
 
-    # Apply transforms first - batched mode processing (matches TraceFL-main)
+    # Apply transforms first - batched mode processing (matches original TraceFL)
     train_transformed = train_hf.map(
         apply_medical_transform, batched=True, batch_size=256, num_proc=1
     ).with_format("torch")

@@ -193,7 +193,7 @@ class FlowerProvenance:
     def _select_provenance_data(self, min_per_label: int = 2):
         """Select a subset of test data for provenance analysis based on balanced,
         correctly predicted samples. This matches the FederatedProvTrue logic from
-        TraceFL-main.
+        original TraceFL.
 
         Parameters
         ----------
@@ -215,7 +215,7 @@ class FlowerProvenance:
 
         logging.info("Total correct predictions: %s", len(correct_indices))
 
-        # Balance dataset by label (same as TraceFL-main)
+        # Balance dataset by label (same as original TraceFL)
         balanced_indices = self._balance_dataset_by_label(
             correct_indices, actual_labels, min_per_label
         )
@@ -278,7 +278,7 @@ class FlowerProvenance:
         ):
             arch = "densenet"
 
-        # Use test_neural_network function (same as TraceFL-main)
+        # Use test_neural_network function (same as original TraceFL)
         d = test_neural_network(arch, {"model": self.global_model}, test_data)
         self.loss = d["loss"]
         self.acc = d["accuracy"]
@@ -292,7 +292,7 @@ class FlowerProvenance:
 
     def _eval_and_extract_correct_preds(self, test_data):
         """Evaluate the model on test data and extract indices and labels for correct
-        predictions. This matches the FederatedProvTrue logic from TraceFL-main.
+        predictions. This matches the FederatedProvTrue logic from original TraceFL.
 
         Parameters
         ----------
@@ -319,7 +319,7 @@ class FlowerProvenance:
         ):
             arch = "densenet"
 
-        # Use test_neural_network function (same as TraceFL-main)
+        # Use test_neural_network function (same as original TraceFL)
         d = test_neural_network(arch, {"model": self.global_model}, test_data)
         self.loss = d["loss"]
         self.acc = d["accuracy"]
@@ -330,7 +330,7 @@ class FlowerProvenance:
     def _balance_dataset_by_label(self, correct_indices, dataset_labels, min_per_label):
         """Balance the dataset by selecting a minimum number of samples per label from
         correctly predicted indices. This matches the _balanceDatasetByLabel logic from
-        TraceFL-main.
+        original TraceFL.
 
         Parameters
         ----------
@@ -377,7 +377,7 @@ class FlowerProvenance:
             return {"error": "No test data available"}
 
         try:
-            # Add time tracking (matching TraceFL-main)
+            # Add time tracking (matching original TraceFL)
             start_time = time.time()
 
             # Initialize NeuronProvenance
@@ -394,7 +394,7 @@ class FlowerProvenance:
             # Compute input provenance
             input2prov = neuron_prov.compute_input_provenance()
 
-            # Compute evaluation metrics (matching TraceFL-main)
+            # Compute evaluation metrics (matching original TraceFL)
             eval_metrics = self._compute_eval_metrics(input2prov)
             end_time = time.time()
 
@@ -422,7 +422,7 @@ class FlowerProvenance:
                 / len(self.subset_test_data),
             }
 
-            # Log results (matching TraceFL-main format)
+            # Log results (matching original TraceFL format)
             logging.info(
                 "[Round %s] TraceFL Localization Accuracy = %s || "
                 "Total Inputs Used In Prov: %s || GM_(loss, acc) (%s,%s)",
@@ -469,7 +469,7 @@ class FlowerProvenance:
 
     def _compute_eval_metrics(self, input2prov):
         """Compute evaluation metrics based on provenance information. This matches the
-        _computeEvalMetrics method from TraceFL-main.
+        _computeEvalMetrics method from original TraceFL.
 
         Parameters
         ----------
@@ -516,6 +516,18 @@ class FlowerProvenance:
             )
 
             if self._faulty_mode:
+                # FAULTY CLIENT DETECTION MODE (matches original TraceFL's FederatedProvFalse)
+                # 
+                # In this mode, we're testing if TraceFL can identify ANY faulty client
+                # that is poisoning the model, not necessarily the specific client with 
+                # the target label. This matches the paper's experimental design.
+                #
+                # Responsible clients = pre-configured faulty clients (from config)
+                # Tracing is "correct" if traced_client is in the faulty set
+                # 
+                # Note: This differs from normal mode where responsible clients are
+                # determined by label distribution. Here, we're testing fault localization,
+                # not data provenance for specific labels.
                 responsible_clients = faulty_responsible
                 res_c_string = ",".join(f"c{c}" for c in responsible_clients)
                 logging.info(

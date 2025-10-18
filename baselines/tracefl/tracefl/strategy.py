@@ -93,13 +93,25 @@ class TraceFLStrategy(FedAvg):
         self.cfg = cfg
         self.output_dir = output_dir
 
-        # Storage for client models and metadata
-        # round_id -> {client_id -> model_state_dict}
+        # Storage for client models and metadata (persists across rounds)
+        # 
+        # self.client_models: Stores client state dicts for provenance analysis
+        #   Structure: {round_id: {client_id: model_state_dict}}
+        #   Example: {1: {0: {...}, 1: {...}}, 2: {0: {...}, 2: {...}}}
+        #   Used by: NeuronProvenance to trace neuron-level contributions
+        #
+        # self.client_num_examples: Number of training examples per client per round
+        #   Structure: {round_id: {client_id: num_examples}}
+        #   Used by: Weight normalization in provenance analysis (p_k = n_k / sum(n_k))
+        #
+        # self.client2class: Label distribution for each client (all rounds combined)
+        #   Structure: {client_id: {label: count}}
+        #   Example: {0: {0: 100, 1: 50}, 1: {2: 80, 3: 120}}
+        #   Used by: Computing "responsible clients" for localization accuracy
+        #
         self.client_models: dict[int, dict[int, dict[str, Any]]] = {}
-        # round_id -> {client_id -> num_examples}
         self.client_num_examples: dict[int, dict[int, int]] = {}
         self.server_test_data: Any = None
-        # Mapping from client ID to label counts
         self.client2class: dict[int, dict[str, int]] = {}
         self._result_logger: Any = None
 
@@ -114,18 +126,32 @@ class TraceFLStrategy(FedAvg):
         server_round: int,
         replies,
     ):
-        """Aggregate train results and store client models for provenance analysis."""
+        """Aggregate train results and store client models for provenance analysis.
+        
+        IMPORTANT: This method is called by FedAvg.start() and may be wrapped
+        by TraceFLWithDP. The wrapping order is:
+        1. Client replies arrive
+        2. This method is called (by DP wrapper if enabled)
+        3. _store_client_models extracts ORIGINAL client models
+        4. super().aggregate_train() does weighted averaging
+        5. DP wrapper (if enabled) clips and adds noise to the result
+        6. Provenance analysis runs with ORIGINAL client models (not noisy)
+        
+        This design ensures provenance analysis uses unmodified client models
+        while the global model still receives DP protection.
+        """
         # Store client data BEFORE calling parent (which may be wrapped by DP)
-        # Convert replies to list to preserve them
+        # Must happen first to capture original models before DP noise is added
         replies_list = list(replies)
 
-        # Extract and store client models from original replies
+        # Extract and store client models from original replies (no DP applied yet)
         self._store_client_models(server_round, replies_list)
 
-        # Call parent aggregate_train with the list
+        # Call parent aggregate_train with the list (FedAvg weighted averaging)
         arrays, metrics = super().aggregate_train(server_round, replies_list)
 
         # Trigger provenance analysis if this round is in provenance_rounds
+        # Uses stored ORIGINAL client models (not the DP-protected global model)
         if server_round in self.provenance_rounds:
             self._run_provenance_analysis(server_round, arrays)
 
