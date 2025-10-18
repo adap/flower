@@ -7,7 +7,7 @@ CONFIG_FILE = "config_cripto.py"
 # Opzioni disponibili
 ENCRYPTION_METHODS = ["AES", "CHACHA", "CHACHA_AEAD", "AES_GCM"]
 INTEGRITY_METHODS = ["HMAC"]
-NET_OPTIONS = ["custom_cnn", "resnet18", "resnet34", "tiny_cnn"]
+NET_OPTIONS = ["custom_cnn", "resnet18", "resnet34", "tiny_cnn", "squeezenet"]
 
 def ask_accuracy(prompt, default=0.5):
     allowed = [0.2, 0.5, 0.7, 0.9]

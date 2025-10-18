@@ -8,8 +8,22 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from datasets import load_from_disk
 from torchvision.transforms import Compose, Normalize, ToTensor, Resize
-from torchvision.models import resnet18, resnet34
+from torchvision.models import resnet18, resnet34, squeezenet1_1
 
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
+
+def get_validation_data(batch_size=64):
+    transform = transforms.Compose([
+        transforms.Resize((32, 32)),  # garantisce forma corretta
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.4914, 0.4822, 0.4465],
+            std=[0.2023, 0.1994, 0.2010]
+        )
+    ])
+    val_set = datasets.CIFAR10(root="./data", train=False, download=True, transform=transform)
+    return DataLoader(val_set, batch_size=batch_size, shuffle=False)
 
 # ----------------------
 # MODELLI
@@ -36,6 +50,11 @@ def get_model(model_name: str, num_classes=10, pretrained=True):
                 x = F.relu(self.fc2(x))
                 return self.fc3(x)
         return CustomCNN()
+    elif model_name == "squeezenet":
+        model = squeezenet1_1(pretrained=True)
+        model.classifier[1] = nn.Conv2d(512, num_classes, kernel_size=1)
+        model.num_classes = num_classes
+        return model
     elif model_name == "tiny_cnn":
         class TinyCNN(nn.Module):
             """Tiny-CNN (dal paper 'Tiny-CNN: Structuring CNNs for Accurate Classification of Rice Leaf Diseases')"""
