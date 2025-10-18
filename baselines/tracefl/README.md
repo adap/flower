@@ -1,6 +1,6 @@
 ---
-title: TraceFL: Interpretability-Driven Debugging in Federated Learning via Neuron Provenance
-url: https://arxiv.org/abs/2312.13632
+title: "TraceFL: Interpretability-Driven Debugging in Federated Learning via Neuron Provenance"
+url: "https://arxiv.org/abs/2312.13632"
 labels:
   - interpretability
   - neuron provenance
