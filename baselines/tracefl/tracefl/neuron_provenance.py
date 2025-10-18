@@ -450,17 +450,6 @@ class NeuronProvenance:
         list
             List of dictionaries mapping each input to its provenance data.
         """
-        # Extract labels from test data (matching TraceFL-main)
-        data_loader = torch.utils.data.DataLoader(self.test_data, batch_size=1)
-        target_labels = []
-        for data in data_loader:
-            if isinstance(data, dict):
-                label = data.get("labels") or data.get("label")
-                if label is not None:
-                    target_labels.append(
-                        label.item() if hasattr(label, "item") else label
-                    )
-
         input2prov = []
         for input_id in range(len(self.test_data)):
             client_conts = self._aggregate_client_contributions(input_id, layers2prov)
@@ -468,32 +457,6 @@ class NeuronProvenance:
             traced_client = max(
                 normalized_conts, key=normalized_conts.get
             )  # type: ignore
-
-            # Use actual label instead of placeholder (matching TraceFL-main)
-            input_label = (
-                target_labels[input_id]
-                if input_id < len(target_labels)
-                else input_id % self.num_classes
-            )
-            responsible_clients = ",".join([f"c{cid}" for cid in self.client_ids])
-
-            logging.info(
-                "             *********** Input Label: %s, "
-                "Responsible Client(s): %s  *************",
-                input_label,
-                responsible_clients,
-            )
-            logging.info("      Traced Client: c%s || Tracing = Correct", traced_client)
-
-            # Format contributions with 'c' prefix to match TraceFL-main
-            client2prov_score = {
-                f"c{c}": round(p, 2) for c, p in normalized_conts.items()
-            }
-            logging.info(
-                "     TraceFL Clients Contributions Rank:     %s",
-                client2prov_score,
-            )
-            logging.info("\n")
 
             input2prov.append(
                 {"traced_client": traced_client, "client2prov": normalized_conts}
