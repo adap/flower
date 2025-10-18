@@ -120,7 +120,14 @@ def train(msg: Message, context: Context):
     )
 
     # Construct and return reply Message
-    model_record = ArrayRecord(model.state_dict())
+    # Convert model state dict to numpy arrays first, then to ArrayRecord
+    # This ensures compatibility with DP wrapper
+    state_dict = model.state_dict()
+    numpy_arrays = []
+    for tensor in state_dict.values():
+        numpy_arrays.append(tensor.detach().cpu().numpy())
+    
+    model_record = ArrayRecord(numpy_ndarrays=numpy_arrays)
 
     metrics = {
         "train_loss": train_loss,
