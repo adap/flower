@@ -53,24 +53,6 @@ def get_prov_eval_metrics(labels, predicted_labels):
     return answer
 
 
-def softmax_normalize(tensor, dim=0):
-    """Apply softmax normalization to a tensor along a specified dimension.
-
-    Parameters
-    ----------
-    tensor : torch.Tensor
-        Input tensor to normalize.
-    dim : int, optional
-        Dimension along which to apply softmax (default is 0).
-
-    Returns
-    -------
-    torch.Tensor
-        Softmax-normalized tensor.
-    """
-    return torch.softmax(tensor, dim=dim)
-
-
 def normalize_contributions(contributions):
     """Normalize client contributions to sum to 1.
 

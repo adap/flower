@@ -10,7 +10,7 @@ build-backend = "hatchling.build"
 [project]
 name = "tracefl"
 version = "1.0.0"
-description = ""
+description = "TraceFL: Interpretability-Driven Debugging in Federated Learning via Neuron Provenance - A Flower Baseline"
 license = "Apache-2.0"
 # Dependencies for your Flower App
 # Keep only essential dependencies:

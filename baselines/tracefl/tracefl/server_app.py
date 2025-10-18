@@ -44,7 +44,7 @@ def _load_server_data(context):
         _SERVER_DATA = ds_dict["server_testdata"]
         _CLIENT2CLASS = ds_dict.get("client2class", {})
 
-        print(f"📊 Server loaded {len(_SERVER_DATA)} test samples")
+        print(f"Server loaded {len(_SERVER_DATA)} test samples")
 
     return _SERVER_DATA, _CLIENT2CLASS
 
@@ -84,11 +84,11 @@ def main(grid: Grid, context: Context) -> None:
     if use_deterministic:
         seed = int(context.run_config.get("tracefl.random-seed", 42))
         _set_random_seed(seed)
-        logging.info("🎲 Deterministic mode enabled with seed: %s", seed)
+        logging.info("Deterministic mode enabled with seed: %s", seed)
         # Keep fraction_train as configured, but ensure min_train_nodes is used
         # Don't force fraction_train to 0.0 as it skips training entirely
     else:
-        logging.info("🎲 Random mode enabled (non-deterministic)")
+        logging.info("Random mode enabled (non-deterministic)")
 
     # Get minimum training nodes (for deterministic mode)
     min_train_nodes = int(context.run_config.get("min-train-nodes", 2))
@@ -101,16 +101,16 @@ def main(grid: Grid, context: Context) -> None:
 
     # Log architecture detection results
     print("🔧 Architecture Detection:")
-    print(f"   📊 Dataset: {cfg.data_dist.dname} ({cfg.data_dist.architecture})")
+    print(f"   Dataset: {cfg.data_dist.dname} ({cfg.data_dist.architecture})")
     print(
-        f"   🤖 Model: {cfg.data_dist.model_name} ({cfg.data_dist.model_architecture})"
+        f"   Model: {cfg.data_dist.model_name} ({cfg.data_dist.model_architecture})"
     )
     print(
-        f"   📐 Classes: {cfg.data_dist.num_classes}, "
+        f"   Classes: {cfg.data_dist.num_classes}, "
         f"Channels: {cfg.data_dist.channels}"
     )
     print(
-        f"   ✅ Compatibility: {cfg.data_dist.model_architecture} + "
+        f"   Compatibility: {cfg.data_dist.model_architecture} + "
         f"{cfg.data_dist.architecture}"
     )
 
