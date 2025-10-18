@@ -191,7 +191,7 @@ class TraceFLWithDP(Strategy):
         dp_params = [old_p + noisy_u for old_p, noisy_u in zip(old_params, noisy_updates)]
         
         # Convert back to ArrayRecord (matches ndarrays_to_parameters)
-        dp_arrays = ArrayRecord(numpy_ndarrays=dp_params)
+        dp_arrays = ArrayRecord(numpy_ndarrays=dp_params, keep_input=True)
         
         return dp_arrays
     
