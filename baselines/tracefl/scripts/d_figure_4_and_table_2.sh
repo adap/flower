@@ -22,7 +22,8 @@ tracefl.noise-multiplier=0.001 \
 tracefl.clipping-norm=15 \
 tracefl.use-deterministic-sampling=true \
 tracefl.random-seed=42 \
-min-train-nodes=4"
+min-train-nodes=4 \
+fraction-train=0.4"
 
 echo "Running TraceFL baseline with differential privacy..."
 flwr run . --run-config "$RUN_CONFIG"

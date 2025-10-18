@@ -20,7 +20,8 @@ tracefl.batch-size=32 \
 tracefl.provenance-rounds='1,2' \
 tracefl.use-deterministic-sampling=true \
 tracefl.random-seed=42 \
-min-train-nodes=4"
+min-train-nodes=4 \
+fraction-train=0.4"
 
 echo "Running TraceFL baseline with Dirichlet alpha=0.3..."
 flwr run . --run-config "$RUN_CONFIG"
