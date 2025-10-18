@@ -146,6 +146,7 @@ clientapp = "tracefl.client_app:app"
 num-server-rounds = 3
 fraction-train = 0.5
 local-epochs = 1
+min-train-nodes = 2
 
 # TraceFL-specific configuration
 [tool.flwr.app.config.tracefl]
