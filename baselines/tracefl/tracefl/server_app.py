@@ -134,23 +134,32 @@ def main(grid: Grid, context: Context) -> None:
     strategy.set_server_test_data(server_data)
     strategy.set_client2class(client2class)
 
-    # Apply differential privacy wrapper if enabled
+    # Apply custom differential privacy wrapper if enabled
     if cfg.noise_multiplier > 0 and cfg.clipping_norm > 0:
-        logging.warning(
-            ">> ----------------------------- DP FL REQUESTED BUT DISABLED -----------------------------"
+        logging.info(
+            ">> ----------------------------- Running DP FL -----------------------------"
         )
-        logging.warning(
-            ">> DP wrapper is temporarily disabled due to compatibility issues with current Flower version"
+        
+        from .dp_wrapper import TraceFLWithDP
+        
+        # Wrap TraceFLStrategy with DP (matching TraceFL-main's approach)
+        dp_strategy = TraceFLWithDP(
+            strategy,
+            noise_multiplier=cfg.noise_multiplier,
+            clipping_norm=cfg.clipping_norm,
+            num_sampled_clients=min_train_nodes,
         )
-        logging.warning(
-            ">> To enable DP: downgrade to Flower 1.9.0 or implement custom DP wrapper"
-        )
-        logging.warning(
-            ">> Running experiment WITHOUT differential privacy (noise_multiplier=%s, clipping_norm=%s)",
+        
+        strategy = dp_strategy
+        
+        logging.info(
+            ">> Custom DP wrapper applied: noise_multiplier=%s, clipping_norm=%s",
             cfg.noise_multiplier,
             cfg.clipping_norm,
         )
-        # Continue without DP wrapper - experiment will run normally
+        logging.info(
+            ">> Provenance analysis ENABLED with differential privacy protection"
+        )
     else:
         logging.info(
             ">> ----------------------------- Running Non-DP FL -----------------------------"
