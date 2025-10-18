@@ -1,0 +1,2 @@
+Run,Total Rounds,Avg. TraceFL Accuracy (%),Best TraceFL Accuracy (%),Best FL Accuracy (%)
+dataset-mnist model-resnet18 clients-10 alpha-0-3 rounds-1-2 noise-0-001 clip-15-0,2,50.0,100.0,10.400390625
