@@ -29,5 +29,5 @@ flwr run . --run-config "$RUN_CONFIG"
 
 echo "Generating plots for faulty client detection..."
 python -m scripts.generate_graphs \
-  --pattern "prov_dataset-mnist_model-resnet18_clients-10_alpha-0.7*.csv" \
+  --pattern "prov_dataset-mnist_model-resnet18_clients-10_alpha-0-7*.csv" \
   --title "TraceFL Faulty Client Detection"

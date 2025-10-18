@@ -28,6 +28,6 @@ flwr run . --run-config "$RUN_CONFIG"
 
 echo "Generating accuracy plots..."
 python -m scripts.generate_graphs \
-  --pattern "prov_dataset-mnist_model-resnet18_clients-10_alpha-0.3_rounds-1-2*.csv" \
+  --pattern "prov_dataset-mnist_model-resnet18_clients-10_alpha-0-3_rounds-1-2*.csv" \
   --title "TraceFL Localization Accuracy (MNIST, 10 Clients)"
 

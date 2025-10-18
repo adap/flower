@@ -29,5 +29,5 @@ flwr run . --run-config "$RUN_CONFIG"
 
 echo "Generating plots for differential privacy analysis..."
 python -m scripts.generate_graphs \
-  --pattern "prov_dataset-mnist_model-resnet18_clients-10_alpha-0.3*.csv" \
+  --pattern "prov_dataset-mnist_model-resnet18_clients-10_alpha-0-3*.csv" \
   --title "TraceFL with Differential Privacy"
