@@ -1,8 +1,20 @@
 ---
 title: TraceFL: Interpretability-Driven Debugging in Federated Learning via Neuron Provenance
 url: https://arxiv.org/abs/2312.13632
-labels: [interpretability, neuron provenance, federated learning, debugging, non-iid, model attribution]
-dataset: [MNIST, CIFAR-10, PathMNIST, OrganAMNIST, DBpedia-14, Yahoo Answers Topics]
+labels:
+  - interpretability
+  - neuron provenance
+  - federated learning
+  - debugging
+  - non-iid
+  - model attribution
+dataset:
+  - MNIST
+  - CIFAR-10
+  - PathMNIST
+  - OrganAMNIST
+  - DBpedia-14
+  - Yahoo Answers Topics
 ---
 
 # TraceFL: Interpretability-Driven Debugging in Federated Learning via Neuron Provenance
