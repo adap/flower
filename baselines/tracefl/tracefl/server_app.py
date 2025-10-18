@@ -113,8 +113,7 @@ def main(grid: Grid, context: Context) -> None:
     )
 
     # Parse output directory from config
-    output_dir_str = context.run_config.get("tracefl.output-dir", "results")
-    output_dir = Path(output_dir_str)
+    output_dir = Path(cfg.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Load global model

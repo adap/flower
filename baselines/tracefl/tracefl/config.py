@@ -270,4 +270,7 @@ def create_tracefl_config(context):
     cfg.faulty_clients_ids = _as_int_list(run_cfg.get("tracefl.faulty-clients-ids"), [])
     cfg.label2flip = _as_label_map(run_cfg.get("tracefl.label2flip"))
 
+    # Output directory for experiment results
+    cfg.output_dir = _as_str(run_cfg.get("tracefl.output-dir"), "results")
+
     return cfg
