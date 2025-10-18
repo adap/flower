@@ -141,6 +141,9 @@ def main(grid: Grid, context: Context) -> None:
         )
         from flwr.serverapp.strategy import DifferentialPrivacyServerSideFixedClipping
         
+        # Wrap the TraceFLStrategy with DP
+        # Note: TraceFLStrategy.aggregate_train is designed to work with DP wrapper
+        # by extracting client data before the parent processes replies
         dp_strategy = DifferentialPrivacyServerSideFixedClipping(
             strategy,
             noise_multiplier=cfg.noise_multiplier,
@@ -148,6 +151,11 @@ def main(grid: Grid, context: Context) -> None:
             num_sampled_clients=min_train_nodes,
         )
         strategy = dp_strategy
+        logging.info(
+            ">> DP wrapper applied: noise_multiplier=%s, clipping_norm=%s",
+            cfg.noise_multiplier,
+            cfg.clipping_norm,
+        )
     else:
         logging.info(
             ">> ----------------------------- Running Non-DP FL -----------------------------"
