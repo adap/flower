@@ -130,6 +130,10 @@ def main(grid: Grid, context: Context) -> None:
         cfg=cfg,
     )
 
+    # Set server test data for provenance analysis BEFORE applying DP wrapper
+    strategy.set_server_test_data(server_data)
+    strategy.set_client2class(client2class)
+
     # Apply differential privacy wrapper if enabled
     if cfg.noise_multiplier > 0 and cfg.clipping_norm > 0:
         logging.info(
@@ -148,10 +152,6 @@ def main(grid: Grid, context: Context) -> None:
         logging.info(
             ">> ----------------------------- Running Non-DP FL -----------------------------"
         )
-
-    # Set server test data for provenance analysis
-    strategy.set_server_test_data(server_data)
-    strategy.set_client2class(client2class)
 
     # Start strategy, run TraceFL for `num_rounds`
     result = strategy.start(
