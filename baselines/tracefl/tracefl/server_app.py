@@ -1,7 +1,9 @@
 """tracefl-baseline: A Flower Baseline."""
 
 import logging
+import random
 
+import numpy as np
 import torch
 from flwr.app import ArrayRecord, Context
 from flwr.serverapp import Grid, ServerApp
@@ -45,12 +47,49 @@ def _load_server_data(context):
     return _SERVER_DATA, _CLIENT2CLASS
 
 
+def _set_random_seed(seed: int) -> None:
+    """Set random seed for reproducibility across all libraries.
+    
+    Parameters
+    ----------
+    seed : int
+        Random seed value to set.
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    # For CuDNN backend (if using CUDA)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+
 @app.main()
 def main(grid: Grid, context: Context) -> None:
     """Run main entry point for the ServerApp."""
     # Read from config
     num_rounds = int(context.run_config["num-server-rounds"])
     fraction_train = float(context.run_config["fraction-train"])
+
+    # Handle reproducibility configuration
+    use_deterministic = context.run_config.get(
+        "tracefl.use-deterministic-sampling", "true"
+    )
+    # Convert string to boolean
+    use_deterministic = str(use_deterministic).lower() == "true"
+    
+    if use_deterministic:
+        seed = int(context.run_config.get("tracefl.random-seed", 42))
+        _set_random_seed(seed)
+        logging.info("🎲 Deterministic mode enabled with seed: %s", seed)
+        # Force fraction_train to 0 for deterministic sampling
+        fraction_train = 0.0
+    else:
+        logging.info("🎲 Random mode enabled (non-deterministic)")
+
+    # Get minimum training nodes (for deterministic mode)
+    min_train_nodes = int(context.run_config.get("min-train-nodes", 2))
 
     # Load TraceFL server data
     server_data, client2class = _load_server_data(context)
@@ -83,7 +122,8 @@ def main(grid: Grid, context: Context) -> None:
     strategy = TraceFLStrategy(
         fraction_train=fraction_train,
         fraction_evaluate=1.0,
-        min_available_nodes=2,
+        min_train_nodes=min_train_nodes,
+        min_available_nodes=min_train_nodes if use_deterministic else 2,
         provenance_rounds=cfg.provenance_rounds,
         enable_beta=cfg.enable_beta,
         client_weights_normalization=cfg.client_weights_normalization,

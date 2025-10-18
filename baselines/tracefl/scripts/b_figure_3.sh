@@ -19,7 +19,9 @@ tracefl.max-per-client-data-size=2048 \
 tracefl.max-server-data-size=2048 \
 tracefl.batch-size=32 \
 tracefl.provenance-rounds='1,2' \
-fraction-train=0.4"
+tracefl.use-deterministic-sampling=true \
+tracefl.random-seed=42 \
+min-train-nodes=4"
 
   echo "Running TraceFL baseline with Dirichlet alpha=${ALPHA}..."
   flwr run . --run-config "$RUN_CONFIG"

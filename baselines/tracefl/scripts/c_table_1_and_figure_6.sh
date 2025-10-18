@@ -20,7 +20,9 @@ tracefl.batch-size=32 \
 tracefl.provenance-rounds='1,2,3' \
 tracefl.faulty-clients-ids='[0]' \
 tracefl.label2flip='{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0,13:0}' \
-fraction-train=1.0"
+tracefl.use-deterministic-sampling=true \
+tracefl.random-seed=42 \
+min-train-nodes=10"
 
 echo "Running TraceFL baseline faulty client detection..."
 flwr run . --run-config "$RUN_CONFIG"

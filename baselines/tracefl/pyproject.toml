@@ -165,6 +165,8 @@ noise-multiplier = -1.0
 clipping-norm = -1.0
 faulty-clients-ids = ""
 label2flip = ""
+use-deterministic-sampling = true
+random-seed = 42
 
 # Default federation to use when running the app
 [tool.flwr.federations]
