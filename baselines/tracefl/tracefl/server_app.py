@@ -136,26 +136,21 @@ def main(grid: Grid, context: Context) -> None:
 
     # Apply differential privacy wrapper if enabled
     if cfg.noise_multiplier > 0 and cfg.clipping_norm > 0:
-        logging.info(
-            ">> ----------------------------- Running DP FL -----------------------------"
+        logging.warning(
+            ">> ----------------------------- DP FL REQUESTED BUT DISABLED -----------------------------"
         )
-        from flwr.serverapp.strategy import DifferentialPrivacyServerSideFixedClipping
-        
-        # Wrap the TraceFLStrategy with DP
-        # Note: TraceFLStrategy.aggregate_train is designed to work with DP wrapper
-        # by extracting client data before the parent processes replies
-        dp_strategy = DifferentialPrivacyServerSideFixedClipping(
-            strategy,
-            noise_multiplier=cfg.noise_multiplier,
-            clipping_norm=cfg.clipping_norm,
-            num_sampled_clients=min_train_nodes,
+        logging.warning(
+            ">> DP wrapper is temporarily disabled due to compatibility issues with current Flower version"
         )
-        strategy = dp_strategy
-        logging.info(
-            ">> DP wrapper applied: noise_multiplier=%s, clipping_norm=%s",
+        logging.warning(
+            ">> To enable DP: downgrade to Flower 1.9.0 or implement custom DP wrapper"
+        )
+        logging.warning(
+            ">> Running experiment WITHOUT differential privacy (noise_multiplier=%s, clipping_norm=%s)",
             cfg.noise_multiplier,
             cfg.clipping_norm,
         )
+        # Continue without DP wrapper - experiment will run normally
     else:
         logging.info(
             ">> ----------------------------- Running Non-DP FL -----------------------------"
