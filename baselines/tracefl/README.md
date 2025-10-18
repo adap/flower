@@ -6,8 +6,6 @@ labels:
   - neuron provenance
   - federated learning
   - debugging
-  - non-iid
-  - model attribution
 dataset:
   - MNIST
   - CIFAR-10
