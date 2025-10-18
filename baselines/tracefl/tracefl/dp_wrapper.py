@@ -188,7 +188,9 @@ class TraceFLWithDP(Strategy):
         
         # Reconstruct model: old + clipped_noisy_update
         # (matches param[i] = param2[i] + model_update[i] in Flower 1.9.0)
-        dp_params = [old_p + noisy_u for old_p, noisy_u in zip(old_params, noisy_updates)]
+        dp_params = [
+            np.asarray(old_p + noisy_u) for old_p, noisy_u in zip(old_params, noisy_updates)
+        ]
         
         # Convert back to ArrayRecord using class method (more explicit)
         dp_arrays = ArrayRecord.from_numpy_ndarrays(dp_params, keep_input=True)
