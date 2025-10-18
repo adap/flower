@@ -190,9 +190,8 @@ class TraceFLWithDP(Strategy):
         # (matches param[i] = param2[i] + model_update[i] in Flower 1.9.0)
         dp_params = [old_p + noisy_u for old_p, noisy_u in zip(old_params, noisy_updates)]
         
-        # Convert back to ArrayRecord (matches ndarrays_to_parameters)
-        # IMPORTANT: Pass list as positional arg, not keyword arg
-        dp_arrays = ArrayRecord(dp_params, keep_input=True)
+        # Convert back to ArrayRecord using class method (more explicit)
+        dp_arrays = ArrayRecord.from_numpy_ndarrays(dp_params, keep_input=True)
         
         return dp_arrays
     
