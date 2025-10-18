@@ -72,10 +72,27 @@ def _smooth(series: pd.Series, window: int) -> pd.Series:
 
 
 def _derive_run_label(path: Path) -> str:
+    """Create a clean, readable run label from the CSV filename."""
     name = path.stem
     if name.startswith("prov_"):
         name = name[5:]
-    return name.replace("_", " ")
+    
+    # Create cleaner labels for common experiment patterns
+    if "experiment_a" in name:
+        return "Localization Accuracy (α=0.3)"
+    elif "experiment_b" in name:
+        return "Data Distribution Analysis"
+    elif "experiment_c" in name:
+        return "Faulty Client Detection"
+    elif "experiment_d" in name:
+        return "Differential Privacy"
+    else:
+        # For other cases, create a shorter label
+        parts = name.split("_")
+        if len(parts) > 3:
+            # Take first few meaningful parts
+            return " ".join(parts[:3]).replace("-", "=")
+        return name.replace("_", " ")
 
 
 def load_results(paths: Iterable[Path]) -> list[pd.DataFrame]:
@@ -155,7 +172,7 @@ def _plot_single_run(
     include_test_accuracy: bool,
 ) -> None:
     run_label = frame["Run"].iloc[0]
-    fig, ax = plt.subplots(figsize=(6.4, 4.0))
+    fig, ax = plt.subplots(figsize=(8.0, 5.0))  # Increased figure size
     ax.plot(
         frame["round"],
         frame["TraceFL Accuracy (Smoothed)"],
@@ -173,7 +190,13 @@ def _plot_single_run(
     ax.set_xlabel("Communication Rounds")
     ax.set_ylabel("Accuracy (%)")
     ax.set_ylim(0, 105)
-    ax.set_title(run_label)
+    
+    # Create a cleaner title by truncating long run labels
+    if len(run_label) > 50:
+        title = run_label[:47] + "..."
+    else:
+        title = run_label
+    ax.set_title(title, fontsize=12, pad=20)
     ax.legend()
     fig.tight_layout()
 
@@ -189,7 +212,7 @@ def _plot_combined_runs(
     title: str | None,
     include_test_accuracy: bool,
 ) -> None:
-    fig, ax = plt.subplots(figsize=(6.8, 4.2))
+    fig, ax = plt.subplots(figsize=(8.0, 5.0))  # Increased figure size
     sns.lineplot(
         data=combined_df,
         x="round",
@@ -217,8 +240,8 @@ def _plot_combined_runs(
     ax.set_ylabel("Accuracy (%)")
     ax.set_ylim(0, 105)
     if title:
-        ax.set_title(title)
-    ax.legend(title="Run")
+        ax.set_title(title, fontsize=14, pad=20)
+    ax.legend(title="Run", bbox_to_anchor=(1.05, 1), loc='upper left')
     fig.tight_layout()
 
     fig.savefig(artefacts.png_dir / "combined_accuracy.png", dpi=300)
