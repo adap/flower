@@ -192,8 +192,20 @@ class TraceFLWithDP(Strategy):
             np.asarray(old_p + noisy_u) for old_p, noisy_u in zip(old_params, noisy_updates)
         ]
         
-        # Convert back to ArrayRecord using class method (more explicit)
-        dp_arrays = ArrayRecord.from_numpy_ndarrays(dp_params, keep_input=True)
+        # Convert back to ArrayRecord preserving PyTorch state dict structure
+        # We need to reconstruct the state dict with proper layer names
+        import torch
+        
+        # Get the original state dict structure from the previous arrays
+        original_state_dict = self.previous_arrays.to_torch_state_dict()
+        
+        # Create new state dict with DP-applied parameters
+        dp_state_dict = {}
+        for i, (key, _) in enumerate(original_state_dict.items()):
+            dp_state_dict[key] = torch.from_numpy(dp_params[i])
+        
+        # Create ArrayRecord from PyTorch state dict (preserves layer names)
+        dp_arrays = ArrayRecord(dp_state_dict)
         
         return dp_arrays
     
