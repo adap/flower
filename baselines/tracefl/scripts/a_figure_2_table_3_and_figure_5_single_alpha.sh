@@ -29,4 +29,3 @@ echo "Generating accuracy plots..."
 python -m scripts.generate_graphs \
   --pattern "prov_dataset-mnist_model-resnet18_clients-10_alpha-0-3*.csv" \
   --title "TraceFL Localization Accuracy (MNIST, 10 Clients, α=0.3)"
-
