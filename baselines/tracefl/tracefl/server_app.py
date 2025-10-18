@@ -130,6 +130,25 @@ def main(grid: Grid, context: Context) -> None:
         cfg=cfg,
     )
 
+    # Apply differential privacy wrapper if enabled
+    if cfg.noise_multiplier > 0 and cfg.clipping_norm > 0:
+        logging.info(
+            ">> ----------------------------- Running DP FL -----------------------------"
+        )
+        from flwr.serverapp.strategy import DifferentialPrivacyServerSideFixedClipping
+        
+        dp_strategy = DifferentialPrivacyServerSideFixedClipping(
+            strategy,
+            noise_multiplier=cfg.noise_multiplier,
+            clipping_norm=cfg.clipping_norm,
+            num_sampled_clients=min_train_nodes,
+        )
+        strategy = dp_strategy
+    else:
+        logging.info(
+            ">> ----------------------------- Running Non-DP FL -----------------------------"
+        )
+
     # Set server test data for provenance analysis
     strategy.set_server_test_data(server_data)
     strategy.set_client2class(client2class)
