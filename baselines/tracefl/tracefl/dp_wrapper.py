@@ -195,6 +195,35 @@ class TraceFLWithDP(Strategy):
         
         return dp_arrays
     
+    def summary(self) -> None:
+        """Log summary configuration of the DP strategy."""
+        log(
+            logging.INFO,
+            "\t├──> Differential Privacy Configuration:",
+        )
+        log(
+            logging.INFO,
+            "\t│\t├──Noise Multiplier: %.6f",
+            self.noise_multiplier,
+        )
+        log(
+            logging.INFO,
+            "\t│\t├──Clipping Norm: %.4f",
+            self.clipping_norm,
+        )
+        log(
+            logging.INFO,
+            "\t│\t├──Sampled Clients: %d",
+            self.num_sampled_clients,
+        )
+        log(
+            logging.INFO,
+            "\t│\t└──Privacy Guarantee: (ε, δ)-DP per round",
+        )
+        
+        # Delegate to wrapped strategy for its summary
+        self.strategy.summary()
+    
     # Delegate all other methods to wrapped strategy
     def __getattr__(self, name):
         """Delegate attribute access to wrapped TraceFLStrategy."""
