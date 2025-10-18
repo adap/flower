@@ -101,9 +101,7 @@ class ExperimentResultLogger:
         # Use output_dir if provided, otherwise fall back to results_dir
         target_dir = self.output_dir if self.output_dir else self.results_dir
         target_dir.mkdir(parents=True, exist_ok=True)
-        self._file_path = (
-            target_dir / f"prov_{_build_experiment_key(self.cfg)}.csv"
-        )
+        self._file_path = target_dir / f"prov_{_build_experiment_key(self.cfg)}.csv"
         if self._file_path.exists():
             try:
                 existing = pd.read_csv(self._file_path)

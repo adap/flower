@@ -60,9 +60,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         # Pattern includes directory, use it directly
         csv_paths = sorted(Path(".").glob(args.pattern))
         if not csv_paths:
-            raise SystemExit(
-                f"No provenance CSVs matching '{args.pattern}' found"
-            )
+            raise SystemExit(f"No provenance CSVs matching '{args.pattern}' found")
     else:
         # Pattern is just a filename pattern, use results_dir
         results_dir: Path = args.results_dir

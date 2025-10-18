@@ -118,28 +118,28 @@ class TraceFLStrategy(FedAvg):
         # Store client data BEFORE calling parent (which may be wrapped by DP)
         # Convert replies to list to preserve them
         replies_list = list(replies)
-        
+
         # Extract and store client models from original replies
         self._store_client_models(server_round, replies_list)
-        
+
         # Call parent aggregate_train with the list
         arrays, metrics = super().aggregate_train(server_round, replies_list)
-        
+
         # Trigger provenance analysis if this round is in provenance_rounds
         if server_round in self.provenance_rounds:
             self._run_provenance_analysis(server_round, arrays)
-        
+
         return arrays, metrics
 
     def _store_client_models(self, server_round: int, replies_list: list) -> None:
         """Extract and store client models from replies for provenance analysis.
-        
+
         This must be called BEFORE the parent's aggregate_train processes replies,
         especially when using DP wrapper which modifies reply contents.
         """
         if not replies_list:
             return
-            
+
         log(
             logging.INFO,
             "Processing %s replies for round %s",
@@ -162,9 +162,7 @@ class TraceFLStrategy(FedAvg):
                     self._next_client_id: int = 0
 
                 if flower_node_id not in self._node_id_to_client_id:
-                    self._node_id_to_client_id[flower_node_id] = (
-                        self._next_client_id
-                    )
+                    self._node_id_to_client_id[flower_node_id] = self._next_client_id
                     self._next_client_id += 1
 
                 client_id = self._node_id_to_client_id[flower_node_id]

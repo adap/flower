@@ -11,6 +11,7 @@ from flwr.serverapp import Grid, ServerApp
 
 from tracefl.config import create_tracefl_config
 from tracefl.dataset import get_clients_server_data
+from tracefl.dp_wrapper import TraceFLWithDP
 from tracefl.model import initialize_model
 from tracefl.strategy import TraceFLStrategy
 
@@ -50,7 +51,7 @@ def _load_server_data(context):
 
 def _set_random_seed(seed: int) -> None:
     """Set random seed for reproducibility across all libraries.
-    
+
     Parameters
     ----------
     seed : int
@@ -79,7 +80,7 @@ def main(grid: Grid, context: Context) -> None:
     )
     # Convert string to boolean
     use_deterministic = str(use_deterministic).lower() == "true"
-    
+
     if use_deterministic:
         seed = int(context.run_config.get("tracefl.random-seed", 42))
         _set_random_seed(seed)
@@ -124,7 +125,7 @@ def main(grid: Grid, context: Context) -> None:
     arrays = ArrayRecord(global_model.state_dict())
 
     # Initialize TraceFL strategy
-    strategy = TraceFLStrategy(
+    strategy: TraceFLStrategy | TraceFLWithDP = TraceFLStrategy(
         fraction_train=fraction_train,
         fraction_evaluate=1.0,
         min_train_nodes=min_train_nodes,
@@ -142,12 +143,8 @@ def main(grid: Grid, context: Context) -> None:
 
     # Apply custom differential privacy wrapper if enabled
     if cfg.noise_multiplier > 0 and cfg.clipping_norm > 0:
-        logging.info(
-            ">> ----------------------------- Running DP FL -----------------------------"
-        )
-        
-        from .dp_wrapper import TraceFLWithDP
-        
+        logging.info(">> Running DP FL")
+
         # Wrap TraceFLStrategy with DP (matching TraceFL-main's approach)
         dp_strategy = TraceFLWithDP(
             strategy,
@@ -155,9 +152,9 @@ def main(grid: Grid, context: Context) -> None:
             clipping_norm=cfg.clipping_norm,
             num_sampled_clients=min_train_nodes,
         )
-        
+
         strategy = dp_strategy
-        
+
         logging.info(
             ">> Custom DP wrapper applied: noise_multiplier=%s, clipping_norm=%s",
             cfg.noise_multiplier,
@@ -167,9 +164,7 @@ def main(grid: Grid, context: Context) -> None:
             ">> Provenance analysis ENABLED with differential privacy protection"
         )
     else:
-        logging.info(
-            ">> ----------------------------- Running Non-DP FL -----------------------------"
-        )
+        logging.info(">> Running Non-DP FL")
 
     # Start strategy, run TraceFL for `num_rounds`
     result = strategy.start(

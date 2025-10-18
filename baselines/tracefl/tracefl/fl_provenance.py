@@ -493,9 +493,7 @@ class FlowerProvenance:
                     )
 
         # Use the normalized client2class instead of creating a new one
-        client2class = {
-            c: self.client2class.get(c, {}) for c in self.client2model
-        }
+        client2class = {c: self.client2class.get(c, {}) for c in self.client2model}
 
         logging.debug("client2class: %s", client2class)
 
@@ -543,9 +541,10 @@ class FlowerProvenance:
                     predicted_labels.append(0)
                     true_labels.append(1)
             else:
-                # Normal mode: Find responsible clients (those who have the target label)
+                # Normal mode: Find responsible clients
                 responsible_clients = [
-                    cid for cid, c_labels in client2class.items() 
+                    cid
+                    for cid, c_labels in client2class.items()
                     if target_l in c_labels
                 ]
                 res_c_string = ",".join(
@@ -559,7 +558,7 @@ class FlowerProvenance:
                     res_c_string,
                 )
 
-                # Check if traced client has the target label (matching TraceFL-main logic)
+                # Check if traced client has the target label
                 if target_l in client2class[traced_client]:
                     logging.info(
                         "     Traced Client: c%s || Tracing = Correct",
