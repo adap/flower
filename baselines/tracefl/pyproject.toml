@@ -168,6 +168,7 @@ faulty-clients-ids = ""
 label2flip = ""
 use-deterministic-sampling = true
 random-seed = 42
+output-dir = "results"
 
 # Default federation to use when running the app
 [tool.flwr.federations]
