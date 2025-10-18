@@ -110,7 +110,7 @@ This experiment evaluates TraceFL's ability to identify responsible clients for 
 - Dirichlet α: 0.3
 - Rounds: 2
 
-**Expected Results:** TraceFL achieves >95% localization accuracy in identifying the client responsible for each correct prediction.
+**Expected Results:** TraceFL achieves 99% localization accuracy in identifying the client responsible for each correct prediction (matches Figure 2 from paper).
 
 ![Experiment A: Combined Accuracy](_static/experiment_a_combined_accuracy.png)
 
@@ -133,7 +133,7 @@ This experiment analyzes how data distribution heterogeneity affects TraceFL's l
 - Model: ResNet18
 - Dirichlet α: 0.3 (single value) or 0.1, 0.3, 0.5, 0.7, 1.0 (complete sweep)
 
-**Expected Results:** Localization accuracy remains high (>90%) across different data distributions, demonstrating TraceFL's robustness to non-IID data.
+**Expected Results:** Localization accuracy remains high (>95%) across different data distributions, demonstrating TraceFL's robustness to non-IID data (matches Figure 3 from paper).
 
 ![Experiment B: Data Distribution Analysis](_static/experiment_b_combined_accuracy.png)
 
@@ -154,7 +154,7 @@ This experiment simulates faulty clients that flip labels to evaluate TraceFL's 
 - Faulty clients: [0]
 - Label flipping: {1→0, 2→0, ..., 13→0}
 
-**Expected Results:** TraceFL successfully identifies the faulty client responsible for mispredictions with >80% accuracy, enabling debugging and client exclusion.
+**Expected Results:** TraceFL successfully identifies the faulty client responsible for mispredictions with 80-85% accuracy, enabling debugging and client exclusion (matches Table 1 and Figure 6 from paper).
 
 ![Experiment C: Faulty Client Detection](_static/experiment_c_combined_accuracy.png)
 
@@ -175,7 +175,7 @@ This experiment evaluates TraceFL under differential privacy constraints, demons
 - Noise multiplier: 0.001
 - Clipping norm: 15.0
 
-**Expected Results:** TraceFL maintains reasonable localization accuracy (>70%) while providing differential privacy guarantees, showing the technique's compatibility with privacy-preserving FL.
+**Expected Results:** TraceFL maintains 70-80% localization accuracy while providing differential privacy guarantees, showing the technique's compatibility with privacy-preserving FL (matches Figure 4 and Table 2 from paper).
 
 ![Experiment D: Differential Privacy](_static/experiment_d_combined_accuracy.png)
 
@@ -228,12 +228,16 @@ All experiments generate the following outputs in their respective `results/expe
 - **Average Client Contribution**: Quantified contribution of each client to specific predictions
 
 ### Performance Benchmarks
-Based on the paper and our replication:
-- **Image Classification (MNIST, CIFAR-10)**: 95-99% localization accuracy
-- **Medical Imaging (PathMNIST, OrganAMNIST)**: 90-95% localization accuracy
-- **Text Classification (DBpedia, Yahoo)**: 85-95% localization accuracy
-- **With Differential Privacy**: 70-85% localization accuracy (maintaining privacy)
-- **Faulty Client Detection**: 80-90% accuracy in identifying faulty clients
+Based on the TraceFL paper (ICSE 2025) results:
+- **Image Classification (MNIST)**: 99% localization accuracy (Figure 2)
+- **Image Classification (CIFAR-10)**: 95% localization accuracy (Figure 2)
+- **Medical Imaging (PathMNIST)**: 90% localization accuracy (Figure 2)
+- **Medical Imaging (OrganAMNIST)**: 85% localization accuracy (Figure 2)
+- **Text Classification (DBpedia-14)**: 95% localization accuracy (Figure 2)
+- **Text Classification (Yahoo Answers)**: 90% localization accuracy (Figure 2)
+- **With Differential Privacy**: 70-80% localization accuracy (Figure 4, Table 2)
+- **Faulty Client Detection**: 80-85% accuracy in identifying faulty clients (Table 1, Figure 6)
+- **Scalability**: Maintains >90% accuracy with up to 100 clients (Figure 5)
 
 ## Key Features
 
