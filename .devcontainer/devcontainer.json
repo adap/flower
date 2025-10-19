@@ -3,9 +3,6 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "containerEnv": {
-    "POETRY_VIRTUALENVS_CREATE": "false"
-  },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "waitFor": "postCreateCommand",
   "mounts": [
