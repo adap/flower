@@ -9,6 +9,13 @@
     "source=flwr-bashhistory,target=/commandhistory,type=volume"
   ],
   "customizations": {
+    "jetbrains": {
+      "settings": {},
+      "plugins": [
+        "PythonCore",
+        "Pythonid"
+      ]
+    },
     "vscode": {
       "settings": {
         "files.watcherExclude": {},
