@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-16 00:08+0000\n"
+"POT-Creation-Date: 2025-10-19 00:08+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -382,10 +382,10 @@ msgstr "Argumento de compilação"
 #: ../../source/ref-exit-codes/104.rst:5 ../../source/ref-exit-codes/2.rst:5
 #: ../../source/ref-exit-codes/200.rst:21 ../../source/ref-exit-codes/201.rst:5
 #: ../../source/ref-exit-codes/202.rst:5 ../../source/ref-exit-codes/3.rst:5
-#: ../../source/ref-exit-codes/300.rst:5 ../../source/ref-exit-codes/301.rst:5
-#: ../../source/ref-exit-codes/302.rst:5 ../../source/ref-exit-codes/400.rst:5
-#: ../../source/ref-exit-codes/500.rst:5 ../../source/ref-exit-codes/600.rst:5
-#: ../../source/ref-exit-codes/601.rst:5 ../../source/ref-exit-codes/602.rst:5
+#: ../../source/ref-exit-codes/300.rst:5 ../../source/ref-exit-codes/302.rst:5
+#: ../../source/ref-exit-codes/400.rst:5 ../../source/ref-exit-codes/500.rst:5
+#: ../../source/ref-exit-codes/600.rst:5 ../../source/ref-exit-codes/601.rst:5
+#: ../../source/ref-exit-codes/602.rst:5
 msgid "Description"
 msgstr "Descrição"
 
@@ -9210,31 +9210,25 @@ msgstr ""
 #: ../../source/how-to-authenticate-supernodes.rst:94
 msgid ""
 "Connecting a SuperNode to a SuperLink that has node authentication "
-"enabled requires passing two additional arguments (i.e. the public and "
-"private keys of the SuperNode) in addition to the TLS certificate."
+"enabled requires passing one additional argument (i.e. the private key of"
+" the SuperNode) in addition to the TLS certificate."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:111
+#: ../../source/how-to-authenticate-supernodes.rst:110
 msgid "``--auth-supernode-private-key``: the private key of this SuperNode."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst
-msgid ""
-"``--auth-supernode-public-key``: the public key of this SuperNode (which "
-"should be the same that was added to othe CSV used by the SuperLink)."
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:114
+#: ../../source/how-to-authenticate-supernodes.rst:112
 msgid ""
 "Follow the same procedure to launch the second SuperNode by passing its "
-"corresponding key pair:"
+"corresponding private key:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:129
+#: ../../source/how-to-authenticate-supernodes.rst:126
 msgid "Security notice"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:131
+#: ../../source/how-to-authenticate-supernodes.rst:128
 msgid ""
 "The system's security relies on the credentials of the SuperLink and each"
 " SuperNode. Therefore, it is imperative to safeguard and safely store the"
@@ -9245,21 +9239,21 @@ msgid ""
 "methods."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:138
+#: ../../source/how-to-authenticate-supernodes.rst:135
 #: ../../source/how-to-enable-tls-connections.rst:138
 #: ../../source/how-to-use-built-in-mods.rst:170
 #: ../../source/tutorial-series-what-is-federated-learning.rst:293
 msgid "Conclusion"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:140
+#: ../../source/how-to-authenticate-supernodes.rst:137
 msgid ""
 "You should now have learned how to start a long-running Flower SuperLink "
 "and SuperNode with node authentication enabled. You should also know the "
 "significance of the private key and store it securely to minimize risks."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:146
+#: ../../source/how-to-authenticate-supernodes.rst:143
 #: ../../source/how-to-enable-tls-connections.rst:148
 msgid ""
 "Refer to the :doc:`docker/index` documentation to learn how to setup a "
@@ -35757,8 +35751,7 @@ msgstr ""
 #: ../../source/ref-exit-codes/201.rst:10
 #: ../../source/ref-exit-codes/202.rst:10
 #: ../../source/ref-exit-codes/300.rst:11
-#: ../../source/ref-exit-codes/301.rst:16
-#: ../../source/ref-exit-codes/302.rst:16
+#: ../../source/ref-exit-codes/302.rst:12
 #: ../../source/ref-exit-codes/400.rst:11
 #: ../../source/ref-exit-codes/500.rst:14
 #: ../../source/ref-exit-codes/600.rst:11
@@ -36010,81 +36003,30 @@ msgid ""
 "correct it as needed."
 msgstr ""
 
-#: ../../source/ref-exit-codes/301.rst:2
-msgid "[301] SUPERNODE_NODE_AUTH_KEYS_REQUIRED"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:7
-msgid ""
-"To run the SuperNode with authentication, file paths for both the private"
-" and public keys must be provided. Specifically, the following options "
-"must be specified:"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:10
-msgid "``--auth-supernode-private-key``"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:11
-msgid "``--auth-supernode-public-key``"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:13
-msgid "Providing only one of these options is insufficient for authentication."
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:18
-msgid ""
-"1. Ensure that the paths to both the private key and public key files are"
-" specified in command-line arguments. For example:"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:26
-msgid "Verify that the specified file paths are correct and that the files exist."
-msgstr ""
-
 #: ../../source/ref-exit-codes/302.rst:2
-msgid "[302] SUPERNODE_NODE_AUTH_KEYS_INVALID"
+msgid "[302] SUPERNODE_NODE_AUTH_KEY_INVALID"
 msgstr ""
 
 #: ../../source/ref-exit-codes/302.rst:7
 msgid ""
-"The provided key files are invalid. Authentication requires a valid "
-"elliptic curve private and public key pair. This error occurs when "
-"either:"
+"Authentication requires a valid elliptic curve private key. This error "
+"occurs when the provided private key file specified in ``--auth-"
+"supernode-private-key`` is invalid or unreadable."
 msgstr ""
 
-#: ../../source/ref-exit-codes/302.rst:10
-msgid ""
-"The **private key** file specified in ``--auth-supernode-private-key`` is"
-" invalid or unreadable."
+#: ../../source/ref-exit-codes/302.rst:14
+msgid "Ensure that the file path provided for the private key option is correct."
 msgstr ""
 
-#: ../../source/ref-exit-codes/302.rst:12
-msgid ""
-"The **public key** file specified in ``--auth-supernode-public-key`` is "
-"invalid or unreadable."
+#: ../../source/ref-exit-codes/302.rst:15
+msgid "Verify that the file exists and contains a valid elliptic curve SSH key."
 msgstr ""
 
-#: ../../source/ref-exit-codes/302.rst:18
+#: ../../source/ref-exit-codes/302.rst:16
 msgid ""
-"Ensure that the file paths provided for the private and public key "
-"options are correct."
-msgstr ""
-
-#: ../../source/ref-exit-codes/302.rst:21
-msgid ""
-"2. Verify that both files exist and contain valid elliptic curve ssh "
-"keys. - The private key file should be in a format compatible with "
-"elliptic curve cryptography. - The public key file should match the "
-"private key."
-msgstr ""
-
-#: ../../source/ref-exit-codes/302.rst:25
-msgid ""
-"3. If the files are corrupted or not in the correct format, regenerate "
-"the elliptic curve ssh key pair and update the file paths accordingly. "
-"For example, in Linux/MacOS, **for rapid prototyping only** (not "
+"If the files are corrupted or not in the correct format, regenerate the "
+"elliptic curve SSH key pair and update the file paths accordingly. For "
+"example, on Linux or macOS, **for rapid prototyping only** (not "
 "production; follow company procedures for key management):"
 msgstr ""
 
@@ -64679,5 +64621,110 @@ msgstr ""
 #~ "elliptic curve cryptography. - The "
 #~ "public key file should match the "
 #~ "private key."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Connecting a SuperNode to a SuperLink"
+#~ " that has node authentication enabled "
+#~ "requires passing two additional arguments "
+#~ "(i.e. the public and private keys "
+#~ "of the SuperNode) in addition to "
+#~ "the TLS certificate."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--auth-supernode-public-key``: the "
+#~ "public key of this SuperNode (which "
+#~ "should be the same that was added"
+#~ " to othe CSV used by the "
+#~ "SuperLink)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Follow the same procedure to launch "
+#~ "the second SuperNode by passing its "
+#~ "corresponding key pair:"
+#~ msgstr ""
+
+#~ msgid "[301] SUPERNODE_NODE_AUTH_KEYS_REQUIRED"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To run the SuperNode with "
+#~ "authentication, file paths for both the"
+#~ " private and public keys must be "
+#~ "provided. Specifically, the following options"
+#~ " must be specified:"
+#~ msgstr ""
+
+#~ msgid "``--auth-supernode-private-key``"
+#~ msgstr ""
+
+#~ msgid "``--auth-supernode-public-key``"
+#~ msgstr ""
+
+#~ msgid "Providing only one of these options is insufficient for authentication."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "1. Ensure that the paths to both"
+#~ " the private key and public key "
+#~ "files are specified in command-line "
+#~ "arguments. For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Verify that the specified file paths "
+#~ "are correct and that the files "
+#~ "exist."
+#~ msgstr ""
+
+#~ msgid "[302] SUPERNODE_NODE_AUTH_KEYS_INVALID"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The provided key files are invalid. "
+#~ "Authentication requires a valid elliptic "
+#~ "curve private and public key pair. "
+#~ "This error occurs when either:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The **private key** file specified in"
+#~ " ``--auth-supernode-private-key`` is "
+#~ "invalid or unreadable."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The **public key** file specified in "
+#~ "``--auth-supernode-public-key`` is "
+#~ "invalid or unreadable."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Ensure that the file paths provided "
+#~ "for the private and public key "
+#~ "options are correct."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "2. Verify that both files exist "
+#~ "and contain valid elliptic curve ssh "
+#~ "keys. - The private key file "
+#~ "should be in a format compatible "
+#~ "with elliptic curve cryptography. - The"
+#~ " public key file should match the "
+#~ "private key."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "3. If the files are corrupted or"
+#~ " not in the correct format, "
+#~ "regenerate the elliptic curve ssh key"
+#~ " pair and update the file paths "
+#~ "accordingly. For example, in Linux/MacOS, "
+#~ "**for rapid prototyping only** (not "
+#~ "production; follow company procedures for "
+#~ "key management):"
 #~ msgstr ""
 
