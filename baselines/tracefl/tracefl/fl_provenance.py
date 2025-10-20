@@ -226,16 +226,6 @@ class FlowerProvenance:
             )
         else:
             logging.info("No correct predictions found")
-            # Use a small subset of test data as fallback
-            subset_size = min(min_per_label, len(self.server_test_data))
-            if hasattr(self.server_test_data, "select"):
-                self.subset_test_data = self.server_test_data.select(range(subset_size))
-            else:
-                self.subset_test_data = torch.utils.data.Subset(
-                    self.server_test_data, range(subset_size)
-                )
-
-            logging.info("Using %s random samples as fallback", subset_size)
 
     def _eval_and_extract_wrong_preds(self, test_data):
         """Evaluate the model on test data and extract indices and labels for incorrect

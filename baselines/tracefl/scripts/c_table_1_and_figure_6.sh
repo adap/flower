@@ -12,7 +12,7 @@ echo "Running TraceFL baseline faulty client detection experiment..."
 RUN_CONFIG="num-server-rounds=3 \
 tracefl.dataset='mnist' \
 tracefl.model='resnet18' \
-tracefl.num-clients=10 \
+tracefl.num-clients=4 \
 tracefl.dirichlet-alpha=0.7 \
 tracefl.max-per-client-data-size=2048 \
 tracefl.max-server-data-size=2048 \
@@ -23,7 +23,7 @@ tracefl.label2flip='{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0,13:0}' \
 tracefl.use-deterministic-sampling=true \
 tracefl.random-seed=42 \
 tracefl.output-dir='results/experiment_c' \
-min-train-nodes=10 \
+min-train-nodes=4 \
 fraction-train=1.0"
 
 echo "Running TraceFL baseline faulty client detection..."
