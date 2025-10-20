@@ -100,20 +100,20 @@ python prepare_dataset.py
 
 Before connecting the `SuperNodes` we need to register them with the `SuperLink`. This means we'll tell the `SuperLink` about the identities of the `SuperNodes` that will be connected. We do this by sending to it the public keys of the `SuperNodes` that we want the `SuperLink` to authorize.
 
-Let's pre-register the first `SuperNode`. The command below will send the public key to the `SuperLink` defined in the `my-federation` federation in the `pyproject.toml`.
+Let's register the first `SuperNode`. The command below will send the public key to the `SuperLink` defined in the `my-federation` federation in the `pyproject.toml`.
 
 ```shell
-flwr supernode create keys/client_credentials_1.pub . my-federation
+flwr supernode register keys/client_credentials_1.pub . my-federation
 # It will print something like:
 # Loading project configuration...
 # Success
 # ✅ Node 16019329408659850374 created successfully.
 ```
 
-Then, we pre-register the second `SuperNode` using the other public key:
+Then, we register the second `SuperNode` using the other public key:
 
 ```shell
-flwr supernode create keys/client_credentials_2.pub . my-federation
+flwr supernode register keys/client_credentials_2.pub . my-federation
 # It will print something like:
 # Loading project configuration...
 # Success
@@ -175,7 +175,7 @@ flwr supernode list . my-federation
 ```
 
 If you generated more than 2 client credentials, you can add more clients by opening new terminal windows and running the command
-above. Don't forget to specify the correct client private and public keys for each client instance you created.
+above. Don't forget to specify the correct client private key for each client (SuperNode) you created.
 
 > [!TIP]
 > Note the `--node-config` passed when spawning the `SuperNode` is accessible to the `ClientApp` via the `context` argument, i.e., `context.node_config`. In this example, the `ClientApp` uses it to load the dataset and then proceed with the training of the model.
