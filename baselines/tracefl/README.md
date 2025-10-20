@@ -33,7 +33,7 @@ dataset:
 
 **Hardware Setup:** This baseline was tested on a desktop machine with 8 CPU cores and 32GB RAM. Experiments run efficiently on CPU-only mode with minimal resource requirements. The baseline supports both CPU and GPU execution, with GPU acceleration available for larger models. Minimum requirements: 4 CPU cores, 8GB RAM for basic experiments. For large-scale experiments (as in the original paper), the authors used six NVIDIA DGX A100 nodes, each with 2048GB memory, 128 cores, and an A100 GPU with 80GB memory.
 
-**Contributors:** Ibrahim Ahmed Khan ([@ibrahim_Cypher10](https://github.com/ibrahim_Cypher10)) | [LinkedIn](https://www.linkedin.com/in/ibrahim-ahmed-khan-752100233/)
+**Contributors:** Ibrahim Ahmed Khan ([@ibrahim_Cypher10](https://github.com/ibrahim_Cypher10)) | [LinkedIn](https://www.linkedin.com/in/ibrahim-ahmed-khan-752100233/) | iak.ibrahimkhan@gmail.com
 
 ## Experimental Setup
 
