@@ -1,2 +1,2 @@
 Run,Total Rounds,Avg. TraceFL Accuracy (%),Best TraceFL Accuracy (%),Best FL Accuracy (%)
-dataset=mnist model=resnet18 clients=10,2,100.0,100.0,49.365234375
+dataset=mnist model=resnet18 clients=10,2,100.0,100.0,53.90625
