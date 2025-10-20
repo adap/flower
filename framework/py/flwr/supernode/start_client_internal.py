@@ -147,7 +147,7 @@ def start_client_internal(
         url_v = f"https://flower.ai/docs/framework/v{package_version}/en/"
         page = "how-to-authenticate-supernodes.html"
         flwr_exit(
-            ExitCode.SUPERNODE_INVALID_ARGS,
+            ExitCode.SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED,
             "Insecure connection is enabled, but the SuperNode's private key is "
             "provided for authentication. SuperNode authentication requires a "
             "secure TLS connection with the SuperLink. Please enable TLS by "
