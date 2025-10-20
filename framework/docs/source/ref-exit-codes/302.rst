@@ -1,32 +1,23 @@
-[302] SUPERNODE_NODE_AUTH_KEYS_INVALID
-======================================
+[302] SUPERNODE_NODE_AUTH_KEY_INVALID
+=====================================
 
 Description
 -----------
 
-The provided key files are invalid. Authentication requires a valid elliptic curve
-private and public key pair. This error occurs when either:
-
-- The **private key** file specified in ``--auth-supernode-private-key`` is invalid or
-  unreadable.
-- The **public key** file specified in ``--auth-supernode-public-key`` is invalid or
-  unreadable.
+Authentication requires a valid elliptic curve private key. This error occurs when the
+provided private key file specified in ``--auth-supernode-private-key`` is invalid or
+unreadable.
 
 How to Resolve
 --------------
 
-1. Ensure that the file paths provided for the private and public key options are
-   correct.
-
-2. Verify that both files exist and contain valid elliptic curve ssh keys. - The private
-key file should be in a format compatible with elliptic curve cryptography. - The public
-key file should match the private key.
-
+1. Ensure that the file path provided for the private key option is correct.
+2. Verify that the file exists and contains a valid elliptic curve SSH key.
 3. If the files are corrupted or not in the correct format, regenerate the elliptic
-curve ssh key pair and update the file paths accordingly. For example, in Linux/MacOS,
-**for rapid prototyping only** (not production; follow company procedures for key
-management):
+   curve SSH key pair and update the file paths accordingly. For example, on Linux or
+   macOS, **for rapid prototyping only** (not production; follow company procedures for
+   key management):
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    ssh-keygen -t ecdsa -b 384 -N "" -f id_ecdsa_nistp384
+       ssh-keygen -t ecdsa -b 384 -N "" -f id_ecdsa_nistp384

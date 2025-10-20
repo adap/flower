@@ -22,10 +22,7 @@ from typing import Optional
 
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.serialization import (
-    load_ssh_private_key,
-    load_ssh_public_key,
-)
+from cryptography.hazmat.primitives.serialization import load_ssh_private_key
 
 from flwr.common import EventType, event
 from flwr.common.args import try_obtain_root_certificates, try_obtain_trust_entities
@@ -221,12 +218,12 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--auth-supernode-private-key",
         type=str,
-        help="The SuperNode's private key (as a path str) to enable authentication.",
+        help="Path to the SuperNode's private key to enable authentication.",
     )
     parser.add_argument(
         "--auth-supernode-public-key",
         type=str,
-        help="The SuperNode's public key (as a path str) to enable authentication.",
+        help="This argument is deprecated and will be removed in a future release.",
     )
     parser.add_argument(
         "--node-config",
@@ -240,11 +237,8 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
 def _try_setup_client_authentication(
     args: argparse.Namespace,
 ) -> Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
-    if not args.auth_supernode_private_key and not args.auth_supernode_public_key:
+    if not args.auth_supernode_private_key:
         return None
-
-    if not args.auth_supernode_private_key or not args.auth_supernode_public_key:
-        flwr_exit(ExitCode.SUPERNODE_NODE_AUTH_KEYS_REQUIRED)
 
     try:
         ssh_private_key = load_ssh_private_key(
@@ -255,23 +249,15 @@ def _try_setup_client_authentication(
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
         flwr_exit(
-            ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID,
+            ExitCode.SUPERNODE_NODE_AUTH_KEY_INVALID,
             "Unable to parse the private key file.",
         )
 
-    try:
-        ssh_public_key = load_ssh_public_key(
-            Path(args.auth_supernode_public_key).read_bytes()
+    if args.auth_supernode_public_key:
+        log(
+            WARN,
+            "The `--auth-supernode-public-key` flag is deprecated and will be "
+            "removed in a future release. The public key is now derived from the "
+            "private key provided by `--auth-supernode-private-key`.",
         )
-        if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
-            raise ValueError()
-    except (ValueError, UnsupportedAlgorithm):
-        flwr_exit(
-            ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID,
-            "Unable to parse the public key file.",
-        )
-
-    return (
-        ssh_private_key,
-        ssh_public_key,
-    )
+    return ssh_private_key, ssh_private_key.public_key()

@@ -61,10 +61,3 @@ generate_client_credentials() {
 }
 
 generate_client_credentials "$1"
-
-printf "%s" "$(cat "${KEY_DIR}/client_credentials_1.pub" | sed 's/.$//')" > $KEY_DIR/client_public_keys.csv
-for ((i=2; i<=${1:-2}; i++))
-do
-    printf ",%s" "$(sed 's/.$//' < "${KEY_DIR}/client_credentials_$i.pub")" >> $KEY_DIR/client_public_keys.csv
-done
-printf "\n" >> $KEY_DIR/client_public_keys.csv
