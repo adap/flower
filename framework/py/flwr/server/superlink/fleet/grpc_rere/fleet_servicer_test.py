@@ -218,7 +218,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             assert node_info.status == NodeStatus.OFFLINE
         else:
             # Status changed to Deleted
-            assert node_info.status == NodeStatus.DELETED
+            assert node_info.status == NodeStatus.UNREGISTERED
 
     def test_successful_push_messages_if_running(self) -> None:
         """Test `PushMessages` success."""
