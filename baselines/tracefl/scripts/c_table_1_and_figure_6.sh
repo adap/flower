@@ -27,7 +27,7 @@ min-train-nodes=4 \
 fraction-train=1.0"
 
 echo "Running TraceFL baseline faulty client detection..."
-flwr run . --local-simulation "num-supernodes=4"  --run-config "$RUN_CONFIG"
+flwr run . --federation-config "num-supernodes=4" --run-config "$RUN_CONFIG"
 
 echo "Generating plots for faulty client detection..."
 python -m scripts.generate_graphs \
