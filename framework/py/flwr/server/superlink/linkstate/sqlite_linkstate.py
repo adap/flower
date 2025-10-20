@@ -495,7 +495,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             WHERE node_id IN ({",".join(["?"] * len(dst_node_ids))})
             AND status != ?
         """
-        rows = self.query(query, tuple(list(dst_node_ids) + [NodeStatus.DELETED]))
+        rows = self.query(query, tuple(dst_node_ids) + (NodeStatus.DELETED,))
         tmp_ret_dict = check_node_availability_for_in_message(
             inquired_in_message_ids=message_ids,
             found_in_message_dict=found_message_ins_dict,
