@@ -21,7 +21,7 @@ authenticate SuperNodes that connect to a running SuperLink:
   SuperNode is allowed to connect to the SuperLink.
 - **CLI-managed authentication**: This mode operates similarly to automatic
   authentication but requires starting the SuperLink with the
-``--enable-supernode-auth`` flag. To connect a SuperNode to the SuperLink, its public
+  ``--enable-supernode-auth`` flag. To connect a SuperNode to the SuperLink, its public
   key must first be registered using the |flower_cli_supernode_link|_. Only registered
   SuperNodes are permitted to connect to the SuperLink, making this mode more secure by
   restricting connections to authorized SuperNodes only.
