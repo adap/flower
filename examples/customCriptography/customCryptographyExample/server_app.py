@@ -38,37 +38,41 @@ class FedAvgWithServerEval(FedAvg):
 # ------------------------------
 # FUNZIONE DI VALUTAZIONE
 # ------------------------------
+# FUNZIONE DI VALUTAZIONE SERVER-SIDE (secondo lo schema ufficiale Flower)
+# ------------------------------
+from flwr.common import NDArrays, Scalar
+from typing import Dict, Optional, Tuple
+import torch
+
 def get_evaluate_fn():
-    """Return a function to evaluate the global model on the server."""
+    """Restituisce una funzione che valuta il modello globale sul server, come negli esempi ufficiali Flower."""
 
-    def evaluate(server_round: int, parameters, config):
-        print(f"Server-side evaluation - Round {server_round}")
+    # Prepara il validation loader una sola volta
+    val_loader = get_validation_data(batch_size=64)
+    criterion = torch.nn.CrossEntropyLoss()
 
-        # Convert parameters to numpy arrays
+    def evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Valutazione centralizzata del modello globale sul server."""
+
+        print(f"\n🔹 Server-side evaluation - Round {server_round}")
+
+        # Carica modello e aggiorna pesi con i parametri globali ricevuti
+        model = get_model(NET, num_classes=10, pretrained=False)
         ndarrays = parameters_to_ndarrays(parameters)
 
-        # Load model and update weights
-        model = get_model(NET, num_classes=10, pretrained=True)
+        # Applica i pesi ricevuti
         state_dict = model.state_dict()
         for (k, v), new_p in zip(state_dict.items(), ndarrays):
-            try:
-                state_dict[k] = torch.tensor(new_p, dtype=state_dict[k].dtype)
-            except Exception:
-                print(f"[WARN] Skipping incompatible layer: {k}, shape {new_p.shape}")
-        model.load_state_dict(state_dict, strict=False)
-
-        val_loader = get_validation_data(batch_size=64)
-        criterion = torch.nn.CrossEntropyLoss()
+            state_dict[k] = torch.tensor(new_p, dtype=v.dtype)
+        model.load_state_dict(state_dict, strict=True)
         model.eval()
 
-        total_loss = 0.0
-        correct = 0
-        total = 0
+        total_loss, correct, total = 0.0, 0, 0
 
-        # Evaluation loop
+        # Loop di valutazione (uguale al reference Flower)
         with torch.no_grad():
             for inputs, targets in val_loader:
-                # Fix input format if needed
+                # Converte input nel formato corretto
                 if isinstance(inputs, list):
                     inputs = torch.stack(inputs)
                 if inputs.ndim == 4 and inputs.shape[1] != 3:
@@ -82,9 +86,13 @@ def get_evaluate_fn():
                 correct += (predicted == targets).sum().item()
                 total += targets.size(0)
 
-        accuracy = correct / total
+        # Calcola metriche aggregate
         avg_loss = total_loss / total
+        accuracy = correct / total
+
         print(f"[Round {server_round}] Server-side accuracy: {accuracy:.4f} | loss: {avg_loss:.4f}")
+
+        # ⬅️ Ritorna (loss, metrics) come richiede Flower
         return avg_loss, {"accuracy": accuracy}
 
     return evaluate
@@ -98,11 +106,11 @@ def server_fn(context: Context):
     net = get_model(NET, num_classes=10, pretrained=True)
     parameters = ndarrays_to_parameters(get_weights(net))
 
-    strategy = FedAvg(
+    strategy = FedAvgWithServerEval(
         fraction_fit=0.2,
-        fraction_evaluate=1.0,  # solo valutazione server-side
+        fraction_evaluate=0.0,  # solo valutazione server-side
         min_available_clients=2,
-        #evaluate_fn=get_evaluate_fn(),
+        evaluate_fn=get_evaluate_fn(),
         initial_parameters=parameters,
         stop_criteria={"metric_ge": ("accuracy", ACCURACY)},
     )
