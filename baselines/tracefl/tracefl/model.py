@@ -228,7 +228,7 @@ def train(net, trainloader, epochs, device, model_type="cnn"):
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss()
     criterion.to(device)
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
+    optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     net.train()
     running_loss = 0.0
 
