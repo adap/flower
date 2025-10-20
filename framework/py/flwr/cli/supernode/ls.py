@@ -32,7 +32,7 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
-from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, NOOP_FLWR_AID
+from flwr.common.constant import FAB_CONFIG_FILE, NOOP_FLWR_AID, CliOutputFormat
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
