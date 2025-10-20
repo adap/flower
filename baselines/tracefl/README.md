@@ -83,14 +83,29 @@ The default model is ResNet18 for image/medical tasks. All models output logits 
 
 ## Environment Setup
 
-This baseline uses Python 3.10, pyenv, and virtualenv. Follow these steps to set up the environment:
+This baseline uses Python 3.10 and pip. Follow these steps to set up the environment:
 
+### Option 1: Using pyenv (if pyenv-virtualenv is installed)
 ```bash
 # Create the virtual environment
-pyenv virtualenv 3.10.14 tracefl-baseline
+pyenv virtualenv 3.10.4 tracefl-baseline
 
 # Activate it
 pyenv activate tracefl-baseline
+
+# Install the baseline (includes all dependencies)
+pip install -e .
+```
+
+### Option 2: Using standard Python venv (recommended)
+```bash
+# Create the virtual environment
+
+# Activate it (Windows)
+tracefl-baseline\Scripts\activate
+
+# Activate it (Linux/Mac)
+source tracefl-baseline/bin/activate
 
 # Install the baseline (includes all dependencies)
 pip install -e .
