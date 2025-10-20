@@ -24,10 +24,10 @@ EXEC_PLUGIN_SECTION = "exec_plugin"
 class NodeStatus:
     """Event log writer types."""
 
-    CREATED = "created"
+    REGISTERED = "registered"
     ONLINE = "online"
     OFFLINE = "offline"
-    DELETED = "deleted"
+    UNREGISTERED = "unregistered"
 
     def __new__(cls) -> NodeStatus:
         """Prevent instantiation."""
