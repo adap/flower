@@ -20,10 +20,8 @@ esac
 case "$2" in
     client-auth)
       server_auth='--enable-supernode-auth'
-      client_auth_1='--auth-supernode-private-key ../keys/client_credentials_1 
-                     --auth-supernode-public-key  ../keys/client_credentials_1.pub'
-      client_auth_2='--auth-supernode-private-key ../keys/client_credentials_2 
-                     --auth-supernode-public-key  ../keys/client_credentials_2.pub'
+      client_auth_1='--auth-supernode-private-key ../keys/client_credentials_1'
+      client_auth_2='--auth-supernode-private-key ../keys/client_credentials_2'
       server_address='127.0.0.1:9092'
       ;;
     *)
