@@ -83,7 +83,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: StartRunRequest, context: grpc.ServicerContext
     ) -> StartRunResponse:
         """Create run ID."""
-        log(INFO, "ControlServicer.StartRun")
+        #log(INFO, "ControlServicer.StartRun")
 
         if len(request.fab.content) > FAB_MAX_SIZE:
             log(

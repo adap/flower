@@ -72,18 +72,18 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: CreateNodeRequest, context: grpc.ServicerContext
     ) -> CreateNodeResponse:
         """."""
-        log(
-            INFO,
-            "[Fleet.CreateNode] Request heartbeat_interval=%s",
-            request.heartbeat_interval,
-        )
-        log(DEBUG, "[Fleet.CreateNode] Request: %s", MessageToDict(request))
+        # log(
+        #     INFO,
+        #     "[Fleet.CreateNode] Request heartbeat_interval=%s",
+        #     request.heartbeat_interval,
+        # )
+        #log(DEBUG, "[Fleet.CreateNode] Request: %s", MessageToDict(request))
         response = message_handler.create_node(
             request=request,
             state=self.state_factory.state(),
         )
-        log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)
-        log(DEBUG, "[Fleet.CreateNode] Response: %s", MessageToDict(response))
+        #log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)
+        #log(DEBUG, "[Fleet.CreateNode] Response: %s", MessageToDict(response))
         return response
 
     def DeleteNode(
@@ -147,7 +147,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: GetRunRequest, context: grpc.ServicerContext
     ) -> GetRunResponse:
         """Get run information."""
-        log(INFO, "[Fleet.GetRun] Requesting `Run` for run_id=%s", request.run_id)
+        #log(INFO, "[Fleet.GetRun] Requesting `Run` for run_id=%s", request.run_id)
 
         try:
             res = message_handler.get_run(
@@ -164,7 +164,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
         """Get FAB."""
-        log(INFO, "[Fleet.GetFab] Requesting FAB for fab_hash=%s", request.hash_str)
+       # log(INFO, "[Fleet.GetFab] Requesting FAB for fab_hash=%s", request.hash_str)
         try:
             res = message_handler.get_fab(
                 request=request,

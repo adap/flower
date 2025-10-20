@@ -38,7 +38,7 @@ def flower_superexec() -> None:
     args = _parse_args().parse_args()
 
     # Log the first message after parsing arguments in case of `--help`
-    log(INFO, "Starting Flower SuperExec")
+    ##log(INFO, "Starting Flower SuperExec")
 
     # Trigger telemetry event
     event(EventType.RUN_SUPEREXEC_ENTER, {"plugin_type": args.plugin_type})

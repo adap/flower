@@ -104,13 +104,13 @@ def flwr_simulation() -> None:
         )
         return
 
-    log(INFO, "Starting Flower Simulation")
-    log(
-        DEBUG,
-        "Starting isolated `Simulation` connected to SuperLink SimulationAppIo API "
-        "at %s",
-        args.simulationio_api_address,
-    )
+    #log(INFO, "Starting Flower Simulation")
+    # log(
+    #     DEBUG,
+    #     "Starting isolated `Simulation` connected to SuperLink SimulationAppIo API "
+    #     "at %s",
+    #     args.simulationio_api_address,
+    # )
     run_simulation_process(
         simulationio_api_address=args.simulationio_api_address,
         log_queue=log_queue,

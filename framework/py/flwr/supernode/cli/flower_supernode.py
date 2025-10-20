@@ -48,7 +48,7 @@ def flower_supernode() -> None:
     """Run Flower SuperNode."""
     args = _parse_args_run_supernode().parse_args()
 
-    log(INFO, "Starting Flower SuperNode")
+    #log(INFO, "Starting Flower SuperNode")
 
     event(EventType.RUN_SUPERNODE_ENTER)
 

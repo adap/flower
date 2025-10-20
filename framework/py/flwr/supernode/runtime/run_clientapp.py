@@ -96,7 +96,7 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
 
         # Install FAB, if provided
         if fab:
-            log(DEBUG, "[flwr-clientapp] Start FAB installation.")
+            #log(DEBUG, "[flwr-clientapp] Start FAB installation.")
             install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
 
         load_client_app_fn = get_load_client_app_fn(
@@ -108,7 +108,7 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
 
         try:
             # Load ClientApp
-            log(DEBUG, "[flwr-clientapp] Start `ClientApp` Loading.")
+            #log(DEBUG, "[flwr-clientapp] Start `ClientApp` Loading.")
             client_app: ClientApp = load_client_app_fn(
                 run.fab_id, run.fab_version, fab.hash_str if fab else ""
             )
@@ -151,7 +151,7 @@ def pull_clientappinputs(
 ) -> tuple[Message, Context, Run, Optional[Fab]]:
     """Pull ClientAppInputs from SuperNode."""
     masked_token = mask_string(token)
-    log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", masked_token)
+    #log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", masked_token)
     try:
         # Pull Context, Run and (optional) FAB
         res: PullAppInputsResponse = stub.PullClientAppInputs(
@@ -191,7 +191,7 @@ def push_clientappoutputs(
 ) -> PushAppOutputsResponse:
     """Push ClientAppOutputs to SuperNode."""
     masked_token = mask_string(token)
-    log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", masked_token)
+    #log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", masked_token)
     # Set message ID
     message.metadata.__dict__["_message_id"] = message.object_id
     proto_message = message_to_proto(remove_content_from_message(message))

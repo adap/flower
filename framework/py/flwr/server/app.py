@@ -126,7 +126,7 @@ def run_superlink() -> None:
     """Run Flower SuperLink (ServerAppIo API and Fleet API)."""
     args = _parse_args_run_superlink().parse_args()
 
-    log(INFO, "Starting Flower SuperLink")
+    #log(INFO, "Starting Flower SuperLink")
 
     event(EventType.RUN_SUPERLINK_ENTER)
 
@@ -572,7 +572,7 @@ def _run_fleet_api_rest(
     except ModuleNotFoundError:
         flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
-    log(INFO, "Starting Flower REST server")
+    #log(INFO, "Starting Flower REST server")
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
     fast_api_app.state.STATE_FACTORY = state_factory

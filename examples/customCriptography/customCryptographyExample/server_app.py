@@ -98,11 +98,11 @@ def server_fn(context: Context):
     net = get_model(NET, num_classes=10, pretrained=True)
     parameters = ndarrays_to_parameters(get_weights(net))
 
-    strategy = FedAvgWithServerEval(
+    strategy = FedAvg(
         fraction_fit=0.2,
-        fraction_evaluate=0.0,  # solo valutazione server-side
+        fraction_evaluate=1.0,  # solo valutazione server-side
         min_available_clients=2,
-        evaluate_fn=get_evaluate_fn(),
+        #evaluate_fn=get_evaluate_fn(),
         initial_parameters=parameters,
         stop_criteria={"metric_ge": ("accuracy", ACCURACY)},
     )

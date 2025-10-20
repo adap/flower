@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from datasets import load_from_disk
 from torchvision.transforms import Compose, Normalize, ToTensor, Resize
-from torchvision.models import resnet18, resnet34, squeezenet1_1
+from torchvision.models import resnet18, resnet34, squeezenet1_1, ResNet18_Weights
 
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
@@ -102,7 +102,7 @@ def get_model(model_name: str, num_classes=10, pretrained=True):
 
         return TinyCNN()
     elif model_name == "resnet18":
-        model = resnet18(pretrained=pretrained)
+        model = resnet18(weights=ResNet18_Weights.DEFAULT)
         model.fc = nn.Linear(model.fc.in_features, num_classes)
         return model
     elif model_name == "resnet34":
