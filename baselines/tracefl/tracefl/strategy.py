@@ -179,23 +179,15 @@ class TraceFLStrategy(FedAvg):
         # Extract client models from Message objects
         for msg in replies_list:
             if not msg.has_error():
-                # Extract client ID from Flower's node_id
-                flower_node_id = msg.metadata.src_node_id
-
-                # Create sequential mapping if not exists
-                if not hasattr(self, "_node_id_to_client_id"):
-                    self._node_id_to_client_id: dict[int, int] = {}
-                    self._next_client_id: int = 0
-
-                if flower_node_id not in self._node_id_to_client_id:
-                    self._node_id_to_client_id[flower_node_id] = self._next_client_id
-                    self._next_client_id += 1
-
-                client_id = self._node_id_to_client_id[flower_node_id]
-
-                # Extract num_examples from metrics
+                # Extract actual client ID from metrics (not sequential mapping)
                 metric_content = msg.content.get("metrics")
                 if metric_content is not None:
+                    # Get actual client ID from metrics
+                    client_id = metric_content.get("client_id")
+                    if client_id is None:
+                        logging.warning("No client_id found in metrics, skipping message")
+                        continue
+                    
                     num_examples = metric_content.get(self.weighted_by_key, 0)
 
                     # Extract ArrayRecord (model weights)
@@ -206,6 +198,12 @@ class TraceFLStrategy(FedAvg):
                         self.client_models[server_round][client_id] = state_dict
 
                     self.client_num_examples[server_round][client_id] = num_examples
+                    
+                    logging.debug(
+                        "Stored model for client %s with %s examples", 
+                        client_id, 
+                        num_examples
+                    )
 
         log(
             logging.INFO,

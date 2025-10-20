@@ -126,6 +126,7 @@ def train(msg: Message, context: Context):
     metrics = {
         "train_loss": train_loss,
         "num-examples": len(train_data),
+        "client_id": int(client_data["client_id"]),  # Include actual client ID
     }
     metric_record = MetricRecord(metrics)
     content = RecordDict({"arrays": model_record, "metrics": metric_record})
