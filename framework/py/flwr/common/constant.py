@@ -147,7 +147,7 @@ FLWR_APP_TOKEN_LENGTH = 128  # Length of the token used
 
 # Constants for object pushing and pulling
 MAX_CONCURRENT_PUSHES = int(
-    os.getenv("MAX_CONCURRENT_PUSHES", "1")
+    os.getenv("MAX_CONCURRENT_PUSHES", "2")
 )  # Default maximum number of concurrent pushes
 MAX_CONCURRENT_PULLS = int(
     os.getenv("MAX_CONCURRENT_PULLS", "2")
