@@ -49,29 +49,30 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
-    CreateNodeCliRequest,
-    CreateNodeCliResponse,
-    DeleteNodeCliRequest,
-    DeleteNodeCliResponse,
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
-    ListNodesCliRequest,
-    ListNodesCliResponse,
+    ListNodesRequest,
+    ListNodesResponse,
     ListRunsRequest,
     ListRunsResponse,
     PullArtifactsRequest,
     PullArtifactsResponse,
+    RegisterNodeRequest,
+    RegisterNodeResponse,
     StartRunRequest,
     StartRunResponse,
     StopRunRequest,
     StopRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
+    UnregisterNodeRequest,
+    UnregisterNodeResponse,
 )
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.supercore.constant import NodeStatus
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
@@ -389,11 +390,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         download_url = self.artifact_provider.get_url(run_id)
         return PullArtifactsResponse(url=download_url)
 
-    def CreateNodeCli(
-        self, request: CreateNodeCliRequest, context: grpc.ServicerContext
-    ) -> CreateNodeCliResponse:
+    def RegisterNode(
+        self, request: RegisterNodeRequest, context: grpc.ServicerContext
+    ) -> RegisterNodeResponse:
         """Add a SuperNode."""
-        log(INFO, "ControlServicer.CreateNodeCli")
+        log(INFO, "ControlServicer.RegisterNode")
 
         # Verify public key
         try:
@@ -427,15 +428,15 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
             )
-        log(INFO, "[ControlServicer.CreateNodeCli] Created node_id=%s", node_id)
+        log(INFO, "[ControlServicer.RegisterNode] Created node_id=%s", node_id)
 
-        return CreateNodeCliResponse(node_id=node_id)
+        return RegisterNodeResponse(node_id=node_id)
 
-    def DeleteNodeCli(
-        self, request: DeleteNodeCliRequest, context: grpc.ServicerContext
-    ) -> DeleteNodeCliResponse:
+    def UnregisterNode(
+        self, request: UnregisterNodeRequest, context: grpc.ServicerContext
+    ) -> UnregisterNodeResponse:
         """Remove a SuperNode."""
-        log(INFO, "ControlServicer.RemoveNode")
+        log(INFO, "ControlServicer.UnregisterNode")
 
         # Init link state
         state = self.linkstate_factory.state()
@@ -448,19 +449,19 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             log(ERROR, NODE_NOT_FOUND_MESSAGE)
             context.abort(grpc.StatusCode.NOT_FOUND, NODE_NOT_FOUND_MESSAGE)
 
-        return DeleteNodeCliResponse()
+        return UnregisterNodeResponse()
 
-    def ListNodesCli(
-        self, request: ListNodesCliRequest, context: grpc.ServicerContext
-    ) -> ListNodesCliResponse:
+    def ListNodes(
+        self, request: ListNodesRequest, context: grpc.ServicerContext
+    ) -> ListNodesResponse:
         """List all SuperNodes."""
-        log(INFO, "ControlServicer.ListNodesCli")
+        log(INFO, "ControlServicer.ListNodes")
 
         if self.is_simulation:
-            log(ERROR, "ListNodesCli is not available in simulation mode.")
+            log(ERROR, "ListNodes is not available in simulation mode.")
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
-                "ListNodesCli is not available in simulation mode.",
+                "ListNodesis not available in simulation mode.",
             )
             raise grpc.RpcError()  # This line is unreachable
 
@@ -478,61 +479,61 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Retrieve all nodes for the account
             nodes_info = state.get_node_info(owner_aids=[flwr_aid])
 
-        return ListNodesCliResponse(nodes_info=nodes_info, now=now().isoformat())
+        return ListNodesResponse(nodes_info=nodes_info, now=now().isoformat())
 
 
 def _create_list_nodeif_for_dry_run() -> Sequence[NodeInfo]:
     """Create a list of NodeInfo for dry run testing."""
     nodes_info: list[NodeInfo] = []
-    # A node created (but not connected)
+    # A node registered (but not connected)
     nodes_info.append(
         NodeInfo(
             node_id=15390646978706312628,
             owner_aid="owner_aid_1",
-            status="created",
-            created_at=(now()).isoformat(),
+            status=NodeStatus.REGISTERED,
+            registered_at=(now()).isoformat(),
             last_activated_at="",
             last_deactivated_at="",
-            deleted_at="",
+            unregistered_at="",
         )
     )
 
-    # A node created and connected
+    # A node registered and connected
     nodes_info.append(
         NodeInfo(
             node_id=2941141058168602545,
             owner_aid="owner_aid_2",
-            status="online",
-            created_at=(now()).isoformat(),
+            status=NodeStatus.ONLINE,
+            registered_at=(now()).isoformat(),
             last_activated_at=(now() + timedelta(hours=0.5)).isoformat(),
             last_deactivated_at="",
-            deleted_at="",
+            unregistered_at="",
         )
     )
 
-    # A node created and deleted (never connected)
+    # A node registered and unregistered (never connected)
     nodes_info.append(
         NodeInfo(
             node_id=906971720890549292,
             owner_aid="owner_aid_3",
-            status="deleted",
-            created_at=(now()).isoformat(),
+            status=NodeStatus.UNREGISTERED,
+            registered_at=(now()).isoformat(),
             last_activated_at="",
             last_deactivated_at="",
-            deleted_at=(now() + timedelta(hours=1)).isoformat(),
+            unregistered_at=(now() + timedelta(hours=1)).isoformat(),
         )
     )
 
-    # A node created, deactivate and then deleted
+    # A node registered, deactivate and then unregistered
     nodes_info.append(
         NodeInfo(
             node_id=1781174086018058152,
             owner_aid="owner_aid_4",
-            status="offline",
-            created_at=(now()).isoformat(),
+            status=NodeStatus.OFFLINE,
+            registered_at=(now()).isoformat(),
             last_activated_at=(now() + timedelta(hours=0.5)).isoformat(),
             last_deactivated_at=(now() + timedelta(hours=1)).isoformat(),
-            deleted_at=(now() + timedelta(hours=1.5)).isoformat(),
+            unregistered_at=(now() + timedelta(hours=1.5)).isoformat(),
         )
     )
     return nodes_info
