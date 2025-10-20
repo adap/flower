@@ -165,3 +165,20 @@ cython_debug/
 # TraceFL-specific generated files
 *.pt
 final_model.pt
+results/
+results_csvs/
+graphs/
+*.csv
+*.png
+*.pdf
+*.log
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+*.egg-info/
+dist/
+build/
+

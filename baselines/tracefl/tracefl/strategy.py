@@ -185,9 +185,11 @@ class TraceFLStrategy(FedAvg):
                     # Get actual client ID from metrics
                     client_id = metric_content.get("client_id")
                     if client_id is None:
-                        logging.warning("No client_id found in metrics, skipping message")
+                        logging.warning(
+                            "No client_id found in metrics, skipping message"
+                        )
                         continue
-                    
+
                     num_examples = metric_content.get(self.weighted_by_key, 0)
 
                     # Extract ArrayRecord (model weights)
@@ -198,11 +200,11 @@ class TraceFLStrategy(FedAvg):
                         self.client_models[server_round][client_id] = state_dict
 
                     self.client_num_examples[server_round][client_id] = num_examples
-                    
+
                     logging.debug(
-                        "Stored model for client %s with %s examples", 
-                        client_id, 
-                        num_examples
+                        "Stored model for client %s with %s examples",
+                        client_id,
+                        num_examples,
                     )
 
         log(
