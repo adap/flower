@@ -107,6 +107,41 @@ The `pyproject.toml` includes all necessary dependencies including:
 
 The baseline provides organized experiment scripts that save results in separate folders for easier navigation. Each script corresponds to specific figures/tables from the paper:
 
+### Expected TraceFL Logging Output
+
+When running TraceFL experiments, you'll see detailed provenance analysis logs showing how TraceFL identifies responsible clients for each prediction. Here's an example of the logging output you can expect:
+
+```log
+[2025-10-20 16:05:06][root]             *********** Input Label: 0, Responsible Client(s): c6,c9,c5,c4  *************
+[2025-10-20 16:05:06][root]      Traced Client: c4 || Tracing = Correct
+[2025-10-20 16:05:06][root]     TraceFL Clients Contributions Rank:     {'c4': 0.49, 'c9': 0.31, 'c6': 0.13, 'c5': 0.07}
+[2025-10-20 16:05:06][root] 
+
+[2025-10-20 16:05:06][root]             *********** Input Label: 1, Responsible Client(s): c6,c5  *************
+[2025-10-20 16:05:06][root]      Traced Client: c6 || Tracing = Correct
+[2025-10-20 16:05:06][root]     TraceFL Clients Contributions Rank:     {'c6': 0.43, 'c5': 0.26, 'c4': 0.16, 'c9': 0.14}
+[2025-10-20 16:05:06][root] 
+
+[2025-10-20 16:05:06][root]             *********** Input Label: 2, Responsible Client(s): c6,c5,c4  *************
+[2025-10-20 16:05:06][root]      Traced Client: c5 || Tracing = Correct
+[2025-10-20 16:05:06][root]     TraceFL Clients Contributions Rank:     {'c5': 0.57, 'c6': 0.27, 'c4': 0.09, 'c9': 0.06}
+[2025-10-20 16:05:06][root] 
+
+[2025-10-20 16:05:06][root] [Round 2] TraceFL Localization Accuracy = 100.0 || Total Inputs Used In Prov: 20 || GM_(loss, acc) (0.7734265252947807,0.73486328125)
+```
+
+**Log Output Explanation:**
+- **Input Label**: The ground truth label of the test sample being analyzed
+- **Responsible Client(s)**: All clients that have this label in their training data
+- **Traced Client**: The client identified by TraceFL as most responsible for this prediction
+- **Tracing = Correct**: Whether TraceFL correctly identified a responsible client
+- **Clients Contributions Rank**: Quantified contribution scores for each client (sums to 1.0)
+- **Localization Accuracy**: Overall accuracy of TraceFL's client identification
+- **Total Inputs Used In Prov**: Number of test samples analyzed for provenance
+- **GM_(loss, acc)**: Global model's loss and accuracy on test data
+
+This detailed logging helps you understand how TraceFL analyzes neuron provenance and identifies responsible clients for each prediction.
+
 ### Experiment A: Localization Accuracy in Correct Predictions (Figure 2, Table 3, Figure 5)
 ```bash
 bash scripts/a_figure_2_table_3_and_figure_5_single_alpha.sh
@@ -126,8 +161,6 @@ This experiment evaluates TraceFL's ability to identify responsible clients for 
 - Rounds: 2
 
 **Expected Results:** TraceFL achieves 100% localization accuracy in identifying the client responsible for each correct prediction. FL test accuracy reaches 69.43%.
-
-![Experiment A: Combined Accuracy](_static/experiment_a_combined_accuracy.png)
 
 ![Experiment A: Provenance Analysis](_static/experiment_a_provenance.png)
 
