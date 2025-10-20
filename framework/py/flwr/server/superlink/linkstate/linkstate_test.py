@@ -778,6 +778,7 @@ class StateTest(CoreStateTest):
         assert len(retrieved_nodes) == 1
         assert retrieved_nodes[0].status == NodeStatus.DELETED
         self.assertAlmostEqual(actual_deleted_at, expected_deleted_at, 2)
+        self.assertAlmostEqual(node.online_until, expected_deleted_at, 2)
 
     def test_delete_node_owner_mismatch(self) -> None:
         """Test deleting a client node with owner mismatch."""

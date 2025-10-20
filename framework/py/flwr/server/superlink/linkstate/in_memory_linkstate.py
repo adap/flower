@@ -380,7 +380,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 )
 
             node.status = NodeStatus.DELETED
-            node.deleted_at = now().isoformat()
+            current = now()
+            node.deleted_at = current.isoformat()
+            # Set online_until to current timestamp on deletion, if it is in the future
+            node.online_until = min(node.online_until, current.timestamp())
 
     def get_nodes(self, run_id: int) -> set[int]:
         """Return all available nodes.
