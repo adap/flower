@@ -71,8 +71,8 @@ from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import (
     ControlAuthnPlugin,
     ControlAuthzPlugin,
-    get_control_authn_plugins,
-    get_control_authz_plugins,
+    NoOpControlAuthnPlugin,
+    NoOpControlAuthzPlugin,
 )
 from flwr.superlink.servicer.control import run_control_api_grpc
 
@@ -93,6 +93,8 @@ P = TypeVar("P", ControlAuthnPlugin, ControlAuthzPlugin)
 try:
     from flwr.ee import (
         add_ee_args_superlink,
+        get_control_authn_ee_plugins,
+        get_control_authz_ee_plugins,
         get_control_event_log_writer_plugins,
         get_ee_artifact_provider,
         get_fleet_event_log_writer_plugins,
@@ -118,6 +120,26 @@ except ImportError:
         raise NotImplementedError(
             "No event log writer plugins are currently supported."
         )
+
+    def get_control_authn_ee_plugins() -> dict[str, type[ControlAuthnPlugin]]:
+        """Return all Control API authentication plugins for EE."""
+        return {}
+
+    def get_control_authz_ee_plugins() -> dict[str, type[ControlAuthzPlugin]]:
+        """Return all Control API authorization plugins for EE."""
+        return {}
+
+
+def get_control_authn_plugins() -> dict[str, type[ControlAuthnPlugin]]:
+    """Return all Control API authentication plugins."""
+    ee_dict: dict[str, type[ControlAuthnPlugin]] = get_control_authn_ee_plugins()
+    return ee_dict | {AuthnType.NOOP: NoOpControlAuthnPlugin}
+
+
+def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
+    """Return all Control API authorization plugins."""
+    ee_dict: dict[str, type[ControlAuthzPlugin]] = get_control_authz_ee_plugins()
+    return ee_dict | {AuthzType.NOOP: NoOpControlAuthzPlugin}
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
