@@ -1222,6 +1222,30 @@ class StateTest(CoreStateTest):
             assert res_msg.has_error()
             assert res_msg.error.code == ErrorCode.MESSAGE_UNAVAILABLE
 
+    def test_get_message_res_node_unavailable(self) -> None:
+        """Test get_message_res to return error Message if the destination node is
+        unavailable."""
+        # Prepare
+        state = self.state_factory()
+        node_id = create_dummy_node(state)
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        ins_msg_id = state.store_message_ins(msg)
+        assert ins_msg_id
+
+        # Execute
+        state.delete_node("mock_flwr_aid", node_id)
+        res_msg = state.get_message_res({ins_msg_id})[0]
+
+        # Assert
+        assert res_msg.has_error()
+        assert res_msg.error.code == ErrorCode.NODE_UNAVAILABLE
+
     def test_get_message_res_reply_not_ready(self) -> None:
         """Test get_message_res to return nothing since reply Message isn't present."""
         # Prepare
