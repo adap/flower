@@ -299,5 +299,5 @@ class ExecPluginType:
 
 
 # Constants for No-op auth plugins
-NOOP_FLWR_AID = "sys_noauth"
+NOOP_FLWR_AID = "<none>"
 NOOP_ACCOUNT_NAME = "sys_noauth"
