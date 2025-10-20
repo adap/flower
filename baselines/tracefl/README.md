@@ -111,6 +111,11 @@ The baseline provides organized experiment scripts that save results in separate
 ```bash
 bash scripts/a_figure_2_table_3_and_figure_5_single_alpha.sh
 ```
+
+Or run directly with Flower:
+```bash
+flwr run . --run-config "num-server-rounds=2 tracefl.dataset='mnist' tracefl.model='resnet18' tracefl.num-clients=10 tracefl.dirichlet-alpha=0.3 tracefl.max-per-client-data-size=2048 tracefl.max-server-data-size=2048 tracefl.batch-size=32 tracefl.provenance-rounds='1,2' tracefl.use-deterministic-sampling=true tracefl.random-seed=42 tracefl.output-dir='results/experiment_a' min-train-nodes=4 fraction-train=0.4"
+```
 This experiment evaluates TraceFL's ability to identify responsible clients for correct predictions. It runs with Dirichlet alpha=0.3 on MNIST with ResNet18 for 2 rounds, selecting 4 out of 10 clients per round.
 
 **Configuration:**
@@ -136,6 +141,11 @@ This experiment evaluates TraceFL's ability to identify responsible clients for 
 ```bash
 bash scripts/b_figure_3.sh
 ```
+
+Or run directly with Flower:
+```bash
+flwr run . --run-config "num-server-rounds=2 tracefl.dataset='mnist' tracefl.model='resnet18' tracefl.num-clients=10 tracefl.dirichlet-alpha=0.3 tracefl.max-per-client-data-size=2048 tracefl.max-server-data-size=2048 tracefl.batch-size=32 tracefl.provenance-rounds='1,2' tracefl.use-deterministic-sampling=true tracefl.random-seed=42 tracefl.output-dir='results/experiment_b' min-train-nodes=4 fraction-train=0.4"
+```
 This experiment analyzes how data distribution heterogeneity affects TraceFL's localization accuracy by testing with a single alpha value (0.3). For a complete sweep across multiple alpha values, use `scripts/b_figure_3_complete_sweep.sh`.
 
 **Configuration:**
@@ -152,6 +162,11 @@ This experiment analyzes how data distribution heterogeneity affects TraceFL's l
 ### Experiment C: Faulty Client Detection (Table 1, Figure 6)
 ```bash
 bash scripts/c_table_1_and_figure_6.sh
+```
+
+Or run directly with Flower:
+```bash
+flwr run . --run-config "num-server-rounds=3 tracefl.dataset='mnist' tracefl.model='resnet18' tracefl.num-clients=10 tracefl.dirichlet-alpha=0.7 tracefl.max-per-client-data-size=2048 tracefl.max-server-data-size=2048 tracefl.batch-size=32 tracefl.provenance-rounds='1,2,3' tracefl.faulty-clients-ids='[0]' tracefl.label2flip='{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0,13:0}' tracefl.use-deterministic-sampling=true tracefl.random-seed=42 tracefl.output-dir='results/experiment_c' min-train-nodes=10 fraction-train=1.0"
 ```
 This experiment simulates faulty clients that flip labels to evaluate TraceFL's ability to localize clients responsible for mispredictions. Client 0 is configured as faulty, flipping labels 1-13 to 0.
 
@@ -173,6 +188,11 @@ This experiment simulates faulty clients that flip labels to evaluate TraceFL's 
 ### Experiment D: Differential Privacy (Figure 4, Table 2)
 ```bash
 bash scripts/d_figure_4_and_table_2.sh
+```
+
+Or run directly with Flower:
+```bash
+flwr run . --run-config "num-server-rounds=2 tracefl.dataset='mnist' tracefl.model='resnet18' tracefl.num-clients=10 tracefl.dirichlet-alpha=0.3 tracefl.max-per-client-data-size=2048 tracefl.max-server-data-size=2048 tracefl.batch-size=32 tracefl.provenance-rounds='1,2' tracefl.noise-multiplier=0.001 tracefl.clipping-norm=15 tracefl.use-deterministic-sampling=true tracefl.random-seed=42 tracefl.output-dir='results/experiment_d' min-train-nodes=4 fraction-train=0.4"
 ```
 This experiment evaluates TraceFL under differential privacy constraints, demonstrating that neuron provenance tracking remains effective even when privacy-preserving mechanisms are applied.
 

@@ -42,15 +42,8 @@ def _load_client_data(context):
 
         # Client ID resolution (with fallback for robustness)
         # Log available clients to help diagnose partition mismatches
-        logging.debug(
-            "Available client IDs: %s",
-            list(ds_dict['client2data'].keys())
-        )
-        logging.debug(
-            "Requested client ID: %s (type: %s)",
-            client_id,
-            type(client_id)
-        )
+        logging.debug("Available client IDs: %s", list(ds_dict["client2data"].keys()))
+        logging.debug("Requested client ID: %s (type: %s)", client_id, type(client_id))
 
         # Check if client ID exists (handle both string and int types)
         if str(client_id) not in [str(k) for k in ds_dict["client2data"].keys()]:

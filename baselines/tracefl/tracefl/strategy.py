@@ -94,7 +94,7 @@ class TraceFLStrategy(FedAvg):
         self.output_dir = output_dir
 
         # Storage for client models and metadata (persists across rounds)
-        # 
+        #
         # self.client_models: Stores client state dicts for provenance analysis
         #   Structure: {round_id: {client_id: model_state_dict}}
         #   Example: {1: {0: {...}, 1: {...}}, 2: {0: {...}, 2: {...}}}
@@ -127,7 +127,7 @@ class TraceFLStrategy(FedAvg):
         replies,
     ):
         """Aggregate train results and store client models for provenance analysis.
-        
+
         IMPORTANT: This method is called by FedAvg.start() and may be wrapped
         by TraceFLWithDP. The wrapping order is:
         1. Client replies arrive
@@ -136,7 +136,7 @@ class TraceFLStrategy(FedAvg):
         4. super().aggregate_train() does weighted averaging
         5. DP wrapper (if enabled) clips and adds noise to the result
         6. Provenance analysis runs with ORIGINAL client models (not noisy)
-        
+
         This design ensures provenance analysis uses unmodified client models
         while the global model still receives DP protection.
         """

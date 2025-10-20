@@ -6,7 +6,7 @@ This module handles:
 3. Validating model-dataset compatibility (e.g., transformers for text)
 4. Normalizing configuration values from CLI string overrides
 
-The main entry point is create_tracefl_config() which returns a 
+The main entry point is create_tracefl_config() which returns a
 SimpleNamespace object matching original TraceFL's configuration structure.
 """
 

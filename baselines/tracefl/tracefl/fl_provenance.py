@@ -162,17 +162,6 @@ class FlowerProvenance:
             if len(selected_wrong_indices) >= min_per_label:
                 break
 
-        if not selected_wrong_indices and wrong_indices:
-            fallback_count = min(min_per_label, len(wrong_indices))
-            logging.warning(
-                "No misclassifications matched label2flip mapping; using first %s "
-                "incorrect samples as fallback",
-                fallback_count,
-            )
-            selected_wrong_indices = [
-                int(idx) for idx in wrong_indices[:fallback_count]
-            ]
-
         logging.info("Selected wrong indices: %s", selected_wrong_indices)
 
         if hasattr(self.server_test_data, "select"):
@@ -516,17 +505,19 @@ class FlowerProvenance:
             )
 
             if self._faulty_mode:
-                # FAULTY CLIENT DETECTION MODE (matches original TraceFL's FederatedProvFalse)
-                # 
+                # FAULTY CLIENT DETECTION MODE (matches original TraceFL's
+                # FederatedProvFalse)
+                #
                 # In this mode, we're testing if TraceFL can identify ANY faulty client
-                # that is poisoning the model, not necessarily the specific client with 
+                # that is poisoning the model, not necessarily the specific client with
                 # the target label. This matches the paper's experimental design.
                 #
                 # Responsible clients = pre-configured faulty clients (from config)
                 # Tracing is "correct" if traced_client is in the faulty set
-                # 
+                #
                 # Note: This differs from normal mode where responsible clients are
-                # determined by label distribution. Here, we're testing fault localization,
+                # determined by label distribution. Here, we're testing fault
+                # localization,
                 # not data provenance for specific labels.
                 responsible_clients = faulty_responsible
                 res_c_string = ",".join(f"c{c}" for c in responsible_clients)

@@ -1,7 +1,7 @@
 """Custom Differential Privacy wrapper for TraceFLStrategy.
 
-This implementation replicates the original TraceFL's DP logic from Flower 1.9.0 while being
-compatible with Flower 1.22.0 and TraceFLStrategy.
+This implementation replicates the original TraceFL's DP logic from Flower 1.9.0 while
+being compatible with Flower 1.22.0 and TraceFLStrategy.
 """
 
 import logging
@@ -101,13 +101,13 @@ class TraceFLWithDP(Strategy):
         This matches Flower 1.9.0's aggregate_fit logic but adapted for
         post-aggregation clipping (which is mathematically equivalent when
         using weighted aggregation).
-        
+
         IMPORTANT TIMING:
         TraceFLStrategy.aggregate_train() extracts client models BEFORE calling
-        super().aggregate_train(), so provenance analysis gets access to 
+        super().aggregate_train(), so provenance analysis gets access to
         ORIGINAL client models. Only the final aggregated global model gets
         DP noise applied, not the stored client models.
-        
+
         This design preserves full provenance accuracy while still providing
         DP guarantees for the global model.
         """

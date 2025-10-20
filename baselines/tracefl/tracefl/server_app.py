@@ -87,11 +87,12 @@ def main(grid: Grid, context: Context) -> None:
     if use_deterministic:
         # Deterministic mode: Fix random seed for reproducibility
         # This ensures the same clients are selected in each round
-        # Critical for comparing results across runs (e.g., original TraceFL vs baseline)
+        # Critical for comparing results across runs (e.g., original TraceFL vs
+        # baseline)
         seed = int(context.run_config.get("tracefl.random-seed", 42))
         _set_random_seed(seed)
         logging.info("Deterministic mode enabled with seed: %s", seed)
-        
+
         # Note: fraction_train still applies, but min_train_nodes ensures
         # at least N clients participate (prevents empty training rounds)
     else:
