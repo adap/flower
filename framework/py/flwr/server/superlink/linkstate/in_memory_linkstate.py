@@ -450,7 +450,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return None
 
             node_info = self.nodes[node_id]
-            if node_info.status == NodeStatus.DELETED:
+            if node_info.status == NodeStatus.UNREGISTERED:
                 return None
             return node_id
 
