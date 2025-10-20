@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-# TraceFL baseline: Localization accuracy on correctly classified samples.
-# This mirrors Figure 2 / Table 3 / Figure 5 from the original repository.
+# TraceFL baseline: Single alpha=0.3 experiment (matches original TraceFL)
 
 set -euo pipefail
 
-# Always run from the TraceFL baseline repository root regardless of the
-# invocation directory.
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
+
+echo "Running TraceFL baseline localization experiment (alpha=0.3 only)..."
 
 RUN_CONFIG="num-server-rounds=2 \
 tracefl.dataset='mnist' \
@@ -21,13 +20,15 @@ tracefl.batch-size=32 \
 tracefl.provenance-rounds='1,2' \
 tracefl.use-deterministic-sampling=true \
 tracefl.random-seed=42 \
-min-train-nodes=4"
+tracefl.output-dir='results/experiment_a' \
+min-train-nodes=4 \
+fraction-train=0.4"
 
-echo "Running TraceFL baseline localization experiment..."
+echo "Running TraceFL baseline with Dirichlet alpha=0.3..."
 flwr run . --run-config "$RUN_CONFIG"
 
 echo "Generating accuracy plots..."
 python -m scripts.generate_graphs \
-  --pattern "prov_dataset-mnist_model-resnet18_clients-10_alpha-0-3_rounds-1-2*.csv" \
-  --title "TraceFL Localization Accuracy (MNIST, 10 Clients)"
-
+  --output-dir "results/experiment_a/graphs" \
+  --pattern "results/experiment_a/prov_*.csv" \
+  --title "TraceFL Localization Accuracy (MNIST, 10 Clients, α=0.3)"

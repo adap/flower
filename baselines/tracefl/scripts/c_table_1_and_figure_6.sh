@@ -13,7 +13,7 @@ RUN_CONFIG="num-server-rounds=3 \
 tracefl.dataset='mnist' \
 tracefl.model='resnet18' \
 tracefl.num-clients=4 \
-tracefl.dirichlet-alpha=0.3 \
+tracefl.dirichlet-alpha=0.7 \
 tracefl.max-per-client-data-size=2048 \
 tracefl.max-server-data-size=2048 \
 tracefl.batch-size=32 \
