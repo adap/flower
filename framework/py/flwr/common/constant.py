@@ -77,6 +77,7 @@ FAB_HASH_TRUNCATION = 8
 FAB_MAX_SIZE = 10 * 1024 * 1024  # 10 MB
 FLWR_DIR = ".flwr"  # The default Flower directory: ~/.flwr/
 FLWR_HOME = "FLWR_HOME"  # If set, override the default Flower directory
+PLATFORM_API_URL = "https://api.flower.ai/v1"
 
 # Constant for SuperLink
 SUPERLINK_NODE_ID = 1
@@ -207,7 +208,8 @@ class ErrorCode:
     REPLY_MESSAGE_UNAVAILABLE = 4
     NODE_UNAVAILABLE = 5
     MOD_FAILED_PRECONDITION = 6
-
+    INVALID_FAB = 7
+    
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")

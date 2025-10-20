@@ -43,6 +43,7 @@ class ExitCode:
     SUPERNODE_REST_ADDRESS_INVALID = 300
     # SUPERNODE_NODE_AUTH_KEYS_REQUIRED = 301 --- DELETED ---
     SUPERNODE_NODE_AUTH_KEY_INVALID = 302
+    SUPERNODE_TRUST_ENTITY_REQUIRED = 303
 
     # SuperExec-specific exit codes (400-499)
     SUPEREXEC_INVALID_PLUGIN_CONFIG = 400
@@ -109,6 +110,10 @@ EXIT_CODE_HELP = {
         "Node authentication requires elliptic curve private key. "
         "Please ensure that the file path points to a valid private key "
         "file and try again."
+    ),
+    ExitCode.SUPERNODE_TRUST_ENTITY_REQUIRED: (
+        "Entity verification is enabled, but no trusted entities were provided. "
+        "The Flower SuperNode should be restarted with a trusted entities list."
     ),
     # SuperExec-specific exit codes (400-499)
     ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (

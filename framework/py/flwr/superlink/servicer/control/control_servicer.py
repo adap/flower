@@ -16,6 +16,8 @@
 
 
 import hashlib
+import json
+import re
 import time
 from collections.abc import Generator, Sequence
 from datetime import timedelta
@@ -23,6 +25,7 @@ from logging import ERROR, INFO
 from typing import Any, Optional, cast
 
 import grpc
+import requests
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
@@ -33,6 +36,7 @@ from flwr.common.constant import (
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
+    PLATFORM_API_URL,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
@@ -108,7 +112,32 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
         ffs = self.ffs_factory.ffs()
 
-        if len(request.fab.content) > FAB_MAX_SIZE:
+        verification = None
+        if request.fab.content == b"":
+            identifier = request.fab.meta["identifier"]
+            m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", identifier)
+            if not m:
+                log(
+                    ERROR,
+                    "Invalid remote app ID. Expected format: '@user_name/app_name'.",
+                )
+                return StartRunResponse()
+
+            # Request download link
+            _, url, verification = _request_download_link(identifier, context)
+
+            # Download FAB from Hub
+            try:
+                r = requests.get(url, timeout=60)
+                r.raise_for_status()
+            except requests.RequestException as e:
+                log(ERROR, "FAB download failed: %s", str(e))
+                return StartRunResponse()
+            fab_file = r.content
+        else:
+            fab_file = request.fab.content
+
+        if len(fab_file) > FAB_MAX_SIZE:
             log(
                 ERROR,
                 "FAB size exceeds maximum allowed size of %d bytes.",
@@ -120,7 +149,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         _check_flwr_aid_exists(flwr_aid, context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
-        fab_file = request.fab.content
 
         try:
             # Check that num-supernodes is set
@@ -130,8 +158,12 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 )
 
             # Create run
-            fab = Fab(hashlib.sha256(fab_file).hexdigest(), fab_file)
-            fab_hash = ffs.put(fab.content, {})
+            fab = Fab(
+                hashlib.sha256(fab_file).hexdigest(),
+                fab_file,
+                {"verification": json.dumps(verification)},
+            )
+            fab_hash = ffs.put(fab.content, fab.meta)
             if fab_hash != fab.hash_str:
                 raise RuntimeError(
                     f"FAB ({fab.hash_str}) hash from request doesn't match contents"
@@ -587,3 +619,45 @@ def _check_flwr_aid_in_run(
             grpc.StatusCode.PERMISSION_DENIED,
             "⛔️ Run ID does not belong to the account",
         )
+
+
+def _request_download_link(
+    identifier: str, context: grpc.ServicerContext
+) -> tuple[str, str, list[dict[str, str]]]:
+    """Request download link from Flower platform API."""
+    url = f"{PLATFORM_API_URL}/hub/fetch"
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    body = {
+        "identifier": identifier,  # send raw string of identifier
+    }
+
+    try:
+        resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
+    except requests.RequestException as e:
+        context.abort(
+            grpc.StatusCode.UNAVAILABLE,
+            f"Unable to connect to Hub: {e}",
+        )
+
+    if resp.status_code == 404:
+        context.abort(
+            grpc.StatusCode.NOT_FOUND,
+            f"'{identifier}' not found in Hub",
+        )
+    if not resp.ok:
+        context.abort(
+            grpc.StatusCode.UNAVAILABLE,
+            f"Hub request failed with status {resp.status_code}. "
+            f"Details: {resp.text}",
+        )
+
+    data = resp.json()
+    if "fab_url" not in data or "verifications" not in data:
+        context.abort(
+            grpc.StatusCode.DATA_LOSS,
+            "Invalid response from Hub",
+        )
+    return data["app_id"], data["fab_url"], data["verifications"]
