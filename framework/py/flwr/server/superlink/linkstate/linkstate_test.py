@@ -1020,17 +1020,19 @@ class StateTest(CoreStateTest):
         # Assert
         assert not is_successful
 
-    def test_node_unavailable_error(self) -> None:
+    def test_node_unavailable_error(self) -> None:  # pylint: disable=too-many-locals
         """Test if get_message_res return Message containing node unavailable error."""
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         node_id_0 = create_dummy_node(state)
         node_id_1 = create_dummy_node(state)
+        node_id_2 = create_dummy_node(state)
 
         # Run acknowledge heartbeat
         state.acknowledge_node_heartbeat(node_id_0, heartbeat_interval=90)
         state.acknowledge_node_heartbeat(node_id_1, heartbeat_interval=30)
+        state.acknowledge_node_heartbeat(node_id_2, heartbeat_interval=30)
 
         # Create and store Messages
         in_message_0 = message_from_proto(
@@ -1047,13 +1049,24 @@ class StateTest(CoreStateTest):
                 run_id=run_id,
             )
         )
+        in_message_2 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id_2,
+                run_id=run_id,
+            )
+        )
         message_id_0 = state.store_message_ins(in_message_0)
         message_id_1 = state.store_message_ins(in_message_1)
-        assert message_id_0 is not None and message_id_1 is not None
+        message_id_2 = state.store_message_ins(in_message_2)
+        assert message_id_0 and message_id_1 and message_id_2
 
         # Get Message to mark them delivered
         state.get_message_ins(node_id=node_id_0, limit=None)
         state.get_message_ins(node_id=node_id_1, limit=None)
+
+        # Delete the 3rd node to simulate unavailability
+        state.delete_node("mock_flwr_aid", node_id_2)
 
         # Create and store reply Messages
         res_message_0 = Message(content=RecordDict(), reply_to=in_message_0)
@@ -1070,17 +1083,19 @@ class StateTest(CoreStateTest):
         future_dt = now() + timedelta(seconds=100)
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = future_dt
-            res_message_list = state.get_message_res({message_id_0, message_id_1})
-            print(res_message_list[0])
-            print(f"{node_id_0=}, {node_id_1=}")
+            res_message_list = state.get_message_res(
+                {message_id_0, message_id_1, message_id_2}
+            )
+            msgs = {msg.metadata.reply_to_message_id: msg for msg in res_message_list}
 
         # Assert
-        assert len(res_message_list) == 2
-        # Note: res_message_list[0] corresponds to node_id_1
-        # due to the order change from get_message_res()
-        err_message = res_message_list[0]
-        assert err_message.has_error()
-        assert err_message.error.code == ErrorCode.NODE_UNAVAILABLE
+        assert len(res_message_list) == 3
+        reply_1 = msgs[message_id_1]  # Offline due to heartbeat timeout
+        assert reply_1.has_error()
+        assert reply_1.error.code == ErrorCode.NODE_UNAVAILABLE
+        reply_2 = msgs[message_id_2]  # Deleted node
+        assert reply_2.has_error()
+        assert reply_2.error.code == ErrorCode.NODE_UNAVAILABLE
 
     def test_store_message_res_message_ins_expired(self) -> None:
         """Test behavior of store_message_res when the Message it replies to is
