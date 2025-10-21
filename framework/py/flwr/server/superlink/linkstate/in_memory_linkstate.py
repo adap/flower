@@ -262,6 +262,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     node_id: self.nodes[node_id].online_until
                     for node_id in dst_node_ids
                     if node_id in self.nodes
+                    and self.nodes[node_id].status != NodeStatus.UNREGISTERED
                 },
                 current_time=current,
             )

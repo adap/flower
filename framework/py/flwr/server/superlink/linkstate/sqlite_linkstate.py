@@ -490,11 +490,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             sint_node_id = convert_uint64_to_sint64(in_message.metadata.dst_node_id)
             dst_node_ids.add(sint_node_id)
         query = f"""
-                    SELECT node_id, online_until
-                    FROM node
-                    WHERE node_id IN ({",".join(["?"] * len(dst_node_ids))});
-                """
-        rows = self.query(query, tuple(dst_node_ids))
+            SELECT node_id, online_until
+            FROM node
+            WHERE node_id IN ({",".join(["?"] * len(dst_node_ids))})
+            AND status != ?
+        """
+        rows = self.query(query, tuple(dst_node_ids) + (NodeStatus.UNREGISTERED,))
         tmp_ret_dict = check_node_availability_for_in_message(
             inquired_in_message_ids=message_ids,
             found_in_message_dict=found_message_ins_dict,
