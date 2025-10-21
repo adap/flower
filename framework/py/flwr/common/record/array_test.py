@@ -26,7 +26,7 @@ from unittest.mock import Mock
 import numpy as np
 from parameterized import parameterized
 
-from ..constant import MAX_ARRAY_CHUNK_SIZE, SType
+from ..constant import FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE, SType
 from ..inflatable import get_object_body, get_object_type_from_object_content
 from ..typing import NDArray
 from .array import Array
@@ -175,7 +175,7 @@ class TestArray(unittest.TestCase):
             (np.random.randn(5, 5),),  # single ArrayChunk
             (
                 np.random.randn(3000, 3000),
-            ),  # 4 ArrayChunks (if MAX_ARRAY_CHUNK_SIZE = 20 MB )
+            ),  # 14 ArrayChunks (if FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE = 5 MB )
         ]
     )
     def test_deflate_and_inflate(self, ndarray) -> None:
@@ -188,7 +188,9 @@ class TestArray(unittest.TestCase):
         assert arr.children == dict(children_list)
 
         # Ensure the number of children is the expected one
-        expected_num_children = np.ceil(len(arr.data) / MAX_ARRAY_CHUNK_SIZE)
+        expected_num_children = np.ceil(
+            len(arr.data) / FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE
+        )
         assert len(arr.children) == expected_num_children
 
         arr_b = arr.deflate()
@@ -244,7 +246,9 @@ class TestArray(unittest.TestCase):
         arr = Array(np.random.randn(3000, 3000))
 
         # Ensure the number of children is the expected one
-        expected_num_children = np.ceil(len(arr.data) / MAX_ARRAY_CHUNK_SIZE)
+        expected_num_children = np.ceil(
+            len(arr.data) / FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE
+        )
         assert len(arr.children) == expected_num_children
 
         # Concatenate all slices
