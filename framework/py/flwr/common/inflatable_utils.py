@@ -25,10 +25,10 @@ from typing import Callable, Optional, TypeVar
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 from .constant import (
+    FLWR_MAX_CONCURRENT_OBJ_PULLS,
+    FLWR_MAX_CONCURRENT_OBJ_PUSHES,
     HEAD_BODY_DIVIDER,
     HEAD_VALUE_DIVIDER,
-    MAX_CONCURRENT_PULLS,
-    MAX_CONCURRENT_PUSHES,
     PULL_BACKOFF_CAP,
     PULL_INITIAL_BACKOFF,
     PULL_MAX_TIME,
@@ -118,7 +118,7 @@ def push_objects(
     *,
     object_ids_to_push: Optional[set[str]] = None,
     keep_objects: bool = False,
-    max_concurrent_pushes: int = MAX_CONCURRENT_PUSHES,
+    max_concurrent_pushes: int = FLWR_MAX_CONCURRENT_OBJ_PUSHES,
 ) -> None:
     """Push multiple objects to the servicer.
 
@@ -137,7 +137,7 @@ def push_objects(
         If `True`, the original objects will be kept in the `objects` dictionary
         after pushing. If `False`, they will be removed from the dictionary to avoid
         high memory usage.
-    max_concurrent_pushes : int (default: MAX_CONCURRENT_PUSHES)
+    max_concurrent_pushes : int (default: FLWR_MAX_CONCURRENT_OBJ_PUSHES)
         The maximum number of concurrent pushes to perform.
     """
     lock = threading.Lock()
@@ -168,7 +168,7 @@ def push_object_contents_from_iterable(
     object_contents: Iterable[tuple[str, bytes]],
     push_object_fn: Callable[[str, bytes], None],
     *,
-    max_concurrent_pushes: int = MAX_CONCURRENT_PUSHES,
+    max_concurrent_pushes: int = FLWR_MAX_CONCURRENT_OBJ_PUSHES,
 ) -> None:
     """Push multiple object contents to the servicer.
 
@@ -181,7 +181,7 @@ def push_object_contents_from_iterable(
         A function that takes an object ID and its content as bytes, and pushes
         it to the servicer. This function should raise `ObjectIdNotPreregisteredError`
         if the object ID is not pre-registered.
-    max_concurrent_pushes : int (default: MAX_CONCURRENT_PUSHES)
+    max_concurrent_pushes : int (default: FLWR_MAX_CONCURRENT_OBJ_PUSHES)
         The maximum number of concurrent pushes to perform.
     """
 
@@ -210,7 +210,7 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
     object_ids: list[str],
     pull_object_fn: Callable[[str], bytes],
     *,
-    max_concurrent_pulls: int = MAX_CONCURRENT_PULLS,
+    max_concurrent_pulls: int = FLWR_MAX_CONCURRENT_OBJ_PULLS,
     max_time: Optional[float] = PULL_MAX_TIME,
     max_tries_per_object: Optional[int] = PULL_MAX_TRIES_PER_OBJECT,
     initial_backoff: float = PULL_INITIAL_BACKOFF,
@@ -227,7 +227,7 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
         The function should raise `ObjectUnavailableError` if the object is not yet
         available, or `ObjectIdNotPreregisteredError` if the object ID is not
         pre-registered.
-    max_concurrent_pulls : int (default: MAX_CONCURRENT_PULLS)
+    max_concurrent_pulls : int (default: FLWR_MAX_CONCURRENT_OBJ_PULLS)
         The maximum number of concurrent pulls to perform.
     max_time : Optional[float] (default: PULL_MAX_TIME)
         The maximum time to wait for all pulls to complete. If `None`, waits
@@ -442,7 +442,7 @@ def pull_and_inflate_object_from_tree(  # pylint: disable=R0913
     confirm_object_received_fn: Callable[[str], None],
     *,
     return_type: type[T] = InflatableObject,  # type: ignore
-    max_concurrent_pulls: int = MAX_CONCURRENT_PULLS,
+    max_concurrent_pulls: int = FLWR_MAX_CONCURRENT_OBJ_PULLS,
     max_time: Optional[float] = PULL_MAX_TIME,
     max_tries_per_object: Optional[int] = PULL_MAX_TRIES_PER_OBJECT,
     initial_backoff: float = PULL_INITIAL_BACKOFF,
@@ -460,7 +460,7 @@ def pull_and_inflate_object_from_tree(  # pylint: disable=R0913
         A function to confirm that the object has been received.
     return_type : type[T] (default: InflatableObject)
         The type of the object to return. Must be a subclass of `InflatableObject`.
-    max_concurrent_pulls : int (default: MAX_CONCURRENT_PULLS)
+    max_concurrent_pulls : int (default: FLWR_MAX_CONCURRENT_OBJ_PULLS)
         The maximum number of concurrent pulls to perform.
     max_time : Optional[float] (default: PULL_MAX_TIME)
         The maximum time to wait for all pulls to complete. If `None`, waits
