@@ -64,7 +64,7 @@ class FlowerClient(NumPyClient):
         cpu_time = end_cpu - start_cpu
         cpu_logger.info(f"{cpu_time:.3f}", extra={"pid": os.getpid()})
 
-        return get_weights(self.net), len(self.trainloader.dataset), {"cpu_fit": cpu_time}
+        return get_weights(self.net), len(self.trainloader.dataset), results
 
 
     def evaluate(self, parameters, config):
