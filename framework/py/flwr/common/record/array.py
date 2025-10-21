@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
-from ..constant import FLWR_MAX_ARRAY_CHUNK_SIZE, SType
+from ..constant import FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE, SType
 from ..inflatable import (
     InflatableObject,
     add_header_to_object_body,
@@ -272,8 +272,8 @@ class Array(InflatableObject):
         chunks: list[tuple[str, InflatableObject]] = []
         # memoryview allows for zero-copy slicing
         data_view = memoryview(self.data)
-        for start in range(0, len(data_view), FLWR_MAX_ARRAY_CHUNK_SIZE):
-            end = min(start + FLWR_MAX_ARRAY_CHUNK_SIZE, len(data_view))
+        for start in range(0, len(data_view), FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE):
+            end = min(start + FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE, len(data_view))
             ac = ArrayChunk(data_view[start:end])
             chunks.append((ac.object_id, ac))
 
