@@ -21,13 +21,24 @@ from typing import Optional
 from flwr.common.logger import log
 
 from .in_memory_object_store import InMemoryObjectStore
+from .sqlite_object_store import SqliteObjectStore
 from .object_store import ObjectStore
 
 
 class ObjectStoreFactory:
-    """Factory class that creates ObjectStore instances."""
+    """Factory class that creates ObjectStore instances.
 
-    def __init__(self) -> None:
+    Parameters
+    ----------
+    database : str (default: ":flwr-in-memory-store:")
+        A string representing the path to the database file that will be opened.
+        Note that passing ":memory:" will open a connection to a database that is
+        in RAM, instead of on disk. And ":flwr-in-memory-store:" will create an
+        Python-based in-memory ObjectStore.
+    """
+
+    def __init__(self, database: str = ":flwr-in-memory-store:") -> None:
+        self.database = database
         self.store_instance: Optional[ObjectStore] = None
 
     def store(self) -> ObjectStore:
@@ -38,7 +49,15 @@ class ObjectStoreFactory:
         ObjectStore
             An ObjectStore instance for storing objects by object_id.
         """
-        if self.store_instance is None:
-            self.store_instance = InMemoryObjectStore()
-        log(DEBUG, "Using InMemoryObjectStore")
-        return self.store_instance
+        # InMemoryObjectStore
+        if self.database == ":flwr-in-memory-state:":
+            if self.store_instance is None:
+                self.store_instance = InMemoryObjectStore()
+            log(DEBUG, "Using InMemoryObjectStore")
+            return self.store_instance
+
+        # SqliteObjectStore
+        store = SqliteObjectStore(self.database)
+        store.initialize()
+        log(DEBUG, "Using SqliteObjectStore")
+        return store

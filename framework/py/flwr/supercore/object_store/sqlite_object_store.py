@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS objects (
     object_id               TEXT PRIMARY KEY,
     content                 BLOB,
     is_available            INTEGER NOT NULL CHECK (is_available IN (0,1)),
-    ref_count               INTEGER NOT NULL,
+    ref_count               INTEGER NOT NULL
 );
 """
 SQL_CREATE_OBJECT_CHILDREN = """
@@ -89,7 +89,8 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
                     # Insert new object
                     self.conn.execute(
                         "INSERT INTO objects"
-                        "(object_id, content, is_available, ref_count) VALUES (?, ?)",
+                        "(object_id, content, is_available, ref_count) "
+                        "VALUES (?, ?, ?, ?)",
                         (obj_id, b"", 0, 0),
                     )
                     for cid in child_ids:
