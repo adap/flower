@@ -24,7 +24,7 @@ from parameterized import parameterized
 from flwr.common import ConfigRecord
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
-    NOOP_ACCOUNT_NAME,
+    NOOP_FLWR_AID,
     SUPERLINK_NODE_ID,
     Status,
 )
@@ -156,7 +156,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def _create_dummy_node(self) -> int:
         """Create a dummy node."""
         return self.state.create_node(
-            NOOP_ACCOUNT_NAME, self.node_pk, heartbeat_interval=30
+            NOOP_FLWR_AID, self.node_pk, heartbeat_interval=30
         )
 
     def _transition_run_status(self, run_id: int, num_transitions: int) -> None:
