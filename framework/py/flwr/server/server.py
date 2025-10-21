@@ -146,8 +146,9 @@ class Server:
                 history.add_metrics_centralized(
                     server_round=current_round, metrics=metrics_cen
                 )
+                print("metrics_cen",metrics_cen )
                 if "accuracy" in metrics_cen:
-
+                    print("ciao")
                     log_time("Round %s Accuracy (centralized): %.4f", current_round, metrics_cen["accuracy"])
 
             # Evaluate model on a sample of available clients
@@ -158,8 +159,7 @@ class Server:
                     history.add_loss_distributed(server_round=current_round, loss=loss_fed)
                     history.add_metrics_distributed(server_round=current_round, metrics=evaluate_metrics_fed)
                     if "accuracy" in evaluate_metrics_fed:
-
-                        log_time("Round %s Accuracy (federated): %.4f", current_round, evaluate_metrics_fed["accuracy"])
+                       log_time("Round %s Accuracy (federated): %.4f", current_round, evaluate_metrics_fed["accuracy"])
             # Fine round: calcolo e log del tempo
             round_elapsed = timeit.default_timer() - round_start
             log_time("Tempo totale round %s: %.2f s", current_round, round_elapsed)
