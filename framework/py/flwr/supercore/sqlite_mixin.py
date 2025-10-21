@@ -42,10 +42,7 @@ class SqliteMixin(ABC):
         return self._conn
 
     @abstractmethod
-    def initialize(
-        self,
-        log_queries: bool = False,
-    ) -> list[tuple[str]]:
+    def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Connect to the DB, enable FK support, and create tables if needed.
 
         Parameters
