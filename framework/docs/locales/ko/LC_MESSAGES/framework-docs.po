@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-13 00:08+0000\n"
+"POT-Creation-Date: 2025-10-21 00:08+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -94,8 +94,10 @@ msgid ""
 "underlying ideas behind Flower and collaborative AI."
 msgstr "이해 중심의 개념 가이드에서는 Flower와 협업 AI의 주요 주제와 기본 아이디어를 설명하고 토론합니다."
 
-#: ../../source/contribute.rst:52 ../../source/index.rst:105
-#: ../../source/index.rst:107 ../../source/reference.rst:5
+#: ../../source/contribute.rst:52
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:355
+#: ../../source/index.rst:105 ../../source/index.rst:107
+#: ../../source/reference.rst:5
 msgid "References"
 msgstr "참조"
 
@@ -372,8 +374,8 @@ msgstr "빌드 전달인자"
 #: ../../source/ref-exit-codes/104.rst:5 ../../source/ref-exit-codes/2.rst:5
 #: ../../source/ref-exit-codes/200.rst:21 ../../source/ref-exit-codes/201.rst:5
 #: ../../source/ref-exit-codes/202.rst:5 ../../source/ref-exit-codes/3.rst:5
-#: ../../source/ref-exit-codes/300.rst:5 ../../source/ref-exit-codes/301.rst:5
-#: ../../source/ref-exit-codes/302.rst:5 ../../source/ref-exit-codes/400.rst:5
+#: ../../source/ref-exit-codes/300.rst:5 ../../source/ref-exit-codes/302.rst:5
+#: ../../source/ref-exit-codes/303.rst:5 ../../source/ref-exit-codes/400.rst:5
 #: ../../source/ref-exit-codes/500.rst:5 ../../source/ref-exit-codes/600.rst:5
 #: ../../source/ref-exit-codes/601.rst:5 ../../source/ref-exit-codes/602.rst:5
 msgid "Description"
@@ -9588,11 +9590,11 @@ msgid ""
 "key authentication, securing federated learning via TLS connections."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:6
+#: ../../source/how-to-authenticate-supernodes.rst:10
 msgid "Authenticate SuperNodes"
 msgstr "SuperNodes 인증하기"
 
-#: ../../source/how-to-authenticate-supernodes.rst:8
+#: ../../source/how-to-authenticate-supernodes.rst:12
 msgid ""
 "When running a Flower Federation (see :doc:`ref-flower-network-"
 "communication`) it is fundamental that an authentication mechanism is "
@@ -9601,63 +9603,71 @@ msgid ""
 "that connect to a running SuperLink:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:13
+#: ../../source/how-to-authenticate-supernodes.rst:17
 msgid ""
 "**Automatic authentication**: In this mode, the SuperLink checks the "
 "timestamp-based signature in each request from SuperNodes to prevent "
-"impersonation and replay attacks."
+"impersonation and replay attacks. The goal of this mode is to confirm the"
+" identity of connected SuperNodes; however, it does **not** restrict "
+"which SuperNodes can connect to the SuperLink. Consequently, any "
+"SuperNode is allowed to connect to the SuperLink."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:15
+#: ../../source/how-to-authenticate-supernodes.rst:22
 msgid ""
-"**CSV-based authentication**: This mode functions similarly to automatic "
-"authentication but requires the SuperLink to be provided with a list of "
-"authorized public keys, allowing only those SuperNodes to connect."
+"**CLI-managed authentication**: This mode operates similarly to automatic"
+" authentication but requires starting the SuperLink with the ``--enable-"
+"supernode-auth`` flag. To connect a SuperNode to the SuperLink, its "
+"public key must first be registered using the "
+"|flower_cli_supernode_link|_. Only registered SuperNodes are permitted to"
+" connect to the SuperLink, making this mode more secure by restricting "
+"connections to authorized SuperNodes only."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:19
+#: ../../source/how-to-authenticate-supernodes.rst:29
 msgid ""
 "The automatic authentication mode works out of the box and therefore "
-"requires no configuration. On the other hand, CSV-based authentication "
+"requires no configuration. On the other hand, CLI-managed authentication "
 "mode is more sophisticated and how it works and how it can be used is "
-"presented reminder of this guide. Flower's CSV-based node authentication "
-"leverages a signature-based mechanism to verify each node's identity and "
-"is only available when encrypted connections (SSL/TLS) are enabled:"
+"presented reminder of this guide. Flower's CLI-managed SuperNode "
+"authentication leverages a signature-based mechanism to verify each "
+"SuperNode's identity and is only available when encrypted connections "
+"(SSL/TLS) are enabled:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:25
+#: ../../source/how-to-authenticate-supernodes.rst:36
 msgid ""
 "Each SuperNode must already possess a unique Elliptic Curve (EC) "
 "public/private key pair."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:27
+#: ../../source/how-to-authenticate-supernodes.rst:38
 #, fuzzy
 msgid ""
 "The SuperLink (server) maintains a whitelist of EC public keys for all "
-"trusted SuperNodes (clients)."
+"trusted SuperNodes (clients), managed through the Flower CLI."
 msgstr "SuperLink(서버)는 알려진 (클라이언트) 노드 공개키 목록을 저장합니다"
 
-#: ../../source/how-to-authenticate-supernodes.rst:29
+#: ../../source/how-to-authenticate-supernodes.rst:40
 msgid ""
 "A SuperNode signs a timestamp with its private key and sends the signed "
 "timestamp to the SuperLink."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:31
+#: ../../source/how-to-authenticate-supernodes.rst:42
 msgid ""
 "The SuperLink verifies the signature and timestamp using the SuperNode's "
 "public key."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:35
+#: ../../source/how-to-authenticate-supernodes.rst:46
 msgid ""
 "This guide builds on the Flower App setup presented in the :doc:`how-to-"
 "enable-tls-connections` guide and extends it to introduce node "
 "authentication to the SuperLink ↔ SuperNode connection."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:41
+#: ../../source/how-to-authenticate-supernodes.rst:52
 #, fuzzy
 msgid ""
 "Checkout the `Flower Authentication "
@@ -9669,24 +9679,18 @@ msgstr ""
 "<https://github.com/adap/flower/tree/main/examples/flower-"
 "authentication>`_를 확인하는 것이 좋습니다."
 
-#: ../../source/how-to-authenticate-supernodes.rst:47
-msgid ""
-"This guide covers a preview feature that might change in future versions "
-"of Flower."
-msgstr "이 가이드에서는 향후 버전의 Flower에서 변경될 수 있는 미리보기 기능에 대해 설명합니다."
-
-#: ../../source/how-to-authenticate-supernodes.rst:50
+#: ../../source/how-to-authenticate-supernodes.rst:57
 msgid "Generate authentication keys"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:52
+#: ../../source/how-to-authenticate-supernodes.rst:59
 msgid ""
 "To establish an authentication mechanism by which only authorized "
 "SuperNodes can connect to a running SuperLink, a set of key pairs for "
 "both SuperLink and SuperNodes need to be created."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:56
+#: ../../source/how-to-authenticate-supernodes.rst:63
 msgid ""
 "We have prepared a script that can be used to generate such set of keys. "
 "While using these are fine for prototyping, we advice you to follow the "
@@ -9696,7 +9700,7 @@ msgid ""
 " at the top of this guide."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:67
+#: ../../source/how-to-authenticate-supernodes.rst:74
 msgid ""
 "This will generate the keys in a new ``keys/`` directory. By default it "
 "creates a key pair for the SuperLink and one for each SuperNode. Copy "
@@ -9704,12 +9708,12 @@ msgid ""
 " earlier via ``flwr new``)."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:72
+#: ../../source/how-to-authenticate-supernodes.rst:79
 #, fuzzy
 msgid "Enable node authentication in SuperLink"
 msgstr ":code:`SuperLink`에서 노드 인증 활성화"
 
-#: ../../source/how-to-authenticate-supernodes.rst:74
+#: ../../source/how-to-authenticate-supernodes.rst:81
 msgid ""
 "To launch a SuperLink with SuperNode authentication enabled, you need to "
 "provide three aditional files in addition to the certificates needed for "
@@ -9717,51 +9721,122 @@ msgid ""
 "enabled in the presence of TLS."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:89
-#, fuzzy
+#: ../../source/how-to-authenticate-supernodes.rst:96
 msgid ""
-"``--auth-list-public-keys``: Specify the path to a CSV file storing the "
-"public keys of all SuperNodes that should be allowed to connect with the "
-"SuperLink. A valid CSV file storing known node public keys should list "
-"the keys in OpenSSH format, separated by commas. Refer to the code "
-"sample, which contains a CSV file with two known node public keys."
+"``--enable-supernode-auth``: Enables SuperNode authentication therefore "
+"only Supernodes that are first register on the SuperLink will be able to "
+"establish a connection."
 msgstr ""
-"알려진 노드 공개키를 저장하는 유효한 CSV 파일은 쉼표로 구분하고 주석 없이 OpenSSH 형식으로 키를 나열해야 합니다. 예를 "
-"들어, 두 개의 알려진 노드 공개키가 포함된 CSV 파일이 포함된 코드 샘플을 참조하세요."
 
-#: ../../source/how-to-authenticate-supernodes.rst:92
+#: ../../source/how-to-authenticate-supernodes.rst:99
+#, fuzzy
+msgid "Register SuperNodes"
+msgstr "SuperNodes 인증하기"
+
+#: ../../source/how-to-authenticate-supernodes.rst:101
+msgid ""
+"Once your SuperLink is running, the next step is to register the "
+"SuperNodes that will be allowed to connect to it. This process is handled"
+" through the |flower_cli_supernode_link|_ using the public keys "
+"previously generated for each SuperNode you plan to connect to the "
+"SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:106
+msgid "Here's how this looks in code:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:113
+msgid "Next, let’s register the second SuperNode as well:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:119
+#, fuzzy
+msgid "You can list the registered SuperNodes using the following command:"
+msgstr "다음 명령을 실행하여 가상 환경을 활성화합니다:"
+
+#: ../../source/how-to-authenticate-supernodes.rst:126
+msgid ""
+"This will display the IDs of the SuperNodes you just registered as well "
+"as their status. You should see a table similar to the following:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:139
+msgid ""
+"The status of the SuperNodes will change after they connect to the "
+"SuperLink. Let's proceed and laucnh the SuperNodes."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:143
 #, fuzzy
 msgid "Enable node authentication in SuperNode"
 msgstr ":code:`SuperNode`에서 노드 인증을 활성화합니다"
 
-#: ../../source/how-to-authenticate-supernodes.rst:94
+#: ../../source/how-to-authenticate-supernodes.rst:145
 msgid ""
 "Connecting a SuperNode to a SuperLink that has node authentication "
-"enabled requires passing two additional arguments (i.e. the public and "
-"private keys of the SuperNode) in addition to the TLS certificate."
+"enabled requires passing one additional argument (i.e. the private key of"
+" the SuperNode) in addition to the TLS certificate."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:111
+#: ../../source/how-to-authenticate-supernodes.rst:161
 msgid "``--auth-supernode-private-key``: the private key of this SuperNode."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst
-msgid ""
-"``--auth-supernode-public-key``: the public key of this SuperNode (which "
-"should be the same that was added to othe CSV used by the SuperLink)."
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:114
+#: ../../source/how-to-authenticate-supernodes.rst:163
 msgid ""
 "Follow the same procedure to launch the second SuperNode by passing its "
-"corresponding key pair:"
+"corresponding private key:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:129
+#: ../../source/how-to-authenticate-supernodes.rst:176
+msgid ""
+"After connecting both SuperNodes, you can check the status of the "
+"SuperNodes again. You will notice their status is now ``online``:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:192
+#, fuzzy
+msgid "Unregister SuperNodes"
+msgstr "SuperNodes 인증하기"
+
+#: ../../source/how-to-authenticate-supernodes.rst:196
+msgid ""
+"This is a destructive operation. Unregistering a SuperNode is permanent "
+"and cannot be undone. If you wish to connect a SuperNode again, a new key"
+" pair is needed."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:199
+msgid ""
+"At anypoint you can unregister a SuperNode from the SuperLink (even if it"
+" has never connected). This will prevent the SuperNode from making future"
+" request to the SuperLink. In other words, it will no longer be "
+"authorized to pull/send, or participate in ongoing or future runs. "
+"Unregistering a SuperNode can be done via the "
+"|flower_cli_supernode_link|_ as follows:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:210
+msgid ""
+"The above command unregisters the first SuperNode. You can verify this by"
+" listing the SuperNodes again:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:223
+msgid ""
+"If you pass the ``--verbose`` flag to the previous command you'll see "
+"that the status of the unregistered SuperNode has changed to "
+"``unregistered``. By default, unregistered SuperNodes are hidden because "
+"they can no longer reconnect to the SuperLink. That's right, **if you "
+"wish to connect a second SuperNode a new EC key pair is needed.**"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:241
 msgid "Security notice"
 msgstr "보안 공지"
 
-#: ../../source/how-to-authenticate-supernodes.rst:131
+#: ../../source/how-to-authenticate-supernodes.rst:243
 msgid ""
 "The system's security relies on the credentials of the SuperLink and each"
 " SuperNode. Therefore, it is imperative to safeguard and safely store the"
@@ -9775,14 +9850,14 @@ msgstr ""
 " 보안 위험을 피하기 위해 자격 증명을 보호하고 안전하게 보관하는 것이 필수적입니다. 노드 인증 메커니즘에는 사람의 상호 작용도 "
 "포함되므로 모든 통신이 신뢰할 수 있는 통신 방법을 사용하여 안전한 방식으로 이루어지도록 하세요."
 
-#: ../../source/how-to-authenticate-supernodes.rst:138
+#: ../../source/how-to-authenticate-supernodes.rst:250
 #: ../../source/how-to-enable-tls-connections.rst:138
 #: ../../source/how-to-use-built-in-mods.rst:170
 #: ../../source/tutorial-series-what-is-federated-learning.rst:293
 msgid "Conclusion"
 msgstr "결론"
 
-#: ../../source/how-to-authenticate-supernodes.rst:140
+#: ../../source/how-to-authenticate-supernodes.rst:252
 #, fuzzy
 msgid ""
 "You should now have learned how to start a long-running Flower SuperLink "
@@ -9793,7 +9868,7 @@ msgstr ""
 "클라이언트(:code:`SuperNode`)를 시작하는 방법을 배웠을 것입니다. 또한 보안 위험을 최소화하기 위해 개인키의 중요성을"
 " 알고 안전하게 보관해야 합니다."
 
-#: ../../source/how-to-authenticate-supernodes.rst:146
+#: ../../source/how-to-authenticate-supernodes.rst:258
 #: ../../source/how-to-enable-tls-connections.rst:148
 msgid ""
 "Refer to the :doc:`docker/index` documentation to learn how to setup a "
@@ -11889,6 +11964,7 @@ msgid "superlink-deployment.yaml"
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-gcp.rst
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst
 #: ../../source/how-to-run-flower-on-red-hat-openshift.rst
 msgid "supernode-1-deployment.yaml"
 msgstr ""
@@ -12008,6 +12084,407 @@ msgstr ""
 
 #: ../../source/how-to-run-flower-on-gcp.rst
 msgid "k8s-shutdown.sh"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:-1
+msgid ""
+"Deploy Flower across OpenShift Clusters using Red Hat Service "
+"Interconnect for secure, scalable federated AI across environments."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:6
+#, fuzzy
+msgid "Run Flower on Multiple OpenShift Clusters"
+msgstr "Flower 서버."
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:8
+msgid ""
+"In this guide, you will learn how to deploy Flower in multiple `Red Hat "
+"OpenShift (RHOS) <https://www.redhat.com/en/technologies/cloud-"
+"computing/openshift>`_ application platforms. This deployment pattern is "
+"useful when connecting multiple OpenShift clusters deployed in "
+"environments that run critical workloads, such as in secure research "
+"environments (also known as trusted research environments, or `secure "
+"data environments <https://digital.nhs.uk/services/secure-data-"
+"environment-service>`_), datacenters, high-performance computing "
+"clusters, or on-premises servers."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:18
+msgid ""
+"This guide assumes you have a working knowledge of OpenShift and have "
+"deployed Flower in a single OpenShift cluster before. If you are new to "
+"OpenShift or Flower, please refer to our guide on `how to run Flower on "
+"OpenShift <how-to-run-flower-on-red-hat-openshift.rst>`_ before "
+"proceeding with this multi-cluster deployment."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:24
+msgid ""
+"To connect multiple OpenShift clusters, we will use `Red Hat Service "
+"Interconnect <https://www.redhat.com/en/technologies/cloud-computing"
+"/service-interconnect>`_. Based on the open source `Skupper "
+"<https://skupper.io/>`_ project, the Service Interconnect simplifies "
+"connections between sites. Applications and services, such as SuperLink "
+"and SuperNodes, can communicate with each other using the interconnect as"
+" if they were in the same network."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:31
+msgid ""
+"Skupper works by creating a site in each cluster, with a router (or "
+"routers) that connect to other sites over the application network. The "
+"application network is the network that connects multiple K8s clusters. "
+"So, the cluster where SuperLink is deployed requires a Skupper site to "
+"accept links and route incoming traffic and the cluster where SuperNode "
+"is deployed must have a Skupper site to join the application network and "
+"route outgoing requests via the interconnect."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:39
+#, fuzzy
+msgid "Pre-requisites"
+msgstr "전제 조건"
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:41
+msgid ""
+"Install the Skupper CLI on your local system by following the "
+"instructions `on the Skupper website "
+"<https://skupper.io/docs/install/index.html#installing-the-skupper-"
+"cli>`_."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:44
+msgid ""
+"Install Kubectl tools on your local system by following the instructions "
+"`on the Kubernetes website <https://kubernetes.io/docs/tasks/tools/>`_."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:48
+msgid "Create OpenShift Clusters"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:50
+msgid ""
+"For this guide, we will create two OpenShift clusters using the ``Red Hat"
+" OpenShift Service on AWS (ROSA)``. Follow the steps in our companion "
+"guide `here <how-to-run-flower-on-red-hat-openshift.rst#create-a-red-hat-"
+"openshift-cluster-on-aws>`_ on deploying the clusters. In this guide, we "
+"will assume that your clusters are deployed in different AWS regions or "
+"availability zones."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:56
+msgid ""
+"Next, deploy SuperLink in the first cluster. For reference, you can "
+"follow the `deployment steps <how-to-run-flower-on-red-hat-openshift.rst"
+"#deploy-flower-superlink-and-supernodes-on-openshift>`_ in our companion "
+"guide."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:62
+msgid "Install Service Interconnect Operator"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:64
+msgid ""
+"In each OpenShift cluster, install the Red Hat Service Interconnect "
+"Operator from the OperatorHub:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:72
+msgid "Red Hat Service Interconnect Operator"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:72
+msgid "Search for Red Hat Service Interconnect Operator on OperatorHub."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:83
+msgid "Install Red Hat Service Interconnect Operator"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:83
+msgid "Install Red Hat Service Interconnect Operator from OperatorHub."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:86
+#, fuzzy
+msgid "Create Skupper Sites"
+msgstr "새 페이지 만들기"
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:88
+msgid ""
+"From your local system, you will now create a Skupper site in each "
+"OpenShift cluster and connect the sites to form an application network."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:91
+msgid ""
+"First, set the namespace in your CLI by logging in to your first "
+"OpenShift cluster (the one with SuperLink deployed):"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:98
+msgid "If successful, you should see a message similar to this:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:110
+msgid ""
+"Now, switch the project to the project name (i.e. namespace) where you "
+"deployed SuperLink:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:117
+msgid ""
+"In our `previous guide <how-to-run-flower-on-red-hat-openshift>`_, we "
+"used the project name ``flower-openshift-demo``, so let's do that:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:127
+msgid ""
+"If you are unsure of the project name, you can list all projects you have"
+" access to using the command ``oc projects``. You can also check that you"
+" are in the correct context by running ``oc whoami --show-context``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:131
+msgid "With the correct namespace set, create a Skupper site in this cluster:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:137
+msgid ""
+"This command creates a Skupper site named ``superlink-interconnect`` and "
+"the ``--enable-link-access`` option enables external access for links "
+"*from* remote sites; this option is necessary for the site where "
+"SuperLink is deployed so that SuperNodes in other clusters can connect to"
+" it. You should see output similar to this:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:148
+msgid ""
+"Finally, repeat the steps above to create a Skupper site in the second "
+"OpenShift cluster (where SuperNode will be deployed). Log in to the "
+"second cluster, switch to the correct namespace, and create the Skupper "
+"site:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:158
+msgid ""
+"Note that the namespace can be different from the first cluster and "
+"depends on the *project name* you created in the second cluster. Note "
+"also that we do not use the ``--enable-link-access`` option in the "
+"Skupper command because this site only needs to connect *to* the "
+"SuperLink site."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:164
+msgid "Link Skupper Sites"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:166
+msgid ""
+"Now that we have created Skupper sites in both clusters, we will link the"
+" sites to form an application network."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:169
+msgid ""
+"From your local system and in the namespace of the SuperLink cluster, "
+"generate a ``Link`` resource as follows:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:179
+msgid ""
+"For more information about the concepts of sites and links, please refer "
+"to the `Skupper Link concepts "
+"<https://skupperproject.github.io/refdog/concepts/link.html>`_."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:183
+msgid ""
+"This command generates a ``Link`` resource and saves it to the file "
+"``superlink-interconnect-link.yaml``. The ``--namespace`` option "
+"specifies the namespace of the SuperLink cluster."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:187
+msgid ""
+"With the ``Link`` resource generated, switch to the namespace of the "
+"SuperNode cluster, and apply the resource in it:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:194
+msgid "You should see output similar to this:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:202
+#, fuzzy
+msgid "To verify the status of the link, run the following command:"
+msgstr "다음 명령을 실행하여 가상 환경을 활성화합니다:"
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:208
+msgid ""
+"You might need to issue the command multiple times before the link is "
+"ready:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:221
+#, fuzzy
+msgid "Create a Connector"
+msgstr "SSL 연결 사용"
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:223
+msgid ""
+"A connector binds a local connection endpoint to connectors in remote "
+"sites, which in this case is the SuperNode cluster. This allows SuperLink"
+" to communicate with SuperNode. Listeners and connectors are matched "
+"using routing keys. In the first cluster (where SuperLink is deployed), "
+"create a connector using the following command:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:232
+msgid ""
+"Here, ``<name>`` is a name for the connector, ``<port>`` is the port "
+"number that the connector will listen on, and ``--workload <workload-"
+"name>`` is an optional argument that specifies the name of a workload "
+"(i.e. deployment) to associate with the connector. The ``<name>`` is the "
+"default routing key if the ``--routing-key`` option is not specified."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:238
+msgid ""
+"In our deployment, SuperLink listens on port ``9092`` corresponding to "
+"the Fleet API (for more details, read our reference on `Flower network "
+"communication <ref-flower-network-communication.rst#flower-components-"
+"apis>`_). Since we have given the SuperLink deployment the name "
+"``superlink``, we will use that as the workload name:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:250
+#, fuzzy
+msgid "Create a Listener"
+msgstr "새 페이지 만들기"
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:252
+msgid ""
+"A listener binds a local connection endpoint to connectors in remote "
+"sites, which in this case is the SuperLink cluster. This allows SuperNode"
+" to communicate with SuperLink. On the second cluster (where SuperNode "
+"will be deployed), create a listener using the following command:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:261
+msgid ""
+"The ``<name>`` is the name of the listener resource, and will be the "
+"default routing key and host if the ``--routing-key`` and ``--host`` "
+"options are not specified. In our case, the ``<name>`` must match the "
+"name of the connector we created in the SuperLink cluster, which is "
+"``fleet-api``. The ``<port>`` is the port number that the listener will "
+"listen on, which must also match the port number of the connector "
+"(``9092``):"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:274
+msgid "Deploy SuperNode in a Separate OpenShift Cluster"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:276
+msgid ""
+"With the listener created, we can now deploy SuperNode in the second "
+"OpenShift cluster using the listener service created by Skupper. The "
+"listener service is a Kubernetes service that Skupper automatically "
+"creates when you create a listener. You can find the DNS of the listener "
+"service by navigating to the OpenShift console > Networking > Services, "
+"and look for the service named ``fleet-api``. The ``Hostname`` is listed "
+"under the ``Service details`` section."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:283
+msgid "Copy and paste the following YAML definition for the SuperNode pod."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:342
+msgid ""
+"Now, when you check the logs of the SuperLink pod in the first OpenShift "
+"cluster, you should see that the SuperNode has successfully connected to "
+"it from the remote cluster."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:345
+msgid ""
+"Congratulations! You have successfully deployed and run SuperLink and "
+"SuperNode in different OpenShift clusters. You can further extend your "
+"federation by deploying additional SuperNodes in other clusters by "
+"repeating the steps above."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:349
+msgid ""
+"This deployment pattern allows you to scale your Flower deployment across"
+" multiple clusters where secure deployment platforms like OpenShift are "
+"required, making it suitable for critical workloads in research "
+"environments, datacenters, and on-premises servers."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:357
+msgid ""
+"To learn more about Red Hat Service Interconnect and Skupper concepts, "
+"please refer to the following resources:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:360
+msgid ""
+"`Red Hat Service Interconnect webpage "
+"<https://www.redhat.com/en/technologies/cloud-computing/service-"
+"interconnect>`_"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:362
+msgid "`Skupper concepts <https://skupperproject.github.io/refdog/concepts/>`_"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:364
+msgid ""
+"For further reading about deploying Flower with Red Hat, Docker, and "
+"Kubernetes, check out our guides below:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:367
+msgid ""
+":doc:`How to run Flower on Red Hat OpenShift <how-to-run-flower-on-red-"
+"hat-openshift>`"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:368
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:689
+#, fuzzy
+msgid ":doc:`How to run Flower with Docker <docker/index>`"
+msgstr ":doc:`Docker를 사용하여 Flower를 실행하는 방법 <how-to-run-flower-using-docker>`"
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:369
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:690
+#, fuzzy
+msgid ":doc:`How to run Flower with Helm <helm/index>`"
+msgstr ":doc:`Docker를 사용하여 Flower를 실행하는 방법 <how-to-run-flower-using-docker>`"
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:371
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:692
+msgid ""
+"To learn about running Flower on other cloud platforms, check out our "
+"guides below:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:373
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:694
+msgid ":doc:`How to run Flower on Microsoft Azure <how-to-run-flower-on-azure>`"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:374
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:695
+msgid ""
+":doc:`How to run Flower on Google Cloud Platform <how-to-run-flower-on-"
+"gcp>`"
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-red-hat-openshift.rst:-1
@@ -12695,32 +13172,6 @@ msgid ""
 "workloads on your OpenShift cluster, for instance, :doc:`with PyTorch "
 "<tutorial-quickstart-pytorch>`. For further reading about deploying "
 "Flower with Docker and Kubernetes, check out our guides below:"
-msgstr ""
-
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:689
-#, fuzzy
-msgid ":doc:`How to run Flower with Docker <docker/index>`"
-msgstr ":doc:`Docker를 사용하여 Flower를 실행하는 방법 <how-to-run-flower-using-docker>`"
-
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:690
-#, fuzzy
-msgid ":doc:`How to run Flower with Helm <helm/index>`"
-msgstr ":doc:`Docker를 사용하여 Flower를 실행하는 방법 <how-to-run-flower-using-docker>`"
-
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:692
-msgid ""
-"To learn about running Flower on other cloud platforms, check out our "
-"guides below:"
-msgstr ""
-
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:694
-msgid ":doc:`How to run Flower on Microsoft Azure <how-to-run-flower-on-azure>`"
-msgstr ""
-
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:695
-msgid ""
-":doc:`How to run Flower on Google Cloud Platform <how-to-run-flower-on-"
-"gcp>`"
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:-1
@@ -15808,8 +16259,8 @@ msgstr ""
 msgid "Arguments"
 msgstr "빌드 전달인자"
 
-#: ../../flwr create:1 delete:1 install:1 list:1 log:1 login:1 new:1 pull:1
-#: run:1 stop:1 supernode
+#: ../../flwr install:1 list:1 log:1 login:1 new:1 pull:1 register:1 run:1
+#: stop:1 supernode unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "선택적 개선 사항"
@@ -15896,7 +16347,7 @@ msgstr ""
 msgid "List all runs"
 msgstr ""
 
-#: ../../flwr create delete list log run stop supernode
+#: ../../flwr list log register run stop supernode unregister
 msgid "default"
 msgstr ""
 
@@ -15909,21 +16360,21 @@ msgstr "``flwr/base``"
 msgid "Specific run ID to display"
 msgstr ""
 
-#: ../../flwr create:1 delete:1 list:1 run:1 stop:1 supernode
+#: ../../flwr list:1 register:1 run:1 stop:1 supernode unregister:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
-#: ../../flwr create:1 delete:1 list:1 run:1 stop:1 supernode
+#: ../../flwr list:1 register:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "``flwr/base``"
 
-#: ../../flwr create:1 delete:1 list:1 stop:1 supernode
+#: ../../flwr list:1 register:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Path of the Flower project"
 msgstr "Flower 기본 이미지의 태그."
 
-#: ../../flwr create:1 delete:1 list:1 stop:1 supernode
+#: ../../flwr list:1 register:1 stop:1 supernode unregister:1
 msgid "Name of the federation"
 msgstr ""
 
@@ -15940,7 +16391,7 @@ msgstr ""
 msgid "``True``"
 msgstr "``DISTRO``"
 
-#: ../../flwr create:1 delete:1 log:1 stop:1 supernode
+#: ../../flwr log:1 register:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Required argument"
 msgstr "빌드 전달인자"
@@ -16063,25 +16514,6 @@ msgstr "Flower 커뮤니티 가입하기"
 msgid "Manage SuperNodes"
 msgstr "SuperNodes 인증하기"
 
-#: ../../flwr create:1 supernode
-#, fuzzy
-msgid "Add a SuperNode to the federation."
-msgstr "flower 초연결"
-
-#: ../../flwr create:1 supernode
-msgid "Path to a P-384 (or any other NIST EC curve) public key file."
-msgstr ""
-
-#: ../../flwr delete:1 supernode
-#, fuzzy
-msgid "Remove a SuperNode from the federation."
-msgstr "flower 초연결"
-
-#: ../../flwr delete:1 supernode
-#, fuzzy
-msgid "ID of the SuperNode to remove."
-msgstr "서버(SuperLink)"
-
 #: ../../flwr list:1 supernode
 #, fuzzy
 msgid "List SuperNodes in the federation."
@@ -16095,6 +16527,25 @@ msgstr "예시"
 #: ../../flwr list:1 supernode
 msgid "Simulate the command without contacting any SuperNodes"
 msgstr ""
+
+#: ../../flwr register:1 supernode
+#, fuzzy
+msgid "Add a SuperNode to the federation."
+msgstr "flower 초연결"
+
+#: ../../flwr register:1 supernode
+msgid "Path to a P-384 (or any other NIST EC curve) public key file."
+msgstr ""
+
+#: ../../flwr supernode unregister:1
+#, fuzzy
+msgid "Unregister a SuperNode from the federation."
+msgstr "flower 초연결"
+
+#: ../../flwr supernode unregister:1
+#, fuzzy
+msgid "ID of the SuperNode to remove."
+msgstr "서버(SuperLink)"
 
 #: ../../source/ref-api-cli.rst:19
 #, fuzzy
@@ -37416,8 +37867,8 @@ msgstr ""
 #: ../../source/ref-exit-codes/201.rst:10
 #: ../../source/ref-exit-codes/202.rst:10
 #: ../../source/ref-exit-codes/300.rst:11
-#: ../../source/ref-exit-codes/301.rst:16
-#: ../../source/ref-exit-codes/302.rst:16
+#: ../../source/ref-exit-codes/302.rst:12
+#: ../../source/ref-exit-codes/303.rst:11
 #: ../../source/ref-exit-codes/400.rst:11
 #: ../../source/ref-exit-codes/500.rst:14
 #: ../../source/ref-exit-codes/600.rst:11
@@ -37669,82 +38120,73 @@ msgid ""
 "correct it as needed."
 msgstr ""
 
-#: ../../source/ref-exit-codes/301.rst:2
-msgid "[301] SUPERNODE_NODE_AUTH_KEYS_REQUIRED"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:7
-msgid ""
-"To run the SuperNode with authentication, file paths for both the private"
-" and public keys must be provided. Specifically, the following options "
-"must be specified:"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:10
-msgid "``--auth-supernode-private-key``"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:11
-msgid "``--auth-supernode-public-key``"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:13
-msgid "Providing only one of these options is insufficient for authentication."
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:18
-msgid ""
-"1. Ensure that the paths to both the private key and public key files are"
-" specified in command-line arguments. For example:"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:26
-msgid "Verify that the specified file paths are correct and that the files exist."
-msgstr ""
-
 #: ../../source/ref-exit-codes/302.rst:2
-msgid "[302] SUPERNODE_NODE_AUTH_KEYS_INVALID"
+msgid "[302] SUPERNODE_NODE_AUTH_KEY_INVALID"
 msgstr ""
 
 #: ../../source/ref-exit-codes/302.rst:7
 msgid ""
-"The provided key files are invalid. Authentication requires a valid "
-"elliptic curve private and public key pair. This error occurs when "
-"either:"
+"Authentication requires a valid elliptic curve private key. This error "
+"occurs when the provided private key file specified in ``--auth-"
+"supernode-private-key`` is invalid or unreadable."
 msgstr ""
 
-#: ../../source/ref-exit-codes/302.rst:10
-msgid ""
-"The **private key** file specified in ``--auth-supernode-private-key`` is"
-" invalid or unreadable."
+#: ../../source/ref-exit-codes/302.rst:14
+msgid "Ensure that the file path provided for the private key option is correct."
 msgstr ""
 
-#: ../../source/ref-exit-codes/302.rst:12
-msgid ""
-"The **public key** file specified in ``--auth-supernode-public-key`` is "
-"invalid or unreadable."
+#: ../../source/ref-exit-codes/302.rst:15
+msgid "Verify that the file exists and contains a valid elliptic curve SSH key."
 msgstr ""
 
-#: ../../source/ref-exit-codes/302.rst:18
+#: ../../source/ref-exit-codes/302.rst:16
 msgid ""
-"Ensure that the file paths provided for the private and public key "
-"options are correct."
-msgstr ""
-
-#: ../../source/ref-exit-codes/302.rst:21
-msgid ""
-"2. Verify that both files exist and contain valid elliptic curve ssh "
-"keys. - The private key file should be in a format compatible with "
-"elliptic curve cryptography. - The public key file should match the "
-"private key."
-msgstr ""
-
-#: ../../source/ref-exit-codes/302.rst:25
-msgid ""
-"3. If the files are corrupted or not in the correct format, regenerate "
-"the elliptic curve ssh key pair and update the file paths accordingly. "
-"For example, in Linux/MacOS, **for rapid prototyping only** (not "
+"If the files are corrupted or not in the correct format, regenerate the "
+"elliptic curve SSH key pair and update the file paths accordingly. For "
+"example, on Linux or macOS, **for rapid prototyping only** (not "
 "production; follow company procedures for key management):"
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:2
+msgid "[303] SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED"
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:7
+msgid ""
+"The private key for SuperNode authentication was provided, but TLS is not"
+" enabled. SuperNode authentication requires a secure TLS connection with "
+"the SuperLink."
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:13
+msgid "To resolve this issue you need to either:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:15
+msgid ""
+"Enable TLS by providing the required TLS certificates when launching the "
+"SuperNode."
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:24
+msgid ""
+"Please refer to the documentation on `how to enable TLS in SuperNode "
+"<../how-to-enable-tls-connections.rst>`_ for more details."
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:27
+msgid ""
+"If you are prototyping, you may disable the CLI-managed SuperNode "
+"authentication mechanism by removing the private key argument when "
+"launching the SuperNode. This will make your SuperNode use the automatic "
+"authentication mechanism."
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:31
+msgid ""
+"Read more about both SuperNode authentication modes in the documentation "
+"on `how to authenticate SuperNodes <../how-to-authenticate-"
+"supernodes.rst>`_."
 msgstr ""
 
 #: ../../source/ref-exit-codes/400.rst:2
@@ -60321,4 +60763,166 @@ msgstr ""
 #~ "public key file should match the "
 #~ "private key."
 #~ msgstr ""
+
+#~ msgid ""
+#~ "Connecting a SuperNode to a SuperLink"
+#~ " that has node authentication enabled "
+#~ "requires passing two additional arguments "
+#~ "(i.e. the public and private keys "
+#~ "of the SuperNode) in addition to "
+#~ "the TLS certificate."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--auth-supernode-public-key``: the "
+#~ "public key of this SuperNode (which "
+#~ "should be the same that was added"
+#~ " to othe CSV used by the "
+#~ "SuperLink)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Follow the same procedure to launch "
+#~ "the second SuperNode by passing its "
+#~ "corresponding key pair:"
+#~ msgstr ""
+
+#~ msgid "[301] SUPERNODE_NODE_AUTH_KEYS_REQUIRED"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To run the SuperNode with "
+#~ "authentication, file paths for both the"
+#~ " private and public keys must be "
+#~ "provided. Specifically, the following options"
+#~ " must be specified:"
+#~ msgstr ""
+
+#~ msgid "``--auth-supernode-private-key``"
+#~ msgstr ""
+
+#~ msgid "``--auth-supernode-public-key``"
+#~ msgstr ""
+
+#~ msgid "Providing only one of these options is insufficient for authentication."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "1. Ensure that the paths to both"
+#~ " the private key and public key "
+#~ "files are specified in command-line "
+#~ "arguments. For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Verify that the specified file paths "
+#~ "are correct and that the files "
+#~ "exist."
+#~ msgstr ""
+
+#~ msgid "[302] SUPERNODE_NODE_AUTH_KEYS_INVALID"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The provided key files are invalid. "
+#~ "Authentication requires a valid elliptic "
+#~ "curve private and public key pair. "
+#~ "This error occurs when either:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The **private key** file specified in"
+#~ " ``--auth-supernode-private-key`` is "
+#~ "invalid or unreadable."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The **public key** file specified in "
+#~ "``--auth-supernode-public-key`` is "
+#~ "invalid or unreadable."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Ensure that the file paths provided "
+#~ "for the private and public key "
+#~ "options are correct."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "2. Verify that both files exist "
+#~ "and contain valid elliptic curve ssh "
+#~ "keys. - The private key file "
+#~ "should be in a format compatible "
+#~ "with elliptic curve cryptography. - The"
+#~ " public key file should match the "
+#~ "private key."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "3. If the files are corrupted or"
+#~ " not in the correct format, "
+#~ "regenerate the elliptic curve ssh key"
+#~ " pair and update the file paths "
+#~ "accordingly. For example, in Linux/MacOS, "
+#~ "**for rapid prototyping only** (not "
+#~ "production; follow company procedures for "
+#~ "key management):"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Automatic authentication**: In this mode,"
+#~ " the SuperLink checks the timestamp-"
+#~ "based signature in each request from "
+#~ "SuperNodes to prevent impersonation and "
+#~ "replay attacks."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**CSV-based authentication**: This mode "
+#~ "functions similarly to automatic "
+#~ "authentication but requires the SuperLink "
+#~ "to be provided with a list of "
+#~ "authorized public keys, allowing only "
+#~ "those SuperNodes to connect."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The automatic authentication mode works "
+#~ "out of the box and therefore "
+#~ "requires no configuration. On the other"
+#~ " hand, CSV-based authentication mode "
+#~ "is more sophisticated and how it "
+#~ "works and how it can be used "
+#~ "is presented reminder of this guide. "
+#~ "Flower's CSV-based node authentication "
+#~ "leverages a signature-based mechanism to"
+#~ " verify each node's identity and is"
+#~ " only available when encrypted connections"
+#~ " (SSL/TLS) are enabled:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This guide covers a preview feature "
+#~ "that might change in future versions "
+#~ "of Flower."
+#~ msgstr "이 가이드에서는 향후 버전의 Flower에서 변경될 수 있는 미리보기 기능에 대해 설명합니다."
+
+#~ msgid ""
+#~ "``--auth-list-public-keys``: Specify the"
+#~ " path to a CSV file storing the"
+#~ " public keys of all SuperNodes that"
+#~ " should be allowed to connect with"
+#~ " the SuperLink. A valid CSV file "
+#~ "storing known node public keys should"
+#~ " list the keys in OpenSSH format, "
+#~ "separated by commas. Refer to the "
+#~ "code sample, which contains a CSV "
+#~ "file with two known node public "
+#~ "keys."
+#~ msgstr ""
+#~ "알려진 노드 공개키를 저장하는 유효한 CSV 파일은 "
+#~ "쉼표로 구분하고 주석 없이 OpenSSH 형식으로 키를 "
+#~ "나열해야 합니다. 예를 들어, 두 개의 알려진 노드"
+#~ " 공개키가 포함된 CSV 파일이 포함된 코드 샘플을"
+#~ " 참조하세요."
 

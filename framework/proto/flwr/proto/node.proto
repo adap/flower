@@ -23,10 +23,10 @@ message NodeInfo {
   uint64 node_id = 1;
   string owner_aid = 2;
   string status = 3;
-  string created_at = 4;
+  string registered_at = 4;
   optional string last_activated_at = 5;
   optional string last_deactivated_at = 6;
-  optional string deleted_at = 7;
+  optional string unregistered_at = 7;
   optional double online_until = 8;
   double heartbeat_interval = 9;
   bytes public_key = 10;

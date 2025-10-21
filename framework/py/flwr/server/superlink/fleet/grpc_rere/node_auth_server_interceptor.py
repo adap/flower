@@ -54,15 +54,10 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     ----------
     state_factory : LinkStateFactory
         A factory for creating new instances of LinkState.
-    auto_auth : bool (default: False)
-        If True, nodes are authenticated without requiring their public keys to be
-        pre-stored in the LinkState. If False, only nodes with pre-stored public keys
-        can be authenticated.
     """
 
-    def __init__(self, state_factory: LinkStateFactory, auto_auth: bool = False):
+    def __init__(self, state_factory: LinkStateFactory):
         self.state_factory = state_factory
-        self.auto_auth = auto_auth
 
     def intercept_service(  # pylint: disable=too-many-return-statements
         self,
@@ -79,7 +74,6 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         if not handler_call_details.method.startswith("/flwr.proto.Fleet/"):
             return continuation(handler_call_details)
 
-        state = self.state_factory.state()
         metadata_dict = dict(handler_call_details.invocation_metadata)
 
         # Retrieve info from the metadata
@@ -89,11 +83,6 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             signature = cast(bytes, metadata_dict[SIGNATURE_HEADER])
         except KeyError:
             return _unary_unary_rpc_terminator("Missing authentication metadata")
-
-        if not self.auto_auth:
-            # Abort the RPC call if the node public key is not found
-            if node_pk_bytes not in state.get_node_public_keys():
-                return _unary_unary_rpc_terminator("Public key not recognized")
 
         # Verify the signature
         node_pk = bytes_to_public_key(node_pk_bytes)

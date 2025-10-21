@@ -32,12 +32,12 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
-from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
+from flwr.common.constant import FAB_CONFIG_FILE, NOOP_FLWR_AID, CliOutputFormat
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
-    ListNodesCliRequest,
-    ListNodesCliResponse,
+    ListNodesRequest,
+    ListNodesResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
@@ -135,9 +135,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917
 def _list_nodes(stub: ControlStub, dry_run: bool) -> list[_NodeListType]:
     """List all nodes."""
     with flwr_cli_grpc_exc_handler():
-        res: ListNodesCliResponse = stub.ListNodesCli(
-            ListNodesCliRequest(dry_run=dry_run)
-        )
+        res: ListNodesResponse = stub.ListNodes(ListNodesRequest(dry_run=dry_run))
 
     return _format_nodes(list(res.nodes_info), res.now)
 
@@ -153,7 +151,9 @@ def _format_nodes(
 
     formatted_nodes: list[_NodeListType] = []
     # Add rows
-    for node in sorted(nodes_info, key=lambda x: datetime.fromisoformat(x.created_at)):
+    for node in sorted(
+        nodes_info, key=lambda x: datetime.fromisoformat(x.registered_at)
+    ):
 
         # Calculate elapsed times
         elapsed_time_activated = timedelta()
@@ -168,10 +168,10 @@ def _format_nodes(
                 node.node_id,
                 node.owner_aid,
                 node.status,
-                _format_datetime(node.created_at),
+                _format_datetime(node.registered_at),
                 _format_datetime(node.last_activated_at),
                 _format_datetime(node.last_deactivated_at),
-                _format_datetime(node.deleted_at),
+                _format_datetime(node.unregistered_at),
                 format_timedelta(elapsed_time_activated),
             )
         )
@@ -185,12 +185,12 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
 
     # Add columns
     table.add_column(
-        Text("Node ID", justify="center"), style="bright_white", no_wrap=True
+        Text("Node ID", justify="center"), style="bright_black", no_wrap=True
     )
-    table.add_column(Text("Owner", justify="center"), style="dim white")
+    table.add_column(Text("Owner", justify="center"))
     table.add_column(Text("Status", justify="center"))
     table.add_column(Text("Elapsed", justify="center"))
-    table.add_column(Text("Status Changed @", justify="center"), style="dim white")
+    table.add_column(Text("Status Changed @", justify="center"), style="bright_black")
 
     for row in nodes_info:
         (
@@ -200,7 +200,7 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
             _,
             last_activated_at,
             last_deactivated_at,
-            deleted_at,
+            unregistered_at,
             elapse_activated,
         ) = row
 
@@ -210,12 +210,12 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
         elif status == "offline":
             status_style = "bright_yellow"
             time_at = last_deactivated_at
-        elif status == "deleted":
+        elif status == "unregistered":
             if not verbose:
                 continue
             status_style = "red"
-            time_at = deleted_at
-        elif status == "created":
+            time_at = unregistered_at
+        elif status == "registered":
             status_style = "blue"
             time_at = "N/A"
         else:
@@ -223,7 +223,7 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
 
         formatted_row = (
             f"[bold]{node_id}[/bold]",
-            f"{owner_aid}",
+            f"{owner_aid}" if owner_aid != NOOP_FLWR_AID else f"[dim]{owner_aid}[/dim]",
             f"[{status_style}]{status}",
             f"[cyan]{elapse_activated}[/cyan]" if status == "online" else "",
             time_at,
