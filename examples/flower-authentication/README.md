@@ -107,7 +107,7 @@ flwr supernode register keys/client_credentials_1.pub . my-federation
 # It will print something like:
 # Loading project configuration...
 # Success
-# ✅ Node 16019329408659850374 created successfully.
+# ✅ SuperNode 16019329408659850374 registered successfully.
 ```
 
 Then, we register the second `SuperNode` using the other public key:
@@ -117,7 +117,7 @@ flwr supernode register keys/client_credentials_2.pub . my-federation
 # It will print something like:
 # Loading project configuration...
 # Success
-# ✅ Node 8392976743692794070 created successfully.
+# ✅ SuperNode 8392976743692794070 registered successfully.
 ```
 
 You could also use the Flower ClI to view the status of the `SuperNodes`.
