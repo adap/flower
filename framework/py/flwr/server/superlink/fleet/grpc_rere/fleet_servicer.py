@@ -15,6 +15,7 @@
 """Fleet API gRPC request-response servicer."""
 
 
+import threading
 from logging import DEBUG, ERROR, INFO
 
 import grpc
@@ -53,6 +54,7 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_grpc_context
+from flwr.supercore.constant import NodeStatus
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 
@@ -71,6 +73,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
         self.enable_supernode_auth = enable_supernode_auth
+        self.lock = threading.Lock()
 
     def CreateNode(
         self, request: CreateNodeRequest, context: grpc.ServicerContext
@@ -88,8 +91,31 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
             # Check if public key is already in use
             if node_id := state.get_node_id_by_public_key(request.public_key):
-                # Prepare response with existing node_id
-                response = CreateNodeResponse(node=Node(node_id=node_id))
+
+                # Ensure only one request that requires checking the node state
+                # is processed at a time. This avoids race conditions when two
+                # SuperNodes try to connect at the same time with the same
+                # public key.
+                with self.lock:
+                    node_info = state.get_node_info(node_ids=[node_id])[0]
+                    if node_info.status == NodeStatus.ONLINE:
+                        # Node is already active
+                        log(
+                            ERROR,
+                            "Public key already in use (node_id=%s)",
+                            node_id,
+                        )
+                        raise ValueError(
+                            "Public key already in use by an active SuperNode"
+                        )
+
+                    # Prepare response with existing node_id
+                    response = CreateNodeResponse(node=Node(node_id=node_id))
+                    # Awknowledge heartbeat to mark node as online
+                    state.acknowledge_node_heartbeat(
+                        node_id=node_id,
+                        heartbeat_interval=request.heartbeat_interval,
+                    )
             else:
                 if self.enable_supernode_auth:
                     # When SuperNode authentication is enabled,

@@ -76,10 +76,10 @@ CREATE TABLE IF NOT EXISTS node(
     node_id                 INTEGER UNIQUE,
     owner_aid               TEXT,
     status                  TEXT,
-    created_at              TEXT,
+    registered_at           TEXT,
     last_activated_at       TEXT NULL,
     last_deactivated_at     TEXT NULL,
-    deleted_at              TEXT NULL,
+    unregistered_at         TEXT NULL,
     online_until            TIMESTAMP NULL,
     heartbeat_interval      REAL,
     public_key              BLOB UNIQUE
@@ -623,8 +623,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         query = """
             INSERT INTO node
-            (node_id, owner_aid, status, created_at, last_activated_at,
-            last_deactivated_at, deleted_at, online_until, heartbeat_interval,
+            (node_id, owner_aid, status, registered_at, last_activated_at,
+            last_deactivated_at, unregistered_at, online_until, heartbeat_interval,
             public_key)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
@@ -636,11 +636,11 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 (
                     sint64_node_id,  # node_id
                     owner_aid,  # owner_aid
-                    NodeStatus.CREATED,  # status
-                    now().isoformat(),  # created_at
+                    NodeStatus.REGISTERED,  # status
+                    now().isoformat(),  # registered_at
                     None,  # last_activated_at
                     None,  # last_deactivated_at
-                    None,  # deleted_at
+                    None,  # unregistered_at
                     None,  # online_until, initialized with offline status
                     heartbeat_interval,  # heartbeat_interval
                     public_key,  # public_key
@@ -662,19 +662,19 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         query = """
             UPDATE node
-            SET status = ?, deleted_at = ?,
+            SET status = ?, unregistered_at = ?,
             online_until = IIF(online_until > ?, ?, online_until)
             WHERE node_id = ? AND status != ? AND owner_aid = ?
             RETURNING node_id
         """
         current = now()
         params = (
-            NodeStatus.DELETED,
+            NodeStatus.UNREGISTERED,
             current.isoformat(),
             current.timestamp(),
             current.timestamp(),
             sint64_node_id,
-            NodeStatus.DELETED,
+            NodeStatus.UNREGISTERED,
             owner_aid,
         )
 
@@ -779,7 +779,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Query the public key for the given node_id
         query = "SELECT public_key FROM node WHERE node_id = ? AND status != ?;"
-        rows = self.query(query, (sint64_node_id, NodeStatus.DELETED))
+        rows = self.query(query, (sint64_node_id, NodeStatus.UNREGISTERED))
 
         # If no result is found, return None
         if not rows:
@@ -792,7 +792,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """Get `node_id` for the specified `public_key` if it exists and is not
         deleted."""
         query = "SELECT node_id FROM node WHERE public_key = ? AND status != ?;"
-        rows = self.query(query, (public_key, NodeStatus.DELETED))
+        rows = self.query(query, (public_key, NodeStatus.UNREGISTERED))
 
         # If no result is found, return None
         if not rows:
@@ -1063,7 +1063,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             # Check if node exists and not deleted
             query = "SELECT status FROM node WHERE node_id = ? AND status != ?"
             row = self.conn.execute(
-                query, (sint64_node_id, NodeStatus.DELETED)
+                query, (sint64_node_id, NodeStatus.UNREGISTERED)
             ).fetchone()
             if row is None:
                 return False
