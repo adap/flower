@@ -21,8 +21,8 @@ from typing import Optional
 from flwr.common.logger import log
 
 from .in_memory_object_store import InMemoryObjectStore
-from .sqlite_object_store import SqliteObjectStore
 from .object_store import ObjectStore
+from .sqlite_object_store import SqliteObjectStore
 
 
 class ObjectStoreFactory:
