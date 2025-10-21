@@ -59,12 +59,14 @@ def _build_experiment_key(cfg: Any) -> str:
     if dist is None:
         return "tracefl_experiment"
 
+    prov_rounds = getattr(cfg, "provenance_rounds", [])
+    rounds_str = "-".join(str(r) for r in sorted(prov_rounds))
     parts = [
         f"dataset-{getattr(dist, 'dname', 'unknown')}",
         f"model-{getattr(dist, 'model_name', 'unknown')}",
         f"clients-{getattr(dist, 'num_clients', 'n')}",
         f"alpha-{getattr(dist, 'dirichlet_alpha', 'a')}",
-        f"rounds-{'-'.join(str(r) for r in sorted(getattr(cfg, 'provenance_rounds', [])))}",  # noqa: E501
+        f"rounds-{rounds_str}",
     ]
 
     noise = getattr(cfg, "noise_multiplier", None)
@@ -106,7 +108,12 @@ class ExperimentResultLogger:
             try:
                 existing = pd.read_csv(self._file_path)
                 self._records = existing.to_dict("records")
-            except Exception:
+            except (
+                pd.errors.EmptyDataError,
+                pd.errors.ParserError,
+                FileNotFoundError,
+                PermissionError,
+            ):
                 # If the file is corrupted we start from scratch but keep a
                 # backup for manual inspection.
                 backup = self._file_path.with_suffix(".backup")

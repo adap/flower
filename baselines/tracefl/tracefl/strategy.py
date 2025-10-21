@@ -12,11 +12,14 @@ from flwr.common.logger import log
 from flwr.serverapp.strategy import FedAvg
 
 from .fl_provenance import FlowerProvenance
+from .model import initialize_model
+from .results_logging import ExperimentResultLogger
 
 
 class TraceFLStrategy(FedAvg):
     """Custom Flower strategy that extends FedAvg with TraceFL provenance analysis."""
 
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self,
         fraction_train: float = 1.0,
@@ -224,11 +227,7 @@ class TraceFLStrategy(FedAvg):
             return
 
         try:
-
             # Create global model from aggregated ArrayRecord
-
-            from .model import initialize_model
-
             model_dict = initialize_model(
                 self.cfg.data_dist.model_name, self.cfg.data_dist
             )
@@ -299,7 +298,11 @@ class TraceFLStrategy(FedAvg):
                         "Stored provenance metrics in %s",
                         result_logger.file_path,
                     )
-                except Exception as exc:  # pragma: no cover - defensive logging
+                except (
+                    OSError,
+                    ValueError,
+                    AttributeError,
+                ) as exc:  # pragma: no cover - defensive logging
                     log(
                         logging.WARNING,
                         "Failed to persist provenance metrics: %s",
@@ -312,8 +315,7 @@ class TraceFLStrategy(FedAvg):
                     results["error"],
                 )
 
-        except Exception as e:
-
+        except (ValueError, RuntimeError, AttributeError, KeyError) as e:
             log(
                 logging.ERROR,
                 "Error in provenance analysis: %s",
@@ -374,7 +376,7 @@ class TraceFLStrategy(FedAvg):
         )
 
     def configure_fit(
-        self, server_round: int, parameters: bytes, client_manager
+        self, _server_round: int, _parameters: bytes, client_manager
     ) -> list[tuple[int, dict[str, Any]]]:
         """Configure the next round of training."""
         # Get base configuration from parent class
@@ -405,8 +407,6 @@ class TraceFLStrategy(FedAvg):
 
     def _get_result_logger(self):
         if self._result_logger is None and self.cfg is not None:
-            from .results_logging import ExperimentResultLogger
-
             self._result_logger = ExperimentResultLogger(
                 cfg=self.cfg,
                 output_dir=self.output_dir,

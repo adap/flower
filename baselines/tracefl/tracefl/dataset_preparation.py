@@ -5,13 +5,15 @@ multiple datasets and partitioning strategies without caching.
 """
 
 import logging
-from collections import Counter
+import random
+from collections import Counter, defaultdict
 from functools import partial
 
 import torch
+from datasets import Dataset, DatasetDict, load_dataset
+from flwr_datasets import FederatedDataset
 
 # import torchvision.transforms as transforms  # Not used in current implementation
-from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import (
     DirichletPartitioner,
     PathologicalPartitioner,
@@ -24,6 +26,16 @@ from torchvision.transforms import (
     Resize,
     ToTensor,
 )
+
+# Optional imports for medical datasets
+try:
+    from medmnist import OrganAMNIST, PathMNIST
+
+    MEDMNIST_AVAILABLE = True
+except ImportError:
+    MEDMNIST_AVAILABLE = False
+    OrganAMNIST = None
+    PathMNIST = None
 
 
 def train_test_transforms_factory(cfg):
@@ -134,7 +146,7 @@ def train_test_transforms_factory(cfg):
     return {"train": train_transforms, "test": test_transforms}
 
 
-def _initialize_medical_dataset(cfg, dat_partitioner_func, fetch_only_test_data):
+def _initialize_medical_dataset(cfg, _dat_partitioner_func, _fetch_only_test_data):
     """Initialize and process a medical dataset (MedMNIST) by applying TraceFL's RGB-
     compatible preprocessing pipeline.
 
@@ -156,19 +168,17 @@ def _initialize_medical_dataset(cfg, dat_partitioner_func, fetch_only_test_data)
     """
     # Import the correct dataset class
     if cfg.dname == "pathmnist":
-        from medmnist import PathMNIST as DataClass
+        data_class = PathMNIST
     elif cfg.dname == "organamnist":
-        from medmnist import OrganAMNIST as DataClass
+        data_class = OrganAMNIST
     else:
         raise ValueError(f"Unknown medical dataset: {cfg.dname}")
 
     # Load MedMNIST datasets
-    train_dataset = DataClass(split="train", download=True)
-    test_dataset = DataClass(split="test", download=True)
+    train_dataset = data_class(split="train", download=True)
+    test_dataset = data_class(split="test", download=True)
 
     # Convert to Hugging Face format
-    from datasets import Dataset
-
     train_hf = Dataset.from_dict(
         {
             "img": [train_dataset[i][0] for i in range(len(train_dataset))],
@@ -212,9 +222,6 @@ def _initialize_medical_dataset(cfg, dat_partitioner_func, fetch_only_test_data)
     ).with_format("torch")
 
     # Simple partitioning for medical datasets
-    import random
-    from collections import defaultdict
-
     # Set random seed for reproducibility
     random.seed(42)
 
@@ -250,7 +257,7 @@ def _initialize_medical_dataset(cfg, dat_partitioner_func, fetch_only_test_data)
     }
 
 
-def _initialize_text_dataset(cfg, dat_partitioner_func, fetch_only_test_data):
+def _initialize_text_dataset(cfg, _dat_partitioner_func, _fetch_only_test_data):
     """Initialize and process a text dataset by applying tokenization.
 
     Parameters
@@ -269,8 +276,6 @@ def _initialize_text_dataset(cfg, dat_partitioner_func, fetch_only_test_data):
             - 'client2data': Mapping of client IDs to transformed training data.
             - 'server_data': Transformed test data.
     """
-    from datasets import load_dataset
-
     # Load text dataset
     if cfg.dname == "dbpedia_14":
         train_dataset = load_dataset("dbpedia_14", split="train")
@@ -330,9 +335,6 @@ def _initialize_text_dataset(cfg, dat_partitioner_func, fetch_only_test_data):
     ).with_format("torch")
 
     # Simple partitioning for text datasets
-    import random
-    from collections import defaultdict
-
     # Set random seed for reproducibility
     random.seed(42)
 
@@ -348,8 +350,6 @@ def _initialize_text_dataset(cfg, dat_partitioner_func, fetch_only_test_data):
         client2class[client_id][label_key] += 1
 
     # Convert lists to datasets
-    from datasets import Dataset
-
     client_datasets = {}
     for client_id, examples in client2data.items():
         client_datasets[client_id] = Dataset.from_list(examples)
@@ -499,11 +499,12 @@ def _fix_partition(cfg, c_partition, target_label_col):
     return {"partition": ds, "partition_labels_count": partition_labels_count}
 
 
+# pylint: disable=too-many-positional-arguments
 def _partition_helper(
     partitioner,
     cfg,
     target_label_col,
-    fetch_only_test_data,
+    _fetch_only_test_data,
     subtask,
     train_dataset=None,
     test_dataset=None,
@@ -545,8 +546,6 @@ def _partition_helper(
     # Handle custom datasets or use FederatedDataset
     if train_dataset is not None and test_dataset is not None:
         # Use provided datasets
-        from datasets import DatasetDict
-
         dataset_dict = DatasetDict({"train": train_dataset, "test": test_dataset})
         fds = FederatedDataset(
             dataset=dataset_dict, partitioners={"train": partitioner}
@@ -600,6 +599,7 @@ def _partition_helper(
     }
 
 
+# pylint: disable=too-many-positional-arguments
 def _dirichlet_data_distribution(
     cfg,
     target_label_col,
@@ -722,7 +722,7 @@ def _pathological_partitioner(
 
 
 def _load_dist_based_clients_server_datasets(
-    cfg, dat_partitioner_func, fetch_only_test_data=False
+    cfg, dat_partitioner_func, _fetch_only_test_data=False
 ):
     """Load and partition the dataset into client and server splits based on a
     distribution strategy.
@@ -755,14 +755,16 @@ def _load_dist_based_clients_server_datasets(
 
     if cfg.dname in ["cifar10", "cifar100", "mnist"]:
         return _initialize_image_dataset(
-            cfg, dat_partitioner_func, fetch_only_test_data
+            cfg, dat_partitioner_func, _fetch_only_test_data
         )
     if cfg.dname in ["pathmnist", "organamnist"]:
         return _initialize_medical_dataset(
-            cfg, dat_partitioner_func, fetch_only_test_data
+            cfg, dat_partitioner_func, _fetch_only_test_data
         )
     if cfg.dname in ["dbpedia_14", "yahoo_answers_topics"]:
-        return _initialize_text_dataset(cfg, dat_partitioner_func, fetch_only_test_data)
+        return _initialize_text_dataset(
+            cfg, dat_partitioner_func, _fetch_only_test_data
+        )
     raise ValueError(f"Unknown dataset: {cfg.dname}")
 
 
@@ -837,6 +839,8 @@ class ClientsAndServerDatasets:
         on the type), and stores the client and server data along with class
         distributions.
         """
+        # pylint: disable=attribute-defined-outside-init
+        # Attributes intentionally set here for lazy loading in property
         d = _load_dist_based_clients_server_datasets(
             self.cfg.data_dist, self.data_dist_partitioner_func
         )

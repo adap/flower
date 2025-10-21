@@ -2,6 +2,7 @@
 
 import logging
 import time
+import traceback
 
 import torch
 
@@ -10,6 +11,7 @@ from .neuron_provenance import NeuronProvenance
 from .utils import get_prov_eval_metrics, normalize_contributions
 
 
+# pylint: disable=too-many-instance-attributes
 class FlowerProvenance:
     """Flower provenance analysis for TraceFL.
 
@@ -17,6 +19,7 @@ class FlowerProvenance:
     faulty client detection and contribution analysis.
     """
 
+    # pylint: disable=too-many-positional-arguments
     def __init__(
         self,
         cfg,
@@ -68,8 +71,8 @@ class FlowerProvenance:
         }
         self._faulty_mode = bool(self.faulty_clients_ids and self.label2flip)
 
-        # Initialize ALLROUNDSCLIENTS2CLASS from provided client-to-class mappings
-        self.ALLROUNDSCLIENTS2CLASS = {
+        # Initialize all_rounds_clients2class from provided client-to-class mappings
+        self.all_rounds_clients2class = {
             client_id: self.client2class.get(client_id, {})
             for client_id in self.client2model.keys()
         }
@@ -77,6 +80,11 @@ class FlowerProvenance:
             []
         )  # Will be set in _setParticipatingClientsLabels
         self._set_participating_clients_labels()
+
+        # Initialize attributes that will be set later
+        self.subset_test_data = None
+        self.loss = None
+        self.acc = None
 
         # Select provenance data
         self._select_provenance_data()
@@ -116,7 +124,7 @@ class FlowerProvenance:
         In baseline without tracking, use all possible labels.
         """
         labels = set()
-        for class_counts in self.ALLROUNDSCLIENTS2CLASS.values():
+        for class_counts in self.all_rounds_clients2class.values():
             for label in class_counts.keys():
                 try:
                     labels.add(int(label))
@@ -414,9 +422,7 @@ class FlowerProvenance:
 
             return results
 
-        except Exception as e:
-            import traceback
-
+        except (ValueError, RuntimeError, AttributeError) as e:
             logging.error("Error in provenance calculation: %s", e)
             logging.error("Traceback:\n%s", traceback.format_exc())
             return {"error": str(e)}

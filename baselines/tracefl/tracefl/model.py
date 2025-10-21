@@ -9,7 +9,12 @@ import torch
 import torch.nn.functional as F
 import torchvision
 from torch import nn
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from torch.utils.data import DataLoader
+from transformers import (
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+    DefaultDataCollator,
+)
 
 
 class Net(nn.Module):
@@ -291,6 +296,7 @@ def test(net, testloader, device, model_type="cnn"):
     return loss, accuracy
 
 
+# pylint: disable=too-many-statements
 def test_neural_network(arch, global_net_dict, server_testdata, batch_size=32):
     """Evaluate the global model on the server test data using the appropriate method.
     This function provides the same interface as original TraceFL for compatibility.
@@ -312,9 +318,6 @@ def test_neural_network(arch, global_net_dict, server_testdata, batch_size=32):
         A dictionary with evaluation loss, accuracy, and detailed prediction
         information.
     """
-    from torch.utils.data import DataLoader
-    from transformers import DefaultDataCollator
-
     model = global_net_dict["model"]
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -445,5 +448,4 @@ def test_neural_network(arch, global_net_dict, server_testdata, batch_size=32):
             "eval_predicted_labels": all_predictions,
         }
 
-    else:
-        raise ValueError(f"Architecture {arch} not supported")
+    raise ValueError(f"Architecture {arch} not supported")

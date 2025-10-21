@@ -16,6 +16,7 @@ class NeuronProvenance:
     through neural network layers.
     """
 
+    # pylint: disable=too-many-positional-arguments
     def __init__(self, cfg, arch, test_data, gmodel, c2model, num_classes, c2nk):
         """Initialize a NeuronProvenance instance.
 
@@ -57,6 +58,10 @@ class NeuronProvenance:
         if self.cfg.client_weights_normalization:
             logging.debug(">> clients weights are normaized")
             self._inplace_scale_client_ws()
+
+        # Initialize attributes that will be set later
+        self.global_neurons_inputs_outputs_batch = None
+        self.inputs2layer_grads = None
 
     def _check_anomalies(self, t):
         """Check the tensor for inf or NaN values.
@@ -510,11 +515,11 @@ class HookManager:
             The hook handle.
         """
 
-        def forward_hook(module, input_tensor, output_tensor):
+        def forward_hook(_module, input_tensor, output_tensor):
             try:
                 input_tensor = input_tensor[0]
                 input_tensor = input_tensor.detach()
-            except Exception:
+            except (AttributeError, TypeError, IndexError):
                 pass
 
             input_tensor = input_tensor.detach()
@@ -537,22 +542,22 @@ class HookManager:
             The hook handle.
         """
 
-        def backward_hook(module, input_tensor, output_tensor):
+        def backward_hook(_module, input_tensor, output_tensor):
             try:
                 input_tensor = input_tensor[0]
                 output_tensor = output_tensor[0]
                 input_tensor = input_tensor.detach()
                 output_tensor = output_tensor.detach()
 
-            except Exception:
+            except (AttributeError, TypeError, IndexError):
                 pass
             try:
                 input_tensor = input_tensor.detach()
-            except Exception:
+            except (AttributeError, TypeError):
                 pass
             try:
                 output_tensor = output_tensor.detach()
-            except Exception:
+            except (AttributeError, TypeError):
                 pass
 
             self.backward_hooks_storage.append((input_tensor, output_tensor))

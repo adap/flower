@@ -5,8 +5,10 @@ being compatible with Flower 1.22.0 and TraceFLStrategy.
 """
 
 import logging
+from collections import OrderedDict
 
 import numpy as np
+import torch
 from flwr.common.logger import log
 from flwr.common.record import ArrayRecord
 from flwr.serverapp.strategy import Strategy
@@ -211,14 +213,11 @@ class TraceFLWithDP(Strategy):
 
         # Convert back to ArrayRecord preserving PyTorch state dict structure
         # We need to reconstruct the state dict with proper layer names
-        import torch
 
         # Get the original state dict structure from the previous arrays
         original_state_dict = self.previous_arrays.to_torch_state_dict()
 
         # Create new state dict with DP-applied parameters
-        from collections import OrderedDict
-
         dp_state_dict = OrderedDict()
         for i, (key, _) in enumerate(original_state_dict.items()):
             dp_state_dict[key] = torch.from_numpy(dp_params[i])

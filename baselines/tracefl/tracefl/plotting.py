@@ -80,19 +80,18 @@ def _derive_run_label(path: Path) -> str:
     # Create cleaner labels for common experiment patterns
     if "experiment_a" in name:
         return "Localization Accuracy (α=0.3)"
-    elif "experiment_b" in name:
+    if "experiment_b" in name:
         return "Data Distribution Analysis"
-    elif "experiment_c" in name:
+    if "experiment_c" in name:
         return "Faulty Client Detection"
-    elif "experiment_d" in name:
+    if "experiment_d" in name:
         return "Differential Privacy"
-    else:
-        # For other cases, create a shorter label
-        parts = name.split("_")
-        if len(parts) > 3:
-            # Take first few meaningful parts
-            return " ".join(parts[:3]).replace("-", "=")
-        return name.replace("_", " ")
+    # For other cases, create a shorter label
+    parts = name.split("_")
+    if len(parts) > 3:
+        # Take first few meaningful parts
+        return " ".join(parts[:3]).replace("-", "=")
+    return name.replace("_", " ")
 
 
 def load_results(paths: Iterable[Path]) -> list[pd.DataFrame]:

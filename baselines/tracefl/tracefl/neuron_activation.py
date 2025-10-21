@@ -6,8 +6,8 @@ import torch.nn.functional as F
 # Import transformers components for layer detection
 try:
     import transformers
-    import transformers.models.bert.modeling_bert as modeling_bert
     import transformers.pytorch_utils
+    from transformers.models.bert import modeling_bert
 
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
@@ -49,8 +49,8 @@ def _get_all_layers_in_neural_network(net):
     return layers
 
 
-global Hooks_Storage
-Hooks_Storage = []
+# Global storage for hooks - will be managed by HookManager class
+_hooks_storage = []
 
 
 def _get_input_and_output_of_layer(self, input_t, output_t):
@@ -69,11 +69,10 @@ def _get_input_and_output_of_layer(self, input_t, output_t):
     -------
     None
     """
-    global Hooks_Storage
     assert (
         len(input_t) == 1
     ), f"Hook, {self.__class__.__name__} Expected 1 input, got {len(input_t)}"
-    Hooks_Storage.append(output_t.detach())
+    _hooks_storage.append(output_t.detach())
 
 
 def _insert_hooks_func(layers):
@@ -139,21 +138,22 @@ def _my_eval_neurons_activations(model, x):
             - A 1D tensor of concatenated flattened activations from all layers.
             - A list of tensors with the activations of each layer.
     """
-    global Hooks_Storage
+    # Use module-level storage for hooks
+    _hooks_storage.clear()  # Clear previous data
     layer2output = []
     all_layers = _get_all_layers_in_neural_network(model)
 
     layers = all_layers  # [1:]
 
     hooks = _insert_hooks_func(layers)
-    model(x)  # forward pass and everything is stored in Hooks_Storage
+    model(x)  # forward pass and everything is stored in _hooks_storage
     for l_id in range(len(layers)):
-        outputs = F.relu(Hooks_Storage[l_id])
+        outputs = F.relu(_hooks_storage[l_id])
         scaled_outputs = _scale_func(outputs)
         layer2output.append(scaled_outputs)
 
     _ = [h.remove() for h in hooks]  # remove the hooks
-    Hooks_Storage = []
+    _hooks_storage.clear()  # Clear for next use
     return torch.cat([out.flatten() for out in layer2output]), layer2output
 
 
