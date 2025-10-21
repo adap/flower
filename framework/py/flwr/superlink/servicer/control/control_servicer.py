@@ -18,7 +18,6 @@
 import hashlib
 import time
 from collections.abc import Generator, Sequence
-from datetime import timedelta
 from logging import ERROR, INFO
 from typing import Any, Optional, cast
 
@@ -72,7 +71,6 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from flwr.supercore.constant import NodeStatus
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
@@ -466,77 +464,15 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             raise grpc.RpcError()  # This line is unreachable
 
         nodes_info: Sequence[NodeInfo] = []
-        # If dry run is enabled, create dummy NodeInfo data
-        if request.dry_run:
-            nodes_info = _create_list_nodeif_for_dry_run()
+        # Init link state
+        state = self.linkstate_factory.state()
 
-        else:
-            # Init link state
-            state = self.linkstate_factory.state()
-
-            flwr_aid = shared_account_info.get().flwr_aid
-            flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
-            # Retrieve all nodes for the account
-            nodes_info = state.get_node_info(owner_aids=[flwr_aid])
+        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        # Retrieve all nodes for the account
+        nodes_info = state.get_node_info(owner_aids=[flwr_aid])
 
         return ListNodesResponse(nodes_info=nodes_info, now=now().isoformat())
-
-
-def _create_list_nodeif_for_dry_run() -> Sequence[NodeInfo]:
-    """Create a list of NodeInfo for dry run testing."""
-    nodes_info: list[NodeInfo] = []
-    # A node registered (but not connected)
-    nodes_info.append(
-        NodeInfo(
-            node_id=15390646978706312628,
-            owner_aid="owner_aid_1",
-            status=NodeStatus.REGISTERED,
-            registered_at=(now()).isoformat(),
-            last_activated_at="",
-            last_deactivated_at="",
-            unregistered_at="",
-        )
-    )
-
-    # A node registered and connected
-    nodes_info.append(
-        NodeInfo(
-            node_id=2941141058168602545,
-            owner_aid="owner_aid_2",
-            status=NodeStatus.ONLINE,
-            registered_at=(now()).isoformat(),
-            last_activated_at=(now() + timedelta(hours=0.5)).isoformat(),
-            last_deactivated_at="",
-            unregistered_at="",
-        )
-    )
-
-    # A node registered and unregistered (never connected)
-    nodes_info.append(
-        NodeInfo(
-            node_id=906971720890549292,
-            owner_aid="owner_aid_3",
-            status=NodeStatus.UNREGISTERED,
-            registered_at=(now()).isoformat(),
-            last_activated_at="",
-            last_deactivated_at="",
-            unregistered_at=(now() + timedelta(hours=1)).isoformat(),
-        )
-    )
-
-    # A node registered, deactivate and then unregistered
-    nodes_info.append(
-        NodeInfo(
-            node_id=1781174086018058152,
-            owner_aid="owner_aid_4",
-            status=NodeStatus.OFFLINE,
-            registered_at=(now()).isoformat(),
-            last_activated_at=(now() + timedelta(hours=0.5)).isoformat(),
-            last_deactivated_at=(now() + timedelta(hours=1)).isoformat(),
-            unregistered_at=(now() + timedelta(hours=1.5)).isoformat(),
-        )
-    )
-    return nodes_info
 
 
 def _create_list_runs_response(

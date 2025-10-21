@@ -137,7 +137,9 @@ GC_THRESHOLD = 200_000_000  # 200 MB
 # Constants for Inflatable
 HEAD_BODY_DIVIDER = b"\x00"
 HEAD_VALUE_DIVIDER = " "
-MAX_ARRAY_CHUNK_SIZE = int(os.getenv("MAX_ARRAY_CHUNK_SIZE", "5242880"))  # 5 MB
+FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE = int(
+    os.getenv("FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE", "5242880")
+)  # 5 MB
 
 # Constants for serialization
 INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
@@ -146,11 +148,11 @@ INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
 FLWR_APP_TOKEN_LENGTH = 128  # Length of the token used
 
 # Constants for object pushing and pulling
-MAX_CONCURRENT_PUSHES = int(
-    os.getenv("MAX_CONCURRENT_PUSHES", "2")
+FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PUSHES = int(
+    os.getenv("FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PUSHES", "2")
 )  # Default maximum number of concurrent pushes
-MAX_CONCURRENT_PULLS = int(
-    os.getenv("MAX_CONCURRENT_PULLS", "2")
+FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PULLS = int(
+    os.getenv("FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PULLS", "2")
 )  # Default maximum number of concurrent pulls
 PULL_MAX_TIME = 7200  # Default maximum time to wait for pulling objects
 PULL_MAX_TRIES_PER_OBJECT = 500  # Default maximum number of tries to pull an object
