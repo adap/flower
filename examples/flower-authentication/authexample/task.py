@@ -1,12 +1,10 @@
 """authexample: An authenticated Flower / PyTorch app."""
 
-from collections import OrderedDict
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader
 from datasets import load_from_disk
+from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
 
@@ -31,16 +29,6 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
-def get_weights(net):
-    return [val.cpu().numpy() for _, val in net.state_dict().items()]
-
-
-def set_weights(net, parameters):
-    params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    net.load_state_dict(state_dict, strict=True)
-
-
 def load_data_from_disk(path: str, batch_size: int):
     partition_train_test = load_from_disk(path)
     pytorch_transforms = Compose(
@@ -60,27 +48,24 @@ def load_data_from_disk(path: str, batch_size: int):
     return trainloader, testloader
 
 
-def train(net, trainloader, valloader, epochs, learning_rate, device):
+def train(net, trainloader, epochs, learning_rate, device):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
     net.train()
+    running_loss = 0.0
     for _ in range(epochs):
         for batch in trainloader:
-            images = batch["img"]
-            labels = batch["label"]
+            images = batch["img"].to(device)
+            labels = batch["label"].to(device)
             optimizer.zero_grad()
-            criterion(net(images.to(device)), labels.to(device)).backward()
+            loss = criterion(net(images), labels)
+            loss.backward()
             optimizer.step()
-
-    val_loss, val_acc = test(net, valloader, device)
-
-    results = {
-        "val_loss": val_loss,
-        "val_accuracy": val_acc,
-    }
-    return results
+            running_loss += loss.item()
+    avg_trainloss = running_loss / len(trainloader)
+    return avg_trainloss
 
 
 def test(net, testloader, device):

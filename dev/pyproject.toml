@@ -51,6 +51,8 @@ extend_exclude = [
 
 [tool.isort]
 profile = "black"
+# `isort` treat "datasets" as first party by default
+known_third_party = ["datasets"]
 
 [tool.black]
 line-length = 88

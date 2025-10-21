@@ -1,98 +1,106 @@
-:og:description: Aggregate custom evaluation results from federated clients in Flower using a strategy that applies weighted averaging for metrics like accuracy.
+:og:description: Aggregate custom evaluation results from federated clients in Flower using a callable function that applies weighted averaging for metrics like accuracy.
 .. meta::
-    :description: Aggregate custom evaluation results from federated clients in Flower using a strategy that applies weighted averaging for metrics like accuracy.
+    :description: Aggregate custom evaluation results from federated clients in Flower using a callable function that applies weighted averaging for metrics like accuracy.
+
+.. |fedavg_link| replace:: ``FedAvg``
+
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
+
+.. |metricrecord_link| replace:: ``MetricRecord``
+
+.. _metricrecord_link: ref-api/flwr.app.MetricRecord.html
+
+.. |message_link| replace:: ``Message``
+
+.. _message_link: ref-api/flwr.app.Message.html
+
+.. |recorddict_link| replace:: ``RecordDict``
+
+.. _recorddict_link: ref-api/flwr.app.RecordDict.html
 
 Aggregate evaluation results
 ============================
 
-The Flower server does not prescribe a way to aggregate evaluation results, but it
-enables the user to fully customize result aggregation.
+Flower strategies (e.g. |fedavg_link|_ and all that derive from it) automatically
+aggregate the metrics in the |metricrecord_link|_ in the ``Messages`` replied by the
+``ClientApps``. By default, a weighted aggregation is performed for all metrics using as
+weight the value assigned to the ``weighted_by_key`` attribute of a strategy.
 
-Aggregate Custom Evaluation Results
------------------------------------
+When constructing your strategy, you can set both the key used to perform weighted
+aggregation but also the callback function used to aggregate metrics.
 
-The same ``Strategy``-customization approach can be used to aggregate custom evaluation
-results coming from individual clients. Clients can return custom metrics to the server
-by returning a dictionary:
+.. note::
 
-.. code-block:: python
-
-    from flwr.client import NumPyClient
-
-
-    class FlowerClient(NumPyClient):
-
-        def fit(self, parameters, config):
-            # ...
-            pass
-
-        def evaluate(self, parameters, config):
-            """Evaluate parameters on the locally held test set."""
-
-            # Update local model with global parameters
-            self.model.set_weights(parameters)
-
-            # Evaluate global model parameters on the local test data
-            loss, accuracy = self.model.evaluate(self.x_test, self.y_test)
-
-            # Return results, including the custom accuracy metric
-            num_examples_test = len(self.x_test)
-            return float(loss), num_examples_test, {"accuracy": float(accuracy)}
-
-The server can then use a customized strategy to aggregate the metrics provided in these
-dictionaries:
+    By default, Flower strategies use as ``weighted_by_key="num-examples"``. If you are
+    interested, see the full implementation of how the default weighted aggregation
+    callback works `here
+    <https://github.com/adap/flower/blob/b174b2e02bb34cae9ba9f2a124c610a844cee870/framework/py/flwr/serverapp/strategy/strategy_utils.py#L109>`_.
 
 .. code-block:: python
 
-    from flwr.server.strategy import FedAvg
+    from flwr.serverapp.strategy import FedAvg
+    from flwr.serverapp.strategy.strategy_utils import aggregate_metricrecords
+
+    strategy = FedAvg(
+        # ... other parameters ...
+        weighted_by_key="your-key",  # Key to use for weighted averaging
+        evaluate_metrics_aggr_fn=my_metrics_aggr_function,  # Custom aggregation function
+    )
+
+Let's see how we can define a custom aggregation function for ``MetricRecord`` objects
+received in the reply of an evaluation round.
+
+.. note::
+
+    Note that Flower strategies also have a ``train_metrics_aggr_fn`` attribute that
+    allows you to define a custom aggregation function for received ``MetricRecord``
+    objects in reply messages of a training round. By default, it performs weighted
+    averaging using the value assigned to the ``weighted_by_key`` exactly as the
+    ``evaluate_metrics_aggr_fn`` presented earlier.
+
+Using a custom metrics aggregation function
+-------------------------------------------
+
+The ``evaluate_metrics_aggr_fn`` can be customized to support any evaluation results
+aggregation logic you need. Its definition is:
+
+.. code-block:: python
+
+    Callable[[list[RecordDict], str], MetricRecord]
+
+It takes a list of |recorddict_link|_ and a weighting key as inputs and returns a
+|metricrecord_link|_. For example, the function below extracts and returns the minimum
+value for each metric key across all |message_link|_:
+
+.. code-block:: python
+
+    from flwr.app import MetricRecord, RecordDict
 
 
-    class AggregateCustomMetricStrategy(FedAvg):
-        def aggregate_evaluate(
-            self,
-            server_round: int,
-            results: List[Tuple[ClientProxy, EvaluateRes]],
-            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-        ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-            """Aggregate evaluation accuracy using weighted average."""
+    def custom_metrics_aggregation_fn(
+        records: list[RecordDict], weighting_metric_name: str
+    ) -> MetricRecord:
+        """Extract the minimum value for each metric key."""
+        aggregated_metrics = MetricRecord()
 
-            if not results:
-                return None, {}
+        # Track current minimum per key in a plain dict,
+        # then copy into MetricRecord at the end
+        mins = {}
 
-            # Call aggregate_evaluate from base class (FedAvg) to aggregate loss and metrics
-            aggregated_loss, aggregated_metrics = super().aggregate_evaluate(
-                server_round, results, failures
-            )
+        for record in records:
+            for record_item in record.metric_records.values():
+                for key, value in record_item.items():
+                    if key == weighting_metric_name:
+                        # We exclude the weighting key from the aggregated MetricRecord
+                        continue
 
-            # Weigh accuracy of each client by number of examples used
-            accuracies = [r.metrics["accuracy"] * r.num_examples for _, r in results]
-            examples = [r.num_examples for _, r in results]
+                    if key in mins:
+                        if value < mins[key]:
+                            mins[key] = value
+                    else:
+                        mins[key] = value
 
-            # Aggregate and print custom metric
-            aggregated_accuracy = sum(accuracies) / sum(examples)
-            print(
-                f"Round {server_round} accuracy aggregated from client results: {aggregated_accuracy}"
-            )
+        for key, value in mins.items():
+            aggregated_metrics[key] = value
 
-            # Return aggregated loss and metrics (i.e., aggregated accuracy)
-            return float(aggregated_loss), {"accuracy": float(aggregated_accuracy)}
-
-
-    def server_fn(context: Context) -> ServerAppComponents:
-        # Read federation rounds from config
-        num_rounds = context.run_config["num-server-rounds"]
-        config = ServerConfig(num_rounds=num_rounds)
-
-        # Define strategy
-        strategy = AggregateCustomMetricStrategy(
-            # (same arguments as FedAvg here)
-        )
-
-        return ServerAppComponents(
-            config=config,
-            strategy=strategy,  # <-- pass the custom strategy here
-        )
-
-
-    # Create ServerApp
-    app = ServerApp(server_fn=server_fn)
+        return aggregated_metrics

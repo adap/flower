@@ -2,58 +2,74 @@
 
 import pytorch_lightning as pl
 from datasets.utils.logging import disable_progress_bar
-from flwr.client import Client, ClientApp, NumPyClient
-from flwr.common import Context
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 
 disable_progress_bar()
 
-from pytorchlightning_example.task import (
-    LitAutoEncoder,
-    get_parameters,
-    load_data,
-    set_parameters,
-)
+from pytorchlightning_example.task import LitAutoEncoder, load_data
+
+# Flower ClientApp
+app = ClientApp()
 
 
-class FlowerClient(NumPyClient):
-    def __init__(self, train_loader, val_loader, test_loader, max_epochs):
-        self.model = LitAutoEncoder()
-        self.train_loader = train_loader
-        self.val_loader = val_loader
-        self.test_loader = test_loader
-        self.max_epochs = max_epochs
+@app.train()
+def train(msg: Message, context: Context):
+    """Train the model on local data."""
 
-    def fit(self, parameters, config):
-        """Train the model with data of this client."""
-        set_parameters(self.model, parameters)
+    # Load the model and initialize it with the received weights
+    model = LitAutoEncoder()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
 
-        trainer = pl.Trainer(max_epochs=self.max_epochs, enable_progress_bar=False)
-        trainer.fit(self.model, self.train_loader, self.val_loader)
-
-        return get_parameters(self.model), len(self.train_loader.dataset), {}
-
-    def evaluate(self, parameters, config):
-        """Evaluate the model on the data this client has."""
-        set_parameters(self.model, parameters)
-
-        trainer = pl.Trainer(enable_progress_bar=False)
-        results = trainer.test(self.model, self.test_loader)
-        loss = results[0]["test_loss"]
-
-        return loss, len(self.test_loader.dataset), {}
-
-
-def client_fn(context: Context) -> Client:
-    """Construct a Client that will be run in a ClientApp."""
-
-    # Read the node_config to fetch data partition associated to this node
+    # Load the data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    train_loader, val_loader, test_loader = load_data(partition_id, num_partitions)
+    train_loader, val_loader, _ = load_data(partition_id, num_partitions)
 
-    # Read run_config to fetch hyperparameters relevant to this run
+    # Train the model on local data
     max_epochs = context.run_config["max-epochs"]
-    return FlowerClient(train_loader, val_loader, test_loader, max_epochs).to_client()
+    trainer = pl.Trainer(max_epochs=max_epochs, enable_progress_bar=False)
+    trainer.fit(model, train_loader, val_loader)
+
+    # FIT does not return values, but you can read final epoch metrics here:
+    fit_metrics = trainer.callback_metrics  # Dict[str, Tensor]
+    loss = float(fit_metrics["train_loss"])
+
+    # Construct and return reply Message
+    model_record = ArrayRecord(model.state_dict())
+    metrics = {
+        "train_loss": loss,
+        "num-examples": len(train_loader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)
 
 
-app = ClientApp(client_fn=client_fn)
+@app.evaluate()
+def evaluate(msg: Message, context: Context):
+    """Evaluate the model on local data."""
+
+    # Load the model and initialize it with the received weights
+    model = LitAutoEncoder()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+
+    # Load the data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    _, _, test_loader = load_data(partition_id, num_partitions)
+
+    # Call the evaluation function
+    trainer = pl.Trainer(enable_progress_bar=False)
+    results = trainer.test(model, test_loader)
+    # Test returns a list[dict] with your logged test_* metrics:
+    loss = results[0]["test_loss"]
+
+    # Construct and return reply Message
+    metrics = {
+        "eval_loss": loss,
+        "num-examples": len(test_loader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
+    return Message(content=content, reply_to=msg)

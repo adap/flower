@@ -15,6 +15,7 @@
 """Tests for in-memory grid."""
 
 
+import secrets
 import time
 import unittest
 from collections.abc import Iterable
@@ -44,7 +45,12 @@ from .inmemory_grid import InMemoryGrid
 def push_messages(grid: InMemoryGrid, num_nodes: int) -> tuple[Iterable[str], int]:
     """Help push messages to state."""
     for _ in range(num_nodes):
-        node_id = grid.state.create_node(heartbeat_interval=HEARTBEAT_MAX_INTERVAL)
+        node_id = grid.state.create_node(
+            "mock_owner",
+            secrets.token_bytes(32),
+            heartbeat_interval=0,  # This field has no effect
+        )
+        grid.state.acknowledge_node_heartbeat(node_id, HEARTBEAT_MAX_INTERVAL)
     num_messages = 3
     msgs = [Message(RecordDict(), node_id, "query") for _ in range(num_messages)]
 

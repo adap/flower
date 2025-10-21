@@ -1,8 +1,10 @@
 """jaxexample: A Flower / JAX app."""
 
+from typing import cast
+
 import numpy as np
-from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 
 from jaxexample.task import (
     apply_model,
@@ -10,57 +12,73 @@ from jaxexample.task import (
     get_params,
     load_data,
     set_params,
-    train,
 )
+from jaxexample.task import train as jax_train
+
+app = ClientApp()
 
 
-# Define Flower Client and client_fn
-class FlowerClient(NumPyClient):
-    def __init__(self, train_state, trainset, testset):
-        self.train_state = train_state
-        self.trainset, self.testset = trainset, testset
-
-    def fit(self, parameters, config):
-        self.train_state = set_params(self.train_state, parameters)
-        self.train_state, loss, acc = train(self.train_state, self.trainset)
-        params = get_params(self.train_state.params)
-        return (
-            params,
-            len(self.trainset),
-            {"train_acc": float(acc), "train_loss": float(loss)},
-        )
-
-    def evaluate(self, parameters, config):
-        self.train_state = set_params(self.train_state, parameters)
-
-        losses = []
-        accs = []
-        for batch in self.testset:
-            _, loss, accuracy = apply_model(
-                self.train_state, batch["image"], batch["label"]
-            )
-            losses.append(float(loss))
-            accs.append(float(accuracy))
-
-        return np.mean(losses), len(self.testset), {"accuracy": np.mean(accs)}
-
-
-def client_fn(context: Context):
-
-    num_partitions = context.node_config["num-partitions"]
-    partition_id = context.node_config["partition-id"]
-    batch_size = context.run_config["batch-size"]
-    trainset, testset = load_data(partition_id, num_partitions, batch_size)
+@app.train()
+def train(msg: Message, context: Context):
+    """Train the model on local data."""
 
     # Create train state object (model + optimizer)
-    lr = context.run_config["learning-rate"]
+    lr = float(context.run_config["learning-rate"])
     train_state = create_train_state(lr)
+    # Extract numpy arrays from ArrayRecord before applying
+    ndarrays = cast(ArrayRecord, msg.content["arrays"]).to_numpy_ndarrays()
+    train_state = set_params(train_state, ndarrays)
 
-    # Return Client instance
-    return FlowerClient(train_state, trainset, testset).to_client()
+    # Load the data
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+    batch_size = int(context.run_config["batch-size"])
+    trainloader, _ = load_data(partition_id, num_partitions, batch_size)
+
+    train_state, loss, acc = jax_train(train_state, trainloader)
+    params = get_params(train_state.params)
+
+    # Construct and return reply Message
+    model_record = ArrayRecord(params)
+    metrics = {
+        "train_loss": float(loss),
+        "train_acc": float(acc),
+        "num-examples": int(len(trainloader) * batch_size),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)
 
 
-# Flower ClientApp
-app = ClientApp(
-    client_fn,
-)
+@app.evaluate()
+def evaluate(msg: Message, context: Context):
+    """Evaluate the model on local data."""
+
+    # Create train state object (model + optimizer)
+    lr = float(context.run_config["learning-rate"])
+    train_state = create_train_state(lr)
+    ndarrays = cast(ArrayRecord, msg.content["arrays"]).to_numpy_ndarrays()
+    train_state = set_params(train_state, ndarrays)
+
+    # Load the data
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+    batch_size = int(context.run_config["batch-size"])
+    _, valloader = load_data(partition_id, num_partitions, batch_size)
+
+    losses = []
+    accs = []
+    for batch in valloader:
+        _, loss, accuracy = apply_model(train_state, batch["image"], batch["label"])
+        losses.append(float(loss))
+        accs.append(float(accuracy))
+
+    # Construct and return reply Message
+    metrics = {
+        "eval_loss": float(np.mean(losses)),
+        "eval_acc": float(np.mean(accs)),
+        "num-examples": int(len(valloader) * batch_size),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
+    return Message(content=content, reply_to=msg)

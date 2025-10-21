@@ -35,8 +35,6 @@ from flwr.common import (
 )
 from flwr.common.secure_aggregation.crypto.shamir import combine_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    bytes_to_private_key,
-    bytes_to_public_key,
     generate_shared_key,
 )
 from flwr.common.secure_aggregation.ndarrays_arithmetic import (
@@ -56,6 +54,10 @@ from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.compat.legacy_context import LegacyContext
 from flwr.server.grid import Grid
+from flwr.supercore.primitives.asymmetric import (
+    bytes_to_private_key,
+    bytes_to_public_key,
+)
 
 from ..constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD
 from ..constant import Key as WorkflowKey

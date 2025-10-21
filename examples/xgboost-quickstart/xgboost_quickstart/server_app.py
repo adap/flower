@@ -1,54 +1,56 @@
 """xgboost_quickstart: A Flower / XGBoost app."""
 
-from typing import Dict
+import numpy as np
+import xgboost as xgb
+from flwr.app import ArrayRecord, Context
+from flwr.common.config import unflatten_dict
+from flwr.serverapp import Grid, ServerApp
+from flwr.serverapp.strategy import FedXgbBagging
 
-from flwr.common import Context, Parameters
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedXgbBagging
-
-
-def evaluate_metrics_aggregation(eval_metrics):
-    """Return an aggregated metric (AUC) for evaluation."""
-    total_num = sum([num for num, _ in eval_metrics])
-    auc_aggregated = (
-        sum([metrics["AUC"] * num for num, metrics in eval_metrics]) / total_num
-    )
-    metrics_aggregated = {"AUC": auc_aggregated}
-    return metrics_aggregated
-
-
-def config_func(rnd: int) -> Dict[str, str]:
-    """Return a configuration with global epochs."""
-    config = {
-        "global_round": str(rnd),
-    }
-    return config
-
-
-def server_fn(context: Context):
-    # Read from config
-    num_rounds = context.run_config["num-server-rounds"]
-    fraction_fit = context.run_config["fraction-fit"]
-    fraction_evaluate = context.run_config["fraction-evaluate"]
-
-    # Init an empty Parameter
-    parameters = Parameters(tensor_type="", tensors=[])
-
-    # Define strategy
-    strategy = FedXgbBagging(
-        fraction_fit=fraction_fit,
-        fraction_evaluate=fraction_evaluate,
-        evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation,
-        on_evaluate_config_fn=config_func,
-        on_fit_config_fn=config_func,
-        initial_parameters=parameters,
-    )
-    config = ServerConfig(num_rounds=num_rounds)
-
-    return ServerAppComponents(strategy=strategy, config=config)
-
+from xgboost_quickstart.task import replace_keys
 
 # Create ServerApp
-app = ServerApp(
-    server_fn=server_fn,
-)
+app = ServerApp()
+
+
+@app.main()
+def main(grid: Grid, context: Context) -> None:
+    # Read run config
+    num_rounds = context.run_config["num-server-rounds"]
+    fraction_train = context.run_config["fraction-train"]
+    fraction_evaluate = context.run_config["fraction-evaluate"]
+    # Flatted config dict and replace "-" with "_"
+    cfg = replace_keys(unflatten_dict(context.run_config))
+    params = cfg["params"]
+
+    # Init global model
+    # Init with an empty object; the XGBooster will be created
+    # and trained on the client side.
+    global_model = b""
+    # Note: we store the model as the first item in a list into ArrayRecord,
+    # which can be accessed using index ["0"].
+    arrays = ArrayRecord([np.frombuffer(global_model, dtype=np.uint8)])
+
+    # Initialize FedXgbBagging strategy
+    strategy = FedXgbBagging(
+        fraction_train=fraction_train,
+        fraction_evaluate=fraction_evaluate,
+    )
+
+    # Start strategy, run FedXgbBagging for `num_rounds`
+    result = strategy.start(
+        grid=grid,
+        initial_arrays=arrays,
+        num_rounds=num_rounds,
+    )
+
+    # Save final model to disk
+    bst = xgb.Booster(params=params)
+    global_model = bytearray(result.arrays["0"].numpy().tobytes())
+
+    # Load global model into booster
+    bst.load_model(global_model)
+
+    # Save model
+    print("\nSaving final model to disk...")
+    bst.save_model("final_model.json")

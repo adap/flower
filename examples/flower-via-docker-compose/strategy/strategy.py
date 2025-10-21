@@ -5,7 +5,6 @@ import flwr as fl
 from flwr.common import EvaluateRes, Scalar
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
-
 from prometheus_client import Gauge
 
 logging.basicConfig(level=logging.INFO)  # Configure logging

@@ -1,295 +1,163 @@
-:og:description: Configure Flower clients by sending parameters from the server to control client-side hyperparameters using configuration dictionaries and strategies.
+:og:description: Configure Flower clients by sending configurations from the strategy to the clients and control client-side hyperparameters dynamically.
 .. meta::
-    :description: Configure Flower clients by sending parameters from the server to control client-side hyperparameters using configuration dictionaries and strategies.
+    :description: Configure Flower clients by sending configurations from the strategy to the clients and control client-side hyperparameters dynamically.
 
-Configure Clients
-=================
+.. |message_link| replace:: ``Message``
+
+.. _message_link: ref-api/flwr.app.Message.html
+
+.. |configrecord_link| replace:: ``ConfigRecord``
+
+.. _configrecord_link: ref-api/flwr.app.ConfigRecord.html
+
+.. |arrayrecord_link| replace:: ``ArrayRecord``
+
+.. _arrayrecord_link: ref-api/flwr.app.ArrayRecord.html
+
+.. |clientapp_link| replace:: ``ClientApp``
+
+.. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
+
+.. |serverapp_link| replace:: ``ServerApp``
+
+.. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
+
+.. |fedavg_link| replace:: ``FedAvg``
+
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
+
+.. |strategy_start_link| replace:: ``start``
+
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
+
+Configure a ``ClientApp``
+=========================
 
 Flower provides the ability to send configuration values to clients, allowing
 server-side control over client behavior. This feature enables flexible and dynamic
 adjustment of client-side hyperparameters, improving collaboration and experimentation.
 
-Configuration values
---------------------
+Sending ``ConfigRecords`` to a ``ClientApp``
+--------------------------------------------
 
-``FitConfig`` and ``EvaluateConfig`` are dictionaries containing configuration values
-that the server sends to clients during federated learning rounds. These values must be
-of type ``Scalar``, which includes ``bool``, ``bytes``, ``float``, ``int``, or ``str``
-(or equivalent types in different languages). Scalar is the value type directly
-supported by Flower for these configurations.
+Make use of a |configrecord_link|_ to send configuration values in a |message_link|_
+from your |serverapp_link|_ to a |clientapp_link|_. A ``ConfigRecord`` is a special type
+of Python dictionary that allows communicating basic types such as ``int``, ``float``,
+``string``, ``bool`` and also ``bytes`` if you need to communicate more complex data
+structures that need to be serialized. Lists of these types are also supported.
 
-For example, a ``FitConfig`` dictionary might look like this:
+Let's see a few examples:
 
 .. code-block:: python
 
-    config = {
-        "batch_size": 32,  # int value
-        "learning_rate": 0.01,  # float value
-        "optimizer": "sgd",  # str value
-        "dropout": True,  # bool value
-    }
+    from flwr.app import ConfigRecord
 
-Flower serializes these configuration dictionaries (or *config dicts* for short) to
-their ProtoBuf representation, transports them to the client using gRPC, and then
-deserializes them back to Python dictionaries.
+    # A config record can hold basic scalars
+    config = ConfigRecord({"lr": 0.1, "max-local-steps": 20000, "loss-w": [0.1, 0.2]})
+
+    # It can also communicate strings and booleans
+    config = ConfigRecord({"augment": True, "wandb-project-name": "awesome-flower-app"})
+
+When you use a Flower strategy, the easiest way to get your ``ConfigRecord``
+communicated as part of the ``Message`` that gets sent to the ``ClientApp`` is by
+passing it to the |strategy_start_link|_ of your strategy of choice (e.g.
+|fedavg_link|_). Let's see how this looks in code:
+
+.. code-block:: python
+    :emphasize-lines: 15,21
+
+    # Create ServerApp
+    app = ServerApp()
+
+
+    @app.main()
+    def main(grid: Grid, context: Context) -> None:
+        """Main entry point for the ServerApp."""
+
+        # ... Read run config, initialize global model, etc
+        # Initialize FedAvg strategy
+        strategy = FedAvg()
+
+        # Construct the config to be embedded into the Messages that will
+        # be sent to the ClientApps
+        config = ConfigRecord({"lr": 0.1, "optim": "adam-w", "augment": True})
+
+        # Start strategy, run FedAvg for `num_rounds`
+        result = strategy.start(
+            grid=grid,
+            initial_arrays=arrays,
+            train_config=config,
+            num_rounds=10,
+        )
+
+Passing the above ``ConfigRecord`` to the strategy's ``start`` method ensures that the
+exact same ``ConfigRecord`` is received on the client side. But what if we'd like the
+configuration to change during the course of the federated learning process or as rounds
+advance?
 
 .. note::
 
-    Currently, there is no support for directly sending collection types (e.g., ``Set``,
-    ``List``, ``Map``) as values in configuration dictionaries. To send collections,
-    convert them to a supported type (e.g., JSON string) and decode on the client side.
+    Note that Flower strategies insert the current server round number into the
+    ``ConfigRecord`` for you under the key ``server-round``. In this way, the
+    ``ClientApp`` knows what's the current round of the federated learning process. Note
+    this is always inserted even if no ``ConfigRecord`` is passed to the strategy
+    ``start`` method. When that's the case, the only content of the ``ConfigRecord``
+    that arrives to the ``ClientApp`` will be such key with the corresponding round
+    number.
 
-    Example:
+Dynamic modification of ``ConfigRecord``
+----------------------------------------
 
-    .. code-block:: python
+Given a ``ConfigRecord`` passed upon starting the execution of a strategy (i.e. passed
+to the |strategy_start_link|_ method), the contents of the ``ConfigRecord`` that arrive
+to the ``ClientApp`` won't change (with the exception of the value under the
+``server-round`` key).
 
-        import json
+However, some applications do benefit or even require certain dynamism in the
+configuration values that one might send over to the ``ClientApps``. For example, the
+learning rate the local optimizers at the ``ClientApps`` make use of. As the federated
+learning rounds go by, it is often reasonable to reduce the learning rate. This dynamism
+can be introduced at the strategy by implementing a custom strategy that just overrides
+the ``configure_train`` method. This method is responsible for, among other aspects, to
+create the ``Messages`` that will be sent to the ``ClientApps``. These ``Messages``
+would typically include an |arrayrecord_link|_ carrying the parameters of the model to
+be federated as well as the ``ConfigRecord`` containing the configurations that the
+``ClientApp`` should use. Let's see how to design a custom strategy that alters the
+``ConfigRecord`` passed to the ``start`` method.
 
-        # On the server
-        config_dict = {"data_splits": json.dumps([0.8, 0.1, 0.1])}
+.. tip::
 
-        # On the client
-        data_splits = json.loads(config["data_splits"])
+    To learn more about how ``configure_train`` and other methods in the strategies
+    check the :doc:`Strategies Explainer <how-to-implement-strategies>`.
 
-Configuration through Built-in Strategies
------------------------------------------
-
-Flower provides configuration options to control client behavior dynamically through
-``FitConfig`` and ``EvaluateConfig``. These configurations allow server-side control
-over client-side parameters such as batch size, number of local epochs, learning rate,
-and evaluation settings, improving collaboration and experimentation.
-
-``FitConfig`` and ``EvaluateConfig``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-``FitConfig`` and ``EvaluateConfig`` are dictionaries containing configuration values
-that the server sends to clients during federated learning rounds. These dictionaries
-enable the server to adjust client-side hyperparameters and monitor progress
-effectively.
-
-``FitConfig``
-+++++++++++++
-
-``FitConfig`` specifies the hyperparameters for training rounds, such as the batch size,
-number of local epochs, and other parameters that influence training.
-
-For example, a ``fit_config`` callback might look like this:
+Let's create a new class inheriting from |fedavg_link|_ and override the
+``configure_train`` method. We then use this new strategy in our ``ServerApp``.
 
 .. code-block:: python
-
-    import json
-
-
-    def fit_config(server_round: int):
-        """Generate training configuration for each round."""
-        # Create the configuration dictionary
-        config = {
-            "batch_size": 32,
-            "current_round": server_round,
-            "local_epochs": 2,
-            "data_splits": json.dumps([0.8, 0.1, 0.1]),  # Example of serialized list
-        }
-        return config
-
-You can then pass this ``fit_config`` callback to a built-in strategy such as
-``FedAvg``:
-
-.. code-block:: python
-
-    from flwr.server.strategy import FedAvg
-
-    strategy = FedAvg(
-        on_fit_config_fn=fit_config,  # Pass the `fit_config` function
-    )
-
-On the client side, the configuration is received in the ``fit`` method, where it can be
-read and used:
-
-.. code-block:: python
-
-    import json
-
-    from flwr.client import NumPyClient
-
-
-    class FlowerClient(NumPyClient):
-        def fit(self, parameters, config):
-            # Read configuration values
-            batch_size = config["batch_size"]
-            local_epochs = config["local_epochs"]
-            data_splits = json.loads(config["data_splits"])  # Deserialize JSON
-
-            # Use configuration values
-            print(f"Training with batch size {batch_size}, epochs {local_epochs}")
-            print(f"Data splits: {data_splits}")
-            # Training logic here
-
-``EvaluateConfig``
-++++++++++++++++++
-
-``EvaluateConfig`` specifies hyperparameters for the evaluation process, such as the
-batch size, evaluation frequency, or metrics to compute during evaluation.
-
-For example, an ``evaluate_config`` callback might look like this:
-
-.. code-block:: python
-
-    def evaluate_config(server_round: int):
-        """Generate evaluation configuration for each round."""
-        # Create the configuration dictionary
-        config = {
-            "batch_size": 64,
-            "current_round": server_round,
-            "metrics": ["accuracy"],  # Example metrics to compute
-        }
-        return config
-
-You can pass this ``evaluate_config`` callback to a built-in strategy like ``FedAvg``:
-
-.. code-block:: python
-
-    strategy = FedAvg(
-        on_evaluate_config_fn=evaluate_config  # Assign the evaluate_config function
-    )
-
-On the client side, the configuration is received in the ``evaluate`` method, where it
-can be used during the evaluation process:
-
-.. code-block:: python
-
-    from flwr.client import NumPyClient
-
-
-    class FlowerClient(NumPyClient):
-        def evaluate(self, parameters, config):
-            # Read configuration values
-            batch_size = config["batch_size"]
-            current_round = config["current_round"]
-            metrics = config["metrics"]
-
-            # Use configuration values
-            print(f"Evaluating with batch size {batch_size}")
-            print(f"Metrics to compute: {metrics}")
-
-            # Evaluation logic here
-
-            return 0.5, {"accuracy": 0.85}  # Example return values
-
-Example: Sending Training Configurations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Imagine we want to send (a) the batch size, (b) the current global round, and (c) the
-number of local epochs. Our configuration function could look like this:
-
-.. code-block:: python
-
-    def fit_config(server_round: int):
-        """Generate training configuration for each round."""
-        return {
-            "batch_size": 32,
-            "current_round": server_round,
-            "local_epochs": 2,
-        }
-
-To use this function with a built-in strategy like ``FedAvg``, pass it to the ``FedAvg``
-constructor (typically in your ``server_fn``):
-
-.. code-block:: python
-
-    from flwr.server import ServerApp, ServerAppComponents
-    from flwr.server.strategy import FedAvg
-
-
-    def server_fn(context):
-        """Define server behavior."""
-        strategy = FedAvg(
-            on_fit_config_fn=fit_config,
-            # Other arguments...
-        )
-        return ServerAppComponents(strategy=strategy, ...)
-
-
-    app = ServerApp(server_fn=server_fn)
-
-Client-Side Configuration
-+++++++++++++++++++++++++
-
-On the client side, configurations are received as input to the ``fit`` and ``evaluate``
-methods. For example:
-
-.. code-block:: python
-
-    class FlowerClient(flwr.client.NumPyClient):
-        def fit(self, parameters, config):
-            print(config["batch_size"])  # Output: 32
-            print(config["current_round"])  # Output: current round number
-            print(config["local_epochs"])  # Output: 2
-            # Training logic here
-
-        def evaluate(self, parameters, config):
-            # Handle evaluation configurations if needed
-            pass
-
-Dynamic Configurations per Round
-++++++++++++++++++++++++++++++++
-
-Configuration functions are called at the beginning of every round. This allows for
-dynamic adjustments based on progress. For example, you can increase the number of local
-epochs in later rounds:
-
-.. code-block:: python
-
-    def fit_config(server_round: int):
-        """Dynamic configuration for training."""
-        return {
-            "batch_size": 32,
-            "current_round": server_round,
-            "local_epochs": 1 if server_round < 3 else 2,
-        }
-
-Customizing Client Configurations
----------------------------------
-
-In some cases, it may be necessary to send different configurations to individual
-clients. To achieve this, you can create a custom strategy by extending a built-in one,
-such as ``FedAvg``:
-
-Example: Client-Specific Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-    from flwr.server.strategy import FedAvg
-
-
-    class CustomClientConfigStrategy(FedAvg):
-        def configure_fit(self, server_round, parameters, client_manager):
-            client_instructions = super().configure_fit(
-                server_round, parameters, client_manager
-            )
-
-            # Modify configuration for a specific client
-            client_proxy, fit_ins = client_instructions[0]
-            fit_ins.config["special_key"] = "special_value"
-
-            return client_instructions
-
-Next, use this custom strategy as usual:
-
-.. code-block:: python
-
-    def server_fn(context):
-        strategy = CustomClientConfigStrategy(
-            # Other FedAvg parameters
-        )
-        return ServerAppComponents(strategy=strategy, ...)
-
-
-    app = ServerApp(server_fn=server_fn)
-
-Summary of Enhancements
------------------------
-
-- **Dynamic Configurations**: Enables per-round adjustments via functions.
-- **Advanced Customization**: Supports client-specific strategies.
-- **Client-Side Integration**: Configurations accessible in ``fit`` and ``evaluate``.
+    :emphasize-lines: 13,14
+
+    from typing import Iterable
+    from flwr.serverapp import Grid
+    from flwr.serverapp.strategy import FedAvg
+    from flwr.app import ArrayRecord, ConfigRecord, Message
+
+
+    class CustomFedAdagrad(FedAvg):
+        def configure_train(
+            self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
+        ) -> Iterable[Message]:
+            """Configure the next round of federated training and maybe do LR decay."""
+            # Decrease learning rate by a factor of 0.5 every 5 rounds
+            # Note: server_round starts at 1, not 0
+            if server_round % 5 == 0:
+                config["lr"] *= 0.5
+                print("LR decreased to:", config["lr"])
+            # Pass the updated config and the rest of arguments to the parent class
+            return super().configure_train(server_round, arrays, config, grid)
+
+In this how-to guide, we have shown how to define (when calling the ``start`` method of
+the strategy) and modify (by overriding the ``configure_train`` method) a
+``ConfigRecord`` to customize how ``ClientApps`` perform training. You can follow
+equivalent steps to define and customize the ``ConfigRecord`` for an evaluation round.
+To do this, use the ``evaluate_config`` argument in the strategy's ``start`` method and
+then optionally override the ``configure_evaluate`` method.

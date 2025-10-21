@@ -1,5 +1,6 @@
 import flwr as fl
 import numpy as np
+
 from fedavg_cpp import FedAvgCpp, weights_to_parameters
 
 model_size = 2

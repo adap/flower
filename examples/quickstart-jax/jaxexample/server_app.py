@@ -1,47 +1,46 @@
 """jaxexample: A Flower / JAX app."""
 
-from typing import List, Tuple
-
-from flwr.common import Context, Metrics, ndarrays_to_parameters
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
+import numpy as np
+from flwr.app import ArrayRecord, ConfigRecord, Context
+from flwr.serverapp import Grid, ServerApp
+from flwr.serverapp.strategy import FedAvg
 from jax import random
 
 from jaxexample.task import create_model, get_params
 
-
-# Define metric aggregation function
-def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
-    examples = [num_examples for num_examples, _ in metrics]
-
-    # Aggregate and return custom metric (weighted average)
-    return {"accuracy": sum(accuracies) / sum(examples)}
+# Create ServerApp
+app = ServerApp()
 
 
-def server_fn(context: Context):
-    # Read from config
-    num_rounds = context.run_config["num-server-rounds"]
+@app.main()
+def main(grid: Grid, context: Context) -> None:
+    """Main entry point for the ServerApp."""
 
-    # Initialize global model
+    # Read run config
+    fraction_evaluate: float = float(context.run_config["fraction-evaluate"])
+    num_rounds: int = int(context.run_config["num-server-rounds"])
+    lr: float = float(context.run_config["learning-rate"])
+
     rng = random.PRNGKey(0)
     rng, _ = random.split(rng)
     _, model_params = create_model(rng)
     params = get_params(model_params)
-    initial_parameters = ndarrays_to_parameters(params)
 
-    # Define strategy
+    # Initialize FedAvg strategy
     strategy = FedAvg(
-        fraction_fit=0.4,
-        fraction_evaluate=0.5,
-        evaluate_metrics_aggregation_fn=weighted_average,
-        initial_parameters=initial_parameters,
+        fraction_train=0.4,
+        fraction_evaluate=fraction_evaluate,
     )
-    config = ServerConfig(num_rounds=num_rounds)
 
-    return ServerAppComponents(strategy=strategy, config=config)
+    # Start strategy, run FedAvg for `num_rounds`
+    result = strategy.start(
+        grid=grid,
+        initial_arrays=ArrayRecord(params),
+        train_config=ConfigRecord({"lr": lr}),
+        num_rounds=num_rounds,
+    )
 
-
-# Create ServerApp
-app = ServerApp(server_fn=server_fn)
+    # Save final model to disk
+    print("\nSaving final model to disk...")
+    ndarrays = result.arrays.to_numpy_ndarrays()
+    np.savez("final_model.npz", *ndarrays)

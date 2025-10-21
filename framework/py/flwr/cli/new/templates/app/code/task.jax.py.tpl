@@ -31,7 +31,7 @@ def loss_fn(params, X, y):
 def train(params, grad_fn, X, y):
     loss = 1_000_000
     num_examples = X.shape[0]
-    for epochs in range(50):
+    for _ in range(50):
         grads = grad_fn(params, X, y)
         params = jax.tree.map(lambda p, g: p - 0.05 * g, params, grads)
         loss = loss_fn(params, X, y)

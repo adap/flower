@@ -6,11 +6,10 @@ from datetime import datetime
 from pathlib import Path
 
 import keras
+from flwr.common.typing import UserConfig
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import DirichletPartitioner
 from keras import layers
-
-from flwr.common.typing import UserConfig
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"

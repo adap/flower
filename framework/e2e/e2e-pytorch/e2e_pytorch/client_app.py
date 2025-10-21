@@ -10,8 +10,9 @@ from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
-from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import ConfigRecord, Context, RecordDict
+from flwr.app import ConfigRecord, Context, RecordDict
+from flwr.client import NumPyClient, start_client
+from flwr.clientapp import ClientApp
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader

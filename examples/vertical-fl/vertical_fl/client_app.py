@@ -1,7 +1,8 @@
-from flwr.client import ClientApp, NumPyClient
+import torch
+from flwr.client import NumPyClient
+from flwr.clientapp import ClientApp
 from flwr.common import Context
 from sklearn.preprocessing import StandardScaler
-import torch
 
 from vertical_fl.task import ClientModel, load_data
 

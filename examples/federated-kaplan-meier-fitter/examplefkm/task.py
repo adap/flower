@@ -1,9 +1,8 @@
 """examplefkm: A Flower / Lifelines app."""
 
-from lifelines.datasets import load_waltons
-
-from flwr_datasets.partitioner import NaturalIdPartitioner
 from datasets import Dataset
+from flwr_datasets.partitioner import NaturalIdPartitioner
+from lifelines.datasets import load_waltons
 
 X = load_waltons()
 

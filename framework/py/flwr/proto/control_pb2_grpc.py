@@ -44,6 +44,26 @@ class ControlStub(object):
                 request_serializer=flwr_dot_proto_dot_control__pb2.GetAuthTokensRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_control__pb2.GetAuthTokensResponse.FromString,
                 )
+        self.PullArtifacts = channel.unary_unary(
+                '/flwr.proto.Control/PullArtifacts',
+                request_serializer=flwr_dot_proto_dot_control__pb2.PullArtifactsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.PullArtifactsResponse.FromString,
+                )
+        self.RegisterNode = channel.unary_unary(
+                '/flwr.proto.Control/RegisterNode',
+                request_serializer=flwr_dot_proto_dot_control__pb2.RegisterNodeRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.RegisterNodeResponse.FromString,
+                )
+        self.UnregisterNode = channel.unary_unary(
+                '/flwr.proto.Control/UnregisterNode',
+                request_serializer=flwr_dot_proto_dot_control__pb2.UnregisterNodeRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.UnregisterNodeResponse.FromString,
+                )
+        self.ListNodes = channel.unary_unary(
+                '/flwr.proto.Control/ListNodes',
+                request_serializer=flwr_dot_proto_dot_control__pb2.ListNodesRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.ListNodesResponse.FromString,
+                )
 
 
 class ControlServicer(object):
@@ -91,6 +111,34 @@ class ControlServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def PullArtifacts(self, request, context):
+        """Pull artifacts generated during a run (flwr pull)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RegisterNode(self, request, context):
+        """Register SuperNode
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UnregisterNode(self, request, context):
+        """Unregister SuperNode
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListNodes(self, request, context):
+        """List SuperNodes
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ControlServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -123,6 +171,26 @@ def add_ControlServicer_to_server(servicer, server):
                     servicer.GetAuthTokens,
                     request_deserializer=flwr_dot_proto_dot_control__pb2.GetAuthTokensRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_control__pb2.GetAuthTokensResponse.SerializeToString,
+            ),
+            'PullArtifacts': grpc.unary_unary_rpc_method_handler(
+                    servicer.PullArtifacts,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.PullArtifactsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.PullArtifactsResponse.SerializeToString,
+            ),
+            'RegisterNode': grpc.unary_unary_rpc_method_handler(
+                    servicer.RegisterNode,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.RegisterNodeRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.RegisterNodeResponse.SerializeToString,
+            ),
+            'UnregisterNode': grpc.unary_unary_rpc_method_handler(
+                    servicer.UnregisterNode,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.UnregisterNodeRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.UnregisterNodeResponse.SerializeToString,
+            ),
+            'ListNodes': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListNodes,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.ListNodesRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.ListNodesResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -233,5 +301,73 @@ class Control(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/GetAuthTokens',
             flwr_dot_proto_dot_control__pb2.GetAuthTokensRequest.SerializeToString,
             flwr_dot_proto_dot_control__pb2.GetAuthTokensResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def PullArtifacts(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/PullArtifacts',
+            flwr_dot_proto_dot_control__pb2.PullArtifactsRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.PullArtifactsResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RegisterNode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/RegisterNode',
+            flwr_dot_proto_dot_control__pb2.RegisterNodeRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.RegisterNodeResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def UnregisterNode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/UnregisterNode',
+            flwr_dot_proto_dot_control__pb2.UnregisterNodeRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.UnregisterNodeResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ListNodes(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/ListNodes',
+            flwr_dot_proto_dot_control__pb2.ListNodesRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.ListNodesResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

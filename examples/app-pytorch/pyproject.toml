@@ -8,7 +8,7 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.20.0",
+    "flwr[simulation]>=1.22.0",
     "flwr-datasets[vision]>=0.5.0",
     "torch==2.6.0",
     "torchvision==0.21.0",
@@ -26,7 +26,7 @@ clientapp = "app_pytorch.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 5
-fraction-sample = 0.5
+fraction-train = 0.5
 local-epochs = 1
 
 [tool.flwr.federations]

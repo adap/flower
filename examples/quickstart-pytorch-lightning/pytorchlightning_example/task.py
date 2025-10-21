@@ -1,7 +1,6 @@
 """pytorchlightning_example: A Flower / PyTorch Lightning app."""
 
 import logging
-from collections import OrderedDict
 from typing import Any
 
 import pytorch_lightning as pl
@@ -62,16 +61,6 @@ class LitAutoEncoder(pl.LightningModule):
         loss = F.mse_loss(x_hat, x)
         if stage:
             self.log(f"{stage}_loss", loss, prog_bar=True)
-
-
-def get_parameters(model):
-    return [val.cpu().numpy() for _, val in model.state_dict().items()]
-
-
-def set_parameters(model, parameters):
-    params_dict = zip(model.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    model.load_state_dict(state_dict, strict=True)
 
 
 def apply_transforms(batch):

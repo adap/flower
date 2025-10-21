@@ -674,3 +674,52 @@ def test_recorddict_raises_value_error_with_unsupported_children() -> None:
     # Inflate but passing expected children value but under the wrong key
     with pytest.raises(ValueError):
         ArrayRecord.inflate(record_dict_b, children={"123": ConfigRecord()})
+
+
+def test_copy_recorddict() -> None:
+    """Test copying a RecordDict."""
+    # Prepare
+    original = RecordDict(
+        {
+            "m": MetricRecord({"a": 123, "b": [0.123, 0.456]}),
+            "c": ConfigRecord({"data": b"hello world"}),
+            "a": ArrayRecord([np.array([1, 2]), np.array([3, 4])]),
+        }
+    )
+
+    # Execute
+    copy = original.copy()
+
+    # Assert
+    assert isinstance(copy, RecordDict)
+    assert list(original.items()) == list(copy.items())
+    original.clear()
+    assert len(original) == 0
+    assert len(copy) == 3
+
+
+@pytest.mark.parametrize(
+    "original",
+    [
+        MetricRecord({"a": 123, "b": [0.123, 0.456]}),
+        ConfigRecord(
+            {
+                "a": 123,
+                "b": [0.123, 0.456],
+                "data": b"hello world",
+            }
+        ),
+        ArrayRecord([np.array([1, 2]), np.array([3, 4])]),
+    ],
+)
+def test_copy_record(original: Union[ConfigRecord, MetricRecord, ArrayRecord]) -> None:
+    """Test copying a Record."""
+    # Execute
+    copy = original.copy()
+
+    # Assert
+    assert isinstance(copy, original.__class__)
+    assert list(original.items()) == list(copy.items())
+    original.clear()
+    assert len(original) == 0
+    assert len(copy) != 0

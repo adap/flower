@@ -5,17 +5,16 @@ import warnings
 # Suppress deprecation warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-import os
 import json
-import faiss
-import yaml
-
-import numpy as np
-
+import os
 from collections import OrderedDict
-from tqdm import tqdm
+
+import faiss
+import numpy as np
+import yaml
 from sentence_transformers import SentenceTransformer
 from sentence_transformers import util as st_util
+from tqdm import tqdm
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 FAISS_DEFAULT_CONFIG = os.path.join(DIR_PATH, "retriever.yaml")

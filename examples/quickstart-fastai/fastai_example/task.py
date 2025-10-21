@@ -1,7 +1,5 @@
 """fastai_example: A Flower / Fastai app."""
 
-from collections import OrderedDict
-
 import torch
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
@@ -70,13 +68,3 @@ def load_data(
         partition_full["test"], batch_size=32, collate_fn=collate_fn, num_workers=1
     )
     return trainloader, valloader, testloader
-
-
-def get_params(model) -> list:
-    return [val.cpu().numpy() for _, val in model.state_dict().items()]
-
-
-def set_params(model, parameters) -> None:
-    params_dict = zip(model.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    model.load_state_dict(state_dict, strict=True)

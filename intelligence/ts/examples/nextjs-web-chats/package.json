@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@flwr/flwr": "^0.2.1",
+    "@flwr/flwr": "^0.2.5",
     "@tailwindcss/typography": "^0.5.16",
-    "next": "15.2.4",
+    "next": "15.4.7",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",

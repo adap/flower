@@ -28,11 +28,11 @@ class SimpleHealthServicer(HealthServicer):  # type: ignore
     """A simple gRPC health servicer that always returns SERVING."""
 
     def Check(
-        self, request: HealthCheckRequest, context: grpc.RpcContext
+        self, request: HealthCheckRequest, context: grpc.ServicerContext
     ) -> HealthCheckResponse:
         """Return a HealthCheckResponse with SERVING status."""
         return HealthCheckResponse(status=HealthCheckResponse.SERVING)
 
-    def Watch(self, request: HealthCheckRequest, context: grpc.RpcContext) -> None:
+    def Watch(self, request: HealthCheckRequest, context: grpc.ServicerContext) -> None:
         """Watch the health status (not implemented)."""
         context.abort(grpc.StatusCode.UNIMPLEMENTED, "Watch is not implemented")

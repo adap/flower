@@ -265,6 +265,8 @@ class GrpcGrid(Grid):
         # Construct Messages
         run_id = cast(Run, self._run).run_id
         message_ids: list[str] = []
+        if not messages:
+            return message_ids
         try:
             with no_object_id_recompute():
                 for msg in messages:

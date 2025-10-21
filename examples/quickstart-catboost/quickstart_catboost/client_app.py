@@ -1,15 +1,16 @@
 """quickstart-catboost: A Flower / CatBoost app."""
 
-from catboost import CatBoostClassifier, Pool
 import json
+
+from catboost import CatBoostClassifier, Pool
+from flwr.clientapp import ClientApp
+from flwr.common import ConfigRecord, Context, Message, RecordDict
+
 from quickstart_catboost.task import (
     convert_to_catboost,
     convert_to_model_dict,
     load_data,
 )
-
-from flwr.client import ClientApp
-from flwr.common import Context, Message, ConfigRecord, RecordDict
 
 # Flower ClientApp
 app = ClientApp()

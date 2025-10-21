@@ -2,127 +2,107 @@
 .. meta::
     :description: Save and load model checkpoints in Flower with custom strategies, including PyTorch checkpoints, for efficient federated learning workflows.
 
-Save and Load Model Checkpoints
+.. |arrayrecord_link| replace:: ``ArrayRecord``
+
+.. _arrayrecord_link: ref-api/flwr.app.ArrayRecord.html
+
+.. |clientapp_link| replace:: ``ClientApp``
+
+.. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
+
+.. |serverapp_link| replace:: ``ServerApp``
+
+.. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
+
+.. |strategy_start_link| replace:: ``start``
+
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
+
+Save and load model checkpoints
 ===============================
 
-Flower does not automatically save model updates on the server-side. This how-to guide
-describes the steps to save (and load) model checkpoints in Flower.
+This how-to guide describes the steps to save (and load) model checkpoints in
+``ClientApp`` and ``ServerApp``.
 
-Model Checkpointing
--------------------
+How to save model checkpoints in ``ClientApp``
+----------------------------------------------
 
-Model updates can be persisted on the server-side by customizing ``Strategy`` methods.
-Implementing custom strategies is always an option, but for many cases it may be more
-convenient to simply customize an existing strategy. The following code example defines
-a new ``SaveModelStrategy`` which customized the existing built-in ``FedAvg`` strategy.
-In particular, it customizes ``aggregate_fit`` by calling ``aggregate_fit`` in the base
-class (``FedAvg``). It then continues to save returned (aggregated) weights before it
-returns those aggregated weights to the caller (i.e., the server):
+Model updates are saved in |arrayrecord_link|_ and transmitted between |serverapp_link|_
+and |clientapp_link|_. To save model checkpoints in |clientapp_link|_, you need to
+convert the |arrayrecord_link|_ into a format compatible with your ML framework (e.g.,
+PyTorch, TensorFlow, or NumPy). Include the following code in your functions registered
+with the ``ClientApp`` (e.g., in your training function decorated with
+``@app.train()``):
 
-.. code-block:: python
-
-    class SaveModelStrategy(fl.server.strategy.FedAvg):
-        def aggregate_fit(
-            self,
-            server_round: int,
-            results: list[tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
-            failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-        ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
-
-            # Call aggregate_fit from base class (FedAvg) to aggregate parameters and metrics
-            aggregated_parameters, aggregated_metrics = super().aggregate_fit(
-                server_round, results, failures
-            )
-
-            if aggregated_parameters is not None:
-                # Convert `Parameters` to `list[np.ndarray]`
-                aggregated_ndarrays: list[np.ndarray] = fl.common.parameters_to_ndarrays(
-                    aggregated_parameters
-                )
-
-                # Save aggregated_ndarrays to disk
-                print(f"Saving round {server_round} aggregated_ndarrays...")
-                np.savez(f"round-{server_round}-weights.npz", *aggregated_ndarrays)
-
-            return aggregated_parameters, aggregated_metrics
-
-
-    # Create strategy and pass into ServerApp
-    def server_fn(context):
-        strategy = SaveModelStrategy(
-            # (same arguments as FedAvg here)
-        )
-        config = ServerConfig(num_rounds=3)
-        return ServerAppComponents(strategy=strategy, config=config)
-
-
-    app = ServerApp(server_fn=server_fn)
-
-Save and Load PyTorch Checkpoints
----------------------------------
-
-Similar to the previous example but with a few extra steps, we'll show how to store a
-PyTorch checkpoint we'll use the ``torch.save`` function. Firstly, ``aggregate_fit``
-returns a ``Parameters`` object that has to be transformed into a list of NumPy
-``ndarray``'s, then those are transformed into the PyTorch ``state_dict`` following the
-``OrderedDict`` class structure.
+PyTorch
 
 .. code-block:: python
 
-    net = cifar.Net().to(DEVICE)
+    # Convert ArrayRecord to PyTorch state dict.
+    state_dict = arrays.to_torch_state_dict()
 
+    # Save model weights to disk
+    torch.save(state_dict, "model.pt")
 
-    class SaveModelStrategy(fl.server.strategy.FedAvg):
-        def aggregate_fit(
-            self,
-            server_round: int,
-            results: list[tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
-            failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-        ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
-            """Aggregate model weights using weighted average and store checkpoint"""
-
-            # Call aggregate_fit from base class (FedAvg) to aggregate parameters and metrics
-            aggregated_parameters, aggregated_metrics = super().aggregate_fit(
-                server_round, results, failures
-            )
-
-            if aggregated_parameters is not None:
-                print(f"Saving round {server_round} aggregated_parameters...")
-
-                # Convert `Parameters` to `list[np.ndarray]`
-                aggregated_ndarrays: list[np.ndarray] = fl.common.parameters_to_ndarrays(
-                    aggregated_parameters
-                )
-
-                # Convert `list[np.ndarray]` to PyTorch `state_dict`
-                params_dict = zip(net.state_dict().keys(), aggregated_ndarrays)
-                state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-                net.load_state_dict(state_dict, strict=True)
-
-                # Save the model to disk
-                torch.save(net.state_dict(), f"model_round_{server_round}.pth")
-
-            return aggregated_parameters, aggregated_metrics
-
-To load your progress, you simply append the following lines to your code. Note that
-this will iterate over all saved checkpoints and load the latest one:
+TensorFlow
 
 .. code-block:: python
 
-    list_of_files = [fname for fname in glob.glob("./model_round_*")]
-    latest_round_file = max(list_of_files, key=os.path.getctime)
-    print("Loading pre-trained model from: ", latest_round_file)
-    state_dict = torch.load(latest_round_file)
-    net.load_state_dict(state_dict)
-    state_dict_ndarrays = [v.cpu().numpy() for v in net.state_dict().values()]
-    parameters = fl.common.ndarrays_to_parameters(state_dict_ndarrays)
+    # Convert ArrayRecord to NumPy ndarrays
+    ndarrays = arrays.to_numpy_ndarrays()
 
-Return/use this object of type ``Parameters`` wherever necessary, such as in the
-``initial_parameters`` when defining a ``Strategy``.
+    # Load weights to a keras model
+    model.set_weights(ndarrays)
 
-Alternatively, we can save and load the model updates during evaluation phase by
-overriding ``evaluate()`` or ``aggregate_evaluate()`` method of the strategy
-(``FedAvg``). Checkout the details in `Advanced PyTorch Example
+    # Save model weights to disk
+    model.save("model.keras")
+
+NumPy
+
+.. code-block:: python
+
+    # Convert ArrayRecord to NumPy ndarrays
+    ndarrays = arrays.to_numpy_ndarrays()
+
+    # Save model weights to disk
+    numpy.savez("model.npz", *ndarrays)
+
+How to save model checkpoints in ``ServerApp``
+----------------------------------------------
+
+To save model checkpoints in |serverapp_link|_ across different FL rounds, you can
+implement this in a customized ``evaluate_fn`` and pass it to the strategy's
+|strategy_start_link|_ method. Here's an example showing how to save the global PyTorch
+model:
+
+.. code-block:: python
+
+    def get_evaluate_fn(save_every_round, total_round, save_path):
+        def evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
+            # Save model every `save_every_round` round and for the last round
+            if server_round != 0 and (
+                server_round == total_round or server_round % save_every_round == 0
+            ):
+                # Convert ArrayRecord to PyTorch state dict
+                state_dict = arrays.to_torch_state_dict()
+
+                # Save model weights to disk
+                torch.save(state_dict, f"{save_path}/model_{server_round}.pt")
+
+            return MetricRecord()
+
+        return evaluate
+
+Then, pass it to the |strategy_start_link|_ method of the defined strategy:
+
+.. code-block:: python
+
+    strategy.start(
+        ...,
+        evaluate_fn=get_evaluate_fn(save_every_round, total_round, save_path),
+    )
+
+If you are interested, checkout the details in `Advanced PyTorch Example
 <https://github.com/adap/flower/tree/main/examples/advanced-pytorch>`_ and `Advanced
 TensorFlow Example
 <https://github.com/adap/flower/tree/main/examples/advanced-tensorflow>`_.

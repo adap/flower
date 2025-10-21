@@ -13,7 +13,7 @@
 // limitations under the License.
 // =============================================================================
 
-import { EmbeddingInput, Message, Tool, ToolCall } from '../../typing';
+import { EmbeddingInput, Message, Tool, ToolCall, Usage } from '../../typing';
 
 interface ChoiceMessage {
   role: string;
@@ -49,15 +49,6 @@ interface StreamChoice {
     tool_calls?: StreamingToolCall[];
     role: string;
   };
-}
-
-interface Usage {
-  total_duration: number; // time spent generating the response
-  load_duration: number; // time spent in nanoseconds loading the model
-  prompt_eval_count: number; // number of tokens in the prompt
-  prompt_eval_duration: number; // time spent in nanoseconds evaluating the prompt
-  eval_count: number; // number of tokens in the response
-  eval_duration: number; // time in nanoseconds spent generating the response
 }
 
 export interface EmbedRequest {

@@ -52,9 +52,11 @@ To run the website using the `Dockerfile`, follow these steps:
 
 - **Approach:** Client component that sends questions to an API route.
 - **Functionality:**
+
   - Uses local state to maintain the chat log.
   - Calls the `/api/chat` endpoint which internally uses shared history (via `lib/chat.ts`) and the @flwr/flwr client.
   - Renders messages with Markdown formatting.
+
 - **Use Case:** Ideal for separating client and server logic with API calls.
 
 ### 2. **Server-side Chat (/server-side-chat)**

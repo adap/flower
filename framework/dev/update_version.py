@@ -8,12 +8,10 @@ from pathlib import Path
 REPLACE_CURR_VERSION = {}
 
 REPLACE_NEXT_VERSION = {
-    "framework/docs/source/conf.py": [
-        ".. |stable_flwr_version| replace:: {version}",
-    ],
     "framework/pyproject.toml": ['version = "{version}"'],
     "framework/docs/source/conf.py": [
         'release = "{version}"',
+        ".. |stable_flwr_version| replace:: {version}",
     ],
     "examples/docs/source/conf.py": ['release = "{version}"'],
     "baselines/docs/source/conf.py": ['release = "{version}"'],
@@ -26,8 +24,11 @@ REPLACE_NEXT_VERSION = {
 }
 
 EXAMPLES = {
-    "examples/*/pyproject.toml": [
+    "examples/**/pyproject.toml": [
         "flwr[simulation]>={version}",
+        "flwr[simulation]=={version}",
+        "flwr>={version}",
+        "flwr=={version}",
     ],
 }
 
@@ -80,15 +81,12 @@ def _update_versions(file_patterns, replace_strings, new_version, check):
 
 
 if __name__ == "__main__":
-    conf_path = ROOT_DIR / "framework/docs/source/conf.py"
-
-    if not conf_path.is_file():
-        raise FileNotFoundError(f"{conf_path} not found!")
-
-    content = conf_path.read_text()
-
-    # Search for the current non-updated version
-    match = re.search(r"\.\.\s*\|stable_flwr_version\|\s*replace::\s*(\S+)", content)
+    # Search for the latest stable release version in the CHANGELOG
+    changelog_path = ROOT_DIR / "framework/docs/source/ref-changelog.md"
+    with changelog_path.open("r") as f:
+        for line in f:
+            if match := re.match(r"^## v(\d+\.\d+\.\d+).+", line):
+                break
 
     parser = argparse.ArgumentParser(
         description="Utility used to bump the version of the package."

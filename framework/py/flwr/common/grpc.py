@@ -23,9 +23,6 @@ from logging import DEBUG, ERROR
 from typing import Any, Callable, Optional
 
 import grpc
-from grpc_health.v1.health_pb2_grpc import add_HealthServicer_to_server
-
-from flwr.supercore.grpc_health import SimpleHealthServicer
 
 from .address import is_port_in_use
 from .logger import log
@@ -109,7 +106,6 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments, R0914, R0
     keepalive_time_ms: int = 210000,
     certificates: Optional[tuple[bytes, bytes, bytes]] = None,
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
-    health_servicer: Optional[Any] = None,
 ) -> grpc.Server:
     """Create a gRPC server with a single servicer.
 
@@ -157,10 +153,6 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments, R0914, R0
             * server private key.
     interceptors : Optional[Sequence[grpc.ServerInterceptor]] (default: None)
         A list of gRPC interceptors.
-    health_servicer : Optional[Any] (default: None)
-        An optional health servicer to add to the server. If provided, it should be an
-        instance of a class that inherits the `HealthServicer` class.
-        If None is provided, `SimpleHealthServicer` will be used by default.
 
     Returns
     -------
@@ -210,9 +202,6 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments, R0914, R0
         interceptors=interceptors,
     )
     add_servicer_to_server_fn(servicer, server)
-
-    # Enable health service
-    add_HealthServicer_to_server(health_servicer or SimpleHealthServicer(), server)
 
     if certificates is not None:
         if not valid_certificates(certificates):

@@ -1,20 +1,17 @@
 """vitexample: A Flower / PyTorch app with Vision Transformers."""
 
-from collections import OrderedDict
-
 import torch
-from torchvision.models import vit_b_16, ViT_B_16_Weights
-from torchvision.transforms import (
-    Compose,
-    Normalize,
-    ToTensor,
-    RandomResizedCrop,
-    Resize,
-    CenterCrop,
-)
-
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
+from torchvision.models import ViT_B_16_Weights, vit_b_16
+from torchvision.transforms import (
+    CenterCrop,
+    Compose,
+    Normalize,
+    RandomResizedCrop,
+    Resize,
+    ToTensor,
+)
 
 
 def get_model(num_classes: int):
@@ -38,21 +35,7 @@ def get_model(num_classes: int):
     return model
 
 
-def set_params(model, parameters):
-    """Apply the parameters to model head."""
-    finetune_layers = model.heads
-    params_dict = zip(finetune_layers.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    finetune_layers.load_state_dict(state_dict, strict=True)
-
-
-def get_params(model):
-    """Get parameters from model head as ndarrays."""
-    finetune_layers = model.heads
-    return [val.cpu().numpy() for _, val in finetune_layers.state_dict().items()]
-
-
-def train(net, trainloader, optimizer, epochs, device):
+def trainer(net, trainloader, optimizer, epochs, device):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     net.train()

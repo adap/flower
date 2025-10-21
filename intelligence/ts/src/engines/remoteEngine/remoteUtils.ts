@@ -14,7 +14,15 @@
 // =============================================================================
 
 import { SDK, VERSION } from '../../constants';
-import { EmbeddingInput, FailureCode, Message, ResponseFormat, Result, Tool } from '../../typing';
+import {
+  EmbeddingInput,
+  FailureCode,
+  Message,
+  ResponseFormat,
+  Result,
+  Tool,
+  ToolChoice,
+} from '../../typing';
 import { ChatCompletionsRequest, EmbedRequest } from './typing';
 
 export function createChatRequestData(
@@ -26,6 +34,7 @@ export function createChatRequestData(
   responseFormat?: ResponseFormat,
   stream?: boolean,
   tools?: Tool[],
+  toolChoice?: ToolChoice,
   encrypt?: boolean,
   encryptionId: string | null = null
 ): ChatCompletionsRequest {
@@ -40,6 +49,7 @@ export function createChatRequestData(
     ...(responseFormat && { response_format: responseFormat }),
     ...(stream && { stream }),
     ...(tools && { tools }),
+    ...(toolChoice && { tool_choice: toolChoice }),
     ...(encrypt && { encrypt, encryption_id: encryptionId }),
   };
 }

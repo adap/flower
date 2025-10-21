@@ -3,8 +3,9 @@ from typing import Dict, List, Tuple
 import numpy as np
 import pandas as pd
 
-from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import Context
+from flwr.app import Context
+from flwr.client import NumPyClient, start_client
+from flwr.clientapp import ClientApp
 
 try:
     df = pd.read_csv("./../data/client.csv")  # for new Flower

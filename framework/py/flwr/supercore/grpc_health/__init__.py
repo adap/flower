@@ -15,8 +15,11 @@
 """GRPC health servicers."""
 
 
+from .health_server import add_args_health, run_health_server_grpc_no_tls
 from .simple_health_servicer import SimpleHealthServicer
 
 __all__ = [
     "SimpleHealthServicer",
+    "add_args_health",
+    "run_health_server_grpc_no_tls",
 ]

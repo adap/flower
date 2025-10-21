@@ -272,11 +272,11 @@ You can add more SuperNodes and ClientApps by uncommenting their definitions in 
         depends_on:
           - superlink
 
-      clientapp-3:
+      superexec-clientapp-3:
         build:
           context: ${PROJECT_DIR:-.}
           dockerfile_inline: |
-            FROM flwr/clientapp:${FLWR_VERSION:-|stable_flwr_version|}
+            FROM flwr/superexec:${FLWR_VERSION:-|stable_flwr_version|}
 
             USER root
             RUN apt-get update \
@@ -290,10 +290,12 @@ You can add more SuperNodes and ClientApps by uncommenting their definitions in 
             RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
               && python -m pip install -U --no-cache-dir .
 
-            ENTRYPOINT ["flwr-clientapp"]
+            ENTRYPOINT ["flower-superexec"]
         command:
           - --insecure
-          - --clientappio-api-address
+          - --plugin-type
+          - clientapp
+          - --appio-api-address
           - supernode-3:9096
         deploy:
           resources:

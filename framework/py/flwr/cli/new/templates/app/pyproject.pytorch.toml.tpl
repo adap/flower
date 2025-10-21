@@ -14,7 +14,7 @@ description = ""
 license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
-    "flwr[simulation]>=1.21.0",
+    "flwr[simulation]>=1.23.0",
     "flwr-datasets[vision]>=0.5.0",
     "torch==2.7.1",
     "torchvision==0.22.1",
@@ -27,7 +27,6 @@ packages = ["."]
 publisher = "$username"
 
 # Point to your ServerApp and ClientApp objects
-# Format: "<module>:<object>"
 [tool.flwr.app.components]
 serverapp = "$import_name.server_app:app"
 clientapp = "$import_name.client_app:app"
@@ -35,8 +34,9 @@ clientapp = "$import_name.client_app:app"
 # Custom config values accessible via `context.run_config`
 [tool.flwr.app.config]
 num-server-rounds = 3
-fraction-fit = 0.5
+fraction-train = 0.5
 local-epochs = 1
+lr = 0.01
 
 # Default federation to use when running the app
 [tool.flwr.federations]

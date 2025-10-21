@@ -2,7 +2,7 @@ from e2e_pandas.strategy import FedAnalytics
 
 import flwr as fl
 
-app = fl.server.ServerApp()
+app = fl.serverapp.ServerApp()
 
 
 @app.main()

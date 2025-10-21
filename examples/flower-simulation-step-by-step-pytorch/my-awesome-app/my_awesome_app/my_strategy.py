@@ -1,11 +1,11 @@
+import json
+from datetime import datetime
+
+import torch
+import wandb
 from flwr.common import FitRes, Parameters, parameters_to_ndarrays
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
-
-import torch
-import json
-import wandb
-from datetime import datetime
 
 from .task import Net, set_weights
 

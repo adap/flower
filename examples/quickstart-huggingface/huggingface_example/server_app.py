@@ -1,33 +1,40 @@
 """huggingface_example: A Flower / Hugging Face app."""
 
-from flwr.common import Context, ndarrays_to_parameters
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
+import torch
+from flwr.app import ArrayRecord, Context
+from flwr.serverapp import Grid, ServerApp
+from flwr.serverapp.strategy import FedAvg
 
-from huggingface_example.task import get_params, get_model
+from huggingface_example.task import get_model
+
+app = ServerApp()
 
 
-def server_fn(context: Context) -> ServerAppComponents:
-    """Construct components for ServerApp."""
-    # Construct ServerConfig
-    num_rounds = context.run_config["num-server-rounds"]
-    config = ServerConfig(num_rounds=num_rounds)
+@app.main()
+def main(grid: Grid, context: Context) -> None:
 
-    # Set global model initialization
+    # Define model to federate and extract parameters
     model_name = context.run_config["model-name"]
-    ndarrays = get_params(get_model(model_name))
-    global_model_init = ndarrays_to_parameters(ndarrays)
+    model = get_model(model_name)
+    arrays = ArrayRecord(model.state_dict())
 
-    # Define strategy
-    fraction_fit = context.run_config["fraction-fit"]
+    # Instantiate strategy
+    fraction_train = context.run_config["fraction-train"]
     fraction_evaluate = context.run_config["fraction-evaluate"]
     strategy = FedAvg(
-        fraction_fit=fraction_fit,
+        fraction_train=fraction_train,
         fraction_evaluate=fraction_evaluate,
-        initial_parameters=global_model_init,
     )
 
-    return ServerAppComponents(config=config, strategy=strategy)
+    num_rounds = context.run_config["num-server-rounds"]
+    # Start the strategy
+    result = strategy.start(
+        grid=grid,
+        initial_arrays=arrays,
+        num_rounds=num_rounds,
+    )
 
-
-app = ServerApp(server_fn=server_fn)
+    # Save final model to disk
+    print("\nSaving final model to disk...")
+    state_dict = result.arrays.to_torch_state_dict()
+    torch.save(state_dict, "final_model.pt")

@@ -1,12 +1,42 @@
 Use a federated learning strategy
 =================================
 
+.. |fedavg_link| replace:: ``FedAvg``
+
+.. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
+
+.. |fedadagrad_link| replace:: ``FedAdagrad``
+
+.. _fedadagrad_link: ref-api/flwr.serverapp.strategy.FedAdagrad.html
+
+.. |serverapp_link| replace:: ``ServerApp``
+
+.. _serverapp_link: ref-api/flwr.serverapp.ServerApp.html
+
+.. |message_link| replace:: ``Message``
+
+.. _message_link: ref-api/flwr.common.Message.html
+
+.. |metricrecord_link| replace:: ``MetricRecord``
+
+.. _metricrecord_link: ref-api/flwr.common.MetricRecord.html
+
+.. |configrecord_link| replace:: ``ConfigRecord``
+
+.. _configrecord_link: ref-api/flwr.common.ConfigRecord.html
+
+.. |strategy_start_link| replace:: ``start``
+
+.. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
+
 Welcome to the next part of the federated learning tutorial. In previous parts of this
 tutorial, we introduced federated learning with PyTorch and Flower (:doc:`part 1
 <tutorial-series-get-started-with-flower-pytorch>`).
 
 In part 2, we'll begin to customize the federated learning system we built in part 1
 using the Flower framework, Flower Datasets, and PyTorch.
+
+.. tip::
 
     `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
@@ -70,44 +100,54 @@ Next, we install the project and its dependencies, which are specified in the
     $ cd flower-tutorial
     $ pip install -e .
 
-Strategy customization
-----------------------
-
 So far, everything should look familiar if you've worked through the introductory
 tutorial. With that, we're ready to introduce a number of new features.
 
-Starting with a customized strategy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Choosing a different strategy
+-----------------------------
 
-In part 1, we created a ``ServerApp`` (in ``server_app.py``) using the ``server_fn``. In
-it, we defined the strategy and number of training rounds.
+In part 1, we created a |serverapp_link|_ (in ``server_app.py``). In it, we defined the
+strategy, the model to federatedly train, and then we launched the strategy by calling
+its ``|strategy_start_link|`` method.
 
 The strategy encapsulates the federated learning approach/algorithm, for example,
-``FedAvg`` or ``FedAdagrad``. Let's try to use a different strategy this time. Add this
-line to the top of your ``server_app.py``: ``from flwr.server.strategy import
-FedAdagrad`` and replace the ``server_fn()`` with the following code:
+|fedavg_link|_. Let's try to use a different strategy this time. Modify the following
+lines in your ``server_app.py`` to switch from ``FedAvg`` to |fedadagrad_link|_.
 
 .. code-block:: python
+    :emphasize-lines: 1,18
 
-    def server_fn(context: Context):
-        # Read from config
-        num_rounds = context.run_config["num-server-rounds"]
-        fraction_fit = context.run_config["fraction-fit"]
+    from flwr.serverapp.strategy import FedAdagrad
 
-        # Initialize model parameters
-        ndarrays = get_weights(Net())
-        parameters = ndarrays_to_parameters(ndarrays)
 
-        # Define strategy
-        strategy = FedAdagrad(
-            fraction_fit=fraction_fit,
-            fraction_evaluate=1.0,
-            min_available_clients=2,
-            initial_parameters=parameters,
+    @app.main()
+    def main(grid: Grid, context: Context) -> None:
+        """Main entry point for the ServerApp."""
+
+        # Read run config
+        fraction_train: float = context.run_config["fraction-train"]
+        num_rounds: int = context.run_config["num-server-rounds"]
+        lr: float = context.run_config["lr"]
+
+        # Load global model
+        global_model = Net()
+        arrays = ArrayRecord(global_model.state_dict())
+
+        # Initialize FedAdagrad strategy
+        strategy = FedAdagrad(fraction_train=fraction_train)
+
+        # Start strategy, run FedAdagrad for `num_rounds`
+        result = strategy.start(
+            grid=grid,
+            initial_arrays=arrays,
+            train_config=ConfigRecord({"lr": lr}),
+            num_rounds=num_rounds,
         )
-        config = ServerConfig(num_rounds=num_rounds)
 
-        return ServerAppComponents(strategy=strategy, config=config)
+        # Save final model to disk
+        print("\nSaving final model to disk...")
+        state_dict = result.arrays.to_torch_state_dict()
+        torch.save(state_dict, "final_model.pt")
 
 Next, run the training with the following command:
 
@@ -118,7 +158,7 @@ Next, run the training with the following command:
 Server-side parameter **evaluation**
 ------------------------------------
 
-Flower can evaluate the aggregated model on the server-side or on the client-side.
+Flower can evaluate the aggregated model on the server side or on the client side.
 Client-side and server-side evaluation are similar in some ways, but different in
 others.
 
@@ -140,23 +180,37 @@ Moreover, the dataset held by each client can also change over consecutive round
 can lead to evaluation results that are not stable, so even if we would not change the
 model, we'd see our evaluation results fluctuate over consecutive rounds.
 
-We've seen how federated evaluation works on the client side (i.e., by implementing the
-``evaluate`` method in ``FlowerClient``). Now let's see how we can evaluate aggregated
-model parameters on the server-side. First we define a new function ``evaluate`` in
-``task.py``:
+We've seen how federated evaluation works on the client side (i.e., by implementing a
+function wrapped with the ``@app.evaluate`` decorator in your ``ClientApp``). Now let's
+see how we can evaluate the aggregated model parameters on the server side.
+
+To do so, we need to create a new function in ``task.py`` that we can name
+``central_evaluate``. This function is a callback that will be passed to the
+|strategy_start_link|_ method of our strategy. This means that the strategy will call
+this function after every round of federated learning passing two arguments: the current
+round of federated learning and the aggregated model parameters.
+
+Our ``central_evaluate`` function performs the following steps:
+
+1. Load the aggregated model parameters into a PyTorch model
+2. Load the entire CIFAR10 test dataset
+3. Evaluate the model on the test dataset
+4. Return the evaluation metrics as a |metricrecord_link|_
 
 .. code-block:: python
 
     from datasets import load_dataset
+    from flwr.app import ArrayRecord, MetricRecord
 
 
-    def evaluate(
-        server_round: int,
-        parameters,
-        config,
-    ):
+    def central_evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
+        """Evaluate model on the server side."""
+
+        # Load the model and initialize it with the received weights
+        model = Net()
+        model.load_state_dict(arrays.to_torch_state_dict())
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        net = Net().to(device)
+        model.to(device)
 
         # Load the entire CIFAR10 test dataset
         # It's a huggingface dataset, so we can load it directly and apply transforms
@@ -165,6 +219,7 @@ model parameters on the server-side. First we define a new function ``evaluate``
             [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
         )
 
+        # Define transforms and construct DataLoader for the test set
         def apply_transforms(batch):
             batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
             return batch
@@ -172,38 +227,37 @@ model parameters on the server-side. First we define a new function ``evaluate``
         testset = cifar10_test.with_transform(apply_transforms)
         testloader = DataLoader(testset, batch_size=64)
 
-        set_weights(net, parameters)  # Update model with the latest parameters
-        loss, accuracy = test(net, testloader, device)
-        return loss, {"accuracy": accuracy}
+        # Evaluate the model on the test set
+        loss, accuracy = test(model, testloader, device)
 
-Next, in ``server_app.py``, we pass the ``evaluate`` function to the ``evaluate_fn``
-parameter of the ``FedAvg`` strategy:
+        # Return the evaluation metrics
+        return MetricRecord({"accuracy": accuracy, "loss": loss})
+
+Remember we mentioned this ``central_evaluate`` will be called by the strategy. To do so
+we need to pass it to the strategy's ``start`` method as shown below.
 
 .. code-block:: python
+    :emphasize-lines: 1,16
 
-    def server_fn(context: Context) -> ServerAppComponents:
-        # Read from config
-        num_rounds = context.run_config["num-server-rounds"]
-        fraction_fit = context.run_config["fraction-fit"]
+    from flower_tutorial.task import central_evaluate
 
-        # Initialize model parameters
-        ndarrays = get_weights(Net())
-        parameters = ndarrays_to_parameters(ndarrays)
 
-        strategy = FedAvg(
-            fraction_fit=fraction_fit,
-            fraction_evaluate=1.0,
-            min_available_clients=2,
-            initial_parameters=parameters,
-            evaluate_fn=evaluate,
+    @app.main()
+    def main(grid: Grid, context: Context) -> None:
+        """Main entry point for the ServerApp."""
+
+        # ... unchanged
+
+        # Start strategy, run FedAdagrad for `num_rounds`
+        result = strategy.start(
+            grid=grid,
+            initial_arrays=arrays,
+            train_config=ConfigRecord({"lr": lr}),
+            num_rounds=num_rounds,
+            evaluate_fn=central_evaluate,
         )
-        config = ServerConfig(num_rounds=num_rounds)
 
-        return ServerAppComponents(strategy=strategy, config=config)
-
-
-    # Create ServerApp
-    app = ServerApp(server_fn=server_fn)
+        # .. unchanged
 
 Finally, we run the simulation.
 
@@ -211,124 +265,98 @@ Finally, we run the simulation.
 
     $ flwr run .
 
+You'll note that the server logs the metrics returned by the callback after each round.
+Also, at the end of the run, note the ``ServerApp-side Evaluate Metrics`` shown:
+
+.. code-block:: shell
+
+    INFO :          ServerApp-side Evaluate Metrics:
+    INFO :          { 0: {'accuracy': '1.0000e-01', 'loss': '2.3053e+00'},
+    INFO :            1: {'accuracy': '1.0000e-01', 'loss': '2.3203e+00'},
+    INFO :            2: {'accuracy': '2.3230e-01', 'loss': '2.0144e+00'},
+    INFO :            3: {'accuracy': '2.5720e-01', 'loss': '1.9258e+00'}}
+
 Sending configurations to clients from strategies
 -------------------------------------------------
 
 In some situations, we want to configure client-side execution (training, evaluation)
-from the server-side. One example for that is the server asking the clients to train for
-a certain number of local epochs. Flower provides a way to send configuration values
-from the server to the clients using a dictionary. Let's look at an example where the
-clients receive values from the server through the ``config`` parameter in ``fit``
-(``config`` is also available in ``evaluate``). The ``fit`` method receives the
-configuration dictionary through the ``config`` parameter and can then read values from
-this dictionary. In this example, it reads ``server_round`` and ``local_epochs`` and
-uses those values to improve the logging and configure the number of local training
-epochs. In our ``client_app.py``, replace the ``FlowerClient()`` class and
-``client_fn()`` with the following code:
+from the server side. One example of this is the server asking the clients to train for
+with a different learning rate based on the current round number. Flower provides a way
+to send configuration values from the server to the clients as part of the
+|message_link|_ that the ``ClientApp`` receives. Let's see how we can do this.
+
+To the |strategy_start_link|_ method of our strategy we are already passing a
+|configrecord_link|_ specifying the initial learning rate. This ``ConfigRecord`` will be
+sent to the clients in all the ``Messages`` addressing the ``@app.train()`` function of
+the ``ClientApp``. Let's say we want to decrease the learning rate by a factor of 0.5
+every 5 rounds, then we need to override the ``configure_train`` method of our strategy
+and embed such logic.
+
+To do so, we create a new class inheriting from |fedadagrad_link|_ and override the
+``configure_train`` method. We then use this new strategy in our ``ServerApp``. Let's
+see how this looks like in code. Create a new file called ``custom_strategy.py`` in the
+``flower_tutorial`` directory and add the following code:
 
 .. code-block:: python
+    :emphasize-lines: 13,14
 
-    class FlowerClient(NumPyClient):
-        def __init__(self, pid, net, trainloader, valloader):
-            self.pid = pid  # partition ID of a client
-            self.net = net
-            self.trainloader = trainloader
-            self.valloader = valloader
-            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-            self.net.to(self.device)
-
-        def get_weights(self, config):
-            print(f"[Client {self.pid}] get_weights")
-            return get_weights(self.net)
-
-        def fit(self, parameters, config):
-            # Read values from config
-            server_round = config["server_round"]
-            local_epochs = config["local_epochs"]
-
-            # Use values provided by the config
-            print(f"[Client {self.pid}, round {server_round}] fit, config: {config}")
-            set_weights(self.net, parameters)
-            train(self.net, self.trainloader, epochs=local_epochs, device=self.device)
-            return get_weights(self.net), len(self.trainloader), {}
-
-        def evaluate(self, parameters, config):
-            print(f"[Client {self.pid}] evaluate, config: {config}")
-            set_weights(self.net, parameters)
-            loss, accuracy = test(self.net, self.valloader, device=self.device)
-            return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
+    from typing import Iterable
+    from flwr.serverapp import Grid
+    from flwr.serverapp.strategy import FedAdagrad
+    from flwr.app import ArrayRecord, ConfigRecord, Message
 
 
-    def client_fn(context: Context):
-        net = Net()
-        partition_id = context.node_config["partition-id"]
-        num_partitions = context.node_config["num-partitions"]
-        trainloader, valloader = load_data(partition_id, num_partitions)
+    class CustomFedAdagrad(FedAdagrad):
+        def configure_train(
+            self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
+        ) -> Iterable[Message]:
+            """Configure the next round of federated training and maybe do LR decay."""
+            # Decrease learning rate by a factor of 0.5 every 5 rounds
+            if server_round % 5 == 0 and server_round > 0:
+                config["lr"] *= 0.5
+                print("LR decreased to:", config["lr"])
+            # Pass the updated config and the rest of arguments to the parent class
+            return super().configure_train(server_round, arrays, config, grid)
 
-        return FlowerClient(partition_id, net, trainloader, valloader).to_client()
+Next, we use this new strategy in our ``ServerApp`` by importing it in your
+``server_app.py`` and use it instead of the standard ``FedAdagrad``.
 
-So how can we send this config dictionary from server to clients? The built-in Flower
-Strategies provide way to do this, and it works similarly to the way server-side
-evaluation works. We provide a callback to the strategy, and the strategy calls this
-callback for every round of federated learning. Add the following to your
-``server_app.py``:
-
-.. code-block:: python
-
-    def fit_config(server_round: int):
-        """Return training configuration dict for each round.
-
-        Perform two rounds of training with one local epoch, increase to two local
-        epochs afterwards.
-        """
-        config = {
-            "server_round": server_round,  # The current round of federated learning
-            "local_epochs": 1 if server_round < 2 else 2,
-        }
-        return config
-
-Next, we'll pass this function to the FedAvg strategy before starting the simulation.
-Change the ``server_fn()`` function in ``server_app.py`` to the following:
-
-.. code-block:: python
-
-    def server_fn(context: Context):
-        # Read from config
-        num_rounds = context.run_config["num-server-rounds"]
-        fraction_fit = context.run_config["fraction-fit"]
-
-        # Initialize model parameters
-        ndarrays = get_weights(Net())
-        parameters = ndarrays_to_parameters(ndarrays)
-
-        strategy = FedAvg(
-            fraction_fit=fraction_fit,
-            fraction_evaluate=1.0,
-            min_available_clients=2,
-            initial_parameters=parameters,
-            evaluate_fn=evaluate,
-            on_fit_config_fn=fit_config,
-        )
-        config = ServerConfig(num_rounds=num_rounds)
-
-        return ServerAppComponents(strategy=strategy, config=config)
-
-Finally, run the training with the following command:
+Finally, run the training with the following command. Here we increase the number of
+rounds to 15 to see the learning rate decay in action.
 
 .. code-block:: shell
 
-    $ flwr run .
+    $ flwr run . --run-config="num-server-rounds=15"
 
-As we can see, the client logs now include the current round of federated learning
-(which they read from the ``config`` dictionary). We can also configure local training
-to run for one epoch during the first and second round of federated learning, and then
-for two epochs during the third round.
+You'll note that in the ``configure_train`` stage of rounds 5 and 10, the learning rate
+is decreased by a factor of 0.5 and the new learning rate is printed to the terminal.
 
-Clients can also return arbitrary values to the server. To do so, they return a
-dictionary from ``fit`` and/or ``evaluate``. We have seen and used this concept
-throughout this tutorial without mentioning it explicitly: our ``FlowerClient`` returns
-a dictionary containing a custom key/value pair as the third return value in
-``evaluate``.
+How do we know the ``ClientApp`` is using that new learning rate? Recall that in
+``client_app.py``, we are reading the learning rate from the ``Message`` received by the
+``@app.train()`` function:
+
+.. code-block:: python
+    :emphasize-lines: 11
+
+    @app.train()
+    def train(msg: Message, context: Context):
+
+        # ... setup
+
+        # Call the training function
+        train_loss = train_fn(
+            model,
+            trainloader,
+            context.run_config["local-epochs"],
+            msg.content["config"]["lr"],
+            device,
+        )
+
+        # ... prepare reply Message
+        return Message(content=content, reply_to=msg)
+
+Congratulations! You have created your first custom strategy adding dynamism to the
+``ConfigRecord`` that is sent to clients.
 
 Scaling federated learning
 --------------------------
@@ -343,62 +371,43 @@ large number of clients. In the ``pyproject.toml``, increase the number of Super
     options.num-supernodes = 1000
 
 Note that we can reuse the ``ClientApp`` for different ``num-supernodes`` since the
-Context is defined by the ``num-partitions`` argument in the ``client_fn()`` and for
-simulations with Flower, the number of partitions is equal to the number of SuperNodes.
+``Context`` carries the ``num-partitions`` key and for simulations with Flower, the
+number of partitions is equal to the number of SuperNodes.
 
 We now have 1000 partitions, each holding 45 training and 5 validation examples. Given
 that the number of training examples on each client is quite small, we should probably
 train the model a bit longer, so we configure the clients to perform 3 local training
 epochs. We should also adjust the fraction of clients selected for training during each
 round (we don't want all 1000 clients participating in every round), so we adjust
-``fraction_fit`` to ``0.025``, which means that only 2.5% of available clients (so 25
-clients) will be selected for training each round. We update the ``fraction-fit`` value
-in the ``pyproject.toml``:
+``fraction_train`` to ``0.025``, which means that only 2.5% of available clients (so 25
+clients) will be selected for training each round. We update the ``fraction-train``
+value in the ``pyproject.toml``:
 
 .. code-block:: toml
 
     [tool.flwr.app.config]
-    fraction-fit = 0.025
+    fraction-train = 0.025
 
-Then, we update the ``fit_config`` and ``server_fn`` functions in ``server_app.py`` to
-the following:
+Then, we update the initialization of our strategy in ``server_app.py`` to the
+following:
 
 .. code-block:: python
 
-    def fit_config(server_round: int):
-        config = {
-            "server_round": server_round,
-            "local_epochs": 3,
-        }
-        return config
+    @app.main()
+    def main(grid: Grid, context: Context) -> None:
+        """Main entry point for the ServerApp."""
 
-
-    def server_fn(context: Context):
-        # Read from config
-        num_rounds = context.run_config["num-server-rounds"]
-        fraction_fit = context.run_config["fraction-fit"]
-
-        # Initialize model parameters
-        ndarrays = get_weights(Net())
-        parameters = ndarrays_to_parameters(ndarrays)
-
-        # Create FedAvg strategy
-        strategy = FedAvg(
-            fraction_fit=fraction_fit,  # Train on 25 clients (each round)
+        # ... unchanged
+        # Initialize FedAdagrad strategy
+        strategy = CustomFedAdagrad(
+            fraction_train=fraction_train,
             fraction_evaluate=0.05,  # Evaluate on 50 clients (each round)
-            min_fit_clients=20,
-            min_evaluate_clients=40,  # Optional config
-            min_available_clients=1000,  # Optional config
-            initial_parameters=parameters,
-            on_fit_config_fn=fit_config,
+            min_train_nodes=20,  # Optional config
+            min_evaluate_nodes=40,  # Optional config
+            min_available_nodes=1000,  # Optional config
         )
-        config = ServerConfig(num_rounds=num_rounds)
 
-        return ServerAppComponents(strategy=strategy, config=config)
-
-
-    # Create the ServerApp
-    server = ServerApp(server_fn=server_fn)
+        # ... rest unchanged
 
 Finally, run the simulation with the following command:
 
@@ -410,14 +419,14 @@ Recap
 -----
 
 In this tutorial, we've seen how we can gradually enhance our system by customizing the
-strategy, initializing parameters on the server side, choosing a different strategy, and
-evaluating models on the server-side. That's quite a bit of flexibility with so little
-code, right?
+strategy, choosing a different strategy, applying learning rate decay at the strategy
+level, and evaluating models on the server side. That's quite a bit of flexibility with
+so little code, right?
 
 In the later sections, we've seen how we can communicate arbitrary values between server
 and clients to fully customize client-side execution. With that capability, we built a
 large-scale Federated Learning simulation using the Flower Virtual Client Engine and ran
-an experiment involving 1000 clients in the same workload - all in the same Flower
+an experiment involving 1000 clients in the same workload — all in the same Flower
 project!
 
 Next steps

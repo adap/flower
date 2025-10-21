@@ -39,6 +39,26 @@ class ControlStub:
         flwr.proto.control_pb2.GetAuthTokensResponse]
     """Get auth tokens upon request"""
 
+    PullArtifacts: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.PullArtifactsRequest,
+        flwr.proto.control_pb2.PullArtifactsResponse]
+    """Pull artifacts generated during a run (flwr pull)"""
+
+    RegisterNode: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.RegisterNodeRequest,
+        flwr.proto.control_pb2.RegisterNodeResponse]
+    """Register SuperNode"""
+
+    UnregisterNode: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.UnregisterNodeRequest,
+        flwr.proto.control_pb2.UnregisterNodeResponse]
+    """Unregister SuperNode"""
+
+    ListNodes: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.ListNodesRequest,
+        flwr.proto.control_pb2.ListNodesResponse]
+    """List SuperNodes"""
+
 
 class ControlServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -87,6 +107,38 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.control_pb2.GetAuthTokensResponse:
         """Get auth tokens upon request"""
+        pass
+
+    @abc.abstractmethod
+    def PullArtifacts(self,
+        request: flwr.proto.control_pb2.PullArtifactsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.control_pb2.PullArtifactsResponse:
+        """Pull artifacts generated during a run (flwr pull)"""
+        pass
+
+    @abc.abstractmethod
+    def RegisterNode(self,
+        request: flwr.proto.control_pb2.RegisterNodeRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.control_pb2.RegisterNodeResponse:
+        """Register SuperNode"""
+        pass
+
+    @abc.abstractmethod
+    def UnregisterNode(self,
+        request: flwr.proto.control_pb2.UnregisterNodeRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.control_pb2.UnregisterNodeResponse:
+        """Unregister SuperNode"""
+        pass
+
+    @abc.abstractmethod
+    def ListNodes(self,
+        request: flwr.proto.control_pb2.ListNodesRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.control_pb2.ListNodesResponse:
+        """List SuperNodes"""
         pass
 
 

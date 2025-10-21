@@ -1,57 +1,82 @@
 """$project_name: A Flower / $framework_str app."""
 
-from flwr.client import NumPyClient, ClientApp
-from flwr.common import Context
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 
 from $import_name.task import load_data, load_model
 
-
-# Define Flower Client and client_fn
-class FlowerClient(NumPyClient):
-    def __init__(
-        self, model, data, epochs, batch_size, verbose
-    ):
-        self.model = model
-        self.x_train, self.y_train, self.x_test, self.y_test = data
-        self.epochs = epochs
-        self.batch_size = batch_size
-        self.verbose = verbose
-
-    def fit(self, parameters, config):
-        self.model.set_weights(parameters)
-        self.model.fit(
-            self.x_train,
-            self.y_train,
-            epochs=self.epochs,
-            batch_size=self.batch_size,
-            verbose=self.verbose,
-        )
-        return self.model.get_weights(), len(self.x_train), {}
-
-    def evaluate(self, parameters, config):
-        self.model.set_weights(parameters)
-        loss, accuracy = self.model.evaluate(self.x_test, self.y_test, verbose=0)
-        return loss, len(self.x_test), {"accuracy": accuracy}
+# Flower ClientApp
+app = ClientApp()
 
 
-def client_fn(context: Context):
-    # Load model and data
-    net = load_model()
+@app.train()
+def train(msg: Message, context: Context):
+    """Train the model on local data."""
 
-    partition_id = context.node_config["partition-id"]
-    num_partitions = context.node_config["num-partitions"]
-    data = load_data(partition_id, num_partitions)
+    # Load the model and initialize it with the received weights
+    model = load_model()
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    model.set_weights(ndarrays)
+
+    # Read from config
     epochs = context.run_config["local-epochs"]
     batch_size = context.run_config["batch-size"]
     verbose = context.run_config.get("verbose")
 
-    # Return Client instance
-    return FlowerClient(
-        net, data, epochs, batch_size, verbose
-    ).to_client()
+    # Load the data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    x_train, y_train, _, _ = load_data(partition_id, num_partitions)
+
+    # Train the model on local data
+    history = model.fit(
+        x_train,
+        y_train,
+        epochs=epochs,
+        batch_size=batch_size,
+        verbose=verbose,
+    )
+
+    # Get final training loss and accuracy
+    train_loss = history.history["loss"][-1] if "loss" in history.history else None
+    train_acc = history.history.get("accuracy")
+    train_acc = train_acc[-1] if train_acc is not None else None
+
+    # Construct and return reply Message
+    model_record = ArrayRecord(model.get_weights())
+    metrics = {"num-examples": len(x_train)}
+    if train_loss is not None:
+        metrics["train_loss"] = train_loss
+    if train_acc is not None:
+        metrics["train_acc"] = train_acc
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)
 
 
-# Flower ClientApp
-app = ClientApp(
-    client_fn=client_fn,
-)
+@app.evaluate()
+def evaluate(msg: Message, context: Context):
+    """Evaluate the model on local data."""
+
+    # Load the model and initialize it with the received weights
+    model = load_model()
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    model.set_weights(ndarrays)
+
+    # Load the data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    _, _, x_test, y_test = load_data(partition_id, num_partitions)
+
+    # Evaluate the model on local data
+    loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
+
+    # Construct and return reply Message
+    metrics = {
+        "eval_loss": loss,
+        "eval_acc": accuracy,
+        "num-examples": len(x_test),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
+    return Message(content=content, reply_to=msg)
