@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-16 00:08+0000\n"
+"POT-Creation-Date: 2025-10-21 00:08+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -382,8 +382,8 @@ msgstr "Argumento de compilação"
 #: ../../source/ref-exit-codes/104.rst:5 ../../source/ref-exit-codes/2.rst:5
 #: ../../source/ref-exit-codes/200.rst:21 ../../source/ref-exit-codes/201.rst:5
 #: ../../source/ref-exit-codes/202.rst:5 ../../source/ref-exit-codes/3.rst:5
-#: ../../source/ref-exit-codes/300.rst:5 ../../source/ref-exit-codes/301.rst:5
-#: ../../source/ref-exit-codes/302.rst:5 ../../source/ref-exit-codes/400.rst:5
+#: ../../source/ref-exit-codes/300.rst:5 ../../source/ref-exit-codes/302.rst:5
+#: ../../source/ref-exit-codes/303.rst:5 ../../source/ref-exit-codes/400.rst:5
 #: ../../source/ref-exit-codes/500.rst:5 ../../source/ref-exit-codes/600.rst:5
 #: ../../source/ref-exit-codes/601.rst:5 ../../source/ref-exit-codes/602.rst:5
 msgid "Description"
@@ -9071,11 +9071,11 @@ msgid ""
 "key authentication, securing federated learning via TLS connections."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:6
+#: ../../source/how-to-authenticate-supernodes.rst:10
 msgid "Authenticate SuperNodes"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:8
+#: ../../source/how-to-authenticate-supernodes.rst:12
 msgid ""
 "When running a Flower Federation (see :doc:`ref-flower-network-"
 "communication`) it is fundamental that an authentication mechanism is "
@@ -9084,62 +9084,70 @@ msgid ""
 "that connect to a running SuperLink:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:13
+#: ../../source/how-to-authenticate-supernodes.rst:17
 msgid ""
 "**Automatic authentication**: In this mode, the SuperLink checks the "
 "timestamp-based signature in each request from SuperNodes to prevent "
-"impersonation and replay attacks."
+"impersonation and replay attacks. The goal of this mode is to confirm the"
+" identity of connected SuperNodes; however, it does **not** restrict "
+"which SuperNodes can connect to the SuperLink. Consequently, any "
+"SuperNode is allowed to connect to the SuperLink."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:15
+#: ../../source/how-to-authenticate-supernodes.rst:22
 msgid ""
-"**CSV-based authentication**: This mode functions similarly to automatic "
-"authentication but requires the SuperLink to be provided with a list of "
-"authorized public keys, allowing only those SuperNodes to connect."
+"**CLI-managed authentication**: This mode operates similarly to automatic"
+" authentication but requires starting the SuperLink with the ``--enable-"
+"supernode-auth`` flag. To connect a SuperNode to the SuperLink, its "
+"public key must first be registered using the "
+"|flower_cli_supernode_link|_. Only registered SuperNodes are permitted to"
+" connect to the SuperLink, making this mode more secure by restricting "
+"connections to authorized SuperNodes only."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:19
+#: ../../source/how-to-authenticate-supernodes.rst:29
 msgid ""
 "The automatic authentication mode works out of the box and therefore "
-"requires no configuration. On the other hand, CSV-based authentication "
+"requires no configuration. On the other hand, CLI-managed authentication "
 "mode is more sophisticated and how it works and how it can be used is "
-"presented reminder of this guide. Flower's CSV-based node authentication "
-"leverages a signature-based mechanism to verify each node's identity and "
-"is only available when encrypted connections (SSL/TLS) are enabled:"
+"presented reminder of this guide. Flower's CLI-managed SuperNode "
+"authentication leverages a signature-based mechanism to verify each "
+"SuperNode's identity and is only available when encrypted connections "
+"(SSL/TLS) are enabled:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:25
+#: ../../source/how-to-authenticate-supernodes.rst:36
 msgid ""
 "Each SuperNode must already possess a unique Elliptic Curve (EC) "
 "public/private key pair."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:27
+#: ../../source/how-to-authenticate-supernodes.rst:38
 msgid ""
 "The SuperLink (server) maintains a whitelist of EC public keys for all "
-"trusted SuperNodes (clients)."
+"trusted SuperNodes (clients), managed through the Flower CLI."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:29
+#: ../../source/how-to-authenticate-supernodes.rst:40
 msgid ""
 "A SuperNode signs a timestamp with its private key and sends the signed "
 "timestamp to the SuperLink."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:31
+#: ../../source/how-to-authenticate-supernodes.rst:42
 msgid ""
 "The SuperLink verifies the signature and timestamp using the SuperNode's "
 "public key."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:35
+#: ../../source/how-to-authenticate-supernodes.rst:46
 msgid ""
 "This guide builds on the Flower App setup presented in the :doc:`how-to-"
 "enable-tls-connections` guide and extends it to introduce node "
 "authentication to the SuperLink ↔ SuperNode connection."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:41
+#: ../../source/how-to-authenticate-supernodes.rst:52
 msgid ""
 "Checkout the `Flower Authentication "
 "<https://github.com/adap/flower/tree/main/examples/flower-"
@@ -9147,24 +9155,18 @@ msgid ""
 " setup TLS and node authentication."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:47
-msgid ""
-"This guide covers a preview feature that might change in future versions "
-"of Flower."
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:50
+#: ../../source/how-to-authenticate-supernodes.rst:57
 msgid "Generate authentication keys"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:52
+#: ../../source/how-to-authenticate-supernodes.rst:59
 msgid ""
 "To establish an authentication mechanism by which only authorized "
 "SuperNodes can connect to a running SuperLink, a set of key pairs for "
 "both SuperLink and SuperNodes need to be created."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:56
+#: ../../source/how-to-authenticate-supernodes.rst:63
 msgid ""
 "We have prepared a script that can be used to generate such set of keys. "
 "While using these are fine for prototyping, we advice you to follow the "
@@ -9174,7 +9176,7 @@ msgid ""
 " at the top of this guide."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:67
+#: ../../source/how-to-authenticate-supernodes.rst:74
 msgid ""
 "This will generate the keys in a new ``keys/`` directory. By default it "
 "creates a key pair for the SuperLink and one for each SuperNode. Copy "
@@ -9182,11 +9184,11 @@ msgid ""
 " earlier via ``flwr new``)."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:72
+#: ../../source/how-to-authenticate-supernodes.rst:79
 msgid "Enable node authentication in SuperLink"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:74
+#: ../../source/how-to-authenticate-supernodes.rst:81
 msgid ""
 "To launch a SuperLink with SuperNode authentication enabled, you need to "
 "provide three aditional files in addition to the certificates needed for "
@@ -9194,47 +9196,120 @@ msgid ""
 "enabled in the presence of TLS."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:89
+#: ../../source/how-to-authenticate-supernodes.rst:96
 msgid ""
-"``--auth-list-public-keys``: Specify the path to a CSV file storing the "
-"public keys of all SuperNodes that should be allowed to connect with the "
-"SuperLink. A valid CSV file storing known node public keys should list "
-"the keys in OpenSSH format, separated by commas. Refer to the code "
-"sample, which contains a CSV file with two known node public keys."
+"``--enable-supernode-auth``: Enables SuperNode authentication therefore "
+"only Supernodes that are first register on the SuperLink will be able to "
+"establish a connection."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:92
+#: ../../source/how-to-authenticate-supernodes.rst:99
+#, fuzzy
+msgid "Register SuperNodes"
+msgstr "Construindo a imagem do servidor"
+
+#: ../../source/how-to-authenticate-supernodes.rst:101
+msgid ""
+"Once your SuperLink is running, the next step is to register the "
+"SuperNodes that will be allowed to connect to it. This process is handled"
+" through the |flower_cli_supernode_link|_ using the public keys "
+"previously generated for each SuperNode you plan to connect to the "
+"SuperLink."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:106
+msgid "Here's how this looks in code:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:113
+msgid "Next, let’s register the second SuperNode as well:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:119
+msgid "You can list the registered SuperNodes using the following command:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:126
+msgid ""
+"This will display the IDs of the SuperNodes you just registered as well "
+"as their status. You should see a table similar to the following:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:139
+msgid ""
+"The status of the SuperNodes will change after they connect to the "
+"SuperLink. Let's proceed and laucnh the SuperNodes."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:143
 msgid "Enable node authentication in SuperNode"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:94
+#: ../../source/how-to-authenticate-supernodes.rst:145
 msgid ""
 "Connecting a SuperNode to a SuperLink that has node authentication "
-"enabled requires passing two additional arguments (i.e. the public and "
-"private keys of the SuperNode) in addition to the TLS certificate."
+"enabled requires passing one additional argument (i.e. the private key of"
+" the SuperNode) in addition to the TLS certificate."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:111
+#: ../../source/how-to-authenticate-supernodes.rst:161
 msgid "``--auth-supernode-private-key``: the private key of this SuperNode."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst
-msgid ""
-"``--auth-supernode-public-key``: the public key of this SuperNode (which "
-"should be the same that was added to othe CSV used by the SuperLink)."
-msgstr ""
-
-#: ../../source/how-to-authenticate-supernodes.rst:114
+#: ../../source/how-to-authenticate-supernodes.rst:163
 msgid ""
 "Follow the same procedure to launch the second SuperNode by passing its "
-"corresponding key pair:"
+"corresponding private key:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:129
+#: ../../source/how-to-authenticate-supernodes.rst:176
+msgid ""
+"After connecting both SuperNodes, you can check the status of the "
+"SuperNodes again. You will notice their status is now ``online``:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:192
+#, fuzzy
+msgid "Unregister SuperNodes"
+msgstr "Construindo a imagem do servidor"
+
+#: ../../source/how-to-authenticate-supernodes.rst:196
+msgid ""
+"This is a destructive operation. Unregistering a SuperNode is permanent "
+"and cannot be undone. If you wish to connect a SuperNode again, a new key"
+" pair is needed."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:199
+msgid ""
+"At anypoint you can unregister a SuperNode from the SuperLink (even if it"
+" has never connected). This will prevent the SuperNode from making future"
+" request to the SuperLink. In other words, it will no longer be "
+"authorized to pull/send, or participate in ongoing or future runs. "
+"Unregistering a SuperNode can be done via the "
+"|flower_cli_supernode_link|_ as follows:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:210
+msgid ""
+"The above command unregisters the first SuperNode. You can verify this by"
+" listing the SuperNodes again:"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:223
+msgid ""
+"If you pass the ``--verbose`` flag to the previous command you'll see "
+"that the status of the unregistered SuperNode has changed to "
+"``unregistered``. By default, unregistered SuperNodes are hidden because "
+"they can no longer reconnect to the SuperLink. That's right, **if you "
+"wish to connect a second SuperNode a new EC key pair is needed.**"
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:241
 msgid "Security notice"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:131
+#: ../../source/how-to-authenticate-supernodes.rst:243
 msgid ""
 "The system's security relies on the credentials of the SuperLink and each"
 " SuperNode. Therefore, it is imperative to safeguard and safely store the"
@@ -9245,21 +9320,21 @@ msgid ""
 "methods."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:138
+#: ../../source/how-to-authenticate-supernodes.rst:250
 #: ../../source/how-to-enable-tls-connections.rst:138
 #: ../../source/how-to-use-built-in-mods.rst:170
 #: ../../source/tutorial-series-what-is-federated-learning.rst:293
 msgid "Conclusion"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:140
+#: ../../source/how-to-authenticate-supernodes.rst:252
 msgid ""
 "You should now have learned how to start a long-running Flower SuperLink "
 "and SuperNode with node authentication enabled. You should also know the "
 "significance of the private key and store it securely to minimize risks."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:146
+#: ../../source/how-to-authenticate-supernodes.rst:258
 #: ../../source/how-to-enable-tls-connections.rst:148
 msgid ""
 "Refer to the :doc:`docker/index` documentation to learn how to setup a "
@@ -15255,8 +15330,8 @@ msgstr ""
 msgid "Arguments"
 msgstr "Argumento de compilação"
 
-#: ../../flwr create:1 delete:1 install:1 list:1 log:1 login:1 new:1 pull:1
-#: run:1 stop:1 supernode
+#: ../../flwr install:1 list:1 log:1 login:1 new:1 pull:1 register:1 run:1
+#: stop:1 supernode unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "Argumento de compilação"
@@ -15339,7 +15414,7 @@ msgstr ""
 msgid "List all runs"
 msgstr ""
 
-#: ../../flwr create delete list log run stop supernode
+#: ../../flwr list log register run stop supernode unregister
 msgid "default"
 msgstr ""
 
@@ -15352,21 +15427,21 @@ msgstr "``FLWR_VERSION``"
 msgid "Specific run ID to display"
 msgstr ""
 
-#: ../../flwr create:1 delete:1 list:1 run:1 stop:1 supernode
+#: ../../flwr list:1 register:1 run:1 stop:1 supernode unregister:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
-#: ../../flwr create:1 delete:1 list:1 run:1 stop:1 supernode
+#: ../../flwr list:1 register:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "``FLWR_VERSION``"
 
-#: ../../flwr create:1 delete:1 list:1 stop:1 supernode
+#: ../../flwr list:1 register:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Path of the Flower project"
 msgstr "O nome do repositório da imagem base."
 
-#: ../../flwr create:1 delete:1 list:1 stop:1 supernode
+#: ../../flwr list:1 register:1 stop:1 supernode unregister:1
 msgid "Name of the federation"
 msgstr ""
 
@@ -15382,7 +15457,7 @@ msgstr ""
 msgid "``True``"
 msgstr ""
 
-#: ../../flwr create:1 delete:1 log:1 stop:1 supernode
+#: ../../flwr log:1 register:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Required argument"
 msgstr "Argumento de compilação"
@@ -15499,25 +15574,6 @@ msgstr ""
 msgid "Manage SuperNodes"
 msgstr "Construindo a imagem do servidor"
 
-#: ../../flwr create:1 supernode
-#, fuzzy
-msgid "Add a SuperNode to the federation."
-msgstr "``FLWR_VERSION``"
-
-#: ../../flwr create:1 supernode
-msgid "Path to a P-384 (or any other NIST EC curve) public key file."
-msgstr ""
-
-#: ../../flwr delete:1 supernode
-#, fuzzy
-msgid "Remove a SuperNode from the federation."
-msgstr "``FLWR_VERSION``"
-
-#: ../../flwr delete:1 supernode
-#, fuzzy
-msgid "ID of the SuperNode to remove."
-msgstr "Construindo a imagem do servidor"
-
 #: ../../flwr list:1 supernode
 #, fuzzy
 msgid "List SuperNodes in the federation."
@@ -15531,6 +15587,25 @@ msgstr "Exemplo"
 #: ../../flwr list:1 supernode
 msgid "Simulate the command without contacting any SuperNodes"
 msgstr ""
+
+#: ../../flwr register:1 supernode
+#, fuzzy
+msgid "Add a SuperNode to the federation."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr register:1 supernode
+msgid "Path to a P-384 (or any other NIST EC curve) public key file."
+msgstr ""
+
+#: ../../flwr supernode unregister:1
+#, fuzzy
+msgid "Unregister a SuperNode from the federation."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr supernode unregister:1
+#, fuzzy
+msgid "ID of the SuperNode to remove."
+msgstr "Construindo a imagem do servidor"
 
 #: ../../source/ref-api-cli.rst:19
 #, fuzzy
@@ -35757,8 +35832,8 @@ msgstr ""
 #: ../../source/ref-exit-codes/201.rst:10
 #: ../../source/ref-exit-codes/202.rst:10
 #: ../../source/ref-exit-codes/300.rst:11
-#: ../../source/ref-exit-codes/301.rst:16
-#: ../../source/ref-exit-codes/302.rst:16
+#: ../../source/ref-exit-codes/302.rst:12
+#: ../../source/ref-exit-codes/303.rst:11
 #: ../../source/ref-exit-codes/400.rst:11
 #: ../../source/ref-exit-codes/500.rst:14
 #: ../../source/ref-exit-codes/600.rst:11
@@ -36010,82 +36085,73 @@ msgid ""
 "correct it as needed."
 msgstr ""
 
-#: ../../source/ref-exit-codes/301.rst:2
-msgid "[301] SUPERNODE_NODE_AUTH_KEYS_REQUIRED"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:7
-msgid ""
-"To run the SuperNode with authentication, file paths for both the private"
-" and public keys must be provided. Specifically, the following options "
-"must be specified:"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:10
-msgid "``--auth-supernode-private-key``"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:11
-msgid "``--auth-supernode-public-key``"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:13
-msgid "Providing only one of these options is insufficient for authentication."
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:18
-msgid ""
-"1. Ensure that the paths to both the private key and public key files are"
-" specified in command-line arguments. For example:"
-msgstr ""
-
-#: ../../source/ref-exit-codes/301.rst:26
-msgid "Verify that the specified file paths are correct and that the files exist."
-msgstr ""
-
 #: ../../source/ref-exit-codes/302.rst:2
-msgid "[302] SUPERNODE_NODE_AUTH_KEYS_INVALID"
+msgid "[302] SUPERNODE_NODE_AUTH_KEY_INVALID"
 msgstr ""
 
 #: ../../source/ref-exit-codes/302.rst:7
 msgid ""
-"The provided key files are invalid. Authentication requires a valid "
-"elliptic curve private and public key pair. This error occurs when "
-"either:"
+"Authentication requires a valid elliptic curve private key. This error "
+"occurs when the provided private key file specified in ``--auth-"
+"supernode-private-key`` is invalid or unreadable."
 msgstr ""
 
-#: ../../source/ref-exit-codes/302.rst:10
-msgid ""
-"The **private key** file specified in ``--auth-supernode-private-key`` is"
-" invalid or unreadable."
+#: ../../source/ref-exit-codes/302.rst:14
+msgid "Ensure that the file path provided for the private key option is correct."
 msgstr ""
 
-#: ../../source/ref-exit-codes/302.rst:12
-msgid ""
-"The **public key** file specified in ``--auth-supernode-public-key`` is "
-"invalid or unreadable."
+#: ../../source/ref-exit-codes/302.rst:15
+msgid "Verify that the file exists and contains a valid elliptic curve SSH key."
 msgstr ""
 
-#: ../../source/ref-exit-codes/302.rst:18
+#: ../../source/ref-exit-codes/302.rst:16
 msgid ""
-"Ensure that the file paths provided for the private and public key "
-"options are correct."
-msgstr ""
-
-#: ../../source/ref-exit-codes/302.rst:21
-msgid ""
-"2. Verify that both files exist and contain valid elliptic curve ssh "
-"keys. - The private key file should be in a format compatible with "
-"elliptic curve cryptography. - The public key file should match the "
-"private key."
-msgstr ""
-
-#: ../../source/ref-exit-codes/302.rst:25
-msgid ""
-"3. If the files are corrupted or not in the correct format, regenerate "
-"the elliptic curve ssh key pair and update the file paths accordingly. "
-"For example, in Linux/MacOS, **for rapid prototyping only** (not "
+"If the files are corrupted or not in the correct format, regenerate the "
+"elliptic curve SSH key pair and update the file paths accordingly. For "
+"example, on Linux or macOS, **for rapid prototyping only** (not "
 "production; follow company procedures for key management):"
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:2
+msgid "[303] SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED"
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:7
+msgid ""
+"The private key for SuperNode authentication was provided, but TLS is not"
+" enabled. SuperNode authentication requires a secure TLS connection with "
+"the SuperLink."
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:13
+msgid "To resolve this issue you need to either:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:15
+msgid ""
+"Enable TLS by providing the required TLS certificates when launching the "
+"SuperNode."
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:24
+msgid ""
+"Please refer to the documentation on `how to enable TLS in SuperNode "
+"<../how-to-enable-tls-connections.rst>`_ for more details."
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:27
+msgid ""
+"If you are prototyping, you may disable the CLI-managed SuperNode "
+"authentication mechanism by removing the private key argument when "
+"launching the SuperNode. This will make your SuperNode use the automatic "
+"authentication mechanism."
+msgstr ""
+
+#: ../../source/ref-exit-codes/303.rst:31
+msgid ""
+"Read more about both SuperNode authentication modes in the documentation "
+"on `how to authenticate SuperNodes <../how-to-authenticate-"
+"supernodes.rst>`_."
 msgstr ""
 
 #: ../../source/ref-exit-codes/400.rst:2
@@ -64679,5 +64745,168 @@ msgstr ""
 #~ "elliptic curve cryptography. - The "
 #~ "public key file should match the "
 #~ "private key."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Connecting a SuperNode to a SuperLink"
+#~ " that has node authentication enabled "
+#~ "requires passing two additional arguments "
+#~ "(i.e. the public and private keys "
+#~ "of the SuperNode) in addition to "
+#~ "the TLS certificate."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--auth-supernode-public-key``: the "
+#~ "public key of this SuperNode (which "
+#~ "should be the same that was added"
+#~ " to othe CSV used by the "
+#~ "SuperLink)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Follow the same procedure to launch "
+#~ "the second SuperNode by passing its "
+#~ "corresponding key pair:"
+#~ msgstr ""
+
+#~ msgid "[301] SUPERNODE_NODE_AUTH_KEYS_REQUIRED"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To run the SuperNode with "
+#~ "authentication, file paths for both the"
+#~ " private and public keys must be "
+#~ "provided. Specifically, the following options"
+#~ " must be specified:"
+#~ msgstr ""
+
+#~ msgid "``--auth-supernode-private-key``"
+#~ msgstr ""
+
+#~ msgid "``--auth-supernode-public-key``"
+#~ msgstr ""
+
+#~ msgid "Providing only one of these options is insufficient for authentication."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "1. Ensure that the paths to both"
+#~ " the private key and public key "
+#~ "files are specified in command-line "
+#~ "arguments. For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Verify that the specified file paths "
+#~ "are correct and that the files "
+#~ "exist."
+#~ msgstr ""
+
+#~ msgid "[302] SUPERNODE_NODE_AUTH_KEYS_INVALID"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The provided key files are invalid. "
+#~ "Authentication requires a valid elliptic "
+#~ "curve private and public key pair. "
+#~ "This error occurs when either:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The **private key** file specified in"
+#~ " ``--auth-supernode-private-key`` is "
+#~ "invalid or unreadable."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The **public key** file specified in "
+#~ "``--auth-supernode-public-key`` is "
+#~ "invalid or unreadable."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Ensure that the file paths provided "
+#~ "for the private and public key "
+#~ "options are correct."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "2. Verify that both files exist "
+#~ "and contain valid elliptic curve ssh "
+#~ "keys. - The private key file "
+#~ "should be in a format compatible "
+#~ "with elliptic curve cryptography. - The"
+#~ " public key file should match the "
+#~ "private key."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "3. If the files are corrupted or"
+#~ " not in the correct format, "
+#~ "regenerate the elliptic curve ssh key"
+#~ " pair and update the file paths "
+#~ "accordingly. For example, in Linux/MacOS, "
+#~ "**for rapid prototyping only** (not "
+#~ "production; follow company procedures for "
+#~ "key management):"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Automatic authentication**: In this mode,"
+#~ " the SuperLink checks the timestamp-"
+#~ "based signature in each request from "
+#~ "SuperNodes to prevent impersonation and "
+#~ "replay attacks."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**CSV-based authentication**: This mode "
+#~ "functions similarly to automatic "
+#~ "authentication but requires the SuperLink "
+#~ "to be provided with a list of "
+#~ "authorized public keys, allowing only "
+#~ "those SuperNodes to connect."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The automatic authentication mode works "
+#~ "out of the box and therefore "
+#~ "requires no configuration. On the other"
+#~ " hand, CSV-based authentication mode "
+#~ "is more sophisticated and how it "
+#~ "works and how it can be used "
+#~ "is presented reminder of this guide. "
+#~ "Flower's CSV-based node authentication "
+#~ "leverages a signature-based mechanism to"
+#~ " verify each node's identity and is"
+#~ " only available when encrypted connections"
+#~ " (SSL/TLS) are enabled:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The SuperLink (server) maintains a "
+#~ "whitelist of EC public keys for "
+#~ "all trusted SuperNodes (clients)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This guide covers a preview feature "
+#~ "that might change in future versions "
+#~ "of Flower."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--auth-list-public-keys``: Specify the"
+#~ " path to a CSV file storing the"
+#~ " public keys of all SuperNodes that"
+#~ " should be allowed to connect with"
+#~ " the SuperLink. A valid CSV file "
+#~ "storing known node public keys should"
+#~ " list the keys in OpenSSH format, "
+#~ "separated by commas. Refer to the "
+#~ "code sample, which contains a CSV "
+#~ "file with two known node public "
+#~ "keys."
 #~ msgstr ""
 
