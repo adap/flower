@@ -64,8 +64,13 @@ def get_evaluate_fn():
 
         # Carica modello e aggiorna pesi con i parametri globali ricevuti
         model = get_model(NET, num_classes=10, pretrained=False)
-        set_model_params(model, parameters)
+
         ndarrays = parameters_to_ndarrays(parameters)
+        state_dict = {
+            k: torch.tensor(v, dtype=param.dtype)
+            for (k, param), v in zip(model.state_dict().items(), ndarrays)
+        }
+        model.load_state_dict(state_dict, strict=True)
 
         # Applica i pesi ricevuti
         state_dict = model.state_dict()
