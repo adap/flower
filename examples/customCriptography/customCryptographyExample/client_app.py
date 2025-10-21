@@ -2,6 +2,7 @@
 import logging
 import os
 
+import numpy as np
 import psutil
 import torch
 from flwr.client import ClientApp, NumPyClient

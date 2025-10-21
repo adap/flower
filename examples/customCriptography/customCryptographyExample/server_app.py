@@ -41,19 +41,24 @@ class FedAvgWithServerEval(FedAvg):
 # FUNZIONE DI VALUTAZIONE SERVER-SIDE (secondo lo schema ufficiale Flower)
 # ------------------------------
 from flwr.common import NDArrays, Scalar
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, OrderedDict
 import torch
 
 
 
+
 def get_evaluate_fn():
-    """Restituisce una funzione che valuta il modello globale sul server, come negli esempi ufficiali Flower."""
+    """Restituisce una funzione che valuta il modello globale sul server."""
 
     # Prepara il validation loader una sola volta
     val_loader = get_validation_data(batch_size=64)
     criterion = torch.nn.CrossEntropyLoss()
 
-    def evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    def evaluate(
+            server_round: int,
+            parameters: NDArrays,
+            config: Dict[str, Scalar]
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Valutazione centralizzata del modello globale sul server."""
 
         print(f"\n🔹 Server-side evaluation - Round {server_round}")
@@ -61,26 +66,18 @@ def get_evaluate_fn():
         # Carica modello e aggiorna pesi con i parametri globali ricevuti
         model = get_model(NET, num_classes=10, pretrained=False)
 
+        # 🔹 Conversione coerente con il client
         ndarrays = parameters_to_ndarrays(parameters)
-        state_dict = {
-            k: torch.tensor(v, dtype=param.dtype)
-            for (k, param), v in zip(model.state_dict().items(), ndarrays)
-        }
-        model.load_state_dict(state_dict, strict=True)
-
-        # Applica i pesi ricevuti
-        state_dict = model.state_dict()
-        for (k, v), new_p in zip(state_dict.items(), ndarrays):
-            state_dict[k] = torch.tensor(new_p, dtype=v.dtype)
+        params_dict = zip(model.state_dict().keys(), ndarrays)
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         model.load_state_dict(state_dict, strict=True)
         model.eval()
 
         total_loss, correct, total = 0.0, 0, 0
 
-        # Loop di valutazione (uguale al reference Flower)
         with torch.no_grad():
             for inputs, targets in val_loader:
-                # Converte input nel formato corretto
+                # Normalizzazione e permutazione canali se necessario
                 if isinstance(inputs, list):
                     inputs = torch.stack(inputs)
                 if inputs.ndim == 4 and inputs.shape[1] != 3:
@@ -98,9 +95,9 @@ def get_evaluate_fn():
         avg_loss = total_loss / total
         accuracy = correct / total
 
-        print(f"[Round {server_round}] Server-side accuracy: {accuracy:.4f} | loss: {avg_loss:.4f}")
+        print(f"✅ [Round {server_round}] Server-side accuracy: {accuracy:.4f} | loss: {avg_loss:.4f}")
 
-        # ⬅️ Ritorna (loss, metrics) come richiede Flower
+        # ⬅️ Ritorna (loss, metrics)
         return avg_loss, {"accuracy": accuracy}
 
     return evaluate
