@@ -220,14 +220,14 @@ def _to_table(run_list: list[_RunListType]) -> Table:
 
     # Add columns
     table.add_column(
-        Text("Run ID", justify="center"), style="bright_white", no_wrap=True
+        Text("Run ID", justify="center"), style="bright_black", no_wrap=True
     )
-    table.add_column(Text("FAB", justify="center"), style="dim white")
+    table.add_column(Text("FAB", justify="center"), style="bright_black")
     table.add_column(Text("Status", justify="center"))
     table.add_column(Text("Elapsed", justify="center"), style="blue")
-    table.add_column(Text("Created At", justify="center"), style="dim white")
-    table.add_column(Text("Running At", justify="center"), style="dim white")
-    table.add_column(Text("Finished At", justify="center"), style="dim white")
+    table.add_column(Text("Created At", justify="center"), style="bright_black")
+    table.add_column(Text("Running At", justify="center"), style="bright_black")
+    table.add_column(Text("Finished At", justify="center"), style="bright_black")
 
     for row in run_list:
         (
