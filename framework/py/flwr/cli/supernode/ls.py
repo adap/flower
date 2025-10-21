@@ -32,7 +32,7 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
-from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
+from flwr.common.constant import FAB_CONFIG_FILE, NOOP_FLWR_AID, CliOutputFormat
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
@@ -185,12 +185,12 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
 
     # Add columns
     table.add_column(
-        Text("Node ID", justify="center"), style="bright_white", no_wrap=True
+        Text("Node ID", justify="center"), style="bright_black", no_wrap=True
     )
-    table.add_column(Text("Owner", justify="center"), style="dim white")
+    table.add_column(Text("Owner", justify="center"))
     table.add_column(Text("Status", justify="center"))
     table.add_column(Text("Elapsed", justify="center"))
-    table.add_column(Text("Status Changed @", justify="center"), style="dim white")
+    table.add_column(Text("Status Changed @", justify="center"), style="bright_black")
 
     for row in nodes_info:
         (
@@ -223,7 +223,7 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
 
         formatted_row = (
             f"[bold]{node_id}[/bold]",
-            f"{owner_aid}",
+            f"{owner_aid}" if owner_aid != NOOP_FLWR_AID else f"[dim]{owner_aid}[/dim]",
             f"[{status_style}]{status}",
             f"[cyan]{elapse_activated}[/cyan]" if status == "online" else "",
             time_at,
