@@ -15,19 +15,18 @@
 """Flower abstract ObjectStore definition."""
 
 
-import abc
-from typing import Optional
+from typing import Optional, cast
 
-from flwr.supercore.sqlite_mixin import SqliteMixin
-from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
-from .object_store import NoObjectInStoreError, ObjectStore
 from flwr.common.inflatable import (
     get_object_id,
     is_valid_sha256_hash,
     iterate_object_tree,
 )
 from flwr.common.inflatable_utils import validate_object_content
+from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
+from flwr.supercore.sqlite_mixin import SqliteMixin
 
+from .object_store import NoObjectInStoreError, ObjectStore
 
 SQL_CREATE_OBJECTS = """
 CREATE TABLE IF NOT EXISTS objects (
@@ -69,7 +68,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
             SQL_CREATE_OBJECTS,
             SQL_CREATE_OBJECT_CHILDREN,
             SQL_CREATE_RUN_OBJECTS,
-            log_queries=log_queries
+            log_queries=log_queries,
         )
 
     def preregister(self, run_id: int, object_tree: ObjectTree) -> list[str]:
@@ -84,14 +83,14 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
             with self.transaction():
                 row = self.conn.execute(
                     "SELECT object_id, is_available FROM objects WHERE object_id=?",
-                    (obj_id,)
+                    (obj_id,),
                 ).fetchone()
                 if row is None:
                     # Insert new object
                     self.conn.execute(
                         "INSERT INTO objects"
                         "(object_id, content, is_available, ref_count) VALUES (?, ?)",
-                        (obj_id, b"", 0, 0)
+                        (obj_id, b"", 0, 0),
                     )
                     for cid in child_ids:
                         self.conn.execute(
@@ -118,7 +117,6 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
                 )
         return new_objects
 
-    @abc.abstractmethod
     def get_object_tree(self, object_id: str) -> ObjectTree:
         """Get the object tree for a given object ID."""
         with self.transaction():
@@ -191,7 +189,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
             # If the object is not in the store, nothing to delete
             if row is None:
                 return
-            
+
             # Skip deletion if there are still references
             if row["ref_count"] > 0:
                 return
@@ -216,7 +214,6 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
             for child_id in child_ids:
                 self.delete(child_id)
 
-    @abc.abstractmethod
     def delete_objects_in_run(self, run_id: int) -> None:
         """Delete all objects that were registered in a specific run."""
         with self.transaction():
@@ -234,29 +231,19 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
 
     def clear(self) -> None:
         """Clear the store."""
-        
+        with self.transaction():
+            self.conn.execute("DELETE FROM object_children;")
+            self.conn.execute("DELETE FROM run_objects;")
+            self.conn.execute("DELETE FROM objects;")
 
-    @abc.abstractmethod
     def __contains__(self, object_id: str) -> bool:
-        """Check if an object_id is in the store.
+        """Check if an object_id is in the store."""
+        row = self.conn.execute(
+            "SELECT 1 FROM objects WHERE object_id=?", (object_id,)
+        ).fetchone()
+        return row is not None
 
-        Parameters
-        ----------
-        object_id : str
-            The object_id to check.
-
-        Returns
-        -------
-        bool
-            True if the object_id is in the store, False otherwise.
-        """
-
-    @abc.abstractmethod
     def __len__(self) -> int:
-        """Return the number of objects in the store.
-
-        Returns
-        -------
-        int
-            The number of objects currently stored.
-        """
+        """Return the number of objects in the store."""
+        row = self.conn.execute("SELECT COUNT(*) AS cnt FROM objects;").fetchone()
+        return cast(int, row["cnt"])
