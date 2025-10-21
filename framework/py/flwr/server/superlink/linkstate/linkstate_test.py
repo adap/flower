@@ -649,15 +649,15 @@ class StateTest(CoreStateTest):
         public_key = b"mock"
 
         # Execute
-        expected_created_at = now().timestamp()
+        expected_registered_at = now().timestamp()
         node_id = state.create_node("fake_aid", public_key, 10)
         node = state.get_node_info(node_ids=[node_id])[0]
-        actual_created_at = datetime.fromisoformat(node.created_at).timestamp()
+        actual_registered_at = datetime.fromisoformat(node.registered_at).timestamp()
 
         # Assert
         assert node.node_id == node_id
         assert node.public_key == public_key
-        self.assertAlmostEqual(actual_created_at, expected_created_at, 2)
+        self.assertAlmostEqual(actual_registered_at, expected_registered_at, 2)
 
     def test_create_node_public_key_twice(self) -> None:
         """Test creating a client node with same public key twice."""
@@ -730,13 +730,13 @@ class StateTest(CoreStateTest):
         state.delete_node("mock_flwr_aid", node_deleted)
 
         # Execute
-        infos = state.get_node_info(statuses=[NodeStatus.CREATED, NodeStatus.ONLINE])
+        infos = state.get_node_info(statuses=[NodeStatus.REGISTERED, NodeStatus.ONLINE])
         returned_statuses = {info.status for info in infos}
 
         # Assert: should only contain CREATED and ONLINE
-        self.assertTrue(NodeStatus.CREATED in returned_statuses)
+        self.assertTrue(NodeStatus.REGISTERED in returned_statuses)
         self.assertTrue(NodeStatus.ONLINE in returned_statuses)
-        self.assertFalse(NodeStatus.DELETED in returned_statuses)
+        self.assertFalse(NodeStatus.UNREGISTERED in returned_statuses)
 
     def test_get_node_info_multiple_filters(self) -> None:
         """Test get_node_info applies AND logic across filters."""
@@ -767,17 +767,19 @@ class StateTest(CoreStateTest):
         node_id = create_dummy_node(state)
 
         # Execute
-        expected_deleted_at = now().timestamp()
+        expected_unregistered_at = now().timestamp()
         state.delete_node("mock_flwr_aid", node_id)
         retrieved_nodes = state.get_node_info(node_ids=[node_id])
         assert len(retrieved_nodes) == 1
         node = retrieved_nodes[0]
-        actual_deleted_at = datetime.fromisoformat(node.deleted_at).timestamp()
+        actual_unregistered_at = datetime.fromisoformat(
+            node.unregistered_at
+        ).timestamp()
 
         # Assert
         assert len(retrieved_nodes) == 1
-        assert retrieved_nodes[0].status == NodeStatus.DELETED
-        self.assertAlmostEqual(actual_deleted_at, expected_deleted_at, 2)
+        assert retrieved_nodes[0].status == NodeStatus.UNREGISTERED
+        self.assertAlmostEqual(actual_unregistered_at, expected_unregistered_at, 2)
 
     def test_delete_node_owner_mismatch(self) -> None:
         """Test deleting a client node with owner mismatch."""
@@ -834,6 +836,20 @@ class StateTest(CoreStateTest):
         # Assert
         assert retrieved_node_id is not None
         assert retrieved_node_id == node_id
+
+    def test_get_node_id_by_public_key_of_deleted_node(self) -> None:
+        """Test get_node_id_by_public_key of a deleted node."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        public_key = b"mock"
+        node_id = state.create_node("fake_aid", public_key, 10)
+
+        # Execute
+        state.delete_node("fake_aid", node_id)
+        retrieved_node_id = state.get_node_id_by_public_key(public_key)
+
+        # Assert
+        assert retrieved_node_id is None
 
     def test_num_message_ins(self) -> None:
         """Test if num_message_ins returns correct number of not delivered Messages."""

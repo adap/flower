@@ -20,10 +20,8 @@ esac
 case "$2" in
     client-auth)
       server_auth='--enable-supernode-auth'
-      client_auth_1='--auth-supernode-private-key ../keys/client_credentials_1 
-                     --auth-supernode-public-key  ../keys/client_credentials_1.pub'
-      client_auth_2='--auth-supernode-private-key ../keys/client_credentials_2 
-                     --auth-supernode-public-key  ../keys/client_credentials_2.pub'
+      client_auth_1='--auth-supernode-private-key ../keys/client_credentials_1'
+      client_auth_2='--auth-supernode-private-key ../keys/client_credentials_2'
       server_address='127.0.0.1:9092'
       ;;
     *)
@@ -80,9 +78,9 @@ sl_pid=$(pgrep -f "flower-superlink")
 sleep 2
 
 if [ "$2" = "client-auth" ] && [ "$3" = "deployment-engine" ]; then
-  # Create two SuperNodes using the Flower CLI
-  flwr supernode create ../keys/client_credentials_1.pub ../e2e-tmp-test e2e
-  flwr supernode create ../keys/client_credentials_2.pub ../e2e-tmp-test e2e
+  # Register two SuperNodes using the Flower CLI
+  flwr supernode register ../keys/client_credentials_1.pub ../e2e-tmp-test e2e
+  flwr supernode register ../keys/client_credentials_2.pub ../e2e-tmp-test e2e
 fi
 
 if [ "$3" = "deployment-engine" ]; then

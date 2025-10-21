@@ -43,12 +43,12 @@ jobs:
           curl $tar_url --output $tar_name
       - name: Upload wheel
         env:
-          AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.ARTIFACT_AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.ARTIFACT_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.ARTIFACT_AWS_SECRET_KEY_ID }}
         run: |
-          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./${{ env.WHEEL_NAME }} s3://${{ env.ARTIFACT_BUCKET }}/py/release/v${{ env.TAG_NAME }}/${{ env.WHEEL_NAME }}
-          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./${{ env.TAR_NAME }} s3://${{ env.ARTIFACT_BUCKET }}/py/release/v${{ env.TAG_NAME }}/${{ env.TAR_NAME }}
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./${{ env.WHEEL_NAME }} s3://${{ secrets.ARTIFACT_AWS_BUCKET_NAME }}/py/release/v${{ env.TAG_NAME }}/${{ env.WHEEL_NAME }}
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./${{ env.TAR_NAME }} s3://${{ secrets.ARTIFACT_AWS_BUCKET_NAME }}/py/release/v${{ env.TAG_NAME }}/${{ env.TAR_NAME }}
 
       - name: Generate body
         run: |
