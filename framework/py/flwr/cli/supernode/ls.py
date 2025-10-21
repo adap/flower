@@ -185,12 +185,12 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
 
     # Add columns
     table.add_column(
-        Text("Node ID", justify="center"), style="bright_white", no_wrap=True
+        Text("Node ID", justify="center"), style="bright_black", no_wrap=True
     )
     table.add_column(Text("Owner", justify="center"))
     table.add_column(Text("Status", justify="center"))
     table.add_column(Text("Elapsed", justify="center"))
-    table.add_column(Text("Status Changed @", justify="center"), style="dim white")
+    table.add_column(Text("Status Changed @", justify="center"), style="bright_black")
 
     for row in nodes_info:
         (
