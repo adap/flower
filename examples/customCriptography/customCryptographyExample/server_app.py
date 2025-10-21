@@ -43,12 +43,8 @@ class FedAvgWithServerEval(FedAvg):
 from flwr.common import NDArrays, Scalar
 from typing import Dict, Optional, Tuple
 import torch
-from flwr.common import parameters_to_weights
 
-def set_model_params(model, parameters):
-    weights = parameters_to_weights(parameters)
-    state_dict = dict(zip(model.state_dict().keys(), weights))
-    model.load_state_dict(state_dict, strict=True)
+
 
 def get_evaluate_fn():
     """Restituisce una funzione che valuta il modello globale sul server, come negli esempi ufficiali Flower."""
