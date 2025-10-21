@@ -18,23 +18,29 @@
 import abc
 from typing import Optional
 
-from ..sqlite_mixin import SqliteMixin
+from flwr.supercore.sqlite_mixin import SqliteMixin
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from .object_store import NoObjectInStoreError, ObjectStore
+from flwr.common.inflatable import (
+    get_object_id,
+    is_valid_sha256_hash,
+    iterate_object_tree,
+)
+from flwr.common.inflatable_utils import validate_object_content
 
 
 SQL_CREATE_OBJECTS = """
 CREATE TABLE IF NOT EXISTS objects (
-    object_id       TEXT PRIMARY KEY,
-    content         BLOB,
-    is_available    INTEGER NOT NULL CHECK (is_available IN (0,1)),
-    ref_count       INTEGER NOT NULL,
+    object_id               TEXT PRIMARY KEY,
+    content                 BLOB,
+    is_available            INTEGER NOT NULL CHECK (is_available IN (0,1)),
+    ref_count               INTEGER NOT NULL,
 );
 """
 SQL_CREATE_OBJECT_CHILDREN = """
 CREATE TABLE IF NOT EXISTS object_children (
-    parent_id       TEXT NOT NULL,
-    child_id        TEXT NOT NULL,
+    parent_id               TEXT NOT NULL,
+    child_id                TEXT NOT NULL,
     FOREIGN KEY (parent_id) REFERENCES objects(object_id) ON DELETE CASCADE,
     FOREIGN KEY (child_id)  REFERENCES objects(object_id) ON DELETE CASCADE,
     PRIMARY KEY (parent_id, child_id)
@@ -42,8 +48,8 @@ CREATE TABLE IF NOT EXISTS object_children (
 """
 SQL_CREATE_RUN_OBJECTS = """
 CREATE TABLE IF NOT EXISTS run_objects (
-    run_id INTEGER NOT NULL,
-    object_id TEXT NOT NULL,
+    run_id                  INTEGER NOT NULL,
+    object_id               TEXT NOT NULL,
     FOREIGN KEY (object_id) REFERENCES objects(object_id) ON DELETE CASCADE,
     PRIMARY KEY (run_id, object_id)
 );
@@ -53,87 +59,162 @@ CREATE TABLE IF NOT EXISTS run_objects (
 class SqliteObjectStore(ObjectStore, SqliteMixin):
     """SQLite-based implementation of the ObjectStore interface."""
 
+    def __init__(self, database_path: str, verify: bool = True) -> None:
+        super().__init__(database_path)
+        self.verify = verify
+
+    def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
+        """Connect to the DB, enable FK support, and create tables if needed."""
+        return self._ensure_initialized(
+            SQL_CREATE_OBJECTS,
+            SQL_CREATE_OBJECT_CHILDREN,
+            SQL_CREATE_RUN_OBJECTS,
+            log_queries=log_queries
+        )
+
     def preregister(self, run_id: int, object_tree: ObjectTree) -> list[str]:
-        """Identify and preregister missing objects in the `ObjectStore`.
+        """Identify and preregister missing objects in the `ObjectStore`."""
+        new_objects = []
+        for tree_node in iterate_object_tree(object_tree):
+            obj_id = tree_node.object_id
+            if not is_valid_sha256_hash(obj_id):
+                raise ValueError(f"Invalid object ID format: {obj_id}")
 
-        Parameters
-        ----------
-        run_id : int
-            The ID of the run for which to preregister objects.
-        object_tree : ObjectTree
-            The object tree containing the IDs of objects to preregister.
-            This tree should contain all objects that are expected to be
-            stored in the `ObjectStore`.
+            child_ids = [child.object_id for child in tree_node.children]
+            with self.conn:
+                row = self.conn.execute(
+                    "SELECT object_id, is_available FROM objects WHERE object_id=?",
+                    (obj_id,)
+                ).fetchone()
+                if row is None:
+                    # Insert new object
+                    self.conn.execute(
+                        "INSERT INTO objects"
+                        "(object_id, content, is_available, ref_count) VALUES (?, ?)",
+                        (obj_id, b"", 0, 0)
+                    )
+                    for cid in child_ids:
+                        self.conn.execute(
+                            "INSERT INTO object_children(parent_id, child_id) "
+                            "VALUES (?, ?)",
+                            (obj_id, cid),
+                        )
+                        self.conn.execute(
+                            "UPDATE objects SET ref_count = ref_count + 1 "
+                            "WHERE object_id = ?",
+                            (cid,),
+                        )
+                    new_objects.append(obj_id)
+                else:
+                    # Add to the list of new objects if not available
+                    if not row["is_available"]:
+                        new_objects.append(obj_id)
 
-        Returns
-        -------
-        list[str]
-            A list of object IDs that were either not previously preregistered
-            in the `ObjectStore`, or were preregistered but are not yet available.
-        """
+                # Ensure run mapping
+                self.conn.execute(
+                    "INSERT OR IGNORE INTO run_objects(run_id, object_id) "
+                    "VALUES (?, ?)",
+                    (run_id, obj_id),
+                )
+        return new_objects
 
     @abc.abstractmethod
     def get_object_tree(self, object_id: str) -> ObjectTree:
-        """Get the object tree for a given object ID.
+        """Get the object tree for a given object ID."""
+        with self.conn:
+            row = self.conn.execute(
+                "SELECT object_id FROM objects WHERE object_id=?", (object_id,)
+            ).fetchone()
+            if not row:
+                raise NoObjectInStoreError(f"Object {object_id} not found.")
+            children = self.query(
+                "SELECT child_id FROM object_children WHERE parent_id=?", (object_id,)
+            )
 
-        Parameters
-        ----------
-        object_id : str
-            The ID of the object for which to retrieve the object tree.
+            # Build the object trees of all children
+            try:
+                child_trees = [self.get_object_tree(ch["child_id"]) for ch in children]
+            except NoObjectInStoreError as e:
+                # Raise an error if any child object is missing
+                # This indicates an integrity issue
+                raise NoObjectInStoreError(
+                    f"Object tree for object ID '{object_id}' contains missing "
+                    "children. This may indicate a corrupted object store."
+                ) from e
 
-        Returns
-        -------
-        ObjectTree
-            An ObjectTree representing the hierarchical structure of the object with
-            the given ID and its descendants.
-        """
+            # Create and return the ObjectTree for the current object
+            return ObjectTree(object_id=object_id, children=child_trees)
 
-    @abc.abstractmethod
     def put(self, object_id: str, object_content: bytes) -> None:
-        """Put an object into the store.
+        """Put an object into the store."""
+        if self.verify:
+            # Verify object_id and object_content match
+            object_id_from_content = get_object_id(object_content)
+            if object_id != object_id_from_content:
+                raise ValueError(f"Object ID {object_id} does not match content hash")
 
-        Parameters
-        ----------
-        object_id : str
-            The object_id under which to store the object. Must be preregistered.
-        object_content : bytes
-            The deflated object to store.
-        """
+            # Validate object content
+            validate_object_content(content=object_content)
 
-    @abc.abstractmethod
+        with self.conn:
+            # Only allow adding the object if it has been preregistered
+            row = self.conn.execute(
+                "SELECT is_available FROM objects WHERE object_id=?", (object_id,)
+            ).fetchone()
+            if row is None:
+                raise NoObjectInStoreError(
+                    f"Object with ID '{object_id}' was not pre-registered."
+                )
+
+            # Return if object is already present in the store
+            if row["is_available"]:
+                return
+
+            # Update the object entry in the store
+            self.conn.execute(
+                "UPDATE objects SET content=?, is_available=1 WHERE object_id=?",
+                (object_content, object_id),
+            )
+
     def get(self, object_id: str) -> Optional[bytes]:
-        """Get an object from the store.
+        """Get an object from the store."""
+        rows = self.query("SELECT content FROM objects WHERE object_id=?", (object_id,))
+        return rows[0]["content"] if rows else None
 
-        Parameters
-        ----------
-        object_id : str
-            The object_id under which the object is stored.
-
-        Returns
-        -------
-        Optional[bytes]
-            The object stored under the given object_id if it exists, else None.
-            The returned bytes will be b"" if the object is not yet available,
-            but has been preregistered.
-        """
-
-    @abc.abstractmethod
     def delete(self, object_id: str) -> None:
-        """Delete an object and its unreferenced descendants from the store.
+        """Delete an object and its unreferenced descendants from the store."""
+        with self.conn:
+            row = self.conn.execute(
+                "SELECT ref_count FROM objects WHERE object_id=?", (object_id,)
+            ).fetchone()
 
-        This method attempts to recursively delete the specified object and its
-        descendants, if they are not referenced by any other object.
+            # If the object is not in the store, nothing to delete
+            if row is None:
+                return
+            
+            # Skip deletion if there are still references
+            if row["ref_count"] > 0:
+                return
 
-        Parameters
-        ----------
-        object_id : str
-            The object_id under which the object is stored.
+            # Deleting will cascade via FK, but we need to decrement children first
+            children = self.conn.execute(
+                "SELECT child_id FROM object_children WHERE parent_id=?", (object_id,)
+            ).fetchall()
+            child_ids = [child["child_id"] for child in children]
 
-        Notes
-        -----
-        The object of the given object_id will NOT be deleted if it is still referenced
-        by any other object in the store.
-        """
+            if child_ids:
+                placeholders = ", ".join("?" for _ in child_ids)
+                query = f"""
+                    UPDATE objects SET ref_count = ref_count - 1
+                    WHERE object_id IN ({placeholders})
+                """
+                self.conn.execute(query, child_ids)
+
+            self.conn.execute("DELETE FROM objects WHERE object_id=?", (object_id,))
+
+            # Recursively clean children
+            for child_id in child_ids:
+                self.delete(child_id)
 
     @abc.abstractmethod
     def delete_objects_in_run(self, run_id: int) -> None:
