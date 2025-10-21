@@ -81,7 +81,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
                 raise ValueError(f"Invalid object ID format: {obj_id}")
 
             child_ids = [child.object_id for child in tree_node.children]
-            with self.conn:
+            with self.transaction():
                 row = self.conn.execute(
                     "SELECT object_id, is_available FROM objects WHERE object_id=?",
                     (obj_id,)
@@ -121,7 +121,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
     @abc.abstractmethod
     def get_object_tree(self, object_id: str) -> ObjectTree:
         """Get the object tree for a given object ID."""
-        with self.conn:
+        with self.transaction():
             row = self.conn.execute(
                 "SELECT object_id FROM objects WHERE object_id=?", (object_id,)
             ).fetchone()
@@ -156,7 +156,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
             # Validate object content
             validate_object_content(content=object_content)
 
-        with self.conn:
+        with self.transaction():
             # Only allow adding the object if it has been preregistered
             row = self.conn.execute(
                 "SELECT is_available FROM objects WHERE object_id=?", (object_id,)
@@ -183,7 +183,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
 
     def delete(self, object_id: str) -> None:
         """Delete an object and its unreferenced descendants from the store."""
-        with self.conn:
+        with self.transaction():
             row = self.conn.execute(
                 "SELECT ref_count FROM objects WHERE object_id=?", (object_id,)
             ).fetchone()
@@ -219,7 +219,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
     @abc.abstractmethod
     def delete_objects_in_run(self, run_id: int) -> None:
         """Delete all objects that were registered in a specific run."""
-        with self.conn:
+        with self.transaction():
             objs = self.conn.execute(
                 "SELECT object_id FROM run_objects WHERE run_id=?", (run_id,)
             ).fetchall()
@@ -232,12 +232,9 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
                     self.delete(object_id)
             self.conn.execute("DELETE FROM run_objects WHERE run_id=?", (run_id,))
 
-    @abc.abstractmethod
     def clear(self) -> None:
-        """Clear the store.
-
-        This method should remove all objects from the store.
-        """
+        """Clear the store."""
+        
 
     @abc.abstractmethod
     def __contains__(self, object_id: str) -> bool:
