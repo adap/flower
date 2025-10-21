@@ -41,8 +41,9 @@ class ExitCode:
 
     # SuperNode-specific exit codes (300-399)
     SUPERNODE_REST_ADDRESS_INVALID = 300
-    SUPERNODE_NODE_AUTH_KEYS_REQUIRED = 301
-    SUPERNODE_NODE_AUTH_KEYS_INVALID = 302
+    # SUPERNODE_NODE_AUTH_KEYS_REQUIRED = 301 --- DELETED ---
+    SUPERNODE_NODE_AUTH_KEY_INVALID = 302
+    SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED = 303
 
     # SuperExec-specific exit codes (400-499)
     SUPEREXEC_INVALID_PLUGIN_CONFIG = 400
@@ -105,15 +106,14 @@ EXIT_CODE_HELP = {
         "When using the REST API, please provide `https://` or "
         "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
     ),
-    ExitCode.SUPERNODE_NODE_AUTH_KEYS_REQUIRED: (
-        "Node authentication requires file paths to both "
-        "'--auth-supernode-private-key' and '--auth-supernode-public-key' "
-        "to be provided (providing only one of them is not sufficient)."
-    ),
-    ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID: (
-        "Node authentication requires elliptic curve private and public key pair. "
-        "Please ensure that the file path points to a valid private/public key "
+    ExitCode.SUPERNODE_NODE_AUTH_KEY_INVALID: (
+        "Node authentication requires elliptic curve private key. "
+        "Please ensure that the file path points to a valid private key "
         "file and try again."
+    ),
+    ExitCode.SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED: (
+        "The private key for SuperNode authentication was provided, but TLS is not "
+        "enabled. Node authentication can only be used when TLS is enabled."
     ),
     # SuperExec-specific exit codes (400-499)
     ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (

@@ -2,6 +2,10 @@
 .. meta::
     :description: Enable authentication for SuperNodes and SuperLink in Flower with public key authentication, securing federated learning via TLS connections.
 
+.. |flower_cli_supernode_link| replace:: ``Flower CLI``
+
+.. _flower_cli_supernode_link: ref-api-cli.html#flwr-supernode
+
 Authenticate SuperNodes
 =======================
 
@@ -12,20 +16,27 @@ authenticate SuperNodes that connect to a running SuperLink:
 
 - **Automatic authentication**: In this mode, the SuperLink checks the timestamp-based
   signature in each request from SuperNodes to prevent impersonation and replay attacks.
-- **CSV-based authentication**: This mode functions similarly to automatic
-  authentication but requires the SuperLink to be provided with a list of authorized
-  public keys, allowing only those SuperNodes to connect.
+  The goal of this mode is to confirm the identity of connected SuperNodes; however, it
+  does **not** restrict which SuperNodes can connect to the SuperLink. Consequently, any
+  SuperNode is allowed to connect to the SuperLink.
+- **CLI-managed authentication**: This mode operates similarly to automatic
+  authentication but requires starting the SuperLink with the
+  ``--enable-supernode-auth`` flag. To connect a SuperNode to the SuperLink, its public
+  key must first be registered using the |flower_cli_supernode_link|_. Only registered
+  SuperNodes are permitted to connect to the SuperLink, making this mode more secure by
+  restricting connections to authorized SuperNodes only.
 
 The automatic authentication mode works out of the box and therefore requires no
-configuration. On the other hand, CSV-based authentication mode is more sophisticated
+configuration. On the other hand, CLI-managed authentication mode is more sophisticated
 and how it works and how it can be used is presented reminder of this guide. Flower's
-CSV-based node authentication leverages a signature-based mechanism to verify each
-node's identity and is only available when encrypted connections (SSL/TLS) are enabled:
+CLI-managed SuperNode authentication leverages a signature-based mechanism to verify
+each SuperNode's identity and is only available when encrypted connections (SSL/TLS) are
+enabled:
 
 - Each SuperNode must already possess a unique Elliptic Curve (EC) public/private key
   pair.
 - The SuperLink (server) maintains a whitelist of EC public keys for all trusted
-  SuperNodes (clients).
+  SuperNodes (clients), managed through the Flower CLI.
 - A SuperNode signs a timestamp with its private key and sends the signed timestamp to
   the SuperLink.
 - The SuperLink verifies the signature and timestamp using the SuperNode's public key.
@@ -41,10 +52,6 @@ node's identity and is only available when encrypted connections (SSL/TLS) are e
     Checkout the `Flower Authentication
     <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_ example
     for a complete self-contained example on how to setup TLS and node authentication.
-
-.. note::
-
-    This guide covers a preview feature that might change in future versions of Flower.
 
 Generate authentication keys
 ----------------------------
@@ -82,48 +89,153 @@ that the authentication feature can only be enabled in the presence of TLS.
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
-        --auth-list-public-keys keys/client_public_keys.csv
+        --enable-supernode-auth
 
 .. dropdown:: Understand the command
 
-    * ``--auth-list-public-keys``: Specify the path to a CSV file storing the public keys of all SuperNodes that should be allowed to connect with the SuperLink. A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas. Refer to the code sample, which contains a CSV file with two known node public keys.
+    * ``--enable-supernode-auth``: Enables SuperNode authentication therefore only Supernodes that are first register on the SuperLink will be able to establish a connection.
+
+Register SuperNodes
+-------------------
+
+Once your SuperLink is running, the next step is to register the SuperNodes that will be
+allowed to connect to it. This process is handled through the
+|flower_cli_supernode_link|_ using the public keys previously generated for each
+SuperNode you plan to connect to the SuperLink.
+
+Here's how this looks in code:
+
+.. code-block:: bash
+
+    # flwr supernode register <supernode-pub-key> <app> <federation>
+    $ flwr supernode register keys/client_credentials_1.pub . local-deployment
+
+Next, let’s register the second SuperNode as well:
+
+.. code-block:: bash
+
+    $ flwr supernode register keys/client_credentials_2.pub . local-deployment
+
+You can list the registered SuperNodes using the following command:
+
+.. code-block:: bash
+
+    # flwr supernode list <app> <federation>
+    $ flwr supernode list . local-deployment
+
+This will display the IDs of the SuperNodes you just registered as well as their status.
+You should see a table similar to the following:
+
+.. code-block:: bash
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃       Node ID        ┃   Owner    ┃   Status   ┃ Elapsed  ┃   Status Changed @   ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+    │ 16019329408659850374 │   <none>   │ registered │          │ N/A                  │
+    ├──────────────────────┼────────────┼────────────┼──────────┼──────────────────────┤
+    │ 8392976743692794070  │   <none>   │ registered │          │ N/A                  │
+    └──────────────────────┴────────────┴────────────┴──────────┴──────────────────────┘
+
+The status of the SuperNodes will change after they connect to the SuperLink. Let's
+proceed and laucnh the SuperNodes.
 
 Enable node authentication in SuperNode
 ---------------------------------------
 
 Connecting a SuperNode to a SuperLink that has node authentication enabled requires
-passing two additional arguments (i.e. the public and private keys of the SuperNode) in
-addition to the TLS certificate.
+passing one additional argument (i.e. the private key of the SuperNode) in addition to
+the TLS certificate.
 
 .. code-block:: bash
-    :emphasize-lines: 6, 7
+    :emphasize-lines: 6
 
     $ flower-supernode \
         --root-certificates certificates/ca.crt \
         --superlink 127.0.0.1:9092 \
         --clientappio-api-address 0.0.0.0:9094 \
         --node-config="partition-id=0 num-partitions=2" \
-        --auth-supernode-private-key keys/client_credentials_1 \
-        --auth-supernode-public-key keys/client_credentials_1.pub
+        --auth-supernode-private-key keys/client_credentials_1
 
 .. dropdown:: Understand the command
 
     * ``--auth-supernode-private-key``: the private key of this SuperNode.
-    * | ``--auth-supernode-public-key``: the public key of this SuperNode (which should be the same that was added to othe CSV used by the SuperLink).
 
 Follow the same procedure to launch the second SuperNode by passing its corresponding
-key pair:
+private key:
 
 .. code-block:: bash
-    :emphasize-lines: 6, 7
+    :emphasize-lines: 6
 
     $ flower-supernode \
         --root-certificates certificates/ca.crt \
         --superlink 127.0.0.1:9092 \
         --clientappio-api-address 0.0.0.0:9095 \
         --node-config="partition-id=1 num-partitions=2" \
-        --auth-supernode-private-key keys/client_credentials_2 \
-        --auth-supernode-public-key keys/client_credentials_2.pub
+        --auth-supernode-private-key keys/client_credentials_2
+
+After connecting both SuperNodes, you can check the status of the SuperNodes again. You
+will notice their status is now ``online``:
+
+.. code-block:: bash
+
+    $ flwr supernode list . local-deployment
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+    │ 16019329408659850374 │   <none>   │ online  │ 00:00:30 │ 2025-10-13 13:40:47Z │
+    ├──────────────────────┼────────────┼─────────┼──────────┼──────────────────────┤
+    │ 8392976743692794070  │   <none>   │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
+    └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
+
+Unregister SuperNodes
+---------------------
+
+.. warning::
+
+    This is a destructive operation. Unregistering a SuperNode is permanent and cannot
+    be undone. If you wish to connect a SuperNode again, a new key pair is needed.
+
+At anypoint you can unregister a SuperNode from the SuperLink (even if it has never
+connected). This will prevent the SuperNode from making future request to the SuperLink.
+In other words, it will no longer be authorized to pull/send, or participate in ongoing
+or future runs. Unregistering a SuperNode can be done via the
+|flower_cli_supernode_link|_ as follows:
+
+.. code-block:: bash
+
+    # flwr supernode unregister <node-id> <app> <federation>
+    $ flwr supernode unregister 16019329408659850374 . local-deployment
+
+The above command unregisters the first SuperNode. You can verify this by listing the
+SuperNodes again:
+
+.. code-block:: bash
+
+    $ flwr supernode list . local-deployment
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+    │ 8392976743692794070  │   <none>   │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
+    └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
+
+If you pass the ``--verbose`` flag to the previous command you'll see that the status of
+the unregistered SuperNode has changed to ``unregistered``. By default, unregistered
+SuperNodes are hidden because they can no longer reconnect to the SuperLink. That's
+right, **if you wish to connect a second SuperNode a new EC key pair is needed.**
+
+.. code-block:: bash
+
+    $ flwr supernode list . local-deployment --verbose
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃       Node ID        ┃   Owner    ┃    Status   ┃ Elapsed  ┃   Status Changed @   ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+    │ 16019329408659850374 │   <none>   │    online   │ 00:00:30 │ 2025-10-13 13:40:47Z │
+    ├──────────────────────┼────────────┼─────────────┼──────────┼──────────────────────┤
+    │ 8392976743692794070  │   <none>   │ unregisterd │ 00:00:22 │ 2025-10-13 13:52:21Z │
+    └──────────────────────┴────────────┴─────────────┴──────────┴──────────────────────┘
 
 Security notice
 ---------------
