@@ -262,6 +262,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     node_id: self.nodes[node_id].online_until
                     for node_id in dst_node_ids
                     if node_id in self.nodes
+                    and self.nodes[node_id].status != NodeStatus.UNREGISTERED
                 },
                 current_time=current,
             )
@@ -380,7 +381,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 )
 
             node.status = NodeStatus.UNREGISTERED
-            node.unregistered_at = now().isoformat()
+            current = now()
+            node.unregistered_at = current.isoformat()
+            # Set online_until to current timestamp on deletion, if it is in the future
+            node.online_until = min(node.online_until, current.timestamp())
 
     def get_nodes(self, run_id: int) -> set[int]:
         """Return all available nodes.
