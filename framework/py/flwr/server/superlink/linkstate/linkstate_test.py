@@ -780,6 +780,7 @@ class StateTest(CoreStateTest):
         assert len(retrieved_nodes) == 1
         assert retrieved_nodes[0].status == NodeStatus.UNREGISTERED
         self.assertAlmostEqual(actual_unregistered_at, expected_unregistered_at, 2)
+        self.assertAlmostEqual(node.online_until, expected_unregistered_at, 2)
 
     def test_delete_node_owner_mismatch(self) -> None:
         """Test deleting a client node with owner mismatch."""

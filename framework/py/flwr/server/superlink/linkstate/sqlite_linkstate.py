@@ -663,13 +663,17 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         query = """
             UPDATE node
-            SET status = ?, unregistered_at = ?
+            SET status = ?, unregistered_at = ?,
+            online_until = IIF(online_until > ?, ?, online_until)
             WHERE node_id = ? AND status != ? AND owner_aid = ?
             RETURNING node_id
         """
+        current = now()
         params = (
             NodeStatus.UNREGISTERED,
-            now().isoformat(),
+            current.isoformat(),
+            current.timestamp(),
+            current.timestamp(),
             sint64_node_id,
             NodeStatus.UNREGISTERED,
             owner_aid,
