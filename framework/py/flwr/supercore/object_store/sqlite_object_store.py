@@ -218,17 +218,19 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
 
     @abc.abstractmethod
     def delete_objects_in_run(self, run_id: int) -> None:
-        """Delete all objects that were registered in a specific run.
-
-        Parameters
-        ----------
-        run_id : int
-            The ID of the run for which to delete objects.
-
-        Notes
-        -----
-        Objects that are still registered in other runs will NOT be deleted.
-        """
+        """Delete all objects that were registered in a specific run."""
+        with self.conn:
+            objs = self.conn.execute(
+                "SELECT object_id FROM run_objects WHERE run_id=?", (run_id,)
+            ).fetchall()
+            for obj in objs:
+                object_id = obj["object_id"]
+                row = self.conn.execute(
+                    "SELECT ref_count FROM objects WHERE object_id=?", (object_id,)
+                ).fetchone()
+                if row and row["ref_count"] == 0:
+                    self.delete(object_id)
+            self.conn.execute("DELETE FROM run_objects WHERE run_id=?", (run_id,))
 
     @abc.abstractmethod
     def clear(self) -> None:
