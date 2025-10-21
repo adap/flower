@@ -649,15 +649,15 @@ class StateTest(CoreStateTest):
         public_key = b"mock"
 
         # Execute
-        expected_created_at = now().timestamp()
+        expected_registered_at = now().timestamp()
         node_id = state.create_node("fake_aid", public_key, 10)
         node = state.get_node_info(node_ids=[node_id])[0]
-        actual_created_at = datetime.fromisoformat(node.created_at).timestamp()
+        actual_registered_at = datetime.fromisoformat(node.registered_at).timestamp()
 
         # Assert
         assert node.node_id == node_id
         assert node.public_key == public_key
-        self.assertAlmostEqual(actual_created_at, expected_created_at, 2)
+        self.assertAlmostEqual(actual_registered_at, expected_registered_at, 2)
 
     def test_create_node_public_key_twice(self) -> None:
         """Test creating a client node with same public key twice."""
@@ -730,13 +730,13 @@ class StateTest(CoreStateTest):
         state.delete_node("mock_flwr_aid", node_deleted)
 
         # Execute
-        infos = state.get_node_info(statuses=[NodeStatus.CREATED, NodeStatus.ONLINE])
+        infos = state.get_node_info(statuses=[NodeStatus.REGISTERED, NodeStatus.ONLINE])
         returned_statuses = {info.status for info in infos}
 
         # Assert: should only contain CREATED and ONLINE
-        self.assertTrue(NodeStatus.CREATED in returned_statuses)
+        self.assertTrue(NodeStatus.REGISTERED in returned_statuses)
         self.assertTrue(NodeStatus.ONLINE in returned_statuses)
-        self.assertFalse(NodeStatus.DELETED in returned_statuses)
+        self.assertFalse(NodeStatus.UNREGISTERED in returned_statuses)
 
     def test_get_node_info_multiple_filters(self) -> None:
         """Test get_node_info applies AND logic across filters."""
@@ -767,17 +767,20 @@ class StateTest(CoreStateTest):
         node_id = create_dummy_node(state)
 
         # Execute
-        expected_deleted_at = now().timestamp()
+        expected_unregistered_at = now().timestamp()
         state.delete_node("mock_flwr_aid", node_id)
         retrieved_nodes = state.get_node_info(node_ids=[node_id])
         assert len(retrieved_nodes) == 1
         node = retrieved_nodes[0]
-        actual_deleted_at = datetime.fromisoformat(node.deleted_at).timestamp()
+        actual_unregistered_at = datetime.fromisoformat(
+            node.unregistered_at
+        ).timestamp()
 
         # Assert
         assert len(retrieved_nodes) == 1
-        assert retrieved_nodes[0].status == NodeStatus.DELETED
-        self.assertAlmostEqual(actual_deleted_at, expected_deleted_at, 2)
+        assert retrieved_nodes[0].status == NodeStatus.UNREGISTERED
+        self.assertAlmostEqual(actual_unregistered_at, expected_unregistered_at, 2)
+        self.assertAlmostEqual(node.online_until, expected_unregistered_at, 2)
 
     def test_delete_node_owner_mismatch(self) -> None:
         """Test deleting a client node with owner mismatch."""
@@ -1017,17 +1020,19 @@ class StateTest(CoreStateTest):
         # Assert
         assert not is_successful
 
-    def test_node_unavailable_error(self) -> None:
+    def test_node_unavailable_error(self) -> None:  # pylint: disable=too-many-locals
         """Test if get_message_res return Message containing node unavailable error."""
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         node_id_0 = create_dummy_node(state)
         node_id_1 = create_dummy_node(state)
+        node_id_2 = create_dummy_node(state)
 
         # Run acknowledge heartbeat
         state.acknowledge_node_heartbeat(node_id_0, heartbeat_interval=90)
         state.acknowledge_node_heartbeat(node_id_1, heartbeat_interval=30)
+        state.acknowledge_node_heartbeat(node_id_2, heartbeat_interval=30)
 
         # Create and store Messages
         in_message_0 = message_from_proto(
@@ -1044,13 +1049,24 @@ class StateTest(CoreStateTest):
                 run_id=run_id,
             )
         )
+        in_message_2 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID,
+                dst_node_id=node_id_2,
+                run_id=run_id,
+            )
+        )
         message_id_0 = state.store_message_ins(in_message_0)
         message_id_1 = state.store_message_ins(in_message_1)
-        assert message_id_0 is not None and message_id_1 is not None
+        message_id_2 = state.store_message_ins(in_message_2)
+        assert message_id_0 and message_id_1 and message_id_2
 
         # Get Message to mark them delivered
         state.get_message_ins(node_id=node_id_0, limit=None)
         state.get_message_ins(node_id=node_id_1, limit=None)
+
+        # Delete the 3rd node to simulate unavailability
+        state.delete_node("mock_flwr_aid", node_id_2)
 
         # Create and store reply Messages
         res_message_0 = Message(content=RecordDict(), reply_to=in_message_0)
@@ -1067,17 +1083,19 @@ class StateTest(CoreStateTest):
         future_dt = now() + timedelta(seconds=100)
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = future_dt
-            res_message_list = state.get_message_res({message_id_0, message_id_1})
-            print(res_message_list[0])
-            print(f"{node_id_0=}, {node_id_1=}")
+            res_message_list = state.get_message_res(
+                {message_id_0, message_id_1, message_id_2}
+            )
+            msgs = {msg.metadata.reply_to_message_id: msg for msg in res_message_list}
 
         # Assert
-        assert len(res_message_list) == 2
-        # Note: res_message_list[0] corresponds to node_id_1
-        # due to the order change from get_message_res()
-        err_message = res_message_list[0]
-        assert err_message.has_error()
-        assert err_message.error.code == ErrorCode.NODE_UNAVAILABLE
+        assert len(res_message_list) == 3
+        reply_1 = msgs[message_id_1]  # Offline due to heartbeat timeout
+        assert reply_1.has_error()
+        assert reply_1.error.code == ErrorCode.NODE_UNAVAILABLE
+        reply_2 = msgs[message_id_2]  # Deleted node
+        assert reply_2.has_error()
+        assert reply_2.error.code == ErrorCode.NODE_UNAVAILABLE
 
     def test_store_message_res_message_ins_expired(self) -> None:
         """Test behavior of store_message_res when the Message it replies to is

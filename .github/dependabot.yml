@@ -78,6 +78,7 @@ updates:
       interval: "weekly"
 
   - package-ecosystem: "docker"
-    directory: "/framework/docker/base"
+    directories:
+      - "/framework/docker/base/**/*"
     schedule:
       interval: "weekly"

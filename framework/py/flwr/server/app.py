@@ -235,6 +235,17 @@ def run_superlink() -> None:
 
     # If supernode authentication is disabled, warn users
     enable_supernode_auth: bool = args.enable_supernode_auth
+    if enable_supernode_auth and args.insecure:
+        url_v = f"https://flower.ai/docs/framework/v{package_version}/en/"
+        page = "how-to-authenticate-supernodes.html"
+        flwr_exit(
+            ExitCode.SUPERLINK_INVALID_ARGS,
+            "The `--enable-supernode-auth` flag requires encrypted TLS communications. "
+            "Please provide TLS certificates using the `--ssl-certfile`, "
+            "`--ssl-keyfile` and `--ssl-ca-certfile` arguments to your SuperLink. "
+            "Please refer to the Flower documentation for more information: "
+            f"{url_v}{page}",
+        )
     if not enable_supernode_auth:
         log(
             WARN,
