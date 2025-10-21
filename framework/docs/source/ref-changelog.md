@@ -6,7 +6,7 @@
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Adam Tupper`, `Alan Yi`, `Alireza Ghasemi`, `Charles Beauville`, `Chong Shen Ng`, `Daniel Anoruo`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Heng Pan`, `Javier`, `Patrick Foley`, `Rohat Bozyil`, `combe4259`, `han97901` <!---TOKEN_v1.23.0-->
+`Adam Tupper`, `Alan Yi`, `Alireza Ghasemi`, `Charles Beauville`, `Chong Shen Ng`, `Daniel Anoruo`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Heng Pan`, `Javier`, `Patrick Foley`, `Rohat Bozyil`, `combe4259`, `han97901`, `maviva` <!---TOKEN_v1.23.0-->
 
 ### What's new?
 
@@ -32,7 +32,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Add deployment guide for multi-cluster OpenShift setups** ([#6001](https://github.com/adap/flower/pull/6001))
 
-- **Improve documentation** ([#5936](https://github.com/adap/flower/pull/5936), [#5937](https://github.com/adap/flower/pull/5937), [#5943](https://github.com/adap/flower/pull/5943), [#5949](https://github.com/adap/flower/pull/5949), [#5956](https://github.com/adap/flower/pull/5956), [#5958](https://github.com/adap/flower/pull/5958), [#5972](https://github.com/adap/flower/pull/5972), [#5976](https://github.com/adap/flower/pull/5976), [#5983](https://github.com/adap/flower/pull/5983), [#5996](https://github.com/adap/flower/pull/5996), [#6010](https://github.com/adap/flower/pull/6010), [#6018](https://github.com/adap/flower/pull/6018), [#6030](https://github.com/adap/flower/pull/6030))
+- **Improve documentation** ([#5936](https://github.com/adap/flower/pull/5936), [#5937](https://github.com/adap/flower/pull/5937), [#5943](https://github.com/adap/flower/pull/5943), [#5949](https://github.com/adap/flower/pull/5949), [#5956](https://github.com/adap/flower/pull/5956), [#5958](https://github.com/adap/flower/pull/5958), [#5972](https://github.com/adap/flower/pull/5972), [#5976](https://github.com/adap/flower/pull/5976), [#5983](https://github.com/adap/flower/pull/5983), [#5996](https://github.com/adap/flower/pull/5996), [#5999](https://github.com/adap/flower/pull/5999), [#6010](https://github.com/adap/flower/pull/6010), [#6018](https://github.com/adap/flower/pull/6018), [#6030](https://github.com/adap/flower/pull/6030))
 
 - **Update dependencies and CI** ([#5932](https://github.com/adap/flower/pull/5932), [#5941](https://github.com/adap/flower/pull/5941), [#5944](https://github.com/adap/flower/pull/5944), [#5964](https://github.com/adap/flower/pull/5964), [#6014](https://github.com/adap/flower/pull/6014), [#6020](https://github.com/adap/flower/pull/6020), [#6022](https://github.com/adap/flower/pull/6022), [#6024](https://github.com/adap/flower/pull/6024), [#6026](https://github.com/adap/flower/pull/6026))
 
