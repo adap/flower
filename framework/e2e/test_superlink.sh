@@ -42,7 +42,7 @@ case "$2" in
     server_address="127.0.0.1:9092"
     server_app_address="127.0.0.1:9091"
     db_arg="--database :flwr-in-memory-state:"
-    server_auth="--auth-list-public-keys keys/client_public_keys.csv"
+    server_auth="--enable-supernode-auth"
     client_auth_1="--auth-supernode-private-key keys/client_credentials_1 --auth-supernode-public-key keys/client_credentials_1.pub"
     client_auth_2="--auth-supernode-private-key keys/client_credentials_2 --auth-supernode-public-key keys/client_credentials_2.pub"
     ;;
@@ -76,6 +76,12 @@ fi
 timeout 5m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth &
 sl_pid=$(pgrep -f "flower-superlink")
 sleep 3
+
+if [ "$2" = "client-auth" ]; then
+  # Register two SuperNodes using the Flower CLI
+  flwr supernode register keys/client_credentials_1.pub "." e2e
+  flwr supernode register keys/client_credentials_2.pub "." e2e
+fi
 
 timeout 5m flower-supernode $client_arg $rest_arg_supernode \
   --superlink $server_address $client_auth_1 \

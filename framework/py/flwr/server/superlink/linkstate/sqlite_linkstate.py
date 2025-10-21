@@ -76,10 +76,10 @@ CREATE TABLE IF NOT EXISTS node(
     node_id                 INTEGER UNIQUE,
     owner_aid               TEXT,
     status                  TEXT,
-    created_at              TEXT,
+    registered_at           TEXT,
     last_activated_at       TEXT NULL,
     last_deactivated_at     TEXT NULL,
-    deleted_at              TEXT NULL,
+    unregistered_at         TEXT NULL,
     online_until            TIMESTAMP NULL,
     heartbeat_interval      REAL,
     public_key              BLOB UNIQUE
@@ -490,11 +490,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             sint_node_id = convert_uint64_to_sint64(in_message.metadata.dst_node_id)
             dst_node_ids.add(sint_node_id)
         query = f"""
-                    SELECT node_id, online_until
-                    FROM node
-                    WHERE node_id IN ({",".join(["?"] * len(dst_node_ids))});
-                """
-        rows = self.query(query, tuple(dst_node_ids))
+            SELECT node_id, online_until
+            FROM node
+            WHERE node_id IN ({",".join(["?"] * len(dst_node_ids))})
+            AND status != ?
+        """
+        rows = self.query(query, tuple(dst_node_ids) + (NodeStatus.UNREGISTERED,))
         tmp_ret_dict = check_node_availability_for_in_message(
             inquired_in_message_ids=message_ids,
             found_in_message_dict=found_message_ins_dict,
@@ -623,8 +624,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         query = """
             INSERT INTO node
-            (node_id, owner_aid, status, created_at, last_activated_at,
-            last_deactivated_at, deleted_at, online_until, heartbeat_interval,
+            (node_id, owner_aid, status, registered_at, last_activated_at,
+            last_deactivated_at, unregistered_at, online_until, heartbeat_interval,
             public_key)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
@@ -636,11 +637,11 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 (
                     sint64_node_id,  # node_id
                     owner_aid,  # owner_aid
-                    NodeStatus.CREATED,  # status
-                    now().isoformat(),  # created_at
+                    NodeStatus.REGISTERED,  # status
+                    now().isoformat(),  # registered_at
                     None,  # last_activated_at
                     None,  # last_deactivated_at
-                    None,  # deleted_at
+                    None,  # unregistered_at
                     None,  # online_until, initialized with offline status
                     heartbeat_interval,  # heartbeat_interval
                     public_key,  # public_key
@@ -662,15 +663,19 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         query = """
             UPDATE node
-            SET status = ?, deleted_at = ?
+            SET status = ?, unregistered_at = ?,
+            online_until = IIF(online_until > ?, ?, online_until)
             WHERE node_id = ? AND status != ? AND owner_aid = ?
             RETURNING node_id
         """
+        current = now()
         params = (
-            NodeStatus.DELETED,
-            now().isoformat(),
+            NodeStatus.UNREGISTERED,
+            current.isoformat(),
+            current.timestamp(),
+            current.timestamp(),
             sint64_node_id,
-            NodeStatus.DELETED,
+            NodeStatus.UNREGISTERED,
             owner_aid,
         )
 
@@ -775,7 +780,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Query the public key for the given node_id
         query = "SELECT public_key FROM node WHERE node_id = ? AND status != ?;"
-        rows = self.query(query, (sint64_node_id, NodeStatus.DELETED))
+        rows = self.query(query, (sint64_node_id, NodeStatus.UNREGISTERED))
 
         # If no result is found, return None
         if not rows:
@@ -783,6 +788,20 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Return the public key
         return cast(bytes, rows[0]["public_key"])
+
+    def get_node_id_by_public_key(self, public_key: bytes) -> Optional[int]:
+        """Get `node_id` for the specified `public_key` if it exists and is not
+        deleted."""
+        query = "SELECT node_id FROM node WHERE public_key = ? AND status != ?;"
+        rows = self.query(query, (public_key, NodeStatus.UNREGISTERED))
+
+        # If no result is found, return None
+        if not rows:
+            return None
+
+        # Convert sint64 node_id to uint64
+        node_id = convert_sint64_to_uint64(rows[0]["node_id"])
+        return node_id
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(
@@ -834,28 +853,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
-
-    def clear_supernode_auth_keys(self) -> None:
-        """Clear stored `node_public_keys` in the link state if any."""
-        self.query("DELETE FROM public_key;")
-
-    def store_node_public_keys(self, public_keys: set[bytes]) -> None:
-        """Store a set of `node_public_keys` in the link state."""
-        query = "INSERT INTO public_key (public_key) VALUES (?)"
-        data = [(key,) for key in public_keys]
-        self.query(query, data)
-
-    def store_node_public_key(self, public_key: bytes) -> None:
-        """Store a `node_public_key` in the link state."""
-        query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
-        self.query(query, {"public_key": public_key})
-
-    def get_node_public_keys(self) -> set[bytes]:
-        """Retrieve all currently stored `node_public_keys` as a set."""
-        query = "SELECT public_key FROM public_key"
-        rows = self.query(query)
-        result: set[bytes] = {row["public_key"] for row in rows}
-        return result
 
     def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
         """Retrieve all run IDs if `flwr_aid` is not specified.
@@ -1067,7 +1064,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             # Check if node exists and not deleted
             query = "SELECT status FROM node WHERE node_id = ? AND status != ?"
             row = self.conn.execute(
-                query, (sint64_node_id, NodeStatus.DELETED)
+                query, (sint64_node_id, NodeStatus.UNREGISTERED)
             ).fetchone()
             if row is None:
                 return False

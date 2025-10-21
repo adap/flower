@@ -54,6 +54,7 @@ from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, _make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
+from flwr.common.version import package_version
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
@@ -140,6 +141,19 @@ def start_client_internal(
     """
     if insecure is None:
         insecure = root_certificates is None
+
+    # Insecure HTTP is incompatible with authentication
+    if insecure and authentication_keys is not None:
+        url_v = f"https://flower.ai/docs/framework/v{package_version}/en/"
+        page = "how-to-authenticate-supernodes.html"
+        flwr_exit(
+            ExitCode.SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED,
+            "Insecure connection is enabled, but the SuperNode's private key is "
+            "provided for authentication. SuperNode authentication requires a "
+            "secure TLS connection with the SuperLink. Please enable TLS by "
+            "providing the certificate via `--root-certificates`. Please refer "
+            f"to the Flower documentation for more information: {url_v}{page}",
+        )
 
     # Initialize factories
     state_factory = NodeStateFactory()
