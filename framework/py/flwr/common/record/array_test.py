@@ -189,7 +189,6 @@ class TestArray(unittest.TestCase):
 
         # Ensure the number of children is the expected one
         expected_num_children = np.ceil(len(arr.data) / FLWR_MAX_ARRAY_CHUNK_SIZE)
-        print("Expected num children:", expected_num_children)
         assert len(arr.children) == expected_num_children
 
         arr_b = arr.deflate()
