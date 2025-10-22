@@ -272,7 +272,7 @@ def run_superlink() -> None:
     ffs_factory = FfsFactory(args.storage_dir)
 
     # Initialize ObjectStoreFactory
-    objectstore_factory = ObjectStoreFactory()
+    objectstore_factory = ObjectStoreFactory(args.database)
 
     # Start Control API
     is_simulation = args.simulation
@@ -710,9 +710,7 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--database",
         help="A string representing the path to the database "
-        "file that will be opened. Note that passing ':memory:' "
-        "will open a connection to a database that is in RAM, "
-        "instead of on disk. If nothing is provided, "
+        "file that will be opened. If nothing is provided, "
         "Flower will just create a state in memory.",
         default=DATABASE,
     )
