@@ -159,7 +159,7 @@ def server_evaluate(server_round: int, parameters: NDArrays):
 # ------------------------------
 def server_fn(context: Context):
     num_rounds = context.run_config["num-server-rounds"]
-    net = get_model(NET, num_classes=10, pretrained=True)
+    net = get_model(NET, num_classes=10, pretrained=False)
     ndarrays = get_weights(net)
     parameters = ndarrays_to_parameters(ndarrays)
     strategy = FedAvgWithServerEval(
