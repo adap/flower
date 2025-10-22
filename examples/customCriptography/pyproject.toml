@@ -28,8 +28,8 @@ clientapp = "customCryptographyExample.client_app:app"
 num-server-rounds = 1000
 fraction-evaluate = 0.5
 local-epochs = 1
-learning-rate = 0.1
-batch-size = 32
+learning-rate = 0.01
+batch-size = 128
 
 [tool.flwr.federations]
 default = "my-federation"
