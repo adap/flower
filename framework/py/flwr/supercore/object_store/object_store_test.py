@@ -389,8 +389,16 @@ class SqliteFileBasedObjectStoreTest(ObjectStoreTest):
 
     __test__ = True
 
+    def setUp(self) -> None:
+        """Set up the test case."""
+        self.temp_file = tempfile.NamedTemporaryFile()  # pylint: disable=R1732
+
+    def tearDown(self) -> None:
+        """Tear down the test case."""
+        self.temp_file.close()
+
     def object_store_factory(self) -> ObjectStore:
         """Return SqliteObjectStore."""
-        store = SqliteObjectStore(tempfile.NamedTemporaryFile().name)
+        store = SqliteObjectStore(self.temp_file.name)
         store.initialize()
         return store
