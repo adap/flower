@@ -62,6 +62,7 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_res_message
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import (
@@ -82,7 +83,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Initialize mock stub and server interceptor."""
         self.node_sk, self.node_pk = generate_key_pairs()
 
-        state_factory = LinkStateFactory(":flwr-in-memory-state:")
+        state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME)
         self.state = state_factory.state()
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         ffs_factory = FfsFactory(self.tmp_dir.name)

@@ -48,6 +48,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     UnregisterNodeRequest,
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.auth_plugin import NoOpControlAuthnPlugin
@@ -79,7 +80,7 @@ class TestControlServicer(unittest.TestCase):
         self.store = Mock()
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         self.servicer = ControlServicer(
-            linkstate_factory=LinkStateFactory(":flwr-in-memory-state:"),
+            linkstate_factory=LinkStateFactory(FLWR_IN_MEMORY_DB_NAME),
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(store=Mock(return_value=self.store)),
             is_simulation=False,
@@ -291,7 +292,7 @@ class TestControlServicerAuth(unittest.TestCase):
         """Set up test fixtures."""
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         self.servicer = ControlServicer(
-            linkstate_factory=LinkStateFactory(":flwr-in-memory-state:"),
+            linkstate_factory=LinkStateFactory(FLWR_IN_MEMORY_DB_NAME),
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(),
             is_simulation=False,

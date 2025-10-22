@@ -19,6 +19,7 @@ from logging import DEBUG
 from typing import Optional
 
 from flwr.common.logger import log
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 
 from .in_memory_object_store import InMemoryObjectStore
 from .object_store import ObjectStore
@@ -30,14 +31,14 @@ class ObjectStoreFactory:
 
     Parameters
     ----------
-    database : str (default: ":flwr-in-memory-store:")
+    database : str (default: ":flwr-in-memory:")
         A string representing the path to the database file that will be opened.
         Note that passing ":memory:" will open a connection to a database that is
-        in RAM, instead of on disk. And ":flwr-in-memory-store:" will create an
+        in RAM, instead of on disk. And ":flwr-in-memory:" will create an
         Python-based in-memory ObjectStore.
     """
 
-    def __init__(self, database: str = ":flwr-in-memory-store:") -> None:
+    def __init__(self, database: str = FLWR_IN_MEMORY_DB_NAME) -> None:
         self.database = database
         self.store_instance: Optional[ObjectStore] = None
 
@@ -50,7 +51,7 @@ class ObjectStoreFactory:
             An ObjectStore instance for storing objects by object_id.
         """
         # InMemoryObjectStore
-        if self.database == ":flwr-in-memory-store:":
+        if self.database == FLWR_IN_MEMORY_DB_NAME:
             if self.store_instance is None:
                 self.store_instance = InMemoryObjectStore()
             log(DEBUG, "Using InMemoryObjectStore")
