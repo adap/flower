@@ -15,11 +15,10 @@
 """Mixin providing common SQLite connection and initialization logic."""
 
 
-import contextlib
 import re
 import sqlite3
 from abc import ABC, abstractmethod
-from collections.abc import Iterator, Sequence
+from collections.abc import Sequence
 from logging import DEBUG, ERROR
 from typing import Any, Optional, Union
 
@@ -41,40 +40,6 @@ class SqliteMixin(ABC):
         if self._conn is None:
             raise AttributeError("Database not initialized. Call initialize() first.")
         return self._conn
-
-    @contextlib.contextmanager
-    def transaction(self) -> Iterator[None]:
-        """Context manager for a transaction.
-
-        This allows nesting of transactions by checking if a transaction is
-        already in progress.
-
-        Examples
-        --------
-        ::
-
-            with self.transaction():
-                # Do some DB operations here
-                ...
-                with self.transaction():
-                    # Do some more DB operations here
-                    ...
-        """
-        if self._conn is None:
-            raise AttributeError("Database not initialized. Call initialize() first.")
-
-        # Start a transaction if not already in one
-        if not self._conn.in_transaction:
-            self._conn.execute("BEGIN")
-            try:
-                yield
-                self._conn.commit()
-            except Exception:
-                self._conn.rollback()
-                raise
-        # Do nothing if already in a transaction
-        else:
-            yield
 
     @abstractmethod
     def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
@@ -127,6 +92,9 @@ class SqliteMixin(ABC):
             The list of all tables in the DB.
         """
         self._conn = sqlite3.connect(self.database_path)
+        # Enable Write-Ahead Logging (WAL) for better concurrency
+        self._conn.execute("PRAGMA journal_mode = WAL;")
+        self._conn.execute("PRAGMA synchronous = NORMAL;")
         self._conn.execute("PRAGMA foreign_keys = ON;")
         self._conn.row_factory = dict_factory
 
@@ -156,7 +124,7 @@ class SqliteMixin(ABC):
         query = re.sub(r"\s+", " ", query)
 
         try:
-            with self.transaction():
+            with self._conn:
                 if (
                     len(data) > 0
                     and isinstance(data, (tuple, list))
