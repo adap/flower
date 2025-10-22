@@ -166,7 +166,7 @@ def server_fn(context: Context):
         fraction_fit=0.2,
         fraction_evaluate=context.run_config["fraction-evaluate"],
         min_available_clients=1,
-        evaluate_fn=server_evaluate,
+        evaluate_fn=None,
         initial_parameters=parameters,
         evaluate_metrics_aggregation_fn=weighted_average,
         stop_criteria={"metric_ge": ("accuracy", ACCURACY)},
