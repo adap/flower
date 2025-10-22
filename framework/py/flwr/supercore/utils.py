@@ -30,3 +30,23 @@ def mask_string(value: str, head: int = 4, tail: int = 4) -> str:
     if len(value) <= head + tail:
         return value
     return f"{value[:head]}...{value[-tail:]}"
+
+
+def uint64_to_int64(unsigned: int) -> int:
+    """Convert a uint64 integer to a sint64 with the same bit pattern.
+
+    For values >= 2^63, wraps around by subtracting 2^64.
+    """
+    if unsigned >= (1 << 63):
+        return unsigned - (1 << 64)
+    return unsigned
+
+
+def int64_to_uint64(signed: int) -> int:
+    """Convert a sint64 integer to a uint64 with the same bit pattern.
+
+    For negative values, wraps around by adding 2^64.
+    """
+    if signed < 0:
+        return signed + (1 << 64)
+    return signed
