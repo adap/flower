@@ -34,7 +34,7 @@ class DummyDb(SqliteMixin):
 
 
 def test_transaction_serialization_with_tempfile() -> None:
-    """Verify that .conn runs inside real SQLite transactions."""
+    """Verify that `.conn` runs inside real SQLite transactions."""
     with tempfile.NamedTemporaryFile(suffix=".db") as tmpfile:
         # Prepare:
         def insert_row(_: int) -> None:
