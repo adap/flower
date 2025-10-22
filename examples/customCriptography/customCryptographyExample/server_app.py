@@ -162,7 +162,7 @@ def server_fn(context: Context):
     net = get_model(NET, num_classes=10, pretrained=True)
     ndarrays = get_weights(net)
     parameters = ndarrays_to_parameters(ndarrays)
-    strategy = FedAvgWithServerEval(
+    strategy = FedAvg(
         fraction_fit=0.2,
         fraction_evaluate=context.run_config["fraction-evaluate"],
         min_available_clients=1,
