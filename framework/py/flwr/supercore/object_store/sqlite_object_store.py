@@ -25,6 +25,7 @@ from flwr.common.inflatable import (
 from flwr.common.inflatable_utils import validate_object_content
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.sqlite_mixin import SqliteMixin
+from flwr.supercore.utils import uint64_to_int64
 
 from .object_store import NoObjectInStoreError, ObjectStore
 
@@ -80,7 +81,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
                 raise ValueError(f"Invalid object ID format: {obj_id}")
 
             child_ids = [child.object_id for child in tree_node.children]
-            with self.transaction():
+            with self.conn:
                 row = self.conn.execute(
                     "SELECT object_id, is_available FROM objects WHERE object_id=?",
                     (obj_id,),
@@ -114,13 +115,13 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
                 self.conn.execute(
                     "INSERT OR IGNORE INTO run_objects(run_id, object_id) "
                     "VALUES (?, ?)",
-                    (uint64_to_sint64(run_id), obj_id),
+                    (uint64_to_int64(run_id), obj_id),
                 )
         return new_objects
 
     def get_object_tree(self, object_id: str) -> ObjectTree:
         """Get the object tree for a given object ID."""
-        with self.transaction():
+        with self.conn:
             row = self.conn.execute(
                 "SELECT object_id FROM objects WHERE object_id=?", (object_id,)
             ).fetchone()
@@ -155,7 +156,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
             # Validate object content
             validate_object_content(content=object_content)
 
-        with self.transaction():
+        with self.conn:
             # Only allow adding the object if it has been preregistered
             row = self.conn.execute(
                 "SELECT is_available FROM objects WHERE object_id=?", (object_id,)
@@ -182,7 +183,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
 
     def delete(self, object_id: str) -> None:
         """Delete an object and its unreferenced descendants from the store."""
-        with self.transaction():
+        with self.conn:
             row = self.conn.execute(
                 "SELECT ref_count FROM objects WHERE object_id=?", (object_id,)
             ).fetchone()
@@ -217,8 +218,8 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
 
     def delete_objects_in_run(self, run_id: int) -> None:
         """Delete all objects that were registered in a specific run."""
-        run_id_sint = uint64_to_sint64(run_id)
-        with self.transaction():
+        run_id_sint = uint64_to_int64(run_id)
+        with self.conn:
             objs = self.conn.execute(
                 "SELECT object_id FROM run_objects WHERE run_id=?", (run_id_sint,)
             ).fetchall()
@@ -233,7 +234,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
 
     def clear(self) -> None:
         """Clear the store."""
-        with self.transaction():
+        with self.conn:
             self.conn.execute("DELETE FROM object_children;")
             self.conn.execute("DELETE FROM run_objects;")
             self.conn.execute("DELETE FROM objects;")
@@ -249,10 +250,3 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
         """Return the number of objects in the store."""
         row = self.conn.execute("SELECT COUNT(*) AS cnt FROM objects;").fetchone()
         return cast(int, row["cnt"])
-
-
-def uint64_to_sint64(unsigned: int) -> int:
-    """Convert a uint64 value to a sint64 value with the same bit sequence."""
-    if unsigned >= (1 << 63):
-        return unsigned - (1 << 64)
-    return unsigned
