@@ -391,10 +391,12 @@ class SqliteFileBasedObjectStoreTest(ObjectStoreTest):
 
     def setUp(self) -> None:
         """Set up the test case."""
+        super().setUp()
         self.temp_file = tempfile.NamedTemporaryFile()  # pylint: disable=R1732
 
     def tearDown(self) -> None:
         """Tear down the test case."""
+        super().tearDown()
         self.temp_file.close()
 
     def object_store_factory(self) -> ObjectStore:
