@@ -92,6 +92,9 @@ class SqliteMixin(ABC):
             The list of all tables in the DB.
         """
         self._conn = sqlite3.connect(self.database_path)
+        # Enable Write-Ahead Logging (WAL) for better concurrency
+        self._conn.execute("PRAGMA journal_mode = WAL;")
+        self._conn.execute("PRAGMA synchronous = NORMAL;")
         self._conn.execute("PRAGMA foreign_keys = ON;")
         self._conn.row_factory = dict_factory
 
