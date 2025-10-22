@@ -50,7 +50,7 @@ class ObjectStoreFactory:
             An ObjectStore instance for storing objects by object_id.
         """
         # InMemoryObjectStore
-        if self.database == ":flwr-in-memory-state:":
+        if self.database == ":flwr-in-memory-store:":
             if self.store_instance is None:
                 self.store_instance = InMemoryObjectStore()
             log(DEBUG, "Using InMemoryObjectStore")
