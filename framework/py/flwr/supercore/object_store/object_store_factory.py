@@ -31,7 +31,7 @@ class ObjectStoreFactory:
 
     Parameters
     ----------
-    database : str (default: ":flwr-in-memory:")
+    database : str (default: FLWR_IN_MEMORY_DB_NAME)
         A string representing the path to the database file that will be opened.
         Note that passing ":memory:" will open a connection to a database that is
         in RAM, instead of on disk. And ":flwr-in-memory:" will create an
