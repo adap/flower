@@ -164,9 +164,9 @@ def server_fn(context: Context):
 
     strategy = FedAvgWithServerEval(
         fraction_fit=0.2,
-        fraction_evaluate=0.0,
+        fraction_evaluate=1.0,
         min_available_clients=1,
-        evaluate_fn=server_evaluate,
+        evaluate_fn=None,
         initial_parameters=parameters,
         evaluate_metrics_aggregation_fn=weighted_average,
         stop_criteria={"metric_ge": ("accuracy", ACCURACY)},
