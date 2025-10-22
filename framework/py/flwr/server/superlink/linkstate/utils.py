@@ -33,6 +33,7 @@ from flwr.common.typing import RunStatus
 # pylint: disable=E0611
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
+from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 
 # pylint: enable=E0611
 VALID_RUN_STATUS_TRANSITIONS = {
@@ -76,58 +77,6 @@ def generate_rand_int_from_bytes(
     return num
 
 
-def convert_uint64_to_sint64(u: int) -> int:
-    """Convert a uint64 value to a sint64 value with the same bit sequence.
-
-    Parameters
-    ----------
-    u : int
-        The unsigned 64-bit integer to convert.
-
-    Returns
-    -------
-    int
-        The signed 64-bit integer equivalent.
-
-        The signed 64-bit integer will have the same bit pattern as the
-        unsigned 64-bit integer but may have a different decimal value.
-
-        For numbers within the range [0, `sint64` max value], the decimal
-        value remains the same. However, for numbers greater than the `sint64`
-        max value, the decimal value will differ due to the wraparound caused
-        by the sign bit.
-    """
-    if u >= (1 << 63):
-        return u - (1 << 64)
-    return u
-
-
-def convert_sint64_to_uint64(s: int) -> int:
-    """Convert a sint64 value to a uint64 value with the same bit sequence.
-
-    Parameters
-    ----------
-    s : int
-        The signed 64-bit integer to convert.
-
-    Returns
-    -------
-    int
-        The unsigned 64-bit integer equivalent.
-
-        The unsigned 64-bit integer will have the same bit pattern as the
-        signed 64-bit integer but may have a different decimal value.
-
-        For negative `sint64` values, the conversion adds 2^64 to the
-        signed value to obtain the equivalent `uint64` value. For non-negative
-        `sint64` values, the decimal value remains unchanged in the `uint64`
-        representation.
-    """
-    if s < 0:
-        return s + (1 << 64)
-    return s
-
-
 def convert_uint64_values_in_dict_to_sint64(
     data_dict: dict[str, int], keys: list[str]
 ) -> None:
@@ -142,7 +91,7 @@ def convert_uint64_values_in_dict_to_sint64(
     """
     for key in keys:
         if key in data_dict:
-            data_dict[key] = convert_uint64_to_sint64(data_dict[key])
+            data_dict[key] = uint64_to_int64(data_dict[key])
 
 
 def convert_sint64_values_in_dict_to_uint64(
@@ -159,7 +108,7 @@ def convert_sint64_values_in_dict_to_uint64(
     """
     for key in keys:
         if key in data_dict:
-            data_dict[key] = convert_sint64_to_uint64(data_dict[key])
+            data_dict[key] = int64_to_uint64(data_dict[key])
 
 
 def context_to_bytes(context: Context) -> bytes:
