@@ -102,7 +102,7 @@ def get_model(model_name: str, num_classes=10, pretrained=True):
 
         return TinyCNN()
     elif model_name == "resnet18":
-        model = resnet18(weights=ResNet18_Weights.DEFAULT)
+        model = resnet18(pretrained=True)
         model.fc = nn.Linear(model.fc.in_features, num_classes)
         return model
     elif model_name == "resnet34":
