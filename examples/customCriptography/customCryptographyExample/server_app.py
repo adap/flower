@@ -160,11 +160,11 @@ def server_evaluate(server_round: int, parameters: NDArrays):
 def server_fn(context: Context):
     num_rounds = context.run_config["num-server-rounds"]
     net = get_model(NET, num_classes=10, pretrained=True)
-    parameters = ndarrays_to_parameters(get_weights(net))
-
+    ndarrays = get_weights(net)
+    parameters = ndarrays_to_parameters(ndarrays)
     strategy = FedAvgWithServerEval(
         fraction_fit=0.2,
-        fraction_evaluate=1.0,
+        fraction_evaluate=context.run_config["fraction-evaluate"],
         min_available_clients=1,
         evaluate_fn=None,
         initial_parameters=parameters,
