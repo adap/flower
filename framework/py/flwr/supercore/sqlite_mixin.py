@@ -65,13 +65,8 @@ class SqliteMixin(ABC):
 
         # Start a transaction if not already in one
         if not self._conn.in_transaction:
-            self._conn.execute("BEGIN")
-            try:
+            with self._conn:
                 yield
-                self._conn.commit()
-            except Exception:
-                self._conn.rollback()
-                raise
         # Do nothing if already in a transaction
         else:
             yield

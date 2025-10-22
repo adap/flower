@@ -114,7 +114,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
                 self.conn.execute(
                     "INSERT OR IGNORE INTO run_objects(run_id, object_id) "
                     "VALUES (?, ?)",
-                    (run_id, obj_id),
+                    (uint64_to_sint64(run_id), obj_id),
                 )
         return new_objects
 
@@ -217,9 +217,10 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
 
     def delete_objects_in_run(self, run_id: int) -> None:
         """Delete all objects that were registered in a specific run."""
+        run_id_sint = uint64_to_sint64(run_id)
         with self.transaction():
             objs = self.conn.execute(
-                "SELECT object_id FROM run_objects WHERE run_id=?", (run_id,)
+                "SELECT object_id FROM run_objects WHERE run_id=?", (run_id_sint,)
             ).fetchall()
             for obj in objs:
                 object_id = obj["object_id"]
@@ -228,7 +229,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
                 ).fetchone()
                 if row and row["ref_count"] == 0:
                     self.delete(object_id)
-            self.conn.execute("DELETE FROM run_objects WHERE run_id=?", (run_id,))
+            self.conn.execute("DELETE FROM run_objects WHERE run_id=?", (run_id_sint,))
 
     def clear(self) -> None:
         """Clear the store."""
@@ -248,3 +249,10 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
         """Return the number of objects in the store."""
         row = self.conn.execute("SELECT COUNT(*) AS cnt FROM objects;").fetchone()
         return cast(int, row["cnt"])
+
+
+def uint64_to_sint64(unsigned: int) -> int:
+    """Convert a uint64 value to a sint64 value with the same bit sequence."""
+    if unsigned >= (1 << 63):
+        return unsigned - (1 << 64)
+    return unsigned
