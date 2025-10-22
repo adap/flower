@@ -38,6 +38,7 @@ from flwr.server.superlink.linkstate import (
 )
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 
 from .inmemory_grid import InMemoryGrid
 
@@ -220,7 +221,7 @@ class TestInMemoryGrid(unittest.TestCase):
     def test_message_store_consistency_after_push_pull_inmemory_state(self) -> None:
         """Test messages are deleted in in-memory state once messages are pulled."""
         # Prepare
-        state_factory = LinkStateFactory(":flwr-in-memory-state:")
+        state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME)
         state = state_factory.state()
         run_id = state.create_run("", "", "", {}, ConfigRecord(), "")
         self.grid = InMemoryGrid(state_factory)
