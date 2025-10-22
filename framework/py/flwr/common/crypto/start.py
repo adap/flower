@@ -8,6 +8,7 @@ CONFIG_FILE = "config_cripto.py"
 ENCRYPTION_METHODS = ["AES", "CHACHA", "CHACHA_AEAD", "AES_GCM"]
 INTEGRITY_METHODS = ["HMAC"]
 NET_OPTIONS = ["custom_cnn", "resnet18", "resnet34", "tiny_cnn", "squeezenet"]
+EVALUATION_OPTIONS = ["server", "client"]
 
 def ask_accuracy(prompt, default=0.5):
     allowed = [0.2, 0.5, 0.7, 0.9]
@@ -103,6 +104,10 @@ def configure():
     # Numero di client
     NUM_CLIENTS = ask_int("Numero di client", existing.get('NUM_CLIENTS', 1))
 
+    EVALUATION_SIDE = ask_choice("Valutazione server-side o client-side?",
+                                 EVALUATION_OPTIONS,
+                                 existing.get('EVALUATION_SIDE', "server"))
+
     # Salvataggio config
     with open(CONFIG_FILE, "w") as f:
         f.write(f"ENCRYPTION_ENABLED = {ENCRYPTION_ENABLED}\n")
@@ -113,6 +118,7 @@ def configure():
         f.write(f"TLS = {TLS}\n")
         f.write(f"ACCURACY = {ACCURACY}\n")
         f.write(f"NUM_CLIENTS = {NUM_CLIENTS}\n")
+        f.write(f"EVALUATION_SIDE = '{EVALUATION_SIDE}'\n")
 
     print(f"\nConfigurazione salvata in {CONFIG_FILE}")
 

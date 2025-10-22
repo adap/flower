@@ -90,6 +90,8 @@ class Server:
     def fit(self, num_rounds: int, timeout: Optional[float]) -> tuple[History, float]:
         """Run federated averaging for a number of rounds."""
         history = History()
+        if hasattr(self.strategy, "history"):
+                self.strategy.history = history
         num_clients = self._client_manager.num_available();
         log_time("Numero totale di client disponibili: %s", num_clients)
         # Initialize parameters
