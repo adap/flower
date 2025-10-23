@@ -149,7 +149,7 @@ def test_fab_from_proto() -> None:
     proto_fab = ProtoFab(
         hash_str="fab_test_hash",
         content=b"fab_test_content",
-        meta={"fab_test_meta": "fab_test_meta"},
+        meta={"meta_key": "meta_value"},
     )
 
     py_fab = typing.Fab(
