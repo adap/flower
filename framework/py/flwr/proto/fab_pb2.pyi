@@ -41,7 +41,7 @@ class Fab(google.protobuf.message.Message):
 
     @property
     def verifications(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]:
-        """Metadata."""
+        """Verifications."""
         pass
     def __init__(self,
         *,
