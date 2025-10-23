@@ -316,7 +316,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         ffs: Ffs = self.ffs_factory.ffs()
         if result := ffs.get(request.hash_str):
-            fab = Fab(request.hash_str, result[0], {})
+            fab = Fab(request.hash_str, result[0], result[1])
             return GetFabResponse(fab=fab_to_proto(fab))
 
         raise ValueError(f"Found no FAB with hash: {request.hash_str}")
@@ -343,7 +343,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             fab = None
             if run and run.fab_hash:
                 if result := ffs.get(run.fab_hash):
-                    fab = Fab(run.fab_hash, result[0], {})
+                    fab = Fab(run.fab_hash, result[0], result[1])
             if run and fab and serverapp_ctxt:
                 # Update run status to STARTING
                 if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
