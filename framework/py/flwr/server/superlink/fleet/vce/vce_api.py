@@ -42,6 +42,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.common.typing import Run
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 
 from .backend import Backend, error_messages_backends, supported_backends
 
@@ -312,7 +313,7 @@ def start_vce(
     if not state_factory:
         log(INFO, "A StateFactory was not supplied to the SimulationEngine.")
         # Create an empty in-memory state factory
-        state_factory = LinkStateFactory(":flwr-in-memory-state:")
+        state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME)
         log(INFO, "Created new %s.", state_factory.__class__.__name__)
 
     if num_supernodes:

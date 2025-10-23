@@ -73,13 +73,6 @@ def ls(  # pylint: disable=R0914, R0913, R0917
             help="Enable verbose output",
         ),
     ] = False,
-    dry_run: Annotated[
-        bool,
-        typer.Option(
-            "--dry-run",
-            help="Simulate the command without contacting any SuperNodes",
-        ),
-    ] = False,
 ) -> None:
     """List SuperNodes in the federation."""
     # Resolve command used (list or ls)
@@ -105,7 +98,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917
             channel = init_channel(app, federation_config, auth_plugin)
             stub = ControlStub(channel)
             typer.echo("📄 Listing all nodes...")
-            formatted_nodes = _list_nodes(stub, dry_run=dry_run)
+            formatted_nodes = _list_nodes(stub)
             restore_output()
             if output_format == CliOutputFormat.JSON:
                 Console().print_json(_to_json(formatted_nodes, verbose=verbose))
@@ -132,10 +125,10 @@ def ls(  # pylint: disable=R0914, R0913, R0917
         captured_output.close()
 
 
-def _list_nodes(stub: ControlStub, dry_run: bool) -> list[_NodeListType]:
+def _list_nodes(stub: ControlStub) -> list[_NodeListType]:
     """List all nodes."""
     with flwr_cli_grpc_exc_handler():
-        res: ListNodesResponse = stub.ListNodes(ListNodesRequest(dry_run=dry_run))
+        res: ListNodesResponse = stub.ListNodes(ListNodesRequest())
 
     return _format_nodes(list(res.nodes_info), res.now)
 
