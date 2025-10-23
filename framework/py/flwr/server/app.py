@@ -64,6 +64,7 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
@@ -85,7 +86,6 @@ from .superlink.linkstate import LinkStateFactory
 from .superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
-DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 P = TypeVar("P", ControlAuthnPlugin, ControlAuthzPlugin)
 
@@ -272,7 +272,7 @@ def run_superlink() -> None:
     ffs_factory = FfsFactory(args.storage_dir)
 
     # Initialize ObjectStoreFactory
-    objectstore_factory = ObjectStoreFactory()
+    objectstore_factory = ObjectStoreFactory(args.database)
 
     # Start Control API
     is_simulation = args.simulation
@@ -710,11 +710,9 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--database",
         help="A string representing the path to the database "
-        "file that will be opened. Note that passing ':memory:' "
-        "will open a connection to a database that is in RAM, "
-        "instead of on disk. If nothing is provided, "
+        "file that will be opened. If nothing is provided, "
         "Flower will just create a state in memory.",
-        default=DATABASE,
+        default=FLWR_IN_MEMORY_DB_NAME,
     )
     parser.add_argument(
         "--storage-dir",
