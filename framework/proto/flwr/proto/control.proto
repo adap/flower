@@ -103,7 +103,7 @@ message RegisterNodeResponse { optional uint64 node_id = 1; }
 message UnregisterNodeRequest { uint64 node_id = 1; }
 message UnregisterNodeResponse {}
 
-message ListNodesRequest { bool dry_run = 1; }
+message ListNodesRequest {}
 message ListNodesResponse {
   repeated NodeInfo nodes_info = 1;
   string now = 2;
