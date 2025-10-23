@@ -5,6 +5,7 @@ isort:skip_file
 import builtins
 import flwr.proto.node_pb2
 import google.protobuf.descriptor
+import google.protobuf.internal.containers
 import google.protobuf.message
 import typing
 import typing_extensions
@@ -13,8 +14,22 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class Fab(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class MetaEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        value: typing.Text
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Text = ...,
+            ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
     HASH_STR_FIELD_NUMBER: builtins.int
     CONTENT_FIELD_NUMBER: builtins.int
+    META_FIELD_NUMBER: builtins.int
     hash_str: typing.Text
     """This field is the hash of the data field. It is used to identify the data.
     The hash is calculated using the SHA-256 algorithm and is represented as a
@@ -24,12 +39,17 @@ class Fab(google.protobuf.message.Message):
     content: builtins.bytes
     """This field contains the fab file contents a one bytes blob."""
 
+    @property
+    def meta(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]:
+        """Metadata."""
+        pass
     def __init__(self,
         *,
         hash_str: typing.Text = ...,
         content: builtins.bytes = ...,
+        meta: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["content",b"content","hash_str",b"hash_str"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["content",b"content","hash_str",b"hash_str","meta",b"meta"]) -> None: ...
 global___Fab = Fab
 
 class GetFabRequest(google.protobuf.message.Message):
