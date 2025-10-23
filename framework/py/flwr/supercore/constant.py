@@ -20,6 +20,9 @@ from __future__ import annotations
 # Top-level key in YAML config for exec plugin settings
 EXEC_PLUGIN_SECTION = "exec_plugin"
 
+# Flower in-memory Python-based database name
+FLWR_IN_MEMORY_DB_NAME = ":flwr-in-memory:"
+
 
 class NodeStatus:
     """Event log writer types."""
