@@ -154,7 +154,7 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
         fab = Fab(
             hash_str="abc123",
             content=b"test_fab_content",
-            meta={"abc123": "abc123"},
+            verifications={"abc123": "abc123"},
         )
         mock_run = Mock(
             run_id=self.run_id,

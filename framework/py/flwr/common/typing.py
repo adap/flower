@@ -256,7 +256,7 @@ class Fab:
 
     hash_str: str
     content: bytes
-    meta: dict[str, str]
+    verifications: dict[str, str]
 
 
 class RunNotRunningException(BaseException):

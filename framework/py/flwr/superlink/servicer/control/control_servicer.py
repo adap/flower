@@ -132,7 +132,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             fab = Fab(
                 hashlib.sha256(fab_file).hexdigest(),
                 fab_file,
-                dict(request.fab.meta),
+                dict(request.fab.verifications),
             )
             fab_hash = ffs.put(fab.content, {})
             if fab_hash != fab.hash_str:
