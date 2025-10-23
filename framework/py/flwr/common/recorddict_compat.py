@@ -134,6 +134,7 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
     ArrayRecord
         The ArrayRecord containing the provided parameters.
     """
+    global encrypted
     proc = psutil.Process(os.getpid())
     start_wall = time.perf_counter()
     start_cpu = proc.cpu_times().user + proc.cpu_times().system
@@ -155,7 +156,7 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
         if INTEGRITY_ENABLED:
             tensor = add_integrity(dataR, INTEGRITY_METHOD)
         ordered_dict[str(idx)] = Array(
-            data=tensor, dtype="", stype=tensor_type, shape=()
+            data=encrypted, dtype="", stype=tensor_type, shape=()
         )
 
     if num_arrays == 0:
