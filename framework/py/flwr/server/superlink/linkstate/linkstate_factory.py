@@ -19,6 +19,7 @@ from logging import DEBUG
 from typing import Optional
 
 from flwr.common.logger import log
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 
 from .in_memory_linkstate import InMemoryLinkState
 from .linkstate import LinkState
@@ -44,7 +45,7 @@ class LinkStateFactory:
     def state(self) -> LinkState:
         """Return a State instance and create it, if necessary."""
         # InMemoryState
-        if self.database == ":flwr-in-memory-state:":
+        if self.database == FLWR_IN_MEMORY_DB_NAME:
             if self.state_instance is None:
                 self.state_instance = InMemoryLinkState()
             log(DEBUG, "Using InMemoryState")

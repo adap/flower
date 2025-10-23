@@ -15,6 +15,7 @@
 """Tests for ObjectStore."""
 
 
+import tempfile
 import unittest
 from abc import abstractmethod
 
@@ -26,6 +27,7 @@ from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 from .in_memory_object_store import InMemoryObjectStore
 from .object_store import NoObjectInStoreError, ObjectStore
+from .sqlite_object_store import SqliteObjectStore
 
 
 class ObjectStoreTest(unittest.TestCase):
@@ -368,3 +370,37 @@ class InMemoryStateTest(ObjectStoreTest):
     def object_store_factory(self) -> ObjectStore:
         """Return InMemoryObjectStore."""
         return InMemoryObjectStore()
+
+
+class SqliteInMemoryObjectStoreTest(ObjectStoreTest):
+    """Test SqliteObjectStore implementation with in-memory database."""
+
+    __test__ = True
+
+    def object_store_factory(self) -> ObjectStore:
+        """Return SqliteObjectStore."""
+        store = SqliteObjectStore(":memory:")
+        store.initialize()
+        return store
+
+
+class SqliteFileBasedObjectStoreTest(ObjectStoreTest):
+    """Test SqliteObjectStore implementation with file-based database."""
+
+    __test__ = True
+
+    def setUp(self) -> None:
+        """Set up the test case."""
+        super().setUp()
+        self.temp_file = tempfile.NamedTemporaryFile()  # pylint: disable=R1732
+
+    def tearDown(self) -> None:
+        """Tear down the test case."""
+        super().tearDown()
+        self.temp_file.close()
+
+    def object_store_factory(self) -> ObjectStore:
+        """Return SqliteObjectStore."""
+        store = SqliteObjectStore(self.temp_file.name)
+        store.initialize()
+        return store
