@@ -175,6 +175,7 @@ def _get_pull_requests_since_tag(
 
     print("Retrieving contributors...")
     contributors = _get_contributors_from_commits(api, commits)
+    print(f"Found following contributors:\n{', '.join(sorted(contributors))}\n")
 
     print("Retrieving pull requests...")
     commit_shas = {commit.hexsha for commit in commits}
@@ -279,16 +280,6 @@ def _update_changelog(prs: set[PullRequest], tag: str, new_tag: str) -> bool:
         for pr_info in prs:
             parsed_title = _extract_changelog_entry(pr_info)
 
-            # Create the topic if not found
-            if (topic := parsed_title["topic"]) and topic not in topic_to_section:
-                section = f"### {topic}"
-                if content.find(section, unreleased_index, end_index) == -1:
-                    content = (
-                        content[:end_index] + f"\n{section}\n\n" + content[end_index:]
-                    )
-                    end_index = content.find(f"## {tag}", end_index)
-                topic_to_section[topic] = section
-
             # Skip if the PR is already in changelog
             if f"#{pr_info.number}]" in content:
                 continue
@@ -296,6 +287,16 @@ def _update_changelog(prs: set[PullRequest], tag: str, new_tag: str) -> bool:
             # Skip Flower Intelligence PRs
             if parsed_title["project"] == "intelligence":
                 continue
+
+            # Create the topic if not found
+            if (topic := parsed_title.get("topic")) and topic not in topic_to_section:
+                section = f"### {topic}"
+                if content.find(section, unreleased_index, end_index) == -1:
+                    content = (
+                        content[:end_index] + f"\n{section}\n\n" + content[end_index:]
+                    )
+                    end_index = content.find(f"## {tag}", end_index)
+                topic_to_section[topic] = section
 
             # Find section to insert
             pr_type = parsed_title.get("type", "unknown")
