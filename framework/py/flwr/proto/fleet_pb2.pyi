@@ -62,7 +62,7 @@ class DeleteNodeResponse(google.protobuf.message.Message):
 global___DeleteNodeResponse = DeleteNodeResponse
 
 class RegisterNodeFleetRequest(google.protobuf.message.Message):
-    """RegisterNode messages"""
+    """RegisterNode messages (add prefix to avoid name clash)"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PUBLIC_KEY_FIELD_NUMBER: builtins.int
     public_key: builtins.bytes
@@ -83,12 +83,15 @@ class ActivateNodeRequest(google.protobuf.message.Message):
     """ActivateNode messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PUBLIC_KEY_FIELD_NUMBER: builtins.int
+    HEARTBEAT_INTERVAL_FIELD_NUMBER: builtins.int
     public_key: builtins.bytes
+    heartbeat_interval: builtins.float
     def __init__(self,
         *,
         public_key: builtins.bytes = ...,
+        heartbeat_interval: builtins.float = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["public_key",b"public_key"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["heartbeat_interval",b"heartbeat_interval","public_key",b"public_key"]) -> None: ...
 global___ActivateNodeRequest = ActivateNodeRequest
 
 class ActivateNodeResponse(google.protobuf.message.Message):
@@ -121,7 +124,7 @@ class DeactivateNodeResponse(google.protobuf.message.Message):
 global___DeactivateNodeResponse = DeactivateNodeResponse
 
 class UnregisterNodeFleetRequest(google.protobuf.message.Message):
-    """UnregisterNode messages"""
+    """UnregisterNode messages (add prefix to avoid name clash)"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NODE_ID_FIELD_NUMBER: builtins.int
     node_id: builtins.int
