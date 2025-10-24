@@ -25,14 +25,22 @@ from google.protobuf.message import Message as GrpcMessage
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    ActivateNodeRequest,
+    ActivateNodeResponse,
     CreateNodeRequest,
     CreateNodeResponse,
+    DeactivateNodeRequest,
+    DeactivateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    RegisterNodeFleetRequest,
+    RegisterNodeFleetResponse,
+    UnregisterNodeFleetRequest,
+    UnregisterNodeFleetResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
@@ -69,6 +77,8 @@ GrpcResponse = TypeVar("GrpcResponse", bound=GrpcMessage)
 GrpcAsyncFunction = Callable[[GrpcRequest], Awaitable[GrpcResponse]]
 RestEndPoint = Callable[[Request], Awaitable[Response]]
 
+routes = []
+
 
 def rest_request_response(
     grpc_request_type: type[GrpcRequest],
@@ -76,6 +86,7 @@ def rest_request_response(
     """Convert an async gRPC-based function into a RESTful HTTP endpoint."""
 
     def decorator(func: GrpcAsyncFunction[GrpcRequest, GrpcResponse]) -> RestEndPoint:
+
         async def wrapper(request: Request) -> Response:
             _check_headers(request.headers)
 
@@ -91,6 +102,9 @@ def rest_request_response(
                 headers={"Content-Type": "application/protobuf"},
             )
 
+        # Register route
+        path = f"/api/v0/fleet/{func.__name__.replace('_', '-')}"
+        routes.append(Route(path, wrapper, methods=["POST"]))
         return wrapper
 
     return decorator
@@ -114,6 +128,38 @@ async def delete_node(request: DeleteNodeRequest) -> DeleteNodeResponse:
 
     # Handle message
     return message_handler.delete_node(request=request, state=state)
+
+
+@rest_request_response(RegisterNodeFleetRequest)
+async def register_node(
+    request: RegisterNodeFleetRequest,
+) -> RegisterNodeFleetResponse:
+    """Register a node (Fleet API only)."""
+    raise NotImplementedError("RegisterNode is not yet implemented.")
+
+
+@rest_request_response(ActivateNodeRequest)
+async def activate_node(
+    request: ActivateNodeRequest,
+) -> ActivateNodeResponse:
+    """Activate a node."""
+    raise NotImplementedError("ActivateNode is not yet implemented.")
+
+
+@rest_request_response(DeactivateNodeRequest)
+async def deactivate_node(
+    request: DeactivateNodeRequest,
+) -> DeactivateNodeResponse:
+    """Deactivate a node."""
+    raise NotImplementedError("DeactivateNode is not yet implemented.")
+
+
+@rest_request_response(UnregisterNodeFleetRequest)
+async def unregister_node(
+    request: UnregisterNodeFleetRequest,
+) -> UnregisterNodeFleetResponse:
+    """Unregister a node (Fleet API only)."""
+    raise NotImplementedError("UnregisterNode is not yet implemented.")
 
 
 @rest_request_response(PullMessagesRequest)
@@ -211,23 +257,6 @@ async def confirm_message_received(
         request=request, state=state, store=store
     )
 
-
-routes = [
-    Route("/api/v0/fleet/create-node", create_node, methods=["POST"]),
-    Route("/api/v0/fleet/delete-node", delete_node, methods=["POST"]),
-    Route("/api/v0/fleet/pull-messages", pull_message, methods=["POST"]),
-    Route("/api/v0/fleet/push-messages", push_message, methods=["POST"]),
-    Route("/api/v0/fleet/pull-object", pull_object, methods=["POST"]),
-    Route("/api/v0/fleet/push-object", push_object, methods=["POST"]),
-    Route("/api/v0/fleet/send-node-heartbeat", send_node_heartbeat, methods=["POST"]),
-    Route("/api/v0/fleet/get-run", get_run, methods=["POST"]),
-    Route("/api/v0/fleet/get-fab", get_fab, methods=["POST"]),
-    Route(
-        "/api/v0/fleet/confirm-message-received",
-        confirm_message_received,
-        methods=["POST"],
-    ),
-]
 
 app: Starlette = Starlette(
     debug=False,

@@ -34,14 +34,22 @@ from flwr.common.constant import (
 from flwr.common.version import package_name, package_version
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    ActivateNodeRequest,
+    ActivateNodeResponse,
     CreateNodeRequest,
     CreateNodeResponse,
+    DeactivateNodeRequest,
+    DeactivateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    RegisterNodeFleetRequest,
+    RegisterNodeFleetResponse,
+    UnregisterNodeFleetRequest,
+    UnregisterNodeFleetResponse,
 )
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
@@ -129,6 +137,30 @@ class GrpcAdapter:
     ) -> DeleteNodeResponse:
         """."""
         return self._send_and_receive(request, DeleteNodeResponse, **kwargs)
+
+    def RegisterNode(  # pylint: disable=C0103
+        self, request: RegisterNodeFleetRequest, **kwargs: Any
+    ) -> RegisterNodeFleetResponse:
+        """."""
+        return self._send_and_receive(request, RegisterNodeFleetResponse, **kwargs)
+
+    def ActivateNode(  # pylint: disable=C0103
+        self, request: ActivateNodeRequest, **kwargs: Any
+    ) -> ActivateNodeResponse:
+        """."""
+        return self._send_and_receive(request, ActivateNodeResponse, **kwargs)
+
+    def DeactivateNode(  # pylint: disable=C0103
+        self, request: DeactivateNodeRequest, **kwargs: Any
+    ) -> DeactivateNodeResponse:
+        """."""
+        return self._send_and_receive(request, DeactivateNodeResponse, **kwargs)
+
+    def UnregisterNode(  # pylint: disable=C0103
+        self, request: UnregisterNodeFleetRequest, **kwargs: Any
+    ) -> UnregisterNodeFleetResponse:
+        """."""
+        return self._send_and_receive(request, UnregisterNodeFleetResponse, **kwargs)
 
     def SendNodeHeartbeat(  # pylint: disable=C0103
         self, request: SendNodeHeartbeatRequest, **kwargs: Any
