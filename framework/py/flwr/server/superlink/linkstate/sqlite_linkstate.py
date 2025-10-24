@@ -613,6 +613,69 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 "deletion attempt."
             )
 
+    def activate_node(self, node_id: int, heartbeat_interval: float) -> bool:
+        """Activate the node with the specified `node_id`."""
+
+        sint64_node_id = uint64_to_int64(node_id)
+        current_dt = now()
+
+        # Update the node status
+        query = """
+            UPDATE node
+            SET status = ?,
+                last_activated_at = ?,
+                online_until = ?
+            WHERE node_id = ?
+                AND status IN (?, ?)
+                AND status != ?
+            RETURNING node_id
+        """
+        params = (
+            NodeStatus.ONLINE,
+            current_dt.isoformat(),
+            current_dt.timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval,
+            sint64_node_id,
+            NodeStatus.REGISTERED,
+            NodeStatus.OFFLINE,
+            NodeStatus.UNREGISTERED,
+        )
+
+        rows = self.query(query, params)
+        return len(rows) > 0
+
+    def deactivate_node(self, node_id: int) -> bool:
+        """Deactivate the node with the specified `node_id`.
+
+        Transitions the node status to "offline" from "online".
+        """
+        if self.conn is None:
+            raise AttributeError("LinkState not initialized")
+
+        sint64_node_id = uint64_to_int64(node_id)
+        current_dt = now()
+
+        query = """
+            UPDATE node
+            SET status = ?,
+                last_deactivated_at = ?,
+                online_until = ?
+            WHERE node_id = ?
+                AND status = ?
+                AND status != ?
+            RETURNING node_id
+        """
+        params = (
+            NodeStatus.OFFLINE,
+            current_dt.isoformat(),
+            current_dt.timestamp(),
+            sint64_node_id,
+            NodeStatus.ONLINE,
+            NodeStatus.UNREGISTERED,
+        )
+
+        rows = self.query(query, params)
+        return len(rows) > 0
+
     def get_nodes(self, run_id: int) -> set[int]:
         """Retrieve all currently stored node IDs as a set.
 

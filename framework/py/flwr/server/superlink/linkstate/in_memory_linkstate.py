@@ -386,6 +386,44 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             # Set online_until to current timestamp on deletion, if it is in the future
             node.online_until = min(node.online_until, current.timestamp())
 
+    def activate_node(self, node_id: int, heartbeat_interval: float) -> bool:
+        """Activate the node with the specified `node_id`."""
+        with self.lock:
+            # Check if the node exists
+            if not (node := self.nodes.get(node_id)):
+                return False
+
+            # Only activate if the node is currently registered or offline
+            current_dt = now()
+            if node.online_until < current_dt.timestamp() and not node.unregistered_at:
+                node.status = NodeStatus.ONLINE
+                node.heartbeat_interval = heartbeat_interval
+                node.last_activated_at = current_dt.isoformat()
+                node.online_until = (
+                    current_dt.timestamp()
+                    + HEARTBEAT_PATIENCE * heartbeat_interval
+                )
+                return True
+            return False
+
+    def deactivate_node(self, node_id: int) -> bool:
+        """Deactivate the node with the specified `node_id`."""
+        with self.lock:
+            # Check if the node exists
+            if not (node := self.nodes.get(node_id)):
+                return False
+
+            # Only deactivate if the node is currently online or offline
+            current_dt = now()
+            if node.online_until >:
+                node.status = NodeStatus.OFFLINE
+                node.last_deactivated_at = current_dt.isoformat()
+
+                # Set online_until to current timestamp
+                node.online_until = current_dt.timestamp()
+                return True
+            return False
+
     def get_nodes(self, run_id: int) -> set[int]:
         """Return all available nodes.
 
