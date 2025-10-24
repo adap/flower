@@ -40,6 +40,7 @@ def private_key_to_bytes(private_key: ed25519.Ed25519PrivateKey) -> bytes:
     ----------
     private_key : Ed25519PrivateKey
         The private key to serialize.
+
     Returns
     -------
     bytes
@@ -59,6 +60,7 @@ def bytes_to_private_key(private_key_bytes: bytes) -> ed25519.Ed25519PrivateKey:
     ----------
     private_key_bytes : bytes
         PEM-encoded private key.
+
     Returns
     -------
     Ed25519PrivateKey
@@ -76,6 +78,7 @@ def public_key_to_bytes(public_key: ed25519.Ed25519PublicKey) -> bytes:
     ----------
     public_key : Ed25519PublicKey
         The public key to serialize.
+
     Returns
     -------
     bytes
@@ -94,6 +97,7 @@ def bytes_to_public_key(public_key_bytes: bytes) -> ed25519.Ed25519PublicKey:
     ----------
     public_key_bytes : bytes
         PEM-encoded public key.
+
     Returns
     -------
     Ed25519PublicKey
@@ -111,6 +115,7 @@ def sign_message(private_key: ed25519.Ed25519PrivateKey, message: bytes) -> byte
         The private key used for signing.
     message : bytes
         The message to sign.
+
     Returns
     -------
     bytes
@@ -132,6 +137,7 @@ def verify_signature(
         The original message.
     signature : bytes
         The signature to verify.
+
     Returns
     -------
     bool
