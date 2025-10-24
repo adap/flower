@@ -29,6 +29,17 @@ confirm() {
   [[ "$response" =~ ^[Yy]$ ]]
 }
 
+parse_semver() {
+  # echo "<major> <minor> <patch>" or fail
+  local v="$1"
+  if [[ "$v" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+    echo "${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${BASH_REMATCH[3]}"
+  else
+    echo "❌ Invalid semver: $v" >&2
+    return 1
+  fi
+}
+
 check_admin_rights() {
   local user perm
   user=$(gh api user --jq '.login' 2>/dev/null || echo "")
@@ -101,11 +112,70 @@ NEW_VERSION="$TS_VERSION"
 echo "✅ Both SDKs at version $NEW_VERSION"
 
 LATEST_TAG=$(get_latest_tag)
+echo "🔖 Latest tag: v$LATEST_TAG"
+
+# Compare versions
 if [[ $(printf '%s\n' "$LATEST_TAG" "$NEW_VERSION" | sort -V | uniq | wc -l) -eq 1 ]]; then
   echo "❌ Version $NEW_VERSION is already tagged."
   git checkout --quiet main
   exit 1
+elif [[ $(printf '%s\n' "$LATEST_TAG" "$NEW_VERSION" | sort -V | tail -n 1) != "$NEW_VERSION" ]]; then
+  echo "❌ Version $NEW_VERSION is not greater than $LATEST_TAG."
+  git checkout --quiet main
+  exit 1
+elif [[ $(printf '%s\n' "$LATEST_TAG" "$NEW_VERSION" | sort -V | head -n 1) != "$LATEST_TAG" ]]; then
+  echo "⚠️  Warning: You might be skipping a version ($LATEST_TAG → $NEW_VERSION)."
+  confirm "Do you really want to proceed?" || { git checkout --quiet main; exit 1; }
 fi
+
+# Fine-grained “skip” detection
+read -r LMAJ LMIN LPAT < <(parse_semver "$LATEST_TAG")
+read -r NMAJ NMIN NPAT < <(parse_semver "$NEW_VERSION")
+
+warn_skip() {
+  echo "⚠️  Warning: This looks like a skipped version ($LATEST_TAG → $NEW_VERSION)."
+  confirm "Do you really want to proceed?" || { git checkout --quiet main; exit 1; }
+}
+
+echo "${LMAJ}.${LMIN}.${LPAT} → ${NMAJ}.${NMIN}.${NPAT}"
+
+# Same major/minor → expect patch+1
+if (( NMAJ == LMAJ && NMIN == LMIN )); then
+  if   (( NPAT == LPAT + 1 )); then : # OK patch bump
+  elif (( NPAT >  LPAT + 1 )); then warn_skip
+  else
+    echo "❌ Patch version must increase (expected ${LMAJ}.${LMIN}.$((LPAT+1)))."
+    git checkout --quiet main
+    exit 1
+  fi
+
+# Same major, next minor → expect .0 patch
+elif (( NMAJ == LMAJ && NMIN == LMIN + 1 )); then
+  if (( NPAT == 0 )); then : # OK minor bump
+  else
+    warn_skip
+  fi
+
+# Next major → expect .0.0
+elif (( NMAJ == LMAJ + 1 )); then
+  if (( NMIN == 0 && NPAT == 0 )); then : # OK major bump
+  else
+    warn_skip
+  fi
+
+# Anything else is a bigger jump → warn
+else
+  warn_skip
+fi
+
+if [[ "${1:-}" == "--dry-run" ]]; then
+  echo "(Dry run) Would tag ${RELEASE_PREFIX}${NEW_VERSION}"
+  git checkout --quiet main
+  exit 0
+fi
+
+# Admin permission check echo "🔐 Verifying GitHub permissions..." 
+check_admin_rights || { git checkout --quiet main; exit 1; }
 
 # --- Confirm tagging ---
 confirm "Proceed to tag ${RELEASE_PREFIX}${NEW_VERSION} at this commit?" || {
