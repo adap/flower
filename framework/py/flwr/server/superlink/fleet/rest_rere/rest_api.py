@@ -163,7 +163,7 @@ async def unregister_node(
 
 
 @rest_request_response(PullMessagesRequest)
-async def pull_message(request: PullMessagesRequest) -> PullMessagesResponse:
+async def pull_messages(request: PullMessagesRequest) -> PullMessagesResponse:
     """Pull PullMessages."""
     # Get state from app
     state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
@@ -174,7 +174,7 @@ async def pull_message(request: PullMessagesRequest) -> PullMessagesResponse:
 
 
 @rest_request_response(PushMessagesRequest)
-async def push_message(request: PushMessagesRequest) -> PushMessagesResponse:
+async def push_messages(request: PushMessagesRequest) -> PushMessagesResponse:
     """Pull PushMessages."""
     # Get state from app
     state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
