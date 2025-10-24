@@ -99,6 +99,10 @@ SQL_CREATE_INDEX_OWNER_AID = """
 CREATE INDEX IF NOT EXISTS idx_node_owner_aid ON node(owner_aid);
 """
 
+SQL_CREATE_INDEX_NODE_STATUS = """
+CREATE INDEX IF NOT EXISTS idx_node_status ON node(status);
+"""
+
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
     run_id                INTEGER UNIQUE,
@@ -199,6 +203,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             SQL_CREATE_TABLE_TOKEN_STORE,
             SQL_CREATE_INDEX_ONLINE_UNTIL,
             SQL_CREATE_INDEX_OWNER_AID,
+            SQL_CREATE_INDEX_NODE_STATUS,
             log_queries=log_queries,
         )
 
@@ -638,6 +643,22 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             node.node_id for node in self.get_node_info(statuses=[NodeStatus.ONLINE])
         }
 
+    def _check_and_tag_offline_nodes(self) -> None:
+        """Check and tag offline nodes."""
+        # strftime will convert POSIX timestamp to ISO format
+        query = """
+            UPDATE node SET status = ?,
+            last_deactivated_at =
+            strftime("%Y-%m-%dT%H:%M:%f+00:00", online_until, "unixepoch")
+            WHERE online_until <= ? AND status == ?
+        """
+        params = [
+            NodeStatus.OFFLINE,
+            now().timestamp(),
+            NodeStatus.ONLINE,
+        ]
+        self.conn.execute(query, params)
+
     def get_node_info(
         self,
         *,
@@ -646,29 +667,12 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         statuses: Optional[Sequence[str]] = None,
     ) -> Sequence[NodeInfo]:
         """Retrieve information about nodes based on the specified filters."""
-        if self.conn is None:
-            raise AttributeError("LinkState is not initialized.")
-
         with self.conn:
-            # Check and tag offline nodes
-            current_dt = now()
-            # strftime will convert POSIX timestamp to ISO format
-            query = """
-                UPDATE node SET status = ?,
-                last_deactivated_at =
-                strftime("%Y-%m-%dT%H:%M:%f+00:00", online_until, "unixepoch")
-                WHERE online_until <= ? AND status == ?
-            """
-            params: list[Any] = [
-                NodeStatus.OFFLINE,
-                current_dt.timestamp(),
-                NodeStatus.ONLINE,
-            ]
-            self.conn.execute(query, params)
+            self._check_and_tag_offline_nodes()
 
             # Build the WHERE clause based on provided filters
             conditions = []
-            params = []
+            params: list[Any] = []
             if node_ids is not None:
                 sint64_node_ids = [uint64_to_int64(node_id) for node_id in node_ids]
                 placeholders = ",".join(["?"] * len(sint64_node_ids))
