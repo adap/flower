@@ -60,6 +60,11 @@ check_admin_rights() {
 
 # --- MAIN LOGIC ---
 
+if ! git diff-index --quiet HEAD --; then
+  echo "❌ You have uncommitted changes. Please commit or stash them before releasing."
+  exit 1
+fi
+
 echo "🔎 Verifying branch..."
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [[ "$CURRENT_BRANCH" != "main" ]]; then
