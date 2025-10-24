@@ -60,16 +60,16 @@ check_admin_rights() {
 
 # --- MAIN LOGIC ---
 
-# echo "🔎 Verifying branch..."
-# CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-# if [[ "$CURRENT_BRANCH" != "main" ]]; then
-#   echo "❌ You are on branch '$CURRENT_BRANCH', not 'main'."
-#   echo "   Please switch to main before running this script."
-#   exit 1
-# fi
-#
-# echo "🔄 Fetching latest main commits from origin..."
-# git fetch origin main >/dev/null 2>&1
+echo "🔎 Verifying branch..."
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [[ "$CURRENT_BRANCH" != "main" ]]; then
+  echo "❌ You are on branch '$CURRENT_BRANCH', not 'main'."
+  echo "   Please switch to main before running this script."
+  exit 1
+fi
+
+echo "🔄 Fetching latest main commits from origin..."
+git fetch origin main >/dev/null 2>&1
 
 # --- Let user pick a commit from origin/main ---
 echo ""
@@ -174,7 +174,8 @@ if [[ "${1:-}" == "--dry-run" ]]; then
   exit 0
 fi
 
-# Admin permission check echo "🔐 Verifying GitHub permissions..." 
+# Admin permission check
+echo "🔐 Verifying GitHub permissions..."
 check_admin_rights || { git checkout --quiet main; exit 1; }
 
 # --- Confirm tagging ---
