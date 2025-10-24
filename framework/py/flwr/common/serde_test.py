@@ -126,9 +126,17 @@ def test_status_from_proto() -> None:
 
 def test_fab_to_proto() -> None:
     """Test Fab serialization."""
-    proto_fab = ProtoFab(hash_str="fab_test_hash", content=b"fab_test_content")
+    proto_fab = ProtoFab(
+        hash_str="fab_test_hash",
+        content=b"fab_test_content",
+        verifications={"fab_test_meta": "fab_test_meta"},
+    )
 
-    py_fab = typing.Fab(hash_str="fab_test_hash", content=b"fab_test_content")
+    py_fab = typing.Fab(
+        hash_str="fab_test_hash",
+        content=b"fab_test_content",
+        verifications={"fab_test_meta": "fab_test_meta"},
+    )
 
     converted_fab = fab_to_proto(py_fab)
 
@@ -138,9 +146,17 @@ def test_fab_to_proto() -> None:
 
 def test_fab_from_proto() -> None:
     """Test Fab deserialization."""
-    proto_fab = ProtoFab(hash_str="fab_test_hash", content=b"fab_test_content")
+    proto_fab = ProtoFab(
+        hash_str="fab_test_hash",
+        content=b"fab_test_content",
+        verifications={"meta_key": "meta_value"},
+    )
 
-    py_fab = typing.Fab(hash_str="fab_test_hash", content=b"fab_test_content")
+    py_fab = typing.Fab(
+        hash_str="fab_test_hash",
+        content=b"fab_test_content",
+        verifications={"meta_key": "meta_value"},
+    )
 
     converted_fab = fab_from_proto(proto_fab)
 

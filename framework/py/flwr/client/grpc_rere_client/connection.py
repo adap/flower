@@ -36,7 +36,12 @@ from flwr.common.inflatable_protobuf_utils import (
 from flwr.common.logger import log
 from flwr.common.message import Message, remove_content_from_message
 from flwr.common.retry_invoker import RetryInvoker, _wrap_stub
-from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
+from flwr.common.serde import (
+    fab_from_proto,
+    message_from_proto,
+    message_to_proto,
+    run_from_proto,
+)
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -289,7 +294,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         get_fab_request = GetFabRequest(node=node, hash_str=fab_hash, run_id=run_id)
         get_fab_response: GetFabResponse = stub.GetFab(request=get_fab_request)
 
-        return Fab(get_fab_response.fab.hash_str, get_fab_response.fab.content)
+        return fab_from_proto(get_fab_response.fab)
 
     def pull_object(run_id: int, object_id: str) -> bytes:
         """Pull the object from the SuperLink."""
