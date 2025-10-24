@@ -31,7 +31,7 @@ from flwr_datasets.visualization.label_distribution import plot_label_distributi
 
 # pylint: disable=too-many-arguments,too-many-locals
 # mypy: disable-error-code="call-overload"
-def plot_comparison_label_distribution(
+def plot_comparison_label_distribution(  # pylint: disable=R0917
     partitioner_list: list[Partitioner],
     label_name: Union[str, list[str]],
     plot_type: Literal["bar", "heatmap"] = "bar",

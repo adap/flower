@@ -1,0 +1,136 @@
+services:
+  supernode-1:
+    image: flwr/supernode:${FLWR_VERSION:-1.23.0}
+    command:
+      - --superlink
+      - ${SUPERLINK_IP:-127.0.0.1}:9092
+      - --clientappio-api-address
+      - 0.0.0.0:9094
+      - --isolation
+      - process
+      - --node-config
+      - "partition-id=0 num-partitions=2"
+      - --root-certificates
+      - certificates/superlink-ca.crt
+    secrets:
+      - source: superlink-ca-certfile
+        target: /app/certificates/superlink-ca.crt
+
+  supernode-2:
+    image: flwr/supernode:${FLWR_VERSION:-1.23.0}
+    command:
+      - --superlink
+      - ${SUPERLINK_IP:-127.0.0.1}:9092
+      - --clientappio-api-address
+      - 0.0.0.0:9095
+      - --isolation
+      - process
+      - --node-config
+      - "partition-id=1 num-partitions=2"
+      - --root-certificates
+      - certificates/superlink-ca.crt
+    secrets:
+      - source: superlink-ca-certfile
+        target: /app/certificates/superlink-ca.crt
+
+  # uncomment to add another SuperNode
+  #
+  # supernode-3:
+  #   image: flwr/supernode:${FLWR_VERSION:-1.23.0}
+  #   command:
+  #     - --superlink
+  #     - ${SUPERLINK_IP:-127.0.0.1}:9092
+  #     - --clientappio-api-address
+  #     - 0.0.0.0:9096
+  #     - --isolation
+  #     - process
+  #     - --node-config
+  #     - "partition-id=1 num-partitions=2"
+  #     - --root-certificates
+  #     - certificates/superlink-ca.crt
+  #   secrets:
+  #     - source: superlink-ca-certfile
+  #       target: /app/certificates/superlink-ca.crt
+
+  superexec-clientapp-1:
+    build:
+      context: ${PROJECT_DIR:-.}
+      dockerfile_inline: |
+        FROM flwr/superexec:${FLWR_VERSION:-1.23.0}
+
+        WORKDIR /app
+        COPY --chown=app:app pyproject.toml .
+        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
+
+        ENTRYPOINT ["flower-superexec"]
+    command:
+      - --insecure
+      - --plugin-type
+      - clientapp
+      - --appio-api-address
+      - supernode-1:9094
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+    stop_signal: SIGINT
+    depends_on:
+      - supernode-1
+
+  superexec-clientapp-2:
+    build:
+      context: ${PROJECT_DIR:-.}
+      dockerfile_inline: |
+        FROM flwr/superexec:${FLWR_VERSION:-1.23.0}
+
+        WORKDIR /app
+        COPY --chown=app:app pyproject.toml .
+        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
+
+        ENTRYPOINT ["flower-superexec"]
+    command:
+      - --insecure
+      - --plugin-type
+      - clientapp
+      - --appio-api-address
+      - supernode-2:9095
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+    stop_signal: SIGINT
+    depends_on:
+      - supernode-2
+  # uncomment to add another ClientApp
+  #
+  # superexec-clientapp-3:
+  #   build:
+  #     context: ${PROJECT_DIR:-.}
+  #     dockerfile_inline: |
+  #       FROM flwr/superexec:${FLWR_VERSION:-1.23.0}
+
+  #       WORKDIR /app
+  #       COPY --chown=app:app pyproject.toml .
+  #       RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+  #         && python -m pip install -U --no-cache-dir .
+
+  #       ENTRYPOINT ["flower-superexec"]
+  #   command:
+  #     - --insecure
+  #     - --plugin-type
+  #     - clientapp
+  #     - --appio-api-address
+  #     - supernode-3:9096
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "2"
+  #   stop_signal: SIGINT
+  #   depends_on:
+  #     - supernode-3
+
+secrets:
+  superlink-ca-certfile:
+    file: ../superlink-certificates/ca.crt

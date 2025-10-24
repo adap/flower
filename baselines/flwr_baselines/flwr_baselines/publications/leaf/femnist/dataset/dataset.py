@@ -2,7 +2,7 @@
 
 import pathlib
 from logging import INFO
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -118,7 +118,7 @@ def train_valid_test_partition(
     train_split: float = 0.9,
     validation_split: float = 0.0,
     test_split: float = 0.1,
-    random_seed: int = None,
+    random_seed: Optional[int] = None,
 ) -> Tuple[List[Dataset], List[Dataset], List[Dataset]]:
     """Partition list of datasets to train, validation and test splits (each
     dataset from the list individually).

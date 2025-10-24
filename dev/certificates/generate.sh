@@ -8,6 +8,9 @@ CA_PASSWORD=notsafe
 
 CERT_DIR=.cache/certificates
 
+# Allow passing a custom certificate config file
+CERT_CONFIG_FILE="${1:-./dev/certificates/certificate.conf}"
+
 # Generate directories if not exists
 mkdir -p .cache/certificates
 
@@ -36,7 +39,7 @@ openssl req \
     -new \
     -key $CERT_DIR/server.key \
     -out $CERT_DIR/server.csr \
-    -config ./dev/certificates/certificate.conf
+    -config "$CERT_CONFIG_FILE"
 
 # Generate a certificate for the server
 openssl x509 \
@@ -48,5 +51,5 @@ openssl x509 \
     -out $CERT_DIR/server.pem \
     -days 365 \
     -sha256 \
-    -extfile ./dev/certificates/certificate.conf \
+    -extfile "$CERT_CONFIG_FILE" \
     -extensions req_ext

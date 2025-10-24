@@ -29,7 +29,7 @@ from flwr_datasets.partitioner.dirichlet_partitioner import DirichletPartitioner
 
 def _dummy_setup(
     num_partitions: int,
-    alpha: Union[float, NDArray[np.float_]],
+    alpha: Union[float, NDArray[np.float64]],
     num_rows: int,
     partition_by: str,
     self_balancing: bool = True,
@@ -99,12 +99,53 @@ class TestDirichletPartitionerSuccess(unittest.TestCase):
             and len(partitioner._partition_id_to_indices) == num_partitions
         )
 
+    def test__determine_partition_id_to_indices_if_needed_consistency(
+        self,
+    ) -> None:
+        """Test that indices are consistently assigned to partition IDs.
+
+        Partition distributions should be consistent regardless of the ordering of
+        examples in the dataset. This is important to ensure that partitions from train
+        and test partitioners have the same distributions.
+        """
+        num_partitions = 3
+        data = {
+            "features": list(range(100)),
+            "labels": [i % 3 for i in range(100)],
+        }
+
+        dataset1 = Dataset.from_dict(data)
+        partitioner1 = DirichletPartitioner(num_partitions, "labels", 0.5, 10)
+        partitioner1.dataset = dataset1
+        partitioner1.load_partition(0)
+
+        data_reversed = data.copy()
+        data_reversed["features"].reverse()
+        data_reversed["labels"].reverse()
+        dataset2 = Dataset.from_dict(data_reversed)
+        partitioner2 = DirichletPartitioner(num_partitions, "labels", 0.5, 10)
+        partitioner2.dataset = dataset2
+        partitioner2.load_partition(0)
+
+        classes = partitioner1.dataset.unique("labels")
+        for i in range(num_partitions):
+            partition1 = partitioner1.load_partition(i)
+            partition2 = partitioner2.load_partition(i)
+
+            targets1 = np.array(partition1["labels"])
+            targets2 = np.array(partition2["labels"])
+
+            for k in classes:
+                self.assertCountEqual(
+                    np.nonzero(targets1 == k)[0], np.nonzero(targets2 == k)[0]
+                )
+
 
 class TestDirichletPartitionerFailure(unittest.TestCase):
     """Test DirichletPartitioner failures (exceptions) by incorrect usage."""
 
     @parameterized.expand([(-2,), (-1,), (3,), (4,), (100,)])  # type: ignore
-    def test_load_invalid_partition_index(self, partition_id):
+    def test_load_invalid_partition_index(self, partition_id) -> None:
         """Test if raises when the load_partition is above the num_partitions."""
         _, partitioner = _dummy_setup(3, 0.5, 100, "labels")
         with self.assertRaises(KeyError):
@@ -129,7 +170,7 @@ class TestDirichletPartitionerFailure(unittest.TestCase):
             (np.array([0.5, 0.5, -0.5, -0.5, 0.5]), 5),
         ]
     )
-    def test_negative_values_in_alpha(self, alpha, num_partitions):
+    def test_negative_values_in_alpha(self, alpha, num_partitions) -> None:
         """Test if giving the negative value of alpha raises error."""
         num_rows, partition_by = 100, "labels"
         with self.assertRaises(ValueError):
@@ -146,7 +187,7 @@ class TestDirichletPartitionerFailure(unittest.TestCase):
             (np.array([0.5, 0.5, 0.5, 0.5]), 3),
         ]
     )
-    def test_incorrect_alpha_shape(self, alpha, num_partitions):
+    def test_incorrect_alpha_shape(self, alpha, num_partitions) -> None:
         """Test alpha list len not matching the num_partitions."""
         with self.assertRaises(ValueError):
             DirichletPartitioner(
@@ -156,7 +197,7 @@ class TestDirichletPartitionerFailure(unittest.TestCase):
     @parameterized.expand(  # type: ignore
         [(0,), (-1,), (11,), (100,)]
     )  # num_partitions,
-    def test_invalid_num_partitions(self, num_partitions):
+    def test_invalid_num_partitions(self, num_partitions) -> None:
         """Test if 0 is invalid num_partitions."""
         with self.assertRaises(ValueError):
             _, partitioner = _dummy_setup(

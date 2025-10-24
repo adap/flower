@@ -1,6 +1,0 @@
-services:
-  gen-certs:
-    build:
-      args:
-        SUPERLINK_IP: ${SUPERLINK_IP:-127.0.0.1}
-        SUPEREXEC_IP: ${SUPEREXEC_IP:-127.0.0.1}

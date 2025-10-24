@@ -49,6 +49,9 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 ### Run with the Simulation Engine
 
+> [!NOTE]
+> Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
+
 ```bash
 flwr run .
 ```
@@ -59,5 +62,5 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 flwr run . --run-config "max-grad-norm=1.0 num-server-rounds=5"
 ```
 
-> \[!NOTE\]
+> [!NOTE]
 > Please note that, at the current state, users cannot set `NodeConfig` for simulated `ClientApp`s. For this reason, the hyperparameter `noise_multiplier` is set in the `client_fn` method based on a condition check on `partition_id`. This will be modified in a future version of Flower to allow users to set `NodeConfig` for simulated `ClientApp`s.

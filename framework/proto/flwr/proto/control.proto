@@ -1,0 +1,110 @@
+// Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
+
+syntax = "proto3";
+
+package flwr.proto;
+
+import "flwr/proto/fab.proto";
+import "flwr/proto/transport.proto";
+import "flwr/proto/recorddict.proto";
+import "flwr/proto/run.proto";
+import "flwr/proto/node.proto";
+
+service Control {
+  // Start run upon request
+  rpc StartRun(StartRunRequest) returns (StartRunResponse) {}
+
+  // Stop run upon request
+  rpc StopRun(StopRunRequest) returns (StopRunResponse) {}
+
+  // Start log stream upon request
+  rpc StreamLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
+
+  // flwr ls command
+  rpc ListRuns(ListRunsRequest) returns (ListRunsResponse) {}
+
+  // Get login details upon request
+  rpc GetLoginDetails(GetLoginDetailsRequest)
+      returns (GetLoginDetailsResponse) {}
+
+  // Get auth tokens upon request
+  rpc GetAuthTokens(GetAuthTokensRequest) returns (GetAuthTokensResponse) {}
+
+  // Pull artifacts generated during a run (flwr pull)
+  rpc PullArtifacts(PullArtifactsRequest) returns (PullArtifactsResponse) {}
+
+  // Register SuperNode
+  rpc RegisterNode(RegisterNodeRequest) returns (RegisterNodeResponse) {}
+
+  // Unregister SuperNode
+  rpc UnregisterNode(UnregisterNodeRequest) returns (UnregisterNodeResponse) {}
+
+  // List SuperNodes
+  rpc ListNodes(ListNodesRequest) returns (ListNodesResponse) {}
+}
+
+message StartRunRequest {
+  Fab fab = 1;
+  map<string, Scalar> override_config = 2;
+  ConfigRecord federation_options = 3;
+}
+message StartRunResponse { optional uint64 run_id = 1; }
+message StreamLogsRequest {
+  uint64 run_id = 1;
+  double after_timestamp = 2;
+}
+message StreamLogsResponse {
+  string log_output = 1;
+  double latest_timestamp = 2;
+}
+message ListRunsRequest { optional uint64 run_id = 1; }
+message ListRunsResponse {
+  map<uint64, Run> run_dict = 1;
+  string now = 2;
+}
+
+message GetLoginDetailsRequest {}
+message GetLoginDetailsResponse {
+  string authn_type = 1;
+  string device_code = 2;
+  string verification_uri_complete = 3;
+  int64 expires_in = 4;
+  int64 interval = 5;
+}
+
+message GetAuthTokensRequest { string device_code = 1; }
+message GetAuthTokensResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+}
+
+message StopRunRequest { uint64 run_id = 1; }
+message StopRunResponse { bool success = 1; }
+
+message PullArtifactsRequest { uint64 run_id = 1; }
+message PullArtifactsResponse { optional string url = 1; }
+
+message RegisterNodeRequest { bytes public_key = 1; }
+message RegisterNodeResponse { optional uint64 node_id = 1; }
+
+message UnregisterNodeRequest { uint64 node_id = 1; }
+message UnregisterNodeResponse {}
+
+message ListNodesRequest {}
+message ListNodesResponse {
+  repeated NodeInfo nodes_info = 1;
+  string now = 2;
+}

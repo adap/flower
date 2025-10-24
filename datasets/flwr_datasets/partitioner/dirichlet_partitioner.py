@@ -63,7 +63,9 @@ class DirichletPartitioner(Partitioner):
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to partitions.
     seed: int
-        Seed used for dataset shuffling. It has no effect if `shuffle` is False.
+        Seed used for initializing the random number generator (RNG),
+        which affects sampling from the Dirichlet distribution
+        and dataset shuffling (if `shuffle` is True).
 
     Examples
     --------
@@ -85,7 +87,7 @@ class DirichletPartitioner(Partitioner):
     [2134, 2615, 3646, 6011, 6170, 6386, 6715, 7653, 8435, 10235]
     """
 
-    def __init__(  # pylint: disable=R0913
+    def __init__(  # pylint: disable=R0913, R0917
         self,
         num_partitions: int,
         partition_by: str,
@@ -202,7 +204,7 @@ class DirichletPartitioner(Partitioner):
             return
 
         # Generate information needed for Dirichlet partitioning
-        self._unique_classes = self.dataset.unique(self._partition_by)
+        self._unique_classes = sorted(self.dataset.unique(self._partition_by))
         assert self._unique_classes is not None
         # This is needed only if self._self_balancing is True (the default option)
         self._avg_num_of_samples_per_partition = (

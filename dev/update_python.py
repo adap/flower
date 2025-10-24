@@ -57,7 +57,7 @@ def _update_python_versions(
                 ),
             ],
             # Documentation files
-            "doc/source/conf.py": [
+            "framework/docs/source/conf.py": [
                 # Update Python full version in conf.py
                 (
                     r"(\.\.\s*\|python_full_version\|\s*replace::\s*)"
@@ -143,7 +143,7 @@ def _update_python_versions(
                 ),
             ],
             # Documentation files
-            "doc/source/conf.py": [
+            "framework/docs/source/conf.py": [
                 # Update Python version in conf.py
                 (
                     r"(\.\.\s*\|python_version\|\s*replace::\s*)"
@@ -159,7 +159,7 @@ def _update_python_versions(
                 ),
             ],
             # ReStructuredText files
-            "doc/source/*.rst": [
+            "framework/docs/source/*.rst": [
                 # Update Python version in rst files
                 (
                     r"(`Python\s*"
@@ -175,7 +175,7 @@ def _update_python_versions(
                 ),
             ],
             # PO files for localization
-            "doc/locales/*/LC_MESSAGES/framework-docs.po": [
+            "framework/docs/locales/*/LC_MESSAGES/framework-docs.po": [
                 # Update Python version in localization files
                 (
                     r"(`Python\s*"

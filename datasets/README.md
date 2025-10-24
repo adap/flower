@@ -6,7 +6,7 @@
 ![Downloads](https://pepy.tech/badge/flwr-datasets)
 [![Slack](https://img.shields.io/badge/Chat-Slack-red)](https://flower.ai/join-slack)
 
-Flower Datasets (`flwr-datasets`) is a library to quickly and easily create datasets for federated learning, federated evaluation, and federated analytics. It was created by the `Flower Labs` team that also created Flower: A Friendly Federated Learning Framework.
+Flower Datasets (`flwr-datasets`) is a library to quickly and easily create datasets for federated learning, federated evaluation, and federated analytics. It was created by the `Flower Labs` team that also created Flower: A Friendly Federated AI Framework.
 
 
 > [!TIP]
@@ -51,7 +51,7 @@ Create **custom partitioning schemes** or choose from the **implemented [partiti
 * Exponential partitioning `ExponentialPartitioner(num_partitions)`
 * more to come in the future releases (contributions are welcome).
 <p align="center">
-  <img src="./doc/source/_static/readme/comparison_of_partitioning_schemes.png" alt="Comparison of partitioning schemes."/>
+  <img src="./docs/source/_static/readme/comparison_of_partitioning_schemes.png" alt="Comparison of partitioning schemes."/>
   <br>
   <em>Comparison of Partitioning Schemes on CIFAR10</em>
 </p>

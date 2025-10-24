@@ -1,82 +1,48 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "fedbn"
 version = "1.0.0"
-description = "Flower Baselines"
+description = ""
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.ai>"]
-readme = "README.md"
-homepage = "https://flower.ai"
-repository = "https://github.com/adap/flower"
-documentation = "https://flower.ai"
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: MacOS :: MacOS X",
-    "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Software Development",
-    "Topic :: Software Development :: Libraries",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Typing :: Typed",
+dependencies = [
+    "flwr[simulation]==1.17.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.10.0, <3.11.0"
-flwr = { extras = ["simulation"], version = "1.5.0" }
-hydra-core = "1.3.2"
-matplotlib = "3.7.1"
-torch = { url = "https://download.pytorch.org/whl/cu117/torch-2.0.1%2Bcu117-cp310-cp310-linux_x86_64.whl"}
-torchvision = { url = "https://download.pytorch.org/whl/cu117/torchvision-0.15.2%2Bcu117-cp310-cp310-linux_x86_64.whl"}
-tqdm = "^4.66.1"
+[tool.hatch.metadata]
+allow-direct-references = true
 
-[tool.poetry.dev-dependencies]
-isort = "==5.13.2"
-black = "==24.2.0"
-docformatter = "==1.7.5"
-mypy = "==1.4.1"
-pylint = "==2.8.2"
-flake8 = "==3.9.2"
-pytest = "==6.2.4"
-pytest-watch = "==4.2.0"
-ruff = "==0.0.272"
-types-requests = "==2.27.7"
-types-pyyaml = "6.0.12.12"
-virtualenv = "^20.21.0"
+[project.optional-dependencies]
+dev = [
+    "isort==5.13.2",
+    "black==24.2.0",
+    "docformatter==1.7.5",
+    "mypy==1.8.0",
+    "pylint==3.2.6",
+    "flake8==5.0.4",
+    "pytest==6.2.4",
+    "pytest-watch==4.2.0",
+    "ruff==0.1.9",
+    "types-requests==2.31.0.20240125",
+]
 
 [tool.isort]
-line_length = 88
-indent = "    "
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
+profile = "black"
+known_first_party = ["flwr"]
 
 [tool.black]
-line-length = 88
+line-length = 79
 target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.pytest.ini_options]
 minversion = "6.2"
 addopts = "-qq"
-testpaths = [
-    "flwr_baselines",
-]
+testpaths = ["flwr_baselines"]
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -84,18 +50,19 @@ strict = false
 plugins = "numpy.typing.mypy_plugin"
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
-good-names = "i,j,k,_,x,y,X,Y"
-signature-mutators = "hydra.main.main"
+disable = "duplicate-code,too-few-public-methods,useless-import-alias,no-member,wrong-import-order"
+good-names = "i,j,k,_,x,y,X,Y,K,N"
+max-args = 10
+max-attributes = 15
+max-locals = 36
+max-branches = 20
+max-statements = 55
 
 [tool.pylint.typecheck]
 generated-members = "numpy.*, torch.*, tensorflow.*"
 
 [[tool.mypy.overrides]]
-module = [
-    "importlib.metadata.*",
-    "importlib_metadata.*",
-]
+module = ["importlib.metadata.*", "importlib_metadata.*"]
 follow_imports = "skip"
 follow_imports_for_stubs = true
 disallow_untyped_calls = false
@@ -106,12 +73,12 @@ follow_imports = "skip"
 follow_imports_for_stubs = true
 
 [tool.docformatter]
-wrap-summaries = 88
-wrap-descriptions = 88
+wrap-summaries = 79
+wrap-descriptions = 79
 
 [tool.ruff]
 target-version = "py38"
-line-length = 88
+line-length = 79
 select = ["D", "E", "F", "W", "B", "ISC", "C4"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
 ignore = ["B024", "B027"]
@@ -141,3 +108,40 @@ exclude = [
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "itsmaddox-j"
+
+[tool.flwr.app.components]
+serverapp = "fedbn.server_app:app"
+clientapp = "fedbn.client_app:app"
+
+[tool.flwr.app.config]
+algorithm-name = "FedBN"
+num-server-rounds = 10
+num-clients = 5 
+local-epochs = 1
+to-include = "MNIST,SVHN,USPS,SynthDigits,MNIST_M"
+batch-size = 32
+num-classes = 10
+percent = 0.1 #  fraction of partitions to include for each client. Note there are 10 partitions per dataset, therefore percent should be any of {0.1, 0.2, .... 0.8, 0.9, 1.0}
+learning-rate = 0.01
+results-save-dir = "results"
+fraction-evaluate = 0.0
+fraction-fit = 1.0
+
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 5 # This is here so that we can access the number of clients during training. Does not change the actual amount of clients.
+# any multiple of 5 between 5 and 50 (both included)
+# this value should be choosen taking dataset.percent into consideration
+# for example if percent=0.2 then at most we can have 25 clients, each
+# using two data partitions of the same dataset.
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.0

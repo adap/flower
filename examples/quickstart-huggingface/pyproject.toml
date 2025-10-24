@@ -12,9 +12,9 @@ authors = [
     { name = "Kaushik Amar Das", email = "kaushik.das@iiitg.ac.in" },
 ]
 dependencies = [
-    "flwr[simulation]==1.12.0",
-    "flwr-datasets>=0.3.0",
-    "torch==2.4.0",
+    "flwr[simulation]>=1.22.0",
+    "flwr-datasets>=0.5.0",
+    "torch==2.6.0",
     "transformers>=4.30.0,<5.0",
     "evaluate>=0.4.0,<1.0",
     "datasets>=2.0.0, <3.0",
@@ -34,7 +34,7 @@ clientapp = "huggingface_example.client_app:app"
 [tool.flwr.app.config]
 num-server-rounds = 3
 model-name = "prajjwal1/bert-tiny"
-fraction-fit = 0.05
+fraction-train = 0.05
 fraction-evaluate = 0.1
 
 [tool.flwr.federations]

@@ -3,11 +3,10 @@
 import warnings
 
 import numpy as np
+from flwr.app import Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
-
-from flwr.client import ClientApp
-from flwr.common import Context, Message, MetricsRecord, RecordSet
 
 fds = None  # Cache FederatedDataset
 
@@ -54,6 +53,6 @@ def query(msg: Message, context: Context):
         metrics[f"{feature_name}_avg"] = dataset[feature_name].mean() * len(dataset)
         metrics[f"{feature_name}_count"] = len(dataset)
 
-    reply_content = RecordSet(metrics_records={"query_results": MetricsRecord(metrics)})
+    reply_content = RecordDict({"query_results": MetricRecord(metrics)})
 
-    return msg.create_reply(reply_content)
+    return Message(reply_content, reply_to=msg)

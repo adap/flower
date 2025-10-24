@@ -2,10 +2,9 @@
 
 from logging import INFO
 
-import flwr.common.recordset_compat as compat
-from flwr.common import Context, log, parameters_to_ndarrays
+from flwr.common import Context, log
 from flwr.common.secure_aggregation.quantization import quantize
-from flwr.server import Driver, LegacyContext
+from flwr.server import Grid, LegacyContext
 from flwr.server.workflow.constant import MAIN_PARAMS_RECORD
 from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
     SecAggPlusWorkflow,
@@ -24,7 +23,7 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
 
     node_ids = []
 
-    def __call__(self, driver: Driver, context: Context) -> None:
+    def __call__(self, grid: Grid, context: Context) -> None:
         first_3_params = get_weights(make_net())[0].flatten()[:3]
         _quantized = quantize(
             [first_3_params for _ in range(5)],
@@ -63,11 +62,9 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
             "########################## Secure Aggregation Start ##########################",
         )
 
-        super().__call__(driver, context)
+        super().__call__(grid, context)
 
-        paramsrecord = context.state.parameters_records[MAIN_PARAMS_RECORD]
-        parameters = compat.parametersrecord_to_parameters(paramsrecord, True)
-        ndarrays = parameters_to_ndarrays(parameters)
+        ndarrays = context.state[MAIN_PARAMS_RECORD].to_numpy_ndarrays()
         log(
             INFO,
             "Weighted average of parameters (dequantized): %s...",
@@ -80,19 +77,17 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
         log(INFO, "")
 
     def setup_stage(
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, grid: Grid, context: LegacyContext, state: WorkflowState
     ) -> bool:
-        ret = super().setup_stage(driver, context, state)
+        ret = super().setup_stage(grid, context, state)
         self.node_ids = list(state.active_node_ids)
-        state.nid_to_fitins[self.node_ids[0]].configs_records["fitins.config"][
-            "drop"
-        ] = True
+        state.nid_to_fitins[self.node_ids[0]]["fitins.config"]["drop"] = True
         return ret
 
     def collect_masked_vectors_stage(
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, grid: Grid, context: LegacyContext, state: WorkflowState
     ) -> bool:
-        ret = super().collect_masked_vectors_stage(driver, context, state)
+        ret = super().collect_masked_vectors_stage(grid, context, state)
         for node_id in state.sampled_node_ids - state.active_node_ids:
             log(INFO, "Client %s dropped out.", self.node_ids.index(node_id))
         log(

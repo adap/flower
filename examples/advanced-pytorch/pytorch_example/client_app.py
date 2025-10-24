@@ -1,122 +1,105 @@
 """pytorch-example: A Flower / PyTorch app."""
 
 import torch
-from pytorch_example.task import Net, get_weights, load_data, set_weights, test, train
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 
-from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context, ParametersRecord, RecordSet, array_from_numpy
-
-
-# Define Flower Client and client_fn
-class FlowerClient(NumPyClient):
-    """A simple client that showcases how to use the state.
-
-    It implements a basic version of `personalization` by which
-    the classification layer of the CNN is stored locally and used
-    and updated during `fit()` and used during `evaluate()`.
-    """
-
-    def __init__(
-        self, net, client_state: RecordSet, trainloader, valloader, local_epochs
-    ):
-        self.net: Net = net
-        self.client_state = client_state
-        self.trainloader = trainloader
-        self.valloader = valloader
-        self.local_epochs = local_epochs
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.net.to(self.device)
-        self.local_layer_name = "classification-head"
-
-    def fit(self, parameters, config):
-        """Train model locally.
-
-        The client stores in its context the parameters of the last layer in the model
-        (i.e. the classification head). The classifier is saved at the end of the
-        training and used the next time this client participates.
-        """
-
-        # Apply weights from global models (the whole model is replaced)
-        set_weights(self.net, parameters)
-
-        # Override weights in classification layer with those this client
-        # had at the end of the last fit() round it participated in
-        self._load_layer_weights_from_state()
-
-        train_loss = train(
-            self.net,
-            self.trainloader,
-            self.local_epochs,
-            lr=float(config["lr"]),
-            device=self.device,
-        )
-        # Save classification head to context's state to use in a future fit() call
-        self._save_layer_weights_to_state()
-
-        # Return locally-trained model and metrics
-        return (
-            get_weights(self.net),
-            len(self.trainloader.dataset),
-            {"train_loss": train_loss},
-        )
-
-    def _save_layer_weights_to_state(self):
-        """Save last layer weights to state."""
-        state_dict_arrays = {}
-        for k, v in self.net.fc2.state_dict().items():
-            state_dict_arrays[k] = array_from_numpy(v.cpu().numpy())
-
-        # Add to recordset (replace if already exists)
-        self.client_state.parameters_records[self.local_layer_name] = ParametersRecord(
-            state_dict_arrays
-        )
-
-    def _load_layer_weights_from_state(self):
-        """Load last layer weights to state."""
-        if self.local_layer_name not in self.client_state.parameters_records:
-            return
-
-        state_dict = {}
-        param_records = self.client_state.parameters_records
-        for k, v in param_records[self.local_layer_name].items():
-            state_dict[k] = torch.from_numpy(v.numpy())
-
-        # apply previously saved classification head by this client
-        self.net.fc2.load_state_dict(state_dict, strict=True)
-
-    def evaluate(self, parameters, config):
-        """Evaluate the global model on the local validation set.
-
-        Note the classification head is replaced with the weights this client had the
-        last time it trained the model.
-        """
-        set_weights(self.net, parameters)
-        # Override weights in classification layer with those this client
-        # had at the end of the last fit() round it participated in
-        self._load_layer_weights_from_state()
-        loss, accuracy = test(self.net, self.valloader, self.device)
-        return loss, len(self.valloader.dataset), {"accuracy": accuracy}
-
-
-def client_fn(context: Context):
-    # Load model and data
-    net = Net()
-    partition_id = context.node_config["partition-id"]
-    num_partitions = context.node_config["num-partitions"]
-    trainloader, valloader = load_data(partition_id, num_partitions)
-    local_epochs = context.run_config["local-epochs"]
-
-    # Return Client instance
-    # We pass the state to persist information across
-    # participation rounds. Note that each client always
-    # receives the same Context instance (it's a 1:1 mapping)
-    client_state = context.state
-    return FlowerClient(
-        net, client_state, trainloader, valloader, local_epochs
-    ).to_client()
-
+from pytorch_example.task import Net, load_data
+from pytorch_example.task import test as test_fn
+from pytorch_example.task import train as train_fn
 
 # Flower ClientApp
-app = ClientApp(
-    client_fn,
-)
+app = ClientApp()
+classification_head_name = "classification-head"
+
+
+def save_layer_weights_to_state(state: RecordDict, net: Net):
+    """Save last layer weights to state."""
+    state[classification_head_name] = ArrayRecord(net.fc2.state_dict())
+
+
+def load_layer_weights_from_state(state: RecordDict, net: Net):
+    """Load last layer weights from state and applies them to the model."""
+    if classification_head_name not in state:
+        return
+
+    # Restore this client's saved classification head
+    state_dict = state[classification_head_name].to_torch_state_dict()
+    net.fc2.load_state_dict(state_dict, strict=True)
+
+
+@app.train()
+def train(msg: Message, context: Context):
+    """Train the model on local data."""
+
+    # Load model and apply received weights
+    model = Net()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    # Restore this client's previously saved classification layer weights
+    # (no action if this is the first round it participates in)
+    load_layer_weights_from_state(context.state, model)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    # Load the data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    trainloader, _ = load_data(partition_id, num_partitions)
+
+    # Call the training function
+    train_loss = train_fn(
+        model,
+        trainloader,
+        context.run_config["local-epochs"],
+        msg.content["config"]["lr"],
+        device,
+    )
+
+    # Save classification head in `context.state` to use in future rounds
+    save_layer_weights_to_state(context.state, model)
+
+    # Construct and return reply Message
+    model_record = ArrayRecord(model.state_dict())
+    metrics = {
+        "train_loss": train_loss,
+        "num-examples": len(trainloader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)
+
+
+@app.evaluate()
+def evaluate(msg: Message, context: Context):
+    """Evaluate the model on local data."""
+
+    # Load model and apply received weights
+    model = Net()
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    # Restore this client's previously saved classification layer weights
+    # (no action if this is the first round it participates in)
+    load_layer_weights_from_state(context.state, model)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    # Load the data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    _, valloader = load_data(partition_id, num_partitions)
+
+    # Call the evaluation function
+    eval_loss, eval_acc = test_fn(
+        model,
+        valloader,
+        device,
+    )
+
+    # Construct and return reply Message
+    metrics = {
+        "eval_loss": eval_loss,
+        "eval_acc": eval_acc,
+        "num-examples": len(valloader.dataset),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
+    return Message(content=content, reply_to=msg)

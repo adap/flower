@@ -14,7 +14,7 @@ The aim of this example is to estimate the survival function using the
 lifelines library (see [KaplanMeierFitter](https://lifelines.readthedocs.io/en/stable/fitters/univariate/KaplanMeierFitter.html#lifelines.fitters.kaplan_meier_fitter.KaplanMeierFitter)). The distributed/federated aspect of this example
 is the data sending to the server. You can think of it as a federated analytics example. However, it's worth noting that this procedure violates privacy since the raw data is exchanged.
 
-Finally, many other estimators beyond KaplanMeierFitter can be used with the provided strategy:
+Finally, many other estimators beyond KaplanMeierFitter can be used:
 AalenJohansenFitter, GeneralizedGammaFitter, LogLogisticFitter,
 SplineFitter, and WeibullFitter.
 
@@ -32,10 +32,13 @@ the group it comes from therefore to simulate the division that might occur.
 Start by cloning the example project:
 
 ```shell
-$ git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/federated-kaplan-meier-fitter . && rm -rf _tmp && cd federated-kaplan-meier-fitter
+$ git clone --depth=1 https://github.com/adap/flower.git _tmp \
+        && mv _tmp/examples/federated-kaplan-meier-fitter . \
+        && rm -rf _tmp \
+        && cd federated-kaplan-meier-fitter
 ```
 
-This will create a new directory called `federated-kaplan-meier-fitter`  with the following structure:
+This will create a new directory called `federated-kaplan-meier-fitter` with the following structure:
 
 ```shell
 federated-kaplan-meier-fitter
@@ -69,7 +72,7 @@ flwr run .
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
+flwr run . --run-config "num-server-rounds=5"
 ```
 
 You can also check that the results match the centralized version.
@@ -80,5 +83,6 @@ $ python3 centralized.py
 
 ### Run with the Deployment Engine
 
-> \[!NOTE\]
-> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
+Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
+
+If you are already familiar with how the Deployment Engine works, you may want to learn how to run it using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.

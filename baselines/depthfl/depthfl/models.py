@@ -1,4 +1,4 @@
-"""ResNet18 model architecutre, training, and testing functions for CIFAR100."""
+"""ResNet18 model architecture, training, and testing functions for CIFAR100."""
 
 from typing import List, Tuple
 
@@ -210,7 +210,7 @@ def test(  # pylint: disable=too-many-locals
             images, labels = images.to(device), labels.to(device)
             output_lst = net(images)
 
-            # ensemble classfiers' output
+            # ensemble classifiers' output
             ensemble_output = torch.stack(output_lst, dim=2)
             ensemble_output = torch.sum(ensemble_output, dim=2) / len(output_lst)
 

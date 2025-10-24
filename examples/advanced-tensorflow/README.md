@@ -1,79 +1,127 @@
 ---
-tags: [advanced, vision, fds]
-dataset: [CIFAR-10]
-framework: [tensorflow, Keras]
+tags: [advanced, vision, fds, wandb]
+dataset: [Fashion-MNIST]
+framework: [keras, tensorflow]
 ---
 
-# Advanced Flower Example (TensorFlow/Keras)
+# Federated Learning with TensorFlow/Keras and Flower (Advanced Example)
 
-This example demonstrates an advanced federated learning setup using Flower with TensorFlow/Keras. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) and it differs from the quickstart example in the following ways:
+> [!TIP]
+> This example shows intermediate and advanced functionality of Flower. If you are new to Flower, it is recommended to start from the [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) example or the [quickstart TensorFlow tutorial](https://flower.ai/docs/framework/tutorial-quickstart-tensorflow.html).
 
-- 10 clients (instead of just 2)
-- Each client holds a local dataset of 1/10 of the train datasets and 80% is training examples and 20% as test examples (note that by default only a small subset of this data is used when running the `run.sh` script)
-- Server-side model evaluation after parameter aggregation
-- Hyperparameter schedule using config functions
-- Custom return values
-- Server-side parameter initialization
+This example shows how to extend your `ClientApp` and `ServerApp` capabilities compared to what's shown in the [`quickstart-tensorflow`](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) example. In particular, it will show how the `ClientApp`'s state (and object of type [RecordDict](https://flower.ai/docs/framework/ref-api/flwr.common.RecordDict.html)) can be used to enable stateful clients, facilitating the design of personalized federated learning strategies, among others. The `ServerApp` in this example makes use of a custom strategy derived from the built-in [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.serverapp.strategy.FedAvg.html). In addition, it will also showcase how to:
 
-## Project Setup
+1. Save model checkpoints
+2. Save the metrics available at the strategy (e.g. accuracies, losses)
+3. Log training artefacts to [Weights & Biases](https://wandb.ai/site)
+4. Implement a simple decaying learning rate schedule across rounds
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
-
-```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/advanced-tensorflow . && rm -rf flower && cd advanced-tensorflow
-```
-
-This will create a new directory called `advanced-tensorflow` containing the following files:
+The structure of this directory is as follows:
 
 ```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- README.md
--- run.sh
+advanced-tensorflow
+├── tensorflow_example
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   ├── strategy.py     # Defines a custom strategy
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-### Installing Dependencies
+> [!NOTE]
+> By default this example will log metrics to Weights & Biases. For this, you need to ensure that your system has logged in. Often it's as simple as executing `wandb login` on the terminal after installing `wandb`. Please, refer to this [quickstart guide](https://docs.wandb.ai/quickstart#2-log-in-to-wb) for more information.
 
-Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+This examples uses [Flower Datasets](https://flower.ai/docs/datasets/) with the [Dirichlet Partitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.DirichletPartitioner.html#flwr_datasets.partitioner.DirichletPartitioner) to partition the [Fashion-MNIST](https://huggingface.co/datasets/zalando-datasets/fashion_mnist) dataset in a non-IID fashion into 50 partitions.
 
-#### Poetry
+![](_static/fmnist_50_lda.png)
 
-```shell
-poetry install
-poetry shell
+> [!TIP]
+> You can use Flower Datasets [built-in visualization tools](https://flower.ai/docs/datasets/tutorial-visualize-label-distribution.html) to easily generate plots like the one above.
+
+### Install dependencies and project
+
+Install the dependencies defined in `pyproject.toml` as well as the `pytorch_example` package. Note that if you want to make use of the GPU, you'll need to install additional packages as described in the [Install Tensorflow](https://www.tensorflow.org/install/pip#linux) documentation.
+
+```bash
+pip install -e .
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+## Run the project
 
-```shell
-poetry run python3 -c "import flwr"
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+
+When you run the project, the strategy will create a directory structure in the form of `outputs/date/time` and store two `JSON` files: `config.json` containing the `run-config` that the `ServerApp` receives; and `results.json` containing the results (accuracies, losses) that are generated at the strategy.
+
+By default, the metrics: {`centralized_accuracy`, `centralized_loss`, `federated_evaluate_accuracy`, `federated_evaluate_loss`} will be logged to Weights & Biases (they are also stored to the `results.json` previously mentioned). Upon executing `flwr run` you'll see a URL linking to your Weight&Biases dashboard where you can see the metrics.
+
+![](_static/wandb_plots.png)
+
+The `results.json` would look along the lines of:
+
+```JSON
+[
+    {
+        "round": 1,
+        "train_metrics": {
+            "train_loss": 2.42163295142398
+        },
+        "evaluate_metrics_clientapp": {
+            "eval_loss": 2.303316633324679,
+            "eval_acc": 0.11882631674867869
+        },
+        "evaluate_metrics_serverapp": {
+            "accuracy": 0.1,
+            "loss": 2.3280856304656203
+        }
+    },
+    {
+        "round": 2,
+        "train_metrics": {
+            "train_loss": 1.8474334717885639
+        },
+        "evaluate_metrics_clientapp": {
+            "eval_loss": 2.1314486836388467,
+            "eval_acc": 0.19826539462272333
+        },
+        "evaluate_metrics_serverapp": {
+            "accuracy": 0.1,
+            "loss": 2.2980988307501944
+        }
+    },
+]
 ```
 
-If you don't see any errors you're good to go!
+### Run with the Simulation Engine
 
-#### pip
+With default parameters, 25% of the total 50 nodes (see `num-supernodes` in `pyproject.toml`) will be sampled for `train` and 50% for an `evaluate` round. By default, `ClientApp` objects will run on CPU.
 
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+> [!TIP]
+> To run your `ClientApps` on GPU or to adjust the degree or parallelism of your simulation, edit the `[tool.flwr.federations.local-simulation]` section in the `pyproject.toml`. Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
 
-```shell
-pip install -r requirements.txt
+```bash
+flwr run .
 ```
 
-## Run Federated Learning with TensorFlow/Keras and Flower
+> [!WARNING]
+> By default TensorFlow processes that use GPU will try to pre-allocate the entire available VRAM. This is undesirable for simulations where we want the GPU to be shared among several `ClientApp` instances. Enable the [GPU memory growth](https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth) by setting the `TF_FORCE_GPU_ALLOW_GROWTH` environment variable to ensure processes only make use of the VRAM they need.
 
-The included `run.sh` will call a script to generate certificates (which will be used by server and clients), start the Flower server (using `server.py`), sleep for 10 seconds to ensure the server is up, and then start 10 Flower clients (using `client.py`). You can simply start everything in a terminal as follows:
+You can run the app using another federation (see `pyproject.toml`). For example, if you have a GPU available, select the `local-sim-gpu` federation:
 
-```shell
-# Once you have activated your environment
-./run.sh
+```bash
+export TF_FORCE_GPU_ALLOW_GROWTH="true"
+flwr run . local-sim-gpu
 ```
 
-The `run.sh` script starts processes in the background so that you don't have to open eleven terminal windows. If you experiment with the code example and something goes wrong, simply using `CTRL + C` on Linux (or `CMD + C` on macOS) wouldn't normally kill all these processes, which is why the script ends with `trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT` and `wait`. This simply allows you to stop the experiment using `CTRL + C` (or `CMD + C`). If you change the script and anything goes wrong you can still use `killall python` (or `killall python3`) to kill all background processes (or a more specific command if you have other Python processes running that you don't want to kill).
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
-By default `run.sh` uses only a subset of the data. To use the full data, remove the `--toy` argument or set it to False.
+```bash
+flwr run . --run-config "num-server-rounds=10 fraction-train=0.5"
+```
 
-## Important / Warning
+### Run with the Deployment Engine
 
-The approach used to generate SSL certificates can serve as an inspiration and starting point, but it should not be considered as viable for production environments. Please refer to other sources regarding the issue of correctly generating certificates for production environments.
+Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
+
+If you are already familiar with how the Deployment Engine works, you may want to learn how to run it using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.

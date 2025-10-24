@@ -18,7 +18,7 @@ It differs from the [xgboost-quickstart](https://github.com/adap/flower/tree/mai
 
 ## Training Strategies
 
-This example provides two training strategies, [**bagging aggregation**](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html#tree-based-bagging-aggregation) ([docs](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedXgbBagging.html)) and [**cyclic training**](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html#cyclic_training) ([docs](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedXgbCyclic.html)).
+This example provides two training strategies, [**bagging aggregation**](https://flower.ai/docs/framework/ref-api/flwr.serverapp.strategy.FedXgbBagging.html) and [**cyclic training**](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedXgbCyclic.html).
 
 ### Bagging Aggregation
 
@@ -81,6 +81,9 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 ### Run with the Simulation Engine
 
+> [!NOTE]
+> Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
+
 ```bash
 flwr run .
 ```
@@ -95,14 +98,11 @@ flwr run . --run-config "train-method='bagging' num-server-rounds=5 centralised-
 flwr run . --run-config "train-method='cyclic' partitioner-type='linear' centralised-eval-client=true"
 ```
 
-> \[!TIP\]
-> For a more detailed walk-through check our [XGBoost tutorial](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html).
-> To extend the aggregation strategy for saving, logging, or other functions, please refer to our [advanced-pytorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch) example.
-
 ### Run with the Deployment Engine
 
-> \[!NOTE\]
-> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
+Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
+
+If you are already familiar with how the Deployment Engine works, you may want to learn how to run it using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.
 
 ## Expected Experimental Results
 

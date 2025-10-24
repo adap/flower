@@ -1,0 +1,23 @@
+[302] SUPERNODE_NODE_AUTH_KEY_INVALID
+=====================================
+
+Description
+-----------
+
+Authentication requires a valid elliptic curve private key. This error occurs when the
+provided private key file specified in ``--auth-supernode-private-key`` is invalid or
+unreadable.
+
+How to Resolve
+--------------
+
+1. Ensure that the file path provided for the private key option is correct.
+2. Verify that the file exists and contains a valid elliptic curve SSH key.
+3. If the files are corrupted or not in the correct format, regenerate the elliptic
+   curve SSH key pair and update the file paths accordingly. For example, on Linux or
+   macOS, **for rapid prototyping only** (not production; follow company procedures for
+   key management):
+
+   .. code-block:: bash
+
+       ssh-keygen -t ecdsa -b 384 -N "" -f id_ecdsa_nistp384

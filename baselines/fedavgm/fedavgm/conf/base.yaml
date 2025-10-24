@@ -1,7 +1,7 @@
 ---
 num_clients: 10
 num_rounds: 5  # original experiments (paper) uses 10000
-fraction_evaluate: 0 # fraction of clients usied during validation
+fraction_evaluate: 0 # fraction of clients used during validation
 num_cpus: 1
 num_gpus: 0
 

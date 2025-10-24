@@ -8,8 +8,8 @@ version = "1.0.0"
 description = "Federated Learning with XGBoost and Flower (Quickstart Example)"
 license = "Apache-2.0"
 dependencies = [
-    "flwr-nightly[simulation]==1.11.0.dev20240826",
-    "flwr-datasets>=0.3.0",
+    "flwr[simulation]>=1.22.0",
+    "flwr-datasets>=0.5.0",
     "xgboost>=2.0.0",
 ]
 
@@ -24,13 +24,12 @@ serverapp = "xgboost_quickstart.server_app:app"
 clientapp = "xgboost_quickstart.client_app:app"
 
 [tool.flwr.app.config]
-# ServerApp
 num-server-rounds = 3
-fraction-fit = 0.1
+fraction-train = 0.1
 fraction-evaluate = 0.1
-
-# ClientApp
 local-epochs = 1
+
+# XGBoost parameters
 params.objective = "binary:logistic"
 params.eta = 0.1 # Learning rate
 params.max-depth = 8

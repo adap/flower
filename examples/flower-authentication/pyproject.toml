@@ -8,10 +8,10 @@ version = "1.0.0"
 description = "Federated Learning with PyTorch and authenticated Flower "
 license = "Apache-2.0"
 dependencies = [
-    "flwr>=1.12.0",
-    "flwr-datasets[vision]>=0.3.0",
-    "torch==2.2.1",
-    "torchvision==0.17.1",
+    "flwr[simulation]>=1.22.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "torch>=2.8.0",
+    "torchvision>=0.23.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -32,8 +32,8 @@ learning-rate = 0.1
 batch-size = 32
 
 [tool.flwr.federations]
-default = "superexec"
+default = "my-federation"
 
 [tool.flwr.federations.my-federation]
-address = "127.0.0.1:9093" # Address of the SuperExec
+address = "127.0.0.1:9093" # Address of the Control API
 root-certificates = "certificates/ca.crt"

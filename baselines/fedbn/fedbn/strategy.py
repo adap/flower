@@ -1,8 +1,4 @@
-"""Optionally define a custom strategy.
-
-Needed only when the strategy is not yet implemented in Flower or because you want to
-extend or modify the functionality of an existing strategy.
-"""
+"""fedbn: A Flower Baseline."""
 
 from typing import Dict, List, Tuple
 
@@ -36,7 +32,9 @@ def get_metrics_aggregation_fn():
             dataset_name = mett["dataset_name"]
 
             _update_dict(totals, dataset_name, num_examples)
-            _update_dict(accuracies, dataset_name, num_examples * mett["accuracy"])
+            _update_dict(
+                accuracies, dataset_name, num_examples * mett["accuracy"]
+            )
             _update_dict(losses, dataset_name, num_examples * mett["loss"])
             if "pre_train_acc" in mett:
                 _update_dict(
@@ -62,7 +60,10 @@ def get_metrics_aggregation_fn():
             pre_train_accuracies.update(
                 (k, v / totals[k]) for k, v in pre_train_accuracies.items()
             )
-            to_return = {**to_return, "pre_train_accuracies": pre_train_accuracies}
+            to_return = {
+                **to_return,
+                "pre_train_accuracies": pre_train_accuracies,
+            }
         if "pre_train_loss" in metrics[0][1]:
             pre_train_losses.update(
                 (k, v / totals[k]) for k, v in pre_train_losses.items()

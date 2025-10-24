@@ -8,10 +8,11 @@ version = "1.0.0"
 description = "Federated Learning with MONAI and Flower (Quickstart Example)"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]==1.12.0",
-    "flwr-datasets[vision]>=0.3.0",
-    "monai==1.3.2",
+    "flwr[simulation]>=1.22.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "monai==1.5.1",
     "filelock==3.15.4",
+    "numpy>=2.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -26,7 +27,7 @@ clientapp = "monaiexample.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 5
-fraction-fit = 0.5
+fraction-train = 0.5
 batch-size = 128
 
 [tool.flwr.federations]

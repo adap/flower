@@ -55,6 +55,9 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 ### Run with the Simulation Engine
 
+> [!NOTE]
+> Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
+
 ```bash
 flwr run .
 ```
@@ -66,13 +69,14 @@ This command will run FL simulations with a 4-bit [OpenLLaMA 3Bv2](https://huggi
 flwr run . --run-config "model.name='openlm-research/open_llama_7b_v2' model.quantization=8"
 
 # Run for 50 rounds but increasing the fraction of clients that participate per round to 25%
-flwr run . --run-config "num-server-rounds=50 strategy.fraction-fit=0.25"
+flwr run . --run-config "num-server-rounds=50 strategy.fraction-train=0.25"
 ```
 
 ### Run with the Deployment Engine
 
-> \[!NOTE\]
-> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
+Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
+
+If you are already familiar with how the Deployment Engine works, you may want to learn how to run it using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.
 
 ## Expected results
 

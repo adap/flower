@@ -43,6 +43,7 @@ class Partitioner(ABC):
 
     @dataset.setter
     def dataset(self, value: Dataset) -> None:
+        """Set the dataset property."""
         if self._dataset is not None:
             raise ValueError(
                 "The dataset should be assigned only once to the partitioner."

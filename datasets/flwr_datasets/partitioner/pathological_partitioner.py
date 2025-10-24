@@ -32,7 +32,7 @@ class PathologicalPartitioner(Partitioner):
     Implementation based on Federated Learning on Non-IID Data Silos: An Experimental
     Study https://arxiv.org/pdf/2102.02079.
 
-    The algorithm firstly determines which classe will be assigned to which partitions.
+    The algorithm firstly determines which classes will be assigned to which partitions.
     For each partition `num_classes_per_partition` are sampled in a way chosen in
     `class_assignment_mode`. Given the information about the required classes for each
     partition, it is determined into how many parts the samples corresponding to this
@@ -65,15 +65,17 @@ class PathologicalPartitioner(Partitioner):
           classes 0, 1, 2, ..., `num_classes_per_partition`-1, partition 1 will have
           classes 1, 2, 3, ...,`num_classes_per_partition`, ....
 
-        The list representing the unique lables is sorted in ascending order. In case
+        The list representing the unique labels is sorted in ascending order. In case
         of numbers starting from zero the class id corresponds to the number itself.
-        `class_assignment_mode="first-deterministic"` was used in the orginal paper,
+        `class_assignment_mode="first-deterministic"` was used in the original paper,
         here we provide the option to use the other modes as well.
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to partitions.
     seed: int
-        Seed used for dataset shuffling. It has no effect if `shuffle` is False.
+        Seed used for initializing the random number generator (RNG),
+        which affects the ranodm assignment of labels/classes to partitions
+        and dataset shuffling (if `shuffle` is True).
 
     Examples
     --------
@@ -93,7 +95,7 @@ class PathologicalPartitioner(Partitioner):
     >>> partition = fds.load_partition(0)
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=R0917
         self,
         num_partitions: int,
         partition_by: str,
@@ -261,7 +263,7 @@ class PathologicalPartitioner(Partitioner):
     def _count_partitions_having_each_unique_label(self) -> None:
         """Count the number of partitions that have each unique label.
 
-        This computation is based on the assigment of the label to the partition_id in
+        This computation is based on the assignment of the label to the partition_id in
         the `_determine_partition_id_to_unique_labels` method.
         Given:
         * partition 0 has only labels: 0,1 (not necessarily just two samples it can have
@@ -298,7 +300,7 @@ class PathologicalPartitioner(Partitioner):
                     f" than there are samples (corresponding to this label) in the "
                     f"dataset ({num_unique}). Please decrease the `num_partitions`, "
                     f"`num_classes_per_partition` to avoid this situation, "
-                    f"or try `class_assigment_mode='deterministic'` to create a more "
+                    f"or try `class_assignment_mode='deterministic'` to create a more "
                     f"even distribution of classes along the partitions. "
                     f"Alternatively use a different dataset if you can not adjust"
                     f" the any of these parameters."

@@ -55,7 +55,7 @@ def compute_counts(
     dataframe: pd.DataFrame
         DataFrame where the row index represent the partition id and the column index
         represent the unique values found in column specified by `column_name`
-        (e.g. represeting the labels). The value of the dataframe.loc[i, j] represents
+        (e.g. representing the labels). The value of the dataframe.loc[i, j] represents
         the count of the label j, in the partition of index i.
 
     Examples
@@ -170,7 +170,7 @@ def compute_frequencies(
     dataframe: pd.DataFrame
         DataFrame where the row index represent the partition id and the column index
         represent the unique values found in column specified by `column_name`
-        (e.g. represeting the labels). The value of the dataframe.loc[i, j] represnt
+        (e.g. representing the labels). The value of the dataframe.loc[i, j] represent
         the ratio of the label j to the total number of sample of in partition i.
 
     Examples

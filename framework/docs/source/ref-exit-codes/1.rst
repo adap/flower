@@ -1,0 +1,7 @@
+[1] GRACEFUL_EXIT_SIGINT
+========================
+
+Description
+-----------
+
+The process exited gracefully, triggered by ``SIGINT``.

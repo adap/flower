@@ -3,8 +3,9 @@
 import mlx.core as mx
 import mlx.nn as nn
 import mlx.optimizers as optim
-from flwr.client import Client, ClientApp, NumPyClient
-from flwr.common import Context
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
+
 from mlxexample.task import (
     MLP,
     batch_iterate,
@@ -15,58 +16,87 @@ from mlxexample.task import (
     set_params,
 )
 
-
-class FlowerClient(NumPyClient):
-    def __init__(self, model, optimizer, batch_size, data):
-        self.train_images, self.train_labels, self.test_images, self.test_labels = data
-        self.model = model
-        self.optimizer = optimizer
-        self.num_epochs = 1
-        self.batch_size = batch_size
-
-    def fit(self, parameters, config):
-        """Train the model with data of this client."""
-        set_params(self.model, parameters)
-        loss_and_grad_fn = nn.value_and_grad(self.model, loss_fn)
-        for _ in range(self.num_epochs):
-            for X, y in batch_iterate(
-                self.batch_size, self.train_images, self.train_labels
-            ):
-                _, grads = loss_and_grad_fn(self.model, X, y)
-                self.optimizer.update(self.model, grads)
-                mx.eval(self.model.parameters(), self.optimizer.state)
-        return get_params(self.model), len(self.train_images), {}
-
-    def evaluate(self, parameters, config):
-        """Evaluate the model on the data this client has."""
-        set_params(self.model, parameters)
-        accuracy = eval_fn(self.model, self.test_images, self.test_labels)
-        loss = loss_fn(self.model, self.test_images, self.test_labels)
-        return loss.item(), len(self.test_images), {"accuracy": accuracy.item()}
+# Flower ClientApp
+app = ClientApp()
 
 
-def client_fn(context: Context) -> Client:
-    """Construct a Client that will be run in a ClientApp."""
+@app.train()
+def train(msg: Message, context: Context):
+    """Train the model on local data."""
 
-    # Read the node_config to fetch data partition associated to this node
+    # Read config
+    num_layers = context.run_config["num-layers"]
+    input_dim = context.run_config["input-dim"]
+    hidden_dim = context.run_config["hidden-dim"]
+    batch_size = context.run_config["batch-size"]
+    learning_rate = context.run_config["learning-rate"]
+    num_epochs = context.run_config["local-epochs"]
+
+    # Instantiate model and apply global parameters
+    model = MLP(num_layers, input_dim, hidden_dim, output_dim=10)
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    set_params(model, ndarrays)
+
+    # Define optimizer and loss function
+    optimizer = optim.SGD(learning_rate=learning_rate)
+    loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
+
+    # Load data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    data = load_data(partition_id, num_partitions)
+    train_images, train_labels, _, _ = load_data(partition_id, num_partitions)
 
-    # Read the run config to get settings to configure the Client
+    # Train on local data
+    for _ in range(num_epochs):
+        for X, y in batch_iterate(batch_size, train_images, train_labels):
+            _, grads = loss_and_grad_fn(model, X, y)
+            optimizer.update(model, grads)
+            mx.eval(model.parameters(), optimizer.state)
+
+    # Compute train accuracy and loss
+    accuracy = eval_fn(model, train_images, train_labels)
+    loss = loss_fn(model, train_images, train_labels)
+    # Construct and return reply Message
+    model_record = ArrayRecord(get_params(model))
+    metrics = {
+        "num-examples": len(train_images),
+        "accuracy": float(accuracy.item()),
+        "loss": float(loss.item()),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)
+
+
+@app.evaluate()
+def evaluate(msg: Message, context: Context):
+    """Evaluate the model on local data."""
+
+    # Read config
     num_layers = context.run_config["num-layers"]
+    input_dim = context.run_config["input-dim"]
     hidden_dim = context.run_config["hidden-dim"]
-    img_size = context.run_config["img-size"]
-    batch_size = context.run_config["batch-size"]
-    lr = context.run_config["learning-rate"]
 
-    # Prepare model and optimizer
-    model = MLP(num_layers, img_size**2, hidden_dim)
-    optimizer = optim.SGD(learning_rate=lr)
+    # Instantiate model and apply global parameters
+    model = MLP(num_layers, input_dim, hidden_dim, output_dim=10)
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+    set_params(model, ndarrays)
 
-    # Return Client instance
-    return FlowerClient(model, optimizer, batch_size, data).to_client()
+    # Load data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    _, _, test_images, test_labels = load_data(partition_id, num_partitions)
 
+    # Evaluate model on local data
+    accuracy = eval_fn(model, test_images, test_labels)
+    loss = loss_fn(model, test_images, test_labels)
 
-# Flower ClientApp
-app = ClientApp(client_fn=client_fn)
+    # Construct and return reply Message
+    metrics = {
+        "num-examples": len(test_images),
+        "accuracy": float(accuracy.item()),
+        "loss": float(loss.item()),
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
+    return Message(content=content, reply_to=msg)

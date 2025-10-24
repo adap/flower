@@ -1,73 +1,39 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "fedrep"
 version = "1.0.0"
-description = "Exploiting Shared Representations for Personalized Federated Learning"
+description = ""
 license = "Apache-2.0"
-authors = ["Jiahao Tan <karhoutam@qq.com>"]
-readme = "README.md"
-homepage = "https://flower.ai"
-repository = "https://github.com/adap/flower"
-documentation = "https://flower.ai"
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: MacOS :: MacOS X",
-    "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Software Development",
-    "Topic :: Software Development :: Libraries",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Typing :: Typed",
+dependencies = [
+    "flwr[simulation]>=1.13.1",
+    "flwr-datasets[vision]>=0.4.0",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.10.0, <3.11.0"                                 # don't change this
-flwr = { extras = ["simulation"], version = "1.9.0" }
-hydra-core = "1.3.2"                                         # don't change this
-pandas = "^2.2.2"
-matplotlib = "^3.9.0"
-tqdm = "^4.66.4"
-torch = "^2.2.2"
-torchvision = "^0.17.2"
-setuptools = "<70"
-flwr-datasets = { extras = ["vision"], version = ">=0.3.0" }
+[tool.hatch.metadata]
+allow-direct-references = true
 
-[tool.poetry.dev-dependencies]
-isort = "==5.13.2"
-black = "==24.2.0"
-docformatter = "==1.7.5"
-mypy = "==1.4.1"
-pylint = "==2.8.2"
-flake8 = "==3.9.2"
-pytest = "==6.2.4"
-pytest-watch = "==4.2.0"
-ruff = "==0.0.272"
-types-requests = "==2.27.7"
-virtualenv = "==20.21.0"
+[project.optional-dependencies]
+dev = [
+    "isort==5.13.2",
+    "black==24.2.0",
+    "docformatter==1.7.5",
+    "mypy==1.8.0",
+    "pylint==3.2.6",
+    "flake8==5.0.4",
+    "pytest==6.2.4",
+    "pytest-watch==4.2.0",
+    "ruff==0.1.9",
+    "types-requests==2.31.0.20240125",
+]
 
 [tool.isort]
-line_length = 88
-indent = "    "
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
+profile = "black"
+known_first_party = ["flwr"]
 
 [tool.black]
 line-length = 88
@@ -76,7 +42,9 @@ target-version = ["py38", "py39", "py310", "py311"]
 [tool.pytest.ini_options]
 minversion = "6.2"
 addopts = "-qq"
-testpaths = ["flwr_baselines"]
+testpaths = [
+    "flwr_baselines",
+]
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -84,14 +52,22 @@ strict = false
 plugins = "numpy.typing.mypy_plugin"
 
 [tool.pylint."MESSAGES CONTROL"]
-good-names = "i,j,k,_,x,y,X,Y"
-signature-mutators = "hydra.main.main"
+disable = "duplicate-code,too-few-public-methods,useless-import-alias"
+good-names = "i,j,k,_,x,y,X,Y,K,N"
+max-args = 10
+max-attributes = 15
+max-locals = 36
+max-branches = 20
+max-statements = 55
 
-[tool.pylint."TYPECHECK"]
+[tool.pylint.typecheck]
 generated-members = "numpy.*, torch.*, tensorflow.*"
 
 [[tool.mypy.overrides]]
-module = ["importlib.metadata.*", "importlib_metadata.*"]
+module = [
+    "importlib.metadata.*",
+    "importlib_metadata.*",
+]
 follow_imports = "skip"
 follow_imports_for_stubs = true
 disallow_untyped_calls = false
@@ -137,3 +113,49 @@ exclude = [
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "dimitris"
+
+[tool.flwr.app.components]
+serverapp = "fedrep.server_app:app"
+clientapp = "fedrep.client_app:app"
+
+[tool.flwr.app.config]
+algorithm = "fedrep"
+
+# dataset specs
+dataset-name = "cifar10"
+dataset-split = "sample"
+dataset-split-num-classes = 2
+dataset-split-seed = 42
+dataset-split-fraction = 0.83
+
+# model specs
+model-name = "cnncifar10"
+batch-size = 50
+learning-rate = 0.01
+momentum = 0.5
+enable-finetune = false
+num-finetune-epochs = 5
+num-local-epochs = 5  # number of local epochs
+num-rep-epochs = 1  # number of representation epochs (only for FedRep)
+
+# server specs
+num-server-rounds = 100
+fraction-fit = 0.1
+fraction-evaluate = 0.1
+min-available-clients = 2
+min-evaluate-clients = 2
+min-fit-clients = 2
+
+[tool.flwr.federations]
+default = "local-sim-100"
+
+[tool.flwr.federations.local-sim-100]
+options.num-supernodes = 100
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.5  # GPU fraction allocated to each client

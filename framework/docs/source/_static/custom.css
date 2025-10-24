@@ -1,0 +1,13 @@
+html, body{
+    font-family: Montserrat,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+}
+
+.mermaid {
+    background: transparent;
+}
+
+img.only-light, img.only-dark {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

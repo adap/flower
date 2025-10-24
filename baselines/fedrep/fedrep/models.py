@@ -1,11 +1,11 @@
-"""Model, model manager and model split for CIFAR-10 and CIFAR-100."""
+"""fedrep: A Flower Baseline."""
 
 from typing import Tuple
 
 import torch
-import torch.nn as nn
+from torch import nn
 
-from fedrep.base_model import ModelManager, ModelSplit
+from .base_model import ModelManager, ModelSplit
 
 
 # pylint: disable=W0223
@@ -58,17 +58,12 @@ class CNNCifar10ModelManager(ModelManager):
     """Manager for models with Body/Head split."""
 
     def __init__(self, **kwargs):
-        """Initialize the attributes of the model manager.
-
-        Args:
-            client_id: The id of the client.
-            config: Dict containing the configurations to be used by the manager.
-        """
+        """Initialize the attributes of the model manager."""
         super().__init__(model_split_class=CNNCifar10ModelSplit, **kwargs)
 
     def _create_model(self) -> nn.Module:
-        """Return CNNCifar10 model to be splitted into head and body."""
-        return CNNCifar10().to(self.device)
+        """Return CNNCifar10 model to be split into head and body."""
+        return CNNCifar10()
 
 
 # pylint: disable=W0223
@@ -104,6 +99,11 @@ class CNNCifar100(nn.Module):
 
         self.head = nn.Sequential(nn.Linear(128, 100))
 
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass of the model."""
+        x = self.body(x)
+        return self.head(x)
+
 
 class CNNCifar100ModelSplit(ModelSplit):
     """Split CNNCifar100 model into body and head."""
@@ -117,14 +117,9 @@ class CNNCifar100ModelManager(ModelManager):
     """Manager for models with Body/Head split."""
 
     def __init__(self, **kwargs):
-        """Initialize the attributes of the model manager.
-
-        Args:
-            client_id: The id of the client.
-            config: Dict containing the configurations to be used by the manager.
-        """
+        """Initialize the attributes of the model manager."""
         super().__init__(model_split_class=CNNCifar100ModelSplit, **kwargs)
 
     def _create_model(self) -> CNNCifar100:
-        """Return CNNCifar100 model to be splitted into head and body."""
-        return CNNCifar100().to(self.device)
+        """Return CNNCifar100 model to be split into head and body."""
+        return CNNCifar100()

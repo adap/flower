@@ -1,5 +1,5 @@
 ---
-tags: [mods, monitoring, app]
+tags: [mods, monitoring]
 dataset: [CIFAR-10]
 framework: [wandb, tensorboard]
 ---
@@ -13,9 +13,7 @@ The following steps describe how to write custom Flower Mods and use them in a s
 
 ## Writing custom Flower Mods
 
-### Flower Mods basics
-
-As described [here](https://flower.ai/docs/framework/how-to-use-built-in-mods.html#what-are-mods), Flower Mods in their simplest form can be described as:
+As described [in the documentation](https://flower.ai/docs/framework/how-to-use-built-in-mods.html#what-are-mods), Flower Mods in their simplest form can be described as:
 
 ```python
 def basic_mod(msg: Message, context: Context, app: ClientApp) -> Message:
@@ -27,309 +25,71 @@ def basic_mod(msg: Message, context: Context, app: ClientApp) -> Message:
     return reply
 ```
 
-and used when defining the `ClientApp`:
+and used when defining the `ClientApp` as:
 
 ```python
-app = fl.client.ClientApp(
-    client_fn=client_fn,
+app = ClientApp(
     mods=[basic_mod],
 )
 ```
 
-Note that in this specific case, this mod won't modify anything, and perform FL as usual.
+The mods in this example do not modify the `Message` object that the `ClientApp` is communicating to the `ServerApp`. Instead, the mods only log the _metrics_ returned by the `ClientApp`'s `train()` method to Weight & Biases or into TensorBoard .
 
-### WandB Flower Mod
+## Set up the project
 
-If we want to write a mod to monitor our client-side training using [Weights & Biases](https://github.com/wandb/wandb), we can follow the steps below.
+### Clone the project
 
-First, we need to initialize our W&B project with the correct parameters:
+Start by cloning the example project:
 
-```python
-wandb.init(
-    project=...,
-    group=...,
-    name=...,
-    id=...,
-    resume="allow",
-    reinit=True,
-)
+```shell
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+        && mv _tmp/examples/custom-mods . \
+        && rm -rf _tmp \
+        && cd custom-mods
 ```
 
-In our case, the group should be the `run_id`, specific to a `ServerApp` run, and the `name` should be the `node_id`. This will make it easy to navigate our W&B project, as for each run we will be able to see the computed results as a whole or for each individual client.
+This will create a new directory called `custom-mods` with the following structure:
 
-The `id` needs to be unique, so it will be a combination of `run_id` and `node_id`.
-
-In the end we have:
-
-```python
-def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message:
-    run_id = msg.metadata.run_id
-    group_name = f"Run ID: {run_id}"
-
-    node_id = str(msg.metadata.dst_node_id)
-    run_name = f"Node ID: {node_id}"
-
-    wandb.init(
-        project="Mod Name",
-        group=group_name,
-        name=run_name,
-        id=f"{run_id}_{node_id}",
-        resume="allow",
-        reinit=True,
-    )
+```shell
+custom-mods
+├── README.md
+├── custom_mods
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── mods.py         # Defines a Weights & Biases and TensorBoard mod
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+└── pyproject.toml      # Project metadata like dependencies and configs
 ```
 
-Now, before the message is processed by the server, we will store the starting time and the round number, in order to compute the time it took the client to perform its fit step.
+### Install dependencies and project
 
-```python
-server_round = int(msg.metadata.group_id)
-start_time = time.time()
-```
-
-And then, we can send the message to the client:
-
-```python
-reply = app(msg, context)
-```
-
-And now, with the message we got back, we can gather our metrics:
-
-```python
-if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
-
-    time_diff = time.time() - start_time
-
-    metrics = reply.content.configs_records
-
-    results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
-    results_to_log["fit_time"] = time_diff
-```
-
-Note that we store our metrics in the `results_to_log` variable and that we only initialize this variable when our client is sending back fit results (with content in it).
-
-Finally, we can send our results to W&B using:
-
-```python
-wandb.log(results_to_log, step=int(server_round), commit=True)
-```
-
-The complete mod becomes:
-
-```python
-def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message:
-    server_round = int(msg.metadata.group_id)
-
-    if reply.metadata.message_type == MessageType.TRAIN and server_round == 1:
-        run_id = msg.metadata.run_id
-        group_name = f"Run ID: {run_id}"
-
-        node_id = str(msg.metadata.dst_node_id)
-        run_name = f"Node ID: {node_id}"
-
-        wandb.init(
-            project="Mod Name",
-            group=group_name,
-            name=run_name,
-            id=f"{run_id}_{node_id}",
-            resume="allow",
-            reinit=True,
-        )
-
-    start_time = time.time()
-
-    reply = app(msg, context)
-
-    if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
-
-        time_diff = time.time() - start_time
-
-        metrics = reply.content.configs_records
-
-        results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
-
-        results_to_log["fit_time"] = time_diff
-
-        wandb.log(results_to_log, step=int(server_round), commit=True)
-
-    return reply
-```
-
-And it can be used like:
-
-```python
-app = fl.client.ClientApp(
-    client_fn=client_fn,
-    mods=[wandb_mod],
-)
-```
-
-If we want to pass an argument to our mod, we can use a wrapper function:
-
-```python
-def get_wandb_mod(name: str) -> Mod:
-    def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message:
-        server_round = int(msg.metadata.group_id)
-
-        run_id = msg.metadata.run_id
-        group_name = f"Run ID: {run_id}"
-
-        node_id = str(msg.metadata.dst_node_id)
-        run_name = f"Node ID: {node_id}"
-
-        wandb.init(
-            project=name,
-            group=group_name,
-            name=run_name,
-            id=f"{run_id}_{node_id}",
-            resume="allow",
-            reinit=True,
-        )
-
-        start_time = time.time()
-
-        reply = app(msg, context)
-
-        if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
-
-            time_diff = time.time() - start_time
-
-            metrics = reply.content.configs_records
-
-            results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
-
-            results_to_log["fit_time"] = time_diff
-
-            wandb.log(results_to_log, step=int(server_round), commit=True)
-
-        return reply
-
-    return wandb_mod
-```
-
-And use it like:
-
-```python
-app = fl.client.ClientApp(
-    client_fn=client_fn,
-    mods=[
-        get_wandb_mod("Custom mods example"),
-    ],
-)
-```
-
-### TensorBoard Flower Mod
-
-The [TensorBoard](https://www.tensorflow.org/tensorboard) Mod will only differ in the initialization and how the data is sent to TensorBoard:
-
-```python
-def get_tensorboard_mod(logdir) -> Mod:
-    os.makedirs(logdir, exist_ok=True)
-
-    def tensorboard_mod(
-        msg: Message, context: Context, app: ClientAppCallable
-    ) -> Message:
-        logdir_run = os.path.join(logdir, str(msg.metadata.run_id))
-
-        node_id = str(msg.metadata.dst_node_id)
-
-        server_round = int(msg.metadata.group_id)
-
-        start_time = time.time()
-
-        reply = app(msg, context)
-
-        time_diff = time.time() - start_time
-
-        if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
-            writer = tf.summary.create_file_writer(os.path.join(logdir_run, node_id))
-
-            metrics = dict(
-                reply.content.configs_records.get("fitres.metrics", ConfigsRecord())
-            )
-
-            with writer.as_default(step=server_round):
-                tf.summary.scalar(f"fit_time", time_diff, step=server_round)
-                for metric in metrics:
-                    tf.summary.scalar(
-                        f"{metric}",
-                        metrics[metric],
-                        step=server_round,
-                    )
-                writer.flush()
-
-        return reply
-
-    return tensorboard_mod
-```
-
-For the initialization, TensorBoard uses a custom directory path, which can, in this case, be passed as an argument to the wrapper function.
-
-It can be used in the following way:
-
-```python
-app = fl.client.ClientApp(
-    client_fn=client_fn,
-    mods=[get_tensorboard_mod(".runs_history/")],
-)
-```
-
-## Running the example
-
-### Preconditions
-
-Let's assume the following project structure:
+Install the dependencies defined in `pyproject.toml` as well as the `custom_mods` package.
 
 ```bash
-$ tree .
-.
-├── client.py           # <-- contains `ClientApp`
-├── server.py           # <-- contains `ServerApp`
-├── task.py             # <-- task-specific code (model, data)
-└── requirements.txt    # <-- dependencies
+pip install -e .
 ```
 
-### Install dependencies
+## Run the project
+
+> [!TIP]
+> By default the `ClientApp` uses the TensorBoard mod, if you would like to enable the Weight & Biases mod, please edit the line at the bottom of `custom_mods/client_app.py` and pass the `get_wandb_mod` mod to the constructor of your `ClientApp`.
+
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+
+### Run with the Simulation Engine
+
+> [!NOTE]
+> Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
 
 ```bash
-pip install -r requirements.txt
+flwr run .
 ```
 
-For [W&B](https://wandb.ai) you will also need a valid account.
-
-### Start the long-running Flower server (SuperLink)
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flower-superlink --insecure
-```
-
-### Start the long-running Flower client (SuperNode)
-
-In a new terminal window, start the first long-running Flower client using:
-
-```bash
-flower-client-app client:wandb_app --insecure
-```
-
-for W&B monitoring, or:
-
-```bash
-flower-client-app client:tb_app --insecure
-```
-
-for TensorBoard.
-
-In yet another new terminal window, start the second long-running Flower client (with the mod of your choice):
-
-```bash
-flower-client-app client:{wandb,tb}_app --insecure
-```
-
-### Run the Flower App
-
-With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
-
-```bash
-flower-server-app server:app --insecure
+flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
 ```
 
 ### Check the results
@@ -338,8 +98,14 @@ For W&B, you will need to login to the [website](https://wandb.ai).
 
 For TensorBoard, you will need to run the following command in your terminal:
 
-```sh
+```bash
 tensorboard --logdir <LOG_DIR>
 ```
 
 Where `<LOG_DIR>` needs to be replaced by the directory passed as an argument to the wrapper function (`.runs_history/` by default).
+
+### Run with the Deployment Engine
+
+Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
+
+If you are already familiar with how the Deployment Engine works, you may want to learn how to run it using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.

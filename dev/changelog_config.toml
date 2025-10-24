@@ -10,18 +10,19 @@ project = [
     "examples",
     "benchmarks",
     "glossary",
+    "intelligence",
 ]
 
 scope = "skip"
 
-pattern_template = "^({types})\\(({projects})(?::({scope}))?\\) ([A-Z][^\\n]*[^\\.\\n])$"
+pattern_template = "^({types})\\(({projects})(?::({scope}))?\\): ([A-Z][^\\n]*[^\\.\\n])$"
 
 allowed_verbs = [
     "Abandon",
     "Abort",
     "Abstract",
     "Accept",
-    "Accomodate",
+    "Accommodate",
     "Accompany",
     "Account",
     "Accumulate",

@@ -1,12 +1,11 @@
-from pathlib import Path
 from logging import WARN
-import torch.nn as nn
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import torch.nn as nn
-from flwr.common.logger import log
-
 from datasets import Dataset
+from flwr.common.logger import log
 from flwr_datasets.partitioner import IidPartitioner
 
 NUM_VERTICAL_SPLITS = 3
@@ -23,7 +22,7 @@ def _bin_age(age_series):
 
 
 def _extract_title(name_series):
-    titles = name_series.str.extract(" ([A-Za-z]+)\.", expand=False)
+    titles = name_series.str.extract(r" ([A-Za-z]+)\.", expand=False)
     rare_titles = {
         "Lady",
         "Countess",

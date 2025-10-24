@@ -32,7 +32,7 @@ class NistSampler:
         sampling_type: str,
         frac: float,
         n_clients: Optional[int] = None,
-        random_seed: int = None,
+        random_seed: Optional[int] = None,
     ) -> pd.DataFrame:
         """Samples data reference stored in the self._data_info_df.
 

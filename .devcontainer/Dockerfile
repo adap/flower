@@ -31,7 +31,11 @@ RUN apt-get install -y curl wget gnupg python3 python-is-python3 python3-pip git
 RUN python -m pip install \
     pip==24.1.2 \
     setuptools==70.3.0 \
-    poetry==1.7.1
+    poetry==2.1.3 \
+    maturin==1.8.6
+# Install taplo from the main branch on GitHub so that maturin can build the wheel
+RUN python -m pip install \
+    "git+https://github.com/tamasfe/taplo.git@1bb2c1881995a819d2bda7681d145709c783be1b#egg=taplo"
 
 USER $USERNAME
 ENV PATH="/home/$USERNAME/.local/bin:${PATH}"

@@ -1,0 +1,193 @@
+services:
+  # create a SuperLink service
+  superlink:
+    image: flwr/superlink:${FLWR_VERSION:-1.23.0}
+    command:
+      - --insecure
+      - --isolation
+      - process
+    ports:
+      - 9093:9093
+
+  # create a SuperExec service for SuperLink to execute ServerApps
+  superexec-serverapp:
+    build:
+      context: ${PROJECT_DIR:-.}
+      dockerfile_inline: |
+        FROM flwr/superexec:${FLWR_VERSION:-1.23.0}
+
+        # gcc is required for the fastai quickstart example
+        USER root
+        RUN apt-get update \
+            && apt-get -y --no-install-recommends install \
+            build-essential \
+            && rm -rf /var/lib/apt/lists/*
+        USER app
+
+        WORKDIR /app
+        COPY --chown=app:app pyproject.toml .
+        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
+
+        ENTRYPOINT ["flower-superexec"]
+    command:
+      - --insecure
+      - --plugin-type
+      - serverapp
+      - --appio-api-address
+      - superlink:9091
+    restart: on-failure:3
+    depends_on:
+      - superlink
+
+  # create two SuperNode services with different node configs
+  supernode-1:
+    image: flwr/supernode:${FLWR_VERSION:-1.23.0}
+    command:
+      - --insecure
+      - --superlink
+      - superlink:9092
+      - --clientappio-api-address
+      - 0.0.0.0:9094
+      - --isolation
+      - process
+      - --node-config
+      - "partition-id=0 num-partitions=2"
+    depends_on:
+      - superlink
+
+  supernode-2:
+    image: flwr/supernode:${FLWR_VERSION:-1.23.0}
+    command:
+      - --insecure
+      - --superlink
+      - superlink:9092
+      - --clientappio-api-address
+      - 0.0.0.0:9095
+      - --isolation
+      - process
+      - --node-config
+      - "partition-id=1 num-partitions=2"
+    depends_on:
+      - superlink
+
+  # uncomment to add another SuperNode
+  #
+  # supernode-3:
+  #   image: flwr/supernode:${FLWR_VERSION:-1.23.0}
+  #   command:
+  #     - --insecure
+  #     - --superlink
+  #     - superlink:9092
+  #     - --clientappio-api-address
+  #     - 0.0.0.0:9096
+  #     - --isolation
+  #     - process
+  #     - --node-config
+  #     - "partition-id=1 num-partitions=2"
+  #   depends_on:
+  #     - superlink
+
+  # create one SuperExec service for each SuperNode to execute ClientApps
+  superexec-clientapp-1:
+    build:
+      context: ${PROJECT_DIR:-.}
+      dockerfile_inline: |
+        FROM flwr/superexec:${FLWR_VERSION:-1.23.0}
+
+        # gcc is required for the fastai quickstart example
+        USER root
+        RUN apt-get update \
+            && apt-get -y --no-install-recommends install \
+            build-essential \
+            && rm -rf /var/lib/apt/lists/*
+        USER app
+
+        WORKDIR /app
+        COPY --chown=app:app pyproject.toml .
+        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
+
+        ENTRYPOINT ["flower-superexec"]
+    command:
+      - --insecure
+      - --plugin-type
+      - clientapp
+      - --appio-api-address
+      - supernode-1:9094
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+    stop_signal: SIGINT
+    depends_on:
+      - supernode-1
+
+  superexec-clientapp-2:
+    build:
+      context: ${PROJECT_DIR:-.}
+      dockerfile_inline: |
+        FROM flwr/superexec:${FLWR_VERSION:-1.23.0}
+
+        # gcc is required for the fastai quickstart example
+        USER root
+        RUN apt-get update \
+            && apt-get -y --no-install-recommends install \
+            build-essential \
+            && rm -rf /var/lib/apt/lists/*
+        USER app
+
+        WORKDIR /app
+        COPY --chown=app:app pyproject.toml .
+        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
+
+        ENTRYPOINT ["flower-superexec"]
+    command:
+      - --insecure
+      - --plugin-type
+      - clientapp
+      - --appio-api-address
+      - supernode-2:9095
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+    stop_signal: SIGINT
+    depends_on:
+      - supernode-2
+  # uncomment to add another ClientApp
+  #
+  # superexec-clientapp-3:
+  #   build:
+  #     context: ${PROJECT_DIR:-.}
+  #     dockerfile_inline: |
+  #       FROM flwr/superexec:${FLWR_VERSION:-1.23.0}
+
+  #       # gcc is required for the fastai quickstart example
+  #       USER root
+  #       RUN apt-get update \
+  #           && apt-get -y --no-install-recommends install \
+  #           build-essential \
+  #           && rm -rf /var/lib/apt/lists/*
+  #       USER app
+
+  #       WORKDIR /app
+  #       COPY --chown=app:app pyproject.toml .
+  #       RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+  #         && python -m pip install -U --no-cache-dir .
+
+  #       ENTRYPOINT ["flower-superexec"]
+  #   command:
+  #     - --insecure
+  #     - --plugin-type
+  #     - clientapp
+  #     - --appio-api-address
+  #     - supernode-3:9096
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "2"
+  #   stop_signal: SIGINT
+  #   depends_on:
+  #     - supernode-3

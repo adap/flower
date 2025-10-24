@@ -1,3 +1,0 @@
----
-_target_: model.Net
-num_classes: ${num_classes}

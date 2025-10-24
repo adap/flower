@@ -8,8 +8,8 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.12.0",
-    "flwr-datasets[vision]>=0.4.0",
+    "flwr[simulation]>=1.22.0",
+    "flwr-datasets[vision]>=0.5.0",
     "datasets>=2.21.0",
     "jax==0.4.31",
     "jaxlib==0.4.31",
@@ -29,6 +29,7 @@ clientapp = "jaxexample.client_app:app"
 [tool.flwr.app.config]
 num-server-rounds = 5
 learning-rate = 0.1
+fraction-evaluate = 0.4
 batch-size = 64
 
 [tool.flwr.federations]

@@ -7,6 +7,8 @@ from typing import Callable, Dict, Tuple
 
 import flwr as fl
 import torch
+from flwr.client.client import Client
+from flwr.common import Context
 from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import DataLoader
 
@@ -74,7 +76,7 @@ def gen_client_fn(
     num_epochs: int,
     batch_size: int,
     learning_rate: float,
-) -> Tuple[Callable[[str], FlowerClient], DataLoader]:
+) -> Tuple[Callable[[Context], Client], DataLoader]:
     """Generates the client function that creates the Flower Clients.
 
     Parameters
@@ -109,20 +111,22 @@ def gen_client_fn(
         iid=iid, balance=balance, num_clients=num_clients, batch_size=batch_size
     )
 
-    def client_fn(cid: str) -> FlowerClient:
+    def client_fn(context: Context) -> Client:
         """Create a Flower client representing a single organization."""
 
         # Load model
         net = model.Net().to(device)
 
+        partition_id = context.node_config["partition-id"]
+
         # Note: each client gets a different trainloader/valloader, so each client
         # will train and evaluate on their own unique data
-        trainloader = trainloaders[int(cid)]
-        valloader = valloaders[int(cid)]
+        trainloader = trainloaders[int(partition_id)]
+        valloader = valloaders[int(partition_id)]
 
         # Create a  single Flower client representing a single organization
         return FlowerClient(
             net, trainloader, valloader, device, num_epochs, learning_rate
-        )
+        ).to_client()
 
     return client_fn, testloader

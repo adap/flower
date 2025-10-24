@@ -245,7 +245,7 @@ def shuffle_and_create_cifar100_lda_dists(
     lda_concentration_coarse: float,
     lda_concentration_fine: float,
     num_partitions: int,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[List[List[np.ndarray]], List[List[np.ndarray]], np.ndarray, np.ndarray]:
     """Shuffles the original dataset and creates the two-level LDA
     distributions.
 
@@ -329,10 +329,10 @@ def partition_cifar100_and_save(
 
             # obtain sample
             sample_x: np.ndarray = x_list[real_class][0]
-            x_list[real_class] = np.delete(x_list[real_class], 0, 0)
+            x_list[real_class] = np.delete(x_list[real_class], 0, 0)  # type: ignore
 
             sample_y: np.ndarray = y_list[real_class][0]
-            y_list[real_class] = np.delete(y_list[real_class], 0, 0)
+            y_list[real_class] = np.delete(y_list[real_class], 0, 0)  # type: ignore
 
             x_this_client.append(sample_x)
             y_this_client.append(sample_y)

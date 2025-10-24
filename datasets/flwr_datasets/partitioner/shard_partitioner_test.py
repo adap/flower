@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ from datasets import Dataset
 from flwr_datasets.partitioner.shard_partitioner import ShardPartitioner
 
 
-def _dummy_setup(
+def _dummy_setup(  # pylint: disable=R0917
     num_rows: int,
     partition_by: str,
     num_partitions: int,

@@ -1,0 +1,10 @@
+[algorithm]
+name = "FedProx"
+stragglers-fraction = 0.0
+mu = 0.0 # Always 0 when using FedAvg
+
+[dataset]
+mu = 0.0 # Always 0 when using FedAvg
+
+[fit]
+drop-client = false # with FedProx, clients shouldn't be dropped even if they are stragglers

@@ -60,6 +60,8 @@ def _dummy_heterogeneous_dataset_setup(
 class TestClassConstrainedPartitioner(unittest.TestCase):
     """Unit tests for PathologicalPartitioner."""
 
+    string_partition_by: bool
+
     @parameterized.expand(  # type: ignore
         [
             # num_partition, num_classes_per_partition, num_samples, total_classes
@@ -116,7 +118,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
             if isinstance(dataset[partition_by][0], int)
             else [str(i) for i in range(10)]
         )
-        actual_classes = set()
+        actual_classes: set[int] = set()
         for pid in range(10):
             partition = partitioner.load_partition(pid)
             actual_classes.update(np.unique(partition["labels"]))
@@ -131,7 +133,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
     )
     def test_deterministic_class_assignment(
         self, num_partitions, num_classes_per_partition, num_samples, num_unique_classes
-    ):
+    ) -> None:
         """Test deterministic assignment of classes to partitions."""
         dataset = _dummy_dataset_setup(num_samples, "labels", num_unique_classes)
         partitioner = PathologicalPartitioner(
@@ -174,7 +176,10 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
     ) -> None:
         """Test  too many partitions for the number of samples in a class."""
         dataset_1 = _dummy_dataset_setup(
-            num_samples // 2, "labels", num_unique_classes - 1
+            num_samples // 2,
+            "labels",
+            num_unique_classes - 1,
+            string_partition_by=self.string_partition_by,
         )
         # Create a skewed part of the dataset for the last label
         data = {
@@ -202,7 +207,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
             "Label: 0 is needed to be assigned to more partitions (10) than there are "
             "samples (corresponding to this label) in the dataset (5). "
             "Please decrease the `num_partitions`, `num_classes_per_partition` to "
-            "avoid this situation, or try `class_assigment_mode='deterministic'` to "
+            "avoid this situation, or try `class_assignment_mode='deterministic'` to "
             "create a more even distribution of classes along the partitions. "
             "Alternatively use a different dataset if you can not adjust the any of "
             "these parameters.",
@@ -224,7 +229,12 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
         num_unique_classes: int,
     ) -> None:
         """Test more num_classes_per_partition > num_unique_classes in the dataset."""
-        dataset = _dummy_dataset_setup(num_samples, "labels", num_unique_classes)
+        dataset = _dummy_dataset_setup(
+            num_samples,
+            "labels",
+            num_unique_classes,
+            string_partition_by=self.string_partition_by,
+        )
         with self.assertRaises(ValueError) as context:
             partitioner = PathologicalPartitioner(
                 num_partitions=num_partitions,

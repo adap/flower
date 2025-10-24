@@ -2,19 +2,19 @@
 
 import random
 import time
+from collections.abc import Iterable
 from logging import INFO
 
 import numpy as np
-
-from flwr.common import Context, MessageType, RecordSet, Message
+from flwr.app import Context, Message, MessageType, RecordDict
 from flwr.common.logger import log
-from flwr.server import Driver, ServerApp
+from flwr.serverapp import Grid, ServerApp
 
 app = ServerApp()
 
 
 @app.main()
-def main(driver: Driver, context: Context) -> None:
+def main(grid: Grid, context: Context) -> None:
     """This `ServerApp` construct a histogram from partial-histograms reported by the
     `ClientApp`s."""
 
@@ -27,9 +27,9 @@ def main(driver: Driver, context: Context) -> None:
         log(INFO, "Starting round %s/%s", server_round + 1, num_rounds)
 
         # Loop and wait until enough nodes are available.
-        all_node_ids = []
+        all_node_ids: list[int] = []
         while len(all_node_ids) < min_nodes:
-            all_node_ids = driver.get_node_ids()
+            all_node_ids = list(grid.get_node_ids())
             if len(all_node_ids) >= min_nodes:
                 # Sample nodes
                 num_to_sample = int(len(all_node_ids) * fraction_sample)
@@ -41,11 +41,11 @@ def main(driver: Driver, context: Context) -> None:
         log(INFO, "Sampled %s nodes (out of %s)", len(node_ids), len(all_node_ids))
 
         # Create messages
-        recordset = RecordSet()
+        recorddict = RecordDict()
         messages = []
         for node_id in node_ids:  # one message for each node
-            message = driver.create_message(
-                content=recordset,
+            message = Message(
+                content=recorddict,
                 message_type=MessageType.QUERY,  # target `query` method in ClientApp
                 dst_node_id=node_id,
                 group_id=str(server_round),
@@ -53,7 +53,7 @@ def main(driver: Driver, context: Context) -> None:
             messages.append(message)
 
         # Send messages and wait for all results
-        replies = driver.send_and_receive(messages)
+        replies = grid.send_and_receive(messages)
         log(INFO, "Received %s/%s results", len(replies), len(messages))
 
         # Aggregate partial histograms
@@ -63,7 +63,7 @@ def main(driver: Driver, context: Context) -> None:
         log(INFO, "Aggregated histogram: %s", aggregated_hist)
 
 
-def aggregate_partial_histograms(messages: Message):
+def aggregate_partial_histograms(messages: Iterable[Message]):
     """Aggregate partial histograms."""
 
     aggregated_hist = {}
@@ -71,7 +71,7 @@ def aggregate_partial_histograms(messages: Message):
     for rep in messages:
         if rep.has_error():
             continue
-        query_results = rep.content.metrics_records["query_results"]
+        query_results = rep.content["query_results"]
         # Sum metrics
         for k, v in query_results.items():
             if k in ["SepalLengthCm", "SepalWidthCm"]:

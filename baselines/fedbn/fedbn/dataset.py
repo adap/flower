@@ -1,14 +1,18 @@
-"""Digits dataset."""
+"""fedbn: A Flower Baseline."""
 
 import os
+from pathlib import Path
 from random import shuffle
 from typing import List, Optional, Tuple
 
 import numpy as np
-from omegaconf import DictConfig
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
+
+from flwr.common import Context
+
+DATA_DIRECTORY = Path(os.path.abspath(__file__)).parent.parent / "data"
 
 
 class DigitsDataset(Dataset):
@@ -77,7 +81,7 @@ class DigitsDataset(Dataset):
 def load_partition(
     dataset: str, path_to_data: str, partition_indx: List[int], batch_size: int
 ) -> Tuple[DataLoader, DataLoader]:
-    """Load 'MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST_M' for the training and test.
+    """Load 'MNIST','SVHN', 'USPS', 'SynthDigits', 'MNIST_M' data.
 
     data to simulate a partition.
     """
@@ -208,64 +212,68 @@ def load_partition(
 
 
 # pylint: disable=too-many-locals
-def get_data(dataset_cfg: DictConfig) -> List[Tuple[DataLoader, DataLoader, str]]:
+def get_data(context: Context) -> List[Tuple[DataLoader, DataLoader, str]]:
     """Generate dataloaders for each client."""
     client_data = []
-    d_cfg = dataset_cfg
+    run_config = context.run_config
+    to_include = str(run_config["to-include"]).split(",")
+    percent = float(run_config["percent"])
+    num_clients = int(run_config["num-clients"])
 
-    total_partitions = (
-        10  # each dataset was pre-processed by the authors and split into 10 partitions
+    total_partitions = 10
+    # each dataset was pre-processed by the authors and split
+    # into 10 partitions. First check that percent
+    # used is allowed
+    allowed_percent = np.arange(1, total_partitions + 1) / total_partitions
+    message = (
+        f"'dataset.percent' should be in {list(allowed_percent)}."
+        "\nTrainset is pre-partitioned into 10 disjoint sets."
     )
-    # First check that percent used is allowed
-    allowed_percent = (np.arange(1, total_partitions + 1) / total_partitions).tolist()
-    assert d_cfg.percent in allowed_percent, (
-        f"'dataset.percent' should be in {allowed_percent}."
-        "\nThis is because the trainset is pre-partitioned into 10 disjoint sets."
-    )
-
-    # Then check that with the percent selected, the desired number of clients (and
+    assert percent in allowed_percent, message
+    # Check that with the percent selected, the desired number of clients (and
     # therefore dataloaders) can be created.
-    max_expected_clients = len(d_cfg.to_include) * 1 / d_cfg.percent
+    max_expected_clients = len(to_include) * 1 / percent
 
-    num_clients_step = len(d_cfg.to_include)
+    num_clients_step = len(to_include)
     possible_client_configs = np.arange(
         num_clients_step,
         max_expected_clients + num_clients_step,
         num_clients_step,
         dtype=np.int32,
     ).tolist()
-    assert d_cfg.num_clients in possible_client_configs, (
-        f"'dataset.num_clients' should be in {possible_client_configs}."
-        "\n this is because you include {len(d_cfg.to_include)} datasets "
-        f"(i.e. {d_cfg.to_include}) and each should be used by the same number"
+    assert num_clients in possible_client_configs, (
+        f"'num-clients' should be in {possible_client_configs}."
+        f"\n this is because you include {to_include} datasets "
+        f"(i.e. {to_include} and each should be used by the same number"
         " of clients. The values of `num_clients` also depend on the"
         "'dataset.percent' you chose."
     )
 
     # All good, then create as many dataloaders as clients in the experiment.
-    # Each dataloader might containe one or more partitions (depends on 'percent')
+    # Each dataloader might contain 1+ partitions (depends on 'percent')
     # Each dataloader contains data of the same dataset.
-    num_clients_per_dataset = d_cfg.num_clients // num_clients_step
-    num_parts = int(d_cfg.percent * total_partitions)
+    num_clients_per_dataset = int(num_clients // num_clients_step)
+    num_parts = int(percent * total_partitions)
 
-    for dataset_name in dataset_cfg.to_include:
+    for dataset_name in to_include:
         parts = list(range(total_partitions))
         shuffle(parts)
         for i in range(num_clients_per_dataset):
-            parts_for_client = parts[i * num_parts : (i + 1) * num_parts]
-            print(f"{dataset_name = } | {parts_for_client = }")
+            front = i * num_parts
+            back = (i + 1) * num_parts
+            parts_for_client = parts[front:back]
+            # print(f"{dataset_name = } | {parts_for_client = }")
             trainloader, testloader = load_partition(
                 dataset_name,
-                path_to_data=d_cfg.data_path,
+                path_to_data=str(DATA_DIRECTORY),
                 partition_indx=parts_for_client,
-                batch_size=d_cfg.batch_size,
+                batch_size=int(run_config["batch-size"]),
             )
 
             client_data.append((trainloader, testloader, dataset_name))
-
     # Ensure there is an entry in the list for each client
     assert (
-        len(client_data) == d_cfg.num_clients
-    ), f"{len(client_data) = } | {d_cfg.num_clients = }"
+        len(client_data) == num_clients
+    ), f"{len(client_data) = } | {num_clients = }"
 
     return client_data

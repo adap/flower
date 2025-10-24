@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # ==============================================================================
 """InnerDirichlet partitioner."""
 import warnings
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
 import numpy as np
 
@@ -51,7 +51,9 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to partitions.
     seed: int
-        Seed used for dataset shuffling. It has no effect if `shuffle` is False.
+        Seed used for initializing the random number generator (RNG),
+        which affects sampling from the Dirichlet distribution
+        and dataset shuffling (if `shuffle` is True).
 
     Examples
     --------
@@ -66,7 +68,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
     >>> print(partition[0])  # Print the first example
     """
 
-    def __init__(  # pylint: disable=R0913
+    def __init__(  # pylint: disable=R0913, R0917
         self,
         partition_sizes: Union[list[int], NDArrayInt],
         partition_by: str,
@@ -253,9 +255,10 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
                 ]
                 break
 
-        partition_id_to_indices = {
-            cid: client_indices[cid].tolist() for cid in range(self._num_partitions)
-        }
+        partition_id_to_indices = cast(
+            dict[int, list[int]],
+            {cid: client_indices[cid].tolist() for cid in range(self._num_partitions)},
+        )
         # Shuffle the indices if the shuffle is True.
         # Note that the samples from this partitioning do not necessarily require
         # shuffling, the order should exhibit consecutive samples.
@@ -304,7 +307,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
 
 def _instantiate_partition_sizes(
-    partition_sizes: Union[list[int], NDArrayInt]
+    partition_sizes: Union[list[int], NDArrayInt],
 ) -> NDArrayInt:
     """Transform list to the ndarray of ints if needed."""
     if isinstance(partition_sizes, list):

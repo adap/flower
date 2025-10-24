@@ -1,9 +1,9 @@
 # Flower
 .flower_ops
 data/
-doc/source/api_documentation
-doc/source/_build
-doc/source/dataset/
+framework/docs/source/api_documentation
+framework/docs/source/_build
+framework/docs/source/dataset/
 flwr_logs
 .cache
 
@@ -16,6 +16,12 @@ examples/**/dataset/**
 
 # Flower Baselines
 baselines/datasets/leaf
+
+# Swift auto-generated documentation
+Documentation
+
+# Exclude ee package
+framework/py/flwr/ee
 
 # macOS
 .DS_Store
@@ -165,6 +171,9 @@ poetry.lock
 
 # iOS
 xcuserdata/
+.swiftpm/
+.build/
+Package.resolved
 
 # Android
 .gradle
@@ -183,3 +192,9 @@ app/src/main/assets
 /captures
 .externalNativeBuild
 .cxx
+
+# Pyright
+pyrightconfig.json
+
+# ruff Python linter
+.ruff_cache/

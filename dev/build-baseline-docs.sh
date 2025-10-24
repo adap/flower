@@ -2,8 +2,15 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-ROOT=`pwd`
-INDEX=$ROOT/baselines/doc/source/index.rst
+# Determine platform
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  SED_INPLACE="sed -i ''"
+else
+  SED_INPLACE="sed -i"
+fi
+
+ROOT=$(pwd)
+INDEX=$ROOT/baselines/docs/source/index.rst
 
 initial_text=$(cat <<-END
 .. toctree::
@@ -52,11 +59,11 @@ function add_table_entry ()
 
 
 # Create Sphinx table block and header
-! sed -i '' -e "s/.. BASELINES_TABLE_ANCHOR/$table_body/" $INDEX
+! $SED_INPLACE -e "s/.. BASELINES_TABLE_ANCHOR/$table_body/" $INDEX
 
 ! grep -q ":caption: References" $INDEX && echo "$initial_text" >> $INDEX && echo "" >> $INDEX
 
-rm -f "baselines/doc/source/*.md"
+rm -f "baselines/docs/source/*.md"
 
 cd $ROOT/baselines/
 
@@ -67,12 +74,12 @@ for d in $(printf '%s\n' */ | sort -V); do
   # Select directories
   baseline=${d%/}
 
-  if ! [[ "$baseline" =~ ^(baseline_template|dev|doc|flwr_baselines)$ ]]; then
+  if ! [[ "$baseline" =~ ^(baseline_template|dev|docs|flwr_baselines)$ ]]; then
     # For each baseline, copy the README into the source of the Baselines docs
-    cp $baseline/README.md $ROOT/baselines/doc/source/$baseline.md 2>&1 >/dev/null
+    cp $baseline/README.md $ROOT/baselines/docs/source/$baseline.md 2>&1 >/dev/null
 
     gh_text="[<img src=\"_static/view-gh.png\" alt=\"View on GitHub\" width=\"200\"/>](https://github.com/adap/flower/blob/main/baselines/$baseline)"
-    readme_file="$ROOT/baselines/doc/source/$baseline.md"
+    readme_file="$ROOT/baselines/docs/source/$baseline.md"
 
     if ! grep -Fq "$gh_text" "$readme_file"; then
       awk -v text="$gh_text" '
@@ -92,8 +99,8 @@ for d in $(printf '%s\n' */ | sort -V); do
     do
       image_dir=$(dirname $img)
 
-      mkdir -p $ROOT/baselines/doc/source/$image_dir && cp $baseline/$img $_
-      images_arr+=("$ROOT/baselines/doc/source/$img")
+      mkdir -p $ROOT/baselines/docs/source/$image_dir && cp $baseline/$img $_
+      images_arr+=("$ROOT/baselines/docs/source/$img")
     done
 
     if [[ $(grep -L "$baseline" $INDEX) ]]; then
@@ -103,13 +110,13 @@ for d in $(printf '%s\n' */ | sort -V); do
 
       # Add entry to the table
       add_table_entry $baseline
-      ! sed -i '' -e "s/.. BASELINES_TABLE_ENTRY/$table_entry/" $INDEX
+      ! $SED_INPLACE -e "s/.. BASELINES_TABLE_ENTRY/$table_entry/" $INDEX
 
     fi
   fi
 done
 
-cd $ROOT/baselines/doc
+cd $ROOT/baselines/docs
 make html
 
 # Restore everything back to the initial state

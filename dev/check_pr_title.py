@@ -61,15 +61,15 @@ if __name__ == "__main__":
     if not valid:
         print(
             f"PR title `{pr_title}` is invalid, {error}.\n\nA PR title should "
-            "be of the form:\n\n\t<PR_TYPE>(<PR_PROJECT>) <PR_SUBJECT>\n\n"
+            "be of the form:\n\n\t<PR_TYPE>(<PR_PROJECT>): <PR_SUBJECT>\n\n"
             f"Or, if the PR shouldn't appear in the changelog:\n\n\t<PR_TYPE>"
-            f"(<PR_PROJECT>:skip) <PR_SUBJECT>\n\nwith <PR_TYPE> in [{types}],\n"
+            f"(<PR_PROJECT>:skip): <PR_SUBJECT>\n\nwith <PR_TYPE> in [{types}],\n"
             f"<PR_PROJECT> in [{'|'.join(config['project']) + '|*'}] "
             "(where '*' is used when modifying multiple projects and should be used in "
             "conjunction with the ':skip' flag),\nand <PR_SUBJECT> starting with "
             "a capitalized verb in the imperative mood and without any punctuation "
-            "at the end.\n\nA valid example is:\n\n\t`feat(framework) "
+            "at the end.\n\nA valid example is:\n\n\t`feat(framework): "
             "Add flwr build CLI command`\n\nOr, if the PR shouldn't appear in "
-            "the changelog:\n\n\t`feat(framework:skip) Add new option to build CLI`\n"
+            "the changelog:\n\n\t`feat(framework:skip): Add new option to build CLI`\n"
         )
         sys.exit(1)

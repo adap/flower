@@ -1,16 +1,36 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "app-pytorch"
-version = "0.1.0"
-description = "Multi-Tenant Federated Learning with Flower and PyTorch"
-authors = ["The Flower Authors <hello@flower.ai>"]
+version = "1.0.0"
+description = ""
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.22.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-# Mandatory dependencies
-flwr = { version = "^1.8.0", extras = ["simulation"] }
-torch = "2.2.1"
-torchvision = "0.17.1"
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "app_pytorch.server_app:app"
+clientapp = "app_pytorch.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 5
+fraction-train = 0.5
+local-epochs = 1
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10

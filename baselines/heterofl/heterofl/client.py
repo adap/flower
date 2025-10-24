@@ -71,7 +71,7 @@ def gen_client_fn(
     client_to_model_rate_mapping: Optional[List[float]],
     client_train_settings: Dict,
     data_loaders,
-) -> Callable[[str], FlowerNumPyClient]:  # pylint: disable=too-many-arguments
+) -> Callable[[str], fl.client.Client]:  # pylint: disable=too-many-arguments
     """Generate the client function that creates the Flower Clients.
 
     Parameters
@@ -97,11 +97,11 @@ def gen_client_fn(
 
     Returns
     -------
-    Callable[[str], FlowerClient]
+    Callable[[str], fl.client.Client]
         A tuple containing the client function that creates Flower Clients
     """
 
-    def client_fn(cid: str) -> FlowerNumPyClient:
+    def client_fn(cid: str) -> fl.client.Client:
         """Create a Flower client representing a single organization."""
         # Note: each client gets a different trainloader/valloader, so each client
         # will train and evaluate on their own unique data
@@ -128,6 +128,6 @@ def gen_client_fn(
             dataloader=client_dataloader,
             model_rate=model_rate,
             client_train_settings=client_train_settings,
-        )
+        ).to_client()
 
     return client_fn

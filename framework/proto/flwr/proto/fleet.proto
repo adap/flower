@@ -1,0 +1,92 @@
+// Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
+
+syntax = "proto3";
+
+package flwr.proto;
+
+import "flwr/proto/heartbeat.proto";
+import "flwr/proto/node.proto";
+import "flwr/proto/run.proto";
+import "flwr/proto/fab.proto";
+import "flwr/proto/message.proto";
+
+service Fleet {
+  rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
+  rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse) {}
+  rpc SendNodeHeartbeat(SendNodeHeartbeatRequest)
+      returns (SendNodeHeartbeatResponse) {}
+
+  // Retrieve one or more messages, if possible
+  //
+  // HTTP API path: /api/v1/fleet/pull-messages
+  rpc PullMessages(PullMessagesRequest) returns (PullMessagesResponse) {}
+
+  // Complete one or more messages, if possible
+  //
+  // HTTP API path: /api/v1/fleet/push-messages
+  rpc PushMessages(PushMessagesRequest) returns (PushMessagesResponse) {}
+
+  rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
+
+  // Get FAB
+  rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
+
+  // Push Object
+  rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
+
+  // Pull Object
+  rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
+
+  // Confirm Message Received
+  rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
+      returns (ConfirmMessageReceivedResponse) {}
+}
+
+// CreateNode messages
+message CreateNodeRequest {
+  bytes public_key = 1;
+  double heartbeat_interval = 2;
+}
+message CreateNodeResponse { Node node = 1; }
+
+// DeleteNode messages
+message DeleteNodeRequest { Node node = 1; }
+message DeleteNodeResponse {}
+
+// PullMessages messages
+message PullMessagesRequest {
+  Node node = 1;
+  repeated string message_ids = 2;
+}
+message PullMessagesResponse {
+  Reconnect reconnect = 1;
+  repeated Message messages_list = 2;
+  repeated ObjectTree message_object_trees = 3;
+}
+
+// PushMessages messages
+message PushMessagesRequest {
+  Node node = 1;
+  repeated Message messages_list = 2;
+  repeated ObjectTree message_object_trees = 3;
+}
+message PushMessagesResponse {
+  Reconnect reconnect = 1;
+  map<string, uint32> results = 2;
+  repeated string objects_to_push = 3;
+}
+
+message Reconnect { uint64 reconnect = 1; }

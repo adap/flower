@@ -36,21 +36,22 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     in a deterministic pathological manner. The 1st dimension is the number of unique
     labels and the 2nd-dimension is the number of buckets into which the samples
     associated with each label will be divided. That is, given a distribution array of
-    shape,
-                           `num_unique_labels_per_partition` x `num_partitions`
-    ( `num_unique_labels`, ---------------------------------------------------- ),
-                                          `num_unique_labels`
-    the label_id at the i'th row is assigned to the partition_id based on the following
-    approach.
+    shape,::
 
-    First, for an i'th row, generate a list of `id`s according to the formula:
-        id = alpha + beta
-    where,
-        alpha = (i - num_unique_labels_per_partition + 1) \
-                 + (j % num_unique_labels_per_partition),
-        alpha = alpha + (alpha >= 0 ? 0 : num_unique_labels),
-        beta = num_unique_labels * (j // num_unique_labels_per_partition)
-    and j in {0, 1, 2, ..., `num_columns`}. Then, sort the list of `id`s in ascending
+                            `num_unique_labels_per_partition` x `num_partitions`
+        ( `num_unique_labels`, ---------------------------------------------------- ),
+                                            `num_unique_labels`
+        the label_id at the i'th row is assigned to the partition_id based on the
+        following approach.
+
+        First, for an i'th row, generate a list of `id`s according to the formula:
+            id = alpha + beta
+        where,
+            alpha = (i - num_unique_labels_per_partition + 1) +
+                    + (j % num_unique_labels_per_partition),
+            alpha = alpha + (alpha >= 0 ? 0 : num_unique_labels),
+            beta = num_unique_labels * (j // num_unique_labels_per_partition)
+    and j in {0, 1, 2, ..., `num_columns`}. Then, sort the list of `id` s in ascending
     order. The j'th index in this sorted list corresponds to the partition_id that the
     i'th unique label (and the underlying distribution array value) will be assigned to.
     So, for a dataset with 10 unique labels and a configuration with 20 partitions and
@@ -96,11 +97,14 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to nodes.
     seed : int, default=42
-        Seed used for dataset shuffling. It has no effect if `shuffle` is False.
+        Seed used for initializing the random number generator (RNG),
+        which affects dataset shuffling (if `shuffle` is True)
+        and random assignment of any unassigned samples that resulted from
+        rounding errors during label rescaling (if `rescale` is True).
 
     Examples
     --------
-    In order to reproduce the power-law distrbution of the paper, follow this setup:
+    In order to reproduce the power-law distribution of the paper, follow this setup:
 
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import DistributionPartitioner
@@ -154,7 +158,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
      9: {0: 124, 9: 13}}
     """
 
-    def __init__(  # pylint: disable=R0913
+    def __init__(  # pylint: disable=R0913, R0917
         self,
         distribution_array: Union[NDArrayInt, NDArrayFloat],
         num_partitions: int,

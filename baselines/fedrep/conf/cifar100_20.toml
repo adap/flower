@@ -1,0 +1,11 @@
+algorithm = "fedrep"
+
+# model specs
+model-name = "cnncifar100"
+
+# dataset specs
+dataset-name = "cifar100"
+dataset-split = "sample"
+dataset-split-num-classes = 20
+dataset-split-seed = 42
+dataset-split-fraction = 0.83
