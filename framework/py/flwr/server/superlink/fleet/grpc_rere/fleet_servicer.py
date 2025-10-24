@@ -247,7 +247,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """Push an object to the ObjectStore."""
         log(
             DEBUG,
-            "[ServerAppIoServicer.PushObject] Push Object with object_id=%s",
+            "[Fleet.PushObject] Push Object with object_id=%s",
             request.object_id,
         )
 
@@ -272,7 +272,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """Pull an object from the ObjectStore."""
         log(
             DEBUG,
-            "[ServerAppIoServicer.PullObject] Pull Object with object_id=%s",
+            "[Fleet.PullObject] Pull Object with object_id=%s",
             request.object_id,
         )
 
