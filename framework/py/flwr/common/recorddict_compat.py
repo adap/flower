@@ -152,11 +152,11 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
         dataR = tensor
 
         if ENCRYPTION_ENABLED:
-            encrypted = encrypt(dataR, ENCRYPTION_METHOD)
+            dataR = encrypt(dataR, ENCRYPTION_METHOD)
         if INTEGRITY_ENABLED:
-            tensor = add_integrity(dataR, INTEGRITY_METHOD)
+            dataR = add_integrity(dataR, INTEGRITY_METHOD)
         ordered_dict[str(idx)] = Array(
-            data=encrypted, dtype="", stype=tensor_type, shape=()
+            data=dataR, dtype="", stype=tensor_type, shape=()
         )
 
     if num_arrays == 0:
