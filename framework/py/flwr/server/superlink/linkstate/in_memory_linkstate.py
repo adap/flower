@@ -411,10 +411,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     ) -> Sequence[NodeInfo]:
         """Retrieve information about nodes based on the specified filters."""
         with self.lock:
-            self._check_and_tag_deactivated_nodes()
+            self._check_and_tag_offline_nodes()
             result = []
-            for node in self.nodes.values():
-                if node_ids is not None and node.node_id not in node_ids:
+            for node_id in self.nodes.keys() if node_ids is None else node_ids:
+                if (node := self.nodes.get(node_id)) is None:
                     continue
                 if owner_aids is not None and node.owner_aid not in owner_aids:
                     continue
@@ -423,7 +423,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 result.append(node)
             return result
 
-    def _check_and_tag_deactivated_nodes(self) -> None:
+    def _check_and_tag_offline_nodes(self) -> None:
         with self.lock:
             # Set all nodes of "online" status to "offline" if they've offline
             current_ts = now().timestamp()
