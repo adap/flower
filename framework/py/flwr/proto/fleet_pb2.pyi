@@ -61,6 +61,86 @@ class DeleteNodeResponse(google.protobuf.message.Message):
         ) -> None: ...
 global___DeleteNodeResponse = DeleteNodeResponse
 
+class RegisterNodeFleetRequest(google.protobuf.message.Message):
+    """RegisterNode messages (add prefix to avoid name clash)"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    PUBLIC_KEY_FIELD_NUMBER: builtins.int
+    public_key: builtins.bytes
+    def __init__(self,
+        *,
+        public_key: builtins.bytes = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["public_key",b"public_key"]) -> None: ...
+global___RegisterNodeFleetRequest = RegisterNodeFleetRequest
+
+class RegisterNodeFleetResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___RegisterNodeFleetResponse = RegisterNodeFleetResponse
+
+class ActivateNodeRequest(google.protobuf.message.Message):
+    """ActivateNode messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    PUBLIC_KEY_FIELD_NUMBER: builtins.int
+    HEARTBEAT_INTERVAL_FIELD_NUMBER: builtins.int
+    public_key: builtins.bytes
+    heartbeat_interval: builtins.float
+    def __init__(self,
+        *,
+        public_key: builtins.bytes = ...,
+        heartbeat_interval: builtins.float = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["heartbeat_interval",b"heartbeat_interval","public_key",b"public_key"]) -> None: ...
+global___ActivateNodeRequest = ActivateNodeRequest
+
+class ActivateNodeResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_ID_FIELD_NUMBER: builtins.int
+    node_id: builtins.int
+    def __init__(self,
+        *,
+        node_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node_id",b"node_id"]) -> None: ...
+global___ActivateNodeResponse = ActivateNodeResponse
+
+class DeactivateNodeRequest(google.protobuf.message.Message):
+    """DeactivateNode messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_ID_FIELD_NUMBER: builtins.int
+    node_id: builtins.int
+    def __init__(self,
+        *,
+        node_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node_id",b"node_id"]) -> None: ...
+global___DeactivateNodeRequest = DeactivateNodeRequest
+
+class DeactivateNodeResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___DeactivateNodeResponse = DeactivateNodeResponse
+
+class UnregisterNodeFleetRequest(google.protobuf.message.Message):
+    """UnregisterNode messages (add prefix to avoid name clash)"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_ID_FIELD_NUMBER: builtins.int
+    node_id: builtins.int
+    def __init__(self,
+        *,
+        node_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node_id",b"node_id"]) -> None: ...
+global___UnregisterNodeFleetRequest = UnregisterNodeFleetRequest
+
+class UnregisterNodeFleetResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___UnregisterNodeFleetResponse = UnregisterNodeFleetResponse
+
 class PullMessagesRequest(google.protobuf.message.Message):
     """PullMessages messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor

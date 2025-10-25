@@ -28,14 +28,22 @@ from flwr.common.typing import InvalidRunStatusException
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    ActivateNodeRequest,
+    ActivateNodeResponse,
     CreateNodeRequest,
     CreateNodeResponse,
+    DeactivateNodeRequest,
+    DeactivateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    RegisterNodeFleetRequest,
+    RegisterNodeFleetResponse,
+    UnregisterNodeFleetRequest,
+    UnregisterNodeFleetResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
@@ -137,6 +145,50 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)
         log(DEBUG, "[Fleet.CreateNode] Response: %s", MessageToDict(response))
         return response
+
+    def RegisterNode(
+        self, request: RegisterNodeFleetRequest, context: grpc.ServicerContext
+    ) -> RegisterNodeFleetResponse:
+        """Register a node (not implemented)."""
+        log(ERROR, "[Fleet.RegisterNode] RegisterNode is not implemented")
+        context.abort(
+            grpc.StatusCode.UNIMPLEMENTED,
+            "RegisterNode RPC is not yet implemented",
+        )
+        raise NotImplementedError
+
+    def ActivateNode(
+        self, request: ActivateNodeRequest, context: grpc.ServicerContext
+    ) -> ActivateNodeResponse:
+        """Activate a node (not implemented)."""
+        log(ERROR, "[Fleet.ActivateNode] ActivateNode is not implemented")
+        context.abort(
+            grpc.StatusCode.UNIMPLEMENTED,
+            "ActivateNode RPC is not yet implemented",
+        )
+        raise NotImplementedError
+
+    def DeactivateNode(
+        self, request: DeactivateNodeRequest, context: grpc.ServicerContext
+    ) -> DeactivateNodeResponse:
+        """Deactivate a node (not implemented)."""
+        log(ERROR, "[Fleet.DeactivateNode] DeactivateNode is not implemented")
+        context.abort(
+            grpc.StatusCode.UNIMPLEMENTED,
+            "DeactivateNode RPC is not yet implemented",
+        )
+        raise NotImplementedError
+
+    def UnregisterNode(
+        self, request: UnregisterNodeFleetRequest, context: grpc.ServicerContext
+    ) -> UnregisterNodeFleetResponse:
+        """Unregister a node (not implemented)."""
+        log(ERROR, "[Fleet.UnregisterNode] UnregisterNode is not implemented")
+        context.abort(
+            grpc.StatusCode.UNIMPLEMENTED,
+            "UnregisterNode RPC is not yet implemented",
+        )
+        raise NotImplementedError
 
     def DeleteNode(
         self, request: DeleteNodeRequest, context: grpc.ServicerContext

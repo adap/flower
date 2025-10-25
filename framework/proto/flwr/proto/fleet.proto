@@ -26,6 +26,21 @@ import "flwr/proto/message.proto";
 service Fleet {
   rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
   rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse) {}
+
+  // Register Node
+  rpc RegisterNode(RegisterNodeFleetRequest)
+      returns (RegisterNodeFleetResponse) {}
+
+  // Activate Node
+  rpc ActivateNode(ActivateNodeRequest) returns (ActivateNodeResponse) {}
+
+  // Deactivate Node
+  rpc DeactivateNode(DeactivateNodeRequest) returns (DeactivateNodeResponse) {}
+
+  // Unregister Node
+  rpc UnregisterNode(UnregisterNodeFleetRequest)
+      returns (UnregisterNodeFleetResponse) {}
+
   rpc SendNodeHeartbeat(SendNodeHeartbeatRequest)
       returns (SendNodeHeartbeatResponse) {}
 
@@ -65,6 +80,25 @@ message CreateNodeResponse { Node node = 1; }
 // DeleteNode messages
 message DeleteNodeRequest { Node node = 1; }
 message DeleteNodeResponse {}
+
+// RegisterNode messages (add prefix to avoid name clash)
+message RegisterNodeFleetRequest { bytes public_key = 1; }
+message RegisterNodeFleetResponse {}
+
+// ActivateNode messages
+message ActivateNodeRequest {
+  bytes public_key = 1;
+  double heartbeat_interval = 2;
+}
+message ActivateNodeResponse { uint64 node_id = 1; }
+
+// DeactivateNode messages
+message DeactivateNodeRequest { uint64 node_id = 1; }
+message DeactivateNodeResponse {}
+
+// UnregisterNode messages (add prefix to avoid name clash)
+message UnregisterNodeFleetRequest { uint64 node_id = 1; }
+message UnregisterNodeFleetResponse {}
 
 // PullMessages messages
 message PullMessagesRequest {
