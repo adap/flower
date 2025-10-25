@@ -29,7 +29,7 @@ num-server-rounds = 1000
 fraction-evaluate = 0.5
 local-epochs = 1
 learning-rate = 0.01
-batch-size = 128
+batch-size = 32
 fraction-fit = 0.2
 
 [tool.flwr.federations]
