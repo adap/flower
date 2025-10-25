@@ -501,12 +501,14 @@ def recorddict_from_proto(recorddict_proto: ProtoRecordDict) -> RecordDict:
 
 def fab_to_proto(fab: typing.Fab) -> ProtoFab:
     """Create a proto Fab object from a Python Fab."""
-    return ProtoFab(hash_str=fab.hash_str, content=fab.content)
+    return ProtoFab(
+        hash_str=fab.hash_str, content=fab.content, verifications=fab.verifications
+    )
 
 
 def fab_from_proto(fab: ProtoFab) -> typing.Fab:
     """Create a Python Fab object from a proto Fab."""
-    return typing.Fab(fab.hash_str, fab.content)
+    return typing.Fab(fab.hash_str, fab.content, dict(fab.verifications))
 
 
 # === User configs ===
