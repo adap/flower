@@ -625,7 +625,7 @@ def _request_download_link(
     identifier: str, context: grpc.ServicerContext
 ) -> tuple[str, str, list[dict[str, str]]]:
     """Request download link from Flower platform API."""
-    url = f"{PLATFORM_API_URL}/hub/fetch"
+    url = f"{PLATFORM_API_URL}/hub/fetch-fab"
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
