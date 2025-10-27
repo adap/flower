@@ -129,7 +129,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 )
 
             # Create run
-            fab = Fab(hashlib.sha256(fab_file).hexdigest(), fab_file)
+            fab = Fab(
+                hashlib.sha256(fab_file).hexdigest(),
+                fab_file,
+                dict(request.fab.verifications),
+            )
             fab_hash = ffs.put(fab.content, {})
             if fab_hash != fab.hash_str:
                 raise RuntimeError(
