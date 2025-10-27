@@ -155,7 +155,7 @@ def _run_with_control_api(
         fab_bytes, fab_hash, config = build_fab(app)
         fab_id, fab_version = get_metadata_from_config(config)
 
-        fab = Fab(fab_hash, fab_bytes)
+        fab = Fab(fab_hash, fab_bytes, {})
 
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
         fed_config = flatten_dict(federation_config.get("options", {}))
