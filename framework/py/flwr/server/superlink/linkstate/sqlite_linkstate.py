@@ -615,7 +615,6 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
 
     def activate_node(self, node_id: int, heartbeat_interval: float) -> bool:
         """Activate the node with the specified `node_id`."""
-
         sint64_node_id = uint64_to_int64(node_id)
         current_dt = now()
 
@@ -626,7 +625,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 last_activated_at = ?,
                 online_until = ?
             WHERE node_id = ?
-                AND status IN (?, ?)
+                AND online_until < ?
                 AND status != ?
             RETURNING node_id
         """
@@ -635,8 +634,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             current_dt.isoformat(),
             current_dt.timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval,
             sint64_node_id,
-            NodeStatus.REGISTERED,
-            NodeStatus.OFFLINE,
+            current_dt.timestamp(),
             NodeStatus.UNREGISTERED,
         )
 
@@ -644,13 +642,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         return len(rows) > 0
 
     def deactivate_node(self, node_id: int) -> bool:
-        """Deactivate the node with the specified `node_id`.
-
-        Transitions the node status to "offline" from "online".
-        """
-        if self.conn is None:
-            raise AttributeError("LinkState not initialized")
-
+        """Deactivate the node with the specified `node_id`."""
         sint64_node_id = uint64_to_int64(node_id)
         current_dt = now()
 
@@ -662,6 +654,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             WHERE node_id = ?
                 AND status = ?
                 AND status != ?
+                AND online_until > ?
             RETURNING node_id
         """
         params = (
@@ -671,6 +664,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             sint64_node_id,
             NodeStatus.ONLINE,
             NodeStatus.UNREGISTERED,
+            current_dt.timestamp(),
         )
 
         rows = self.query(query, params)

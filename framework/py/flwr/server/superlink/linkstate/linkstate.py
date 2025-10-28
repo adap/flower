@@ -143,7 +143,8 @@ class LinkState(CoreState):  # pylint: disable=R0904
     def activate_node(self, node_id: int, heartbeat_interval: float) -> bool:
         """Activate the node with the specified `node_id`.
 
-        Transitions the node status to "online" from "registered" or "offline".
+        Transitions the node status to "online". The transition will fail
+        if the current status is not "registered" or "offline".
 
         Parameters
         ----------
@@ -163,7 +164,8 @@ class LinkState(CoreState):  # pylint: disable=R0904
     def deactivate_node(self, node_id: int) -> bool:
         """Deactivate the node with the specified `node_id`.
 
-        Transitions the node status to "offline" from "online".
+        Transitions the node status to "offline". The transition will fail
+        if the current status is not "online".
 
         Parameters
         ----------

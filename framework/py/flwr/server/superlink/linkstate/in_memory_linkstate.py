@@ -395,7 +395,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
             # Only activate if the node is currently registered or offline
             current_dt = now()
-            if node.online_until < current_dt.timestamp() and not node.unregistered_at:
+            if node.online_until < current_dt.timestamp() and node.status != NodeStatus.UNREGISTERED:
                 node.status = NodeStatus.ONLINE
                 node.heartbeat_interval = heartbeat_interval
                 node.last_activated_at = current_dt.isoformat()
