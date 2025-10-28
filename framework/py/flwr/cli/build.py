@@ -23,10 +23,12 @@ from pathlib import Path
 from typing import Annotated, Any, Optional, Union
 
 import pathspec
+import tomli
 import tomli_w
 import typer
 
 from flwr.common.constant import (
+    FAB_CONFIG_FILE,
     FAB_DATE,
     FAB_EXCLUDE_PATTERNS,
     FAB_HASH_TRUNCATION,
@@ -34,7 +36,6 @@ from flwr.common.constant import (
     FAB_MAX_SIZE,
 )
 
-from .config_utils import load as load_toml
 from .config_utils import load_and_validate
 from .utils import is_valid_project_name
 
@@ -114,7 +115,10 @@ def build(
         )
 
     # Build FAB
-    fab_bytes, fab_hash, _ = build_fab(app)
+    fab_bytes = build_fab_from_disk(app)
+
+    # Calculate hash for filename
+    fab_hash = hashlib.sha256(fab_bytes).hexdigest()
 
     # Get the name of the zip file
     fab_filename = get_fab_filename(config, fab_hash)
@@ -127,11 +131,10 @@ def build(
     )
 
 
-def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
-    """Build a FAB in memory and return the bytes, hash, and config.
+def build_fab_from_disk(app: Path) -> bytes:
+    """Build a FAB from files on disk and return the FAB as bytes.
 
-    This function assumes that the provided path points to a valid Flower app and
-    bundles it into a FAB without performing additional validation.
+    This function reads files from disk and bundles them into a FAB.
 
     Parameters
     ----------
@@ -140,18 +143,67 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
 
     Returns
     -------
-    tuple[bytes, str, dict[str, Any]]
-        A tuple containing:
-        - the FAB as bytes
-        - the SHA256 hash of the FAB
-        - the project configuration (with the 'federations' field removed)
+    bytes
+        The FAB as bytes.
     """
     app = app.resolve()
 
-    # Load the pyproject.toml file
-    config = load_toml(app / "pyproject.toml")
-    if config is None:
-        raise ValueError("Project configuration could not be loaded.")
+    # Collect all files recursively (including pyproject.toml and .gitignore)
+    all_files = [f for f in app.rglob("*") if f.is_file()]
+
+    # Create dict mapping relative paths to Path objects
+    files_dict: dict[str, Union[bytes, Path]] = {
+        # Ensure consistent path separators across platforms
+        str(file_path.relative_to(app)).replace("\\", "/"): file_path
+        for file_path in all_files
+    }
+
+    # Build FAB from the files dict
+    return build_fab_from_files(files_dict)
+
+
+def build_fab_from_files(files: dict[str, Union[bytes, Path]]) -> bytes:
+    r"""Build a FAB from in-memory files and return the FAB as bytes.
+
+    This is the core FAB building function that works with in-memory data.
+    It accepts either bytes or Path objects as file contents, applies filtering
+    rules (include/exclude patterns), and builds the FAB.
+
+    Parameters
+    ----------
+    files : dict[str, Union[bytes, Path]]
+        Dictionary mapping relative file paths to their contents.
+        - Keys: Relative paths (strings)
+        - Values: Either bytes (file contents) or Path (will be read)
+        Must include "pyproject.toml" and optionally ".gitignore".
+
+    Returns
+    -------
+    bytes
+        The FAB as bytes.
+
+    Examples
+    --------
+    Build a FAB from in-memory files::
+
+        files = {
+            "pyproject.toml": b"[project]\nname = 'myapp'\n...",
+            ".gitignore": b"*.pyc\n__pycache__/\n",
+            "src/client.py": Path("/path/to/client.py"),
+            "src/server.py": b"print('hello')",
+            "README.md": b"# My App\n",
+        }
+        fab_bytes = build_fab_from_files(files)
+    """
+
+    def to_bytes(content: Union[bytes, Path]) -> bytes:
+        return content.read_bytes() if isinstance(content, Path) else content
+
+    # Extract, load, and parse pyproject.toml
+    if FAB_CONFIG_FILE not in files:
+        raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
+    pyproject_content = to_bytes(files[FAB_CONFIG_FILE])
+    config = tomli.loads(pyproject_content.decode("utf-8"))
 
     # Remove the 'federations' field if it exists
     if (
@@ -161,23 +213,22 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
     ):
         del config["tool"]["flwr"]["federations"]
 
-    # Build exclude spec
+    # Extract and load .gitignore if present
     gitignore_content = None
-    if (app / ".gitignore").is_file():
-        # Load .gitignore rules if present
-        gitignore_content = (app / ".gitignore").read_bytes()
-    exclude_spec = get_fab_exclude_pathspec(gitignore_content)
+    if ".gitignore" in files:
+        gitignore_content = to_bytes(files[".gitignore"])
 
-    # Build include spec
+    # Get exclude and include specs
+    exclude_spec = get_fab_exclude_pathspec(gitignore_content)
     include_spec = get_fab_include_pathspec()
 
-    # Search for all files in the app directory
-    all_files = [
-        f
-        for f in app.rglob("*")
-        if include_spec.match_file(f) and not exclude_spec.match_file(f)
+    # Filter files based on include/exclude specs
+    filtered_paths = [
+        path.replace("\\", "/")  # Ensure consistent path separators across platforms
+        for path in files.keys()
+        if include_spec.match_file(path) and not exclude_spec.match_file(path)
     ]
-    all_files.sort()
+    filtered_paths.sort()  # Sort for deterministic output
 
     # Create a zip file in memory
     list_file_content = ""
@@ -185,34 +236,35 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
     fab_buffer = BytesIO()
     with zipfile.ZipFile(fab_buffer, "w", zipfile.ZIP_DEFLATED) as fab_file:
         # Add pyproject.toml
-        write_to_zip(fab_file, "pyproject.toml", tomli_w.dumps(config))
+        write_to_zip(fab_file, FAB_CONFIG_FILE, tomli_w.dumps(config))
 
-        for file_path in all_files:
-            # Read the file content manually
-            file_contents = file_path.read_bytes()
+        for file_path in filtered_paths:
 
-            archive_path = str(file_path.relative_to(app)).replace("\\", "/")
-            write_to_zip(fab_file, archive_path, file_contents)
+            # Get file contents as bytes
+            file_content = to_bytes(files[file_path])
 
-            # Calculate file info
-            sha256_hash = hashlib.sha256(file_contents).hexdigest()
-            file_size_bits = len(file_contents) * 8  # size in bits
-            list_file_content += f"{archive_path},{sha256_hash},{file_size_bits}\n"
+            # Write file to FAB
+            write_to_zip(fab_file, file_path, file_content)
 
-        # Add CONTENT and CONTENT.jwt to the zip file
+            # Calculate file info for CONTENT manifest
+            sha256_hash = hashlib.sha256(file_content).hexdigest()
+            file_size_bits = len(file_content) * 8  # size in bits
+            list_file_content += f"{file_path},{sha256_hash},{file_size_bits}\n"
+
+        # Add CONTENT manifest to the zip file
         write_to_zip(fab_file, ".info/CONTENT", list_file_content)
 
     fab_bytes = fab_buffer.getvalue()
+
+    # Validate FAB size
     if len(fab_bytes) > FAB_MAX_SIZE:
         raise ValueError(
-            f"FAB size exceeds maximum allowed size of {FAB_MAX_SIZE:,} bytes."
+            f"FAB size exceeds maximum allowed size of {FAB_MAX_SIZE:,} bytes. "
             "To reduce the package size, consider ignoring unnecessary files "
             "via your `.gitignore` file or excluding them from the build."
         )
 
-    fab_hash = hashlib.sha256(fab_bytes).hexdigest()
-
-    return fab_bytes, fab_hash, config
+    return fab_bytes
 
 
 def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:
