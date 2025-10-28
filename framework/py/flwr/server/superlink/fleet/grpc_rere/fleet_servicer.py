@@ -130,11 +130,13 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                     request=request,
                     state=state,
                 )
+                log(
+                    INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id
+                )
 
         except ValueError as e:
             # Public key already in use
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
-        log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)
         log(DEBUG, "[Fleet.CreateNode] Response: %s", MessageToDict(response))
         return response
 

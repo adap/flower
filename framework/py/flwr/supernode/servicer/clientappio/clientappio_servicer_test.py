@@ -68,6 +68,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         mock_fab = typing.Fab(
             hash_str="abc123#$%",
             content=b"\xf3\xf5\xf8\x98",
+            verifications={"ab12#$%": "abc123#$%"},
         )
         mock_response = PullAppInputsResponse(
             context=ProtoContext(node_id=123),
