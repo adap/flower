@@ -29,8 +29,12 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, InvalidRunStatusException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    ActivateNodeRequest,
+    ActivateNodeResponse,
     CreateNodeRequest,
     CreateNodeResponse,
+    DeactivateNodeRequest,
+    DeactivateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
     PullMessagesRequest,
@@ -38,6 +42,10 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushMessagesRequest,
     PushMessagesResponse,
     Reconnect,
+    RegisterNodeFleetRequest,
+    RegisterNodeFleetResponse,
+    UnregisterNodeFleetRequest,
+    UnregisterNodeFleetResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
@@ -85,6 +93,47 @@ def delete_node(request: DeleteNodeRequest, state: LinkState) -> DeleteNodeRespo
     # Update state
     state.delete_node(NOOP_FLWR_AID, node_id=request.node.node_id)
     return DeleteNodeResponse()
+
+
+def register_node(
+    request: RegisterNodeFleetRequest,
+    state: LinkState,
+) -> RegisterNodeFleetResponse:
+    """Register a node (Fleet API only)."""
+    state.create_node(NOOP_FLWR_AID, request.public_key, 0)
+    return RegisterNodeFleetResponse()
+
+
+def activate_node(
+    request: ActivateNodeRequest,
+    state: LinkState,
+) -> ActivateNodeResponse:
+    """Activate a node."""
+    node_id = state.get_node_id_by_public_key(request.public_key)
+    if node_id is None:
+        raise ValueError("No node found with the given public key.")
+    if not state.activate_node(node_id, request.heartbeat_interval):
+        raise ValueError(f"Node with ID {node_id} could not be activated.")
+    return ActivateNodeResponse(node_id=node_id)
+
+
+def deactivate_node(
+    request: DeactivateNodeRequest,
+    state: LinkState,
+) -> DeactivateNodeResponse:
+    """Deactivate a node."""
+    if not state.deactivate_node(request.node_id):
+        raise ValueError(f"Node with ID {request.node_id} could not be deactivated.")
+    return DeactivateNodeResponse()
+
+
+def unregister_node(
+    request: UnregisterNodeFleetRequest,
+    state: LinkState,
+) -> UnregisterNodeFleetResponse:
+    """Unregister a node (Fleet API only)."""
+    state.delete_node(NOOP_FLWR_AID, request.node_id)
+    return UnregisterNodeFleetResponse()
 
 
 def send_node_heartbeat(
