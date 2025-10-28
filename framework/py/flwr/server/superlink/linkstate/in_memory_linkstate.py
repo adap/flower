@@ -423,11 +423,15 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 result.append(node)
             return result
 
-    def _check_and_tag_offline_nodes(self) -> None:
+    def _check_and_tag_offline_nodes(
+        self, node_ids: Optional[list[int]] = None
+    ) -> None:
         with self.lock:
             # Set all nodes of "online" status to "offline" if they've offline
             current_ts = now().timestamp()
-            for node in self.nodes.values():
+            for node_id in node_ids or self.nodes.keys():
+                if (node := self.nodes.get(node_id)) is None:
+                    continue
                 if node.status == NodeStatus.ONLINE:
                     if node.online_until <= current_ts:
                         node.status = NodeStatus.OFFLINE

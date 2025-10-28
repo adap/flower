@@ -643,7 +643,9 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             node.node_id for node in self.get_node_info(statuses=[NodeStatus.ONLINE])
         }
 
-    def _check_and_tag_offline_nodes(self) -> None:
+    def _check_and_tag_offline_nodes(
+        self, node_ids: Optional[list[int]] = None
+    ) -> None:
         """Check and tag offline nodes."""
         # strftime will convert POSIX timestamp to ISO format
         query = """
@@ -657,6 +659,10 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             now().timestamp(),
             NodeStatus.ONLINE,
         ]
+        if node_ids is not None:
+            placeholders = ",".join(["?"] * len(node_ids))
+            query += f" AND node_id IN ({placeholders})"
+            params.extend(uint64_to_int64(node_id) for node_id in node_ids)
         self.conn.execute(query, params)
 
     def get_node_info(
