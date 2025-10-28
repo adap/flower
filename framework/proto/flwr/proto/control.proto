@@ -60,6 +60,7 @@ message StartRunRequest {
   Fab fab = 1;
   map<string, Scalar> override_config = 2;
   ConfigRecord federation_options = 3;
+  string app_id = 4;
 }
 message StartRunResponse { optional uint64 run_id = 1; }
 message StreamLogsRequest {

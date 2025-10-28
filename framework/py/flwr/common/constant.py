@@ -72,13 +72,23 @@ NODE_ID_NUM_BYTES = 8
 
 # Constants for FAB
 APP_DIR = "apps"
-FAB_ALLOWED_EXTENSIONS = {".py", ".toml", ".md"}
 FAB_CONFIG_FILE = "pyproject.toml"
 FAB_DATE = (2024, 10, 1, 0, 0, 0)
 FAB_HASH_TRUNCATION = 8
 FAB_MAX_SIZE = 10 * 1024 * 1024  # 10 MB
 FLWR_DIR = ".flwr"  # The default Flower directory: ~/.flwr/
 FLWR_HOME = "FLWR_HOME"  # If set, override the default Flower directory
+# FAB file include patterns (gitignore-style patterns)
+FAB_INCLUDE_PATTERNS = (
+    "**/*.py",
+    "**/*.toml",
+    "**/*.md",
+)
+# FAB file exclude patterns (gitignore-style patterns)
+FAB_EXCLUDE_PATTERNS = (
+    "**/__pycache__/**",
+    FAB_CONFIG_FILE,  # Exclude the original pyproject.toml
+)
 
 # Constant for SuperLink
 SUPERLINK_NODE_ID = 1
