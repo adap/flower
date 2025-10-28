@@ -1,0 +1,25 @@
+name: Framework Docs Manually
+
+on:
+  workflow_dispatch:
+    inputs:
+      build-versioned:
+        description: "Flag that determines whether all versions of the docs should be built."
+        required: false
+        default: false
+        type: boolean
+      deploy:
+        description: "Flag that determines whether the docs should be deployed."
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build-and-deploy-manually:
+    name: Build and deploy manually
+    if: github.repository == 'adap/flower'
+    uses: ./.github/workflows/_framework-docs.yml
+    with:
+      build-versioned: ${{ inputs.build-versioned }}
+      deploy: ${{ inputs.deploy }}
+    secrets: inherit

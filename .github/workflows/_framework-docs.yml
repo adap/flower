@@ -1,0 +1,57 @@
+name: Reusable framework docs workflow
+
+on:
+  workflow_call:
+    inputs:
+      build-versioned:
+        description: "Flag that determines whether all versions of the docs should be built."
+        required: false
+        default: false
+        type: boolean
+      deploy:
+        description: "Flag that determines whether the docs should be deployed."
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-22.04
+    name: Build and deploy
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+      - name: Check copyright line
+        run: ./dev/test-copyright.sh
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install pandoc
+        run: sudo apt install pandoc
+      - name: Install Flower Framework and Flower Datasets with dependencies
+        working-directory: framework
+        run: |
+          python -m poetry add ../datasets
+          python -m poetry install
+      - name: Build docs
+        run: ./dev/build-docs.sh ${{ inputs.build-versioned }}
+      - name: Copy versioned docs
+        if: ${{ inputs.build-versioned && inputs.deploy }}
+        run: cp -r doc/build/html/v* framework/docs/build/html
+      - name: Deploy docs
+        if: ${{ inputs.deploy }}
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets.DOCS_AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.DOCS_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DOCS_AWS_SECRET_KEY_ID }}
+        run: |
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./framework/docs/build/html/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./baselines/docs/build/html/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/baselines
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./examples/docs/build/html/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/examples
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./datasets/docs/build/html/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/datasets
