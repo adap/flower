@@ -180,6 +180,19 @@ def build_fab_from_files(files: dict[str, Union[bytes, Path]]) -> bytes:
     -------
     bytes
         The FAB as bytes.
+
+    Examples
+    --------
+    Build a FAB from in-memory files::
+
+        files = {
+            "pyproject.toml": b"[project]\\nname = 'myapp'\\n...",
+            ".gitignore": b"*.pyc\\n__pycache__/\\n",
+            "src/client.py": Path("/path/to/client.py"),
+            "src/server.py": b"print('hello')",
+            "README.md": b"# My App\\n",
+        }
+        fab_bytes = build_fab_from_files(files)
     """
 
     def to_bytes(content: Union[bytes, Path]) -> bytes:
