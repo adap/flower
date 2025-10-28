@@ -620,60 +620,58 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
 
     def activate_node(self, node_id: int, heartbeat_interval: float) -> bool:
         """Activate the node with the specified `node_id`."""
-        sint64_node_id = uint64_to_int64(node_id)
-        current_dt = now()
+        with self.conn:
+            self._check_and_tag_offline_nodes([node_id])
 
-        # Update the node status
-        query = """
-            UPDATE node
-            SET status = ?,
-                last_activated_at = ?,
-                online_until = ?
-            WHERE node_id = ?
-                AND online_until < ?
-                AND status != ?
-            RETURNING node_id
-        """
-        params = (
-            NodeStatus.ONLINE,
-            current_dt.isoformat(),
-            current_dt.timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval,
-            sint64_node_id,
-            current_dt.timestamp(),
-            NodeStatus.UNREGISTERED,
-        )
+            # Only activate if the node is currently registered or offline
+            current_dt = now()
+            query = """
+                UPDATE node
+                SET status = ?,
+                    last_activated_at = ?,
+                    online_until = ?,
+                    heartbeat_interval = ?
+                WHERE node_id = ? AND status in (?, ?)
+                RETURNING node_id
+            """
+            params = (
+                NodeStatus.ONLINE,
+                current_dt.isoformat(),
+                current_dt.timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval,
+                heartbeat_interval,
+                uint64_to_int64(node_id),
+                NodeStatus.REGISTERED,
+                NodeStatus.OFFLINE,
+            )
 
-        rows = self.query(query, params)
-        return len(rows) > 0
+            row = self.conn.execute(query, params).fetchone()
+            return row is not None
 
     def deactivate_node(self, node_id: int) -> bool:
         """Deactivate the node with the specified `node_id`."""
-        sint64_node_id = uint64_to_int64(node_id)
-        current_dt = now()
+        with self.conn:
+            self._check_and_tag_offline_nodes([node_id])
 
-        query = """
-            UPDATE node
-            SET status = ?,
-                last_deactivated_at = ?,
-                online_until = ?
-            WHERE node_id = ?
-                AND status = ?
-                AND status != ?
-                AND online_until > ?
-            RETURNING node_id
-        """
-        params = (
-            NodeStatus.OFFLINE,
-            current_dt.isoformat(),
-            current_dt.timestamp(),
-            sint64_node_id,
-            NodeStatus.ONLINE,
-            NodeStatus.UNREGISTERED,
-            current_dt.timestamp(),
-        )
+            # Only deactivate if the node is currently online
+            current_dt = now()
+            query = """
+                UPDATE node
+                SET status = ?,
+                    last_deactivated_at = ?,
+                    online_until = ?
+                WHERE node_id = ? AND status = ?
+                RETURNING node_id
+            """
+            params = (
+                NodeStatus.OFFLINE,
+                current_dt.isoformat(),
+                current_dt.timestamp(),
+                uint64_to_int64(node_id),
+                NodeStatus.ONLINE,
+            )
 
-        rows = self.query(query, params)
-        return len(rows) > 0
+            row = self.conn.execute(query, params).fetchone()
+            return row is not None
 
     def get_nodes(self, run_id: int) -> set[int]:
         """Retrieve all currently stored node IDs as a set.
