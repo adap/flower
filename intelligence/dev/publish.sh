@@ -7,7 +7,6 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
 REPO="adap/flower"
 TS_PATH="intelligence/ts/package.json"
 KT_PATH="intelligence/kt/gradle.properties"
-CODEOWNERS_FILE=".github/CODEOWNERS"
 RELEASE_PREFIX="intelligence/v"
 
 # --- UTILITY FUNCTIONS ---
@@ -20,7 +19,10 @@ get_kt_version() {
 }
 
 get_latest_tag() {
-  git fetch --tags >/dev/null 2>&1
+  if ! git fetch --tags >/dev/null 2>&1; then
+    echo "❌ Failed to fetch tags from origin." >&2
+    return 1
+  fi
   git tag --list "${RELEASE_PREFIX}*" | sort -V | tail -n 1 | sed "s|${RELEASE_PREFIX}||"
 }
 
@@ -74,7 +76,10 @@ if [[ "$CURRENT_BRANCH" != "main" ]]; then
 fi
 
 echo "🔄 Fetching latest main commits from origin..."
-git fetch origin main >/dev/null 2>&1
+if ! git fetch origin main >/dev/null 2>&1; then
+  echo "❌ Failed to fetch origin/main." >&2
+  exit 1
+fi
 
 # --- Let user pick a commit from origin/main ---
 echo ""
@@ -116,7 +121,11 @@ fi
 NEW_VERSION="$TS_VERSION"
 echo "✅ Both SDKs at version $NEW_VERSION"
 
-LATEST_TAG=$(get_latest_tag)
+if ! LATEST_TAG=$(get_latest_tag); then
+  echo "❌ Unable to determine latest release tag." >&2
+  git checkout --quiet main
+  exit 1
+fi
 echo "🔖 Latest tag: v$LATEST_TAG"
 
 # Compare versions
