@@ -161,14 +161,14 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
     ):
         del config["tool"]["flwr"]["federations"]
 
-    # Load include spec
+    # Build exclude spec
     gitignore_content = None
     if (app / ".gitignore").is_file():
         # Load .gitignore rules if present
         gitignore_content = (app / ".gitignore").read_bytes()
     exclude_spec = get_fab_exclude_pathspec(gitignore_content)
 
-    # Load include spec
+    # Build include spec
     include_spec = get_fab_include_pathspec()
 
     # Search for all files in the app directory
