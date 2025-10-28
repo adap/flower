@@ -153,6 +153,7 @@ def build_fab_from_disk(app: Path) -> bytes:
 
     # Create dict mapping relative paths to Path objects
     files_dict: dict[str, Union[bytes, Path]] = {
+        # Ensure consistent path separators across platforms
         str(file_path.relative_to(app)).replace("\\", "/"): file_path
         for file_path in all_files
     }
@@ -162,7 +163,7 @@ def build_fab_from_disk(app: Path) -> bytes:
 
 
 def build_fab_from_files(files: dict[str, Union[bytes, Path]]) -> bytes:
-    """Build a FAB from in-memory files and return the FAB as bytes.
+    r"""Build a FAB from in-memory files and return the FAB as bytes.
 
     This is the core FAB building function that works with in-memory data.
     It accepts either bytes or Path objects as file contents, applies filtering
@@ -172,7 +173,7 @@ def build_fab_from_files(files: dict[str, Union[bytes, Path]]) -> bytes:
     ----------
     files : dict[str, Union[bytes, Path]]
         Dictionary mapping relative file paths to their contents.
-        - Keys: Relative paths (strings with forward slashes)
+        - Keys: Relative paths (strings)
         - Values: Either bytes (file contents) or Path (will be read)
         Must include "pyproject.toml" and optionally ".gitignore".
 
@@ -186,11 +187,11 @@ def build_fab_from_files(files: dict[str, Union[bytes, Path]]) -> bytes:
     Build a FAB from in-memory files::
 
         files = {
-            "pyproject.toml": b"[project]\\nname = 'myapp'\\n...",
-            ".gitignore": b"*.pyc\\n__pycache__/\\n",
+            "pyproject.toml": b"[project]\nname = 'myapp'\n...",
+            ".gitignore": b"*.pyc\n__pycache__/\n",
             "src/client.py": Path("/path/to/client.py"),
             "src/server.py": b"print('hello')",
-            "README.md": b"# My App\\n",
+            "README.md": b"# My App\n",
         }
         fab_bytes = build_fab_from_files(files)
     """
@@ -200,7 +201,7 @@ def build_fab_from_files(files: dict[str, Union[bytes, Path]]) -> bytes:
 
     # Extract, load, and parse pyproject.toml
     if FAB_CONFIG_FILE not in files:
-        raise ValueError("pyproject.toml not found in files")
+        raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
     pyproject_content = to_bytes(files[FAB_CONFIG_FILE])
     config = tomli.loads(pyproject_content.decode("utf-8"))
 
@@ -223,7 +224,7 @@ def build_fab_from_files(files: dict[str, Union[bytes, Path]]) -> bytes:
 
     # Filter files based on include/exclude specs
     filtered_paths = [
-        path
+        path.replace("\\", "/")  # Ensure consistent path separators across platforms
         for path in files.keys()
         if include_spec.match_file(path) and not exclude_spec.match_file(path)
     ]
