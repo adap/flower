@@ -17,6 +17,7 @@
 
 import hashlib
 import zipfile
+from collections.abc import Iterable
 from io import BytesIO
 from pathlib import Path
 from typing import Annotated, Any, Optional, Union
@@ -26,9 +27,10 @@ import tomli_w
 import typer
 
 from flwr.common.constant import (
-    FAB_ALLOWED_EXTENSIONS,
     FAB_DATE,
+    FAB_EXCLUDE_PATTERNS,
     FAB_HASH_TRUNCATION,
+    FAB_INCLUDE_PATTERNS,
     FAB_MAX_SIZE,
 )
 
@@ -159,16 +161,21 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
     ):
         del config["tool"]["flwr"]["federations"]
 
-    # Load .gitignore rules if present
-    ignore_spec = _load_gitignore(app)
+    # Load include spec
+    gitignore_content = None
+    if (app / ".gitignore").is_file():
+        # Load .gitignore rules if present
+        gitignore_content = (app / ".gitignore").read_bytes()
+    exclude_spec = get_fab_exclude_pathspec(gitignore_content)
+
+    # Load include spec
+    include_spec = get_fab_include_pathspec()
 
     # Search for all files in the app directory
     all_files = [
         f
         for f in app.rglob("*")
-        if not ignore_spec.match_file(f)
-        and f.suffix in FAB_ALLOWED_EXTENSIONS
-        and f.name != "pyproject.toml"  # Exclude the original pyproject.toml
+        if include_spec.match_file(f) and not exclude_spec.match_file(f)
     ]
     all_files.sort()
 
@@ -208,11 +215,23 @@ def build_fab(app: Path) -> tuple[bytes, str, dict[str, Any]]:
     return fab_bytes, fab_hash, config
 
 
-def _load_gitignore(app: Path) -> pathspec.PathSpec:
-    """Load and parse .gitignore file, returning a pathspec."""
-    gitignore_path = app / ".gitignore"
-    patterns = ["__pycache__/"]  # Default pattern
-    if gitignore_path.exists():
-        with open(gitignore_path, encoding="UTF-8") as file:
-            patterns.extend(file.readlines())
+def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:
+    """Build a PathSpec from a list of patterns."""
+    return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+
+
+def get_fab_include_pathspec() -> pathspec.PathSpec:
+    """Get the PathSpec for files to include in a FAB."""
+    return build_pathspec(FAB_INCLUDE_PATTERNS)
+
+
+def get_fab_exclude_pathspec(gitignore_content: Optional[bytes]) -> pathspec.PathSpec:
+    """Get the PathSpec for files to exclude from a FAB.
+
+    If gitignore_content is provided, its patterns will be combined with the default
+    exclude patterns.
+    """
+    patterns = list(FAB_EXCLUDE_PATTERNS)
+    if gitignore_content:
+        patterns += gitignore_content.decode("UTF-8").splitlines()
     return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
