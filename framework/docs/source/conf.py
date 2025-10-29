@@ -17,6 +17,7 @@
 import datetime
 import os
 import sys
+from packaging import version
 
 from git import Repo
 
@@ -92,12 +93,19 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version of the next release, including alpha/beta/rc tags
-release = "1.23.0"
-# The current released version
-rst_prolog = """
-.. |stable_flwr_version| replace:: 1.23.0
+if local or current_version == "main":
+    release = "1.23.0"
+else:
+    release = current_version.lstrip("v")
+
+ubuntu_version = "24.04"
+if version.parse(release) < version.parse("1.11.1"):
+    ubuntu_version = "22.04"
+
+rst_prolog = f"""
+.. |stable_flwr_version| replace:: {release}
 .. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
-.. |ubuntu_version| replace:: 24.04
+.. |ubuntu_version| replace:: {ubuntu_version}
 .. |setuptools_version| replace:: 70.3.0
 .. |pip_version| replace:: 24.1.2
 .. |python_version| replace:: 3.9

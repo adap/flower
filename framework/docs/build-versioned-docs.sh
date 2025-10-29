@@ -17,8 +17,12 @@ cp -r framework/docs/source/_templates ${tmp_dir}/_templates
 
 # Get a list of languages based on the folders in locales
 languages="en `find framework/docs/locales/ -mindepth 1 -maxdepth 1 -type d -exec basename '{}' \;`"
-# Get a list of tags, excluding those before v1.0.0
-versions="`git for-each-ref '--format=%(refname:lstrip=-1)' refs/tags/ | grep -iE '^v((([1-9]|[0-9]{2,}).*\.([8-9]|[0-9]{2,}).*)|([2-9]|[0-9]{2,}).*)$'`"
+
+# Get all version tags >= v1.8.0, sorted
+versions=$(git for-each-ref '--format=%(refname:lstrip=-1)' refs/tags/ | \
+    grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | \
+    sort -V | \
+    awk -F'[v.]' '{ if ($2 > 1 || ($2 == 1 && $3 >= 8)) print $0 }')
 
 # Set the numpy version to use for v1.8.0 to v1.12.0
 numpy_version_1="1.26.4"
@@ -70,71 +74,6 @@ for current_version in ${versions}; do
       # Copy updated version of locales
       cp -r ${tmp_dir}/locales/$current_language locales/
 
-    fi
-
-    # Only for v1.5.0, update the versions listed in the switcher
-    if [ "$current_version" = "v1.5.0" ]; then
-      corrected_versions=$(cat <<-END
-html_context['versions'] = list()
-versions = sorted(
-    [
-        tag.name
-        for tag in repo.tags
-        if not tag.name.startswith("intelligence/")
-        and tag.name[0] == "v"
-        and int(tag.name[1]) > 0
-        and int(tag.name.split(".")[1]) >= 8
-    ],
-    key=lambda x: [int(part) for part in x[1:].split(".")],
-)
-versions.append("main")
-for version in versions:
-    html_context["versions"].append({"name": version})
-END
-      )
-      echo "$corrected_versions" >> source/conf.py
-    fi
-
-    if [ "$current_version" = "v1.6.0"  ] || \
-       [ "$current_version" = "v1.7.0"  ] || \
-       [ "$current_version" = "v1.8.0"  ] || \
-       [ "$current_version" = "v1.9.0"  ] || \
-       [ "$current_version" = "v1.10.0" ] || \
-       [ "$current_version" = "v1.11.0" ] || \
-       [ "$current_version" = "v1.11.1" ] || \
-       [ "$current_version" = "v1.12.0" ] || \
-       [ "$current_version" = "v1.13.0" ] || \
-       [ "$current_version" = "v1.13.1" ] || \
-       [ "$current_version" = "v1.14.0" ] || \
-       [ "$current_version" = "v1.15.0" ] || \
-       [ "$current_version" = "v1.15.1" ] || \
-       [ "$current_version" = "v1.15.2" ]; then
-      awk '
-        # when we see the start of the old block, switch mode
-        /html_context\["versions"\] = list\(\)/ {
-          print "html_context[\"versions\"] = list()"
-          print "versions = sorted("
-          print "    ["
-          print "        tag.name"
-          print "        for tag in repo.tags"
-          print "        if not tag.name.startswith(\"intelligence/\")"
-          print "        and tag.name[0] == \"v\""
-          print "        and int(tag.name[1]) > 0"
-          print "        and int(tag.name.split(\".\")[1]) >= 8"
-          print "    ],"
-          print "    key=lambda x: [int(part) for part in x[1:].split(\".\")]"
-          print ")"
-          print "versions.append(\"main\")"
-          print "for version in versions:"
-          print "    html_context[\"versions\"].append({\"name\": version})"
-          skip=1
-          next
-        }
-        # skip lines until we reach a blank line (or some other heuristic)
-        skip && /^$/ { skip=0 }
-        skip { next }
-        { print }
-      ' source/conf.py > source/conf_new.py && mv source/conf_new.py source/conf.py
     fi
 
     # Copy updated version of html files
