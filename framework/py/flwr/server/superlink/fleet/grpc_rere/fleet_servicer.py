@@ -156,6 +156,16 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     ) -> RegisterNodeFleetResponse:
         """Register a node."""
         log(DEBUG, "[Fleet.RegisterNode] Request: %s", MessageToDict(request))
+
+        # Prevent registration when SuperNode authentication is enabled
+        if self.enable_supernode_auth:
+            log(ERROR, "SuperNode registration is disabled through Fleet API.")
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "SuperNode authentication is enabled. "
+                "All SuperNodes must be registered via the CLI.",
+            )
+
         try:
             return message_handler.register_node(
                 request=request,
@@ -205,6 +215,15 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: UnregisterNodeFleetRequest, context: grpc.ServicerContext
     ) -> UnregisterNodeFleetResponse:
         """Unregister a node."""
+        # Prevent unregistration when SuperNode authentication is enabled
+        if self.enable_supernode_auth:
+            log(ERROR, "SuperNode unregistration is disabled through Fleet API.")
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "SuperNode authentication is enabled. "
+                "All SuperNodes must be unregistered via the CLI.",
+            )
+
         try:
             response = message_handler.unregister_node(
                 request=request,
