@@ -215,8 +215,6 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: UnregisterNodeFleetRequest, context: grpc.ServicerContext
     ) -> UnregisterNodeFleetResponse:
         """Unregister a node."""
-        log(DEBUG, "[Fleet.UnregisterNode] Request: %s", MessageToDict(request))
-
         # Prevent unregistration when SuperNode authentication is enabled
         if self.enable_supernode_auth:
             log(ERROR, "SuperNode unregistration is disabled through Fleet API.")
