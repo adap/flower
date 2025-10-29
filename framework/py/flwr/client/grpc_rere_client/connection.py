@@ -45,12 +45,18 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    DeleteNodeRequest,
+    ActivateNodeRequest,
+    ActivateNodeResponse,
+    DeactivateNodeRequest,
+    DeactivateNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    RegisterNodeFleetRequest,
+    RegisterNodeFleetResponse,
+    UnregisterNodeFleetRequest,
+    UnregisterNodeFleetResponse,
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
@@ -81,7 +87,9 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     tuple[
         Callable[[], Optional[tuple[Message, ObjectTree]]],
         Callable[[Message, ObjectTree], set[str]],
+        Callable[[], None],
         Callable[[], Optional[int]],
+        Callable[[], None],
         Callable[[], None],
         Callable[[int], Run],
         Callable[[str, int], Fab],
@@ -125,11 +133,11 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     Returns
     -------
+    node_id : int
     receive : Callable
     send : Callable
-    create_node : Optional[Callable]
-    delete_node : Optional[Callable]
-    get_run : Optional[Callable]
+    get_run : Callable
+    get_fab : Callable
     pull_object : Callable[[str], bytes]
     push_object : Callable[[str, bytes], None]
     confirm_message_received : Callable[[str], None]
@@ -138,7 +146,9 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         root_certificates = Path(root_certificates).read_bytes()
 
     # Automatic node auth: generate keys if user didn't provide any
+    self_registered = False
     if authentication_keys is None:
+        self_registered = True
         authentication_keys = generate_key_pairs()
 
     # Always configure auth interceptor, with either user-provided or generated keys
@@ -201,23 +211,26 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     heartbeat_sender = HeartbeatSender(send_node_heartbeat)
 
-    def create_node() -> Optional[int]:
-        """Set create_node."""
-        # Call FleetAPI
-        create_node_request = CreateNodeRequest(
+    def register_node() -> None:
+        """Register node with SuperLink."""
+        stub.RegisterNode(RegisterNodeFleetRequest(public_key=node_pk))
+
+    def activate_node() -> Optional[int]:
+        """Activate node and start heartbeat."""
+        req = ActivateNodeRequest(
             public_key=node_pk,
             heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
         )
-        create_node_response = stub.CreateNode(request=create_node_request)
+        res: ActivateNodeResponse = stub.ActivateNode(req)
 
         # Remember the node and start the heartbeat sender
         nonlocal node
-        node = cast(Node, create_node_response.node)
+        node = Node(node_id=res.node_id)
         heartbeat_sender.start()
         return node.node_id
 
-    def delete_node() -> None:
-        """Set delete_node."""
+    def deactivate_node() -> None:
+        """Deactivate node and stop heartbeat."""
         # Get Node
         nonlocal node
         if node is None:
@@ -228,11 +241,25 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         heartbeat_sender.stop()
 
         # Call FleetAPI
-        delete_node_request = DeleteNodeRequest(node=node)
-        stub.DeleteNode(request=delete_node_request)
+        req = DeactivateNodeRequest(node_id=node.node_id)
+        _res: DeactivateNodeResponse = stub.DeactivateNode(request=req)
+
+    def unregister_node() -> None:
+        """Unregister node from SuperLink."""
+        # Get Node
+        nonlocal node
+        if node is None:
+            log(ERROR, "Node instance missing")
+            return
+
+        # Call FleetAPI
+        req = UnregisterNodeFleetRequest(node_id=node.node_id)
+        _res: UnregisterNodeFleetResponse = stub.UnregisterNode(request=req)
 
         # Cleanup
         node = None
+
+
 
     def receive() -> Optional[tuple[Message, ObjectTree]]:
         """Pull a message with its ObjectTree from SuperLink."""
@@ -340,8 +367,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         yield (
             receive,
             send,
-            create_node,
-            delete_node,
+            register_node,
+            activate_node,
+            deactivate_node,
+            unregister_node,
             get_run,
             get_fab,
             pull_object,
@@ -356,7 +385,8 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             if node is not None:
                 # Disable retrying
                 retry_invoker.max_tries = 1
-                delete_node()
+                deactivate_node()
+                unregister_node()
         except grpc.RpcError:
             pass
         channel.close()
