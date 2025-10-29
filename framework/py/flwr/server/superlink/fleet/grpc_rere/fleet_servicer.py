@@ -154,73 +154,6 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     def RegisterNode(
         self, request: RegisterNodeFleetRequest, context: grpc.ServicerContext
     ) -> RegisterNodeFleetResponse:
-        """Register a node (not implemented)."""
-        log(ERROR, "[Fleet.RegisterNode] RegisterNode is not implemented")
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "RegisterNode RPC is not yet implemented",
-        )
-        raise NotImplementedError
-
-    def ActivateNode(
-        self, request: ActivateNodeRequest, context: grpc.ServicerContext
-    ) -> ActivateNodeResponse:
-        """Activate a node (not implemented)."""
-        log(ERROR, "[Fleet.ActivateNode] ActivateNode is not implemented")
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "ActivateNode RPC is not yet implemented",
-        )
-        raise NotImplementedError
-
-    def DeactivateNode(
-        self, request: DeactivateNodeRequest, context: grpc.ServicerContext
-    ) -> DeactivateNodeResponse:
-        """Deactivate a node (not implemented)."""
-        log(ERROR, "[Fleet.DeactivateNode] DeactivateNode is not implemented")
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "DeactivateNode RPC is not yet implemented",
-        )
-        raise NotImplementedError
-
-    def UnregisterNode(
-        self, request: UnregisterNodeFleetRequest, context: grpc.ServicerContext
-    ) -> UnregisterNodeFleetResponse:
-        """Unregister a node (not implemented)."""
-        log(ERROR, "[Fleet.UnregisterNode] UnregisterNode is not implemented")
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "UnregisterNode RPC is not yet implemented",
-        )
-        raise NotImplementedError
-
-    def DeleteNode(
-        self, request: DeleteNodeRequest, context: grpc.ServicerContext
-    ) -> DeleteNodeResponse:
-        """."""
-        log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
-        log(DEBUG, "[Fleet.DeleteNode] Request: %s", MessageToDict(request))
-        # This shall be refactored when renaming `Fleet.Create/DeleteNode`
-        # to `Fleet.Activate/DeactivateNode`
-        if self.enable_supernode_auth:
-            # SuperNodes can only be deleted from the CLI
-            # We simply acknowledge the heartbeat with interval 0
-            # to mark the node as offline
-            state = self.state_factory.state()
-            state.acknowledge_node_heartbeat(
-                node_id=request.node.node_id, heartbeat_interval=0
-            )
-            return DeleteNodeResponse()
-
-        return message_handler.delete_node(
-            request=request,
-            state=self.state_factory.state(),
-        )
-
-    def RegisterNode(
-        self, request: RegisterNodeFleetRequest, context: grpc.ServicerContext
-    ) -> RegisterNodeFleetResponse:
         """Register a node."""
         log(DEBUG, "[Fleet.RegisterNode] Request: %s", MessageToDict(request))
         try:
@@ -287,6 +220,29 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             )
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
             raise RuntimeError from None  # Make mypy happy
+
+    def DeleteNode(
+        self, request: DeleteNodeRequest, context: grpc.ServicerContext
+    ) -> DeleteNodeResponse:
+        """."""
+        log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
+        log(DEBUG, "[Fleet.DeleteNode] Request: %s", MessageToDict(request))
+        # This shall be refactored when renaming `Fleet.Create/DeleteNode`
+        # to `Fleet.Activate/DeactivateNode`
+        if self.enable_supernode_auth:
+            # SuperNodes can only be deleted from the CLI
+            # We simply acknowledge the heartbeat with interval 0
+            # to mark the node as offline
+            state = self.state_factory.state()
+            state.acknowledge_node_heartbeat(
+                node_id=request.node.node_id, heartbeat_interval=0
+            )
+            return DeleteNodeResponse()
+
+        return message_handler.delete_node(
+            request=request,
+            state=self.state_factory.state(),
+        )
 
     def SendNodeHeartbeat(
         self, request: SendNodeHeartbeatRequest, context: grpc.ServicerContext
