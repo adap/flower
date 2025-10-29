@@ -28,7 +28,7 @@ from typing import Optional
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     FLWR_APP_TOKEN_LENGTH,
-    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_INTERVAL_INF,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -641,7 +641,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             current = now()
             run_record = self.run_ids[run_id]
             if new_status.status in (Status.STARTING, Status.RUNNING):
-                run_record.heartbeat_interval = HEARTBEAT_MAX_INTERVAL
+                run_record.heartbeat_interval = HEARTBEAT_INTERVAL_INF
                 run_record.active_until = (
                     current.timestamp() + run_record.heartbeat_interval
                 )

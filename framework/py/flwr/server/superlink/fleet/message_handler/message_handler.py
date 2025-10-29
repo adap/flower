@@ -14,11 +14,16 @@
 # ==============================================================================
 """Fleet API message handlers."""
 
-from logging import ERROR
+from logging import ERROR, WARN
 from typing import Optional
 
 from flwr.common import Message, log
-from flwr.common.constant import NOOP_FLWR_AID, Status
+from flwr.common.constant import (
+    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_MIN_INTERVAL,
+    NOOP_FLWR_AID,
+    Status,
+)
 from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.serde import (
     fab_to_proto,
@@ -112,7 +117,8 @@ def activate_node(
     node_id = state.get_node_id_by_public_key(request.public_key)
     if node_id is None:
         raise ValueError("No node found with the given public key.")
-    if not state.activate_node(node_id, request.heartbeat_interval):
+    heartbeat_interval = _limit_heartbeat_interval(request.heartbeat_interval)
+    if not state.activate_node(node_id, heartbeat_interval):
         raise ValueError(f"Node with ID {node_id} could not be activated.")
     return ActivateNodeResponse(node_id=node_id)
 
@@ -141,9 +147,8 @@ def send_node_heartbeat(
     state: LinkState,  # pylint: disable=unused-argument
 ) -> SendNodeHeartbeatResponse:
     """."""
-    res = state.acknowledge_node_heartbeat(
-        request.node.node_id, request.heartbeat_interval
-    )
+    heartbeat_interval = _limit_heartbeat_interval(request.heartbeat_interval)
+    res = state.acknowledge_node_heartbeat(request.node.node_id, heartbeat_interval)
     return SendNodeHeartbeatResponse(success=res)
 
 
@@ -335,3 +340,26 @@ def confirm_message_received(
     store.delete(request.message_object_id)
 
     return ConfirmMessageReceivedResponse()
+
+
+def _limit_heartbeat_interval(
+    interval: float,
+) -> float:
+    """Limit heartbeat interval to be within acceptable bounds."""
+    if interval < HEARTBEAT_MIN_INTERVAL:
+        log(
+            WARN,
+            "Heartbeat interval %ss is below minimum %ss. Setting to minimum.",
+            interval,
+            HEARTBEAT_MIN_INTERVAL,
+        )
+        return HEARTBEAT_MIN_INTERVAL
+    if interval > HEARTBEAT_MAX_INTERVAL:
+        log(
+            WARN,
+            "Heartbeat interval %ss is above maximum %ss. Setting to maximum.",
+            interval,
+            HEARTBEAT_MAX_INTERVAL,
+        )
+        return HEARTBEAT_MAX_INTERVAL
+    return interval
