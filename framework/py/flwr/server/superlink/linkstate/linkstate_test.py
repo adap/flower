@@ -793,6 +793,50 @@ class StateTest(CoreStateTest):
         with self.assertRaises(ValueError):
             state.delete_node("wrong_owner_aid", node_id)
 
+    def test_activate_node(self) -> None:
+        """Test node activation transitions."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        heartbeat_interval = 30.0
+
+        # Test successful activation from REGISTERED
+        node_id = create_dummy_node(state, activate=False)
+        assert state.activate_node(node_id, heartbeat_interval)
+        assert state.get_node_info(node_ids=[node_id])[0].status == NodeStatus.ONLINE
+
+        # Test successful activation from OFFLINE
+        state.deactivate_node(node_id)
+        assert state.activate_node(node_id, heartbeat_interval)
+        assert state.get_node_info(node_ids=[node_id])[0].status == NodeStatus.ONLINE
+
+        # Test failed activation when already ONLINE
+        assert not state.activate_node(node_id, heartbeat_interval)
+
+        # Test failed activation when UNREGISTERED
+        state.delete_node("mock_flwr_aid", node_id)
+        assert not state.activate_node(node_id, heartbeat_interval)
+
+    def test_deactivate_node(self) -> None:
+        """Test node deactivation transitions."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        node_id = create_dummy_node(state)
+
+        # Test successful deactivation from ONLINE
+        assert state.deactivate_node(node_id)
+        assert state.get_node_info(node_ids=[node_id])[0].status == NodeStatus.OFFLINE
+
+        # Test failed deactivation when already OFFLINE
+        assert not state.deactivate_node(node_id)
+
+        # Test failed deactivation from REGISTERED
+        node_id2 = create_dummy_node(state, activate=False)
+        assert not state.deactivate_node(node_id2)
+
+        # Test failed deactivation when UNREGISTERED
+        state.delete_node("mock_flwr_aid", node_id)
+        assert not state.deactivate_node(node_id)
+
     def test_delete_node_public_key(self) -> None:
         """Test deleting a client node with public key."""
         # Prepare
