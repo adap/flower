@@ -39,14 +39,22 @@ from flwr.common.serde import message_from_proto
 from flwr.common.typing import RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    ActivateNodeRequest,
+    ActivateNodeResponse,
     CreateNodeRequest,
     CreateNodeResponse,
+    DeactivateNodeRequest,
+    DeactivateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    RegisterNodeFleetRequest,
+    RegisterNodeFleetResponse,
+    UnregisterNodeFleetRequest,
+    UnregisterNodeFleetResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
@@ -71,7 +79,7 @@ from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 
 
-class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
+class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
     """FleetServicer tests for allowed RunStatuses."""
 
     enable_node_auth = False
@@ -112,6 +120,26 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.Fleet/DeleteNode",
             request_serializer=DeleteNodeRequest.SerializeToString,
             response_deserializer=DeleteNodeResponse.FromString,
+        )
+        self._register_node = self._channel.unary_unary(
+            "/flwr.proto.Fleet/RegisterNode",
+            request_serializer=RegisterNodeFleetRequest.SerializeToString,
+            response_deserializer=RegisterNodeFleetResponse.FromString,
+        )
+        self._activate_node = self._channel.unary_unary(
+            "/flwr.proto.Fleet/ActivateNode",
+            request_serializer=ActivateNodeRequest.SerializeToString,
+            response_deserializer=ActivateNodeResponse.FromString,
+        )
+        self._deactivate_node = self._channel.unary_unary(
+            "/flwr.proto.Fleet/DeactivateNode",
+            request_serializer=DeactivateNodeRequest.SerializeToString,
+            response_deserializer=DeactivateNodeResponse.FromString,
+        )
+        self._unregister_node = self._channel.unary_unary(
+            "/flwr.proto.Fleet/UnregisterNode",
+            request_serializer=UnregisterNodeFleetRequest.SerializeToString,
+            response_deserializer=UnregisterNodeFleetResponse.FromString,
         )
         self._push_messages = self._channel.unary_unary(
             "/flwr.proto.Fleet/PushMessages",
@@ -239,6 +267,97 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         else:
             # Status changed to Deleted
             assert node_info.status == NodeStatus.UNREGISTERED
+
+    def test_register_node_success(self) -> None:
+        """Test `RegisterNode` success."""
+        # Prepare
+        public_key = b"test_register_public_key"
+        request = RegisterNodeFleetRequest(public_key=public_key)
+
+        # Execute
+        response, call = self._register_node.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, RegisterNodeFleetResponse)
+        assert grpc.StatusCode.OK == call.code()
+        # Verify node was created in state
+        node_id = self.state.get_node_id_by_public_key(public_key)
+        assert node_id is not None
+        assert node_id > 0
+
+    def test_activate_node_success(self) -> None:
+        """Test `ActivateNode` success."""
+        # Prepare: Register a node first
+        public_key = b"test_activate_public_key"
+        self.state.create_node(NOOP_FLWR_AID, public_key, 0)
+        request = ActivateNodeRequest(public_key=public_key, heartbeat_interval=30)
+
+        # Execute
+        response, call = self._activate_node.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, ActivateNodeResponse)
+        assert grpc.StatusCode.OK == call.code()
+        assert response.node_id > 0
+        # Verify node status is ONLINE
+        node_info = self.state.get_node_info(node_ids=[response.node_id])[0]
+        assert node_info.status == NodeStatus.ONLINE
+
+    def test_activate_node_not_found(self) -> None:
+        """Test `ActivateNode` with non-existent public key."""
+        # Prepare
+        public_key = b"non_existent_public_key"
+        request = ActivateNodeRequest(public_key=public_key, heartbeat_interval=30)
+
+        # Execute and assert
+        with self.assertRaises(grpc.RpcError) as cm:
+            self._activate_node.with_call(request=request)
+        assert cm.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
+
+    def test_deactivate_node_success(self) -> None:
+        """Test `DeactivateNode` success."""
+        # Prepare: Create and activate a node
+        public_key = b"test_deactivate_public_key"
+        node_id = self.state.create_node(NOOP_FLWR_AID, public_key, 30)
+        self.state.activate_node(node_id, 30)
+        request = DeactivateNodeRequest(node_id=node_id)
+
+        # Execute
+        response, call = self._deactivate_node.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, DeactivateNodeResponse)
+        assert grpc.StatusCode.OK == call.code()
+        # Verify node status is OFFLINE
+        node_info = self.state.get_node_info(node_ids=[node_id])[0]
+        assert node_info.status == NodeStatus.OFFLINE
+
+    def test_deactivate_node_failure(self) -> None:
+        """Test `DeactivateNode` with invalid node_id."""
+        # Prepare: Use a non-existent node_id
+        request = DeactivateNodeRequest(node_id=99999)
+
+        # Execute and assert
+        with self.assertRaises(grpc.RpcError) as cm:
+            self._deactivate_node.with_call(request=request)
+        assert cm.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
+
+    def test_unregister_node_success(self) -> None:
+        """Test `UnregisterNode` success."""
+        # Prepare: Create a node
+        public_key = b"test_unregister_public_key"
+        node_id = self.state.create_node(NOOP_FLWR_AID, public_key, 0)
+        request = UnregisterNodeFleetRequest(node_id=node_id)
+
+        # Execute
+        response, call = self._unregister_node.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, UnregisterNodeFleetResponse)
+        assert grpc.StatusCode.OK == call.code()
+        # Verify node status is UNREGISTERED
+        node_info = self.state.get_node_info(node_ids=[node_id])[0]
+        assert node_info.status == NodeStatus.UNREGISTERED
 
     def test_successful_push_messages_if_running(self) -> None:
         """Test `PushMessages` success."""

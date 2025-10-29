@@ -21,7 +21,10 @@ from logging import DEBUG, ERROR, INFO
 import grpc
 from google.protobuf.json_format import MessageToDict
 
-from flwr.common.constant import SUPERNODE_NOT_CREATED_FROM_CLI_MESSAGE
+from flwr.common.constant import (
+    PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
+    SUPERNODE_NOT_CREATED_FROM_CLI_MESSAGE,
+)
 from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
@@ -148,50 +151,6 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         log(DEBUG, "[Fleet.CreateNode] Response: %s", MessageToDict(response))
         return response
 
-    def RegisterNode(
-        self, request: RegisterNodeFleetRequest, context: grpc.ServicerContext
-    ) -> RegisterNodeFleetResponse:
-        """Register a node (not implemented)."""
-        log(ERROR, "[Fleet.RegisterNode] RegisterNode is not implemented")
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "RegisterNode RPC is not yet implemented",
-        )
-        raise NotImplementedError
-
-    def ActivateNode(
-        self, request: ActivateNodeRequest, context: grpc.ServicerContext
-    ) -> ActivateNodeResponse:
-        """Activate a node (not implemented)."""
-        log(ERROR, "[Fleet.ActivateNode] ActivateNode is not implemented")
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "ActivateNode RPC is not yet implemented",
-        )
-        raise NotImplementedError
-
-    def DeactivateNode(
-        self, request: DeactivateNodeRequest, context: grpc.ServicerContext
-    ) -> DeactivateNodeResponse:
-        """Deactivate a node (not implemented)."""
-        log(ERROR, "[Fleet.DeactivateNode] DeactivateNode is not implemented")
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "DeactivateNode RPC is not yet implemented",
-        )
-        raise NotImplementedError
-
-    def UnregisterNode(
-        self, request: UnregisterNodeFleetRequest, context: grpc.ServicerContext
-    ) -> UnregisterNodeFleetResponse:
-        """Unregister a node (not implemented)."""
-        log(ERROR, "[Fleet.UnregisterNode] UnregisterNode is not implemented")
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "UnregisterNode RPC is not yet implemented",
-        )
-        raise NotImplementedError
-
     def DeleteNode(
         self, request: DeleteNodeRequest, context: grpc.ServicerContext
     ) -> DeleteNodeResponse:
@@ -214,6 +173,76 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             request=request,
             state=self.state_factory.state(),
         )
+
+    def RegisterNode(
+        self, request: RegisterNodeFleetRequest, context: grpc.ServicerContext
+    ) -> RegisterNodeFleetResponse:
+        """Register a node."""
+        log(DEBUG, "[Fleet.RegisterNode] Request: %s", MessageToDict(request))
+        try:
+            return message_handler.register_node(
+                request=request,
+                state=self.state_factory.state(),
+            )
+        except ValueError:
+            # Public key already in use
+            log(ERROR, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE)
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
+            )
+            raise RuntimeError from None  # Make mypy happy
+
+    def ActivateNode(
+        self, request: ActivateNodeRequest, context: grpc.ServicerContext
+    ) -> ActivateNodeResponse:
+        """Activate a node."""
+        try:
+            response = message_handler.activate_node(
+                request=request,
+                state=self.state_factory.state(),
+            )
+            log(INFO, "[Fleet.ActivateNode] Activated node_id=%s", response.node_id)
+            return response
+        except ValueError as e:
+            log(ERROR, "[Fleet.ActivateNode] Failed to activate node: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+            raise RuntimeError from None  # Make mypy happy
+
+    def DeactivateNode(
+        self, request: DeactivateNodeRequest, context: grpc.ServicerContext
+    ) -> DeactivateNodeResponse:
+        """Deactivate a node."""
+        try:
+            response = message_handler.deactivate_node(
+                request=request,
+                state=self.state_factory.state(),
+            )
+            log(INFO, "[Fleet.DeactivateNode] Deactivated node_id=%s", request.node_id)
+            return response
+        except ValueError as e:
+            log(ERROR, "[Fleet.DeactivateNode] Failed to deactivate node: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+            raise RuntimeError from None  # Make mypy happy
+
+    def UnregisterNode(
+        self, request: UnregisterNodeFleetRequest, context: grpc.ServicerContext
+    ) -> UnregisterNodeFleetResponse:
+        """Unregister a node."""
+        try:
+            response = message_handler.unregister_node(
+                request=request,
+                state=self.state_factory.state(),
+            )
+            log(INFO, "[Fleet.UnregisterNode] Unregistered node_id=%s", request.node_id)
+            return response
+        except ValueError as e:
+            log(
+                ERROR,
+                "[Fleet.UnregisterNode] Failed to unregister node: %s",
+                str(e),
+            )
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+            raise RuntimeError from None  # Make mypy happy
 
     def SendNodeHeartbeat(
         self, request: SendNodeHeartbeatRequest, context: grpc.ServicerContext
