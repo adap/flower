@@ -29,7 +29,10 @@ from flwr.common.constant import (
     TIMESTAMP_HEADER,
     TIMESTAMP_TOLERANCE,
 )
-from flwr.proto.fleet_pb2 import CreateNodeRequest  # pylint: disable=E0611
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    ActivateNodeRequest,
+    RegisterNodeFleetRequest,
+)
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, verify_signature
 
@@ -111,7 +114,7 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             context: grpc.ServicerContext,
         ) -> GrpcMessage:
             # Retrieve the public key
-            if isinstance(request, CreateNodeRequest):
+            if isinstance(request, (RegisterNodeFleetRequest, ActivateNodeRequest)):
                 actual_public_key = request.public_key
             else:
                 # Note: This function runs in a different thread
