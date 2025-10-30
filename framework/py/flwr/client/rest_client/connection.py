@@ -15,7 +15,6 @@
 """Contextmanager for a REST request-response channel to the Flower server."""
 
 
-import secrets
 from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import ERROR, WARN
@@ -74,6 +73,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 
 try:
     import requests
@@ -184,8 +184,12 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     if authentication_keys is not None:
         log(ERROR, "Client authentication is not supported for this transport type.")
 
-    # REST does not support node authentication; random bytes are used instead
-    node_pk = secrets.token_bytes(32)
+    # REST does NOT support node authentication
+    self_registered = False
+    if authentication_keys is None:
+        self_registered = True
+        authentication_keys = generate_key_pairs()
+    node_pk = public_key_to_bytes(authentication_keys[1])
 
     # Shared variables for inner functions
     node: Optional[Node] = None
@@ -476,7 +480,8 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         fn(object_id)
 
     try:
-        register_node()
+        if self_registered:
+            register_node()
         node_id = activate_node()
         # Yield methods
         yield (
@@ -498,6 +503,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
                 # Disable retrying
                 retry_invoker.max_tries = 1
                 deactivate_node()
-                unregister_node()
+                if self_registered:
+                    unregister_node()
         except RequestsConnectionError:
             pass
