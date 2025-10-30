@@ -257,8 +257,9 @@ def run_superlink() -> None:
         if args.simulation:
             log(
                 WARN,
-                "SuperNode authentication is not applicable in simulation runtime, "
-                "as no SuperNodes can connect to this SuperLink. Proceeding...",
+                "SuperNode authentication is not applicable with the simulation, "
+                "runtime as no SuperNodes can connect to this SuperLink. "
+                "Proceeding...",
             )
     # If supernode authentication is disabled, warn users
     else:
