@@ -135,7 +135,11 @@ async def register_node(
     request: RegisterNodeFleetRequest,
 ) -> RegisterNodeFleetResponse:
     """Register a node (Fleet API only)."""
-    raise NotImplementedError("RegisterNode is not yet implemented.")
+    # Get state from app
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+
+    # Handle message
+    return message_handler.register_node(request=request, state=state)
 
 
 @rest_request_response(ActivateNodeRequest)
@@ -143,7 +147,11 @@ async def activate_node(
     request: ActivateNodeRequest,
 ) -> ActivateNodeResponse:
     """Activate a node."""
-    raise NotImplementedError("ActivateNode is not yet implemented.")
+    # Get state from app
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+
+    # Handle message
+    return message_handler.activate_node(request=request, state=state)
 
 
 @rest_request_response(DeactivateNodeRequest)
@@ -151,7 +159,11 @@ async def deactivate_node(
     request: DeactivateNodeRequest,
 ) -> DeactivateNodeResponse:
     """Deactivate a node."""
-    raise NotImplementedError("DeactivateNode is not yet implemented.")
+    # Get state from app
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+
+    # Handle message
+    return message_handler.deactivate_node(request=request, state=state)
 
 
 @rest_request_response(UnregisterNodeFleetRequest)
@@ -159,7 +171,11 @@ async def unregister_node(
     request: UnregisterNodeFleetRequest,
 ) -> UnregisterNodeFleetResponse:
     """Unregister a node (Fleet API only)."""
-    raise NotImplementedError("UnregisterNode is not yet implemented.")
+    # Get state from app
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+
+    # Handle message
+    return message_handler.unregister_node(request=request, state=state)
 
 
 @rest_request_response(PullMessagesRequest)

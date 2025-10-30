@@ -18,7 +18,12 @@ from logging import ERROR
 from typing import Optional
 
 from flwr.common import Message, log
-from flwr.common.constant import NOOP_FLWR_AID, Status
+from flwr.common.constant import (
+    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_MIN_INTERVAL,
+    NOOP_FLWR_AID,
+    Status,
+)
 from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.serde import (
     fab_to_proto,
@@ -29,8 +34,12 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, InvalidRunStatusException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    ActivateNodeRequest,
+    ActivateNodeResponse,
     CreateNodeRequest,
     CreateNodeResponse,
+    DeactivateNodeRequest,
+    DeactivateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
     PullMessagesRequest,
@@ -38,6 +47,10 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushMessagesRequest,
     PushMessagesResponse,
     Reconnect,
+    RegisterNodeFleetRequest,
+    RegisterNodeFleetResponse,
+    UnregisterNodeFleetRequest,
+    UnregisterNodeFleetResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
@@ -64,6 +77,10 @@ from flwr.supercore.object_store import NoObjectInStoreError, ObjectStore
 from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 
 
+class InvalidHeartbeatIntervalError(Exception):
+    """Invalid heartbeat interval exception."""
+
+
 def create_node(
     request: CreateNodeRequest,  # pylint: disable=unused-argument
     state: LinkState,
@@ -87,11 +104,56 @@ def delete_node(request: DeleteNodeRequest, state: LinkState) -> DeleteNodeRespo
     return DeleteNodeResponse()
 
 
+def register_node(
+    request: RegisterNodeFleetRequest,
+    state: LinkState,
+) -> RegisterNodeFleetResponse:
+    """Register a node (Fleet API only)."""
+    state.create_node(NOOP_FLWR_AID, request.public_key, 0)
+    return RegisterNodeFleetResponse()
+
+
+def activate_node(
+    request: ActivateNodeRequest,
+    state: LinkState,
+) -> ActivateNodeResponse:
+    """Activate a node."""
+    node_id = state.get_node_id_by_public_key(request.public_key)
+    if node_id is None:
+        raise ValueError("No SuperNode found with the given public key.")
+    _validate_heartbeat_interval(request.heartbeat_interval)
+    if not state.activate_node(node_id, request.heartbeat_interval):
+        raise ValueError(f"SuperNode with node ID {node_id} could not be activated.")
+    return ActivateNodeResponse(node_id=node_id)
+
+
+def deactivate_node(
+    request: DeactivateNodeRequest,
+    state: LinkState,
+) -> DeactivateNodeResponse:
+    """Deactivate a node."""
+    if not state.deactivate_node(request.node_id):
+        raise ValueError(
+            f"SuperNode with node ID {request.node_id} could not be deactivated."
+        )
+    return DeactivateNodeResponse()
+
+
+def unregister_node(
+    request: UnregisterNodeFleetRequest,
+    state: LinkState,
+) -> UnregisterNodeFleetResponse:
+    """Unregister a node (Fleet API only)."""
+    state.delete_node(NOOP_FLWR_AID, request.node_id)
+    return UnregisterNodeFleetResponse()
+
+
 def send_node_heartbeat(
     request: SendNodeHeartbeatRequest,  # pylint: disable=unused-argument
     state: LinkState,  # pylint: disable=unused-argument
 ) -> SendNodeHeartbeatResponse:
     """."""
+    _validate_heartbeat_interval(request.heartbeat_interval)
     res = state.acknowledge_node_heartbeat(
         request.node.node_id, request.heartbeat_interval
     )
@@ -286,3 +348,12 @@ def confirm_message_received(
     store.delete(request.message_object_id)
 
     return ConfirmMessageReceivedResponse()
+
+
+def _validate_heartbeat_interval(interval: float) -> None:
+    """Raise if heartbeat interval is out of bounds."""
+    if not HEARTBEAT_MIN_INTERVAL <= interval <= HEARTBEAT_MAX_INTERVAL:
+        raise InvalidHeartbeatIntervalError(
+            f"Heartbeat interval {interval} is out of bounds "
+            f"[{HEARTBEAT_MIN_INTERVAL}, {HEARTBEAT_MAX_INTERVAL}]."
+        )
