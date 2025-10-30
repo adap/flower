@@ -177,7 +177,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
             )
-            raise RuntimeError from None  # Make mypy happy
+
+        raise RuntimeError  # Make mypy happy
 
     def ActivateNode(
         self, request: ActivateNodeRequest, context: grpc.ServicerContext
@@ -190,10 +191,17 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             )
             log(INFO, "[Fleet.ActivateNode] Activated node_id=%s", response.node_id)
             return response
+        except message_handler.InvalidHeartbeatIntervalError:
+            # Heartbeat interval is invalid
+            log(ERROR, "[Fleet.ActivateNode] Invalid heartbeat interval")
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT, "Invalid heartbeat interval"
+            )
         except ValueError as e:
             log(ERROR, "[Fleet.ActivateNode] Failed to activate node: %s", str(e))
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
-            raise RuntimeError from None  # Make mypy happy
+
+        raise RuntimeError  # Make mypy happy
 
     def DeactivateNode(
         self, request: DeactivateNodeRequest, context: grpc.ServicerContext
@@ -209,7 +217,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         except ValueError as e:
             log(ERROR, "[Fleet.DeactivateNode] Failed to deactivate node: %s", str(e))
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
-            raise RuntimeError from None  # Make mypy happy
+
+        raise RuntimeError  # Make mypy happy
 
     def UnregisterNode(
         self, request: UnregisterNodeFleetRequest, context: grpc.ServicerContext
@@ -268,10 +277,18 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     ) -> SendNodeHeartbeatResponse:
         """."""
         log(DEBUG, "[Fleet.SendNodeHeartbeat] Request: %s", MessageToDict(request))
-        return message_handler.send_node_heartbeat(
-            request=request,
-            state=self.state_factory.state(),
-        )
+        try:
+            return message_handler.send_node_heartbeat(
+                request=request,
+                state=self.state_factory.state(),
+            )
+        except message_handler.InvalidHeartbeatIntervalError:
+            # Heartbeat interval is invalid
+            log(ERROR, "[Fleet.SendNodeHeartbeat] Invalid heartbeat interval")
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT, "Invalid heartbeat interval"
+            )
+        raise RuntimeError  # Make mypy happy
 
     def PullMessages(
         self, request: PullMessagesRequest, context: grpc.ServicerContext

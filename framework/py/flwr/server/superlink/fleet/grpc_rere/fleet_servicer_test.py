@@ -274,7 +274,14 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         public_key = b"test_register_public_key"
         request = RegisterNodeFleetRequest(public_key=public_key)
 
-        # Execute
+        # Execute: Registeration should be blocked when node authentication is enabled
+        if self.enable_node_auth:
+            with self.assertRaises(grpc.RpcError) as cm:
+                self._register_node.with_call(request=request)
+            assert cm.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
+            return
+
+        # Execute: Allow registration when node authentication is disabled
         response, call = self._register_node.with_call(request=request)
 
         # Assert
@@ -349,7 +356,14 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         node_id = self.state.create_node(NOOP_FLWR_AID, public_key, 0)
         request = UnregisterNodeFleetRequest(node_id=node_id)
 
-        # Execute
+        # Execute: Unregistration should be blocked when node authentication is enabled
+        if self.enable_node_auth:
+            with self.assertRaises(grpc.RpcError) as cm:
+                self._unregister_node.with_call(request=request)
+            assert cm.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
+            return
+
+        # Execute: Allow unregistration when node authentication is disabled
         response, call = self._unregister_node.with_call(request=request)
 
         # Assert
