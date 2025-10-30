@@ -155,7 +155,6 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: RegisterNodeFleetRequest, context: grpc.ServicerContext
     ) -> RegisterNodeFleetResponse:
         """Register a node."""
-
         # Prevent registration when SuperNode authentication is enabled
         if self.enable_supernode_auth:
             log(ERROR, "SuperNode registration is disabled through Fleet API.")
