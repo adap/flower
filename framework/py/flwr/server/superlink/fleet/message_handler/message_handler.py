@@ -120,10 +120,10 @@ def activate_node(
     """Activate a node."""
     node_id = state.get_node_id_by_public_key(request.public_key)
     if node_id is None:
-        raise ValueError("No node found with the given public key.")
+        raise ValueError("No SuperNode found with the given public key.")
     _validate_heartbeat_interval(request.heartbeat_interval)
     if not state.activate_node(node_id, request.heartbeat_interval):
-        raise ValueError(f"Node with ID {node_id} could not be activated.")
+        raise ValueError(f"SuperNode with node ID {node_id} could not be activated.")
     return ActivateNodeResponse(node_id=node_id)
 
 
@@ -133,7 +133,9 @@ def deactivate_node(
 ) -> DeactivateNodeResponse:
     """Deactivate a node."""
     if not state.deactivate_node(request.node_id):
-        raise ValueError(f"Node with ID {request.node_id} could not be deactivated.")
+        raise ValueError(
+            f"SuperNode with node ID {request.node_id} could not be deactivated."
+        )
     return DeactivateNodeResponse()
 
 
