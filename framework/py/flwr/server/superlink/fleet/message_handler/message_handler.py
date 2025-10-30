@@ -18,7 +18,12 @@ from logging import ERROR
 from typing import Optional
 
 from flwr.common import Message, log
-from flwr.common.constant import NOOP_FLWR_AID, Status
+from flwr.common.constant import (
+    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_MIN_INTERVAL,
+    NOOP_FLWR_AID,
+    Status,
+)
 from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.serde import (
     fab_to_proto,
@@ -72,6 +77,10 @@ from flwr.supercore.object_store import NoObjectInStoreError, ObjectStore
 from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 
 
+class InvalidHeartbeatIntervalError(Exception):
+    """Invalid heartbeat interval exception."""
+
+
 def create_node(
     request: CreateNodeRequest,  # pylint: disable=unused-argument
     state: LinkState,
@@ -112,6 +121,7 @@ def activate_node(
     node_id = state.get_node_id_by_public_key(request.public_key)
     if node_id is None:
         raise ValueError("No node found with the given public key.")
+    _validate_heartbeat_interval(request.heartbeat_interval)
     if not state.activate_node(node_id, request.heartbeat_interval):
         raise ValueError(f"Node with ID {node_id} could not be activated.")
     return ActivateNodeResponse(node_id=node_id)
@@ -141,6 +151,7 @@ def send_node_heartbeat(
     state: LinkState,  # pylint: disable=unused-argument
 ) -> SendNodeHeartbeatResponse:
     """."""
+    _validate_heartbeat_interval(request.heartbeat_interval)
     res = state.acknowledge_node_heartbeat(
         request.node.node_id, request.heartbeat_interval
     )
@@ -335,3 +346,12 @@ def confirm_message_received(
     store.delete(request.message_object_id)
 
     return ConfirmMessageReceivedResponse()
+
+
+def _validate_heartbeat_interval(interval: float) -> None:
+    """Raise if heartbeat interval is out of bounds."""
+    if not HEARTBEAT_MIN_INTERVAL <= interval <= HEARTBEAT_MAX_INTERVAL:
+        raise InvalidHeartbeatIntervalError(
+            f"Heartbeat interval {interval} is out of bounds "
+            f"[{HEARTBEAT_MIN_INTERVAL}, {HEARTBEAT_MAX_INTERVAL}]."
+        )
