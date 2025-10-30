@@ -113,15 +113,21 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             request: GrpcMessage,
             context: grpc.ServicerContext,
         ) -> GrpcMessage:
+            # Note: This function runs in a different thread
+            # than the `intercept_service` function.
+
             # Retrieve the public key
             if isinstance(request, (RegisterNodeFleetRequest, ActivateNodeRequest)):
                 actual_public_key = request.public_key
             else:
-                # Note: This function runs in a different thread
-                # than the `intercept_service` function.
+                if hasattr(request, "node"):
+                    node_id = request.node.node_id
+                else:
+                    node_id = request.node_id  # type: ignore[attr-defined]
                 actual_public_key = self.state_factory.state().get_node_public_key(
-                    request.node.node_id  # type: ignore
+                    node_id
                 )
+
             # Verify the public key
             if actual_public_key != expected_public_key:
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid node ID")
