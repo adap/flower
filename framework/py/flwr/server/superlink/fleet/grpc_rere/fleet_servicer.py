@@ -198,7 +198,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 grpc.StatusCode.INVALID_ARGUMENT, "Invalid heartbeat interval"
             )
         except ValueError as e:
-            log(ERROR, "[Fleet.ActivateNode] Failed to activate node: %s", str(e))
+            log(ERROR, "[Fleet.ActivateNode] Activation failed: %s", str(e))
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         raise RuntimeError  # Make mypy happy
@@ -215,7 +215,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             log(INFO, "[Fleet.DeactivateNode] Deactivated node_id=%s", request.node_id)
             return response
         except ValueError as e:
-            log(ERROR, "[Fleet.DeactivateNode] Failed to deactivate node: %s", str(e))
+            log(ERROR, "[Fleet.DeactivateNode] Deactivation failed: %s", str(e))
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         raise RuntimeError  # Make mypy happy
@@ -245,7 +245,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         except ValueError as e:
             log(
                 ERROR,
-                "[Fleet.UnregisterNode] Failed to unregister node: %s",
+                "[Fleet.UnregisterNode] Unregistration failed: %s",
                 str(e),
             )
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
