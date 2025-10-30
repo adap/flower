@@ -238,7 +238,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 request=request,
                 state=self.state_factory.state(),
             )
-            log(INFO, "[Fleet.UnregisterNode] Unregistered node_id=%s", request.node_id)
+            log(DEBUG, "[Fleet.UnregisterNode] Unregistered node_id=%s", request.node_id)
             return response
         except ValueError as e:
             log(
