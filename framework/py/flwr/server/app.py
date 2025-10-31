@@ -75,6 +75,7 @@ from flwr.superlink.auth_plugin import (
     NoOpControlAuthnPlugin,
     NoOpControlAuthzPlugin,
 )
+from flwr.superlink.federation import FederationManager, NoOpFederationManager
 from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
@@ -97,6 +98,7 @@ try:
         get_control_authz_ee_plugins,
         get_control_event_log_writer_plugins,
         get_ee_artifact_provider,
+        get_ee_federation_manager,
         get_fleet_event_log_writer_plugins,
     )
 except ImportError:
@@ -129,6 +131,10 @@ except ImportError:
         """Return all Control API authorization plugins for EE."""
         return {}
 
+    def get_ee_federation_manager() -> FederationManager:
+        """Return the EE FederationManager."""
+        return NoOpFederationManager()
+
 
 def get_control_authn_plugins() -> dict[str, type[ControlAuthnPlugin]]:
     """Return all Control API authentication plugins."""
@@ -140,6 +146,12 @@ def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
     """Return all Control API authorization plugins."""
     ee_dict: dict[str, type[ControlAuthzPlugin]] = get_control_authz_ee_plugins()
     return ee_dict | {AuthzType.NOOP: NoOpControlAuthzPlugin}
+
+
+def get_federation_manager() -> FederationManager:
+    """Return the FederationManager."""
+    federation_manager: FederationManager = get_ee_federation_manager()
+    return federation_manager
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
@@ -281,6 +293,9 @@ def run_superlink() -> None:
             f" to the Flower documentation for more information: {url_v}{page}",
         )
 
+    # Load Federation Manager
+    federation_manager = get_federation_manager()
+
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
 
@@ -299,6 +314,7 @@ def run_superlink() -> None:
         objectstore_factory=objectstore_factory,
         certificates=certificates,
         is_simulation=is_simulation,
+        federation_manager=federation_manager,
         authn_plugin=authn_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
@@ -323,6 +339,7 @@ def run_superlink() -> None:
             state_factory=state_factory,
             ffs_factory=ffs_factory,
             objectstore_factory=objectstore_factory,
+            federation_manager=federation_manager,
             certificates=None,  # ServerAppIo API doesn't support SSL yet
         )
         grpc_servers.append(serverappio_server)
@@ -389,6 +406,7 @@ def run_superlink() -> None:
                 state_factory=state_factory,
                 ffs_factory=ffs_factory,
                 objectstore_factory=objectstore_factory,
+                federation_manager=federation_manager,
                 enable_supernode_auth=enable_supernode_auth,
                 certificates=certificates,
                 interceptors=interceptors,
@@ -400,6 +418,7 @@ def run_superlink() -> None:
                 state_factory=state_factory,
                 ffs_factory=ffs_factory,
                 objectstore_factory=objectstore_factory,
+                federation_manager=federation_manager,
                 certificates=certificates,
             )
             grpc_servers.append(fleet_server)
@@ -550,6 +569,7 @@ def _run_fleet_api_grpc_rere(  # pylint: disable=R0913, R0917
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
+    federation_manager: FederationManager,
     enable_supernode_auth: bool,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
@@ -560,6 +580,7 @@ def _run_fleet_api_grpc_rere(  # pylint: disable=R0913, R0917
         state_factory=state_factory,
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
+        federation_manager=federation_manager,
         enable_supernode_auth=enable_supernode_auth,
     )
     fleet_add_servicer_to_server_fn = add_FleetServicer_to_server
@@ -585,6 +606,7 @@ def _run_fleet_api_grpc_adapter(
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
+    federation_manager: FederationManager,
     certificates: Optional[tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (GrpcAdapter)."""
@@ -593,6 +615,7 @@ def _run_fleet_api_grpc_adapter(
         state_factory=state_factory,
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
+        federation_manager=federation_manager,
         enable_supernode_auth=False,
     )
     fleet_add_servicer_to_server_fn = add_GrpcAdapterServicer_to_server

@@ -92,6 +92,7 @@ from flwr.server.utils.validator import validate_message
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 from flwr.supercore.object_store.utils import store_mapping_and_register_objects
+from flwr.superlink.federation import FederationManager
 
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
@@ -102,10 +103,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
+        federation_manager: FederationManager,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
+        self.federation_manager = federation_manager
         self.lock = threading.RLock()
 
     def ListAppsToLaunch(

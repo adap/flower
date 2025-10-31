@@ -70,6 +70,7 @@ from flwr.supercore.primitives.asymmetric import (
     public_key_to_bytes,
     sign_message,
 )
+from flwr.superlink.federation import NoOpFederationManager
 
 from .node_auth_server_interceptor import NodeAuthServerInterceptor
 
@@ -97,6 +98,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             state_factory,
             ffs_factory,
             objectstore_factory,
+            NoOpFederationManager(),
             self.enable_node_auth,
             None,
             [self._server_interceptor],
