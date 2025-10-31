@@ -24,9 +24,6 @@ import "flwr/proto/fab.proto";
 import "flwr/proto/message.proto";
 
 service Fleet {
-  rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
-  rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse) {}
-
   // Register Node
   rpc RegisterNode(RegisterNodeFleetRequest)
       returns (RegisterNodeFleetResponse) {}
@@ -69,17 +66,6 @@ service Fleet {
   rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
       returns (ConfirmMessageReceivedResponse) {}
 }
-
-// CreateNode messages
-message CreateNodeRequest {
-  bytes public_key = 1;
-  double heartbeat_interval = 2;
-}
-message CreateNodeResponse { Node node = 1; }
-
-// DeleteNode messages
-message DeleteNodeRequest { Node node = 1; }
-message DeleteNodeResponse {}
 
 // RegisterNode messages (add prefix to avoid name clash)
 message RegisterNodeFleetRequest { bytes public_key = 1; }
