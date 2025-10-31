@@ -13,6 +13,7 @@ echo "- Start Markdown checks"
 
 if $RUN_FULL_TEST; then
     pip freeze | grep mdformat
+    pip show beautysh
     echo "- mdformat: start"
     python -m mdformat --check --number docs/source
     echo "- mdformat: done"
