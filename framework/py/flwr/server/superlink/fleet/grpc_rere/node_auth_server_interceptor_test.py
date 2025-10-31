@@ -273,7 +273,9 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_send_node_heartbeat(self, metadata: list[Any]) -> Any:
         """Test SendNodeHeartbeat."""
         node_id = self._create_node_in_linkstate()
-        req = SendNodeHeartbeatRequest(node=Node(node_id=node_id))
+        req = SendNodeHeartbeatRequest(
+            node=Node(node_id=node_id), heartbeat_interval=30.0
+        )
         return self._send_node_heartbeat.with_call(request=req, metadata=metadata)
 
     def _test_get_fab(self, metadata: list[Any]) -> Any:
