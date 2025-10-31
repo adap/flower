@@ -18,16 +18,6 @@ class FleetStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.CreateNode = channel.unary_unary(
-                '/flwr.proto.Fleet/CreateNode',
-                request_serializer=flwr_dot_proto_dot_fleet__pb2.CreateNodeRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_fleet__pb2.CreateNodeResponse.FromString,
-                )
-        self.DeleteNode = channel.unary_unary(
-                '/flwr.proto.Fleet/DeleteNode',
-                request_serializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeResponse.FromString,
-                )
         self.RegisterNode = channel.unary_unary(
                 '/flwr.proto.Fleet/RegisterNode',
                 request_serializer=flwr_dot_proto_dot_fleet__pb2.RegisterNodeFleetRequest.SerializeToString,
@@ -92,18 +82,6 @@ class FleetStub(object):
 
 class FleetServicer(object):
     """Missing associated documentation comment in .proto file."""
-
-    def CreateNode(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def DeleteNode(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
 
     def RegisterNode(self, request, context):
         """Register Node
@@ -194,16 +172,6 @@ class FleetServicer(object):
 
 def add_FleetServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'CreateNode': grpc.unary_unary_rpc_method_handler(
-                    servicer.CreateNode,
-                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.CreateNodeRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_fleet__pb2.CreateNodeResponse.SerializeToString,
-            ),
-            'DeleteNode': grpc.unary_unary_rpc_method_handler(
-                    servicer.DeleteNode,
-                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeResponse.SerializeToString,
-            ),
             'RegisterNode': grpc.unary_unary_rpc_method_handler(
                     servicer.RegisterNode,
                     request_deserializer=flwr_dot_proto_dot_fleet__pb2.RegisterNodeFleetRequest.FromString,
@@ -273,40 +241,6 @@ def add_FleetServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class Fleet(object):
     """Missing associated documentation comment in .proto file."""
-
-    @staticmethod
-    def CreateNode(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/CreateNode',
-            flwr_dot_proto_dot_fleet__pb2.CreateNodeRequest.SerializeToString,
-            flwr_dot_proto_dot_fleet__pb2.CreateNodeResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def DeleteNode(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/DeleteNode',
-            flwr_dot_proto_dot_fleet__pb2.DeleteNodeRequest.SerializeToString,
-            flwr_dot_proto_dot_fleet__pb2.DeleteNodeResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def RegisterNode(request,

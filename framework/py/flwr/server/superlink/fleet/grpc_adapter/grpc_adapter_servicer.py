@@ -34,9 +34,7 @@ from flwr.proto import grpcadapter_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
-    CreateNodeRequest,
     DeactivateNodeRequest,
-    DeleteNodeRequest,
     PullMessagesRequest,
     PushMessagesRequest,
     RegisterNodeFleetRequest,
@@ -86,10 +84,6 @@ class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer, FleetService
     ) -> MessageContainer:
         """."""
         log(DEBUG, "GrpcAdapterServicer.SendReceive")
-        if request.grpc_message_name == CreateNodeRequest.__qualname__:
-            return _handle(request, context, CreateNodeRequest, self.CreateNode)
-        if request.grpc_message_name == DeleteNodeRequest.__qualname__:
-            return _handle(request, context, DeleteNodeRequest, self.DeleteNode)
         if request.grpc_message_name == RegisterNodeFleetRequest.__qualname__:
             return _handle(
                 request, context, RegisterNodeFleetRequest, self.RegisterNode
