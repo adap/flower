@@ -36,12 +36,8 @@ from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
     ActivateNodeResponse,
-    CreateNodeRequest,
-    CreateNodeResponse,
     DeactivateNodeRequest,
     DeactivateNodeResponse,
-    DeleteNodeRequest,
-    DeleteNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -64,7 +60,6 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectRequest,
     PushObjectResponse,
 )
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
@@ -79,29 +74,6 @@ from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 
 class InvalidHeartbeatIntervalError(Exception):
     """Invalid heartbeat interval exception."""
-
-
-def create_node(
-    request: CreateNodeRequest,  # pylint: disable=unused-argument
-    state: LinkState,
-) -> CreateNodeResponse:
-    """."""
-    # Create node
-    node_id = state.create_node(
-        NOOP_FLWR_AID, request.public_key, request.heartbeat_interval
-    )
-    return CreateNodeResponse(node=Node(node_id=node_id))
-
-
-def delete_node(request: DeleteNodeRequest, state: LinkState) -> DeleteNodeResponse:
-    """."""
-    # Validate node_id
-    if request.node.node_id == 0:  # i.e. unset `node_id`
-        return DeleteNodeResponse()
-
-    # Update state
-    state.delete_node(NOOP_FLWR_AID, node_id=request.node.node_id)
-    return DeleteNodeResponse()
 
 
 def register_node(
