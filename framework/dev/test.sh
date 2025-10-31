@@ -9,16 +9,6 @@ echo "=== test.sh ==="
 RUN_FULL_TEST=${1:-true}
 echo "RUN_FULL_TEST: $RUN_FULL_TEST"
 
-echo "- Start Markdown checks"
-
-if $RUN_FULL_TEST; then
-    pip freeze | grep mdformat
-    pip show beautysh
-    echo "- mdformat: start"
-    python -m mdformat --check --number docs/source
-    echo "- mdformat: done"
-fi
-
 echo "- Start Python checks"
 
 echo "- clang-format:  start"
@@ -74,6 +64,14 @@ python -m pytest --cov=py/flwr
 echo "- pytest: done"
 
 echo "- All Python checks passed"
+
+echo "- Start Markdown checks"
+
+if $RUN_FULL_TEST; then
+    echo "- mdformat: start"
+    python -m mdformat --check --number docs/source
+    echo "- mdformat: done"
+fi
 
 echo "- All Markdown checks passed"
 
