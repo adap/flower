@@ -20,6 +20,7 @@ from typer.main import get_command
 from flwr.common.version import package_version
 
 from .build import build
+from .hub_app import publish as app_publish
 from .install import install
 from .log import log
 from .login import login
@@ -62,6 +63,11 @@ supernode_app.command("list")(supernode_list)
 # Hide "ls" command (left as alias)
 supernode_app.command(hidden=True)(supernode_list)
 app.add_typer(supernode_app, name="supernode")
+
+# Create app command group
+app_app = typer.Typer(help="Manage Apps")
+app_app.command()(app_publish)
+app.add_typer(app_app, name="app")
 
 typer_click_object = get_command(app)
 
