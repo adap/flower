@@ -76,6 +76,7 @@ from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin
+from flwr.superlink.federation import FederationManager
 
 from .control_account_auth_interceptor import shared_account_info
 
@@ -89,6 +90,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
         is_simulation: bool,
+        federation_manager: FederationManager,
         authn_plugin: ControlAuthnPlugin,
         artifact_provider: Optional[ArtifactProvider] = None,
     ) -> None:
@@ -96,6 +98,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
         self.is_simulation = is_simulation
+        self.federation_manager = federation_manager
         self.authn_plugin = authn_plugin
         self.artifact_provider = artifact_provider
 

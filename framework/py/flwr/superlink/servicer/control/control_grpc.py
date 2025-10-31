@@ -36,6 +36,7 @@ from flwr.superlink.auth_plugin import (
     ControlAuthzPlugin,
     NoOpControlAuthnPlugin,
 )
+from flwr.superlink.federation import FederationManager
 
 from .control_account_auth_interceptor import ControlAccountAuthInterceptor
 from .control_event_log_interceptor import ControlEventLogInterceptor
@@ -58,6 +59,7 @@ def run_control_api_grpc(
     objectstore_factory: ObjectStoreFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     is_simulation: bool,
+    federation_manager: FederationManager,
     authn_plugin: ControlAuthnPlugin,
     authz_plugin: ControlAuthzPlugin,
     event_log_plugin: Optional[EventLogWriterPlugin] = None,
@@ -73,6 +75,7 @@ def run_control_api_grpc(
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
         is_simulation=is_simulation,
+        federation_manager=federation_manager,
         authn_plugin=authn_plugin,
         artifact_provider=artifact_provider,
     )
