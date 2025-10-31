@@ -19,8 +19,8 @@ import threading
 import unittest
 from collections.abc import Sequence
 from concurrent import futures
-from logging import DEBUG, INFO, WARN
 from typing import Any, Callable, Optional, Union
+from unittest.mock import Mock
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -29,10 +29,8 @@ from parameterized import parameterized
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import PUBLIC_KEY_HEADER, SIGNATURE_HEADER, TIMESTAMP_HEADER
-from flwr.common.logger import log
 from flwr.common.message import Message
 from flwr.common.record import RecordDict
-from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
     ActivateNodeResponse,
@@ -156,44 +154,6 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
     server.add_generic_rpc_handlers((generic_handler,))
 
 
-def _init_retry_invoker() -> RetryInvoker:
-    return RetryInvoker(
-        wait_gen_factory=exponential,
-        recoverable_exceptions=grpc.RpcError,
-        max_tries=1,
-        max_time=None,
-        on_giveup=lambda retry_state: (
-            log(
-                WARN,
-                "Giving up reconnection after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-            if retry_state.tries > 1
-            else None
-        ),
-        on_success=lambda retry_state: (
-            log(
-                INFO,
-                "Connection successful after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-            if retry_state.tries > 1
-            else None
-        ),
-        on_backoff=lambda retry_state: (
-            log(WARN, "Connection attempt failed, retrying...")
-            if retry_state.tries == 1
-            else log(
-                DEBUG,
-                "Connection attempt failed, retrying in %.2f seconds",
-                retry_state.actual_wait,
-            )
-        ),
-    )
-
-
 def _receive(conn: Any) -> None:
     _, receive, _, _, _, _, _, _ = conn
     receive()
@@ -231,14 +191,11 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
     @parameterized.expand([(_receive,), (_send,), (_get_run,)])  # type: ignore
     def test_client_auth_rpc(self, grpc_call: Callable[[Any], None]) -> None:
         """Test client authentication during create node."""
-        # Prepare
-        retry_invoker = _init_retry_invoker()
-
         # Execute
         with self._connection(
             self._address,
             True,
-            retry_invoker,
+            Mock(invoke=lambda fn, *args, **kwargs: fn(*args, **kwargs)),
             GRPC_MAX_MESSAGE_LENGTH,
             None,
             (self._client_private_key, self._client_public_key),
