@@ -328,21 +328,21 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             self.state.activate_node(node_id, 30)
         return node_id
 
-    @parameterized.expand(
-        [
-            (_test_register_node,),
-            (_test_activate_node,),
-            (_test_deactivate_node,),
-            (_test_unregister_node,),
-            (_test_pull_messages,),
-            (_test_push_messages,),
-            (_test_pull_object,),
-            (_test_push_object,),
-            (_test_get_run,),
-            (_test_send_node_heartbeat,),
-            (_test_get_fab,),
-        ]
-    )  # type: ignore
+    rpcs = [
+        (_test_register_node,),
+        (_test_activate_node,),
+        (_test_deactivate_node,),
+        (_test_unregister_node,),
+        (_test_pull_messages,),
+        (_test_push_messages,),
+        (_test_pull_object,),
+        (_test_push_object,),
+        (_test_get_run,),
+        (_test_send_node_heartbeat,),
+        (_test_get_fab,),
+    ]
+
+    @parameterized.expand(rpcs)  # type: ignore
     def test_successful_rpc_with_metadata(
         self, rpc: Callable[[Any, list[Any]], Any]
     ) -> None:
@@ -360,21 +360,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert call.code() == grpc.StatusCode.OK
 
-    @parameterized.expand(
-        [
-            (_test_register_node,),
-            (_test_activate_node,),
-            (_test_deactivate_node,),
-            (_test_unregister_node,),
-            (_test_pull_messages,),
-            (_test_push_messages,),
-            (_test_pull_object,),
-            (_test_push_object,),
-            (_test_get_run,),
-            (_test_send_node_heartbeat,),
-            (_test_get_fab,),
-        ]
-    )  # type: ignore
+    @parameterized.expand(rpcs)  # type: ignore
     def test_unsuccessful_rpc_with_invalid_signature(
         self, rpc: Callable[[Any, list[Any]], Any]
     ) -> None:
@@ -384,21 +370,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             rpc(self, self._make_metadata_with_invalid_signature())
         assert cm.exception.code() == grpc.StatusCode.UNAUTHENTICATED
 
-    @parameterized.expand(
-        [
-            (_test_register_node,),
-            (_test_activate_node,),
-            (_test_deactivate_node,),
-            (_test_unregister_node,),
-            (_test_pull_messages,),
-            (_test_push_messages,),
-            (_test_pull_object,),
-            (_test_push_object,),
-            (_test_get_run,),
-            (_test_send_node_heartbeat,),
-            (_test_get_fab,),
-        ]
-    )  # type: ignore
+    @parameterized.expand(rpcs)  # type: ignore
     def test_unsuccessful_rpc_with_invalid_public_key(
         self, rpc: Callable[[Any, list[Any]], Any]
     ) -> None:
@@ -408,21 +380,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             rpc(self, self._make_metadata_with_invalid_public_key())
         assert cm.exception.code() == grpc.StatusCode.UNAUTHENTICATED
 
-    @parameterized.expand(
-        [
-            (_test_register_node,),
-            (_test_activate_node,),
-            (_test_deactivate_node,),
-            (_test_unregister_node,),
-            (_test_pull_messages,),
-            (_test_push_messages,),
-            (_test_pull_object,),
-            (_test_push_object,),
-            (_test_get_run,),
-            (_test_send_node_heartbeat,),
-            (_test_get_fab,),
-        ]
-    )  # type: ignore
+    @parameterized.expand(rpcs)  # type: ignore
     def test_unsuccessful_rpc_with_invalid_timestamp(
         self, rpc: Callable[[Any, list[Any]], Any]
     ) -> None:
