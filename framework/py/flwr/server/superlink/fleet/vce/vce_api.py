@@ -33,7 +33,7 @@ from flwr.clientapp.client_app import ClientApp, ClientAppException, LoadClientA
 from flwr.clientapp.utils import get_load_client_app_fn
 from flwr.common import Message
 from flwr.common.constant import (
-    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_INTERVAL_INF,
     NOOP_FLWR_AID,
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -62,10 +62,10 @@ def _register_nodes(
             # use random bytes as public key
             NOOP_FLWR_AID,
             secrets.token_bytes(32),
-            heartbeat_interval=HEARTBEAT_MAX_INTERVAL,
+            heartbeat_interval=HEARTBEAT_INTERVAL_INF,
         )
         state.acknowledge_node_heartbeat(
-            node_id=node_id, heartbeat_interval=HEARTBEAT_MAX_INTERVAL
+            node_id=node_id, heartbeat_interval=HEARTBEAT_INTERVAL_INF
         )
         nodes_mapping[node_id] = i
     log(DEBUG, "Registered %i nodes", len(nodes_mapping))

@@ -27,7 +27,7 @@ from typing import Any, Optional, Union, cast
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     FLWR_APP_TOKEN_LENGTH,
-    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_INTERVAL_INF,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -982,7 +982,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         # when switching to starting or running
         current = now()
         if new_status.status in (Status.STARTING, Status.RUNNING):
-            heartbeat_interval = HEARTBEAT_MAX_INTERVAL
+            heartbeat_interval = HEARTBEAT_INTERVAL_INF
             active_until = current.timestamp() + heartbeat_interval
         else:
             heartbeat_interval = 0
