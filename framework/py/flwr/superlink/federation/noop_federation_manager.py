@@ -12,32 +12,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract base class FederationManager."""
-
-
-from abc import ABC, abstractmethod
+"""NoOp implementation of FederationManager."""
 
 from flwr.app import Message
 
+from .federation_manager import FederationManager
 
-class FederationManager(ABC):
-    """Abstract base class for FederationManager."""
 
-    @abstractmethod
+class NoOpFederationManager(FederationManager):
+    """No-Op FederationManager implementation."""
+
     def exists(self, federation_name: str) -> bool:
         """Check if a federation exists."""
+        return True
 
-    @abstractmethod
     def is_member(self, federation_name: str, flwr_aid: str) -> bool:
         """Check if a member of the federation."""
+        return True
 
-    @abstractmethod
     def filter_nodes(self, node_ids: list[int], federation_name: str) -> list[int]:
         """Given a list of node IDs, return sublist with nodes in federation."""
+        return node_ids
 
-    @abstractmethod
     def filter_messages(
         self, messages: list[Message], federation_name: str
     ) -> list[Message]:
         """Given a list of messages, filter out those from/to nodes outside the
         federation."""
+        return messages
