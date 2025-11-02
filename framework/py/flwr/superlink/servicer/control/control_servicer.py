@@ -131,6 +131,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                     "Federation options doesn't contain key `num-supernodes`."
                 )
 
+            federation_name = federation_options.get("federation_name", "")
+            if not self.is_simulation:
+                if not self.federation_manager.exists(federation_name):
+                    raise ValueError(f"Federation '{federation_name}' does not exist.")
+
             # Create run
             fab = Fab(
                 hashlib.sha256(fab_file).hexdigest(),
