@@ -386,6 +386,7 @@ class StateTest(CoreStateTest):
         node_id = create_dummy_node(state)
         node_id2 = create_dummy_node(state)
         state.delete_node("mock_flwr_aid", node_id2)
+        node_id3 = create_dummy_node(state, activate=False)
         invalid_node_id = 61016 if node_id != 61016 else 61017
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         # A message for a node that doesn't exist
@@ -406,11 +407,18 @@ class StateTest(CoreStateTest):
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id2, run_id=run_id
             )
         )
+        # A message for a node that is offline
+        msg4 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id3, run_id=run_id
+            )
+        )
 
         # Execute and assert
         assert state.store_message_ins(msg) is None
         assert state.store_message_ins(msg2) is None
         assert state.store_message_ins(msg3) is None
+        assert state.store_message_ins(msg4) is None
 
     def test_store_and_delete_messages(self) -> None:
         """Test delete_message."""

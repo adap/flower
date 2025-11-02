@@ -118,7 +118,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             return None
         # Validate destination node ID
         dst_node = self.nodes.get(message.metadata.dst_node_id)
-        if dst_node is None or dst_node.status == NodeStatus.UNREGISTERED:
+        if dst_node is None or dst_node.status != NodeStatus.ONLINE:
             log(
                 ERROR,
                 "Invalid destination node ID for Message: %s",
