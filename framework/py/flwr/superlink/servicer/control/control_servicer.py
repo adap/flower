@@ -71,6 +71,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.supercore.constant import NOOP_FEDERATION_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
@@ -131,7 +132,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                     "Federation options doesn't contain key `num-supernodes`."
                 )
 
-            federation_name = federation_options.get("federation_name", "")
+            federation_name = federation_options.get(
+                "federation_name", NOOP_FEDERATION_NAME
+            )
             if not self.is_simulation:
                 if not self.federation_manager.exists(federation_name):
                     raise ValueError(f"Federation '{federation_name}' does not exist.")
