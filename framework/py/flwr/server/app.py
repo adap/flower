@@ -131,7 +131,7 @@ except ImportError:
         """Return all Control API authorization plugins for EE."""
         return {}
 
-    def get_ee_federation_manager() -> FederationManager:
+    def get_ee_federation_manager(config_path: Optional[str]) -> FederationManager:
         """Return the EE FederationManager."""
         return NoOpFederationManager()
 
@@ -148,9 +148,9 @@ def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
     return ee_dict | {AuthzType.NOOP: NoOpControlAuthzPlugin}
 
 
-def get_federation_manager() -> FederationManager:
+def get_federation_manager(config_path: Optional[str]=None) -> FederationManager:
     """Return the FederationManager."""
-    federation_manager: FederationManager = get_ee_federation_manager()
+    federation_manager: FederationManager = get_ee_federation_manager(config_path)
     return federation_manager
 
 
@@ -294,7 +294,8 @@ def run_superlink() -> None:
         )
 
     # Load Federation Manager
-    federation_manager = get_federation_manager()
+    fed_config_path = getattr(args, "federations_config", None)
+    federation_manager = get_federation_manager(fed_config_path)
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
