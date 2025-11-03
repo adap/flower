@@ -42,6 +42,7 @@ class Run(google.protobuf.message.Message):
     FINISHED_AT_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
     FLWR_AID_FIELD_NUMBER: builtins.int
+    FEDERATION_NAME_FIELD_NUMBER: builtins.int
     run_id: builtins.int
     fab_id: typing.Text
     fab_version: typing.Text
@@ -55,6 +56,7 @@ class Run(google.protobuf.message.Message):
     @property
     def status(self) -> global___RunStatus: ...
     flwr_aid: typing.Text
+    federation_name: typing.Text
     def __init__(self,
         *,
         run_id: builtins.int = ...,
@@ -68,9 +70,10 @@ class Run(google.protobuf.message.Message):
         finished_at: typing.Text = ...,
         status: typing.Optional[global___RunStatus] = ...,
         flwr_aid: typing.Text = ...,
+        federation_name: typing.Text = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["status",b"status"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_hash",b"fab_hash","fab_id",b"fab_id","fab_version",b"fab_version","finished_at",b"finished_at","flwr_aid",b"flwr_aid","override_config",b"override_config","pending_at",b"pending_at","run_id",b"run_id","running_at",b"running_at","starting_at",b"starting_at","status",b"status"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab_hash",b"fab_hash","fab_id",b"fab_id","fab_version",b"fab_version","federation_name",b"federation_name","finished_at",b"finished_at","flwr_aid",b"flwr_aid","override_config",b"override_config","pending_at",b"pending_at","run_id",b"run_id","running_at",b"running_at","starting_at",b"starting_at","status",b"status"]) -> None: ...
 global___Run = Run
 
 class RunStatus(google.protobuf.message.Message):
