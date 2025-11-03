@@ -118,7 +118,7 @@ EXIT_CODE_HELP = {
     ),
     ExitCode.SUPERNODE_TRUST_ENTITY_REQUIRED: (
         "Entity verification is enabled, but no trusted entities were provided. "
-        "The Flower SuperNode should be restarted with a trusted entities list."
+        "Please ensure that a trusted entities list is provided."
     ),
     # SuperExec-specific exit codes (400-499)
     ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (
