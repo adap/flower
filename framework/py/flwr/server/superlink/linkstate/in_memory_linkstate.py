@@ -28,7 +28,7 @@ from typing import Optional
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     FLWR_APP_TOKEN_LENGTH,
-    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_INTERVAL_INF,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -117,7 +117,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             )
             return None
         # Validate destination node ID
-        if message.metadata.dst_node_id not in self.nodes:
+        dst_node = self.nodes.get(message.metadata.dst_node_id)
+        if dst_node is None or dst_node.status not in [
+            NodeStatus.ONLINE,
+            NodeStatus.OFFLINE,
+        ]:
             log(
                 ERROR,
                 "Invalid destination node ID for Message: %s",
@@ -386,6 +390,47 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             # Set online_until to current timestamp on deletion, if it is in the future
             node.online_until = min(node.online_until, current.timestamp())
 
+    def activate_node(self, node_id: int, heartbeat_interval: float) -> bool:
+        """Activate the node with the specified `node_id`."""
+        with self.lock:
+            self._check_and_tag_offline_nodes(node_ids=[node_id])
+
+            # Check if the node exists
+            if not (node := self.nodes.get(node_id)):
+                return False
+
+            # Only activate if the node is currently registered or offline
+            current_dt = now()
+            if node.status in (NodeStatus.REGISTERED, NodeStatus.OFFLINE):
+                node.status = NodeStatus.ONLINE
+                node.last_activated_at = current_dt.isoformat()
+                node.online_until = (
+                    current_dt.timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval
+                )
+                node.heartbeat_interval = heartbeat_interval
+                return True
+            return False
+
+    def deactivate_node(self, node_id: int) -> bool:
+        """Deactivate the node with the specified `node_id`."""
+        with self.lock:
+            self._check_and_tag_offline_nodes(node_ids=[node_id])
+
+            # Check if the node exists
+            if not (node := self.nodes.get(node_id)):
+                return False
+
+            # Only deactivate if the node is currently online
+            current_dt = now()
+            if node.status == NodeStatus.ONLINE:
+                node.status = NodeStatus.OFFLINE
+                node.last_deactivated_at = current_dt.isoformat()
+
+                # Set online_until to current timestamp
+                node.online_until = current_dt.timestamp()
+                return True
+            return False
+
     def get_nodes(self, run_id: int) -> set[int]:
         """Return all available nodes.
 
@@ -411,10 +456,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     ) -> Sequence[NodeInfo]:
         """Retrieve information about nodes based on the specified filters."""
         with self.lock:
-            self._check_and_tag_deactivated_nodes()
+            self._check_and_tag_offline_nodes()
             result = []
-            for node in self.nodes.values():
-                if node_ids is not None and node.node_id not in node_ids:
+            for node_id in self.nodes.keys() if node_ids is None else node_ids:
+                if (node := self.nodes.get(node_id)) is None:
                     continue
                 if owner_aids is not None and node.owner_aid not in owner_aids:
                     continue
@@ -423,11 +468,15 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 result.append(node)
             return result
 
-    def _check_and_tag_deactivated_nodes(self) -> None:
+    def _check_and_tag_offline_nodes(
+        self, node_ids: Optional[list[int]] = None
+    ) -> None:
         with self.lock:
             # Set all nodes of "online" status to "offline" if they've offline
             current_ts = now().timestamp()
-            for node in self.nodes.values():
+            for node_id in node_ids or self.nodes.keys():
+                if (node := self.nodes.get(node_id)) is None:
+                    continue
                 if node.status == NodeStatus.ONLINE:
                     if node.online_until <= current_ts:
                         node.status = NodeStatus.OFFLINE
@@ -596,7 +645,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             current = now()
             run_record = self.run_ids[run_id]
             if new_status.status in (Status.STARTING, Status.RUNNING):
-                run_record.heartbeat_interval = HEARTBEAT_MAX_INTERVAL
+                run_record.heartbeat_interval = HEARTBEAT_INTERVAL_INF
                 run_record.active_until = (
                     current.timestamp() + run_record.heartbeat_interval
                 )
