@@ -1,0 +1,32 @@
+[304] SUPERNODE_TRUST_ENTITY_REQUIRED
+=====================================
+
+Description
+-----------
+
+This error occurs when entity verification is enabled using the
+``--enable-entities-verification`` flag, but no trusted entities have been provided. The
+SuperNode should be restarted with a valid list of trusted entities.
+
+How to Resolve
+--------------
+
+To fix this issue, you can either:
+
+- Provide a trusted entities list Supply a YAML file containing the trusted entities'
+  public key IDs and their corresponding public keys when launching the SuperNode. The
+  file should follow this format:
+
+  .. code-block:: yaml
+
+      alice-2025: |
+        -----BEGIN PUBLIC KEY-----
+        ...
+        -----END PUBLIC KEY-----
+      bob-2025: |
+        -----BEGIN PUBLIC KEY-----
+        ...
+        -----END PUBLIC KEY-----
+
+- Disable entity verification Remove the ``--enable-entities-verification`` flag when
+  starting the SuperNode to run without entity verification.
