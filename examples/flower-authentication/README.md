@@ -144,7 +144,6 @@ In a new terminal window, start the first long-running Flower client (SuperNode)
 flower-supernode \
     --root-certificates certificates/ca.crt \
     --auth-supernode-private-key keys/client_credentials_1 \
-    --auth-supernode-public-key keys/client_credentials_1.pub \
     --node-config 'dataset-path="datasets/cifar10_part_1"' \
     --clientappio-api-address="0.0.0.0:9094"
 ```
@@ -155,7 +154,6 @@ In yet another new terminal window, start the second long-running Flower client:
 flower-supernode \
     --root-certificates certificates/ca.crt \
     --auth-supernode-private-key keys/client_credentials_2 \
-    --auth-supernode-public-key keys/client_credentials_2.pub \
     --node-config 'dataset-path="datasets/cifar10_part_2"' \
     --clientappio-api-address="0.0.0.0:9095"
 ```
