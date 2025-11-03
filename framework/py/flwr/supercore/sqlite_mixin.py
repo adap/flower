@@ -91,7 +91,7 @@ class SqliteMixin(ABC):
         list[tuple[str]]
             The list of all tables in the DB.
         """
-        self._conn = sqlite3.connect(self.database_path, timeout=1)
+        self._conn = sqlite3.connect(self.database_path, timeout=0.1)
         # Enable Write-Ahead Logging (WAL) for better concurrency
         self._conn.execute("PRAGMA journal_mode = WAL;")
         self._conn.execute("PRAGMA synchronous = NORMAL;")
