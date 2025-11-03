@@ -167,11 +167,14 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         """Clean up grpc server."""
         self._server.stop(None)
 
-    def _create_dummy_node(self) -> int:
+    def _create_dummy_node(self, activate: bool = True) -> int:
         """Create a dummy node."""
-        return self.state.create_node(
+        node_id = self.state.create_node(
             NOOP_FLWR_AID, self.node_pk, heartbeat_interval=30
         )
+        if activate:
+            self.state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
+        return node_id
 
     def _transition_run_status(self, run_id: int, num_transitions: int) -> None:
         if num_transitions > 0:
