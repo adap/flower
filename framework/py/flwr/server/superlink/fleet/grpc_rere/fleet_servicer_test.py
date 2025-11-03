@@ -41,12 +41,8 @@ from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
     ActivateNodeResponse,
-    CreateNodeRequest,
-    CreateNodeResponse,
     DeactivateNodeRequest,
     DeactivateNodeResponse,
-    DeleteNodeRequest,
-    DeleteNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -113,16 +109,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         )
 
         self._channel = grpc.insecure_channel("localhost:9092")
-        self._create_node = self._channel.unary_unary(
-            "/flwr.proto.Fleet/CreateNode",
-            request_serializer=CreateNodeRequest.SerializeToString,
-            response_deserializer=CreateNodeResponse.FromString,
-        )
-        self._delete_node = self._channel.unary_unary(
-            "/flwr.proto.Fleet/DeleteNode",
-            request_serializer=DeleteNodeRequest.SerializeToString,
-            response_deserializer=DeleteNodeResponse.FromString,
-        )
         self._register_node = self._channel.unary_unary(
             "/flwr.proto.Fleet/RegisterNode",
             request_serializer=RegisterNodeFleetRequest.SerializeToString,
@@ -183,11 +169,14 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         """Clean up grpc server."""
         self._server.stop(None)
 
-    def _create_dummy_node(self) -> int:
+    def _create_dummy_node(self, activate: bool = True) -> int:
         """Create a dummy node."""
-        return self.state.create_node(
+        node_id = self.state.create_node(
             NOOP_FLWR_AID, self.node_pk, heartbeat_interval=30
         )
+        if activate:
+            self.state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
+        return node_id
 
     def _transition_run_status(self, run_id: int, num_transitions: int) -> None:
         if num_transitions > 0:
@@ -196,79 +185,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
             _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
         if num_transitions > 2:
             _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
-
-    def test_create_node_without_pre_registration(self) -> None:
-        """Create a node without pre-registration."""
-        # Prepare
-        request = CreateNodeRequest(public_key=self.node_pk)
-
-        # Execute and assert: node authentication enabled
-        if self.enable_node_auth:
-            with self.assertRaises(grpc.RpcError) as cm:
-                self._create_node.with_call(request=request)
-            assert cm.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-            return
-
-        # Execute and assert: node authentication disabled
-        response, call = self._create_node.with_call(request=request)
-        assert isinstance(response, CreateNodeResponse)
-        assert grpc.StatusCode.OK == call.code()
-        assert response.node.node_id > 0
-
-    def test_create_node_with_pre_registration(self) -> None:
-        """Create a node with pre-registration."""
-        # Prepare
-        node_id = self._create_dummy_node()
-        request = CreateNodeRequest(public_key=self.node_pk)
-
-        # Execute
-        response, call = self._create_node.with_call(request=request)
-
-        # Assert
-        assert isinstance(response, CreateNodeResponse)
-        assert grpc.StatusCode.OK == call.code()
-        assert response.node.node_id == node_id
-
-    def test_create_node_with_existing_active_key(self) -> None:
-        """Create a node with an existing active public key."""
-        # Prepare
-        node_id = self._create_dummy_node()
-        request = CreateNodeRequest(public_key=self.node_pk)
-
-        # Execute first time
-        response, call = self._create_node.with_call(request=request)
-        assert isinstance(response, CreateNodeResponse)
-        assert grpc.StatusCode.OK == call.code()
-        assert response.node.node_id == node_id
-        # Set node status as ONLINE
-        self.state.acknowledge_node_heartbeat(node_id=node_id, heartbeat_interval=10)
-
-        # Execute second time - should fail since there is already
-        # an active SuperNode with the same public key
-        with self.assertRaises(grpc.RpcError) as cm:
-            self._create_node.with_call(request=request)
-        assert cm.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-
-    def test_delete_node(self) -> None:
-        """Test `DeleteNode`."""
-        # Prepare
-        node_id = self._create_dummy_node()
-        request = DeleteNodeRequest(node=Node(node_id=node_id))
-
-        # Execute
-        response, call = self._delete_node.with_call(request=request)
-
-        # Assert
-        assert isinstance(response, DeleteNodeResponse)
-        assert grpc.StatusCode.OK == call.code()
-        # Assert: Node is deleted
-        node_info = self.state.get_node_info(node_ids=[node_id])[0]
-        if self.enable_node_auth:
-            # Status changed to OFFLINE
-            assert node_info.status == NodeStatus.OFFLINE
-        else:
-            # Status changed to Deleted
-            assert node_info.status == NodeStatus.UNREGISTERED
 
     def test_register_node_success(self) -> None:
         """Test `RegisterNode` success."""
@@ -293,6 +209,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         node_id = self.state.get_node_id_by_public_key(public_key)
         assert node_id is not None
         assert node_id > 0
+        assert response.node_id == node_id
 
     def test_activate_node_success(self) -> None:
         """Test `ActivateNode` success."""
