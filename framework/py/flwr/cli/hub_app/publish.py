@@ -295,7 +295,7 @@ def publish(
     """Upload all project files to the Platform API using multipart/form-data."""
     if not federation:
         typer.secho(
-            "Please specify the federation used for login before publishing app.",
+            "❌ Please specify the federation used for login before publishing app.",
             fg=typer.colors.RED,
             err=True,
         )
@@ -305,7 +305,7 @@ def publish(
     creds_path = app.absolute() / FLWR_DIR / CREDENTIALS_DIR / f"{federation}.json"
     if not creds_path.is_file():
         typer.secho(
-            "Please login before publishing app.",
+            "❌ Please login before publishing app.",
             fg=typer.colors.RED,
             err=True,
         )
@@ -325,7 +325,7 @@ def publish(
         try:
             resp = _post_files(files_param, token)
         except requests.RequestException as err:
-            typer.secho(f"Network error: {err}", fg=typer.colors.RED, err=True)
+            typer.secho(f"❌ Network error: {err}", fg=typer.colors.RED, err=True)
             raise typer.Exit(code=1) from err
 
     if resp.status_code // 100 == 2:
@@ -333,7 +333,7 @@ def publish(
         return  # success
 
     # Error path:
-    msg = f"Upload failed with status {resp.status_code}"
+    msg = f"❌ Upload failed with status {resp.status_code}"
     if resp.text:
         msg += f": {resp.text}"
     typer.secho(msg, fg=typer.colors.RED, err=True)
