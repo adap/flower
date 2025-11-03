@@ -99,7 +99,7 @@ rst_prolog = """
 .. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
 .. |ubuntu_version| replace:: 24.04
 .. |setuptools_version| replace:: 70.3.0
-.. |pip_version| replace:: 24.1.2
+.. |pip_version| replace:: 25.3
 .. |python_version| replace:: 3.9
 .. |python_full_version| replace:: 3.9.20
 """
