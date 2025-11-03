@@ -463,7 +463,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             log(ERROR, "ListNodes is not available in simulation mode.")
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
-                "ListNodesis not available in simulation mode.",
+                "ListNodes is not available in simulation mode.",
             )
             raise grpc.RpcError()  # This line is unreachable
 

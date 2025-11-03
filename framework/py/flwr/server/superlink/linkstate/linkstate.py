@@ -140,6 +140,45 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """Remove `node_id` from the link state."""
 
     @abc.abstractmethod
+    def activate_node(self, node_id: int, heartbeat_interval: float) -> bool:
+        """Activate the node with the specified `node_id`.
+
+        Transitions the node status to "online". The transition will fail
+        if the current status is not "registered" or "offline".
+
+        Parameters
+        ----------
+        node_id : int
+            The identifier of the node to activate.
+        heartbeat_interval : float
+            The interval (in seconds) from the current timestamp within which
+            the next heartbeat from this node is expected to be received.
+
+        Returns
+        -------
+        bool
+            True if the status transition was successful, False otherwise.
+        """
+
+    @abc.abstractmethod
+    def deactivate_node(self, node_id: int) -> bool:
+        """Deactivate the node with the specified `node_id`.
+
+        Transitions the node status to "offline". The transition will fail
+        if the current status is not "online".
+
+        Parameters
+        ----------
+        node_id : int
+            The identifier of the node to deactivate.
+
+        Returns
+        -------
+        bool
+            True if the status transition was successful, False otherwise.
+        """
+
+    @abc.abstractmethod
     def get_nodes(self, run_id: int) -> set[int]:
         """Retrieve all currently stored node IDs as a set.
 
