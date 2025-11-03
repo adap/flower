@@ -407,7 +407,7 @@ class StateTest(CoreStateTest):
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id2, run_id=run_id
             )
         )
-        # A message for a node that is offline
+        # A message for a node of "registered" status
         msg4 = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id3, run_id=run_id
