@@ -145,7 +145,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
     authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
-        Client authentication is not supported for this transport type.
+        SuperNode authentication is not supported for this transport type.
 
     Returns
     -------
@@ -182,7 +182,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             "must be provided as a string path to the client.",
         )
     if authentication_keys is not None:
-        log(ERROR, "Client authentication is not supported for this transport type.")
+        log(ERROR, "SuperNode authentication is not supported for this transport type.")
 
     # REST does NOT support node authentication
     self_registered = False
