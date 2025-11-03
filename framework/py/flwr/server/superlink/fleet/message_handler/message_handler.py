@@ -81,8 +81,8 @@ def register_node(
     state: LinkState,
 ) -> RegisterNodeFleetResponse:
     """Register a node (Fleet API only)."""
-    state.create_node(NOOP_FLWR_AID, request.public_key, 0)
-    return RegisterNodeFleetResponse()
+    node_id = state.create_node(NOOP_FLWR_AID, request.public_key, 0)
+    return RegisterNodeFleetResponse(node_id=node_id)
 
 
 def activate_node(
