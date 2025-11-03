@@ -58,7 +58,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Renames "user authentication" to "account authentication" across the framework for improved clarity and consistency. This change also updates the YAML key from `auth_type` to `authn_type` to align with `authz_type`.
 
-- **Deprecate `--auth-supernode-public-key` flag** ([#6002](https://github.com/adap/flower/pull/6002))
+- **Deprecate `--auth-supernode-public-key` flag** ([#6002](https://github.com/adap/flower/pull/6002), [#6076](https://github.com/adap/flower/pull/6076))
 
   The `--auth-supernode-public-key` flag in `flower-supernode` is deprecated and no longer in use. The public key is now automatically derived from the `--auth-supernode-private-key`, simplifying configuration and reducing redundancy.
 
