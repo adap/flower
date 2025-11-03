@@ -83,11 +83,10 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
     for key in list(record.keys()):
         if key != EMPTY_TENSOR_KEY:
             tensor = record[key].data
-            if ENCRYPTION_ENABLED:
-                tensor = decrypt(tensor, ENCRYPTION_METHOD)
             if INTEGRITY_ENABLED:
                 tensor = check_integrity(tensor, INTEGRITY_METHOD)
-
+            if ENCRYPTION_ENABLED:
+                tensor = decrypt(tensor, ENCRYPTION_METHOD)
             parameters.tensors.append(tensor)
 
         if not parameters.tensor_type:

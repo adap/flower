@@ -92,7 +92,7 @@ def server_evaluate(server_round: int, parameters: NDArrays):
         print(f"[Round {server_round}] Parameters=None/empty: salto valutazione server-side.")
         return None
 
-    model = get_model("resnet18", num_classes=10, pretrained=False).to(DEVICE)
+    model = get_model(NET, num_classes=10, pretrained=False).to(DEVICE)
     ndarrays = parameters_to_ndarrays(parameters)
     params_dict = zip(model.state_dict().keys(), ndarrays)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
