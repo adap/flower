@@ -13,7 +13,7 @@ How to Resolve
 
 To fix this issue, you can either:
 
-- Provide a trusted entities list Supply a YAML file containing the trusted entities'
+- Provide a trusted entities list. Supply a YAML file containing the trusted entities'
   public key IDs and their corresponding public keys when launching the SuperNode. The
   file should follow this format:
 
@@ -28,5 +28,5 @@ To fix this issue, you can either:
         ...
         -----END PUBLIC KEY-----
 
-- Disable entity verification Remove the ``--enable-entities-verification`` flag when
+- Disable entity verification. Remove the ``--enable-entities-verification`` flag when
   starting the SuperNode to run without entity verification.
