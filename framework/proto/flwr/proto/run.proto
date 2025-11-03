@@ -34,7 +34,7 @@ message Run {
   string finished_at = 9;
   RunStatus status = 10;
   string flwr_aid = 11;
-  string federation_name = 12;
+  string federation = 12;
 }
 
 message RunStatus {

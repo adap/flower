@@ -61,7 +61,7 @@ message StartRunRequest {
   map<string, Scalar> override_config = 2;
   ConfigRecord federation_options = 3;
   string app_id = 4;
-  string federation_name = 5;
+  string federation = 5;
 }
 message StartRunResponse { optional uint64 run_id = 1; }
 message StreamLogsRequest {
