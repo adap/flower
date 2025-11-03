@@ -52,7 +52,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Remove CSV-based SuperNode authentication** ([#5997](https://github.com/adap/flower/pull/5997))
 
-  Deprecates the legacy CSV-based SuperNode authentication mechanism in favor of the new dynamic SuperNode management system. The `--auth-list-public-keys` flag is no longer supported, as SuperNode whitelisting is now handled through the Flower CLI.
+  Deprecates the legacy CSV-based SuperNode authentication mechanism in favor of the new dynamic SuperNode management system. The `--auth-list-public-keys` flag is no longer supported, as SuperNode whitelisting is now handled through the Flower CLI. Please refer to the [Node Authentication documentation](https://flower.ai/docs/framework/v1.23.0/en/how-to-authenticate-supernodes.html) to learn how to use the new mechanism.
 
 - **Rename user authentication to account authentication** ([#5965](https://github.com/adap/flower/pull/5965), [#5969](https://github.com/adap/flower/pull/5969))
 
