@@ -96,6 +96,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 state=self.state_factory.state(),
             )
             log(DEBUG, "[Fleet.RegisterNode] Registered node_id=%s", response.node_id)
+            return response
         except ValueError:
             # Public key already in use
             # This should NEVER happen due to the public keys should be automatically
