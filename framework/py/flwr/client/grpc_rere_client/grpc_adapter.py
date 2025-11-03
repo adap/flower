@@ -36,12 +36,8 @@ from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
     ActivateNodeResponse,
-    CreateNodeRequest,
-    CreateNodeResponse,
     DeactivateNodeRequest,
     DeactivateNodeResponse,
-    DeleteNodeRequest,
-    DeleteNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -125,18 +121,6 @@ class GrpcAdapter:
         response = response_type()
         response.ParseFromString(container_res.grpc_message_content)
         return response
-
-    def CreateNode(  # pylint: disable=C0103
-        self, request: CreateNodeRequest, **kwargs: Any
-    ) -> CreateNodeResponse:
-        """."""
-        return self._send_and_receive(request, CreateNodeResponse, **kwargs)
-
-    def DeleteNode(  # pylint: disable=C0103
-        self, request: DeleteNodeRequest, **kwargs: Any
-    ) -> DeleteNodeResponse:
-        """."""
-        return self._send_and_receive(request, DeleteNodeResponse, **kwargs)
 
     def RegisterNode(  # pylint: disable=C0103
         self, request: RegisterNodeFleetRequest, **kwargs: Any

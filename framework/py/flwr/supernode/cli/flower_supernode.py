@@ -61,6 +61,13 @@ def flower_supernode() -> None:
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     authentication_keys = _try_setup_client_authentication(args)
 
+    # Warn if authentication keys are provided but transport is not grpc-rere
+    if authentication_keys is not None and args.transport != TRANSPORT_TYPE_GRPC_RERE:
+        log(
+            WARN,
+            "SuperNode Authentication is only supported with the grpc-rere transport.",
+        )
+
     log(DEBUG, "Isolation mode: %s", args.isolation)
 
     start_client_internal(

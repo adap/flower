@@ -239,8 +239,10 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             return None
 
         # Validate destination node ID
-        query = "SELECT node_id FROM node WHERE node_id = ?;"
-        if not self.query(query, (data[0]["dst_node_id"],)):
+        query = "SELECT node_id FROM node WHERE node_id = ? AND status IN (?, ?);"
+        if not self.query(
+            query, (data[0]["dst_node_id"], NodeStatus.ONLINE, NodeStatus.OFFLINE)
+        ):
             log(
                 ERROR,
                 "Invalid destination node ID for Message: %s",

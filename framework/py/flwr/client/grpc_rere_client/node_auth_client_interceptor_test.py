@@ -19,8 +19,8 @@ import threading
 import unittest
 from collections.abc import Sequence
 from concurrent import futures
-from logging import DEBUG, INFO, WARN
 from typing import Any, Callable, Optional, Union
+from unittest.mock import Mock
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -29,25 +29,26 @@ from parameterized import parameterized
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import PUBLIC_KEY_HEADER, SIGNATURE_HEADER, TIMESTAMP_HEADER
-from flwr.common.logger import log
 from flwr.common.message import Message
 from flwr.common.record import RecordDict
-from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    CreateNodeResponse,
-    DeleteNodeRequest,
-    DeleteNodeResponse,
+    ActivateNodeRequest,
+    ActivateNodeResponse,
+    DeactivateNodeRequest,
+    DeactivateNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    RegisterNodeFleetRequest,
+    RegisterNodeFleetResponse,
+    UnregisterNodeFleetRequest,
+    UnregisterNodeFleetResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
     SendNodeHeartbeatResponse,
 )
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.supercore.primitives.asymmetric import (
     generate_key_pairs,
@@ -75,10 +76,14 @@ class _MockServicer:
             self._received_client_metadata = context.invocation_metadata()
             self._received_message_bytes = request.SerializeToString(deterministic=True)
 
-            if isinstance(request, CreateNodeRequest):
-                return CreateNodeResponse(node=Node(node_id=123))
-            if isinstance(request, DeleteNodeRequest):
-                return DeleteNodeResponse()
+            if isinstance(request, RegisterNodeFleetRequest):
+                return RegisterNodeFleetResponse()
+            if isinstance(request, ActivateNodeRequest):
+                return ActivateNodeResponse(node_id=123)
+            if isinstance(request, DeactivateNodeRequest):
+                return DeactivateNodeResponse()
+            if isinstance(request, UnregisterNodeFleetRequest):
+                return UnregisterNodeFleetResponse()
             if isinstance(request, PushMessagesRequest):
                 return PushMessagesResponse()
             if isinstance(request, GetRunRequest):
@@ -102,15 +107,25 @@ class _MockServicer:
 
 def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
     rpc_method_handlers = {
-        "CreateNode": grpc.unary_unary_rpc_method_handler(
+        "RegisterNode": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
-            request_deserializer=CreateNodeRequest.FromString,
-            response_serializer=CreateNodeResponse.SerializeToString,
+            request_deserializer=RegisterNodeFleetRequest.FromString,
+            response_serializer=RegisterNodeFleetResponse.SerializeToString,
         ),
-        "DeleteNode": grpc.unary_unary_rpc_method_handler(
+        "ActivateNode": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
-            request_deserializer=DeleteNodeRequest.FromString,
-            response_serializer=DeleteNodeResponse.SerializeToString,
+            request_deserializer=ActivateNodeRequest.FromString,
+            response_serializer=ActivateNodeResponse.SerializeToString,
+        ),
+        "DeactivateNode": grpc.unary_unary_rpc_method_handler(
+            servicer.unary_unary,
+            request_deserializer=DeactivateNodeRequest.FromString,
+            response_serializer=DeactivateNodeResponse.SerializeToString,
+        ),
+        "UnregisterNode": grpc.unary_unary_rpc_method_handler(
+            servicer.unary_unary,
+            request_deserializer=UnregisterNodeFleetRequest.FromString,
+            response_serializer=UnregisterNodeFleetResponse.SerializeToString,
         ),
         "PullMessages": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
@@ -139,71 +154,19 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
     server.add_generic_rpc_handlers((generic_handler,))
 
 
-def _init_retry_invoker() -> RetryInvoker:
-    return RetryInvoker(
-        wait_gen_factory=exponential,
-        recoverable_exceptions=grpc.RpcError,
-        max_tries=1,
-        max_time=None,
-        on_giveup=lambda retry_state: (
-            log(
-                WARN,
-                "Giving up reconnection after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-            if retry_state.tries > 1
-            else None
-        ),
-        on_success=lambda retry_state: (
-            log(
-                INFO,
-                "Connection successful after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-            if retry_state.tries > 1
-            else None
-        ),
-        on_backoff=lambda retry_state: (
-            log(WARN, "Connection attempt failed, retrying...")
-            if retry_state.tries == 1
-            else log(
-                DEBUG,
-                "Connection attempt failed, retrying in %.2f seconds",
-                retry_state.actual_wait,
-            )
-        ),
-    )
-
-
-def _create_node(conn: Any) -> None:
-    create_node = conn[2]
-    create_node()
-
-
-def _delete_node(conn: Any) -> None:
-    _, _, create_node, delete_node, _, _, _, _, _ = conn
-    create_node()
-    delete_node()
-
-
 def _receive(conn: Any) -> None:
-    receive, _, create_node, _, _, _, _, _, _ = conn
-    create_node()
+    _, receive, _, _, _, _, _, _ = conn
     receive()
 
 
 def _send(conn: Any) -> None:
-    receive, send, create_node, _, _, _, _, _, _ = conn
-    create_node()
+    _, receive, send, _, _, _, _, _ = conn
     receive()
     send(Message(RecordDict(), dst_node_id=0, message_type="query"))
 
 
 def _get_run(conn: Any) -> None:
-    _, _, create_node, _, get_run, _, _, _, _ = conn
-    create_node()
+    _, _, _, get_run, _, _, _, _ = conn
     get_run(0)
 
 
@@ -225,19 +188,14 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
         self._connection = grpc_request_response
         self._address = f"localhost:{port}"
 
-    @parameterized.expand(
-        [(_create_node,), (_delete_node,), (_receive,), (_send,), (_get_run,)]
-    )  # type: ignore
+    @parameterized.expand([(_receive,), (_send,), (_get_run,)])  # type: ignore
     def test_client_auth_rpc(self, grpc_call: Callable[[Any], None]) -> None:
         """Test client authentication during create node."""
-        # Prepare
-        retry_invoker = _init_retry_invoker()
-
         # Execute
         with self._connection(
             self._address,
             True,
-            retry_invoker,
+            Mock(invoke=lambda fn, *args, **kwargs: fn(*args, **kwargs)),
             GRPC_MAX_MESSAGE_LENGTH,
             None,
             (self._client_private_key, self._client_public_key),
@@ -261,28 +219,3 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             assert verify_signature(
                 self._client_public_key, timestamp.encode("ascii"), signature
             )
-
-    def test_without_servicer(self) -> None:
-        """Test client authentication without servicer."""
-        # Prepare
-        self._server.stop(grace=None)
-        retry_invoker = _init_retry_invoker()
-
-        # Execute and Assert
-        with self._connection(
-            self._address,
-            True,
-            retry_invoker,
-            GRPC_MAX_MESSAGE_LENGTH,
-            None,
-            (self._client_private_key, self._client_public_key),
-        ) as conn:
-            _, _, create_node, _, _, _, _, _, _ = conn
-            assert create_node is not None
-            create_node()
-
-            assert self._servicer.received_client_metadata() is None
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

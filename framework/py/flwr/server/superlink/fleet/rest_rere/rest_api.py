@@ -27,12 +27,8 @@ from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
     ActivateNodeResponse,
-    CreateNodeRequest,
-    CreateNodeResponse,
     DeactivateNodeRequest,
     DeactivateNodeResponse,
-    DeleteNodeRequest,
-    DeleteNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
@@ -108,26 +104,6 @@ def rest_request_response(
         return wrapper
 
     return decorator
-
-
-@rest_request_response(CreateNodeRequest)
-async def create_node(request: CreateNodeRequest) -> CreateNodeResponse:
-    """Create Node."""
-    # Get state from app
-    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
-
-    # Handle message
-    return message_handler.create_node(request=request, state=state)
-
-
-@rest_request_response(DeleteNodeRequest)
-async def delete_node(request: DeleteNodeRequest) -> DeleteNodeResponse:
-    """Delete Node Id."""
-    # Get state from app
-    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
-
-    # Handle message
-    return message_handler.delete_node(request=request, state=state)
 
 
 @rest_request_response(RegisterNodeFleetRequest)
