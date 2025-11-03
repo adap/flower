@@ -27,7 +27,7 @@ from typing import Any, Optional, Union, cast
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     FLWR_APP_TOKEN_LENGTH,
-    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_INTERVAL_INF,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -97,6 +97,10 @@ CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 
 SQL_CREATE_INDEX_OWNER_AID = """
 CREATE INDEX IF NOT EXISTS idx_node_owner_aid ON node(owner_aid);
+"""
+
+SQL_CREATE_INDEX_NODE_STATUS = """
+CREATE INDEX IF NOT EXISTS idx_node_status ON node(status);
 """
 
 SQL_CREATE_TABLE_RUN = """
@@ -199,6 +203,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             SQL_CREATE_TABLE_TOKEN_STORE,
             SQL_CREATE_INDEX_ONLINE_UNTIL,
             SQL_CREATE_INDEX_OWNER_AID,
+            SQL_CREATE_INDEX_NODE_STATUS,
             log_queries=log_queries,
         )
 
@@ -234,8 +239,10 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             return None
 
         # Validate destination node ID
-        query = "SELECT node_id FROM node WHERE node_id = ?;"
-        if not self.query(query, (data[0]["dst_node_id"],)):
+        query = "SELECT node_id FROM node WHERE node_id = ? AND status IN (?, ?);"
+        if not self.query(
+            query, (data[0]["dst_node_id"], NodeStatus.ONLINE, NodeStatus.OFFLINE)
+        ):
             log(
                 ERROR,
                 "Invalid destination node ID for Message: %s",
@@ -613,6 +620,61 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 "deletion attempt."
             )
 
+    def activate_node(self, node_id: int, heartbeat_interval: float) -> bool:
+        """Activate the node with the specified `node_id`."""
+        with self.conn:
+            self._check_and_tag_offline_nodes([node_id])
+
+            # Only activate if the node is currently registered or offline
+            current_dt = now()
+            query = """
+                UPDATE node
+                SET status = ?,
+                    last_activated_at = ?,
+                    online_until = ?,
+                    heartbeat_interval = ?
+                WHERE node_id = ? AND status in (?, ?)
+                RETURNING node_id
+            """
+            params = (
+                NodeStatus.ONLINE,
+                current_dt.isoformat(),
+                current_dt.timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval,
+                heartbeat_interval,
+                uint64_to_int64(node_id),
+                NodeStatus.REGISTERED,
+                NodeStatus.OFFLINE,
+            )
+
+            row = self.conn.execute(query, params).fetchone()
+            return row is not None
+
+    def deactivate_node(self, node_id: int) -> bool:
+        """Deactivate the node with the specified `node_id`."""
+        with self.conn:
+            self._check_and_tag_offline_nodes([node_id])
+
+            # Only deactivate if the node is currently online
+            current_dt = now()
+            query = """
+                UPDATE node
+                SET status = ?,
+                    last_deactivated_at = ?,
+                    online_until = ?
+                WHERE node_id = ? AND status = ?
+                RETURNING node_id
+            """
+            params = (
+                NodeStatus.OFFLINE,
+                current_dt.isoformat(),
+                current_dt.timestamp(),
+                uint64_to_int64(node_id),
+                NodeStatus.ONLINE,
+            )
+
+            row = self.conn.execute(query, params).fetchone()
+            return row is not None
+
     def get_nodes(self, run_id: int) -> set[int]:
         """Retrieve all currently stored node IDs as a set.
 
@@ -638,6 +700,28 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             node.node_id for node in self.get_node_info(statuses=[NodeStatus.ONLINE])
         }
 
+    def _check_and_tag_offline_nodes(
+        self, node_ids: Optional[list[int]] = None
+    ) -> None:
+        """Check and tag offline nodes."""
+        # strftime will convert POSIX timestamp to ISO format
+        query = """
+            UPDATE node SET status = ?,
+            last_deactivated_at =
+            strftime("%Y-%m-%dT%H:%M:%f+00:00", online_until, "unixepoch")
+            WHERE online_until <= ? AND status == ?
+        """
+        params = [
+            NodeStatus.OFFLINE,
+            now().timestamp(),
+            NodeStatus.ONLINE,
+        ]
+        if node_ids is not None:
+            placeholders = ",".join(["?"] * len(node_ids))
+            query += f" AND node_id IN ({placeholders})"
+            params.extend(uint64_to_int64(node_id) for node_id in node_ids)
+        self.conn.execute(query, params)
+
     def get_node_info(
         self,
         *,
@@ -646,29 +730,12 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         statuses: Optional[Sequence[str]] = None,
     ) -> Sequence[NodeInfo]:
         """Retrieve information about nodes based on the specified filters."""
-        if self.conn is None:
-            raise AttributeError("LinkState is not initialized.")
-
         with self.conn:
-            # Check and tag offline nodes
-            current_dt = now()
-            # strftime will convert POSIX timestamp to ISO format
-            query = """
-                UPDATE node SET status = ?,
-                last_deactivated_at =
-                strftime("%Y-%m-%dT%H:%M:%f+00:00", online_until, "unixepoch")
-                WHERE online_until <= ? AND status == ?
-            """
-            params: list[Any] = [
-                NodeStatus.OFFLINE,
-                current_dt.timestamp(),
-                NodeStatus.ONLINE,
-            ]
-            self.conn.execute(query, params)
+            self._check_and_tag_offline_nodes()
 
             # Build the WHERE clause based on provided filters
             conditions = []
-            params = []
+            params: list[Any] = []
             if node_ids is not None:
                 sint64_node_ids = [uint64_to_int64(node_id) for node_id in node_ids]
                 placeholders = ",".join(["?"] * len(sint64_node_ids))
@@ -917,7 +984,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         # when switching to starting or running
         current = now()
         if new_status.status in (Status.STARTING, Status.RUNNING):
-            heartbeat_interval = HEARTBEAT_MAX_INTERVAL
+            heartbeat_interval = HEARTBEAT_INTERVAL_INF
             active_until = current.timestamp() + heartbeat_interval
         else:
             heartbeat_interval = 0

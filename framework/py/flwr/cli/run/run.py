@@ -15,16 +15,18 @@
 """Flower command line interface `run` command."""
 
 
+import hashlib
 import io
 import json
 import subprocess
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, Optional, cast
 
 import typer
 from rich.console import Console
 
-from flwr.cli.build import build_fab, get_fab_filename
+from flwr.cli.build import build_fab_from_disk, get_fab_filename
+from flwr.cli.config_utils import load as load_toml
 from flwr.cli.config_utils import (
     load_and_validate,
     process_loaded_project_config,
@@ -37,7 +39,7 @@ from flwr.common.config import (
     parse_config_args,
     user_config_to_configrecord,
 )
-from flwr.common.constant import CliOutputFormat
+from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab
@@ -152,10 +154,12 @@ def _run_with_control_api(
         channel = init_channel(app, federation_config, auth_plugin)
         stub = ControlStub(channel)
 
-        fab_bytes, fab_hash, config = build_fab(app)
+        fab_bytes = build_fab_from_disk(app)
+        fab_hash = hashlib.sha256(fab_bytes).hexdigest()
+        config = cast(dict[str, Any], load_toml(app / FAB_CONFIG_FILE))
         fab_id, fab_version = get_metadata_from_config(config)
 
-        fab = Fab(fab_hash, fab_bytes)
+        fab = Fab(fab_hash, fab_bytes, {})
 
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
         fed_config = flatten_dict(federation_config.get("options", {}))
