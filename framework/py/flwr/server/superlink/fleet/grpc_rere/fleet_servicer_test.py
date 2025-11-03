@@ -204,6 +204,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         node_id = self.state.get_node_id_by_public_key(public_key)
         assert node_id is not None
         assert node_id > 0
+        assert response.node_id == node_id
 
     def test_activate_node_success(self) -> None:
         """Test `ActivateNode` success."""
