@@ -347,47 +347,52 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             fab = get_fab(run_info.fab_hash, run_id)
 
             # Verify the received FAB
-            #########################
             # FAB must be signed if trust entities provided
             if enable_entities_verification and trust_entities:
                 verification = dict(fab.verifications)
-                fab_verified = False
-                for public_key_id, verif in verification.items():
-                    if public_key_id in trust_entities:
-                        verifier_public_key = load_ssh_public_key(
-                            trust_entities[public_key_id].encode("utf-8")
-                        )
-                        if not isinstance(
-                                verifier_public_key, ed25519.Ed25519PublicKey
-                        ):
-                            log(
-                                WARN,
-                                "The provided public key associated with "
-                                "trusted entity %s is not Ed25519.",
-                                public_key_id,
-                            )
-                            continue
-                        signed_message = create_signed_message(
-                            hashlib.sha256(fab.content).digest(),
-                            verif["signed_at"],
-                        )
-                        if verify_signature(
-                                verifier_public_key,
-                                signed_message,
-                                decode_base64url(verif["signature"]),
-                        ):
-                            fab_verified = True
-                            break
-                if not fab_verified:
-                    # Insert an error message in the state when FAB verification fails
+                if not verification:
                     log(
-                        ERROR,
-                        "FAB verification failed: the provided trusted entities could "
-                        "not verify the FAB. An error reply has been generated.",
+                        WARN,
+                        "App verification is not supported by the connected SuperLink.",
                     )
-                    reply = Message(FAB_VERIFICATION_ERROR, reply_to=message)
-                    _insert_message(reply, state, object_store)
-                    return run_id
+                else:
+                    fab_verified = False
+                    for public_key_id, verif in verification.items():
+                        if public_key_id in trust_entities:
+                            verifier_public_key = load_ssh_public_key(
+                                trust_entities[public_key_id].encode("utf-8")
+                            )
+                            if not isinstance(
+                                    verifier_public_key, ed25519.Ed25519PublicKey
+                            ):
+                                log(
+                                    WARN,
+                                    "The provided public key associated with "
+                                    "trusted entity %s is not Ed25519.",
+                                    public_key_id,
+                                )
+                                continue
+                            signed_message = create_signed_message(
+                                hashlib.sha256(fab.content).digest(),
+                                verif["signed_at"],
+                            )
+                            if verify_signature(
+                                    verifier_public_key,
+                                    signed_message,
+                                    decode_base64url(verif["signature"]),
+                            ):
+                                fab_verified = True
+                                break
+                    if not fab_verified:
+                        # Insert an error message in the state when FAB verification fails
+                        log(
+                            ERROR,
+                            "FAB verification failed: the provided trusted entities could "
+                            "not verify the FAB. An error reply has been generated.",
+                        )
+                        reply = Message(FAB_VERIFICATION_ERROR, reply_to=message)
+                        _insert_message(reply, state, object_store)
+                        return run_id
 
             # Initialize the context
             run_cfg = get_fused_config_from_fab(fab.content, run_info)
