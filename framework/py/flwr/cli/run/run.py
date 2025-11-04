@@ -204,7 +204,7 @@ def _run_with_control_api(
             fab=fab_to_proto(fab),
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
             federation_options=config_record_to_proto(c_record),
-            app_identifier=original_app_str,
+            app_id=original_app_str,
         )
         with flwr_cli_grpc_exc_handler():
             res = stub.StartRun(req)
