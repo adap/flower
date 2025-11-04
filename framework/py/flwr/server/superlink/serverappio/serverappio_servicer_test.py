@@ -86,7 +86,6 @@ from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.superlink.federation import NoOpFederationManager
 
 # pylint: disable=broad-except
 
@@ -161,7 +160,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             state_factory,
             ffs_factory,
             objectstore_factory,
-            NoOpFederationManager(),
             None,
         )
 

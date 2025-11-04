@@ -52,7 +52,6 @@ from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.auth_plugin import NoOpControlAuthnPlugin
-from flwr.superlink.federation import NoOpFederationManager
 from flwr.superlink.servicer.control.control_account_auth_interceptor import (
     shared_account_info,
 )
@@ -85,7 +84,6 @@ class TestControlServicer(unittest.TestCase):
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(store=Mock(return_value=self.store)),
             is_simulation=False,
-            federation_manager=NoOpFederationManager(),
             authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
         )
         account_info = authn_plugin.validate_tokens_in_metadata([])[1]
@@ -298,7 +296,6 @@ class TestControlServicerAuth(unittest.TestCase):
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(),
             is_simulation=False,
-            federation_manager=NoOpFederationManager(),
             authn_plugin=Mock(),
         )
         self.state = self.servicer.linkstate_factory.state()

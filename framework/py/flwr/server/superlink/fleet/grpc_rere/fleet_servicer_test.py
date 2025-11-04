@@ -73,7 +73,6 @@ from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NodeStatus
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.superlink.federation import NoOpFederationManager
 
 
 class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
@@ -102,7 +101,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
             state_factory,
             ffs_factory,
             objectstore_factory,
-            NoOpFederationManager(),
             self.enable_node_auth,
             None,
             None,

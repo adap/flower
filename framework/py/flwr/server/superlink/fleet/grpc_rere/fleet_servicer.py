@@ -59,7 +59,6 @@ from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_grpc_context
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.superlink.federation import FederationManager
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
@@ -71,13 +70,11 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         state_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
-        federation_manager: FederationManager,
         enable_supernode_auth: bool,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
-        self.federation_manager = federation_manager
         self.enable_supernode_auth = enable_supernode_auth
         self.lock = threading.Lock()
 
