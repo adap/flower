@@ -154,7 +154,7 @@ def try_obtain_server_certificates(
 
 
 def try_obtain_trust_entities(
-        trust_entities_path: Path | None,
+    trust_entities_path: Path | None,
 ) -> Optional[dict[str, str]]:
     """Validate and return the trust entities."""
     if not trust_entities_path:

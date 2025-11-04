@@ -27,8 +27,8 @@ from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
 import grpc
-from cryptography.hazmat.primitives.serialization.ssh import load_ssh_public_key
 from cryptography.hazmat.primitives.asymmetric import ec, ed25519
+from cryptography.hazmat.primitives.serialization.ssh import load_ssh_public_key
 from grpc import RpcError
 
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
@@ -363,7 +363,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                                 trust_entities[public_key_id].encode("utf-8")
                             )
                             if not isinstance(
-                                    verifier_public_key, ed25519.Ed25519PublicKey
+                                verifier_public_key, ed25519.Ed25519PublicKey
                             ):
                                 log(
                                     WARN,
@@ -377,18 +377,20 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                                 verif["signed_at"],
                             )
                             if verify_signature(
-                                    verifier_public_key,
-                                    signed_message,
-                                    decode_base64url(verif["signature"]),
+                                verifier_public_key,
+                                signed_message,
+                                decode_base64url(verif["signature"]),
                             ):
                                 fab_verified = True
                                 break
                     if not fab_verified:
-                        # Insert an error message in the state when FAB verification fails
+                        # Insert an error message in the state
+                        # when FAB verification fails
                         log(
                             ERROR,
-                            "FAB verification failed: the provided trusted entities could "
-                            "not verify the FAB. An error reply has been generated.",
+                            "FAB verification failed: the provided trusted entities "
+                            "could not verify the FAB. An error reply "
+                            "has been generated.",
                         )
                         reply = Message(FAB_VERIFICATION_ERROR, reply_to=message)
                         _insert_message(reply, state, object_store)

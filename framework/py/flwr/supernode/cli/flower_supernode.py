@@ -148,7 +148,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "--enable-entities-verification",
         action="store_true",
         help="If this flag is set, all apps must be signed by a trusted"
-             " entity. If set, at least one trusted entity must be provided.",
+        " entity. If set, at least one trusted entity must be provided.",
     )
     add_args_health(parser)
 
