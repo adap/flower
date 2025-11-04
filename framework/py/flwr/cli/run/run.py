@@ -237,7 +237,7 @@ def _run_with_control_api(
                         "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
                         "fab-version": fab_version,
                         "fab-hash": fab_hash[:8],
-                        "fab-filename": get_fab_filename(cfg, fab_hash),
+                        "fab-filename": get_fab_filename(config, fab_hash),
                     }
                 )
             restore_output()
