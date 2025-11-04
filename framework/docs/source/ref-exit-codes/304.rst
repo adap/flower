@@ -15,7 +15,7 @@ To fix this issue, you can either:
 
 - Provide a trusted entities list with ``--trust-entities`` when launching the
   SuperNode. Supply a YAML file containing the trusted entities' public key IDs and
-  their corresponding public keys when launching the SuperNode. The file should follow
+  their corresponding public keys when launching the SuperNode, e.g., `--trust-entities ./pks.yaml`. The file should follow
   this format:
 
   .. code-block:: yaml
