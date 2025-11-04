@@ -25,7 +25,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import load_ssh_private_key
 
 from flwr.common import EventType, event
-from flwr.common.args import try_obtain_root_certificates
+from flwr.common.args import try_obtain_root_certificates, try_obtain_trust_entities
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
@@ -58,6 +58,10 @@ def flower_supernode() -> None:
             "Ignoring `--flwr-dir`.",
         )
 
+    if args.enable_entities_verification and not args.trust_entities:
+        flwr_exit(ExitCode.SUPERNODE_TRUST_ENTITY_REQUIRED)
+
+    trust_entities = try_obtain_trust_entities(args.trust_entities)
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     authentication_keys = _try_setup_client_authentication(args)
 
@@ -85,6 +89,8 @@ def flower_supernode() -> None:
         isolation=args.isolation,
         clientappio_api_address=args.clientappio_api_address,
         health_server_address=args.health_server_address,
+        trust_entities=trust_entities,
+        enable_entities_verification=args.enable_entities_verification,
     )
 
 
@@ -123,6 +129,32 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         default=CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
         help="ClientAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
         f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
+    )
+    parser.add_argument(
+        "--trust-entities",
+        type=Path,
+        default=None,
+        metavar="YAML_FILE",
+        help=(
+            "Path to a YAML file defining trusted entities. "
+            "Only apps verified by at least one of these "
+            "entities can run on a supernode.\n\n"
+            "Example YAML file:\n"
+            "  entity1: |\n"
+            "    -----BEGIN PUBLIC KEY-----\n"
+            "    ABCDEF1234\n"
+            "    -----END PUBLIC KEY-----\n"
+            "  entity2: |\n"
+            "    -----BEGIN PUBLIC KEY-----\n"
+            "    XYZ7890\n"
+            "    -----END PUBLIC KEY-----\n\n"
+        ),
+    )
+    parser.add_argument(
+        "--enable-entities-verification",
+        action="store_true",
+        help="If this flag is set, all apps must be signed by a trusted"
+             " entity. If set, at least one trusted entity must be provided.",
     )
     add_args_health(parser)
 
