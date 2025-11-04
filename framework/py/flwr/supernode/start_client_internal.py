@@ -16,7 +16,6 @@
 
 
 import hashlib
-import json
 import os
 import subprocess
 import time
@@ -28,7 +27,7 @@ from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
 import grpc
-from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.serialization.ssh import load_ssh_public_key
 from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 from grpc import RpcError
 
@@ -355,7 +354,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                 fab_verified = False
                 for public_key_id, verif in verification.items():
                     if public_key_id in trust_entities:
-                        verifier_public_key = serialization.load_pem_public_key(
+                        verifier_public_key = load_ssh_public_key(
                             trust_entities[public_key_id].encode("utf-8")
                         )
                         if not isinstance(
@@ -380,7 +379,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                             fab_verified = True
                             break
                 if not fab_verified:
-                    # Insert an error message in the state when FAB verfication fails
+                    # Insert an error message in the state when FAB verification fails
                     log(
                         ERROR,
                         "FAB verification failed: the provided trusted entities could "
