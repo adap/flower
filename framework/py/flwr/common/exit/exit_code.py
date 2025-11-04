@@ -118,7 +118,7 @@ EXIT_CODE_HELP = {
     ),
     ExitCode.SUPERNODE_TRUST_ENTITY_REQUIRED: (
         "Entity verification is enabled, but no trusted entities were provided. "
-        "Please ensure that a trusted entities list is provided."
+        "Please ensure that a trusted entities list is provided via `--trust-entities`."
     ),
     # SuperExec-specific exit codes (400-499)
     ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (
