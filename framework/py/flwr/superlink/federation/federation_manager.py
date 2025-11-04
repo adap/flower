@@ -24,7 +24,7 @@ class FederationManager(ABC):
     """Abstract base class for FederationManager."""
 
     @abstractmethod
-    def exists(self, federation_name: str) -> bool:
+    def exists(self, federation: str) -> bool:
         """Check if a federation exists."""
 
     @abstractmethod
@@ -32,7 +32,7 @@ class FederationManager(ABC):
         """Check if a member of the federation."""
 
     @abstractmethod
-    def filter_nodes(self, node_ids: list[int], federation_name: str) -> list[int]:
+    def filter_nodes(self, node_ids: set[int], federation_name: str) -> set[int]:
         """Given a list of node IDs, return sublist with nodes in federation."""
 
     @abstractmethod
