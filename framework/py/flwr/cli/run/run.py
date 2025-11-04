@@ -27,7 +27,6 @@ import typer
 from rich.console import Console
 
 from flwr.cli.build import build_fab_from_disk, get_fab_filename
-from flwr.cli.config_utils import load
 from flwr.cli.config_utils import load as load_toml
 from flwr.cli.config_utils import (
     load_and_validate,
@@ -125,7 +124,7 @@ def run(
 
         # Disable the validation due to the local empty project
         if remote_app_ref:
-            config = load(app_path / "pyproject.toml")
+            config = load_toml(app_path / "pyproject.toml")
         else:
             pyproject_path = app_path / "pyproject.toml" if app_path else None
             config, errors, warnings = load_and_validate(path=pyproject_path)
