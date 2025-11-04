@@ -28,7 +28,7 @@ APP_ID_PATTERN = r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$"
 PLATFORM_API_URL = "https://api.flower.ai/v1"
 
 # Constants for federations
-NOOP_FEDERATION_NAME = "default"
+NOOP_FEDERATION = "default"
 
 
 class NodeStatus:
