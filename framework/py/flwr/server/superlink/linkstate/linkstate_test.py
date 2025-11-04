@@ -384,6 +384,9 @@ class StateTest(CoreStateTest):
         # Prepare
         state = self.state_factory()
         node_id = create_dummy_node(state)
+        node_id2 = create_dummy_node(state)
+        state.delete_node("mock_flwr_aid", node_id2)
+        node_id3 = create_dummy_node(state, activate=False)
         invalid_node_id = 61016 if node_id != 61016 else 61017
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
         # A message for a node that doesn't exist
@@ -398,10 +401,24 @@ class StateTest(CoreStateTest):
         msg2 = message_from_proto(
             create_ins_message(src_node_id=61016, dst_node_id=node_id, run_id=run_id)
         )
+        # A message for a node that is unregistered
+        msg3 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id2, run_id=run_id
+            )
+        )
+        # A message for a node of "registered" status
+        msg4 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id3, run_id=run_id
+            )
+        )
 
         # Execute and assert
         assert state.store_message_ins(msg) is None
         assert state.store_message_ins(msg2) is None
+        assert state.store_message_ins(msg3) is None
+        assert state.store_message_ins(msg4) is None
 
     def test_store_and_delete_messages(self) -> None:
         """Test delete_message."""
@@ -792,6 +809,50 @@ class StateTest(CoreStateTest):
         # Execute
         with self.assertRaises(ValueError):
             state.delete_node("wrong_owner_aid", node_id)
+
+    def test_activate_node(self) -> None:
+        """Test node activation transitions."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        heartbeat_interval = 30.0
+
+        # Test successful activation from REGISTERED
+        node_id = create_dummy_node(state, activate=False)
+        assert state.activate_node(node_id, heartbeat_interval)
+        assert state.get_node_info(node_ids=[node_id])[0].status == NodeStatus.ONLINE
+
+        # Test successful activation from OFFLINE
+        state.deactivate_node(node_id)
+        assert state.activate_node(node_id, heartbeat_interval)
+        assert state.get_node_info(node_ids=[node_id])[0].status == NodeStatus.ONLINE
+
+        # Test failed activation when already ONLINE
+        assert not state.activate_node(node_id, heartbeat_interval)
+
+        # Test failed activation when UNREGISTERED
+        state.delete_node("mock_flwr_aid", node_id)
+        assert not state.activate_node(node_id, heartbeat_interval)
+
+    def test_deactivate_node(self) -> None:
+        """Test node deactivation transitions."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        node_id = create_dummy_node(state)
+
+        # Test successful deactivation from ONLINE
+        assert state.deactivate_node(node_id)
+        assert state.get_node_info(node_ids=[node_id])[0].status == NodeStatus.OFFLINE
+
+        # Test failed deactivation when already OFFLINE
+        assert not state.deactivate_node(node_id)
+
+        # Test failed deactivation from REGISTERED
+        node_id2 = create_dummy_node(state, activate=False)
+        assert not state.deactivate_node(node_id2)
+
+        # Test failed deactivation when UNREGISTERED
+        state.delete_node("mock_flwr_aid", node_id)
+        assert not state.deactivate_node(node_id)
 
     def test_delete_node_public_key(self) -> None:
         """Test deleting a client node with public key."""
@@ -1599,7 +1660,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 19
+        assert len(result) == 20
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1624,7 +1685,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 19
+        assert len(result) == 20
 
 
 if __name__ == "__main__":

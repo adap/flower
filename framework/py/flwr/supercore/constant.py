@@ -23,6 +23,10 @@ EXEC_PLUGIN_SECTION = "exec_plugin"
 # Flower in-memory Python-based database name
 FLWR_IN_MEMORY_DB_NAME = ":flwr-in-memory:"
 
+# Constants for Hub
+APP_ID_PATTERN = r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$"
+PLATFORM_API_URL = "https://api.flower.ai/v1"
+
 
 class NodeStatus:
     """Event log writer types."""

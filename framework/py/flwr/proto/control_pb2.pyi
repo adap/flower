@@ -36,23 +36,23 @@ class StartRunRequest(google.protobuf.message.Message):
     FAB_FIELD_NUMBER: builtins.int
     OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
     FEDERATION_OPTIONS_FIELD_NUMBER: builtins.int
-    APP_IDENTIFIER_FIELD_NUMBER: builtins.int
+    APP_ID_FIELD_NUMBER: builtins.int
     @property
     def fab(self) -> flwr.proto.fab_pb2.Fab: ...
     @property
     def override_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     @property
     def federation_options(self) -> flwr.proto.recorddict_pb2.ConfigRecord: ...
-    app_identifier: typing.Text
+    app_id: typing.Text
     def __init__(self,
         *,
         fab: typing.Optional[flwr.proto.fab_pb2.Fab] = ...,
         override_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
         federation_options: typing.Optional[flwr.proto.recorddict_pb2.ConfigRecord] = ...,
-        app_identifier: typing.Text = ...,
+        app_id: typing.Text = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["fab",b"fab","federation_options",b"federation_options"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["app_identifier",b"app_identifier","fab",b"fab","federation_options",b"federation_options","override_config",b"override_config"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["app_id",b"app_id","fab",b"fab","federation_options",b"federation_options","override_config",b"override_config"]) -> None: ...
 global___StartRunRequest = StartRunRequest
 
 class StartRunResponse(google.protobuf.message.Message):
