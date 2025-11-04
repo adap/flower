@@ -25,7 +25,7 @@ class NoOpFederationManager(FederationManager):
 
     def exists(self, federation: str) -> bool:
         """Check if a federation exists."""
-        return federation == NOOP_FEDERATION_NAME
+        return federation == NOOP_FEDERATION
 
     def is_member(self, federation: str, flwr_aid: str) -> bool:
         """Check if a member of the federation."""
