@@ -15,7 +15,7 @@
 """NoOp implementation of FederationManager."""
 
 from flwr.app import Message
-from flwr.supercore.constant import NOOP_FEDERATION_NAME
+from flwr.supercore.constant import NOOP_FEDERATION
 
 from .federation_manager import FederationManager
 
