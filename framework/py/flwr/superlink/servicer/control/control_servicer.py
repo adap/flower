@@ -130,7 +130,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 item["public_key_id"]: {
                     k: str(v) for k, v in item.items() if k != "public_key_id"
                 }
-                for item in verification_dict
+                for item in verification
             }
 
             # Download FAB from Hub
@@ -171,6 +171,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 verification_dict,
             )
             fab_hash = ffs.put(fab.content, fab.verification)
+
             if fab_hash != fab.hash_str:
                 raise RuntimeError(
                     f"FAB ({fab.hash_str}) hash from request doesn't match contents"
@@ -499,7 +500,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             log(ERROR, "ListNodes is not available in simulation mode.")
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
-                "ListNodesis not available in simulation mode.",
+                "ListNodes is not available in simulation mode.",
             )
             raise grpc.RpcError()  # This line is unreachable
 

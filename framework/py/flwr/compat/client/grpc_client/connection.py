@@ -96,7 +96,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
     authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
-        Client authentication is not supported for this transport type.
+        SuperNode authentication is not supported for this transport type.
 
     Returns
     -------
@@ -120,7 +120,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
     if authentication_keys is not None:
-        log(ERROR, "Client authentication is not supported for this transport type.")
+        log(ERROR, "SuperNode authentication is not supported for this transport type.")
 
     channel = create_channel(
         server_address=server_address,

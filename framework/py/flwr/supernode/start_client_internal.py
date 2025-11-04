@@ -207,21 +207,16 @@ def start_client_internal(
         max_wait_time=max_wait_time,
     ) as conn:
         (
+            node_id,
             receive,
             send,
-            create_node,
-            _,
             get_run,
             get_fab,
             pull_object,
             push_object,
             confirm_message_received,
         ) = conn
-
-        # Call create_node fn to register node
-        # and store node_id in state
-        if (node_id := create_node()) is None:
-            raise ValueError("Failed to register SuperNode with the SuperLink")
+        # Store node_id in state
         state.set_node_id(node_id)
 
         # pylint: disable=too-many-nested-blocks
@@ -457,10 +452,9 @@ def _init_connection(  # pylint: disable=too-many-positional-arguments
     max_wait_time: Optional[float] = None,
 ) -> Iterator[
     tuple[
+        int,
         Callable[[], Optional[tuple[Message, ObjectTree]]],
         Callable[[Message, ObjectTree], set[str]],
-        Callable[[], Optional[int]],
-        Callable[[], None],
         Callable[[int], Run],
         Callable[[str, int], Fab],
         Callable[[int, str], bytes],

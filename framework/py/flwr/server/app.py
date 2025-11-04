@@ -233,20 +233,36 @@ def run_superlink() -> None:
         log(WARN, "The `--artifact-provider-config` flag is highly experimental.")
         artifact_provider = get_ee_artifact_provider(cfg_path)
 
-    # If supernode authentication is disabled, warn users
+    # Check for incompatible args with SuperNode authentication
     enable_supernode_auth: bool = args.enable_supernode_auth
-    if enable_supernode_auth and args.insecure:
-        url_v = f"https://flower.ai/docs/framework/v{package_version}/en/"
-        page = "how-to-authenticate-supernodes.html"
-        flwr_exit(
-            ExitCode.SUPERLINK_INVALID_ARGS,
-            "The `--enable-supernode-auth` flag requires encrypted TLS communications. "
-            "Please provide TLS certificates using the `--ssl-certfile`, "
-            "`--ssl-keyfile` and `--ssl-ca-certfile` arguments to your SuperLink. "
-            "Please refer to the Flower documentation for more information: "
-            f"{url_v}{page}",
-        )
-    if not enable_supernode_auth:
+    if enable_supernode_auth:
+        if args.insecure:
+            url_v = f"https://flower.ai/docs/framework/v{package_version}/en/"
+            page = "how-to-authenticate-supernodes.html"
+            flwr_exit(
+                ExitCode.SUPERLINK_INVALID_ARGS,
+                "The `--enable-supernode-auth` flag requires encrypted TLS "
+                "communications. Please provide TLS certificates using the "
+                "`--ssl-certfile`, `--ssl-keyfile` and `--ssl-ca-certfile` "
+                "arguments to your SuperLink. Please refer to the Flower "
+                f"documentation for more information: {url_v}{page}",
+            )
+        if args.fleet_api_type != TRANSPORT_TYPE_GRPC_RERE:
+            flwr_exit(
+                ExitCode.SUPERLINK_INVALID_ARGS,
+                "The `--enable-supernode-auth` flag is only supported "
+                "with the gRPC-rere Fleet API transport. Please set "
+                f"`--fleet-api-type` to `{TRANSPORT_TYPE_GRPC_RERE}`.",
+            )
+        if args.simulation:
+            log(
+                WARN,
+                "SuperNode authentication is not applicable with the simulation, "
+                "runtime as no SuperNodes can connect to this SuperLink. "
+                "Proceeding...",
+            )
+    # If supernode authentication is disabled, warn users
+    else:
         log(
             WARN,
             "SuperNode authentication is disabled. The SuperLink will accept "
@@ -384,7 +400,6 @@ def run_superlink() -> None:
                 state_factory=state_factory,
                 ffs_factory=ffs_factory,
                 objectstore_factory=objectstore_factory,
-                enable_supernode_auth=enable_supernode_auth,
                 certificates=certificates,
             )
             grpc_servers.append(fleet_server)
@@ -570,7 +585,6 @@ def _run_fleet_api_grpc_adapter(
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
-    enable_supernode_auth: bool,
     certificates: Optional[tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (GrpcAdapter)."""
@@ -579,7 +593,7 @@ def _run_fleet_api_grpc_adapter(
         state_factory=state_factory,
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
-        enable_supernode_auth=enable_supernode_auth,
+        enable_supernode_auth=False,
     )
     fleet_add_servicer_to_server_fn = add_GrpcAdapterServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(

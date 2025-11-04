@@ -62,7 +62,9 @@ HEARTBEAT_DEFAULT_INTERVAL = 30
 HEARTBEAT_CALL_TIMEOUT = 5
 HEARTBEAT_BASE_MULTIPLIER = 0.8
 HEARTBEAT_RANDOM_RANGE = (-0.1, 0.1)
-HEARTBEAT_MAX_INTERVAL = 1e300
+HEARTBEAT_MIN_INTERVAL = 10
+HEARTBEAT_MAX_INTERVAL = 1800  # 30 minutes
+HEARTBEAT_INTERVAL_INF = 1e300  # Large value, disabling heartbeats
 HEARTBEAT_PATIENCE = 2
 RUN_FAILURE_DETAILS_NO_HEARTBEAT = "No heartbeat received from the run."
 
@@ -72,13 +74,23 @@ NODE_ID_NUM_BYTES = 8
 
 # Constants for FAB
 APP_DIR = "apps"
-FAB_ALLOWED_EXTENSIONS = {".py", ".toml", ".md"}
 FAB_CONFIG_FILE = "pyproject.toml"
 FAB_DATE = (2024, 10, 1, 0, 0, 0)
 FAB_HASH_TRUNCATION = 8
 FAB_MAX_SIZE = 10 * 1024 * 1024  # 10 MB
 FLWR_DIR = ".flwr"  # The default Flower directory: ~/.flwr/
 FLWR_HOME = "FLWR_HOME"  # If set, override the default Flower directory
+# FAB file include patterns (gitignore-style patterns)
+FAB_INCLUDE_PATTERNS = (
+    "**/*.py",
+    "**/*.toml",
+    "**/*.md",
+)
+# FAB file exclude patterns (gitignore-style patterns)
+FAB_EXCLUDE_PATTERNS = (
+    "**/__pycache__/**",
+    FAB_CONFIG_FILE,  # Exclude the original pyproject.toml
+)
 PLATFORM_API_URL = "https://api.flower.ai/v1"
 
 # Constant for SuperLink
