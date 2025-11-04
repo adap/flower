@@ -35,9 +35,6 @@ class NoOpFederationManager(FederationManager):
         """Given a list of node IDs, return sublist with nodes in federation."""
         return node_ids
 
-    def filter_messages(
-        self, messages: list[Message], federation: str
-    ) -> list[Message]:
-        """Given a list of messages, filter out those from/to nodes outside the
-        federation."""
-        return messages
+    def has_node(self, message: Message, federation: str) -> bool:
+        """Given a message, check if it is from/to a node in the federation."""
+        return True

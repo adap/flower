@@ -36,8 +36,5 @@ class FederationManager(ABC):
         """Given a list of node IDs, return sublist with nodes in federation."""
 
     @abstractmethod
-    def filter_messages(
-        self, messages: list[Message], federation: str
-    ) -> list[Message]:
-        """Given a list of messages, filter out those from/to nodes outside the
-        federation."""
+    def has_node(self, message: Message, federation: str) -> bool:
+        """Given a message, check if it is from/to a node in the federation."""
