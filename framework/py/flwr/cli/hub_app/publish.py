@@ -33,7 +33,9 @@ from flwr.common.constant import (
     FLWR_DIR,
     REFRESH_TOKEN_KEY,
 )
-from flwr.supercore.constant import PLATFORM_API_URL
+# from flwr.supercore.constant import PLATFORM_API_URL
+PLATFORM_API_URL = "https://api.flower.blue/v1"
+
 
 # Constants per spec
 ALLOWED_EXTS = {".py", ".toml", ".md"}
@@ -206,10 +208,10 @@ def _validate_files(files: list[tuple[Path, Path]]) -> None:
 def _build_multipart_files_param(
     files: list[tuple[Path, Path]],
     stack: ExitStack,
-) -> list[tuple[str, tuple[str, IO[bytes], str, dict[str, str]]]]:
+) -> list[tuple[str, tuple[str, IO[bytes], str]]]:
     """Return a list suitable for requests.post(files=...) and register file handles
     with ExitStack."""
-    form: list[tuple[str, tuple[str, IO[bytes], str, dict[str, str]]]] = []
+    form: list[tuple[str, tuple[str, IO[bytes], str]]] = []
     for abs_p, rel_p in files:
         rel_posix = rel_p.as_posix()
         mime = _detect_mime(abs_p)
@@ -219,17 +221,12 @@ def _build_multipart_files_param(
         )
         typer.echo(f"Attach {rel_posix} ({mime}, {abs_p.stat().st_size} B)")
 
-        headers = {
-            "Content-Type": mime,
-            "Content-Location": rel_posix,
-        }
-
-        form.append(("file", (rel_posix, fobj, mime, headers)))
+        form.append(("files", (rel_posix, fobj, mime)))
     return form
 
 
 def _post_files(
-    files_param: list[tuple[str, tuple[str, IO[bytes], str, dict[str, str]]]],
+    files_param: list[tuple[str, tuple[str, IO[bytes], str]]],
     token: str,
 ) -> Response:
     """POST multipart with one part per file."""
