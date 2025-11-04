@@ -14,20 +14,19 @@ How to Resolve
 To fix this issue, you can either:
 
 - Provide a trusted entities list with ``--trust-entities`` when launching the
-  SuperNode. Supply a YAML file containing the trusted entities' public key IDs and
-  their corresponding public keys when launching the SuperNode, e.g., `--trust-entities ./pks.yaml`. The file should follow
-  this format:
+  SuperNode. Supply a YAML file (for example, ``--trust-entities ./pks.yaml``)
+  containing the trusted entities’ public key IDs and their corresponding public keys.
+
+  - The public keys must be in **OpenSSH format**, and currently only the
+    **ssh-ed25519** key type is supported.
+  - Public key IDs must follow the format ``fpk_<UUID>``, where ``fpk`` stands for
+    Flower Public Key.
+  - The YAML file should follow this structure:
 
   .. code-block:: yaml
 
-      alice-2025: |
-        -----BEGIN PUBLIC KEY-----
-        ...
-        -----END PUBLIC KEY-----
-      bob-2025: |
-        -----BEGIN PUBLIC KEY-----
-        ...
-        -----END PUBLIC KEY-----
+      fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]
+      fpk_UUID2: ssh-ed25519 <base64-encoded-key2> [comment2]
 
 - Disable entity verification. Remove the ``--enable-entities-verification`` flag when
   starting the SuperNode to run without entity verification.
