@@ -27,9 +27,9 @@ import typer
 from rich.console import Console
 
 from flwr.cli.build import build_fab_from_disk, get_fab_filename
+from flwr.cli.config_utils import load
 from flwr.cli.config_utils import load as load_toml
 from flwr.cli.config_utils import (
-    load,
     load_and_validate,
     process_loaded_project_config,
     validate_federation_in_project_config,
