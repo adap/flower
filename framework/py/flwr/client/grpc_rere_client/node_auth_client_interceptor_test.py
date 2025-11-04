@@ -171,7 +171,7 @@ def _get_run(conn: Any) -> None:
 
 
 class TestAuthenticateClientInterceptor(unittest.TestCase):
-    """Test for client interceptor client authentication."""
+    """Test for client interceptor SuperNode authentication."""
 
     def setUp(self) -> None:
         """Initialize mock server and client."""
@@ -190,7 +190,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
 
     @parameterized.expand([(_receive,), (_send,), (_get_run,)])  # type: ignore
     def test_client_auth_rpc(self, grpc_call: Callable[[Any], None]) -> None:
-        """Test client authentication during create node."""
+        """Test SuperNode authentication during create node."""
         # Execute
         with self._connection(
             self._address,

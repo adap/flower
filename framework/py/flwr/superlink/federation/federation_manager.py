@@ -24,20 +24,17 @@ class FederationManager(ABC):
     """Abstract base class for FederationManager."""
 
     @abstractmethod
-    def exists(self, federation_name: str) -> bool:
+    def exists(self, federation: str) -> bool:
         """Check if a federation exists."""
 
     @abstractmethod
-    def is_member(self, federation_name: str, flwr_aid: str) -> bool:
+    def is_member(self, federation: str, flwr_aid: str) -> bool:
         """Check if a member of the federation."""
 
     @abstractmethod
-    def filter_nodes(self, node_ids: list[int], federation_name: str) -> list[int]:
+    def filter_nodes(self, node_ids: set[int], federation: str) -> set[int]:
         """Given a list of node IDs, return sublist with nodes in federation."""
 
     @abstractmethod
-    def filter_messages(
-        self, messages: list[Message], federation_name: str
-    ) -> list[Message]:
-        """Given a list of messages, filter out those from/to nodes outside the
-        federation."""
+    def has_node(self, message: Message, federation: str) -> bool:
+        """Given a message, check if it is from/to a node in the federation."""

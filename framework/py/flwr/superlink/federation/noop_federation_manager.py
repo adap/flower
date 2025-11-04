@@ -23,21 +23,18 @@ from .federation_manager import FederationManager
 class NoOpFederationManager(FederationManager):
     """No-Op FederationManager implementation."""
 
-    def exists(self, federation_name: str) -> bool:
+    def exists(self, federation: str) -> bool:
         """Check if a federation exists."""
-        return federation_name == NOOP_FEDERATION_NAME
+        return federation == NOOP_FEDERATION_NAME
 
-    def is_member(self, federation_name: str, flwr_aid: str) -> bool:
+    def is_member(self, federation: str, flwr_aid: str) -> bool:
         """Check if a member of the federation."""
         return True
 
-    def filter_nodes(self, node_ids: list[int], federation_name: str) -> list[int]:
+    def filter_nodes(self, node_ids: set[int], federation: str) -> set[int]:
         """Given a list of node IDs, return sublist with nodes in federation."""
         return node_ids
 
-    def filter_messages(
-        self, messages: list[Message], federation_name: str
-    ) -> list[Message]:
-        """Given a list of messages, filter out those from/to nodes outside the
-        federation."""
-        return messages
+    def has_node(self, message: Message, federation: str) -> bool:
+        """Given a message, check if it is from/to a node in the federation."""
+        return True
