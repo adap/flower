@@ -74,6 +74,7 @@ from flwr.supercore.primitives.asymmetric import (
     public_key_to_bytes,
     sign_message,
 )
+from flwr.superlink.federation import NoOpFederationManager
 
 from .node_auth_server_interceptor import NodeAuthServerInterceptor
 
@@ -88,7 +89,9 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.node_sk, self.node_pk = generate_key_pairs()
         self.node_pk_bytes = public_key_to_bytes(self.node_pk)
 
-        state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME)
+        state_factory = LinkStateFactory(
+            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+        )
         self.state = state_factory.state()
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         ffs_factory = FfsFactory(self.tmp_dir.name)

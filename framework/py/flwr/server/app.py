@@ -131,6 +131,7 @@ except ImportError:
         """Return all Control API authorization plugins for EE."""
         return {}
 
+    # pylint: disable-next=unused-argument
     def get_ee_federation_manager(config_path: Optional[str]) -> FederationManager:
         """Return the EE FederationManager."""
         return NoOpFederationManager()

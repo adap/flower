@@ -52,6 +52,7 @@ from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.superlink.federation import NoOpFederationManager
 
 
 def _replace_keys(d: Any, match: str, target: str) -> Any:
@@ -337,7 +338,7 @@ def _main_loop(
 ) -> Context:
     """Start ServerApp on a separate thread, then launch Simulation Engine."""
     # Initialize StateFactory
-    state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME)
+    state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager())
 
     f_stop = threading.Event()
     # A Threading event to indicate if an exception was raised in the ServerApp thread

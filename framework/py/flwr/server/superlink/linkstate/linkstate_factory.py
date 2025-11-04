@@ -52,14 +52,12 @@ class LinkStateFactory:
         # InMemoryState
         if self.database == FLWR_IN_MEMORY_DB_NAME:
             if self.state_instance is None:
-                self.state_instance = InMemoryLinkState()
-                self.state_instance.federation_manager = self.federation_manager
+                self.state_instance = InMemoryLinkState(self.federation_manager)
             log(DEBUG, "Using InMemoryState")
             return self.state_instance
 
         # SqliteState
-        state = SqliteLinkState(self.database)
+        state = SqliteLinkState(self.database, self.federation_manager)
         state.initialize()
-        state.federation_manager = self.federation_manager
         log(DEBUG, "Using SqliteState")
         return state

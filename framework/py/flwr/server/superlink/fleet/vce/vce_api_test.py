@@ -51,6 +51,7 @@ from flwr.server.superlink.fleet.vce.vce_api import (
 from flwr.server.superlink.linkstate import InMemoryLinkState, LinkStateFactory
 from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.superlink.federation import NoOpFederationManager
 
 
 class DummyClient(NumPyClient):
@@ -92,7 +93,7 @@ def init_state_factory_nodes_mapping(
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
     run_id = 1234
-    state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME)
+    state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager())
 
     # Register a few nodes
     nodes_mapping = _register_nodes(num_nodes=num_nodes, state_factory=state_factory)
