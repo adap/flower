@@ -140,14 +140,8 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
             "Only apps verified by at least one of these "
             "entities can run on a supernode.\n\n"
             "Example YAML file:\n"
-            "  entity1: |\n"
-            "    -----BEGIN PUBLIC KEY-----\n"
-            "    ABCDEF1234\n"
-            "    -----END PUBLIC KEY-----\n"
-            "  entity2: |\n"
-            "    -----BEGIN PUBLIC KEY-----\n"
-            "    XYZ7890\n"
-            "    -----END PUBLIC KEY-----\n\n"
+            "  fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]\n"
+            "  fpk_UUID2: ssh-ed25519 <base64-encoded-key2> [comment2]\n"
         ),
     )
     parser.add_argument(
