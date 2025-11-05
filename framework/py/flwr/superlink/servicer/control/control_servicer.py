@@ -127,9 +127,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
             # Convert verification to dict[str, str] type
             verification_dict = {
-                item["public_key_id"]: {
-                    k: str(v) for k, v in item.items() if k != "public_key_id"
-                }
+                item["public_key_id"]: json.dumps(
+                    {k: v for k, v in item.items() if k != "public_key_id"}
+                )
                 for item in verification
             }
 
