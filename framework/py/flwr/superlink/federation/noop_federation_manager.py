@@ -14,7 +14,6 @@
 # ==============================================================================
 """NoOp implementation of FederationManager."""
 
-from flwr.app import Message
 from flwr.supercore.constant import NOOP_FEDERATION
 
 from .federation_manager import FederationManager
@@ -35,6 +34,6 @@ class NoOpFederationManager(FederationManager):
         """Given a list of node IDs, return sublist with nodes in federation."""
         return node_ids
 
-    def has_node(self, message: Message, federation: str) -> bool:
-        """Given a message, check if it is from/to a node in the federation."""
+    def has_node(self, node_id: int, federation: str) -> bool:
+        """Given a node ID, check if it is in the federation."""
         return True
