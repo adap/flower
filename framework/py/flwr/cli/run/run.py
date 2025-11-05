@@ -119,9 +119,7 @@ def run(
         if is_remote_app:
             config = load_toml("pyproject.toml")
             if not config:
-                raise typer.BadParameter(
-                    "A 'pyproject.toml' file is required."
-                )
+                raise typer.BadParameter("A 'pyproject.toml' file is required.")
         else:
             pyproject_path = app / "pyproject.toml" if app else None
             config, errors, warnings = load_and_validate(path=pyproject_path)
