@@ -146,6 +146,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 fab_version,
                 fab_hash,
                 override_config,
+                request.federation,
                 federation_options,
                 flwr_aid,
             )
