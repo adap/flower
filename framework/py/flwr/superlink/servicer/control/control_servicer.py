@@ -418,9 +418,12 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         flwr_aid = shared_account_info.get().flwr_aid
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        # Account name exists if `flwr_aid` exists
+        account_name = cast(str, shared_account_info.get().account_name)
         try:
             node_id = state.create_node(
                 owner_aid=flwr_aid,
+                owner_name=account_name,
                 public_key=request.public_key,
                 heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
             )

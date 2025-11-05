@@ -199,7 +199,10 @@ class TestControlServicer(unittest.TestCase):
         # Prepare
         if pre_register_key:
             self.state.create_node(
-                owner_aid="fake_aid", public_key=pub_key, heartbeat_interval=10
+                owner_aid="fake_aid",
+                owner_name="fake_name",
+                public_key=pub_key,
+                heartbeat_interval=10,
             )
 
         # Execute
@@ -224,7 +227,10 @@ class TestControlServicer(unittest.TestCase):
         # Prepare
         pub_key = public_key_to_bytes(generate_key_pairs()[1])
         node_id = self.state.create_node(
-            owner_aid="fake_aid", public_key=pub_key, heartbeat_interval=10
+            owner_aid="fake_aid",
+            owner_name="fake_name",
+            public_key=pub_key,
+            heartbeat_interval=10,
         )
 
         # Execute
@@ -241,7 +247,10 @@ class TestControlServicer(unittest.TestCase):
         # Prepare
         pub_key = public_key_to_bytes(generate_key_pairs()[1])
         node_id = self.state.create_node(
-            owner_aid="fake_aid", public_key=pub_key, heartbeat_interval=10
+            owner_aid="fake_aid",
+            owner_name="fake_name",
+            public_key=pub_key,
+            heartbeat_interval=10,
         )
 
         # Execute
@@ -262,7 +271,10 @@ class TestControlServicer(unittest.TestCase):
         # Prepare
         pub_key = public_key_to_bytes(generate_key_pairs()[1])
         node_id = self.state.create_node(
-            owner_aid="fake_aid", public_key=pub_key, heartbeat_interval=10
+            owner_aid="fake_aid",
+            owner_name="fake_name",
+            public_key=pub_key,
+            heartbeat_interval=10,
         )
 
         # Execute
