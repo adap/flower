@@ -376,7 +376,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                                 continue
                             signed_message = create_signed_message(
                                 hashlib.sha256(fab.content).digest(),
-                                int(verif["signed_at"]),
+                                verif["signed_at"],
                             )
                             if verify_signature(
                                 verifier_public_key,
