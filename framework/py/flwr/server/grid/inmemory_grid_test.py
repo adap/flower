@@ -48,6 +48,7 @@ def push_messages(grid: InMemoryGrid, num_nodes: int) -> tuple[Iterable[str], in
     for _ in range(num_nodes):
         node_id = grid.state.create_node(
             "mock_owner",
+            "mock_account",
             secrets.token_bytes(32),
             heartbeat_interval=0,  # This field has no effect
         )
@@ -100,6 +101,7 @@ class TestInMemoryGrid(unittest.TestCase):
             finished_at="",
             status=RunStatus(status=Status.PENDING, sub_status="", details=""),
             flwr_aid="user123",
+            federation="mock-fed",
         )
         state_factory = MagicMock(state=lambda: self.state)
         self.grid = InMemoryGrid(state_factory=state_factory)
@@ -196,7 +198,7 @@ class TestInMemoryGrid(unittest.TestCase):
         """Test messages are deleted in sqlite state once messages are pulled."""
         # Prepare
         state = LinkStateFactory("").state()
-        run_id = state.create_run("", "", "", {}, ConfigRecord(), "")
+        run_id = state.create_run("", "", "", {}, "", ConfigRecord(), "")
         self.grid = InMemoryGrid(MagicMock(state=lambda: state))
         self.grid.set_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.grid, self.num_nodes)
@@ -223,7 +225,7 @@ class TestInMemoryGrid(unittest.TestCase):
         # Prepare
         state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME)
         state = state_factory.state()
-        run_id = state.create_run("", "", "", {}, ConfigRecord(), "")
+        run_id = state.create_run("", "", "", {}, "", ConfigRecord(), "")
         self.grid = InMemoryGrid(state_factory)
         self.grid.set_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.grid, self.num_nodes)

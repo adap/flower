@@ -346,7 +346,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         return len(self.message_res_store)
 
     def create_node(
-        self, owner_aid: str, public_key: bytes, heartbeat_interval: float
+        self,
+        owner_aid: str,
+        owner_name: str,
+        public_key: bytes,
+        heartbeat_interval: float,
     ) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
@@ -365,6 +369,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             self.nodes[node_id] = NodeInfo(
                 node_id=node_id,
                 owner_aid=owner_aid,
+                owner_name=owner_name,
                 status=NodeStatus.REGISTERED,
                 registered_at=now().isoformat(),
                 last_activated_at=None,
@@ -521,10 +526,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
+        federation: str,
         federation_options: ConfigRecord,
         flwr_aid: Optional[str],
     ) -> int:
-        """Create a new run for the specified `fab_hash`."""
+        """Create a new run."""
         # Sample a random int64 as run_id
         with self.lock:
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
@@ -547,6 +553,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             details="",
                         ),
                         flwr_aid=flwr_aid if flwr_aid else "",
+                        federation=federation,
                     ),
                 )
                 self.run_ids[run_id] = run_record

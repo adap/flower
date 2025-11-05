@@ -75,6 +75,7 @@ SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
     node_id                 INTEGER UNIQUE,
     owner_aid               TEXT,
+    owner_name              TEXT,
     status                  TEXT,
     registered_at           TEXT,
     last_activated_at       TEXT NULL,
@@ -119,6 +120,7 @@ CREATE TABLE IF NOT EXISTS run(
     finished_at           TEXT,
     sub_status            TEXT,
     details               TEXT,
+    federation            TEXT,
     federation_options    BLOB,
     flwr_aid              TEXT
 );
@@ -557,7 +559,11 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         return {row["message_id"] for row in rows}
 
     def create_node(
-        self, owner_aid: str, public_key: bytes, heartbeat_interval: float
+        self,
+        owner_aid: str,
+        owner_name: str,
+        public_key: bytes,
+        heartbeat_interval: float,
     ) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random uint64 as node_id
@@ -570,10 +576,10 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
 
         query = """
             INSERT INTO node
-            (node_id, owner_aid, status, registered_at, last_activated_at,
+            (node_id, owner_aid, owner_name, status, registered_at, last_activated_at,
             last_deactivated_at, unregistered_at, online_until, heartbeat_interval,
             public_key)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
 
         # Mark the node online until now().timestamp() + heartbeat_interval
@@ -583,6 +589,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 (
                     sint64_node_id,  # node_id
                     owner_aid,  # owner_aid
+                    owner_name,  # owner_name
                     NodeStatus.REGISTERED,  # status
                     now().isoformat(),  # registered_at
                     None,  # last_activated_at
@@ -814,10 +821,11 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
+        federation: str,
         federation_options: ConfigRecord,
         flwr_aid: Optional[str],
     ) -> int:
-        """Create a new run for the specified `fab_id` and `fab_version`."""
+        """Create a new run."""
         # Sample a random int64 as run_id
         uint64_run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
@@ -831,27 +839,28 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             query = (
                 "INSERT INTO run "
                 "(run_id, active_until, heartbeat_interval, fab_id, fab_version, "
-                "fab_hash, override_config, federation_options, pending_at, "
+                "fab_hash, override_config, federation, federation_options, pending_at,"
                 "starting_at, running_at, finished_at, sub_status, details, flwr_aid) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             override_config_json = json.dumps(override_config)
             data = [
-                sint64_run_id,
-                0,  # The `active_until` is not used until the run is started
-                0,  # This `heartbeat_interval` is not used until the run is started
-                fab_id,
-                fab_version,
-                fab_hash,
-                override_config_json,
-                configrecord_to_bytes(federation_options),
-                now().isoformat(),
-                "",
-                "",
-                "",
-                "",
-                "",
-                flwr_aid or "",
+                sint64_run_id,  # run_id
+                0,  # active_until (not used until the run is started)
+                0,  # heartbeat_interval (not used until the run is started)
+                fab_id,  # fab_id
+                fab_version,  # fab_version
+                fab_hash,  # fab_hash
+                override_config_json,  # override_config
+                federation,  # federation
+                configrecord_to_bytes(federation_options),  # federation_options
+                now().isoformat(),  # pending_at
+                "",  # starting_at
+                "",  # running_at
+                "",  # finished_at
+                "",  # sub_status
+                "",  # details
+                flwr_aid or "",  # flwr_aid
             ]
             self.query(query, tuple(data))
             return uint64_run_id
@@ -921,6 +930,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                     details=row["details"],
                 ),
                 flwr_aid=row["flwr_aid"],
+                federation=row["federation"],
             )
         log(ERROR, "`run_id` does not exist.")
         return None
