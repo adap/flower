@@ -229,7 +229,7 @@ def _run_with_control_api(
                 "success": res.HasField("run_id"),
                 "run-id": res.run_id if res.HasField("run_id") else None,
             }
-            if not remote_app_ref and fab_id and fab_version and fab_hash:
+            if not remote_app_ref:
                 payload.update(
                     {
                         "fab-id": fab_id,
