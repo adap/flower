@@ -27,7 +27,7 @@ class FederationManager(ABC):
 
     @abstractmethod
     def has_member(self, flwr_aid: str, federation: str) -> bool:
-        """Check if a member of the federation."""
+        """Check if the given account is a member of the federation."""
 
     @abstractmethod
     def filter_nodes(self, node_ids: set[int], federation: str) -> set[int]:
