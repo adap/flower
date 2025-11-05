@@ -53,7 +53,7 @@ from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugi
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
-# pylint: disable-next=too-many-locals, R0913, R0917
+# pylint: disable-next=too-many-locals, too-many-branches, R0913, R0917
 def run(
     app: Annotated[
         Path,
