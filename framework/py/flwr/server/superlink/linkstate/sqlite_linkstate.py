@@ -53,6 +53,7 @@ from flwr.server.utils.validator import validate_message
 from flwr.supercore.constant import NodeStatus
 from flwr.supercore.sqlite_mixin import SqliteMixin
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
+from flwr.superlink.federation import FederationManager
 
 from .linkstate import LinkState
 from .utils import (
@@ -191,6 +192,12 @@ CREATE TABLE IF NOT EXISTS token_store (
 class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
     """SQLite-based LinkState implementation."""
 
+    def __init__(
+        self, database_path: str, federation_manager: FederationManager
+    ) -> None:
+        super().__init__(database_path)
+        self._federation_manager = federation_manager
+
     def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Connect to the DB, enable FK support, and create tables if needed."""
         return self._ensure_initialized(
@@ -207,6 +214,11 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             SQL_CREATE_INDEX_NODE_STATUS,
             log_queries=log_queries,
         )
+
+    @property
+    def federation_manager(self) -> FederationManager:
+        """Get the FederationManager instance."""
+        return self._federation_manager
 
     def store_message_ins(self, message: Message) -> Optional[str]:
         """Store one Message."""
