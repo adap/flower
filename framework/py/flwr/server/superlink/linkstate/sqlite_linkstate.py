@@ -927,6 +927,9 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                     details=row["details"],
                 ),
                 flwr_aid=row["flwr_aid"],
+                # Set to non-empty string when LinkState.create_run is extended
+                # to accept `federation` parameter
+                federation="",
             )
         log(ERROR, "`run_id` does not exist.")
         return None
