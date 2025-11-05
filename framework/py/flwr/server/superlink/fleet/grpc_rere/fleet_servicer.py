@@ -64,7 +64,6 @@ from flwr.supercore.object_store import ObjectStoreFactory
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
-    # pylint: disable-next=too-many-positional-arguments,too-many-arguments
     def __init__(
         self,
         state_factory: LinkStateFactory,
