@@ -26,7 +26,7 @@ class FederationManager(ABC):
         """Check if a federation exists."""
 
     @abstractmethod
-    def is_member(self, federation: str, flwr_aid: str) -> bool:
+    def has_member(self, flwr_aid: str, federation: str) -> bool:
         """Check if a member of the federation."""
 
     @abstractmethod
