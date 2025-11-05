@@ -199,7 +199,7 @@ class TestInMemoryGrid(unittest.TestCase):
         """Test messages are deleted in sqlite state once messages are pulled."""
         # Prepare
         state = LinkStateFactory("", NoOpFederationManager()).state()
-        run_id = state.create_run("", "", "", {}, ConfigRecord(), "")
+        run_id = state.create_run("", "", "", {}, "", ConfigRecord(), "")
         self.grid = InMemoryGrid(MagicMock(state=lambda: state))
         self.grid.set_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.grid, self.num_nodes)
@@ -228,7 +228,7 @@ class TestInMemoryGrid(unittest.TestCase):
             FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
         )
         state = state_factory.state()
-        run_id = state.create_run("", "", "", {}, ConfigRecord(), "")
+        run_id = state.create_run("", "", "", {}, "", ConfigRecord(), "")
         self.grid = InMemoryGrid(state_factory)
         self.grid.set_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.grid, self.num_nodes)

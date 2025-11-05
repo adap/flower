@@ -91,10 +91,14 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
         if num_transitions > 2:
             _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
 
+    def _create_dummy_run(self) -> int:
+        run_id = self.state.create_run("", "", "", {}, "", ConfigRecord(), "")
+        return run_id
+
     def test_push_simulation_outputs_successful_if_running(self) -> None:
         """Test `PushAppOutputs` success."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        run_id = self._create_dummy_run()
         token = self.state.create_token(run_id)
         assert token is not None
 
@@ -149,7 +153,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `PushAppOutputs` not successful if RunStatus is not running."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        run_id = self._create_dummy_run()
         token = self.state.create_token(run_id)
         assert token is not None
 
@@ -179,7 +183,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `UpdateRunStatus` success."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        run_id = self._create_dummy_run()
         _ = self.state.get_run_status({run_id})[run_id]
         next_run_status = RunStatus(Status.STARTING, "", "")
 
@@ -204,7 +208,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_update_run_status_not_successful_if_finished(self) -> None:
         """Test `UpdateRunStatus` not successful."""
         # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
+        run_id = self._create_dummy_run()
         _ = self.state.get_run_status({run_id})[run_id]
         _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
         run_status = self.state.get_run_status({run_id})[run_id]

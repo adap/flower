@@ -99,6 +99,11 @@ class TestControlServicer(unittest.TestCase):
         """Clean up after tests."""
         self.tmp_dir.cleanup()
 
+    def _create_dummy_run(self, flwr_aid: Optional[str]) -> int:
+        return self.state.create_run(
+            "flwr/demo", "v0.0.1", "hash123", {}, "mock-fed", ConfigRecord(), flwr_aid
+        )
+
     def test_start_run(self) -> None:
         """Test StartRun method of ControlServicer."""
         # Prepare
@@ -129,9 +134,7 @@ class TestControlServicer(unittest.TestCase):
         # Prepare
         run_ids = set()
         for _ in range(3):
-            run_id = self.state.create_run(
-                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord(), self.aid
-            )
+            run_id = self._create_dummy_run(self.aid)
             run_ids.add(run_id)
 
         # Execute
@@ -146,9 +149,7 @@ class TestControlServicer(unittest.TestCase):
         """Test List method of ControlServicer with --run-id option."""
         # Prepare
         for _ in range(3):
-            run_id = self.state.create_run(
-                "mock fabid", "mock fabver", "fake hash", {}, ConfigRecord(), self.aid
-            )
+            run_id = self._create_dummy_run(self.aid)
 
         # Execute
         response = self.servicer.ListRuns(ListRunsRequest(run_id=run_id), Mock())
@@ -161,9 +162,7 @@ class TestControlServicer(unittest.TestCase):
     def test_stop_run(self) -> None:
         """Test StopRun method of ControlServicer."""
         # Prepare
-        run_id = self.state.create_run(
-            "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigRecord(), self.aid
-        )
+        run_id = self._create_dummy_run(self.aid)
         expected_run_status = RunStatus(Status.FINISHED, SubStatus.STOPPED, "")
 
         # Execute
@@ -321,6 +320,11 @@ class TestControlServicerAuth(unittest.TestCase):
         """Clean up after tests."""
         self.tmp_dir.cleanup()
 
+    def _create_dummy_run(self, flwr_aid: Optional[str]) -> int:
+        return self.state.create_run(
+            "flwr/demo", "v0.0.1", "hash123", {}, "mock-fed", ConfigRecord(), flwr_aid
+        )
+
     def make_context(self) -> MagicMock:
         """Create a mock context."""
         ctx = MagicMock(spec=grpc.ServicerContext)
@@ -338,9 +342,7 @@ class TestControlServicerAuth(unittest.TestCase):
     ) -> None:
         """Test StreamLogs unsuccessful."""
         # Prepare
-        run_id = self.state.create_run(
-            "fab", "ver", "hash", {}, ConfigRecord(), run_flwr_aid
-        )
+        run_id = self._create_dummy_run(run_flwr_aid)
         request = StreamLogsRequest(run_id=run_id, after_timestamp=0)
         ctx = self.make_context()
 
@@ -357,9 +359,7 @@ class TestControlServicerAuth(unittest.TestCase):
     def test_streamlogs_auth_successful(self) -> None:
         """Test StreamLogs successful with matching flwr_aid."""
         # Prepare
-        run_id = self.state.create_run(
-            "fab", "ver", "hash", {}, ConfigRecord(), "user-123"
-        )
+        run_id = self._create_dummy_run("user-123")
         request = StreamLogsRequest(run_id=run_id, after_timestamp=0)
         ctx = self.make_context()
         ctx.is_active.return_value = True
@@ -396,9 +396,7 @@ class TestControlServicerAuth(unittest.TestCase):
     ) -> None:
         """Test StopRun unsuccessful with missing or mismatched flwr_aid."""
         # Prepare
-        run_id = self.state.create_run(
-            "fab", "ver", "hash", {}, ConfigRecord(), run_flwr_aid
-        )
+        run_id = self._create_dummy_run(run_flwr_aid)
         request = StopRunRequest(run_id=run_id)
         ctx = self.make_context()
 
@@ -414,9 +412,7 @@ class TestControlServicerAuth(unittest.TestCase):
     def test_stoprun_auth_successful(self) -> None:
         """Test StopRun successful with matching flwr_aid."""
         # Prepare
-        run_id = self.state.create_run(
-            "fab", "ver", "hash", {}, ConfigRecord(), "user-123"
-        )
+        run_id = self._create_dummy_run("user-123")
         request = StopRunRequest(run_id=run_id)
         ctx = self.make_context()
 
@@ -438,9 +434,7 @@ class TestControlServicerAuth(unittest.TestCase):
     ) -> None:
         """Test ListRuns unsuccessful with missing or mismatched flwr_aid."""
         # Prepare
-        run_id = self.state.create_run(
-            "fab", "ver", "hash", {}, ConfigRecord(), run_flwr_aid
-        )
+        run_id = self._create_dummy_run(run_flwr_aid)
         request = ListRunsRequest(run_id=run_id)
         ctx = self.make_context()
 
@@ -456,9 +450,7 @@ class TestControlServicerAuth(unittest.TestCase):
     def test_listruns_auth_run_success(self) -> None:
         """Test ListRuns successful with matching flwr_aid."""
         # Prepare
-        run_id = self.state.create_run(
-            "fab", "ver", "hash", {}, ConfigRecord(), "user-123"
-        )
+        run_id = self._create_dummy_run("user-123")
         request = ListRunsRequest(run_id=run_id)
         ctx = self.make_context()
 

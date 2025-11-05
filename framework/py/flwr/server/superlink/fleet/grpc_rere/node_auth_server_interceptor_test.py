@@ -250,13 +250,18 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         req = PullMessagesRequest(node=Node(node_id=node_id))
         return self._pull_messages.with_call(request=req, metadata=metadata)
 
+    def _create_dummy_run(self, running: bool = True) -> int:
+        """Create a dummy run in linkstate and return the run_id."""
+        run_id = self.state.create_run("", "", "", {}, "", ConfigRecord(), "")
+        if running:
+            self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+            self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        return run_id
+
     def _test_push_messages(self, metadata: list[Any]) -> Any:
         """Test PushMessages."""
         node_id = self._create_node_in_linkstate()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
-        # Transition status to running. PushMessages is only allowed in running status.
-        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        run_id = self._create_dummy_run()
         msg_proto = create_res_message(
             src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
         )
@@ -266,10 +271,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_pull_object(self, metadata: list[Any]) -> Any:
         """Test PullObject."""
         node_id = self._create_node_in_linkstate()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
-        # Transition status to running. PushMessages is only allowed in running status.
-        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        run_id = self._create_dummy_run()
         req = PullObjectRequest(
             node=Node(node_id=node_id), run_id=run_id, object_id="1234"
         )
@@ -278,10 +280,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_push_object(self, metadata: list[Any]) -> Any:
         """Test PushObject."""
         node_id = self._create_node_in_linkstate()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
-        # Transition status to running. PushMessages is only allowed in running status.
-        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        run_id = self._create_dummy_run()
         req = PushObjectRequest(
             node=Node(node_id=node_id),
             run_id=run_id,
@@ -293,10 +292,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_get_run(self, metadata: list[Any]) -> Any:
         """Test GetRun."""
         node_id = self._create_node_in_linkstate()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
-        # Transition status to running. GetRun is only allowed in running status.
-        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        run_id = self._create_dummy_run()
         req = GetRunRequest(node=Node(node_id=node_id), run_id=run_id)
         return self._get_run.with_call(request=req, metadata=metadata)
 
@@ -312,10 +308,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test GetFab."""
         fab_hash = self.ffs.put(b"mock fab content", {})
         node_id = self._create_node_in_linkstate()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
-        # Transition status to running. GetFabRequest is only allowed in running status.
-        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        run_id = self._create_dummy_run()
         req = GetFabRequest(
             node=Node(node_id=node_id),
             run_id=run_id,
