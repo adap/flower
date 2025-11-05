@@ -111,18 +111,17 @@ def run(
                 raise typer.BadParameter(
                     "Invalid remote app ID. Expected format: '@user_name/app_name'."
                 )
-            app_name = m.group("app")
-
-            # Use local folder named {app_name} for pyproject lookup
-            # and downstream calls
-            app = Path(app_name)
             is_remote_app = True
 
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
         # Disable the validation due to the local empty project
         if is_remote_app:
-            config = load_toml(app / "pyproject.toml")
+            config = load_toml("pyproject.toml")
+            if not config:
+                raise typer.BadParameter(
+                    "A 'pyproject.toml' file is required."
+                )
         else:
             pyproject_path = app / "pyproject.toml" if app else None
             config, errors, warnings = load_and_validate(path=pyproject_path)
