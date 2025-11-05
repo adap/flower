@@ -540,6 +540,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             details="",
                         ),
                         flwr_aid=flwr_aid if flwr_aid else "",
+                        # Set to non-empty string when LinkState.create_run is extended
+                        # to accept `federation` parameter
+                        federation="",
                     ),
                 )
                 self.run_ids[run_id] = run_record

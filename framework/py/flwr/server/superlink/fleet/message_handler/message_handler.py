@@ -29,7 +29,7 @@ from flwr.common.serde import (
     fab_to_proto,
     message_from_proto,
     message_to_proto,
-    user_config_to_proto,
+    run_to_proto,
 )
 from flwr.common.typing import Fab, InvalidRunStatusException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -60,11 +60,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectRequest,
     PushObjectResponse,
 )
-from flwr.proto.run_pb2 import (  # pylint: disable=E0611
-    GetRunRequest,
-    GetRunResponse,
-    Run,
-)
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
 from flwr.supercore.ffs import Ffs
@@ -218,15 +214,7 @@ def get_run(
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
 
-    return GetRunResponse(
-        run=Run(
-            run_id=run.run_id,
-            fab_id=run.fab_id,
-            fab_version=run.fab_version,
-            override_config=user_config_to_proto(run.override_config),
-            fab_hash=run.fab_hash,
-        )
-    )
+    return GetRunResponse(run=run_to_proto(run))
 
 
 def get_fab(
