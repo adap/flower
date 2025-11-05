@@ -102,31 +102,29 @@ def run(
         if suppress_output:
             redirect_output(captured_output)
 
-        original_app_str = str(app) if app is not None else ""
-        remote_app_ref: Optional[str] = None  # "user_name/app_name" if given with "@"
-        app_path: Path = app
+        app_id_str = str(app) if app is not None else ""
+        is_remote_app: bool = False
 
-        if original_app_str.startswith("@"):
-            m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", original_app_str)
+        if app_id_str.startswith("@"):
+            m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", app_id_str)
             if not m:
                 raise typer.BadParameter(
                     "Invalid remote app ID. Expected format: '@user_name/app_name'."
                 )
             app_name = m.group("app")
-            user_name = m.group("user")
 
             # Use local folder named {app_name} for pyproject lookup
             # and downstream calls
-            app_path = Path(app_name)
-            remote_app_ref = f"{user_name}/{app_name}"
+            app = Path(app_name)
+            is_remote_app = True
 
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
         # Disable the validation due to the local empty project
-        if remote_app_ref:
-            config = load_toml(app_path / "pyproject.toml")
+        if is_remote_app:
+            config = load_toml(app / "pyproject.toml")
         else:
-            pyproject_path = app_path / "pyproject.toml" if app_path else None
+            pyproject_path = app / "pyproject.toml" if app else None
             config, errors, warnings = load_and_validate(path=pyproject_path)
             config = process_loaded_project_config(config, errors, warnings)
 
@@ -136,18 +134,18 @@ def run(
 
         if "address" in federation_config:
             _run_with_control_api(
-                app_path,
+                app,
                 federation,
                 federation_config,
                 run_config_overrides,
                 stream,
                 output_format,
-                original_app_str,
-                remote_app_ref,
+                app_id_str,
+                is_remote_app,
             )
         else:
             _run_without_control_api(
-                app_path, federation_config, run_config_overrides, federation
+                app, federation_config, run_config_overrides, federation
             )
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
         if suppress_output:
@@ -174,8 +172,8 @@ def _run_with_control_api(
     config_overrides: Optional[list[str]],
     stream: bool,
     output_format: str,
-    original_app_str: str,
-    remote_app_ref: Optional[str] = None,
+    app_id_str: str,
+    is_remote_app: bool,
 ) -> None:
     channel = None
     try:
@@ -185,7 +183,7 @@ def _run_with_control_api(
 
         # Build fab only if not a remote reference
         fab_id = fab_version = fab_hash = None
-        if remote_app_ref:
+        if is_remote_app:
             # Skip build; send a placeholder Fab containing the remote reference
             fab = Fab("", b"", {})
         else:
@@ -203,7 +201,7 @@ def _run_with_control_api(
             fab=fab_to_proto(fab),
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
             federation_options=config_record_to_proto(c_record),
-            app_id=original_app_str,
+            app_id=app_id_str,
         )
         with flwr_cli_grpc_exc_handler():
             res = stub.StartRun(req)
@@ -213,7 +211,7 @@ def _run_with_control_api(
                 f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN
             )
         else:
-            if remote_app_ref:
+            if is_remote_app:
                 typer.secho(
                     "❌ Failed to start run. Please check that the provided "
                     "app identifier (@user_name/app_name) is correct.",
@@ -229,7 +227,7 @@ def _run_with_control_api(
                 "success": res.HasField("run_id"),
                 "run-id": res.run_id if res.HasField("run_id") else None,
             }
-            if not remote_app_ref:
+            if not is_remote_app:
                 payload.update(
                     {
                         "fab-id": fab_id,
