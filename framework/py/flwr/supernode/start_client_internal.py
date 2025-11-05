@@ -16,6 +16,7 @@
 
 
 import hashlib
+import json
 import os
 import subprocess
 import time
@@ -349,15 +350,16 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             # Verify the received FAB
             # FAB must be signed if trust entities provided
             if enable_entities_verification and trust_entities:
-                verification = dict(fab.verifications)
-                if not verification:
+                verifications = dict(fab.verifications)
+                if not verifications:
                     log(
                         WARN,
                         "App verification is not supported by the connected SuperLink.",
                     )
                 else:
+                    verifications = {k: json.loads(v) for k, v in verifications.items()}
                     fab_verified = False
-                    for public_key_id, verif in verification.items():
+                    for public_key_id, verif in verifications.items():
                         if public_key_id in trust_entities:
                             verifier_public_key = load_ssh_public_key(
                                 trust_entities[public_key_id].encode("utf-8")
