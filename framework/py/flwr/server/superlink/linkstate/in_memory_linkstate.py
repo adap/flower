@@ -44,6 +44,7 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
 from flwr.supercore.constant import NodeStatus
+from flwr.superlink.federation import FederationManager
 
 from .utils import (
     check_node_availability_for_in_message,
@@ -70,7 +71,7 @@ class RunRecord:  # pylint: disable=R0902
 class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     """In-memory LinkState implementation."""
 
-    def __init__(self) -> None:
+    def __init__(self, federation_manager: FederationManager) -> None:
 
         # Map node_id to NodeInfo
         self.nodes: dict[int, NodeInfo] = {}
@@ -96,6 +97,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.node_public_keys: set[bytes] = set()
 
         self.lock = threading.RLock()
+        self._federation_manager = federation_manager
+
+    @property
+    def federation_manager(self) -> FederationManager:
+        """Get the FederationManager instance."""
+        return self._federation_manager
 
     def store_message_ins(self, message: Message) -> Optional[str]:
         """Store one Message."""
