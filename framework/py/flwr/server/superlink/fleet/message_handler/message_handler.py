@@ -21,6 +21,7 @@ from flwr.common import Message, log
 from flwr.common.constant import (
     HEARTBEAT_MAX_INTERVAL,
     HEARTBEAT_MIN_INTERVAL,
+    NOOP_ACCOUNT_NAME,
     NOOP_FLWR_AID,
     Status,
 )
@@ -77,7 +78,7 @@ def register_node(
     state: LinkState,
 ) -> RegisterNodeFleetResponse:
     """Register a node (Fleet API only)."""
-    node_id = state.create_node(NOOP_FLWR_AID, request.public_key, 0)
+    node_id = state.create_node(NOOP_FLWR_AID, NOOP_ACCOUNT_NAME, request.public_key, 0)
     return RegisterNodeFleetResponse(node_id=node_id)
 
 

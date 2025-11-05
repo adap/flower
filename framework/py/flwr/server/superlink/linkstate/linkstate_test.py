@@ -668,7 +668,7 @@ class StateTest(CoreStateTest):
 
         # Execute
         expected_registered_at = now().timestamp()
-        node_id = state.create_node("fake_aid", public_key, 10)
+        node_id = state.create_node("fake_aid", "fake_name", public_key, 10)
         node = state.get_node_info(node_ids=[node_id])[0]
         actual_registered_at = datetime.fromisoformat(node.registered_at).timestamp()
 
@@ -682,11 +682,11 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        node_id = state.create_node("fake_aid", public_key, 10)
+        node_id = state.create_node("fake_aid", "fake_name", public_key, 10)
 
         # Execute
         with self.assertRaises(ValueError):
-            state.create_node("fake_aid2", public_key, 10)
+            state.create_node("fake_aid2", "fake_name", public_key, 10)
         retrieved_nodes = state.get_node_info()
         retrieved_public_key = state.get_node_public_key(node_id)
 
@@ -861,7 +861,9 @@ class StateTest(CoreStateTest):
         state: LinkState = self.state_factory()
         public_key = b"mock"
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_id = state.create_node("fake_aid", public_key, heartbeat_interval=10)
+        node_id = state.create_node(
+            "fake_aid", "fake_name", public_key, heartbeat_interval=10
+        )
 
         # Execute
         state.delete_node("fake_aid", node_id)
@@ -891,7 +893,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        node_id = state.create_node("fake_aid", public_key, 10)
+        node_id = state.create_node("fake_aid", "fake_name", public_key, 10)
 
         # Execute
         retrieved_node_id = state.get_node_id_by_public_key(public_key)
@@ -905,7 +907,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        node_id = state.create_node("fake_aid", public_key, 10)
+        node_id = state.create_node("fake_aid", "fake_name", public_key, 10)
 
         # Execute
         state.delete_node("fake_aid", node_id)
@@ -1610,10 +1612,13 @@ def create_dummy_node(
     state: LinkState,
     heartbeat_interval: int = 1000,
     owner_aid: str = "mock_flwr_aid",
+    owner_name: str = "mock_flwr_name",
     activate: bool = True,
 ) -> int:
     """Create a dummy node."""
-    node_id = state.create_node(owner_aid, secrets.token_bytes(32), heartbeat_interval)
+    node_id = state.create_node(
+        owner_aid, owner_name, secrets.token_bytes(32), heartbeat_interval
+    )
     if activate:
         state.acknowledge_node_heartbeat(node_id, heartbeat_interval)
     return node_id
@@ -1632,9 +1637,9 @@ class InMemoryStateTest(StateTest):
         """Test that the owner_aid index works correctly."""
         # Prepare
         state = self.state_factory()
-        node_id1 = state.create_node("aid1", b"key1", 10)
-        node_id2 = state.create_node("aid1", b"key2", 10)
-        node_id3 = state.create_node("aid2", b"key3", 10)
+        node_id1 = state.create_node("aid1", "owner1", b"key1", 10)
+        node_id2 = state.create_node("aid1", "owner2", b"key2", 10)
+        node_id3 = state.create_node("aid2", "owner3", b"key3", 10)
 
         # Assert
         self.assertSetEqual(state.owner_to_node_ids["aid1"], {node_id1, node_id2})

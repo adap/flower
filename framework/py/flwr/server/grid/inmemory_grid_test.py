@@ -48,6 +48,7 @@ def push_messages(grid: InMemoryGrid, num_nodes: int) -> tuple[Iterable[str], in
     for _ in range(num_nodes):
         node_id = grid.state.create_node(
             "mock_owner",
+            "mock_account",
             secrets.token_bytes(32),
             heartbeat_interval=0,  # This field has no effect
         )

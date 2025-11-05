@@ -25,6 +25,7 @@ class NodeInfo(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NODE_ID_FIELD_NUMBER: builtins.int
     OWNER_AID_FIELD_NUMBER: builtins.int
+    OWNER_NAME_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
     REGISTERED_AT_FIELD_NUMBER: builtins.int
     LAST_ACTIVATED_AT_FIELD_NUMBER: builtins.int
@@ -35,6 +36,7 @@ class NodeInfo(google.protobuf.message.Message):
     PUBLIC_KEY_FIELD_NUMBER: builtins.int
     node_id: builtins.int
     owner_aid: typing.Text
+    owner_name: typing.Text
     status: typing.Text
     registered_at: typing.Text
     last_activated_at: typing.Text
@@ -47,6 +49,7 @@ class NodeInfo(google.protobuf.message.Message):
         *,
         node_id: builtins.int = ...,
         owner_aid: typing.Text = ...,
+        owner_name: typing.Text = ...,
         status: typing.Text = ...,
         registered_at: typing.Text = ...,
         last_activated_at: typing.Optional[typing.Text] = ...,
@@ -57,7 +60,7 @@ class NodeInfo(google.protobuf.message.Message):
         public_key: builtins.bytes = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["_last_activated_at",b"_last_activated_at","_last_deactivated_at",b"_last_deactivated_at","_online_until",b"_online_until","_unregistered_at",b"_unregistered_at","last_activated_at",b"last_activated_at","last_deactivated_at",b"last_deactivated_at","online_until",b"online_until","unregistered_at",b"unregistered_at"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["_last_activated_at",b"_last_activated_at","_last_deactivated_at",b"_last_deactivated_at","_online_until",b"_online_until","_unregistered_at",b"_unregistered_at","heartbeat_interval",b"heartbeat_interval","last_activated_at",b"last_activated_at","last_deactivated_at",b"last_deactivated_at","node_id",b"node_id","online_until",b"online_until","owner_aid",b"owner_aid","public_key",b"public_key","registered_at",b"registered_at","status",b"status","unregistered_at",b"unregistered_at"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_last_activated_at",b"_last_activated_at","_last_deactivated_at",b"_last_deactivated_at","_online_until",b"_online_until","_unregistered_at",b"_unregistered_at","heartbeat_interval",b"heartbeat_interval","last_activated_at",b"last_activated_at","last_deactivated_at",b"last_deactivated_at","node_id",b"node_id","online_until",b"online_until","owner_aid",b"owner_aid","owner_name",b"owner_name","public_key",b"public_key","registered_at",b"registered_at","status",b"status","unregistered_at",b"unregistered_at"]) -> None: ...
     @typing.overload
     def WhichOneof(self, oneof_group: typing_extensions.Literal["_last_activated_at",b"_last_activated_at"]) -> typing.Optional[typing_extensions.Literal["last_activated_at"]]: ...
     @typing.overload
