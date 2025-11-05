@@ -100,6 +100,7 @@ class TestInMemoryGrid(unittest.TestCase):
             finished_at="",
             status=RunStatus(status=Status.PENDING, sub_status="", details=""),
             flwr_aid="user123",
+            federation="mock-fed",
         )
         state_factory = MagicMock(state=lambda: self.state)
         self.grid = InMemoryGrid(state_factory=state_factory)
