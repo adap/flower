@@ -117,7 +117,7 @@ def run(
 
         # Disable the validation due to the local empty project
         if is_remote_app:
-            config = load_toml("pyproject.toml")
+            config = load_toml(Path("pyproject.toml"))
             if not config:
                 raise typer.BadParameter("A 'pyproject.toml' file is required.")
         else:
@@ -126,7 +126,7 @@ def run(
             config = process_loaded_project_config(config, errors, warnings)
 
         federation, federation_config = validate_federation_in_project_config(
-            federation, config, federation_config_overrides  # type: ignore[arg-type]
+            federation, config, federation_config_overrides
         )
 
         if "address" in federation_config:
@@ -224,7 +224,7 @@ def _run_with_control_api(
                 "success": res.HasField("run_id"),
                 "run-id": res.run_id if res.HasField("run_id") else None,
             }
-            if not is_remote_app:
+            if not is_remote_app and fab_id and fab_version and fab_hash:
                 payload.update(
                     {
                         "fab-id": fab_id,
