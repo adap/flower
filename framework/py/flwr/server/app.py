@@ -132,9 +132,9 @@ except ImportError:
         return {}
 
     # pylint: disable-next=unused-argument
-    def get_ee_federation_manager(config_path: Optional[str]) -> FederationManager:
+    def get_ee_federation_manager(config_path: str) -> FederationManager:
         """Return the EE FederationManager."""
-        return NoOpFederationManager()
+        raise NotImplementedError("No federation manager is currently supported.")
 
 
 def get_control_authn_plugins() -> dict[str, type[ControlAuthnPlugin]]:
@@ -151,6 +151,8 @@ def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
 
 def get_federation_manager(config_path: Optional[str] = None) -> FederationManager:
     """Return the FederationManager."""
+    if config_path is None:
+        return NoOpFederationManager()
     federation_manager: FederationManager = get_ee_federation_manager(config_path)
     return federation_manager
 
