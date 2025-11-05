@@ -27,6 +27,9 @@ FLWR_IN_MEMORY_DB_NAME = ":flwr-in-memory:"
 APP_ID_PATTERN = r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$"
 PLATFORM_API_URL = "https://api.flower.ai/v1"
 
+# Constants for federations
+NOOP_FEDERATION = "default"
+
 
 class NodeStatus:
     """Event log writer types."""
