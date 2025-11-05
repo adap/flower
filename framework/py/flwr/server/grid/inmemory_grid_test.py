@@ -49,6 +49,7 @@ def push_messages(grid: InMemoryGrid, num_nodes: int) -> tuple[Iterable[str], in
     for _ in range(num_nodes):
         node_id = grid.state.create_node(
             "mock_owner",
+            "mock_account",
             secrets.token_bytes(32),
             heartbeat_interval=0,  # This field has no effect
         )
@@ -101,6 +102,7 @@ class TestInMemoryGrid(unittest.TestCase):
             finished_at="",
             status=RunStatus(status=Status.PENDING, sub_status="", details=""),
             flwr_aid="user123",
+            federation="mock-fed",
         )
         state_factory = MagicMock(state=lambda: self.state)
         self.grid = InMemoryGrid(state_factory=state_factory)

@@ -24,6 +24,7 @@ from parameterized import parameterized
 from flwr.common import ConfigRecord
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
+    NOOP_ACCOUNT_NAME,
     NOOP_FLWR_AID,
     SUPERLINK_NODE_ID,
     Status,
@@ -173,7 +174,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
     def _create_dummy_node(self, activate: bool = True) -> int:
         """Create a dummy node."""
         node_id = self.state.create_node(
-            NOOP_FLWR_AID, self.node_pk, heartbeat_interval=30
+            NOOP_FLWR_AID, NOOP_ACCOUNT_NAME, self.node_pk, heartbeat_interval=30
         )
         if activate:
             self.state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
@@ -216,7 +217,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         """Test `ActivateNode` success."""
         # Prepare: Register a node first
         public_key = b"test_activate_public_key"
-        self.state.create_node(NOOP_FLWR_AID, public_key, 0)
+        self.state.create_node(NOOP_FLWR_AID, NOOP_ACCOUNT_NAME, public_key, 0)
         request = ActivateNodeRequest(public_key=public_key, heartbeat_interval=30)
 
         # Execute
@@ -245,7 +246,9 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         """Test `DeactivateNode` success."""
         # Prepare: Create and activate a node
         public_key = b"test_deactivate_public_key"
-        node_id = self.state.create_node(NOOP_FLWR_AID, public_key, 30)
+        node_id = self.state.create_node(
+            NOOP_FLWR_AID, NOOP_ACCOUNT_NAME, public_key, 30
+        )
         self.state.activate_node(node_id, 30)
         request = DeactivateNodeRequest(node_id=node_id)
 
@@ -273,7 +276,9 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         """Test `UnregisterNode` success."""
         # Prepare: Create a node
         public_key = b"test_unregister_public_key"
-        node_id = self.state.create_node(NOOP_FLWR_AID, public_key, 0)
+        node_id = self.state.create_node(
+            NOOP_FLWR_AID, NOOP_ACCOUNT_NAME, public_key, 0
+        )
         request = UnregisterNodeFleetRequest(node_id=node_id)
 
         # Execute: Unregistration should be blocked when node authentication is enabled

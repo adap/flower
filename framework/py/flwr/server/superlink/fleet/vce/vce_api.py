@@ -34,6 +34,7 @@ from flwr.clientapp.utils import get_load_client_app_fn
 from flwr.common import Message
 from flwr.common.constant import (
     HEARTBEAT_INTERVAL_INF,
+    NOOP_ACCOUNT_NAME,
     NOOP_FLWR_AID,
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -62,6 +63,7 @@ def _register_nodes(
             # use NOOP_FLWR_AID as owner_aid and
             # use random bytes as public key
             NOOP_FLWR_AID,
+            NOOP_ACCOUNT_NAME,
             secrets.token_bytes(32),
             heartbeat_interval=HEARTBEAT_INTERVAL_INF,
         )
