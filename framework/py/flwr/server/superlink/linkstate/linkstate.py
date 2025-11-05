@@ -24,10 +24,16 @@ from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.corestate import CoreState
+from flwr.superlink.federation import FederationManager
 
 
 class LinkState(CoreState):  # pylint: disable=R0904
     """Abstract LinkState."""
+
+    @property
+    @abc.abstractmethod
+    def federation_manager(self) -> FederationManager:
+        """Return the FederationManager instance."""
 
     @abc.abstractmethod
     def store_message_ins(self, message: Message) -> Optional[str]:
