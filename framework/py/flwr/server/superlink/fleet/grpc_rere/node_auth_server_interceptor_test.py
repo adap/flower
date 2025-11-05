@@ -323,7 +323,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _create_node_in_linkstate(self, activate: bool = True) -> int:
         pk_bytes = self.node_pk_bytes
         node_id = self.state.create_node(
-            NOOP_FLWR_AID,
+            owner_aid=NOOP_FLWR_AID,
             owner_name=NOOP_ACCOUNT_NAME,
             public_key=pk_bytes,
             heartbeat_interval=30,
