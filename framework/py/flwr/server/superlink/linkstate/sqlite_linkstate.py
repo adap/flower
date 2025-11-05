@@ -74,6 +74,7 @@ SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
     node_id                 INTEGER UNIQUE,
     owner_aid               TEXT,
+    owner_name              TEXT,
     status                  TEXT,
     registered_at           TEXT,
     last_activated_at       TEXT NULL,
@@ -545,7 +546,11 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         return {row["message_id"] for row in rows}
 
     def create_node(
-        self, owner_aid: str, public_key: bytes, heartbeat_interval: float
+        self,
+        owner_aid: str,
+        owner_name: str,
+        public_key: bytes,
+        heartbeat_interval: float,
     ) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random uint64 as node_id
@@ -558,10 +563,10 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
 
         query = """
             INSERT INTO node
-            (node_id, owner_aid, status, registered_at, last_activated_at,
+            (node_id, owner_aid, owner_name, status, registered_at, last_activated_at,
             last_deactivated_at, unregistered_at, online_until, heartbeat_interval,
             public_key)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
 
         # Mark the node online until now().timestamp() + heartbeat_interval
@@ -571,6 +576,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 (
                     sint64_node_id,  # node_id
                     owner_aid,  # owner_aid
+                    owner_name,  # owner_name
                     NodeStatus.REGISTERED,  # status
                     now().isoformat(),  # registered_at
                     None,  # last_activated_at
