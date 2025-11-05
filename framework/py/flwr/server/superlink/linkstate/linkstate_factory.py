@@ -37,12 +37,15 @@ class LinkStateFactory:
         Note that passing ':memory:' will open a connection to a database that is
         in RAM, instead of on disk. For more information on special in-memory
         databases, please refer to https://sqlite.org/inmemorydb.html.
-
     federation_manager : FederationManager
         An instance of FederationManager to manage federations.
     """
 
-    def __init__(self, database: str, federation_manager: FederationManager) -> None:
+    def __init__(
+        self,
+        database: str,
+        federation_manager: FederationManager,
+    ) -> None:
         self.database = database
         self.state_instance: Optional[LinkState] = None
         self.federation_manager = federation_manager

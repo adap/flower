@@ -17,8 +17,6 @@
 
 from abc import ABC, abstractmethod
 
-from flwr.app import Message
-
 
 class FederationManager(ABC):
     """Abstract base class for FederationManager."""
@@ -36,5 +34,5 @@ class FederationManager(ABC):
         """Given a list of node IDs, return sublist with nodes in federation."""
 
     @abstractmethod
-    def has_node(self, message: Message, federation: str) -> bool:
-        """Given a message, check if it is from/to a node in the federation."""
+    def has_node(self, node_id: int, federation: str) -> bool:
+        """Given a node ID, check if it is in the federation."""
