@@ -26,6 +26,7 @@ from parameterized import parameterized
 from flwr.common import ConfigRecord, now
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
+    NOOP_ACCOUNT_NAME,
     NOOP_FLWR_AID,
     PUBLIC_KEY_HEADER,
     SIGNATURE_HEADER,
@@ -322,7 +323,10 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _create_node_in_linkstate(self, activate: bool = True) -> int:
         pk_bytes = self.node_pk_bytes
         node_id = self.state.create_node(
-            NOOP_FLWR_AID, public_key=pk_bytes, heartbeat_interval=30
+            owner_aid=NOOP_FLWR_AID,
+            owner_name=NOOP_ACCOUNT_NAME,
+            public_key=pk_bytes,
+            heartbeat_interval=30,
         )
         if activate:
             self.state.activate_node(node_id, 30)
