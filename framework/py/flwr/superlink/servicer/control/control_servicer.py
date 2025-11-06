@@ -128,21 +128,18 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                     "Federation options doesn't contain key `num-supernodes`."
                 )
 
-            # If it's not simulation, check (1) federation exists
-            # and (2) the flwr_aid is a member
-            if not self.is_simulation:
+            # Check (1) federation exists and (2) the flwr_aid is a member
+            federation = request.federation
 
-                federation = request.federation
+            if not state.federation_manager.exists(federation):
+                raise ValueError(f"Federation '{federation}' does not exist.")
 
-                if not state.federation_manager.exists(federation):
-                    raise ValueError(f"Federation '{federation}' does not exist.")
-
-                if not state.federation_manager.has_member(flwr_aid, federation):
-                    raise ValueError(
-                        f"Account with ID '{flwr_aid}' is not a member of the "
-                        f"federation '{federation}'. Please log in with another account "
-                        "or request access to this federation."
-                    )
+            if not state.federation_manager.has_member(flwr_aid, federation):
+                raise ValueError(
+                    f"Account with ID '{flwr_aid}' is not a member of the "
+                    f"federation '{federation}'. Please log in with another account "
+                    "or request access to this federation."
+                )
 
             # Create run
             fab = Fab(
