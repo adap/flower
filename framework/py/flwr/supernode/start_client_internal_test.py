@@ -195,7 +195,7 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
         # Assert: the Run and FAB should be fetched and stored if run_id is unknown
         self.mock_get_run.assert_called_once_with(self.run_id)
         self.mock_get_fab.assert_called_once_with(fab.hash_str, self.run_id)
-        self.mock_ffs.put.assert_called_once_with(fab.content, {})
+        self.mock_ffs.put.assert_called_once_with(fab.content, fab.verifications)
         self.mock_state.store_run.assert_called_once_with(mock_run)
 
         # Assert: the Context should be created and stored if run_id is unknown
