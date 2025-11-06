@@ -188,7 +188,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # pylint: disable-next=broad-except
         except Exception as e:
             log(ERROR, "Could not start run: %s", str(e))
-            return StartRunResponse()
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                str(e),
+            )
 
         log(INFO, "Created run %s", str(run_id))
         return StartRunResponse(run_id=run_id)

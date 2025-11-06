@@ -396,4 +396,12 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     bold=True,
                 )
                 raise typer.Exit(code=1) from None
+
+            # Log details from grpc error directly
+            typer.secho(
+                e.details(),
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
         raise
