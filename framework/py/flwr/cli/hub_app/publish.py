@@ -289,16 +289,17 @@ def publish(
     ] = None,
 ) -> None:
     """Upload all project files to the Platform API using multipart/form-data."""
-    if not federation:
-        typer.secho(
-            "❌ Please specify the federation used for login before publishing app.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
 
     # Check the credentials path
     if not token:
+        if not federation:
+            typer.secho(
+                "❌ Please specify the federation used for login before publishing app.",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(code=1)
+
         creds_path = app.absolute() / FLWR_DIR / CREDENTIALS_DIR / f"{federation}.json"
         if not creds_path.is_file():
             typer.secho(
