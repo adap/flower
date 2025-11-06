@@ -14,7 +14,7 @@ description = ""
 license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
-    "flwr[simulation]>=1.23.0",
+    "flwr[simulation]>=1.24.0",
     "flwr-datasets>=0.5.0",
     "xgboost>=2.0.0",
 ]

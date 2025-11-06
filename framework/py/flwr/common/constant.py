@@ -62,7 +62,9 @@ HEARTBEAT_DEFAULT_INTERVAL = 30
 HEARTBEAT_CALL_TIMEOUT = 5
 HEARTBEAT_BASE_MULTIPLIER = 0.8
 HEARTBEAT_RANDOM_RANGE = (-0.1, 0.1)
-HEARTBEAT_MAX_INTERVAL = 1e300
+HEARTBEAT_MIN_INTERVAL = 10
+HEARTBEAT_MAX_INTERVAL = 1800  # 30 minutes
+HEARTBEAT_INTERVAL_INF = 1e300  # Large value, disabling heartbeats
 HEARTBEAT_PATIENCE = 2
 RUN_FAILURE_DETAILS_NO_HEARTBEAT = "No heartbeat received from the run."
 
@@ -225,6 +227,7 @@ class ErrorCode:
     REPLY_MESSAGE_UNAVAILABLE = 4
     NODE_UNAVAILABLE = 5
     MOD_FAILED_PRECONDITION = 6
+    INVALID_FAB = 7
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
@@ -318,4 +321,4 @@ class ExecPluginType:
 
 # Constants for No-op auth plugins
 NOOP_FLWR_AID = "<none>"
-NOOP_ACCOUNT_NAME = "sys_noauth"
+NOOP_ACCOUNT_NAME = "<none>"

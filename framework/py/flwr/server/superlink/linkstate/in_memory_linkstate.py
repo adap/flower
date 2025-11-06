@@ -28,7 +28,7 @@ from typing import Optional
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     FLWR_APP_TOKEN_LENGTH,
-    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_INTERVAL_INF,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -44,6 +44,7 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
 from flwr.supercore.constant import NodeStatus
+from flwr.superlink.federation import FederationManager
 
 from .utils import (
     check_node_availability_for_in_message,
@@ -70,7 +71,7 @@ class RunRecord:  # pylint: disable=R0902
 class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     """In-memory LinkState implementation."""
 
-    def __init__(self) -> None:
+    def __init__(self, federation_manager: FederationManager) -> None:
 
         # Map node_id to NodeInfo
         self.nodes: dict[int, NodeInfo] = {}
@@ -96,6 +97,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.node_public_keys: set[bytes] = set()
 
         self.lock = threading.RLock()
+        self._federation_manager = federation_manager
+
+    @property
+    def federation_manager(self) -> FederationManager:
+        """Get the FederationManager instance."""
+        return self._federation_manager
 
     def store_message_ins(self, message: Message) -> Optional[str]:
         """Store one Message."""
@@ -117,7 +124,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             )
             return None
         # Validate destination node ID
-        if message.metadata.dst_node_id not in self.nodes:
+        dst_node = self.nodes.get(message.metadata.dst_node_id)
+        if dst_node is None or dst_node.status not in [
+            NodeStatus.ONLINE,
+            NodeStatus.OFFLINE,
+        ]:
             log(
                 ERROR,
                 "Invalid destination node ID for Message: %s",
@@ -335,7 +346,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         return len(self.message_res_store)
 
     def create_node(
-        self, owner_aid: str, public_key: bytes, heartbeat_interval: float
+        self,
+        owner_aid: str,
+        owner_name: str,
+        public_key: bytes,
+        heartbeat_interval: float,
     ) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
@@ -354,6 +369,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             self.nodes[node_id] = NodeInfo(
                 node_id=node_id,
                 owner_aid=owner_aid,
+                owner_name=owner_name,
                 status=NodeStatus.REGISTERED,
                 registered_at=now().isoformat(),
                 last_activated_at=None,
@@ -510,10 +526,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
+        federation: str,
         federation_options: ConfigRecord,
         flwr_aid: Optional[str],
     ) -> int:
-        """Create a new run for the specified `fab_hash`."""
+        """Create a new run."""
         # Sample a random int64 as run_id
         with self.lock:
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
@@ -536,6 +553,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             details="",
                         ),
                         flwr_aid=flwr_aid if flwr_aid else "",
+                        federation=federation,
                     ),
                 )
                 self.run_ids[run_id] = run_record
@@ -641,7 +659,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             current = now()
             run_record = self.run_ids[run_id]
             if new_status.status in (Status.STARTING, Status.RUNNING):
-                run_record.heartbeat_interval = HEARTBEAT_MAX_INTERVAL
+                run_record.heartbeat_interval = HEARTBEAT_INTERVAL_INF
                 run_record.active_until = (
                     current.timestamp() + run_record.heartbeat_interval
                 )

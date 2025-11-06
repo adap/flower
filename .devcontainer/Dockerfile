@@ -29,7 +29,7 @@ RUN apt-get install -y curl wget gnupg python3 python-is-python3 python3-pip git
     build-essential tmux vim
 
 RUN python -m pip install \
-    pip==24.1.2 \
+    pip==25.3 \
     setuptools==70.3.0 \
     poetry==2.1.3 \
     maturin==1.8.6

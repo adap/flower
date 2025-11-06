@@ -75,6 +75,7 @@ from flwr.superlink.auth_plugin import (
     NoOpControlAuthnPlugin,
     NoOpControlAuthzPlugin,
 )
+from flwr.superlink.federation import FederationManager, NoOpFederationManager
 from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
@@ -97,6 +98,7 @@ try:
         get_control_authz_ee_plugins,
         get_control_event_log_writer_plugins,
         get_ee_artifact_provider,
+        get_ee_federation_manager,
         get_fleet_event_log_writer_plugins,
     )
 except ImportError:
@@ -129,6 +131,11 @@ except ImportError:
         """Return all Control API authorization plugins for EE."""
         return {}
 
+    # pylint: disable-next=unused-argument
+    def get_ee_federation_manager(config_path: str) -> FederationManager:
+        """Return the EE FederationManager."""
+        raise NotImplementedError("No federation manager is currently supported.")
+
 
 def get_control_authn_plugins() -> dict[str, type[ControlAuthnPlugin]]:
     """Return all Control API authentication plugins."""
@@ -140,6 +147,14 @@ def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
     """Return all Control API authorization plugins."""
     ee_dict: dict[str, type[ControlAuthzPlugin]] = get_control_authz_ee_plugins()
     return ee_dict | {AuthzType.NOOP: NoOpControlAuthzPlugin}
+
+
+def get_federation_manager(config_path: Optional[str] = None) -> FederationManager:
+    """Return the FederationManager."""
+    if config_path is None:
+        return NoOpFederationManager()
+    federation_manager: FederationManager = get_ee_federation_manager(config_path)
+    return federation_manager
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
@@ -233,20 +248,36 @@ def run_superlink() -> None:
         log(WARN, "The `--artifact-provider-config` flag is highly experimental.")
         artifact_provider = get_ee_artifact_provider(cfg_path)
 
-    # If supernode authentication is disabled, warn users
+    # Check for incompatible args with SuperNode authentication
     enable_supernode_auth: bool = args.enable_supernode_auth
-    if enable_supernode_auth and args.insecure:
-        url_v = f"https://flower.ai/docs/framework/v{package_version}/en/"
-        page = "how-to-authenticate-supernodes.html"
-        flwr_exit(
-            ExitCode.SUPERLINK_INVALID_ARGS,
-            "The `--enable-supernode-auth` flag requires encrypted TLS communications. "
-            "Please provide TLS certificates using the `--ssl-certfile`, "
-            "`--ssl-keyfile` and `--ssl-ca-certfile` arguments to your SuperLink. "
-            "Please refer to the Flower documentation for more information: "
-            f"{url_v}{page}",
-        )
-    if not enable_supernode_auth:
+    if enable_supernode_auth:
+        if args.insecure:
+            url_v = f"https://flower.ai/docs/framework/v{package_version}/en/"
+            page = "how-to-authenticate-supernodes.html"
+            flwr_exit(
+                ExitCode.SUPERLINK_INVALID_ARGS,
+                "The `--enable-supernode-auth` flag requires encrypted TLS "
+                "communications. Please provide TLS certificates using the "
+                "`--ssl-certfile`, `--ssl-keyfile` and `--ssl-ca-certfile` "
+                "arguments to your SuperLink. Please refer to the Flower "
+                f"documentation for more information: {url_v}{page}",
+            )
+        if args.fleet_api_type != TRANSPORT_TYPE_GRPC_RERE:
+            flwr_exit(
+                ExitCode.SUPERLINK_INVALID_ARGS,
+                "The `--enable-supernode-auth` flag is only supported "
+                "with the gRPC-rere Fleet API transport. Please set "
+                f"`--fleet-api-type` to `{TRANSPORT_TYPE_GRPC_RERE}`.",
+            )
+        if args.simulation:
+            log(
+                WARN,
+                "SuperNode authentication is not applicable with the simulation, "
+                "runtime as no SuperNodes can connect to this SuperLink. "
+                "Proceeding...",
+            )
+    # If supernode authentication is disabled, warn users
+    else:
         log(
             WARN,
             "SuperNode authentication is disabled. The SuperLink will accept "
@@ -265,8 +296,12 @@ def run_superlink() -> None:
             f" to the Flower documentation for more information: {url_v}{page}",
         )
 
+    # Load Federation Manager
+    fed_config_path = getattr(args, "federations_config", None)
+    federation_manager = get_federation_manager(fed_config_path)
+
     # Initialize StateFactory
-    state_factory = LinkStateFactory(args.database)
+    state_factory = LinkStateFactory(args.database, federation_manager)
 
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
@@ -384,7 +419,6 @@ def run_superlink() -> None:
                 state_factory=state_factory,
                 ffs_factory=ffs_factory,
                 objectstore_factory=objectstore_factory,
-                enable_supernode_auth=enable_supernode_auth,
                 certificates=certificates,
             )
             grpc_servers.append(fleet_server)
@@ -570,7 +604,6 @@ def _run_fleet_api_grpc_adapter(
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
-    enable_supernode_auth: bool,
     certificates: Optional[tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (GrpcAdapter)."""
@@ -579,7 +612,7 @@ def _run_fleet_api_grpc_adapter(
         state_factory=state_factory,
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
-        enable_supernode_auth=enable_supernode_auth,
+        enable_supernode_auth=False,
     )
     fleet_add_servicer_to_server_fn = add_GrpcAdapterServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(

@@ -116,7 +116,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             return StartRunResponse()
 
         flwr_aid = shared_account_info.get().flwr_aid
-        _check_flwr_aid_exists(flwr_aid, context)
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
         fab_file = request.fab.content
@@ -126,6 +126,19 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             if self.is_simulation and "num-supernodes" not in federation_options:
                 raise ValueError(
                     "Federation options doesn't contain key `num-supernodes`."
+                )
+
+            # Check (1) federation exists and (2) the flwr_aid is a member
+            federation = request.federation
+
+            if not state.federation_manager.exists(federation):
+                raise ValueError(f"Federation '{federation}' does not exist.")
+
+            if not state.federation_manager.has_member(flwr_aid, federation):
+                raise ValueError(
+                    f"Account with ID '{flwr_aid}' is not a member of the "
+                    f"federation '{federation}'. Please log in with another account "
+                    "or request access to this federation."
                 )
 
             # Create run
@@ -146,6 +159,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 fab_version,
                 fab_hash,
                 override_config,
+                request.federation,
                 federation_options,
                 flwr_aid,
             )
@@ -174,7 +188,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # pylint: disable-next=broad-except
         except Exception as e:
             log(ERROR, "Could not start run: %s", str(e))
-            return StartRunResponse()
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                str(e),
+            )
 
         log(INFO, "Created run %s", str(run_id))
         return StartRunResponse(run_id=run_id)
@@ -417,9 +434,12 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         flwr_aid = shared_account_info.get().flwr_aid
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        # Account name exists if `flwr_aid` exists
+        account_name = cast(str, shared_account_info.get().account_name)
         try:
             node_id = state.create_node(
                 owner_aid=flwr_aid,
+                owner_name=account_name,
                 public_key=request.public_key,
                 heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
             )

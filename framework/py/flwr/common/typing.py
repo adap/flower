@@ -231,6 +231,7 @@ class Run:  # pylint: disable=too-many-instance-attributes
     finished_at: str
     status: RunStatus
     flwr_aid: str
+    federation: str
 
     @classmethod
     def create_empty(cls, run_id: int) -> "Run":
@@ -247,6 +248,7 @@ class Run:  # pylint: disable=too-many-instance-attributes
             finished_at="",
             status=RunStatus(status="", sub_status="", details=""),
             flwr_aid="",
+            federation="",
         )
 
 
