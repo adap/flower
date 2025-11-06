@@ -191,7 +191,7 @@ def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
     return buf
 
 
-def _request_download_link(identifier: str) -> str:
+def _request_download_link(app_id: str) -> str:
     """Request download link from Flower platform API."""
     url = f"{PLATFORM_API_URL}/hub/fetch-zip"
     headers = {
@@ -199,7 +199,7 @@ def _request_download_link(identifier: str) -> str:
         "Accept": "application/json",
     }
     body = {
-        "identifier": identifier,  # send raw string of identifier
+        "app_id": app_id,  # send raw string of app_id
     }
 
     try:
@@ -208,7 +208,7 @@ def _request_download_link(identifier: str) -> str:
         raise typer.BadParameter(f"Unable to connect to Platform API: {e}") from e
 
     if resp.status_code == 404:
-        raise typer.BadParameter(f"'{identifier}' not found in Platform API")
+        raise typer.BadParameter(f"'{app_id}' not found in Platform API")
     if not resp.ok:
         raise typer.BadParameter(
             f"Platform API request failed with "
@@ -221,10 +221,10 @@ def _request_download_link(identifier: str) -> str:
     return str(data["zip_url"])
 
 
-def download_remote_app_via_api(identifier: str) -> None:
+def download_remote_app_via_api(app_id: str) -> None:
     """Download App from Platform API."""
     # Parse @user/app just to derive local dir name
-    m = re.match(APP_ID_PATTERN, identifier)
+    m = re.match(APP_ID_PATTERN, app_id)
     if not m:
         raise typer.BadParameter(
             "Invalid remote app ID. Expected format: '@user_name/app_name'."
@@ -244,12 +244,12 @@ def download_remote_app_via_api(identifier: str) -> None:
 
     print(
         typer.style(
-            f"\n🔗 Requesting download link for {identifier}...",
+            f"\n🔗 Requesting download link for {app_id}...",
             fg=typer.colors.GREEN,
             bold=True,
         )
     )
-    presigned_url = _request_download_link(identifier)
+    presigned_url = _request_download_link(app_id)
 
     print(
         typer.style(
