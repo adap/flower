@@ -139,8 +139,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
                 if not state.federation_manager.has_member(flwr_aid, federation):
                     raise ValueError(
-                        f"Account with flwr_aid '{flwr_aid}' is not a member of "
-                        f"federation '{federation}'. Login with another account "
+                        f"Account with ID '{flwr_aid}' is not a member of the "
+                        f"federation '{federation}'. Please log in with another account "
                         "or request access to this federation."
                     )
 
