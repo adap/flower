@@ -48,7 +48,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     UnregisterNodeRequest,
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
-from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.auth_plugin import NoOpControlAuthnPlugin
@@ -114,6 +114,7 @@ class TestControlServicer(unittest.TestCase):
         request = StartRunRequest()
         request.fab.hash_str = fab_hash
         request.fab.content = fab_content
+        request.federation = NOOP_FEDERATION
 
         # Execute
         with patch(
