@@ -199,7 +199,7 @@ def _request_download_link(identifier: str) -> str:
         "Accept": "application/json",
     }
     body = {
-        "identifier": identifier,  # send raw string of identifier
+        "app_id": identifier,  # send raw string of identifier
     }
 
     try:
