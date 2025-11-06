@@ -33,8 +33,7 @@ from flwr.common.constant import (
     FLWR_DIR,
     REFRESH_TOKEN_KEY,
 )
-# from flwr.supercore.constant import PLATFORM_API_URL
-PLATFORM_API_URL = "https://api.flower.blue/v1"
+from flwr.supercore.constant import PLATFORM_API_URL
 
 
 # Constants per spec
@@ -299,18 +298,19 @@ def publish(
         raise typer.Exit(code=1)
 
     # Check the credentials path
-    creds_path = app.absolute() / FLWR_DIR / CREDENTIALS_DIR / f"{federation}.json"
-    if not creds_path.is_file():
-        typer.secho(
-            "❌ Please login before publishing app.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
+    if not token:
+        creds_path = app.absolute() / FLWR_DIR / CREDENTIALS_DIR / f"{federation}.json"
+        if not creds_path.is_file():
+            typer.secho(
+                "❌ Please login before publishing app.",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(code=1)
 
-    # Load and validate credentials
-    creds = _validate_credentials_content(creds_path)
-    token = token or creds[ACCESS_TOKEN_KEY]
+        # Load and validate credentials
+        creds = _validate_credentials_content(creds_path)
+        token = creds[ACCESS_TOKEN_KEY]
 
     # Collect & validate app files
     files = _collect_files(app)
