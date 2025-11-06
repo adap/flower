@@ -116,7 +116,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             return StartRunResponse()
 
         flwr_aid = shared_account_info.get().flwr_aid
-        _check_flwr_aid_exists(flwr_aid, context)
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
         fab_file = request.fab.content
@@ -127,6 +127,22 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 raise ValueError(
                     "Federation options doesn't contain key `num-supernodes`."
                 )
+
+            # If it's not simulation, check (1) federation exists
+            # and (2) the flwr_aid is a member
+            if not self.is_simulation:
+
+                federation = request.federation
+
+                if not state.federation_manager.exists(federation):
+                    raise ValueError(f"Federation '{federation}' does not exist.")
+
+                if not state.federation_manager.has_member(flwr_aid, federation):
+                    raise ValueError(
+                        f"Account with flwr_aid '{flwr_aid}' is not a member of "
+                        f"federation '{federation}'. Login with another account "
+                        "or request access to this federation."
+                    )
 
             # Create run
             fab = Fab(
