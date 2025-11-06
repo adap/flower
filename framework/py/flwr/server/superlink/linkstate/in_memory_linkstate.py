@@ -171,7 +171,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     {src_node_id, dst_node_id},
                     self.run_ids[message.metadata.run_id].run.federation,
                 )
-                if len(filtered) == 0:  # Both nodes are not in the federation
+                if len(filtered) != 2:  # Not both nodes are in the federation
                     invalid_msg_ids.add(msg_id)
 
             # Delete all invalid messages

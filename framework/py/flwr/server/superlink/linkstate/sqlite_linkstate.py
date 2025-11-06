@@ -316,7 +316,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 filtered = self.federation_manager.filter_nodes(
                     {src_node_id, dst_node_id}, federation
                 )
-                if len(filtered) == 0:  # Both nodes are not in the federation
+                if len(filtered) != 2:  # Not both nodes are in the federation
                     invalid_msg_ids.add(msg_id)
 
             # Delete all invalid messages
