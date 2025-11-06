@@ -24,6 +24,7 @@ from flwr.server.history import History
 from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
+from flwr.server.client_results_strategy import ClientResultsStrategy
 
 from ..grid import Grid
 from .app_utils import start_update_client_manager_thread
@@ -35,6 +36,7 @@ def start_grid(  # pylint: disable=too-many-arguments, too-many-locals
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
+    client_results_strategy: Optional[ClientResultsStrategy] = None,
     client_manager: Optional[ClientManager] = None,
 ) -> History:
     """Start a Flower server.
@@ -69,6 +71,7 @@ def start_grid(  # pylint: disable=too-many-arguments, too-many-locals
         server=server,
         config=config,
         strategy=strategy,
+        client_results_strategy=client_results_strategy,
         client_manager=client_manager,
     )
     log(
