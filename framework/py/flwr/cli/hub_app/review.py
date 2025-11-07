@@ -16,7 +16,6 @@
 
 
 import hashlib
-import json
 import re
 import time
 from cryptography.hazmat.primitives import serialization
@@ -29,6 +28,7 @@ import requests
 import typer
 
 from flwr.cli.install import install_from_fab
+from flwr.cli.utils import request_download_link
 from flwr.common.config import get_flwr_dir
 from flwr.supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
 from flwr.supercore.primitives.asymmetric_ed25519 import (
@@ -46,34 +46,11 @@ def _mk_review_dir(publisher: str, app_name: str) -> Path:
     return d
 
 
-def _request_download_link(app_id: str) -> str:
+def _request_download_link(app_id: str, version: Optional[str]) -> str:
     """Request download link from Flower platform API."""
     url = f"{PLATFORM_API_URL}/hub/fetch-fab"
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
-    body = {
-        "app_id": app_id,  # send raw string of app_id
-    }
 
-    try:
-        resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
-    except requests.RequestException as e:
-        raise typer.BadParameter(f"Unable to connect to Platform API: {e}") from e
-
-    if resp.status_code == 404:
-        raise typer.BadParameter(f"'{app_id}' not found in Platform API")
-    if not resp.ok:
-        raise typer.BadParameter(
-            f"Platform API request failed with "
-            f"status {resp.status_code}. Details: {resp.text}"
-        )
-
-    data = resp.json()
-    if "fab_url" not in data:
-        raise typer.BadParameter("Invalid response from Platform API")
-    return str(data["fab_url"])
+    return request_download_link(app_id, version, url, "fab_url")
 
 
 def _download_fab(url: str) -> bytes:
@@ -156,6 +133,13 @@ def review(
             help="App identifier in the form @user_name/app_name)."
         ),
     ],
+    version: Annotated[
+        Optional[str],
+        typer.Option(
+            "--version",
+            help="Version of the app to review (e.g., '1.0.0').",
+        ),
+    ] = None,
     token: Annotated[
         Optional[str],
         typer.Option(
@@ -192,7 +176,7 @@ def review(
 
     # Download FAB
     typer.secho("Downloading FAB... ", fg=typer.colors.BLUE)
-    url = _request_download_link(app_id)
+    url = _request_download_link(app_id, version)
     fab_bytes = _download_fab(url)
 
     # Unpack FAB
