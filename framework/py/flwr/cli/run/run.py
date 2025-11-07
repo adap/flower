@@ -104,15 +104,13 @@ def run(
             redirect_output(captured_output)
 
         app_id_str = str(app) if app is not None else ""
-        is_remote_app: bool = False
-
-        if app_id_str.startswith("@"):
-            m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", app_id_str)
-            if not m:
+        app_id = None
+        if (app_str := str(app)).startswith("@"):
+            if not re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", app_str):
                 raise typer.BadParameter(
                     "Invalid remote app ID. Expected format: '@user_name/app_name'."
                 )
-            is_remote_app = True
+            app_id = app_str
 
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
