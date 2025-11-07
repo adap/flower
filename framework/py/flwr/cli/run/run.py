@@ -117,6 +117,7 @@ def run(
 
         # Disable the validation for remote apps
         pyproject_path = app / "pyproject.toml" if not is_remote_app else None
+        # `./pyproject.toml` will be loaded when `pyproject_path` is None
         config, errors, warnings = load_and_validate(
             pyproject_path, check_module=not is_remote_app
         )
