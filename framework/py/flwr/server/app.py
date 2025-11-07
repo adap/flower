@@ -75,6 +75,7 @@ from flwr.superlink.auth_plugin import (
     NoOpControlAuthnPlugin,
     NoOpControlAuthzPlugin,
 )
+from flwr.superlink.federation import FederationManager, NoOpFederationManager
 from flwr.superlink.servicer.control import run_control_api_grpc
 
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
@@ -97,6 +98,7 @@ try:
         get_control_authz_ee_plugins,
         get_control_event_log_writer_plugins,
         get_ee_artifact_provider,
+        get_ee_federation_manager,
         get_fleet_event_log_writer_plugins,
     )
 except ImportError:
@@ -129,6 +131,11 @@ except ImportError:
         """Return all Control API authorization plugins for EE."""
         return {}
 
+    # pylint: disable-next=unused-argument
+    def get_ee_federation_manager(config_path: str) -> FederationManager:
+        """Return the EE FederationManager."""
+        raise NotImplementedError("No federation manager is currently supported.")
+
 
 def get_control_authn_plugins() -> dict[str, type[ControlAuthnPlugin]]:
     """Return all Control API authentication plugins."""
@@ -140,6 +147,14 @@ def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
     """Return all Control API authorization plugins."""
     ee_dict: dict[str, type[ControlAuthzPlugin]] = get_control_authz_ee_plugins()
     return ee_dict | {AuthzType.NOOP: NoOpControlAuthzPlugin}
+
+
+def get_federation_manager(config_path: Optional[str] = None) -> FederationManager:
+    """Return the FederationManager."""
+    if config_path is None:
+        return NoOpFederationManager()
+    federation_manager: FederationManager = get_ee_federation_manager(config_path)
+    return federation_manager
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
@@ -281,8 +296,12 @@ def run_superlink() -> None:
             f" to the Flower documentation for more information: {url_v}{page}",
         )
 
+    # Load Federation Manager
+    fed_config_path = getattr(args, "federations_config", None)
+    federation_manager = get_federation_manager(fed_config_path)
+
     # Initialize StateFactory
-    state_factory = LinkStateFactory(args.database)
+    state_factory = LinkStateFactory(args.database, federation_manager)
 
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
