@@ -24,7 +24,7 @@ from abc import abstractmethod
 from datetime import datetime, timedelta, timezone
 from itertools import product
 from typing import Optional
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 from uuid import uuid4
 
 from parameterized import parameterized
@@ -370,7 +370,9 @@ class StateTest(CoreStateTest):
         node_id2 = create_dummy_node(state)
         state.delete_node("mock_flwr_aid", node_id2)
         node_id3 = create_dummy_node(state, activate=False)
-        invalid_node_id = 61016 if node_id != 61016 else 61017
+        node_id4 = create_dummy_node(state)
+        invalid_node_id = 61016
+        assert invalid_node_id not in {node_id, node_id2, node_id3, node_id4}
         run_id = create_dummy_run(state)
         # A message for a node that doesn't exist
         msg = message_from_proto(
@@ -396,12 +398,21 @@ class StateTest(CoreStateTest):
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id3, run_id=run_id
             )
         )
+        # A message for a node outside the federation
+        mock_has_node = Mock(side_effect=lambda nid, _: nid != node_id4)
+        state.federation_manager.has_node = mock_has_node  # type: ignore
+        msg5 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id4, run_id=run_id
+            )
+        )
 
         # Execute and assert
         assert state.store_message_ins(msg) is None
         assert state.store_message_ins(msg2) is None
         assert state.store_message_ins(msg3) is None
         assert state.store_message_ins(msg4) is None
+        assert state.store_message_ins(msg5) is None
 
     def test_store_and_delete_messages(self) -> None:
         """Test delete_message."""
@@ -641,6 +652,27 @@ class StateTest(CoreStateTest):
         # Assert
         for i in retrieved_node_ids:
             assert i in node_ids
+
+    def test_get_nodes_filtered_by_federation(self) -> None:
+        """Test that get_nodes respects federation manager filtering."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id = create_dummy_run(state, federation="test-federation")
+
+        # Create 5 nodes
+        node_ids = [create_dummy_node(state) for _ in range(5)]
+
+        # Mock filter_nodes to return only a subset (first 2 nodes)
+        subset_node_ids = set(node_ids[:2])
+        mock_filter = Mock(return_value=subset_node_ids)
+        state.federation_manager.filter_nodes = mock_filter  # type: ignore
+
+        # Execute
+        retrieved_node_ids = state.get_nodes(run_id)
+
+        # Assert
+        mock_filter.assert_called_once_with(set(node_ids), "test-federation")
+        assert retrieved_node_ids == subset_node_ids
 
     def test_create_node_public_key(self) -> None:
         """Test creating a client node with public key."""
@@ -1234,6 +1266,39 @@ class StateTest(CoreStateTest):
             else:
                 assert res is None
 
+    def test_store_message_res_node_removed_from_federation(self) -> None:
+        """Test that store_message_res returns None if destination node is removed from
+        federation after message was stored."""
+        # Prepare
+        state = self.state_factory()
+        node_id = create_dummy_node(state)
+        run_id = create_dummy_run(state)
+
+        # Store message for node and retrieve
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        state.store_message_ins(message=msg)
+        assert state.get_message_ins(node_id=node_id, limit=None)
+
+        # Mock removal of node from federation
+        state.federation_manager.filter_nodes = Mock(return_value=set())  # type: ignore
+
+        # Create reply message
+        reply_msg = Message(RecordDict(), reply_to=msg)
+        reply_msg.metadata.__dict__["_message_id"] = reply_msg.object_id
+
+        # Execute
+        result = state.store_message_res(reply_msg)
+
+        # Assert
+        # Should return None since node is no longer in federation
+        assert result is None
+        assert state.num_message_res() == 0
+        assert state.num_message_ins() == 0
+
     def test_get_message_ins_not_return_expired(self) -> None:
         """Test get_message_ins not to return expired Messages."""
         # Prepare
@@ -1258,6 +1323,34 @@ class StateTest(CoreStateTest):
             mock_dt.now.return_value = future_dt
             message_list = state.get_message_ins(node_id=2, limit=None)
             assert len(message_list) == 0
+
+    def test_get_message_ins_node_removed_from_federation(self) -> None:
+        """Test that get_message_ins returns nothing if node is removed from federation
+        after message was stored."""
+        # Prepare
+        state = self.state_factory()
+        node_id = create_dummy_node(state)
+        run_id = create_dummy_run(state)
+
+        # Store message for node
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        assert state.store_message_ins(message=msg)
+
+        # Mock removal of node from federation
+        state.federation_manager.filter_nodes = Mock(return_value=set())  # type: ignore
+
+        # Execute
+        message_ins_list = state.get_message_ins(node_id=node_id, limit=None)
+
+        # Assert
+        # Should return empty list since node is no longer in federation
+        assert len(message_ins_list) == 0
+        # Message should still be deleted
+        assert state.num_message_ins() == 0
 
     def test_get_message_res_expired_message_ins(self) -> None:
         """Test get_message_res to return error Message if the inquired message has
@@ -1319,6 +1412,43 @@ class StateTest(CoreStateTest):
         assert len(message_res_list) == 1
         assert message_res_list[0].has_error()
         assert message_res_list[0].error.code == ErrorCode.MESSAGE_UNAVAILABLE
+
+    def test_get_message_res_node_removed_from_federation(self) -> None:
+        """Test that when node is removed from federation after storing message_ins and
+        message_res, both are deleted and get_message_res returns error."""
+        # Prepare
+        state = self.state_factory()
+        node_id = create_dummy_node(state)
+        run_id = create_dummy_run(state)
+
+        # Store message_ins and retrieve
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        assert state.store_message_ins(msg)
+        state.get_message_ins(node_id=node_id, limit=None)
+
+        # Store message_res
+        res_msg = Message(RecordDict(), reply_to=msg)
+        res_msg.metadata.__dict__["_message_id"] = res_msg.object_id
+        assert state.store_message_res(res_msg)
+
+        # Mock removal of node from federation
+        state.federation_manager.filter_nodes = Mock(return_value=set())  # type: ignore
+
+        # Execute
+        message_res_list = state.get_message_res(message_ids={msg.object_id})
+
+        # Assert
+        # Should return error message since node is no longer in federation
+        assert len(message_res_list) == 1
+        assert message_res_list[0].has_error()
+        assert message_res_list[0].error.code == ErrorCode.MESSAGE_UNAVAILABLE
+        # Both message_ins and message_res should be deleted
+        assert state.num_message_ins() == 0
+        assert state.num_message_res() == 0
 
     def test_get_message_res_return_successful(self) -> None:
         """Test get_message_res returns correct Message."""
