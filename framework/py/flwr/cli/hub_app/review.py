@@ -27,8 +27,8 @@ from typing import Annotated, Optional
 import requests
 import typer
 
-from flwr.cli.install import install_from_fab
-from flwr.cli.utils import request_download_link
+from ..install import install_from_fab
+from ..utils import request_download_link
 from flwr.common.config import get_flwr_dir
 from flwr.supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
 from flwr.supercore.primitives.asymmetric_ed25519 import (
