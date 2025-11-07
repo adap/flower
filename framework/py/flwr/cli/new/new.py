@@ -16,7 +16,6 @@
 
 
 import io
-import json
 import re
 import zipfile
 from enum import Enum
@@ -33,6 +32,7 @@ from ..utils import (
     is_valid_project_name,
     prompt_options,
     prompt_text,
+    request_download_link,
     sanitize_project_name,
 )
 
@@ -191,37 +191,13 @@ def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
     return buf
 
 
-def _request_download_link(app_id: str) -> str:
+def _request_download_link(app_id: str, version: Optional[str]) -> str:
     """Request download link from Flower platform API."""
     url = f"{PLATFORM_API_URL}/hub/fetch-zip"
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
-    body = {
-        "app_id": app_id,  # send raw string of app_id
-    }
-
-    try:
-        resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
-    except requests.RequestException as e:
-        raise typer.BadParameter(f"Unable to connect to Platform API: {e}") from e
-
-    if resp.status_code == 404:
-        raise typer.BadParameter(f"'{app_id}' not found in Platform API")
-    if not resp.ok:
-        raise typer.BadParameter(
-            f"Platform API request failed with "
-            f"status {resp.status_code}. Details: {resp.text}"
-        )
-
-    data = resp.json()
-    if "zip_url" not in data:
-        raise typer.BadParameter("Invalid response from Platform API")
-    return str(data["zip_url"])
+    return request_download_link(app_id, version, url, "zip_url")
 
 
-def download_remote_app_via_api(app_id: str) -> None:
+def download_remote_app_via_api(app_id: str, version: Optional[str]) -> None:
     """Download App from Platform API."""
     # Parse @user/app just to derive local dir name
     m = re.match(APP_ID_PATTERN, app_id)
@@ -249,7 +225,7 @@ def download_remote_app_via_api(app_id: str) -> None:
             bold=True,
         )
     )
-    presigned_url = _request_download_link(app_id)
+    presigned_url = _request_download_link(app_id, version)
 
     print(
         typer.style(
@@ -287,6 +263,13 @@ def new(
         Optional[str],
         typer.Option(case_sensitive=False, help="The Flower username of the author"),
     ] = None,
+    version: Annotated[
+        Optional[str],
+        typer.Option(
+            "--version",
+            help="Version of the app to download (e.g., '1.0.0').",
+        ),
+    ] = None,
 ) -> None:
     """Create new Flower App."""
     if app_name is None:
@@ -294,7 +277,7 @@ def new(
 
     # Download remote app
     if app_name and app_name.startswith("@"):
-        download_remote_app_via_api(app_name)
+        download_remote_app_via_api(app_name, version)
         return
 
     if not is_valid_project_name(app_name):
