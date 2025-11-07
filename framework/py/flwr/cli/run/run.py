@@ -105,12 +105,12 @@ def run(
 
         # Determine if app is remote
         app_id = None
-        if str(app).startswith("@"):
-            if not re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", str(app)):
+        if (app_str := str(app)).startswith("@"):
+            if not re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", app_str):
                 raise typer.BadParameter(
                     "Invalid remote app ID. Expected format: '@user_name/app_name'."
                 )
-            app_id = str(app)
+            app_id = app_str
         is_remote_app = app_id is not None
 
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
