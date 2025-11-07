@@ -91,7 +91,6 @@ FAB_EXCLUDE_PATTERNS = (
     "**/__pycache__/**",
     FAB_CONFIG_FILE,  # Exclude the original pyproject.toml
 )
-PLATFORM_API_URL = "https://api.flower.ai/v1"
 
 # Constant for SuperLink
 SUPERLINK_NODE_ID = 1
