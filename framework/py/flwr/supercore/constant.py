@@ -27,6 +27,19 @@ FLWR_IN_MEMORY_DB_NAME = ":flwr-in-memory:"
 APP_ID_PATTERN = r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$"
 PLATFORM_API_URL = "https://api.flower.ai/v1"
 
+# App spec
+ALLOWED_EXTS = [".py", ".toml", ".md"]
+MAX_TOTAL_BYTES = 10 * 1024 * 1024  # 10 MB
+MAX_FILE_BYTES = 1 * 1024 * 1024  # 1 MB
+MAX_FILE_COUNT = 1000
+MAX_DIR_DEPTH = 10  # relative depth (number of parts in relpath)
+UTF8 = "utf-8"
+MIME_MAP = {
+    ".py": "text/x-python; charset=utf-8",
+    ".md": "text/markdown; charset=utf-8",
+    ".toml": "application/toml; charset=utf-8",
+}
+
 # Constants for federations
 NOOP_FEDERATION = "default"
 

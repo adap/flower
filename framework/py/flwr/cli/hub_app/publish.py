@@ -33,21 +33,16 @@ from flwr.common.constant import (
     FLWR_DIR,
     REFRESH_TOKEN_KEY,
 )
-from flwr.supercore.constant import PLATFORM_API_URL
-
-# Constants per spec
-ALLOWED_EXTS = {".py", ".toml", ".md"}
-MAX_TOTAL_BYTES = 10 * 1024 * 1024  # 10 MB
-MAX_FILE_BYTES = 1 * 1024 * 1024  # 1 MB
-MAX_FILE_COUNT = 1000
-MAX_DIR_DEPTH = 10  # relative depth (number of parts in relpath)
-UTF8 = "utf-8"
-
-MIME_MAP = {
-    ".py": "text/x-python; charset=utf-8",
-    ".md": "text/markdown; charset=utf-8",
-    ".toml": "application/toml; charset=utf-8",
-}
+from flwr.supercore.constant import (
+    ALLOWED_EXTS,
+    MAX_DIR_DEPTH,
+    MAX_FILE_BYTES,
+    MAX_FILE_COUNT,
+    MAX_TOTAL_BYTES,
+    MIME_MAP,
+    PLATFORM_API_URL,
+    UTF8,
+)
 
 
 def _load_gitignore(root: Path) -> Optional[Iterable[str]]:
@@ -265,7 +260,7 @@ def _validate_credentials_content(creds_path: Path) -> dict[str, str]:
         )
         raise typer.Exit(code=1)
 
-    return content
+    return content  # type: ignore[no-any-return]
 
 
 def publish(
