@@ -18,6 +18,7 @@
 import hashlib
 import io
 import json
+import re
 import subprocess
 from pathlib import Path
 from typing import Annotated, Any, Optional, cast
@@ -45,6 +46,7 @@ from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_
 from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
+from flwr.supercore.constant import NOOP_FEDERATION
 
 from ..log import start_stream
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
@@ -52,7 +54,7 @@ from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugi
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
-# pylint: disable-next=too-many-locals, R0913, R0917
+# pylint: disable-next=too-many-locals, too-many-branches, R0913, R0917
 def run(
     app: Annotated[
         Path,
@@ -100,11 +102,27 @@ def run(
     try:
         if suppress_output:
             redirect_output(captured_output)
+
+        # Determine if app is remote
+        app_id = None
+        if (app_str := str(app)).startswith("@"):
+            if not re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", app_str):
+                raise typer.BadParameter(
+                    "Invalid remote app ID. Expected format: '@user_name/app_name'."
+                )
+            app_id = app_str
+        is_remote_app = app_id is not None
+
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-        pyproject_path = app / "pyproject.toml" if app else None
-        config, errors, warnings = load_and_validate(path=pyproject_path)
+        # Disable the validation for remote apps
+        pyproject_path = app / "pyproject.toml" if not is_remote_app else None
+        # `./pyproject.toml` will be loaded when `pyproject_path` is None
+        config, errors, warnings = load_and_validate(
+            pyproject_path, check_module=not is_remote_app
+        )
         config = process_loaded_project_config(config, errors, warnings)
+
         federation, federation_config = validate_federation_in_project_config(
             federation, config, federation_config_overrides
         )
@@ -117,6 +135,7 @@ def run(
                 run_config_overrides,
                 stream,
                 output_format,
+                app_id,
             )
         else:
             _run_without_control_api(
@@ -147,19 +166,29 @@ def _run_with_control_api(
     config_overrides: Optional[list[str]],
     stream: bool,
     output_format: str,
+    app_id: Optional[str],
 ) -> None:
     channel = None
+    is_remote_app = app_id is not None
     try:
         auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
         channel = init_channel(app, federation_config, auth_plugin)
         stub = ControlStub(channel)
 
-        fab_bytes = build_fab_from_disk(app)
-        fab_hash = hashlib.sha256(fab_bytes).hexdigest()
-        config = cast(dict[str, Any], load_toml(app / FAB_CONFIG_FILE))
-        fab_id, fab_version = get_metadata_from_config(config)
+        # Build FAB if local app
+        if not is_remote_app:
+            fab_bytes = build_fab_from_disk(app)
+            fab_hash = hashlib.sha256(fab_bytes).hexdigest()
+            config = cast(dict[str, Any], load_toml(app / FAB_CONFIG_FILE))
+            fab_id, fab_version = get_metadata_from_config(config)
+            fab = Fab(fab_hash, fab_bytes, {})
+        # Skip FAB build if remote app
+        else:
+            # Use empty values for FAB
+            fab_id = fab_version = fab_hash = ""
+            fab = Fab(fab_hash, b"", {})
 
-        fab = Fab(fab_hash, fab_bytes, {})
+        real_federation: str = federation_config.get("federation", NOOP_FEDERATION)
 
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
         fed_config = flatten_dict(federation_config.get("options", {}))
@@ -168,7 +197,9 @@ def _run_with_control_api(
         req = StartRunRequest(
             fab=fab_to_proto(fab),
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
+            federation=real_federation,
             federation_options=config_record_to_proto(c_record),
+            app_id=app_id or "",
         )
         with flwr_cli_grpc_exc_handler():
             res = stub.StartRun(req)
@@ -178,23 +209,34 @@ def _run_with_control_api(
                 f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN
             )
         else:
-            typer.secho("❌ Failed to start run", fg=typer.colors.RED)
+            if is_remote_app:
+                typer.secho(
+                    "❌ Failed to start run. Please check that the provided "
+                    "app identifier (@user_name/app_name) is correct.",
+                    fg=typer.colors.RED,
+                )
+            else:
+                typer.secho("❌ Failed to start run", fg=typer.colors.RED)
             raise typer.Exit(code=1)
 
         if output_format == CliOutputFormat.JSON:
-            run_output = json.dumps(
-                {
-                    "success": res.HasField("run_id"),
-                    "run-id": res.run_id if res.HasField("run_id") else None,
-                    "fab-id": fab_id,
-                    "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
-                    "fab-version": fab_version,
-                    "fab-hash": fab_hash[:8],
-                    "fab-filename": get_fab_filename(config, fab_hash),
-                }
-            )
+            # Only include FAB metadata if we actually built a local FAB
+            payload: dict[str, Any] = {
+                "success": res.HasField("run_id"),
+                "run-id": res.run_id if res.HasField("run_id") else None,
+            }
+            if not is_remote_app:
+                payload.update(
+                    {
+                        "fab-id": fab_id,
+                        "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
+                        "fab-version": fab_version,
+                        "fab-hash": fab_hash[:8],
+                        "fab-filename": get_fab_filename(config, fab_hash),
+                    }
+                )
             restore_output()
-            Console().print_json(run_output)
+            Console().print_json(json.dumps(payload))
 
         if stream:
             start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)

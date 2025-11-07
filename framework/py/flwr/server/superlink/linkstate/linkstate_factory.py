@@ -20,7 +20,7 @@ from typing import Optional
 
 from flwr.common.logger import log
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
-from flwr.superlink.federation import FederationManager, NoOpFederationManager
+from flwr.superlink.federation import FederationManager
 
 from .in_memory_linkstate import InMemoryLinkState
 from .linkstate import LinkState
@@ -44,11 +44,11 @@ class LinkStateFactory:
     def __init__(
         self,
         database: str,
-        federation_manager: Optional[FederationManager] = None,
+        federation_manager: FederationManager,
     ) -> None:
         self.database = database
         self.state_instance: Optional[LinkState] = None
-        self.federation_manager = federation_manager or NoOpFederationManager()
+        self.federation_manager = federation_manager
 
     def state(self) -> LinkState:
         """Return a State instance and create it, if necessary."""

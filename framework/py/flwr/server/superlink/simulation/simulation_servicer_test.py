@@ -39,6 +39,7 @@ from flwr.server.superlink.simulation.simulationio_grpc import run_simulationio_
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
+from flwr.superlink.federation import NoOpFederationManager
 
 
 class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
@@ -50,7 +51,9 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
         self.temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         self.addCleanup(self.temp_dir.cleanup)  # Ensures cleanup after test
 
-        state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME)
+        state_factory = LinkStateFactory(
+            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+        )
         self.state = state_factory.state()
         ffs_factory = FfsFactory(self.temp_dir.name)
         self.ffs = ffs_factory.ffs()

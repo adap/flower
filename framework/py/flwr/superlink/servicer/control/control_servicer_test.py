@@ -48,10 +48,11 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     UnregisterNodeRequest,
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
-from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.auth_plugin import NoOpControlAuthnPlugin
+from flwr.superlink.federation import NoOpFederationManager
 from flwr.superlink.servicer.control.control_account_auth_interceptor import (
     shared_account_info,
 )
@@ -80,7 +81,9 @@ class TestControlServicer(unittest.TestCase):
         self.store = Mock()
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         self.servicer = ControlServicer(
-            linkstate_factory=LinkStateFactory(FLWR_IN_MEMORY_DB_NAME),
+            linkstate_factory=LinkStateFactory(
+                FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+            ),
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(store=Mock(return_value=self.store)),
             is_simulation=False,
@@ -111,6 +114,7 @@ class TestControlServicer(unittest.TestCase):
         request = StartRunRequest()
         request.fab.hash_str = fab_hash
         request.fab.content = fab_content
+        request.federation = NOOP_FEDERATION
 
         # Execute
         with patch(
@@ -303,7 +307,9 @@ class TestControlServicerAuth(unittest.TestCase):
         """Set up test fixtures."""
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         self.servicer = ControlServicer(
-            linkstate_factory=LinkStateFactory(FLWR_IN_MEMORY_DB_NAME),
+            linkstate_factory=LinkStateFactory(
+                FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+            ),
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(),
             is_simulation=False,
