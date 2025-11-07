@@ -180,10 +180,10 @@ def _run_with_control_api(
         stub = ControlStub(channel)
 
         # Build fab only if not a remote reference
-        fab_id = fab_version = fab_hash = None
+        fab_id = fab_version = fab_hash = ""
         if is_remote_app:
             # Skip build; send a placeholder Fab containing the remote reference
-            fab = Fab("", b"", {})
+            fab = Fab(fab_hash, b"", {})
         else:
             fab_bytes = build_fab_from_disk(app)
             fab_hash = hashlib.sha256(fab_bytes).hexdigest()
