@@ -137,7 +137,11 @@ class LinkState(CoreState):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def create_node(
-        self, owner_aid: str, public_key: bytes, heartbeat_interval: float
+        self,
+        owner_aid: str,
+        owner_name: str,
+        public_key: bytes,
+        heartbeat_interval: float,
     ) -> int:
         """Create, store in the link state, and return `node_id`."""
 
@@ -269,10 +273,40 @@ class LinkState(CoreState):  # pylint: disable=R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
+        federation: str,
         federation_options: ConfigRecord,
         flwr_aid: Optional[str],
     ) -> int:
-        """Create a new run for the specified `fab_hash`."""
+        """Create a new run.
+
+        Parameters
+        ----------
+        fab_id : Optional[str]
+            The ID of the FAB, of format `<publisher>/<app-name>`.
+        fab_version : Optional[str]
+            The version of the FAB.
+        fab_hash : Optional[str]
+            The SHA256 hex hash of the FAB.
+        override_config : UserConfig
+            Configuration overrides for the run config.
+        federation : str
+            The federation this run belongs to.
+        federation_options : ConfigRecord
+            Federation configurations. For now, only `num-supernodes` for
+            the simulation runtime.
+        flwr_aid : Optional[str]
+            Flower Account ID of the creator.
+
+        Returns
+        -------
+        int
+            The run ID of the newly created run.
+
+        Notes
+        -----
+        This method will not verify if the account has permission to create
+        a run in the federation.
+        """
 
     @abc.abstractmethod
     def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:

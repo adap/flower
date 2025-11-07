@@ -46,6 +46,7 @@ from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_
 from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
+from flwr.supercore.constant import NOOP_FEDERATION
 
 from ..log import start_stream
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
@@ -190,6 +191,8 @@ def _run_with_control_api(
             fab_id, fab_version = get_metadata_from_config(config)
             fab = Fab(fab_hash, fab_bytes, {})
 
+        real_federation: str = federation_config.get("federation", NOOP_FEDERATION)
+
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
         fed_config = flatten_dict(federation_config.get("options", {}))
         c_record = user_config_to_configrecord(fed_config)
@@ -197,6 +200,7 @@ def _run_with_control_api(
         req = StartRunRequest(
             fab=fab_to_proto(fab),
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
+            federation=real_federation,
             federation_options=config_record_to_proto(c_record),
             app_id=app_id_str,
         )

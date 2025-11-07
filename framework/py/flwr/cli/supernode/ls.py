@@ -32,7 +32,7 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
-from flwr.common.constant import FAB_CONFIG_FILE, NOOP_FLWR_AID, CliOutputFormat
+from flwr.common.constant import FAB_CONFIG_FILE, NOOP_ACCOUNT_NAME, CliOutputFormat
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
@@ -44,7 +44,7 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 
-_NodeListType = tuple[int, str, str, str, str, str, str, str]
+_NodeListType = tuple[int, str, str, str, str, str, str, str, str]
 
 
 def ls(  # pylint: disable=R0914, R0913, R0917
@@ -160,6 +160,7 @@ def _format_nodes(
             (
                 node.node_id,
                 node.owner_aid,
+                node.owner_name,
                 node.status,
                 _format_datetime(node.registered_at),
                 _format_datetime(node.last_activated_at),
@@ -188,7 +189,8 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
     for row in nodes_info:
         (
             node_id,
-            owner_aid,
+            _,
+            owner_name,
             status,
             _,
             last_activated_at,
@@ -216,7 +218,11 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
 
         formatted_row = (
             f"[bold]{node_id}[/bold]",
-            f"{owner_aid}" if owner_aid != NOOP_FLWR_AID else f"[dim]{owner_aid}[/dim]",
+            (
+                f"{owner_name}"
+                if owner_name != NOOP_ACCOUNT_NAME
+                else f"[dim]{owner_name}[/dim]"
+            ),
             f"[{status_style}]{status}",
             f"[cyan]{elapse_activated}[/cyan]" if status == "online" else "",
             time_at,
@@ -233,6 +239,7 @@ def _to_json(nodes_info: list[_NodeListType], verbose: bool) -> str:
         (
             node_id,
             owner_aid,
+            owner_name,
             status,
             created_at,
             activated_at,
@@ -248,6 +255,7 @@ def _to_json(nodes_info: list[_NodeListType], verbose: bool) -> str:
             {
                 "node-id": node_id,
                 "owner-aid": owner_aid,
+                "owner-name": owner_name,
                 "status": status,
                 "created-at": created_at,
                 "online-at": activated_at,

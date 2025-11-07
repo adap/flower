@@ -26,6 +26,7 @@ from parameterized import parameterized
 from flwr.common import ConfigRecord, now
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
+    NOOP_ACCOUNT_NAME,
     NOOP_FLWR_AID,
     PUBLIC_KEY_HEADER,
     SIGNATURE_HEADER,
@@ -74,6 +75,7 @@ from flwr.supercore.primitives.asymmetric import (
     public_key_to_bytes,
     sign_message,
 )
+from flwr.superlink.federation import NoOpFederationManager
 
 from .node_auth_server_interceptor import NodeAuthServerInterceptor
 
@@ -88,7 +90,9 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.node_sk, self.node_pk = generate_key_pairs()
         self.node_pk_bytes = public_key_to_bytes(self.node_pk)
 
-        state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME)
+        state_factory = LinkStateFactory(
+            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+        )
         self.state = state_factory.state()
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         ffs_factory = FfsFactory(self.tmp_dir.name)
@@ -246,13 +250,18 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         req = PullMessagesRequest(node=Node(node_id=node_id))
         return self._pull_messages.with_call(request=req, metadata=metadata)
 
+    def _create_dummy_run(self, running: bool = True) -> int:
+        """Create a dummy run in linkstate and return the run_id."""
+        run_id = self.state.create_run("", "", "", {}, "", ConfigRecord(), "")
+        if running:
+            self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+            self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        return run_id
+
     def _test_push_messages(self, metadata: list[Any]) -> Any:
         """Test PushMessages."""
         node_id = self._create_node_in_linkstate()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
-        # Transition status to running. PushMessages is only allowed in running status.
-        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        run_id = self._create_dummy_run()
         msg_proto = create_res_message(
             src_node_id=node_id, dst_node_id=SUPERLINK_NODE_ID, run_id=run_id
         )
@@ -262,10 +271,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_pull_object(self, metadata: list[Any]) -> Any:
         """Test PullObject."""
         node_id = self._create_node_in_linkstate()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
-        # Transition status to running. PushMessages is only allowed in running status.
-        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        run_id = self._create_dummy_run()
         req = PullObjectRequest(
             node=Node(node_id=node_id), run_id=run_id, object_id="1234"
         )
@@ -274,10 +280,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_push_object(self, metadata: list[Any]) -> Any:
         """Test PushObject."""
         node_id = self._create_node_in_linkstate()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
-        # Transition status to running. PushMessages is only allowed in running status.
-        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        run_id = self._create_dummy_run()
         req = PushObjectRequest(
             node=Node(node_id=node_id),
             run_id=run_id,
@@ -289,10 +292,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _test_get_run(self, metadata: list[Any]) -> Any:
         """Test GetRun."""
         node_id = self._create_node_in_linkstate()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
-        # Transition status to running. GetRun is only allowed in running status.
-        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        run_id = self._create_dummy_run()
         req = GetRunRequest(node=Node(node_id=node_id), run_id=run_id)
         return self._get_run.with_call(request=req, metadata=metadata)
 
@@ -308,10 +308,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test GetFab."""
         fab_hash = self.ffs.put(b"mock fab content", {})
         node_id = self._create_node_in_linkstate()
-        run_id = self.state.create_run("", "", "", {}, ConfigRecord(), "")
-        # Transition status to running. GetFabRequest is only allowed in running status.
-        self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        run_id = self._create_dummy_run()
         req = GetFabRequest(
             node=Node(node_id=node_id),
             run_id=run_id,
@@ -322,7 +319,10 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _create_node_in_linkstate(self, activate: bool = True) -> int:
         pk_bytes = self.node_pk_bytes
         node_id = self.state.create_node(
-            NOOP_FLWR_AID, public_key=pk_bytes, heartbeat_interval=30
+            owner_aid=NOOP_FLWR_AID,
+            owner_name=NOOP_ACCOUNT_NAME,
+            public_key=pk_bytes,
+            heartbeat_interval=30,
         )
         if activate:
             self.state.activate_node(node_id, 30)

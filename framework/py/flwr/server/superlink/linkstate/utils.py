@@ -51,7 +51,8 @@ VALID_RUN_SUB_STATUSES = {
 }
 MESSAGE_UNAVAILABLE_ERROR_REASON = (
     "Error: Message Unavailable - The requested message could not be found in the "
-    "database. It may have expired due to its TTL or never existed."
+    "database. It may have expired due to its TTL, been deleted because the "
+    "destination SuperNode was removed from the federation, or never existed."
 )
 REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON = (
     "Error: Reply Message Unavailable - The reply message has expired."

@@ -75,6 +75,7 @@ SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
     node_id                 INTEGER UNIQUE,
     owner_aid               TEXT,
+    owner_name              TEXT,
     status                  TEXT,
     registered_at           TEXT,
     last_activated_at       TEXT NULL,
@@ -119,6 +120,7 @@ CREATE TABLE IF NOT EXISTS run(
     finished_at           TEXT,
     sub_status            TEXT,
     details               TEXT,
+    federation            TEXT,
     federation_options    BLOB,
     flwr_aid              TEXT
 );
@@ -236,10 +238,11 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         )
 
         # Validate run_id
-        query = "SELECT run_id FROM run WHERE run_id = ?;"
-        if not self.query(query, (data[0]["run_id"],)):
+        query = "SELECT federation FROM run WHERE run_id = ?;"
+        if not (rows := self.query(query, (data[0]["run_id"],))):
             log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
             return None
+        federation: str = rows[0]["federation"]
 
         # Validate source node ID
         if message.metadata.src_node_id != SUPERLINK_NODE_ID:
@@ -254,6 +257,8 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         query = "SELECT node_id FROM node WHERE node_id = ? AND status IN (?, ?);"
         if not self.query(
             query, (data[0]["dst_node_id"], NodeStatus.ONLINE, NodeStatus.OFFLINE)
+        ) or not self.federation_manager.has_node(
+            message.metadata.dst_node_id, federation
         ):
             log(
                 ERROR,
@@ -270,6 +275,52 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         self.query(query, data)
 
         return message.metadata.message_id
+
+    def _check_stored_messages(self, message_ids: set[str]) -> None:
+        """Check and delete the message if it's invalid."""
+        if not message_ids:
+            return
+
+        with self.conn:
+            invalid_msg_ids: set[str] = set()
+            current_time = now().timestamp()
+
+            for msg_id in message_ids:
+                # Check if message exists
+                query = "SELECT * FROM message_ins WHERE message_id = ?;"
+                message_row = self.conn.execute(query, (msg_id,)).fetchone()
+                if not message_row:
+                    continue
+
+                # Check if the message has expired
+                available_until = message_row["created_at"] + message_row["ttl"]
+                if available_until <= current_time:
+                    invalid_msg_ids.add(msg_id)
+                    continue
+
+                # Check if src_node_id and dst_node_id are in the federation
+                # Get federation from run table
+                run_id = message_row["run_id"]
+                query = "SELECT federation FROM run WHERE run_id = ?;"
+                run_row = self.conn.execute(query, (run_id,)).fetchone()
+                if not run_row:  # This should not happen
+                    invalid_msg_ids.add(msg_id)
+                    continue
+                federation = run_row["federation"]
+
+                # Convert sint64 to uint64 for node IDs
+                src_node_id = int64_to_uint64(message_row["src_node_id"])
+                dst_node_id = int64_to_uint64(message_row["dst_node_id"])
+
+                # Filter nodes to check if they're in the federation
+                filtered = self.federation_manager.filter_nodes(
+                    {src_node_id, dst_node_id}, federation
+                )
+                if len(filtered) != 2:  # Not both nodes are in the federation
+                    invalid_msg_ids.add(msg_id)
+
+            # Delete all invalid messages
+            self.delete_messages(invalid_msg_ids)
 
     def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
         """Get all Messages that have not been delivered yet."""
@@ -301,10 +352,12 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         query += ";"
 
         rows = self.query(query, data)
+        message_ids: set[str] = {row["message_id"] for row in rows}
+        self._check_stored_messages(message_ids)
 
+        # Mark retrieved Messages as delivered
         if rows:
             # Prepare query
-            message_ids = [row["message_id"] for row in rows]
             placeholders: str = ",".join([f":id_{i}" for i in range(len(message_ids))])
             query = f"""
                 UPDATE message_ins
@@ -348,7 +401,8 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 ERROR,
                 "Failed to store Message reply: "
                 "The message it replies to with message_id %s does not exist or "
-                "has expired.",
+                "has expired, or was deleted because the target SuperNode was "
+                "removed from the federation.",
                 msg_ins_id,
             )
             return None
@@ -410,6 +464,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         ret: dict[str, Message] = {}
 
         # Verify Message IDs
+        self._check_stored_messages(message_ids)
         current = now().timestamp()
         query = f"""
             SELECT *
@@ -557,7 +612,11 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         return {row["message_id"] for row in rows}
 
     def create_node(
-        self, owner_aid: str, public_key: bytes, heartbeat_interval: float
+        self,
+        owner_aid: str,
+        owner_name: str,
+        public_key: bytes,
+        heartbeat_interval: float,
     ) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random uint64 as node_id
@@ -570,10 +629,10 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
 
         query = """
             INSERT INTO node
-            (node_id, owner_aid, status, registered_at, last_activated_at,
+            (node_id, owner_aid, owner_name, status, registered_at, last_activated_at,
             last_deactivated_at, unregistered_at, online_until, heartbeat_interval,
             public_key)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
 
         # Mark the node online until now().timestamp() + heartbeat_interval
@@ -583,6 +642,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 (
                     sint64_node_id,  # node_id
                     owner_aid,  # owner_aid
+                    owner_name,  # owner_name
                     NodeStatus.REGISTERED,  # status
                     now().isoformat(),  # registered_at
                     None,  # last_activated_at
@@ -702,15 +762,18 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         sint64_run_id = uint64_to_int64(run_id)
 
         # Validate run ID
-        query = "SELECT COUNT(*) FROM run WHERE run_id = ?"
+        query = "SELECT federation FROM run WHERE run_id = ?"
         rows = self.query(query, (sint64_run_id,))
-        if rows[0]["COUNT(*)"] == 0:
+        if not rows:
             return set()
+        federation: str = rows[0]["federation"]
 
         # Retrieve all online nodes
-        return {
+        node_ids = {
             node.node_id for node in self.get_node_info(statuses=[NodeStatus.ONLINE])
         }
+        # Filter node IDs by federation
+        return self.federation_manager.filter_nodes(node_ids, federation)
 
     def _check_and_tag_offline_nodes(
         self, node_ids: Optional[list[int]] = None
@@ -814,10 +877,11 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
+        federation: str,
         federation_options: ConfigRecord,
         flwr_aid: Optional[str],
     ) -> int:
-        """Create a new run for the specified `fab_id` and `fab_version`."""
+        """Create a new run."""
         # Sample a random int64 as run_id
         uint64_run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
@@ -831,27 +895,28 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             query = (
                 "INSERT INTO run "
                 "(run_id, active_until, heartbeat_interval, fab_id, fab_version, "
-                "fab_hash, override_config, federation_options, pending_at, "
+                "fab_hash, override_config, federation, federation_options, pending_at,"
                 "starting_at, running_at, finished_at, sub_status, details, flwr_aid) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             override_config_json = json.dumps(override_config)
             data = [
-                sint64_run_id,
-                0,  # The `active_until` is not used until the run is started
-                0,  # This `heartbeat_interval` is not used until the run is started
-                fab_id,
-                fab_version,
-                fab_hash,
-                override_config_json,
-                configrecord_to_bytes(federation_options),
-                now().isoformat(),
-                "",
-                "",
-                "",
-                "",
-                "",
-                flwr_aid or "",
+                sint64_run_id,  # run_id
+                0,  # active_until (not used until the run is started)
+                0,  # heartbeat_interval (not used until the run is started)
+                fab_id,  # fab_id
+                fab_version,  # fab_version
+                fab_hash,  # fab_hash
+                override_config_json,  # override_config
+                federation,  # federation
+                configrecord_to_bytes(federation_options),  # federation_options
+                now().isoformat(),  # pending_at
+                "",  # starting_at
+                "",  # running_at
+                "",  # finished_at
+                "",  # sub_status
+                "",  # details
+                flwr_aid or "",  # flwr_aid
             ]
             self.query(query, tuple(data))
             return uint64_run_id
@@ -921,6 +986,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                     details=row["details"],
                 ),
                 flwr_aid=row["flwr_aid"],
+                federation=row["federation"],
             )
         log(ERROR, "`run_id` does not exist.")
         return None
@@ -1201,6 +1267,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
 
         Return Message if valid.
         """
+        self._check_stored_messages({message_id})
         query = """
             SELECT *
             FROM message_ins
@@ -1212,16 +1279,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             # Message does not exist
             return None
 
-        message_ins = rows[0]
-        created_at = message_ins["created_at"]
-        ttl = message_ins["ttl"]
-        current_time = now().timestamp()
-
-        # Check if Message is expired
-        if ttl is not None and created_at + ttl <= current_time:
-            return None
-
-        return message_ins
+        return rows[0]
 
     def create_token(self, run_id: int) -> Optional[str]:
         """Create a token for the given run ID."""
