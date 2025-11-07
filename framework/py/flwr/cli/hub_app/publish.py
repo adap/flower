@@ -35,7 +35,6 @@ from flwr.common.constant import (
 )
 from flwr.supercore.constant import PLATFORM_API_URL
 
-
 # Constants per spec
 ALLOWED_EXTS = {".py", ".toml", ".md"}
 MAX_TOTAL_BYTES = 10 * 1024 * 1024  # 10 MB
@@ -289,12 +288,12 @@ def publish(
     ] = None,
 ) -> None:
     """Upload all project files to the Platform API using multipart/form-data."""
-
     # Check the credentials path
     if not token:
         if not federation:
             typer.secho(
-                "❌ Please specify the federation used for login before publishing app.",
+                "❌ Please specify the federation used for "
+                "login before publishing app.",
                 fg=typer.colors.RED,
                 err=True,
             )
