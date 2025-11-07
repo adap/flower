@@ -15,6 +15,7 @@
 """Flower command line interface `app review` command."""
 
 
+import base64
 import hashlib
 import re
 import time
@@ -89,7 +90,7 @@ def _load_private_key(path: Path) -> ed25519.Ed25519PrivateKey:
     return private_key
 
 
-def _sign_fab(fab_bytes: bytes, private_key: ed25519.Ed25519PrivateKey) -> bytes:
+def _sign_fab(fab_bytes: bytes, private_key: ed25519.Ed25519PrivateKey) -> tuple[bytes, int]:
     """Sign the given FAB hash bytes."""
     # Get current timestamp
     timestamp = int(time.time())
@@ -97,16 +98,18 @@ def _sign_fab(fab_bytes: bytes, private_key: ed25519.Ed25519PrivateKey) -> bytes
         hashlib.sha256(fab_bytes).digest(),
         timestamp,
     )
-    return sign_message(private_key, signed_message)
+    return sign_message(private_key, signed_message), timestamp
 
 
-def _submit_review(app_id: str, sig_hex: str, token: str) -> None:
+def _submit_review(app_id: str, signature: bytes, sign_at: int, token: str) -> None:
     """Submit review to Flower Platform API."""
+    signature_b64 = base64.urlsafe_b64encode(signature).rstrip(b"=").decode("ascii")
     url = f"{PLATFORM_API_URL}/hub/apps/review"
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     payload = {
         "app_id": app_id,
-        "signature_hex": sig_hex,
+        "signature_b64": signature_b64,
+        "sign_at": sign_at
     }
     try:
         resp = requests.post(url, headers=headers, json=payload, timeout=120)
@@ -212,8 +215,7 @@ def review(
 
     # Load private key and sign FAB
     private_key = _load_private_key(key_path)
-    signature = _sign_fab(fab_bytes, private_key)
-    sig_hex = signature.hex()
+    signature, sign_at = _sign_fab(fab_bytes, private_key)
 
     # Submit review
-    _submit_review(app_id=app_id, sig_hex=sig_hex, token=token)
+    _submit_review(app_id, signature, sign_at, token)
