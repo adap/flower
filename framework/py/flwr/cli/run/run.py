@@ -103,7 +103,7 @@ def run(
         if suppress_output:
             redirect_output(captured_output)
 
-        app_id_str = str(app) if app is not None else ""
+        # Determine if app is remote
         app_id = None
         if (app_str := str(app)).startswith("@"):
             if not re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", app_str):
@@ -111,18 +111,17 @@ def run(
                     "Invalid remote app ID. Expected format: '@user_name/app_name'."
                 )
             app_id = app_str
+        is_remote_app = app_id is not None
 
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-        # Disable the validation due to the local empty project
-        if is_remote_app:
-            config = load_toml(Path("pyproject.toml"))
-            if not config:
-                raise typer.BadParameter("A 'pyproject.toml' file is required.")
-        else:
-            pyproject_path = app / "pyproject.toml" if app else None
-            config, errors, warnings = load_and_validate(path=pyproject_path)
-            config = process_loaded_project_config(config, errors, warnings)
+        # Disable the validation for remote apps
+        pyproject_path = app / "pyproject.toml" if not is_remote_app else None
+        # `./pyproject.toml` will be loaded when `pyproject_path` is None
+        config, errors, warnings = load_and_validate(
+            pyproject_path, check_module=not is_remote_app
+        )
+        config = process_loaded_project_config(config, errors, warnings)
 
         federation, federation_config = validate_federation_in_project_config(
             federation, config, federation_config_overrides
@@ -136,8 +135,7 @@ def run(
                 run_config_overrides,
                 stream,
                 output_format,
-                app_id_str,
-                is_remote_app,
+                app_id,
             )
         else:
             _run_without_control_api(
@@ -168,26 +166,27 @@ def _run_with_control_api(
     config_overrides: Optional[list[str]],
     stream: bool,
     output_format: str,
-    app_id_str: str,
-    is_remote_app: bool,
+    app_id: Optional[str],
 ) -> None:
     channel = None
+    is_remote_app = app_id is not None
     try:
         auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
         channel = init_channel(app, federation_config, auth_plugin)
         stub = ControlStub(channel)
 
-        # Build fab only if not a remote reference
-        fab_id = fab_version = fab_hash = ""
-        if is_remote_app:
-            # Skip build; send a placeholder Fab containing the remote reference
-            fab = Fab(fab_hash, b"", {})
-        else:
+        # Build FAB if local app
+        if not is_remote_app:
             fab_bytes = build_fab_from_disk(app)
             fab_hash = hashlib.sha256(fab_bytes).hexdigest()
             config = cast(dict[str, Any], load_toml(app / FAB_CONFIG_FILE))
             fab_id, fab_version = get_metadata_from_config(config)
             fab = Fab(fab_hash, fab_bytes, {})
+        # Skip FAB build if remote app
+        else:
+            # Use empty values for FAB
+            fab_id = fab_version = fab_hash = ""
+            fab = Fab(fab_hash, b"", {})
 
         real_federation: str = federation_config.get("federation", NOOP_FEDERATION)
 
@@ -200,7 +199,7 @@ def _run_with_control_api(
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
             federation=real_federation,
             federation_options=config_record_to_proto(c_record),
-            app_id=app_id_str,
+            app_id=app_id or "",
         )
         with flwr_cli_grpc_exc_handler():
             res = stub.StartRun(req)
