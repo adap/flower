@@ -124,12 +124,12 @@ def run(
         config = process_loaded_project_config(config, errors, warnings)
 
         federation, federation_config = validate_federation_in_project_config(
-            federation, config, federation_config_overrides  # type: ignore[arg-type]
+            federation, config, federation_config_overrides
         )
 
         if "address" in federation_config:
             _run_with_control_api(
-                app_path,
+                app,
                 federation,
                 federation_config,
                 run_config_overrides,
@@ -139,7 +139,7 @@ def run(
             )
         else:
             _run_without_control_api(
-                app_path, federation_config, run_config_overrides, federation
+                app, federation_config, run_config_overrides, federation
             )
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
         if suppress_output:
