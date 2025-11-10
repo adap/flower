@@ -74,7 +74,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from supercore.constant import PLATFORM_API_URL
+from supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
@@ -113,8 +113,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         verification_dict = {}
         if request.fab.content == b"":
-            identifier = request.app_identifier
-            m = re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", identifier)
+            app_id = request.app_id
+            m = re.match(APP_ID_PATTERN, app_id)
             if not m:
                 log(
                     ERROR,
@@ -123,17 +123,18 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 return StartRunResponse()
 
             # Request download link
-            _, url, verification = _request_download_link(identifier, context)
+            _, url, verification = _request_download_link(app_id, context)
 
             # Convert verification to dict[str, str] type
-            verification_dict = {
-                item["public_key_id"]: json.dumps(
-                    {k: v for k, v in item.items() if k != "public_key_id"}
-                )
-                for item in verification
-            }
+            if verification:
+                verification_dict = {
+                    item["public_key_id"]: json.dumps(
+                        {k: v for k, v in item.items() if k != "public_key_id"}
+                    )
+                    for item in verification
+                }
 
-            # Download FAB from Hub
+            # Download FAB from Flower platform API
             try:
                 r = requests.get(url, timeout=60)
                 r.raise_for_status()
@@ -588,7 +589,7 @@ def _check_flwr_aid_in_run(
 
 
 def _request_download_link(
-    identifier: str, context: grpc.ServicerContext
+    app_id: str, context: grpc.ServicerContext
 ) -> tuple[str, str, list[dict[str, str]]]:
     """Request download link from Flower platform API."""
     url = f"{PLATFORM_API_URL}/hub/fetch-fab"
@@ -597,7 +598,7 @@ def _request_download_link(
         "Accept": "application/json",
     }
     body = {
-        "identifier": identifier,  # send raw string of identifier
+        "app_id": app_id,  # send raw string of app_id
     }
 
     try:
@@ -605,18 +606,18 @@ def _request_download_link(
     except requests.RequestException as e:
         context.abort(
             grpc.StatusCode.UNAVAILABLE,
-            f"Unable to connect to Hub: {e}",
+            f"Unable to connect to Flower platform API: {e}",
         )
 
     if resp.status_code == 404:
         context.abort(
             grpc.StatusCode.NOT_FOUND,
-            f"'{identifier}' not found in Hub",
+            f"'{app_id}' not found in Flower platform API",
         )
     if not resp.ok:
         context.abort(
             grpc.StatusCode.UNAVAILABLE,
-            f"Hub request failed with status {resp.status_code}. "
+            f"Flower platform API request failed with status {resp.status_code}. "
             f"Details: {resp.text}",
         )
 
@@ -624,6 +625,6 @@ def _request_download_link(
     if "fab_url" not in data or "verifications" not in data:
         context.abort(
             grpc.StatusCode.DATA_LOSS,
-            "Invalid response from Hub",
+            "Invalid response from Flower platform API",
         )
     return data["app_id"], data["fab_url"], data["verifications"]
