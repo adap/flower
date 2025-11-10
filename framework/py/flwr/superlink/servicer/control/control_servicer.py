@@ -41,6 +41,7 @@ from flwr.common.constant import (
     RUN_ID_NOT_FOUND_MESSAGE,
     Status,
     SubStatus,
+    TRANSPORT_TYPE_GRPC_ADAPTER,
 )
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -95,6 +96,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         is_simulation: bool,
         authn_plugin: ControlAuthnPlugin,
         artifact_provider: Optional[ArtifactProvider] = None,
+        fleet_api_type: Optional[str] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
@@ -102,6 +104,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self.is_simulation = is_simulation
         self.authn_plugin = authn_plugin
         self.artifact_provider = artifact_provider
+        self.fleet_api_type = fleet_api_type
 
     def StartRun(  # pylint: disable=too-many-locals
         self, request: StartRunRequest, context: grpc.ServicerContext
@@ -113,6 +116,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         verification_dict = {}
         if request.fab.content == b"":
+            if self.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
+                log(ERROR, "FAB downloading is not supported when using the gRPC adapter.")
+                return StartRunResponse()
+
             app_id = request.app_id
             m = re.match(APP_ID_PATTERN, app_id)
             if not m:
