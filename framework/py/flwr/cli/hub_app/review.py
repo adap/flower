@@ -104,7 +104,7 @@ def _sign_fab(fab_bytes: bytes, private_key: ed25519.Ed25519PrivateKey) -> tuple
 def _submit_review(app_id: str, signature: bytes, sign_at: int, token: str) -> None:
     """Submit review to Flower Platform API."""
     signature_b64 = base64.urlsafe_b64encode(signature).rstrip(b"=").decode("ascii")
-    url = f"{PLATFORM_API_URL}/hub/apps/review"
+    url = f"{PLATFORM_API_URL}/hub/apps/signature"
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     payload = {
         "app_id": app_id,
