@@ -25,6 +25,7 @@ from typing import Any, Optional, cast
 
 import grpc
 import requests
+from supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
@@ -39,9 +40,9 @@ from flwr.common.constant import (
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
+    TRANSPORT_TYPE_GRPC_ADAPTER,
     Status,
     SubStatus,
-    TRANSPORT_TYPE_GRPC_ADAPTER,
 )
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -75,7 +76,6 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
@@ -117,7 +117,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         verification_dict = {}
         if request.fab.content == b"":
             if self.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
-                log(ERROR, "FAB downloading is not supported when using the gRPC adapter.")
+                log(
+                    ERROR,
+                    "FAB downloading is not supported when using the gRPC adapter.",
+                )
                 return StartRunResponse()
 
             app_id = request.app_id
