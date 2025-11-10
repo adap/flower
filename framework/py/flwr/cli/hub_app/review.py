@@ -29,7 +29,11 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from flwr.common.config import get_flwr_dir
-from flwr.supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
+from flwr.supercore.constant import (
+    APP_ID_PATTERN,
+    APP_VERSION_PATTERN,
+    PLATFORM_API_URL,
+)
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_signed_message,
     sign_message,
@@ -39,16 +43,16 @@ from ..install import install_from_fab
 from ..utils import request_download_link
 
 
-def _mk_review_dir(publisher: str, app_name: str) -> Path:
+def _mk_review_dir(publisher: str, app_name: str, version: str) -> Path:
     """Create a directory for reviewing code."""
     home = get_flwr_dir()
     ts = datetime.now().strftime("%Y-%m-%d-%H-%M")
-    d = home / "reviews" / f"{ts}--@{publisher}--{app_name}"
+    d = home / "reviews" / f"{ts}--@{publisher}--{app_name}" / version
     d.mkdir(parents=True, exist_ok=False)
     return d
 
 
-def _request_download_link(app_id: str, version: Optional[str]) -> str:
+def _request_download_link(app_id: str, version: str) -> str:
     """Request download link from Flower platform API."""
     url = f"{PLATFORM_API_URL}/hub/fetch-fab"
 
@@ -108,12 +112,19 @@ def _sign_fab(
     return sign_message(private_key, signed_message), timestamp
 
 
-def _submit_review(app_id: str, signature: bytes, sign_at: int, token: str) -> None:
+def _submit_review(
+    app_id: str, version: str, signature: bytes, sign_at: int, token: str
+) -> None:
     """Submit review to Flower Platform API."""
     signature_b64 = base64.urlsafe_b64encode(signature).rstrip(b"=").decode("ascii")
     url = f"{PLATFORM_API_URL}/hub/apps/signature"
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    payload = {"app_id": app_id, "signature_b64": signature_b64, "sign_at": sign_at}
+    payload = {
+        "app_id": app_id,
+        "version": version,
+        "signature_b64": signature_b64,
+        "sign_at": sign_at,
+    }
     try:
         resp = requests.post(url, headers=headers, json=payload, timeout=120)
     except requests.RequestException as e:
@@ -142,12 +153,12 @@ def review(
         typer.Argument(help="App identifier in the form @user_name/app_name)."),
     ],
     version: Annotated[
-        Optional[str],
+        str,
         typer.Option(
             "--version",
             help="Version of the app to review (e.g., '1.0.0').",
         ),
-    ] = None,
+    ],
     token: Annotated[
         Optional[str],
         typer.Option(
@@ -167,9 +178,29 @@ def review(
         )
         raise typer.Exit(code=1)
 
+    # Validate version format
+    if not version:
+        typer.secho(
+            "❌ App version missing. Please provide a version "
+            "to review (e.g., '1.0.0').",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    m_version = re.match(APP_VERSION_PATTERN, version)
+    if not m_version:
+        typer.secho(
+            f"❌ Invalid version '{version}'. "
+            f"Expected format: x.x.x (digits only).",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
     # Validate app_id format
-    m = re.match(APP_ID_PATTERN, app_id)
-    if not m:
+    m_id = re.match(APP_ID_PATTERN, app_id)
+    if not m_id:
         typer.secho(
             "❌ Invalid remote app ID. Expected format: '@user_name/app_name'.",
             fg=typer.colors.RED,
@@ -177,7 +208,7 @@ def review(
         )
         raise typer.Exit(code=1)
 
-    publisher, app_name = m.group(1), m.group(2)  # (publisher, app_name)
+    publisher, app_name = m_id.group(1), m_id.group(2)  # (publisher, app_name)
 
     # Download FAB
     typer.secho("Downloading FAB... ", fg=typer.colors.BLUE)
@@ -186,7 +217,7 @@ def review(
 
     # Unpack FAB
     typer.secho("Unpacking FAB... ", fg=typer.colors.BLUE)
-    review_dir = _mk_review_dir(publisher, app_name)
+    review_dir = _mk_review_dir(publisher, app_name, version)
     install_from_fab(fab_bytes, review_dir)
 
     # Prompt to ask for sign
@@ -224,4 +255,4 @@ def review(
     signature, sign_at = _sign_fab(fab_bytes, private_key)
 
     # Submit review
-    _submit_review(app_id, signature, sign_at, token)
+    _submit_review(app_id, version, signature, sign_at, token)
