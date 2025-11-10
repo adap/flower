@@ -34,7 +34,8 @@ __version__ = _package_version
 _lazy_imports = {"simulation", "server", "client", "common"}
 
 
-def __getattr__(name):
+def __getattr__(name: str) -> object:
+    """Lazy import for legacy support."""
     if name in _lazy_imports:
         module = importlib.import_module(f"flwr.{name}")
         globals()[name] = module
