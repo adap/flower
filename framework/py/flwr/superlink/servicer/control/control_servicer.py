@@ -52,6 +52,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
+    ListFederationsRequest,
+    ListFederationsResponse,
     ListNodesRequest,
     ListNodesResponse,
     ListRunsRequest,
@@ -497,6 +499,14 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         nodes_info = state.get_node_info(owner_aids=[flwr_aid])
 
         return ListNodesResponse(nodes_info=nodes_info, now=now().isoformat())
+
+    def ListFederations(
+        self, request: ListFederationsRequest, context: grpc.ServicerContext
+    ) -> ListFederationsResponse:
+        """List all SuperNodes."""
+        log(INFO, "ControlServicer.ListFederations")
+
+        raise NotImplementedError("ListFederations is not yet implemented.")
 
 
 def _create_list_runs_response(

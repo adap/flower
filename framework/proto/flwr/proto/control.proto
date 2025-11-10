@@ -54,6 +54,10 @@ service Control {
 
   // List SuperNodes
   rpc ListNodes(ListNodesRequest) returns (ListNodesResponse) {}
+
+  // List Federations
+  rpc ListFederations(ListFederationsRequest)
+      returns (ListFederationsResponse) {}
 }
 
 message StartRunRequest {
@@ -110,3 +114,6 @@ message ListNodesResponse {
   repeated NodeInfo nodes_info = 1;
   string now = 2;
 }
+
+message ListFederationsRequest {}
+message ListFederationsResponse { repeated string federation_names = 1; }

@@ -303,3 +303,21 @@ class ListNodesResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["nodes_info",b"nodes_info","now",b"now"]) -> None: ...
 global___ListNodesResponse = ListNodesResponse
+
+class ListFederationsRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___ListFederationsRequest = ListFederationsRequest
+
+class ListFederationsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    FEDERATION_NAMES_FIELD_NUMBER: builtins.int
+    @property
+    def federation_names(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    def __init__(self,
+        *,
+        federation_names: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["federation_names",b"federation_names"]) -> None: ...
+global___ListFederationsResponse = ListFederationsResponse
