@@ -147,6 +147,7 @@ def _submit_review(
     raise typer.Exit(code=1)
 
 
+# pylint: disable-next=too-many-locals
 def review(
     app_id: Annotated[
         str,
