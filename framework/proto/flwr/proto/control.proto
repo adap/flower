@@ -115,5 +115,5 @@ message ListNodesResponse {
   string now = 2;
 }
 
-message ListFederationsRequest {}
-message ListFederationsResponse { repeated string federation_names = 1; }
+message ListFederationsRequest { string federation = 1; }
+message ListFederationsResponse { repeated string federations = 1; }

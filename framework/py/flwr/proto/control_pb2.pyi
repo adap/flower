@@ -306,18 +306,23 @@ global___ListNodesResponse = ListNodesResponse
 
 class ListFederationsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    FEDERATION_FIELD_NUMBER: builtins.int
+    federation: typing.Text
     def __init__(self,
+        *,
+        federation: typing.Text = ...,
         ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["federation",b"federation"]) -> None: ...
 global___ListFederationsRequest = ListFederationsRequest
 
 class ListFederationsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    FEDERATION_NAMES_FIELD_NUMBER: builtins.int
+    FEDERATIONS_FIELD_NUMBER: builtins.int
     @property
-    def federation_names(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    def federations(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     def __init__(self,
         *,
-        federation_names: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        federations: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["federation_names",b"federation_names"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["federations",b"federations"]) -> None: ...
 global___ListFederationsResponse = ListFederationsResponse
