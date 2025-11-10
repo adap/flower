@@ -19,17 +19,15 @@ import base64
 import hashlib
 import re
 import time
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import ed25519
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Optional
 
 import requests
 import typer
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from ..install import install_from_fab
-from ..utils import request_download_link
 from flwr.common.config import get_flwr_dir
 from flwr.supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
 from flwr.supercore.primitives.asymmetric_ed25519 import (
@@ -37,10 +35,13 @@ from flwr.supercore.primitives.asymmetric_ed25519 import (
     sign_message,
 )
 
+from ..install import install_from_fab
+from ..utils import request_download_link
+
 
 def _mk_review_dir(publisher: str, app_name: str) -> Path:
     """Create a directory for reviewing code."""
-    home = get_flwr_dir
+    home = get_flwr_dir()
     ts = datetime.now().strftime("%Y-%m-%d-%H-%M")
     d = home / "reviews" / f"{ts}--@{publisher}--{app_name}"
     d.mkdir(parents=True, exist_ok=False)
@@ -74,14 +75,18 @@ def _load_private_key(path: Path) -> ed25519.Ed25519PrivateKey:
     try:
         pem = path.read_bytes()
     except OSError as e:
-        typer.secho(f"❌ Failed to read private key: {e}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=1)
+        typer.secho(
+            f"❌ Failed to read private key: {e}", fg=typer.colors.RED, err=True
+        )
+        raise typer.Exit(code=1) from e
 
     try:
         private_key = serialization.load_pem_private_key(pem, password=None)
     except ValueError as e:
-        typer.secho(f"❌ Invalid private key format: {e}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=1)
+        typer.secho(
+            f"❌ Invalid private key format: {e}", fg=typer.colors.RED, err=True
+        )
+        raise typer.Exit(code=1) from e
 
     if not isinstance(private_key, ed25519.Ed25519PrivateKey):
         typer.secho("❌ Private key is not Ed25519", fg=typer.colors.RED, err=True)
@@ -90,7 +95,9 @@ def _load_private_key(path: Path) -> ed25519.Ed25519PrivateKey:
     return private_key
 
 
-def _sign_fab(fab_bytes: bytes, private_key: ed25519.Ed25519PrivateKey) -> tuple[bytes, int]:
+def _sign_fab(
+    fab_bytes: bytes, private_key: ed25519.Ed25519PrivateKey
+) -> tuple[bytes, int]:
     """Sign the given FAB hash bytes."""
     # Get current timestamp
     timestamp = int(time.time())
@@ -106,16 +113,16 @@ def _submit_review(app_id: str, signature: bytes, sign_at: int, token: str) -> N
     signature_b64 = base64.urlsafe_b64encode(signature).rstrip(b"=").decode("ascii")
     url = f"{PLATFORM_API_URL}/hub/apps/signature"
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    payload = {
-        "app_id": app_id,
-        "signature_b64": signature_b64,
-        "sign_at": sign_at
-    }
+    payload = {"app_id": app_id, "signature_b64": signature_b64, "sign_at": sign_at}
     try:
         resp = requests.post(url, headers=headers, json=payload, timeout=120)
     except requests.RequestException as e:
-        typer.secho(f"❌ Network error while submitting review: {e}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=1)
+        typer.secho(
+            f"❌ Network error while submitting review: {e}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from e
 
     if resp.status_code // 100 == 2:
         typer.secho("🎊 Review submitted", fg=typer.colors.GREEN, bold=True)
@@ -132,9 +139,7 @@ def _submit_review(app_id: str, signature: bytes, sign_at: int, token: str) -> N
 def review(
     app_id: Annotated[
         str,
-        typer.Argument(
-            help="App identifier in the form @user_name/app_name)."
-        ),
+        typer.Argument(help="App identifier in the form @user_name/app_name)."),
     ],
     version: Annotated[
         Optional[str],
@@ -151,10 +156,8 @@ def review(
         ),
     ] = None,
 ) -> None:
-    """
-    Download a FAB for <APP-ID>, unpack it for manual review, and upon confirmation
-    sign & submit the review to the Platform.
-    """
+    """Download a FAB for <APP-ID>, unpack it for manual review, and upon confirmation
+    sign & submit the review to the Platform."""
     if not token:
         typer.secho(
             "❌ Missing authentication token. "
@@ -168,8 +171,7 @@ def review(
     m = re.match(APP_ID_PATTERN, app_id)
     if not m:
         typer.secho(
-            "❌ Invalid remote app ID. Expected "
-            "format: '@user_name/app_name'.",
+            "❌ Invalid remote app ID. Expected format: '@user_name/app_name'.",
             fg=typer.colors.RED,
             err=True,
         )
@@ -207,10 +209,14 @@ def review(
         raise typer.Exit(code=130)
 
     # Ask for private key path
-    key_path_str = typer.prompt("Please specify the path of Ed25519 private key (PEM) for signing")
+    key_path_str = typer.prompt(
+        "Please specify the path of Ed25519 private key (PEM) for signing"
+    )
     key_path = Path(key_path_str).expanduser().resolve()
     if not key_path.is_file():
-        typer.secho(f"❌ Private key not found: {key_path}", fg=typer.colors.RED, err=True)
+        typer.secho(
+            f"❌ Private key not found: {key_path}", fg=typer.colors.RED, err=True
+        )
         raise typer.Exit(code=1)
 
     # Load private key and sign FAB

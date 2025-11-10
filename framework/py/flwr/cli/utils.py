@@ -18,13 +18,13 @@
 import hashlib
 import json
 import re
-import requests
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Callable, Optional, Union, cast
 
 import grpc
+import requests
 import typer
 
 from flwr.common.constant import (
@@ -408,7 +408,9 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
         raise
 
 
-def request_download_link(app_id: str, version: Optional[str], in_url: str, out_url: str) -> str:
+def request_download_link(
+    app_id: str, version: Optional[str], in_url: str, out_url: str
+) -> str:
     """Request download link from Flower platform API."""
     headers = {
         "Content-Type": "application/json",
