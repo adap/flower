@@ -25,7 +25,6 @@ from typing import Any, Optional, cast
 
 import grpc
 import requests
-from supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
@@ -76,6 +75,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
@@ -106,7 +106,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self.artifact_provider = artifact_provider
         self.fleet_api_type = fleet_api_type
 
-    def StartRun(  # pylint: disable=too-many-locals
+    def StartRun(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         self, request: StartRunRequest, context: grpc.ServicerContext
     ) -> StartRunResponse:
         """Create run ID."""
@@ -194,7 +194,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 fab_file,
                 verification_dict,
             )
-            fab_hash = ffs.put(fab.content, fab.verification)
+            fab_hash = ffs.put(fab.content, fab.verifications)
 
             if fab_hash != fab.hash_str:
                 raise RuntimeError(
