@@ -9,8 +9,7 @@ description = "Keras Federated Learning E2E test with Flower"
 license = "Apache-2.0"
 dependencies = [
     "flwr[simulation] @ {root:parent:parent:uri}",
-    "tensorflow-cpu==2.20.0",
-    "tensorflow-datasets==4.9.2",
+    "tensorflow-cpu>=2.18.0",
     "tensorflow-io-gcs-filesystem<0.35.0",
     "Pillow>=11.2.1",
 ]
