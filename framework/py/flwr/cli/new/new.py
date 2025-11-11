@@ -191,12 +191,6 @@ def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
     return buf
 
 
-def _request_download_link(app_id: str, version: Optional[str]) -> str:
-    """Request download link from Flower platform API."""
-    url = f"{PLATFORM_API_URL}/hub/fetch-zip"
-    return request_download_link(app_id, version, url, "zip_url")
-
-
 def download_remote_app_via_api(app_id: str, version: Optional[str]) -> None:
     """Download App from Platform API."""
     # Parse @user/app just to derive local dir name
@@ -225,7 +219,9 @@ def download_remote_app_via_api(app_id: str, version: Optional[str]) -> None:
             bold=True,
         )
     )
-    presigned_url = _request_download_link(app_id, version)
+    # Fetch ZIP downloading URL
+    url = f"{PLATFORM_API_URL}/hub/fetch-zip"
+    presigned_url = request_download_link(app_id, version, url, "zip_url")
 
     print(
         typer.style(
@@ -267,7 +263,8 @@ def new(
         Optional[str],
         typer.Option(
             "--version",
-            help="Version of the app to download (e.g., '1.0.0').",
+            help="App version to download (e.g., '1.0.0'). "
+            "If not specified, the latest version is downloaded.",
         ),
     ] = None,
 ) -> None:
