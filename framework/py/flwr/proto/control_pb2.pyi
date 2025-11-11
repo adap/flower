@@ -306,13 +306,8 @@ global___ListNodesResponse = ListNodesResponse
 
 class ListFederationsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    FEDERATION_FIELD_NUMBER: builtins.int
-    federation: typing.Text
     def __init__(self,
-        *,
-        federation: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["federation",b"federation"]) -> None: ...
 global___ListFederationsRequest = ListFederationsRequest
 
 class ListFederationsResponse(google.protobuf.message.Message):
