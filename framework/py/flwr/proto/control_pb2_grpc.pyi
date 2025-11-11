@@ -59,6 +59,11 @@ class ControlStub:
         flwr.proto.control_pb2.ListNodesResponse]
     """List SuperNodes"""
 
+    ListFederations: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.ListFederationsRequest,
+        flwr.proto.control_pb2.ListFederationsResponse]
+    """List Federations"""
+
 
 class ControlServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -139,6 +144,14 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.control_pb2.ListNodesResponse:
         """List SuperNodes"""
+        pass
+
+    @abc.abstractmethod
+    def ListFederations(self,
+        request: flwr.proto.control_pb2.ListFederationsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.control_pb2.ListFederationsResponse:
+        """List Federations"""
         pass
 
 
