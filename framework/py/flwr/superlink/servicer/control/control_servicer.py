@@ -636,7 +636,7 @@ def _request_download_link(
     }
     body = {
         "app_id": app_id,  # send raw string of app_id
-        "flwr_license_key": os.getenv("FLWR_LICENSE_KEY")
+        "flwr_license_key": os.getenv("FLWR_LICENSE_KEY"),
     }
 
     try:
