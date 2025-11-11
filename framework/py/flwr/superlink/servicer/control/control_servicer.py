@@ -17,6 +17,7 @@
 
 import hashlib
 import json
+import os
 import re
 import time
 from collections.abc import Generator, Sequence
@@ -136,16 +137,20 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 return StartRunResponse()
 
             # Request download link
-            _, url, verification = _request_download_link(app_id, context)
+            url, verifications = _request_download_link(app_id, context)
 
-            # Convert verification to dict[str, str] type
-            if verification:
+            valid_license = ""
+            if verifications is None:
+                valid_license = "Valid"
+            else:
+                # Convert verifications to dict[str, str] type
                 verification_dict = {
                     item["public_key_id"]: json.dumps(
                         {k: v for k, v in item.items() if k != "public_key_id"}
                     )
-                    for item in verification
+                    for item in verifications
                 }
+            verification_dict.update({"valid_license": valid_license})
 
             # Download FAB from Flower platform API
             try:
@@ -622,7 +627,7 @@ def _check_flwr_aid_in_run(
 
 def _request_download_link(
     app_id: str, context: grpc.ServicerContext
-) -> tuple[str, str, list[dict[str, str]]]:
+) -> tuple[str, Optional[list[dict[str, str]]]]:
     """Request download link from Flower platform API."""
     url = f"{PLATFORM_API_URL}/hub/fetch-fab"
     headers = {
@@ -631,6 +636,7 @@ def _request_download_link(
     }
     body = {
         "app_id": app_id,  # send raw string of app_id
+        "flwr_license_key": os.getenv("FLWR_LICENSE_KEY")
     }
 
     try:
@@ -654,9 +660,11 @@ def _request_download_link(
         )
 
     data = resp.json()
-    if "fab_url" not in data or "verifications" not in data:
+    if "fab_url" not in data:
         context.abort(
             grpc.StatusCode.DATA_LOSS,
             "Invalid response from Flower platform API",
         )
-    return data["app_id"], data["fab_url"], data["verifications"]
+    verifications = data["verifications"] if "verifications" in data else None
+
+    return data["fab_url"], verifications
