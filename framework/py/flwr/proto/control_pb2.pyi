@@ -20,6 +20,7 @@ limitations under the License.
 import builtins
 import collections.abc
 import flwr.proto.fab_pb2
+import flwr.proto.federation_pb2
 import flwr.proto.node_pb2
 import flwr.proto.recorddict_pb2
 import flwr.proto.run_pb2
@@ -404,3 +405,21 @@ class ListNodesResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing.Literal["nodes_info", b"nodes_info", "now", b"now"]) -> None: ...
 
 global___ListNodesResponse = ListNodesResponse
+
+class ListFederationsRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___ListFederationsRequest = ListFederationsRequest
+
+class ListFederationsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    FEDERATIONS_FIELD_NUMBER: builtins.int
+    @property
+    def federations(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.federation_pb2.Federation]: ...
+    def __init__(self,
+        *,
+        federations: typing.Optional[typing.Iterable[flwr.proto.federation_pb2.Federation]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["federations",b"federations"]) -> None: ...
+global___ListFederationsResponse = ListFederationsResponse

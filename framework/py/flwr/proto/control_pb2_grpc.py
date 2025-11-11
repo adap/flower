@@ -83,7 +83,7 @@ class ControlStub(object):
                 '/flwr.proto.Control/ListNodes',
                 request_serializer=flwr_dot_proto_dot_control__pb2.ListNodesRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_control__pb2.ListNodesResponse.FromString,
-                _registered_method=True)
+                )
 
 
 class ControlServicer(object):
@@ -159,6 +159,13 @@ class ControlServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ListFederations(self, request, context):
+        """List Federations
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ControlServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -211,6 +218,11 @@ def add_ControlServicer_to_server(servicer, server):
                     servicer.ListNodes,
                     request_deserializer=flwr_dot_proto_dot_control__pb2.ListNodesRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_control__pb2.ListNodesResponse.SerializeToString,
+            ),
+            'ListFederations': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListFederations,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.ListFederationsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.ListFederationsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -483,12 +495,5 @@ class Control(object):
             '/flwr.proto.Control/ListNodes',
             flwr_dot_proto_dot_control__pb2.ListNodesRequest.SerializeToString,
             flwr_dot_proto_dot_control__pb2.ListNodesResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
