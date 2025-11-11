@@ -272,7 +272,9 @@ def publish(
     ] = Path("."),
     federation: Annotated[
         Optional[str],
-        typer.Argument(help="Name of the federation used for login before publishing app."),
+        typer.Argument(
+            help="Name of the federation used for login before publishing app."
+        ),
     ] = None,
     token: Annotated[
         Optional[str],
