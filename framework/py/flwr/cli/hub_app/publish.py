@@ -239,7 +239,7 @@ def _validate_credentials_content(creds_path: Path) -> str:
       - REFRESH_TOKEN_KEY
     """
     try:
-        creds = json.loads(creds_path.read_text(encoding="utf-8"))
+        creds: dict[str, str] = json.loads(creds_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as err:
         typer.secho(
             f"Invalid credentials file at '{creds_path}': {err}",
