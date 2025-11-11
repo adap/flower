@@ -91,7 +91,6 @@ def ls(  # pylint: disable=R0914, R0913, R0917
                 Console().print_json(data=_to_json(federations))
             else:
                 Console().print(_to_table(federations))
-
         finally:
             if channel:
                 channel.close()
