@@ -37,3 +37,7 @@ class NoOpFederationManager(FederationManager):
     def has_node(self, node_id: int, federation: str) -> bool:
         """Given a node ID, check if it is in the federation."""
         return True
+
+    def get_federations(self, flwr_aid: str) -> list[str]:
+        """Get federations of which the account is a member."""
+        return [NOOP_FEDERATION]
