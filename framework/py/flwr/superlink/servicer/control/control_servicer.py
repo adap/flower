@@ -513,7 +513,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
 
         # Get federations the account is a member of
-        federations = state.federation_manager.ls(flwr_aid=flwr_aid)
+        federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
 
         return ListFederationsResponse(federations=federations)
 
