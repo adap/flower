@@ -230,7 +230,7 @@ def _post_files(
     return resp
 
 
-def _validate_credentials_content(creds_path: Path) -> dict[str, str]:
+def _validate_credentials_content(creds_path: Path) -> str:
     """Load and validate the credentials file content.
 
     Ensures required keys exist:
@@ -239,7 +239,7 @@ def _validate_credentials_content(creds_path: Path) -> dict[str, str]:
       - REFRESH_TOKEN_KEY
     """
     try:
-        content = json.loads(creds_path.read_text(encoding="utf-8"))
+        creds = json.loads(creds_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as err:
         typer.secho(
             f"Invalid credentials file at '{creds_path}': {err}",
@@ -249,18 +249,18 @@ def _validate_credentials_content(creds_path: Path) -> dict[str, str]:
         raise typer.Exit(code=1) from err
 
     required_keys = [AUTHN_TYPE_JSON_KEY, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]
-    missing = [key for key in required_keys if key not in content]
+    missing = [key for key in required_keys if key not in creds]
 
     if missing:
         typer.secho(
             f"Credentials file '{creds_path}' is missing "
-            f"required key(s): {', '.join(missing)}.",
+            f"required key(s): {', '.join(missing)}. Please log in again.",
             fg=typer.colors.RED,
             err=True,
         )
         raise typer.Exit(code=1)
 
-    return content  # type: ignore[no-any-return]
+    return creds[ACCESS_TOKEN_KEY]
 
 
 def publish(
@@ -272,7 +272,7 @@ def publish(
     ] = Path("."),
     federation: Annotated[
         Optional[str],
-        typer.Argument(help="Name of the federation used for app publishing."),
+        typer.Argument(help="Name of the federation used for login before publishing app."),
     ] = None,
     token: Annotated[
         Optional[str],
@@ -297,15 +297,14 @@ def publish(
         creds_path = app.absolute() / FLWR_DIR / CREDENTIALS_DIR / f"{federation}.json"
         if not creds_path.is_file():
             typer.secho(
-                "❌ Please login before publishing app.",
+                "❌ Please log in before publishing app.",
                 fg=typer.colors.RED,
                 err=True,
             )
             raise typer.Exit(code=1)
 
         # Load and validate credentials
-        creds = _validate_credentials_content(creds_path)
-        token = creds[ACCESS_TOKEN_KEY]
+        token = _validate_credentials_content(creds_path)
 
     # Collect & validate app files
     files = _collect_files(app)
@@ -320,7 +319,7 @@ def publish(
             typer.secho(f"❌ Network error: {err}", fg=typer.colors.RED, err=True)
             raise typer.Exit(code=1) from err
 
-    if resp.status_code // 100 == 2:
+    if resp.status_code == 200:
         typer.secho("🎊 Upload successful", fg=typer.colors.GREEN, bold=True)
         return  # success
 
