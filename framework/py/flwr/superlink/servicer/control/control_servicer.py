@@ -506,16 +506,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         """List all SuperNodes."""
         log(INFO, "ControlServicer.ListFederations")
 
-        # Init link state
-        state = self.linkstate_factory.state()
-
-        flwr_aid = shared_account_info.get().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
-
-        # Get federations the account is a member of
-        federations = state.federation_manager.ls(flwr_aid=flwr_aid)
-
-        return ListFederationsResponse(federations=federations)
+        raise NotImplementedError("ListFederations is not yet implemented.")
 
 
 def _create_list_runs_response(
