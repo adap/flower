@@ -71,6 +71,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     UnregisterNodeRequest,
     UnregisterNodeResponse,
 )
+from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
@@ -506,7 +507,18 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         """List all SuperNodes."""
         log(INFO, "ControlServicer.ListFederations")
 
-        raise NotImplementedError("ListFederations is not yet implemented.")
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Get federations the account is a member of
+        federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
+
+        return ListFederationsResponse(
+            federations=[Federation(name=fed) for fed in federations]
+        )
 
 
 def _create_list_runs_response(

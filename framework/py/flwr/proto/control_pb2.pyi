@@ -4,6 +4,7 @@ isort:skip_file
 """
 import builtins
 import flwr.proto.fab_pb2
+import flwr.proto.federation_pb2
 import flwr.proto.node_pb2
 import flwr.proto.recorddict_pb2
 import flwr.proto.run_pb2
@@ -314,10 +315,10 @@ class ListFederationsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     FEDERATIONS_FIELD_NUMBER: builtins.int
     @property
-    def federations(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    def federations(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.federation_pb2.Federation]: ...
     def __init__(self,
         *,
-        federations: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        federations: typing.Optional[typing.Iterable[flwr.proto.federation_pb2.Federation]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["federations",b"federations"]) -> None: ...
 global___ListFederationsResponse = ListFederationsResponse
