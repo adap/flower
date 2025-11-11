@@ -120,7 +120,7 @@ def _list_federations(stub: ControlStub) -> list[Federation]:
     return list(res.federations)
 
 
-def _to_table(federations: list[Federation]) -> str:
+def _to_table(federations: list[Federation]) -> Table:
     """Format the provided federations list to a rich Table."""
     table = Table(header_style="bold cyan", show_lines=True)
 
