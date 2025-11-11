@@ -22,6 +22,7 @@ import "flwr/proto/transport.proto";
 import "flwr/proto/recorddict.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/node.proto";
+import "flwr/proto/federation.proto";
 
 service Control {
   // Start run upon request
@@ -116,4 +117,4 @@ message ListNodesResponse {
 }
 
 message ListFederationsRequest {}
-message ListFederationsResponse { repeated string federations = 1; }
+message ListFederationsResponse { repeated Federation federations = 1; }
