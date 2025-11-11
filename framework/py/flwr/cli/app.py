@@ -63,7 +63,6 @@ supernode_app.command("list")(supernode_list)
 supernode_app.command(hidden=True)(supernode_list)
 app.add_typer(supernode_app, name="supernode")
 
-
 typer_click_object = get_command(app)
 
 
