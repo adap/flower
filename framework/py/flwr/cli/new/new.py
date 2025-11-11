@@ -26,7 +26,11 @@ from typing import Annotated, Optional
 import requests
 import typer
 
-from flwr.supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
+from flwr.supercore.constant import (
+    APP_ID_PATTERN,
+    APP_VERSION_PATTERN,
+    PLATFORM_API_URL,
+)
 
 from ..utils import (
     is_valid_project_name,
@@ -191,9 +195,24 @@ def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
     return buf
 
 
-def download_remote_app_via_api(app_id: str, version: Optional[str]) -> None:
+def download_remote_app_via_api(app_str: str) -> None:
     """Download App from Platform API."""
-    # Parse @user/app just to derive local dir name
+    # Extract app version info
+    if "==" in app_str:
+        app_id = app_str.split("==")[0]
+        version = app_str.split("==")[1]
+
+        # Validate app version format
+        m = re.match(APP_VERSION_PATTERN, version)
+        if not m:
+            raise typer.BadParameter(
+                "Invalid app version. Expected format: x.x.x (digits only)."
+            )
+    else:
+        app_id = app_str
+        version = None
+
+    # Validate app_id format
     m = re.match(APP_ID_PATTERN, app_id)
     if not m:
         raise typer.BadParameter(
@@ -259,14 +278,6 @@ def new(
         Optional[str],
         typer.Option(case_sensitive=False, help="The Flower username of the author"),
     ] = None,
-    version: Annotated[
-        Optional[str],
-        typer.Option(
-            "--version",
-            help="App version to download (e.g., '1.0.0'). "
-            "If not specified, the latest version is downloaded.",
-        ),
-    ] = None,
 ) -> None:
     """Create new Flower App."""
     if app_name is None:
@@ -274,7 +285,7 @@ def new(
 
     # Download remote app
     if app_name and app_name.startswith("@"):
-        download_remote_app_via_api(app_name, version)
+        download_remote_app_via_api(app_name)
         return
 
     if not is_valid_project_name(app_name):
