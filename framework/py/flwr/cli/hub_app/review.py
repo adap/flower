@@ -32,7 +32,7 @@ from flwr.common.config import get_flwr_dir
 from flwr.supercore.constant import (
     APP_ID_PATTERN,
     APP_VERSION_PATTERN,
-    PLATFORM_API_URL,
+    # PLATFORM_API_URL,
 )
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_signed_message,
@@ -41,7 +41,7 @@ from flwr.supercore.primitives.asymmetric_ed25519 import (
 
 from ..install import install_from_fab
 from ..utils import request_download_link
-
+PLATFORM_API_URL = "https://api.flower.blue/v1"
 
 def _mk_review_dir(publisher: str, app_name: str, version: str) -> Path:
     """Create a directory for reviewing code."""
@@ -106,7 +106,7 @@ def _sign_fab(
 
 
 def _submit_review(
-    app_id: str, version: str, signature: bytes, sign_at: int, token: str
+    app_id: str, version: str, signature: bytes, signed_at: int, token: str
 ) -> None:
     """Submit review to Flower Platform API."""
     signature_b64 = base64.urlsafe_b64encode(signature).rstrip(b"=").decode("ascii")
@@ -116,7 +116,7 @@ def _submit_review(
         "app_id": app_id,
         "version": version,
         "signature_b64": signature_b64,
-        "sign_at": sign_at,
+        "signed_at": signed_at,
     }
     try:
         resp = requests.post(url, headers=headers, json=payload, timeout=120)
@@ -127,6 +127,7 @@ def _submit_review(
             err=True,
         )
         raise typer.Exit(code=1) from e
+    print("status_code: ", resp.status_code)
 
     if resp.status_code // 100 == 2:
         typer.secho("🎊 Review submitted", fg=typer.colors.GREEN, bold=True)
@@ -219,14 +220,13 @@ def review(
     typer.secho(
         f"""
     Review the unpacked app in the following directory:
-
-        {review_dir}
+        
+        {typer.style(review_dir, fg=typer.colors.GREEN, bold=True)}
 
     If you have reviewed the app and want to continue to sign it,
     type {typer.style("SIGN", fg=typer.colors.GREEN, bold=True)} or abort with CTRL+C.
     """,
-        fg=typer.colors.BRIGHT_CYAN,
-        bold=True,
+        fg=typer.colors.BLUE,
     )
 
     confirmation = typer.prompt("Type SIGN to continue").strip()
@@ -247,7 +247,7 @@ def review(
 
     # Load private key and sign FAB
     private_key = _load_private_key(key_path)
-    signature, sign_at = _sign_fab(fab_bytes, private_key)
+    signature, signed_at = _sign_fab(fab_bytes, private_key)
 
     # Submit review
-    _submit_review(app_id, version, signature, sign_at, token)
+    _submit_review(app_id, version, signature, signed_at, token)
