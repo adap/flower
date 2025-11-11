@@ -37,7 +37,7 @@ _lazy_imports = {"simulation", "server", "client", "common"}
 def __getattr__(name: str) -> object:
     """Lazy import for legacy support."""
     if name in _lazy_imports:
-        module = importlib.import_module(f"flwr.{name}")
+        module = importlib.import_module(f"{__name__}.{name}")
         globals()[name] = module
         return module
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
