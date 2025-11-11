@@ -52,13 +52,6 @@ def _mk_review_dir(publisher: str, app_name: str, version: str) -> Path:
     return d
 
 
-def _request_download_link(app_id: str, version: str) -> str:
-    """Request download link from Flower platform API."""
-    url = f"{PLATFORM_API_URL}/hub/fetch-fab"
-
-    return request_download_link(app_id, version, url, "fab_url")
-
-
 def _download_fab(url: str) -> bytes:
     """Download FAB file from given URL."""
     try:
@@ -213,8 +206,9 @@ def review(
 
     # Download FAB
     typer.secho("Downloading FAB... ", fg=typer.colors.BLUE)
-    url = _request_download_link(app_id, version)
-    fab_bytes = _download_fab(url)
+    url = f"{PLATFORM_API_URL}/hub/fetch-fab"
+    presigned_url = request_download_link(app_id, version, url, "fab_url")
+    fab_bytes = _download_fab(presigned_url)
 
     # Unpack FAB
     typer.secho("Unpacking FAB... ", fg=typer.colors.BLUE)
