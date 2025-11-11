@@ -357,7 +357,11 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                         "App verification is not supported by the connected SuperLink.",
                     )
                 else:
-                    verif_full = {k: json.loads(v) for k, v in verifications.items() if k != "valid_license"}
+                    verif_full = {
+                        k: json.loads(v)
+                        for k, v in verifications.items()
+                        if k != "valid_license"
+                    }
                     fab_verified = False
                     for public_key_id, verif in verif_full.items():
                         if public_key_id in trust_entities:
