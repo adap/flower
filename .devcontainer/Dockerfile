@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 # https://code.visualstudio.com/docs/remote/containers-advanced#_creating-a-nonroot-user
-ARG USERNAME=flwr-vscode
+ARG USERNAME=flwr-dev
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
@@ -26,7 +26,8 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhisto
 # Install system dependencies
 RUN apt-get update
 RUN apt-get install -y curl wget gnupg python3 python-is-python3 python3-pip git \
-    build-essential tmux vim
+    build-essential tmux vim zlib1g-dev libssl-dev libsqlite3-dev libreadline-dev  \
+    libbz2-dev libffi-dev liblzma-dev pandoc
 
 RUN python -m pip install \
     pip==25.3 \
