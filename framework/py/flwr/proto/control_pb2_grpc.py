@@ -83,7 +83,12 @@ class ControlStub(object):
                 '/flwr.proto.Control/ListNodes',
                 request_serializer=flwr_dot_proto_dot_control__pb2.ListNodesRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_control__pb2.ListNodesResponse.FromString,
-                )
+                _registered_method=True)
+        self.ListFederations = channel.unary_unary(
+                '/flwr.proto.Control/ListFederations',
+                request_serializer=flwr_dot_proto_dot_control__pb2.ListFederationsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.ListFederationsResponse.FromString,
+                _registered_method=True)
 
 
 class ControlServicer(object):
@@ -495,5 +500,39 @@ class Control(object):
             '/flwr.proto.Control/ListNodes',
             flwr_dot_proto_dot_control__pb2.ListNodesRequest.SerializeToString,
             flwr_dot_proto_dot_control__pb2.ListNodesResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListFederations(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/flwr.proto.Control/ListFederations',
+            flwr_dot_proto_dot_control__pb2.ListFederationsRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.ListFederationsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)

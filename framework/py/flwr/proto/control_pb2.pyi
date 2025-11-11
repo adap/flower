@@ -406,20 +406,28 @@ class ListNodesResponse(google.protobuf.message.Message):
 
 global___ListNodesResponse = ListNodesResponse
 
+@typing.final
 class ListFederationsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    def __init__(self,
-        ) -> None: ...
+
+    def __init__(
+        self,
+    ) -> None: ...
+
 global___ListFederationsRequest = ListFederationsRequest
 
+@typing.final
 class ListFederationsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     FEDERATIONS_FIELD_NUMBER: builtins.int
     @property
     def federations(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.federation_pb2.Federation]: ...
-    def __init__(self,
+    def __init__(
+        self,
         *,
-        federations: typing.Optional[typing.Iterable[flwr.proto.federation_pb2.Federation]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["federations",b"federations"]) -> None: ...
+        federations: collections.abc.Iterable[flwr.proto.federation_pb2.Federation] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["federations", b"federations"]) -> None: ...
+
 global___ListFederationsResponse = ListFederationsResponse
