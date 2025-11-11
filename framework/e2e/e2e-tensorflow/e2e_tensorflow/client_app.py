@@ -14,12 +14,6 @@ TEST_SUBSET_SIZE = 10
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
-# Load CIFAR-10 using tf.keras.datasets
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
-ds_train = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-ds_test = tf.data.Dataset.from_tensor_slices((x_test, y_test))
-
-
 # Define one fast preprocessing function
 @tf.function
 def preprocess_sample(image, label):
@@ -36,9 +30,18 @@ def preprocess(split, subset_size):
     )
 
 
-# Preprocess datasets
-ds_train = preprocess(ds_train, TRAIN_SUBSET_SIZE)
-ds_test = preprocess(ds_test, TEST_SUBSET_SIZE)
+def load_data():
+    """Load and preprocess CIFAR-10 data."""
+    # Load CIFAR-10 using tf.keras.datasets
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+    ds_train = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+    ds_test = tf.data.Dataset.from_tensor_slices((x_test, y_test))
+    
+    # Preprocess datasets
+    ds_train = preprocess(ds_train, TRAIN_SUBSET_SIZE)
+    ds_test = preprocess(ds_test, TEST_SUBSET_SIZE)
+    
+    return ds_train, ds_test
 
 
 # Load model (MobileNetV2, CIFAR-10)
@@ -50,22 +53,27 @@ model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
 # Define Flower client
 class FlowerClient(NumPyClient):
+    def __init__(self, ds_train, ds_test):
+        self.ds_train = ds_train
+        self.ds_test = ds_test
+    
     def get_parameters(self, config):
         return model.get_weights()
 
     def fit(self, parameters, config):
         model.set_weights(parameters)
-        model.fit(ds_train, epochs=1, batch_size=32)
-        return model.get_weights(), len(ds_train), {}
+        model.fit(self.ds_train, epochs=1, batch_size=32)
+        return model.get_weights(), len(self.ds_train), {}
 
     def evaluate(self, parameters, config):
         model.set_weights(parameters)
-        loss, accuracy = model.evaluate(ds_test)
-        return loss, len(ds_test), {"accuracy": accuracy}
+        loss, accuracy = model.evaluate(self.ds_test)
+        return loss, len(self.ds_test), {"accuracy": accuracy}
 
 
 def client_fn(context: Context):
-    return FlowerClient().to_client()
+    ds_train, ds_test = load_data()
+    return FlowerClient(ds_train, ds_test).to_client()
 
 
 app = ClientApp(
@@ -74,4 +82,8 @@ app = ClientApp(
 
 if __name__ == "__main__":
     # Start Flower client
-    start_client(server_address="127.0.0.1:8080", client=FlowerClient().to_client())
+    ds_train, ds_test = load_data()
+    start_client(
+        server_address="127.0.0.1:8080",
+        client=FlowerClient(ds_train, ds_test).to_client()
+    )
