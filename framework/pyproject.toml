@@ -194,6 +194,10 @@ module = "torch.*"
 follow_imports = "skip"
 follow_imports_for_stubs = true
 
+[[tool.mypy.overrides]]
+module = "flwr.proto.*"
+warn_unused_ignores = false
+
 [tool.docformatter]
 wrap-summaries = 88
 wrap-descriptions = 88
