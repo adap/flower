@@ -78,7 +78,7 @@ def _load_private_key(path: Path) -> ed25519.Ed25519PrivateKey:
         raise typer.Exit(code=1) from e
 
     try:
-        private_key = serialization.load_pem_private_key(pem, password=None)
+        private_key = serialization.load_ssh_private_key(pem, password=None)
     except ValueError as e:
         typer.secho(
             f"❌ Invalid private key format: {e}", fg=typer.colors.RED, err=True
@@ -236,7 +236,7 @@ def review(
 
     # Ask for private key path
     key_path_str = typer.prompt(
-        "Please specify the path of Ed25519 private key (PEM) for signing"
+        "Please specify the path of Ed25519 private key for signing"
     )
     key_path = Path(key_path_str).expanduser().resolve()
     if not key_path.is_file():
