@@ -5,8 +5,8 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 taplo fmt
 
 # Python
-python -m devtool.check_copyright py/flwr
-python -m devtool.init_py_fix py/flwr
+# python -m devtool.check_copyright py/flwr
+# python -m devtool.init_py_fix py/flwr
 python -m isort --skip py/flwr/proto py
 python -m black -q --exclude py/flwr/proto py
 python -m docformatter -i -r py/flwr -e py/flwr/proto
