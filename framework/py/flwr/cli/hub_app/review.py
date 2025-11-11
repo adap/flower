@@ -236,7 +236,7 @@ def review(
 
     # Ask for private key path
     key_path_str = typer.prompt(
-        "Please specify the path of Ed25519 private key for signing"
+        "Please specify the path of Ed25519 SSH private key for signing"
     )
     key_path = Path(key_path_str).expanduser().resolve()
     if not key_path.is_file():
