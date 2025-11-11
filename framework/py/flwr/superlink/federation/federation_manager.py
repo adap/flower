@@ -39,4 +39,4 @@ class FederationManager(ABC):
 
     @abstractmethod
     def get_federations(self, flwr_aid: str) -> list[str]:
-        """Get federations the account is member of."""
+        """Get federations of which the account is a member."""
