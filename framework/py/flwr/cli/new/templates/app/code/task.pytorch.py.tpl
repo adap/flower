@@ -84,8 +84,8 @@ def train(net, trainloader, epochs, lr, device):
 def test(net, testloader, device):
     """Validate the model on the test set."""
     net.to(device)
-    criterion = torch.nn.CrossEntropyLoss()
     net.eval()
+    criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
         for batch in testloader:
