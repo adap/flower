@@ -119,7 +119,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         ffs = self.ffs_factory.ffs()
 
         verification_dict = {}
-        if request.fab.content == b"":
+        if request.app_id.startswith("@"):
             if self.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
                 log(
                     ERROR,
@@ -127,8 +127,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 )
                 return StartRunResponse()
 
-            app_id = request.app_id
-            m = re.match(APP_ID_PATTERN, app_id)
+            m = re.match(APP_ID_PATTERN, request.app_id)
             if not m:
                 log(
                     ERROR,
@@ -137,20 +136,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 return StartRunResponse()
 
             # Request download link
-            url, verifications = _request_download_link(app_id, context)
-
-            valid_license = ""
-            if verifications is None:
-                valid_license = "Valid"
-            else:
-                # Convert verifications to dict[str, str] type
-                verification_dict = {
-                    item["public_key_id"]: json.dumps(
-                        {k: v for k, v in item.items() if k != "public_key_id"}
-                    )
-                    for item in verifications
-                }
-            verification_dict.update({"valid_license": valid_license})
+            url, verifications = _request_download_link(request.app_id, context)
+            verification_dict = _format_verification(verifications, verification_dict)
 
             # Download FAB from Flower platform API
             try:
@@ -160,6 +147,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 log(ERROR, "FAB download failed: %s", str(e))
                 return StartRunResponse()
             fab_file = r.content
+
         else:
             fab_file = request.fab.content
 
@@ -668,3 +656,21 @@ def _request_download_link(
     verifications = data["verifications"] if "verifications" in data else None
 
     return data["fab_url"], verifications
+
+
+def _format_verification(
+    verifications: Optional[list[dict[str, str]]], verification_dict: dict[str, str]
+) -> dict[str, str]:
+    """Format verification information for FAB."""
+    if verifications is not None:
+        # Convert verifications to dict[str, str] type
+        verification_dict = {
+            item["public_key_id"]: json.dumps(
+                {k: v for k, v in item.items() if k != "public_key_id"}
+            )
+            for item in verifications
+        }
+    valid_license = "" if verifications is None else "Valid"
+    verification_dict.update({"valid_license": valid_license})
+
+    return verification_dict
