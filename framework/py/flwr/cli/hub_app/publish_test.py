@@ -27,9 +27,7 @@ from flwr.common.constant import (
     FLWR_DIR,
     REFRESH_TOKEN_KEY,
 )
-from flwr.supercore.constant import (
-    ALLOWED_EXTS,
-)
+from flwr.supercore.constant import ALLOWED_EXTS
 
 from .publish import (
     _build_multipart_files_param,
