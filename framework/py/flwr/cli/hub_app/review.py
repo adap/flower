@@ -43,13 +43,13 @@ from ..install import install_from_fab
 from ..utils import request_download_link
 PLATFORM_API_URL = "https://api.flower.blue/v1"
 
-def _mk_review_dir(publisher: str, app_name: str, version: str) -> Path:
+
+def _create_review_dir() -> Path:
     """Create a directory for reviewing code."""
     home = get_flwr_dir()
-    ts = datetime.now().strftime("%Y-%m-%d-%H-%M")
-    d = home / "reviews" / f"{ts}--@{publisher}--{app_name}" / version
-    d.mkdir(parents=True, exist_ok=False)
-    return d
+    review_dir = home / "reviews"
+    review_dir.mkdir(parents=True, exist_ok=True)
+    return review_dir
 
 
 def _download_fab(url: str) -> bytes:
@@ -203,8 +203,6 @@ def review(
         )
         raise typer.Exit(code=1)
 
-    publisher, app_name = m_id.group(1), m_id.group(2)  # (publisher, app_name)
-
     # Download FAB
     typer.secho("Downloading FAB... ", fg=typer.colors.BLUE)
     url = f"{PLATFORM_API_URL}/hub/fetch-fab"
@@ -213,15 +211,15 @@ def review(
 
     # Unpack FAB
     typer.secho("Unpacking FAB... ", fg=typer.colors.BLUE)
-    review_dir = _mk_review_dir(publisher, app_name, version)
-    install_from_fab(fab_bytes, review_dir)
+    review_dir = _create_review_dir()
+    review_app_path = install_from_fab(fab_bytes, review_dir)
 
     # Prompt to ask for sign
     typer.secho(
         f"""
     Review the unpacked app in the following directory:
         
-        {typer.style(review_dir, fg=typer.colors.GREEN, bold=True)}
+        {typer.style(review_app_path, fg=typer.colors.GREEN, bold=True)}
 
     If you have reviewed the app and want to continue to sign it,
     type {typer.style("SIGN", fg=typer.colors.GREEN, bold=True)} or abort with CTRL+C.
