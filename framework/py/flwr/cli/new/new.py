@@ -269,7 +269,7 @@ def new(
     app_name: Annotated[
         Optional[str],
         typer.Argument(
-            help="Flower app name. For remote apps, use '@user/app==1.0.0'. "
+            help="Flower app name. For remote apps, use the format '@user/app==1.0.0'. "
             "Version is optional (defaults to latest)."
         ),
     ] = None,
