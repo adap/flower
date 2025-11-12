@@ -69,6 +69,14 @@ app_app = typer.Typer(help="Manage Apps")
 app_app.command()(app_publish)
 app.add_typer(app_app, name="app")
 
+# Create federation command group
+federation_app = typer.Typer(help="Manage Federations")
+# Make it appear as "list"
+federation_app.command("list")(supernode_list)
+# Hide "ls" command (left as alias)
+federation_app.command(hidden=True)(supernode_list)
+app.add_typer(federation_app, name="federation")
+
 typer_click_object = get_command(app)
 
 
