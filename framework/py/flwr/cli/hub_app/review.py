@@ -186,7 +186,7 @@ def review(
         app_id = app_name
         version = None
         typer.secho(
-            "⚠️ No app version specified. Downloading the latest version.",
+            "No app version specified. Downloading the latest version.",
             fg=typer.colors.YELLOW,
         )
 
@@ -211,11 +211,16 @@ def review(
     review_dir = _create_review_dir()
     review_app_path = install_from_fab(fab_bytes, review_dir)
 
+    # Extract app version
+    version_pattern = re.compile(r"\b(\d+\.\d+\.\d+)\b")
+    match = version_pattern.search(str(review_app_path))
+    version = match.group(1)
+
     # Prompt to ask for sign
     typer.secho(
         f"""
     Review the unpacked app in the following directory:
-        
+
         {typer.style(review_app_path, fg=typer.colors.GREEN, bold=True)}
 
     If you have reviewed the app and want to continue to sign it,
