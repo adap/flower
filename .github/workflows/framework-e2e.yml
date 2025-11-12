@@ -334,6 +334,8 @@ jobs:
           flwr new tmp-${CLEAN_FRAMEWORK} --framework="${{ matrix.framework }}" --username gh_ci
           cd tmp-${CLEAN_FRAMEWORK}
           sed -i 's/"flwr\[[^]]*\][^"]*", *//g' pyproject.toml
+          # Replace tensorflow with tensorflow-cpu to avoid GPU warnings in CI
+          sed -i 's/"tensorflow\([^"]*\)"/"tensorflow-cpu\1"/g' pyproject.toml
           pip install flwr[simulation]
           pip install .
       - name: Run project
