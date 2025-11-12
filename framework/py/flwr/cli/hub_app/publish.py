@@ -321,7 +321,7 @@ def publish(
             typer.secho(f"❌ Network error: {err}", fg=typer.colors.RED, err=True)
             raise typer.Exit(code=1) from err
 
-    #if resp.status_code == 200:
+    # if resp.status_code == 200:
     if resp.ok:
         typer.secho("🎊 Upload successful", fg=typer.colors.GREEN, bold=True)
         return  # success
