@@ -94,12 +94,10 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
     The following details are displayed:
 
     - **Run ID:** Unique identifier for the run.
-    - **FAB:** Name of the FAB associated with the run (``{FAB_ID} (v{FAB_VERSION})``).
+    - **App:** Name of the FAB associated with the run (``{FAB_ID}=={FAB_VERSION}``).
     - **Status:** Current status of the run (pending, starting, running, finished).
     - **Elapsed:** Time elapsed since the run started (``HH:MM:SS``).
-    - **Created At:** Timestamp when the run was created.
-    - **Running At:** Timestamp when the run started running.
-    - **Finished At:** Timestamp when the run finished.
+    - **Status Changed @:** Timestamp of the most recent status change.
 
     All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD HH:MM:SSZ``.
     """
@@ -225,9 +223,7 @@ def _to_table(run_list: list[_RunListType]) -> Table:
     table.add_column(Text("FAB", justify="center"), style="bright_black")
     table.add_column(Text("Status", justify="center"))
     table.add_column(Text("Elapsed", justify="center"), style="blue")
-    table.add_column(Text("Created At", justify="center"), style="bright_black")
-    table.add_column(Text("Running At", justify="center"), style="bright_black")
-    table.add_column(Text("Finished At", justify="center"), style="bright_black")
+    table.add_column(Text("Status Changed @", justify="center"), style="bright_black")
 
     for row in run_list:
         (
@@ -250,14 +246,20 @@ def _to_table(run_list: list[_RunListType]) -> Table:
         else:
             status_style = "yellow"
 
+        # Use the most recent timestamp
+        if finished_at != "N/A":
+            status_changed_at = finished_at
+        elif running_at != "N/A":
+            status_changed_at = running_at
+        else:
+            status_changed_at = created_at
+
         formatted_row = (
             f"[bold]{run_id}[/bold]",
             f"{fab_id} (v{fab_version})",
             f"[{status_style}]{status_text}[/{status_style}]",
             elapsed,
-            created_at,
-            running_at,
-            finished_at,
+            status_changed_at,
         )
         table.add_row(*formatted_row)
 
