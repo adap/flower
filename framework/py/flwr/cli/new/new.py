@@ -268,7 +268,10 @@ def download_remote_app_via_api(app_str: str) -> None:
 def new(
     app_name: Annotated[
         Optional[str],
-        typer.Argument(help="The name of the Flower App"),
+        typer.Argument(
+            help="Flower app name. For remote apps, use '@user/app==1.0.0'. "
+            "Version is optional (defaults to latest)."
+        ),
     ] = None,
     framework: Annotated[
         Optional[MlFramework],
