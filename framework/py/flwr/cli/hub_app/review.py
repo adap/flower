@@ -127,7 +127,7 @@ def _submit_review(
         )
         raise typer.Exit(code=1) from e
 
-    if resp.status_code == 201:
+    if resp.ok:
         typer.secho("🎊 Review submitted", fg=typer.colors.GREEN, bold=True)
         return
 
