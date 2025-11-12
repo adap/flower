@@ -45,6 +45,7 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
+from flwr.common.version import package_version as flwr_version
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
@@ -419,6 +420,7 @@ def request_download_link(
     body = {
         "app_id": app_id,  # send raw string of app_id
         "version": version,
+        "flwr_version": flwr_version,
     }
     try:
         resp = requests.post(in_url, headers=headers, data=json.dumps(body), timeout=20)
