@@ -1,7 +1,6 @@
 import os
 
 import tensorflow as tf
-from tensorflow import keras
 
 from flwr.app import Context
 from flwr.client import NumPyClient, start_client
@@ -15,25 +14,24 @@ TEST_SUBSET_SIZE = 10
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
-# Load CIFAR-10 using keras.datasets
-(x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
+# Load CIFAR-10 using built-in Keras loader
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
-# Normalize pixel values to [0, 1]
 x_train = x_train.astype("float32") / 255.0
 x_test = x_test.astype("float32") / 255.0
+x_train, y_train = x_train[:TRAIN_SUBSET_SIZE], y_train[:TRAIN_SUBSET_SIZE]
+x_test, y_test = x_test[:TEST_SUBSET_SIZE], y_test[:TEST_SUBSET_SIZE]
 
-# Take subsets
-x_train = x_train[:TRAIN_SUBSET_SIZE]
-y_train = y_train[:TRAIN_SUBSET_SIZE]
-x_test = x_test[:TEST_SUBSET_SIZE]
-y_test = y_test[:TEST_SUBSET_SIZE]
-
-# Create TensorFlow datasets
-ds_train = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-ds_train = ds_train.batch(32).prefetch(tf.data.AUTOTUNE)
-
-ds_test = tf.data.Dataset.from_tensor_slices((x_test, y_test))
-ds_test = ds_test.batch(32).prefetch(tf.data.AUTOTUNE)
+ds_train = (
+    tf.data.Dataset.from_tensor_slices((x_train, y_train))
+    .batch(32)
+    .prefetch(tf.data.AUTOTUNE)
+)
+ds_test = (
+    tf.data.Dataset.from_tensor_slices((x_test, y_test))
+    .batch(32)
+    .prefetch(tf.data.AUTOTUNE)
+)
 
 
 # Load model (MobileNetV2, CIFAR-10)
