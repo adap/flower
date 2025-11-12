@@ -19,7 +19,6 @@ import base64
 import hashlib
 import re
 import time
-from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -29,10 +28,9 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from flwr.common.config import get_flwr_dir
-from flwr.supercore.constant import (
+from flwr.supercore.constant import (  # PLATFORM_API_URL,
     APP_ID_PATTERN,
     APP_VERSION_PATTERN,
-    # PLATFORM_API_URL,
 )
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_signed_message,
@@ -41,6 +39,7 @@ from flwr.supercore.primitives.asymmetric_ed25519 import (
 
 from ..install import install_from_fab
 from ..utils import request_download_link
+
 PLATFORM_API_URL = "https://api.flower.blue/v1"
 
 
@@ -143,15 +142,11 @@ def _submit_review(
 
 # pylint: disable-next=too-many-locals
 def review(
-    app_id: Annotated[
+    app_name: Annotated[
         str,
-        typer.Argument(help="App identifier in the form @user_name/app_name)."),
-    ],
-    version: Annotated[
-        str,
-        typer.Option(
-            "--version",
-            help="Version of the app to review (e.g., '1.0.0').",
+        typer.Argument(
+            help="App identifier (e.g., '@user/app==1.0.0'). "
+            "Version is optional; defaults to the latest."
         ),
     ],
     token: Annotated[
@@ -174,28 +169,30 @@ def review(
         raise typer.Exit(code=1)
 
     # Validate version format
-    if not version:
-        typer.secho(
-            "❌ App version missing. Please provide a version "
-            "to review (e.g., '1.0.0').",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
+    if "==" in app_name:
+        app_id = app_name.split("==")[0]
+        version = app_name.split("==")[1]
 
-    m_version = re.match(APP_VERSION_PATTERN, version)
-    if not m_version:
+        # Validate app version format
+        m = re.match(APP_VERSION_PATTERN, version)
+        if not m:
+            typer.secho(
+                "❌ Invalid app version. Expected format: x.x.x (digits only).",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(code=1)
+    else:
+        app_id = app_name
+        version = None
         typer.secho(
-            f"❌ Invalid version '{version}'. "
-            f"Expected format: x.x.x (digits only).",
-            fg=typer.colors.RED,
-            err=True,
+            "⚠️ No app version specified. Downloading the latest version.",
+            fg=typer.colors.YELLOW,
         )
-        raise typer.Exit(code=1)
 
     # Validate app_id format
-    m_id = re.match(APP_ID_PATTERN, app_id)
-    if not m_id:
+    m = re.match(APP_ID_PATTERN, app_id)
+    if not m:
         typer.secho(
             "❌ Invalid remote app ID. Expected format: '@user_name/app_name'.",
             fg=typer.colors.RED,
