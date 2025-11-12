@@ -63,6 +63,14 @@ supernode_app.command("list")(supernode_list)
 supernode_app.command(hidden=True)(supernode_list)
 app.add_typer(supernode_app, name="supernode")
 
+# Create federation command group
+federation_app = typer.Typer(help="Manage Federations")
+# Make it appear as "list"
+federation_app.command("list")(supernode_list)
+# Hide "ls" command (left as alias)
+federation_app.command(hidden=True)(supernode_list)
+app.add_typer(federation_app, name="federation")
+
 typer_click_object = get_command(app)
 
 
