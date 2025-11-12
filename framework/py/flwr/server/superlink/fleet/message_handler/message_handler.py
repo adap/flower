@@ -32,7 +32,7 @@ from flwr.common.serde import (
     message_to_proto,
     run_to_proto,
 )
-from flwr.common.typing import Fab, InvalidRunStatusException
+from flwr.common.typing import Fab, InvalidRunStatusException, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
@@ -200,10 +200,8 @@ def get_run(
     request: GetRunRequest, state: LinkState, store: ObjectStore
 ) -> GetRunResponse:
     """Get run information."""
-    run = state.get_run(request.run_id)
-
-    if run is None:
-        return GetRunResponse()
+    # Validate that the requesting SuperNode is part of the federation
+    run = _validate_node_in_federation(state, request.node.node_id, request.run_id)
 
     # Abort if the run is not running
     abort_msg = check_abort(
@@ -222,6 +220,9 @@ def get_fab(
     request: GetFabRequest, ffs: Ffs, state: LinkState, store: ObjectStore
 ) -> GetFabResponse:
     """Get FAB."""
+    # Validate that the requesting SuperNode is part of the federation
+    _validate_node_in_federation(state, request.node.node_id, request.run_id)
+
     # Abort if the run is not running
     abort_msg = check_abort(
         request.run_id,
@@ -318,3 +319,19 @@ def _validate_heartbeat_interval(interval: float) -> None:
             f"Heartbeat interval {interval} is out of bounds "
             f"[{HEARTBEAT_MIN_INTERVAL}, {HEARTBEAT_MAX_INTERVAL}]."
         )
+
+
+def _validate_node_in_federation(
+    state: LinkState,
+    node_id: int,
+    run_id: int,
+) -> Run:
+    """Raise if the requesting SuperNode is not part of the federation the run belongs
+    to."""
+    run = state.get_run(run_id)
+    if not run:
+        raise ValueError(f"Run ID not found: {run_id}")
+
+    if not state.federation_manager.has_node(node_id, run.federation):
+        raise ValueError(f"SuperNode is not part of the federation '{run.federation}'.")
+    return run
