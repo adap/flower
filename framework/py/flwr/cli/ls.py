@@ -303,7 +303,7 @@ def _to_detail_table(run: RunRow) -> Table:
     table.add_row("Run ID", f"[bold]{run.run_id}[/bold]")
     table.add_row("Federation", run.federation)
     table.add_row("App", f"@{run.fab_id}=={run.fab_version}")
-    table.add_row("FAB Hash", run.fab_hash[:8])
+    table.add_row("FAB Hash", f"{run.fab_hash[:8]}...{run.fab_hash[-8:]}")
     table.add_row("Status", f"[{status_style}]{run.status_text}[/{status_style}]")
     table.add_row("Elapsed", f"[blue]{run.elapsed}[/blue]")
     table.add_row("Pending At", run.pending_at)
