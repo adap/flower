@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-12 00:08+0000\n"
+"POT-Creation-Date: 2025-11-13 00:08+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -15237,6 +15237,59 @@ msgstr ""
 msgid "Path of the Flower App to bundle into a FAB"
 msgstr ""
 
+#: ../../flwr federation:1
+#, fuzzy
+msgid "Manage Federations"
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr federation list:1 supernode
+#, fuzzy
+msgid "List SuperNodes in the federation."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
+msgid "Format output using 'default' view or 'json'"
+msgstr ""
+
+#: ../../flwr federation list log register run stop supernode unregister
+msgid "default"
+msgstr ""
+
+#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "``'default'``"
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr federation list:1 supernode
+#, fuzzy
+msgid "Enable verbose output"
+msgstr "Exemplo"
+
+#: ../../flwr federation list:1 run:1 supernode
+#, fuzzy
+msgid "``False``"
+msgstr "``FLWR_VERSION``"
+
+#: ../../source/ref-api-cli.rst
+#, fuzzy
+msgid "Arguments"
+msgstr "Argumento de compilação"
+
+#: ../../flwr federation install:1 list:1 log:1 login:1 new:1 pull:1 register:1
+#: run:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "Optional argument"
+msgstr "Argumento de compilação"
+
+#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "Path of the Flower project"
+msgstr "O nome do repositório da imagem base."
+
+#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
+msgid "Name of the federation"
+msgstr ""
+
 #: ../../flwr install:1
 msgid "Install a Flower App Bundle."
 msgstr ""
@@ -15278,17 +15331,6 @@ msgstr ""
 #: ../../flwr install:1
 msgid "The desired install path."
 msgstr ""
-
-#: ../../source/ref-api-cli.rst
-#, fuzzy
-msgid "Arguments"
-msgstr "Argumento de compilação"
-
-#: ../../flwr install:1 list:1 log:1 login:1 new:1 pull:1 register:1 run:1
-#: stop:1 supernode unregister:1
-#, fuzzy
-msgid "Optional argument"
-msgstr "Argumento de compilação"
 
 #: ../../flwr install:1
 msgid "The source FAB file to install."
@@ -15368,35 +15410,8 @@ msgstr ""
 msgid "List all runs"
 msgstr ""
 
-#: ../../flwr list log register run stop supernode unregister
-msgid "default"
-msgstr ""
-
-#: ../../flwr list:1 run:1 supernode
-#, fuzzy
-msgid "``False``"
-msgstr "``FLWR_VERSION``"
-
 #: ../../flwr list:1
 msgid "Specific run ID to display"
-msgstr ""
-
-#: ../../flwr list:1 register:1 run:1 stop:1 supernode unregister:1
-msgid "Format output using 'default' view or 'json'"
-msgstr ""
-
-#: ../../flwr list:1 register:1 run:1 stop:1 supernode unregister:1
-#, fuzzy
-msgid "``'default'``"
-msgstr "``FLWR_VERSION``"
-
-#: ../../flwr list:1 register:1 stop:1 supernode unregister:1
-#, fuzzy
-msgid "Path of the Flower project"
-msgstr "O nome do repositório da imagem base."
-
-#: ../../flwr list:1 register:1 stop:1 supernode unregister:1
-msgid "Name of the federation"
 msgstr ""
 
 #: ../../flwr log:1
@@ -15465,9 +15480,10 @@ msgid "The Flower username of the author"
 msgstr ""
 
 #: ../../flwr new:1
-#, fuzzy
-msgid "The name of the Flower App"
-msgstr "O nome do repositório da imagem base."
+msgid ""
+"Flower app name. For remote apps, use the format '@user/app==1.0.0'. "
+"Version is optional (defaults to latest)."
+msgstr ""
 
 #: ../../flwr pull:1
 msgid "Pull artifacts from a Flower run."
@@ -15527,16 +15543,6 @@ msgstr ""
 #, fuzzy
 msgid "Manage SuperNodes"
 msgstr "Construindo a imagem do servidor"
-
-#: ../../flwr list:1 supernode
-#, fuzzy
-msgid "List SuperNodes in the federation."
-msgstr "``FLWR_VERSION``"
-
-#: ../../flwr list:1 supernode
-#, fuzzy
-msgid "Enable verbose output"
-msgstr "Exemplo"
 
 #: ../../flwr register:1 supernode
 #, fuzzy

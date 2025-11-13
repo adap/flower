@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-12 00:08+0000\n"
+"POT-Creation-Date: 2025-11-13 00:08+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -16164,6 +16164,59 @@ msgstr ""
 msgid "Path of the Flower App to bundle into a FAB"
 msgstr ""
 
+#: ../../flwr federation:1
+#, fuzzy
+msgid "Manage Federations"
+msgstr "시뮬레이션 실행"
+
+#: ../../flwr federation list:1 supernode
+#, fuzzy
+msgid "List SuperNodes in the federation."
+msgstr "flower 초연결"
+
+#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
+msgid "Format output using 'default' view or 'json'"
+msgstr ""
+
+#: ../../flwr federation list log register run stop supernode unregister
+msgid "default"
+msgstr ""
+
+#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "``'default'``"
+msgstr "``flwr/base``"
+
+#: ../../flwr federation list:1 supernode
+#, fuzzy
+msgid "Enable verbose output"
+msgstr "예시"
+
+#: ../../flwr federation list:1 run:1 supernode
+#, fuzzy
+msgid "``False``"
+msgstr "``flwr/base``"
+
+#: ../../source/ref-api-cli.rst
+#, fuzzy
+msgid "Arguments"
+msgstr "빌드 전달인자"
+
+#: ../../flwr federation install:1 list:1 log:1 login:1 new:1 pull:1 register:1
+#: run:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "Optional argument"
+msgstr "선택적 개선 사항"
+
+#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "Path of the Flower project"
+msgstr "Flower 기본 이미지의 태그."
+
+#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
+msgid "Name of the federation"
+msgstr ""
+
 #: ../../flwr install:1
 #, fuzzy
 msgid "Install a Flower App Bundle."
@@ -16206,17 +16259,6 @@ msgstr ""
 #: ../../flwr install:1
 msgid "The desired install path."
 msgstr ""
-
-#: ../../source/ref-api-cli.rst
-#, fuzzy
-msgid "Arguments"
-msgstr "빌드 전달인자"
-
-#: ../../flwr install:1 list:1 log:1 login:1 new:1 pull:1 register:1 run:1
-#: stop:1 supernode unregister:1
-#, fuzzy
-msgid "Optional argument"
-msgstr "선택적 개선 사항"
 
 #: ../../flwr install:1
 msgid "The source FAB file to install."
@@ -16300,35 +16342,8 @@ msgstr ""
 msgid "List all runs"
 msgstr ""
 
-#: ../../flwr list log register run stop supernode unregister
-msgid "default"
-msgstr ""
-
-#: ../../flwr list:1 run:1 supernode
-#, fuzzy
-msgid "``False``"
-msgstr "``flwr/base``"
-
 #: ../../flwr list:1
 msgid "Specific run ID to display"
-msgstr ""
-
-#: ../../flwr list:1 register:1 run:1 stop:1 supernode unregister:1
-msgid "Format output using 'default' view or 'json'"
-msgstr ""
-
-#: ../../flwr list:1 register:1 run:1 stop:1 supernode unregister:1
-#, fuzzy
-msgid "``'default'``"
-msgstr "``flwr/base``"
-
-#: ../../flwr list:1 register:1 stop:1 supernode unregister:1
-#, fuzzy
-msgid "Path of the Flower project"
-msgstr "Flower 기본 이미지의 태그."
-
-#: ../../flwr list:1 register:1 stop:1 supernode unregister:1
-msgid "Name of the federation"
 msgstr ""
 
 #: ../../flwr log:1
@@ -16401,9 +16416,10 @@ msgid "The Flower username of the author"
 msgstr ""
 
 #: ../../flwr new:1
-#, fuzzy
-msgid "The name of the Flower App"
-msgstr "Flower 기본 이미지의 태그."
+msgid ""
+"Flower app name. For remote apps, use the format '@user/app==1.0.0'. "
+"Version is optional (defaults to latest)."
+msgstr ""
 
 #: ../../flwr pull:1
 msgid "Pull artifacts from a Flower run."
@@ -16466,16 +16482,6 @@ msgstr "Flower 커뮤니티 가입하기"
 #, fuzzy
 msgid "Manage SuperNodes"
 msgstr "SuperNodes 인증하기"
-
-#: ../../flwr list:1 supernode
-#, fuzzy
-msgid "List SuperNodes in the federation."
-msgstr "flower 초연결"
-
-#: ../../flwr list:1 supernode
-#, fuzzy
-msgid "Enable verbose output"
-msgstr "예시"
 
 #: ../../flwr register:1 supernode
 #, fuzzy
