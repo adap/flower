@@ -5,20 +5,23 @@ Description
 -----------
 
 This error occurs when an invalid YAML file for trusted entities is provided via the
-``--trust-entities`` option.
-The SuperNode must be restarted with a valid trusted entities list.
+``--trust-entities`` option. The SuperNode must be restarted with a valid trusted
+entities list.
 
 How to Resolve
 --------------
 
 To resolve this issue, you can do one of the following:
 
-- **Provide a valid trusted entities list** using the ``--trust-entities`` option when launching the
-  SuperNode. Supply a YAML file (for example, ``--trust-entities ./pks.yaml``) that contains
-  the trusted entities’ public key IDs and their corresponding public keys.
+- **Provide a valid trusted entities list** using the ``--trust-entities`` option when
+  launching the SuperNode. Supply a YAML file (for example, ``--trust-entities
+  ./pks.yaml``) that contains the trusted entities’ public key IDs and their
+  corresponding public keys.
 
-  - Public keys must be in **OpenSSH format**, and currently only the **ssh-ed25519** key type is supported.
-  - Public key IDs must follow the format ``fpk_<UUID>``, where ``fpk`` stands for Flower Public Key.
+  - Public keys must be in **OpenSSH format**, and currently only the **ssh-ed25519**
+    key type is supported.
+  - Public key IDs must follow the format ``fpk_<UUID>``, where ``fpk`` stands for
+    Flower Public Key.
   - The YAML file should follow this structure:
 
   .. code-block:: yaml
@@ -26,5 +29,5 @@ To resolve this issue, you can do one of the following:
       fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]
       fpk_UUID2: ssh-ed25519 <base64-encoded-key2> [comment2]
 
-- **Disable entity verification** by removing the ``--trust-entities`` option when starting
-  the SuperNode. This allows the SuperNode to run without entity verification.
+- **Disable entity verification** by removing the ``--trust-entities`` option when
+  starting the SuperNode. This allows the SuperNode to run without entity verification.
