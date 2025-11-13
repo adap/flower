@@ -20,6 +20,7 @@ from contextlib import ExitStack
 from pathlib import Path
 
 import pytest
+import typer
 
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
@@ -27,16 +28,25 @@ from flwr.common.constant import (
     FLWR_DIR,
     REFRESH_TOKEN_KEY,
 )
-from flwr.supercore.constant import ALLOWED_EXTS
+from flwr.supercore.constant import (
+    MAX_DIR_DEPTH,
+    MAX_FILE_BYTES,
+    MAX_FILE_COUNT,
+    MAX_TOTAL_BYTES,
+)
 
 from .publish import (
     _build_multipart_files_param,
+    _collect_files,
     _compile_gitignore,
     _depth_of,
     _detect_mime,
     _load_gitignore,
     _validate_credentials_content,
 )
+
+TEXT_EXT = ".py"
+ALT_TEXT_EXT = ".md"
 
 
 def write(tmp: Path, rel: str, data: bytes) -> Path:
@@ -47,33 +57,11 @@ def write(tmp: Path, rel: str, data: bytes) -> Path:
     return p
 
 
-def pick_text_ext():
-    """Pick a texty extension from the REAL allowed set, or skip if none."""
-    preferred = [
-        ".txt",
-        ".py",
-        ".md",
-        ".json",
-        ".yaml",
-        ".yml",
-        ".toml",
-        ".cfg",
-        ".ini",
-    ]
-    for ext in preferred:
-        if ext in ALLOWED_EXTS:
-            return ext
-    # Fall back to any allowed extension; if none exist, skip the test
-    allowed = list(ALLOWED_EXTS)
-    if not allowed:
-        pytest.skip("No allowed extensions configured")
-    return allowed[0]
-
-
 def test_load_gitignore(tmp_path: Path) -> None:
     """Test '.gitignore' loading."""
     (tmp_path / ".gitignore").write_text("*.log\nsecret/\n", encoding="utf-8")
     lines = _load_gitignore(tmp_path)
+    assert lines is not None
     assert list(lines) == ["*.log", "secret/"]
 
 
@@ -103,32 +91,83 @@ def test_compile_gitignore_ignores_flwr_dir(tmp_path: Path) -> None:
         (Path("d1/d2/d3/d4/d5/x"), 5),
     ],
 )
-def test_depth_of(rel, expected):
+def test_depth_of(rel: Path, expected: int) -> None:
     """Test the directory depth detection."""
     assert _depth_of(rel) == expected
 
 
-def test_detect_mime_has_string(tmp_path: Path):
+def test_detect_mime_has_string(tmp_path: Path) -> None:
     """Test the MIME detection."""
-    ext = pick_text_ext()
-    f = write(tmp_path, f"a{ext}", b"content")
-    # We don't assert exact mapping—only that a non-empty MIME string is returned.
+    f = write(tmp_path, f"a{TEXT_EXT}", b"print('x')")
     mime = _detect_mime(f)
     assert isinstance(mime, str) and len(mime) > 0
 
 
-def test_build_multipart_files_param(tmp_path: Path):
+def test_collect_files_depth_limit(tmp_path: Path) -> None:
+    """Test collect files depth limit."""
+    # Create a path deeper than allowed
+    parts = [f"d{i}" for i in range(MAX_DIR_DEPTH + 1)]
+    deep = Path(*parts) / f"too_deep{TEXT_EXT}"
+    write(tmp_path, deep.as_posix(), b"x")
+
+    with pytest.raises(typer.Exit) as exc:
+        _collect_files(tmp_path)
+    assert exc.value.exit_code == 2
+
+
+def test_collect_files_count_limit(tmp_path: Path) -> None:
+    """Test collect files count limit."""
+    # Create (max_count + 1) tiny files
+    for i in range(MAX_FILE_COUNT + 1):
+        write(tmp_path, f"f{i}{TEXT_EXT}", b"x")
+
+    with pytest.raises(typer.Exit) as exc:
+        _collect_files(tmp_path)
+    assert exc.value.exit_code == 2
+
+
+def test_collect_files_total_bytes_limit(tmp_path: Path) -> None:
+    """Test collect files total bytes limit."""
+    # One file exceeding the total limit by 1 byte
+    data = b"x" * (MAX_TOTAL_BYTES + 1)
+    write(tmp_path, f"big{TEXT_EXT}", data)
+
+    with pytest.raises(typer.Exit) as exc:
+        _collect_files(tmp_path)
+    assert exc.value.exit_code == 2
+
+
+def test_collect_files_per_file_size_limit(tmp_path: Path) -> None:
+    """Test collect files per file size limit."""
+    data = b"x" * (MAX_FILE_BYTES + 1)
+    write(tmp_path, f"too_big{ALT_TEXT_EXT}", data)
+
+    with pytest.raises(typer.Exit) as exc:
+        _collect_files(tmp_path)
+    assert exc.value.exit_code == 2
+
+
+def test_collect_files_non_utf8_raises_for_text(tmp_path: Path) -> None:
+    """Test collect files UTF8 format."""
+    # Invalid UTF-8 payload in a text extension
+    write(tmp_path, f"bad{TEXT_EXT}", b"\xff\xfe\xfa")
+
+    with pytest.raises(typer.Exit) as exc:
+        _collect_files(tmp_path)
+    assert exc.value.exit_code == 2
+
+
+def test_build_multipart_files_param(tmp_path: Path) -> None:
     """Test multipart files building."""
-    ext = pick_text_ext()
-    f1 = write(tmp_path, f"a{ext}", b"hello")
-    files = [(f1, Path(f"a{ext}"))]
+    f1 = write(tmp_path, f"a{TEXT_EXT}", b"hello")
+    files = [(f1, Path(f"a{TEXT_EXT}"))]
 
     with ExitStack() as stack:
         parts = _build_multipart_files_param(files, stack)
         assert len(parts) == 1
         key, (fname, fobj, mime) = parts[0]
         assert key == "files"
-        assert fname == f"a{ext}"
+        assert fname == f"a{TEXT_EXT}"
         assert hasattr(fobj, "read")
         assert isinstance(mime, str) and mime
 
@@ -137,7 +176,7 @@ def test_build_multipart_files_param(tmp_path: Path):
         fobj.read(1)  # closed file
 
 
-def test_validate_credentials_content_success(tmp_path: Path):
+def test_validate_credentials_content_success(tmp_path: Path) -> None:
     """Test the credentials content loading."""
     creds = {
         AUTHN_TYPE_JSON_KEY: "userpass",
