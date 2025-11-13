@@ -356,4 +356,5 @@ def _display_one_run(stub: ControlStub, run_id: int) -> list[RunRow]:
         raise ValueError(f"Run ID {run_id} not found")
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
+
     return _format_runs(run_dict, res.now)
