@@ -1304,12 +1304,9 @@ msgstr "Version Python"
 #: ../../source/how-to-install-flower.rst:11
 #, fuzzy
 msgid ""
-"Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, "
-"but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is "
-"recommended."
+"Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_"
 msgstr ""
-"Flower nécessite `Python 3.9 <https://docs.python.org/3.9/>`_ ou plus, "
-"nous recommandons `Python 3.10 <https://docs.python.org/3.10/>`_."
+"Flower nécessite `Python 3.10 <https://docs.python.org/3.9/>`_ ou plus."
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:17
 msgid ""
@@ -2504,7 +2501,7 @@ msgstr "Prérequis"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:7
 #, fuzzy
-msgid "`Python 3.9 <https://docs.python.org/3.9/>`_ or above"
+msgid "`Python 3.10 <https://docs.python.org/3.10/>`_ or above"
 msgstr "`Python 3.10 <https://docs.python.org/3.10/>`_ ou plus"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:8

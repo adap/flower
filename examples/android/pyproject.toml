@@ -10,7 +10,7 @@ authors = ["The Flower Authors <hello@flower.ai>"]
 package-mode = false
 
 [tool.poetry.dependencies]
-python = ">=3.9.2,<3.11"
+python = ">=3.10,<3.11"
 flwr = ">=1.0,<2.0"
 tensorflow-cpu = { version = ">=2.9.1,<2.11.1 || >2.11.1", markers = "platform_machine == \"x86_64\"" }
 tensorflow-macos = { version = ">=2.9.1,<2.11.1 || >2.11.1", markers = "sys_platform == \"darwin\" and platform_machine == \"arm64\"" }
