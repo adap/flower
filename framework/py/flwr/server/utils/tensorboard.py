@@ -25,11 +25,6 @@ from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import Strategy
 
-try:
-    import tensorflow as TF
-except ModuleNotFoundError:
-    TF = None
-
 MISSING_EXTRA_TF = """
 Extra dependency required for using tensorboard are missing.
 The program will continue without tensorboard.
@@ -59,6 +54,17 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
         # Variant 2
         strategy = tensorboard(logdir=LOGDIR)(FedAvg)()
     """
+    log(
+        WARN,
+        "The `tensorboard` function is deprecated and will be removed "
+        "in a future release.",
+    )
+    # Lazy import of TensorFlow to avoid slow import times
+    try:
+        import tensorflow as TF  # pylint: disable=import-outside-toplevel
+    except ModuleNotFoundError:
+        TF = None  # pylint: disable=invalid-name
+
     print(
         "\n\t\033[32mStart TensorBoard with the following parameters"
         f"\n\t$ tensorboard --logdir {logdir}\033[39m\n"
