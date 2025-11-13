@@ -28,9 +28,10 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from flwr.common.config import get_flwr_dir
-from flwr.supercore.constant import (  # PLATFORM_API_URL,
+from flwr.supercore.constant import (
     APP_ID_PATTERN,
     APP_VERSION_PATTERN,
+    PLATFORM_API_URL,
 )
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_signed_message,
@@ -39,8 +40,6 @@ from flwr.supercore.primitives.asymmetric_ed25519 import (
 
 from ..install import install_from_fab
 from ..utils import request_download_link
-
-PLATFORM_API_URL = "https://api.flower.blue/v1"
 
 
 def _create_review_dir() -> Path:
@@ -213,6 +212,7 @@ def review(
     # Extract app version
     version_pattern = re.compile(r"\b(\d+\.\d+\.\d+)\b")
     match = version_pattern.search(str(review_app_path))
+    assert match is not None
     version = match.group(1)
 
     # Prompt to ask for sign
