@@ -9,7 +9,7 @@
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@flwr/flwr": "^0.2.1"
+    "@flwr/flwr": "^0.2.5"
   },
   "devDependencies": {
     "typescript": "^5.6.3",

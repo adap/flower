@@ -14,9 +14,9 @@ description = ""
 license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
-    "flwr[simulation]>=1.21.0",
+    "flwr[simulation]>=1.24.0",
     "flwr-datasets>=0.5.0",
-    "torch==2.7.1",
+    "torch>=2.7.1",
     "transformers>=4.30.0,<5.0",
     "evaluate>=0.4.0,<1.0",
     "datasets>=2.0.0, <3.0",
@@ -38,8 +38,8 @@ clientapp = "$import_name.client_app:app"
 # Custom config values accessible via `context.run_config`
 [tool.flwr.app.config]
 num-server-rounds = 3
-fraction-fit = 0.5
-local-epochs = 1
+fraction-train = 0.5
+local-steps = 5
 model-name = "prajjwal1/bert-tiny" # Set a larger model if you have access to more GPU resources
 num-labels = 2
 

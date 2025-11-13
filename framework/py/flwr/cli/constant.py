@@ -15,13 +15,30 @@
 """Constants for CLI commands."""
 
 
+# General help message for config overrides
+CONFIG_HELP_MESSAGE = (
+    "Override {0} values using one of the following formats:\n\n"
+    "--{1} '<k1>=<v1> <k2>=<v2>' | --{1} '<k1>=<v1>' --{1} '<k2>=<v2>'{2}\n\n"
+    "When providing key-value pairs, values can be of any type supported by TOML "
+    "(e.g., bool, int, float, string). The specified keys (<k1> and <k2> in the "
+    "example) must exist in the {0} under the `{3}` section of `pyproject.toml` to be "
+    "overridden.{4}"
+)
+
+# The help message for `--run-config` option
+RUN_CONFIG_HELP_MESSAGE = CONFIG_HELP_MESSAGE.format(
+    "run configuration",
+    "run-config",
+    " | --run-config <path/to/your/toml>",
+    "[tool.flwr.app.config]",
+    " Alternatively, provide a TOML file containing overrides.",
+)
+
 # The help message for `--federation-config` option
-FEDERATION_CONFIG_HELP_MESSAGE = (
-    "Override federation configuration values in the format:\n\n"
-    "`--federation-config 'key1=value1 key2=value2' --federation-config "
-    "'key3=value3'`\n\nValues can be of any type supported in TOML, such as "
-    "bool, int, float, or string. Ensure that the keys (`key1`, `key2`, `key3` "
-    "in this example) exist in the federation configuration under the "
-    "`[tool.flwr.federations.<YOUR_FEDERATION>]` table of the `pyproject.toml` "
-    "for proper overriding."
+FEDERATION_CONFIG_HELP_MESSAGE = CONFIG_HELP_MESSAGE.format(
+    "federation configuration",
+    "federation-config",
+    "",
+    "[tool.flwr.federations.<YOUR-FEDERATION>]",
+    "",
 )

@@ -17,6 +17,9 @@
 
 import argparse
 from logging import INFO
+from typing import Any, Optional
+
+import yaml
 
 from flwr.common import EventType, event
 from flwr.common.constant import ExecPluginType
@@ -25,6 +28,8 @@ from flwr.common.logger import log
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
+from flwr.supercore.constant import EXEC_PLUGIN_SECTION
+from flwr.supercore.grpc_health import add_args_health
 from flwr.supercore.superexec.plugin import (
     ClientAppExecPlugin,
     ExecPlugin,
@@ -32,6 +37,30 @@ from flwr.supercore.superexec.plugin import (
     SimulationExecPlugin,
 )
 from flwr.supercore.superexec.run_superexec import run_superexec
+
+try:
+    from flwr.ee import add_ee_args_superexec
+    from flwr.ee.constant import ExecEePluginType
+    from flwr.ee.exec_plugin import get_ee_plugin_and_stub_class
+except ImportError:
+
+    class ExecEePluginType:  # type: ignore[no-redef]
+        """SuperExec EE plugin types."""
+
+        @staticmethod
+        def all() -> list[str]:
+            """Return all SuperExec EE plugin types."""
+            return []
+
+    def get_ee_plugin_and_stub_class(  # pylint: disable=unused-argument
+        plugin_type: str,
+    ) -> Optional[tuple[type[ExecPlugin], type[object]]]:
+        """Get the EE plugin class and stub class based on the plugin type."""
+        return None
+
+    # pylint: disable-next=unused-argument
+    def add_ee_args_superexec(parser: argparse.ArgumentParser) -> None:
+        """Add EE-specific arguments to the parser."""
 
 
 def flower_superexec() -> None:
@@ -49,14 +78,31 @@ def flower_superexec() -> None:
     # Trigger telemetry event
     event(EventType.RUN_SUPEREXEC_ENTER, {"plugin_type": args.plugin_type})
 
+    # Load plugin config from YAML file if provided
+    plugin_config = None
+    if plugin_config_path := getattr(args, "plugin_config", None):
+        try:
+            with open(plugin_config_path, encoding="utf-8") as file:
+                yaml_config: Optional[dict[str, Any]] = yaml.safe_load(file)
+                if yaml_config is None or EXEC_PLUGIN_SECTION not in yaml_config:
+                    raise ValueError(f"Missing '{EXEC_PLUGIN_SECTION}' section.")
+                plugin_config = yaml_config[EXEC_PLUGIN_SECTION]
+        except (FileNotFoundError, yaml.YAMLError, ValueError) as e:
+            flwr_exit(
+                ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG,
+                f"Failed to load plugin config from '{plugin_config_path}': {e!r}",
+            )
+
     # Get the plugin class and stub class based on the plugin type
     plugin_class, stub_class = _get_plugin_and_stub_class(args.plugin_type)
     run_superexec(
         plugin_class=plugin_class,
         stub_class=stub_class,  # type: ignore
         appio_api_address=args.appio_api_address,
+        plugin_config=plugin_config,
         flwr_dir=args.flwr_dir,
         parent_pid=args.parent_pid,
+        health_server_address=args.health_server_address,
     )
 
 
@@ -71,7 +117,7 @@ def _parse_args() -> argparse.ArgumentParser:
     parser.add_argument(
         "--plugin-type",
         type=str,
-        choices=ExecPluginType.all(),
+        choices=ExecPluginType.all() + ExecEePluginType.all(),
         required=True,
         help="The type of plugin to use.",
     )
@@ -100,6 +146,8 @@ def _parse_args() -> argparse.ArgumentParser:
         help="The PID of the parent process. When set, the process will terminate "
         "when the parent process exits.",
     )
+    add_ee_args_superexec(parser)
+    add_args_health(parser)
     return parser
 
 
@@ -113,4 +161,6 @@ def _get_plugin_and_stub_class(
         return ServerAppExecPlugin, ServerAppIoStub
     if plugin_type == ExecPluginType.SIMULATION:
         return SimulationExecPlugin, SimulationIoStub
+    if ret := get_ee_plugin_and_stub_class(plugin_type):
+        return ret  # type: ignore[no-any-return]
     raise ValueError(f"Unknown plugin type: {plugin_type}")

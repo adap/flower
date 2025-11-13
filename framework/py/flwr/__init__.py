@@ -15,15 +15,29 @@
 """Flower main package."""
 
 
+import importlib
+
 from flwr.common.version import package_version as _package_version
 
-from . import client, common, server, simulation
+from . import app, clientapp, serverapp
 
 __all__ = [
-    "client",
-    "common",
-    "server",
-    "simulation",
+    "app",
+    "clientapp",
+    "serverapp",
 ]
 
 __version__ = _package_version
+
+
+# Lazy imports for legacy support
+_lazy_imports = {"simulation", "server", "client", "common"}
+
+
+def __getattr__(name: str) -> object:
+    """Lazy import for legacy support."""
+    if name in _lazy_imports:
+        module = importlib.import_module(f"{__name__}.{name}")
+        globals()[name] = module
+        return module
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

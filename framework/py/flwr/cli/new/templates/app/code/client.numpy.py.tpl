@@ -1,23 +1,46 @@
 """$project_name: A Flower / $framework_str app."""
 
-from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
-from $import_name.task import get_dummy_model
-
-
-class FlowerClient(NumPyClient):
-
-    def fit(self, parameters, config):
-        model = get_dummy_model()
-        return [model], 1, {}
-
-    def evaluate(self, parameters, config):
-        return float(0.0), 1, {"accuracy": float(1.0)}
-
-
-def client_fn(context: Context):
-    return FlowerClient().to_client()
-
+import numpy as np
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
 
 # Flower ClientApp
-app = ClientApp(client_fn=client_fn)
+app = ClientApp()
+
+
+@app.train()
+def train(msg: Message, context: Context):
+    """Train the model on local data."""
+
+    # The model is the global arrays
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+
+    # Simulate local training (here we just add random noise to model parameters)
+    model = [m + np.random.rand(*m.shape) for m in ndarrays]
+
+    # Construct and return reply Message
+    model_record = ArrayRecord(model)
+    metrics = {
+        "random_metric": np.random.rand(),
+        "num-examples": 1,
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)
+
+
+@app.evaluate()
+def evaluate(msg: Message, context: Context):
+    """Evaluate the model on local data."""
+
+    # The model is the global arrays
+    ndarrays = msg.content["arrays"].to_numpy_ndarrays()
+
+    # Return reply Message
+    metrics = {
+        "random_metric": np.random.rand(3).tolist(),
+        "num-examples": 1,
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
+    return Message(content=content, reply_to=msg)

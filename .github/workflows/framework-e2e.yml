@@ -55,9 +55,9 @@ jobs:
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         id: upload
         env:
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.ARTIFACT_AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.ARTIFACT_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.ARTIFACT_AWS_SECRET_KEY_ID }}
         run: |
           cd ./framework/dist
           echo "WHL_PATH=$(ls *.whl)" >> "$GITHUB_OUTPUT"
@@ -65,8 +65,8 @@ jobs:
           echo "SHORT_SHA=$sha_short" >> "$GITHUB_OUTPUT"
           [ -z "${{ github.head_ref }}" ] && dir="${{ github.ref_name }}" || dir="pr/${{ github.head_ref }}"
           echo "DIR=$dir" >> "$GITHUB_OUTPUT"
-          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://${{ env.ARTIFACT_BUCKET }}/py/$dir/$sha_short --recursive
-          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://${{ env.ARTIFACT_BUCKET }}/py/$dir/latest --recursive
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://${{ secrets.ARTIFACT_AWS_BUCKET_NAME }}/py/$dir/$sha_short --recursive
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://${{ secrets.ARTIFACT_AWS_BUCKET_NAME }}/py/$dir/latest --recursive
     outputs:
       whl_path: ${{ steps.upload.outputs.WHL_PATH }}
       short_sha: ${{ steps.upload.outputs.SHORT_SHA }}
@@ -162,8 +162,8 @@ jobs:
           - directory: e2e-tensorflow
             e2e: e2e_tensorflow
             dataset: |
-              import tensorflow_datasets as tfds
-              tfds.load('cifar10', split=['train', 'test'], as_supervised=True)
+              import tensorflow as tf
+              tf.keras.datasets.cifar10.load_data()
 
           - directory: e2e-opacus
             e2e: e2e_opacus
@@ -309,7 +309,7 @@ jobs:
     needs: [changes, wheel]
     strategy:
       matrix:
-        framework: ["numpy", "pytorch", "tensorflow", "jax", "sklearn"]
+        framework: ["numpy", "pytorch", "PyTorch (Legacy API, deprecated)","tensorflow", "jax", "sklearn"]
 
     name: Template / ${{ matrix.framework }}
 
@@ -330,15 +330,19 @@ jobs:
       - name: Create project and install it
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
-          cd tmp-${{ matrix.framework }}
+          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
+          flwr new tmp-${CLEAN_FRAMEWORK} --framework="${{ matrix.framework }}" --username gh_ci
+          cd tmp-${CLEAN_FRAMEWORK}
           sed -i 's/"flwr\[[^]]*\][^"]*", *//g' pyproject.toml
+          # Replace tensorflow with tensorflow-cpu to avoid GPU warnings in CI
+          sed -i 's/"tensorflow\([^"]*\)"/"tensorflow-cpu\1"/g' pyproject.toml
           pip install flwr[simulation]
           pip install .
       - name: Run project
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          cd tmp-${{ matrix.framework }}
+          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
+          cd tmp-${CLEAN_FRAMEWORK}
           flwr run --run-config num-server-rounds=1 2>&1 | tee flwr_output.log 
           if grep -q "ERROR" flwr_output.log; then
             exit 1
@@ -378,8 +382,9 @@ jobs:
       - name: Create project, build, and install it
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
-          cd tmp-${{ matrix.framework }}
+          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
+          flwr new tmp-${CLEAN_FRAMEWORK} --framework ${{ matrix.framework }} --username gh_ci
+          cd tmp-${CLEAN_FRAMEWORK}
           flwr build
           flwr install *.fab
 

@@ -16,6 +16,7 @@
 
 
 import json
+import secrets
 import threading
 import time
 import traceback
@@ -27,12 +28,14 @@ from typing import Callable, Optional
 from uuid import uuid4
 
 from flwr.app.error import Error
-from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
-from flwr.client.clientapp.utils import get_load_client_app_fn
 from flwr.client.run_info_store import DeprecatedRunInfoStore
+from flwr.clientapp.client_app import ClientApp, ClientAppException, LoadClientAppError
+from flwr.clientapp.utils import get_load_client_app_fn
 from flwr.common import Message
 from flwr.common.constant import (
-    HEARTBEAT_MAX_INTERVAL,
+    HEARTBEAT_INTERVAL_INF,
+    NOOP_ACCOUNT_NAME,
+    NOOP_FLWR_AID,
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
     ErrorCode,
@@ -40,6 +43,8 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.common.typing import Run
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.superlink.federation import NoOpFederationManager
 
 from .backend import Backend, error_messages_backends, supported_backends
 
@@ -53,7 +58,18 @@ def _register_nodes(
     nodes_mapping: NodeToPartitionMapping = {}
     state = state_factory.state()
     for i in range(num_nodes):
-        node_id = state.create_node(heartbeat_interval=HEARTBEAT_MAX_INTERVAL)
+        node_id = state.create_node(
+            # No node authentication in simulation;
+            # use NOOP_FLWR_AID as owner_aid and
+            # use random bytes as public key
+            NOOP_FLWR_AID,
+            NOOP_ACCOUNT_NAME,
+            secrets.token_bytes(32),
+            heartbeat_interval=HEARTBEAT_INTERVAL_INF,
+        )
+        state.acknowledge_node_heartbeat(
+            node_id=node_id, heartbeat_interval=HEARTBEAT_INTERVAL_INF
+        )
         nodes_mapping[node_id] = i
     log(DEBUG, "Registered %i nodes", len(nodes_mapping))
     return nodes_mapping
@@ -300,7 +316,9 @@ def start_vce(
     if not state_factory:
         log(INFO, "A StateFactory was not supplied to the SimulationEngine.")
         # Create an empty in-memory state factory
-        state_factory = LinkStateFactory(":flwr-in-memory-state:")
+        state_factory = LinkStateFactory(
+            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+        )
         log(INFO, "Created new %s.", state_factory.__class__.__name__)
 
     if num_supernodes:

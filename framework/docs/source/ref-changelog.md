@@ -2,6 +2,178 @@
 
 ## Unreleased
 
+## v1.23.0 (2025-11-03)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Adam Tupper`, `Alan Yi`, `Alireza Ghasemi`, `Charles Beauville`, `Chong Shen Ng`, `Daniel Anoruo`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Heng Pan`, `Javier`, `Patrick Foley`, `Robert Steiner`, `Rohat Bozyil`, `Yan Gao`, `combe4259`, `han97901`, `maviva` <!---TOKEN_v1.23.0-->
+
+### What's new?
+
+- **Enable dynamic SuperNode management via Flower CLI** ([#5953](https://github.com/adap/flower/pull/5953), [#5954](https://github.com/adap/flower/pull/5954), [#5955](https://github.com/adap/flower/pull/5955), [#5962](https://github.com/adap/flower/pull/5962), [#5968](https://github.com/adap/flower/pull/5968), [#5974](https://github.com/adap/flower/pull/5974), [#5977](https://github.com/adap/flower/pull/5977), [#5980](https://github.com/adap/flower/pull/5980), [#5981](https://github.com/adap/flower/pull/5981), [#5985](https://github.com/adap/flower/pull/5985), [#5986](https://github.com/adap/flower/pull/5986), [#5987](https://github.com/adap/flower/pull/5987), [#5988](https://github.com/adap/flower/pull/5988), [#5991](https://github.com/adap/flower/pull/5991), [#5998](https://github.com/adap/flower/pull/5998), [#6003](https://github.com/adap/flower/pull/6003), [#6004](https://github.com/adap/flower/pull/6004), [#6006](https://github.com/adap/flower/pull/6006), [#6009](https://github.com/adap/flower/pull/6009), [#6023](https://github.com/adap/flower/pull/6023), [#6028](https://github.com/adap/flower/pull/6028), [#6029](https://github.com/adap/flower/pull/6029), [#6037](https://github.com/adap/flower/pull/6037), [#6064](https://github.com/adap/flower/pull/6064), [#6070](https://github.com/adap/flower/pull/6070))
+
+  Revamps SuperNode authentication and introduce dynamic SuperNode management through the Flower CLI. Users can now register, list, and unregister SuperNodes directly via commands, such as `flwr supernode register` which adds a SuperNode's public key to the SuperLink whitelist. SuperNodes can then be launched using the corresponding private key. See the [SuperNode authentication guide](https://flower.ai/docs/framework/v1.23.0/en/how-to-authenticate-supernodes.html) for full details.
+
+- **Add migration guide for OpenFL to Flower** ([#5975](https://github.com/adap/flower/pull/5975))
+
+  Adds a migration guide to support OpenFL users as the project approaches archival. The guide explains how to transition existing OpenFL setups to Flower, providing step-by-step migration instructions.
+
+- **Add quantum federated learning example with PennyLane** ([#5852](https://github.com/adap/flower/pull/5852))
+
+  Introduces a new example demonstrating quantum federated learning using PennyLane. This example showcases how Flower can be integrated with quantum machine learning workflows—Flower is going quantum!
+
+- **Replace** `flwr ls` **with** `flwr list` **(keep alias for compatibility)** ([#5973](https://github.com/adap/flower/pull/5973))
+
+  The old `flwr ls` command remains available as an alias.
+
+- **Migrate examples and tutorials to Message API** ([#5950](https://github.com/adap/flower/pull/5950), [#5957](https://github.com/adap/flower/pull/5957), [#5963](https://github.com/adap/flower/pull/5963), [#5966](https://github.com/adap/flower/pull/5966))
+
+  Migrates the remaining examples and tutorials, including the 30-minute Flower tutorial, `whisper`, `quickstart-pandas`, and `federated-kaplan-meier-fitter`, to the new Message API for improved consistency and maintainability.
+
+- **Refactor SuperNode lifecycle** ([#6051](https://github.com/adap/flower/pull/6051), [#6052](https://github.com/adap/flower/pull/6052), [#6060](https://github.com/adap/flower/pull/6060), [#6061](https://github.com/adap/flower/pull/6061), [#6063](https://github.com/adap/flower/pull/6063), [#6069](https://github.com/adap/flower/pull/6069), [#6073](https://github.com/adap/flower/pull/6073))
+
+  Refactors the SuperNode lifecycle to align with the new management flow, streamlining SuperNode registration, activation, deactivation, and unregistration.
+
+- **Add deployment guide for multi-cluster OpenShift setups** ([#6001](https://github.com/adap/flower/pull/6001))
+
+- **Introduce file-based ObjectStore** ([#6040](https://github.com/adap/flower/pull/6040), [#6036](https://github.com/adap/flower/pull/6036), [#6008](https://github.com/adap/flower/pull/6008), [#6042](https://github.com/adap/flower/pull/6042))
+
+- **Improve documentation** ([#5936](https://github.com/adap/flower/pull/5936), [#5937](https://github.com/adap/flower/pull/5937), [#5943](https://github.com/adap/flower/pull/5943), [#5949](https://github.com/adap/flower/pull/5949), [#5956](https://github.com/adap/flower/pull/5956), [#5958](https://github.com/adap/flower/pull/5958), [#5972](https://github.com/adap/flower/pull/5972), [#5976](https://github.com/adap/flower/pull/5976), [#5983](https://github.com/adap/flower/pull/5983), [#5996](https://github.com/adap/flower/pull/5996), [#5999](https://github.com/adap/flower/pull/5999), [#6010](https://github.com/adap/flower/pull/6010), [#6018](https://github.com/adap/flower/pull/6018), [#6030](https://github.com/adap/flower/pull/6030))
+
+- **Update dependencies and CI** ([#5932](https://github.com/adap/flower/pull/5932), [#5941](https://github.com/adap/flower/pull/5941), [#5944](https://github.com/adap/flower/pull/5944), [#5964](https://github.com/adap/flower/pull/5964), [#6014](https://github.com/adap/flower/pull/6014), [#6020](https://github.com/adap/flower/pull/6020), [#6021](https://github.com/adap/flower/pull/6021), [#6022](https://github.com/adap/flower/pull/6022), [#6024](https://github.com/adap/flower/pull/6024), [#6026](https://github.com/adap/flower/pull/6026), [#6032](https://github.com/adap/flower/pull/6032), [#6035](https://github.com/adap/flower/pull/6035), [#6055](https://github.com/adap/flower/pull/6055), [#6065](https://github.com/adap/flower/pull/6065))
+
+- **Bugfix** ([#5979](https://github.com/adap/flower/pull/5979))
+
+- **General improvements** ([#5773](https://github.com/adap/flower/pull/5773), [#5938](https://github.com/adap/flower/pull/5938), [#5939](https://github.com/adap/flower/pull/5939), [#5942](https://github.com/adap/flower/pull/5942), [#5948](https://github.com/adap/flower/pull/5948), [#5951](https://github.com/adap/flower/pull/5951), [#5959](https://github.com/adap/flower/pull/5959), [#5984](https://github.com/adap/flower/pull/5984), [#5989](https://github.com/adap/flower/pull/5989), [#5992](https://github.com/adap/flower/pull/5992), [#6007](https://github.com/adap/flower/pull/6007), [#6011](https://github.com/adap/flower/pull/6011), [#6033](https://github.com/adap/flower/pull/6033), [#6038](https://github.com/adap/flower/pull/6038), [#6041](https://github.com/adap/flower/pull/6041), [#6046](https://github.com/adap/flower/pull/6046), [#6047](https://github.com/adap/flower/pull/6047), [#6048](https://github.com/adap/flower/pull/6048), [#6050](https://github.com/adap/flower/pull/6050), [#6054](https://github.com/adap/flower/pull/6054), [#6057](https://github.com/adap/flower/pull/6057), [#6058](https://github.com/adap/flower/pull/6058), [#6074](https://github.com/adap/flower/pull/6074), [#6075](https://github.com/adap/flower/pull/6075))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
+
+### Incompatible changes
+
+- **Remove CSV-based SuperNode authentication** ([#5997](https://github.com/adap/flower/pull/5997))
+
+  Deprecates the legacy CSV-based SuperNode authentication mechanism in favor of the new dynamic SuperNode management system. The `--auth-list-public-keys` flag is no longer supported, as SuperNode whitelisting is now handled through the Flower CLI. Please refer to the [Node Authentication documentation](https://flower.ai/docs/framework/v1.23.0/en/how-to-authenticate-supernodes.html) to learn how to use the new mechanism.
+
+- **Rename user authentication to account authentication** ([#5965](https://github.com/adap/flower/pull/5965), [#5969](https://github.com/adap/flower/pull/5969))
+
+  Renames "user authentication" to "account authentication" across the framework for improved clarity and consistency. This change also updates the YAML key from `auth_type` to `authn_type` to align with `authz_type`.
+
+- **Deprecate `--auth-supernode-public-key` flag** ([#6002](https://github.com/adap/flower/pull/6002), [#6076](https://github.com/adap/flower/pull/6076))
+
+  The `--auth-supernode-public-key` flag in `flower-supernode` is deprecated and no longer in use. The public key is now automatically derived from the `--auth-supernode-private-key`, simplifying configuration and reducing redundancy.
+
+## v1.22.0 (2025-09-21)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Mohammad Naseri`, `Patrick Foley`, `William Lindskog`, `Yan Gao` <!---TOKEN_v1.22.0-->
+
+### What's new?
+
+- **Migrate all strategies to Message API** ([#5845](https://github.com/adap/flower/pull/5845), [#5850](https://github.com/adap/flower/pull/5850), [#5851](https://github.com/adap/flower/pull/5851), [#5867](https://github.com/adap/flower/pull/5867), [#5884](https://github.com/adap/flower/pull/5884), [#5894](https://github.com/adap/flower/pull/5894), [#5904](https://github.com/adap/flower/pull/5904), [#5905](https://github.com/adap/flower/pull/5905), [#5908](https://github.com/adap/flower/pull/5908), [#5913](https://github.com/adap/flower/pull/5913), [#5914](https://github.com/adap/flower/pull/5914), [#5915](https://github.com/adap/flower/pull/5915), [#5917](https://github.com/adap/flower/pull/5917), [#5919](https://github.com/adap/flower/pull/5919), [#5920](https://github.com/adap/flower/pull/5920), [#5931](https://github.com/adap/flower/pull/5931))
+
+  Migrates and implements all federated learning strategies to support the new Message API. Strategies updated or introduced include FedAvg, FedOpt and its variants (FedAdam, FedYogi, FedAdagrad), FedProx, Krum, MultiKrum, FedAvgM, FedMedian, FedTrimmedAvg, QFedAvg, and Bulyan. Differential privacy strategies were also migrated, including both fixed and adaptive clipping mechanisms on the server and client sides.
+
+- **Migrate `flwr new` templates to Message API** ([#5901](https://github.com/adap/flower/pull/5901), [#5818](https://github.com/adap/flower/pull/5818), [#5893](https://github.com/adap/flower/pull/5893), [#5849](https://github.com/adap/flower/pull/5849), [#5883](https://github.com/adap/flower/pull/5883))
+
+  All `flwr new` templates have been updated to use the Message API. The PyTorch template based on the legacy API is retained and explicitly marked as legacy for those who prefer or require the older approach. A new template for `XGBoost` is introduced.
+
+- **Revamp main tutorials to use the Message API** ([#5861](https://github.com/adap/flower/pull/5861))
+
+  The primary tutorial series has been updated to showcase the Message API. The revamped content improves alignment with recent architectural changes and enhances learning clarity. See the updated tutorial: [Get started with Flower](https://flower.ai/docs/framework/tutorial-series-get-started-with-flower-pytorch.html).
+
+- **Upgrade tutorials and how-to guides to the Message API** ([#5862](https://github.com/adap/flower/pull/5862), [#5877](https://github.com/adap/flower/pull/5877), [#5891](https://github.com/adap/flower/pull/5891), [#5895](https://github.com/adap/flower/pull/5895), [#5896](https://github.com/adap/flower/pull/5896), [#5897](https://github.com/adap/flower/pull/5897), [#5898](https://github.com/adap/flower/pull/5898), [#5906](https://github.com/adap/flower/pull/5906), [#5912](https://github.com/adap/flower/pull/5912), [#5916](https://github.com/adap/flower/pull/5916), [#5921](https://github.com/adap/flower/pull/5921), [#5922](https://github.com/adap/flower/pull/5922), [#5923](https://github.com/adap/flower/pull/5923), [#5924](https://github.com/adap/flower/pull/5924), [#5927](https://github.com/adap/flower/pull/5927), [#5928](https://github.com/adap/flower/pull/5928), [#5925](https://github.com/adap/flower/pull/5925))
+
+  All framework tutorials and how-to guides have been fully migrated to the Message API. This includes quickstarts for JAX, TensorFlow, PyTorch Lightning, MLX, FastAI, Hugging Face Transformers, and XGBoost, along with comprehensive updates to guides covering strategy design, differential privacy, checkpointing, client configuration, evaluation aggregation, and stateful client implementation. These changes ensure all learning resources are up-to-date, aligned with the current architecture, and ready for developers building on the Message API.
+
+- **Migrate and update examples to support the Message API** ([#5827](https://github.com/adap/flower/pull/5827), [#5830](https://github.com/adap/flower/pull/5830), [#5833](https://github.com/adap/flower/pull/5833), [#5834](https://github.com/adap/flower/pull/5834), [#5839](https://github.com/adap/flower/pull/5839), [#5840](https://github.com/adap/flower/pull/5840), [#5841](https://github.com/adap/flower/pull/5841), [#5860](https://github.com/adap/flower/pull/5860), [#5868](https://github.com/adap/flower/pull/5868), [#5869](https://github.com/adap/flower/pull/5869), [#5875](https://github.com/adap/flower/pull/5875), [#5876](https://github.com/adap/flower/pull/5876), [#5879](https://github.com/adap/flower/pull/5879), [#5880](https://github.com/adap/flower/pull/5880), [#5882](https://github.com/adap/flower/pull/5882), [#5887](https://github.com/adap/flower/pull/5887), [#5888](https://github.com/adap/flower/pull/5888), [#5889](https://github.com/adap/flower/pull/5889), [#5892](https://github.com/adap/flower/pull/5892), [#5907](https://github.com/adap/flower/pull/5907), [#5911](https://github.com/adap/flower/pull/5911), [#5930](https://github.com/adap/flower/pull/5930))
+
+  Migrates a wide range of examples to the new Message API, ensuring consistency with recent framework updates. Examples updated include quickstarts (e.g., TensorFlow, PyTorch Lightning, Hugging Face, MONAI, FastAI, MLX), advanced use cases (e.g., FlowerTune for ViT and LLMs, FedRAG, FL-VAE), and specialized scenarios (e.g., XGBoost, tabular data, embedded devices, authentication, and custom mods). Enhancements also include updated variable naming, model-saving logic, readme improvements, and import path corrections for better usability and alignment with the new API.
+
+- **Introduce experimental `flwr pull` command** ([#5863](https://github.com/adap/flower/pull/5863))
+
+  The `flwr pull` Flower CLI command is the foundation for future functionality allowing for the retrieval of artifacts generated by a `ServerApp` in a remote SuperLink.
+
+- **Improve CI/CD workflows** ([#5810](https://github.com/adap/flower/pull/5810), [#5842](https://github.com/adap/flower/pull/5842), [#5843](https://github.com/adap/flower/pull/5843), [#5854](https://github.com/adap/flower/pull/5854), [#5856](https://github.com/adap/flower/pull/5856), [#5857](https://github.com/adap/flower/pull/5857), [#5858](https://github.com/adap/flower/pull/5858), [#5859](https://github.com/adap/flower/pull/5859), [#5865](https://github.com/adap/flower/pull/5865), [#5874](https://github.com/adap/flower/pull/5874), [#5900](https://github.com/adap/flower/pull/5900), [#5815](https://github.com/adap/flower/pull/5815))
+
+- **General improvements** ([#5844](https://github.com/adap/flower/pull/5844), [#5847](https://github.com/adap/flower/pull/5847), [#5870](https://github.com/adap/flower/pull/5870), [#5872](https://github.com/adap/flower/pull/5872), [#5873](https://github.com/adap/flower/pull/5873), [#5881](https://github.com/adap/flower/pull/5881), [#5886](https://github.com/adap/flower/pull/5886), [#5890](https://github.com/adap/flower/pull/5890), [#5902](https://github.com/adap/flower/pull/5902), [#5903](https://github.com/adap/flower/pull/5903), [#5909](https://github.com/adap/flower/pull/5909), [#5910](https://github.com/adap/flower/pull/5910), [#5918](https://github.com/adap/flower/pull/5918))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
+
+## v1.21.0 (2025-09-10)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris Stripelis`, `Evram`, `Heng Pan`, `Javier`, `Robert Steiner`, `Yan Gao` <!---TOKEN_v1.21.0-->
+
+### What's new?
+
+- **Introduce Message API strategies** ([#5710](https://github.com/adap/flower/pull/5710), [#5766](https://github.com/adap/flower/pull/5766), [#5770](https://github.com/adap/flower/pull/5770), [#5771](https://github.com/adap/flower/pull/5771), [#5774](https://github.com/adap/flower/pull/5774), [#5779](https://github.com/adap/flower/pull/5779), [#5787](https://github.com/adap/flower/pull/5787), [#5794](https://github.com/adap/flower/pull/5794), [#5798](https://github.com/adap/flower/pull/5798), [#5804](https://github.com/adap/flower/pull/5804), [#5807](https://github.com/adap/flower/pull/5807), [#5813](https://github.com/adap/flower/pull/5813), [#5824](https://github.com/adap/flower/pull/5824), [#5831](https://github.com/adap/flower/pull/5831), [#5838](https://github.com/adap/flower/pull/5838))
+
+  Introduces a new abstract base class `Strategy` that operate on `Message` replies, mirroring the design of those operating on `FitIns/FitRes` or `EvaluateIns/EvaluteRes` while providing more versatility on the type of payloads that can be federated with Flower. The first batch of `Message`-based strategies are: `FedAvg`, `FedOpt`, `FedAdam`, `FedAdagrad`, `FedYogi`, and fixed-clipping Differential Privacy strategies. More will follow in subsequent releases. A [migration guide](https://flower.ai/docs/framework/how-to-upgrade-to-message-api.html) has been added to help users transition their existing Flower Apps operating on the original `Strategy` and `NumPyClient` abstractions to the Message API.
+
+- **Introduce Flower SuperExec** ([#5659](https://github.com/adap/flower/pull/5659), [#5674](https://github.com/adap/flower/pull/5674), [#5678](https://github.com/adap/flower/pull/5678), [#5680](https://github.com/adap/flower/pull/5680), [#5682](https://github.com/adap/flower/pull/5682), [#5683](https://github.com/adap/flower/pull/5683), [#5685](https://github.com/adap/flower/pull/5685), [#5696](https://github.com/adap/flower/pull/5696), [#5699](https://github.com/adap/flower/pull/5699), [#5700](https://github.com/adap/flower/pull/5700), [#5701](https://github.com/adap/flower/pull/5701), [#5702](https://github.com/adap/flower/pull/5702), [#5703](https://github.com/adap/flower/pull/5703), [#5706](https://github.com/adap/flower/pull/5706), [#5713](https://github.com/adap/flower/pull/5713), [#5726](https://github.com/adap/flower/pull/5726), [#5731](https://github.com/adap/flower/pull/5731), [#5734](https://github.com/adap/flower/pull/5734), [#5735](https://github.com/adap/flower/pull/5735), [#5737](https://github.com/adap/flower/pull/5737), [#5751](https://github.com/adap/flower/pull/5751), [#5759](https://github.com/adap/flower/pull/5759), [#5811](https://github.com/adap/flower/pull/5811), [#5828](https://github.com/adap/flower/pull/5828))
+
+  SuperExec is a new component responsible for scheduling, launching, and managing app processes (e.g., `ServerApp`, `ClientApp`) within the Flower deployment runtime. It is automatically spawned when running a SuperLink or SuperNode in subprocess mode (default). This also introduces a token-based mechanism that improves security by assigning a unique token to each app execution. Supporting changes include new RPCs, protocol updates, plugin abstractions, and Docker image support for SuperExec. For more details, refer to the updated [Flower architecture explainer](https://flower.ai/docs/framework/explanation-flower-architecture.html). Documentation has been revised to reflect the introduction of Flower SuperExec, including guides and tutorials such as quickstart with Docker, GCP deployment, and network communication to consistently use SuperExec.
+
+- **Update quickstart-pytorch to use Message API** ([#5785](https://github.com/adap/flower/pull/5785), [#5786](https://github.com/adap/flower/pull/5786), [#5802](https://github.com/adap/flower/pull/5802))
+
+  The `quickstart-pytorch` [tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html) has been migrated to the Message API, using the new `FedAvg` strategy and the new `flwr new` template.
+
+- **New PyTorch template with Message API** ([#5784](https://github.com/adap/flower/pull/5784))
+
+  A new PyTorch template using the Message API is now available through `flwr new`.
+
+- **Add OpenShift deployment guide for Flower** ([#5781](https://github.com/adap/flower/pull/5781))
+
+  Introduces a [guide](https://flower.ai/docs/framework/how-to-run-flower-on-red-hat-openshift.html) for deploying Flower on Red Hat OpenShift, including setup steps and configuration examples.
+
+- **Improve Helm documentation** ([#5711](https://github.com/adap/flower/pull/5711), [#5733](https://github.com/adap/flower/pull/5733), [#5748](https://github.com/adap/flower/pull/5748), [#5758](https://github.com/adap/flower/pull/5758), [#5765](https://github.com/adap/flower/pull/5765), [#5816](https://github.com/adap/flower/pull/5816))
+
+  Helm guide has been enhanced with additional configuration details and updated formatting. Changes include adding a parameters section, documenting how to set a custom `secretKey`, updating TLS instructions for version 1.20, introducing audit logging configuration, and using SuperExec.
+
+- **Improve documentation** ([#5159](https://github.com/adap/flower/pull/5159), [#5655](https://github.com/adap/flower/pull/5655), [#5668](https://github.com/adap/flower/pull/5668), [#5692](https://github.com/adap/flower/pull/5692), [#5723](https://github.com/adap/flower/pull/5723), [#5738](https://github.com/adap/flower/pull/5738), [#5739](https://github.com/adap/flower/pull/5739), [#5740](https://github.com/adap/flower/pull/5740), [#5753](https://github.com/adap/flower/pull/5753), [#5764](https://github.com/adap/flower/pull/5764), [#5769](https://github.com/adap/flower/pull/5769), [#5775](https://github.com/adap/flower/pull/5775), [#5782](https://github.com/adap/flower/pull/5782), [#5788](https://github.com/adap/flower/pull/5788), [#5795](https://github.com/adap/flower/pull/5795), [#5809](https://github.com/adap/flower/pull/5809), [#5812](https://github.com/adap/flower/pull/5812), [#5817](https://github.com/adap/flower/pull/5817), [#5819](https://github.com/adap/flower/pull/5819), [#5825](https://github.com/adap/flower/pull/5825), [#5836](https://github.com/adap/flower/pull/5836))
+
+  Restructures the tutorial series, removes `flower-simulation` references, and updates versioned docs to use the correct `flwr` versions. The [framework documentation homepage](https://flower.ai/docs/framework/) now defaults to the latest stable release instead of the `main` branch.
+
+- **Re-export user-facing API from `flwr.*app`** ([#5814](https://github.com/adap/flower/pull/5814), [#5821](https://github.com/adap/flower/pull/5821), [#5832](https://github.com/adap/flower/pull/5832), [#5835](https://github.com/adap/flower/pull/5835))
+
+  The following classes are now re-exported:
+
+  - From `flwr.serverapp`: `ServerApp`, `Grid`
+  - From `flwr.clientapp`: `ClientApp`, `arrays_size_mod`, `message_size_mod`
+  - From `flwr.app`: `Array`, `ArrayRecord`, `ConfigRecord`, `Context`, `Message`, `MetricRecord`, `RecordDict`
+
+  Importing these from `flwr.server`, `flwr.client`, or `flwr.common` is **deprecated**. Please update your imports to use `flwr.serverapp`, `flwr.clientapp`, or `flwr.app` instead to ensure forward compatibility.
+
+- **Add `--health-server-address` flag to Flower SuperLink/SuperNode/SuperExec** ([#5792](https://github.com/adap/flower/pull/5792))
+
+- **Update CI/CD workflows and dependencies** ([#5647](https://github.com/adap/flower/pull/5647), [#5650](https://github.com/adap/flower/pull/5650), [#5651](https://github.com/adap/flower/pull/5651), [#5656](https://github.com/adap/flower/pull/5656), [#5712](https://github.com/adap/flower/pull/5712), [#5714](https://github.com/adap/flower/pull/5714), [#5747](https://github.com/adap/flower/pull/5747), [#5754](https://github.com/adap/flower/pull/5754), [#5755](https://github.com/adap/flower/pull/5755), [#5796](https://github.com/adap/flower/pull/5796), [#5806](https://github.com/adap/flower/pull/5806), [#5808](https://github.com/adap/flower/pull/5808), [#5829](https://github.com/adap/flower/pull/5829))
+
+- **General improvements** ([#5622](https://github.com/adap/flower/pull/5622), [#5660](https://github.com/adap/flower/pull/5660), [#5673](https://github.com/adap/flower/pull/5673), [#5675](https://github.com/adap/flower/pull/5675), [#5676](https://github.com/adap/flower/pull/5676), [#5686](https://github.com/adap/flower/pull/5686), [#5697](https://github.com/adap/flower/pull/5697), [#5708](https://github.com/adap/flower/pull/5708), [#5719](https://github.com/adap/flower/pull/5719), [#5720](https://github.com/adap/flower/pull/5720), [#5722](https://github.com/adap/flower/pull/5722), [#5736](https://github.com/adap/flower/pull/5736), [#5746](https://github.com/adap/flower/pull/5746), [#5750](https://github.com/adap/flower/pull/5750), [#5757](https://github.com/adap/flower/pull/5757), [#5776](https://github.com/adap/flower/pull/5776), [#5777](https://github.com/adap/flower/pull/5777), [#5789](https://github.com/adap/flower/pull/5789), [#5805](https://github.com/adap/flower/pull/5805), [#5797](https://github.com/adap/flower/pull/5797), [#5820](https://github.com/adap/flower/pull/5820))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
+
+### Incompatible changes
+
+- **Rename Exec API to Control API** ([#5663](https://github.com/adap/flower/pull/5663), [#5665](https://github.com/adap/flower/pull/5665), [#5667](https://github.com/adap/flower/pull/5667), [#5671](https://github.com/adap/flower/pull/5671))
+
+  The Exec API has been fully renamed to Control API to make its purpose clearer and avoid confusion with SuperExec. This includes renaming `exec.proto` to `control.proto`, updating documentation, and changing the `--exec-api-address` flag to `--control-api-address`. For backward compatibility, the old flag is still supported.
+
+- **Deprecate `flwr-*` commands** ([#5707](https://github.com/adap/flower/pull/5707), [#5725](https://github.com/adap/flower/pull/5725), [#5727](https://github.com/adap/flower/pull/5727), [#5760](https://github.com/adap/flower/pull/5760))
+
+  The long-running commands `flwr-serverapp`, `flwr-clientapp`, and `flwr-simulation` are deprecated in favor of SuperExec. Invoking them now launches the corresponding SuperExec process for backward compatibility.
+
+- **Remove `--executor*` flags** ([#5657](https://github.com/adap/flower/pull/5657), [#5745](https://github.com/adap/flower/pull/5745), [#5749](https://github.com/adap/flower/pull/5749))
+
+  The `--executor`, `--executor-dir`, and `--executor-config` flags have been deprecated and the executor code removed. Use the new `--simulation` flag to run SuperLink with the simulation runtime.
+
 ## v1.20.0 (2025-07-29)
 
 ### Thanks to our contributors

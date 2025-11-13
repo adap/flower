@@ -1,6 +1,6 @@
 services:
   supernode-1:
-    image: flwr/supernode:${FLWR_VERSION:-1.21.0}
+    image: flwr/supernode:${FLWR_VERSION:-1.24.0}
     command:
       - --superlink
       - ${SUPERLINK_IP:-127.0.0.1}:9092
@@ -17,7 +17,7 @@ services:
         target: /app/certificates/superlink-ca.crt
 
   supernode-2:
-    image: flwr/supernode:${FLWR_VERSION:-1.21.0}
+    image: flwr/supernode:${FLWR_VERSION:-1.24.0}
     command:
       - --superlink
       - ${SUPERLINK_IP:-127.0.0.1}:9092
@@ -36,7 +36,7 @@ services:
   # uncomment to add another SuperNode
   #
   # supernode-3:
-  #   image: flwr/supernode:${FLWR_VERSION:-1.21.0}
+  #   image: flwr/supernode:${FLWR_VERSION:-1.24.0}
   #   command:
   #     - --superlink
   #     - ${SUPERLINK_IP:-127.0.0.1}:9092
@@ -52,21 +52,23 @@ services:
   #     - source: superlink-ca-certfile
   #       target: /app/certificates/superlink-ca.crt
 
-  clientapp-1:
+  superexec-clientapp-1:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/clientapp:${FLWR_VERSION:-1.21.0}
+        FROM flwr/superexec:${FLWR_VERSION:-1.24.0}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
-        ENTRYPOINT ["flwr-clientapp"]
+        ENTRYPOINT ["flower-superexec"]
     command:
       - --insecure
-      - --clientappio-api-address
+      - --plugin-type
+      - clientapp
+      - --appio-api-address
       - supernode-1:9094
     deploy:
       resources:
@@ -76,21 +78,23 @@ services:
     depends_on:
       - supernode-1
 
-  clientapp-2:
+  superexec-clientapp-2:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/clientapp:${FLWR_VERSION:-1.21.0}
+        FROM flwr/superexec:${FLWR_VERSION:-1.24.0}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
-        ENTRYPOINT ["flwr-clientapp"]
+        ENTRYPOINT ["flower-superexec"]
     command:
       - --insecure
-      - --clientappio-api-address
+      - --plugin-type
+      - clientapp
+      - --appio-api-address
       - supernode-2:9095
     deploy:
       resources:
@@ -101,21 +105,23 @@ services:
       - supernode-2
   # uncomment to add another ClientApp
   #
-  # clientapp-3:
+  # superexec-clientapp-3:
   #   build:
   #     context: ${PROJECT_DIR:-.}
   #     dockerfile_inline: |
-  #       FROM flwr/clientapp:${FLWR_VERSION:-1.21.0}
+  #       FROM flwr/superexec:${FLWR_VERSION:-1.24.0}
 
   #       WORKDIR /app
   #       COPY --chown=app:app pyproject.toml .
   #       RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
   #         && python -m pip install -U --no-cache-dir .
 
-  #       ENTRYPOINT ["flwr-clientapp"]
+  #       ENTRYPOINT ["flower-superexec"]
   #   command:
   #     - --insecure
-  #     - --clientappio-api-address
+  #     - --plugin-type
+  #     - clientapp
+  #     - --appio-api-address
   #     - supernode-3:9096
   #   deploy:
   #     resources:

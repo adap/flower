@@ -12,7 +12,7 @@
     "lint:check": "eslint src"
   },
   "dependencies": {
-    "@flwr/flwr": "^0.2.1",
+    "@flwr/flwr": "^0.2.5",
     "@mozilla/readability": "^0.6.0",
     "webextension-polyfill": "^0.12.0"
   },

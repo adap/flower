@@ -24,6 +24,7 @@ import {
   Result,
   StreamEvent,
   Tool,
+  ToolChoice,
 } from '../typing';
 
 export interface Engine {
@@ -37,6 +38,7 @@ export interface Engine {
     stream?: boolean,
     onStreamEvent?: (event: StreamEvent) => void,
     tools?: Tool[],
+    toolChoice?: ToolChoice,
     encrypt?: boolean,
     signal?: AbortSignal
   ): Promise<ChatResponseResult>;
@@ -56,6 +58,7 @@ export abstract class BaseEngine implements Engine {
     _stream?: boolean,
     _onStreamEvent?: (event: StreamEvent) => void,
     _tools?: Tool[],
+    _toolChoice?: ToolChoice,
     _encrypt?: boolean,
     _signal?: AbortSignal
   ): Promise<ChatResponseResult> {

@@ -19,15 +19,49 @@ connections used in a deployed Flower federated AI system.
 .. raw:: html
 
     <div id="diagram1" style="display:block;">
-        <img src="./_static/flower-network-diagram-subprocess.svg" alt="Flower Network Diagram (subprocess)">
+        <img class="themed-image"
+             data-light="./_static/flower-network-diagram-subprocess-light.svg"
+             data-dark="./_static/flower-network-diagram-subprocess-dark.svg"
+             alt="Flower Network Diagram (subprocess)">
     </div>
     <div id="diagram2" style="display:none;">
-        <img src="./_static/flower-network-diagram-process.svg" alt="Flower Network Diagram (process)">
+        <img class="themed-image"
+             data-light="./_static/flower-network-diagram-process-light.svg"
+             data-dark="./_static/flower-network-diagram-process-dark.svg"
+             alt="Flower Network Diagram (process)">
     </div>
     <div style="text-align: center; margin-bottom: 1em;">
         <button onclick="document.getElementById('diagram1').style.display='block'; document.getElementById('diagram2').style.display='none';">Subprocess Mode</button>
         <button onclick="document.getElementById('diagram1').style.display='none'; document.getElementById('diagram2').style.display='block';">Process Mode</button>
     </div>
+
+    <script>
+      function currentTheme() {
+        const t = document.body.dataset.theme || "auto";
+        if (t === "dark") return "dark";
+        if (t === "light") return "light";
+        // auto → follow system
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+
+      function updateThemedImages() {
+        const theme = currentTheme();
+        document.querySelectorAll("img.themed-image").forEach((img) => {
+          img.src = img.dataset[theme];
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        updateThemedImages();
+
+        // Update whenever the theme toggle is clicked
+        document.querySelectorAll(".theme-toggle").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            requestAnimationFrame(updateThemedImages);
+          });
+        });
+      });
+    </script>
 
 .. tip::
 
@@ -142,10 +176,10 @@ communicate with the SuperLink or SuperNode:
     Each group must remain inside a single trusted network. They should never
     communicate with each other over untrusted networks (e.g., the public internet).
 
-User Authentication
-~~~~~~~~~~~~~~~~~~~
+Account Authentication
+~~~~~~~~~~~~~~~~~~~~~~
 
-When user authentication is enabled, Flower uses an OIDC-compatible server to
+When account authentication is enabled, Flower uses an OIDC-compatible server to
 authenticate requests:
 
 - **SuperLink to OIDC server**: A SuperLink can optionally be configured to only allow

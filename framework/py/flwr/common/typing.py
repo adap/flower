@@ -231,6 +231,7 @@ class Run:  # pylint: disable=too-many-instance-attributes
     finished_at: str
     status: RunStatus
     flwr_aid: str
+    federation: str
 
     @classmethod
     def create_empty(cls, run_id: int) -> "Run":
@@ -247,6 +248,7 @@ class Run:  # pylint: disable=too-many-instance-attributes
             finished_at="",
             status=RunStatus(status="", sub_status="", details=""),
             flwr_aid="",
+            federation="",
         )
 
 
@@ -256,6 +258,7 @@ class Fab:
 
     hash_str: str
     content: bytes
+    verifications: dict[str, str]
 
 
 class RunNotRunningException(BaseException):
@@ -270,12 +273,12 @@ class InvalidRunStatusException(BaseException):
         self.message = message
 
 
-# OIDC user authentication types
+# OIDC account authentication types
 @dataclass
-class UserAuthLoginDetails:
-    """User authentication login details."""
+class AccountAuthLoginDetails:
+    """Account authentication login details."""
 
-    auth_type: str
+    authn_type: str
     device_code: str
     verification_uri_complete: str
     expires_in: int
@@ -283,8 +286,8 @@ class UserAuthLoginDetails:
 
 
 @dataclass
-class UserAuthCredentials:
-    """User authentication tokens."""
+class AccountAuthCredentials:
+    """Account authentication tokens."""
 
     access_token: str
     refresh_token: str

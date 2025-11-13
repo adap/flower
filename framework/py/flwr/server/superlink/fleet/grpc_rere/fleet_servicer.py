@@ -15,25 +15,31 @@
 """Fleet API gRPC request-response servicer."""
 
 
-from logging import DEBUG, INFO
+import threading
+from logging import DEBUG, ERROR, INFO
 
 import grpc
 from google.protobuf.json_format import MessageToDict
 
+from flwr.common.constant import PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
 from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    CreateNodeResponse,
-    DeleteNodeRequest,
-    DeleteNodeResponse,
+    ActivateNodeRequest,
+    ActivateNodeResponse,
+    DeactivateNodeRequest,
+    DeactivateNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    RegisterNodeFleetRequest,
+    RegisterNodeFleetResponse,
+    UnregisterNodeFleetRequest,
+    UnregisterNodeFleetResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
@@ -63,49 +69,137 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         state_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
+        enable_supernode_auth: bool,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
+        self.enable_supernode_auth = enable_supernode_auth
+        self.lock = threading.Lock()
 
-    def CreateNode(
-        self, request: CreateNodeRequest, context: grpc.ServicerContext
-    ) -> CreateNodeResponse:
-        """."""
-        log(
-            INFO,
-            "[Fleet.CreateNode] Request heartbeat_interval=%s",
-            request.heartbeat_interval,
-        )
-        log(DEBUG, "[Fleet.CreateNode] Request: %s", MessageToDict(request))
-        response = message_handler.create_node(
-            request=request,
-            state=self.state_factory.state(),
-        )
-        log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)
-        log(DEBUG, "[Fleet.CreateNode] Response: %s", MessageToDict(response))
-        return response
+    def RegisterNode(
+        self, request: RegisterNodeFleetRequest, context: grpc.ServicerContext
+    ) -> RegisterNodeFleetResponse:
+        """Register a node."""
+        # Prevent registration when SuperNode authentication is enabled
+        if self.enable_supernode_auth:
+            log(ERROR, "SuperNode registration is disabled through Fleet API.")
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "SuperNode authentication is enabled. "
+                "All SuperNodes must be registered via the CLI.",
+            )
 
-    def DeleteNode(
-        self, request: DeleteNodeRequest, context: grpc.ServicerContext
-    ) -> DeleteNodeResponse:
-        """."""
-        log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
-        log(DEBUG, "[Fleet.DeleteNode] Request: %s", MessageToDict(request))
-        return message_handler.delete_node(
-            request=request,
-            state=self.state_factory.state(),
-        )
+        try:
+            response = message_handler.register_node(
+                request=request,
+                state=self.state_factory.state(),
+            )
+            log(DEBUG, "[Fleet.RegisterNode] Registered node_id=%s", response.node_id)
+            return response
+        except ValueError:
+            # Public key already in use
+            # This should NEVER happen due to the public keys should be automatically
+            # generated and unique for each SuperNode instance.
+            log(
+                ERROR,
+                "[Fleet.RegisterNode] Registration failed: %s",
+                PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
+            )
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION, PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
+            )
+
+        raise RuntimeError  # Make mypy happy
+
+    def ActivateNode(
+        self, request: ActivateNodeRequest, context: grpc.ServicerContext
+    ) -> ActivateNodeResponse:
+        """Activate a node."""
+        try:
+            response = message_handler.activate_node(
+                request=request,
+                state=self.state_factory.state(),
+            )
+            log(INFO, "[Fleet.ActivateNode] Activated node_id=%s", response.node_id)
+            return response
+        except message_handler.InvalidHeartbeatIntervalError:
+            # Heartbeat interval is invalid
+            log(ERROR, "[Fleet.ActivateNode] Invalid heartbeat interval")
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT, "Invalid heartbeat interval"
+            )
+        except ValueError as e:
+            log(ERROR, "[Fleet.ActivateNode] Activation failed: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+
+        raise RuntimeError  # Make mypy happy
+
+    def DeactivateNode(
+        self, request: DeactivateNodeRequest, context: grpc.ServicerContext
+    ) -> DeactivateNodeResponse:
+        """Deactivate a node."""
+        try:
+            response = message_handler.deactivate_node(
+                request=request,
+                state=self.state_factory.state(),
+            )
+            log(INFO, "[Fleet.DeactivateNode] Deactivated node_id=%s", request.node_id)
+            return response
+        except ValueError as e:
+            log(ERROR, "[Fleet.DeactivateNode] Deactivation failed: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+
+        raise RuntimeError  # Make mypy happy
+
+    def UnregisterNode(
+        self, request: UnregisterNodeFleetRequest, context: grpc.ServicerContext
+    ) -> UnregisterNodeFleetResponse:
+        """Unregister a node."""
+        # Prevent unregistration when SuperNode authentication is enabled
+        if self.enable_supernode_auth:
+            log(ERROR, "SuperNode unregistration is disabled through Fleet API.")
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "SuperNode authentication is enabled. "
+                "All SuperNodes must be unregistered via the CLI.",
+            )
+
+        try:
+            response = message_handler.unregister_node(
+                request=request,
+                state=self.state_factory.state(),
+            )
+            log(
+                DEBUG, "[Fleet.UnregisterNode] Unregistered node_id=%s", request.node_id
+            )
+            return response
+        except ValueError as e:
+            log(
+                ERROR,
+                "[Fleet.UnregisterNode] Unregistration failed: %s",
+                str(e),
+            )
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+            raise RuntimeError from None  # Make mypy happy
 
     def SendNodeHeartbeat(
         self, request: SendNodeHeartbeatRequest, context: grpc.ServicerContext
     ) -> SendNodeHeartbeatResponse:
         """."""
         log(DEBUG, "[Fleet.SendNodeHeartbeat] Request: %s", MessageToDict(request))
-        return message_handler.send_node_heartbeat(
-            request=request,
-            state=self.state_factory.state(),
-        )
+        try:
+            return message_handler.send_node_heartbeat(
+                request=request,
+                state=self.state_factory.state(),
+            )
+        except message_handler.InvalidHeartbeatIntervalError:
+            # Heartbeat interval is invalid
+            log(ERROR, "[Fleet.SendNodeHeartbeat] Invalid heartbeat interval")
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT, "Invalid heartbeat interval"
+            )
+        raise RuntimeError  # Make mypy happy
 
     def PullMessages(
         self, request: PullMessagesRequest, context: grpc.ServicerContext
@@ -155,8 +249,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 state=self.state_factory.state(),
                 store=self.objectstore_factory.store(),
             )
-        except InvalidRunStatusException as e:
-            abort_grpc_context(e.message, context)
+        except (InvalidRunStatusException, ValueError) as e:
+            abort_grpc_context(str(e), context)
 
         return res
 
@@ -172,8 +266,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 state=self.state_factory.state(),
                 store=self.objectstore_factory.store(),
             )
-        except InvalidRunStatusException as e:
-            abort_grpc_context(e.message, context)
+        except (InvalidRunStatusException, ValueError) as e:
+            abort_grpc_context(str(e), context)
 
         return res
 
@@ -183,7 +277,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """Push an object to the ObjectStore."""
         log(
             DEBUG,
-            "[ServerAppIoServicer.PushObject] Push Object with object_id=%s",
+            "[Fleet.PushObject] Push Object with object_id=%s",
             request.object_id,
         )
 
@@ -208,7 +302,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """Pull an object from the ObjectStore."""
         log(
             DEBUG,
-            "[ServerAppIoServicer.PullObject] Pull Object with object_id=%s",
+            "[Fleet.PullObject] Pull Object with object_id=%s",
             request.object_id,
         )
 

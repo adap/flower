@@ -30,7 +30,7 @@ from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
-from flwr.client import ClientApp
+from flwr.clientapp import ClientApp
 from flwr.common import Context, EventType, RecordDict, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
 from flwr.common.constant import RUN_ID_NUM_BYTES, Status
@@ -51,6 +51,8 @@ from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.superlink.federation import NoOpFederationManager
 
 
 def _replace_keys(d: Any, match: str, target: str) -> Any:
@@ -143,6 +145,15 @@ def run_simulation_from_cli() -> None:
     run = Run.create_empty(run_id)
     run.override_config = override_config
 
+    # Create Context
+    server_app_context = Context(
+        run_id=run_id,
+        node_id=0,
+        node_config=UserConfig(),
+        state=RecordDict(),
+        run_config=fused_config,
+    )
+
     _ = _run_simulation(
         server_app_attr=server_app_attr,
         client_app_attr=client_app_attr,
@@ -153,7 +164,7 @@ def run_simulation_from_cli() -> None:
         run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
         verbose_logging=args.verbose,
-        server_app_run_config=fused_config,
+        server_app_context=server_app_context,
         is_app=True,
         exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
     )
@@ -241,13 +252,12 @@ def run_simulation(
 def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
-    server_app_run_config: UserConfig,
+    server_app_context: Context,
     grid: Grid,
     app_dir: str,
     f_stop: threading.Event,
     has_exception: threading.Event,
     enable_tf_gpu_growth: bool,
-    run_id: int,
     ctx_queue: "Queue[Context]",
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
@@ -258,7 +268,6 @@ def run_serverapp_th(
         exception_event: threading.Event,
         _grid: Grid,
         _server_app_dir: str,
-        _server_app_run_config: UserConfig,
         _server_app_attr: Optional[str],
         _server_app: Optional[ServerApp],
         _ctx_queue: "Queue[Context]",
@@ -272,19 +281,10 @@ def run_serverapp_th(
                 log(INFO, "Enabling GPU growth for Tensorflow on the server thread.")
                 enable_gpu_growth()
 
-            # Initialize Context
-            context = Context(
-                run_id=run_id,
-                node_id=0,
-                node_config={},
-                state=RecordDict(),
-                run_config=_server_app_run_config,
-            )
-
             # Run ServerApp
             updated_context = _run(
                 grid=_grid,
-                context=context,
+                context=server_app_context,
                 server_app_dir=_server_app_dir,
                 server_app_attr=_server_app_attr,
                 loaded_server_app=_server_app,
@@ -310,7 +310,6 @@ def run_serverapp_th(
             has_exception,
             grid,
             app_dir,
-            server_app_run_config,
             server_app_attr,
             server_app,
             ctx_queue,
@@ -335,24 +334,26 @@ def _main_loop(
     client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
     server_app_attr: Optional[str] = None,
-    server_app_run_config: Optional[UserConfig] = None,
+    server_app_context: Optional[Context] = None,
 ) -> Context:
     """Start ServerApp on a separate thread, then launch Simulation Engine."""
     # Initialize StateFactory
-    state_factory = LinkStateFactory(":flwr-in-memory-state:")
+    state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager())
 
     f_stop = threading.Event()
     # A Threading event to indicate if an exception was raised in the ServerApp thread
     server_app_thread_has_exception = threading.Event()
     serverapp_th = None
     success = True
-    updated_context = Context(
-        run_id=run.run_id,
-        node_id=0,
-        node_config=UserConfig(),
-        state=RecordDict(),
-        run_config=UserConfig(),
-    )
+    if server_app_context is None:
+        server_app_context = Context(
+            run_id=run.run_id,
+            node_id=0,
+            node_config=UserConfig(),
+            state=RecordDict(),
+            run_config=UserConfig(),
+        )
+    updated_context = server_app_context
     try:
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
@@ -360,9 +361,6 @@ def _main_loop(
         run.starting_at = now().isoformat()
         run.running_at = run.starting_at
         state_factory.state().run_ids[run.run_id] = RunRecord(run=run)  # type: ignore
-
-        if server_app_run_config is None:
-            server_app_run_config = {}
 
         # Initialize Grid
         grid = InMemoryGrid(state_factory=state_factory)
@@ -373,13 +371,12 @@ def _main_loop(
         serverapp_th = run_serverapp_th(
             server_app_attr=server_app_attr,
             server_app=server_app,
-            server_app_run_config=server_app_run_config,
+            server_app_context=server_app_context,
             grid=grid,
             app_dir=app_dir,
             f_stop=f_stop,
             has_exception=server_app_thread_has_exception,
             enable_tf_gpu_growth=enable_tf_gpu_growth,
-            run_id=run.run_id,
             ctx_queue=output_context_queue,
         )
 
@@ -438,7 +435,7 @@ def _run_simulation(
     backend_config: Optional[BackendConfig] = None,
     client_app_attr: Optional[str] = None,
     server_app_attr: Optional[str] = None,
-    server_app_run_config: Optional[UserConfig] = None,
+    server_app_context: Optional[Context] = None,
     app_dir: str = "",
     flwr_dir: Optional[str] = None,
     run: Optional[Run] = None,
@@ -502,7 +499,7 @@ def _run_simulation(
         client_app_attr,
         server_app,
         server_app_attr,
-        server_app_run_config,
+        server_app_context,
     )
     # Detect if there is an Asyncio event loop already running.
     # If yes, disable logger propagation. In environmnets

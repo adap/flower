@@ -18,7 +18,7 @@ import { vi } from 'vitest';
 vi.mock('./constants', () => ({
   DEFAULT_MODEL: 'meta/llama3.2-1b/instruct-fp16',
   REMOTE_URL: process.env.FI_DEV_REMOTE_URL,
-  VERSION: '0.2.2',
+  VERSION: '0.2.6',
   SDK: 'TS',
   ALLOWED_ROLES: ['system', 'assistant', 'user'],
 }));

@@ -5,8 +5,9 @@ import pytorch_lightning as pl
 import torch
 from e2e_pytorch_lightning import mnist
 
-from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import Context
+from flwr.app import Context
+from flwr.client import NumPyClient, start_client
+from flwr.clientapp import ClientApp
 
 
 class FlowerClient(NumPyClient):

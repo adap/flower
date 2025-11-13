@@ -1,17 +1,15 @@
 """fltabular: Flower Example on Adult Census Income Tabular Dataset."""
 
-from collections import OrderedDict
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OrdinalEncoder, StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
-from flwr_datasets.partitioner import IidPartitioner
 
 fds = None  # Cache FederatedDataset
 
@@ -80,7 +78,7 @@ class IncomeClassifier(nn.Module):
         return x
 
 
-def train(model, train_loader, num_epochs=1):
+def trainer(model, train_loader, num_epochs=1):
     criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     model.train()
@@ -93,7 +91,7 @@ def train(model, train_loader, num_epochs=1):
             optimizer.step()
 
 
-def evaluate(model, test_loader):
+def evaluator(model, test_loader):
     model.eval()
     criterion = nn.BCELoss()
     loss = 0.0
@@ -110,14 +108,3 @@ def evaluate(model, test_loader):
     accuracy = correct / total
     loss = loss / len(test_loader)
     return loss, accuracy
-
-
-def set_weights(net, parameters):
-    params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    net.load_state_dict(state_dict, strict=True)
-
-
-def get_weights(net):
-    ndarrays = [val.cpu().numpy() for _, val in net.state_dict().items()]
-    return ndarrays

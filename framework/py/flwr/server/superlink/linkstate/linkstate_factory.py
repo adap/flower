@@ -19,6 +19,8 @@ from logging import DEBUG
 from typing import Optional
 
 from flwr.common.logger import log
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.superlink.federation import FederationManager
 
 from .in_memory_linkstate import InMemoryLinkState
 from .linkstate import LinkState
@@ -35,23 +37,30 @@ class LinkStateFactory:
         Note that passing ':memory:' will open a connection to a database that is
         in RAM, instead of on disk. For more information on special in-memory
         databases, please refer to https://sqlite.org/inmemorydb.html.
+    federation_manager : FederationManager
+        An instance of FederationManager to manage federations.
     """
 
-    def __init__(self, database: str) -> None:
+    def __init__(
+        self,
+        database: str,
+        federation_manager: FederationManager,
+    ) -> None:
         self.database = database
         self.state_instance: Optional[LinkState] = None
+        self.federation_manager = federation_manager
 
     def state(self) -> LinkState:
         """Return a State instance and create it, if necessary."""
         # InMemoryState
-        if self.database == ":flwr-in-memory-state:":
+        if self.database == FLWR_IN_MEMORY_DB_NAME:
             if self.state_instance is None:
-                self.state_instance = InMemoryLinkState()
+                self.state_instance = InMemoryLinkState(self.federation_manager)
             log(DEBUG, "Using InMemoryState")
             return self.state_instance
 
         # SqliteState
-        state = SqliteLinkState(self.database)
+        state = SqliteLinkState(self.database, self.federation_manager)
         state.initialize()
         log(DEBUG, "Using SqliteState")
         return state

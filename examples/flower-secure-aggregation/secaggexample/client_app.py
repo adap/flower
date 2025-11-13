@@ -3,11 +3,11 @@
 import time
 
 import torch
-from secaggexample.task import Net, get_weights, load_data, set_weights, test, train
-
 from flwr.client import ClientApp, NumPyClient
 from flwr.client.mod import secaggplus_mod
 from flwr.common import Context
+
+from secaggexample.task import Net, get_weights, load_data, set_weights, test, train
 
 
 # Define Flower Client

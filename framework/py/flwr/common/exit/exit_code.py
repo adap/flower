@@ -36,13 +36,21 @@ class ExitCode:
 
     # ServerApp-specific exit codes (200-299)
     SERVERAPP_STRATEGY_PRECONDITION_UNMET = 200
+    SERVERAPP_EXCEPTION = 201
+    SERVERAPP_STRATEGY_AGGREGATION_ERROR = 202
 
     # SuperNode-specific exit codes (300-399)
     SUPERNODE_REST_ADDRESS_INVALID = 300
-    SUPERNODE_NODE_AUTH_KEYS_REQUIRED = 301
-    SUPERNODE_NODE_AUTH_KEYS_INVALID = 302
+    # SUPERNODE_NODE_AUTH_KEYS_REQUIRED = 301 --- DELETED ---
+    SUPERNODE_NODE_AUTH_KEY_INVALID = 302
+    SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED = 303
+    SUPERNODE_TRUST_ENTITY_REQUIRED = 304
 
     # SuperExec-specific exit codes (400-499)
+    SUPEREXEC_INVALID_PLUGIN_CONFIG = 400
+
+    # FlowerCLI-specific exit codes (500-599)
+    FLWRCLI_NODE_AUTH_PUBLIC_KEY_INVALID = 500
 
     # Common exit codes (600-699)
     COMMON_ADDRESS_INVALID = 600
@@ -89,22 +97,40 @@ EXIT_CODE_HELP = {
         "perform weighted average (e.g. in FedAvg) please ensure the returned "
         "MetricRecord from ClientApps do include this key."
     ),
+    ExitCode.SERVERAPP_EXCEPTION: "An unhandled exception occurred in the ServerApp.",
+    ExitCode.SERVERAPP_STRATEGY_AGGREGATION_ERROR: (
+        "The strategy encountered an error during aggregation. Please check the logs "
+        "for more details."
+    ),
     # SuperNode-specific exit codes (300-399)
     ExitCode.SUPERNODE_REST_ADDRESS_INVALID: (
         "When using the REST API, please provide `https://` or "
         "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
     ),
-    ExitCode.SUPERNODE_NODE_AUTH_KEYS_REQUIRED: (
-        "Node authentication requires file paths to both "
-        "'--auth-supernode-private-key' and '--auth-supernode-public-key' "
-        "to be provided (providing only one of them is not sufficient)."
-    ),
-    ExitCode.SUPERNODE_NODE_AUTH_KEYS_INVALID: (
-        "Node authentication requires elliptic curve private and public key pair. "
-        "Please ensure that the file path points to a valid private/public key "
+    ExitCode.SUPERNODE_NODE_AUTH_KEY_INVALID: (
+        "Node authentication requires elliptic curve private key. "
+        "Please ensure that the file path points to a valid private key "
         "file and try again."
     ),
+    ExitCode.SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED: (
+        "The private key for SuperNode authentication was provided, but TLS is not "
+        "enabled. Node authentication can only be used when TLS is enabled."
+    ),
+    ExitCode.SUPERNODE_TRUST_ENTITY_REQUIRED: (
+        "Entity verification is enabled, but no trusted entities were provided. "
+        "Please ensure that a trusted entities list is provided via `--trust-entities`."
+    ),
     # SuperExec-specific exit codes (400-499)
+    ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (
+        "The YAML configuration for the SuperExec plugin is invalid."
+    ),
+    # FlowerCLI-specific exit codes (500-599)
+    ExitCode.FLWRCLI_NODE_AUTH_PUBLIC_KEY_INVALID: (
+        "Node authentication requires a valid elliptic curve public key in the "
+        "SSH format and following a NIST standard elliptic curve (e.g. SECP384R1). "
+        "Please ensure that the file path points to a valid public key "
+        "file and try again."
+    ),
     # Common exit codes (600-699)
     ExitCode.COMMON_ADDRESS_INVALID: (
         "Please provide a valid URL, IPv4 or IPv6 address."

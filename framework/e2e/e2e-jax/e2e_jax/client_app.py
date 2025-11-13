@@ -6,8 +6,9 @@ import jax
 import numpy as np
 from e2e_jax import jax_training
 
-from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import Context
+from flwr.app import Context
+from flwr.client import NumPyClient, start_client
+from flwr.clientapp import ClientApp
 
 # Load data and determine model shape
 train_x, train_y, test_x, test_y = jax_training.load_data()
