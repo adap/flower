@@ -65,7 +65,7 @@ def test_download_fab_success_and_failure(
     class Boom(requests.RequestException):
         """Custom RequestException subclass used to simulate network errors in tests."""
 
-    def boom() -> None:
+    def boom(url: str, timeout: int = 60) -> None:
         """Raise a Boom(RequestException) to simulate a network failure."""
         raise Boom("net down")
 
@@ -119,12 +119,18 @@ def test_submit_review_success_and_errors(
         """Lightweight mock of `requests.Response` used for testing `_submit_review`."""
 
         def __init__(self, ok: bool, status: int = 200, text: str = ""):
+            """Initialize a fake response with minimal HTTP-like attributes."""
             self.ok = ok
             self.status_code = status
             self.text = text
 
     # --- success ---
-    def fake_post(url: str, headers: dict[str, str], json: dict[str, Any]) -> FakeResp:
+    def fake_post(
+        url: str,
+        headers: dict[str, str],
+        json: dict[str, Any],
+        **_kwargs: Any,
+    ) -> FakeResp:
         """Simulate a successful POST request that captures its arguments."""
         captured["url"] = url
         captured["headers"] = headers
@@ -143,7 +149,10 @@ def test_submit_review_success_and_errors(
     assert captured["json"]["signed_at"] == 123
 
     # --- non-OK HTTP response ---
-    def fake_post_fail() -> FakeResp:
+    def fake_post_fail(
+        _url: str,
+        **_kwargs: Any,
+    ) -> FakeResp:
         """Simulate a non-OK HTTP response from the review submission endpoint."""
         return FakeResp(False, 503, "oops")
 
@@ -153,7 +162,7 @@ def test_submit_review_success_and_errors(
     assert exc.value.exit_code == 1
 
     # --- network exception ---
-    def fake_post_raise(*_a: Any, **_k: Any) -> None:
+    def fake_post_raise(*_args: Any, **_kwargs: Any) -> None:
         """Raise a RequestException (simulated network error)."""
         raise requests.RequestException("boom")
 
