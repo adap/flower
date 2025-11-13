@@ -54,6 +54,11 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
         # Variant 2
         strategy = tensorboard(logdir=LOGDIR)(FedAvg)()
     """
+    log(
+        WARN,
+        "The `tensorboard` function is deprecated and will be removed "
+        "in a future release.",
+    )
     # Lazy import of TensorFlow to avoid slow import times
     try:
         import tensorflow as TF  # pylint: disable=import-outside-toplevel
