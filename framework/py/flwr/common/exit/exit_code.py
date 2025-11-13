@@ -118,7 +118,8 @@ EXIT_CODE_HELP = {
     ),
     ExitCode.SUPERNODE_INVALID_TRUST_ENTITIES: (
         "Failed to read the trusted entities YAML file. "
-        "Please ensure that a valid file is provided using the `--trust-entities` option."
+        "Please ensure that a valid file is provided using "
+        "the `--trust-entities` option."
     ),
     # SuperExec-specific exit codes (400-499)
     ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (
