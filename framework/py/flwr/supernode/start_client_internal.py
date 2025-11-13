@@ -345,45 +345,13 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             # Verify the received FAB
             # FAB must be signed if trust entities provided
             if trust_entities:
-                verifications = dict(fab.verifications)
-                if not verifications["valid_license"]:
+                if not fab.verifications["valid_license"]:
                     log(
                         WARN,
                         "App verification is not supported by the connected SuperLink.",
                     )
                 else:
-                    verif_full = {
-                        k: json.loads(v)
-                        for k, v in verifications.items()
-                        if k != "valid_license"
-                    }
-                    fab_verified = False
-                    for public_key_id, verif in verif_full.items():
-                        if public_key_id in trust_entities:
-                            verifier_public_key = load_ssh_public_key(
-                                trust_entities[public_key_id].encode("utf-8")
-                            )
-                            if not isinstance(
-                                verifier_public_key, ed25519.Ed25519PublicKey
-                            ):
-                                log(
-                                    WARN,
-                                    "The provided public key associated with "
-                                    "trusted entity %s is not Ed25519.",
-                                    public_key_id,
-                                )
-                                continue
-                            signed_message = create_signed_message(
-                                hashlib.sha256(fab.content).digest(),
-                                verif["signed_at"],
-                            )
-                            if verify_signature(
-                                verifier_public_key,
-                                signed_message,
-                                decode_base64url(verif["signature"]),
-                            ):
-                                fab_verified = True
-                                break
+                    fab_verified = _verify_fab(fab, trust_entities)
                     if not fab_verified:
                         # Insert an error message in the state
                         # when FAB verification fails
@@ -650,3 +618,41 @@ def run_clientappio_api_grpc(
     log(INFO, "Flower Deployment Runtime: Starting ClientAppIo API on %s", address)
     clientappio_grpc_server.start()
     return clientappio_grpc_server
+
+
+def _verify_fab(fab: Fab, trust_entities: dict[str, str]) -> bool:
+    """Verify a FAB using its verification data and the provided trusted entities.
+
+    The FAB is considered verified if at least one trusted entity matches the
+    information contained in its verification records.
+    """
+    verifications = fab.verifications
+    verif_full = {
+        k: json.loads(v) for k, v in verifications.items() if k != "valid_license"
+    }
+    fab_verified = False
+    for public_key_id, verif in verif_full.items():
+        if public_key_id in trust_entities:
+            verifier_public_key = load_ssh_public_key(
+                trust_entities[public_key_id].encode("utf-8")
+            )
+            if not isinstance(verifier_public_key, ed25519.Ed25519PublicKey):
+                log(
+                    WARN,
+                    "The provided public key associated with "
+                    "trusted entity %s is not Ed25519.",
+                    public_key_id,
+                )
+                continue
+            signed_message = create_signed_message(
+                hashlib.sha256(fab.content).digest(),
+                verif["signed_at"],
+            )
+            if verify_signature(
+                verifier_public_key,
+                signed_message,
+                decode_base64url(verif["signature"]),
+            ):
+                fab_verified = True
+                break
+    return fab_verified
