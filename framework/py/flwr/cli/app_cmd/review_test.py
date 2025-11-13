@@ -39,6 +39,7 @@ def test_download_fab_success_and_failure(
     # --- success ---
     class FakeResp:
         """A minimal stand-in for `requests.Response` used in tests."""
+
         def __init__(self, content: bytes):
             self._content = content
             self.status_code = 200
@@ -63,6 +64,7 @@ def test_download_fab_success_and_failure(
     # --- failure (network error) ---
     class Boom(requests.RequestException):
         """Custom RequestException subclass used to simulate network errors in tests."""
+
         pass
 
     def boom() -> None:
@@ -117,6 +119,7 @@ def test_submit_review_success_and_errors(
 
     class FakeResp:
         """Lightweight mock of `requests.Response` used for testing `_submit_review`."""
+
         def __init__(self, ok: bool, status: int = 200, text: str = ""):
             self.ok = ok
             self.status_code = status
