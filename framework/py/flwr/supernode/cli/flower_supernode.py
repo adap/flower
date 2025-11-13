@@ -16,7 +16,6 @@
 
 
 import argparse
-import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
@@ -60,9 +59,6 @@ def flower_supernode() -> None:
             "Ignoring `--flwr-dir`.",
         )
 
-    if args.enable_entities_verification and not args.trust_entities:
-        flwr_exit(ExitCode.SUPERNODE_TRUST_ENTITY_REQUIRED)
-
     trust_entities = try_obtain_trust_entities(args.trust_entities)
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     authentication_keys = _try_setup_client_authentication(args)
@@ -92,7 +88,6 @@ def flower_supernode() -> None:
         clientappio_api_address=args.clientappio_api_address,
         health_server_address=args.health_server_address,
         trust_entities=trust_entities,
-        enable_entities_verification=args.enable_entities_verification,
     )
 
 
@@ -145,12 +140,6 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
             "  fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]\n"
             "  fpk_UUID2: ssh-ed25519 <base64-encoded-key2> [comment2]\n"
         ),
-    )
-    parser.add_argument(
-        "--enable-entities-verification",
-        action="store_true",
-        help="If this flag is set, all apps must be signed by a trusted"
-        " entity. If set, at least one trusted entity must be provided.",
     )
     add_args_health(parser)
 
@@ -272,10 +261,16 @@ def try_obtain_trust_entities(
     if not trust_entities_path:
         return None
     if not trust_entities_path.is_file():
-        sys.exit("Path argument `--trust-entities` does not point to a file.")
+        flwr_exit(
+            ExitCode.SUPERNODE_INVALID_TRUST_ENTITIES,
+            "Path argument `--trust-entities` does not point to a file.",
+        )
     try:
         with trust_entities_path.open("r", encoding="utf-8") as f:
             trust_entities = yaml.safe_load(f) or {}
     except yaml.YAMLError as e:
-        sys.exit(f"Failed to read YAML file '{trust_entities_path}': {e}")
+        flwr_exit(
+            ExitCode.SUPERNODE_INVALID_TRUST_ENTITIES,
+            f"Failed to read YAML file '{trust_entities_path}': {e}",
+        )
     return trust_entities

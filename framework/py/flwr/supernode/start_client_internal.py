@@ -104,7 +104,6 @@ def start_client_internal(
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     health_server_address: Optional[str] = None,
     trust_entities: Optional[dict[str, str]] = None,
-    enable_entities_verification: Optional[bool] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -159,8 +158,6 @@ def start_client_internal(
     trust_entities : Optional[dict[str, str]] (default: None)
         A list of trusted entities. Only apps verified by at least one of these
         entities can run on a supernode.
-    enable_entities_verification : Optional[bool] (default: None)
-        Perform entities app verification using the trust_entities list.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -257,7 +254,6 @@ def start_client_internal(
                 pull_object=pull_object,
                 confirm_message_received=confirm_message_received,
                 trust_entities=trust_entities,
-                enable_entities_verification=enable_entities_verification,
             )
 
             # No message has been pulled therefore we can skip the push stage.
@@ -301,7 +297,6 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     pull_object: Callable[[int, str], bytes],
     confirm_message_received: Callable[[int, str], None],
     trust_entities: Optional[dict[str, str]],
-    enable_entities_verification: Optional[bool],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
@@ -349,7 +344,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
             # Verify the received FAB
             # FAB must be signed if trust entities provided
-            if enable_entities_verification and trust_entities:
+            if trust_entities:
                 verifications = dict(fab.verifications)
                 if not verifications["valid_license"]:
                     log(

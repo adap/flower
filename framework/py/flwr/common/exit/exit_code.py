@@ -44,7 +44,7 @@ class ExitCode:
     # SUPERNODE_NODE_AUTH_KEYS_REQUIRED = 301 --- DELETED ---
     SUPERNODE_NODE_AUTH_KEY_INVALID = 302
     SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED = 303
-    SUPERNODE_TRUST_ENTITY_REQUIRED = 304
+    SUPERNODE_INVALID_TRUST_ENTITIES = 304
 
     # SuperExec-specific exit codes (400-499)
     SUPEREXEC_INVALID_PLUGIN_CONFIG = 400
@@ -116,9 +116,9 @@ EXIT_CODE_HELP = {
         "The private key for SuperNode authentication was provided, but TLS is not "
         "enabled. Node authentication can only be used when TLS is enabled."
     ),
-    ExitCode.SUPERNODE_TRUST_ENTITY_REQUIRED: (
-        "Entity verification is enabled, but no trusted entities were provided. "
-        "Please ensure that a trusted entities list is provided via `--trust-entities`."
+    ExitCode.SUPERNODE_INVALID_TRUST_ENTITIES: (
+        "Failed to read the trusted entities YAML file. "
+        "Please ensure that a valid file is provided using the `--trust-entities` option."
     ),
     # SuperExec-specific exit codes (400-499)
     ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (
