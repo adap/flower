@@ -249,8 +249,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 state=self.state_factory.state(),
                 store=self.objectstore_factory.store(),
             )
-        except InvalidRunStatusException as e:
-            abort_grpc_context(e.message, context)
+        except (InvalidRunStatusException, ValueError) as e:
+            abort_grpc_context(str(e), context)
 
         return res
 
@@ -266,8 +266,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 state=self.state_factory.state(),
                 store=self.objectstore_factory.store(),
             )
-        except InvalidRunStatusException as e:
-            abort_grpc_context(e.message, context)
+        except (InvalidRunStatusException, ValueError) as e:
+            abort_grpc_context(str(e), context)
 
         return res
 
