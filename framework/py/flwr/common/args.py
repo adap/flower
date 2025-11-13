@@ -22,8 +22,6 @@ from os.path import isfile
 from pathlib import Path
 from typing import Optional, Union
 
-import yaml
-
 from flwr.common.constant import TRANSPORT_TYPE_REST
 from flwr.common.logger import log
 
@@ -151,19 +149,3 @@ def try_obtain_server_certificates(
         "in insecure mode using '--insecure' if you understand the risks.",
     )
     sys.exit(1)
-
-
-def try_obtain_trust_entities(
-    trust_entities_path: Optional[Path],
-) -> Optional[dict[str, str]]:
-    """Validate and return the trust entities."""
-    if not trust_entities_path:
-        return None
-    if not trust_entities_path.is_file():
-        sys.exit("Path argument `--trust-entities` does not point to a file.")
-    try:
-        with trust_entities_path.open("r", encoding="utf-8") as f:
-            trust_entities = yaml.safe_load(f) or {}
-    except yaml.YAMLError as e:
-        sys.exit(f"Failed to read YAML file '{trust_entities_path}': {e}")
-    return trust_entities

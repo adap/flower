@@ -16,16 +16,18 @@
 
 
 import argparse
+import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
 
+import yaml
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import load_ssh_private_key
 
 from flwr.common import EventType, event
-from flwr.common.args import try_obtain_root_certificates, try_obtain_trust_entities
+from flwr.common.args import try_obtain_root_certificates
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
@@ -261,3 +263,19 @@ def _try_setup_client_authentication(
             "private key provided by `--auth-supernode-private-key`.",
         )
     return ssh_private_key, ssh_private_key.public_key()
+
+
+def try_obtain_trust_entities(
+    trust_entities_path: Optional[Path],
+) -> Optional[dict[str, str]]:
+    """Validate and return the trust entities."""
+    if not trust_entities_path:
+        return None
+    if not trust_entities_path.is_file():
+        sys.exit("Path argument `--trust-entities` does not point to a file.")
+    try:
+        with trust_entities_path.open("r", encoding="utf-8") as f:
+            trust_entities = yaml.safe_load(f) or {}
+    except yaml.YAMLError as e:
+        sys.exit(f"Failed to read YAML file '{trust_entities_path}': {e}")
+    return trust_entities
