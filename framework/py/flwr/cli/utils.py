@@ -419,7 +419,7 @@ def request_download_link(
     }
     body = {
         "app_id": app_id,  # send raw string of app_id
-        "version": version,
+        "app_version": version,
         "flwr_version": flwr_version,
     }
     try:
