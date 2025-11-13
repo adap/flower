@@ -65,8 +65,6 @@ def test_download_fab_success_and_failure(
     class Boom(requests.RequestException):
         """Custom RequestException subclass used to simulate network errors in tests."""
 
-        pass
-
     def boom() -> None:
         """Raise a Boom(RequestException) to simulate a network failure."""
         raise Boom("net down")
