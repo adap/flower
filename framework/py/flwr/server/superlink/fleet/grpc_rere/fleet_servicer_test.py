@@ -17,6 +17,7 @@
 
 import tempfile
 import unittest
+from unittest.mock import Mock
 
 import grpc
 from parameterized import parameterized
@@ -480,6 +481,23 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Execute & Assert
         self._assert_get_run_not_allowed(run_id)
 
+    def test_get_run_permission_denied_if_node_not_in_federation(self) -> None:
+        """Test `GetRun` raises PERMISSION_DENIED when node is not in federation."""
+        # Prepare
+        node_id = self._create_dummy_node()
+        run_id = self._create_dummy_run()
+
+        # Mock federation manager to exclude the node
+        mock_has_node = Mock(return_value=False)
+        self.state.federation_manager.has_node = mock_has_node  # type: ignore
+        request = GetRunRequest(run_id=run_id, node=Node(node_id=node_id))
+
+        # Execute and assert
+        with self.assertRaises(grpc.RpcError) as e:
+            self._get_run.with_call(request=request)
+
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+
     def test_successful_get_fab_if_running(self) -> None:
         """Test `GetFab` success."""
         # Prepare
@@ -534,6 +552,31 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
 
         # Execute & Assert
         self._assert_get_fab_not_allowed(node_id, fab_hash, run_id)
+
+    def test_get_fab_permission_denied_if_node_not_in_federation(self) -> None:
+        """Test `GetFab` raises PERMISSION_DENIED when node is not in federation."""
+        # Prepare
+        node_id = self._create_dummy_node()
+        fab_content = b"content"
+        fab_hash = self.ffs.put(fab_content, {"meta": "data"})
+        run_id = self.state.create_run("", "", fab_hash, {}, "", ConfigRecord(), "")
+
+        # Transition status to running
+        self._transition_run_status(run_id, 2)
+
+        # Mock federation manager to exclude the node
+        mock_has_node = Mock(return_value=False)
+        self.state.federation_manager.has_node = mock_has_node  # type: ignore
+
+        request = GetFabRequest(
+            node=Node(node_id=node_id), hash_str=fab_hash, run_id=run_id
+        )
+
+        # Execute and assert
+        with self.assertRaises(grpc.RpcError) as e:
+            self._get_fab.with_call(request=request)
+
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
 
     def test_push_object_succesful(self) -> None:
         """Test `PushObject`."""
