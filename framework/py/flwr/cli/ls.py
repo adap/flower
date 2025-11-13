@@ -33,7 +33,7 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
 )
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
-from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, SubStatus
+from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, Status, SubStatus
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import run_from_proto
@@ -46,7 +46,7 @@ from flwr.proto.control_pb2_grpc import ControlStub
 
 from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 
-_RunListType = tuple[int, str, str, str, str, str, str, str, str]
+_RunListType = tuple[int, str, str, str, str, str, str, str, str, str]
 
 
 def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
@@ -94,7 +94,8 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
     The following details are displayed:
 
     - **Run ID:** Unique identifier for the run.
-    - **App:** Name of the FAB associated with the run (``{FAB_ID}=={FAB_VERSION}``).
+    - **Federation:** The federation to which the run belongs.
+    - **App:** The App associated with the run (``<APP_ID>==<APP_VERSION>``).
     - **Status:** Current status of the run (pending, starting, running, finished).
     - **Elapsed:** Time elapsed since the run started (``HH:MM:SS``).
     - **Status Changed @:** Timestamp of the most recent status change.
@@ -207,6 +208,7 @@ def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[_RunListT
                 _format_datetime(pending_at),
                 _format_datetime(running_at),
                 _format_datetime(finished_at),
+                run.federation,
             )
         )
     return run_list
@@ -217,13 +219,12 @@ def _to_table(run_list: list[_RunListType]) -> Table:
     table = Table(header_style="bold cyan", show_lines=True)
 
     # Add columns
-    table.add_column(
-        Text("Run ID", justify="center"), style="bright_black", no_wrap=True
-    )
-    table.add_column(Text("FAB", justify="center"), style="bright_black")
+    table.add_column(Text("Run ID", justify="center"), no_wrap=True)
+    table.add_column(Text("Federation", justify="center"))
+    table.add_column(Text("App", justify="center"))
     table.add_column(Text("Status", justify="center"))
     table.add_column(Text("Elapsed", justify="center"), style="blue")
-    table.add_column(Text("Status Changed @", justify="center"), style="bright_black")
+    table.add_column(Text("Status Changed @", justify="center"))
 
     for row in run_list:
         (
@@ -236,15 +237,22 @@ def _to_table(run_list: list[_RunListType]) -> Table:
             created_at,
             running_at,
             finished_at,
+            federation,
         ) = row
-        # Style the status based on its value
+
+        # Determine status style based on status and sub_status
+        status = status_text.lower()
         sub_status = status_text.rsplit(":", maxsplit=1)[-1]
         if sub_status == SubStatus.COMPLETED:
             status_style = "green"
         elif sub_status == SubStatus.FAILED:
             status_style = "red"
-        else:
+        elif sub_status == SubStatus.STOPPED:
             status_style = "yellow"
+        elif status in (Status.STARTING, Status.RUNNING):
+            status_style = "blue"
+        else:  # pending
+            status_style = "bright_black"
 
         # Use the most recent timestamp
         if finished_at != "N/A":
@@ -256,7 +264,8 @@ def _to_table(run_list: list[_RunListType]) -> Table:
 
         formatted_row = (
             f"[bold]{run_id}[/bold]",
-            f"{fab_id} (v{fab_version})",
+            federation,
+            f"@{fab_id}=={fab_version}",
             f"[{status_style}]{status_text}[/{status_style}]",
             elapsed,
             status_changed_at,
@@ -280,10 +289,12 @@ def _to_json(run_list: list[_RunListType]) -> str:
             created_at,
             running_at,
             finished_at,
+            federation,
         ) = row
         runs_list.append(
             {
                 "run-id": run_id,
+                "federation": federation,
                 "fab-id": fab_id,
                 "fab-name": fab_id.split("/")[-1],
                 "fab-version": fab_version,
@@ -317,5 +328,4 @@ def _display_one_run(stub: ControlStub, run_id: int) -> list[_RunListType]:
         raise ValueError(f"Run ID {run_id} not found")
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
-
     return _format_runs(run_dict, res.now)
