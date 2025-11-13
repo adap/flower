@@ -118,7 +118,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
         ffs = self.ffs_factory.ffs()
 
-        verification_dict = {}
+        verification_dict: dict[str, str] = {}
         if request.app_id.startswith("@"):
             if self.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
                 log(
