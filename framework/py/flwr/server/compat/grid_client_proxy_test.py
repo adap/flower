@@ -160,7 +160,7 @@ class GridClientProxyTestCase(unittest.TestCase):
 
         # Execute and assert
         self.assertRaises(
-            Exception, self.client.get_properties, ins, timeout=None, group_id=0
+            ValueError, self.client.get_properties, ins, timeout=None, group_id=0
         )
         self._common_assertions(ins)
 
@@ -174,7 +174,7 @@ class GridClientProxyTestCase(unittest.TestCase):
 
         # Execute and assert
         self.assertRaises(
-            Exception, self.client.get_parameters, ins, timeout=None, group_id=0
+            ValueError, self.client.get_parameters, ins, timeout=None, group_id=0
         )
         self._common_assertions(ins)
 
@@ -188,7 +188,7 @@ class GridClientProxyTestCase(unittest.TestCase):
         ins = FitIns(parameters, {})
 
         # Execute and assert
-        self.assertRaises(Exception, self.client.fit, ins, timeout=None, group_id=0)
+        self.assertRaises(ValueError, self.client.fit, ins, timeout=None, group_id=0)
         self._common_assertions(ins)
 
     def test_evaluate_and_fail(self) -> None:
@@ -202,7 +202,7 @@ class GridClientProxyTestCase(unittest.TestCase):
 
         # Execute and assert
         self.assertRaises(
-            Exception, self.client.evaluate, ins, timeout=None, group_id=0
+            ValueError, self.client.evaluate, ins, timeout=None, group_id=0
         )
         self._common_assertions(ins)
 
