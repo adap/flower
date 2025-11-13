@@ -71,7 +71,7 @@ def _compile_gitignore(root: Path) -> Callable[[Path], bool]:
 
     def ignored(p: Path) -> bool:
         rel = p.relative_to(root).as_posix()
-        # pathspec expects directory entries with trailing slash for dir matches
+        # Pathspec expects directory entries with trailing slash for dir matches
         if p.is_dir() and not rel.endswith("/"):
             rel += "/"
         return spec.match_file(rel)
@@ -321,7 +321,6 @@ def publish(
             typer.secho(f"❌ Network error: {err}", fg=typer.colors.RED, err=True)
             raise typer.Exit(code=1) from err
 
-    # if resp.status_code == 200:
     if resp.ok:
         typer.secho("🎊 Upload successful", fg=typer.colors.GREEN, bold=True)
         return  # success
