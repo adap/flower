@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-11-12 00:08+0000\n"
+"POT-Creation-Date: 2025-11-13 00:08+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -16214,6 +16214,59 @@ msgstr ""
 msgid "Path of the Flower App to bundle into a FAB"
 msgstr ""
 
+#: ../../flwr federation:1
+#, fuzzy
+msgid "Manage Federations"
+msgstr "Simulation de moniteur"
+
+#: ../../flwr federation list:1 supernode
+#, fuzzy
+msgid "List SuperNodes in the federation."
+msgstr "flower-superlink"
+
+#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
+msgid "Format output using 'default' view or 'json'"
+msgstr ""
+
+#: ../../flwr federation list log register run stop supernode unregister
+#, fuzzy
+msgid "default"
+msgstr "Flux de travail"
+
+#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "``'default'``"
+msgstr "Flux de travail"
+
+#: ../../flwr federation list:1 supernode
+#, fuzzy
+msgid "Enable verbose output"
+msgstr "Exemples de PyTorch"
+
+#: ../../flwr federation list:1 run:1 supernode
+msgid "``False``"
+msgstr ""
+
+#: ../../source/ref-api-cli.rst
+#, fuzzy
+msgid "Arguments"
+msgstr "Amélioration de la documentation"
+
+#: ../../flwr federation install:1 list:1 log:1 login:1 new:1 pull:1 register:1
+#: run:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "Optional argument"
+msgstr "Améliorations facultatives"
+
+#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "Path of the Flower project"
+msgstr "Chargement des données"
+
+#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
+msgid "Name of the federation"
+msgstr ""
+
 #: ../../flwr install:1
 #, fuzzy
 msgid "Install a Flower App Bundle."
@@ -16256,17 +16309,6 @@ msgstr ""
 #: ../../flwr install:1
 msgid "The desired install path."
 msgstr ""
-
-#: ../../source/ref-api-cli.rst
-#, fuzzy
-msgid "Arguments"
-msgstr "Amélioration de la documentation"
-
-#: ../../flwr install:1 list:1 log:1 login:1 new:1 pull:1 register:1 run:1
-#: stop:1 supernode unregister:1
-#, fuzzy
-msgid "Optional argument"
-msgstr "Améliorations facultatives"
 
 #: ../../flwr install:1
 msgid "The source FAB file to install."
@@ -16347,35 +16389,8 @@ msgstr ""
 msgid "List all runs"
 msgstr ""
 
-#: ../../flwr list log register run stop supernode unregister
-#, fuzzy
-msgid "default"
-msgstr "Flux de travail"
-
-#: ../../flwr list:1 run:1 supernode
-msgid "``False``"
-msgstr ""
-
 #: ../../flwr list:1
 msgid "Specific run ID to display"
-msgstr ""
-
-#: ../../flwr list:1 register:1 run:1 stop:1 supernode unregister:1
-msgid "Format output using 'default' view or 'json'"
-msgstr ""
-
-#: ../../flwr list:1 register:1 run:1 stop:1 supernode unregister:1
-#, fuzzy
-msgid "``'default'``"
-msgstr "Flux de travail"
-
-#: ../../flwr list:1 register:1 stop:1 supernode unregister:1
-#, fuzzy
-msgid "Path of the Flower project"
-msgstr "Chargement des données"
-
-#: ../../flwr list:1 register:1 stop:1 supernode unregister:1
-msgid "Name of the federation"
 msgstr ""
 
 #: ../../flwr log:1
@@ -16447,9 +16462,10 @@ msgid "The Flower username of the author"
 msgstr ""
 
 #: ../../flwr new:1
-#, fuzzy
-msgid "The name of the Flower App"
-msgstr "Chargement des données"
+msgid ""
+"Flower app name. For remote apps, use the format '@user/app==1.0.0'. "
+"Version is optional (defaults to latest)."
+msgstr ""
 
 #: ../../flwr pull:1
 msgid "Pull artifacts from a Flower run."
@@ -16512,16 +16528,6 @@ msgstr "Rejoignez la communauté de Flower"
 #, fuzzy
 msgid "Manage SuperNodes"
 msgstr "flower-superlink"
-
-#: ../../flwr list:1 supernode
-#, fuzzy
-msgid "List SuperNodes in the federation."
-msgstr "flower-superlink"
-
-#: ../../flwr list:1 supernode
-#, fuzzy
-msgid "Enable verbose output"
-msgstr "Exemples de PyTorch"
 
 #: ../../flwr register:1 supernode
 #, fuzzy
