@@ -49,7 +49,7 @@ from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 
 
 @dataclass
-class RunRow:
+class RunRow:  # pylint: disable=too-many-instance-attributes
     """Represents a single run's data for display."""
 
     run_id: int
