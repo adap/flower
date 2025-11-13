@@ -16,15 +16,18 @@
 
 
 import hashlib
+import json
 import os
 import tempfile
 import unittest
 from datetime import datetime
 from types import SimpleNamespace
-from typing import Optional, cast
+from typing import Any, Optional, cast
 from unittest.mock import MagicMock, Mock, patch
 
 import grpc
+import pytest
+import requests
 from parameterized import parameterized
 
 from flwr.common import ConfigRecord, now
@@ -57,7 +60,11 @@ from flwr.superlink.servicer.control.control_account_auth_interceptor import (
     shared_account_info,
 )
 
-from .control_servicer import ControlServicer
+from .control_servicer import (
+    ControlServicer,
+    _format_verification,
+    _request_download_link,
+)
 
 FLWR_AID_MISMATCH_CASES = (
     # (context_flwr_aid, run_flwr_aid)
@@ -462,3 +469,158 @@ class TestControlServicerAuth(unittest.TestCase):
         ):
             response = self.servicer.ListRuns(request, ctx)
             self.assertEqual(set(response.run_dict.keys()), {run_id})
+
+
+def _make_dummy_context() -> MagicMock:
+    """Mock grpc.ServicerContext whose abort raises RuntimeError(code:msg)."""
+    ctx: MagicMock = MagicMock(spec=grpc.ServicerContext)
+    ctx.abort.side_effect = lambda code, msg: (_ for _ in ()).throw(
+        RuntimeError(f"{code}:{msg}")
+    )
+    ctx.is_active.return_value = False
+    return ctx
+
+
+def test__request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Single table-driven test covering all major outcomes."""
+    ctx: MagicMock = _make_dummy_context()
+    app_id: str = "@user/app"
+
+    # Table of scenarios
+    scenarios: list[dict[str, Any]] = [
+        {
+            "name": "success_with_verifications",
+            "fake_resp": {
+                "ok": True,
+                "status": 200,
+                "json": {
+                    "fab_url": "https://example.ai/fab.fab",
+                    "verifications": [
+                        {"public_key_id": "key1", "sig": "abc", "algo": "ed25519"}
+                    ],
+                },
+            },
+            "assert": lambda out: (
+                out[0] == "https://example.ai/fab.fab"
+                and isinstance(out[1], list)
+                and out[1][0]["public_key_id"] == "key1"
+            ),
+        },
+        {
+            "name": "success_without_verifications",
+            "fake_resp": {
+                "ok": True,
+                "status": 200,
+                "json": {"fab_url": "https://example.ai/fab.fab"},
+            },
+            "assert": lambda out: out[0] == "https://example.ai/fab.fab"
+            and out[1] is None,
+        },
+        {
+            "name": "http_404_not_found",
+            "fake_resp": {"ok": False, "status": 404, "text": "not found"},
+            "raises": "NOT_FOUND",
+        },
+        {
+            "name": "http_503_unavailable",
+            "fake_resp": {"ok": False, "status": 503, "text": "service unavailable"},
+            "raises": "UNAVAILABLE",
+        },
+        {
+            "name": "network_error",
+            "fake_exc": requests.RequestException("network down"),
+            "raises": "UNAVAILABLE",
+        },
+        {
+            "name": "missing_fab_url",
+            "fake_resp": {"ok": True, "status": 200, "json": {"verifications": []}},
+            "raises": "DATA_LOSS",
+        },
+    ]
+
+    current_case: dict[str, Any] = {"data": None}
+
+    class _FakeResp:
+        ok: bool
+        status_code: int
+        _json: Optional[dict[str, Any]]
+        text: str
+
+        def __init__(
+            self,
+            ok: bool,
+            status: int,
+            json_data: Optional[dict[str, Any]] = None,
+            text: str = "",
+        ) -> None:
+            self.ok = ok
+            self.status_code = status
+            self._json = json_data
+            self.text = text
+
+        def json(self) -> Optional[dict[str, Any]]:
+            """Return JSON data."""
+            return self._json
+
+    def fake_post(url: str, data: Optional[str] = None, **_: Any) -> _FakeResp:
+        # Basic payload sanity check for the success-like cases
+        case_data: Optional[dict[str, Any]] = current_case.get("data")
+        if isinstance(case_data, dict) and "fake_resp" in case_data:
+            assert url.endswith("/hub/fetch-fab")
+            assert data is not None
+            payload: dict[str, Any] = json.loads(data)
+            assert payload["app_id"] == app_id
+            assert "flwr_license_key" in payload
+
+        if isinstance(case_data, dict) and "fake_exc" in case_data:
+            raise case_data["fake_exc"]
+
+        fr: dict[str, Any] = case_data["fake_resp"]  # type: ignore[index]
+        return _FakeResp(
+            ok=fr["ok"],
+            status=fr["status"],
+            json_data=fr.get("json"),
+            text=fr.get("text", ""),
+        )
+
+    monkeypatch.setattr(requests, "post", fake_post)
+
+    for case in scenarios:
+        current_case["data"] = case
+        if "raises" in case:
+            with pytest.raises(RuntimeError) as exc:
+                _ = _request_download_link(app_id, ctx)
+            msg: str = str(exc.value)
+            assert case["raises"] in msg
+            if case["name"] == "http_404_not_found":
+                assert app_id in msg
+        else:
+            # Expect a (fab_url, verifications) tuple
+            result2: tuple[str, Optional[list[dict[str, str]]]] = (
+                _request_download_link(app_id, ctx)
+            )
+            assert case["assert"](result2), f"Assertion failed for {case['name']}"
+
+
+def test__format_verification_compact() -> None:
+    """One test covering both 'with entries' and 'None' input."""
+    # Case 1: verifications list present
+    verifications: list[dict[str, str]] = [
+        {"public_key_id": "key1", "sig": "abc", "algo": "ed25519"},
+        {"public_key_id": "key2", "sig": "def", "algo": "ed25519"},
+    ]
+    base: dict[str, str] = {}
+    out: dict[str, str] = _format_verification(verifications, base)
+
+    # Should mark valid
+    assert out["valid_license"] == "Valid"
+    # public_key_id -> JSON of remaining fields
+    v1: dict[str, str] = json.loads(out["key1"])
+    v2: dict[str, str] = json.loads(out["key2"])
+    assert v1 == {"sig": "abc", "algo": "ed25519"}
+    assert v2 == {"sig": "def", "algo": "ed25519"}
+
+    # Case 2: verifications None -> only valid_license is set to "" and base preserved
+    out2: dict[str, str] = _format_verification(None, {"x": "y"})
+    assert out2["x"] == "y"
+    assert out2["valid_license"] == ""
