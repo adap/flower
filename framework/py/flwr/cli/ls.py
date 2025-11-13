@@ -149,7 +149,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
             # Display information about a specific run ID
             if run_id is not None:
                 typer.echo(f"🔍 Displaying information for run ID {run_id}...")
-                formatted_runs = [_display_one_run(stub, run_id)]
+                formatted_runs = _display_one_run(stub, run_id)
             # By default, list all runs
             else:
                 typer.echo("📄 Listing all runs...")
@@ -347,7 +347,7 @@ def _list_runs(stub: ControlStub) -> list[RunRow]:
     return _format_runs(run_dict, res.now)
 
 
-def _display_one_run(stub: ControlStub, run_id: int) -> RunRow:
+def _display_one_run(stub: ControlStub, run_id: int) -> list[RunRow]:
     """Display information about a specific run."""
     with flwr_cli_grpc_exc_handler():
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
@@ -356,5 +356,4 @@ def _display_one_run(stub: ControlStub, run_id: int) -> RunRow:
         raise ValueError(f"Run ID {run_id} not found")
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
-    runs = _format_runs(run_dict, res.now)
-    return runs[0]  # Should only be one run
+    return _format_runs(run_dict, res.now)
