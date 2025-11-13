@@ -20,7 +20,7 @@ from typer.main import get_command
 from flwr.common.version import package_version
 
 from .build import build
-from .hub_app import review as app_review
+from .app_cmd import review as app_review
 from .install import install
 from .log import log
 from .login import login
