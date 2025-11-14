@@ -137,10 +137,9 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         metavar="YAML_FILE",
         help=(
             "Path to a YAML file defining trusted entities. "
-            "Only apps verified by at least one of these "
-            "entities can run on a SuperNode. Example format: "
-            "fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]; "
-            "fpk_UUID2: ssh-ed25519 <base64-encoded-key2> [comment2]"
+            "The file must map public key IDs to public keys. "
+            "Example: { fpk_UUID1: 'ssh-ed25519 <key1> [comment1]', "
+            "fpk_UUID2: 'ssh-ed25519 <key2> [comment2]' }"
         ),
     )
     add_args_health(parser)
