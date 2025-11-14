@@ -15,6 +15,7 @@
 """Main loop for Flower SuperNode."""
 
 
+import hashlib
 import os
 import subprocess
 import time
@@ -304,6 +305,14 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             # Pull and store the FAB
             fab = get_fab(run_info.fab_hash, run_id)
             ffs.put(fab.content, {})
+
+            # Verify the FAB hash
+            verified_fab_hash = hashlib.sha256(fab.content).hexdigest()
+            if verified_fab_hash != fab.hash_str:
+                raise RuntimeError(
+                    "The hash of the FAB received from the SuperLink did not",
+                    f" match the expected hash ({fab.hash_str})",
+                )
 
             # Initialize the context
             run_cfg = get_fused_config_from_fab(fab.content, run_info)
