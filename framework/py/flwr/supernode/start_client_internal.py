@@ -15,23 +15,26 @@
 """Main loop for Flower SuperNode."""
 
 
+import hashlib
+import json
 import os
 import subprocess
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from functools import partial
-from logging import INFO
+from logging import ERROR, INFO, WARN
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
 import grpc
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519
+from cryptography.hazmat.primitives.serialization.ssh import load_ssh_public_key
 from grpc import RpcError
 
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Message, RecordDict
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Error, Message, RecordDict
 from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir, get_fused_config_from_fab
 from flwr.common.constant import (
@@ -41,11 +44,17 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
+    ErrorCode,
     ExecPluginType,
 )
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
-from flwr.common.inflatable import iterate_object_tree
+from flwr.common.inflatable import (
+    get_all_nested_objects,
+    get_object_tree,
+    iterate_object_tree,
+    no_object_id_recompute,
+)
 from flwr.common.inflatable_utils import (
     pull_objects,
     push_object_contents_from_iterable,
@@ -60,10 +69,17 @@ from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
+from flwr.supercore.primitives.asymmetric_ed25519 import (
+    create_message_to_sign,
+    decode_base64url,
+    verify_signature,
+)
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
+
+FAB_VERIFICATION_ERROR = Error(ErrorCode.INVALID_FAB, "The FAB could not be verified.")
 
 
 # pylint: disable=import-outside-toplevel
@@ -87,6 +103,7 @@ def start_client_internal(
     isolation: str = ISOLATION_MODE_SUBPROCESS,
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     health_server_address: Optional[str] = None,
+    trusted_entities: Optional[dict[str, str]] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -138,6 +155,10 @@ def start_client_internal(
     health_server_address : Optional[str] (default: None)
         The address of the health server. If `None` is provided, the health server will
         NOT be started.
+    trusted_entities : Optional[dict[str, str]] (default: None)
+        A dictionary mapping public key IDs to public keys.
+        Only apps verified by at least one of these
+        entities can run on a supernode.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -233,6 +254,7 @@ def start_client_internal(
                 get_fab=get_fab,
                 pull_object=pull_object,
                 confirm_message_received=confirm_message_received,
+                trusted_entities=trusted_entities,
             )
 
             # No message has been pulled therefore we can skip the push stage.
@@ -249,6 +271,22 @@ def start_client_internal(
             )
 
 
+def _insert_message(msg: Message, state: NodeState, store: ObjectStore) -> None:
+    """Insert a message into the NodeState and ObjectStore."""
+    with no_object_id_recompute():
+        # Store message in state
+        msg.metadata.__dict__["_message_id"] = msg.object_id  # Set message_id
+        state.store_message(msg)
+
+        # Preregister objects in ObjectStore
+        store.preregister(msg.metadata.run_id, get_object_tree(msg))
+
+        # Store all objects in ObjectStore
+        all_objects = get_all_nested_objects(msg)
+        for obj_id, obj in all_objects.items():
+            store.put(obj_id, obj.deflate())
+
+
 def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     state: NodeState,
     ffs: Ffs,
@@ -259,6 +297,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     get_fab: Callable[[str, int], Fab],
     pull_object: Callable[[int, str], bytes],
     confirm_message_received: Callable[[int, str], None],
+    trusted_entities: Optional[dict[str, str]],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
@@ -267,6 +306,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     This behavior will change in the future to return None after
     completing transition to the `NodeState`-based SuperNode.
     """
+    # pylint: disable=too-many-nested-blocks
     message = None
     try:
         # Pull message
@@ -299,11 +339,32 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
         if (run_info := state.get_run(run_id)) is None:
             # Pull run info from SuperLink
             run_info = get_run(run_id)
-            state.store_run(run_info)
 
             # Pull and store the FAB
             fab = get_fab(run_info.fab_hash, run_id)
-            ffs.put(fab.content, {})
+
+            # Verify the received FAB
+            # FAB must be signed if trust entities provided
+            if trusted_entities:
+                if not fab.verifications.get("valid_license", ""):
+                    log(
+                        WARN,
+                        "App verification is not supported by the connected SuperLink.",
+                    )
+                else:
+                    fab_verified = _verify_fab(fab, trusted_entities)
+                    if not fab_verified:
+                        # Insert an error message in the state
+                        # when FAB verification fails
+                        log(
+                            ERROR,
+                            "FAB verification failed: the provided trusted entities "
+                            "could not verify the FAB. An error reply "
+                            "has been generated.",
+                        )
+                        reply = Message(FAB_VERIFICATION_ERROR, reply_to=message)
+                        _insert_message(reply, state, object_store)
+                        return run_id
 
             # Initialize the context
             run_cfg = get_fused_config_from_fab(fab.content, run_info)
@@ -314,7 +375,11 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                 state=RecordDict(),
                 run_config=run_cfg,
             )
+
+            # Store in the state
             state.store_context(run_ctx)
+            state.store_run(run_info)
+            ffs.put(fab.content, fab.verifications)
 
         # Preregister the object tree of the message
         obj_ids_to_pull = object_store.preregister(run_id, object_tree)
@@ -554,3 +619,34 @@ def run_clientappio_api_grpc(
     log(INFO, "Flower Deployment Runtime: Starting ClientAppIo API on %s", address)
     clientappio_grpc_server.start()
     return clientappio_grpc_server
+
+
+def _verify_fab(fab: Fab, trusted_entities: dict[str, str]) -> bool:
+    """Verify a FAB using its verification data and the provided trusted entities.
+
+    The FAB is considered verified if at least one trusted entity matches the
+    information contained in its verification records.
+    """
+    verifications = fab.verifications
+    verif_full = {
+        k: json.loads(v) for k, v in verifications.items() if k != "valid_license"
+    }
+    fab_verified = False
+    for public_key_id, verif in verif_full.items():
+        if public_key_id in trusted_entities:
+            verifier_public_key = load_ssh_public_key(
+                trusted_entities[public_key_id].encode("utf-8")
+            )
+            message_to_verify = create_message_to_sign(
+                hashlib.sha256(fab.content).digest(),
+                verif["signed_at"],
+            )
+            assert isinstance(verifier_public_key, ed25519.Ed25519PublicKey)
+            if verify_signature(
+                verifier_public_key,
+                message_to_verify,
+                decode_base64url(verif["signature"]),
+            ):
+                fab_verified = True
+                break
+    return fab_verified
