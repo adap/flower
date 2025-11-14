@@ -24,8 +24,6 @@ To resolve this issue, you can do one of the following:
     Flower Public Key.
   - The YAML file should follow this structure:
 
-- The YAML file should follow this structure:
-
     .. code-block:: yaml
 
         fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]*
