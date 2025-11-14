@@ -86,8 +86,7 @@ def _depth_of(relpath: Path) -> int:
     Example: "a/b/c.py" -> depth 3
     Interpret "directory depth" as number of directories: len(parts) - 1
     """
-    parts = relpath.as_posix().split("/")
-    return max(0, len(parts) - 1)
+    return max(0, len(relpath.parts) - 1)
 
 
 def _detect_mime(path: Path) -> str:
