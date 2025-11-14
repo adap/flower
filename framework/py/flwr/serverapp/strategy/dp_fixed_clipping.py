@@ -220,10 +220,7 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
                 # Replace content while preserving keys
                 reply.content[arr_name] = ArrayRecord(
                     OrderedDict(
-                        {
-                            k: Array(v)
-                            for k, v in zip(record.keys(), reply_ndarrays, strict=True)
-                        }
+                        zip(record.keys(), map(Array, reply_ndarrays), strict=True)
                     )
                 )
             log(
