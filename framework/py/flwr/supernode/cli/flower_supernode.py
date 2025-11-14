@@ -22,8 +22,9 @@ from typing import Optional
 
 import yaml
 from cryptography.exceptions import UnsupportedAlgorithm
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 from cryptography.hazmat.primitives.serialization import load_ssh_private_key
+from cryptography.hazmat.primitives.serialization.ssh import load_ssh_public_key
 
 from flwr.common import EventType, event
 from flwr.common.args import try_obtain_root_certificates
@@ -59,7 +60,8 @@ def flower_supernode() -> None:
             "Ignoring `--flwr-dir`.",
         )
 
-    trusted_entities = try_obtain_trusted_entities(args.trusted_entities)
+    trusted_entities = _try_obtain_trusted_entities(args.trusted_entities)
+    _validate_public_keys_ed25519(trusted_entities)
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     authentication_keys = _try_setup_client_authentication(args)
 
@@ -135,10 +137,9 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         help=(
             "Path to a YAML file defining trusted entities. "
             "Only apps verified by at least one of these "
-            "entities can run on a supernode.\n\n"
-            "Example YAML file:\n"
-            "  fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]\n"
-            "  fpk_UUID2: ssh-ed25519 <base64-encoded-key2> [comment2]\n"
+            "entities can run on a SuperNode. Example format: "
+            "fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]; "
+            "fpk_UUID2: ssh-ed25519 <base64-encoded-key2> [comment2]"
         ),
     )
     add_args_health(parser)
@@ -254,7 +255,7 @@ def _try_setup_client_authentication(
     return ssh_private_key, ssh_private_key.public_key()
 
 
-def try_obtain_trusted_entities(
+def _try_obtain_trusted_entities(
     trusted_entities_path: Optional[Path],
 ) -> Optional[dict[str, str]]:
     """Validate and return the trust entities."""
@@ -276,3 +277,17 @@ def try_obtain_trusted_entities(
             f"Failed to read YAML file '{trusted_entities_path}': {e}",
         )
     return trusted_entities
+
+
+def _validate_public_keys_ed25519(trusted_entities: dict[str, str]) -> None:
+    """Validate public keys for the trust entities are Ed25519."""
+    for public_key_id in trusted_entities.keys():
+        verifier_public_key = load_ssh_public_key(
+            trusted_entities[public_key_id].encode("utf-8")
+        )
+        if not isinstance(verifier_public_key, ed25519.Ed25519PublicKey):
+            flwr_exit(
+                ExitCode.SUPERNODE_INVALID_TRUSTED_ENTITIES,
+                "The provided public key associated with "
+                f"trusted entity {public_key_id} is not Ed25519.",
+            )

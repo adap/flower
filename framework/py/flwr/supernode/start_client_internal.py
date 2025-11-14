@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
 import grpc
-from cryptography.hazmat.primitives.asymmetric import ec, ed25519
+from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization.ssh import load_ssh_public_key
 from grpc import RpcError
 
@@ -70,7 +70,7 @@ from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric_ed25519 import (
-    create_signed_message,
+    create_message_to_sign,
     decode_base64url,
     verify_signature,
 )
@@ -156,7 +156,8 @@ def start_client_internal(
         The address of the health server. If `None` is provided, the health server will
         NOT be started.
     trusted_entities : Optional[dict[str, str]] (default: None)
-        A list of trusted entities. Only apps verified by at least one of these
+        A dictionary mapping public key IDs to public keys.
+        Only apps verified by at least one of these
         entities can run on a supernode.
     """
     if insecure is None:
@@ -274,7 +275,7 @@ def _insert_message(msg: Message, state: NodeState, store: ObjectStore) -> None:
     """Insert a message into the NodeState and ObjectStore."""
     with no_object_id_recompute():
         # Store message in state
-        setattr(msg.metadata, "_message_id", msg.object_id)  # Set message_id
+        msg.metadata._message_id = msg.object_id  # Set message_id
         state.store_message(msg)
 
         # Preregister objects in ObjectStore
@@ -345,7 +346,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             # Verify the received FAB
             # FAB must be signed if trust entities provided
             if trusted_entities:
-                if not fab.verifications["valid_license"]:
+                if not fab.verifications.get("valid_license", ""):
                     log(
                         WARN,
                         "App verification is not supported by the connected SuperLink.",
@@ -636,21 +637,13 @@ def _verify_fab(fab: Fab, trusted_entities: dict[str, str]) -> bool:
             verifier_public_key = load_ssh_public_key(
                 trusted_entities[public_key_id].encode("utf-8")
             )
-            if not isinstance(verifier_public_key, ed25519.Ed25519PublicKey):
-                log(
-                    WARN,
-                    "The provided public key associated with "
-                    "trusted entity %s is not Ed25519.",
-                    public_key_id,
-                )
-                continue
-            signed_message = create_signed_message(
+            message_to_verify = create_message_to_sign(
                 hashlib.sha256(fab.content).digest(),
                 verif["signed_at"],
             )
             if verify_signature(
                 verifier_public_key,
-                signed_message,
+                message_to_verify,
                 decode_base64url(verif["signature"]),
             ):
                 fab_verified = True
