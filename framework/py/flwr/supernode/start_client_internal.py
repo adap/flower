@@ -274,7 +274,7 @@ def _insert_message(msg: Message, state: NodeState, store: ObjectStore) -> None:
     """Insert a message into the NodeState and ObjectStore."""
     with no_object_id_recompute():
         # Store message in state
-        msg.metadata.__dict__["_message_id"] = msg.object_id  # Set message_id
+        setattr(msg.metadata, "_message_id", msg.object_id)  # Set message_id
         state.store_message(msg)
 
         # Preregister objects in ObjectStore
