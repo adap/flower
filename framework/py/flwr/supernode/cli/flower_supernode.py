@@ -59,7 +59,7 @@ def flower_supernode() -> None:
             "Ignoring `--flwr-dir`.",
         )
 
-    trust_entities = try_obtain_trust_entities(args.trust_entities)
+    trusted_entities = try_obtain_trusted_entities(args.trusted_entities)
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     authentication_keys = _try_setup_client_authentication(args)
 
@@ -87,7 +87,7 @@ def flower_supernode() -> None:
         isolation=args.isolation,
         clientappio_api_address=args.clientappio_api_address,
         health_server_address=args.health_server_address,
-        trust_entities=trust_entities,
+        trusted_entities=trusted_entities,
     )
 
 
@@ -128,7 +128,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
     )
     parser.add_argument(
-        "--trust-entities",
+        "--trusted-entities",
         type=Path,
         default=None,
         metavar="YAML_FILE",
@@ -254,23 +254,23 @@ def _try_setup_client_authentication(
     return ssh_private_key, ssh_private_key.public_key()
 
 
-def try_obtain_trust_entities(
-    trust_entities_path: Optional[Path],
+def try_obtain_trusted_entities(
+    trusted_entities_path: Optional[Path],
 ) -> Optional[dict[str, str]]:
     """Validate and return the trust entities."""
-    if not trust_entities_path:
+    if not trusted_entities_path:
         return None
-    if not trust_entities_path.is_file():
+    if not trusted_entities_path.is_file():
         flwr_exit(
-            ExitCode.SUPERNODE_INVALID_TRUST_ENTITIES,
-            "Path argument `--trust-entities` does not point to a file.",
+            ExitCode.SUPERNODE_INVALID_TRUSTED_ENTITIES,
+            "Path argument `--trusted-entities` does not point to a file.",
         )
     try:
-        with trust_entities_path.open("r", encoding="utf-8") as f:
-            trust_entities = yaml.safe_load(f) or {}
+        with trusted_entities_path.open("r", encoding="utf-8") as f:
+            trusted_entities = yaml.safe_load(f) or {}
     except yaml.YAMLError as e:
         flwr_exit(
-            ExitCode.SUPERNODE_INVALID_TRUST_ENTITIES,
-            f"Failed to read YAML file '{trust_entities_path}': {e}",
+            ExitCode.SUPERNODE_INVALID_TRUSTED_ENTITIES,
+            f"Failed to read YAML file '{trusted_entities_path}': {e}",
         )
-    return trust_entities
+    return trusted_entities

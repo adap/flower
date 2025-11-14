@@ -103,7 +103,7 @@ def start_client_internal(
     isolation: str = ISOLATION_MODE_SUBPROCESS,
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     health_server_address: Optional[str] = None,
-    trust_entities: Optional[dict[str, str]] = None,
+    trusted_entities: Optional[dict[str, str]] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -155,7 +155,7 @@ def start_client_internal(
     health_server_address : Optional[str] (default: None)
         The address of the health server. If `None` is provided, the health server will
         NOT be started.
-    trust_entities : Optional[dict[str, str]] (default: None)
+    trusted_entities : Optional[dict[str, str]] (default: None)
         A list of trusted entities. Only apps verified by at least one of these
         entities can run on a supernode.
     """
@@ -253,7 +253,7 @@ def start_client_internal(
                 get_fab=get_fab,
                 pull_object=pull_object,
                 confirm_message_received=confirm_message_received,
-                trust_entities=trust_entities,
+                trusted_entities=trusted_entities,
             )
 
             # No message has been pulled therefore we can skip the push stage.
@@ -296,7 +296,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     get_fab: Callable[[str, int], Fab],
     pull_object: Callable[[int, str], bytes],
     confirm_message_received: Callable[[int, str], None],
-    trust_entities: Optional[dict[str, str]],
+    trusted_entities: Optional[dict[str, str]],
 ) -> Optional[int]:
     """Pull a message from the SuperLink and store it in the state.
 
@@ -344,14 +344,14 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 
             # Verify the received FAB
             # FAB must be signed if trust entities provided
-            if trust_entities:
+            if trusted_entities:
                 if not fab.verifications["valid_license"]:
                     log(
                         WARN,
                         "App verification is not supported by the connected SuperLink.",
                     )
                 else:
-                    fab_verified = _verify_fab(fab, trust_entities)
+                    fab_verified = _verify_fab(fab, trusted_entities)
                     if not fab_verified:
                         # Insert an error message in the state
                         # when FAB verification fails
@@ -620,7 +620,7 @@ def run_clientappio_api_grpc(
     return clientappio_grpc_server
 
 
-def _verify_fab(fab: Fab, trust_entities: dict[str, str]) -> bool:
+def _verify_fab(fab: Fab, trusted_entities: dict[str, str]) -> bool:
     """Verify a FAB using its verification data and the provided trusted entities.
 
     The FAB is considered verified if at least one trusted entity matches the
@@ -632,9 +632,9 @@ def _verify_fab(fab: Fab, trust_entities: dict[str, str]) -> bool:
     }
     fab_verified = False
     for public_key_id, verif in verif_full.items():
-        if public_key_id in trust_entities:
+        if public_key_id in trusted_entities:
             verifier_public_key = load_ssh_public_key(
-                trust_entities[public_key_id].encode("utf-8")
+                trusted_entities[public_key_id].encode("utf-8")
             )
             if not isinstance(verifier_public_key, ed25519.Ed25519PublicKey):
                 log(

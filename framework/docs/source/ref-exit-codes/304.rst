@@ -1,11 +1,11 @@
-[304] SUPERNODE_INVALID_TRUST_ENTITIES
+[304] SUPERNODE_INVALID_TRUSTED_ENTITIES
 ======================================
 
 Description
 -----------
 
 This error occurs when an invalid YAML file for trusted entities is provided via the
-``--trust-entities`` option. The SuperNode must be restarted with a valid trusted
+``--trusted-entities`` option. The SuperNode must be restarted with a valid trusted
 entities list.
 
 How to Resolve
@@ -13,8 +13,8 @@ How to Resolve
 
 To resolve this issue, you can do one of the following:
 
-- **Provide a valid trusted entities list** using the ``--trust-entities`` option when
-  launching the SuperNode. Supply a YAML file (for example, ``--trust-entities
+- **Provide a valid trusted entities list** using the ``--trusted-entities`` option when
+  launching the SuperNode. Supply a YAML file (for example, ``--trusted-entities
   ./pks.yaml``) that contains the trusted entities’ public key IDs and their
   corresponding public keys.
 
@@ -29,5 +29,5 @@ To resolve this issue, you can do one of the following:
       fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]
       fpk_UUID2: ssh-ed25519 <base64-encoded-key2> [comment2]
 
-- **Disable entity verification** by removing the ``--trust-entities`` option when
+- **Disable entity verification** by removing the ``--trusted-entities`` option when
   starting the SuperNode. This allows the SuperNode to run without entity verification.
