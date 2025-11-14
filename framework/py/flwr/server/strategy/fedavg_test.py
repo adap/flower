@@ -176,5 +176,5 @@ def test_inplace_aggregate_fit_equivalence() -> None:
     inplace_np = parameters_to_ndarrays(inplace)
 
     # Assert
-    for ref, inp in zip(reference_np, inplace_np):
+    for ref, inp in zip(reference_np, inplace_np, strict=True):
         assert_allclose(ref, inp)

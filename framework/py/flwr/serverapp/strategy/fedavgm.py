@@ -168,7 +168,8 @@ class FedAvgM(FedAvg):
 
             # Remember that updates are the opposite of gradients
             pseudo_gradient = [
-                old - new for new, old in zip(aggregated_ndarrays, ndarrays)
+                old - new
+                for new, old in zip(aggregated_ndarrays, ndarrays, strict=True)
             ]
             if self.server_momentum > 0.0:
                 if self.momentum_vector is None:
@@ -177,7 +178,9 @@ class FedAvgM(FedAvg):
                 else:
                     self.momentum_vector = [
                         self.server_momentum * mv + pg
-                        for mv, pg in zip(self.momentum_vector, pseudo_gradient)
+                        for mv, pg in zip(
+                            self.momentum_vector, pseudo_gradient, strict=True
+                        )
                     ]
 
                 # No nesterov for now
@@ -186,10 +189,10 @@ class FedAvgM(FedAvg):
             # SGD and convert back to ArrayRecord
             updated_array_list = [
                 Array(old - self.server_learning_rate * pg)
-                for old, pg in zip(ndarrays, pseudo_gradient)
+                for old, pg in zip(ndarrays, pseudo_gradient, strict=True)
             ]
             aggregated_arrays = ArrayRecord(
-                OrderedDict(zip(array_keys, updated_array_list))
+                OrderedDict(zip(array_keys, updated_array_list, strict=True))
             )
 
             # Update current weights

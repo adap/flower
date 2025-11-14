@@ -175,7 +175,9 @@ class Bulyan(FedAvg):
         ]
 
         # Compute median
-        median_ndarrays = [np.median(arr, axis=0) for arr in zip(*selected_ndarrays)]
+        median_ndarrays = [
+            np.median(arr, axis=0) for arr in zip(*selected_ndarrays, strict=True)
+        ]
 
         # Aggregate the beta closest weights element-wise
         aggregated_ndarrays = aggregate_n_closest_weights(
@@ -184,7 +186,7 @@ class Bulyan(FedAvg):
 
         # Convert to ArrayRecord
         arrays = ArrayRecord(
-            OrderedDict(zip(array_keys, map(Array, aggregated_ndarrays)))
+            OrderedDict(zip(array_keys, map(Array, aggregated_ndarrays), strict=True))
         )
 
         # Aggregate MetricRecords

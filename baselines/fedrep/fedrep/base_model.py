@@ -93,7 +93,7 @@ class ModelSplit(ABC, nn.Module):
         Args:
             state_dict: dictionary of the state to set the model to.
         """
-        self.load_state_dict(state_dict, strict=False)
+        self.load_state_dict(state_dict, strict=True)
 
     def enable_head(self) -> None:
         """Enable gradient tracking for the head parameters."""

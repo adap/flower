@@ -106,7 +106,7 @@ class TestArrayRecord(unittest.TestCase):
             ]
         )
         ndarrays = [np.array([1, 2]), np.array([3, 4])]
-        for tensor_mock, numpy_array in zip(state_dict.values(), ndarrays):
+        for tensor_mock, numpy_array in zip(state_dict.values(), ndarrays, strict=True):
             tensor_mock.detach.return_value = tensor_mock
             tensor_mock.cpu.return_value = tensor_mock
             tensor_mock.numpy.return_value = numpy_array
@@ -143,7 +143,11 @@ class TestArrayRecord(unittest.TestCase):
         record = ArrayRecord()
         numpy_arrays = [np.array([1, 2]), np.array([3, 4])]
         mock_arrays = [Mock(spec=Array), Mock(spec=Array)]
+<<<<<<< HEAD
         for mock_arr, arr in zip(mock_arrays, numpy_arrays):
+=======
+        for mock_arr, arr in zip(mock_arrays, numpy_arrays, strict=True):
+>>>>>>> 30c6e6636 (fix zip)
             mock_arr.numpy.return_value = arr
         record["0"] = mock_arrays[0]
         record["1"] = mock_arrays[1]
@@ -165,7 +169,11 @@ class TestArrayRecord(unittest.TestCase):
         record = ArrayRecord()
         ndarrays = [np.array([1, 2]), np.array([3, 4])]
         mock_arrays = [Mock(spec=Array), Mock(spec=Array)]
+<<<<<<< HEAD
         for mock_arr, arr in zip(mock_arrays, ndarrays):
+=======
+        for mock_arr, arr in zip(mock_arrays, ndarrays, strict=True):
+>>>>>>> 30c6e6636 (fix zip)
             mock_arr.numpy.return_value = arr
         record["weight"] = mock_arrays[0]
         record["bias"] = mock_arrays[1]

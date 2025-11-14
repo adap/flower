@@ -161,7 +161,9 @@ class LocalDpMod:
                 {
                     k: Array(v)
                     for k, v in zip(
-                        client_to_server_arrecord.keys(), client_to_server_ndarrays
+                        client_to_server_arrecord.keys(),
+                        client_to_server_ndarrays,
+                        strict=True,
                     )
                 }
             )

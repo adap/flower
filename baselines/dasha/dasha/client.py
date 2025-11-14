@@ -69,7 +69,7 @@ class CompressionClient(
             state_dict[k] = torch.Tensor(parameter)
             shift += numel
         missing_keys, unexpected_keys = self._function.load_state_dict(
-            state_dict, strict=False
+            state_dict, strict=True
         )
         assert len(unexpected_keys) == 0
         if self._strict_load:

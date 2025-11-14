@@ -143,7 +143,7 @@ class FedBNFlowerClient(FlowerClient):
         keys = [k for k in self.net.state_dict().keys() if "bn" not in k]
         params_dict = zip(keys, parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        self.net.load_state_dict(state_dict, strict=False)
+        self.net.load_state_dict(state_dict, strict=True)
 
         # Now also load from bn_state_dir
         if (
@@ -156,7 +156,7 @@ class FedBNFlowerClient(FlowerClient):
                     "local_batch_norm"
                 ].items()
             }
-            self.net.load_state_dict(batch_norm_state, strict=False)
+            self.net.load_state_dict(batch_norm_state, strict=True)
 
 
 def client_fn(context: Context):

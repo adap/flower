@@ -115,7 +115,9 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
             OrderedDict(
                 {
                     k: Array(v)
-                    for k, v in zip(aggregated_arrays.keys(), aggregated_ndarrays)
+                    for k, v in zip(
+                        aggregated_arrays.keys(), aggregated_ndarrays, strict=True
+                    )
                 }
             )
         )
@@ -218,7 +220,10 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
                 # Replace content while preserving keys
                 reply.content[arr_name] = ArrayRecord(
                     OrderedDict(
-                        {k: Array(v) for k, v in zip(record.keys(), reply_ndarrays)}
+                        {
+                            k: Array(v)
+                            for k, v in zip(record.keys(), reply_ndarrays, strict=True)
+                        }
                     )
                 )
             log(

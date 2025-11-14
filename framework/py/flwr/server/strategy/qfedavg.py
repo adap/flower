@@ -199,7 +199,7 @@ class QFedAvg(FedAvg):
             # plug in the weight updates into the gradient
             grads = [
                 np.multiply((u - v), 1.0 / self.learning_rate)
-                for u, v in zip(weights_before, new_weights)
+                for u, v in zip(weights_before, new_weights, strict=True)
             ]
             deltas.append(
                 [np.float_power(loss + 1e-10, self.q_param) * grad for grad in grads]

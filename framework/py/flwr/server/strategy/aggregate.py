@@ -37,7 +37,7 @@ def aggregate(results: list[tuple[NDArrays, int]]) -> NDArrays:
     # Compute average weights of each layer
     weights_prime: NDArrays = [
         reduce(np.add, layer_updates) / num_examples_total
-        for layer_updates in zip(*weighted_weights)
+        for layer_updates in zip(*weighted_weights, strict=True)
     ]
     return weights_prime
 
@@ -75,7 +75,7 @@ def aggregate_inplace(results: list[tuple[ClientProxy, FitRes]]) -> NDArrays:
         )
         params = [
             reduce(partial(_try_inplace, np_binary_op=np.add), layer_updates)
-            for layer_updates in zip(params, res)
+            for layer_updates in zip(params, res, strict=True)
         ]
 
     return params
@@ -88,7 +88,7 @@ def aggregate_median(results: list[tuple[NDArrays, int]]) -> NDArrays:
 
     # Compute median weight of each layer
     median_w: NDArrays = [
-        np.median(np.asarray(layer), axis=0) for layer in zip(*weights)
+        np.median(np.asarray(layer), axis=0) for layer in zip(*weights, strict=True)
     ]
     return median_w
 
@@ -235,7 +235,7 @@ def aggregate_qffl(
         for j in range(1, len(deltas)):
             tmp += scaled_deltas[j][i]
         updates.append(tmp)
-    new_parameters = [(u - v) * 1.0 for u, v in zip(parameters, updates)]
+    new_parameters = [(u - v) * 1.0 for u, v in zip(parameters, updates, strict=True)]
     return new_parameters
 
 
@@ -287,7 +287,7 @@ def aggregate_trimmed_avg(
 
     trimmed_w: NDArrays = [
         _trim_mean(np.asarray(layer), proportiontocut=proportiontocut)
-        for layer in zip(*weights)
+        for layer in zip(*weights, strict=True)
     ]
 
     return trimmed_w
@@ -299,7 +299,7 @@ def _check_weights_equality(weights1: NDArrays, weights2: NDArrays) -> bool:
         return False
     return all(
         np.array_equal(layer_weights1, layer_weights2)
-        for layer_weights1, layer_weights2 in zip(weights1, weights2)
+        for layer_weights1, layer_weights2 in zip(weights1, weights2, strict=True)
     )
 
 

@@ -120,7 +120,10 @@ class DPFedAvgNumPyClient(NumPyClient):
         updated_params, num_examples, metrics = self.client.fit(parameters, config)
 
         # Update = updated model - original model
-        update = [np.subtract(x, y) for (x, y) in zip(updated_params, original_params)]
+        update = [
+            np.subtract(x, y)
+            for (x, y) in zip(updated_params, original_params, strict=True)
+        ]
 
         if "dpfedavg_clip_norm" not in config:
             raise KeyError("Clipping threshold not supplied by the server.")
