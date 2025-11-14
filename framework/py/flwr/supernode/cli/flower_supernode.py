@@ -267,8 +267,10 @@ def try_obtain_trust_entities(
         )
     try:
         with trust_entities_path.open("r", encoding="utf-8") as f:
-            trust_entities = yaml.safe_load(f) or {}
-    except yaml.YAMLError as e:
+            trust_entities = yaml.safe_load(f)
+        if not isinstance(trust_entities, dict):
+            raise ValueError("Invalid trusted entities format.")
+    except (yaml.YAMLError, ValueError) as e:
         flwr_exit(
             ExitCode.SUPERNODE_INVALID_TRUST_ENTITIES,
             f"Failed to read YAML file '{trust_entities_path}': {e}",
