@@ -1251,7 +1251,7 @@ msgstr "Python 버전"
 msgid ""
 "Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_."
 msgstr ""
-"Flower는 `Python 3.10 <https://docs.python.org/3.9/>`_이상이 필요하지만."
+"Flower는 `Python 3.10 <https://docs.python.org/3.10/>`_이상이 필요하지만."
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:17
 msgid ""

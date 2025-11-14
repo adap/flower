@@ -1306,7 +1306,7 @@ msgstr "Version Python"
 msgid ""
 "Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_"
 msgstr ""
-"Flower nécessite `Python 3.10 <https://docs.python.org/3.9/>`_ ou plus."
+"Flower nécessite `Python 3.10 <https://docs.python.org/3.10/>`_ ou plus."
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:17
 msgid ""
