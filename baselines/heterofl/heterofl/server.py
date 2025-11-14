@@ -54,7 +54,7 @@ def gen_evaluate_fn(
         net = model
         params_dict = zip(intermediate_keys, parameters_ndarrays)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-        net.load_state_dict(state_dict, strict=True)
+        net.load_state_dict(state_dict, strict=False)
         net.to(device)
 
         if server_round % 100 == 0:

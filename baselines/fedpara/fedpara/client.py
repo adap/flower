@@ -123,7 +123,7 @@ class PFlowerClient(fl.client.NumPyClient):
         ):
             client_dict[k] = server_dict[k]
 
-        self.net.load_state_dict(client_dict, strict=True)
+        self.net.load_state_dict(client_dict, strict=False)
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
