@@ -9,5 +9,5 @@ description = "Example Server for Flower iOS/CoreML"
 authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.11"
+python = ">=3.9.2,<3.11"
 flwr = ">=1.0,<2.0"

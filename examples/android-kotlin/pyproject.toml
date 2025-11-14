@@ -9,5 +9,5 @@ description = ""
 authors = ["Steven Hé (Sīchàng) <sichang.he@dukekunshan.edu.cn>"]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.11"
+python = ">=3.9.2,<3.11"
 flwr = ">=1.0,<2.0"
