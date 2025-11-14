@@ -61,7 +61,8 @@ def flower_supernode() -> None:
         )
 
     trusted_entities = _try_obtain_trusted_entities(args.trusted_entities)
-    _validate_public_keys_ed25519(trusted_entities)
+    if trusted_entities:
+        _validate_public_keys_ed25519(trusted_entities)
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     authentication_keys = _try_setup_client_authentication(args)
 

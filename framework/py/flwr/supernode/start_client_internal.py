@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
 import grpc
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 from cryptography.hazmat.primitives.serialization.ssh import load_ssh_public_key
 from grpc import RpcError
 
@@ -275,7 +275,7 @@ def _insert_message(msg: Message, state: NodeState, store: ObjectStore) -> None:
     """Insert a message into the NodeState and ObjectStore."""
     with no_object_id_recompute():
         # Store message in state
-        msg.metadata._message_id = msg.object_id  # Set message_id
+        msg.metadata.__dict__["_message_id"] = msg.object_id  # Set message_id
         state.store_message(msg)
 
         # Preregister objects in ObjectStore
@@ -641,6 +641,7 @@ def _verify_fab(fab: Fab, trusted_entities: dict[str, str]) -> bool:
                 hashlib.sha256(fab.content).digest(),
                 verif["signed_at"],
             )
+            assert isinstance(verifier_public_key, ed25519.Ed25519PublicKey)
             if verify_signature(
                 verifier_public_key,
                 message_to_verify,
