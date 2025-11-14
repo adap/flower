@@ -24,10 +24,14 @@ To resolve this issue, you can do one of the following:
     Flower Public Key.
   - The YAML file should follow this structure:
 
-  .. code-block:: yaml
+- The YAML file should follow this structure:
 
-      fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]
-      fpk_UUID2: ssh-ed25519 <base64-encoded-key2> [comment2]
+    .. code-block:: yaml
+
+        fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]*
+        fpk_UUID2: ssh-ed25519 <base64-encoded-key2> [comment2]*
+
+    \*Comments are optional.
 
 - **Disable entity verification** by removing the ``--trusted-entities`` option when
   starting the SuperNode. This allows the SuperNode to run without entity verification.
