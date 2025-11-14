@@ -18,12 +18,13 @@
 import hashlib
 import json
 import re
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Callable, Optional, Union, cast
 
 import grpc
+import pathspec
 import requests
 import typer
 
@@ -439,3 +440,27 @@ def request_download_link(
     if out_url not in data:
         raise typer.BadParameter("Invalid response from Platform API")
     return str(data[out_url])
+
+
+def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:
+    """Build a PathSpec from a list of patterns."""
+    return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+
+
+def get_exclude_pathspec(
+    default_content: Iterable[str], gitignore_content: Optional[bytes]
+) -> pathspec.PathSpec:
+    """Get the PathSpec for files to exclude.
+
+    If gitignore_content is provided, its patterns will be combined with the default
+    exclude patterns.
+    """
+    patterns = list(default_content)
+    if gitignore_content:
+        patterns += gitignore_content.decode("UTF-8").splitlines()
+    return build_pathspec(patterns)
+
+
+def to_bytes(content: Union[bytes, Path]) -> bytes:
+    """Convert a Path or bytes object to bytes."""
+    return content.read_bytes() if isinstance(content, Path) else content

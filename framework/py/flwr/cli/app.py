@@ -19,8 +19,8 @@ from typer.main import get_command
 
 from flwr.common.version import package_version
 
-from .build import build
 from .app_cmd import publish as app_publish
+from .build import build
 from .install import install
 from .log import log
 from .login import login

@@ -16,7 +16,6 @@
 
 
 import json
-from collections.abc import Iterable
 from contextlib import ExitStack
 from pathlib import Path
 from typing import IO, Annotated, Callable, Optional
@@ -44,12 +43,14 @@ from flwr.supercore.constant import (
     UTF8,
 )
 
+from ..utils import build_pathspec, get_exclude_pathspec, to_bytes
 
-def _load_gitignore(root: Path) -> Optional[Iterable[str]]:
+
+def _load_gitignore(root: Path) -> Optional[bytes]:
     """Load gitignore file."""
-    gi = root / ".gitignore"
-    if gi.is_file():
-        return gi.read_text(encoding="utf-8").splitlines()
+    gitignore_path = root / ".gitignore"
+    if gitignore_path.is_file():
+        return to_bytes(gitignore_path)
     return None
 
 
@@ -59,34 +60,37 @@ def _compile_gitignore(root: Path) -> Callable[[Path], bool]:
     Paths are evaluated relative to `root` with POSIX separators.
     Always ignores the Flower internal directory (`FLWR_DIR`).
     """
-    patterns = list(_load_gitignore(root) or [])
-
+    gitignore_content = _load_gitignore(root)
     # Always ignore the internal Flower directory
-    flwr_dir_rel = (root.absolute() / FLWR_DIR).relative_to(root.absolute()).as_posix()
-    if not flwr_dir_rel.endswith("/"):
-        flwr_dir_rel += "/"
-    patterns.append(flwr_dir_rel)
+    flwr_dir_relative = (
+        (root.absolute() / FLWR_DIR).relative_to(root.absolute()).as_posix()
+    )
+    if not flwr_dir_relative.endswith("/"):
+        flwr_dir_relative += "/"
 
-    spec = pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+    # Create PathSpec
+    exclude_spec = get_exclude_pathspec([flwr_dir_relative], gitignore_content)
 
-    def ignored(p: Path) -> bool:
-        rel = p.relative_to(root).as_posix()
-        # Pathspec expects directory entries with trailing slash for dir matches
-        if p.is_dir() and not rel.endswith("/"):
-            rel += "/"
-        return spec.match_file(rel)
+    def ignored(path: Path) -> bool:
+        relative_path = path.relative_to(root).as_posix()
+        return exclude_spec.match_file(relative_path)
 
     return ignored
 
 
-def _depth_of(relpath: Path) -> int:
+def _get_include_extensions_pathspec() -> pathspec.PathSpec:
+    """Get the PathSpec for files to include."""
+    return build_pathspec(ALLOWED_EXTS)
+
+
+def _depth_of(relative_path: Path) -> int:
     """Return depth that is number of parts (directories) in the relative path
     (excluding filename).
 
     Example: "a/b/c.py" -> depth 3
     Interpret "directory depth" as number of directories: len(parts) - 1
     """
-    return max(0, len(relpath.parts) - 1)
+    return max(0, len(relative_path.parts) - 1)
 
 
 def _detect_mime(path: Path) -> str:
@@ -95,42 +99,49 @@ def _detect_mime(path: Path) -> str:
 
 
 def _collect_files(root: Path) -> list[tuple[Path, Path]]:
-    """Return list of (abs_path, rel_path) that pass allowed list + ignore logic."""
+    """Return list of (absolute_path, relative_path) that pass allowed list + ignore
+    logic."""
     ignored = _compile_gitignore(root)
     files: list[tuple[Path, Path]] = []
 
-    for p in root.rglob("*"):
+    for absolute_path in root.rglob("*"):
         try:
-            if ignored(p):
-                if p.is_file():
+            if ignored(absolute_path):
+                if absolute_path.is_file():
                     typer.echo(
-                        typer.style(f"Skip (gitignore): {p}", fg=typer.colors.YELLOW)
+                        typer.style(
+                            f"Skip (gitignore): {absolute_path}", fg=typer.colors.YELLOW
+                        )
                     )
                 continue
         except Exception:  # pylint: disable=broad-exception-caught
             # If ignore callable crashes for some weird FS entry, just continue safely
             continue
 
-        if p.is_dir():
+        if absolute_path.is_dir():
             continue
 
         # Only include allowed extensions
-        if p.suffix.lower() not in ALLOWED_EXTS:
-            typer.echo(typer.style(f"Skip (ext): {p}", fg=typer.colors.YELLOW))
+        include_extensions_spec = _get_include_extensions_pathspec()
+        relative_path = absolute_path.relative_to(root)
+        if not include_extensions_spec.match_file(relative_path.as_posix()):
+            typer.echo(
+                typer.style(f"Skip (ext): {absolute_path}", fg=typer.colors.YELLOW)
+            )
             continue
 
         # Check max depth
-        rel = p.relative_to(root)
-        if _depth_of(rel) > MAX_DIR_DEPTH:
+        if _depth_of(relative_path) > MAX_DIR_DEPTH:
             typer.secho(
-                f"Error: '{rel.as_posix()}' exceeds the maximum directory depth "
+                f"Error: '{relative_path.as_posix()}' "
+                f"exceeds the maximum directory depth "
                 f"of {MAX_DIR_DEPTH}.",
                 fg=typer.colors.RED,
                 err=True,
             )
             raise typer.Exit(code=2)
 
-        files.append((p, rel))
+        files.append((absolute_path, relative_path))
 
     # Sort for deterministic ordering
     files.sort(key=lambda pr: pr[1].as_posix())
@@ -142,7 +153,7 @@ def _validate_files(files: list[tuple[Path, Path]]) -> None:
     if len(files) == 0:
         typer.secho(
             "Nothing to upload: no files matched after applying .gitignore and "
-            f"allowed extensions {sorted(ALLOWED_EXTS)}.",
+            "allowed extensions.",
             fg=typer.colors.RED,
             err=True,
         )
@@ -158,14 +169,14 @@ def _validate_files(files: list[tuple[Path, Path]]) -> None:
 
     # Calculate files size
     total = 0
-    for abs_p, rel_p in files:
-        size = abs_p.stat().st_size
+    for absolute_path, relative_path in files:
+        size = absolute_path.stat().st_size
         total += size
 
         # Check single file size
         if size > MAX_FILE_BYTES:
             typer.secho(
-                f"File too large: '{rel_p.as_posix()}' is {size} bytes, "
+                f"File too large: '{relative_path.as_posix()}' is {size} bytes, "
                 f"exceeding the per-file limit of {MAX_FILE_BYTES} bytes.",
                 fg=typer.colors.RED,
                 err=True,
@@ -174,10 +185,10 @@ def _validate_files(files: list[tuple[Path, Path]]) -> None:
 
         # Ensure we can decode as UTF-8.
         try:
-            abs_p.read_text(encoding=UTF8)
+            absolute_path.read_text(encoding=UTF8)
         except UnicodeDecodeError as err:
             typer.secho(
-                f"Encoding error: '{rel_p.as_posix()}' is not UTF-8 encoded.",
+                f"Encoding error: '{relative_path.as_posix()}' is not UTF-8 encoded.",
                 fg=typer.colors.RED,
                 err=True,
             )
@@ -204,16 +215,18 @@ def _build_multipart_files_param(
     """Return a list suitable for requests.post(files=...) and register file handles
     with ExitStack."""
     form: list[tuple[str, tuple[str, IO[bytes], str]]] = []
-    for abs_p, rel_p in files:
-        rel_posix = rel_p.as_posix()
-        mime = _detect_mime(abs_p)
+    for absolute_path, relative_path in files:
+        relative_posix = relative_path.as_posix()
+        mime = _detect_mime(absolute_path)
 
         fobj = stack.enter_context(
-            open(abs_p, "rb")  # pylint: disable=consider-using-with
+            open(absolute_path, "rb")  # pylint: disable=consider-using-with
         )
-        typer.echo(f"Attach {rel_posix} ({mime}, {abs_p.stat().st_size} B)")
+        typer.echo(
+            f"Attach {relative_posix} ({mime}, {absolute_path.stat().st_size} B)"
+        )
 
-        form.append(("files", (rel_posix, fobj, mime)))
+        form.append(("files", (relative_posix, fobj, mime)))
     return form
 
 

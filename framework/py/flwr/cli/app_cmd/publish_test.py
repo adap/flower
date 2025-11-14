@@ -43,26 +43,31 @@ from .publish import (
     _detect_mime,
     _load_gitignore,
     _validate_credentials_content,
+    _validate_files,
 )
 
 TEXT_EXT = ".py"
 ALT_TEXT_EXT = ".md"
 
 
-def write(tmp: Path, rel: str, data: bytes) -> Path:
+def write(tmp: Path, file_name: str, data: bytes) -> Path:
     """Write data to given path."""
-    p = tmp / rel
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_bytes(data)
-    return p
+    path = tmp / file_name
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+    return path
 
 
 def test_load_gitignore(tmp_path: Path) -> None:
     """Test '.gitignore' loading."""
     (tmp_path / ".gitignore").write_text("*.log\nsecret/\n", encoding="utf-8")
-    lines = _load_gitignore(tmp_path)
-    assert lines is not None
-    assert list(lines) == ["*.log", "secret/"]
+    raw = _load_gitignore(tmp_path)
+
+    assert raw is not None
+    assert isinstance(raw, bytes)
+
+    lines = raw.decode("utf-8").splitlines()
+    assert lines == ["*.log", "secret/"]
 
 
 def test_compile_gitignore_ignores_flwr_dir(tmp_path: Path) -> None:
@@ -122,7 +127,7 @@ def test_collect_files_count_limit(tmp_path: Path) -> None:
         write(tmp_path, f"f{i}{TEXT_EXT}", b"x")
 
     with pytest.raises(typer.Exit) as exc:
-        _collect_files(tmp_path)
+        _validate_files(_collect_files(tmp_path))
     assert exc.value.exit_code == 2
 
 
@@ -133,7 +138,7 @@ def test_collect_files_total_bytes_limit(tmp_path: Path) -> None:
     write(tmp_path, f"big{TEXT_EXT}", data)
 
     with pytest.raises(typer.Exit) as exc:
-        _collect_files(tmp_path)
+        _validate_files(_collect_files(tmp_path))
     assert exc.value.exit_code == 2
 
 
@@ -143,7 +148,7 @@ def test_collect_files_per_file_size_limit(tmp_path: Path) -> None:
     write(tmp_path, f"too_big{ALT_TEXT_EXT}", data)
 
     with pytest.raises(typer.Exit) as exc:
-        _collect_files(tmp_path)
+        _validate_files(_collect_files(tmp_path))
     assert exc.value.exit_code == 2
 
 
@@ -153,7 +158,7 @@ def test_collect_files_non_utf8_raises_for_text(tmp_path: Path) -> None:
     write(tmp_path, f"bad{TEXT_EXT}", b"\xff\xfe\xfa")
 
     with pytest.raises(typer.Exit) as exc:
-        _collect_files(tmp_path)
+        _validate_files(_collect_files(tmp_path))
     assert exc.value.exit_code == 2
 
 

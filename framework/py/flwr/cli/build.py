@@ -17,7 +17,6 @@
 
 import hashlib
 import zipfile
-from collections.abc import Iterable
 from io import BytesIO
 from pathlib import Path
 from typing import Annotated, Any, Optional, Union
@@ -37,7 +36,7 @@ from flwr.common.constant import (
 )
 
 from .config_utils import load_and_validate
-from .utils import is_valid_project_name
+from .utils import build_pathspec, get_exclude_pathspec, is_valid_project_name, to_bytes
 
 
 def write_to_zip(
@@ -195,10 +194,6 @@ def build_fab_from_files(files: dict[str, Union[bytes, Path]]) -> bytes:
         }
         fab_bytes = build_fab_from_files(files)
     """
-
-    def to_bytes(content: Union[bytes, Path]) -> bytes:
-        return content.read_bytes() if isinstance(content, Path) else content
-
     # Extract, load, and parse pyproject.toml
     if FAB_CONFIG_FILE not in files:
         raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
@@ -267,11 +262,6 @@ def build_fab_from_files(files: dict[str, Union[bytes, Path]]) -> bytes:
     return fab_bytes
 
 
-def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:
-    """Build a PathSpec from a list of patterns."""
-    return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
-
-
 def get_fab_include_pathspec() -> pathspec.PathSpec:
     """Get the PathSpec for files to include in a FAB."""
     return build_pathspec(FAB_INCLUDE_PATTERNS)
@@ -283,7 +273,4 @@ def get_fab_exclude_pathspec(gitignore_content: Optional[bytes]) -> pathspec.Pat
     If gitignore_content is provided, its patterns will be combined with the default
     exclude patterns.
     """
-    patterns = list(FAB_EXCLUDE_PATTERNS)
-    if gitignore_content:
-        patterns += gitignore_content.decode("UTF-8").splitlines()
-    return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+    return get_exclude_pathspec(FAB_EXCLUDE_PATTERNS, gitignore_content)

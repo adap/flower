@@ -29,7 +29,11 @@ APP_VERSION_PATTERN = r"^\d+\.\d+\.\d+$"
 PLATFORM_API_URL = "https://api.flower.ai/v1"
 
 # App spec
-ALLOWED_EXTS = [".py", ".toml", ".md"]
+ALLOWED_EXTS = (
+    "**/*.py",
+    "**/*.toml",
+    "**/*.md",
+)
 MAX_TOTAL_BYTES = 10 * 1024 * 1024  # 10 MB
 MAX_FILE_BYTES = 1 * 1024 * 1024  # 1 MB
 MAX_FILE_COUNT = 1000
