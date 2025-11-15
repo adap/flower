@@ -19,7 +19,7 @@ import io
 import random
 import string
 from datetime import datetime, timedelta
-from typing import Any, Optional, Union
+from typing import Any
 
 import numpy as np
 from PIL import Image
@@ -137,7 +137,7 @@ def _generate_random_date(
     end_date: datetime,
     date_format: str = "%a %b %d %H:%M:%S %Y",
     as_string: bool = True,
-) -> Union[str, datetime]:
+) -> str | datetime:
     """Generate a random date between start_date and end_date."""
     time_between_dates = end_date - start_date
     random_seconds = random.randint(0, int(time_between_dates.total_seconds()))
@@ -154,7 +154,7 @@ def _generate_random_date_column(
     end_date: datetime,
     date_format: str = "%a %b %d %H:%M:%S %Y",
     as_string: bool = True,
-) -> list[Union[str, datetime]]:
+) -> list[str | datetime]:
     """Generate a list of random dates."""
     return [
         _generate_random_date(start_date, end_date, date_format, as_string)
@@ -174,7 +174,7 @@ def _generate_random_bool_column(num_rows: int) -> list[bool]:
 
 def _generate_random_image_column(
     num_rows: int,
-    image_size: Union[tuple[int, int], tuple[int, int, int]],
+    image_size: tuple[int, int] | tuple[int, int, int],
     simulate_type: str,
 ) -> list[Any]:
     """Simulate the images with the format that is found in HF Hub.
@@ -372,7 +372,7 @@ def _load_mocked_dataset(
     dataset_dict = {}
     name = dataset_name if subset == "" else dataset_name + "_" + subset
     dataset_creation_fnc = dataset_name_to_mock_function[name]
-    for params in zip(num_rows, split_names):
+    for params in zip(num_rows, split_names, strict=False):
         dataset_dict[params[1]] = dataset_creation_fnc(params[0])
     return datasets.DatasetDict(dataset_dict)
 
@@ -381,7 +381,7 @@ def _load_mocked_dataset_by_partial_download(
     dataset_name: str,
     split_name: str,
     skip_take_list: list[tuple[int, int]],
-    subset_name: Optional[str] = None,
+    subset_name: str | None = None,
 ) -> Dataset:
     """Download a partial dataset.
 
@@ -429,14 +429,14 @@ def _load_mocked_dataset_dict_by_partial_download(
     dataset_name: str,
     split_names: list[str],
     skip_take_lists: list[list[tuple[int, int]]],
-    subset_name: Optional[str] = None,
+    subset_name: str | None = None,
 ) -> DatasetDict:
     """Like _load_mocked_dataset_by_partial_download but for many splits."""
     assert len(split_names) == len(
         skip_take_lists
     ), "The split_names should be thesame length as the skip_take_lists."
     dataset_dict = {}
-    for split_name, skip_take_list in zip(split_names, skip_take_lists):
+    for split_name, skip_take_list in zip(split_names, skip_take_lists, strict=False):
         dataset_dict[split_name] = _load_mocked_dataset_by_partial_download(
             dataset_name, split_name, skip_take_list, subset_name
         )
