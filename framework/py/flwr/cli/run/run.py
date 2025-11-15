@@ -212,7 +212,8 @@ def _run_with_control_api(
             if is_remote_app:
                 typer.secho(
                     "❌ Failed to start run. Please check that the provided "
-                    "app identifier (@user_name/app_name) is correct.",
+                    "app identifier (@user_name/app_name) is correct, "
+                    "or that it is not using an unsupported gRPC adapter.",
                     fg=typer.colors.RED,
                 )
             else:

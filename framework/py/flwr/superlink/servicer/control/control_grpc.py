@@ -62,6 +62,7 @@ def run_control_api_grpc(
     authz_plugin: ControlAuthzPlugin,
     event_log_plugin: Optional[EventLogWriterPlugin] = None,
     artifact_provider: Optional[ArtifactProvider] = None,
+    fleet_api_type: Optional[str] = None,
 ) -> grpc.Server:
     """Run Control API (gRPC, request-response)."""
     license_plugin: Optional[LicensePlugin] = get_license_plugin()
@@ -75,6 +76,7 @@ def run_control_api_grpc(
         is_simulation=is_simulation,
         authn_plugin=authn_plugin,
         artifact_provider=artifact_provider,
+        fleet_api_type=fleet_api_type,
     )
     interceptors = [ControlAccountAuthInterceptor(authn_plugin, authz_plugin)]
     if license_plugin is not None:
