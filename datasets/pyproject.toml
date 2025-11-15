@@ -90,7 +90,7 @@ known_first_party = ["flwr_datasets"]
 
 [tool.black]
 line-length = 88
-target-version = ["py310", "py311", "py312"]
+target-version = ["py310", "py311", "py312", "py313"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "duplicate-code,too-few-public-methods,useless-import-alias"
