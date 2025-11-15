@@ -30,6 +30,10 @@ class FederationManager(ABC):
         """Check if the given account is a member of the federation."""
 
     @abstractmethod
+    def get_members(self, federation: str) -> set[str]:
+        """Get all members of a federation."""
+
+    @abstractmethod
     def filter_nodes(self, node_ids: set[int], federation: str) -> set[int]:
         """Given a list of node IDs, return sublist with nodes in federation."""
 
