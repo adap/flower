@@ -1257,12 +1257,9 @@ msgstr "Python 版本"
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:12
 #: ../../source/how-to-install-flower.rst:11
 msgid ""
-"Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, "
-"but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is "
-"recommended."
+"Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_."
 msgstr ""
-"Flower 至少需要 `Python 3.9 <https://docs.python.org/3.9/>`_，但建议使用 `Python "
-"3.10 <https://docs.python.org/3.10/>`_或更高版本。"
+"Flower 至少需要 `Python 3.10 <https://docs.python.org/3.10/>`_."
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:17
 #, fuzzy
@@ -2306,8 +2303,8 @@ msgstr "先决条件"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:7
 #, fuzzy
-msgid "`Python 3.9 <https://docs.python.org/3.9/>`_ or above"
-msgstr "Python 3.9 <https://docs.python.org/3.9/>`_ 或更高版本"
+msgid "`Python 3.10 <https://docs.python.org/3.10/>`_ or above"
+msgstr "Python 3.10 <https://docs.python.org/3.10/>`_ 或更高版本"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:8
 msgid "`Poetry 1.3 <https://python-poetry.org/>`_ or above"
@@ -38509,7 +38506,7 @@ msgstr ""
 #~ msgstr ""
 #~ "其次，创建虚拟环境（并激活它）。如果您选择使用 :code:`pyenv`（使用 :code:`pyenv-"
 #~ "virtualenv`插件），并且已经安装了该插件，则可以使用下面的便捷脚本（默认情况下使用 "
-#~ ":code:`Python3.8.17`，但您可以通过提供特定的 :code:`<版本>`来更改）：："
+#~ ":code:`Python3.10.19`，但您可以通过提供特定的 :code:`<版本>`来更改）：："
 
 #~ msgid "flwr (Python API reference)"
 #~ msgstr "flwr（Python API 参考）"
@@ -48625,7 +48622,7 @@ msgstr ""
 #~ " default):"
 #~ msgstr ""
 #~ "如果没有安装 :code:`pyenv`，可以使用以下脚本安装 pyenv、设置并创建虚拟环境（默认使用 "
-#~ ":code:`Python 3.9.20）：："
+#~ ":code:`Python 3.10.19）：："
 
 #~ msgid ""
 #~ "If you already have ``pyenv`` installed"
@@ -48635,7 +48632,7 @@ msgstr ""
 #~ "code:`Python |python_full_version|` by default):"
 #~ msgstr ""
 #~ "如果没有安装 :code:`pyenv`，可以使用以下脚本安装 pyenv、设置并创建虚拟环境（默认使用 "
-#~ ":code:`Python 3.9.20）：："
+#~ ":code:`Python 3.10.19）：："
 
 #~ msgid ""
 #~ "3. Install the Flower package in "

@@ -15,7 +15,6 @@
 """Divider tests."""
 
 import unittest
-from typing import Union
 
 from parameterized import parameterized_class
 
@@ -83,12 +82,12 @@ from flwr_datasets.preprocessor import Divider
 class TestDivider(unittest.TestCase):
     """Divider tests."""
 
-    divide_config: Union[
-        dict[str, float],
-        dict[str, int],
-        dict[str, dict[str, float]],
-        dict[str, dict[str, int]],
-    ]
+    divide_config: (
+        dict[str, float]
+        | dict[str, int]
+        | dict[str, dict[str, float]]
+        | dict[str, dict[str, int]]
+    )
     divide_split: str
     drop_remaining_splits: bool
     split_name_to_size: dict[str, int]

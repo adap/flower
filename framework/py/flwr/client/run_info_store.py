@@ -17,7 +17,6 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from flwr.common import Context, RecordDict
 from flwr.common.config import (
@@ -52,10 +51,10 @@ class DeprecatedRunInfoStore:
     def register_context(
         self,
         run_id: int,
-        run: Optional[Run] = None,
-        flwr_path: Optional[Path] = None,
-        app_dir: Optional[str] = None,
-        fab: Optional[Fab] = None,
+        run: Run | None = None,
+        flwr_path: Path | None = None,
+        app_dir: str | None = None,
+        fab: Fab | None = None,
     ) -> None:
         """Register new run context for this node."""
         if run_id not in self.run_infos:

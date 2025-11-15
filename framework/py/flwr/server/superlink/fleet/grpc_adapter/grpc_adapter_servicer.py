@@ -15,8 +15,9 @@
 """Fleet API gRPC adapter servicer."""
 
 
+from collections.abc import Callable
 from logging import DEBUG
-from typing import Callable, TypeVar
+from typing import TypeVar
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage

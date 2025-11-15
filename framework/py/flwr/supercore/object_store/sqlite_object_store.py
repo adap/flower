@@ -15,7 +15,7 @@
 """Flower SQLite ObjectStore implementation."""
 
 
-from typing import Optional, cast
+from typing import cast
 
 from flwr.common.inflatable import (
     get_object_id,
@@ -176,7 +176,7 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
                 (object_content, object_id),
             )
 
-    def get(self, object_id: str) -> Optional[bytes]:
+    def get(self, object_id: str) -> bytes | None:
         """Get an object from the store."""
         rows = self.query("SELECT content FROM objects WHERE object_id=?", (object_id,))
         return rows[0]["content"] if rows else None

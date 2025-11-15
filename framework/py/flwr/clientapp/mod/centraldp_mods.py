@@ -109,7 +109,9 @@ def fixedclipping_mod(
             {
                 k: Array(v)
                 for k, v in zip(
-                    client_to_server_arrecord.keys(), client_to_server_ndarrays
+                    client_to_server_arrecord.keys(),
+                    client_to_server_ndarrays,
+                    strict=True,
                 )
             }
         )
@@ -196,7 +198,9 @@ def adaptiveclipping_mod(
             {
                 k: Array(v)
                 for k, v in zip(
-                    client_to_server_arrecord.keys(), client_to_server_ndarrays
+                    client_to_server_arrecord.keys(),
+                    client_to_server_ndarrays,
+                    strict=True,
                 )
             }
         )

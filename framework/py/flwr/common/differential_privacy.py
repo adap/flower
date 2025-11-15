@@ -16,7 +16,6 @@
 
 
 from logging import WARNING
-from typing import Optional
 
 import numpy as np
 
@@ -70,7 +69,7 @@ def compute_clip_model_update(
     """Compute model update (param1 - param2) and clip it.
 
     Then add the clipped value to param1."""
-    model_update = [np.subtract(x, y) for (x, y) in zip(param1, param2)]
+    model_update = [np.subtract(x, y) for (x, y) in zip(param1, param2, strict=True)]
     clip_inputs_inplace(model_update, clipping_norm)
 
     for i, _ in enumerate(param2):
@@ -98,7 +97,7 @@ def compute_adaptive_clip_model_update(
     model update = param1 - param2
     Return the norm_bit
     """
-    model_update = [np.subtract(x, y) for (x, y) in zip(param1, param2)]
+    model_update = [np.subtract(x, y) for (x, y) in zip(param1, param2, strict=True)]
     norm_bit = adaptive_clip_inputs_inplace(model_update, clipping_norm)
 
     for i, _ in enumerate(param2):
@@ -125,7 +124,7 @@ def add_gaussian_noise_to_params(
 def compute_adaptive_noise_params(
     noise_multiplier: float,
     num_sampled_clients: float,
-    clipped_count_stddev: Optional[float],
+    clipped_count_stddev: float | None,
 ) -> tuple[float, float]:
     """Compute noising parameters for the adaptive clipping.
 

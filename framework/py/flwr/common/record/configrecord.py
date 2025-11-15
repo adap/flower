@@ -142,11 +142,11 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
             var_bytes = 0
             if isinstance(value, bool):
                 var_bytes = 1
-            elif isinstance(value, (int, float)):
+            elif isinstance(value, (int | float)):
                 var_bytes = (
                     8  # the profobufing represents int/floats in ConfigRecords as 64bit
                 )
-            if isinstance(value, (str, bytes)):
+            if isinstance(value, (str | bytes)):
                 var_bytes = len(value)
             if var_bytes == 0:
                 raise ValueError(
@@ -159,7 +159,7 @@ class ConfigRecord(TypedDict[str, ConfigRecordValues], InflatableObject):
 
         for k, v in self.items():
             if isinstance(v, list):
-                if isinstance(v[0], (bytes, str)):
+                if isinstance(v[0], (bytes | str)):
                     # not all str are of equal length necessarily
                     # for both the footprint of each element is 1 Byte
                     num_bytes += int(sum(len(s) for s in v))  # type: ignore

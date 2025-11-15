@@ -18,7 +18,6 @@
 import time
 import unittest
 from threading import Event
-from typing import Optional
 from unittest.mock import Mock, patch
 
 from ..client_manager import SimpleClientManager
@@ -40,7 +39,7 @@ class TestUtils(unittest.TestCase):
         client_manager = SimpleClientManager()
         original_wait = Event.wait
 
-        def custom_wait(self: Event, timeout: Optional[float] = None) -> None:
+        def custom_wait(self: Event, timeout: float | None = None) -> None:
             if timeout is not None:
                 timeout /= 100
             original_wait(self, timeout)

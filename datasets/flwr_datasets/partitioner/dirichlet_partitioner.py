@@ -16,7 +16,6 @@
 
 
 import warnings
-from typing import Optional, Union
 
 import numpy as np
 
@@ -91,11 +90,11 @@ class DirichletPartitioner(Partitioner):
         self,
         num_partitions: int,
         partition_by: str,
-        alpha: Union[int, float, list[float], NDArrayFloat],
+        alpha: int | float | list[float] | NDArrayFloat,
         min_partition_size: int = 10,
         self_balancing: bool = False,
         shuffle: bool = True,
-        seed: Optional[int] = 42,
+        seed: int | None = 42,
     ) -> None:
         super().__init__()
         # Attributes based on the constructor
@@ -111,8 +110,8 @@ class DirichletPartitioner(Partitioner):
 
         # Utility attributes
         # The attributes below are determined during the first call to load_partition
-        self._avg_num_of_samples_per_partition: Optional[float] = None
-        self._unique_classes: Optional[Union[list[int], list[str]]] = None
+        self._avg_num_of_samples_per_partition: float | None = None
+        self._unique_classes: list[int] | list[str] | None = None
         self._partition_id_to_indices: dict[int, list[int]] = {}
         self._partition_id_to_indices_determined = False
 
@@ -144,7 +143,7 @@ class DirichletPartitioner(Partitioner):
         return self._num_partitions
 
     def _initialize_alpha(
-        self, alpha: Union[int, float, list[float], NDArrayFloat]
+        self, alpha: int | float | list[float] | NDArrayFloat
     ) -> NDArrayFloat:
         """Convert alpha to the used format in the code a NDArrayFloat.
 

@@ -17,7 +17,6 @@
 
 from collections.abc import Iterator
 from itertools import product
-from typing import Optional
 from unittest.mock import Mock
 
 import pytest
@@ -244,7 +243,7 @@ def test_register_func_with_wrong_action_name(category: str, action: str) -> Non
     "category, action",
     product(["train", "evaluate", "query"], [None, "dummy_action", "default"]),
 )
-def test_register_repeated_func(category: str, action: Optional[str]) -> None:
+def test_register_repeated_func(category: str, action: str | None) -> None:
     """Test the train/evaluate/query decorators with repeated functions."""
     # Prepare
     app = ClientApp()

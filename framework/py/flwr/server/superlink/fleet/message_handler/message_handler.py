@@ -15,7 +15,6 @@
 """Fleet API message handlers."""
 
 from logging import ERROR
-from typing import Optional
 
 from flwr.common import Message, log
 from flwr.common.constant import (
@@ -182,7 +181,7 @@ def push_messages(
         raise InvalidRunStatusException(abort_msg)
 
     # Store Message in State
-    message_id: Optional[str] = state.store_message_res(message=msg)
+    message_id: str | None = state.store_message_res(message=msg)
 
     # Store Message object to descendants mapping and preregister objects
     objects_to_push = store_mapping_and_register_objects(store, request=request)

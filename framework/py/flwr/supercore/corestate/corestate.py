@@ -16,14 +16,13 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 
 class CoreState(ABC):
     """Abstract base class for core state."""
 
     @abstractmethod
-    def create_token(self, run_id: int) -> Optional[str]:
+    def create_token(self, run_id: int) -> str | None:
         """Create a token for the given run ID.
 
         Parameters
@@ -66,7 +65,7 @@ class CoreState(ABC):
         """
 
     @abstractmethod
-    def get_run_id_by_token(self, token: str) -> Optional[int]:
+    def get_run_id_by_token(self, token: str) -> int | None:
         """Get the run ID associated with a given token.
 
         Parameters

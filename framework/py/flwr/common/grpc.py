@@ -18,9 +18,9 @@
 import concurrent.futures
 import os
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from logging import DEBUG, ERROR
-from typing import Any, Callable, Optional
+from typing import Any
 
 import grpc
 
@@ -46,9 +46,9 @@ if "GRPC_VERBOSITY" not in os.environ:
 def create_channel(
     server_address: str,
     insecure: bool,
-    root_certificates: Optional[bytes] = None,
+    root_certificates: bytes | None = None,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
+    interceptors: Sequence[grpc.UnaryUnaryClientInterceptor] | None = None,
 ) -> grpc.Channel:
     """Create a gRPC channel, either secure or insecure."""
     # Check for conflicting parameters
@@ -104,8 +104,8 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments, R0914, R0
     max_concurrent_workers: int = 1000,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     keepalive_time_ms: int = 210000,
-    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
-    interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
+    certificates: tuple[bytes, bytes, bytes] | None = None,
+    interceptors: Sequence[grpc.ServerInterceptor] | None = None,
 ) -> grpc.Server:
     """Create a gRPC server with a single servicer.
 

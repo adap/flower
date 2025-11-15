@@ -1219,9 +1219,7 @@ msgstr ""
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:12
 #: ../../source/how-to-install-flower.rst:11
 msgid ""
-"Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, "
-"but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is "
-"recommended."
+"Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_."
 msgstr ""
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:17
@@ -2156,7 +2154,7 @@ msgid "Prerequisites"
 msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:7
-msgid "`Python 3.9 <https://docs.python.org/3.9/>`_ or above"
+msgid "`Python 3.10 <https://docs.python.org/3.10/>`_ or above"
 msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:8
@@ -33725,7 +33723,7 @@ msgstr ""
 #~ msgid "Add CI job to deploy the staging system when the `main` branch changes"
 #~ msgstr ""
 
-#~ msgid "`Python 3.7 <https://docs.python.org/3.7/>`_ or above"
+#~ msgid "`Python 3.10 <https://docs.python.org/3.10/>`_ or above"
 #~ msgstr ""
 
 #~ msgid ""
@@ -39471,7 +39469,7 @@ msgstr ""
 #~ "installed, the following script that "
 #~ "will install it, set it up, and"
 #~ " create the virtual environment (with "
-#~ ":code:`Python 3.9.20` by default)::"
+#~ ":code:`Python 3.10.19` by default)::"
 #~ msgstr ""
 
 #~ msgid ""
@@ -39479,7 +39477,7 @@ msgstr ""
 #~ "installed (along with the :code:`pyenv-"
 #~ "virtualenv` plugin), you can use the "
 #~ "following convenience script (with "
-#~ ":code:`Python 3.9.20` by default)::"
+#~ ":code:`Python 3.10.19` by default)::"
 #~ msgstr ""
 
 #~ msgid ""
@@ -41631,7 +41629,7 @@ msgstr ""
 #~ "If you already have ``pyenv`` installed"
 #~ " (along with the ``pyenv-virtualenv`` "
 #~ "plugin), you can use the following "
-#~ "convenience script (with ``Python 3.9.20`` "
+#~ "convenience script (with ``Python 3.10.19`` "
 #~ "by default):"
 #~ msgstr ""
 
