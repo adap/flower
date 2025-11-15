@@ -485,6 +485,7 @@ def test_run_serialization_deserialization() -> None:
         finished_at="",
         status=typing.RunStatus(status="running", sub_status="", details="OK"),
         flwr_aid="user123",
+        federation="mock-fed",
     )
 
     # Execute

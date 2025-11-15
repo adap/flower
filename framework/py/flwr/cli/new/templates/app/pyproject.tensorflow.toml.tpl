@@ -14,9 +14,9 @@ description = ""
 license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
-    "flwr[simulation]>=1.23.0",
+    "flwr[simulation]>=1.24.0",
     "flwr-datasets[vision]>=0.5.0",
-    "tensorflow>=2.11.1,<2.18.0",
+    "tensorflow>=2.18.0",
 ]
 
 [tool.hatch.build.targets.wheel]

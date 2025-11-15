@@ -44,6 +44,7 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
 from flwr.supercore.constant import NodeStatus
+from flwr.superlink.federation import FederationManager
 
 from .utils import (
     check_node_availability_for_in_message,
@@ -70,7 +71,7 @@ class RunRecord:  # pylint: disable=R0902
 class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     """In-memory LinkState implementation."""
 
-    def __init__(self) -> None:
+    def __init__(self, federation_manager: FederationManager) -> None:
 
         # Map node_id to NodeInfo
         self.nodes: dict[int, NodeInfo] = {}
@@ -96,6 +97,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.node_public_keys: set[bytes] = set()
 
         self.lock = threading.RLock()
+        self._federation_manager = federation_manager
+
+    @property
+    def federation_manager(self) -> FederationManager:
+        """Get the FederationManager instance."""
+        return self._federation_manager
 
     def store_message_ins(self, message: Message) -> Optional[str]:
         """Store one Message."""
@@ -108,6 +115,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if message.metadata.run_id not in self.run_ids:
             log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
             return None
+        federation = self.run_ids[message.metadata.run_id].run.federation
         # Validate source node ID
         if message.metadata.src_node_id != SUPERLINK_NODE_ID:
             log(
@@ -118,7 +126,14 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             return None
         # Validate destination node ID
         dst_node = self.nodes.get(message.metadata.dst_node_id)
-        if dst_node is None or dst_node.status == NodeStatus.UNREGISTERED:
+        if (
+            # Node must exist
+            dst_node is None
+            # Node must be online or offline
+            or dst_node.status not in (NodeStatus.ONLINE, NodeStatus.OFFLINE)
+            # Node must belong to the same federation
+            or not self.federation_manager.has_node(dst_node.node_id, federation)
+        ):
             log(
                 ERROR,
                 "Invalid destination node ID for Message: %s",
@@ -133,6 +148,35 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Return the new message_id
         return message_id
 
+    def _check_stored_messages(self, message_ids: set[str]) -> None:
+        """Check and delete the message if it's invalid."""
+        with self.lock:
+            invalid_msg_ids: set[str] = set()
+            current = now().timestamp()
+            for msg_id in message_ids:
+                if not (message := self.message_ins_store.get(msg_id)):
+                    continue
+
+                # Check if the message has expired
+                available_until = message.metadata.created_at + message.metadata.ttl
+                if available_until <= current:
+                    invalid_msg_ids.add(msg_id)
+                    continue
+
+                # Check if the destination node and the source node are still in the
+                # same federation
+                src_node_id = message.metadata.src_node_id
+                dst_node_id = message.metadata.dst_node_id
+                filtered = self.federation_manager.filter_nodes(
+                    {src_node_id, dst_node_id},
+                    self.run_ids[message.metadata.run_id].run.federation,
+                )
+                if len(filtered) != 2:  # Not both nodes are in the federation
+                    invalid_msg_ids.add(msg_id)
+
+            # Delete all invalid messages
+            self.delete_messages(invalid_msg_ids)
+
     def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
         """Get all Messages that have not been delivered yet."""
         if limit is not None and limit < 1:
@@ -140,14 +184,14 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Find Message for node_id that were not delivered yet
         message_ins_list: list[Message] = []
-        current_time = now().timestamp()
         with self.lock:
-            for _, msg_ins in self.message_ins_store.items():
+            for msg_id in list(self.message_ins_store.keys()):
+                self._check_stored_messages({msg_id})
+
                 if (
-                    msg_ins.metadata.dst_node_id == node_id
+                    (msg_ins := self.message_ins_store.get(msg_id))
+                    and msg_ins.metadata.dst_node_id == node_id
                     and msg_ins.metadata.delivered_at == ""
-                    and msg_ins.metadata.created_at + msg_ins.metadata.ttl
-                    > current_time
                 ):
                     message_ins_list.append(msg_ins)
                 if limit and len(message_ins_list) == limit:
@@ -174,6 +218,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             # Check if the Message it is replying to exists and is valid
             msg_ins_id = res_metadata.reply_to_message_id
+            self._check_stored_messages({msg_ins_id})
             msg_ins = self.message_ins_store.get(msg_ins_id)
 
             # Ensure that dst_node_id of original Message matches the src_node_id of
@@ -193,22 +238,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 )
                 return None
 
-            ins_metadata = msg_ins.metadata
-            if ins_metadata.created_at + ins_metadata.ttl <= now().timestamp():
-                log(
-                    ERROR,
-                    "Failed to store Message: the message it is replying to "
-                    "(with ID %s) has expired",
-                    msg_ins_id,
-                )
-                return None
-
             # Fail if the Message TTL exceeds the
             # expiration time of the Message it replies to.
             # Condition: ins_metadata.created_at + ins_metadata.ttl ≥
             #            res_metadata.created_at + res_metadata.ttl
             # A small tolerance is introduced to account
             # for floating-point precision issues.
+            ins_metadata = msg_ins.metadata
             max_allowed_ttl = (
                 ins_metadata.created_at + ins_metadata.ttl - res_metadata.created_at
             )
@@ -242,6 +278,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         ret: dict[str, Message] = {}
 
         with self.lock:
+            self._check_stored_messages(message_ids)
             current = now().timestamp()
 
             # Verify Message IDs
@@ -336,7 +373,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         return len(self.message_res_store)
 
     def create_node(
-        self, owner_aid: str, public_key: bytes, heartbeat_interval: float
+        self,
+        owner_aid: str,
+        owner_name: str,
+        public_key: bytes,
+        heartbeat_interval: float,
     ) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
@@ -355,6 +396,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             self.nodes[node_id] = NodeInfo(
                 node_id=node_id,
                 owner_aid=owner_aid,
+                owner_name=owner_name,
                 status=NodeStatus.REGISTERED,
                 registered_at=now().isoformat(),
                 last_activated_at=None,
@@ -439,10 +481,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             if run_id not in self.run_ids:
                 return set()
-            return {
+            federation = self.run_ids[run_id].run.federation
+            node_ids = {
                 node.node_id
                 for node in self.get_node_info(statuses=[NodeStatus.ONLINE])
             }
+            return self.federation_manager.filter_nodes(node_ids, federation)
 
     def get_node_info(
         self,
@@ -511,10 +555,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
+        federation: str,
         federation_options: ConfigRecord,
         flwr_aid: Optional[str],
     ) -> int:
-        """Create a new run for the specified `fab_hash`."""
+        """Create a new run."""
         # Sample a random int64 as run_id
         with self.lock:
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
@@ -537,6 +582,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             details="",
                         ),
                         flwr_aid=flwr_aid if flwr_aid else "",
+                        federation=federation,
                     ),
                 )
                 self.run_ids[run_id] = run_record

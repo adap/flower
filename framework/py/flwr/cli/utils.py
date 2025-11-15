@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional, Union, cast
 
 import grpc
+import requests
 import typer
 
 from flwr.common.constant import (
@@ -44,6 +45,7 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
+from flwr.common.version import package_version as flwr_version
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
@@ -396,4 +398,44 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     bold=True,
                 )
                 raise typer.Exit(code=1) from None
+
+            # Log details from grpc error directly
+            typer.secho(
+                f"❌ {e.details()}",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from None
         raise
+
+
+def request_download_link(
+    app_id: str, version: Optional[str], in_url: str, out_url: str
+) -> str:
+    """Request download link from Flower platform API."""
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    body = {
+        "app_id": app_id,  # send raw string of app_id
+        "app_version": version,
+        "flwr_version": flwr_version,
+    }
+    try:
+        resp = requests.post(in_url, headers=headers, data=json.dumps(body), timeout=20)
+    except requests.RequestException as e:
+        raise typer.BadParameter(f"Unable to connect to Platform API: {e}") from e
+
+    if resp.status_code == 404:
+        raise typer.BadParameter(f"'{app_id}' not found in Platform API")
+    if not resp.ok:
+        raise typer.BadParameter(
+            f"Platform API request failed with "
+            f"status {resp.status_code}. Details: {resp.text}"
+        )
+
+    data = resp.json()
+    if out_url not in data:
+        raise typer.BadParameter("Invalid response from Platform API")
+    return str(data[out_url])

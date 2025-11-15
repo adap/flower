@@ -21,6 +21,7 @@ from flwr.common import Message, log
 from flwr.common.constant import (
     HEARTBEAT_MAX_INTERVAL,
     HEARTBEAT_MIN_INTERVAL,
+    NOOP_ACCOUNT_NAME,
     NOOP_FLWR_AID,
     Status,
 )
@@ -29,9 +30,9 @@ from flwr.common.serde import (
     fab_to_proto,
     message_from_proto,
     message_to_proto,
-    user_config_to_proto,
+    run_to_proto,
 )
-from flwr.common.typing import Fab, InvalidRunStatusException
+from flwr.common.typing import Fab, InvalidRunStatusException, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
@@ -60,11 +61,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectRequest,
     PushObjectResponse,
 )
-from flwr.proto.run_pb2 import (  # pylint: disable=E0611
-    GetRunRequest,
-    GetRunResponse,
-    Run,
-)
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
 from flwr.supercore.ffs import Ffs
@@ -81,8 +78,8 @@ def register_node(
     state: LinkState,
 ) -> RegisterNodeFleetResponse:
     """Register a node (Fleet API only)."""
-    state.create_node(NOOP_FLWR_AID, request.public_key, 0)
-    return RegisterNodeFleetResponse()
+    node_id = state.create_node(NOOP_FLWR_AID, NOOP_ACCOUNT_NAME, request.public_key, 0)
+    return RegisterNodeFleetResponse(node_id=node_id)
 
 
 def activate_node(
@@ -203,10 +200,8 @@ def get_run(
     request: GetRunRequest, state: LinkState, store: ObjectStore
 ) -> GetRunResponse:
     """Get run information."""
-    run = state.get_run(request.run_id)
-
-    if run is None:
-        return GetRunResponse()
+    # Validate that the requesting SuperNode is part of the federation
+    run = _validate_node_in_federation(state, request.node.node_id, request.run_id)
 
     # Abort if the run is not running
     abort_msg = check_abort(
@@ -218,21 +213,16 @@ def get_run(
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
 
-    return GetRunResponse(
-        run=Run(
-            run_id=run.run_id,
-            fab_id=run.fab_id,
-            fab_version=run.fab_version,
-            override_config=user_config_to_proto(run.override_config),
-            fab_hash=run.fab_hash,
-        )
-    )
+    return GetRunResponse(run=run_to_proto(run))
 
 
 def get_fab(
     request: GetFabRequest, ffs: Ffs, state: LinkState, store: ObjectStore
 ) -> GetFabResponse:
     """Get FAB."""
+    # Validate that the requesting SuperNode is part of the federation
+    _validate_node_in_federation(state, request.node.node_id, request.run_id)
+
     # Abort if the run is not running
     abort_msg = check_abort(
         request.run_id,
@@ -329,3 +319,19 @@ def _validate_heartbeat_interval(interval: float) -> None:
             f"Heartbeat interval {interval} is out of bounds "
             f"[{HEARTBEAT_MIN_INTERVAL}, {HEARTBEAT_MAX_INTERVAL}]."
         )
+
+
+def _validate_node_in_federation(
+    state: LinkState,
+    node_id: int,
+    run_id: int,
+) -> Run:
+    """Raise if the requesting SuperNode is not part of the federation the run belongs
+    to."""
+    run = state.get_run(run_id)
+    if not run:
+        raise ValueError(f"Run ID not found: {run_id}")
+
+    if not state.federation_manager.has_node(node_id, run.federation):
+        raise ValueError(f"SuperNode is not part of the federation '{run.federation}'.")
+    return run

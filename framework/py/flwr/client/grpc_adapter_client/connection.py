@@ -76,7 +76,7 @@ def grpc_adapter(  # pylint: disable=R0913,too-many-positional-arguments
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
     authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
-        Client authentication is not supported for this transport type.
+        SuperNode authentication is not supported for this transport type.
 
     Returns
     -------
@@ -90,7 +90,7 @@ def grpc_adapter(  # pylint: disable=R0913,too-many-positional-arguments
     confirm_message_received : Callable[[str], None]
     """
     if authentication_keys is not None:
-        log(ERROR, "Client authentication is not supported for this transport type.")
+        log(ERROR, "SuperNode authentication is not supported for this transport type.")
     with grpc_request_response(
         server_address=server_address,
         insecure=insecure,

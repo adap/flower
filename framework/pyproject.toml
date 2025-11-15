@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.23.0"
+version = "1.24.0"
 description = "Flower: A Friendly Federated AI Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -65,13 +65,13 @@ flwr-clientapp = "flwr.supernode.cli:flwr_clientapp"
 python = "^3.9.2"
 # Mandatory dependencies
 numpy = ">=1.26.0,<3.0.0"
-grpcio = "^1.62.3,!=1.65.0"
-grpcio-health-checking = "^1.62.3"
-protobuf = "^4.21.6"
+grpcio = "^1.70.0"
+grpcio-health-checking = "^1.70.0"
+protobuf = ">=5.28.0,<7.0.0"
 cryptography = "^44.0.1"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
-typer = "^0.12.5"
+typer = ">=0.12.5,<0.21.0"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 pathspec = "^0.12.1"
@@ -80,7 +80,7 @@ pyyaml = "^6.0.2"
 requests = "^2.31.0"
 click = "<8.2.0"
 # Optional dependencies (Simulation Engine)
-ray = { version = "==2.31.0", optional = true, python = ">=3.9,<3.13" }
+ray = { version = "==2.51.1", optional = true, python = ">=3.9,<3.13" }
 # Optional dependencies (REST transport layer)
 starlette = { version = "^0.45.2", optional = true }
 uvicorn = { version = "^0.34.0", extras = ["standard"], optional = true }
@@ -91,7 +91,7 @@ rest = ["starlette", "uvicorn"]
 
 [tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.6"
-types-protobuf = "==4.21.0.7"
+types-protobuf = "==5.29.1.20250403"
 types-requests = "==2.31.0.20240125"
 types-setuptools = "==69.0.0.20240125"
 clang-format = "==17.0.6"
@@ -105,8 +105,8 @@ parameterized = "==0.9.0"
 pytest = "==7.4.4"
 pytest-cov = "==4.1.0"
 pytest-watcher = "==0.4.3"
-grpcio-tools = "==1.62.3"
-mypy-protobuf = "==3.2.0"
+grpcio-tools = "==1.70.0"
+mypy-protobuf = "==3.6.0"
 jupyterlab = "==4.0.12"
 rope = "==1.13.0"
 semver = "==3.0.2"
@@ -193,6 +193,10 @@ disallow_untyped_calls = false
 module = "torch.*"
 follow_imports = "skip"
 follow_imports_for_stubs = true
+
+[[tool.mypy.overrides]]
+module = "flwr.proto.*"
+warn_unused_ignores = false
 
 [tool.docformatter]
 wrap-summaries = 88
