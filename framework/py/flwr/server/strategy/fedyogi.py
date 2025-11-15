@@ -151,7 +151,8 @@ class FedYogi(FedOpt):
 
         # Yogi
         delta_t: NDArrays = [
-            x - y for x, y in zip(fedavg_weights_aggregate, self.current_weights)
+            x - y
+            for x, y in zip(fedavg_weights_aggregate, self.current_weights, strict=True)
         ]
 
         # m_t
@@ -159,7 +160,7 @@ class FedYogi(FedOpt):
             self.m_t = [np.zeros_like(x) for x in delta_t]
         self.m_t = [
             np.multiply(self.beta_1, x) + (1 - self.beta_1) * y
-            for x, y in zip(self.m_t, delta_t)
+            for x, y in zip(self.m_t, delta_t, strict=True)
         ]
 
         # v_t
@@ -167,12 +168,12 @@ class FedYogi(FedOpt):
             self.v_t = [np.zeros_like(x) for x in delta_t]
         self.v_t = [
             x - (1.0 - self.beta_2) * np.multiply(y, y) * np.sign(x - np.multiply(y, y))
-            for x, y in zip(self.v_t, delta_t)
+            for x, y in zip(self.v_t, delta_t, strict=True)
         ]
 
         new_weights = [
             x + self.eta * y / (np.sqrt(z) + self.tau)
-            for x, y, z in zip(self.current_weights, self.m_t, self.v_t)
+            for x, y, z in zip(self.current_weights, self.m_t, self.v_t, strict=True)
         ]
 
         self.current_weights = new_weights

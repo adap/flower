@@ -184,7 +184,7 @@ class QFedAvg(FedAvg):
             if sum_delta is None:
                 sum_delta = delta
             else:
-                sum_delta = [sd + d for sd, d in zip(sum_delta, delta)]
+                sum_delta = [sd + d for sd, d in zip(sum_delta, delta, strict=True)]
             sum_h += h
 
         # Compute new global weights and convert to Array type
@@ -192,7 +192,7 @@ class QFedAvg(FedAvg):
         assert sum_delta is not None  # Make mypy happy
         array_list = [
             Array(np.asarray(gw - (d / sum_h)))
-            for gw, d in zip(global_weights, sum_delta)
+            for gw, d in zip(global_weights, sum_delta, strict=True)
         ]
 
         # Aggregate MetricRecords
@@ -200,7 +200,10 @@ class QFedAvg(FedAvg):
             [msg.content for msg in valid_replies],
             self.weighted_by_key,
         )
-        return ArrayRecord(OrderedDict(zip(array_keys, array_list))), metrics
+        return (
+            ArrayRecord(OrderedDict(zip(array_keys, array_list, strict=True))),
+            metrics,
+        )
 
 
 def get_train_loss(msg: Message, loss_key: str) -> float:
@@ -236,7 +239,7 @@ def compute_delta_and_h(
 ) -> tuple[list[NDArray], float]:
     """Compute delta and h used in q-FedAvg aggregation."""
     # Compute gradient_k = L * (w - w_k)
-    for gw, lw in zip(global_weights, local_weights):
+    for gw, lw in zip(global_weights, local_weights, strict=True):
         np.subtract(gw, lw, out=lw)
         lw *= L
     grad = local_weights  # After in-place operations, local_weights is now grad

@@ -86,7 +86,10 @@ def test_arrayrecords_aggregation() -> None:
     aggrd = aggregate_arrayrecords(records, weighting_metric_name="weight")
 
     # Assert consistency
-    assert all(np.allclose(a, b) for a, b in zip(aggrd.to_numpy_ndarrays(), avg_list))
+    assert all(
+        np.allclose(a, b)
+        for a, b in zip(aggrd.to_numpy_ndarrays(), avg_list, strict=True)
+    )
     assert aggrd.object_id == ArrayRecord(avg_list).object_id
 
 
@@ -143,7 +146,9 @@ def test_metricrecords_aggregation() -> None:
         ).tolist()
         for i in range(len(as_np_entries[0]))
     ]
-    expected_record = MetricRecord(dict(zip(as_np_entries[0].keys(), avg_list)))
+    expected_record = MetricRecord(
+        dict(zip(as_np_entries[0].keys(), avg_list, strict=True))
+    )
     expected_record["a"] = float(expected_record["a"])  # type: ignore
     expected_record["b"] = float(expected_record["b"])  # type: ignore
 

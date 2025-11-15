@@ -77,7 +77,7 @@ def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
 
     # Assert
     assert actual
-    for w_act, w_exp in zip(parameters_to_ndarrays(actual), expected):
+    for w_act, w_exp in zip(parameters_to_ndarrays(actual), expected, strict=True):
         assert_almost_equal(w_act, w_exp)
 
 
@@ -135,5 +135,5 @@ def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
 
     # Assert
     assert actual
-    for w_act, w_exp in zip(parameters_to_ndarrays(actual), expected):
+    for w_act, w_exp in zip(parameters_to_ndarrays(actual), expected, strict=True):
         assert_almost_equal(w_act, w_exp)

@@ -31,7 +31,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -62,7 +61,7 @@ flwr-serverapp = "flwr.server.serverapp:flwr_serverapp"
 flwr-clientapp = "flwr.supernode.cli:flwr_clientapp"
 
 [tool.poetry.dependencies]
-python = "^3.9.2"
+python = "^3.10"
 # Mandatory dependencies
 numpy = ">=1.26.0,<3.0.0"
 grpcio = "^1.70.0"
@@ -80,7 +79,7 @@ pyyaml = "^6.0.2"
 requests = "^2.31.0"
 click = "<8.2.0"
 # Optional dependencies (Simulation Engine)
-ray = { version = "==2.51.1", optional = true, python = ">=3.9,<3.13" }
+ray = { version = "==2.51.1", optional = true, python = ">=3.10,<3.13" }
 # Optional dependencies (REST transport layer)
 starlette = { version = "^0.45.2", optional = true }
 uvicorn = { version = "^0.34.0", extras = ["standard"], optional = true }

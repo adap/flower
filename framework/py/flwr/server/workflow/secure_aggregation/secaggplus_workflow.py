@@ -467,7 +467,7 @@ class SecAggPlusWorkflow:
             dsts += dst_lst
             ciphertexts += ctxt_lst
 
-        for src, dst, ciphertext in zip(srcs, dsts, ciphertexts):
+        for src, dst, ciphertext in zip(srcs, dsts, ciphertexts, strict=True):
             if dst in fwd_ciphertexts:
                 fwd_ciphertexts[dst].append(ciphertext)
                 fwd_srcs[dst].append(src)
@@ -604,7 +604,7 @@ class SecAggPlusWorkflow:
             res_dict = msg.content.config_records[RECORD_KEY_CONFIGS]
             nids = cast(list[int], res_dict[Key.NODE_ID_LIST])
             shares = cast(list[bytes], res_dict[Key.SHARE_LIST])
-            for owner_nid, share in zip(nids, shares):
+            for owner_nid, share in zip(nids, shares, strict=True):
                 collected_shares_dict[owner_nid].append(share)
 
         # Remove masks for every active client after collect_masked_vectors stage
