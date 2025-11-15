@@ -17,7 +17,7 @@
 
 import collections
 import warnings
-from typing import Optional, Union, cast
+from typing import cast
 
 import datasets
 from datasets import DatasetDict
@@ -100,29 +100,29 @@ class Divider:
 
     def __init__(
         self,
-        divide_config: Union[
-            dict[str, float],
-            dict[str, int],
-            dict[str, dict[str, float]],
-            dict[str, dict[str, int]],
-        ],
-        divide_split: Optional[str] = None,
+        divide_config: (
+            dict[str, float]
+            | dict[str, int]
+            | dict[str, dict[str, float]]
+            | dict[str, dict[str, int]]
+        ),
+        divide_split: str | None = None,
         drop_remaining_splits: bool = False,
     ) -> None:
-        self._single_split_config: Union[dict[str, float], dict[str, int]]
-        self._multiple_splits_config: Union[
-            dict[str, dict[str, float]], dict[str, dict[str, int]]
-        ]
+        self._single_split_config: dict[str, float] | dict[str, int]
+        self._multiple_splits_config: (
+            dict[str, dict[str, float]] | dict[str, dict[str, int]]
+        )
 
         self._config_type = _determine_config_type(divide_config)
         self._check_type_correctness(divide_config)
         if self._config_type == "single-split":
             self._single_split_config = cast(
-                Union[dict[str, float], dict[str, int]], divide_config
+                dict[str, float] | dict[str, int], divide_config
             )
         else:
             self._multiple_splits_config = cast(
-                Union[dict[str, dict[str, float]], dict[str, dict[str, int]]],
+                dict[str, dict[str, float]] | dict[str, dict[str, int]],
                 divide_config,
             )
         self._divide_split = divide_split
@@ -154,7 +154,7 @@ class Divider:
                     )
                 self._divide_split = dataset_splits[0]
             self._multiple_splits_config = cast(
-                Union[dict[str, dict[str, float]], dict[str, dict[str, int]]],
+                dict[str, dict[str, float]] | dict[str, dict[str, int]],
                 {self._divide_split: self._single_split_config},
             )
 
@@ -302,12 +302,12 @@ class Divider:
 
     def _check_type_correctness(
         self,
-        divide_config: Union[
-            dict[str, float],
-            dict[str, int],
-            dict[str, dict[str, float]],
-            dict[str, dict[str, int]],
-        ],
+        divide_config: (
+            dict[str, float]
+            | dict[str, int]
+            | dict[str, dict[str, float]]
+            | dict[str, dict[str, int]]
+        ),
     ) -> None:
         assert self._config_type in [
             "single-split",
@@ -355,12 +355,12 @@ class Divider:
 
 
 def _determine_config_type(
-    config: Union[
-        dict[str, float],
-        dict[str, int],
-        dict[str, dict[str, float]],
-        dict[str, dict[str, int]],
-    ],
+    config: (
+        dict[str, float]
+        | dict[str, int]
+        | dict[str, dict[str, float]]
+        | dict[str, dict[str, int]]
+    ),
 ) -> str:
     """Determine configuration type of `divide_config` based on the dict structure.
 
