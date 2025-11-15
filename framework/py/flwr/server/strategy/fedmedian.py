@@ -19,7 +19,6 @@ Paper: arxiv.org/pdf/1803.01498v1.pdf
 
 
 from logging import WARNING
-from typing import Optional, Union
 
 from flwr.common import (
     FitRes,
@@ -47,8 +46,8 @@ class FedMedian(FedAvg):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate fit results using median."""
         if not results:
             return None, {}

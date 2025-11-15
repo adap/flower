@@ -20,8 +20,7 @@ Relevant knowledge for reading this modules code:
 
 
 import uuid
-from collections.abc import Iterator
-from typing import Callable
+from collections.abc import Callable, Iterator
 
 import grpc
 from iterators import TimeoutIterator

@@ -17,7 +17,6 @@
 
 import sys
 from queue import Queue
-from typing import Optional
 
 from .logger import mirror_output_to_queue, restore_output
 
@@ -25,7 +24,7 @@ from .logger import mirror_output_to_queue, restore_output
 def test_mirror_output_to_queue() -> None:
     """Test that stdout and stderr are mirrored to the provided queue."""
     # Prepare
-    log_queue: Queue[Optional[str]] = Queue()
+    log_queue: Queue[str | None] = Queue()
 
     # Execute
     mirror_output_to_queue(log_queue)
@@ -42,7 +41,7 @@ def test_mirror_output_to_queue() -> None:
 def test_restore_output() -> None:
     """Test that stdout and stderr are restored after calling restore_output."""
     # Prepare
-    log_queue: Queue[Optional[str]] = Queue()
+    log_queue: Queue[str | None] = Queue()
 
     # Execute
     mirror_output_to_queue(log_queue)
