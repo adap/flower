@@ -165,11 +165,7 @@ class TestArrayRecord(unittest.TestCase):
         record = ArrayRecord()
         ndarrays = [np.array([1, 2]), np.array([3, 4])]
         mock_arrays = [Mock(spec=Array), Mock(spec=Array)]
-<<<<<<< HEAD
-        for mock_arr, arr in zip(mock_arrays, ndarrays):
-=======
         for mock_arr, arr in zip(mock_arrays, ndarrays, strict=True):
->>>>>>> 30c6e6636 (fix zip)
             mock_arr.numpy.return_value = arr
         record["weight"] = mock_arrays[0]
         record["bias"] = mock_arrays[1]
