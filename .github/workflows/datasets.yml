@@ -27,6 +27,7 @@ jobs:
   test_core:
     runs-on: ubuntu-22.04
     strategy:
+      max-parallel: 2
       matrix:
         # Latest version which comes cached in the host image can be found here:
         # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#python
