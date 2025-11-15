@@ -431,3 +431,64 @@ class ListFederationsResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing.Literal["federations", b"federations"]) -> None: ...
 
 global___ListFederationsResponse = ListFederationsResponse
+
+@typing.final
+class ShowFederationRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    FEDERATION_FIELD_NUMBER: builtins.int
+    federation: builtins.str
+    def __init__(
+        self,
+        *,
+        federation: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["federation", b"federation"]) -> None: ...
+
+global___ShowFederationRequest = ShowFederationRequest
+
+@typing.final
+class ShowFederationResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    @typing.final
+    class RunDictEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: builtins.int
+        @property
+        def value(self) -> flwr.proto.run_pb2.Run: ...
+        def __init__(
+            self,
+            *,
+            key: builtins.int = ...,
+            value: flwr.proto.run_pb2.Run | None = ...,
+        ) -> None: ...
+        def HasField(self, field_name: typing.Literal["value", b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing.Literal["key", b"key", "value", b"value"]) -> None: ...
+
+    FEDERATION_FIELD_NUMBER: builtins.int
+    NODES_INFO_FIELD_NUMBER: builtins.int
+    RUN_DICT_FIELD_NUMBER: builtins.int
+    NOW_FIELD_NUMBER: builtins.int
+    now: builtins.str
+    @property
+    def federation(self) -> flwr.proto.federation_pb2.Federation: ...
+    @property
+    def nodes_info(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.NodeInfo]: ...
+    @property
+    def run_dict(self) -> google.protobuf.internal.containers.MessageMap[builtins.int, flwr.proto.run_pb2.Run]: ...
+    def __init__(
+        self,
+        *,
+        federation: flwr.proto.federation_pb2.Federation | None = ...,
+        nodes_info: collections.abc.Iterable[flwr.proto.node_pb2.NodeInfo] | None = ...,
+        run_dict: collections.abc.Mapping[builtins.int, flwr.proto.run_pb2.Run] | None = ...,
+        now: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["federation", b"federation"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["federation", b"federation", "nodes_info", b"nodes_info", "now", b"now", "run_dict", b"run_dict"]) -> None: ...
+
+global___ShowFederationResponse = ShowFederationResponse

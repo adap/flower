@@ -62,6 +62,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsResponse,
     RegisterNodeRequest,
     RegisterNodeResponse,
+    ShowFederationRequest,
+    ShowFederationResponse,
     StartRunRequest,
     StartRunResponse,
     StopRunRequest,
@@ -519,6 +521,14 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         return ListFederationsResponse(
             federations=[Federation(name=fed) for fed in federations]
         )
+
+    def ShowFederation(
+        self, request: ShowFederationRequest, context: grpc.ServicerContext
+    ) -> ShowFederationResponse:
+        """Show details of a specific Federation."""
+        log(INFO, "ControlServicer.ShowFederation")
+
+        raise NotImplementedError("ShowFederation is not yet implemented.")
 
 
 def _create_list_runs_response(
