@@ -22,7 +22,7 @@ import threading
 import traceback
 import warnings
 from logging import ERROR, INFO
-from typing import Any, Optional, Union
+from typing import Any
 
 import ray
 from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
@@ -101,17 +101,17 @@ def start_simulation(
     *,
     client_fn: ClientFnExt,
     num_clients: int,
-    clients_ids: Optional[list[str]] = None,  # UNSUPPORTED, WILL BE REMOVED
-    client_resources: Optional[dict[str, float]] = None,
-    server: Optional[Server] = None,
-    config: Optional[ServerConfig] = None,
-    strategy: Optional[Strategy] = None,
-    client_manager: Optional[ClientManager] = None,
-    ray_init_args: Optional[dict[str, Any]] = None,
-    keep_initialised: Optional[bool] = False,
+    clients_ids: list[str] | None = None,  # UNSUPPORTED, WILL BE REMOVED
+    client_resources: dict[str, float] | None = None,
+    server: Server | None = None,
+    config: ServerConfig | None = None,
+    strategy: Strategy | None = None,
+    client_manager: ClientManager | None = None,
+    ray_init_args: dict[str, Any] | None = None,
+    keep_initialised: bool | None = False,
     actor_type: type[VirtualClientEngineActor] = ClientAppActor,
-    actor_kwargs: Optional[dict[str, Any]] = None,
-    actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
+    actor_kwargs: dict[str, Any] | None = None,
+    actor_scheduling: str | NodeAffinitySchedulingStrategy = "DEFAULT",
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -219,7 +219,7 @@ def start_simulation(
         sys.exit()
 
     # Set logger propagation
-    loop: Optional[asyncio.AbstractEventLoop] = None
+    loop: asyncio.AbstractEventLoop | None = None
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:

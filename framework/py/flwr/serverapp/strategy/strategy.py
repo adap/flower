@@ -18,9 +18,8 @@
 import io
 import time
 from abc import ABC, abstractmethod
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from logging import INFO
-from typing import Callable, Optional
 
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, log
 from flwr.server import Grid
@@ -61,7 +60,7 @@ class Strategy(ABC):
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate training results from client nodes.
 
         Parameters
@@ -109,7 +108,7 @@ class Strategy(ABC):
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> Optional[MetricRecord]:
+    ) -> MetricRecord | None:
         """Aggregate evaluation metrics from client nodes.
 
         Parameters
@@ -138,11 +137,9 @@ class Strategy(ABC):
         initial_arrays: ArrayRecord,
         num_rounds: int = 3,
         timeout: float = 3600,
-        train_config: Optional[ConfigRecord] = None,
-        evaluate_config: Optional[ConfigRecord] = None,
-        evaluate_fn: Optional[
-            Callable[[int, ArrayRecord], Optional[MetricRecord]]
-        ] = None,
+        train_config: ConfigRecord | None = None,
+        evaluate_config: ConfigRecord | None = None,
+        evaluate_fn: Callable[[int, ArrayRecord], MetricRecord | None] | None = None,
     ) -> Result:
         """Execute the federated learning strategy.
 

@@ -16,7 +16,6 @@
 
 
 from logging import DEBUG
-from typing import Optional
 
 from flwr.common.logger import log
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
@@ -47,7 +46,7 @@ class LinkStateFactory:
         federation_manager: FederationManager,
     ) -> None:
         self.database = database
-        self.state_instance: Optional[LinkState] = None
+        self.state_instance: LinkState | None = None
         self.federation_manager = federation_manager
 
     def state(self) -> LinkState:

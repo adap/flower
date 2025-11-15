@@ -17,7 +17,6 @@
 
 import threading
 from dataclasses import dataclass
-from typing import Optional
 
 from flwr.common.inflatable import (
     get_object_id,
@@ -154,7 +153,7 @@ class InMemoryObjectStore(ObjectStore):
             self.store[object_id].content = object_content
             self.store[object_id].is_available = True
 
-    def get(self, object_id: str) -> Optional[bytes]:
+    def get(self, object_id: str) -> bytes | None:
         """Get an object from the store."""
         with self.lock_store:
             # Check if the object ID is pre-registered

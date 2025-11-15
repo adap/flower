@@ -18,9 +18,8 @@ Paper: arxiv.org/abs/1812.06127
 """
 
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from logging import INFO, WARN
-from typing import Callable, Optional
 
 from flwr.common import (
     ArrayRecord,
@@ -130,12 +129,12 @@ class FedProx(FedAvg):
         weighted_by_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
         configrecord_key: str = "config",
-        train_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
-        evaluate_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
+        train_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
+        evaluate_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
         proximal_mu: float = 0.0,
     ) -> None:
         super().__init__(

@@ -17,8 +17,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable
-from typing import Callable, TypeVar, cast
+from collections.abc import Awaitable, Callable
+from typing import TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 

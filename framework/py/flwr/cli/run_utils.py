@@ -17,7 +17,6 @@
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Optional
 
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.typing import Run
@@ -43,7 +42,7 @@ class RunRow:  # pylint: disable=too-many-instance-attributes
 def format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[RunRow]:
     """Format runs to a list of RunRow objects."""
 
-    def _format_datetime(dt: Optional[datetime]) -> str:
+    def _format_datetime(dt: datetime | None) -> str:
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
 
     run_list: list[RunRow] = []

@@ -17,7 +17,7 @@
 
 import io
 from pathlib import Path
-from typing import Annotated, Optional, cast
+from typing import Annotated, cast
 
 import typer
 from rich.console import Console
@@ -49,7 +49,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917
         typer.Argument(help="Path of the Flower project"),
     ] = Path("."),
     federation: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(help="Name of the federation"),
     ] = None,
     output_format: Annotated[

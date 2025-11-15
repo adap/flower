@@ -19,9 +19,8 @@ Paper: openreview.net/pdf?id=ByexElSYDr
 
 
 from collections import OrderedDict
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from logging import INFO
-from typing import Callable, Optional
 
 import numpy as np
 
@@ -105,12 +104,12 @@ class QFedAvg(FedAvg):
         weighted_by_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
         configrecord_key: str = "config",
-        train_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
-        evaluate_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
+        train_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
+        evaluate_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
     ) -> None:
         super().__init__(
             fraction_train=fraction_train,
@@ -127,7 +126,7 @@ class QFedAvg(FedAvg):
         self.q = q
         self.client_learning_rate = client_learning_rate
         self.train_loss_key = train_loss_key
-        self.current_arrays: Optional[ArrayRecord] = None
+        self.current_arrays: ArrayRecord | None = None
 
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
@@ -148,7 +147,7 @@ class QFedAvg(FedAvg):
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         # Call FedAvg aggregate_train to perform validation and aggregation
         valid_replies, _ = self._check_and_log_replies(replies, is_train=True)
@@ -209,7 +208,7 @@ class QFedAvg(FedAvg):
 def get_train_loss(msg: Message, loss_key: str) -> float:
     """Extract training loss from a Message."""
     metrics = list(msg.content.metric_records.values())[0]
-    if (loss := metrics.get(loss_key)) is None or not isinstance(loss, (int, float)):
+    if (loss := metrics.get(loss_key)) is None or not isinstance(loss, (int | float)):
         raise AggregationError(
             "Missing or invalid training loss. "
             f"The strategy expected a float value for the key '{loss_key}' "

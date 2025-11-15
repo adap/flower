@@ -18,8 +18,8 @@ Paper: arxiv.org/pdf/1909.06335.pdf
 """
 
 
+from collections.abc import Callable
 from logging import WARNING
-from typing import Callable, Optional, Union
 
 from flwr.common import (
     FitRes,
@@ -82,18 +82,19 @@ class FedAvgM(FedAvg):
         min_fit_clients: int = 2,
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        evaluate_fn: Optional[
+        evaluate_fn: (
             Callable[
                 [int, NDArrays, dict[str, Scalar]],
-                Optional[tuple[float, dict[str, Scalar]]],
+                tuple[float, dict[str, Scalar]] | None,
             ]
-        ] = None,
-        on_fit_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
+            | None
+        ) = None,
+        on_fit_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
+        on_evaluate_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
         accept_failures: bool = True,
-        initial_parameters: Optional[Parameters] = None,
-        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        initial_parameters: Parameters | None = None,
+        fit_metrics_aggregation_fn: MetricsAggregationFn | None = None,
+        evaluate_metrics_aggregation_fn: MetricsAggregationFn | None = None,
         server_learning_rate: float = 1.0,
         server_momentum: float = 0.0,
     ) -> None:
@@ -116,16 +117,14 @@ class FedAvgM(FedAvg):
         self.server_opt: bool = (self.server_momentum != 0.0) or (
             self.server_learning_rate != 1.0
         )
-        self.momentum_vector: Optional[NDArrays] = None
+        self.momentum_vector: NDArrays | None = None
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
         rep = f"FedAvgM(accept_failures={self.accept_failures})"
         return rep
 
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
+    def initialize_parameters(self, client_manager: ClientManager) -> Parameters | None:
         """Initialize global model parameters."""
         return self.initial_parameters
 
@@ -133,8 +132,8 @@ class FedAvgM(FedAvg):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}

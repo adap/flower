@@ -16,7 +16,6 @@
 
 
 from logging import INFO
-from typing import Optional
 
 import grpc
 
@@ -36,7 +35,7 @@ def run_simulationio_api_grpc(
     address: str,
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
-    certificates: Optional[tuple[bytes, bytes, bytes]],
+    certificates: tuple[bytes, bytes, bytes] | None,
 ) -> grpc.Server:
     """Run SimulationIo API (gRPC, request-response)."""
     # Create SimulationIo API gRPC server

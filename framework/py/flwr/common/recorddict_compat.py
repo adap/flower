@@ -17,7 +17,7 @@
 
 from collections import OrderedDict
 from collections.abc import Mapping
-from typing import Union, cast, get_args
+from typing import cast, get_args
 
 from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 from .typing import (
@@ -122,7 +122,7 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
 
 
 def _check_mapping_from_recordscalartype_to_scalar(
-    record_data: Mapping[str, Union[ConfigRecordValues, MetricRecordValues]]
+    record_data: Mapping[str, ConfigRecordValues | MetricRecordValues]
 ) -> dict[str, Scalar]:
     """Check mapping `common.*RecordValues` into `common.Scalar` is possible."""
     for value in record_data.values():
@@ -157,7 +157,7 @@ def _recorddict_to_fit_or_evaluate_ins_components(
 
 
 def _fit_or_evaluate_ins_to_recorddict(
-    ins: Union[FitIns, EvaluateIns], keep_input: bool
+    ins: FitIns | EvaluateIns, keep_input: bool
 ) -> RecordDict:
     recorddict = RecordDict()
 

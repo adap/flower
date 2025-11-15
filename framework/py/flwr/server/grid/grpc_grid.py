@@ -18,7 +18,7 @@
 import time
 from collections.abc import Iterable
 from logging import DEBUG, ERROR, WARNING
-from typing import Optional, cast
+from typing import cast
 
 import grpc
 
@@ -119,13 +119,13 @@ class GrpcGrid(Grid):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         serverappio_service_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
-        root_certificates: Optional[bytes] = None,
+        root_certificates: bytes | None = None,
     ) -> None:
         self._addr = serverappio_service_address
         self._cert = root_certificates
-        self._run: Optional[Run] = None
-        self._grpc_stub: Optional[ServerAppIoStub] = None
-        self._channel: Optional[grpc.Channel] = None
+        self._run: Run | None = None
+        self._grpc_stub: ServerAppIoStub | None = None
+        self._channel: grpc.Channel | None = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
         self._retry_invoker = _make_simple_grpc_retry_invoker()
         super().__init__()
@@ -200,7 +200,7 @@ class GrpcGrid(Grid):
         message_type: str,
         dst_node_id: int,
         group_id: str,
-        ttl: Optional[float] = None,
+        ttl: float | None = None,
     ) -> Message:
         """Create a new message with specified parameters.
 
@@ -378,7 +378,7 @@ class GrpcGrid(Grid):
         self,
         messages: Iterable[Message],
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> Iterable[Message]:
         """Push messages to specified node IDs and pull the reply messages.
 

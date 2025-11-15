@@ -15,7 +15,6 @@
 """FedAvgM tests."""
 
 
-from typing import Union
 from unittest.mock import MagicMock
 
 from numpy import array, float32
@@ -61,7 +60,7 @@ def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
             ),
         ),
     ]
-    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = []
+    failures: list[tuple[ClientProxy, FitRes] | BaseException] = []
     expected: NDArrays = [
         array([[1, 2, 3], [4, 5, 6]], dtype=float32),
         array([7, 8, 9, 10], dtype=float32),
@@ -114,7 +113,7 @@ def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
             ),
         ),
     ]
-    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = []
+    failures: list[tuple[ClientProxy, FitRes] | BaseException] = []
     expected: NDArrays = [
         array([[1, 2, 3], [4, 5, 6]], dtype=float32),
         array([7, 8, 9, 10], dtype=float32),
