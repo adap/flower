@@ -17,7 +17,6 @@
 
 import threading
 from logging import DEBUG, ERROR, INFO
-from typing import Optional
 
 import grpc
 
@@ -192,7 +191,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             request_name="PushMessages",
             detail="`messages_list` must not be empty",
         )
-        message_ids: list[Optional[str]] = []
+        message_ids: list[str | None] = []
         for message_proto in request.messages_list:
             message = message_from_proto(message_proto=message_proto)
             validation_errors = validate_message(message, is_reply_message=False)
@@ -207,7 +206,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 detail="`Message.metadata` has mismatched `run_id`",
             )
             # Store
-            message_id: Optional[str] = state.store_message_ins(message=message)
+            message_id: str | None = state.store_message_ins(message=message)
             message_ids.append(message_id)
 
         # Store Message object to descendants mapping and preregister objects

@@ -18,7 +18,7 @@
 import io
 import json
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -57,7 +57,7 @@ def register(  # pylint: disable=R0914
         typer.Argument(help="Path of the Flower project"),
     ] = Path("."),
     federation: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(help="Name of the federation"),
     ] = None,
     output_format: Annotated[

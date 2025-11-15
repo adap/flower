@@ -16,7 +16,6 @@
 
 
 from dataclasses import dataclass
-from typing import Optional
 
 from flwr.common import Context
 
@@ -38,9 +37,9 @@ class LegacyContext(Context):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         context: Context,
-        config: Optional[ServerConfig] = None,
-        strategy: Optional[Strategy] = None,
-        client_manager: Optional[ClientManager] = None,
+        config: ServerConfig | None = None,
+        strategy: Strategy | None = None,
+        client_manager: ClientManager | None = None,
     ) -> None:
         if config is None:
             config = ServerConfig()

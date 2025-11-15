@@ -15,8 +15,8 @@
 """RecordDict from legacy messages tests."""
 
 
+from collections.abc import Callable
 from copy import deepcopy
-from typing import Callable
 
 import numpy as np
 import pytest

@@ -16,7 +16,6 @@
 
 
 from logging import INFO
-from typing import Optional
 
 import grpc
 
@@ -46,7 +45,7 @@ try:
     from flwr.ee import get_license_plugin
 except ImportError:
 
-    def get_license_plugin() -> Optional[LicensePlugin]:
+    def get_license_plugin() -> LicensePlugin | None:
         """Return the license plugin."""
 
 
@@ -56,15 +55,15 @@ def run_control_api_grpc(
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
-    certificates: Optional[tuple[bytes, bytes, bytes]],
+    certificates: tuple[bytes, bytes, bytes] | None,
     is_simulation: bool,
     authn_plugin: ControlAuthnPlugin,
     authz_plugin: ControlAuthzPlugin,
-    event_log_plugin: Optional[EventLogWriterPlugin] = None,
-    artifact_provider: Optional[ArtifactProvider] = None,
+    event_log_plugin: EventLogWriterPlugin | None = None,
+    artifact_provider: ArtifactProvider | None = None,
 ) -> grpc.Server:
     """Run Control API (gRPC, request-response)."""
-    license_plugin: Optional[LicensePlugin] = get_license_plugin()
+    license_plugin: LicensePlugin | None = get_license_plugin()
     if license_plugin and not license_plugin.check_license():
         flwr_exit(ExitCode.SUPERLINK_LICENSE_INVALID)
 

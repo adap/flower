@@ -20,12 +20,12 @@ import json
 import os
 import subprocess
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from functools import partial
 from logging import ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional, Union, cast
+from typing import cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec, ed25519
@@ -91,19 +91,19 @@ def start_client_internal(
     *,
     server_address: str,
     node_config: UserConfig,
-    root_certificates: Optional[Union[bytes, str]] = None,
-    insecure: Optional[bool] = None,
+    root_certificates: bytes | str | None = None,
+    insecure: bool | None = None,
     transport: str,
-    authentication_keys: Optional[
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
-    ] = None,
-    max_retries: Optional[int] = None,
-    max_wait_time: Optional[float] = None,
-    flwr_path: Optional[Path] = None,
+    authentication_keys: (
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+    ) = None,
+    max_retries: int | None = None,
+    max_wait_time: float | None = None,
+    flwr_path: Path | None = None,
     isolation: str = ISOLATION_MODE_SUBPROCESS,
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
-    health_server_address: Optional[str] = None,
-    trusted_entities: Optional[dict[str, str]] = None,
+    health_server_address: str | None = None,
+    trusted_entities: dict[str, str] | None = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -292,13 +292,13 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
     ffs: Ffs,
     object_store: ObjectStore,
     node_config: UserConfig,
-    receive: Callable[[], Optional[tuple[Message, ObjectTree]]],
+    receive: Callable[[], tuple[Message, ObjectTree] | None],
     get_run: Callable[[int], Run],
     get_fab: Callable[[str, int], Fab],
     pull_object: Callable[[int, str], bytes],
     confirm_message_received: Callable[[int, str], None],
-    trusted_entities: Optional[dict[str, str]],
-) -> Optional[int]:
+    trusted_entities: dict[str, str] | None,
+) -> int | None:
     """Pull a message from the SuperLink and store it in the state.
 
     This function current returns None if no message is received,
@@ -509,16 +509,16 @@ def _init_connection(  # pylint: disable=too-many-positional-arguments
     transport: str,
     server_address: str,
     insecure: bool,
-    root_certificates: Optional[Union[bytes, str]] = None,
-    authentication_keys: Optional[
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
-    ] = None,
-    max_retries: Optional[int] = None,
-    max_wait_time: Optional[float] = None,
+    root_certificates: bytes | str | None = None,
+    authentication_keys: (
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+    ) = None,
+    max_retries: int | None = None,
+    max_wait_time: float | None = None,
 ) -> Iterator[
     tuple[
         int,
-        Callable[[], Optional[tuple[Message, ObjectTree]]],
+        Callable[[], tuple[Message, ObjectTree] | None],
         Callable[[Message, ObjectTree], set[str]],
         Callable[[int], Run],
         Callable[[str, int], Fab],
@@ -578,8 +578,8 @@ def _init_connection(  # pylint: disable=too-many-positional-arguments
 
 
 def _make_fleet_connection_retry_invoker(
-    max_retries: Optional[int] = None,
-    max_wait_time: Optional[float] = None,
+    max_retries: int | None = None,
+    max_wait_time: float | None = None,
     connection_error_type: type[Exception] = RpcError,
 ) -> RetryInvoker:
     """Create a retry invoker for fleet connection."""
@@ -598,7 +598,7 @@ def run_clientappio_api_grpc(
     state_factory: NodeStateFactory,
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
-    certificates: Optional[tuple[bytes, bytes, bytes]],
+    certificates: tuple[bytes, bytes, bytes] | None,
 ) -> grpc.Server:
     """Run ClientAppIo API gRPC server."""
     clientappio_servicer: grpc.Server = ClientAppIoServicer(

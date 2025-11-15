@@ -17,7 +17,7 @@
 
 import signal
 import threading
-from typing import Callable
+from collections.abc import Callable
 
 from .exit_code import ExitCode
 

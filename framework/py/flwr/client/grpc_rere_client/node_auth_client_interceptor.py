@@ -15,7 +15,8 @@
 """Flower client interceptor."""
 
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec

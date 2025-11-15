@@ -15,7 +15,6 @@
 """FaultTolerantFedAvg tests."""
 
 
-from typing import Optional, Union
 from unittest.mock import MagicMock
 
 from flwr.common import (
@@ -37,8 +36,8 @@ def test_aggregate_fit_no_results_no_failures() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.1)
     results: list[tuple[ClientProxy, FitRes]] = []
-    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = []
-    expected: Optional[Parameters] = None
+    failures: list[tuple[ClientProxy, FitRes] | BaseException] = []
+    expected: Parameters | None = None
 
     # Execute
     actual, _ = strategy.aggregate_fit(1, results, failures)
@@ -52,8 +51,8 @@ def test_aggregate_fit_no_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.1)
     results: list[tuple[ClientProxy, FitRes]] = []
-    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = [Exception()]
-    expected: Optional[Parameters] = None
+    failures: list[tuple[ClientProxy, FitRes] | BaseException] = [Exception()]
+    expected: Parameters | None = None
 
     # Execute
     actual, _ = strategy.aggregate_fit(1, results, failures)
@@ -77,11 +76,11 @@ def test_aggregate_fit_not_enough_results() -> None:
             ),
         )
     ]
-    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = [
+    failures: list[tuple[ClientProxy, FitRes] | BaseException] = [
         Exception(),
         Exception(),
     ]
-    expected: Optional[Parameters] = None
+    expected: Parameters | None = None
 
     # Execute
     actual, _ = strategy.aggregate_fit(1, results, failures)
@@ -105,8 +104,8 @@ def test_aggregate_fit_just_enough_results() -> None:
             ),
         )
     ]
-    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = [Exception()]
-    expected: Optional[NDArrays] = []
+    failures: list[tuple[ClientProxy, FitRes] | BaseException] = [Exception()]
+    expected: NDArrays | None = []
 
     # Execute
     actual, _ = strategy.aggregate_fit(1, results, failures)
@@ -131,8 +130,8 @@ def test_aggregate_fit_no_failures() -> None:
             ),
         )
     ]
-    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = []
-    expected: Optional[NDArrays] = []
+    failures: list[tuple[ClientProxy, FitRes] | BaseException] = []
+    expected: NDArrays | None = []
 
     # Execute
     actual, _ = strategy.aggregate_fit(1, results, failures)
@@ -147,8 +146,8 @@ def test_aggregate_evaluate_no_results_no_failures() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.1)
     results: list[tuple[ClientProxy, EvaluateRes]] = []
-    failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]] = []
-    expected: Optional[float] = None
+    failures: list[tuple[ClientProxy, EvaluateRes] | BaseException] = []
+    expected: float | None = None
 
     # Execute
     actual, _ = strategy.aggregate_evaluate(1, results, failures)
@@ -162,10 +161,8 @@ def test_aggregate_evaluate_no_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.1)
     results: list[tuple[ClientProxy, EvaluateRes]] = []
-    failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]] = [
-        Exception()
-    ]
-    expected: Optional[float] = None
+    failures: list[tuple[ClientProxy, EvaluateRes] | BaseException] = [Exception()]
+    expected: float | None = None
 
     # Execute
     actual, _ = strategy.aggregate_evaluate(1, results, failures)
@@ -189,11 +186,11 @@ def test_aggregate_evaluate_not_enough_results() -> None:
             ),
         )
     ]
-    failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]] = [
+    failures: list[tuple[ClientProxy, EvaluateRes] | BaseException] = [
         Exception(),
         Exception(),
     ]
-    expected: Optional[float] = None
+    expected: float | None = None
 
     # Execute
     actual, _ = strategy.aggregate_evaluate(1, results, failures)
@@ -217,10 +214,8 @@ def test_aggregate_evaluate_just_enough_results() -> None:
             ),
         )
     ]
-    failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]] = [
-        Exception()
-    ]
-    expected: Optional[float] = 2.3
+    failures: list[tuple[ClientProxy, EvaluateRes] | BaseException] = [Exception()]
+    expected: float | None = 2.3
 
     # Execute
     actual, _ = strategy.aggregate_evaluate(1, results, failures)
@@ -244,8 +239,8 @@ def test_aggregate_evaluate_no_failures() -> None:
             ),
         )
     ]
-    failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]] = []
-    expected: Optional[float] = 2.3
+    failures: list[tuple[ClientProxy, EvaluateRes] | BaseException] = []
+    expected: float | None = 2.3
 
     # Execute
     actual, _ = strategy.aggregate_evaluate(1, results, failures)

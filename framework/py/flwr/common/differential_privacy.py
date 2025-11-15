@@ -16,7 +16,6 @@
 
 
 from logging import WARNING
-from typing import Optional
 
 import numpy as np
 
@@ -125,7 +124,7 @@ def add_gaussian_noise_to_params(
 def compute_adaptive_noise_params(
     noise_multiplier: float,
     num_sampled_clients: float,
-    clipped_count_stddev: Optional[float],
+    clipped_count_stddev: float | None,
 ) -> tuple[float, float]:
     """Compute noising parameters for the adaptive clipping.
 

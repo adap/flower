@@ -21,7 +21,6 @@ from json import JSONDecodeError
 from math import pi
 from pathlib import Path
 from time import sleep
-from typing import Optional
 from unittest import TestCase
 
 from flwr.client import Client, NumPyClient
@@ -186,11 +185,11 @@ def _autoresolve_app_dir(rel_client_app_dir: str = "backend") -> str:
 # pylint: disable=too-many-arguments,too-many-positional-arguments
 def start_and_shutdown(
     backend: str = "ray",
-    client_app_attr: Optional[str] = None,
+    client_app_attr: str | None = None,
     app_dir: str = "",
-    num_supernodes: Optional[int] = None,
-    state_factory: Optional[LinkStateFactory] = None,
-    nodes_mapping: Optional[NodeToPartitionMapping] = None,
+    num_supernodes: int | None = None,
+    state_factory: LinkStateFactory | None = None,
+    nodes_mapping: NodeToPartitionMapping | None = None,
     duration: int = 0,
     backend_config: str = "{}",
 ) -> None:

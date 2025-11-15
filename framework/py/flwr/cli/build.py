@@ -20,7 +20,7 @@ import zipfile
 from collections.abc import Iterable
 from io import BytesIO
 from pathlib import Path
-from typing import Annotated, Any, Optional, Union
+from typing import Annotated, Any
 
 import pathspec
 import tomli
@@ -41,7 +41,7 @@ from .utils import is_valid_project_name
 
 
 def write_to_zip(
-    zipfile_obj: zipfile.ZipFile, filename: str, contents: Union[bytes, str]
+    zipfile_obj: zipfile.ZipFile, filename: str, contents: bytes | str
 ) -> zipfile.ZipFile:
     """Set a fixed date and write contents to a zip file."""
     zip_info = zipfile.ZipInfo(filename)
@@ -62,7 +62,7 @@ def get_fab_filename(config: dict[str, Any], fab_hash: str) -> str:
 # pylint: disable=too-many-locals, too-many-statements
 def build(
     app: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(help="Path of the Flower App to bundle into a FAB"),
     ] = None,
 ) -> None:
@@ -152,7 +152,7 @@ def build_fab_from_disk(app: Path) -> bytes:
     all_files = [f for f in app.rglob("*") if f.is_file()]
 
     # Create dict mapping relative paths to Path objects
-    files_dict: dict[str, Union[bytes, Path]] = {
+    files_dict: dict[str, bytes | Path] = {
         # Ensure consistent path separators across platforms
         str(file_path.relative_to(app)).replace("\\", "/"): file_path
         for file_path in all_files
@@ -162,7 +162,7 @@ def build_fab_from_disk(app: Path) -> bytes:
     return build_fab_from_files(files_dict)
 
 
-def build_fab_from_files(files: dict[str, Union[bytes, Path]]) -> bytes:
+def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     r"""Build a FAB from in-memory files and return the FAB as bytes.
 
     This is the core FAB building function that works with in-memory data.
@@ -196,7 +196,7 @@ def build_fab_from_files(files: dict[str, Union[bytes, Path]]) -> bytes:
         fab_bytes = build_fab_from_files(files)
     """
 
-    def to_bytes(content: Union[bytes, Path]) -> bytes:
+    def to_bytes(content: bytes | Path) -> bytes:
         return content.read_bytes() if isinstance(content, Path) else content
 
     # Extract, load, and parse pyproject.toml
@@ -277,7 +277,7 @@ def get_fab_include_pathspec() -> pathspec.PathSpec:
     return build_pathspec(FAB_INCLUDE_PATTERNS)
 
 
-def get_fab_exclude_pathspec(gitignore_content: Optional[bytes]) -> pathspec.PathSpec:
+def get_fab_exclude_pathspec(gitignore_content: bytes | None) -> pathspec.PathSpec:
     """Get the PathSpec for files to exclude from a FAB.
 
     If gitignore_content is provided, its patterns will be combined with the default

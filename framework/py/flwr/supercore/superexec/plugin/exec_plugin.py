@@ -16,8 +16,8 @@
 
 
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
-from typing import Any, Callable, Optional
+from collections.abc import Callable, Sequence
+from typing import Any
 
 from flwr.common.typing import Run
 
@@ -36,7 +36,7 @@ class ExecPlugin(ABC):
         self.get_run = get_run
 
     @abstractmethod
-    def select_run_id(self, candidate_run_ids: Sequence[int]) -> Optional[int]:
+    def select_run_id(self, candidate_run_ids: Sequence[int]) -> int | None:
         """Select a run ID to execute from a sequence of candidates.
 
         A candidate run ID is one that has at least one pending message and is

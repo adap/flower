@@ -21,7 +21,7 @@ import unittest
 from collections import OrderedDict
 from io import BytesIO
 from types import ModuleType
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import Mock, call, patch
 
 import numpy as np
@@ -244,7 +244,7 @@ class TestArrayRecord(unittest.TestCase):
         ]
     )
     def test_init_keep_input_true_and_false(
-        self, keyword: Optional[str], input_arg: Any
+        self, keyword: str | None, input_arg: Any
     ) -> None:
         """Test initializing with keep_input=True/False."""
         # Prepare

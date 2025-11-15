@@ -133,7 +133,7 @@ def test_metricrecords_aggregation() -> None:
     # For ease, we convert everything into numpy arrays, then aggregate
     as_np_entries = [
         {
-            k: np.array(v) if isinstance(v, (int, float, list)) else v
+            k: np.array(v) if isinstance(v, (int | float | list)) else v
             for k, v in record.items()
         }
         for record in metric_records

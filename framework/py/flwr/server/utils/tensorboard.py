@@ -16,9 +16,10 @@
 
 
 import os
+from collections.abc import Callable
 from datetime import datetime
 from logging import WARN
-from typing import Callable, Optional, Union, cast
+from typing import cast
 
 from flwr.common import EvaluateRes, Scalar
 from flwr.common.logger import log
@@ -99,8 +100,8 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
                 self,
                 server_round: int,
                 results: list[tuple[ClientProxy, EvaluateRes]],
-                failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
-            ) -> tuple[Optional[float], dict[str, Scalar]]:
+                failures: list[tuple[ClientProxy, EvaluateRes] | BaseException],
+            ) -> tuple[float | None, dict[str, Scalar]]:
                 """Hooks into aggregate_evaluate for TensorBoard logging purpose."""
                 # Execute decorated function and extract results for logging
                 # They will be returned at the end of this function but also
