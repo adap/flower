@@ -17,7 +17,6 @@
 
 import time
 from threading import Thread
-from typing import Union
 
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
@@ -97,7 +96,7 @@ def test_workflow_close() -> None:
 
     worker_thread = start_worker(rounds, bridge, client_messages_received)
 
-    raised_error: Union[GrpcBridgeClosed, StopIteration, None] = None
+    raised_error: GrpcBridgeClosed | StopIteration | None = None
 
     # Execute
     for i in range(rounds):
@@ -142,7 +141,7 @@ def test_ins_wrapper_iterator_close_while_blocking() -> None:
 
     worker_thread = start_worker(rounds, bridge, client_messages_received)
 
-    raised_error: Union[GrpcBridgeClosed, StopIteration, None] = None
+    raised_error: GrpcBridgeClosed | StopIteration | None = None
 
     def close_bridge_delayed(secs: int) -> None:
         """Close brige after {secs} second(s)."""

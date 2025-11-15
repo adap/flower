@@ -15,8 +15,8 @@
 """Flower Control API license interceptor."""
 
 
-from collections.abc import Iterator
-from typing import Any, Callable, Union
+from collections.abc import Callable, Iterator
+from typing import Any
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -57,7 +57,7 @@ class ControlLicenseInterceptor(grpc.ServerInterceptor):  # type: ignore
         def _generic_method_handler(
             request: GrpcMessage,
             context: grpc.ServicerContext,
-        ) -> Union[GrpcMessage, Iterator[GrpcMessage]]:
+        ) -> GrpcMessage | Iterator[GrpcMessage]:
             """Handle the method call with license checking."""
             call = method_handler.unary_unary or method_handler.unary_stream
 

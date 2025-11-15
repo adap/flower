@@ -15,8 +15,8 @@
 """Flower Control API event log interceptor."""
 
 
-from collections.abc import Iterator
-from typing import Any, Callable, Union, cast
+from collections.abc import Callable, Iterator
+from typing import Any, cast
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -60,7 +60,7 @@ class ControlEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         def _generic_method_handler(
             request: GrpcMessage,
             context: grpc.ServicerContext,
-        ) -> Union[GrpcMessage, Iterator[GrpcMessage], BaseException]:
+        ) -> GrpcMessage | Iterator[GrpcMessage] | BaseException:
             log_entry: LogEntry
             # Log before call
             log_entry = self.log_plugin.compose_log_before_event(

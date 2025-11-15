@@ -21,7 +21,6 @@ from abc import ABC
 from collections import OrderedDict
 from collections.abc import Iterable
 from logging import INFO, WARNING
-from typing import Optional
 
 from flwr.common import Array, ArrayRecord, ConfigRecord, Message, MetricRecord, log
 from flwr.common.differential_privacy import (
@@ -132,7 +131,7 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> Optional[MetricRecord]:
+    ) -> MetricRecord | None:
         """Aggregate MetricRecords in the received Messages."""
         return self.strategy.aggregate_evaluate(server_round, replies)
 
@@ -201,7 +200,7 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         if not validate_replies(replies, self.num_sampled_clients):
             return None, None
@@ -304,7 +303,7 @@ class DifferentialPrivacyClientSideFixedClipping(DifferentialPrivacyFixedClippin
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         if not validate_replies(replies, self.num_sampled_clients):
             return None, None

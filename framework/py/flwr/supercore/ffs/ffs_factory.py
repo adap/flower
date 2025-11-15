@@ -16,7 +16,6 @@
 
 
 from logging import DEBUG
-from typing import Optional
 
 from flwr.common.logger import log
 
@@ -35,7 +34,7 @@ class FfsFactory:
 
     def __init__(self, base_dir: str) -> None:
         self.base_dir = base_dir
-        self.ffs_instance: Optional[Ffs] = None
+        self.ffs_instance: Ffs | None = None
 
     def ffs(self) -> Ffs:
         """Return a Ffs instance and create it, if necessary."""

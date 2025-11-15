@@ -15,8 +15,9 @@
 """Aggregation functions for strategy implementations."""
 # mypy: disallow_untyped_calls=False
 
+from collections.abc import Callable
 from functools import partial, reduce
-from typing import Any, Callable, Union
+from typing import Any
 
 import numpy as np
 
@@ -53,7 +54,7 @@ def aggregate_inplace(results: list[tuple[ClientProxy, FitRes]]) -> NDArrays:
     )
 
     def _try_inplace(
-        x: NDArray, y: Union[NDArray, np.float64], np_binary_op: np.ufunc
+        x: NDArray, y: NDArray | np.float64, np_binary_op: np.ufunc
     ) -> NDArray:
         return (  # type: ignore[no-any-return]
             np_binary_op(x, y, out=x)

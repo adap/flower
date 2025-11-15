@@ -22,7 +22,6 @@ from abc import ABC
 from collections import OrderedDict
 from collections.abc import Iterable
 from logging import INFO
-from typing import Optional
 
 import numpy as np
 
@@ -53,7 +52,7 @@ class DifferentialPrivacyAdaptiveBase(Strategy, ABC):
         initial_clipping_norm: float = 0.1,
         target_clipped_quantile: float = 0.5,
         clip_norm_lr: float = 0.2,
-        clipped_count_stddev: Optional[float] = None,
+        clipped_count_stddev: float | None = None,
     ) -> None:
         super().__init__()
 
@@ -117,7 +116,7 @@ class DifferentialPrivacyAdaptiveBase(Strategy, ABC):
 
     def aggregate_evaluate(
         self, server_round: int, replies: Iterable[Message]
-    ) -> Optional[MetricRecord]:
+    ) -> MetricRecord | None:
         """Aggregate MetricRecords in the received Messages."""
         return self.strategy.aggregate_evaluate(server_round, replies)
 
@@ -138,7 +137,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
         initial_clipping_norm: float = 0.1,
         target_clipped_quantile: float = 0.5,
         clip_norm_lr: float = 0.2,
-        clipped_count_stddev: Optional[float] = None,
+        clipped_count_stddev: float | None = None,
     ) -> None:
         super().__init__(
             strategy,
@@ -173,7 +172,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
 
     def aggregate_train(
         self, server_round: int, replies: Iterable[Message]
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         if not validate_replies(replies, self.num_sampled_clients):
             return None, None
@@ -297,7 +296,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
 
     def aggregate_train(
         self, server_round: int, replies: Iterable[Message]
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         if not validate_replies(replies, self.num_sampled_clients):
             return None, None

@@ -113,5 +113,5 @@ def uses_nist_ec_curve(public_key: ec.EllipticCurvePublicKey) -> bool:
     """Return True if the provided key uses a NIST EC curve."""
     return isinstance(
         public_key.curve,
-        (ec.SECP192R1, ec.SECP224R1, ec.SECP256R1, ec.SECP384R1, ec.SECP521R1),
+        (ec.SECP192R1 | ec.SECP224R1 | ec.SECP256R1 | ec.SECP384R1 | ec.SECP521R1),
     )

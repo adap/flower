@@ -17,9 +17,8 @@
 Paper: arxiv.org/abs/2003.00295
 """
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from logging import INFO
-from typing import Callable, Optional
 
 import numpy as np
 
@@ -101,12 +100,12 @@ class FedOpt(FedAvg):
         weighted_by_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
         configrecord_key: str = "config",
-        train_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
-        evaluate_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
+        train_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
+        evaluate_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
         eta: float = 1e-1,
         eta_l: float = 1e-1,
         beta_1: float = 0.0,
@@ -125,14 +124,14 @@ class FedOpt(FedAvg):
             train_metrics_aggr_fn=train_metrics_aggr_fn,
             evaluate_metrics_aggr_fn=evaluate_metrics_aggr_fn,
         )
-        self.current_arrays: Optional[dict[str, NDArray]] = None
+        self.current_arrays: dict[str, NDArray] | None = None
         self.eta = eta
         self.eta_l = eta_l
         self.tau = tau
         self.beta_1 = beta_1
         self.beta_2 = beta_2
-        self.m_t: Optional[dict[str, NDArray]] = None
-        self.v_t: Optional[dict[str, NDArray]] = None
+        self.m_t: dict[str, NDArray] | None = None
+        self.v_t: dict[str, NDArray] | None = None
 
     def summary(self) -> None:
         """Log summary configuration of the strategy."""

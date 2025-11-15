@@ -17,7 +17,6 @@
 
 import gc
 from logging import DEBUG, ERROR, INFO
-from typing import Optional
 
 import grpc
 
@@ -69,9 +68,9 @@ from flwr.supercore.utils import mask_string
 def run_clientapp(  # pylint: disable=R0913, R0914, R0917
     clientappio_api_address: str,
     token: str,
-    flwr_dir: Optional[str] = None,
-    certificates: Optional[bytes] = None,
-    parent_pid: Optional[int] = None,
+    flwr_dir: str | None = None,
+    certificates: bytes | None = None,
+    parent_pid: int | None = None,
 ) -> None:
     """Run Flower ClientApp process."""
     # Monitor the main process in case of SIGKILL
@@ -148,7 +147,7 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
 
 def pull_clientappinputs(
     stub: ClientAppIoStub, token: str
-) -> tuple[Message, Context, Run, Optional[Fab]]:
+) -> tuple[Message, Context, Run, Fab | None]:
     """Pull ClientAppInputs from SuperNode."""
     masked_token = mask_string(token)
     log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", masked_token)

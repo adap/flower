@@ -16,7 +16,6 @@
 
 
 from logging import DEBUG
-from typing import Optional
 
 from flwr.common import Context
 from flwr.common.logger import log
@@ -30,8 +29,8 @@ def run(
     grid: Grid,
     context: Context,
     server_app_dir: str,
-    server_app_attr: Optional[str] = None,
-    loaded_server_app: Optional[ServerApp] = None,
+    server_app_attr: str | None = None,
+    loaded_server_app: ServerApp | None = None,
 ) -> Context:
     """Run ServerApp with a given Grid."""
     if not (server_app_attr is None) ^ (loaded_server_app is None):

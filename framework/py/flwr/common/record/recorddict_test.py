@@ -18,8 +18,9 @@
 import json
 import pickle
 from collections import OrderedDict
+from collections.abc import Callable
 from copy import deepcopy
-from typing import Callable, Union, cast
+from typing import cast
 from unittest.mock import Mock, PropertyMock, patch
 
 import numpy as np
@@ -163,8 +164,8 @@ def test_set_parameters_with_correct_types() -> None:
     ],
 )
 def test_set_parameters_with_incorrect_types(
-    key_type: type[Union[int, str]],
-    value_fn: Callable[[NDArray], Union[NDArray, list[float]]],
+    key_type: type[int | str],
+    value_fn: Callable[[NDArray], NDArray | list[float]],
 ) -> None:
     """Test adding dictionary of unsupported types to ArrayRecord."""
     arr_record = ArrayRecord()
@@ -244,8 +245,8 @@ def test_set_metrics_to_metricrecord_with_correct_types(
     ],
 )
 def test_set_metrics_to_metricrecord_with_incorrect_types(
-    key_type: type[Union[str, int, float, bool]],
-    value_fn: Callable[[NDArray], Union[NDArray, dict[str, NDArray], list[float]]],
+    key_type: type[str | int | float | bool],
+    value_fn: Callable[[NDArray], NDArray | dict[str, NDArray] | list[float]],
 ) -> None:
     """Test adding metrics of various unsupported types to a MetricRecord."""
     m_record = MetricRecord()
@@ -363,8 +364,8 @@ def test_set_configs_to_configrecord_with_correct_types(
     ],
 )
 def test_set_configs_to_configrecord_with_incorrect_types(
-    key_type: type[Union[str, int, float]],
-    value_fn: Callable[[NDArray], Union[NDArray, dict[str, NDArray], list[float]]],
+    key_type: type[str | int | float],
+    value_fn: Callable[[NDArray], NDArray | dict[str, NDArray] | list[float]],
 ) -> None:
     """Test adding configs of various unsupported types to a ConfigRecord."""
     c_record = ConfigRecord()
@@ -579,9 +580,9 @@ def test_configs_records_delegation_and_return() -> None:
     ],
 )
 def test_metric_and_config_record_deflate_and_inflate(
-    record_type: type[Union[ConfigRecord, MetricRecord]],
-    record_data: dict[str, Union[ConfigRecordValues, MetricRecordValues]],
-    proto_conversion_fn: Callable[[Union[ConfigRecord, MetricRecord]], bytes],
+    record_type: type[ConfigRecord | MetricRecord],
+    record_data: dict[str, ConfigRecordValues | MetricRecordValues],
+    proto_conversion_fn: Callable[[ConfigRecord | MetricRecord], bytes],
 ) -> None:
     """Ensure an MetricRecord and ConfigRecord can be (de)inflated correctly."""
     record = record_type(record_data)  # type: ignore[arg-type]
@@ -639,7 +640,7 @@ def test_metric_and_config_record_deflate_and_inflate(
     ],
 )
 def test_recorddict_deflate_and_inflate(
-    records: dict[str, Union[ConfigRecord, MetricRecord, ArrayRecord]],
+    records: dict[str, ConfigRecord | MetricRecord | ArrayRecord],
 ) -> None:
     """Test that a RecordDict can be (de)inflated correctly."""
     record = RecordDict(records)
@@ -727,7 +728,7 @@ def test_copy_recorddict() -> None:
         ArrayRecord([np.array([1, 2]), np.array([3, 4])]),
     ],
 )
-def test_copy_record(original: Union[ConfigRecord, MetricRecord, ArrayRecord]) -> None:
+def test_copy_record(original: ConfigRecord | MetricRecord | ArrayRecord) -> None:
     """Test copying a Record."""
     # Execute
     copy = original.copy()

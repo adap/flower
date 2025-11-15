@@ -16,7 +16,6 @@
 
 
 from logging import DEBUG
-from typing import Optional
 
 from flwr.common.logger import log
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
@@ -40,7 +39,7 @@ class ObjectStoreFactory:
 
     def __init__(self, database: str = FLWR_IN_MEMORY_DB_NAME) -> None:
         self.database = database
-        self.store_instance: Optional[ObjectStore] = None
+        self.store_instance: ObjectStore | None = None
 
     def store(self) -> ObjectStore:
         """Return an ObjectStore instance and create it, if necessary.
