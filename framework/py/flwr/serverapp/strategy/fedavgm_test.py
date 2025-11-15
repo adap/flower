@@ -68,7 +68,7 @@ def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
 
     # Assert
     assert actual is not None
-    for w_act, w_exp in zip(actual.to_numpy_ndarrays(), expected):
+    for w_act, w_exp in zip(actual.to_numpy_ndarrays(), expected, strict=True):
         np.testing.assert_almost_equal(w_act, w_exp, decimal=5)
 
 
@@ -87,5 +87,5 @@ def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
 
     # Assert
     assert actual is not None
-    for w_act, w_exp in zip(actual.to_numpy_ndarrays(), expected):
+    for w_act, w_exp in zip(actual.to_numpy_ndarrays(), expected, strict=True):
         np.testing.assert_almost_equal(w_act, w_exp, decimal=5)

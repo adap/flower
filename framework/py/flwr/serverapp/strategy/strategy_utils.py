@@ -92,7 +92,7 @@ def aggregate_arrayrecords(
     # Perform weighted aggregation
     aggregated_np_arrays: dict[str, NDArray] = {}
 
-    for record, weight in zip(records, weight_factors):
+    for record, weight in zip(records, weight_factors, strict=True):
         for record_item in record.array_records.values():
             # aggregate in-place
             for key, value in record_item.items():
@@ -125,7 +125,7 @@ def aggregate_metricrecords(
     weight_factors = [w / total_weight for w in weights]
 
     aggregated_metrics = MetricRecord()
-    for record, weight in zip(records, weight_factors):
+    for record, weight in zip(records, weight_factors, strict=True):
         for record_item in record.metric_records.values():
             # aggregate in-place
             for key, value in record_item.items():
@@ -142,7 +142,7 @@ def aggregate_metricrecords(
                         current_list = cast(list[float], aggregated_metrics[key])
                         aggregated_metrics[key] = [
                             curr + val * weight
-                            for curr, val in zip(current_list, value)
+                            for curr, val in zip(current_list, value, strict=True)
                         ]
                     else:
                         current_value = cast(float, aggregated_metrics[key])
