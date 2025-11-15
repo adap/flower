@@ -201,7 +201,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up Python
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.10'
       - name: Install build tools
@@ -459,7 +459,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up Python
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.10'
       - name: Install build tools
@@ -494,7 +494,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install build tools
