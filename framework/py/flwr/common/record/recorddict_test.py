@@ -120,7 +120,7 @@ def test_parameters_to_arrayrecord_and_back(
     ndarrays_ = parameters_to_ndarrays(parameters=parameters_)
 
     # Validate returned NDArrays match those at the beginning
-    for arr, arr_ in zip(ndarrays, ndarrays_):
+    for arr, arr_ in zip(ndarrays, ndarrays_, strict=True):
         assert np.array_equal(arr, arr_), "no"
 
     # Validate initial Parameters object has been handled according to `keep_input`
@@ -198,7 +198,10 @@ def test_set_metrics_to_metricrecord_with_correct_types(
     arrays = get_ndarrays()
 
     my_metrics = OrderedDict(
-        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
+        {
+            key_type(label): value_fn(arr)
+            for label, arr in zip(labels, arrays, strict=True)
+        }
     )
 
     # Add metric
@@ -251,7 +254,10 @@ def test_set_metrics_to_metricrecord_with_incorrect_types(
     arrays = get_ndarrays()
 
     my_metrics = OrderedDict(
-        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
+        {
+            key_type(label): value_fn(arr)
+            for label, arr in zip(labels, arrays, strict=True)
+        }
     )
 
     with pytest.raises(TypeError):
@@ -274,7 +280,10 @@ def test_set_metrics_to_metricrecord_with_and_without_keeping_input(
     arrays = get_ndarrays()
     my_metrics = cast(
         dict[str, MetricRecordValues],
-        {str(label): arr.flatten().tolist() for label, arr in zip(labels, arrays)},
+        {
+            str(label): arr.flatten().tolist()
+            for label, arr in zip(labels, arrays, strict=True)
+        },
     )
     my_metrics_copy = my_metrics.copy()
 
@@ -315,7 +324,10 @@ def test_set_configs_to_configrecord_with_correct_types(
     arrays = get_ndarrays()
 
     my_configs = OrderedDict(
-        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
+        {
+            key_type(label): value_fn(arr)
+            for label, arr in zip(labels, arrays, strict=True)
+        }
     )
 
     c_record = ConfigRecord(my_configs)
@@ -361,7 +373,10 @@ def test_set_configs_to_configrecord_with_incorrect_types(
     arrays = get_ndarrays()
 
     my_configs = OrderedDict(
-        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
+        {
+            key_type(label): value_fn(arr)
+            for label, arr in zip(labels, arrays, strict=True)
+        }
     )
 
     with pytest.raises(TypeError):

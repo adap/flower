@@ -8,8 +8,7 @@ Install Flower
 Python version
 --------------
 
-Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, but `Python 3.10
-<https://docs.python.org/3.10/>`_ or above is recommended.
+Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_.
 
 Install stable release
 ----------------------

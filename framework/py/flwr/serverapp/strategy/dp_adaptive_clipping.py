@@ -96,7 +96,9 @@ class DifferentialPrivacyAdaptiveBase(Strategy, ABC):
         add_gaussian_noise_inplace(nds, stdv)
         log(INFO, "aggregate_fit: central DP noise with %.4f stdev added", stdv)
         return ArrayRecord(
-            OrderedDict({k: Array(v) for k, v in zip(aggregated.keys(), nds)})
+            OrderedDict(
+                {k: Array(v) for k, v in zip(aggregated.keys(), nds, strict=True)}
+            )
         )
 
     def _noisy_fraction(self, count: int, total: int) -> float:
@@ -184,16 +186,24 @@ class DifferentialPrivacyServerSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
             for arr_name, record in reply.content.array_records.items():
                 reply_nd = record.to_numpy_ndarrays()
                 model_update = [
-                    np.subtract(x, y) for (x, y) in zip(reply_nd, current_nd)
+                    np.subtract(x, y)
+                    for (x, y) in zip(reply_nd, current_nd, strict=True)
                 ]
                 norm_bit = adaptive_clip_inputs_inplace(
                     model_update, self.clipping_norm
                 )
                 clipped_indicator_count += int(norm_bit)
                 # reconstruct array using clipped contribution from current round
-                restored = [c + u for c, u in zip(current_nd, model_update)]
+                restored = [
+                    c + u for c, u in zip(current_nd, model_update, strict=True)
+                ]
                 reply.content[arr_name] = ArrayRecord(
-                    OrderedDict({k: Array(v) for k, v in zip(record.keys(), restored)})
+                    OrderedDict(
+                        {
+                            k: Array(v)
+                            for k, v in zip(record.keys(), restored, strict=True)
+                        }
+                    )
                 )
             log(
                 INFO,

@@ -192,7 +192,8 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
             param = parameters_to_ndarrays(res.parameters)
             # Compute and clip update
             model_update = [
-                np.subtract(x, y) for (x, y) in zip(param, self.current_round_params)
+                np.subtract(x, y)
+                for (x, y) in zip(param, self.current_round_params, strict=True)
             ]
 
             norm_bit = adaptive_clip_inputs_inplace(model_update, self.clipping_norm)

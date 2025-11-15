@@ -150,7 +150,7 @@ def verify_signature(
         return False
 
 
-def create_signed_message(fab_digest: bytes, timestamp: int) -> bytes:
+def create_message_to_sign(fab_digest: bytes, timestamp: int) -> bytes:
     """Create a canonical message:
     timestamp (8 bytes big-endian) + fab_digest.
     """

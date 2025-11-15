@@ -70,7 +70,7 @@ def compute_clip_model_update(
     """Compute model update (param1 - param2) and clip it.
 
     Then add the clipped value to param1."""
-    model_update = [np.subtract(x, y) for (x, y) in zip(param1, param2)]
+    model_update = [np.subtract(x, y) for (x, y) in zip(param1, param2, strict=True)]
     clip_inputs_inplace(model_update, clipping_norm)
 
     for i, _ in enumerate(param2):
@@ -98,7 +98,7 @@ def compute_adaptive_clip_model_update(
     model update = param1 - param2
     Return the norm_bit
     """
-    model_update = [np.subtract(x, y) for (x, y) in zip(param1, param2)]
+    model_update = [np.subtract(x, y) for (x, y) in zip(param1, param2, strict=True)]
     norm_bit = adaptive_clip_inputs_inplace(model_update, clipping_norm)
 
     for i, _ in enumerate(param2):

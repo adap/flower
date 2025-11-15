@@ -33,7 +33,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -51,7 +50,7 @@ packages = [{ include = "flwr_datasets", from = "./" }]
 exclude = ["./**/*_test.py"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 numpy = ">=1.26.0,<3.0.0"
 datasets = ">=2.14.6 <=3.1.0"
 pillow = { version = ">=6.2.1", optional = true }
