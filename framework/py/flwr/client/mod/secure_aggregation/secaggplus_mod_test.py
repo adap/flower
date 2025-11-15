@@ -16,8 +16,8 @@
 
 
 import unittest
+from collections.abc import Callable
 from itertools import product
-from typing import Callable
 
 from flwr.client.mod import make_ffn
 from flwr.common import ConfigRecord, Context, Message, RecordDict

@@ -18,7 +18,7 @@
 import io
 import json
 from pathlib import Path
-from typing import Annotated, Optional, cast
+from typing import Annotated, cast
 
 import typer
 from rich.console import Console
@@ -52,11 +52,11 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         typer.Argument(help="Path of the Flower project"),
     ] = Path("."),
     federation: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(help="Name of the federation"),
     ] = None,
     federation_config_overrides: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option(
             "--federation-config",
             help=FEDERATION_CONFIG_HELP_MESSAGE,
@@ -70,7 +70,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         ),
     ] = False,
     run_id: Annotated[
-        Optional[int],
+        int | None,
         typer.Option(
             "--run-id",
             help="Specific run ID to display",

@@ -511,7 +511,7 @@ def _check_arg_types(  # pylint: disable=too-many-arguments, R0917
         and (message_type is None or isinstance(message_type, str))
         and (content is None or isinstance(content, RecordDict))
         and (error is None or isinstance(error, Error))
-        and (ttl is None or isinstance(ttl, (int, float)))
+        and (ttl is None or isinstance(ttl, (int | float)))
         and (group_id is None or isinstance(group_id, str))
         and (reply_to is None or isinstance(reply_to, Message))
         and (metadata is None or isinstance(metadata, Metadata))

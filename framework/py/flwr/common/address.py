@@ -18,14 +18,13 @@
 import re
 import socket
 from ipaddress import ip_address
-from typing import Optional
 
 import grpc
 
 IPV6: int = 6
 
 
-def parse_address(address: str) -> Optional[tuple[str, int, Optional[bool]]]:
+def parse_address(address: str) -> tuple[str, int, bool | None] | None:
     """Parse an IP address into host, port, and version.
 
     Parameters

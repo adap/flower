@@ -16,14 +16,13 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 
 class ArtifactProvider(ABC):
     """ArtifactProvider interface for providing artifact download links."""
 
     @abstractmethod
-    def get_url(self, run_id: int) -> Optional[str]:
+    def get_url(self, run_id: int) -> str | None:
         """Return the artifact download link for the given run ID."""
 
     @property

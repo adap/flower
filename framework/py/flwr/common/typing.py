@@ -15,9 +15,10 @@
 """Flower type definitions."""
 
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -31,29 +32,29 @@ NDArrays = list[NDArray]
 # ProtoBuf considers to be "Scalar Value Types", even though some of them arguably do
 # not conform to other definitions of what a scalar is. Source:
 # https://developers.google.com/protocol-buffers/docs/overview#scalar
-Scalar = Union[bool, bytes, float, int, str]
-Value = Union[
-    bool,
-    bytes,
-    float,
-    int,
-    str,
-    list[bool],
-    list[bytes],
-    list[float],
-    list[int],
-    list[str],
-]
+Scalar = bool | bytes | float | int | str
+Value = (
+    bool
+    | bytes
+    | float
+    | int
+    | str
+    | list[bool]
+    | list[bytes]
+    | list[float]
+    | list[int]
+    | list[str]
+)
+
 
 # Value types for common.MetricRecord
-MetricScalar = Union[int, float]
-MetricScalarList = Union[list[int], list[float]]
-MetricRecordValues = Union[MetricScalar, MetricScalarList]
+MetricScalar = int | float
+MetricScalarList = list[int] | list[float]
+MetricRecordValues = MetricScalar | MetricScalarList
 # Value types for common.ConfigRecord
-ConfigScalar = Union[MetricScalar, str, bytes, bool]
-ConfigScalarList = Union[MetricScalarList, list[str], list[bytes], list[bool]]
-ConfigRecordValues = Union[ConfigScalar, ConfigScalarList]
-
+ConfigScalar = MetricScalar | str | bytes | bool
+ConfigScalarList = MetricScalarList | list[str] | list[bytes] | list[bool]
+ConfigRecordValues = ConfigScalar | ConfigScalarList
 Metrics = dict[str, Scalar]
 MetricsAggregationFn = Callable[[list[tuple[int, Metrics]]], Metrics]
 
@@ -61,7 +62,7 @@ Config = dict[str, Scalar]
 Properties = dict[str, Scalar]
 
 # Value type for user configs
-UserConfigValue = Union[bool, float, int, str]
+UserConfigValue = bool | float | int | str
 UserConfig = dict[str, UserConfigValue]
 
 
@@ -177,7 +178,7 @@ class GetPropertiesRes:
 class ReconnectIns:
     """ReconnectIns message from server to client."""
 
-    seconds: Optional[int]
+    seconds: int | None
 
 
 @dataclass
@@ -191,20 +192,20 @@ class DisconnectRes:
 class ServerMessage:
     """ServerMessage is a container used to hold one instruction message."""
 
-    get_properties_ins: Optional[GetPropertiesIns] = None
-    get_parameters_ins: Optional[GetParametersIns] = None
-    fit_ins: Optional[FitIns] = None
-    evaluate_ins: Optional[EvaluateIns] = None
+    get_properties_ins: GetPropertiesIns | None = None
+    get_parameters_ins: GetParametersIns | None = None
+    fit_ins: FitIns | None = None
+    evaluate_ins: EvaluateIns | None = None
 
 
 @dataclass
 class ClientMessage:
     """ClientMessage is a container used to hold one result message."""
 
-    get_properties_res: Optional[GetPropertiesRes] = None
-    get_parameters_res: Optional[GetParametersRes] = None
-    fit_res: Optional[FitRes] = None
-    evaluate_res: Optional[EvaluateRes] = None
+    get_properties_res: GetPropertiesRes | None = None
+    get_parameters_res: GetParametersRes | None = None
+    fit_res: FitRes | None = None
+    evaluate_res: EvaluateRes | None = None
 
 
 @dataclass
@@ -297,16 +298,16 @@ class AccountAuthCredentials:
 class AccountInfo:
     """User information for event log."""
 
-    flwr_aid: Optional[str]
-    account_name: Optional[str]
+    flwr_aid: str | None
+    account_name: str | None
 
 
 @dataclass
 class Actor:
     """Event log actor."""
 
-    actor_id: Optional[str]
-    description: Optional[str]
+    actor_id: str | None
+    description: str | None
     ip_address: str
 
 
@@ -315,8 +316,8 @@ class Event:
     """Event log description."""
 
     action: str
-    run_id: Optional[int]
-    fab_hash: Optional[str]
+    run_id: int | None
+    fab_hash: str | None
 
 
 @dataclass

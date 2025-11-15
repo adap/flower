@@ -18,8 +18,6 @@ Paper: arxiv.org/pdf/1710.06963.pdf
 """
 
 
-from typing import Optional, Union
-
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Scalar
 from flwr.common.dp import add_gaussian_noise
 from flwr.common.logger import warn_deprecated_feature
@@ -72,9 +70,7 @@ class DPFedAvgFixed(Strategy):
             self.noise_multiplier * self.clip_norm / (self.num_sampled_clients ** (0.5))
         )
 
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
+    def initialize_parameters(self, client_manager: ClientManager) -> Parameters | None:
         """Initialize global model parameters using given strategy."""
         return self.strategy.initialize_parameters(client_manager)
 
@@ -149,8 +145,8 @@ class DPFedAvgFixed(Strategy):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate training results using unweighted aggregation."""
         if failures:
             return None, {}
@@ -170,13 +166,13 @@ class DPFedAvgFixed(Strategy):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, EvaluateRes]],
-        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> tuple[Optional[float], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, EvaluateRes] | BaseException],
+    ) -> tuple[float | None, dict[str, Scalar]]:
         """Aggregate evaluation losses using the given strategy."""
         return self.strategy.aggregate_evaluate(server_round, results, failures)
 
     def evaluate(
         self, server_round: int, parameters: Parameters
-    ) -> Optional[tuple[float, dict[str, Scalar]]]:
+    ) -> tuple[float, dict[str, Scalar]] | None:
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)

@@ -17,7 +17,6 @@
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import Optional
 
 from flwr.common import Message, RecordDict
 from flwr.common.typing import Run
@@ -52,7 +51,7 @@ class Grid(ABC):
         message_type: str,
         dst_node_id: int,
         group_id: str,
-        ttl: Optional[float] = None,
+        ttl: float | None = None,
     ) -> Message:
         """Create a new message with specified parameters.
 
@@ -130,7 +129,7 @@ class Grid(ABC):
         self,
         messages: Iterable[Message],
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> Iterable[Message]:
         """Push messages to specified node IDs and pull the reply messages.
 

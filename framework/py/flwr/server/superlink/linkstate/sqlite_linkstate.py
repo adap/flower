@@ -22,7 +22,7 @@ import secrets
 import sqlite3
 from collections.abc import Sequence
 from logging import ERROR, WARNING
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
@@ -221,7 +221,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         """Get the FederationManager instance."""
         return self._federation_manager
 
-    def store_message_ins(self, message: Message) -> Optional[str]:
+    def store_message_ins(self, message: Message) -> str | None:
         """Store one Message."""
         # Validate message
         errors = validate_message(message=message, is_reply_message=False)
@@ -322,7 +322,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             # Delete all invalid messages
             self.delete_messages(invalid_msg_ids)
 
-    def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
+    def get_message_ins(self, node_id: int, limit: int | None) -> list[Message]:
         """Get all Messages that have not been delivered yet."""
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
@@ -331,7 +331,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             msg = f"`node_id` must be != {SUPERLINK_NODE_ID}"
             raise AssertionError(msg)
 
-        data: dict[str, Union[str, int]] = {}
+        data: dict[str, str | int] = {}
 
         # Convert the uint64 value to sint64 for SQLite
         data["node_id"] = uint64_to_int64(node_id)
@@ -385,7 +385,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
 
         return result
 
-    def store_message_res(self, message: Message) -> Optional[str]:
+    def store_message_res(self, message: Message) -> str | None:
         """Store one Message."""
         # Validate message
         errors = validate_message(message=message, is_reply_message=True)
@@ -775,9 +775,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         # Filter node IDs by federation
         return self.federation_manager.filter_nodes(node_ids, federation)
 
-    def _check_and_tag_offline_nodes(
-        self, node_ids: Optional[list[int]] = None
-    ) -> None:
+    def _check_and_tag_offline_nodes(self, node_ids: list[int] | None = None) -> None:
         """Check and tag offline nodes."""
         # strftime will convert POSIX timestamp to ISO format
         query = """
@@ -800,9 +798,9 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
     def get_node_info(
         self,
         *,
-        node_ids: Optional[Sequence[int]] = None,
-        owner_aids: Optional[Sequence[str]] = None,
-        statuses: Optional[Sequence[str]] = None,
+        node_ids: Sequence[int] | None = None,
+        owner_aids: Sequence[str] | None = None,
+        statuses: Sequence[str] | None = None,
     ) -> Sequence[NodeInfo]:
         """Retrieve information about nodes based on the specified filters."""
         with self.conn:
@@ -856,7 +854,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         # Return the public key
         return cast(bytes, rows[0]["public_key"])
 
-    def get_node_id_by_public_key(self, public_key: bytes) -> Optional[int]:
+    def get_node_id_by_public_key(self, public_key: bytes) -> int | None:
         """Get `node_id` for the specified `public_key` if it exists and is not
         deleted."""
         query = "SELECT node_id FROM node WHERE public_key = ? AND status != ?;"
@@ -873,13 +871,13 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(
         self,
-        fab_id: Optional[str],
-        fab_version: Optional[str],
-        fab_hash: Optional[str],
+        fab_id: str | None,
+        fab_version: str | None,
+        fab_hash: str | None,
         override_config: UserConfig,
         federation: str,
         federation_options: ConfigRecord,
-        flwr_aid: Optional[str],
+        flwr_aid: str | None,
     ) -> int:
         """Create a new run."""
         # Sample a random int64 as run_id
@@ -923,7 +921,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+    def get_run_ids(self, flwr_aid: str | None) -> set[int]:
         """Retrieve all run IDs if `flwr_aid` is not specified.
 
         Otherwise, retrieve all run IDs for the specified `flwr_aid`.
@@ -959,7 +957,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             ),
         )
 
-    def get_run(self, run_id: int) -> Optional[Run]:
+    def get_run(self, run_id: int) -> Run | None:
         """Retrieve information about the run with the specified `run_id`."""
         # Check if runs are still active
         self._check_and_tag_inactive_run(run_ids={run_id})
@@ -1088,7 +1086,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         self.query(query % timestamp_fld, data)
         return True
 
-    def get_pending_run_id(self) -> Optional[int]:
+    def get_pending_run_id(self) -> int | None:
         """Get the `run_id` of a run with `Status.PENDING` status, if any."""
         pending_run_id = None
 
@@ -1100,7 +1098,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
 
         return pending_run_id
 
-    def get_federation_options(self, run_id: int) -> Optional[ConfigRecord]:
+    def get_federation_options(self, run_id: int) -> ConfigRecord | None:
         """Retrieve the federation options for the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = uint64_to_int64(run_id)
@@ -1196,7 +1194,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         self.query(query, (active_until, heartbeat_interval, sint_run_id))
         return True
 
-    def get_serverapp_context(self, run_id: int) -> Optional[Context]:
+    def get_serverapp_context(self, run_id: int) -> Context | None:
         """Get the context for the specified `run_id`."""
         # Retrieve context if any
         query = "SELECT context FROM context WHERE run_id = ?;"
@@ -1239,7 +1237,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             raise ValueError(f"Run {run_id} not found") from None
 
     def get_serverapp_log(
-        self, run_id: int, after_timestamp: Optional[float]
+        self, run_id: int, after_timestamp: float | None
     ) -> tuple[str, float]:
         """Get the ServerApp logs for the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
@@ -1262,7 +1260,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         latest_timestamp = rows[-1]["timestamp"] if rows else 0.0
         return "".join(row["log"] for row in rows), latest_timestamp
 
-    def get_valid_message_ins(self, message_id: str) -> Optional[dict[str, Any]]:
+    def get_valid_message_ins(self, message_id: str) -> dict[str, Any] | None:
         """Check if the Message exists and is valid (not expired).
 
         Return Message if valid.
@@ -1281,7 +1279,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
 
         return rows[0]
 
-    def create_token(self, run_id: int) -> Optional[str]:
+    def create_token(self, run_id: int) -> str | None:
         """Create a token for the given run ID."""
         token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
         query = "INSERT INTO token_store (run_id, token) VALUES (:run_id, :token);"
@@ -1307,7 +1305,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         data = {"run_id": uint64_to_int64(run_id)}
         self.query(query, data)
 
-    def get_run_id_by_token(self, token: str) -> Optional[int]:
+    def get_run_id_by_token(self, token: str) -> int | None:
         """Get the run ID associated with a given token."""
         query = "SELECT run_id FROM token_store WHERE token = :token;"
         data = {"token": token}

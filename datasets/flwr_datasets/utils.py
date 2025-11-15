@@ -103,15 +103,6 @@ def _instantiate_merger_if_needed(
     return cast(Optional[Preprocessor], merger)
 
 
-def _check_if_dataset_tested(dataset: str) -> None:
-    """Check if the dataset is in the narrowed down list of the tested datasets."""
-    if dataset not in tested_datasets:
-        warnings.warn(
-            f"The currently tested dataset are {tested_datasets}. Given: {dataset}.",
-            stacklevel=1,
-        )
-
-
 def divide_dataset(
     dataset: Dataset, division: Union[list[float], tuple[float, ...], dict[str, float]]
 ) -> Union[list[Dataset], DatasetDict]:

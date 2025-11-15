@@ -16,7 +16,6 @@
 
 
 import abc
-from typing import Optional
 
 
 class Ffs(abc.ABC):  # pylint: disable=R0904
@@ -40,7 +39,7 @@ class Ffs(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get(self, key: str) -> Optional[tuple[bytes, dict[str, str]]]:
+    def get(self, key: str) -> tuple[bytes, dict[str, str]] | None:
         """Return tuple containing the object content and metadata.
 
         Parameters

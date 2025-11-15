@@ -22,11 +22,7 @@ from datasets import Dataset, DatasetDict
 from flwr_datasets.common import EventType, event
 from flwr_datasets.partitioner import Partitioner
 from flwr_datasets.preprocessor import Preprocessor
-from flwr_datasets.utils import (
-    _check_if_dataset_tested,
-    _instantiate_merger_if_needed,
-    _instantiate_partitioners,
-)
+from flwr_datasets.utils import _instantiate_merger_if_needed, _instantiate_partitioners
 
 
 # noqa: E501
@@ -119,7 +115,6 @@ class FederatedDataset:
         seed: Optional[int] = 42,
         **load_dataset_kwargs: Any,
     ) -> None:
-        _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
         self._subset: Optional[str] = subset
         self._preprocessor: Optional[Preprocessor] = _instantiate_merger_if_needed(

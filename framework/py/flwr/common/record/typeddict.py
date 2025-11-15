@@ -15,8 +15,15 @@
 """Typed dict base class for *Records."""
 
 
-from collections.abc import ItemsView, Iterator, KeysView, MutableMapping, ValuesView
-from typing import Callable, Generic, TypeVar, cast
+from collections.abc import (
+    Callable,
+    ItemsView,
+    Iterator,
+    KeysView,
+    MutableMapping,
+    ValuesView,
+)
+from typing import Generic, TypeVar, cast
 
 from typing_extensions import Self
 

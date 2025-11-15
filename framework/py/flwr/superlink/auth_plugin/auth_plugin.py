@@ -18,7 +18,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Optional, Union
 
 from flwr.common.typing import (
     AccountAuthCredentials,
@@ -48,25 +47,23 @@ class ControlAuthnPlugin(ABC):
         """Abstract constructor."""
 
     @abstractmethod
-    def get_login_details(self) -> Optional[AccountAuthLoginDetails]:
+    def get_login_details(self) -> AccountAuthLoginDetails | None:
         """Get the login details."""
 
     @abstractmethod
     def validate_tokens_in_metadata(
-        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> tuple[bool, Optional[AccountInfo]]:
+        self, metadata: Sequence[tuple[str, str | bytes]]
+    ) -> tuple[bool, AccountInfo | None]:
         """Validate authentication tokens in the provided metadata."""
 
     @abstractmethod
-    def get_auth_tokens(self, device_code: str) -> Optional[AccountAuthCredentials]:
+    def get_auth_tokens(self, device_code: str) -> AccountAuthCredentials | None:
         """Get authentication tokens."""
 
     @abstractmethod
     def refresh_tokens(
-        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> tuple[
-        Optional[Sequence[tuple[str, Union[str, bytes]]]], Optional[AccountInfo]
-    ]:
+        self, metadata: Sequence[tuple[str, str | bytes]]
+    ) -> tuple[Sequence[tuple[str, str | bytes]] | None, AccountInfo | None]:
         """Refresh authentication tokens in the provided metadata."""
 
 

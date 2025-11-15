@@ -18,10 +18,10 @@
 import hashlib
 import json
 import re
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Optional, Union, cast
+from typing import Any, cast
 
 import grpc
 import requests
@@ -55,7 +55,7 @@ from .config_utils import validate_certificate_in_federation_config
 def prompt_text(
     text: str,
     predicate: Callable[[str], bool] = lambda _: True,
-    default: Optional[str] = None,
+    default: str | None = None,
 ) -> str:
     """Ask user to enter text input."""
     while True:
@@ -156,7 +156,7 @@ def sanitize_project_name(name: str) -> str:
     return sanitized_name
 
 
-def get_sha256_hash(file_path_or_int: Union[Path, int]) -> str:
+def get_sha256_hash(file_path_or_int: Path | int) -> str:
     """Calculate the SHA-256 hash of a file."""
     sha256 = hashlib.sha256()
     if isinstance(file_path_or_int, Path):
@@ -251,7 +251,7 @@ def load_cli_auth_plugin(
     root_dir: Path,
     federation: str,
     federation_config: dict[str, Any],
-    authn_type: Optional[str] = None,
+    authn_type: str | None = None,
 ) -> CliAuthPlugin:
     """Load the CLI-side account auth plugin for the given authn type."""
     # Find the path to the account auth config file
@@ -410,7 +410,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
 
 
 def request_download_link(
-    app_id: str, version: Optional[str], in_url: str, out_url: str
+    app_id: str, version: str | None, in_url: str, out_url: str
 ) -> str:
     """Request download link from Flower platform API."""
     headers = {

@@ -16,7 +16,7 @@
 
 
 from logging import DEBUG, WARNING
-from typing import Optional, cast
+from typing import cast
 
 import grpc
 
@@ -43,12 +43,12 @@ class SimulationIoConnection:
     def __init__(  # pylint: disable=too-many-arguments
         self,
         simulationio_service_address: str = SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
-        root_certificates: Optional[bytes] = None,
+        root_certificates: bytes | None = None,
     ) -> None:
         self._addr = simulationio_service_address
         self._cert = root_certificates
-        self._grpc_stub: Optional[SimulationIoStub] = None
-        self._channel: Optional[grpc.Channel] = None
+        self._grpc_stub: SimulationIoStub | None = None
+        self._channel: grpc.Channel | None = None
         self._retry_invoker = _make_simple_grpc_retry_invoker()
 
     @property

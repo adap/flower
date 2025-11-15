@@ -51,7 +51,6 @@ natural_id_datasets = [
 mocked_natural_id_datasets = [
     "flwrlabs/ucf101",
     "flwrlabs/ambient-acoustic-context",
-    "LIUM/tedlium",
 ]
 
 
@@ -454,7 +453,6 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         ("flwrlabs/femnist", "", "", "writer_id"),
         ("flwrlabs/ucf101", "test", None, "video_id"),
         ("flwrlabs/ambient-acoustic-context", "", None, "speaker_id"),
-        ("LIUM/tedlium", "test", "release3", "speaker_id"),
     ],
 )
 class NaturalIdPartitionerIntegrationTest(unittest.TestCase):
@@ -535,11 +533,6 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
 
         with pytest.raises(ValueError):
             dataset_fds.load_partition(0, "non-existent-split")
-
-    def test_unsupported_dataset(self) -> None:
-        """Test creating FederatedDataset for unsupported dataset."""
-        with pytest.warns(UserWarning):
-            FederatedDataset(dataset="food101", partitioners={"train": 100})
 
     def test_cannot_use_the_old_split_names(self) -> None:
         """Test if the initial split names can not be used."""
