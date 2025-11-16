@@ -139,8 +139,6 @@ class Server:
             res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
-
-
                 log(INFO, "fit progress: (%s, %s, %s, %s)",
                     current_round, loss_cen, metrics_cen, timeit.default_timer() - round_start)
                 log_time(f"fit progress: ({current_round}, {loss_cen}, {metrics_cen}, {timeit.default_timer() - round_start:.5f}s)")
@@ -150,7 +148,6 @@ class Server:
                 )
                 print("metrics_cen",metrics_cen )
                 if "accuracy" in metrics_cen:
-                    print("ciao")
                     log_time("Round %s Accuracy (centralized): %.4f", current_round, metrics_cen["accuracy"])
 
             # Evaluate model on a sample of available clients
