@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-13 00:08+0000\n"
+"POT-Creation-Date: 2025-11-16 00:08+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -1248,12 +1248,10 @@ msgstr "Python 버전"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:12
 #: ../../source/how-to-install-flower.rst:11
-msgid ""
-"Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_."
-msgstr ""
-"Flower는 `Python 3.10 <https://docs.python.org/3.10/>`_이상이 필요하지만."
+msgid "Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_."
+msgstr "Flower는 `Python 3.10 <https://docs.python.org/3.10/>`_이상이 필요하지만."
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:17
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:16
 msgid ""
 "Due to a known incompatibility with `ray "
 "<https://docs.ray.io/en/latest/>`_, we currently recommend utilizing at "
@@ -1264,11 +1262,11 @@ msgstr ""
 " 시뮬레이션을 실행할 때는 최대 `Python 3.11 <https://docs.python.org/3.11/>`_을 사용하는 것이"
 " 좋습니다."
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:22
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:21
 msgid "Virtualenv with Pyenv/Virtualenv"
 msgstr "Pyenv/Virtualenv를 사용한 가상 환경"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:24
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:23
 msgid ""
 "One of the recommended virtual environment is `pyenv "
 "<https://github.com/pyenv/pyenv>`_/`virtualenv <https://github.com/pyenv"
@@ -1279,7 +1277,7 @@ msgstr ""
 "<https://github.com/pyenv/pyenv-virtualenv>`_입니다. 자세한 내용은 `Flower "
 "examples <https://github.com/adap/flower/tree/main/examples/>`_를 참조하세요."
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:29
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:28
 msgid ""
 "Once Pyenv is set up, you can use it to install `Python Version 3.10 "
 "<https://docs.python.org/3.10/>`_ or above:"
@@ -1287,19 +1285,19 @@ msgstr ""
 "Pyenv가 설정되면 이를 사용하여 'Python 버전 3.10 <https://docs.python.org/3.10/>`_ "
 "이상'을 설치할 수 있습니다:"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:36
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:35
 msgid "Create the virtualenv with:"
 msgstr "가상 환경을 만듭니다:"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:42
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:41
 msgid "Activate the virtualenv by running the following command:"
 msgstr "다음 명령을 실행하여 가상 환경을 활성화합니다:"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:49
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:48
 msgid "Virtualenv with Poetry"
 msgstr "Poetry를 사용한 가상 환경"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:51
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:50
 msgid ""
 "The Flower examples are based on `Poetry <https://python-"
 "poetry.org/docs/>`_ to manage dependencies. After installing Poetry you "
@@ -1308,17 +1306,17 @@ msgstr ""
 "Flower examples은 의존성을 관리하기 위해 `Poetry <https://python-"
 "poetry.org/docs/>`_를 기반으로 합니다. Poetry를 설치한 후 가상 환경을 생성하기만 하면 됩니다:"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:58
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:57
 msgid ""
 "If you open a new terminal you can activate the previously created "
 "virtual environment with the following command:"
 msgstr "새 터미널을 열면 다음 명령을 사용하여 이전에 생성한 가상 환경을 활성화할 수 있습니다:"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:66
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:65
 msgid "Virtualenv with Anaconda"
 msgstr "Anaconda를 사용한 가상 환경"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:68
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:67
 #, fuzzy
 msgid ""
 "If you prefer to use Anaconda for your virtual environment then install "
@@ -1331,7 +1329,7 @@ msgstr ""
 "guide/install/index.html>`_ 패키지를 설치 및 설정하세요. 설정 후 다음을 사용하여 가상 환경을 만들 수 "
 "있습니다:"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:76
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:75
 msgid "and activate the virtual environment with:"
 msgstr "그 후 가상 환경을 활성화합니다:"
 
@@ -10895,58 +10893,58 @@ msgstr "Flower 설치"
 msgid "Python version"
 msgstr "Python 버전"
 
-#: ../../source/how-to-install-flower.rst:15
+#: ../../source/how-to-install-flower.rst:14
 msgid "Install stable release"
 msgstr "안정적인 릴리즈 설치"
 
-#: ../../source/how-to-install-flower.rst:18
+#: ../../source/how-to-install-flower.rst:17
 msgid "Using pip"
 msgstr "pip 사용"
 
-#: ../../source/how-to-install-flower.rst:20
+#: ../../source/how-to-install-flower.rst:19
 #, fuzzy
 msgid "Stable releases are available on `PyPI <https://pypi.org/project/flwr/>`_:"
 msgstr "안정적인 릴리즈는 `PyPI <https://pypi.org/project/flwr/>`_:: 에서 확인할 수 있습니다::"
 
-#: ../../source/how-to-install-flower.rst:26
+#: ../../source/how-to-install-flower.rst:25
 #, fuzzy
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr`` should be "
 "installed with the ``simulation`` extra:"
 msgstr "가상 클라이언트 엔진을 사용하는 시뮬레이션의 경우 ``flwr``을 ``simulation``extra와 함께 설치해야 합니다:"
 
-#: ../../source/how-to-install-flower.rst:34
+#: ../../source/how-to-install-flower.rst:33
 msgid "Using conda (or mamba)"
 msgstr "conda(또는 mamba) 사용"
 
-#: ../../source/how-to-install-flower.rst:36
+#: ../../source/how-to-install-flower.rst:35
 msgid "Flower can also be installed from the ``conda-forge`` channel."
 msgstr "Flower은 'conda-forge' 채널에서도 설치할 수 있습니다."
 
-#: ../../source/how-to-install-flower.rst:38
+#: ../../source/how-to-install-flower.rst:37
 #, fuzzy
 msgid ""
 "If you have not added ``conda-forge`` to your channels, you will first "
 "need to run the following:"
 msgstr "채널에 'conda-forge'를 추가하지 않은 경우 먼저 다음을 실행해야 합니다:"
 
-#: ../../source/how-to-install-flower.rst:46
+#: ../../source/how-to-install-flower.rst:45
 #, fuzzy
 msgid ""
 "Once the ``conda-forge`` channel has been enabled, ``flwr`` can be "
 "installed with ``conda``:"
 msgstr "conda-forge`` 채널이 활성화되면 ``flwr``을 ``conda``로 설치할 수 있습니다::"
 
-#: ../../source/how-to-install-flower.rst:53
+#: ../../source/how-to-install-flower.rst:52
 #, fuzzy
 msgid "or with ``mamba``:"
 msgstr "또는 ``mamba``::"
 
-#: ../../source/how-to-install-flower.rst:60
+#: ../../source/how-to-install-flower.rst:59
 msgid "Verify installation"
 msgstr "설치 확인"
 
-#: ../../source/how-to-install-flower.rst:62
+#: ../../source/how-to-install-flower.rst:61
 #, fuzzy
 msgid ""
 "The following command can be used to verify if Flower was successfully "
@@ -10956,24 +10954,24 @@ msgstr ""
 "다음 명령을 사용하여 Flower가 성공적으로 설치되었는지 확인할 수 있습니다. 모든 것이 정상적으로 작동하면 명령줄에 "
 "Flower의 버전이 출력됩니다:"
 
-#: ../../source/how-to-install-flower.rst:72
+#: ../../source/how-to-install-flower.rst:71
 msgid "Advanced installation options"
 msgstr "고급 설치 옵션"
 
-#: ../../source/how-to-install-flower.rst:75
+#: ../../source/how-to-install-flower.rst:74
 msgid "Install via Docker"
 msgstr "Docker를 통해 설치"
 
-#: ../../source/how-to-install-flower.rst:77
+#: ../../source/how-to-install-flower.rst:76
 #, fuzzy
 msgid ":doc:`Run Flower using Docker <docker/index>`"
 msgstr ":doc:`Docker를 사용하여 Flower를 실행하는 방법 <how-to-run-flower-using-docker>`"
 
-#: ../../source/how-to-install-flower.rst:80
+#: ../../source/how-to-install-flower.rst:79
 msgid "Install pre-release"
 msgstr "사전 릴리즈 설치"
 
-#: ../../source/how-to-install-flower.rst:82
+#: ../../source/how-to-install-flower.rst:81
 #, fuzzy
 msgid ""
 "New (possibly unstable) versions of Flower are sometimes available as "
@@ -10983,7 +10981,7 @@ msgstr ""
 "새(불안정할 수 있는) 버전의 Flower는 안정 버전이 출시되기 전에 사전 릴리즈 버전(알파, 베타, 릴리즈 후보)으로 제공되는 "
 "경우가 있습니다:"
 
-#: ../../source/how-to-install-flower.rst:89
+#: ../../source/how-to-install-flower.rst:88
 #, fuzzy
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr`` pre-releases"
@@ -10992,18 +10990,18 @@ msgstr ""
 "가상 클라이언트 엔진을 사용하는 시뮬레이션의 경우 ``flwr`` 사전 릴리즈를 ``simulation`` extra와 함께 "
 "설치해야 합니다:"
 
-#: ../../source/how-to-install-flower.rst:97
+#: ../../source/how-to-install-flower.rst:96
 msgid "Install nightly release"
 msgstr "야간 릴리즈 설치"
 
-#: ../../source/how-to-install-flower.rst:99
+#: ../../source/how-to-install-flower.rst:98
 #, fuzzy
 msgid ""
 "The latest (potentially unstable) changes in Flower are available as "
 "nightly releases:"
 msgstr "Flower의 최신 (불안정할 수 있는) 변경 사항은 다음과 같이 야간 릴리즈로 제공됩니다:"
 
-#: ../../source/how-to-install-flower.rst:105
+#: ../../source/how-to-install-flower.rst:104
 #, fuzzy
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr-nightly`` "
@@ -16187,16 +16185,6 @@ msgstr ""
 msgid "``'default'``"
 msgstr "``flwr/base``"
 
-#: ../../flwr federation list:1 supernode
-#, fuzzy
-msgid "Enable verbose output"
-msgstr "예시"
-
-#: ../../flwr federation list:1 run:1 supernode
-#, fuzzy
-msgid "``False``"
-msgstr "``flwr/base``"
-
 #: ../../source/ref-api-cli.rst
 #, fuzzy
 msgid "Arguments"
@@ -16280,10 +16268,11 @@ msgid "**Run ID:** Unique identifier for the run."
 msgstr "현재 실행에 대한 식별자입니다."
 
 #: ../../flwr list:1
-#, python-brace-format
-msgid ""
-"**FAB:** Name of the FAB associated with the run (``{FAB_ID} "
-"(v{FAB_VERSION})``)."
+msgid "**Federation:** The federation to which the run belongs."
+msgstr ""
+
+#: ../../flwr list:1
+msgid "**App:** The App associated with the run (``<APP_ID>==<APP_VERSION>``)."
 msgstr ""
 
 #: ../../flwr list:1
@@ -16298,17 +16287,8 @@ msgstr ""
 
 #: ../../flwr list:1
 #, fuzzy
-msgid "**Created At:** Timestamp when the run was created."
+msgid "**Status Changed @:** Timestamp of the most recent status change."
 msgstr "메시지가 생성된 때의 Unix timestamp입니다."
-
-#: ../../flwr list:1
-#, fuzzy
-msgid "**Running At:** Timestamp when the run started running."
-msgstr "메시지가 생성된 때의 Unix timestamp입니다."
-
-#: ../../flwr list:1
-msgid "**Finished At:** Timestamp when the run finished."
-msgstr ""
 
 #: ../../flwr list:1
 msgid ""
@@ -16341,6 +16321,11 @@ msgstr ""
 #: ../../flwr list:1
 msgid "List all runs"
 msgstr ""
+
+#: ../../flwr list:1 run:1 supernode
+#, fuzzy
+msgid "``False``"
+msgstr "``flwr/base``"
 
 #: ../../flwr list:1
 msgid "Specific run ID to display"
@@ -16482,6 +16467,11 @@ msgstr "Flower 커뮤니티 가입하기"
 #, fuzzy
 msgid "Manage SuperNodes"
 msgstr "SuperNodes 인증하기"
+
+#: ../../flwr list:1 supernode
+#, fuzzy
+msgid "Enable verbose output"
+msgstr "예시"
 
 #: ../../flwr register:1 supernode
 #, fuzzy
@@ -30845,50 +30835,53 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-exit-codes/304.rst:2
-msgid "[304] SUPERNODE_TRUST_ENTITY_REQUIRED"
+msgid "[304] SUPERNODE_INVALID_TRUSTED_ENTITIES"
 msgstr ""
 
 #: ../../source/ref-exit-codes/304.rst:7
 msgid ""
-"This error occurs when entity verification is enabled using the "
-"``--enable-entities-verification`` flag, but no trusted entities have "
-"been provided. The SuperNode should be restarted with a valid list of "
-"trusted entities."
+"This error occurs when an invalid YAML file for trusted entities is "
+"provided via the ``--trusted-entities`` option. The SuperNode must be "
+"restarted with a valid trusted entities list."
 msgstr ""
 
 #: ../../source/ref-exit-codes/304.rst:14
-msgid "To fix this issue, you can either:"
+msgid "To resolve this issue, you can do one of the following:"
 msgstr ""
 
 #: ../../source/ref-exit-codes/304.rst:16
 msgid ""
-"Provide a trusted entities list with ``--trust-entities`` when launching "
-"the SuperNode. Supply a YAML file (for example, ``--trust-entities "
-"./pks.yaml``) containing the trusted entities’ public key IDs and their "
-"corresponding public keys."
+"**Provide a valid trusted entities list** using the ``--trusted-"
+"entities`` option when launching the SuperNode. Supply a YAML file (for "
+"example, ``--trusted-entities ./pks.yaml``) that contains the trusted "
+"entities’ public key IDs and their corresponding public keys."
 msgstr ""
 
-#: ../../source/ref-exit-codes/304.rst:20
+#: ../../source/ref-exit-codes/304.rst:21
 msgid ""
-"The public keys must be in **OpenSSH format**, and currently only the "
-"**ssh-ed25519** key type is supported."
+"Public keys must be in **OpenSSH format**, and currently only the **ssh-"
+"ed25519** key type is supported."
 msgstr ""
 
-#: ../../source/ref-exit-codes/304.rst:22
+#: ../../source/ref-exit-codes/304.rst:23
 msgid ""
 "Public key IDs must follow the format ``fpk_<UUID>``, where ``fpk`` "
 "stands for Flower Public Key."
 msgstr ""
 
-#: ../../source/ref-exit-codes/304.rst:24
+#: ../../source/ref-exit-codes/304.rst:25
 msgid "The YAML file should follow this structure:"
 msgstr ""
 
-#: ../../source/ref-exit-codes/304.rst:31
+#: ../../source/ref-exit-codes/304.rst:32
+msgid "\\*Comments are optional."
+msgstr ""
+
+#: ../../source/ref-exit-codes/304.rst:34
 msgid ""
-"Disable entity verification. Remove the ``--enable-entities-"
-"verification`` flag when starting the SuperNode to run without entity "
-"verification."
+"**Disable entity verification** by removing the ``--trusted-entities`` "
+"option when starting the SuperNode. This allows the SuperNode to run "
+"without entity verification."
 msgstr ""
 
 #: ../../source/ref-exit-codes/400.rst:2
@@ -59248,5 +59241,56 @@ msgstr ""
 #~ msgstr "시뮬레이션 실행"
 
 #~ msgid "start\\_simulation"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**FAB:** Name of the FAB associated "
+#~ "with the run (``{FAB_ID} (v{FAB_VERSION})``)."
+#~ msgstr ""
+
+#~ msgid "**Created At:** Timestamp when the run was created."
+#~ msgstr "메시지가 생성된 때의 Unix timestamp입니다."
+
+#~ msgid "**Finished At:** Timestamp when the run finished."
+#~ msgstr ""
+
+#~ msgid "[304] SUPERNODE_TRUST_ENTITY_REQUIRED"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This error occurs when entity "
+#~ "verification is enabled using the "
+#~ "``--enable-entities-verification`` flag, but "
+#~ "no trusted entities have been provided."
+#~ " The SuperNode should be restarted "
+#~ "with a valid list of trusted "
+#~ "entities."
+#~ msgstr ""
+
+#~ msgid "To fix this issue, you can either:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Provide a trusted entities list with "
+#~ "``--trust-entities`` when launching the "
+#~ "SuperNode. Supply a YAML file (for "
+#~ "example, ``--trust-entities ./pks.yaml``) "
+#~ "containing the trusted entities’ public "
+#~ "key IDs and their corresponding public"
+#~ " keys."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The public keys must be in "
+#~ "**OpenSSH format**, and currently only "
+#~ "the **ssh-ed25519** key type is "
+#~ "supported."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Disable entity verification. Remove the "
+#~ "``--enable-entities-verification`` flag when "
+#~ "starting the SuperNode to run without"
+#~ " entity verification."
 #~ msgstr ""
 
