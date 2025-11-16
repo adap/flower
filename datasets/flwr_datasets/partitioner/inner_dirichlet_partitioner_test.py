@@ -15,7 +15,6 @@
 """Test DirichletPartitioner."""
 # pylint: disable=W0212
 import unittest
-from typing import Union
 
 from datasets import Dataset
 from flwr_datasets.common.typing import NDArrayFloat, NDArrayInt
@@ -27,8 +26,8 @@ from flwr_datasets.partitioner.inner_dirichlet_partitioner import (
 def _dummy_setup(
     num_rows: int,
     partition_by: str,
-    partition_sizes: Union[list[int], NDArrayInt],
-    alpha: Union[float, list[float], NDArrayFloat],
+    partition_sizes: list[int] | NDArrayInt,
+    alpha: float | list[float] | NDArrayFloat,
 ) -> tuple[Dataset, InnerDirichletPartitioner]:
     """Create a dummy dataset and partitioner for testing."""
     data = {

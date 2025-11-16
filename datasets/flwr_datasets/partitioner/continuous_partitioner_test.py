@@ -16,7 +16,6 @@
 
 # pylint: disable=W0212, R0801, R0917, R0913
 import unittest
-from typing import Optional
 
 import numpy as np
 from parameterized import parameterized
@@ -31,7 +30,7 @@ def _dummy_setup(
     num_rows: int,
     partition_by: str = "score",
     shuffle: bool = True,
-    seed: Optional[int] = 42,
+    seed: int | None = 42,
 ) -> tuple[Dataset, ContinuousPartitioner]:
     """Create a dummy dataset and partitioner for testing."""
     scores = np.linspace(0, 10, num_rows)
