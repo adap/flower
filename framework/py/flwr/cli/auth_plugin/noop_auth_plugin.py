@@ -17,7 +17,6 @@
 
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Optional, Union
 
 from flwr.common.typing import AccountAuthCredentials, AccountAuthLoginDetails
 from flwr.proto.control_pb2_grpc import ControlStub
@@ -46,13 +45,13 @@ class NoOpCliAuthPlugin(CliAuthPlugin):
         """Do nothing."""
 
     def write_tokens_to_metadata(
-        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Sequence[tuple[str, Union[str, bytes]]]:
+        self, metadata: Sequence[tuple[str, str | bytes]]
+    ) -> Sequence[tuple[str, str | bytes]]:
         """Return the metadata unchanged."""
         return metadata
 
     def read_tokens_from_metadata(
-        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Optional[AccountAuthCredentials]:
+        self, metadata: Sequence[tuple[str, str | bytes]]
+    ) -> AccountAuthCredentials | None:
         """Return None."""
         return None

@@ -18,7 +18,6 @@
 import argparse
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Optional
 
 import yaml
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -228,7 +227,7 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
 
 def _try_setup_client_authentication(
     args: argparse.Namespace,
-) -> Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+) -> tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None:
     if not args.auth_supernode_private_key:
         return None
 
@@ -256,8 +255,8 @@ def _try_setup_client_authentication(
 
 
 def _try_obtain_trusted_entities(
-    trusted_entities_path: Optional[Path],
-) -> Optional[dict[str, str]]:
+    trusted_entities_path: Path | None,
+) -> dict[str, str] | None:
     """Validate and return the trust entities."""
     if not trusted_entities_path:
         return None

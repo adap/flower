@@ -16,7 +16,6 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from flwr.common import (
     DisconnectRes,
@@ -46,8 +45,8 @@ class ClientProxy(ABC):
     def get_properties(
         self,
         ins: GetPropertiesIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> GetPropertiesRes:
         """Return the client's properties."""
 
@@ -55,8 +54,8 @@ class ClientProxy(ABC):
     def get_parameters(
         self,
         ins: GetParametersIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> GetParametersRes:
         """Return the current local model parameters."""
 
@@ -64,8 +63,8 @@ class ClientProxy(ABC):
     def fit(
         self,
         ins: FitIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> FitRes:
         """Refine the provided parameters using the locally held dataset."""
 
@@ -73,8 +72,8 @@ class ClientProxy(ABC):
     def evaluate(
         self,
         ins: EvaluateIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset."""
 
@@ -82,7 +81,7 @@ class ClientProxy(ABC):
     def reconnect(
         self,
         ins: ReconnectIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> DisconnectRes:
         """Disconnect and (optionally) reconnect later."""

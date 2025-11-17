@@ -22,7 +22,7 @@ Paper: arxiv.org/abs/2304.07537
 
 
 from logging import WARNING
-from typing import Any, Optional, Union
+from typing import Any
 
 from flwr.common import FitRes, Scalar, ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common.logger import log, warn_deprecated_feature
@@ -57,7 +57,7 @@ class FedXgbNnAvg(FedAvg):
 
     def evaluate(
         self, server_round: int, parameters: Any
-    ) -> Optional[tuple[float, dict[str, Scalar]]]:
+    ) -> tuple[float, dict[str, Scalar]] | None:
         """Evaluate model parameters using an evaluation function."""
         if self.evaluate_fn is None:
             # No evaluation function provided
@@ -72,8 +72,8 @@ class FedXgbNnAvg(FedAvg):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Any], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Any | None, dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}

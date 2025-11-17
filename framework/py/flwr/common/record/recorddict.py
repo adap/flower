@@ -20,7 +20,7 @@ from __future__ import annotations
 import json
 from logging import WARN
 from textwrap import indent
-from typing import TypeVar, Union, cast
+from typing import TypeVar, cast
 
 from ..inflatable import InflatableObject, add_header_to_object_body, get_object_body
 from ..logger import log
@@ -29,7 +29,7 @@ from .configrecord import ConfigRecord
 from .metricrecord import MetricRecord
 from .typeddict import TypedDict
 
-RecordType = Union[ArrayRecord, MetricRecord, ConfigRecord]
+RecordType = ArrayRecord | MetricRecord | ConfigRecord
 
 
 class _WarningTracker:
@@ -59,7 +59,7 @@ def _check_key(key: str) -> None:
 
 
 def _check_value(value: RecordType) -> None:
-    if not isinstance(value, (ArrayRecord, MetricRecord, ConfigRecord)):
+    if not isinstance(value, (ArrayRecord | MetricRecord | ConfigRecord)):
         raise TypeError(
             f"Expected `{ArrayRecord.__name__}`, `{MetricRecord.__name__}`, "
             f"or `{ConfigRecord.__name__}` but received "
@@ -76,7 +76,7 @@ class _SyncedDict(TypedDict[str, T]):
     """
 
     def __init__(self, ref_recorddict: RecordDict, allowed_type: type[T]) -> None:
-        if not issubclass(allowed_type, (ArrayRecord, MetricRecord, ConfigRecord)):
+        if not issubclass(allowed_type, (ArrayRecord | MetricRecord | ConfigRecord)):
             raise TypeError(f"{allowed_type} is not a valid type.")
         super().__init__(_check_key, self.check_value)
         self.recorddict = ref_recorddict
@@ -341,7 +341,7 @@ class RecordDict(TypedDict[str, RecordType], InflatableObject):
 
         # Ensure children are one of the *Record objects exepecte in a RecordDict
         if not all(
-            isinstance(ch, (ArrayRecord, ConfigRecord, MetricRecord))
+            isinstance(ch, (ArrayRecord | ConfigRecord | MetricRecord))
             for ch in children.values()
         ):
             raise ValueError(

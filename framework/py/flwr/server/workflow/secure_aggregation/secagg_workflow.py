@@ -15,8 +15,6 @@
 """Workflow for the SecAgg protocol."""
 
 
-from typing import Optional, Union
-
 from .secaggplus_workflow import SecAggPlusWorkflow
 
 
@@ -94,13 +92,13 @@ class SecAggWorkflow(SecAggPlusWorkflow):
 
     def __init__(  # pylint: disable=R0913
         self,
-        reconstruction_threshold: Union[int, float],
+        reconstruction_threshold: int | float,
         *,
         max_weight: float = 1000.0,
         clipping_range: float = 8.0,
         quantization_range: int = 4194304,
         modulus_range: int = 4294967296,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> None:
         super().__init__(
             num_shares=1.0,

@@ -23,7 +23,6 @@ import unittest
 from abc import abstractmethod
 from datetime import datetime, timedelta, timezone
 from itertools import product
-from typing import Optional
 from unittest.mock import Mock, patch
 from uuid import uuid4
 
@@ -1683,7 +1682,7 @@ def create_res_message(
     src_node_id: int,
     dst_node_id: int,
     run_id: int,
-    error: Optional[Error] = None,
+    error: Error | None = None,
 ) -> ProtoMessage:
     """Create a (reply) Message for testing."""
     in_msg_proto = create_ins_message(
@@ -1729,13 +1728,13 @@ def create_dummy_node(
 
 def create_dummy_run(  # pylint: disable=too-many-positional-arguments
     state: LinkState,
-    fab_id: Optional[str] = "mock_fab_id",
-    fab_version: Optional[str] = "mock_fab_version",
-    fab_hash: Optional[str] = "mock_fab_hash",
-    override_config: Optional[UserConfig] = None,
+    fab_id: str | None = "mock_fab_id",
+    fab_version: str | None = "mock_fab_version",
+    fab_hash: str | None = "mock_fab_hash",
+    override_config: UserConfig | None = None,
     federation: str = "mock_federation",
-    federation_options: Optional[ConfigRecord] = None,
-    flwr_aid: Optional[str] = "mock_flwr_aid",
+    federation_options: ConfigRecord | None = None,
+    flwr_aid: str | None = "mock_flwr_aid",
 ) -> int:
     """Create a dummy run."""
     return state.create_run(

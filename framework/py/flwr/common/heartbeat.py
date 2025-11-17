@@ -17,7 +17,7 @@
 
 import random
 import threading
-from typing import Callable, Union
+from collections.abc import Callable
 
 import grpc
 
@@ -117,7 +117,7 @@ class HeartbeatSender:
 
 
 def get_grpc_app_heartbeat_fn(
-    stub: Union[ServerAppIoStub, SimulationIoStub],
+    stub: ServerAppIoStub | SimulationIoStub,
     run_id: int,
     *,
     failure_message: str,

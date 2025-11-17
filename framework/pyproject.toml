@@ -79,7 +79,10 @@ pyyaml = "^6.0.2"
 requests = "^2.31.0"
 click = "<8.2.0"
 # Optional dependencies (Simulation Engine)
-ray = { version = "==2.51.1", optional = true, python = ">=3.10,<3.13" }
+ray = [
+    { version = "==2.51.1", optional = true, python = ">=3.10,<3.13" },
+    { version = "==2.51.1", optional = true, python = "==3.13", markers = "sys_platform != 'win32'" },
+]
 # Optional dependencies (REST transport layer)
 starlette = { version = "^0.45.2", optional = true }
 uvicorn = { version = "^0.34.0", extras = ["standard"], optional = true }
@@ -95,7 +98,7 @@ types-requests = "==2.31.0.20240125"
 types-setuptools = "==69.0.0.20240125"
 clang-format = "==17.0.6"
 isort = "==5.13.2"
-black = { version = "==24.2.0", extras = ["jupyter"] }
+black = { version = "==24.10.0", extras = ["jupyter"] }
 taplo = "==0.9.3"
 docformatter = "==1.7.5"
 mypy = "==1.8.0"
@@ -157,7 +160,7 @@ known_first_party = ["flwr", "flwr_tool"]
 
 [tool.black]
 line-length = 88
-target-version = ["py39", "py310", "py311"]
+target-version = ["py310", "py311", "py312", "py313"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "duplicate-code,too-few-public-methods,useless-import-alias"
@@ -202,7 +205,7 @@ wrap-summaries = 88
 wrap-descriptions = 88
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 88
 exclude = [
     ".bzr",

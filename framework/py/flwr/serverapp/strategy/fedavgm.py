@@ -19,9 +19,8 @@ Paper: arxiv.org/pdf/1909.06335.pdf
 
 
 from collections import OrderedDict
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from logging import INFO
-from typing import Callable, Optional
 
 from flwr.common import (
     Array,
@@ -93,12 +92,12 @@ class FedAvgM(FedAvg):
         weighted_by_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
         configrecord_key: str = "config",
-        train_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
-        evaluate_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
+        train_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
+        evaluate_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
         server_learning_rate: float = 1.0,
         server_momentum: float = 0.0,
     ) -> None:
@@ -119,8 +118,8 @@ class FedAvgM(FedAvg):
         self.server_opt: bool = (self.server_momentum != 0.0) or (
             self.server_learning_rate != 1.0
         )
-        self.current_arrays: Optional[ArrayRecord] = None
-        self.momentum_vector: Optional[NDArrays] = None
+        self.current_arrays: ArrayRecord | None = None
+        self.momentum_vector: NDArrays | None = None
 
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
@@ -143,7 +142,7 @@ class FedAvgM(FedAvg):
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         # Call FedAvg aggregate_train to perform validation and aggregation
         aggregated_arrays, aggregated_metrics = super().aggregate_train(

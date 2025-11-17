@@ -19,7 +19,7 @@ import io
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Annotated, Optional, cast
+from typing import Annotated, cast
 
 import typer
 from rich.console import Console
@@ -54,7 +54,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917
         typer.Argument(help="Path of the Flower project"),
     ] = Path("."),
     federation: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(help="Name of the federation"),
     ] = None,
     output_format: Annotated[
@@ -138,7 +138,7 @@ def _format_nodes(
 ) -> list[_NodeListType]:
     """Format node information for display."""
 
-    def _format_datetime(dt_str: Optional[str]) -> str:
+    def _format_datetime(dt_str: str | None) -> str:
         dt = datetime.fromisoformat(dt_str) if dt_str else None
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
 

@@ -17,7 +17,6 @@
 
 from abc import abstractmethod
 from collections.abc import Sequence
-from typing import Optional
 
 from flwr.common import Context, Message
 from flwr.common.typing import Run
@@ -36,7 +35,7 @@ class NodeState(CoreState):
         """Get the node ID."""
 
     @abstractmethod
-    def store_message(self, message: Message) -> Optional[str]:
+    def store_message(self, message: Message) -> str | None:
         """Store a message.
 
         Parameters
@@ -54,9 +53,9 @@ class NodeState(CoreState):
     def get_messages(
         self,
         *,
-        run_ids: Optional[Sequence[int]] = None,
-        is_reply: Optional[bool] = None,
-        limit: Optional[int] = None,
+        run_ids: Sequence[int] | None = None,
+        is_reply: bool | None = None,
+        limit: int | None = None,
     ) -> Sequence[Message]:
         """Retrieve messages based on the specified filters.
 
@@ -89,7 +88,7 @@ class NodeState(CoreState):
     def delete_messages(
         self,
         *,
-        message_ids: Optional[Sequence[str]] = None,
+        message_ids: Sequence[str] | None = None,
     ) -> None:
         """Delete messages based on the specified filters.
 
@@ -118,7 +117,7 @@ class NodeState(CoreState):
         """
 
     @abstractmethod
-    def get_run(self, run_id: int) -> Optional[Run]:
+    def get_run(self, run_id: int) -> Run | None:
         """Retrieve a run by its ID.
 
         Parameters
@@ -143,7 +142,7 @@ class NodeState(CoreState):
         """
 
     @abstractmethod
-    def get_context(self, run_id: int) -> Optional[Context]:
+    def get_context(self, run_id: int) -> Context | None:
         """Retrieve a context by its run ID.
 
         Parameters

@@ -20,7 +20,6 @@ Paper (Andrew et al.): https://arxiv.org/abs/1905.03871
 
 import math
 from logging import INFO, WARNING
-from typing import Optional, Union
 
 import numpy as np
 
@@ -97,7 +96,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
         initial_clipping_norm: float = 0.1,
         target_clipped_quantile: float = 0.5,
         clip_norm_lr: float = 0.2,
-        clipped_count_stddev: Optional[float] = None,
+        clipped_count_stddev: float | None = None,
     ) -> None:
         super().__init__()
 
@@ -148,9 +147,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
         rep = "Differential Privacy Strategy Wrapper (Server-Side Adaptive Clipping)"
         return rep
 
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
+    def initialize_parameters(self, client_manager: ClientManager) -> Parameters | None:
         """Initialize global model parameters using given strategy."""
         return self.strategy.initialize_parameters(client_manager)
 
@@ -173,8 +170,8 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate training results and update clip norms."""
         if failures:
             return None, {}
@@ -247,14 +244,14 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, EvaluateRes]],
-        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> tuple[Optional[float], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, EvaluateRes] | BaseException],
+    ) -> tuple[float | None, dict[str, Scalar]]:
         """Aggregate evaluation losses using the given strategy."""
         return self.strategy.aggregate_evaluate(server_round, results, failures)
 
     def evaluate(
         self, server_round: int, parameters: Parameters
-    ) -> Optional[tuple[float, dict[str, Scalar]]]:
+    ) -> tuple[float, dict[str, Scalar]] | None:
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
@@ -317,7 +314,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
         initial_clipping_norm: float = 0.1,
         target_clipped_quantile: float = 0.5,
         clip_norm_lr: float = 0.2,
-        clipped_count_stddev: Optional[float] = None,
+        clipped_count_stddev: float | None = None,
     ) -> None:
         super().__init__()
 
@@ -365,9 +362,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
         rep = "Differential Privacy Strategy Wrapper (Client-Side Adaptive Clipping)"
         return rep
 
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
+    def initialize_parameters(self, client_manager: ClientManager) -> Parameters | None:
         """Initialize global model parameters using given strategy."""
         return self.strategy.initialize_parameters(client_manager)
 
@@ -396,8 +391,8 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate training results and update clip norms."""
         if failures:
             return None, {}
@@ -459,13 +454,13 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, EvaluateRes]],
-        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> tuple[Optional[float], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, EvaluateRes] | BaseException],
+    ) -> tuple[float | None, dict[str, Scalar]]:
         """Aggregate evaluation losses using the given strategy."""
         return self.strategy.aggregate_evaluate(server_round, results, failures)
 
     def evaluate(
         self, server_round: int, parameters: Parameters
-    ) -> Optional[tuple[float, dict[str, Scalar]]]:
+    ) -> tuple[float, dict[str, Scalar]] | None:
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)

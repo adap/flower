@@ -20,8 +20,8 @@ Paper: proceedings.neurips.cc/paper/2017/file/f4b9ec30ad9f68f89b29639786cb62ef-P
 """
 
 
+from collections.abc import Callable
 from logging import WARNING
-from typing import Callable, Optional, Union
 
 from flwr.common import (
     FitRes,
@@ -85,18 +85,19 @@ class Krum(FedAvg):
         min_available_clients: int = 2,
         num_malicious_clients: int = 0,
         num_clients_to_keep: int = 0,
-        evaluate_fn: Optional[
+        evaluate_fn: (
             Callable[
                 [int, NDArrays, dict[str, Scalar]],
-                Optional[tuple[float, dict[str, Scalar]]],
+                tuple[float, dict[str, Scalar]] | None,
             ]
-        ] = None,
-        on_fit_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
+            | None
+        ) = None,
+        on_fit_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
+        on_evaluate_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
         accept_failures: bool = True,
-        initial_parameters: Optional[Parameters] = None,
-        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        initial_parameters: Parameters | None = None,
+        fit_metrics_aggregation_fn: MetricsAggregationFn | None = None,
+        evaluate_metrics_aggregation_fn: MetricsAggregationFn | None = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -124,8 +125,8 @@ class Krum(FedAvg):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate fit results using Krum."""
         if not results:
             return None, {}

@@ -68,7 +68,7 @@ audio = ["soundfile", "librosa"]
 types-requests = "==2.31.0.20240125"
 types-setuptools = "==69.0.0.20240125"
 isort = "==5.13.2"
-black = { version = "==24.2.0", extras = ["jupyter"] }
+black = { version = "==24.10.0", extras = ["jupyter"] }
 taplo = "==0.9.3"
 docformatter = "==1.7.5"
 mypy = "==1.8.0"
@@ -90,7 +90,7 @@ known_first_party = ["flwr_datasets"]
 
 [tool.black]
 line-length = 88
-target-version = ["py39", "py310", "py311"]
+target-version = ["py310", "py311", "py312", "py313"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "duplicate-code,too-few-public-methods,useless-import-alias"
@@ -121,7 +121,7 @@ wrap-summaries = 88
 wrap-descriptions = 88
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 88
 exclude = [
     ".bzr",

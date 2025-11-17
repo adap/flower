@@ -18,8 +18,9 @@ Paper: arxiv.org/abs/1802.07927
 """
 
 
+from collections.abc import Callable
 from logging import WARNING
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 from flwr.common import (
     FitRes,
@@ -84,18 +85,19 @@ class Bulyan(FedAvg):
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
         num_malicious_clients: int = 0,
-        evaluate_fn: Optional[
+        evaluate_fn: (
             Callable[
                 [int, NDArrays, dict[str, Scalar]],
-                Optional[tuple[float, dict[str, Scalar]]],
+                tuple[float, dict[str, Scalar]] | None,
             ]
-        ] = None,
-        on_fit_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
+            | None
+        ) = None,
+        on_fit_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
+        on_evaluate_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
         accept_failures: bool = True,
-        initial_parameters: Optional[Parameters] = None,
-        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        initial_parameters: Parameters | None = None,
+        fit_metrics_aggregation_fn: MetricsAggregationFn | None = None,
+        evaluate_metrics_aggregation_fn: MetricsAggregationFn | None = None,
         first_aggregation_rule: Callable = aggregate_krum,  # type: ignore
         **aggregation_rule_kwargs: Any,
     ) -> None:
@@ -126,8 +128,8 @@ class Bulyan(FedAvg):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate fit results using Bulyan."""
         if not results:
             return None, {}

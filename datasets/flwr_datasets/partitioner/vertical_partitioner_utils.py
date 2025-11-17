@@ -15,7 +15,7 @@
 """VerticalPartitioner utils.py."""
 # noqa: E501
 # pylint: disable=C0301
-from typing import Any, Literal, Union
+from typing import Any, Literal
 
 
 def _list_split(lst: list[Any], num_sublists: int) -> list[list[Any]]:
@@ -48,17 +48,17 @@ def _list_split(lst: list[Any], num_sublists: int) -> list[list[Any]]:
 
 
 def _add_active_party_columns(  # pylint: disable=R0912
-    active_party_columns: Union[str, list[str]],
-    active_party_columns_mode: Union[
+    active_party_columns: str | list[str],
+    active_party_columns_mode: (
         Literal[
             "add_to_first",
             "add_to_last",
             "create_as_first",
             "create_as_last",
             "add_to_all",
-        ],
-        int,
-    ],
+        ]
+        | int
+    ),
     partition_columns: list[list[str]],
 ) -> list[list[str]]:
     """Add active party columns to the partition columns based on the mode.
@@ -105,7 +105,7 @@ def _add_active_party_columns(  # pylint: disable=R0912
     return partition_columns
 
 
-def _init_optional_str_or_list_str(parameter: Union[str, list[str], None]) -> list[str]:
+def _init_optional_str_or_list_str(parameter: str | list[str] | None) -> list[str]:
     """Initialize a parameter as a list of strings.
 
     Parameters
@@ -120,7 +120,7 @@ def _init_optional_str_or_list_str(parameter: Union[str, list[str], None]) -> li
     """
     if parameter is None:
         return []
-    if not isinstance(parameter, (str, list)):
+    if not isinstance(parameter, (str | list)):
         raise TypeError("Parameter must be a string or a list of strings")
     if isinstance(parameter, list) and not all(
         isinstance(single_param, str) for single_param in parameter

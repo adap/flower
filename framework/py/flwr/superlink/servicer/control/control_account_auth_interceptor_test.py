@@ -16,7 +16,8 @@
 
 
 import unittest
-from typing import Any, Callable, Union
+from collections.abc import Callable
+from typing import Any
 from unittest.mock import MagicMock
 
 import grpc
@@ -132,10 +133,10 @@ class TestControlAccountAuthInterceptor(unittest.TestCase):
         interceptor = ControlAccountAuthInterceptor(
             authn_plugin=dummy_authn_plugin, authz_plugin=dummy_authz_plugin
         )
-        continuation: Union[
-            Callable[[Any], NoOpUnaryUnaryHandler],
-            Callable[[Any], NoOpUnaryStreamHandler],
-        ] = get_noop_unary_unary_handler
+        continuation: (
+            Callable[[Any], NoOpUnaryUnaryHandler]
+            | Callable[[Any], NoOpUnaryStreamHandler]
+        ) = get_noop_unary_unary_handler
         # Set up unary-stream case for StreamLogsRequest
         if isinstance(request, StreamLogsRequest):
             continuation = get_noop_unary_stream_handler
@@ -183,10 +184,10 @@ class TestControlAccountAuthInterceptor(unittest.TestCase):
         interceptor = ControlAccountAuthInterceptor(
             authn_plugin=dummy_authn_plugin, authz_plugin=dummy_authz_plugin
         )
-        continuation: Union[
-            Callable[[Any], NoOpUnaryUnaryHandler],
-            Callable[[Any], NoOpUnaryStreamHandler],
-        ] = get_noop_unary_unary_handler
+        continuation: (
+            Callable[[Any], NoOpUnaryUnaryHandler]
+            | Callable[[Any], NoOpUnaryStreamHandler]
+        ) = get_noop_unary_unary_handler
         # Set up unary-stream case for StreamLogsRequest
         if isinstance(request, StreamLogsRequest):
             continuation = get_noop_unary_stream_handler
@@ -250,10 +251,10 @@ class TestControlAccountAuthInterceptor(unittest.TestCase):
         interceptor = ControlAccountAuthInterceptor(
             authn_plugin=dummy_authn_plugin, authz_plugin=dummy_authz_plugin
         )
-        continuation: Union[
-            Callable[[Any], NoOpUnaryUnaryHandler],
-            Callable[[Any], NoOpUnaryStreamHandler],
-        ] = get_noop_unary_unary_handler
+        continuation: (
+            Callable[[Any], NoOpUnaryUnaryHandler]
+            | Callable[[Any], NoOpUnaryStreamHandler]
+        ) = get_noop_unary_unary_handler
         # Set up unary-stream case for StreamLogsRequest
         if isinstance(request, StreamLogsRequest):
             continuation = get_noop_unary_stream_handler
@@ -330,10 +331,10 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
         )
 
         # Pick correct continuation for unary vs stream
-        continuation: Union[
-            Callable[[Any], NoOpUnaryUnaryHandler],
-            Callable[[Any], NoOpUnaryStreamHandler],
-        ] = get_noop_unary_unary_handler
+        continuation: (
+            Callable[[Any], NoOpUnaryUnaryHandler]
+            | Callable[[Any], NoOpUnaryStreamHandler]
+        ) = get_noop_unary_unary_handler
         if isinstance(request, StreamLogsRequest):
             continuation = get_noop_unary_stream_handler
 
@@ -372,10 +373,10 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
             authn_plugin=self.authn_plugin, authz_plugin=self.authz_plugin
         )
 
-        continuation: Union[
-            Callable[[Any], NoOpUnaryUnaryHandler],
-            Callable[[Any], NoOpUnaryStreamHandler],
-        ] = get_noop_unary_unary_handler
+        continuation: (
+            Callable[[Any], NoOpUnaryUnaryHandler]
+            | Callable[[Any], NoOpUnaryStreamHandler]
+        ) = get_noop_unary_unary_handler
         if isinstance(request, StreamLogsRequest):
             continuation = get_noop_unary_stream_handler
 

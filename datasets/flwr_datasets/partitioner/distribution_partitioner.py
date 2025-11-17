@@ -16,7 +16,6 @@
 
 
 from collections import Counter
-from typing import Optional, Union
 
 import numpy as np
 
@@ -160,14 +159,14 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
 
     def __init__(  # pylint: disable=R0913, R0917
         self,
-        distribution_array: Union[NDArrayInt, NDArrayFloat],
+        distribution_array: NDArrayInt | NDArrayFloat,
         num_partitions: int,
         num_unique_labels_per_partition: int,
         partition_by: str,
         preassigned_num_samples_per_label: int,
         rescale: bool = True,
         shuffle: bool = True,
-        seed: Optional[int] = 42,
+        seed: int | None = 42,
     ) -> None:
         super().__init__()
         # Attributes based on the constructor
@@ -278,7 +277,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
 
         # Create the label sampling dictionary
         label_samples = dict(
-            zip(unique_label_distribution.keys(), label_sampling_matrix)
+            zip(unique_label_distribution.keys(), label_sampling_matrix, strict=False)
         )
 
         # Create indices split from dataset

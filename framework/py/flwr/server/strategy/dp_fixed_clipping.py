@@ -19,7 +19,6 @@ Papers: https://arxiv.org/abs/1712.07557, https://arxiv.org/abs/1710.06963
 
 
 from logging import INFO, WARNING
-from typing import Optional, Union
 
 from flwr.common import (
     EvaluateIns,
@@ -109,9 +108,7 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
         rep = "Differential Privacy Strategy Wrapper (Server-Side Fixed Clipping)"
         return rep
 
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
+    def initialize_parameters(self, client_manager: ClientManager) -> Parameters | None:
         """Initialize global model parameters using given strategy."""
         return self.strategy.initialize_parameters(client_manager)
 
@@ -134,8 +131,8 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Compute the updates, clip, and pass them for aggregation.
 
         Afterward, add noise to the aggregated parameters.
@@ -192,14 +189,14 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, EvaluateRes]],
-        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> tuple[Optional[float], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, EvaluateRes] | BaseException],
+    ) -> tuple[float | None, dict[str, Scalar]]:
         """Aggregate evaluation losses using the given strategy."""
         return self.strategy.aggregate_evaluate(server_round, results, failures)
 
     def evaluate(
         self, server_round: int, parameters: Parameters
-    ) -> Optional[tuple[float, dict[str, Scalar]]]:
+    ) -> tuple[float, dict[str, Scalar]] | None:
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
@@ -277,9 +274,7 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
         rep = "Differential Privacy Strategy Wrapper (Client-Side Fixed Clipping)"
         return rep
 
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
+    def initialize_parameters(self, client_manager: ClientManager) -> Parameters | None:
         """Initialize global model parameters using given strategy."""
         return self.strategy.initialize_parameters(client_manager)
 
@@ -308,8 +303,8 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Add noise to the aggregated parameters."""
         if failures:
             return None, {}
@@ -349,13 +344,13 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, EvaluateRes]],
-        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> tuple[Optional[float], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, EvaluateRes] | BaseException],
+    ) -> tuple[float | None, dict[str, Scalar]]:
         """Aggregate evaluation losses using the given strategy."""
         return self.strategy.aggregate_evaluate(server_round, results, failures)
 
     def evaluate(
         self, server_round: int, parameters: Parameters
-    ) -> Optional[tuple[float, dict[str, Scalar]]]:
+    ) -> tuple[float, dict[str, Scalar]] | None:
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)

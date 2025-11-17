@@ -19,7 +19,6 @@ import argparse
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
-from typing import Optional
 
 from flwr.app.exception import AppExitException
 from flwr.cli.config_utils import get_fab_metadata
@@ -73,7 +72,7 @@ from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 def flwr_serverapp() -> None:
     """Run process-isolated Flower ServerApp."""
     # Capture stdout/stderr
-    log_queue: Queue[Optional[str]] = Queue()
+    log_queue: Queue[str | None] = Queue()
     mirror_output_to_queue(log_queue)
 
     args = _parse_args_run_flwr_serverapp().parse_args()
@@ -120,11 +119,11 @@ def flwr_serverapp() -> None:
 
 def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     serverappio_api_address: str,
-    log_queue: Queue[Optional[str]],
+    log_queue: Queue[str | None],
     token: str,
-    flwr_dir: Optional[str] = None,
-    certificates: Optional[bytes] = None,
-    parent_pid: Optional[int] = None,
+    flwr_dir: str | None = None,
+    certificates: bytes | None = None,
+    parent_pid: int | None = None,
 ) -> None:
     """Run Flower ServerApp process."""
     # Monitor the main process in case of SIGKILL

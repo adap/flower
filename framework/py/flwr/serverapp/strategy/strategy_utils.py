@@ -20,7 +20,7 @@ import random
 from collections import OrderedDict
 from logging import INFO
 from time import sleep
-from typing import Optional, cast
+from typing import cast
 
 import numpy as np
 
@@ -49,8 +49,8 @@ def config_to_str(config: ConfigRecord) -> str:
 def log_strategy_start_info(
     num_rounds: int,
     arrays: ArrayRecord,
-    train_config: Optional[ConfigRecord],
-    evaluate_config: Optional[ConfigRecord],
+    train_config: ConfigRecord | None,
+    evaluate_config: ConfigRecord | None,
 ) -> None:
     """Log information about the strategy start."""
     log(INFO, "\t├── Number of rounds: %d", num_rounds)
