@@ -2,8 +2,9 @@
 .. meta::
     :description: Learn how to use built-in modifiers to enhance the behaviour of a ClientApp in Flower for federated learning.
 
-Use Built-in Mods
-=================
+###################
+ Use Built-in Mods
+###################
 
 .. note::
 
@@ -14,8 +15,9 @@ In this tutorial, we will learn how to utilize built-in mods to augment the beha
 a ``ClientApp``. Mods (sometimes also called Modifiers) allow us to perform operations
 before and after a task is processed in the ``ClientApp``.
 
-What are Mods?
---------------
+****************
+ What are Mods?
+****************
 
 A Mod is a callable that wraps around a ``ClientApp``. It can manipulate or inspect the
 incoming ``Message`` and the resulting outgoing ``Message``. The signature for a ``Mod``
@@ -43,8 +45,9 @@ A typical mod function might look something like this:
         # before returning
         return msg
 
-Using Mods
-----------
+************
+ Using Mods
+************
 
 Mods can be registered in two ways: **Application-wide mods** and **Function-specific
 mods**.
@@ -55,12 +58,12 @@ mods**.
    function decorated by ``@app.train()``)
 
 1. Registering Application-wide Mods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+====================================
 
 To use application-wide mods in your ``ClientApp``, follow these steps:
 
 Import the required mods
-++++++++++++++++++++++++
+------------------------
 
 .. code-block:: python
 
@@ -68,7 +71,7 @@ Import the required mods
     from flwr.clientapp.mod import example_mod_1, example_mod_2
 
 Create the ``ClientApp`` with application-wide mods
-+++++++++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------------
 
 Create your ``ClientApp`` and pass the mods as a list to the ``mods`` argument. The
 order in which you provide the mods matters:
@@ -83,7 +86,7 @@ order in which you provide the mods matters:
     )
 
 2. Registering Function-specific Mods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=====================================
 
 Instead of applying mods to the entire ``ClientApp``, you can specify them for a
 particular function:
@@ -110,8 +113,9 @@ particular function:
 In this case, ``example_mod_3`` and ``example_mod_4`` are only applied to the ``train``
 function.
 
-Order of Execution
-------------------
+********************
+ Order of Execution
+********************
 
 When the ``ClientApp`` runs, the mods execute in the following order:
 
@@ -128,7 +132,7 @@ to the next mod, and likewise with the outgoing ``Message`` before returning it 
 stack.
 
 Example Execution Flow
-~~~~~~~~~~~~~~~~~~~~~~
+======================
 
 Assuming the following registration:
 
@@ -166,8 +170,9 @@ The execution order for an incoming **evaluate** message is as follows:
 4. ``example_mod_2`` (after handling)
 5. ``example_mod_1`` (after handling)
 
-Conclusion
-----------
+************
+ Conclusion
+************
 
 By following this guide, you have learned how to effectively use mods to enhance your
 ``ClientApp``'s functionality. Remember that the order of mods is crucial and affects

@@ -18,14 +18,16 @@
 
 .. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
 
-Save and load model checkpoints
-===============================
+#################################
+ Save and load model checkpoints
+#################################
 
 This how-to guide describes the steps to save (and load) model checkpoints in
 ``ClientApp`` and ``ServerApp``.
 
-How to save model checkpoints in ``ClientApp``
-----------------------------------------------
+************************************************
+ How to save model checkpoints in ``ClientApp``
+************************************************
 
 Model updates are saved in |arrayrecord_link|_ and transmitted between |serverapp_link|_
 and |clientapp_link|_. To save model checkpoints in |clientapp_link|_, you need to
@@ -67,8 +69,9 @@ NumPy
     # Save model weights to disk
     numpy.savez("model.npz", *ndarrays)
 
-How to save model checkpoints in ``ServerApp``
-----------------------------------------------
+************************************************
+ How to save model checkpoints in ``ServerApp``
+************************************************
 
 To save model checkpoints in |serverapp_link|_ across different FL rounds, you can
 implement this in a customized ``evaluate_fn`` and pass it to the strategy's

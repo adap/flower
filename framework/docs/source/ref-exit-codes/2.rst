@@ -1,7 +1,9 @@
-[2] GRACEFUL_EXIT_SIGQUIT
-=========================
+###########################
+ [2] GRACEFUL_EXIT_SIGQUIT
+###########################
 
-Description
------------
+*************
+ Description
+*************
 
 The process exited gracefully, triggered by ``SIGQUIT``.

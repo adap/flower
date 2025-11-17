@@ -1,13 +1,15 @@
-Flower CLI reference
-====================
+######################
+ Flower CLI reference
+######################
 
-Basic Commands
---------------
+****************
+ Basic Commands
+****************
 
 .. _flwr-apiref:
 
 ``flwr`` CLI
-~~~~~~~~~~~~
+============
 
 .. click:: flwr.cli.app:typer_click_object
     :prog: flwr
@@ -16,7 +18,7 @@ Basic Commands
 .. _flower-superlink-apiref:
 
 ``flower-superlink``
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 .. argparse::
     :module: flwr.server.app
@@ -26,20 +28,21 @@ Basic Commands
 .. _flower-supernode-apiref:
 
 ``flower-supernode``
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 .. argparse::
     :module: flwr.supernode.cli.flower_supernode
     :func: _parse_args_run_supernode
     :prog: flower-supernode
 
-Advanced Commands
------------------
+*******************
+ Advanced Commands
+*******************
 
 .. _flower-superexec-apiref:
 
 ``flower-superexec``
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 .. argparse::
     :module: flwr.supercore.cli.flower_superexec
