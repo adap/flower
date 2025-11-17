@@ -61,7 +61,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """List federations one is a member of."""
+    """List SuperNodes in the federation."""
     # Resolve command used (list or ls)
     command_name = cast(str, ctx.command.name) if ctx.command else "ls"
 
@@ -78,7 +78,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917
         federation, federation_config = validate_federation_in_project_config(
             federation, config
         )
-        exit_if_no_address(federation_config, f"federation {command_name}")
+        exit_if_no_address(federation_config, f"supernode {command_name}")
         channel = None
         try:
             auth_plugin = load_cli_auth_plugin(app, federation, federation_config)

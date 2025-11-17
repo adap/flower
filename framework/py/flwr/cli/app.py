@@ -21,7 +21,6 @@ from flwr.common.version import package_version
 
 from .build import build
 from .federation import ls as federation_list
-from .federation import show as federation_show
 from .install import install
 from .log import log
 from .login import login
@@ -72,7 +71,6 @@ federation_app.command("list")(federation_list)
 # Hide "ls" command (left as alias)
 federation_app.command(hidden=True)(federation_list)
 app.add_typer(federation_app, name="federation")
-federation_app.command()(federation_show)
 
 typer_click_object = get_command(app)
 
