@@ -4,7 +4,7 @@ Get started as a contributor
 Prerequisites
 -------------
 
-- `Python 3.9 <https://docs.python.org/3.9/>`_ or above
+- `Python 3.10 <https://docs.python.org/3.10/>`_ or above
 - `Poetry 1.3 <https://python-poetry.org/>`_ or above
 - (Optional) `pyenv <https://github.com/pyenv/pyenv>`_
 - (Optional) `pyenv-virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_

@@ -10,7 +10,7 @@ authors = ["The Flower Authors <hello@flower.ai>"]
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 flwr-datasets = { path = "./../../", extras = ["vision"] }
 torch = ">=1.12.0,<3.0.0"
 torchvision = ">=0.19.0,<1.0.0"

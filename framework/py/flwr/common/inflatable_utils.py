@@ -19,8 +19,8 @@ import os
 import random
 import threading
 import time
-from collections.abc import Iterable, Iterator
-from typing import Callable, Optional, TypeVar
+from collections.abc import Callable, Iterable, Iterator
+from typing import TypeVar
 
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
@@ -116,7 +116,7 @@ def push_objects(
     objects: dict[str, InflatableObject],
     push_object_fn: Callable[[str, bytes], None],
     *,
-    object_ids_to_push: Optional[set[str]] = None,
+    object_ids_to_push: set[str] | None = None,
     keep_objects: bool = False,
     max_concurrent_pushes: int = FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PUSHES,
 ) -> None:
@@ -211,8 +211,8 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
     pull_object_fn: Callable[[str], bytes],
     *,
     max_concurrent_pulls: int = FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PULLS,
-    max_time: Optional[float] = PULL_MAX_TIME,
-    max_tries_per_object: Optional[int] = PULL_MAX_TRIES_PER_OBJECT,
+    max_time: float | None = PULL_MAX_TIME,
+    max_tries_per_object: int | None = PULL_MAX_TRIES_PER_OBJECT,
     initial_backoff: float = PULL_INITIAL_BACKOFF,
     backoff_cap: float = PULL_BACKOFF_CAP,
 ) -> dict[str, bytes]:
@@ -254,7 +254,7 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
 
     results: dict[str, bytes] = {}
     results_lock = threading.Lock()
-    err_to_raise: Optional[Exception] = None
+    err_to_raise: Exception | None = None
     early_stop = threading.Event()
     start = time.monotonic()
 
@@ -323,7 +323,7 @@ def inflate_object_from_contents(
     object_contents: dict[str, bytes],
     *,
     keep_object_contents: bool = False,
-    objects: Optional[dict[str, InflatableObject]] = None,
+    objects: dict[str, InflatableObject] | None = None,
 ) -> InflatableObject:
     """Inflate an object from object contents.
 
@@ -443,8 +443,8 @@ def pull_and_inflate_object_from_tree(  # pylint: disable=R0913
     *,
     return_type: type[T] = InflatableObject,  # type: ignore
     max_concurrent_pulls: int = FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PULLS,
-    max_time: Optional[float] = PULL_MAX_TIME,
-    max_tries_per_object: Optional[int] = PULL_MAX_TRIES_PER_OBJECT,
+    max_time: float | None = PULL_MAX_TIME,
+    max_tries_per_object: int | None = PULL_MAX_TRIES_PER_OBJECT,
     initial_backoff: float = PULL_INITIAL_BACKOFF,
     backoff_cap: float = PULL_BACKOFF_CAP,
 ) -> T:

@@ -18,9 +18,9 @@ Paper: arxiv.org/abs/1803.01498
 """
 
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from logging import INFO
-from typing import Callable, Optional, cast
+from typing import cast
 
 import numpy as np
 
@@ -83,12 +83,12 @@ class FedTrimmedAvg(FedAvg):
         weighted_by_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
         configrecord_key: str = "config",
-        train_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
-        evaluate_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
+        train_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
+        evaluate_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
         beta: float = 0.2,
     ) -> None:
         super().__init__(
@@ -115,7 +115,7 @@ class FedTrimmedAvg(FedAvg):
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         # Call FedAvg aggregate_train to perform validation and aggregation
         valid_replies, _ = self._check_and_log_replies(replies, is_train=True)

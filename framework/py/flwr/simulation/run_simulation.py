@@ -26,7 +26,7 @@ import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from queue import Empty, Queue
-from typing import Any, Optional
+from typing import Any
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
@@ -177,7 +177,7 @@ def run_simulation(
     client_app: ClientApp,
     num_supernodes: int,
     backend_name: str = "ray",
-    backend_config: Optional[BackendConfig] = None,
+    backend_config: BackendConfig | None = None,
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
 ) -> None:
@@ -250,8 +250,8 @@ def run_simulation(
 
 # pylint: disable=too-many-arguments,too-many-positional-arguments
 def run_serverapp_th(
-    server_app_attr: Optional[str],
-    server_app: Optional[ServerApp],
+    server_app_attr: str | None,
+    server_app: ServerApp | None,
     server_app_context: Context,
     grid: Grid,
     app_dir: str,
@@ -268,8 +268,8 @@ def run_serverapp_th(
         exception_event: threading.Event,
         _grid: Grid,
         _server_app_dir: str,
-        _server_app_attr: Optional[str],
-        _server_app: Optional[ServerApp],
+        _server_app_attr: str | None,
+        _server_app: ServerApp | None,
         _ctx_queue: "Queue[Context]",
     ) -> None:
         """Run SeverApp, after check if GPU memory growth has to be set.
@@ -329,12 +329,12 @@ def _main_loop(
     enable_tf_gpu_growth: bool,
     run: Run,
     exit_event: EventType,
-    flwr_dir: Optional[str] = None,
-    client_app: Optional[ClientApp] = None,
-    client_app_attr: Optional[str] = None,
-    server_app: Optional[ServerApp] = None,
-    server_app_attr: Optional[str] = None,
-    server_app_context: Optional[Context] = None,
+    flwr_dir: str | None = None,
+    client_app: ClientApp | None = None,
+    client_app_attr: str | None = None,
+    server_app: ServerApp | None = None,
+    server_app_attr: str | None = None,
+    server_app_context: Context | None = None,
 ) -> Context:
     """Start ServerApp on a separate thread, then launch Simulation Engine."""
     # Initialize StateFactory
@@ -429,16 +429,16 @@ def _main_loop(
 def _run_simulation(
     num_supernodes: int,
     exit_event: EventType,
-    client_app: Optional[ClientApp] = None,
-    server_app: Optional[ServerApp] = None,
+    client_app: ClientApp | None = None,
+    server_app: ServerApp | None = None,
     backend_name: str = "ray",
-    backend_config: Optional[BackendConfig] = None,
-    client_app_attr: Optional[str] = None,
-    server_app_attr: Optional[str] = None,
-    server_app_context: Optional[Context] = None,
+    backend_config: BackendConfig | None = None,
+    client_app_attr: str | None = None,
+    server_app_attr: str | None = None,
+    server_app_context: Context | None = None,
     app_dir: str = "",
-    flwr_dir: Optional[str] = None,
-    run: Optional[Run] = None,
+    flwr_dir: str | None = None,
+    run: Run | None = None,
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
     is_app: bool = False,

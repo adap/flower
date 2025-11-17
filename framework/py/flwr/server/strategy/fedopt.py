@@ -18,7 +18,7 @@ Paper: arxiv.org/abs/2003.00295
 """
 
 
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from flwr.common import (
     MetricsAggregationFn,
@@ -84,18 +84,19 @@ class FedOpt(FedAvg):
         min_fit_clients: int = 2,
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        evaluate_fn: Optional[
+        evaluate_fn: (
             Callable[
                 [int, NDArrays, dict[str, Scalar]],
-                Optional[tuple[float, dict[str, Scalar]]],
+                tuple[float, dict[str, Scalar]] | None,
             ]
-        ] = None,
-        on_fit_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
+            | None
+        ) = None,
+        on_fit_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
+        on_evaluate_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
         accept_failures: bool = True,
         initial_parameters: Parameters,
-        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        fit_metrics_aggregation_fn: MetricsAggregationFn | None = None,
+        evaluate_metrics_aggregation_fn: MetricsAggregationFn | None = None,
         eta: float = 1e-1,
         eta_l: float = 1e-1,
         beta_1: float = 0.0,
@@ -122,8 +123,8 @@ class FedOpt(FedAvg):
         self.tau = tau
         self.beta_1 = beta_1
         self.beta_2 = beta_2
-        self.m_t: Optional[NDArrays] = None
-        self.v_t: Optional[NDArrays] = None
+        self.m_t: NDArrays | None = None
+        self.v_t: NDArrays | None = None
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""

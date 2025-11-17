@@ -20,11 +20,11 @@ import sqlite3
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from logging import DEBUG, ERROR
-from typing import Any, Optional, Union
+from typing import Any
 
 from flwr.common.logger import log
 
-DictOrTuple = Union[tuple[Any, ...], dict[str, Any]]
+DictOrTuple = tuple[Any, ...] | dict[str, Any]
 
 
 class SqliteMixin(ABC):
@@ -32,7 +32,7 @@ class SqliteMixin(ABC):
 
     def __init__(self, database_path: str) -> None:
         self.database_path = database_path
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
 
     @property
     def conn(self) -> sqlite3.Connection:
@@ -111,7 +111,7 @@ class SqliteMixin(ABC):
     def query(
         self,
         query: str,
-        data: Optional[Union[Sequence[DictOrTuple], DictOrTuple]] = None,
+        data: Sequence[DictOrTuple] | DictOrTuple | None = None,
     ) -> list[dict[str, Any]]:
         """Execute a SQL query and return the results as list of dicts."""
         if self._conn is None:
@@ -127,8 +127,8 @@ class SqliteMixin(ABC):
             with self._conn:
                 if (
                     len(data) > 0
-                    and isinstance(data, (tuple, list))
-                    and isinstance(data[0], (tuple, dict))
+                    and isinstance(data, (tuple | list))
+                    and isinstance(data[0], (tuple | dict))
                 ):
                     rows = self._conn.executemany(query, data)
                 else:
@@ -153,4 +153,4 @@ def dict_factory(
     Less efficent for retrival of large amounts of data but easier to use.
     """
     fields = [column[0] for column in cursor.description]
-    return dict(zip(fields, row))
+    return dict(zip(fields, row, strict=True))

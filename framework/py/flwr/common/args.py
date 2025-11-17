@@ -20,7 +20,6 @@ import sys
 from logging import DEBUG, ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from typing import Optional, Union
 
 from flwr.common.constant import TRANSPORT_TYPE_REST
 from flwr.common.logger import log
@@ -70,9 +69,9 @@ def add_args_flwr_app_common(parser: argparse.ArgumentParser) -> None:
 def try_obtain_root_certificates(
     args: argparse.Namespace,
     grpc_server_address: str,
-) -> Optional[Union[bytes, str]]:
+) -> bytes | str | None:
     """Validate and return the root certificates."""
-    root_cert_path: Optional[str] = args.root_certificates
+    root_cert_path: str | None = args.root_certificates
     if args.insecure:
         if root_cert_path is not None:
             sys.exit(
@@ -111,7 +110,7 @@ def try_obtain_root_certificates(
 
 def try_obtain_server_certificates(
     args: argparse.Namespace,
-) -> Optional[tuple[bytes, bytes, bytes]]:
+) -> tuple[bytes, bytes, bytes] | None:
     """Validate and return the CA cert, server cert, and server private key."""
     if args.insecure:
         log(

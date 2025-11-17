@@ -14,7 +14,7 @@
 # ==============================================================================
 """Flower message-based FedXgbBagging strategy."""
 from collections.abc import Iterable
-from typing import Optional, cast
+from typing import cast
 
 import numpy as np
 
@@ -65,7 +65,7 @@ class FedXgbBagging(FedAvg):
         average using the provided weight factor key.
     """
 
-    current_bst: Optional[bytes] = None
+    current_bst: bytes | None = None
 
     def _ensure_single_array(self, arrays: ArrayRecord) -> None:
         """Check that ensures there's only one Array in the ArrayRecord."""
@@ -89,7 +89,7 @@ class FedXgbBagging(FedAvg):
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         valid_replies, _ = self._check_and_log_replies(replies, is_train=True)
 

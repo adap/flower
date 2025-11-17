@@ -19,7 +19,6 @@ import concurrent.futures
 import io
 import timeit
 from logging import INFO, WARN
-from typing import Optional, Union
 
 from flwr.common import (
     Code,
@@ -43,15 +42,15 @@ from .server_config import ServerConfig
 
 FitResultsAndFailures = tuple[
     list[tuple[ClientProxy, FitRes]],
-    list[Union[tuple[ClientProxy, FitRes], BaseException]],
+    list[tuple[ClientProxy, FitRes] | BaseException],
 ]
 EvaluateResultsAndFailures = tuple[
     list[tuple[ClientProxy, EvaluateRes]],
-    list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
+    list[tuple[ClientProxy, EvaluateRes] | BaseException],
 ]
 ReconnectResultsAndFailures = tuple[
     list[tuple[ClientProxy, DisconnectRes]],
-    list[Union[tuple[ClientProxy, DisconnectRes], BaseException]],
+    list[tuple[ClientProxy, DisconnectRes] | BaseException],
 ]
 
 
@@ -62,16 +61,16 @@ class Server:
         self,
         *,
         client_manager: ClientManager,
-        strategy: Optional[Strategy] = None,
+        strategy: Strategy | None = None,
     ) -> None:
         self._client_manager: ClientManager = client_manager
         self.parameters: Parameters = Parameters(
             tensors=[], tensor_type="numpy.ndarray"
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
-        self.max_workers: Optional[int] = None
+        self.max_workers: int | None = None
 
-    def set_max_workers(self, max_workers: Optional[int]) -> None:
+    def set_max_workers(self, max_workers: int | None) -> None:
         """Set the max_workers used by ThreadPoolExecutor."""
         self.max_workers = max_workers
 
@@ -84,7 +83,7 @@ class Server:
         return self._client_manager
 
     # pylint: disable=too-many-locals
-    def fit(self, num_rounds: int, timeout: Optional[float]) -> tuple[History, float]:
+    def fit(self, num_rounds: int, timeout: float | None) -> tuple[History, float]:
         """Run federated averaging for a number of rounds."""
         history = History()
 
@@ -161,10 +160,8 @@ class Server:
     def evaluate_round(
         self,
         server_round: int,
-        timeout: Optional[float],
-    ) -> Optional[
-        tuple[Optional[float], dict[str, Scalar], EvaluateResultsAndFailures]
-    ]:
+        timeout: float | None,
+    ) -> tuple[float | None, dict[str, Scalar], EvaluateResultsAndFailures] | None:
         """Validate current global model on a number of clients."""
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_evaluate(
@@ -198,7 +195,7 @@ class Server:
 
         # Aggregate the evaluation results
         aggregated_result: tuple[
-            Optional[float],
+            float | None,
             dict[str, Scalar],
         ] = self.strategy.aggregate_evaluate(server_round, results, failures)
 
@@ -208,10 +205,8 @@ class Server:
     def fit_round(
         self,
         server_round: int,
-        timeout: Optional[float],
-    ) -> Optional[
-        tuple[Optional[Parameters], dict[str, Scalar], FitResultsAndFailures]
-    ]:
+        timeout: float | None,
+    ) -> tuple[Parameters | None, dict[str, Scalar], FitResultsAndFailures] | None:
         """Perform a single round of federated averaging."""
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
@@ -246,14 +241,14 @@ class Server:
 
         # Aggregate training results
         aggregated_result: tuple[
-            Optional[Parameters],
+            Parameters | None,
             dict[str, Scalar],
         ] = self.strategy.aggregate_fit(server_round, results, failures)
 
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
 
-    def disconnect_all_clients(self, timeout: Optional[float]) -> None:
+    def disconnect_all_clients(self, timeout: float | None) -> None:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
         clients = [all_clients[k] for k in all_clients.keys()]
@@ -266,11 +261,11 @@ class Server:
         )
 
     def _get_initial_parameters(
-        self, server_round: int, timeout: Optional[float]
+        self, server_round: int, timeout: float | None
     ) -> Parameters:
         """Get initial parameters from one of the available clients."""
         # Server-side parameter initialization
-        parameters: Optional[Parameters] = self.strategy.initialize_parameters(
+        parameters: Parameters | None = self.strategy.initialize_parameters(
             client_manager=self._client_manager
         )
         if parameters is not None:
@@ -297,8 +292,8 @@ class Server:
 
 def reconnect_clients(
     client_instructions: list[tuple[ClientProxy, ReconnectIns]],
-    max_workers: Optional[int],
-    timeout: Optional[float],
+    max_workers: int | None,
+    timeout: float | None,
 ) -> ReconnectResultsAndFailures:
     """Instruct clients to disconnect and never reconnect."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -313,7 +308,7 @@ def reconnect_clients(
 
     # Gather results
     results: list[tuple[ClientProxy, DisconnectRes]] = []
-    failures: list[Union[tuple[ClientProxy, DisconnectRes], BaseException]] = []
+    failures: list[tuple[ClientProxy, DisconnectRes] | BaseException] = []
     for future in finished_fs:
         failure = future.exception()
         if failure is not None:
@@ -327,7 +322,7 @@ def reconnect_clients(
 def reconnect_client(
     client: ClientProxy,
     reconnect: ReconnectIns,
-    timeout: Optional[float],
+    timeout: float | None,
 ) -> tuple[ClientProxy, DisconnectRes]:
     """Instruct client to disconnect and (optionally) reconnect later."""
     disconnect = client.reconnect(
@@ -340,8 +335,8 @@ def reconnect_client(
 
 def fit_clients(
     client_instructions: list[tuple[ClientProxy, FitIns]],
-    max_workers: Optional[int],
-    timeout: Optional[float],
+    max_workers: int | None,
+    timeout: float | None,
     group_id: int,
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
@@ -357,7 +352,7 @@ def fit_clients(
 
     # Gather results
     results: list[tuple[ClientProxy, FitRes]] = []
-    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = []
+    failures: list[tuple[ClientProxy, FitRes] | BaseException] = []
     for future in finished_fs:
         _handle_finished_future_after_fit(
             future=future, results=results, failures=failures
@@ -366,7 +361,7 @@ def fit_clients(
 
 
 def fit_client(
-    client: ClientProxy, ins: FitIns, timeout: Optional[float], group_id: int
+    client: ClientProxy, ins: FitIns, timeout: float | None, group_id: int
 ) -> tuple[ClientProxy, FitRes]:
     """Refine parameters on a single client."""
     fit_res = client.fit(ins, timeout=timeout, group_id=group_id)
@@ -376,7 +371,7 @@ def fit_client(
 def _handle_finished_future_after_fit(
     future: concurrent.futures.Future,  # type: ignore
     results: list[tuple[ClientProxy, FitRes]],
-    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
+    failures: list[tuple[ClientProxy, FitRes] | BaseException],
 ) -> None:
     """Convert finished future into either a result or a failure."""
     # Check if there was an exception
@@ -400,8 +395,8 @@ def _handle_finished_future_after_fit(
 
 def evaluate_clients(
     client_instructions: list[tuple[ClientProxy, EvaluateIns]],
-    max_workers: Optional[int],
-    timeout: Optional[float],
+    max_workers: int | None,
+    timeout: float | None,
     group_id: int,
 ) -> EvaluateResultsAndFailures:
     """Evaluate parameters concurrently on all selected clients."""
@@ -417,7 +412,7 @@ def evaluate_clients(
 
     # Gather results
     results: list[tuple[ClientProxy, EvaluateRes]] = []
-    failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]] = []
+    failures: list[tuple[ClientProxy, EvaluateRes] | BaseException] = []
     for future in finished_fs:
         _handle_finished_future_after_evaluate(
             future=future, results=results, failures=failures
@@ -428,7 +423,7 @@ def evaluate_clients(
 def evaluate_client(
     client: ClientProxy,
     ins: EvaluateIns,
-    timeout: Optional[float],
+    timeout: float | None,
     group_id: int,
 ) -> tuple[ClientProxy, EvaluateRes]:
     """Evaluate parameters on a single client."""
@@ -439,7 +434,7 @@ def evaluate_client(
 def _handle_finished_future_after_evaluate(
     future: concurrent.futures.Future,  # type: ignore
     results: list[tuple[ClientProxy, EvaluateRes]],
-    failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
+    failures: list[tuple[ClientProxy, EvaluateRes] | BaseException],
 ) -> None:
     """Convert finished future into either a result or a failure."""
     # Check if there was an exception
@@ -462,10 +457,10 @@ def _handle_finished_future_after_evaluate(
 
 
 def init_defaults(
-    server: Optional[Server],
-    config: Optional[ServerConfig],
-    strategy: Optional[Strategy],
-    client_manager: Optional[ClientManager],
+    server: Server | None,
+    config: ServerConfig | None,
+    strategy: Strategy | None,
+    client_manager: ClientManager | None,
 ) -> tuple[Server, ServerConfig]:
     """Create server instance if none was given."""
     if server is None:

@@ -10,7 +10,6 @@ authors = ["The Flower Authors <hello@flower.ai>"]
 package-mode = false
 
 [tool.poetry.dependencies]
-python = ">=3.9.2,<3.11"
+python = ">=3.10,<3.11"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
-tensorflow-cpu = "^2.9.1, !=2.11.1"
-tensorflow-io-gcs-filesystem = "<0.35.0"
+tensorflow-cpu = ">=2.18.0"

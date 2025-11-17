@@ -20,11 +20,11 @@ import secrets
 import threading
 import time
 import traceback
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from queue import Empty, Queue
-from typing import Callable, Optional
 from uuid import uuid4
 
 from flwr.app.error import Error
@@ -78,7 +78,7 @@ def _register_nodes(
 def _register_node_info_stores(
     nodes_mapping: NodeToPartitionMapping,
     run: Run,
-    app_dir: Optional[str] = None,
+    app_dir: str | None = None,
 ) -> dict[int, DeprecatedRunInfoStore]:
     """Create DeprecatedRunInfoStore objects and register the context for the run."""
     node_info_store: dict[int, DeprecatedRunInfoStore] = {}
@@ -273,12 +273,12 @@ def start_vce(
     is_app: bool,
     f_stop: threading.Event,
     run: Run,
-    flwr_dir: Optional[str] = None,
-    client_app: Optional[ClientApp] = None,
-    client_app_attr: Optional[str] = None,
-    num_supernodes: Optional[int] = None,
-    state_factory: Optional[LinkStateFactory] = None,
-    existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
+    flwr_dir: str | None = None,
+    client_app: ClientApp | None = None,
+    client_app_attr: str | None = None,
+    num_supernodes: int | None = None,
+    state_factory: LinkStateFactory | None = None,
+    existing_nodes_mapping: NodeToPartitionMapping | None = None,
 ) -> None:
     """Start Fleet API with the Simulation Engine."""
     nodes_mapping = {}

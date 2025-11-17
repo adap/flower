@@ -19,7 +19,7 @@ Paper: arxiv.org/pdf/1803.01498v1.pdf
 
 
 from collections.abc import Iterable
-from typing import Optional, cast
+from typing import cast
 
 import numpy as np
 
@@ -72,7 +72,7 @@ class FedMedian(FedAvg):
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         # Call FedAvg aggregate_train to perform validation and aggregation
         valid_replies, _ = self._check_and_log_replies(replies, is_train=True)

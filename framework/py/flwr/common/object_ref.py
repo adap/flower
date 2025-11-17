@@ -21,7 +21,7 @@ import sys
 from importlib.util import find_spec
 from pathlib import Path
 from threading import Lock
-from typing import Any, Optional, Union
+from typing import Any
 
 OBJECT_REF_HELP_STR = """
 \n\nThe object reference string should have the form <module>:<attribute>. Valid
@@ -31,15 +31,15 @@ attribute.
 """
 
 
-_current_sys_path: Optional[str] = None
+_current_sys_path: str | None = None
 _import_lock = Lock()
 
 
 def validate(
     module_attribute_str: str,
     check_module: bool = True,
-    project_dir: Optional[Union[str, Path]] = None,
-) -> tuple[bool, Optional[str]]:
+    project_dir: str | Path | None = None,
+) -> tuple[bool, str | None]:
     """Validate object reference.
 
     Parameters
@@ -114,7 +114,7 @@ def validate(
 def load_app(  # pylint: disable= too-many-branches
     module_attribute_str: str,
     error_type: type[Exception],
-    project_dir: Optional[Union[str, Path]] = None,
+    project_dir: str | Path | None = None,
 ) -> Any:
     """Return the object specified in a module attribute string.
 
@@ -194,12 +194,12 @@ def _unload_modules(project_dir: Path) -> None:
     """Unload modules from the project directory."""
     dir_str = str(project_dir.absolute())
     for name, m in list(sys.modules.items()):
-        path: Optional[str] = getattr(m, "__file__", None)
+        path: str | None = getattr(m, "__file__", None)
         if path is not None and path.startswith(dir_str):
             del sys.modules[name]
 
 
-def _set_sys_path(directory: Optional[Union[str, Path]]) -> None:
+def _set_sys_path(directory: str | Path | None) -> None:
     """Set the system path."""
     if directory is None:
         directory = Path.cwd()

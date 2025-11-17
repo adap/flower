@@ -16,7 +16,6 @@
 
 
 # pylint: disable=R0913, R0917
-from typing import Optional
 
 import numpy as np
 
@@ -110,7 +109,7 @@ class ContinuousPartitioner(
         partition_by: str,
         strictness: float,
         shuffle: bool = True,
-        seed: Optional[int] = 42,
+        seed: int | None = 42,
     ) -> None:
         super().__init__()
         if not 0 <= strictness <= 1:

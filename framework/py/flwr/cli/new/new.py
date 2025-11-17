@@ -16,23 +16,27 @@
 
 
 import io
-import json
 import re
 import zipfile
 from enum import Enum
 from pathlib import Path
 from string import Template
-from typing import Annotated, Optional
+from typing import Annotated
 
 import requests
 import typer
 
-from flwr.supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
+from flwr.supercore.constant import (
+    APP_ID_PATTERN,
+    APP_VERSION_PATTERN,
+    PLATFORM_API_URL,
+)
 
 from ..utils import (
     is_valid_project_name,
     prompt_options,
     prompt_text,
+    request_download_link,
     sanitize_project_name,
 )
 
@@ -100,7 +104,7 @@ def render_and_create(file_path: Path, template: str, context: dict[str, str]) -
 
 
 def print_success_prompt(
-    package_name: str, llm_challenge_str: Optional[str] = None
+    package_name: str, llm_challenge_str: str | None = None
 ) -> None:
     """Print styled setup instructions for running a new Flower App after creation."""
     prompt = typer.style(
@@ -191,39 +195,24 @@ def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
     return buf
 
 
-def _request_download_link(app_id: str) -> str:
-    """Request download link from Flower platform API."""
-    url = f"{PLATFORM_API_URL}/hub/fetch-zip"
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
-    body = {
-        "app_id": app_id,  # send raw string of app_id
-    }
-
-    try:
-        resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
-    except requests.RequestException as e:
-        raise typer.BadParameter(f"Unable to connect to Platform API: {e}") from e
-
-    if resp.status_code == 404:
-        raise typer.BadParameter(f"'{app_id}' not found in Platform API")
-    if not resp.ok:
-        raise typer.BadParameter(
-            f"Platform API request failed with "
-            f"status {resp.status_code}. Details: {resp.text}"
-        )
-
-    data = resp.json()
-    if "zip_url" not in data:
-        raise typer.BadParameter("Invalid response from Platform API")
-    return str(data["zip_url"])
-
-
-def download_remote_app_via_api(app_id: str) -> None:
+def download_remote_app_via_api(app_str: str) -> None:
     """Download App from Platform API."""
-    # Parse @user/app just to derive local dir name
+    # Extract app version info
+    if "==" in app_str:
+        app_id = app_str.split("==")[0]
+        version = app_str.split("==")[1]
+
+        # Validate app version format
+        m = re.match(APP_VERSION_PATTERN, version)
+        if not m:
+            raise typer.BadParameter(
+                "Invalid app version. Expected format: x.x.x (digits only)."
+            )
+    else:
+        app_id = app_str
+        version = None
+
+    # Validate app_id format
     m = re.match(APP_ID_PATTERN, app_id)
     if not m:
         raise typer.BadParameter(
@@ -249,7 +238,9 @@ def download_remote_app_via_api(app_id: str) -> None:
             bold=True,
         )
     )
-    presigned_url = _request_download_link(app_id)
+    # Fetch ZIP downloading URL
+    url = f"{PLATFORM_API_URL}/hub/fetch-zip"
+    presigned_url = request_download_link(app_id, version, url, "zip_url")
 
     print(
         typer.style(
@@ -276,15 +267,18 @@ def download_remote_app_via_api(app_id: str) -> None:
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
 def new(
     app_name: Annotated[
-        Optional[str],
-        typer.Argument(help="The name of the Flower App"),
+        str | None,
+        typer.Argument(
+            help="Flower app name. For remote apps, use the format '@user/app==1.0.0'. "
+            "Version is optional (defaults to latest)."
+        ),
     ] = None,
     framework: Annotated[
-        Optional[MlFramework],
+        MlFramework | None,
         typer.Option(case_sensitive=False, help="The ML framework to use"),
     ] = None,
     username: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(case_sensitive=False, help="The Flower username of the author"),
     ] = None,
 ) -> None:
