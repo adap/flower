@@ -191,7 +191,7 @@ def review(
     m = re.match(APP_ID_PATTERN, app_id)
     if not m:
         typer.secho(
-            "❌ Invalid remote app ID. Expected format: '@user_name/app_name'.",
+            "❌ Invalid remote app ID. Expected format: '@account_name/app_name'.",
             fg=typer.colors.RED,
             err=True,
         )
