@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -euo pipefail
 
 cd framework
@@ -24,7 +23,11 @@ for f in "${files[@]}"; do
   comment_taplo "$f"
 done
 
-sudo poetry install --with dev --extras "simulation"
+# Prevent Poetry from creating a venv, since we are using a DevContainer and
+# therefore don't care if dependencies are installed into your system
+# environment.
+sudo python -m poetry config virtualenvs.create false
+sudo python -m poetry install --all-extras
 
 # Restore taplo lines in "files"
 for f in "${files[@]}"; do
