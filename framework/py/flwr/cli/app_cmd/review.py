@@ -24,6 +24,7 @@ from typing import Annotated, Optional
 
 import requests
 import typer
+from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
@@ -36,6 +37,7 @@ from flwr.supercore.constant import (
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_message_to_sign,
     sign_message,
+    load_private_key,
 )
 
 from ..install import install_from_fab
@@ -63,31 +65,6 @@ def _download_fab(url: str) -> bytes:
         )
         raise typer.Exit(code=1) from e
     return r.content
-
-
-def _load_private_key(path: Path) -> ed25519.Ed25519PrivateKey:
-    """Load a private key (Ed25519) using cryptography."""
-    try:
-        pem = path.read_bytes()
-    except OSError as e:
-        typer.secho(
-            f"❌ Failed to read private key: {e}", fg=typer.colors.RED, err=True
-        )
-        raise typer.Exit(code=1) from e
-
-    try:
-        private_key = serialization.load_ssh_private_key(pem, password=None)
-    except ValueError as e:
-        typer.secho(
-            f"❌ Invalid private key format: {e}", fg=typer.colors.RED, err=True
-        )
-        raise typer.Exit(code=1) from e
-
-    if not isinstance(private_key, ed25519.Ed25519PrivateKey):
-        typer.secho("❌ Private key is not Ed25519", fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=1)
-
-    return private_key
 
 
 def _sign_fab(
@@ -140,7 +117,7 @@ def _submit_review(
 
 # pylint: disable-next=too-many-locals
 def review(
-    app_name: Annotated[
+    app_ref: Annotated[
         str,
         typer.Argument(
             help="App identifier (e.g., '@user/app' or '@user/app==1.0.0'). "
@@ -167,8 +144,8 @@ def review(
         raise typer.Exit(code=1)
 
     # Validate version format
-    if "==" in app_name:
-        app_id, app_version = app_name.split("==")
+    if "==" in app_ref:
+        app_id, app_version = app_ref.split("==")
 
         # Validate app version format
         m = re.match(APP_VERSION_PATTERN, app_version)
@@ -180,18 +157,14 @@ def review(
             )
             raise typer.Exit(code=1)
     else:
-        app_id = app_name
+        app_id = app_ref
         app_version = None
-        typer.secho(
-            "No app version specified. Downloading the latest version.",
-            fg=typer.colors.YELLOW,
-        )
-
+    
     # Validate app_id format
     m = re.match(APP_ID_PATTERN, app_id)
     if not m:
         typer.secho(
-            "❌ Invalid remote app ID. Expected format: '@account_name/app_name'.",
+            "❌ Invalid remote app ID. Expected format: '@user/app'.",
             fg=typer.colors.RED,
             err=True,
         )
@@ -244,7 +217,14 @@ def review(
         raise typer.Exit(code=1)
 
     # Load private key and sign FAB
-    private_key = _load_private_key(key_path)
+    try:
+        private_key = load_private_key(key_path)
+    except (OSError, ValueError, UnsupportedAlgorithm) as e:
+        typer.secho(
+            f"❌ Failed to load the private key: {e}", fg=typer.colors.RED, err=True
+        )
+        raise typer.Exit(code=1) from e
+
     signature, signed_at = _sign_fab(fab_bytes, private_key)
 
     # Submit review
