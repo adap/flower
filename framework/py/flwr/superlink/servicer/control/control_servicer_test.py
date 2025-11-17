@@ -568,7 +568,7 @@ def test__request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) -
         if isinstance(case_data, dict) and "fake_resp" in case_data:
             assert url.endswith("/hub/fetch-fab")
             assert data is not None
-            payload: dict[str, Any] = json.loads(data)
+            payload: dict[str, Any] = data
             assert payload["app_id"] == app_id
             assert "flwr_license_key" in payload
 
