@@ -132,7 +132,7 @@ class FederatedDataset:
         # Indicate if the dataset is prepared for `load_partition` or `load_split`
         self._dataset_prepared: bool = False
         self._event = {
-            "load_partition": {split: False for split in self._partitioners},
+            "load_partition": dict.fromkeys(self._partitioners, False),
         }
         self._load_dataset_kwargs = load_dataset_kwargs
 
@@ -323,7 +323,7 @@ class FederatedDataset:
         if self._preprocessor:
             self._dataset = self._preprocessor(self._dataset)
         available_splits = list(self._dataset.keys())
-        self._event["load_split"] = {split: False for split in available_splits}
+        self._event["load_split"] = dict.fromkeys(available_splits, False)
         self._dataset_prepared = True
 
     def _check_if_no_split_keyword_possible(self) -> None:
