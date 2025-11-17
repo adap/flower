@@ -32,8 +32,9 @@
 
 .. _strategy_link: ref-api/flwr.serverapp.Strategy.html
 
-Quickstart TensorFlow
-=====================
+#######################
+ Quickstart TensorFlow
+#######################
 
 In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR-10
 using the Flower framework and TensorFlow. First of all, it is recommended to create a
@@ -165,8 +166,9 @@ in ``pyproject.toml`` like this:
     # Override some arguments
     $ flwr run . --run-config "num-server-rounds=5 batch-size=16"
 
-The Data
---------
+**********
+ The Data
+**********
 
 This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ to easily
 download and partition the `CIFAR-10` dataset. In this example you'll make use of the
@@ -192,8 +194,9 @@ arrays that correspond to their data partition.
     x_train, y_train = partition["train"]["img"] / 255.0, partition["train"]["label"]
     x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
 
-The Model
----------
+***********
+ The Model
+***********
 
 Next, we need a model. We defined a simple Convolutional Neural Network (CNN), but feel
 free to replace it with a more sophisticated model if you'd like:
@@ -221,8 +224,9 @@ free to replace it with a more sophisticated model if you'd like:
         )
         return model
 
-The ClientApp
--------------
+***************
+ The ClientApp
+***************
 
 The main changes we have to make to use `Tensorflow` with `Flower` have to do with
 converting the |arrayrecord_link|_ received in the |message_link|_ into numpy ndarrays
@@ -323,8 +327,9 @@ model is not locally trained, instead it is used to evaluate its performance on 
 locally held-out validation set; (2) including the model in the reply Message is no
 longer needed because it is not locally modified.
 
-The ServerApp
--------------
+***************
+ The ServerApp
+***************
 
 To construct a |serverapp_link|_ we define its ``@app.main()`` method. This method
 receive as input arguments:

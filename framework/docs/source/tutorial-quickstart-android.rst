@@ -1,7 +1,8 @@
 .. _quickstart-android:
 
-Quickstart Android
-==================
+####################
+ Quickstart Android
+####################
 
 .. meta::
     :description: Read this Federated Learning quickstart tutorial for creating an Android app using Flower.

@@ -18,7 +18,6 @@ Paper: openreview.net/pdf?id=ByexElSYDr
 """
 
 
-from collections import OrderedDict
 from collections.abc import Callable, Iterable
 from logging import INFO
 
@@ -200,7 +199,7 @@ class QFedAvg(FedAvg):
             self.weighted_by_key,
         )
         return (
-            ArrayRecord(OrderedDict(zip(array_keys, array_list, strict=True))),
+            ArrayRecord(dict(zip(array_keys, array_list, strict=True))),
             metrics,
         )
 

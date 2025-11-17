@@ -315,7 +315,7 @@ def _validate_run_config(config_dict: dict[str, Any], errors: list[str]) -> None
 
 # pylint: disable=too-many-branches
 def validate_fields_in_config(
-    config: dict[str, Any]
+    config: dict[str, Any],
 ) -> tuple[bool, list[str], list[str]]:
     """Validate pyproject.toml fields."""
     errors = []

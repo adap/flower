@@ -1,13 +1,16 @@
-[103] SUPERLINK_LICENSE_URL_INVALID
-===================================
+#####################################
+ [103] SUPERLINK_LICENSE_URL_INVALID
+#####################################
 
-Description
------------
+*************
+ Description
+*************
 
 The SuperLink license URL is invalid, causing it to exit prematurely on startup.
 
-How to Resolve
---------------
+****************
+ How to Resolve
+****************
 
 1. Set the `FLWR_LICENSE_URL` environment variable with a valid license URL when
    starting the SuperLink.
