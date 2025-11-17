@@ -559,14 +559,14 @@ def test__request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) -
         def json(self) -> dict[str, Any] | None:
             """Return JSON data."""
             return self._json
-
-    def fake_post(url: str, data: dict[str, Any] | None = None, **_: Any) -> _FakeResp:
+        
+    def fake_post(url: str, data: str | None = None, **_: Any) -> _FakeResp:
         # Basic payload sanity check for the success-like cases
         case_data: dict[str, Any] | None = current_case.get("data")
         if isinstance(case_data, dict) and "fake_resp" in case_data:
             assert url.endswith("/hub/fetch-fab")
-            assert data is not None
-            payload: dict[str, Any] = data
+            assert data is not None  # narrows type for type checkers
+            payload: dict[str, Any] = json.loads(data)
             assert payload["app_id"] == app_id
             assert "flwr_license_key" in payload
 
