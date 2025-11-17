@@ -2,8 +2,9 @@
 .. meta::
     :description: In this Flower explainer, learn how differential privacy ensures data security in federated learning, with central & local approaches to prevent leakage of sensitive information during model training.
 
-Differential Privacy
-====================
+######################
+ Differential Privacy
+######################
 
 The information in datasets like healthcare, financial transactions, user preferences,
 etc., is valuable and has the potential for scientific breakthroughs and provides
@@ -14,8 +15,9 @@ Traditional methods like anonymization alone would not work because of attacks l
 Re-identification and Data Linkage. That's where differential privacy comes in. It
 provides the possibility of analyzing data while ensuring the privacy of individuals.
 
-Differential Privacy
---------------------
+**********************
+ Differential Privacy
+**********************
 
 Imagine two datasets that are identical except for a single record (for instance,
 Alice's data). Differential Privacy (DP) guarantees that any analysis (M), like
@@ -33,7 +35,7 @@ output of the analysis to mask the contribution of each individual in the data w
 preserving the overall accuracy of the analysis.
 
 Formal Definition
-~~~~~~~~~~~~~~~~~
+=================
 
 Differential Privacy (DP) provides statistical guarantees against the information an
 adversary can infer through the output of a randomized algorithm. It provides an
@@ -56,8 +58,9 @@ indicate higher levels of privacy but are likely to reduce utility as well. The
 privacy is proportional to the sensitivity of the output, which measures the maximum
 change in the output due to the inclusion or removal of a single record.
 
-Differential Privacy in Machine Learning
-----------------------------------------
+******************************************
+ Differential Privacy in Machine Learning
+******************************************
 
 DP can be utilized in machine learning to preserve the privacy of the training data.
 Differentially private machine learning algorithms are designed in a way to prevent the
@@ -69,8 +72,9 @@ the features or labels), while another method entails injecting noise into the g
 of the loss function during model training. Additionally, such noise can be incorporated
 into the model's output.
 
-Differential Privacy in Federated Learning
-------------------------------------------
+********************************************
+ Differential Privacy in Federated Learning
+********************************************
 
 Federated learning is a data minimization approach that allows multiple parties to
 collaboratively train a model without sharing their raw data. However, federated
@@ -94,7 +98,7 @@ the server (also known as the center) or at the client (also known as the local)
   server from leaking any information about the client's data.
 
 Central Differential Privacy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+============================
 
 In this approach, which is also known as user-level DP, the central server is
 responsible for adding noise to the globally aggregated parameters. It should be noted
@@ -127,7 +131,7 @@ privacy guarantee. The Gaussian mechanism is used with a noise sampled from `N (
 where `σ = ( noise_scale * S ) / (number of sampled clients)`.
 
 Clipping
-++++++++
+--------
 
 There are two forms of clipping commonly used in Central DP: Fixed Clipping and Adaptive
 Clipping.
@@ -142,7 +146,7 @@ The choice between fixed and adaptive clipping depends on various factors such a
 privacy requirements, data distribution, model complexity, and others.
 
 Local Differential Privacy
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================
 
 In this approach, each client is responsible for performing DP. Local DP avoids the need
 for a fully trusted aggregator, but it should be noted that local DP leads to a decrease
