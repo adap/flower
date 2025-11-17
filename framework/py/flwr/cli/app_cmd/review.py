@@ -20,12 +20,11 @@ import hashlib
 import re
 import time
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import requests
 import typer
 from cryptography.exceptions import UnsupportedAlgorithm
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from flwr.common.config import get_flwr_dir
@@ -36,8 +35,8 @@ from flwr.supercore.constant import (
 )
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_message_to_sign,
-    sign_message,
     load_private_key,
+    sign_message,
 )
 
 from ..install import install_from_fab
@@ -125,7 +124,7 @@ def review(
         ),
     ],
     token: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--token",
             help="Bearer token for Platform API.",
@@ -159,7 +158,7 @@ def review(
     else:
         app_id = app_ref
         app_version = None
-    
+
     # Validate app_id format
     m = re.match(APP_ID_PATTERN, app_id)
     if not m:

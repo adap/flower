@@ -168,7 +168,7 @@ def decode_base64url(sig: str) -> bytes:
 
 def load_private_key(path: Path) -> ed25519.Ed25519PrivateKey:
     """Load an SSH-format private key (Ed25519) using cryptography."""
-    key_bytes= path.read_bytes()
+    key_bytes = path.read_bytes()
     private_key = serialization.load_ssh_private_key(key_bytes, password=None)
     if not isinstance(private_key, ed25519.Ed25519PrivateKey):
         raise ValueError("Private key is not Ed25519")
