@@ -22,15 +22,17 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
+from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
+from flwr.proto import node_pb2 as flwr_dot_proto_dot_node__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1b\x66lwr/proto/federation.proto\x12\nflwr.proto\"\x1a\n\nFederation\x12\x0c\n\x04name\x18\x01 \x01(\tb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1b\x66lwr/proto/federation.proto\x12\nflwr.proto\x1a\x14\x66lwr/proto/run.proto\x1a\x15\x66lwr/proto/node.proto\"t\n\nFederation\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x14\n\x0cmembers_aids\x18\x02 \x03(\t\x12#\n\x05nodes\x18\x03 \x03(\x0b\x32\x14.flwr.proto.NodeInfo\x12\x1d\n\x04runs\x18\x04 \x03(\x0b\x32\x0f.flwr.proto.Runb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'flwr.proto.federation_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_FEDERATION']._serialized_start=43
-  _globals['_FEDERATION']._serialized_end=69
+  _globals['_FEDERATION']._serialized_start=88
+  _globals['_FEDERATION']._serialized_end=204
 # @@protoc_insertion_point(module_scope)
