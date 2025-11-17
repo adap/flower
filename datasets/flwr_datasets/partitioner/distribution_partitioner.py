@@ -306,7 +306,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # Values are the smallest indices of each array in `label_samples`
         # which will be sampled next. Once a sample is taken from a label/key,
         # increment the value (index) by 1.
-        index_tracker = {k: 0 for k in unique_labels}
+        index_tracker = dict.fromkeys(unique_labels, 0)
 
         # Prepare data structure to store indices assigned to partition ids
         self._partition_id_to_indices = {

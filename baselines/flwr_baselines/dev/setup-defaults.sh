@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-version=${1:-3.8.15}
+version=${1:-3.10.19}
 
 # To install pyenv and virtualenv plugin
 function install_pyenv(){
