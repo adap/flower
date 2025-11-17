@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-11-13 00:08+0000\n"
+"POT-Creation-Date: 2025-11-17 00:08+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -1303,12 +1303,10 @@ msgstr "Version Python"
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:12
 #: ../../source/how-to-install-flower.rst:11
 #, fuzzy
-msgid ""
-"Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_"
-msgstr ""
-"Flower nécessite `Python 3.10 <https://docs.python.org/3.10/>`_ ou plus."
+msgid "Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_."
+msgstr "Flower nécessite `Python 3.10 <https://docs.python.org/3.10/>`_ ou plus."
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:17
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:16
 msgid ""
 "Due to a known incompatibility with `ray "
 "<https://docs.ray.io/en/latest/>`_, we currently recommend utilizing at "
@@ -1316,12 +1314,12 @@ msgid ""
 "simulations."
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:22
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:21
 #, fuzzy
 msgid "Virtualenv with Pyenv/Virtualenv"
 msgstr "Virutualenv avec Pyenv/Virtualenv"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:24
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:23
 msgid ""
 "One of the recommended virtual environment is `pyenv "
 "<https://github.com/pyenv/pyenv>`_/`virtualenv <https://github.com/pyenv"
@@ -1334,7 +1332,7 @@ msgstr ""
 "<https://github.com/adap/flower/tree/main/examples/>`_ pour plus de "
 "détails."
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:29
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:28
 #, fuzzy
 msgid ""
 "Once Pyenv is set up, you can use it to install `Python Version 3.10 "
@@ -1343,19 +1341,19 @@ msgstr ""
 "Une fois Pyenv mis en place, tu peux l'utiliser pour installer `Python "
 "Version 3.7 <https://docs.python.org/3.7/>`_ ou supérieure :"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:36
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:35
 msgid "Create the virtualenv with:"
 msgstr "Crée le virtualenv avec :"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:42
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:41
 msgid "Activate the virtualenv by running the following command:"
 msgstr "Active la virtualenv en exécutant la commande suivante :"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:49
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:48
 msgid "Virtualenv with Poetry"
 msgstr "Virtualenv et la poésie"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:51
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:50
 msgid ""
 "The Flower examples are based on `Poetry <https://python-"
 "poetry.org/docs/>`_ to manage dependencies. After installing Poetry you "
@@ -1365,7 +1363,7 @@ msgstr ""
 "poetry.org/docs/>`_ pour gérer les dépendances. Après l'installation de "
 "Poetry, il te suffit de créer un environnement virtuel avec :"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:58
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:57
 msgid ""
 "If you open a new terminal you can activate the previously created "
 "virtual environment with the following command:"
@@ -1373,11 +1371,11 @@ msgstr ""
 "Si tu ouvres un nouveau terminal, tu peux activer l'environnement virtuel"
 " précédemment créé avec la commande suivante :"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:66
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:65
 msgid "Virtualenv with Anaconda"
 msgstr "Virtualenv avec Anaconda"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:68
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:67
 #, fuzzy
 msgid ""
 "If you prefer to use Anaconda for your virtual environment then install "
@@ -1391,7 +1389,7 @@ msgstr ""
 "guide/install/index.html>`_. Après l'avoir configuré, tu peux créer un "
 "environnement virtuel avec :"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:76
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:75
 msgid "and activate the virtual environment with:"
 msgstr "et active l'environnement virtuel avec :"
 
@@ -11053,22 +11051,22 @@ msgstr "Installer Flower"
 msgid "Python version"
 msgstr "Version Python"
 
-#: ../../source/how-to-install-flower.rst:15
+#: ../../source/how-to-install-flower.rst:14
 msgid "Install stable release"
 msgstr "Installe la version stable"
 
-#: ../../source/how-to-install-flower.rst:18
+#: ../../source/how-to-install-flower.rst:17
 msgid "Using pip"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:20
+#: ../../source/how-to-install-flower.rst:19
 #, fuzzy
 msgid "Stable releases are available on `PyPI <https://pypi.org/project/flwr/>`_:"
 msgstr ""
 "Les versions stables sont disponibles sur `PyPI "
 "<https://pypi.org/project/flwr/>`_: :"
 
-#: ../../source/how-to-install-flower.rst:26
+#: ../../source/how-to-install-flower.rst:25
 #, fuzzy
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr`` should be "
@@ -11077,35 +11075,35 @@ msgstr ""
 "Pour les simulations qui utilisent le moteur de client virtuel, ``flwr`` "
 "doit être installé avec l'option ``simulation``: :"
 
-#: ../../source/how-to-install-flower.rst:34
+#: ../../source/how-to-install-flower.rst:33
 msgid "Using conda (or mamba)"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:36
+#: ../../source/how-to-install-flower.rst:35
 msgid "Flower can also be installed from the ``conda-forge`` channel."
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:38
+#: ../../source/how-to-install-flower.rst:37
 msgid ""
 "If you have not added ``conda-forge`` to your channels, you will first "
 "need to run the following:"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:46
+#: ../../source/how-to-install-flower.rst:45
 msgid ""
 "Once the ``conda-forge`` channel has been enabled, ``flwr`` can be "
 "installed with ``conda``:"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:53
+#: ../../source/how-to-install-flower.rst:52
 msgid "or with ``mamba``:"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:60
+#: ../../source/how-to-install-flower.rst:59
 msgid "Verify installation"
 msgstr "Vérifie l'installation"
 
-#: ../../source/how-to-install-flower.rst:62
+#: ../../source/how-to-install-flower.rst:61
 #, fuzzy
 msgid ""
 "The following command can be used to verify if Flower was successfully "
@@ -11116,24 +11114,24 @@ msgstr ""
 "installé avec succès. Si tout a fonctionné, la version de Flower devrait "
 "être imprimée sur la ligne de commande: :"
 
-#: ../../source/how-to-install-flower.rst:72
+#: ../../source/how-to-install-flower.rst:71
 msgid "Advanced installation options"
 msgstr "Options d'installation avancées"
 
-#: ../../source/how-to-install-flower.rst:75
+#: ../../source/how-to-install-flower.rst:74
 #, fuzzy
 msgid "Install via Docker"
 msgstr "Installer Flower"
 
-#: ../../source/how-to-install-flower.rst:77
+#: ../../source/how-to-install-flower.rst:76
 msgid ":doc:`Run Flower using Docker <docker/index>`"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:80
+#: ../../source/how-to-install-flower.rst:79
 msgid "Install pre-release"
 msgstr "Installer la version pre-release"
 
-#: ../../source/how-to-install-flower.rst:82
+#: ../../source/how-to-install-flower.rst:81
 #, fuzzy
 msgid ""
 "New (possibly unstable) versions of Flower are sometimes available as "
@@ -11144,7 +11142,7 @@ msgstr ""
 "disponibles en tant que versions préliminaires (alpha, bêta, release "
 "candidate) avant que la version stable n'arrive : :"
 
-#: ../../source/how-to-install-flower.rst:89
+#: ../../source/how-to-install-flower.rst:88
 #, fuzzy
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr`` pre-releases"
@@ -11154,11 +11152,11 @@ msgstr ""
 "versions de ``flwr`` doivent être installées avec l'option "
 "``simulation``: :"
 
-#: ../../source/how-to-install-flower.rst:97
+#: ../../source/how-to-install-flower.rst:96
 msgid "Install nightly release"
 msgstr "Installer la version nightly"
 
-#: ../../source/how-to-install-flower.rst:99
+#: ../../source/how-to-install-flower.rst:98
 #, fuzzy
 msgid ""
 "The latest (potentially unstable) changes in Flower are available as "
@@ -11167,7 +11165,7 @@ msgstr ""
 "Les dernières modifications (potentiellement instables) de Flower sont "
 "disponibles sous forme de versions nocturnes: :"
 
-#: ../../source/how-to-install-flower.rst:105
+#: ../../source/how-to-install-flower.rst:104
 #, fuzzy
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr-nightly`` "
@@ -16235,15 +16233,6 @@ msgstr "Flux de travail"
 msgid "``'default'``"
 msgstr "Flux de travail"
 
-#: ../../flwr federation list:1 supernode
-#, fuzzy
-msgid "Enable verbose output"
-msgstr "Exemples de PyTorch"
-
-#: ../../flwr federation list:1 run:1 supernode
-msgid "``False``"
-msgstr ""
-
 #: ../../source/ref-api-cli.rst
 #, fuzzy
 msgid "Arguments"
@@ -16326,10 +16315,11 @@ msgid "**Run ID:** Unique identifier for the run."
 msgstr ""
 
 #: ../../flwr list:1
-#, python-brace-format
-msgid ""
-"**FAB:** Name of the FAB associated with the run (``{FAB_ID} "
-"(v{FAB_VERSION})``)."
+msgid "**Federation:** The federation to which the run belongs."
+msgstr ""
+
+#: ../../flwr list:1
+msgid "**App:** The App associated with the run (``<APP_ID>==<APP_VERSION>``)."
 msgstr ""
 
 #: ../../flwr list:1
@@ -16343,15 +16333,7 @@ msgid "**Elapsed:** Time elapsed since the run started (``HH:MM:SS``)."
 msgstr ""
 
 #: ../../flwr list:1
-msgid "**Created At:** Timestamp when the run was created."
-msgstr ""
-
-#: ../../flwr list:1
-msgid "**Running At:** Timestamp when the run started running."
-msgstr ""
-
-#: ../../flwr list:1
-msgid "**Finished At:** Timestamp when the run finished."
+msgid "**Status Changed @:** Timestamp of the most recent status change."
 msgstr ""
 
 #: ../../flwr list:1
@@ -16384,6 +16366,10 @@ msgstr ""
 
 #: ../../flwr list:1
 msgid "List all runs"
+msgstr ""
+
+#: ../../flwr list:1 run:1 supernode
+msgid "``False``"
 msgstr ""
 
 #: ../../flwr list:1
@@ -16525,6 +16511,11 @@ msgstr "Rejoignez la communauté de Flower"
 #, fuzzy
 msgid "Manage SuperNodes"
 msgstr "flower-superlink"
+
+#: ../../flwr list:1 supernode
+#, fuzzy
+msgid "Enable verbose output"
+msgstr "Exemples de PyTorch"
 
 #: ../../flwr register:1 supernode
 #, fuzzy
@@ -33551,50 +33542,53 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-exit-codes/304.rst:2
-msgid "[304] SUPERNODE_TRUST_ENTITY_REQUIRED"
+msgid "[304] SUPERNODE_INVALID_TRUSTED_ENTITIES"
 msgstr ""
 
 #: ../../source/ref-exit-codes/304.rst:7
 msgid ""
-"This error occurs when entity verification is enabled using the "
-"``--enable-entities-verification`` flag, but no trusted entities have "
-"been provided. The SuperNode should be restarted with a valid list of "
-"trusted entities."
+"This error occurs when an invalid YAML file for trusted entities is "
+"provided via the ``--trusted-entities`` option. The SuperNode must be "
+"restarted with a valid trusted entities list."
 msgstr ""
 
 #: ../../source/ref-exit-codes/304.rst:14
-msgid "To fix this issue, you can either:"
+msgid "To resolve this issue, you can do one of the following:"
 msgstr ""
 
 #: ../../source/ref-exit-codes/304.rst:16
 msgid ""
-"Provide a trusted entities list with ``--trust-entities`` when launching "
-"the SuperNode. Supply a YAML file (for example, ``--trust-entities "
-"./pks.yaml``) containing the trusted entities’ public key IDs and their "
-"corresponding public keys."
+"**Provide a valid trusted entities list** using the ``--trusted-"
+"entities`` option when launching the SuperNode. Supply a YAML file (for "
+"example, ``--trusted-entities ./pks.yaml``) that contains the trusted "
+"entities’ public key IDs and their corresponding public keys."
 msgstr ""
 
-#: ../../source/ref-exit-codes/304.rst:20
+#: ../../source/ref-exit-codes/304.rst:21
 msgid ""
-"The public keys must be in **OpenSSH format**, and currently only the "
-"**ssh-ed25519** key type is supported."
+"Public keys must be in **OpenSSH format**, and currently only the **ssh-"
+"ed25519** key type is supported."
 msgstr ""
 
-#: ../../source/ref-exit-codes/304.rst:22
+#: ../../source/ref-exit-codes/304.rst:23
 msgid ""
 "Public key IDs must follow the format ``fpk_<UUID>``, where ``fpk`` "
 "stands for Flower Public Key."
 msgstr ""
 
-#: ../../source/ref-exit-codes/304.rst:24
+#: ../../source/ref-exit-codes/304.rst:25
 msgid "The YAML file should follow this structure:"
 msgstr ""
 
-#: ../../source/ref-exit-codes/304.rst:31
+#: ../../source/ref-exit-codes/304.rst:32
+msgid "\\*Comments are optional."
+msgstr ""
+
+#: ../../source/ref-exit-codes/304.rst:34
 msgid ""
-"Disable entity verification. Remove the ``--enable-entities-"
-"verification`` flag when starting the SuperNode to run without entity "
-"verification."
+"**Disable entity verification** by removing the ``--trusted-entities`` "
+"option when starting the SuperNode. This allows the SuperNode to run "
+"without entity verification."
 msgstr ""
 
 #: ../../source/ref-exit-codes/400.rst:2
@@ -69397,4 +69391,58 @@ msgstr ""
 
 #~ msgid "start\\_simulation"
 #~ msgstr "démarrer_simulation"
+
+#~ msgid ""
+#~ "**FAB:** Name of the FAB associated "
+#~ "with the run (``{FAB_ID} (v{FAB_VERSION})``)."
+#~ msgstr ""
+
+#~ msgid "**Created At:** Timestamp when the run was created."
+#~ msgstr ""
+
+#~ msgid "**Running At:** Timestamp when the run started running."
+#~ msgstr ""
+
+#~ msgid "**Finished At:** Timestamp when the run finished."
+#~ msgstr ""
+
+#~ msgid "[304] SUPERNODE_TRUST_ENTITY_REQUIRED"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This error occurs when entity "
+#~ "verification is enabled using the "
+#~ "``--enable-entities-verification`` flag, but "
+#~ "no trusted entities have been provided."
+#~ " The SuperNode should be restarted "
+#~ "with a valid list of trusted "
+#~ "entities."
+#~ msgstr ""
+
+#~ msgid "To fix this issue, you can either:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Provide a trusted entities list with "
+#~ "``--trust-entities`` when launching the "
+#~ "SuperNode. Supply a YAML file (for "
+#~ "example, ``--trust-entities ./pks.yaml``) "
+#~ "containing the trusted entities’ public "
+#~ "key IDs and their corresponding public"
+#~ " keys."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The public keys must be in "
+#~ "**OpenSSH format**, and currently only "
+#~ "the **ssh-ed25519** key type is "
+#~ "supported."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Disable entity verification. Remove the "
+#~ "``--enable-entities-verification`` flag when "
+#~ "starting the SuperNode to run without"
+#~ " entity verification."
+#~ msgstr ""
 
