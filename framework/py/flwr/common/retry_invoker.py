@@ -253,7 +253,7 @@ class RetryInvoker:
         """
 
         def try_call_event_handler(
-            handler: Callable[[RetryState], None] | None
+            handler: Callable[[RetryState], None] | None,
         ) -> None:
             if handler is not None:
                 handler(cast(RetryState, ref_state[0]))

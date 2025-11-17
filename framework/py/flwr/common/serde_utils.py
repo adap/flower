@@ -114,7 +114,7 @@ def record_value_dict_to_proto(
     Note: `bool` MUST be put in the front of allowd_types if it exists.
     """
     # Move bool to the front
-    if bool in allowed_types and allowed_types[0] != bool:
+    if bool in allowed_types and allowed_types[0] is not bool:
         allowed_types.remove(bool)
         allowed_types.insert(0, bool)
 
@@ -125,7 +125,7 @@ def record_value_dict_to_proto(
 
 
 def record_value_dict_from_proto(
-    value_dict_proto: MutableMapping[str, Any]
+    value_dict_proto: MutableMapping[str, Any],
 ) -> dict[str, Any]:
     """Deserialize the record value dict from ProtoBuf."""
     return {k: _record_value_from_proto(v) for k, v in value_dict_proto.items()}

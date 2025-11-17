@@ -1,5 +1,6 @@
-[200] SERVERAPP_STRATEGY_PRECONDITION_UNMET
-===========================================
+#############################################
+ [200] SERVERAPP_STRATEGY_PRECONDITION_UNMET
+#############################################
 
 .. |arrayrecord_link| replace:: ``ArrayRecord``
 
@@ -17,16 +18,18 @@
 
 .. _recorddict_link: ref-api/flwr.common.RecordDict.html
 
-Description
------------
+*************
+ Description
+*************
 
 The strategy received replies that cannot be aggregated because either not all replies
 contain a supported number of records, because the keys used within each record do not
 match those in other replies, or because the key required by the strategy to perform
 weighted averaging is missing.
 
-How to Resolve
---------------
+****************
+ How to Resolve
+****************
 
 Please ensure all replies returned by ClientApps have one |arrayrecord_link|_ (none when
 replies are from a round of federated evaluation, i.e. when message type is

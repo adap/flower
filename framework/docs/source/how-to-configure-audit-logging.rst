@@ -2,8 +2,9 @@
 .. meta::
     :description: Configure SuperLink for audit logging to capture or store events such as user interactions and application behavior.
 
-Configure Audit Logging
-=======================
+#########################
+ Configure Audit Logging
+#########################
 
 .. note::
 
@@ -74,8 +75,9 @@ where,
     - - ``status``
       - A string describing whether the action is started, completed or failed
 
-Prerequisites
--------------
+***************
+ Prerequisites
+***************
 
 To enable audit logging, start the SuperLink with the argument ``--enable-event-log`` as
 follows:
@@ -87,8 +89,9 @@ follows:
 Note that the audit logging feature can only be activated with the :doc:`user
 authentication feature <how-to-authenticate-users>`.
 
-Example Outputs
----------------
+*****************
+ Example Outputs
+*****************
 
 Here is an example output when a user runs ``flwr run`` (note the ``"action":
 "ControlServicer.StartRun"``):

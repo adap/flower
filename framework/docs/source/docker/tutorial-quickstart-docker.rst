@@ -2,8 +2,9 @@
 .. meta::
     :description: Containerize a Flower federated learning project and run it end-to-end with this guide, including SuperLink, SuperNode, ServerApp, and ClientApp setup.
 
-Quickstart with Docker
-======================
+########################
+ Quickstart with Docker
+########################
 
 This quickstart aims to guide you through the process of containerizing a Flower project
 and running it end to end using Docker on your local machine.
@@ -11,16 +12,18 @@ and running it end to end using Docker on your local machine.
 This tutorial does not use production-ready settings, so you can focus on understanding
 the basic workflow that uses the minimum configurations.
 
-Prerequisites
--------------
+***************
+ Prerequisites
+***************
 
 Before you start, make sure that:
 
 - The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally.
 - The Docker daemon is running.
 
-Step 1: Set Up
---------------
+****************
+ Step 1: Set Up
+****************
 
 1. Create a new Flower project (PyTorch):
 
@@ -54,8 +57,9 @@ Step 1: Set Up
    names, a feature absent in the default bridge network. This simplifies quickstart
    example by avoiding the need to determine host IP first.
 
-Step 2: Start the SuperLink
----------------------------
+*****************************
+ Step 2: Start the SuperLink
+*****************************
 
 Open your terminal and run:
 
@@ -91,8 +95,9 @@ Open your terminal and run:
       independent process. The SuperLink does not attempt to execute it. You can learn more about
       the different process modes here: :doc:`run-as-subprocess`.
 
-Step 3: Start the SuperNodes
-----------------------------
+******************************
+ Step 3: Start the SuperNodes
+******************************
 
 Start two SuperNode containers.
 
@@ -155,8 +160,9 @@ Start two SuperNode containers.
            --clientappio-api-address 0.0.0.0:9095 \
            --isolation process
 
-Step 4: Start the SuperExec to execute ServerApps
--------------------------------------------------
+***************************************************
+ Step 4: Start the SuperExec to execute ServerApps
+***************************************************
 
 The **SuperExec** Docker image comes with a pre-installed version of Flower and serves
 as a base for building your own image. Use a **single** image and select the desired
@@ -244,8 +250,9 @@ to the SuperLink's **ServerAppIO API** endpoint.
        * ``--appio-api-address superlink:9091``: Connect to the SuperLink's ServerAppIO API
          at the address ``superlink:9091``.
 
-Step 5: Start the SuperExec to execute ClientApps
--------------------------------------------------
+***************************************************
+ Step 5: Start the SuperExec to execute ClientApps
+***************************************************
 
 For ClientApps, reuse the **same** image and change the plugin and API address. When
 using the *clientapp* plugin, pass ``--appio-api-address`` pointing to the SuperNode's
@@ -294,8 +301,9 @@ using the *clientapp* plugin, pass ``--appio-api-address`` pointing to the Super
            --plugin-type clientapp \
            --appio-api-address supernode-2:9095
 
-Step 6: Run the Quickstart Project
-----------------------------------
+************************************
+ Step 6: Run the Quickstart Project
+************************************
 
 1. Add the following lines to the ``pyproject.toml``:
 
@@ -313,8 +321,9 @@ Step 6: Run the Quickstart Project
 
        $ flwr run . local-deployment --stream
 
-Step 7: Update the Application
-------------------------------
+********************************
+ Step 7: Update the Application
+********************************
 
 1. Change the application code. For example, change the ``seed`` in
    ``quickstart_docker/task.py`` to ``43`` and save it:
@@ -381,8 +390,9 @@ Step 7: Update the Application
 
        $ flwr run . local-deployment --stream
 
-Step 8: Clean Up
-----------------
+******************
+ Step 8: Clean Up
+******************
 
 Remove the containers and the bridge network:
 
@@ -394,8 +404,9 @@ Remove the containers and the bridge network:
        superlink
     $ docker network rm flwr-network
 
-Where to Go Next
-----------------
+******************
+ Where to Go Next
+******************
 
 - :doc:`enable-tls`
 - :doc:`persist-superlink-state`
