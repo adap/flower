@@ -18,7 +18,7 @@
 import hashlib
 import json
 import re
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, cast
@@ -461,6 +461,6 @@ def get_exclude_pathspec(
     return build_pathspec(patterns)
 
 
-def to_bytes(content: Union[bytes, Path]) -> bytes:
+def to_bytes(content: bytes | Path) -> bytes:
     """Convert a Path or bytes object to bytes."""
     return content.read_bytes() if isinstance(content, Path) else content
