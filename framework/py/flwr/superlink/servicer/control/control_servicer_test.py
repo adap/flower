@@ -283,10 +283,8 @@ class TestControlServicer(unittest.TestCase):
 
         # Execute
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(
-                get=lambda: SimpleNamespace(flwr_aid=flwr_aid_retrieving)
-            ),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=flwr_aid_retrieving),
         ):
             res: ListNodesResponse = self.servicer.ListNodes(ListNodesRequest(), Mock())
 
@@ -349,8 +347,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=context_flwr_aid),
         ):
             gen = self.servicer.StreamLogs(request, ctx)
             with self.assertRaises(RuntimeError) as cm:
@@ -378,8 +376,8 @@ class TestControlServicerAuth(unittest.TestCase):
                 },
             ),
             patch(
-                "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-                new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
+                "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+                return_value=SimpleNamespace(flwr_aid="user-123"),
             ),
         ):
             msgs = list(self.servicer.StreamLogs(request, ctx))
@@ -403,8 +401,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=context_flwr_aid),
         ):
             with self.assertRaises(RuntimeError) as cm:
                 self.servicer.StopRun(request, ctx)
@@ -419,8 +417,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid="user-123"),
         ):
             response = self.servicer.StopRun(request, ctx)
             self.assertTrue(response.success)
@@ -441,8 +439,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=context_flwr_aid),
         ):
             with self.assertRaises(RuntimeError) as cm:
                 self.servicer.ListRuns(request, ctx)
@@ -457,8 +455,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid="user-123"),
         ):
             response = self.servicer.ListRuns(request, ctx)
             self.assertEqual(set(response.run_dict.keys()), {run_id})

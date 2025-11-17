@@ -2,7 +2,7 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-version=${1:-3.8.15}
+version=${1:-3.10.19}
 
 # Check if the directory for the Python version does not exist and if so, 
 # install the right Python version through pyenv
