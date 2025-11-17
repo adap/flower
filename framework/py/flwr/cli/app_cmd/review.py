@@ -168,8 +168,7 @@ def review(
 
     # Validate version format
     if "==" in app_name:
-        app_id = app_name.split("==")[0]
-        version = app_name.split("==")[1]
+        app_id, app_version = app_name.split("==")
 
         # Validate app version format
         m = re.match(APP_VERSION_PATTERN, version)
