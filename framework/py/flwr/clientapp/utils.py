@@ -15,9 +15,9 @@
 """Flower ClientApp loading utils."""
 
 
+from collections.abc import Callable
 from logging import DEBUG
 from pathlib import Path
-from typing import Callable, Optional
 
 from flwr.clientapp.client_app import ClientApp, LoadClientAppError
 from flwr.common.config import (
@@ -32,9 +32,9 @@ from flwr.common.object_ref import load_app, validate
 
 def get_load_client_app_fn(
     default_app_ref: str,
-    app_path: Optional[str],
+    app_path: str | None,
     multi_app: bool,
-    flwr_dir: Optional[str] = None,
+    flwr_dir: str | None = None,
 ) -> Callable[[str, str, str], ClientApp]:
     """Get the load_client_app_fn function.
 

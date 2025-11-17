@@ -72,7 +72,7 @@ class NaturalIdPartitioner(Partitioner):
         """
         unique_natural_ids = sorted(self.dataset.unique(self._partition_by))
         self._partition_id_to_natural_id = dict(
-            zip(range(len(unique_natural_ids)), unique_natural_ids)
+            zip(range(len(unique_natural_ids)), unique_natural_ids, strict=False)
         )
 
     def _create_natural_id_to_int_partition_id(self) -> None:

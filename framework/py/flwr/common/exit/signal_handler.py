@@ -16,9 +16,9 @@
 
 
 import signal
+from collections.abc import Callable
 from threading import Thread
 from types import FrameType
-from typing import Callable, Optional
 
 from grpc import Server
 
@@ -40,10 +40,10 @@ if hasattr(signal, "SIGQUIT"):
 
 def register_signal_handlers(
     event_type: EventType,
-    exit_message: Optional[str] = None,
-    grpc_servers: Optional[list[Server]] = None,
-    bckg_threads: Optional[list[Thread]] = None,
-    exit_handlers: Optional[list[Callable[[], None]]] = None,
+    exit_message: str | None = None,
+    grpc_servers: list[Server] | None = None,
+    bckg_threads: list[Thread] | None = None,
+    exit_handlers: list[Callable[[], None]] | None = None,
 ) -> None:
     """Register exit handlers for `SIGINT`, `SIGTERM` and `SIGQUIT` signals.
 

@@ -18,7 +18,6 @@
 import argparse
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
-from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
@@ -78,7 +77,7 @@ from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 def flwr_simulation() -> None:
     """Run process-isolated Flower Simulation."""
     # Capture stdout/stderr
-    log_queue: Queue[Optional[str]] = Queue()
+    log_queue: Queue[str | None] = Queue()
     mirror_output_to_queue(log_queue)
 
     args = _parse_args_run_flwr_simulation().parse_args()
@@ -125,11 +124,11 @@ def flwr_simulation() -> None:
 
 def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     simulationio_api_address: str,
-    log_queue: Queue[Optional[str]],
+    log_queue: Queue[str | None],
     token: str,
-    flwr_dir_: Optional[str] = None,
-    certificates: Optional[bytes] = None,
-    parent_pid: Optional[int] = None,
+    flwr_dir_: str | None = None,
+    certificates: bytes | None = None,
+    parent_pid: int | None = None,
 ) -> None:
     """Run Flower Simulation process."""
     # Start monitoring the parent process if a PID is provided

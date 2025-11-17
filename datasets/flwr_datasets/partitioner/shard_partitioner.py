@@ -17,7 +17,6 @@
 
 # pylint: disable=R0912, R0914
 import math
-from typing import Optional
 
 import numpy as np
 
@@ -143,11 +142,11 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         self,
         num_partitions: int,
         partition_by: str,
-        num_shards_per_partition: Optional[int] = None,
-        shard_size: Optional[int] = None,
+        num_shards_per_partition: int | None = None,
+        shard_size: int | None = None,
         keep_incomplete_shard: bool = False,
         shuffle: bool = True,
-        seed: Optional[int] = 42,
+        seed: int | None = 42,
     ) -> None:
         super().__init__()
         # Attributes based on the constructor
@@ -158,7 +157,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
             num_shards_per_partition, "num_shards_per_partition", True
         )
         self._num_shards_per_partition = num_shards_per_partition
-        self._num_shards_used: Optional[int] = None
+        self._num_shards_used: int | None = None
         _check_if_natural_number(shard_size, "shard_size", True)
         self._shard_size = shard_size
         self._keep_incomplete_shard = keep_incomplete_shard
@@ -363,7 +362,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
 
 
 def _check_if_natural_number(
-    number: Optional[int], parameter_name: str, none_acceptable: bool = False
+    number: int | None, parameter_name: str, none_acceptable: bool = False
 ) -> None:
     if none_acceptable and number is None:
         return

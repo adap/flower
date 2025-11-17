@@ -17,7 +17,6 @@
 
 import abc
 from collections.abc import Sequence
-from typing import Optional
 
 from flwr.common import Context, Message
 from flwr.common.record import ConfigRecord
@@ -36,7 +35,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """Return the FederationManager instance."""
 
     @abc.abstractmethod
-    def store_message_ins(self, message: Message) -> Optional[str]:
+    def store_message_ins(self, message: Message) -> str | None:
         """Store one Message.
 
         Usually, the ServerAppIo API calls this to schedule instructions.
@@ -54,7 +53,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_message_ins(self, node_id: int, limit: Optional[int]) -> list[Message]:
+    def get_message_ins(self, node_id: int, limit: int | None) -> list[Message]:
         """Get zero or more `Message` objects for the provided `node_id`.
 
         Usually, the Fleet API calls this for Nodes planning to work on one or more
@@ -69,7 +68,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def store_message_res(self, message: Message) -> Optional[str]:
+    def store_message_res(self, message: Message) -> str | None:
         """Store one Message.
 
         Usually, the Fleet API calls this for Nodes returning results.
@@ -199,7 +198,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_node_id_by_public_key(self, public_key: bytes) -> Optional[int]:
+    def get_node_id_by_public_key(self, public_key: bytes) -> int | None:
         """Get `node_id` for the specified `public_key` if it exists and is not deleted.
 
         Parameters
@@ -218,9 +217,9 @@ class LinkState(CoreState):  # pylint: disable=R0904
     def get_node_info(
         self,
         *,
-        node_ids: Optional[Sequence[int]] = None,
-        owner_aids: Optional[Sequence[str]] = None,
-        statuses: Optional[Sequence[str]] = None,
+        node_ids: Sequence[int] | None = None,
+        owner_aids: Sequence[str] | None = None,
+        statuses: Sequence[str] | None = None,
     ) -> Sequence[NodeInfo]:
         """Retrieve information about nodes based on the specified filters.
 
@@ -269,13 +268,13 @@ class LinkState(CoreState):  # pylint: disable=R0904
     @abc.abstractmethod
     def create_run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
-        fab_id: Optional[str],
-        fab_version: Optional[str],
-        fab_hash: Optional[str],
+        fab_id: str | None,
+        fab_version: str | None,
+        fab_hash: str | None,
         override_config: UserConfig,
         federation: str,
         federation_options: ConfigRecord,
-        flwr_aid: Optional[str],
+        flwr_aid: str | None,
     ) -> int:
         """Create a new run.
 
@@ -309,14 +308,14 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_run_ids(self, flwr_aid: Optional[str]) -> set[int]:
+    def get_run_ids(self, flwr_aid: str | None) -> set[int]:
         """Retrieve all run IDs if `flwr_aid` is not specified.
 
         Otherwise, retrieve all run IDs for the specified `flwr_aid`.
         """
 
     @abc.abstractmethod
-    def get_run(self, run_id: int) -> Optional[Run]:
+    def get_run(self, run_id: int) -> Run | None:
         """Retrieve information about the run with the specified `run_id`.
 
         Parameters
@@ -368,7 +367,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_pending_run_id(self) -> Optional[int]:
+    def get_pending_run_id(self) -> int | None:
         """Get the `run_id` of a run with `Status.PENDING` status.
 
         Returns
@@ -379,7 +378,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_federation_options(self, run_id: int) -> Optional[ConfigRecord]:
+    def get_federation_options(self, run_id: int) -> ConfigRecord | None:
         """Retrieve the federation options for the specified `run_id`.
 
         Parameters
@@ -443,7 +442,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_serverapp_context(self, run_id: int) -> Optional[Context]:
+    def get_serverapp_context(self, run_id: int) -> Context | None:
         """Get the context for the specified `run_id`.
 
         Parameters
@@ -484,7 +483,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def get_serverapp_log(
-        self, run_id: int, after_timestamp: Optional[float]
+        self, run_id: int, after_timestamp: float | None
     ) -> tuple[str, float]:
         """Get the ServerApp logs for the specified `run_id`.
 

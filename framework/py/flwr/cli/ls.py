@@ -17,10 +17,8 @@
 
 import io
 import json
-from dataclasses import dataclass
-from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Annotated, Optional, cast
+from typing import Annotated, cast
 
 import typer
 from rich.console import Console
@@ -35,34 +33,16 @@ from flwr.cli.config_utils import (
 )
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, Status, SubStatus
-from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import run_from_proto
-from flwr.common.typing import Run
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListRunsRequest,
     ListRunsResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 
+from .run_utils import RunRow, format_runs
 from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
-
-
-@dataclass
-class RunRow:  # pylint: disable=too-many-instance-attributes
-    """Represents a single run's data for display."""
-
-    run_id: int
-    federation: str
-    fab_id: str
-    fab_version: str
-    fab_hash: str
-    status_text: str
-    elapsed: str
-    pending_at: str
-    starting_at: str
-    running_at: str
-    finished_at: str
 
 
 def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
@@ -72,11 +52,11 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         typer.Argument(help="Path of the Flower project"),
     ] = Path("."),
     federation: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(help="Name of the federation"),
     ] = None,
     federation_config_overrides: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option(
             "--federation-config",
             help=FEDERATION_CONFIG_HELP_MESSAGE,
@@ -90,7 +70,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         ),
     ] = False,
     run_id: Annotated[
-        Optional[int],
+        int | None,
         typer.Option(
             "--run-id",
             help="Specific run ID to display",
@@ -180,60 +160,6 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         if suppress_output:
             restore_output()
         captured_output.close()
-
-
-def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[RunRow]:
-    """Format runs to a list of RunRow objects."""
-
-    def _format_datetime(dt: Optional[datetime]) -> str:
-        return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
-
-    run_list: list[RunRow] = []
-
-    # Add rows
-    for run in sorted(
-        run_dict.values(), key=lambda x: datetime.fromisoformat(x.pending_at)
-    ):
-        # Combine status and sub-status into a single string
-        if run.status.sub_status == "":
-            status_text = run.status.status
-        else:
-            status_text = f"{run.status.status}:{run.status.sub_status}"
-
-        # Convert isoformat to datetime
-        pending_at = datetime.fromisoformat(run.pending_at) if run.pending_at else None
-        starting_at = (
-            datetime.fromisoformat(run.starting_at) if run.starting_at else None
-        )
-        running_at = datetime.fromisoformat(run.running_at) if run.running_at else None
-        finished_at = (
-            datetime.fromisoformat(run.finished_at) if run.finished_at else None
-        )
-
-        # Calculate elapsed time
-        elapsed_time = timedelta()
-        if running_at:
-            if finished_at:
-                end_time = finished_at
-            else:
-                end_time = datetime.fromisoformat(now_isoformat)
-            elapsed_time = end_time - running_at
-
-        row = RunRow(
-            run_id=run.run_id,
-            federation=run.federation,
-            fab_id=run.fab_id,
-            fab_version=run.fab_version,
-            fab_hash=run.fab_hash,
-            status_text=status_text,
-            elapsed=format_timedelta(elapsed_time),
-            pending_at=_format_datetime(pending_at),
-            starting_at=_format_datetime(starting_at),
-            running_at=_format_datetime(running_at),
-            finished_at=_format_datetime(finished_at),
-        )
-        run_list.append(row)
-    return run_list
 
 
 def _get_status_style(status_text: str) -> str:
@@ -344,7 +270,7 @@ def _list_runs(stub: ControlStub) -> list[RunRow]:
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    return _format_runs(run_dict, res.now)
+    return format_runs(run_dict, res.now)
 
 
 def _display_one_run(stub: ControlStub, run_id: int) -> list[RunRow]:
@@ -357,4 +283,4 @@ def _display_one_run(stub: ControlStub, run_id: int) -> list[RunRow]:
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    return _format_runs(run_dict, res.now)
+    return format_runs(run_dict, res.now)

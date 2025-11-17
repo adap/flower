@@ -15,18 +15,14 @@
 """FederatedDataset."""
 
 
-from typing import Any, Optional, Union
+from typing import Any
 
 import datasets
 from datasets import Dataset, DatasetDict
 from flwr_datasets.common import EventType, event
 from flwr_datasets.partitioner import Partitioner
 from flwr_datasets.preprocessor import Preprocessor
-from flwr_datasets.utils import (
-    _check_if_dataset_tested,
-    _instantiate_merger_if_needed,
-    _instantiate_partitioners,
-)
+from flwr_datasets.utils import _instantiate_merger_if_needed, _instantiate_partitioners
 
 
 # noqa: E501
@@ -112,17 +108,16 @@ class FederatedDataset:
         self,
         *,
         dataset: str,
-        subset: Optional[str] = None,
-        preprocessor: Optional[Union[Preprocessor, dict[str, tuple[str, ...]]]] = None,
-        partitioners: dict[str, Union[Partitioner, int]],
+        subset: str | None = None,
+        preprocessor: Preprocessor | dict[str, tuple[str, ...]] | None = None,
+        partitioners: dict[str, Partitioner | int],
         shuffle: bool = True,
-        seed: Optional[int] = 42,
+        seed: int | None = 42,
         **load_dataset_kwargs: Any,
     ) -> None:
-        _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
-        self._subset: Optional[str] = subset
-        self._preprocessor: Optional[Preprocessor] = _instantiate_merger_if_needed(
+        self._subset: str | None = subset
+        self._preprocessor: Preprocessor | None = _instantiate_merger_if_needed(
             preprocessor
         )
         self._partitioners: dict[str, Partitioner] = _instantiate_partitioners(
@@ -133,7 +128,7 @@ class FederatedDataset:
         self._seed = seed
         #  _dataset is prepared lazily on the first call to `load_partition`
         #  or `load_split`. See _prepare_datasets for more details
-        self._dataset: Optional[DatasetDict] = None
+        self._dataset: DatasetDict | None = None
         # Indicate if the dataset is prepared for `load_partition` or `load_split`
         self._dataset_prepared: bool = False
         self._event = {
@@ -144,7 +139,7 @@ class FederatedDataset:
     def load_partition(
         self,
         partition_id: int,
-        split: Optional[str] = None,
+        split: str | None = None,
     ) -> Dataset:
         """Load the partition specified by the idx in the selected split.
 

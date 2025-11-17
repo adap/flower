@@ -17,8 +17,9 @@
 
 import threading
 from abc import ABC
+from collections.abc import Callable
 from logging import DEBUG, ERROR, WARNING
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 import ray
 from ray import ObjectRef
@@ -76,13 +77,13 @@ class ClientAppActor(VirtualClientEngineActor):
         A function to execute upon actor initialization.
     """
 
-    def __init__(self, on_actor_init_fn: Optional[Callable[[], None]] = None) -> None:
+    def __init__(self, on_actor_init_fn: Callable[[], None] | None = None) -> None:
         super().__init__()
         if on_actor_init_fn:
             on_actor_init_fn()
 
 
-def pool_size_from_resources(client_resources: dict[str, Union[int, float]]) -> int:
+def pool_size_from_resources(client_resources: dict[str, int | float]) -> int:
     """Calculate number of Actors that fit in the cluster.
 
     For this we consider the resources available on each node and those required per
@@ -166,8 +167,8 @@ class VirtualClientEngineActorPool(ActorPool):
     def __init__(
         self,
         create_actor_fn: Callable[[], type[VirtualClientEngineActor]],
-        client_resources: dict[str, Union[int, float]],
-        actor_list: Optional[list[type[VirtualClientEngineActor]]] = None,
+        client_resources: dict[str, int | float],
+        actor_list: list[type[VirtualClientEngineActor]] | None = None,
     ):
         self.client_resources = client_resources
         self.create_actor_fn = create_actor_fn
@@ -186,9 +187,7 @@ class VirtualClientEngineActorPool(ActorPool):
 
         # A dict that maps cid to another dict containing: a reference to the remote job
         # and its status (i.e. whether it is ready or not)
-        self._cid_to_future: dict[
-            str, dict[str, Union[bool, Optional[ObjectRef[Any]]]]
-        ] = {}
+        self._cid_to_future: dict[str, dict[str, bool | ObjectRef[Any] | None]] = {}
         self.actor_to_remove: set[str] = set()  # a set
         self.num_actors = len(actors)
 
@@ -353,7 +352,7 @@ class VirtualClientEngineActorPool(ActorPool):
 
         return True
 
-    def process_unordered_future(self, timeout: Optional[float] = None) -> None:
+    def process_unordered_future(self, timeout: float | None = None) -> None:
         """Similar to parent's get_next_unordered() but without final ray.get()."""
         if not self.has_next():  # type: ignore
             raise StopIteration("No more results to get")
@@ -384,7 +383,7 @@ class VirtualClientEngineActorPool(ActorPool):
                     actor.terminate.remote()
 
     def get_client_result(
-        self, cid: str, timeout: Optional[float]
+        self, cid: str, timeout: float | None
     ) -> tuple[Message, Context]:
         """Get result from VirtualClient with specific cid."""
         # Loop until all jobs submitted to the pool are completed. Break early
@@ -407,7 +406,7 @@ class BasicActorPool:
     def __init__(
         self,
         actor_type: type[VirtualClientEngineActor],
-        client_resources: dict[str, Union[int, float]],
+        client_resources: dict[str, int | float],
         actor_kwargs: dict[str, Any],
     ):
         self.client_resources = client_resources

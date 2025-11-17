@@ -17,8 +17,8 @@
 
 import unittest
 import unittest.mock
-from collections.abc import Iterable
-from typing import Any, Callable, Optional, Union, cast
+from collections.abc import Callable, Iterable
+from typing import Any, cast
 from unittest.mock import Mock, patch
 
 import numpy as np
@@ -69,7 +69,7 @@ class GridClientProxyTestCase(unittest.TestCase):
         )
         self.grid = grid
         self.client = client
-        self.created_msg: Optional[Message] = None
+        self.created_msg: Message | None = None
         self.called_times: int = 0
         self.patcher.start()
 
@@ -211,8 +211,8 @@ class GridClientProxyTestCase(unittest.TestCase):
         content: RecordDict,
         dst_node_id: int,
         message_type: str,
-        ttl: Optional[float] = None,
-        group_id: Optional[str] = None,
+        ttl: float | None = None,
+        group_id: str | None = None,
     ) -> Message:
         """Create a new message.
 
@@ -226,7 +226,7 @@ class GridClientProxyTestCase(unittest.TestCase):
 
     def _exec_send_and_receive(
         self,
-        res: Union[GetParametersRes, GetPropertiesRes, FitRes, EvaluateRes, None],
+        res: GetParametersRes | GetPropertiesRes | FitRes | EvaluateRes | None,
         error_reply: bool = False,
     ) -> Callable[[Iterable[Message]], Iterable[Message]]:
         """Get the generate_replies function that sets the return value of grid's

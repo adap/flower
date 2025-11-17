@@ -21,7 +21,7 @@ import zipfile
 from enum import Enum
 from pathlib import Path
 from string import Template
-from typing import Annotated, Optional
+from typing import Annotated
 
 import requests
 import typer
@@ -104,7 +104,7 @@ def render_and_create(file_path: Path, template: str, context: dict[str, str]) -
 
 
 def print_success_prompt(
-    package_name: str, llm_challenge_str: Optional[str] = None
+    package_name: str, llm_challenge_str: str | None = None
 ) -> None:
     """Print styled setup instructions for running a new Flower App after creation."""
     prompt = typer.style(
@@ -267,18 +267,18 @@ def download_remote_app_via_api(app_str: str) -> None:
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
 def new(
     app_name: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(
             help="Flower app name. For remote apps, use the format '@user/app==1.0.0'. "
             "Version is optional (defaults to latest)."
         ),
     ] = None,
     framework: Annotated[
-        Optional[MlFramework],
+        MlFramework | None,
         typer.Option(case_sensitive=False, help="The ML framework to use"),
     ] = None,
     username: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(case_sensitive=False, help="The Flower username of the author"),
     ] = None,
 ) -> None:

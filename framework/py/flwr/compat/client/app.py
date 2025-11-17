@@ -16,10 +16,10 @@
 
 
 import time
+from collections.abc import Callable
 from contextlib import AbstractContextManager
 from logging import ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
@@ -50,7 +50,7 @@ from flwr.supernode.nodestate import NodeStateFactory
 
 
 def _check_actionable_client(
-    client: Optional[Client], client_fn: Optional[ClientFnExt]
+    client: Client | None, client_fn: ClientFnExt | None
 ) -> None:
     if client_fn is None and client is None:
         raise ValueError(
@@ -71,17 +71,17 @@ def _check_actionable_client(
 def start_client(
     *,
     server_address: str,
-    client_fn: Optional[ClientFnExt] = None,
-    client: Optional[Client] = None,
+    client_fn: ClientFnExt | None = None,
+    client: Client | None = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificates: Optional[Union[bytes, str]] = None,
-    insecure: Optional[bool] = None,
-    transport: Optional[str] = None,
-    authentication_keys: Optional[
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
-    ] = None,
-    max_retries: Optional[int] = None,
-    max_wait_time: Optional[float] = None,
+    root_certificates: bytes | str | None = None,
+    insecure: bool | None = None,
+    transport: str | None = None,
+    authentication_keys: (
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+    ) = None,
+    max_retries: int | None = None,
+    max_wait_time: float | None = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -205,19 +205,19 @@ def start_client_internal(
     *,
     server_address: str,
     node_config: UserConfig,
-    load_client_app_fn: Optional[Callable[[str, str, str], ClientApp]] = None,
-    client_fn: Optional[ClientFnExt] = None,
-    client: Optional[Client] = None,
+    load_client_app_fn: Callable[[str, str, str], ClientApp] | None = None,
+    client_fn: ClientFnExt | None = None,
+    client: Client | None = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificates: Optional[Union[bytes, str]] = None,
-    insecure: Optional[bool] = None,
-    transport: Optional[str] = None,
-    authentication_keys: Optional[
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
-    ] = None,
-    max_retries: Optional[int] = None,
-    max_wait_time: Optional[float] = None,
-    flwr_path: Optional[Path] = None,
+    root_certificates: bytes | str | None = None,
+    insecure: bool | None = None,
+    transport: str | None = None,
+    authentication_keys: (
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+    ) = None,
+    max_retries: int | None = None,
+    max_wait_time: float | None = None,
+    flwr_path: Path | None = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -342,7 +342,7 @@ def start_client_internal(
     )
 
     # DeprecatedRunInfoStore gets initialized when the first connection is established
-    run_info_store: Optional[DeprecatedRunInfoStore] = None
+    run_info_store: DeprecatedRunInfoStore | None = None
     state_factory = NodeStateFactory()
     state = state_factory.state()
 
@@ -537,9 +537,9 @@ def start_numpy_client(
     server_address: str,
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificates: Optional[bytes] = None,
-    insecure: Optional[bool] = None,
-    transport: Optional[str] = None,
+    root_certificates: bytes | None = None,
+    insecure: bool | None = None,
+    transport: str | None = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -631,24 +631,24 @@ def start_numpy_client(
     )
 
 
-def _init_connection(transport: Optional[str], server_address: str) -> tuple[
+def _init_connection(transport: str | None, server_address: str) -> tuple[
     Callable[
         [
             str,
             bool,
             RetryInvoker,
             int,
-            Union[bytes, str, None],
-            Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
+            bytes | str | None,
+            tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None,
         ],
         AbstractContextManager[
             tuple[
-                Callable[[], Optional[Message]],
+                Callable[[], Message | None],
                 Callable[[Message], None],
-                Optional[Callable[[], Optional[int]]],
-                Optional[Callable[[], None]],
-                Optional[Callable[[int], Run]],
-                Optional[Callable[[str, int], Fab]],
+                Callable[[], int | None] | None,
+                Callable[[], None] | None,
+                Callable[[int], Run] | None,
+                Callable[[str, int], Fab] | None,
             ]
         ],
     ],

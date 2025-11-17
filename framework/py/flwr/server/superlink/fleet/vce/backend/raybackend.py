@@ -16,8 +16,8 @@
 
 
 import sys
+from collections.abc import Callable
 from logging import DEBUG, ERROR
-from typing import Callable, Optional, Union
 
 import ray
 
@@ -32,8 +32,8 @@ from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
 from .backend import Backend, BackendConfig
 
-ClientResourcesDict = dict[str, Union[int, float]]
-ActorArgsDict = dict[str, Union[int, float, Callable[[], None]]]
+ClientResourcesDict = dict[str, int | float]
+ActorArgsDict = dict[str, int | float | Callable[[], None]]
 
 
 class RayBackend(Backend):
@@ -57,9 +57,9 @@ class RayBackend(Backend):
 
         # Valide actor resources
         self.actor_kwargs = self._validate_actor_arguments(config=backend_config)
-        self.pool: Optional[BasicActorPool] = None
+        self.pool: BasicActorPool | None = None
 
-        self.app_fn: Optional[Callable[[], ClientApp]] = None
+        self.app_fn: Callable[[], ClientApp] | None = None
 
     def _validate_client_resources(self, config: BackendConfig) -> ClientResourcesDict:
         client_resources_config = config.get(self.client_resources_key)

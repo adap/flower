@@ -15,7 +15,7 @@
 """IdToSizeFncPartitioner class."""
 
 
-from typing import Callable, Union
+from collections.abc import Callable
 
 import numpy as np
 
@@ -105,7 +105,7 @@ class IdToSizeFncPartitioner(Partitioner):
         data_division_in_units = self._partition_id_to_size_fn(
             np.linspace(start=1, stop=self._num_partitions, num=self._num_partitions)
         )
-        total_units: Union[int, float] = data_division_in_units.sum()
+        total_units: int | float = data_division_in_units.sum()
         # Normalize the units to get the fraction total dataset
         partition_sizes_as_fraction = data_division_in_units / total_units
         # Calculate the number of samples
