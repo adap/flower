@@ -22,7 +22,7 @@ import tempfile
 import unittest
 from datetime import datetime
 from types import SimpleNamespace
-from typing import cast
+from typing import Any, cast
 from unittest.mock import MagicMock, Mock, patch
 
 import grpc
@@ -596,7 +596,7 @@ def test__request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) -
                 assert app_id in msg
         else:
             # Expect a (fab_url, verifications) tuple
-            result2: tuple[str, Optional[list[dict[str, str]]]] = (
+            result2: tuple[str, list[dict[str, str]] | None] = (
                 _request_download_link(app_id, ctx)
             )
             assert case["assert"](result2), f"Assertion failed for {case['name']}"

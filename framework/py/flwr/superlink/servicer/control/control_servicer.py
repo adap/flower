@@ -613,7 +613,7 @@ def _check_flwr_aid_in_run(
 
 def _request_download_link(
     app_id: str, context: grpc.ServicerContext
-) -> tuple[str, Optional[list[dict[str, str]]]]:
+) -> tuple[str, list[dict[str, str]] | None]:
     """Request download link from Flower platform API."""
     url = f"{PLATFORM_API_URL}/hub/fetch-fab"
     headers = {
@@ -657,7 +657,7 @@ def _request_download_link(
 
 
 def _format_verification(
-    verifications: Optional[list[dict[str, str]]], verification_dict: dict[str, str]
+    verifications: list[dict[str, str] | None], verification_dict: dict[str, str]
 ) -> dict[str, str]:
     """Format verification information for FAB."""
     if verifications is not None:
