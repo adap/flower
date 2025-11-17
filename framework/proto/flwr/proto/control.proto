@@ -122,10 +122,5 @@ message ListNodesResponse {
 message ListFederationsRequest {}
 message ListFederationsResponse { repeated Federation federations = 1; }
 
-message ShowFederationRequest { string federation = 1; }
-message ShowFederationResponse {
-  Federation federation = 1;
-  repeated NodeInfo nodes_info = 2;
-  map<uint64, Run> run_dict = 3;
-  string now = 4;
-}
+message ShowFederationRequest { string federation_name = 1; }
+message ShowFederationResponse { Federation federation = 1; }
