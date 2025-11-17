@@ -15,7 +15,6 @@
 """Tests for message-based strategy utilities."""
 
 
-from collections import OrderedDict
 from unittest.mock import Mock
 
 import numpy as np
@@ -268,7 +267,7 @@ def test_consistency_of_replies_with_matching_keys(
                 RecordDict(
                     {
                         "global-model": ArrayRecord(
-                            OrderedDict({"a": Array(np.random.randn(7, 3))})
+                            {"a": Array(np.random.randn(7, 3))}
                         ),
                         "metrics": MetricRecord({"weight": 0.123}),
                     }
@@ -276,7 +275,7 @@ def test_consistency_of_replies_with_matching_keys(
                 RecordDict(
                     {
                         "global-model": ArrayRecord(
-                            OrderedDict({"b": Array(np.random.randn(7, 3))})
+                            {"b": Array(np.random.randn(7, 3))}
                         ),
                         "metrics": MetricRecord({"weight": 0.123}),
                     }

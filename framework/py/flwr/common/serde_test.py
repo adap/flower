@@ -17,7 +17,6 @@
 
 import random
 import string
-from collections import OrderedDict
 from collections.abc import Callable
 from typing import Any, TypeVar, cast
 
@@ -237,9 +236,7 @@ class RecordMaker:
     def array_record(self) -> ArrayRecord:
         """Create a ArrayRecord."""
         num_arrays = self.rng.randint(1, 5)
-        arrays = OrderedDict(
-            [(self.get_str(), self.array()) for i in range(num_arrays)]
-        )
+        arrays = {self.get_str(): self.array() for i in range(num_arrays)}
         return ArrayRecord(arrays, keep_input=False)
 
     def metric_record(self) -> MetricRecord:

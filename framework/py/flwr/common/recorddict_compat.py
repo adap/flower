@@ -15,7 +15,6 @@
 """RecordDict utilities."""
 
 
-from collections import OrderedDict
 from collections.abc import Mapping
 from typing import cast, get_args
 
@@ -104,25 +103,23 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
     tensor_type = parameters.tensor_type
 
     num_arrays = len(parameters.tensors)
-    ordered_dict = OrderedDict()
+    array_dict = {}
     for idx in range(num_arrays):
         if keep_input:
             tensor = parameters.tensors[idx]
         else:
             tensor = parameters.tensors.pop(0)
-        ordered_dict[str(idx)] = Array(
-            data=tensor, dtype="", stype=tensor_type, shape=()
-        )
+        array_dict[str(idx)] = Array(data=tensor, dtype="", stype=tensor_type, shape=())
 
     if num_arrays == 0:
-        ordered_dict[EMPTY_TENSOR_KEY] = Array(
+        array_dict[EMPTY_TENSOR_KEY] = Array(
             data=b"", dtype="", stype=tensor_type, shape=()
         )
-    return ArrayRecord(ordered_dict, keep_input=keep_input)
+    return ArrayRecord(array_dict, keep_input=keep_input)
 
 
 def _check_mapping_from_recordscalartype_to_scalar(
-    record_data: Mapping[str, ConfigRecordValues | MetricRecordValues]
+    record_data: Mapping[str, ConfigRecordValues | MetricRecordValues],
 ) -> dict[str, Scalar]:
     """Check mapping `common.*RecordValues` into `common.Scalar` is possible."""
     for value in record_data.values():

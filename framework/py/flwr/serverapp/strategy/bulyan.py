@@ -18,7 +18,6 @@ Paper: arxiv.org/abs/1802.07927
 """
 
 
-from collections import OrderedDict
 from collections.abc import Callable, Iterable
 from logging import INFO, WARN
 from typing import cast
@@ -186,7 +185,7 @@ class Bulyan(FedAvg):
 
         # Convert to ArrayRecord
         arrays = ArrayRecord(
-            OrderedDict(zip(array_keys, map(Array, aggregated_ndarrays), strict=True))
+            dict(zip(array_keys, map(Array, aggregated_ndarrays), strict=True))
         )
 
         # Aggregate MetricRecords
