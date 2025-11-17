@@ -1,8 +1,10 @@
-Reference
-=========
+###########
+ Reference
+###########
 
-References
-----------
+************
+ References
+************
 
 Information-oriented API reference and other reference material.
 

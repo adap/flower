@@ -4,8 +4,9 @@
 
 .. _quickstart-jax:
 
-Quickstart JAX
-==============
+################
+ Quickstart JAX
+################
 
 In this federated learning tutorial we will learn how to train a linear regression model
 using Flower and `JAX <https://jax.readthedocs.io/en/latest/>`_. It is recommended to
@@ -140,8 +141,9 @@ in ``pyproject.toml`` like this:
 What follows is an explanation of each component in the project you just created:
 dataset partition, the model, defining the ``ClientApp`` and defining the ``ServerApp``.
 
-The Data
---------
+**********
+ The Data
+**********
 
 This tutorial uses scikit-learn's |makeregression|_ function to generate a random
 regression problem.
@@ -154,8 +156,9 @@ regression problem.
         X, X_test, y, y_test = train_test_split(X, y)
         return X, y, X_test, y_test
 
-The Model
----------
+***********
+ The Model
+***********
 
 We defined a simple linear regression model to demonstrate how to create a JAX model,
 but feel free to replace it with a more sophisticated JAX model if you'd like, (such as
@@ -196,8 +199,9 @@ the above model.
         loss_test = jnp.mean(jnp.square(err_test))
         return loss_test, num_examples
 
-The ClientApp
--------------
+***************
+ The ClientApp
+***************
 
 The main changes we have to make to use JAX with Flower have to do with converting the
 |arrayrecord_link|_ received in the |message_link|_ into NumPy arrays and vice versa
@@ -297,8 +301,9 @@ model is not locally trained, instead it is used to evaluate its performance on 
 locally held-out validation set; (2) including the model in the reply Message is no
 longer needed because it is not locally modified.
 
-The ServerApp
--------------
+***************
+ The ServerApp
+***************
 
 To construct a |serverapp_link|_ we define its ``@app.main()`` method. This method
 receive as input arguments:

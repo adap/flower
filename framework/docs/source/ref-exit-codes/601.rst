@@ -1,13 +1,16 @@
-[601] COMMON_MISSING_EXTRA_REST
-===============================
+#################################
+ [601] COMMON_MISSING_EXTRA_REST
+#################################
 
-Description
------------
+*************
+ Description
+*************
 
 Extra dependencies required for using the REST-based Fleet API are missing.
 
-How to Resolve
---------------
+****************
+ How to Resolve
+****************
 
 To enable the REST-based Fleet API, install ``flwr`` with the ``rest`` extra:
 

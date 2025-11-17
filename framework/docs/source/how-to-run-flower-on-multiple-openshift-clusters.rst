@@ -2,8 +2,9 @@
 .. meta::
     :description: Deploy Flower across OpenShift Clusters using Red Hat Service Interconnect for secure, scalable federated AI across environments.
 
-Run Flower on Multiple OpenShift Clusters
-=========================================
+###########################################
+ Run Flower on Multiple OpenShift Clusters
+###########################################
 
 In this guide, you will learn how to deploy Flower in multiple `Red Hat OpenShift (RHOS)
 <https://www.redhat.com/en/technologies/cloud-computing/openshift>`_ application
@@ -35,8 +36,9 @@ requires a Skupper site to accept links and route incoming traffic and the clust
 SuperNode is deployed must have a Skupper site to join the application network and route
 outgoing requests via the interconnect.
 
-Pre-requisites
---------------
+****************
+ Pre-requisites
+****************
 
 - Install the Skupper CLI on your local system by following the instructions `on the
   Skupper website
@@ -44,8 +46,9 @@ Pre-requisites
 - Install Kubectl tools on your local system by following the instructions `on the
   Kubernetes website <https://kubernetes.io/docs/tasks/tools/>`_.
 
-Create OpenShift Clusters
--------------------------
+***************************
+ Create OpenShift Clusters
+***************************
 
 For this guide, we will create two OpenShift clusters using the ``Red Hat OpenShift
 Service on AWS (ROSA)``. Follow the steps in our companion guide `here
@@ -58,8 +61,9 @@ Next, deploy SuperLink in the first cluster. For reference, you can follow the
 <how-to-run-flower-on-red-hat-openshift.rst#deploy-flower-superlink-and-supernodes-on-openshift>`_
 in our companion guide.
 
-Install Service Interconnect Operator
--------------------------------------
+***************************************
+ Install Service Interconnect Operator
+***************************************
 
 In each OpenShift cluster, install the Red Hat Service Interconnect Operator from the
 OperatorHub:
@@ -82,8 +86,9 @@ OperatorHub:
 
     Install Red Hat Service Interconnect Operator from OperatorHub.
 
-Create Skupper Sites
---------------------
+**********************
+ Create Skupper Sites
+**********************
 
 From your local system, you will now create a Skupper site in each OpenShift cluster and
 connect the sites to form an application network.
@@ -160,8 +165,9 @@ Note that the namespace can be different from the first cluster and depends on t
 ``--enable-link-access`` option in the Skupper command because this site only needs to
 connect *to* the SuperLink site.
 
-Link Skupper Sites
-------------------
+********************
+ Link Skupper Sites
+********************
 
 Now that we have created Skupper sites in both clusters, we will link the sites to form
 an application network.
@@ -217,8 +223,9 @@ You might need to issue the command multiple times before the link is ready:
     NAME                                            STATUS  COST    MESSAGE
     link-superlink-interconnect-skupper-router      Ready   1       OK
 
-Create a Connector
-------------------
+********************
+ Create a Connector
+********************
 
 A connector binds a local connection endpoint to connectors in remote sites, which in
 this case is the SuperNode cluster. This allows SuperLink to communicate with SuperNode.
@@ -246,8 +253,9 @@ the SuperLink deployment the name ``superlink``, we will use that as the workloa
     Waiting for create to complete...
     Connector "fleet-api" is configured.
 
-Create a Listener
------------------
+*******************
+ Create a Listener
+*******************
 
 A listener binds a local connection endpoint to connectors in remote sites, which in
 this case is the SuperLink cluster. This allows SuperNode to communicate with SuperLink.
@@ -270,8 +278,9 @@ on, which must also match the port number of the connector (``9092``):
     Waiting for create to complete...
     Listener "fleet-api" is configured.
 
-Deploy SuperNode in a Separate OpenShift Cluster
-------------------------------------------------
+**************************************************
+ Deploy SuperNode in a Separate OpenShift Cluster
+**************************************************
 
 With the listener created, we can now deploy SuperNode in the second OpenShift cluster
 using the listener service created by Skupper. The listener service is a Kubernetes
@@ -351,8 +360,9 @@ clusters where secure deployment platforms like OpenShift are required, making i
 suitable for critical workloads in research environments, datacenters, and on-premises
 servers.
 
-References
-----------
+************
+ References
+************
 
 To learn more about Red Hat Service Interconnect and Skupper concepts, please refer to
 the following resources:

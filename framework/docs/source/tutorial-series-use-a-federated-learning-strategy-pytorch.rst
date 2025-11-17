@@ -1,5 +1,6 @@
-Use a federated learning strategy
-=================================
+###################################
+ Use a federated learning strategy
+###################################
 
 .. |fedavg_link| replace:: ``FedAvg``
 
@@ -51,13 +52,14 @@ using the Flower framework, Flower Datasets, and PyTorch.
 
 Let's move beyond FedAvg with Flower strategies! 🌼
 
-Preparation
------------
+*************
+ Preparation
+*************
 
 Before we begin with the actual code, let's make sure that we have everything we need.
 
 Installing dependencies
-~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 .. note::
 
@@ -103,8 +105,9 @@ Next, we install the project and its dependencies, which are specified in the
 So far, everything should look familiar if you've worked through the introductory
 tutorial. With that, we're ready to introduce a number of new features.
 
-Choosing a different strategy
------------------------------
+*******************************
+ Choosing a different strategy
+*******************************
 
 In part 1, we created a |serverapp_link|_ (in ``server_app.py``). In it, we defined the
 strategy, the model to federatedly train, and then we launched the strategy by calling
@@ -155,8 +158,9 @@ Next, run the training with the following command:
 
     $ flwr run .
 
-Server-side parameter **evaluation**
-------------------------------------
+**************************************
+ Server-side parameter **evaluation**
+**************************************
 
 Flower can evaluate the aggregated model on the server side or on the client side.
 Client-side and server-side evaluation are similar in some ways, but different in
@@ -276,8 +280,9 @@ Also, at the end of the run, note the ``ServerApp-side Evaluate Metrics`` shown:
     INFO :            2: {'accuracy': '2.3230e-01', 'loss': '2.0144e+00'},
     INFO :            3: {'accuracy': '2.5720e-01', 'loss': '1.9258e+00'}}
 
-Sending configurations to clients from strategies
--------------------------------------------------
+***************************************************
+ Sending configurations to clients from strategies
+***************************************************
 
 In some situations, we want to configure client-side execution (training, evaluation)
 from the server side. One example of this is the server asking the clients to train for
@@ -358,8 +363,9 @@ How do we know the ``ClientApp`` is using that new learning rate? Recall that in
 Congratulations! You have created your first custom strategy adding dynamism to the
 ``ConfigRecord`` that is sent to clients.
 
-Scaling federated learning
---------------------------
+****************************
+ Scaling federated learning
+****************************
 
 As a last step in this tutorial, let's see how we can use Flower to experiment with a
 large number of clients. In the ``pyproject.toml``, increase the number of SuperNodes to
@@ -415,8 +421,9 @@ Finally, run the simulation with the following command:
 
     $ flwr run .
 
-Recap
------
+*******
+ Recap
+*******
 
 In this tutorial, we've seen how we can gradually enhance our system by customizing the
 strategy, choosing a different strategy, applying learning rate decay at the strategy
@@ -429,8 +436,9 @@ large-scale Federated Learning simulation using the Flower Virtual Client Engine
 an experiment involving 1000 clients in the same workload — all in the same Flower
 project!
 
-Next steps
-----------
+************
+ Next steps
+************
 
 Before you continue, make sure to join the Flower community on Flower Discuss (`Join
 Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack
