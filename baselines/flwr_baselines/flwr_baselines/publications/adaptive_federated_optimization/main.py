@@ -66,7 +66,7 @@ def main(cfg: DictConfig) -> None:
             ray_init_args=ray_config,
         )
     else:  # or start server
-        hist = fl.server.app.start_server(
+        hist = fl.server.start_server(
             server_address=cfg.server_address,
             server=cfg.server,
             config=ServerConfig(num_rounds=cfg.num_rounds),
