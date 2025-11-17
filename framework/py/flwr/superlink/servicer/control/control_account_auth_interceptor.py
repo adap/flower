@@ -16,7 +16,8 @@
 
 
 import contextvars
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 import grpc
 
@@ -45,7 +46,7 @@ Response = (
 )
 
 
-shared_account_info: contextvars.ContextVar[Optional[AccountInfo]] = (
+shared_account_info: contextvars.ContextVar[AccountInfo | None] = (
     contextvars.ContextVar("account_info", default=None)
 )
 
