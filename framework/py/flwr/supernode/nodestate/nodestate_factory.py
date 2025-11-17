@@ -16,7 +16,6 @@
 
 
 import threading
-from typing import Optional
 
 from .in_memory_nodestate import InMemoryNodeState
 from .nodestate import NodeState
@@ -26,7 +25,7 @@ class NodeStateFactory:
     """Factory class that creates NodeState instances."""
 
     def __init__(self) -> None:
-        self.state_instance: Optional[NodeState] = None
+        self.state_instance: NodeState | None = None
         self.lock = threading.RLock()
 
     def state(self) -> NodeState:

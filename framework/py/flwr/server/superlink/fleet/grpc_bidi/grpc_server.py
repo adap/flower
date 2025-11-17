@@ -15,8 +15,6 @@
 """Implements utility function to create a gRPC server."""
 
 
-from typing import Optional
-
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
@@ -36,7 +34,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments,R0917
     max_concurrent_workers: int = 1000,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     keepalive_time_ms: int = 210000,
-    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
+    certificates: tuple[bytes, bytes, bytes] | None = None,
 ) -> grpc.Server:
     """Create and start a gRPC server running FlowerServiceServicer.
 

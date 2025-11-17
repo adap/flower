@@ -21,7 +21,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
-from typing import Annotated, Any, Optional, cast
+from typing import Annotated, Any, cast
 
 import typer
 from rich.console import Console
@@ -61,11 +61,11 @@ def run(
         typer.Argument(help="Path of the Flower App to run."),
     ] = Path("."),
     federation: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(help="Name of the federation to run the app on."),
     ] = None,
     run_config_overrides: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option(
             "--run-config",
             "-c",
@@ -73,7 +73,7 @@ def run(
         ),
     ] = None,
     federation_config_overrides: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option(
             "--federation-config",
             help=FEDERATION_CONFIG_HELP_MESSAGE,
@@ -163,10 +163,10 @@ def _run_with_control_api(
     app: Path,
     federation: str,
     federation_config: dict[str, Any],
-    config_overrides: Optional[list[str]],
+    config_overrides: list[str] | None,
     stream: bool,
     output_format: str,
-    app_id: Optional[str],
+    app_id: str | None,
 ) -> None:
     channel = None
     is_remote_app = app_id is not None
@@ -247,14 +247,14 @@ def _run_with_control_api(
 
 
 def _run_without_control_api(
-    app: Optional[Path],
+    app: Path | None,
     federation_config: dict[str, Any],
-    config_overrides: Optional[list[str]],
+    config_overrides: list[str] | None,
     federation: str,
 ) -> None:
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]
-        verbose: Optional[bool] = federation_config["options"].get("verbose")
+        verbose: bool | None = federation_config["options"].get("verbose")
         backend_cfg = federation_config["options"].get("backend", {})
     except KeyError as err:
         typer.secho(

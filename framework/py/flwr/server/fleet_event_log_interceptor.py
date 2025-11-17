@@ -15,7 +15,8 @@
 """Flower Fleet API event log interceptor."""
 
 
-from typing import Any, Callable, cast
+from collections.abc import Callable
+from typing import Any, cast
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage

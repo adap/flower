@@ -16,8 +16,9 @@
 
 
 import json
+from collections.abc import Callable
 from logging import WARNING
-from typing import Any, Callable, Optional, Union, cast
+from typing import Any, cast
 
 from flwr.common import EvaluateRes, FitRes, Parameters, Scalar
 from flwr.common.logger import log
@@ -32,16 +33,17 @@ class FedXgbBagging(FedAvg):
     # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
-        evaluate_function: Optional[
+        evaluate_function: (
             Callable[
                 [int, Parameters, dict[str, Scalar]],
-                Optional[tuple[float, dict[str, Scalar]]],
+                tuple[float, dict[str, Scalar]] | None,
             ]
-        ] = None,
+            | None
+        ) = None,
         **kwargs: Any,
     ):
         self.evaluate_function = evaluate_function
-        self.global_model: Optional[bytes] = None
+        self.global_model: bytes | None = None
         super().__init__(**kwargs)
 
     def __repr__(self) -> str:
@@ -53,8 +55,8 @@ class FedXgbBagging(FedAvg):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate fit results using bagging."""
         if not results:
             return None, {}
@@ -80,8 +82,8 @@ class FedXgbBagging(FedAvg):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, EvaluateRes]],
-        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> tuple[Optional[float], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, EvaluateRes] | BaseException],
+    ) -> tuple[float | None, dict[str, Scalar]]:
         """Aggregate evaluation metrics using average."""
         if not results:
             return None, {}
@@ -101,7 +103,7 @@ class FedXgbBagging(FedAvg):
 
     def evaluate(
         self, server_round: int, parameters: Parameters
-    ) -> Optional[tuple[float, dict[str, Scalar]]]:
+    ) -> tuple[float, dict[str, Scalar]] | None:
         """Evaluate model parameters using an evaluation function."""
         if self.evaluate_function is None:
             # No evaluation function provided
@@ -114,7 +116,7 @@ class FedXgbBagging(FedAvg):
 
 
 def aggregate(
-    bst_prev_org: Optional[bytes],
+    bst_prev_org: bytes | None,
     bst_curr_org: bytes,
 ) -> bytes:
     """Conduct bagging aggregation for given trees."""

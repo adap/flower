@@ -22,7 +22,7 @@ import re
 import time
 from collections.abc import Generator, Sequence
 from logging import ERROR, INFO
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import grpc
 import requests
@@ -99,8 +99,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         objectstore_factory: ObjectStoreFactory,
         is_simulation: bool,
         authn_plugin: ControlAuthnPlugin,
-        artifact_provider: Optional[ArtifactProvider] = None,
-        fleet_api_type: Optional[str] = None,
+        artifact_provider: ArtifactProvider | None = None,
+        fleet_api_type: str | None = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
@@ -579,9 +579,7 @@ def _create_list_runs_response(
     )
 
 
-def _check_flwr_aid_exists(
-    flwr_aid: Optional[str], context: grpc.ServicerContext
-) -> str:
+def _check_flwr_aid_exists(flwr_aid: str | None, context: grpc.ServicerContext) -> str:
     """Guard clause to check if `flwr_aid` exists."""
     if flwr_aid is None:
         context.abort(
@@ -593,7 +591,7 @@ def _check_flwr_aid_exists(
 
 
 def _check_flwr_aid_in_run(
-    flwr_aid: Optional[str], run: Run, context: grpc.ServicerContext
+    flwr_aid: str | None, run: Run, context: grpc.ServicerContext
 ) -> None:
     """Guard clause to check if `flwr_aid` matches the run's `flwr_aid`."""
     _check_flwr_aid_exists(flwr_aid, context)

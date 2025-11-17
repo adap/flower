@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-12 00:08+0000\n"
+"POT-Creation-Date: 2025-11-17 00:08+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -1218,13 +1218,10 @@ msgstr ""
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:12
 #: ../../source/how-to-install-flower.rst:11
-msgid ""
-"Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, "
-"but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is "
-"recommended."
+msgid "Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_."
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:17
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:16
 msgid ""
 "Due to a known incompatibility with `ray "
 "<https://docs.ray.io/en/latest/>`_, we currently recommend utilizing at "
@@ -1232,11 +1229,11 @@ msgid ""
 "simulations."
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:22
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:21
 msgid "Virtualenv with Pyenv/Virtualenv"
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:24
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:23
 msgid ""
 "One of the recommended virtual environment is `pyenv "
 "<https://github.com/pyenv/pyenv>`_/`virtualenv <https://github.com/pyenv"
@@ -1244,42 +1241,42 @@ msgid ""
 "<https://github.com/adap/flower/tree/main/examples/>`_ for details."
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:29
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:28
 msgid ""
 "Once Pyenv is set up, you can use it to install `Python Version 3.10 "
 "<https://docs.python.org/3.10/>`_ or above:"
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:36
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:35
 msgid "Create the virtualenv with:"
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:42
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:41
 msgid "Activate the virtualenv by running the following command:"
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:49
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:48
 msgid "Virtualenv with Poetry"
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:51
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:50
 msgid ""
 "The Flower examples are based on `Poetry <https://python-"
 "poetry.org/docs/>`_ to manage dependencies. After installing Poetry you "
 "simply create a virtual environment with:"
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:58
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:57
 msgid ""
 "If you open a new terminal you can activate the previously created "
 "virtual environment with the following command:"
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:66
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:65
 msgid "Virtualenv with Anaconda"
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:68
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:67
 msgid ""
 "If you prefer to use Anaconda for your virtual environment then install "
 "and setup the `conda <https://docs.conda.io/projects/conda/en/latest"
@@ -1287,7 +1284,7 @@ msgid ""
 "create a virtual environment with:"
 msgstr ""
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:76
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:75
 msgid "and activate the virtual environment with:"
 msgstr ""
 
@@ -2156,7 +2153,7 @@ msgid "Prerequisites"
 msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:7
-msgid "`Python 3.9 <https://docs.python.org/3.9/>`_ or above"
+msgid "`Python 3.10 <https://docs.python.org/3.10/>`_ or above"
 msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:8
@@ -10323,99 +10320,99 @@ msgstr ""
 msgid "Python version"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:15
+#: ../../source/how-to-install-flower.rst:14
 msgid "Install stable release"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:18
+#: ../../source/how-to-install-flower.rst:17
 msgid "Using pip"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:20
+#: ../../source/how-to-install-flower.rst:19
 msgid "Stable releases are available on `PyPI <https://pypi.org/project/flwr/>`_:"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:26
+#: ../../source/how-to-install-flower.rst:25
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr`` should be "
 "installed with the ``simulation`` extra:"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:34
+#: ../../source/how-to-install-flower.rst:33
 msgid "Using conda (or mamba)"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:36
+#: ../../source/how-to-install-flower.rst:35
 msgid "Flower can also be installed from the ``conda-forge`` channel."
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:38
+#: ../../source/how-to-install-flower.rst:37
 msgid ""
 "If you have not added ``conda-forge`` to your channels, you will first "
 "need to run the following:"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:46
+#: ../../source/how-to-install-flower.rst:45
 msgid ""
 "Once the ``conda-forge`` channel has been enabled, ``flwr`` can be "
 "installed with ``conda``:"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:53
+#: ../../source/how-to-install-flower.rst:52
 msgid "or with ``mamba``:"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:60
+#: ../../source/how-to-install-flower.rst:59
 msgid "Verify installation"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:62
+#: ../../source/how-to-install-flower.rst:61
 msgid ""
 "The following command can be used to verify if Flower was successfully "
 "installed. If everything worked, it should print the version of Flower to"
 " the command line:"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:72
+#: ../../source/how-to-install-flower.rst:71
 msgid "Advanced installation options"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:75
+#: ../../source/how-to-install-flower.rst:74
 msgid "Install via Docker"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:77
+#: ../../source/how-to-install-flower.rst:76
 msgid ":doc:`Run Flower using Docker <docker/index>`"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:80
+#: ../../source/how-to-install-flower.rst:79
 msgid "Install pre-release"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:82
+#: ../../source/how-to-install-flower.rst:81
 msgid ""
 "New (possibly unstable) versions of Flower are sometimes available as "
 "pre-release versions (alpha, beta, release candidate) before the stable "
 "release happens:"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:89
+#: ../../source/how-to-install-flower.rst:88
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr`` pre-releases"
 " should be installed with the ``simulation`` extra:"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:97
+#: ../../source/how-to-install-flower.rst:96
 msgid "Install nightly release"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:99
+#: ../../source/how-to-install-flower.rst:98
 msgid ""
 "The latest (potentially unstable) changes in Flower are available as "
 "nightly releases:"
 msgstr ""
 
-#: ../../source/how-to-install-flower.rst:105
+#: ../../source/how-to-install-flower.rst:104
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr-nightly`` "
 "should be installed with the ``simulation`` extra:"
@@ -15239,6 +15236,49 @@ msgstr ""
 msgid "Path of the Flower App to bundle into a FAB"
 msgstr ""
 
+#: ../../flwr federation:1
+#, fuzzy
+msgid "Manage Federations"
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr federation list:1 supernode
+#, fuzzy
+msgid "List SuperNodes in the federation."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
+msgid "Format output using 'default' view or 'json'"
+msgstr ""
+
+#: ../../flwr federation list log register run stop supernode unregister
+msgid "default"
+msgstr ""
+
+#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "``'default'``"
+msgstr "``FLWR_VERSION``"
+
+#: ../../source/ref-api-cli.rst
+#, fuzzy
+msgid "Arguments"
+msgstr "Argumento de compilação"
+
+#: ../../flwr federation install:1 list:1 log:1 login:1 new:1 pull:1 register:1
+#: run:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "Optional argument"
+msgstr "Argumento de compilação"
+
+#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "Path of the Flower project"
+msgstr "O nome do repositório da imagem base."
+
+#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
+msgid "Name of the federation"
+msgstr ""
+
 #: ../../flwr install:1
 msgid "Install a Flower App Bundle."
 msgstr ""
@@ -15281,17 +15321,6 @@ msgstr ""
 msgid "The desired install path."
 msgstr ""
 
-#: ../../source/ref-api-cli.rst
-#, fuzzy
-msgid "Arguments"
-msgstr "Argumento de compilação"
-
-#: ../../flwr install:1 list:1 log:1 login:1 new:1 pull:1 register:1 run:1
-#: stop:1 supernode unregister:1
-#, fuzzy
-msgid "Optional argument"
-msgstr "Argumento de compilação"
-
 #: ../../flwr install:1
 msgid "The source FAB file to install."
 msgstr ""
@@ -15311,10 +15340,11 @@ msgid "**Run ID:** Unique identifier for the run."
 msgstr ""
 
 #: ../../flwr list:1
-#, python-brace-format
-msgid ""
-"**FAB:** Name of the FAB associated with the run (``{FAB_ID} "
-"(v{FAB_VERSION})``)."
+msgid "**Federation:** The federation to which the run belongs."
+msgstr ""
+
+#: ../../flwr list:1
+msgid "**App:** The App associated with the run (``<APP_ID>==<APP_VERSION>``)."
 msgstr ""
 
 #: ../../flwr list:1
@@ -15328,15 +15358,7 @@ msgid "**Elapsed:** Time elapsed since the run started (``HH:MM:SS``)."
 msgstr ""
 
 #: ../../flwr list:1
-msgid "**Created At:** Timestamp when the run was created."
-msgstr ""
-
-#: ../../flwr list:1
-msgid "**Running At:** Timestamp when the run started running."
-msgstr ""
-
-#: ../../flwr list:1
-msgid "**Finished At:** Timestamp when the run finished."
+msgid "**Status Changed @:** Timestamp of the most recent status change."
 msgstr ""
 
 #: ../../flwr list:1
@@ -15370,10 +15392,6 @@ msgstr ""
 msgid "List all runs"
 msgstr ""
 
-#: ../../flwr list log register run stop supernode unregister
-msgid "default"
-msgstr ""
-
 #: ../../flwr list:1 run:1 supernode
 #, fuzzy
 msgid "``False``"
@@ -15381,24 +15399,6 @@ msgstr "``FLWR_VERSION``"
 
 #: ../../flwr list:1
 msgid "Specific run ID to display"
-msgstr ""
-
-#: ../../flwr list:1 register:1 run:1 stop:1 supernode unregister:1
-msgid "Format output using 'default' view or 'json'"
-msgstr ""
-
-#: ../../flwr list:1 register:1 run:1 stop:1 supernode unregister:1
-#, fuzzy
-msgid "``'default'``"
-msgstr "``FLWR_VERSION``"
-
-#: ../../flwr list:1 register:1 stop:1 supernode unregister:1
-#, fuzzy
-msgid "Path of the Flower project"
-msgstr "O nome do repositório da imagem base."
-
-#: ../../flwr list:1 register:1 stop:1 supernode unregister:1
-msgid "Name of the federation"
 msgstr ""
 
 #: ../../flwr log:1
@@ -15467,9 +15467,10 @@ msgid "The Flower username of the author"
 msgstr ""
 
 #: ../../flwr new:1
-#, fuzzy
-msgid "The name of the Flower App"
-msgstr "O nome do repositório da imagem base."
+msgid ""
+"Flower app name. For remote apps, use the format '@user/app==1.0.0'. "
+"Version is optional (defaults to latest)."
+msgstr ""
 
 #: ../../flwr pull:1
 msgid "Pull artifacts from a Flower run."
@@ -15529,11 +15530,6 @@ msgstr ""
 #, fuzzy
 msgid "Manage SuperNodes"
 msgstr "Construindo a imagem do servidor"
-
-#: ../../flwr list:1 supernode
-#, fuzzy
-msgid "List SuperNodes in the federation."
-msgstr "``FLWR_VERSION``"
 
 #: ../../flwr list:1 supernode
 #, fuzzy
@@ -29311,50 +29307,53 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-exit-codes/304.rst:2
-msgid "[304] SUPERNODE_TRUST_ENTITY_REQUIRED"
+msgid "[304] SUPERNODE_INVALID_TRUSTED_ENTITIES"
 msgstr ""
 
 #: ../../source/ref-exit-codes/304.rst:7
 msgid ""
-"This error occurs when entity verification is enabled using the "
-"``--enable-entities-verification`` flag, but no trusted entities have "
-"been provided. The SuperNode should be restarted with a valid list of "
-"trusted entities."
+"This error occurs when an invalid YAML file for trusted entities is "
+"provided via the ``--trusted-entities`` option. The SuperNode must be "
+"restarted with a valid trusted entities list."
 msgstr ""
 
 #: ../../source/ref-exit-codes/304.rst:14
-msgid "To fix this issue, you can either:"
+msgid "To resolve this issue, you can do one of the following:"
 msgstr ""
 
 #: ../../source/ref-exit-codes/304.rst:16
 msgid ""
-"Provide a trusted entities list with ``--trust-entities`` when launching "
-"the SuperNode. Supply a YAML file (for example, ``--trust-entities "
-"./pks.yaml``) containing the trusted entities’ public key IDs and their "
-"corresponding public keys."
+"**Provide a valid trusted entities list** using the ``--trusted-"
+"entities`` option when launching the SuperNode. Supply a YAML file (for "
+"example, ``--trusted-entities ./pks.yaml``) that contains the trusted "
+"entities’ public key IDs and their corresponding public keys."
 msgstr ""
 
-#: ../../source/ref-exit-codes/304.rst:20
+#: ../../source/ref-exit-codes/304.rst:21
 msgid ""
-"The public keys must be in **OpenSSH format**, and currently only the "
-"**ssh-ed25519** key type is supported."
+"Public keys must be in **OpenSSH format**, and currently only the **ssh-"
+"ed25519** key type is supported."
 msgstr ""
 
-#: ../../source/ref-exit-codes/304.rst:22
+#: ../../source/ref-exit-codes/304.rst:23
 msgid ""
 "Public key IDs must follow the format ``fpk_<UUID>``, where ``fpk`` "
 "stands for Flower Public Key."
 msgstr ""
 
-#: ../../source/ref-exit-codes/304.rst:24
+#: ../../source/ref-exit-codes/304.rst:25
 msgid "The YAML file should follow this structure:"
 msgstr ""
 
-#: ../../source/ref-exit-codes/304.rst:31
+#: ../../source/ref-exit-codes/304.rst:32
+msgid "\\*Comments are optional."
+msgstr ""
+
+#: ../../source/ref-exit-codes/304.rst:34
 msgid ""
-"Disable entity verification. Remove the ``--enable-entities-"
-"verification`` flag when starting the SuperNode to run without entity "
-"verification."
+"**Disable entity verification** by removing the ``--trusted-entities`` "
+"option when starting the SuperNode. This allows the SuperNode to run "
+"without entity verification."
 msgstr ""
 
 #: ../../source/ref-exit-codes/400.rst:2
@@ -33723,7 +33722,7 @@ msgstr ""
 #~ msgid "Add CI job to deploy the staging system when the `main` branch changes"
 #~ msgstr ""
 
-#~ msgid "`Python 3.7 <https://docs.python.org/3.7/>`_ or above"
+#~ msgid "`Python 3.10 <https://docs.python.org/3.10/>`_ or above"
 #~ msgstr ""
 
 #~ msgid ""
@@ -39469,7 +39468,7 @@ msgstr ""
 #~ "installed, the following script that "
 #~ "will install it, set it up, and"
 #~ " create the virtual environment (with "
-#~ ":code:`Python 3.9.20` by default)::"
+#~ ":code:`Python 3.10.19` by default)::"
 #~ msgstr ""
 
 #~ msgid ""
@@ -39477,7 +39476,7 @@ msgstr ""
 #~ "installed (along with the :code:`pyenv-"
 #~ "virtualenv` plugin), you can use the "
 #~ "following convenience script (with "
-#~ ":code:`Python 3.9.20` by default)::"
+#~ ":code:`Python 3.10.19` by default)::"
 #~ msgstr ""
 
 #~ msgid ""
@@ -41629,8 +41628,8 @@ msgstr ""
 #~ "If you already have ``pyenv`` installed"
 #~ " (along with the ``pyenv-virtualenv`` "
 #~ "plugin), you can use the following "
-#~ "convenience script (with ``Python 3.9.20`` "
-#~ "by default):"
+#~ "convenience script (with ``Python 3.10.19``"
+#~ " by default):"
 #~ msgstr ""
 
 #~ msgid "|3a7aceef05f0421794726ac54aaf12fd|"
@@ -63258,5 +63257,59 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "start\\_simulation"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**FAB:** Name of the FAB associated "
+#~ "with the run (``{FAB_ID} (v{FAB_VERSION})``)."
+#~ msgstr ""
+
+#~ msgid "**Created At:** Timestamp when the run was created."
+#~ msgstr ""
+
+#~ msgid "**Running At:** Timestamp when the run started running."
+#~ msgstr ""
+
+#~ msgid "**Finished At:** Timestamp when the run finished."
+#~ msgstr ""
+
+#~ msgid "[304] SUPERNODE_TRUST_ENTITY_REQUIRED"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This error occurs when entity "
+#~ "verification is enabled using the "
+#~ "``--enable-entities-verification`` flag, but "
+#~ "no trusted entities have been provided."
+#~ " The SuperNode should be restarted "
+#~ "with a valid list of trusted "
+#~ "entities."
+#~ msgstr ""
+
+#~ msgid "To fix this issue, you can either:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Provide a trusted entities list with "
+#~ "``--trust-entities`` when launching the "
+#~ "SuperNode. Supply a YAML file (for "
+#~ "example, ``--trust-entities ./pks.yaml``) "
+#~ "containing the trusted entities’ public "
+#~ "key IDs and their corresponding public"
+#~ " keys."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The public keys must be in "
+#~ "**OpenSSH format**, and currently only "
+#~ "the **ssh-ed25519** key type is "
+#~ "supported."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Disable entity verification. Remove the "
+#~ "``--enable-entities-verification`` flag when "
+#~ "starting the SuperNode to run without"
+#~ " entity verification."
 #~ msgstr ""
 

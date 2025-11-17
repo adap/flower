@@ -16,7 +16,7 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Callable
+from collections.abc import Callable
 
 from flwr.clientapp.client_app import ClientApp
 from flwr.common.context import Context

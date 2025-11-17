@@ -16,9 +16,8 @@
 
 
 import inspect
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
-from typing import Callable, Optional
 
 from flwr.common import Context
 from flwr.common.logger import warn_deprecated_feature_with_example
@@ -118,11 +117,11 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self,
-        server: Optional[Server] = None,
-        config: Optional[ServerConfig] = None,
-        strategy: Optional[Strategy] = None,
-        client_manager: Optional[ClientManager] = None,
-        server_fn: Optional[ServerFn] = None,
+        server: Server | None = None,
+        config: ServerConfig | None = None,
+        strategy: Strategy | None = None,
+        client_manager: ClientManager | None = None,
+        server_fn: ServerFn | None = None,
     ) -> None:
         if any([server, config, strategy, client_manager]):
             warn_deprecated_feature_with_example(
@@ -148,7 +147,7 @@ class ServerApp:  # pylint: disable=too-many-instance-attributes
         self._strategy = strategy
         self._client_manager = client_manager
         self._server_fn = server_fn
-        self._main: Optional[ServerAppCallable] = None
+        self._main: ServerAppCallable | None = None
         self._lifespan = _empty_lifespan
 
     def __call__(self, grid: Grid, context: Context) -> None:

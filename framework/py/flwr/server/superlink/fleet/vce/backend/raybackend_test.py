@@ -15,8 +15,8 @@
 """Test for Ray backend for the Fleet API using the Simulation Engine."""
 
 
+from collections.abc import Callable
 from math import pi
-from typing import Callable, Optional, Union
 from unittest import TestCase
 
 import ray
@@ -73,8 +73,8 @@ def _load_app() -> ClientApp:
 def backend_build_process_and_termination(
     backend: RayBackend,
     app_fn: Callable[[], ClientApp],
-    process_args: Optional[tuple[Message, Context]] = None,
-) -> Union[tuple[Message, Context], None]:
+    process_args: tuple[Message, Context] | None = None,
+) -> tuple[Message, Context] | None:
     """Build, process job and terminate RayBackend."""
     backend.build(app_fn)
     to_return = None
@@ -221,7 +221,7 @@ class TestRayBackend(TestCase):
 
             try:
                 # Test the pool size calculation
-                client_resources: dict[str, Union[int, float]] = {
+                client_resources: dict[str, int | float] = {
                     "num_cpus": 2,
                     "num_gpus": 0,
                 }

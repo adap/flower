@@ -21,11 +21,11 @@ import os
 import subprocess
 import sys
 import threading
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from logging import INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Callable, Optional, TypeVar, cast
+from typing import TypeVar, cast
 
 import grpc
 import yaml
@@ -149,7 +149,7 @@ def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
     return ee_dict | {AuthzType.NOOP: NoOpControlAuthzPlugin}
 
 
-def get_federation_manager(config_path: Optional[str] = None) -> FederationManager:
+def get_federation_manager(config_path: str | None = None) -> FederationManager:
     """Return the FederationManager."""
     if config_path is None:
         return NoOpFederationManager()
@@ -224,9 +224,9 @@ def run_superlink() -> None:
     # provided
     verify_tls_cert = not getattr(args, "disable_oidc_tls_cert_verification", None)
 
-    authn_plugin: Optional[ControlAuthnPlugin] = None
-    authz_plugin: Optional[ControlAuthzPlugin] = None
-    event_log_plugin: Optional[EventLogWriterPlugin] = None
+    authn_plugin: ControlAuthnPlugin | None = None
+    authz_plugin: ControlAuthzPlugin | None = None
+    event_log_plugin: EventLogWriterPlugin | None = None
     # Load the auth plugin if the args.account_auth_config is provided
     if cfg_path := getattr(args, "user_auth_config", None):
         log(
@@ -478,7 +478,7 @@ def _format_address(address: str) -> tuple[str, str, int]:
 
 
 def _load_control_auth_plugins(
-    config_path: Optional[str], verify_tls_cert: bool
+    config_path: str | None, verify_tls_cert: bool
 ) -> tuple[ControlAuthnPlugin, ControlAuthzPlugin]:
     """Obtain Control API authentication and authorization plugins."""
     # Load NoOp plugins if no config path is provided
@@ -537,7 +537,7 @@ def _load_control_auth_plugins(
     return authn_plugin, authz_plugin
 
 
-def _try_obtain_control_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]:
+def _try_obtain_control_event_log_writer_plugin() -> EventLogWriterPlugin | None:
     """Return an instance of the event log writer plugin."""
     try:
         all_plugins: dict[str, type[EventLogWriterPlugin]] = (
@@ -551,7 +551,7 @@ def _try_obtain_control_event_log_writer_plugin() -> Optional[EventLogWriterPlug
         sys.exit("No event log writer plugins are currently supported.")
 
 
-def _try_obtain_fleet_event_log_writer_plugin() -> Optional[EventLogWriterPlugin]:
+def _try_obtain_fleet_event_log_writer_plugin() -> EventLogWriterPlugin | None:
     """Return an instance of the Fleet Servicer event log writer plugin."""
     try:
         all_plugins: dict[str, type[EventLogWriterPlugin]] = (
@@ -571,8 +571,8 @@ def _run_fleet_api_grpc_rere(  # pylint: disable=R0913, R0917
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
     enable_supernode_auth: bool,
-    certificates: Optional[tuple[bytes, bytes, bytes]],
-    interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
+    certificates: tuple[bytes, bytes, bytes] | None,
+    interceptors: Sequence[grpc.ServerInterceptor] | None = None,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
     # Create Fleet API gRPC server
@@ -605,7 +605,7 @@ def _run_fleet_api_grpc_adapter(
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
-    certificates: Optional[tuple[bytes, bytes, bytes]],
+    certificates: tuple[bytes, bytes, bytes] | None,
 ) -> grpc.Server:
     """Run Fleet API (GrpcAdapter)."""
     # Create Fleet API gRPC server
@@ -638,8 +638,8 @@ def _run_fleet_api_grpc_adapter(
 def _run_fleet_api_rest(
     host: str,
     port: int,
-    ssl_keyfile: Optional[str],
-    ssl_certfile: Optional[str],
+    ssl_keyfile: str | None,
+    ssl_certfile: str | None,
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,

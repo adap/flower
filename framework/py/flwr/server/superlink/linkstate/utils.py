@@ -16,7 +16,6 @@
 
 
 from os import urandom
-from typing import Optional
 
 from flwr.common import ConfigRecord, Context, Error, Message, Metadata, now, serde
 from flwr.common.constant import (
@@ -64,7 +63,7 @@ NODE_UNAVAILABLE_ERROR_REASON = (
 
 
 def generate_rand_int_from_bytes(
-    num_bytes: int, exclude: Optional[list[int]] = None
+    num_bytes: int, exclude: list[int] | None = None
 ) -> int:
     """Generate a random unsigned integer from `num_bytes` bytes.
 
@@ -258,7 +257,7 @@ def message_ttl_has_expired(message_metadata: Metadata, current_time: float) -> 
 def verify_message_ids(
     inquired_message_ids: set[str],
     found_message_ins_dict: dict[str, Message],
-    current_time: Optional[float] = None,
+    current_time: float | None = None,
     update_set: bool = True,
 ) -> dict[str, Message]:
     """Verify found Messages and generate error Messages for invalid ones.
@@ -301,7 +300,7 @@ def verify_found_message_replies(
     inquired_message_ids: set[str],
     found_message_ins_dict: dict[str, Message],
     found_message_res_list: list[Message],
-    current_time: Optional[float] = None,
+    current_time: float | None = None,
     update_set: bool = True,
 ) -> dict[str, Message]:
     """Verify found Message replies and generate error Message for invalid ones.
@@ -346,7 +345,7 @@ def check_node_availability_for_in_message(
     inquired_in_message_ids: set[str],
     found_in_message_dict: dict[str, Message],
     node_id_to_online_until: dict[int, float],
-    current_time: Optional[float] = None,
+    current_time: float | None = None,
     update_set: bool = True,
 ) -> dict[str, Message]:
     """Check node availability for given Message and generate error reply Message if

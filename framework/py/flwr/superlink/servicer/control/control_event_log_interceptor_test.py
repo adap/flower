@@ -16,7 +16,6 @@
 
 
 import unittest
-from typing import Optional, Union
 from unittest.mock import MagicMock
 
 import grpc
@@ -46,7 +45,7 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        account_info: Optional[AccountInfo],
+        account_info: AccountInfo | None,
         method_name: str,
     ) -> LogEntry:
         """Compose pre-event log entry from the provided request and context."""
@@ -65,9 +64,9 @@ class DummyLogPlugin(EventLogWriterPlugin):
         self,
         request: GrpcMessage,
         context: grpc.ServicerContext,
-        account_info: Optional[AccountInfo],
+        account_info: AccountInfo | None,
         method_name: str,
-        response: Optional[Union[GrpcMessage, BaseException]],
+        response: GrpcMessage | BaseException | None,
     ) -> LogEntry:
         """Compose post-event log entry from the provided response and context."""
         return LogEntry(

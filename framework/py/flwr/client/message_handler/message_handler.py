@@ -16,7 +16,7 @@
 
 
 from logging import WARN
-from typing import Optional, cast
+from typing import cast
 
 from flwr.client.client import (
     maybe_call_evaluate,
@@ -53,7 +53,7 @@ class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle_control_message(message: Message) -> tuple[Optional[Message], int]:
+def handle_control_message(message: Message) -> tuple[Message | None, int]:
     """Handle control part of the incoming message.
 
     Parameters
