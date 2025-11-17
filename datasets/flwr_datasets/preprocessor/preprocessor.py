@@ -15,7 +15,7 @@
 """Preprocessor."""
 
 
-from typing import Callable
+from collections.abc import Callable
 
 from datasets import DatasetDict
 

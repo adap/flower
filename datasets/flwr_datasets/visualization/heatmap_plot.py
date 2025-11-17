@@ -15,7 +15,7 @@
 """Label distribution heatmap plotting."""
 
 
-from typing import Any, Optional, Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -27,16 +27,16 @@ from matplotlib.axes import Axes
 
 def _plot_heatmap(  # pylint: disable=R0913, R0917
     dataframe: pd.DataFrame,
-    axis: Optional[Axes],
-    figsize: Optional[tuple[float, float]],
+    axis: Axes | None,
+    figsize: tuple[float, float] | None,
     title: str,
-    colormap: Optional[Union[str, mcolors.Colormap]],
+    colormap: str | mcolors.Colormap | None,
     partition_id_axis: str,
     size_unit: str,
     legend: bool,
-    legend_title: Optional[str],
-    plot_kwargs: Optional[dict[str, Any]],
-    legend_kwargs: Optional[dict[str, Any]],
+    legend_title: str | None,
+    plot_kwargs: dict[str, Any] | None,
+    legend_kwargs: dict[str, Any] | None,
 ) -> Axes:
     if axis is None:
         if figsize is None:
@@ -99,5 +99,5 @@ def _initialize_figsize(
     return figsize
 
 
-def _initialize_cbar_title(size_unit: str) -> Optional[str]:
+def _initialize_cbar_title(size_unit: str) -> str | None:
     return "Count" if size_unit == "absolute" else "Percent %"

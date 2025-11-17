@@ -17,10 +17,11 @@
 
 import time
 from collections import namedtuple
+from collections.abc import Callable
 from contextlib import ExitStack
 from copy import copy
 from itertools import product
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 import pytest
 
@@ -87,7 +88,7 @@ def test_message_creation(
         assert message.metadata.created_at < time.time()
 
 
-def create_message_with_content(ttl: Optional[float] = None) -> Message:
+def create_message_with_content(ttl: float | None = None) -> Message:
     """Create a Message with content."""
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
@@ -96,7 +97,7 @@ def create_message_with_content(ttl: Optional[float] = None) -> Message:
     return make_message(metadata=metadata, content=RecordDict())
 
 
-def create_message_with_error(ttl: Optional[float] = None) -> Message:
+def create_message_with_error(ttl: float | None = None) -> Message:
     """Create a Message with error."""
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
@@ -140,7 +141,7 @@ def test_altering_message(
 def test_create_reply(
     message_creation_fn: Callable[[float], Message],
     ttl: float,
-    reply_ttl: Optional[float],
+    reply_ttl: float | None,
 ) -> None:
     """Test reply creation from message."""
     message: Message = message_creation_fn(ttl)
@@ -249,7 +250,7 @@ def test_reply_ttl_limitation(
     product([None, 10.0, 10], [None, "group_xyz"], [True, False]),
 )
 def test_create_ins_message_success(
-    ttl: Optional[float], group_id: Optional[str], use_keyword: bool
+    ttl: float | None, group_id: str | None, use_keyword: bool
 ) -> None:
     """Test creating an instruction message with content."""
     # Prepare
@@ -285,7 +286,7 @@ def test_create_ins_message_success(
     product([RecordDict(), Error(0)], [None, 10.0, 20]),
 )
 def test_create_reply_message_success(
-    content_or_error: Union[RecordDict, Error], ttl: Optional[float]
+    content_or_error: RecordDict | Error, ttl: float | None
 ) -> None:
     """Test creating a reply message."""
     # Prepare

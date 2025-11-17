@@ -18,7 +18,6 @@ authorization plugins."""
 
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Optional, Union
 
 from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID, AuthnType
 from flwr.common.typing import (
@@ -45,7 +44,7 @@ class NoOpControlAuthnPlugin(ControlAuthnPlugin):
     ):
         pass
 
-    def get_login_details(self) -> Optional[AccountAuthLoginDetails]:
+    def get_login_details(self) -> AccountAuthLoginDetails | None:
         """Get the login details."""
         # This allows the `flwr login` command to load the NoOp plugin accordingly,
         # which then raises a LoginError when attempting to login.
@@ -58,20 +57,18 @@ class NoOpControlAuthnPlugin(ControlAuthnPlugin):
         )
 
     def validate_tokens_in_metadata(
-        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> tuple[bool, Optional[AccountInfo]]:
+        self, metadata: Sequence[tuple[str, str | bytes]]
+    ) -> tuple[bool, AccountInfo | None]:
         """Return valid for no-op plugin."""
         return True, NOOP_ACCOUNT_INFO
 
-    def get_auth_tokens(self, device_code: str) -> Optional[AccountAuthCredentials]:
+    def get_auth_tokens(self, device_code: str) -> AccountAuthCredentials | None:
         """Get authentication tokens."""
         raise RuntimeError("NoOp plugin does not support getting auth tokens.")
 
     def refresh_tokens(
-        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> tuple[
-        Optional[Sequence[tuple[str, Union[str, bytes]]]], Optional[AccountInfo]
-    ]:
+        self, metadata: Sequence[tuple[str, str | bytes]]
+    ) -> tuple[Sequence[tuple[str, str | bytes]] | None, AccountInfo | None]:
         """Refresh authentication tokens in the provided metadata."""
         return metadata, NOOP_ACCOUNT_INFO
 

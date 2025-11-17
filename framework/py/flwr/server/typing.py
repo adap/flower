@@ -15,7 +15,7 @@
 """Custom types for Flower servers."""
 
 
-from typing import Callable
+from collections.abc import Callable
 
 from flwr.common import Context
 

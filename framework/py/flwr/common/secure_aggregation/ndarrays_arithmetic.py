@@ -15,7 +15,7 @@
 """Utility functions for performing operations on Numpy NDArrays."""
 
 
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
@@ -68,14 +68,14 @@ def parameters_mod(parameters: list[NDArray[Any]], divisor: int) -> list[NDArray
 
 
 def parameters_multiply(
-    parameters: list[NDArray[Any]], multiplier: Union[int, float]
+    parameters: list[NDArray[Any]], multiplier: int | float
 ) -> list[NDArray[Any]]:
     """Multiply parameters by an integer/float multiplier."""
     return [parameters[idx] * multiplier for idx in range(len(parameters))]
 
 
 def parameters_divide(
-    parameters: list[NDArray[Any]], divisor: Union[int, float]
+    parameters: list[NDArray[Any]], divisor: int | float
 ) -> list[NDArray[Any]]:
     """Divide weight by an integer/float divisor."""
     return [parameters[idx] / divisor for idx in range(len(parameters))]

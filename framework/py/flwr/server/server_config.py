@@ -16,7 +16,6 @@
 
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -28,7 +27,7 @@ class ServerConfig:
     """
 
     num_rounds: int = 1
-    round_timeout: Optional[float] = None
+    round_timeout: float | None = None
 
     def __repr__(self) -> str:
         """Return the string representation of the ServerConfig."""

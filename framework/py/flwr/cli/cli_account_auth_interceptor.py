@@ -15,7 +15,8 @@
 """Flower run interceptor."""
 
 
-from typing import Any, Callable, Union
+from collections.abc import Callable
+from typing import Any
 
 import grpc
 
@@ -26,10 +27,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 
 from .auth_plugin import CliAuthPlugin
 
-Request = Union[
-    StartRunRequest,
-    StreamLogsRequest,
-]
+Request = StartRunRequest | StreamLogsRequest
 
 
 class CliAccountAuthInterceptor(

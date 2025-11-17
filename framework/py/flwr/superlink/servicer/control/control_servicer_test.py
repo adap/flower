@@ -21,7 +21,7 @@ import tempfile
 import unittest
 from datetime import datetime
 from types import SimpleNamespace
-from typing import Optional, cast
+from typing import cast
 from unittest.mock import MagicMock, Mock, patch
 
 import grpc
@@ -99,7 +99,7 @@ class TestControlServicer(unittest.TestCase):
         """Clean up after tests."""
         self.tmp_dir.cleanup()
 
-    def _create_dummy_run(self, flwr_aid: Optional[str]) -> int:
+    def _create_dummy_run(self, flwr_aid: str | None) -> int:
         return self.state.create_run(
             "flwr/demo", "v0.0.1", "hash123", {}, "mock-fed", ConfigRecord(), flwr_aid
         )
@@ -321,7 +321,7 @@ class TestControlServicerAuth(unittest.TestCase):
         """Clean up after tests."""
         self.tmp_dir.cleanup()
 
-    def _create_dummy_run(self, flwr_aid: Optional[str]) -> int:
+    def _create_dummy_run(self, flwr_aid: str | None) -> int:
         return self.state.create_run(
             "flwr/demo", "v0.0.1", "hash123", {}, "mock-fed", ConfigRecord(), flwr_aid
         )
@@ -339,7 +339,7 @@ class TestControlServicerAuth(unittest.TestCase):
     # Test all invalid cases for StreamLogs with authentication
     @parameterized.expand(FLWR_AID_MISMATCH_CASES)  # type: ignore
     def test_streamlogs_auth_unsucessful(
-        self, context_flwr_aid: Optional[str], run_flwr_aid: Optional[str]
+        self, context_flwr_aid: str | None, run_flwr_aid: str | None
     ) -> None:
         """Test StreamLogs unsuccessful."""
         # Prepare
@@ -393,7 +393,7 @@ class TestControlServicerAuth(unittest.TestCase):
     # Test all invalid cases for StopRun with authentication
     @parameterized.expand(FLWR_AID_MISMATCH_CASES)  # type: ignore
     def test_stoprun_auth_unsuccessful(
-        self, context_flwr_aid: Optional[str], run_flwr_aid: Optional[str]
+        self, context_flwr_aid: str | None, run_flwr_aid: str | None
     ) -> None:
         """Test StopRun unsuccessful with missing or mismatched flwr_aid."""
         # Prepare
@@ -431,7 +431,7 @@ class TestControlServicerAuth(unittest.TestCase):
     # Test all invalid cases for ListRuns with authentication
     @parameterized.expand(FLWR_AID_MISMATCH_CASES)  # type: ignore
     def test_listruns_auth_unsuccessful(
-        self, context_flwr_aid: Optional[str], run_flwr_aid: Optional[str]
+        self, context_flwr_aid: str | None, run_flwr_aid: str | None
     ) -> None:
         """Test ListRuns unsuccessful with missing or mismatched flwr_aid."""
         # Prepare

@@ -16,7 +16,7 @@
 # noqa: E501
 # pylint: disable=C0301, R0902, R0913
 from math import floor
-from typing import Literal, Optional, Union, cast
+from typing import Literal, cast
 
 import numpy as np
 
@@ -93,22 +93,22 @@ class VerticalSizePartitioner(Partitioner):
 
     def __init__(  # pylint: disable=R0917
         self,
-        partition_sizes: Union[list[int], list[float]],
-        active_party_columns: Optional[Union[str, list[str]]] = None,
-        active_party_columns_mode: Union[
+        partition_sizes: list[int] | list[float],
+        active_party_columns: str | list[str] | None = None,
+        active_party_columns_mode: (
             Literal[
                 "add_to_first",
                 "add_to_last",
                 "create_as_first",
                 "create_as_last",
                 "add_to_all",
-            ],
-            int,
-        ] = "add_to_last",
-        drop_columns: Optional[Union[str, list[str]]] = None,
-        shared_columns: Optional[Union[str, list[str]]] = None,
+            ]
+            | int
+        ) = "add_to_last",
+        drop_columns: str | list[str] | None = None,
+        shared_columns: str | list[str] | None = None,
         shuffle: bool = True,
-        seed: Optional[int] = 42,
+        seed: int | None = 42,
     ) -> None:
         super().__init__()
 
@@ -123,7 +123,7 @@ class VerticalSizePartitioner(Partitioner):
         self._seed = seed
         self._rng = np.random.default_rng(seed=self._seed)
 
-        self._partition_columns: Optional[list[list[str]]] = None
+        self._partition_columns: list[list[str]] | None = None
         self._partitions_determined = False
 
         self._validate_parameters_in_init()

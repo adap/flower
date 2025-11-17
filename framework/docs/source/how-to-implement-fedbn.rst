@@ -79,7 +79,7 @@ parameters are excluded from model state dict when sending to or receiving from 
         state_dict_wo_bn = OrderedDict(
             (k, v) for k, v in state_dict.items() if "bn" not in k
         )
-        model.load_state_dict(state_dict_wo_bn, strict=False)
+        model.load_state_dict(state_dict_wo_bn, strict=True)
 
         # ... [Perform training]
 

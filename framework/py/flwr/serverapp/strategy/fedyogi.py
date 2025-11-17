@@ -19,8 +19,7 @@ Paper: arxiv.org/abs/2003.00295
 
 
 from collections import OrderedDict
-from collections.abc import Iterable
-from typing import Callable, Optional
+from collections.abc import Callable, Iterable
 
 import numpy as np
 
@@ -95,12 +94,12 @@ class FedYogi(FedOpt):
         weighted_by_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
         configrecord_key: str = "config",
-        train_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
-        evaluate_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
+        train_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
+        evaluate_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
         eta: float = 1e-2,
         eta_l: float = 0.0316,
         beta_1: float = 0.9,
@@ -129,7 +128,7 @@ class FedYogi(FedOpt):
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         aggregated_arrayrecord, aggregated_metrics = super().aggregate_train(
             server_round, replies
