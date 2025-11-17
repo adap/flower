@@ -1,15 +1,18 @@
-[304] SUPERNODE_INVALID_TRUSTED_ENTITIES
-========================================
+##########################################
+ [304] SUPERNODE_INVALID_TRUSTED_ENTITIES
+##########################################
 
-Description
------------
+*************
+ Description
+*************
 
 This error occurs when an invalid YAML file for trusted entities is provided via the
 ``--trusted-entities`` option. The SuperNode must be restarted with a valid trusted
 entities list.
 
-How to Resolve
---------------
+****************
+ How to Resolve
+****************
 
 To resolve this issue, you can do one of the following:
 

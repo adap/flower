@@ -1,14 +1,17 @@
-[303] SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED
-=========================================================
+###########################################################
+ [303] SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED
+###########################################################
 
-Description
------------
+*************
+ Description
+*************
 
 The private key for SuperNode authentication was provided, but TLS is not enabled.
 SuperNode authentication requires a secure TLS connection with the SuperLink.
 
-How to Resolve
---------------
+****************
+ How to Resolve
+****************
 
 To resolve this issue you need to either:
 
