@@ -42,6 +42,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 
 from .control_account_auth_interceptor import (
     ControlAccountAuthInterceptor,
+    get_current_account_info,
     shared_account_info,
 )
 
@@ -99,7 +100,7 @@ class TestControlAccountAuthInterceptor(unittest.TestCase):
         # Assert response is as expected
         self.assertEqual(response, "dummy_response")
         # Assert `shared_account_info` is not set
-        account_info_from_context = shared_account_info.get()
+        account_info_from_context = get_current_account_info()
         self.assertIsNone(account_info_from_context.flwr_aid)
         self.assertIsNone(account_info_from_context.account_name)
 
@@ -206,7 +207,7 @@ class TestControlAccountAuthInterceptor(unittest.TestCase):
             self.assertEqual(response, "dummy_response")
 
         # Assert `shared_account_info` is set
-        account_info_from_context = shared_account_info.get()
+        account_info_from_context = get_current_account_info()
         self.assertEqual(
             account_info_from_context.flwr_aid, self.expected_account_info.flwr_aid
         )
