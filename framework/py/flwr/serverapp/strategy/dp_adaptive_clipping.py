@@ -19,7 +19,6 @@ Paper (Andrew et al.): https://arxiv.org/abs/1905.03871
 
 import math
 from abc import ABC
-from collections import OrderedDict
 from collections.abc import Iterable
 from logging import INFO
 
@@ -95,9 +94,7 @@ class DifferentialPrivacyAdaptiveBase(Strategy, ABC):
         add_gaussian_noise_inplace(nds, stdv)
         log(INFO, "aggregate_fit: central DP noise with %.4f stdev added", stdv)
         return ArrayRecord(
-            OrderedDict(
-                {k: Array(v) for k, v in zip(aggregated.keys(), nds, strict=True)}
-            )
+            {k: Array(v) for k, v in zip(aggregated.keys(), nds, strict=True)}
         )
 
     def _noisy_fraction(self, count: int, total: int) -> float:
@@ -197,12 +194,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(DifferentialPrivacyAdaptiveB
                     c + u for c, u in zip(current_nd, model_update, strict=True)
                 ]
                 reply.content[arr_name] = ArrayRecord(
-                    OrderedDict(
-                        {
-                            k: Array(v)
-                            for k, v in zip(record.keys(), restored, strict=True)
-                        }
-                    )
+                    {k: Array(v) for k, v in zip(record.keys(), restored, strict=True)}
                 )
             log(
                 INFO,

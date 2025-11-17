@@ -2,8 +2,9 @@
 .. meta::
     :description: Beginner’s guide to running Flower quickstart examples with the Deployment Engine using Docker Compose, showcasing its powerful federated learning capabilities.
 
-Run Flower Quickstart Examples with Docker Compose
-==================================================
+####################################################
+ Run Flower Quickstart Examples with Docker Compose
+####################################################
 
 Flower provides a set of `quickstart examples
 <https://github.com/adap/flower/tree/main/examples>`_ to help you get started with the
@@ -16,8 +17,9 @@ Flower's Deployment Engine via Docker Compose.
     Some quickstart examples may have limitations or requirements that prevent them from
     running on every environment. For more information, please see Limitations_.
 
-Prerequisites
--------------
+***************
+ Prerequisites
+***************
 
 Before you start, make sure that:
 
@@ -25,8 +27,9 @@ Before you start, make sure that:
 - The Docker daemon is running.
 - Docker Compose V2 is `installed <https://docs.docker.com/compose/install/>`_.
 
-Run the Quickstart Example
---------------------------
+****************************
+ Run the Quickstart Example
+****************************
 
 1. Clone the quickstart example you like to run. For example, ``quickstart-pytorch``:
 
@@ -82,8 +85,9 @@ Run the Quickstart Example
 That is all it takes! You can monitor the progress of the run through the logs of the
 ``ServerApp``.
 
-Run a Different Quickstart Example
-----------------------------------
+************************************
+ Run a Different Quickstart Example
+************************************
 
 To run a different quickstart example, such as ``quickstart-tensorflow``, first, shut
 down the Docker Compose services of the current example:
@@ -94,8 +98,9 @@ down the Docker Compose services of the current example:
 
 After that, you can repeat the steps above.
 
-Limitations
------------
+*************
+ Limitations
+*************
 
 .. list-table::
     :header-rows: 1

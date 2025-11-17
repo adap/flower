@@ -30,15 +30,17 @@
 
 .. _strategy_start_link: ref-api/flwr.serverapp.strategy.Strategy.html#flwr.serverapp.strategy.Strategy.start
 
-Configure a ``ClientApp``
-=========================
+###########################
+ Configure a ``ClientApp``
+###########################
 
 Flower provides the ability to send configuration values to clients, allowing
 server-side control over client behavior. This feature enables flexible and dynamic
 adjustment of client-side hyperparameters, improving collaboration and experimentation.
 
-Sending ``ConfigRecords`` to a ``ClientApp``
---------------------------------------------
+**********************************************
+ Sending ``ConfigRecords`` to a ``ClientApp``
+**********************************************
 
 Make use of a |configrecord_link|_ to send configuration values in a |message_link|_
 from your |serverapp_link|_ to a |clientapp_link|_. A ``ConfigRecord`` is a special type
@@ -105,8 +107,9 @@ advance?
     that arrives to the ``ClientApp`` will be such key with the corresponding round
     number.
 
-Dynamic modification of ``ConfigRecord``
-----------------------------------------
+******************************************
+ Dynamic modification of ``ConfigRecord``
+******************************************
 
 Given a ``ConfigRecord`` passed upon starting the execution of a strategy (i.e. passed
 to the |strategy_start_link|_ method), the contents of the ``ConfigRecord`` that arrive
