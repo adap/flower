@@ -19,7 +19,6 @@ import secrets
 from collections.abc import Sequence
 from dataclasses import dataclass
 from threading import Lock
-from typing import Optional
 
 from flwr.common import Context, Message
 from flwr.common.constant import FLWR_APP_TOKEN_LENGTH
@@ -41,7 +40,7 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
 
     def __init__(self) -> None:
         # Store node_id
-        self.node_id: Optional[int] = None
+        self.node_id: int | None = None
         # Store Object ID to MessageEntry mapping
         self.msg_store: dict[str, MessageEntry] = {}
         self.lock_msg_store = Lock()
@@ -56,7 +55,7 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
         self.token_to_run_id: dict[str, int] = {}
         self.lock_token_store = Lock()
 
-    def set_node_id(self, node_id: Optional[int]) -> None:
+    def set_node_id(self, node_id: int | None) -> None:
         """Set the node ID."""
         self.node_id = node_id
 
@@ -66,7 +65,7 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
             raise ValueError("Node ID not set")
         return self.node_id
 
-    def store_message(self, message: Message) -> Optional[str]:
+    def store_message(self, message: Message) -> str | None:
         """Store a message."""
         with self.lock_msg_store:
             msg_id = message.metadata.message_id
@@ -78,9 +77,9 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
     def get_messages(
         self,
         *,
-        run_ids: Optional[Sequence[int]] = None,
-        is_reply: Optional[bool] = None,
-        limit: Optional[int] = None,
+        run_ids: Sequence[int] | None = None,
+        is_reply: bool | None = None,
+        limit: int | None = None,
     ) -> Sequence[Message]:
         """Retrieve messages based on the specified filters."""
         selected_messages: list[Message] = []
@@ -122,7 +121,7 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
     def delete_messages(
         self,
         *,
-        message_ids: Optional[Sequence[str]] = None,
+        message_ids: Sequence[str] | None = None,
     ) -> None:
         """Delete messages based on the specified filters."""
         with self.lock_msg_store:
@@ -140,7 +139,7 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
         with self.lock_run_store:
             self.run_store[run.run_id] = run
 
-    def get_run(self, run_id: int) -> Optional[Run]:
+    def get_run(self, run_id: int) -> Run | None:
         """Retrieve a run by its ID."""
         with self.lock_run_store:
             return self.run_store.get(run_id)
@@ -150,7 +149,7 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
         with self.lock_ctx_store:
             self.ctx_store[context.run_id] = context
 
-    def get_context(self, run_id: int) -> Optional[Context]:
+    def get_context(self, run_id: int) -> Context | None:
         """Retrieve a context by its run ID."""
         with self.lock_ctx_store:
             return self.ctx_store.get(run_id)
@@ -171,7 +170,7 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
             ret -= set(self.token_store.keys())
             return list(ret)
 
-    def create_token(self, run_id: int) -> Optional[str]:
+    def create_token(self, run_id: int) -> str | None:
         """Create a token for the given run ID."""
         token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
         with self.lock_token_store:
@@ -193,7 +192,7 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
             if token is not None:
                 self.token_to_run_id.pop(token, None)
 
-    def get_run_id_by_token(self, token: str) -> Optional[int]:
+    def get_run_id_by_token(self, token: str) -> int | None:
         """Get the run ID associated with a given token."""
         with self.lock_token_store:
             return self.token_to_run_id.get(token)

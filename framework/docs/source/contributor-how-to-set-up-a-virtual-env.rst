@@ -9,8 +9,7 @@ preferred setup.
 Python Version
 --------------
 
-Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, but `Python 3.10
-<https://docs.python.org/3.10/>`_ or above is recommended.
+Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_.
 
 .. note::
 
@@ -31,19 +30,19 @@ Once Pyenv is set up, you can use it to install `Python Version 3.10
 
 .. code-block:: shell
 
-    pyenv install 3.10.12
+    pyenv install 3.10.19
 
 Create the virtualenv with:
 
 .. code-block:: shell
 
-    pyenv virtualenv 3.10.12 flower-3.10.12
+    pyenv virtualenv 3.10.19 flower-3.10.19
 
 Activate the virtualenv by running the following command:
 
 .. code-block:: shell
 
-    echo flower-3.10.12 > .python-version
+    echo flower-3.10.19 > .python-version
 
 Virtualenv with Poetry
 ----------------------
@@ -71,10 +70,10 @@ package. After setting it up you can create a virtual environment with:
 
 .. code-block:: shell
 
-    conda create -n flower-3.10.12 python=3.10.12
+    conda create -n flower-3.10.19 python=3.10.19
 
 and activate the virtual environment with:
 
 .. code-block:: shell
 
-    conda activate flower-3.10.12
+    conda activate flower-3.10.19

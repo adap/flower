@@ -16,7 +16,8 @@
 
 
 import datetime
-from typing import Any, Callable, cast
+from collections.abc import Callable
+from typing import Any, cast
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -117,7 +118,7 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             # than the `intercept_service` function.
 
             # Retrieve the public key
-            if isinstance(request, (RegisterNodeFleetRequest, ActivateNodeRequest)):
+            if isinstance(request, (RegisterNodeFleetRequest | ActivateNodeRequest)):
                 actual_public_key = request.public_key
             else:
                 if hasattr(request, "node"):

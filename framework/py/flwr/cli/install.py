@@ -21,7 +21,7 @@ import tempfile
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Annotated, Optional, Union
+from typing import IO, Annotated
 
 import typer
 
@@ -34,11 +34,11 @@ from .utils import get_sha256_hash
 
 def install(
     source: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Argument(metavar="source", help="The source FAB file to install."),
     ] = None,
     flwr_dir: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(help="The desired install path."),
     ] = None,
 ) -> None:
@@ -83,13 +83,13 @@ def install(
 
 
 def install_from_fab(
-    fab_file: Union[Path, bytes],
-    flwr_dir: Optional[Path],
+    fab_file: Path | bytes,
+    flwr_dir: Path | None,
     skip_prompt: bool = False,
 ) -> Path:
     """Install from a FAB file after extracting and validating."""
-    fab_file_archive: Union[Path, IO[bytes]]
-    fab_name: Optional[str]
+    fab_file_archive: Path | IO[bytes]
+    fab_name: str | None
     if isinstance(fab_file, bytes):
         fab_file_archive = BytesIO(fab_file)
         fab_hash = hashlib.sha256(fab_file).hexdigest()
@@ -139,8 +139,8 @@ def install_from_fab(
 def validate_and_install(
     project_dir: Path,
     fab_hash: str,
-    fab_name: Optional[str],
-    flwr_dir: Optional[Path],
+    fab_name: str | None,
+    flwr_dir: Path | None,
     skip_prompt: bool = False,
 ) -> Path:
     """Validate TOML files and install the project to the desired directory."""

@@ -33,16 +33,16 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.superlink.auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 
-Request = Union[
-    StartRunRequest,
-    StreamLogsRequest,
-    GetLoginDetailsRequest,
-    GetAuthTokensRequest,
-]
+Request = (
+    StartRunRequest | StreamLogsRequest | GetLoginDetailsRequest | GetAuthTokensRequest
+)
 
-Response = Union[
-    StartRunResponse, StreamLogsResponse, GetLoginDetailsResponse, GetAuthTokensResponse
-]
+Response = (
+    StartRunResponse
+    | StreamLogsResponse
+    | GetLoginDetailsResponse
+    | GetAuthTokensResponse
+)
 
 
 shared_account_info: contextvars.ContextVar[Optional[AccountInfo]] = (
@@ -93,7 +93,7 @@ class ControlAccountAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
 
             # Intercept GetLoginDetails and GetAuthTokens requests, and return
             # the response without authentication
-            if isinstance(request, (GetLoginDetailsRequest, GetAuthTokensRequest)):
+            if isinstance(request, (GetLoginDetailsRequest | GetAuthTokensRequest)):
                 return call(request, context)  # type: ignore
 
             # For other requests, check if the account is authenticated

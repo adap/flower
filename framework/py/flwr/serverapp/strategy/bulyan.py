@@ -19,9 +19,9 @@ Paper: arxiv.org/abs/1802.07927
 
 
 from collections import OrderedDict
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from logging import INFO, WARN
-from typing import Callable, Optional, cast
+from typing import cast
 
 import numpy as np
 
@@ -104,15 +104,15 @@ class Bulyan(FedAvg):
         weighted_by_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
         configrecord_key: str = "config",
-        train_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
-        evaluate_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
-        selection_rule: Optional[
-            Callable[[list[RecordDict], int, int], list[RecordDict]]
-        ] = None,
+        train_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
+        evaluate_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
+        selection_rule: (
+            Callable[[list[RecordDict], int, int], list[RecordDict]] | None
+        ) = None,
     ) -> None:
         super().__init__(
             fraction_train=fraction_train,
@@ -140,7 +140,7 @@ class Bulyan(FedAvg):
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         valid_replies, _ = self._check_and_log_replies(replies, is_train=True)
 
@@ -175,7 +175,9 @@ class Bulyan(FedAvg):
         ]
 
         # Compute median
-        median_ndarrays = [np.median(arr, axis=0) for arr in zip(*selected_ndarrays)]
+        median_ndarrays = [
+            np.median(arr, axis=0) for arr in zip(*selected_ndarrays, strict=True)
+        ]
 
         # Aggregate the beta closest weights element-wise
         aggregated_ndarrays = aggregate_n_closest_weights(
@@ -184,7 +186,7 @@ class Bulyan(FedAvg):
 
         # Convert to ArrayRecord
         arrays = ArrayRecord(
-            OrderedDict(zip(array_keys, map(Array, aggregated_ndarrays)))
+            OrderedDict(zip(array_keys, map(Array, aggregated_ndarrays), strict=True))
         )
 
         # Aggregate MetricRecords

@@ -27,11 +27,12 @@ jobs:
   test_core:
     runs-on: ubuntu-22.04
     strategy:
+      max-parallel: 2
       matrix:
         # Latest version which comes cached in the host image can be found here:
         # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#python
         # In case of a mismatch, the job has to download Python to install it.
-        python: ['3.9', '3.10', '3.11', '3.12']
+        python: ['3.10', '3.11', '3.12', '3.13']
 
     name: Python ${{ matrix.python }}
 
@@ -57,7 +58,7 @@ jobs:
         run: |
           if [ -n "${{ secrets.HF_TOKEN }}" ]; then
             echo "Logging into Hugging Face..."
-            huggingface-cli login --token ${{ secrets.HF_TOKEN }}
+            hf auth login --token ${{ secrets.HF_TOKEN }}
           else
             echo "Skipping Hugging Face login stage (HF_TOKEN not set)"
           fi

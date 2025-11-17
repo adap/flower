@@ -20,7 +20,7 @@ Paper: arxiv.org/abs/2003.00295
 """
 
 
-from typing import Callable, Optional, Union
+from collections.abc import Callable
 
 import numpy as np
 
@@ -87,16 +87,17 @@ class FedAdagrad(FedOpt):
         min_fit_clients: int = 2,
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        evaluate_fn: Optional[
+        evaluate_fn: (
             Callable[
                 [int, NDArrays, dict[str, Scalar]],
-                Optional[tuple[float, dict[str, Scalar]]],
+                tuple[float, dict[str, Scalar]] | None,
             ]
-        ] = None,
-        on_fit_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
-        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+            | None
+        ) = None,
+        on_fit_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
+        on_evaluate_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
+        fit_metrics_aggregation_fn: MetricsAggregationFn | None = None,
+        evaluate_metrics_aggregation_fn: MetricsAggregationFn | None = None,
         accept_failures: bool = True,
         initial_parameters: Parameters,
         eta: float = 1e-1,
@@ -132,8 +133,8 @@ class FedAdagrad(FedOpt):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         fedavg_parameters_aggregated, metrics_aggregated = super().aggregate_fit(
             server_round=server_round, results=results, failures=failures
@@ -145,7 +146,8 @@ class FedAdagrad(FedOpt):
 
         # Adagrad
         delta_t: NDArrays = [
-            x - y for x, y in zip(fedavg_weights_aggregate, self.current_weights)
+            x - y
+            for x, y in zip(fedavg_weights_aggregate, self.current_weights, strict=True)
         ]
 
         # m_t
@@ -153,17 +155,19 @@ class FedAdagrad(FedOpt):
             self.m_t = [np.zeros_like(x) for x in delta_t]
         self.m_t = [
             np.multiply(self.beta_1, x) + (1 - self.beta_1) * y
-            for x, y in zip(self.m_t, delta_t)
+            for x, y in zip(self.m_t, delta_t, strict=True)
         ]
 
         # v_t
         if not self.v_t:
             self.v_t = [np.zeros_like(x) for x in delta_t]
-        self.v_t = [x + np.multiply(y, y) for x, y in zip(self.v_t, delta_t)]
+        self.v_t = [
+            x + np.multiply(y, y) for x, y in zip(self.v_t, delta_t, strict=True)
+        ]
 
         new_weights = [
             x + self.eta * y / (np.sqrt(z) + self.tau)
-            for x, y, z in zip(self.current_weights, self.m_t, self.v_t)
+            for x, y, z in zip(self.current_weights, self.m_t, self.v_t, strict=True)
         ]
 
         self.current_weights = new_weights

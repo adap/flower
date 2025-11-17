@@ -17,9 +17,8 @@
 
 import io
 import json
-from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Annotated, Optional, cast
+from typing import Annotated, cast
 
 import typer
 from rich.console import Console
@@ -33,20 +32,17 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
 )
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
-from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, SubStatus
-from flwr.common.date import format_timedelta, isoformat8601_utc
+from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, Status, SubStatus
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import run_from_proto
-from flwr.common.typing import Run
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListRunsRequest,
     ListRunsResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 
+from .run_utils import RunRow, format_runs
 from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
-
-_RunListType = tuple[int, str, str, str, str, str, str, str, str]
 
 
 def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
@@ -56,11 +52,11 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         typer.Argument(help="Path of the Flower project"),
     ] = Path("."),
     federation: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(help="Name of the federation"),
     ] = None,
     federation_config_overrides: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option(
             "--federation-config",
             help=FEDERATION_CONFIG_HELP_MESSAGE,
@@ -74,7 +70,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         ),
     ] = False,
     run_id: Annotated[
-        Optional[int],
+        int | None,
         typer.Option(
             "--run-id",
             help="Specific run ID to display",
@@ -94,12 +90,11 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
     The following details are displayed:
 
     - **Run ID:** Unique identifier for the run.
-    - **FAB:** Name of the FAB associated with the run (``{FAB_ID} (v{FAB_VERSION})``).
+    - **Federation:** The federation to which the run belongs.
+    - **App:** The App associated with the run (``<APP_ID>==<APP_VERSION>``).
     - **Status:** Current status of the run (pending, starting, running, finished).
     - **Elapsed:** Time elapsed since the run started (``HH:MM:SS``).
-    - **Created At:** Timestamp when the run was created.
-    - **Running At:** Timestamp when the run started running.
-    - **Finished At:** Timestamp when the run finished.
+    - **Status Changed @:** Timestamp of the most recent status change.
 
     All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD HH:MM:SSZ``.
     """
@@ -143,7 +138,10 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
             if output_format == CliOutputFormat.JSON:
                 Console().print_json(_to_json(formatted_runs))
             else:
-                Console().print(_to_table(formatted_runs))
+                if run_id is not None:
+                    Console().print(_to_detail_table(formatted_runs[0]))
+                else:
+                    Console().print(_to_table(formatted_runs))
         finally:
             if channel:
                 channel.close()
@@ -164,149 +162,118 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         captured_output.close()
 
 
-def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[_RunListType]:
-    """Format runs to a list."""
+def _get_status_style(status_text: str) -> str:
+    """Determine the display style/color for a status."""
+    status = status_text.lower()
+    sub_status = status_text.rsplit(":", maxsplit=1)[-1]
 
-    def _format_datetime(dt: Optional[datetime]) -> str:
-        return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
-
-    run_list: list[_RunListType] = []
-
-    # Add rows
-    for run in sorted(
-        run_dict.values(), key=lambda x: datetime.fromisoformat(x.pending_at)
-    ):
-        # Combine status and sub-status into a single string
-        if run.status.sub_status == "":
-            status_text = run.status.status
-        else:
-            status_text = f"{run.status.status}:{run.status.sub_status}"
-
-        # Convert isoformat to datetime
-        pending_at = datetime.fromisoformat(run.pending_at) if run.pending_at else None
-        running_at = datetime.fromisoformat(run.running_at) if run.running_at else None
-        finished_at = (
-            datetime.fromisoformat(run.finished_at) if run.finished_at else None
-        )
-
-        # Calculate elapsed time
-        elapsed_time = timedelta()
-        if running_at:
-            if finished_at:
-                end_time = finished_at
-            else:
-                end_time = datetime.fromisoformat(now_isoformat)
-            elapsed_time = end_time - running_at
-
-        run_list.append(
-            (
-                run.run_id,
-                run.fab_id,
-                run.fab_version,
-                run.fab_hash,
-                status_text,
-                format_timedelta(elapsed_time),
-                _format_datetime(pending_at),
-                _format_datetime(running_at),
-                _format_datetime(finished_at),
-            )
-        )
-    return run_list
+    if sub_status == SubStatus.COMPLETED:  # finished:completed
+        return "green"
+    if sub_status == SubStatus.FAILED:  # finished:failed
+        return "red"
+    if sub_status == SubStatus.STOPPED:  # finished:stopped
+        return "yellow"
+    if status in (Status.STARTING, Status.RUNNING):  # starting, running
+        return "blue"
+    return "bright_black"  # pending
 
 
-def _to_table(run_list: list[_RunListType]) -> Table:
+def _to_table(run_list: list[RunRow]) -> Table:
     """Format the provided run list to a rich Table."""
     table = Table(header_style="bold cyan", show_lines=True)
 
     # Add columns
-    table.add_column(
-        Text("Run ID", justify="center"), style="bright_black", no_wrap=True
-    )
-    table.add_column(Text("FAB", justify="center"), style="bright_black")
+    table.add_column(Text("Run ID", justify="center"), no_wrap=True)
+    table.add_column(Text("Federation", justify="center"))
+    table.add_column(Text("App", justify="center"))
     table.add_column(Text("Status", justify="center"))
     table.add_column(Text("Elapsed", justify="center"), style="blue")
-    table.add_column(Text("Created At", justify="center"), style="bright_black")
-    table.add_column(Text("Running At", justify="center"), style="bright_black")
-    table.add_column(Text("Finished At", justify="center"), style="bright_black")
+    table.add_column(Text("Status Changed @", justify="center"))
 
     for row in run_list:
-        (
-            run_id,
-            fab_id,
-            fab_version,
-            _,
-            status_text,
-            elapsed,
-            created_at,
-            running_at,
-            finished_at,
-        ) = row
-        # Style the status based on its value
-        sub_status = status_text.rsplit(":", maxsplit=1)[-1]
-        if sub_status == SubStatus.COMPLETED:
-            status_style = "green"
-        elif sub_status == SubStatus.FAILED:
-            status_style = "red"
+        status_style = _get_status_style(row.status_text)
+
+        # Use the most recent timestamp
+        if row.finished_at != "N/A":
+            status_changed_at = row.finished_at
+        elif row.running_at != "N/A":
+            status_changed_at = row.running_at
+        elif row.starting_at != "N/A":
+            status_changed_at = row.starting_at
         else:
-            status_style = "yellow"
+            status_changed_at = row.pending_at
 
         formatted_row = (
-            f"[bold]{run_id}[/bold]",
-            f"{fab_id} (v{fab_version})",
-            f"[{status_style}]{status_text}[/{status_style}]",
-            elapsed,
-            created_at,
-            running_at,
-            finished_at,
+            f"[bold]{row.run_id}[/bold]",
+            row.federation,
+            f"@{row.fab_id}=={row.fab_version}",
+            f"[{status_style}]{row.status_text}[/{status_style}]",
+            row.elapsed,
+            status_changed_at,
         )
         table.add_row(*formatted_row)
 
     return table
 
 
-def _to_json(run_list: list[_RunListType]) -> str:
+def _to_detail_table(run: RunRow) -> Table:
+    """Format a single run's details in a vertical table layout."""
+    status_style = _get_status_style(run.status_text)
+
+    # Create vertical table with field names on the left
+    table = Table(show_header=False, show_lines=False)
+    table.add_column("Field", style="bold cyan", no_wrap=True)
+    table.add_column("Value")
+
+    # Add rows with all details
+    table.add_row("Run ID", f"[bold]{run.run_id}[/bold]")
+    table.add_row("Federation", run.federation)
+    table.add_row("App", f"@{run.fab_id}=={run.fab_version}")
+    table.add_row("FAB Hash", f"{run.fab_hash[:8]}...{run.fab_hash[-8:]}")
+    table.add_row("Status", f"[{status_style}]{run.status_text}[/{status_style}]")
+    table.add_row("Elapsed", f"[blue]{run.elapsed}[/blue]")
+    table.add_row("Pending At", run.pending_at)
+    table.add_row("Starting At", run.starting_at)
+    table.add_row("Running At", run.running_at)
+    table.add_row("Finished At", run.finished_at)
+
+    return table
+
+
+def _to_json(run_list: list[RunRow]) -> str:
     """Format run status list to a JSON formatted string."""
     runs_list = []
     for row in run_list:
-        (
-            run_id,
-            fab_id,
-            fab_version,
-            fab_hash,
-            status_text,
-            elapsed,
-            created_at,
-            running_at,
-            finished_at,
-        ) = row
         runs_list.append(
             {
-                "run-id": run_id,
-                "fab-id": fab_id,
-                "fab-name": fab_id.split("/")[-1],
-                "fab-version": fab_version,
-                "fab-hash": fab_hash[:8],
-                "status": status_text,
-                "elapsed": elapsed,
-                "created-at": created_at,
-                "running-at": running_at,
-                "finished-at": finished_at,
+                "run-id": row.run_id,
+                "federation": row.federation,
+                "fab-id": row.fab_id,
+                "fab-name": row.fab_id.split("/")[-1],
+                "fab-version": row.fab_version,
+                "fab-hash": row.fab_hash[:8],
+                "status": row.status_text,
+                "elapsed": row.elapsed,
+                "pending-at": row.pending_at,
+                "starting-at": row.starting_at,
+                "running-at": row.running_at,
+                "finished-at": row.finished_at,
             }
         )
 
     return json.dumps({"success": True, "runs": runs_list})
 
 
-def _list_runs(stub: ControlStub) -> list[_RunListType]:
+def _list_runs(stub: ControlStub) -> list[RunRow]:
     """List all runs."""
     with flwr_cli_grpc_exc_handler():
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    return _format_runs(run_dict, res.now)
+    return format_runs(run_dict, res.now)
 
 
-def _display_one_run(stub: ControlStub, run_id: int) -> list[_RunListType]:
+def _display_one_run(stub: ControlStub, run_id: int) -> list[RunRow]:
     """Display information about a specific run."""
     with flwr_cli_grpc_exc_handler():
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
@@ -316,4 +283,4 @@ def _display_one_run(stub: ControlStub, run_id: int) -> list[_RunListType]:
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    return _format_runs(run_dict, res.now)
+    return format_runs(run_dict, res.now)

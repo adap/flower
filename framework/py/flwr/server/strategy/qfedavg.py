@@ -18,8 +18,8 @@ Paper: openreview.net/pdf?id=ByexElSYDr
 """
 
 
+from collections.abc import Callable
 from logging import WARNING
-from typing import Callable, Optional, Union
 
 import numpy as np
 
@@ -58,18 +58,19 @@ class QFedAvg(FedAvg):
         min_fit_clients: int = 1,
         min_evaluate_clients: int = 1,
         min_available_clients: int = 1,
-        evaluate_fn: Optional[
+        evaluate_fn: (
             Callable[
                 [int, NDArrays, dict[str, Scalar]],
-                Optional[tuple[float, dict[str, Scalar]]],
+                tuple[float, dict[str, Scalar]] | None,
             ]
-        ] = None,
-        on_fit_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
+            | None
+        ) = None,
+        on_fit_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
+        on_evaluate_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
         accept_failures: bool = True,
-        initial_parameters: Optional[Parameters] = None,
-        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        initial_parameters: Parameters | None = None,
+        fit_metrics_aggregation_fn: MetricsAggregationFn | None = None,
+        evaluate_metrics_aggregation_fn: MetricsAggregationFn | None = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -87,7 +88,7 @@ class QFedAvg(FedAvg):
         )
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
-        self.pre_weights: Optional[NDArrays] = None
+        self.pre_weights: NDArrays | None = None
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
@@ -159,8 +160,8 @@ class QFedAvg(FedAvg):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
@@ -199,7 +200,7 @@ class QFedAvg(FedAvg):
             # plug in the weight updates into the gradient
             grads = [
                 np.multiply((u - v), 1.0 / self.learning_rate)
-                for u, v in zip(weights_before, new_weights)
+                for u, v in zip(weights_before, new_weights, strict=True)
             ]
             deltas.append(
                 [np.float_power(loss + 1e-10, self.q_param) * grad for grad in grads]
@@ -230,8 +231,8 @@ class QFedAvg(FedAvg):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, EvaluateRes]],
-        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> tuple[Optional[float], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, EvaluateRes] | BaseException],
+    ) -> tuple[float | None, dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
             return None, {}
