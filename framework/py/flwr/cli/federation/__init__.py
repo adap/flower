@@ -16,7 +16,9 @@
 
 
 from .ls import ls as ls
+from .show import show as show
 
 __all__ = [
     "ls",
+    "show",
 ]

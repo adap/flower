@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `federation list` command."""
+"""Flower command line interface `federation show` command."""
 
 
 import io
 from pathlib import Path
-from typing import Annotated, cast
+from typing import Annotated
 
 import typer
 from rich.console import Console
@@ -33,8 +33,8 @@ from flwr.cli.config_utils import (
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
-    ListFederationsRequest,
-    ListFederationsResponse,
+    ShowFederationRequest,
+    ShowFederationResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
@@ -42,8 +42,7 @@ from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 
 
-def ls(  # pylint: disable=R0914, R0913, R0917
-    ctx: typer.Context,
+def show(  # pylint: disable=R0914, R0913, R0917
     app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project"),
@@ -61,10 +60,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """List federations one is a member of."""
-    # Resolve command used (list or ls)
-    command_name = cast(str, ctx.command.name) if ctx.command else "ls"
-
+    """Show information about a federation."""
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:
@@ -78,19 +74,19 @@ def ls(  # pylint: disable=R0914, R0913, R0917
         federation, federation_config = validate_federation_in_project_config(
             federation, config
         )
-        exit_if_no_address(federation_config, f"federation {command_name}")
+        exit_if_no_address(federation_config, "federation show")
         channel = None
         try:
             auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
             channel = init_channel(app, federation_config, auth_plugin)
             stub = ControlStub(channel)
-            typer.echo("📄 Listing federations...")
-            federations = _list_federations(stub)
+            typer.echo(f"📄 Showing federation information {federation}...")
+            federation_info = _show_federation(stub, federation)
             restore_output()
             if output_format == CliOutputFormat.JSON:
-                Console().print_json(data=_to_json(federations))
+                Console().print_json(data=_to_json(federation_info))
             else:
-                Console().print(_to_table(federations))
+                Console().print(_to_table(federation_info))
         finally:
             if channel:
                 channel.close()
@@ -111,12 +107,16 @@ def ls(  # pylint: disable=R0914, R0913, R0917
         captured_output.close()
 
 
-def _list_federations(stub: ControlStub) -> list[Federation]:
-    """List all federations."""
+def _show_federation(
+    stub: ControlStub, federation: str
+) -> tuple[Federation, list[str], dict]:
+    """Show federation details."""
     with flwr_cli_grpc_exc_handler():
-        res: ListFederationsResponse = stub.ListFederations(ListFederationsRequest())
+        res: ShowFederationResponse = stub.ShowFederation(
+            ShowFederationRequest(name=federation)
+        )
 
-    return list(res.federations)
+    return res.federation, res.nodes_info, res.run_dict
 
 
 def _to_table(federations: list[Federation]) -> Table:
