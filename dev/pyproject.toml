@@ -14,7 +14,7 @@ packages = [{ include = "devtool", from = "./" }]
 python = "^3.9"
 clang-format = "==17.0.6"
 isort = "==5.13.2"
-black = { version = "==24.10.0" }
+black = { version = "==25.11.0" }
 taplo = "==0.9.3"
 docformatter = "==1.7.5"
 rope = "==1.13.0"

@@ -34,8 +34,9 @@
 
 .. _localdp_mod_link: ref-api/flwr.clientapp.mod.localdp_mod.html
 
-Use Differential Privacy
-========================
+##########################
+ Use Differential Privacy
+##########################
 
 This guide explains how you can utilize differential privacy in the Flower framework. If
 you are not yet familiar with differential privacy, you can refer to
@@ -47,8 +48,9 @@ you are not yet familiar with differential privacy, you can refer to
     features in a production environment with sensitive data, feel free contact us to
     discuss your requirements and to receive guidance on how to best use these features.
 
-Central Differential Privacy
-----------------------------
+******************************
+ Central Differential Privacy
+******************************
 
 This approach consists of two separate phases: clipping of the updates and adding noise
 to the aggregated model. For the clipping phase, Flower framework has made it possible
@@ -64,7 +66,7 @@ to decide whether to perform clipping on the server side or the client side.
   centralized control, as the server has less control over the clipping process.
 
 Server-side Clipping
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 For central DP with server-side clipping, there are two ``Strategy`` classes that act as
 wrappers around the actual ``Strategy`` instance (for example, |fedavg_link|_). The two
@@ -97,7 +99,7 @@ the corresponding input parameters.
     )
 
 Client-side Clipping
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 For central DP with client-side clipping, the server sends the clipping value to
 selected clients on each round. Clients can use existing Flower ``Mods`` to perform the
@@ -140,8 +142,9 @@ the matching ``fixedclipping_mod`` to perform the client-side clipping:
     # Add fixedclipping_mod to the client-side mods
     app = ClientApp(mods=[fixedclipping_mod])
 
-Local Differential Privacy
---------------------------
+****************************
+ Local Differential Privacy
+****************************
 
 To utilize local differential privacy (DP) and add noise to the client model parameters
 before transmitting them to the server in Flower, you can use the |localdp_mod_link|_.
@@ -187,7 +190,7 @@ important when using multiple modifiers. Typically, differential privacy (DP) mo
 should be the last to operate on parameters.
 
 Local Training using Privacy Engines
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+====================================
 
 For ensuring data instance-level privacy during local model training on the client side,
 consider leveraging privacy engines such as Opacus and TensorFlow Privacy. For examples

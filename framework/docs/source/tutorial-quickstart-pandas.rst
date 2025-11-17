@@ -1,7 +1,8 @@
 .. _quickstart-pandas:
 
-Quickstart Pandas
-=================
+###################
+ Quickstart Pandas
+###################
 
 .. meta::
     :description: Check out this Federated Learning quickstart tutorial for using Flower with Pandas to perform Federated Analytics.

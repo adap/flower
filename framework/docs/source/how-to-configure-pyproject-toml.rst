@@ -2,8 +2,9 @@
 .. meta::
     :description: Learn how to configure your Flower app using the pyproject.toml file, including dependencies, components, runtime settings, and federation setup.
 
-Configure ``pyproject.toml``
-============================
+##############################
+ Configure ``pyproject.toml``
+##############################
 
 All Flower Apps need a ``pyproject.toml``. When you create a new Flower App using ``flwr
 new``, a ``pyproject.toml`` file is generated. This file defines your app's
@@ -51,8 +52,9 @@ A complete ``pyproject.toml`` file, for example, looks like this:
 
 Here are a few key sections to look out for:
 
-App Metadata and Dependencies
------------------------------
+*******************************
+ App Metadata and Dependencies
+*******************************
 
 .. code-block:: toml
 
@@ -92,8 +94,9 @@ run:
 
     pip install -e .
 
-App Components
---------------
+****************
+ App Components
+****************
 
 .. code-block:: toml
 
@@ -114,8 +117,9 @@ These entries point to your ``ServerApp`` and ``ClientApp`` definitions, using t
 format ``<module>:<object>``. Only update these import paths if you rename your modules
 or the variables that reference your ``ServerApp`` or ``ClientApp``.
 
-App Configuration
------------------
+*******************
+ App Configuration
+*******************
 
 .. code-block:: toml
 
@@ -133,8 +137,9 @@ Access these values in your code using ``context.run_config``. For example:
 
     server_rounds = context.run_config["num-server-rounds"]
 
-Federation Configuration
-------------------------
+**************************
+ Federation Configuration
+**************************
 
 .. code-block:: toml
 
@@ -157,7 +162,7 @@ configure multiple federations, such as local simulations or remote deployments,
 the ``[tool.flwr.federations]`` section.
 
 Local Simulation Example
-~~~~~~~~~~~~~~~~~~~~~~~~
+========================
 
 .. code-block:: toml
 
@@ -172,7 +177,7 @@ Learn more in the `How to Run Simulations
 <https://flower.ai/docs/framework/how-to-run-simulations.html>`_ guide.
 
 Remote Deployment Example
-~~~~~~~~~~~~~~~~~~~~~~~~~
+=========================
 
 You can also configure federations for remote deployment. For example:
 
@@ -197,7 +202,7 @@ Refer to the `deployment documentation <https://flower.ai/docs/framework/deploy.
 for TLS setup and advanced configurations.
 
 Running a Federation
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 To run a specific federation, use the following command:
 
