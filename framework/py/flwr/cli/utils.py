@@ -448,7 +448,7 @@ def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:
 
 
 def get_exclude_pathspec(
-    default_content: Iterable[str], gitignore_content: Optional[bytes]
+    default_content: Iterable[str], gitignore_content: bytes | None
 ) -> pathspec.PathSpec:
     """Get the PathSpec for files to exclude.
 
