@@ -16,7 +16,7 @@
 
 
 import contextvars
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional
 
 import grpc
 
