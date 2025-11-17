@@ -190,15 +190,15 @@ class RecordMaker:
     def get_value(self, dtype: type[T] | str) -> T:
         """Create a value of a given type."""
         ret: Any = None
-        if dtype == bool:
+        if dtype is bool:
             ret = self.rng.random() < 0.5
-        elif dtype == str:
+        elif dtype is str:
             ret = self.get_str(self.rng.randint(10, 100))
-        elif dtype == int:
+        elif dtype is int:
             ret = self.rng.randint(-1 << 63, (1 << 63) - 1)
-        elif dtype == float:
+        elif dtype is float:
             ret = (self.rng.random() - 0.5) * (2.0 ** self.rng.randint(0, 50))
-        elif dtype == bytes:
+        elif dtype is bytes:
             ret = self.randbytes(self.rng.randint(10, 100))
         elif dtype == "uint":
             ret = self.rng.randint(0, (1 << 64) - 1)
