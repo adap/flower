@@ -16,9 +16,10 @@
 
 
 import json
+from collections.abc import Callable
 from contextlib import ExitStack
 from pathlib import Path
-from typing import IO, Annotated, Callable, Optional
+from typing import IO, Annotated
 
 import pathspec
 import requests
@@ -46,7 +47,7 @@ from flwr.supercore.constant import (
 from ..utils import build_pathspec, get_exclude_pathspec, to_bytes
 
 
-def _load_gitignore(root: Path) -> Optional[bytes]:
+def _load_gitignore(root: Path) -> bytes | None:
     """Load gitignore file."""
     gitignore_path = root / ".gitignore"
     if gitignore_path.is_file():
@@ -283,13 +284,13 @@ def publish(
         ),
     ] = Path("."),
     federation: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(
             help="Name of the federation used for login before publishing app."
         ),
     ] = None,
     token: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--token",
             help="Bearer token for Platform API.",
