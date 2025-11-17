@@ -174,7 +174,7 @@ def review(
         m = re.match(APP_VERSION_PATTERN, version)
         if not m:
             typer.secho(
-                "❌ Invalid app version. Expected format: x.x.x (digits only).",
+                "❌ Invalid app version. Expected format: x.y.z (digits only).",
                 fg=typer.colors.RED,
                 err=True,
             )
