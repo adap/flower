@@ -543,14 +543,14 @@ def test__request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) -
     class _FakeResp:
         ok: bool
         status_code: int
-        _json: Optional[dict[str, Any]]
+        _json: dict[str, Any] | None
         text: str
 
         def __init__(
             self,
             ok: bool,
             status: int,
-            json_data: Optional[dict[str, Any]] = None,
+            json_data: dict[str, Any] | None = None,
             text: str = "",
         ) -> None:
             self.ok = ok
@@ -558,13 +558,13 @@ def test__request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) -
             self._json = json_data
             self.text = text
 
-        def json(self) -> Optional[dict[str, Any]]:
+        def json(self) -> dict[str, Any] | None:
             """Return JSON data."""
             return self._json
 
-    def fake_post(url: str, data: Optional[str] = None, **_: Any) -> _FakeResp:
+    def fake_post(url: str, data: dict[str, Any] | None = None, **_: Any) -> _FakeResp:
         # Basic payload sanity check for the success-like cases
-        case_data: Optional[dict[str, Any]] = current_case.get("data")
+        case_data: dict[str, Any] | None = current_case.get("data")
         if isinstance(case_data, dict) and "fake_resp" in case_data:
             assert url.endswith("/hub/fetch-fab")
             assert data is not None
@@ -596,8 +596,8 @@ def test__request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) -
                 assert app_id in msg
         else:
             # Expect a (fab_url, verifications) tuple
-            result2: tuple[str, list[dict[str, str]] | None] = (
-                _request_download_link(app_id, ctx)
+            result2: tuple[str, list[dict[str, str]] | None] = _request_download_link(
+                app_id, ctx
             )
             assert case["assert"](result2), f"Assertion failed for {case['name']}"
 
