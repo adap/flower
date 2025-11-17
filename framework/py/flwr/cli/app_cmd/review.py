@@ -34,7 +34,7 @@ from flwr.supercore.constant import (
     PLATFORM_API_URL,
 )
 from flwr.supercore.primitives.asymmetric_ed25519 import (
-    create_signed_message,
+    create_message_to_sign,
     sign_message,
 )
 
@@ -96,11 +96,11 @@ def _sign_fab(
     """Sign the given FAB hash bytes."""
     # Get current timestamp
     timestamp = int(time.time())
-    signed_message = create_signed_message(
+    message_to_sign = create_message_to_sign(
         hashlib.sha256(fab_bytes).digest(),
         timestamp,
     )
-    return sign_message(private_key, signed_message), timestamp
+    return sign_message(private_key, message_to_sign), timestamp
 
 
 def _submit_review(
