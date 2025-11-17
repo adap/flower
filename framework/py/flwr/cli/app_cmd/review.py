@@ -143,7 +143,7 @@ def review(
     app_name: Annotated[
         str,
         typer.Argument(
-            help="App identifier (e.g., '@user/app==1.0.0'). "
+            help="App identifier (e.g., '@user/app' or '@user/app==1.0.0'). "
             "Version is optional; defaults to the latest."
         ),
     ],
