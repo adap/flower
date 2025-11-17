@@ -171,7 +171,7 @@ def review(
         app_id, app_version = app_name.split("==")
 
         # Validate app version format
-        m = re.match(APP_VERSION_PATTERN, version)
+        m = re.match(APP_VERSION_PATTERN, app_version)
         if not m:
             typer.secho(
                 "❌ Invalid app version. Expected format: x.y.z (digits only).",
@@ -181,7 +181,7 @@ def review(
             raise typer.Exit(code=1)
     else:
         app_id = app_name
-        version = None
+        app_version = None
         typer.secho(
             "No app version specified. Downloading the latest version.",
             fg=typer.colors.YELLOW,
@@ -200,7 +200,7 @@ def review(
     # Download FAB
     typer.secho("Downloading FAB... ", fg=typer.colors.BLUE)
     url = f"{PLATFORM_API_URL}/hub/fetch-fab"
-    presigned_url = request_download_link(app_id, version, url, "fab_url")
+    presigned_url = request_download_link(app_id, app_version, url, "fab_url")
     fab_bytes = _download_fab(presigned_url)
 
     # Unpack FAB
@@ -212,7 +212,7 @@ def review(
     version_pattern = re.compile(r"\b(\d+\.\d+\.\d+)\b")
     match = version_pattern.search(str(review_app_path))
     assert match is not None
-    version = match.group(1)
+    app_version = match.group(1)
 
     # Prompt to ask for sign
     typer.secho(
@@ -248,4 +248,4 @@ def review(
     signature, signed_at = _sign_fab(fab_bytes, private_key)
 
     # Submit review
-    _submit_review(app_id, version, signature, signed_at, token)
+    _submit_review(app_id, app_version, signature, signed_at, token)
