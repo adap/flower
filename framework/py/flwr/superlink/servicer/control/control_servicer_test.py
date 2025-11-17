@@ -559,7 +559,7 @@ def test__request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) -
         def json(self) -> dict[str, Any] | None:
             """Return JSON data."""
             return self._json
-        
+
     def fake_post(url: str, data: str | None = None, **_: Any) -> _FakeResp:
         # Basic payload sanity check for the success-like cases
         case_data: dict[str, Any] | None = current_case.get("data")
