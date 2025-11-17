@@ -17,8 +17,8 @@
 Papers: https://arxiv.org/abs/1712.07557, https://arxiv.org/abs/1710.06963
 """
 
+
 from abc import ABC
-from collections import OrderedDict
 from collections.abc import Iterable
 from logging import INFO, WARNING
 
@@ -111,14 +111,12 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
         )
 
         return ArrayRecord(
-            OrderedDict(
-                {
-                    k: Array(v)
-                    for k, v in zip(
-                        aggregated_arrays.keys(), aggregated_ndarrays, strict=True
-                    )
-                }
-            )
+            {
+                k: Array(v)
+                for k, v in zip(
+                    aggregated_arrays.keys(), aggregated_ndarrays, strict=True
+                )
+            }
         )
 
     def configure_evaluate(
@@ -218,9 +216,7 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
                 )
                 # Replace content while preserving keys
                 reply.content[arr_name] = ArrayRecord(
-                    OrderedDict(
-                        zip(record.keys(), map(Array, reply_ndarrays), strict=True)
-                    )
+                    dict(zip(record.keys(), map(Array, reply_ndarrays), strict=True))
                 )
             log(
                 INFO,

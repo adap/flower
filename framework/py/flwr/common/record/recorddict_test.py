@@ -17,7 +17,6 @@
 
 import json
 import pickle
-from collections import OrderedDict
 from collections.abc import Callable
 from copy import deepcopy
 from typing import cast
@@ -131,9 +130,9 @@ def test_parameters_to_arrayrecord_and_back(
 def test_set_parameters_while_keeping_intputs() -> None:
     """Test keep_input functionality in ArrayRecord."""
     # Adding parameters to a record that doesn't erase entries in the input `array_dict`
-    array_dict = OrderedDict(
-        {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
-    )
+    array_dict = {
+        str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())
+    }
     arr_record = ArrayRecord(array_dict, keep_input=True)
 
     # Creating a second ArrayRecord passing the same `array_dict` (not erased)
@@ -147,9 +146,9 @@ def test_set_parameters_while_keeping_intputs() -> None:
 def test_set_parameters_with_correct_types() -> None:
     """Test adding dictionary of Arrays to ArrayRecord."""
     arr_record = ArrayRecord()
-    array_dict = OrderedDict(
-        {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
-    )
+    array_dict = {
+        str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())
+    }
     arr_record.update(array_dict)
 
 
@@ -198,12 +197,10 @@ def test_set_metrics_to_metricrecord_with_correct_types(
     labels = [1, 2.0]
     arrays = get_ndarrays()
 
-    my_metrics = OrderedDict(
-        {
-            key_type(label): value_fn(arr)
-            for label, arr in zip(labels, arrays, strict=True)
-        }
-    )
+    my_metrics = {
+        key_type(label): value_fn(arr)
+        for label, arr in zip(labels, arrays, strict=True)
+    }
 
     # Add metric
     m_record.update(my_metrics)
@@ -254,12 +251,10 @@ def test_set_metrics_to_metricrecord_with_incorrect_types(
     labels = [1, 2.0]
     arrays = get_ndarrays()
 
-    my_metrics = OrderedDict(
-        {
-            key_type(label): value_fn(arr)
-            for label, arr in zip(labels, arrays, strict=True)
-        }
-    )
+    my_metrics = {
+        key_type(label): value_fn(arr)
+        for label, arr in zip(labels, arrays, strict=True)
+    }
 
     with pytest.raises(TypeError):
         m_record.update(my_metrics)  # type: ignore
@@ -324,13 +319,10 @@ def test_set_configs_to_configrecord_with_correct_types(
     labels = [1, 2.0]
     arrays = get_ndarrays()
 
-    my_configs = OrderedDict(
-        {
-            key_type(label): value_fn(arr)
-            for label, arr in zip(labels, arrays, strict=True)
-        }
-    )
-
+    my_configs = {
+        key_type(label): value_fn(arr)
+        for label, arr in zip(labels, arrays, strict=True)
+    }
     c_record = ConfigRecord(my_configs)
 
     # check values are actually there
@@ -373,13 +365,10 @@ def test_set_configs_to_configrecord_with_incorrect_types(
     labels = [1, 2.0]
     arrays = get_ndarrays()
 
-    my_configs = OrderedDict(
-        {
-            key_type(label): value_fn(arr)
-            for label, arr in zip(labels, arrays, strict=True)
-        }
-    )
-
+    my_configs = {
+        key_type(label): value_fn(arr)
+        for label, arr in zip(labels, arrays, strict=True)
+    }
     with pytest.raises(TypeError):
         c_record.update(my_configs)  # type: ignore
 
@@ -391,7 +380,7 @@ def test_count_bytes_metricrecord() -> None:
     bytes_in_dict += 4  # represnting the keys
 
     m_record = MetricRecord()
-    m_record.update(OrderedDict(data))
+    m_record.update(data)  # type: ignore
     record_bytest_count = m_record.count_bytes()
     assert bytes_in_dict == record_bytest_count
 
@@ -417,7 +406,7 @@ def test_count_bytes_configrecord() -> None:
     bytes_in_dict = int(bytes_in_dict)
 
     c_record = ConfigRecord()
-    c_record.update(OrderedDict(data))
+    c_record.update(data)  # type: ignore
 
     record_bytest_count = c_record.count_bytes()
     assert bytes_in_dict == record_bytest_count
@@ -490,9 +479,7 @@ def test_recorddict_set_get_del_item() -> None:
 def test_constructor_with_deprecated_arguments() -> None:
     """Test constructor with deprecated arguments."""
     # Prepare
-    array_rec = ArrayRecord(
-        OrderedDict({"weights": Array("mock", (2, 3), "mock", b"123")})
-    )
+    array_rec = ArrayRecord({"weights": Array("mock", (2, 3), "mock", b"123")})
     metric_rec = MetricRecord({"accuracy": 0.95})
     config_rec = ConfigRecord({"lr": 0.01})
 
