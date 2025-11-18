@@ -47,4 +47,6 @@ class NoOpFederationManager(FederationManager):
 
     def get_federations(self, flwr_aid: str) -> list[str]:
         """Get federations of which the account is a member."""
+        if flwr_aid != NOOP_FLWR_AID:
+            return []
         return [NOOP_FEDERATION]
