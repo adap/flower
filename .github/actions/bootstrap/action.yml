@@ -9,7 +9,7 @@ inputs:
     default: 25.3
   setuptools-version:
     description: "Version of setuptools to be installed using pip"
-    default: 78.1.1
+    default: 80.9.0
   poetry-version:
     description: "Version of poetry to be installed using pip"
     default: 2.1.3
