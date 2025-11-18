@@ -24,6 +24,7 @@ from typing import Any, NoReturn
 
 from flwr.common import EventType, event
 from flwr.common.version import package_version
+from flwr.supercore.constant import FORCE_EXIT_TIMEOUT_SECONDS
 
 from ..logger import log
 from .exit_code import EXIT_CODE_HELP
@@ -91,7 +92,7 @@ def flwr_exit(
 
     # Start a daemon thread to force exit if graceful exit fails
     def force_exit() -> None:
-        time.sleep(5)
+        time.sleep(FORCE_EXIT_TIMEOUT_SECONDS)
         os._exit(sys_exit_code)
 
     threading.Thread(target=force_exit, daemon=True).start()
