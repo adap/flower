@@ -123,4 +123,7 @@ message ListFederationsRequest {}
 message ListFederationsResponse { repeated Federation federations = 1; }
 
 message ShowFederationRequest { string federation_name = 1; }
-message ShowFederationResponse { Federation federation = 1; }
+message ShowFederationResponse {
+  Federation federation = 1;
+  string now = 2;
+}
