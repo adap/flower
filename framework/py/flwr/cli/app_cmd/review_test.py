@@ -19,16 +19,14 @@ from __future__ import annotations
 
 import base64
 import time
-from pathlib import Path
 from typing import Any
 
 import pytest
 import requests
 import typer
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from .review import _download_fab, _load_private_key, _sign_fab, _submit_review
+from .review import _download_fab, _sign_fab, _submit_review
 
 
 def test_download_fab_success_and_failure(
@@ -72,30 +70,6 @@ def test_download_fab_success_and_failure(
     monkeypatch.setattr(requests, "get", boom, raising=True)
     with pytest.raises(typer.Exit) as exc:
         _download_fab("https://example.ai/fab")
-    assert exc.value.exit_code == 1
-
-
-def test_load_private_key_valid_and_invalid(tmp_path: Path) -> None:
-    """Test _load_private_key() correctly loads a valid Ed25519 key and exits on invalid
-    data."""
-    # Generate a valid ed25519 private key in OpenSSH format
-    key = ed25519.Ed25519PrivateKey.generate()
-    pem = key.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.OpenSSH,
-        encryption_algorithm=serialization.NoEncryption(),
-    )
-    key_path = tmp_path / "id_ed25519"
-    key_path.write_bytes(pem)
-
-    loaded = _load_private_key(key_path)
-    assert isinstance(loaded, ed25519.Ed25519PrivateKey)
-
-    # Invalid content should raise Exit
-    bad_path = tmp_path / "bad_key"
-    bad_path.write_bytes(b"not a key")
-    with pytest.raises(typer.Exit) as exc:
-        _load_private_key(bad_path)
     assert exc.value.exit_code == 1
 
 

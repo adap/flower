@@ -44,7 +44,7 @@ from ..install import install_from_fab
 from ..utils import request_download_link, validate_credentials_content
 
 
-# pylint: disable-next=too-many-locals
+# pylint: disable-next=too-many-locals, too-many-statements
 def review(
     app_spec: Annotated[
         str,
