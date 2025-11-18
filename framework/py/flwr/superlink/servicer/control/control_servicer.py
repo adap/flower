@@ -538,7 +538,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
 
         # Ensure flwr_aid is a member of the requested federation
-        federation = request.federation
+        federation = request.federation_name
         if federation not in federations:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
@@ -556,7 +556,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
         )
-        raise ShowFederationResponse(federation=federation_proto, now=now().isoformat())
+        return ShowFederationResponse(
+            federation=federation_proto, now=now().isoformat()
+        )
 
 
 def _create_list_runs_response(

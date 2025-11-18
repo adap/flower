@@ -78,13 +78,14 @@ def show(  # pylint: disable=R0914, R0913, R0917
             federation, config
         )
         exit_if_no_address(federation_config, "federation show")
+        federation_name = federation_config.get("federation", "")
         channel = None
         try:
             auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
             channel = init_channel(app, federation_config, auth_plugin)
             stub = ControlStub(channel)
-            typer.echo(f"📄 Showing federation for {federation}...")
-            members, nodes, runs = _show_federation(stub, federation)
+            typer.echo(f"📄 Showing '{federation_name}' federation ...")
+            members, nodes, runs = _show_federation(stub, federation_name)
             restore_output()
             if output_format == CliOutputFormat.JSON:
                 Console().print_json(data=_to_json(members, nodes, runs))
@@ -118,7 +119,7 @@ def _show_federation(
     """Show federation details."""
     with flwr_cli_grpc_exc_handler():
         res: ShowFederationResponse = stub.ShowFederation(
-            ShowFederationRequest(name=federation)
+            ShowFederationRequest(federation_name=federation)
         )
 
     fed_proto = res.federation
