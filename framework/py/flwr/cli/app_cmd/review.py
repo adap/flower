@@ -28,6 +28,7 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from flwr.common.config import get_flwr_dir
+from flwr.common.constant import CREDENTIALS_DIR, FLWR_DIR
 from flwr.supercore.constant import (
     APP_ID_PATTERN,
     APP_VERSION_PATTERN,
@@ -40,7 +41,7 @@ from flwr.supercore.primitives.asymmetric_ed25519 import (
 )
 
 from ..install import install_from_fab
-from ..utils import request_download_link
+from ..utils import request_download_link, validate_credentials_content
 
 
 # pylint: disable-next=too-many-locals
@@ -52,26 +53,44 @@ def review(
             "Version is optional; defaults to the latest."
         ),
     ],
-    token: Annotated[
+    app_dir_login: Annotated[
+        Path,
+        typer.Argument(
+            help="Project directory to used for login before reviewing app."
+        ),
+    ] = Path("."),
+    federation: Annotated[
         str | None,
-        typer.Option(
-            "--token",
-            help="Bearer token for Platform API.",
+        typer.Argument(
+            help="Name of the federation used for login before reviewing app."
         ),
     ] = None,
 ) -> None:
     """Download a FAB for <APP-ID>, unpack it for manual review, and upon confirmation
     sign & submit the review to the Platform."""
-    if not token:
+    if not app_dir_login or not federation:
         typer.secho(
-            "❌ Missing authentication token. "
-            "Please run `flwr login` to generate one.",
+            "❌ Missing project directory or federation used for login.",
             fg=typer.colors.RED,
             err=True,
         )
         raise typer.Exit(code=1)
 
-    # Validate version format
+    # Load and validate credentials
+    creds_path = (
+        app_dir_login.absolute() / FLWR_DIR / CREDENTIALS_DIR / f"{federation}.json"
+    )
+    if not creds_path.is_file():
+        typer.secho(
+            "❌ Please log in before reviewing app.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    token = validate_credentials_content(creds_path)
+
+    # Validate app version format
     if "==" in app_spec:
         app_id, app_version = app_spec.split("==")
 
