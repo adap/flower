@@ -1654,6 +1654,11 @@ class StateTest(CoreStateTest):
         unique_int = next(num for num in range(0, 1) if num not in {run_id})
         assert state.get_federation_options(run_id=unique_int) is None
 
+    def test_set_linkstate_of_federation_manager(self) -> None:
+        """Test that setting the LinkState of the FederationManager works."""
+        state: LinkState = self.state_factory()
+        assert state.federation_manager.linkstate is state
+
 
 def create_ins_message(
     src_node_id: int,
