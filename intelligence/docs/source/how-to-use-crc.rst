@@ -1,11 +1,13 @@
-Use Flower Confidential Remote Compute
-======================================
+########################################
+ Use Flower Confidential Remote Compute
+########################################
 
 To use Flower Confidential Remote Compute you must first subscribe from the `Flower
 Intelligence page <https://flower.ai/intelligence>`_.
 
-Obtain your API key
--------------------
+*********************
+ Obtain your API key
+*********************
 
 Once you are connected and have a valid subscription, you can navigate to the `Projects
 page <https://flower.ai/intelligence/projects>`_.
@@ -97,8 +99,9 @@ process:
    .. image:: /_static/signup/api-key-created-dashboard.png
        :alt: API keys dashboard with key
 
-Use your API key
-----------------
+******************
+ Use your API key
+******************
 
 Once all of this is done, you can use your API key in your application code to enable
 Flower Confidential Remote Compute.

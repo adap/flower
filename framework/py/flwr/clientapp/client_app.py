@@ -354,7 +354,7 @@ class ClientApp:
         """
 
         def lifespan_decorator(
-            lifespan_fn: Callable[[Context], Iterator[None]]
+            lifespan_fn: Callable[[Context], Iterator[None]],
         ) -> Callable[[Context], Iterator[None]]:
             """Register the lifespan fn with the ServerApp object."""
 

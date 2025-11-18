@@ -2,19 +2,22 @@
 .. meta::
     :description: Learn how to install Flower, the Python-based federated learning framework, using PyPI, conda, or Docker in this easy-to-follow guide.
 
-Install Flower
-==============
+################
+ Install Flower
+################
 
-Python version
---------------
+****************
+ Python version
+****************
 
 Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_.
 
-Install stable release
-----------------------
+************************
+ Install stable release
+************************
 
 Using pip
-~~~~~~~~~
+=========
 
 Stable releases are available on `PyPI <https://pypi.org/project/flwr/>`_:
 
@@ -30,7 +33,7 @@ the ``simulation`` extra:
     python -m pip install "flwr[simulation]"
 
 Using conda (or mamba)
-~~~~~~~~~~~~~~~~~~~~~~
+======================
 
 Flower can also be installed from the ``conda-forge`` channel.
 
@@ -55,8 +58,9 @@ or with ``mamba``:
 
     mamba install flwr
 
-Verify installation
--------------------
+*********************
+ Verify installation
+*********************
 
 The following command can be used to verify if Flower was successfully installed. If
 everything worked, it should print the version of Flower to the command line:
@@ -67,16 +71,17 @@ everything worked, it should print the version of Flower to the command line:
     python -c "import flwr;print(flwr.__version__)"
     |stable_flwr_version|
 
-Advanced installation options
------------------------------
+*******************************
+ Advanced installation options
+*******************************
 
 Install via Docker
-~~~~~~~~~~~~~~~~~~
+==================
 
 :doc:`Run Flower using Docker <docker/index>`
 
 Install pre-release
-~~~~~~~~~~~~~~~~~~~
+===================
 
 New (possibly unstable) versions of Flower are sometimes available as pre-release
 versions (alpha, beta, release candidate) before the stable release happens:
@@ -93,7 +98,7 @@ installed with the ``simulation`` extra:
     python -m pip install -U --pre 'flwr[simulation]'
 
 Install nightly release
-~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 The latest (potentially unstable) changes in Flower are available as nightly releases:
 

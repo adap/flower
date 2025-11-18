@@ -18,7 +18,7 @@ let package = Package(
     .package(url: "https://github.com/ml-explore/mlx-swift", from: "0.12.1"),
     .package(url: "https://github.com/huggingface/swift-transformers", from: "1.0.0"),
     .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.0.0"),
-    .package(url: "https://github.com/ml-explore/mlx-swift-examples/", branch: "main"),
+    .package(url: "https://github.com/ml-explore/mlx-swift-lm/", .upToNextMinor(from: "2.29.1")),
     .package(url: "https://github.com/apple/swift-crypto.git", .upToNextMajor(from: "3.10.1")),
   ],
   targets: [
@@ -35,7 +35,7 @@ let package = Package(
         .product(name: "MLXLinalg", package: "mlx-swift"),
         .product(name: "Transformers", package: "swift-transformers"),
         .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
-        .product(name: "MLXLLM", package: "mlx-swift-examples"),
+        .product(name: "MLXLLM", package: "mlx-swift-lm"),
         .product(name: "Crypto", package: "swift-crypto"),
       ],
       path: "intelligence/swift/src"

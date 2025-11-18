@@ -1,12 +1,14 @@
-Good first contributions
-========================
+##########################
+ Good first contributions
+##########################
 
 We welcome contributions to Flower! However, it is not always easy to know where to
 start. We therefore put together a few recommendations on where to start to increase
 your chances of getting your PR accepted into the Flower codebase.
 
-Where to start
---------------
+****************
+ Where to start
+****************
 
 In general, it is easier to get PR's accepted if they only touch non-core areas of the
 codebase. Good candidates to get started are:
@@ -17,8 +19,9 @@ codebase. Good candidates to get started are:
 - Baselines: See below.
 - Examples: See below.
 
-Flower Baselines
-----------------
+******************
+ Flower Baselines
+******************
 
 If you are not familiar with Flower Baselines, please check our `contributing guide for
 baselines <https://flower.ai/docs/baselines/how-to-contribute-baselines.html>`_.
@@ -31,8 +34,9 @@ assignees, feel free to assign it to yourself and get started!
 If you don't find the baseline you'd like to work on, be sure to open a new issue with
 the baseline request template!
 
-Usage examples
---------------
+****************
+ Usage examples
+****************
 
 We wish we had more time to write usage examples because they help users to get started
 with building what they want. If you notice any missing examples that could help others,

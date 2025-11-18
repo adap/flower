@@ -32,8 +32,9 @@
 
 .. _strategy_link: ref-api/flwr.serverapp.Strategy.html
 
-Quickstart scikit-learn
-=======================
+#########################
+ Quickstart scikit-learn
+#########################
 
 In this federated learning tutorial we will learn how to train a Logistic Regression on
 MNIST using Flower and scikit-learn. It is recommended to create a virtual environment
@@ -179,8 +180,9 @@ in ``pyproject.toml`` like this:
 What follows is an explanation of each component in the project you just created:
 dataset partition, the model, defining the ``ClientApp`` and defining the ``ServerApp``.
 
-The Data
---------
+**********
+ The Data
+**********
 
 This tutorial uses |flowerdatasets|_ to easily download and partition the `MNIST
 <https://huggingface.co/datasets/ylecun/mnist>`_ dataset. In this example you'll make
@@ -204,8 +206,9 @@ function to create dataloaders with the data that correspond to their data parti
     X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
     y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
 
-The Model
----------
+***********
+ The Model
+***********
 
 We define the |logisticregression|_ model from scikit-learn in the ``get_model()``
 function:
@@ -219,8 +222,9 @@ function:
             warm_start=True,
         )
 
-The ClientApp
--------------
+***************
+ The ClientApp
+***************
 
 The main changes we have to make to use ``Scikit-learn`` with ``Flower`` have to do with
 converting the |arrayrecord_link|_ received in the |message_link|_ into numpy ndarrays
@@ -318,8 +322,9 @@ the local validation set. It returns a ``MetricRecord`` containing the evaluatio
 and accuracy and does not include the model weights, since they are not modified during
 evaluation.
 
-The ServerApp
--------------
+***************
+ The ServerApp
+***************
 
 To construct a |serverapp_link|_ we define its ``@app.main()`` method. This method
 receive as input arguments:
