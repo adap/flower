@@ -19,7 +19,7 @@ Adaptive Federated Optimization using Adagrad.
 Paper: arxiv.org/abs/2003.00295
 """
 
-from collections import OrderedDict
+
 from collections.abc import Callable, Iterable
 
 import numpy as np
@@ -153,6 +153,6 @@ class FedAdagrad(FedOpt):
         }
 
         return (
-            ArrayRecord(OrderedDict({k: Array(v) for k, v in new_arrays.items()})),
+            ArrayRecord({k: Array(v) for k, v in new_arrays.items()}),
             aggregated_metrics,
         )

@@ -1,5 +1,6 @@
-FAQ
-===
+#####
+ FAQ
+#####
 
 This page collects answers to commonly asked questions about Federated Learning with
 Flower.

@@ -40,8 +40,9 @@
 
 .. _result_link: ref-api/flwr.serverapp.strategy.Result.html
 
-Quickstart MLX
-==============
+################
+ Quickstart MLX
+################
 
 In this federated learning tutorial, we will learn how to train a simple MLP on MNIST
 using Flower and MLX. It is recommended to create a virtual environment and run
@@ -176,8 +177,9 @@ What follows is an explanation of each component in the project you just created
 dataset partitioning, the model, defining the ``ClientApp``, and defining the
 ``ServerApp``.
 
-The Data
---------
+**********
+ The Data
+**********
 
 We will use `Flower Datasets <https://flower.ai/docs/datasets/>`_ to easily download and
 partition the `MNIST` dataset. In this example, you'll make use of the `IidPartitioner
@@ -217,8 +219,9 @@ Flower Datasets:
 
     train_images, train_labels, test_images, test_labels = map(mx.array, data)
 
-The Model
----------
+***********
+ The Model
+***********
 
 We define the model as in the `centralized MLX example
 <https://github.com/ml-explore/mlx-examples/tree/main/mnist>`_, it's a simple MLP:
@@ -262,7 +265,7 @@ We also define some utility functions to test our model and to iterate over batc
             yield X[ids], y[ids]
 
 The ClientApp
-~~~~~~~~~~~~~
+=============
 
 The main changes we have to make to use `MLX` with `Flower` will be found in the
 ``get_params()`` and ``set_params()`` functions. MLX doesn't provide an easy way to
@@ -420,10 +423,11 @@ by the server to perform weighted averaging of the metrics.
         return Message(content=content, reply_to=msg)
 
 The ServerApp
-+++++++++++++
-
-The ServerApp
 -------------
+
+***************
+ The ServerApp
+***************
 
 To construct a |serverapp_link|_, we define its ``@app.main()`` method. This method
 receives as input arguments:

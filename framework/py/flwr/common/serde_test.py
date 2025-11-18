@@ -17,7 +17,6 @@
 
 import random
 import string
-from collections import OrderedDict
 from collections.abc import Callable
 from typing import Any, TypeVar, cast
 
@@ -190,15 +189,15 @@ class RecordMaker:
     def get_value(self, dtype: type[T] | str) -> T:
         """Create a value of a given type."""
         ret: Any = None
-        if dtype == bool:
+        if dtype is bool:
             ret = self.rng.random() < 0.5
-        elif dtype == str:
+        elif dtype is str:
             ret = self.get_str(self.rng.randint(10, 100))
-        elif dtype == int:
+        elif dtype is int:
             ret = self.rng.randint(-1 << 63, (1 << 63) - 1)
-        elif dtype == float:
+        elif dtype is float:
             ret = (self.rng.random() - 0.5) * (2.0 ** self.rng.randint(0, 50))
-        elif dtype == bytes:
+        elif dtype is bytes:
             ret = self.randbytes(self.rng.randint(10, 100))
         elif dtype == "uint":
             ret = self.rng.randint(0, (1 << 64) - 1)
@@ -237,9 +236,7 @@ class RecordMaker:
     def array_record(self) -> ArrayRecord:
         """Create a ArrayRecord."""
         num_arrays = self.rng.randint(1, 5)
-        arrays = OrderedDict(
-            [(self.get_str(), self.array()) for i in range(num_arrays)]
-        )
+        arrays = {self.get_str(): self.array() for i in range(num_arrays)}
         return ArrayRecord(arrays, keep_input=False)
 
     def metric_record(self) -> MetricRecord:

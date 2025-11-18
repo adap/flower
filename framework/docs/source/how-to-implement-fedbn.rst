@@ -2,8 +2,9 @@
 .. meta::
     :description: Learn to build a federated ML workload using Flower with FedBN for non-IID data. Train a CNN with PyTorch on CIFAR-10 with minimal changes from the Quickstart.
 
-Implement FedBN
-===============
+#################
+ Implement FedBN
+#################
 
 This tutorial will show you how to use Flower to build a federated version of an
 existing machine learning workload with `FedBN <https://github.com/med-air/FedBN>`_, a
@@ -12,8 +13,9 @@ Convolutional Neural Network (with Batch Normalization layers) on the CIFAR-10 d
 When applying FedBN, only minor changes are needed compared to :doc:`Quickstart PyTorch
 <tutorial-quickstart-pytorch>`.
 
-Model
------
+*******
+ Model
+*******
 
 A full introduction to federated learning with PyTorch and Flower can be found in
 :doc:`Quickstart PyTorch <tutorial-quickstart-pytorch>`. This how-to guide changes only
@@ -55,8 +57,9 @@ works:
 
 So far this should all look fairly familiar if you've used Flower with PyTorch before.
 
-FedBN
------
+*******
+ FedBN
+*******
 
 To adopt FedBN, we revise the ``train`` method in ``ClientApp``. The batch normalization
 parameters are excluded from model state dict when sending to or receiving from the
@@ -99,8 +102,9 @@ To test the new approach, run the project again:
 
 Your PyTorch project now runs federated learning with FedBN. Congratulations!
 
-Next Steps
-----------
+************
+ Next Steps
+************
 
 The example is certainly over-simplified since all ``ClientApp``\s load the exact same
 dataset. This isn't realistic. You now have the tools to explore this topic further. How
