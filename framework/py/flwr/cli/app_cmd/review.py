@@ -43,6 +43,122 @@ from ..install import install_from_fab
 from ..utils import request_download_link
 
 
+# pylint: disable-next=too-many-locals
+def review(
+    app_spec: Annotated[
+        str,
+        typer.Argument(
+            help="App identifier (e.g., '@account/app' or '@account/app==1.0.0'). "
+            "Version is optional; defaults to the latest."
+        ),
+    ],
+    token: Annotated[
+        str | None,
+        typer.Option(
+            "--token",
+            help="Bearer token for Platform API.",
+        ),
+    ] = None,
+) -> None:
+    """Download a FAB for <APP-ID>, unpack it for manual review, and upon confirmation
+    sign & submit the review to the Platform."""
+    if not token:
+        typer.secho(
+            "❌ Missing authentication token. "
+            "Please run `flwr login` to generate one.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Validate version format
+    if "==" in app_spec:
+        app_id, app_version = app_spec.split("==")
+
+        # Validate app version format
+        m = re.match(APP_VERSION_PATTERN, app_version)
+        if not m:
+            typer.secho(
+                "❌ Invalid app version. Expected format: x.y.z (digits only).",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(code=1)
+    else:
+        app_id = app_spec
+        app_version = None
+
+    # Validate app_id format
+    m = re.match(APP_ID_PATTERN, app_id)
+    if not m:
+        typer.secho(
+            "❌ Invalid remote app ID. Expected format: '@account/app'.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Download FAB
+    typer.secho("Downloading FAB... ", fg=typer.colors.BLUE)
+    url = f"{PLATFORM_API_URL}/hub/fetch-fab"
+    presigned_url = request_download_link(app_id, app_version, url, "fab_url")
+    fab_bytes = _download_fab(presigned_url)
+
+    # Unpack FAB
+    typer.secho("Unpacking FAB... ", fg=typer.colors.BLUE)
+    review_dir = _create_review_dir()
+    review_app_path = install_from_fab(fab_bytes, review_dir)
+
+    # Extract app version
+    version_pattern = re.compile(r"\b(\d+\.\d+\.\d+)\b")
+    match = version_pattern.search(str(review_app_path))
+    assert match is not None
+    app_version = match.group(1)
+
+    # Prompt to ask for sign
+    typer.secho(
+        f"""
+    Review the unpacked app in the following directory:
+
+        {typer.style(review_app_path, fg=typer.colors.GREEN, bold=True)}
+
+    If you have reviewed the app and want to continue to sign it,
+    type {typer.style("SIGN", fg=typer.colors.GREEN, bold=True)} or abort with CTRL+C.
+    """,
+        fg=typer.colors.BLUE,
+    )
+
+    confirmation = typer.prompt("Type SIGN to continue").strip()
+    if confirmation.upper() != "SIGN":
+        typer.secho("Aborted (user did not type SIGN).", fg=typer.colors.YELLOW)
+        raise typer.Exit(code=130)
+
+    # Ask for private key path
+    key_path_str = typer.prompt(
+        "Please specify the path of Ed25519 OpenSSH private key for signing"
+    )
+    key_path = Path(key_path_str).expanduser().resolve()
+    if not key_path.is_file():
+        typer.secho(
+            f"❌ Private key not found: {key_path}", fg=typer.colors.RED, err=True
+        )
+        raise typer.Exit(code=1)
+
+    # Load private key and sign FAB
+    try:
+        private_key = load_private_key(key_path)
+    except (OSError, ValueError, UnsupportedAlgorithm) as e:
+        typer.secho(
+            f"❌ Failed to load the private key: {e}", fg=typer.colors.RED, err=True
+        )
+        raise typer.Exit(code=1) from e
+
+    signature, signed_at = _sign_fab(fab_bytes, private_key)
+
+    # Submit review
+    _submit_review(app_id, app_version, signature, signed_at, token)
+
+
 def _create_review_dir() -> Path:
     """Create a directory for reviewing code."""
     home = get_flwr_dir()
@@ -112,119 +228,3 @@ def _submit_review(
         msg += f": {resp.text}"
     typer.secho(msg, fg=typer.colors.RED, err=True)
     raise typer.Exit(code=1)
-
-
-# pylint: disable-next=too-many-locals
-def review(
-    app_ref: Annotated[
-        str,
-        typer.Argument(
-            help="App identifier (e.g., '@user/app' or '@user/app==1.0.0'). "
-            "Version is optional; defaults to the latest."
-        ),
-    ],
-    token: Annotated[
-        str | None,
-        typer.Option(
-            "--token",
-            help="Bearer token for Platform API.",
-        ),
-    ] = None,
-) -> None:
-    """Download a FAB for <APP-ID>, unpack it for manual review, and upon confirmation
-    sign & submit the review to the Platform."""
-    if not token:
-        typer.secho(
-            "❌ Missing authentication token. "
-            "Please run `flwr login` to generate one.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
-
-    # Validate version format
-    if "==" in app_ref:
-        app_id, app_version = app_ref.split("==")
-
-        # Validate app version format
-        m = re.match(APP_VERSION_PATTERN, app_version)
-        if not m:
-            typer.secho(
-                "❌ Invalid app version. Expected format: x.y.z (digits only).",
-                fg=typer.colors.RED,
-                err=True,
-            )
-            raise typer.Exit(code=1)
-    else:
-        app_id = app_ref
-        app_version = None
-
-    # Validate app_id format
-    m = re.match(APP_ID_PATTERN, app_id)
-    if not m:
-        typer.secho(
-            "❌ Invalid remote app ID. Expected format: '@user/app'.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
-
-    # Download FAB
-    typer.secho("Downloading FAB... ", fg=typer.colors.BLUE)
-    url = f"{PLATFORM_API_URL}/hub/fetch-fab"
-    presigned_url = request_download_link(app_id, app_version, url, "fab_url")
-    fab_bytes = _download_fab(presigned_url)
-
-    # Unpack FAB
-    typer.secho("Unpacking FAB... ", fg=typer.colors.BLUE)
-    review_dir = _create_review_dir()
-    review_app_path = install_from_fab(fab_bytes, review_dir)
-
-    # Extract app version
-    version_pattern = re.compile(r"\b(\d+\.\d+\.\d+)\b")
-    match = version_pattern.search(str(review_app_path))
-    assert match is not None
-    app_version = match.group(1)
-
-    # Prompt to ask for sign
-    typer.secho(
-        f"""
-    Review the unpacked app in the following directory:
-
-        {typer.style(review_app_path, fg=typer.colors.GREEN, bold=True)}
-
-    If you have reviewed the app and want to continue to sign it,
-    type {typer.style("SIGN", fg=typer.colors.GREEN, bold=True)} or abort with CTRL+C.
-    """,
-        fg=typer.colors.BLUE,
-    )
-
-    confirmation = typer.prompt("Type SIGN to continue").strip()
-    if confirmation.upper() != "SIGN":
-        typer.secho("Aborted (user did not type SIGN).", fg=typer.colors.YELLOW)
-        raise typer.Exit(code=130)
-
-    # Ask for private key path
-    key_path_str = typer.prompt(
-        "Please specify the path of Ed25519 OpenSSH private key for signing"
-    )
-    key_path = Path(key_path_str).expanduser().resolve()
-    if not key_path.is_file():
-        typer.secho(
-            f"❌ Private key not found: {key_path}", fg=typer.colors.RED, err=True
-        )
-        raise typer.Exit(code=1)
-
-    # Load private key and sign FAB
-    try:
-        private_key = load_private_key(key_path)
-    except (OSError, ValueError, UnsupportedAlgorithm) as e:
-        typer.secho(
-            f"❌ Failed to load the private key: {e}", fg=typer.colors.RED, err=True
-        )
-        raise typer.Exit(code=1) from e
-
-    signature, signed_at = _sign_fab(fab_bytes, private_key)
-
-    # Submit review
-    _submit_review(app_id, app_version, signature, signed_at, token)
