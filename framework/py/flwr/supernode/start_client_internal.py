@@ -239,7 +239,7 @@ def start_client_internal(
         ) = conn
         # Store node_id in state
         state.set_node_id(node_id)
-        log(INFO, "Node ID: %s", node_id)
+        log(INFO, "SuperNode ID: %s", node_id)
 
         # pylint: disable=too-many-nested-blocks
         while True:
