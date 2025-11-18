@@ -16,12 +16,18 @@
 
 
 import hashlib
+import json
 import os
 import tempfile
 import unittest
 from pathlib import Path
 
-from flwr.cli.utils import get_sha256_hash
+from flwr.cli.utils import get_sha256_hash, validate_credentials_content
+from flwr.common.constant import (
+    ACCESS_TOKEN_KEY,
+    AUTHN_TYPE_JSON_KEY,
+    REFRESH_TOKEN_KEY,
+)
 
 
 class TestGetSHA256Hash(unittest.TestCase):
@@ -107,3 +113,16 @@ class TestGetSHA256Hash(unittest.TestCase):
         # Execute & assert
         with self.assertRaises(FileNotFoundError):
             get_sha256_hash(nonexistent_path)
+
+
+def test_validate_credentials_content_success(tmp_path: Path) -> None:
+    """Test the credentials content loading."""
+    creds = {
+        AUTHN_TYPE_JSON_KEY: "userpass",
+        ACCESS_TOKEN_KEY: "abc",
+        REFRESH_TOKEN_KEY: "def",
+    }
+    path = tmp_path / "creds.json"
+    path.write_text(json.dumps(creds), encoding="utf-8")
+    token = validate_credentials_content(path)
+    assert token == "abc"

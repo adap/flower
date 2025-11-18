@@ -15,19 +15,13 @@
 """Test for Flower command line interface `app publish` command."""
 
 
-import json
 from contextlib import ExitStack
 from pathlib import Path
 
 import pytest
 import typer
 
-from flwr.common.constant import (
-    ACCESS_TOKEN_KEY,
-    AUTHN_TYPE_JSON_KEY,
-    FLWR_DIR,
-    REFRESH_TOKEN_KEY,
-)
+from flwr.common.constant import FLWR_DIR
 from flwr.supercore.constant import (
     MAX_DIR_DEPTH,
     MAX_FILE_BYTES,
@@ -42,7 +36,6 @@ from .publish import (
     _depth_of,
     _detect_mime,
     _load_gitignore,
-    _validate_credentials_content,
     _validate_files,
 )
 
@@ -179,16 +172,3 @@ def test_build_multipart_files_param(tmp_path: Path) -> None:
     # ExitStack closes the opened file object
     with pytest.raises(ValueError):
         fobj.read(1)  # closed file
-
-
-def test_validate_credentials_content_success(tmp_path: Path) -> None:
-    """Test the credentials content loading."""
-    creds = {
-        AUTHN_TYPE_JSON_KEY: "userpass",
-        ACCESS_TOKEN_KEY: "abc",
-        REFRESH_TOKEN_KEY: "def",
-    }
-    p = tmp_path / "creds.json"
-    p.write_text(json.dumps(creds), encoding="utf-8")
-    token = _validate_credentials_content(p)
-    assert token == "abc"

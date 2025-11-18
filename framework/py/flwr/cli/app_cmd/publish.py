@@ -15,7 +15,6 @@
 """Flower command line interface `app publish` command."""
 
 
-import json
 from collections.abc import Callable
 from contextlib import ExitStack
 from pathlib import Path
@@ -26,13 +25,7 @@ import requests
 import typer
 from requests import Response
 
-from flwr.common.constant import (
-    ACCESS_TOKEN_KEY,
-    AUTHN_TYPE_JSON_KEY,
-    CREDENTIALS_DIR,
-    FLWR_DIR,
-    REFRESH_TOKEN_KEY,
-)
+from flwr.common.constant import CREDENTIALS_DIR, FLWR_DIR
 from flwr.supercore.constant import (
     ALLOWED_EXTS,
     MAX_DIR_DEPTH,
@@ -44,7 +37,82 @@ from flwr.supercore.constant import (
     UTF8,
 )
 
-from ..utils import build_pathspec, get_exclude_pathspec, to_bytes
+from ..utils import (
+    build_pathspec,
+    get_exclude_pathspec,
+    to_bytes,
+    validate_credentials_content,
+)
+
+
+def publish(
+    app: Annotated[
+        Path,
+        typer.Argument(
+            help="Project directory to upload (defaults to current directory)."
+        ),
+    ] = Path("."),
+    federation: Annotated[
+        str | None,
+        typer.Argument(
+            help="Name of the federation used for login before publishing app."
+        ),
+    ] = None,
+    token: Annotated[
+        str | None,
+        typer.Option(
+            "--token",
+            help="Bearer token for Platform API.",
+        ),
+    ] = None,
+) -> None:
+    """Upload all project files to the Platform API using multipart/form-data."""
+    # Check the credentials path
+    if not token:
+        if not federation:
+            typer.secho(
+                "❌ Please specify the federation used for "
+                "login before publishing app.",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(code=1)
+
+        creds_path = app.absolute() / FLWR_DIR / CREDENTIALS_DIR / f"{federation}.json"
+        if not creds_path.is_file():
+            typer.secho(
+                "❌ Please log in before publishing app.",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(code=1)
+
+        # Load and validate credentials
+        token = validate_credentials_content(creds_path)
+
+    # Collect & validate app files
+    files = _collect_files(app)
+    _validate_files(files)
+
+    # Build and POST multipart
+    with ExitStack() as stack:
+        files_param = _build_multipart_files_param(files, stack)
+        try:
+            resp = _post_files(files_param, token)
+        except requests.RequestException as err:
+            typer.secho(f"❌ Network error: {err}", fg=typer.colors.RED, err=True)
+            raise typer.Exit(code=1) from err
+
+    if resp.ok:
+        typer.secho("🎊 Upload successful", fg=typer.colors.GREEN, bold=True)
+        return  # success
+
+    # Error path:
+    msg = f"❌ Upload failed with status {resp.status_code}"
+    if resp.text:
+        msg += f": {resp.text}"
+    typer.secho(msg, fg=typer.colors.RED, err=True)
+    raise typer.Exit(code=1)
 
 
 def _load_gitignore(root: Path) -> bytes | None:
@@ -241,106 +309,3 @@ def _post_files(
 
     resp = requests.post(url, files=files_param, headers=headers, timeout=120)
     return resp
-
-
-def _validate_credentials_content(creds_path: Path) -> str:
-    """Load and validate the credentials file content.
-
-    Ensures required keys exist:
-      - AUTHN_TYPE_JSON_KEY
-      - ACCESS_TOKEN_KEY
-      - REFRESH_TOKEN_KEY
-    """
-    try:
-        creds: dict[str, str] = json.loads(creds_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as err:
-        typer.secho(
-            f"Invalid credentials file at '{creds_path}': {err}",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from err
-
-    required_keys = [AUTHN_TYPE_JSON_KEY, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]
-    missing = [key for key in required_keys if key not in creds]
-
-    if missing:
-        typer.secho(
-            f"Credentials file '{creds_path}' is missing "
-            f"required key(s): {', '.join(missing)}. Please log in again.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
-
-    return creds[ACCESS_TOKEN_KEY]
-
-
-def publish(
-    app: Annotated[
-        Path,
-        typer.Argument(
-            help="Project directory to upload (defaults to current directory)."
-        ),
-    ] = Path("."),
-    federation: Annotated[
-        str | None,
-        typer.Argument(
-            help="Name of the federation used for login before publishing app."
-        ),
-    ] = None,
-    token: Annotated[
-        str | None,
-        typer.Option(
-            "--token",
-            help="Bearer token for Platform API.",
-        ),
-    ] = None,
-) -> None:
-    """Upload all project files to the Platform API using multipart/form-data."""
-    # Check the credentials path
-    if not token:
-        if not federation:
-            typer.secho(
-                "❌ Please specify the federation used for "
-                "login before publishing app.",
-                fg=typer.colors.RED,
-                err=True,
-            )
-            raise typer.Exit(code=1)
-
-        creds_path = app.absolute() / FLWR_DIR / CREDENTIALS_DIR / f"{federation}.json"
-        if not creds_path.is_file():
-            typer.secho(
-                "❌ Please log in before publishing app.",
-                fg=typer.colors.RED,
-                err=True,
-            )
-            raise typer.Exit(code=1)
-
-        # Load and validate credentials
-        token = _validate_credentials_content(creds_path)
-
-    # Collect & validate app files
-    files = _collect_files(app)
-    _validate_files(files)
-
-    # Build and POST multipart
-    with ExitStack() as stack:
-        files_param = _build_multipart_files_param(files, stack)
-        try:
-            resp = _post_files(files_param, token)
-        except requests.RequestException as err:
-            typer.secho(f"❌ Network error: {err}", fg=typer.colors.RED, err=True)
-            raise typer.Exit(code=1) from err
-
-    if resp.ok:
-        typer.secho("🎊 Upload successful", fg=typer.colors.GREEN, bold=True)
-        return  # success
-
-    # Error path:
-    msg = f"❌ Upload failed with status {resp.status_code}"
-    if resp.text:
-        msg += f": {resp.text}"
-    typer.secho(msg, fg=typer.colors.RED, err=True)
-    raise typer.Exit(code=1)
