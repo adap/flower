@@ -15,7 +15,7 @@ jobs:
       base-branch: main # The base branch for the PR
     name: Update text
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Generate unique branch name
         id: generate_branch
