@@ -546,7 +546,17 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 "not a member of it.",
             )
 
-        raise ShowFederationResponse()
+        # Fetch federation details
+        details = state.federation_manager.get_details(federation)
+
+        # Build Federation proto object
+        federation_proto = Federation(
+            name=federation,
+            member_aids=details.member_aids,
+            nodes=details.nodes,
+            runs=[run_to_proto(run) for run in details.runs],
+        )
+        raise ShowFederationResponse(federation=federation_proto, now=now().isoformat())
 
 
 def _create_list_runs_response(
