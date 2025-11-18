@@ -30,7 +30,7 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
-from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
+from flwr.common.constant import FAB_CONFIG_FILE, NOOP_ACCOUNT_NAME, CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ShowFederationRequest,
@@ -38,7 +38,9 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
+from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 
+from ..run_utils import RunRow, format_runs
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 
 
@@ -81,12 +83,14 @@ def show(  # pylint: disable=R0914, R0913, R0917
             channel = init_channel(app, federation_config, auth_plugin)
             stub = ControlStub(channel)
             typer.echo(f"📄 Showing federation for {federation}...")
-            federation_info = _show_federation(stub, federation)
+            members, nodes, runs = _show_federation(stub, federation)
             restore_output()
             if output_format == CliOutputFormat.JSON:
                 Console().print_json(data=_to_json(federation_info))
             else:
-                Console().print(_to_table(federation_info))
+                Console().print(_to_members_table(members))
+                Console().print(_to_nodes_table(nodes))
+                Console().print(_to_runs_table(runs))
         finally:
             if channel:
                 channel.close()
@@ -109,31 +113,80 @@ def show(  # pylint: disable=R0914, R0913, R0917
 
 def _show_federation(
     stub: ControlStub, federation: str
-) -> tuple[Federation, list[str], dict]:
+) -> tuple[list[str], list[NodeInfo], list[RunRow]]:
     """Show federation details."""
     with flwr_cli_grpc_exc_handler():
         res: ShowFederationResponse = stub.ShowFederation(
             ShowFederationRequest(name=federation)
         )
 
-    return res.federation, res.nodes_info, res.run_dict
+    fed_proto = res.federation
+
+    return fed_proto.members_aids, fed_proto.nodes, format_runs(fed_proto.runs)
 
 
-def _to_table(federations: list[Federation]) -> Table:
-    """Format the provided federations list to a rich Table."""
+def _to_members_table(members_aid: list[str]) -> Table:
+    """Format the provided list of federation members as a rich Table."""
     table = Table(header_style="bold cyan", show_lines=True)
 
-    # Add columns
     table.add_column(
-        Text("Federation", justify="center"), style="bright_black", no_wrap=True
+        Text("Member ID", justify="center"), style="bright_black", no_wrap=True
     )
+    table.add_column(Text("Role", justify="center"), style="bright_black", no_wrap=True)
 
-    for federation in federations:
-        table.add_row(federation.name)
+    for member_aid in members_aid:
+        table.add_row(member_aid, "Member")
 
     return table
 
 
-def _to_json(federations: list[Federation]) -> list[dict[str, str]]:
-    """Format the provided federations list to JSON serializable format."""
-    return [{"name": federation.name} for federation in federations]
+def _to_nodes_table(nodes: list[NodeInfo]) -> Table:
+    """Format the provided list of federation nodes as a rich Table."""
+    table = Table(header_style="bold cyan", show_lines=True)
+
+    # Add columns
+    table.add_column(
+        Text("Node ID", justify="center"), style="bright_black", no_wrap=True
+    )
+    table.add_column(Text("Owner", justify="center"))
+    table.add_column(Text("Status", justify="center"))
+
+    for row in nodes:
+        owner_name = row.owner_name
+        status = row.status
+
+        if status == "online":
+            status_style = "green"
+        elif status == "offline":
+            status_style = "bright_yellow"
+        elif status == "unregistered":
+            continue
+        elif status == "registered":
+            status_style = "blue"
+        else:
+            raise ValueError(f"Unexpected node status '{status}'")
+
+        formatted_row = (
+            f"[bold]{row.node_id}[/bold]",
+            (
+                f"{owner_name}"
+                if owner_name != NOOP_ACCOUNT_NAME
+                else f"[dim]{owner_name}[/dim]"
+            ),
+            f"[{status_style}]{status}",
+        )
+        table.add_row(*formatted_row)
+
+    return table
+
+
+def _to_runs_table(runs: list[str]) -> Table:
+    """Format the provided list of federation runs as a rich Table."""
+    table = Table(header_style="bold cyan", show_lines=True)
+
+    return table
+
+
+def _to_json(federation: Federation) -> dict[str, str]:
+    """Format the provided federation information to JSON serializable format."""
+    return {"name": federation.name}
