@@ -152,16 +152,30 @@ def review(
         typer.secho("Aborted (user did not type SIGN).", fg=typer.colors.YELLOW)
         raise typer.Exit(code=130)
 
-    # Ask for private key path
-    key_path_str = typer.prompt(
-        "Please specify the path of Ed25519 OpenSSH private key for signing"
-    )
-    key_path = Path(key_path_str).expanduser().resolve()
-    if not key_path.is_file():
-        typer.secho(
-            f"❌ Private key not found: {key_path}", fg=typer.colors.RED, err=True
-        )
-        raise typer.Exit(code=1)
+    # Ask for private key path (retry until valid)
+    while True:
+        try:
+            key_path_str = typer.prompt(
+                "Please specify the path of Ed25519 OpenSSH private key for signing"
+            )
+        except typer.Abort as e:
+            typer.secho("Aborted by user.", fg=typer.colors.YELLOW)
+            raise typer.Exit(code=130) from e
+
+        key_path = Path(key_path_str).expanduser().resolve()
+
+        if not key_path.is_file():
+            typer.secho(
+                f"❌ Private key not found: {key_path}",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            typer.secho(
+                "Please try again or press CTRL+C to abort.\n", fg=typer.colors.YELLOW
+            )
+            continue
+
+        break  # valid
 
     # Load private key and sign FAB
     try:
