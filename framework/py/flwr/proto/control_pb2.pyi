@@ -452,14 +452,17 @@ class ShowFederationResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     FEDERATION_FIELD_NUMBER: builtins.int
+    NOW_FIELD_NUMBER: builtins.int
+    now: builtins.str
     @property
     def federation(self) -> flwr.proto.federation_pb2.Federation: ...
     def __init__(
         self,
         *,
         federation: flwr.proto.federation_pb2.Federation | None = ...,
+        now: builtins.str = ...,
     ) -> None: ...
     def HasField(self, field_name: typing.Literal["federation", b"federation"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["federation", b"federation"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["federation", b"federation", "now", b"now"]) -> None: ...
 
 global___ShowFederationResponse = ShowFederationResponse
