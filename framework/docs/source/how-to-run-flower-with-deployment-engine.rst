@@ -2,8 +2,9 @@
 .. meta::
     :description: Guide to use Flower's Deployment Engine and run a Flower App trough a federation consisting of a SuperLink and two SuperNodes.
 
-Run Flower with the Deployment Engine
-=====================================
+#######################################
+ Run Flower with the Deployment Engine
+#######################################
 
 This how-to guide demonstrates how to set up and run Flower with the Deployment Engine
 using minimal configurations to illustrate the workflow. This is a complementary guide
@@ -18,8 +19,9 @@ In this how-to guide, you will:
 
 The how-to guide should take less than 10 minutes to complete.
 
-Prerequisites
--------------
+***************
+ Prerequisites
+***************
 
 Before you start, make sure that:
 
@@ -43,8 +45,9 @@ Before you start, make sure that:
     such deployments is by means of Docker. Check the :doc:`docker/index` to gain a
     better understanding on how to do so.
 
-Step 1: Create a Flower App
----------------------------
+*****************************
+ Step 1: Create a Flower App
+*****************************
 
 Although you could write a Flower app from scratch, it is often easier to start from one
 of the templates available via ``flwr new`` and then customize it to your use case.
@@ -84,14 +87,15 @@ Create a new Flower app (PyTorch), and follow the instructions show upon executi
     would like to get an overview of the code that was generated, take a look at the
     :doc:`tutorial-quickstart-pytorch` tutorial.
 
-Step 2: Launch Flower Federation
---------------------------------
+**********************************
+ Step 2: Launch Flower Federation
+**********************************
 
 In this section you will learn how to launch a SuperLink and connect two SuperNodes to
 it.
 
 Start a Flower SuperLink
-~~~~~~~~~~~~~~~~~~~~~~~~
+========================
 
 In a new terminal, activate your environment and start the SuperLink process in insecure
 mode:
@@ -107,7 +111,7 @@ mode:
       unencrypted communication. Refer to the :doc:`how-to-enable-tls-connections` guide to learn how to run your SuperLink with TLS.
 
 Start two Flower SuperNodes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===========================
 
 In this step, you will launch two SuperNodes and connect them to the SuperLink. You will
 need two terminals for this step.
@@ -158,8 +162,9 @@ need two terminals for this step.
        * ``--clientappio-api-address 127.0.0.1:9095``: Note that a different port is being used. This is only needed because you are running two SuperNodes on the same machine. Typically you would run one node per machine and therefore, the ``--clientappio-api-address`` could be omitted all together and left with its default value.
        * ``--node-config "partition-id=1 num-partitions=2"``: Note here we indicate a different `partition-id`. In this way, a ``ClientApp`` will use a different data partition depending on which SuperNode runs in.
 
-Step 3: Run a Flower App on the Federation
-------------------------------------------
+********************************************
+ Step 3: Run a Flower App on the Federation
+********************************************
 
 At this point, you have launched two SuperNodes that are connected to the same
 SuperLink. The system is idling waiting for a ``Run`` to be submitted. Before you can
@@ -197,7 +202,8 @@ any) or set the insecure flag (only when testing locally, real deployments requi
    If you want to rerun the project or test an updated version by making changes to the
    code, simply re-run the command above.
 
-Step 4: Clean Up
-----------------
+******************
+ Step 4: Clean Up
+******************
 
 Use the ``Ctrl+C`` command in each terminal to stop the respective processes.

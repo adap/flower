@@ -1,14 +1,17 @@
-[600] COMMON_ADDRESS_INVALID
-============================
+##############################
+ [600] COMMON_ADDRESS_INVALID
+##############################
 
-Description
------------
+*************
+ Description
+*************
 
 The provided address is invalid and cannot be parsed. It must be a valid URL, IPv4, or
 IPv6 address.
 
-How to Resolve
---------------
+****************
+ How to Resolve
+****************
 
 Verify that the address is correctly formatted as one of the following:
     - URL (e.g., ``https://127.0.0.1:8080`` or ``https://example.com:8080``)

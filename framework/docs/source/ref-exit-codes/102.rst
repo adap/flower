@@ -1,13 +1,16 @@
-[102] SUPERLINK_LICENSE_MISSING
-===============================
+#################################
+ [102] SUPERLINK_LICENSE_MISSING
+#################################
 
-Description
------------
+*************
+ Description
+*************
 
 The SuperLink license is missing, causing it to exit prematurely on startup.
 
-How to Resolve
---------------
+****************
+ How to Resolve
+****************
 
 Set the `FLWR_LICENSE_KEY` environment variable with a valid license key when starting
 the SuperLink.

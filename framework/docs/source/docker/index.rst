@@ -2,8 +2,9 @@
 .. meta::
     :description: Learn how to run Flower for federated learning using Docker with pre-made images, including advanced options and Docker Compose for seamless deployment.
 
-Run Flower using Docker
-=======================
+#########################
+ Run Flower using Docker
+#########################
 
 Start your Flower journey with our pre-made Docker images on Docker Hub, supporting
 ``amd64`` and ``arm64v8`` architectures.
@@ -11,16 +12,18 @@ Start your Flower journey with our pre-made Docker images on Docker Hub, support
 Our Quickstart guide walks you through containerizing a Flower project and running it
 end to end using Docker.
 
-Getting Started
----------------
+*****************
+ Getting Started
+*****************
 
 .. toctree::
     :maxdepth: 1
 
     tutorial-quickstart-docker
 
-Running in Production
----------------------
+***********************
+ Running in Production
+***********************
 
 .. toctree::
     :maxdepth: 1
@@ -28,8 +31,9 @@ Running in Production
     enable-tls
     persist-superlink-state
 
-Advanced Options
-----------------
+******************
+ Advanced Options
+******************
 
 .. toctree::
     :maxdepth: 1
@@ -40,8 +44,9 @@ Advanced Options
     pin-version
     use-a-different-version
 
-Run Flower using Docker Compose
--------------------------------
+*********************************
+ Run Flower using Docker Compose
+*********************************
 
 .. toctree::
     :maxdepth: 1

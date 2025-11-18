@@ -42,8 +42,9 @@
 
 .. _strategy_explainer_link: explanation-flower-strategy-abstraction.html#understand-start-method
 
-Use strategies
-==============
+################
+ Use strategies
+################
 
 Flower allows full customization of the learning process through the |strategy_link|_
 abstraction. A number of built-in `strategies <ref-api/flwr.serverapp.strategy.html>`_
@@ -66,8 +67,9 @@ server side:
     unlimited records of any type. If you want to communicate multiple records you'd
     need to either expand an existing strategy or implement one from scratch.
 
-Use an existing strategy
-------------------------
+**************************
+ Use an existing strategy
+**************************
 
 Flower comes with a number of popular federated learning ``Strategies`` which can be
 instantiated as follows as part of a simple |serverapp_link|_:
@@ -104,8 +106,9 @@ The above ``ServerApp`` is very minimal, makes use of the default settings for
 a bit more detail what options we have when instantiating strategies and when launching
 it.
 
-Parameterizing an existing strategy
------------------------------------
+*************************************
+ Parameterizing an existing strategy
+*************************************
 
 The constructor of strategies accepts different parameters based on, primarily, the
 aggregation algorithm they implement. For example, |fedadam_link|_ accepts additional
@@ -206,8 +209,9 @@ Finally, the strategy constructor also allows passing two callbacks to control h
 :doc:`how-to-aggregate-evaluation-results` guide for a walkthrough on how to define
 these callbacks.
 
-Using the strategy's ``start`` method
--------------------------------------
+***************************************
+ Using the strategy's ``start`` method
+***************************************
 
 As mentioned earlier, it is the ``start`` method of the strategy that launches the
 federated learning process. Let's see what each argument passed to this method

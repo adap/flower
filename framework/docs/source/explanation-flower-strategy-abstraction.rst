@@ -10,8 +10,9 @@
 
 .. _fedavg_link: ref-api/flwr.serverapp.strategy.FedAvg.html
 
-Flower Strategy Abstraction
-===========================
+#############################
+ Flower Strategy Abstraction
+#############################
 
 The strategy abstraction enables the implementation of fully custom federated learning
 strategies. In Flower, a *strategy* is essentially the federated learning algorithm that
@@ -26,8 +27,9 @@ Flower ships with a number of built-in strategies, all following the same API de
 below. You can also implement your own strategies with full access to the same
 capabilities.
 
-The ``Strategy`` abstraction
-----------------------------
+******************************
+ The ``Strategy`` abstraction
+******************************
 
 All strategy implementations must derive from the abstract base class |strategy_link|_.
 This includes both built-in strategies and third-party/custom strategies. By extending
@@ -90,8 +92,9 @@ implement several abstract methods:
             # Implementation details
             pass
 
-Creating a new strategy
------------------------
+*************************
+ Creating a new strategy
+*************************
 
 You can customize an existing strategy (e.g., |fedavg_link|_) by overriding one or
 several of its methods. For full flexibility, you can also implement a strategy from
@@ -125,8 +128,9 @@ The ``start`` method is already implemented in the base class and typically does
 need to be overridden. It orchestrates the federated learning process by invoking the
 abstract methods in sequence.
 
-Understand ``start`` method
----------------------------
+*****************************
+ Understand ``start`` method
+*****************************
 
 The ``start`` method of the ``Strategy`` base class follows this workflow:
 
@@ -192,8 +196,9 @@ The following diagram illustrates the flow.
 
         ST-->>SA: final Result
 
-The ``configure_train`` method
-------------------------------
+********************************
+ The ``configure_train`` method
+********************************
 
 The ``configure_train`` method is responsible for preparing the next round of training.
 But what does *configure* mean in this context? It means selecting which clients should
@@ -234,8 +239,9 @@ generates a message for its node ID.
     heterogeneous configurations. For example, different clients can receive different
     models or hyperparameters, enabling highly customized training behaviors.
 
-The ``aggregate_train`` method
-------------------------------
+********************************
+ The ``aggregate_train`` method
+********************************
 
 The ``aggregate_train`` method is responsible for aggregating the training results
 received from the clients selected in ``configure_train``.
@@ -270,8 +276,9 @@ the method may decide to return ``(None, None)`` instead.
     You can use ``Message.has_error()`` to check if a reply contains an error and decide
     how to handle it during aggregation.
 
-The ``configure_evaluate`` method
----------------------------------
+***********************************
+ The ``configure_evaluate`` method
+***********************************
 
 The ``configure_evaluate`` method is responsible for preparing the next round of
 evaluation. Similar to ``configure_train``, this involves selecting which clients should
@@ -313,8 +320,9 @@ send different evaluation configurations to different clients.
     evaluation setups. For example, some clients might evaluate on larger test sets,
     while others might use specialized metrics.
 
-The ``aggregate_evaluate`` method
----------------------------------
+***********************************
+ The ``aggregate_evaluate`` method
+***********************************
 
 The ``aggregate_evaluate`` method is responsible for aggregating the evaluation results
 received from the clients selected in ``configure_evaluate``.
