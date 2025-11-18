@@ -1,11 +1,13 @@
-List of available models
-========================
+##########################
+ List of available models
+##########################
 
 This document provides an overview of the available models, their providers, and
 corresponding aliases. Note that all models are also supported via remote inference.
 
-Models
-------
+********
+ Models
+********
 
 ========================================== ============= ================ ======== ========== ============= ============================================================================== ========================================================================= ==============================================================================
 **Model**                                  **Publisher** **Model Family** **Size** **Quant.** **Precision** **Web (On-Device)**                                                            **Node.JS (On-Device)**                                                   **MLX-Swift (On-Device)**
@@ -23,8 +25,9 @@ Models
 ``deepseek/r1-distill-llama-8b/q4``        DeepSeek      R1               8B       Q4         Float 16      `✔ <https://huggingface.co/mlc-ai/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC>`__ –                                                                         `✔ <https://huggingface.co/mlx-community/DeepSeek-R1-Distill-Llama-8B-4bit>`__
 ========================================== ============= ================ ======== ========== ============= ============================================================================== ========================================================================= ==============================================================================
 
-Aliases
--------
+*********
+ Aliases
+*********
 
 The following table lists all aliases for each canonical model:
 
