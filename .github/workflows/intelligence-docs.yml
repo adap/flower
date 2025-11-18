@@ -5,14 +5,14 @@ on:
     branches:
       - main
     paths:
-      - 'intelligence/**/*'
-      - '.github/workflows/intelligence-*.yml'
+      - "intelligence/**/*"
+      - ".github/workflows/intelligence-*.yml"
   pull_request:
     branches:
       - main
     paths:
-      - 'intelligence/**/*'
-      - '.github/workflows/intelligence-*.yml'
+      - "intelligence/**/*"
+      - ".github/workflows/intelligence-*.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
@@ -38,7 +38,7 @@ jobs:
       - name: Check docs format
         run: |
           cd dev
-          docstrfmt --check ../intelligence/docs/source
+          docstrfmt --check ../intelligence/docs/source -x "**/_templates/autosummary"
   build_ts_docs:
     runs-on: ubuntu-22.04
     name: Build TypeScript Docs
@@ -51,7 +51,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22.14.0'
+          node-version: "22.14.0"
       - name: Install pnpm
         run: |
           npm install -g pnpm
@@ -119,8 +119,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
 
       - name: Build Kotlin docs
         run: |
