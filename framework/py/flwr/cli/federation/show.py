@@ -33,6 +33,7 @@ from flwr.cli.config_utils import (
 from flwr.cli.ls import _get_status_style
 from flwr.common.constant import FAB_CONFIG_FILE, NOOP_ACCOUNT_NAME, CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
+from flwr.common.serde import run_from_proto
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ShowFederationRequest,
     ShowFederationResponse,
@@ -121,7 +122,8 @@ def _show_federation(
         )
 
     fed_proto = res.federation
-    formatted_runs = format_runs(fed_proto.runs, res.now)
+    runs = [run_from_proto(run_proto) for run_proto in fed_proto.runs]
+    formatted_runs = format_runs(runs, res.now)
 
     return fed_proto.member_aids, fed_proto.nodes, formatted_runs
 
