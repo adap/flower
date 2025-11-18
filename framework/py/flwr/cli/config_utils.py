@@ -16,7 +16,7 @@
 
 
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 import tomli
 import typer
@@ -30,7 +30,7 @@ from flwr.common.config import (
 )
 
 
-def get_fab_metadata(fab_file: Union[Path, bytes]) -> tuple[str, str]:
+def get_fab_metadata(fab_file: Path | bytes) -> tuple[str, str]:
     """Extract the fab_id and the fab_version from a FAB file or path.
 
     Parameters
@@ -48,9 +48,9 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> tuple[str, str]:
 
 
 def load_and_validate(
-    path: Optional[Path] = None,
+    path: Path | None = None,
     check_module: bool = True,
-) -> tuple[Optional[dict[str, Any]], list[str], list[str]]:
+) -> tuple[dict[str, Any] | None, list[str], list[str]]:
     """Load and validate pyproject.toml as dict.
 
     Parameters
@@ -89,7 +89,7 @@ def load_and_validate(
     return (config, errors, warnings)
 
 
-def load(toml_path: Path) -> Optional[dict[str, Any]]:
+def load(toml_path: Path) -> dict[str, Any] | None:
     """Load pyproject.toml and return as dict."""
     if not toml_path.is_file():
         return None
@@ -102,7 +102,7 @@ def load(toml_path: Path) -> Optional[dict[str, Any]]:
 
 
 def process_loaded_project_config(
-    config: Union[dict[str, Any], None], errors: list[str], warnings: list[str]
+    config: dict[str, Any] | None, errors: list[str], warnings: list[str]
 ) -> dict[str, Any]:
     """Process and return the loaded project configuration.
 
@@ -133,9 +133,9 @@ def process_loaded_project_config(
 
 
 def validate_federation_in_project_config(
-    federation: Optional[str],
+    federation: str | None,
     config: dict[str, Any],
-    overrides: Optional[list[str]] = None,
+    overrides: list[str] | None = None,
 ) -> tuple[str, dict[str, Any]]:
     """Validate the federation name in the Flower project configuration."""
     federation = federation or config["tool"]["flwr"]["federations"].get("default")
@@ -175,7 +175,7 @@ def validate_federation_in_project_config(
 
 def validate_certificate_in_federation_config(
     app: Path, federation_config: dict[str, Any]
-) -> tuple[bool, Optional[bytes]]:
+) -> tuple[bool, bytes | None]:
     """Validate the certificates in the Flower project configuration.
 
     Accepted configurations:

@@ -15,8 +15,6 @@
 """Flower ClientProxy implementation using gRPC bidirectional streaming."""
 
 
-from typing import Optional
-
 from flwr import common
 from flwr.common import serde
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
@@ -45,8 +43,8 @@ class GrpcClientProxy(ClientProxy):
     def get_properties(
         self,
         ins: common.GetPropertiesIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> common.GetPropertiesRes:
         """Request client's set of internal properties."""
         get_properties_msg = serde.get_properties_ins_to_proto(ins)
@@ -65,8 +63,8 @@ class GrpcClientProxy(ClientProxy):
     def get_parameters(
         self,
         ins: common.GetParametersIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
         get_parameters_msg = serde.get_parameters_ins_to_proto(ins)
@@ -85,8 +83,8 @@ class GrpcClientProxy(ClientProxy):
     def fit(
         self,
         ins: common.FitIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> common.FitRes:
         """Refine the provided parameters using the locally held dataset."""
         fit_ins_msg = serde.fit_ins_to_proto(ins)
@@ -104,8 +102,8 @@ class GrpcClientProxy(ClientProxy):
     def evaluate(
         self,
         ins: common.EvaluateIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> common.EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset."""
         evaluate_msg = serde.evaluate_ins_to_proto(ins)
@@ -122,8 +120,8 @@ class GrpcClientProxy(ClientProxy):
     def reconnect(
         self,
         ins: common.ReconnectIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         reconnect_ins_msg = serde.reconnect_ins_to_proto(ins)

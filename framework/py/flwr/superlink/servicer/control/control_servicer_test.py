@@ -21,7 +21,7 @@ import tempfile
 import unittest
 from datetime import datetime
 from types import SimpleNamespace
-from typing import Optional, cast
+from typing import cast
 from unittest.mock import MagicMock, Mock, patch
 
 import grpc
@@ -99,7 +99,7 @@ class TestControlServicer(unittest.TestCase):
         """Clean up after tests."""
         self.tmp_dir.cleanup()
 
-    def _create_dummy_run(self, flwr_aid: Optional[str]) -> int:
+    def _create_dummy_run(self, flwr_aid: str | None) -> int:
         return self.state.create_run(
             "flwr/demo", "v0.0.1", "hash123", {}, "mock-fed", ConfigRecord(), flwr_aid
         )
@@ -283,10 +283,8 @@ class TestControlServicer(unittest.TestCase):
 
         # Execute
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(
-                get=lambda: SimpleNamespace(flwr_aid=flwr_aid_retrieving)
-            ),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=flwr_aid_retrieving),
         ):
             res: ListNodesResponse = self.servicer.ListNodes(ListNodesRequest(), Mock())
 
@@ -321,7 +319,7 @@ class TestControlServicerAuth(unittest.TestCase):
         """Clean up after tests."""
         self.tmp_dir.cleanup()
 
-    def _create_dummy_run(self, flwr_aid: Optional[str]) -> int:
+    def _create_dummy_run(self, flwr_aid: str | None) -> int:
         return self.state.create_run(
             "flwr/demo", "v0.0.1", "hash123", {}, "mock-fed", ConfigRecord(), flwr_aid
         )
@@ -339,7 +337,7 @@ class TestControlServicerAuth(unittest.TestCase):
     # Test all invalid cases for StreamLogs with authentication
     @parameterized.expand(FLWR_AID_MISMATCH_CASES)  # type: ignore
     def test_streamlogs_auth_unsucessful(
-        self, context_flwr_aid: Optional[str], run_flwr_aid: Optional[str]
+        self, context_flwr_aid: str | None, run_flwr_aid: str | None
     ) -> None:
         """Test StreamLogs unsuccessful."""
         # Prepare
@@ -349,8 +347,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=context_flwr_aid),
         ):
             gen = self.servicer.StreamLogs(request, ctx)
             with self.assertRaises(RuntimeError) as cm:
@@ -378,8 +376,8 @@ class TestControlServicerAuth(unittest.TestCase):
                 },
             ),
             patch(
-                "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-                new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
+                "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+                return_value=SimpleNamespace(flwr_aid="user-123"),
             ),
         ):
             msgs = list(self.servicer.StreamLogs(request, ctx))
@@ -393,7 +391,7 @@ class TestControlServicerAuth(unittest.TestCase):
     # Test all invalid cases for StopRun with authentication
     @parameterized.expand(FLWR_AID_MISMATCH_CASES)  # type: ignore
     def test_stoprun_auth_unsuccessful(
-        self, context_flwr_aid: Optional[str], run_flwr_aid: Optional[str]
+        self, context_flwr_aid: str | None, run_flwr_aid: str | None
     ) -> None:
         """Test StopRun unsuccessful with missing or mismatched flwr_aid."""
         # Prepare
@@ -403,8 +401,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=context_flwr_aid),
         ):
             with self.assertRaises(RuntimeError) as cm:
                 self.servicer.StopRun(request, ctx)
@@ -419,8 +417,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid="user-123"),
         ):
             response = self.servicer.StopRun(request, ctx)
             self.assertTrue(response.success)
@@ -431,7 +429,7 @@ class TestControlServicerAuth(unittest.TestCase):
     # Test all invalid cases for ListRuns with authentication
     @parameterized.expand(FLWR_AID_MISMATCH_CASES)  # type: ignore
     def test_listruns_auth_unsuccessful(
-        self, context_flwr_aid: Optional[str], run_flwr_aid: Optional[str]
+        self, context_flwr_aid: str | None, run_flwr_aid: str | None
     ) -> None:
         """Test ListRuns unsuccessful with missing or mismatched flwr_aid."""
         # Prepare
@@ -441,8 +439,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=context_flwr_aid),
         ):
             with self.assertRaises(RuntimeError) as cm:
                 self.servicer.ListRuns(request, ctx)
@@ -457,8 +455,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid="user-123"),
         ):
             response = self.servicer.ListRuns(request, ctx)
             self.assertEqual(set(response.run_dict.keys()), {run_id})

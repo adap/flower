@@ -16,12 +16,12 @@
 
 
 import uuid
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
-from typing import Callable, Optional, Union, cast
+from typing import cast
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -56,18 +56,18 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
     insecure: bool,
     retry_invoker: RetryInvoker,  # pylint: disable=unused-argument
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificates: Optional[Union[bytes, str]] = None,
-    authentication_keys: Optional[  # pylint: disable=unused-argument
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
-    ] = None,
+    root_certificates: bytes | str | None = None,
+    authentication_keys: (
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+    ) = None,
 ) -> Iterator[
     tuple[
-        Callable[[], Optional[Message]],
+        Callable[[], Message | None],
         Callable[[Message], None],
-        Optional[Callable[[], Optional[int]]],
-        Optional[Callable[[], None]],
-        Optional[Callable[[int], Run]],
-        Optional[Callable[[str, int], Fab]],
+        Callable[[], int | None] | None,
+        Callable[[], None] | None,
+        Callable[[int], Run] | None,
+        Callable[[str, int], Fab] | None,
     ]
 ]:
     """Establish a gRPC connection to a gRPC server.

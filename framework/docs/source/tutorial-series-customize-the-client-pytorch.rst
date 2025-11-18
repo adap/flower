@@ -1,5 +1,6 @@
-Communicate custom Messages
-===========================
+#############################
+ Communicate custom Messages
+#############################
 
 .. |message_link| replace:: ``Message``
 
@@ -46,13 +47,14 @@ communicate arbitrary Python objects via a ``Message`` and how to use it on the
 Let's go deeper and see how to serialize arbitrary Python objects and communicate them!
 🌼
 
-Preparation
------------
+*************
+ Preparation
+*************
 
 Before we begin with the actual code, let's make sure that we have everything we need.
 
 Installing dependencies
-~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 .. note::
 
@@ -94,8 +96,9 @@ Next, we install the project and its dependencies, which are specified in the
     $ cd flower-tutorial
     $ pip install -e .
 
-Revisiting replying from ClientApps
------------------------------------
+*************************************
+ Revisiting replying from ClientApps
+*************************************
 
 Let's remind ourselves how the communication between ``ClientApp`` and ``ServerApp``
 works. A ``ClientApp`` function wrapped with ``@app.train()`` would typically return the
@@ -163,8 +166,9 @@ floats, you can use a ``ConfigRecord`` to send strings, booleans and even bytes.
 next section we'll learn to communicate arbitrary Python objects by first serializing
 them to bytes.
 
-Communicating arbitrary objects
--------------------------------
+*********************************
+ Communicating arbitrary objects
+*********************************
 
 Let's assume the training stage of our ``ClientApp`` produces a dataclass like the one
 below and we would like to communicate it to the ``ServerApp`` via the ``Message``.
@@ -187,7 +191,7 @@ Now, let's see how the ``ClientApp`` can serialize this object, send it to the
 ``ServerApp``, make the strategy deserialize it back to the original object, and use it.
 
 Sending from ClientApps
-~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 Let's assume our ``ClientApp`` trains the model locally and generates an instance of
 ``TrainProcessMetadata``. In order to send it as part of the message reply, we need to
@@ -249,7 +253,7 @@ Let's see next how the strategy on the ``ServerApp`` can deserialize the object 
 its original form and use it.
 
 Receiving on ServerApps
-~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 As you know, a Flower strategy will automatically aggregate the ``ArrayRecord`` and
 ``MetricRecord`` from each client. However, it will not do anything with the
@@ -317,8 +321,9 @@ You can now use this information in your strategy logic as needed. For example, 
 implement a custom aggregation method based on convergence status or to log additional
 metrics.
 
-Recap
------
+*******
+ Recap
+*******
 
 In this part of the tutorial, we've seen how to communicate arbitrary Python objects
 between the ``ClientApp`` and the ``ServerApp`` by serializing them to bytes and sending
@@ -327,8 +332,9 @@ back to their original form on the server side and use them in a custom strategy
 that the steps presented here are identical if you need to serialize objects in the
 strategy to send them to the clients.
 
-Next steps
-----------
+************
+ Next steps
+************
 
 Before you continue, make sure to join the Flower community on Flower Discuss (`Join
 Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack

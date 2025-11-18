@@ -2,8 +2,9 @@
 .. meta::
     :description: Comparison of Flower Runtimes for simulation and deployment of federated AI apps.
 
-Flower Runtime Comparison
-=========================
+###########################
+ Flower Runtime Comparison
+###########################
 
 Flower Apps can be executed with both `simulation <how-to-run-simulations.html>`_ or
 `deployment <how-to-run-flower-with-deployment-engine.html>`_ runtimes. Switching

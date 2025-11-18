@@ -16,7 +16,8 @@
 
 
 import unittest
-from typing import Any, Callable, Union
+from collections.abc import Callable
+from typing import Any
 from unittest.mock import MagicMock
 
 import grpc
@@ -41,6 +42,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 
 from .control_account_auth_interceptor import (
     ControlAccountAuthInterceptor,
+    get_current_account_info,
     shared_account_info,
 )
 
@@ -98,7 +100,7 @@ class TestControlAccountAuthInterceptor(unittest.TestCase):
         # Assert response is as expected
         self.assertEqual(response, "dummy_response")
         # Assert `shared_account_info` is not set
-        account_info_from_context = shared_account_info.get()
+        account_info_from_context = get_current_account_info()
         self.assertIsNone(account_info_from_context.flwr_aid)
         self.assertIsNone(account_info_from_context.account_name)
 
@@ -132,10 +134,10 @@ class TestControlAccountAuthInterceptor(unittest.TestCase):
         interceptor = ControlAccountAuthInterceptor(
             authn_plugin=dummy_authn_plugin, authz_plugin=dummy_authz_plugin
         )
-        continuation: Union[
-            Callable[[Any], NoOpUnaryUnaryHandler],
-            Callable[[Any], NoOpUnaryStreamHandler],
-        ] = get_noop_unary_unary_handler
+        continuation: (
+            Callable[[Any], NoOpUnaryUnaryHandler]
+            | Callable[[Any], NoOpUnaryStreamHandler]
+        ) = get_noop_unary_unary_handler
         # Set up unary-stream case for StreamLogsRequest
         if isinstance(request, StreamLogsRequest):
             continuation = get_noop_unary_stream_handler
@@ -183,10 +185,10 @@ class TestControlAccountAuthInterceptor(unittest.TestCase):
         interceptor = ControlAccountAuthInterceptor(
             authn_plugin=dummy_authn_plugin, authz_plugin=dummy_authz_plugin
         )
-        continuation: Union[
-            Callable[[Any], NoOpUnaryUnaryHandler],
-            Callable[[Any], NoOpUnaryStreamHandler],
-        ] = get_noop_unary_unary_handler
+        continuation: (
+            Callable[[Any], NoOpUnaryUnaryHandler]
+            | Callable[[Any], NoOpUnaryStreamHandler]
+        ) = get_noop_unary_unary_handler
         # Set up unary-stream case for StreamLogsRequest
         if isinstance(request, StreamLogsRequest):
             continuation = get_noop_unary_stream_handler
@@ -205,7 +207,7 @@ class TestControlAccountAuthInterceptor(unittest.TestCase):
             self.assertEqual(response, "dummy_response")
 
         # Assert `shared_account_info` is set
-        account_info_from_context = shared_account_info.get()
+        account_info_from_context = get_current_account_info()
         self.assertEqual(
             account_info_from_context.flwr_aid, self.expected_account_info.flwr_aid
         )
@@ -250,10 +252,10 @@ class TestControlAccountAuthInterceptor(unittest.TestCase):
         interceptor = ControlAccountAuthInterceptor(
             authn_plugin=dummy_authn_plugin, authz_plugin=dummy_authz_plugin
         )
-        continuation: Union[
-            Callable[[Any], NoOpUnaryUnaryHandler],
-            Callable[[Any], NoOpUnaryStreamHandler],
-        ] = get_noop_unary_unary_handler
+        continuation: (
+            Callable[[Any], NoOpUnaryUnaryHandler]
+            | Callable[[Any], NoOpUnaryStreamHandler]
+        ) = get_noop_unary_unary_handler
         # Set up unary-stream case for StreamLogsRequest
         if isinstance(request, StreamLogsRequest):
             continuation = get_noop_unary_stream_handler
@@ -330,10 +332,10 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
         )
 
         # Pick correct continuation for unary vs stream
-        continuation: Union[
-            Callable[[Any], NoOpUnaryUnaryHandler],
-            Callable[[Any], NoOpUnaryStreamHandler],
-        ] = get_noop_unary_unary_handler
+        continuation: (
+            Callable[[Any], NoOpUnaryUnaryHandler]
+            | Callable[[Any], NoOpUnaryStreamHandler]
+        ) = get_noop_unary_unary_handler
         if isinstance(request, StreamLogsRequest):
             continuation = get_noop_unary_stream_handler
 
@@ -372,10 +374,10 @@ class TestExecUserAuthInterceptorAuthorization(unittest.TestCase):
             authn_plugin=self.authn_plugin, authz_plugin=self.authz_plugin
         )
 
-        continuation: Union[
-            Callable[[Any], NoOpUnaryUnaryHandler],
-            Callable[[Any], NoOpUnaryStreamHandler],
-        ] = get_noop_unary_unary_handler
+        continuation: (
+            Callable[[Any], NoOpUnaryUnaryHandler]
+            | Callable[[Any], NoOpUnaryStreamHandler]
+        ) = get_noop_unary_unary_handler
         if isinstance(request, StreamLogsRequest):
             continuation = get_noop_unary_stream_handler
 

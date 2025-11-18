@@ -17,9 +17,9 @@
 
 import threading
 import unittest
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from concurrent import futures
-from typing import Any, Callable, Optional, Union
+from typing import Any
 from unittest.mock import Mock
 
 import grpc
@@ -63,9 +63,7 @@ class _MockServicer:
     def __init__(self) -> None:
         """Initialize mock servicer."""
         self._lock = threading.Lock()
-        self._received_client_metadata: Optional[
-            Sequence[tuple[str, Union[str, bytes]]]
-        ] = None
+        self._received_client_metadata: Sequence[tuple[str, str | bytes]] | None = None
         self._received_message_bytes: bytes = b""
 
     def unary_unary(  # pylint: disable=too-many-return-statements
@@ -94,7 +92,7 @@ class _MockServicer:
 
     def received_client_metadata(
         self,
-    ) -> Optional[Sequence[tuple[str, Union[str, bytes]]]]:
+    ) -> Sequence[tuple[str, str | bytes]] | None:
         """Return received client metadata."""
         with self._lock:
             return self._received_client_metadata

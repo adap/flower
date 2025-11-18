@@ -16,7 +16,6 @@
 
 
 from logging import INFO
-from typing import Optional
 
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
@@ -32,10 +31,10 @@ from .app_utils import start_update_client_manager_thread
 def start_grid(  # pylint: disable=too-many-arguments, too-many-locals
     *,
     grid: Grid,
-    server: Optional[Server] = None,
-    config: Optional[ServerConfig] = None,
-    strategy: Optional[Strategy] = None,
-    client_manager: Optional[ClientManager] = None,
+    server: Server | None = None,
+    config: ServerConfig | None = None,
+    strategy: Strategy | None = None,
+    client_manager: ClientManager | None = None,
 ) -> History:
     """Start a Flower server.
 

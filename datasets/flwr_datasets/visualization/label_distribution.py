@@ -15,7 +15,7 @@
 """Label distribution plotting."""
 
 
-from typing import Any, Optional, Union
+from typing import Any
 
 import matplotlib.colors as mcolors
 import pandas as pd
@@ -37,17 +37,17 @@ def plot_label_distributions(  # pylint: disable=R0917
     label_name: str,
     plot_type: str = "bar",
     size_unit: str = "absolute",
-    max_num_partitions: Optional[int] = None,
+    max_num_partitions: int | None = None,
     partition_id_axis: str = "x",
-    axis: Optional[Axes] = None,
-    figsize: Optional[tuple[float, float]] = None,
+    axis: Axes | None = None,
+    figsize: tuple[float, float] | None = None,
     title: str = "Per Partition Label Distribution",
-    cmap: Optional[Union[str, mcolors.Colormap]] = None,
+    cmap: str | mcolors.Colormap | None = None,
     legend: bool = False,
-    legend_title: Optional[str] = None,
+    legend_title: str | None = None,
     verbose_labels: bool = True,
-    plot_kwargs: Optional[dict[str, Any]] = None,
-    legend_kwargs: Optional[dict[str, Any]] = None,
+    plot_kwargs: dict[str, Any] | None = None,
+    legend_kwargs: dict[str, Any] | None = None,
 ) -> tuple[Figure, Axes, pd.DataFrame]:
     """Plot the label distribution of the partitions.
 

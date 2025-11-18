@@ -90,7 +90,7 @@ def test_clip_inputs_inplace() -> None:
     clip_inputs_inplace(updates, clipping_norm)
 
     # Assert
-    for updated, original_update in zip(updates, original_updates):
+    for updated, original_update in zip(updates, original_updates, strict=True):
         clip_norm = np.linalg.norm(original_update)
         assert np.all(updated <= clip_norm) and np.all(updated >= -clip_norm)
 

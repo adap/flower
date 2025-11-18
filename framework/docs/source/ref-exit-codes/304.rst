@@ -1,32 +1,38 @@
-[304] SUPERNODE_TRUST_ENTITY_REQUIRED
-=====================================
+##########################################
+ [304] SUPERNODE_INVALID_TRUSTED_ENTITIES
+##########################################
 
-Description
------------
+*************
+ Description
+*************
 
-This error occurs when entity verification is enabled using the
-``--enable-entities-verification`` flag, but no trusted entities have been provided. The
-SuperNode should be restarted with a valid list of trusted entities.
+This error occurs when an invalid YAML file for trusted entities is provided via the
+``--trusted-entities`` option. The SuperNode must be restarted with a valid trusted
+entities list.
 
-How to Resolve
---------------
+****************
+ How to Resolve
+****************
 
-To fix this issue, you can either:
+To resolve this issue, you can do one of the following:
 
-- Provide a trusted entities list with ``--trust-entities`` when launching the
-  SuperNode. Supply a YAML file (for example, ``--trust-entities ./pks.yaml``)
-  containing the trusted entities’ public key IDs and their corresponding public keys.
+- **Provide a valid trusted entities list** using the ``--trusted-entities`` option when
+  launching the SuperNode. Supply a YAML file (for example, ``--trusted-entities
+  ./pks.yaml``) that contains the trusted entities’ public key IDs and their
+  corresponding public keys.
 
-  - The public keys must be in **OpenSSH format**, and currently only the
-    **ssh-ed25519** key type is supported.
+  - Public keys must be in **OpenSSH format**, and currently only the **ssh-ed25519**
+    key type is supported.
   - Public key IDs must follow the format ``fpk_<UUID>``, where ``fpk`` stands for
     Flower Public Key.
   - The YAML file should follow this structure:
 
-  .. code-block:: yaml
+    .. code-block:: yaml
 
-      fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]
-      fpk_UUID2: ssh-ed25519 <base64-encoded-key2> [comment2]
+        fpk_UUID1: ssh-ed25519 <base64-encoded-key1> [comment1]*
+        fpk_UUID2: ssh-ed25519 <base64-encoded-key2> [comment2]*
 
-- Disable entity verification. Remove the ``--enable-entities-verification`` flag when
-  starting the SuperNode to run without entity verification.
+    \*Comments are optional.
+
+- **Disable entity verification** by removing the ``--trusted-entities`` option when
+  starting the SuperNode. This allows the SuperNode to run without entity verification.

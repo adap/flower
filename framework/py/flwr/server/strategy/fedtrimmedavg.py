@@ -16,8 +16,8 @@
 
 Paper: arxiv.org/abs/1803.01498
 """
+from collections.abc import Callable
 from logging import WARNING
-from typing import Callable, Optional, Union
 
 from flwr.common import (
     FitRes,
@@ -76,18 +76,19 @@ class FedTrimmedAvg(FedAvg):
         min_fit_clients: int = 2,
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        evaluate_fn: Optional[
+        evaluate_fn: (
             Callable[
                 [int, NDArrays, dict[str, Scalar]],
-                Optional[tuple[float, dict[str, Scalar]]],
+                tuple[float, dict[str, Scalar]] | None,
             ]
-        ] = None,
-        on_fit_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
+            | None
+        ) = None,
+        on_fit_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
+        on_evaluate_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
         accept_failures: bool = True,
-        initial_parameters: Optional[Parameters] = None,
-        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        initial_parameters: Parameters | None = None,
+        fit_metrics_aggregation_fn: MetricsAggregationFn | None = None,
+        evaluate_metrics_aggregation_fn: MetricsAggregationFn | None = None,
         beta: float = 0.2,
     ) -> None:
         super().__init__(
@@ -115,8 +116,8 @@ class FedTrimmedAvg(FedAvg):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate fit results using trimmed average."""
         if not results:
             return None, {}

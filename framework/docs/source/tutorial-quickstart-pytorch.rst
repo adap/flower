@@ -40,8 +40,9 @@
 
 .. _result_link: ref-api/flwr.serverapp.strategy.Result.html
 
-Quickstart PyTorch
-==================
+####################
+ Quickstart PyTorch
+####################
 
 In this federated learning tutorial we will learn how to train a Convolutional Neural
 Network on CIFAR-10 using Flower and PyTorch. It is recommended to create a virtual
@@ -177,8 +178,9 @@ in ``pyproject.toml`` like this:
 What follows is an explanation of each component in the project you just created:
 dataset partition, the model, defining the ``ClientApp`` and defining the ``ServerApp``.
 
-The Data
---------
+**********
+ The Data
+**********
 
 This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ to easily
 download and partition the `CIFAR-10` dataset. In this example you'll make use of the
@@ -212,8 +214,9 @@ the data that correspond to their data partition.
     trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
     testloader = DataLoader(partition_train_test["test"], batch_size=32)
 
-The Model
----------
+***********
+ The Model
+***********
 
 We defined a simple Convolutional Neural Network (CNN), but feel free to replace it with
 a more sophisticated model if you'd like:
@@ -286,8 +289,9 @@ training/testing functions to perform local training or evaluation:
         loss = loss / len(testloader)
         return loss, accuracy
 
-The ClientApp
--------------
+***************
+ The ClientApp
+***************
 
 The main changes we have to make to use `PyTorch` with `Flower` have to do with
 converting the |arrayrecord_link|_ received in the |message_link|_ into a `PyTorch`
@@ -383,8 +387,9 @@ model is not locally trained, instead it is used to evaluate its performance on 
 locally held-out validation set; (2) including the model in the reply Message is no
 longer needed because it is not locally modified.
 
-The ServerApp
--------------
+***************
+ The ServerApp
+***************
 
 To construct a |serverapp_link|_ we define its ``@app.main()`` method. This method
 receive as input arguments:

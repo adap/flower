@@ -17,7 +17,7 @@
 
 import time
 import unittest
-from typing import Callable
+from collections.abc import Callable
 from unittest import mock
 
 from flwr_datasets.common.telemetry import EventType, _get_source_id, event

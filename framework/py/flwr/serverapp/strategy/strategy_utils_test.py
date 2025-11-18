@@ -15,7 +15,6 @@
 """Tests for message-based strategy utilities."""
 
 
-from collections import OrderedDict
 from unittest.mock import Mock
 
 import numpy as np
@@ -86,7 +85,10 @@ def test_arrayrecords_aggregation() -> None:
     aggrd = aggregate_arrayrecords(records, weighting_metric_name="weight")
 
     # Assert consistency
-    assert all(np.allclose(a, b) for a, b in zip(aggrd.to_numpy_ndarrays(), avg_list))
+    assert all(
+        np.allclose(a, b)
+        for a, b in zip(aggrd.to_numpy_ndarrays(), avg_list, strict=True)
+    )
     assert aggrd.object_id == ArrayRecord(avg_list).object_id
 
 
@@ -130,7 +132,7 @@ def test_metricrecords_aggregation() -> None:
     # For ease, we convert everything into numpy arrays, then aggregate
     as_np_entries = [
         {
-            k: np.array(v) if isinstance(v, (int, float, list)) else v
+            k: np.array(v) if isinstance(v, (int | float | list)) else v
             for k, v in record.items()
         }
         for record in metric_records
@@ -143,7 +145,9 @@ def test_metricrecords_aggregation() -> None:
         ).tolist()
         for i in range(len(as_np_entries[0]))
     ]
-    expected_record = MetricRecord(dict(zip(as_np_entries[0].keys(), avg_list)))
+    expected_record = MetricRecord(
+        dict(zip(as_np_entries[0].keys(), avg_list, strict=True))
+    )
     expected_record["a"] = float(expected_record["a"])  # type: ignore
     expected_record["b"] = float(expected_record["b"])  # type: ignore
 
@@ -263,7 +267,7 @@ def test_consistency_of_replies_with_matching_keys(
                 RecordDict(
                     {
                         "global-model": ArrayRecord(
-                            OrderedDict({"a": Array(np.random.randn(7, 3))})
+                            {"a": Array(np.random.randn(7, 3))}
                         ),
                         "metrics": MetricRecord({"weight": 0.123}),
                     }
@@ -271,7 +275,7 @@ def test_consistency_of_replies_with_matching_keys(
                 RecordDict(
                     {
                         "global-model": ArrayRecord(
-                            OrderedDict({"b": Array(np.random.randn(7, 3))})
+                            {"b": Array(np.random.randn(7, 3))}
                         ),
                         "metrics": MetricRecord({"weight": 0.123}),
                     }
