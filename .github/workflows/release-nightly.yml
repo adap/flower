@@ -18,7 +18,7 @@ jobs:
       setuptools-version: ${{ steps.release.outputs.setuptools-version }}
       matrix: ${{ steps.release.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         id: bootstrap
         uses: ./.github/actions/bootstrap

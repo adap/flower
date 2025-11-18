@@ -22,7 +22,7 @@ jobs:
       framework: ${{ steps.filter.outputs.framework }}
       ex_bench: ${{ steps.filter.outputs.ex_bench }}  # Examples and Benchmarks
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Filter changed paths
         id: filter
@@ -51,7 +51,7 @@ jobs:
     name: Python ${{ matrix.python }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Bootstrap
