@@ -1,5 +1,6 @@
-Quickstart tutorials
-====================
+######################
+ Quickstart tutorials
+######################
 
 .. toctree::
     :titlesonly:

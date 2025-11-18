@@ -57,7 +57,7 @@ tested_datasets = [
 
 
 def _instantiate_partitioners(
-    partitioners: dict[str, Partitioner | int]
+    partitioners: dict[str, Partitioner | int],
 ) -> dict[str, Partitioner]:
     """Transform the partitioners from the initial format to instantiated objects.
 
@@ -95,7 +95,7 @@ def _instantiate_partitioners(
 
 
 def _instantiate_merger_if_needed(
-    merger: Preprocessor | dict[str, tuple[str, ...]] | None
+    merger: Preprocessor | dict[str, tuple[str, ...]] | None,
 ) -> Preprocessor | None:
     """Instantiate `Merger` if preprocessor is merge_config."""
     if merger and isinstance(merger, dict):
@@ -197,7 +197,7 @@ def _create_division_indices_ranges(
 
 
 def _check_division_config_types_correctness(
-    division: list[float] | tuple[float, ...] | dict[str, float]
+    division: list[float] | tuple[float, ...] | dict[str, float],
 ) -> None:
     if isinstance(division, (list | tuple)):
         if not all(isinstance(x, float) for x in division):
@@ -216,7 +216,7 @@ def _check_division_config_types_correctness(
 
 
 def _check_division_config_values_correctness(
-    division: list[float] | tuple[float, ...] | dict[str, float]
+    division: list[float] | tuple[float, ...] | dict[str, float],
 ) -> None:
     if isinstance(division, (list | tuple)):
         if not all(0 < x <= 1 for x in division):
@@ -254,7 +254,7 @@ def _check_division_config_values_correctness(
 
 
 def _check_division_config_correctness(
-    division: list[float] | tuple[float, ...] | dict[str, float]
+    division: list[float] | tuple[float, ...] | dict[str, float],
 ) -> None:
     _check_division_config_types_correctness(division)
     _check_division_config_values_correctness(division)

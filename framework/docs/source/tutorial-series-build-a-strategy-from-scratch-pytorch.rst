@@ -1,5 +1,6 @@
-Customize a Flower Strategy
-===========================
+#############################
+ Customize a Flower Strategy
+#############################
 
 .. |configrecord_link| replace:: ``ConfigRecord``
 
@@ -40,13 +41,14 @@ Let's build a new ``Strategy`` with a customized |strategy_start_link|_ method t
 - saves a copy of the global model when a new best global accuracy is found;
 - logs the metrics generated during the run to Weights & Biases!
 
-Preparation
------------
+*************
+ Preparation
+*************
 
 Before we begin with the actual code, let's make sure that we have everything we need.
 
 Installing dependencies
-~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 .. note::
 
@@ -108,8 +110,9 @@ Next, we install the project and its dependencies, which are specified in the
 
         $ wandb login
 
-Customize the ``start`` method of a strategy
---------------------------------------------
+**********************************************
+ Customize the ``start`` method of a strategy
+**********************************************
 
 Flower strategies have a number of methods that can be overridden to customize their
 behavior. In part 2, you learned how to customize the ``configure_train`` method to
@@ -380,8 +383,9 @@ Congratulations! You've successfully created a custom Flower strategy by overrid
 |strategy_start_link|_ method. You've also learned how to log metrics to Weight & Biases
 and how to save model checkpoints to disk.
 
-Recap
------
+*******
+ Recap
+*******
 
 In this tutorial, we've seen how to customize the |strategy_start_link|_ method of a
 Flower strategy. This method is the main entry point of any strategy and contains the
@@ -392,8 +396,9 @@ In the next tutorial, we're going to cover how to communicate arbitrary Python o
 between the ``ClientApp`` and the ``ServerApp`` by serializing them and send them in a
 ``Message`` as a ``ConfigRecord``.
 
-Next steps
-----------
+************
+ Next steps
+************
 
 Before you continue, make sure to join the Flower community on Flower Discuss (`Join
 Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack

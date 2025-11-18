@@ -2,8 +2,9 @@
 .. meta::
     :description: Configure SuperLink for account authentication and authorization. Private-by-default runs securely with OpenID Connect and OpenFGA.
 
-Authenticate Accounts via OpenID Connect
-========================================
+##########################################
+ Authenticate Accounts via OpenID Connect
+##########################################
 
 .. note::
 
@@ -22,8 +23,9 @@ with the SuperLink.
     that your runs are **private by default**, ensuring that only authorized accounts
     can access them.
 
-Prerequisites
--------------
+***************
+ Prerequisites
+***************
 
 To enable account authentication and authorization, the SuperLink must be deployed with
 an `OpenID Connect (OIDC) <https://openid.net/developers/how-connect-works/>`_ provider
@@ -34,7 +36,7 @@ been granted the necessary permissions by the SuperLink administrator. When enab
 both account authentication and authorization must be configured on the SuperLink.
 
 Enable Account Authentication and Authorization on the SuperLink
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+================================================================
 
 Create a YAML configuration file with the following content:
 
@@ -82,8 +84,9 @@ Save this file as ``account-auth-config.yaml``. Then pass it to the SuperLink vi
     - ``auth_url`` → ``authn_url`` (in YAML configuration)
     - ``--user-auth-config`` → ``--account-auth-config`` (in SuperLink CLI)
 
-Login to the SuperLink
-----------------------
+************************
+ Login to the SuperLink
+************************
 
 Once a SuperLink with account authentication and authorization is up and running, an
 account can interface with it after installing the ``flwr`` PyPI package via the Flower
@@ -124,8 +127,9 @@ SuperLink will be saved to the app's directory under
 sent transparently with each subsequent ``flwr`` CLI request to the SuperLink, and it
 will relay them to OIDC provider to perform the authentication checks.
 
-Run authorized ``flwr`` CLI commands
-------------------------------------
+**************************************
+ Run authorized ``flwr`` CLI commands
+**************************************
 
 With the above steps completed, you can now run ``flwr`` CLI commands against a
 SuperLink setup with account authentication and authorization. For example, as an
