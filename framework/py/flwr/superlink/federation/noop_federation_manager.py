@@ -14,6 +14,7 @@
 # ==============================================================================
 """NoOp implementation of FederationManager."""
 
+
 from flwr.common.constant import NOOP_FLWR_AID
 from flwr.common.typing import Federation
 from flwr.supercore.constant import NOOP_FEDERATION
