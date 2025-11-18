@@ -31,6 +31,9 @@ PLATFORM_API_URL = "https://api.flower.ai/v1"
 # Constants for federations
 NOOP_FEDERATION = "default"
 
+# Constants for exit handling
+FORCE_EXIT_TIMEOUT_SECONDS = 5  # Used in `flwr_exit` function
+
 
 class NodeStatus:
     """Event log writer types."""
