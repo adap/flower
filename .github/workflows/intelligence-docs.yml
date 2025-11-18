@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Check Docs Formatting
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory only)
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Build TypeScript Docs
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Setup Node.js
@@ -72,7 +72,7 @@ jobs:
     runs-on: macos-14
     name: Build Swift Docs
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Build Kotlin Docs
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
@@ -131,7 +131,7 @@ jobs:
     needs: [build_ts_docs, build_swift_docs, build_kt_docs]
     name: Deploy Docs
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
       - name: Bootstrap
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}

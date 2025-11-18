@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Build and deploy
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Check copyright line
