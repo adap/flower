@@ -38,7 +38,7 @@ jobs:
       - name: Check docs format
         run: |
           cd dev
-          docstrfmt --check ../intelligence/docs/source -x ../intelligence/docs/source/_templates/autosummary
+          docstrfmt --check ../intelligence/docs/source
   build_ts_docs:
     runs-on: ubuntu-22.04
     name: Build TypeScript Docs
