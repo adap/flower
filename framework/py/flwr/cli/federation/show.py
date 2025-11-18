@@ -30,6 +30,7 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
+from flwr.cli.ls import _get_status_style
 from flwr.common.constant import FAB_CONFIG_FILE, NOOP_ACCOUNT_NAME, CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
@@ -37,7 +38,6 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ShowFederationResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 
 from ..run_utils import RunRow, format_runs
@@ -86,7 +86,7 @@ def show(  # pylint: disable=R0914, R0913, R0917
             members, nodes, runs = _show_federation(stub, federation)
             restore_output()
             if output_format == CliOutputFormat.JSON:
-                Console().print_json(data=_to_json(federation_info))
+                Console().print_json(data=_to_json(members, nodes, runs))
             else:
                 Console().print(_to_members_table(members))
                 Console().print(_to_nodes_table(nodes))
@@ -121,8 +121,9 @@ def _show_federation(
         )
 
     fed_proto = res.federation
+    formatted_runs = format_runs(fed_proto.runs, res.now)
 
-    return fed_proto.members_aids, fed_proto.nodes, format_runs(fed_proto.runs)
+    return fed_proto.members_aids, fed_proto.nodes, formatted_runs
 
 
 def _to_members_table(members_aid: list[str]) -> Table:
@@ -180,13 +181,58 @@ def _to_nodes_table(nodes: list[NodeInfo]) -> Table:
     return table
 
 
-def _to_runs_table(runs: list[str]) -> Table:
+def _to_runs_table(run_list: list[RunRow]) -> Table:
     """Format the provided list of federation runs as a rich Table."""
     table = Table(header_style="bold cyan", show_lines=True)
+
+    # Add columns
+    table.add_column(Text("Run ID", justify="center"), no_wrap=True)
+    table.add_column(Text("App", justify="center"))
+    table.add_column(Text("Status", justify="center"))
+    table.add_column(Text("Elapsed", justify="center"), style="blue")
+
+    for row in run_list:
+        status_style = _get_status_style(row.status_text)
+
+        formatted_row = (
+            f"[bold]{row.run_id}[/bold]",
+            f"@{row.fab_id}=={row.fab_version}",
+            f"[{status_style}]{row.status_text}[/{status_style}]",
+            row.elapsed,
+        )
+        table.add_row(*formatted_row)
 
     return table
 
 
-def _to_json(federation: Federation) -> dict[str, str]:
+def _to_json(
+    members: list[str], nodes: list[NodeInfo], runs: list[RunRow]
+) -> list[list[dict[str, str]]]:
     """Format the provided federation information to JSON serializable format."""
-    return {"name": federation.name}
+    members_list: list[dict[str, str]] = []
+    nodes_list: list[dict[str, str]] = []
+    runs_list: list[dict[str, str]] = []
+
+    for member in members:
+        members_list.append({"member_id": member, "role": "Member"})
+
+    for node in nodes:
+        nodes_list.append(
+            {
+                "node_id": node.node_id,
+                "owner": node.owner_name,
+                "status": node.status,
+            }
+        )
+
+    for run in runs:
+        runs_list.append(
+            {
+                "run_id": run.run_id,
+                "app": f"@{run.fab_id}=={run.fab_version}",
+                "status": run.status_text,
+                "elapsed": run.elapsed,
+            }
+        )
+
+    return [members_list, nodes_list, runs_list]
