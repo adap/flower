@@ -46,7 +46,7 @@ jobs:
         run: |
           cd framework
           python -m poetry install --all-extras
-          python -m pip install -U setuptools==70.3.0
+          python -m pip install -U setuptools==80.9.0
       - name: Build wheel
         run: ./framework/dev/build.sh
       - name: Test wheel

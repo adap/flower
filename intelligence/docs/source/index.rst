@@ -1,5 +1,6 @@
-Flower Intelligence
-===================
+#####################
+ Flower Intelligence
+#####################
 
 .. note::
 
@@ -13,8 +14,9 @@ Friendly Federated AI Framework <https://flower.ai>`_.
 
 We currently provide SDKs for TypeScript/JavaScript, Kotlin, and Swift.
 
-Install
--------
+*********
+ Install
+*********
 
 .. tab-set::
     :sync-group: category
@@ -52,8 +54,9 @@ Install
           # Add Flower Intelligence dependency to your build.gradle.kts
           implementation("ai.flower:intelligence:0.1.8")
 
-Hello, Flower Intelligence!
----------------------------
+*****************************
+ Hello, Flower Intelligence!
+*****************************
 
 Flower Intelligence is built around the Singleton design pattern, meaning you only need
 to configure a single instance that can be reused throughout your project. This simple
@@ -136,8 +139,9 @@ setup helps you integrate powerful AI capabilities with minimal overhead.
                 }
             }
 
-Specify the model
------------------
+*******************
+ Specify the model
+*******************
 
 By specifying a model in the chat options, you can easily switch between different AI
 models available in the ecosystem. For a full list of supported models, please refer to
@@ -228,8 +232,9 @@ the :doc:`available models list <ref-models>`.
                 }
             }
 
-Check for errors
-----------------
+******************
+ Check for errors
+******************
 
 Instead of throwing exceptions that might crash your application, Flower Intelligence
 returns a response object that includes a dedicated :doc:`Failure
@@ -329,8 +334,9 @@ application stability.
                 }
             }
 
-Stream Responses
-----------------
+******************
+ Stream Responses
+******************
 
 By enabling the stream option and providing a callback function, you can watch the AI’s
 response as it is being generated. This approach is ideal for interactive applications,
@@ -444,8 +450,9 @@ available. The callback function must accept an argument of type :doc:`StreamEve
                 }
             }
 
-Use Roles
----------
+***********
+ Use Roles
+***********
 
 Instead of simply sending a single string, you can provide an array of :doc:`messages
 <ts-api-ref/interfaces/Message>` with designated roles such as ``system`` and ``user``.
@@ -571,8 +578,9 @@ ensuring that the assistant responds in a way that’s tailored to the scenario.
                 }
             }
 
-Handle history
---------------
+****************
+ Handle history
+****************
 
 In this example, the conversation history is maintained in an array that includes both
 system and user messages. Each time a new message is sent, it is appended to the
@@ -751,8 +759,9 @@ interactions, resulting in a more coherent and dynamic conversation.
                 chatWithHistory("Why is the sky blue?")
             }
 
-Pre-loading the model
----------------------
+***********************
+ Pre-loading the model
+***********************
 
 You might have noticed that the first time you run inference on a given model, you'll
 have to wait longer for it to complete compared to the second time you call the model.
@@ -889,8 +898,9 @@ that takes a :doc:`Progress <ts-api-ref/interfaces/Progress>` object as input:
     <https://github.com/adap/flower/tree/main/intelligence/ts/examples>`_ for more
     information!
 
-Flower Confidential Remote Compute
-----------------------------------
+************************************
+ Flower Confidential Remote Compute
+************************************
 
 Flower Intelligence prioritizes local inference, but also allows to privately handoff
 the compute to the Flower Confidential Remote Compute service when local resources are
@@ -1038,8 +1048,9 @@ You will also need to provide a valid API key via the ``apiKey`` attribute.
                 }
             }
 
-Embedding
----------
+***********
+ Embedding
+***********
 
 .. warning::
 
@@ -1115,8 +1126,9 @@ You will need to enable ``remoteHandoff`` and to provide a valid API key via the
 
             await main().then().catch();
 
-How-to guides
--------------
+***************
+ How-to guides
+***************
 
 Below you will find some simple guides to get you started.
 
@@ -1127,8 +1139,9 @@ Below you will find some simple guides to get you started.
 
     how-to-use-crc.rst
 
-References
-----------
+************
+ References
+************
 
 Information-oriented API reference and other reference material.
 
@@ -1143,8 +1156,9 @@ Information-oriented API reference and other reference material.
     swift-api-ref/index
     kt-api-ref/index
 
-Contributor guides
-------------------
+********************
+ Contributor guides
+********************
 
 If you are interested in contributing or playing around with the source code.
 
@@ -1155,8 +1169,9 @@ If you are interested in contributing or playing around with the source code.
 
     contributor-how-to-build-from-source.rst
 
-Join the Flower Community
--------------------------
+***************************
+ Join the Flower Community
+***************************
 
 The Flower Community is growing quickly - we're a friendly group of researchers,
 engineers, students, professionals, academics, and other enthusiasts.
