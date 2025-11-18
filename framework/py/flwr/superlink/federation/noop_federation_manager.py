@@ -14,6 +14,7 @@
 # ==============================================================================
 """NoOp implementation of FederationManager."""
 
+from flwr.common.constant import NOOP_FLWR_AID
 from flwr.supercore.constant import NOOP_FEDERATION
 
 from .federation_manager import FederationManager
@@ -30,7 +31,7 @@ class NoOpFederationManager(FederationManager):
         """Check if the given account is a member of the federation."""
         if not self.exists(federation):
             raise ValueError(f"Federation '{federation}' does not exist.")
-        return True
+        return flwr_aid == NOOP_FLWR_AID
 
     def filter_nodes(self, node_ids: set[int], federation: str) -> set[int]:
         """Given a list of node IDs, return sublist with nodes in federation."""
