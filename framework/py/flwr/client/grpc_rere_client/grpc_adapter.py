@@ -32,6 +32,7 @@ from flwr.common.constant import (
     GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY,
     GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY,
 )
+from flwr.supercore.constant import FORCE_EXIT_TIMEOUT_SECONDS
 from flwr.common.version import package_name, package_version
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -110,7 +111,8 @@ class GrpcAdapter:
                 'Received shutdown signal: exit flag is set to ``"true"``. Exiting...',
             )
             signal.raise_signal(signal.SIGTERM)
-            time.sleep(6)  # Give some time to handle the signal
+            # Give some time to handle the signal
+            time.sleep(FORCE_EXIT_TIMEOUT_SECONDS + 1)
 
         # Check the grpc_message_name of the response
         if container_res.grpc_message_name != response_type.__qualname__:
