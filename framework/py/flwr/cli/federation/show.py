@@ -123,7 +123,7 @@ def _show_federation(
     fed_proto = res.federation
     formatted_runs = format_runs(fed_proto.runs, res.now)
 
-    return fed_proto.members_aids, fed_proto.nodes, formatted_runs
+    return fed_proto.member_aids, fed_proto.nodes, formatted_runs
 
 
 def _to_members_table(members_aid: list[str]) -> Table:
