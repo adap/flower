@@ -15,7 +15,8 @@
 """GrpcAdapter implementation."""
 
 
-import sys
+import signal
+import time
 from logging import DEBUG
 from typing import Any, TypeVar, cast
 
@@ -108,7 +109,8 @@ class GrpcAdapter:
                 DEBUG,
                 'Received shutdown signal: exit flag is set to ``"true"``. Exiting...',
             )
-            sys.exit(0)
+            signal.raise_signal(signal.SIGTERM)
+            time.sleep(6)  # Give some time to handle the signal
 
         # Check the grpc_message_name of the response
         if container_res.grpc_message_name != response_type.__qualname__:
