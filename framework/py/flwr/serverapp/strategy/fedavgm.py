@@ -18,7 +18,6 @@ Paper: arxiv.org/pdf/1909.06335.pdf
 """
 
 
-from collections import OrderedDict
 from collections.abc import Callable, Iterable
 from logging import INFO
 
@@ -191,7 +190,7 @@ class FedAvgM(FedAvg):
                 for old, pg in zip(ndarrays, pseudo_gradient, strict=True)
             ]
             aggregated_arrays = ArrayRecord(
-                OrderedDict(zip(array_keys, updated_array_list, strict=True))
+                dict(zip(array_keys, updated_array_list, strict=True))
             )
 
             # Update current weights

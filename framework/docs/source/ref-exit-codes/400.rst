@@ -1,14 +1,17 @@
-[400] SUPEREXEC_INVALID_PLUGIN_CONFIG
-=====================================
+#######################################
+ [400] SUPEREXEC_INVALID_PLUGIN_CONFIG
+#######################################
 
-Description
------------
+*************
+ Description
+*************
 
 The YAML configuration for the SuperExec plugin is invalid, could not be parsed, or was
 provided at an invalid path.
 
-How to Resolve
---------------
+****************
+ How to Resolve
+****************
 
 1. Confirm that the configuration file path is correct and that the file exists.
 2. Ensure the file is a valid YAML document.

@@ -2,8 +2,9 @@
 .. meta::
     :description: Pin Flower Docker images to specific versions using image digests, ensuring consistent deployments while receiving essential security updates.
 
-Pin a Docker Image to a Specific Version
-========================================
+##########################################
+ Pin a Docker Image to a Specific Version
+##########################################
 
 It may happen that we update the images behind the tags. Such updates usually include
 security updates of system dependencies that should not change the functionality of
@@ -12,8 +13,9 @@ in your deployments, you can `specify the digest
 <https://docs.docker.com/reference/cli/docker/image/pull/#pull-an-image-by-digest-immutable-identifier>`_
 of the image instead of the tag.
 
-Example
--------
+*********
+ Example
+*********
 
 The following command returns the current image digest referenced by the
 :substitution-code:`superlink:|stable_flwr_version|` tag:

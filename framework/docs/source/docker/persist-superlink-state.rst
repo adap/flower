@@ -2,8 +2,9 @@
 .. meta::
     :description: Persist SuperLink state in Flower by saving it to a local directory, ensuring data retention across Docker container restarts.
 
-Persist the State of the SuperLink
-==================================
+####################################
+ Persist the State of the SuperLink
+####################################
 
 By default, the Flower SuperLink keeps its state in-memory. When using the Docker flag
 ``--rm``, the state is not persisted between container starts.
@@ -20,8 +21,9 @@ proper permissions.
 If you later want to delete the directory, you can change the user ID back to the
 current user ID by running ``sudo chown -R $USER:$(id -gn) state``.
 
-Example
--------
+*********
+ Example
+*********
 
 In the example below, we create a new directory called ``state``, change the user ID and
 tell Docker via the flag ``--volume`` to mount the local ``state`` directory into the

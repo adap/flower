@@ -2,8 +2,9 @@
 .. meta::
     :description: Build stateful ClientApps in Flower with context objects, enabling efficient simulations and deployments.
 
-Design stateful ClientApps
-==========================
+############################
+ Design stateful ClientApps
+############################
 
 .. _array: ref-api/flwr.common.Array.html
 
@@ -38,8 +39,9 @@ values with a new entry appended each time the ``ClientApp`` is executed), certa
 of the model that should persist on the client side, or some other arbitrary Python
 objects. These items would need to be serialized before saving them into the context.
 
-Saving metrics to the context
------------------------------
+*******************************
+ Saving metrics to the context
+*******************************
 
 This section will demonstrate how to save metrics such as accuracy/loss values to the
 Context_ so they can be used in subsequent executions of the ``ClientApp``.
@@ -135,8 +137,9 @@ may change each round due to the random ordering of simulated clients.
     config_records={'random-metrics': {'random-ints': [2, 5, 1]}}
     config_records={'random-metrics': {'random-ints': [7, 4, 2]}}
 
-Saving model parameters to the context
---------------------------------------
+****************************************
+ Saving model parameters to the context
+****************************************
 
 Using ConfigRecord_ or MetricRecord_ to save "simple" components is fine (e.g., float,
 integer, boolean, string, bytes, and lists of these types. Note that MetricRecord_ only
@@ -153,7 +156,7 @@ parameters of PyTorch and TensorFlow models.
     the same principles as outlined earlier.
 
 Saving NumPy arrays to the context
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==================================
 
 Elements stored in an ``ArrayRecord`` are of type Array_, which is a data structure that
 holds ``bytes`` and metadata that can be used for deserialization. Let's see how to
@@ -218,7 +221,7 @@ interest. For example, following the example above:
     #        [-0.10758364,  1.97619858, -0.37120501]])
 
 Saving PyTorch parameters to the context
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+========================================
 
 Flower offers one-liner utilities to convert PyTorch model parameters to/from
 ``ArrayRecord`` objects. Let's see how to do that.
@@ -282,7 +285,7 @@ identical, but you might need to adjust how it is loaded into an existing model 
 PyTorch APIs.
 
 Saving Tensorflow/Keras parameters to the context
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=================================================
 
 Follow the same steps as done above but replace the ``state_dict`` logic with simply
 `get_weights() <https://www.tensorflow.org/api_docs/python/tf/keras/Layer#get_weights>`_
