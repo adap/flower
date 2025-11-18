@@ -51,7 +51,7 @@ from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
-from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
 from flwr.superlink.federation import NoOpFederationManager
 
 
@@ -143,6 +143,7 @@ def run_simulation_from_cli() -> None:
 
     # Create run
     run = Run.create_empty(run_id)
+    run.federation = NOOP_FEDERATION
     run.override_config = override_config
 
     # Create Context
@@ -484,6 +485,7 @@ def _run_simulation(
     if run is None:
         run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
         run = Run.create_empty(run_id=run_id)
+        run.federation = NOOP_FEDERATION
 
     args = (
         num_supernodes,
