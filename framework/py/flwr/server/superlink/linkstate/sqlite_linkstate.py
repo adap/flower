@@ -197,6 +197,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         self, database_path: str, federation_manager: FederationManager
     ) -> None:
         super().__init__(database_path)
+        federation_manager.linkstate = self
         self._federation_manager = federation_manager
 
     def initialize(self, log_queries: bool = False) -> list[tuple[str]]:

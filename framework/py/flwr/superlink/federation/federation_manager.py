@@ -16,10 +16,26 @@
 
 
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from flwr.server.superlink.linkstate.linkstate import LinkState
 
 
 class FederationManager(ABC):
     """Abstract base class for FederationManager."""
+
+    @property
+    def linkstate(self) -> "LinkState":
+        """Return the LinkState instance."""
+        if not (ret := getattr(self, "_linkstate", None)):
+            raise RuntimeError("linkstate not set. Assign to linkstate property first.")
+        return ret  # type: ignore
+
+    @linkstate.setter
+    def linkstate(self, linkstate: "LinkState") -> None:
+        """Set the LinkState instance."""
+        self._linkstate = linkstate
 
     @abstractmethod
     def exists(self, federation: str) -> bool:
