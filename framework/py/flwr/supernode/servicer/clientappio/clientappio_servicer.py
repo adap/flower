@@ -243,7 +243,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self, request: PushObjectRequest, context: grpc.ServicerContext
     ) -> PushObjectResponse:
         """Push an object to the ObjectStore."""
-        log(DEBUG, "ServerAppIoServicer.PushObject")
+        log(DEBUG, "ClientAppIoServicer.PushObject")
 
         # Init state and store
         store = self.objectstore_factory.store()
@@ -265,7 +265,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self, request: PullObjectRequest, context: grpc.ServicerContext
     ) -> PullObjectResponse:
         """Pull an object from the ObjectStore."""
-        log(DEBUG, "ServerAppIoServicer.PullObject")
+        log(DEBUG, "ClientAppIoServicer.PullObject")
 
         # Init state and store
         store = self.objectstore_factory.store()
@@ -285,7 +285,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self, request: ConfirmMessageReceivedRequest, context: grpc.ServicerContext
     ) -> ConfirmMessageReceivedResponse:
         """Confirm message received."""
-        log(DEBUG, "ServerAppIoServicer.ConfirmMessageReceived")
+        log(DEBUG, "ClientAppIoServicer.ConfirmMessageReceived")
 
         # Init state and store
         store = self.objectstore_factory.store()
