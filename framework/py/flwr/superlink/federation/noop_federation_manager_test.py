@@ -144,18 +144,22 @@ def test_exists() -> None:
     manager = NoOpFederationManager()
 
     # Execute & Assert
-    assert manager.exists(NOOP_FEDERATION) is True
-    assert manager.exists("other_federation") is False
+    assert manager.exists(NOOP_FEDERATION)
+    assert not manager.exists("other_federation")
 
 
 def test_has_member() -> None:
-    """Test has_member method always returns True."""
+    """Test has_member method returns True only for NOOP_FLWR_AID."""
     # Prepare
     manager = NoOpFederationManager()
 
     # Execute & Assert
-    assert manager.has_member("any_aid", NOOP_FEDERATION) is True
-    assert manager.has_member("another_aid", "any_federation") is True
+    assert manager.has_member(NOOP_FLWR_AID, NOOP_FEDERATION) is True
+    assert manager.has_member("any_aid", NOOP_FEDERATION) is False
+
+    # Test that it raises ValueError for non-existent federation
+    with pytest.raises(ValueError):
+        manager.has_member("any_aid", "other_federation")
 
 
 def test_filter_nodes() -> None:
@@ -170,15 +174,23 @@ def test_filter_nodes() -> None:
     # Assert
     assert result == node_ids
 
+    # Test that it raises ValueError for non-existent federation
+    with pytest.raises(ValueError):
+        manager.filter_nodes(node_ids, "other_federation")
+
 
 def test_has_node() -> None:
-    """Test has_node method always returns True."""
+    """Test has_node method returns True for NOOP_FEDERATION."""
     # Prepare
     manager = NoOpFederationManager()
 
     # Execute & Assert
     assert manager.has_node(1, NOOP_FEDERATION) is True
-    assert manager.has_node(999, "any_federation") is True
+    assert manager.has_node(999, NOOP_FEDERATION) is True
+
+    # Test that it raises ValueError for non-existent federation
+    with pytest.raises(ValueError):
+        manager.has_node(999, "any_federation")
 
 
 def test_get_federations() -> None:
@@ -188,6 +200,8 @@ def test_get_federations() -> None:
 
     # Execute
     result = manager.get_federations("any_aid")
+    result2 = manager.get_federations(NOOP_FLWR_AID)
 
     # Assert
-    assert result == [NOOP_FEDERATION]
+    assert len(result) == 0
+    assert result2 == [NOOP_FEDERATION]
