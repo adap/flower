@@ -268,9 +268,9 @@ def _list_runs(stub: ControlStub) -> list[RunRow]:
     """List all runs."""
     with flwr_cli_grpc_exc_handler():
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
-    run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
+    runs = [run_from_proto(proto) for proto in res.run_dict.values()]
 
-    return format_runs(run_dict, res.now)
+    return format_runs(runs, res.now)
 
 
 def _display_one_run(stub: ControlStub, run_id: int) -> list[RunRow]:
@@ -281,6 +281,5 @@ def _display_one_run(stub: ControlStub, run_id: int) -> list[RunRow]:
         # This won't be reached as an gRPC error is raised if run_id is invalid
         raise ValueError(f"Run ID {run_id} not found")
 
-    run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
-
-    return format_runs(run_dict, res.now)
+    runs = [run_from_proto(proto) for proto in res.run_dict.values()]
+    return format_runs(runs, res.now)
