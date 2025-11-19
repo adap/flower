@@ -18,6 +18,8 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from flwr.common.typing import Federation
+
 if TYPE_CHECKING:
     from flwr.server.superlink.linkstate.linkstate import LinkState
 
@@ -56,3 +58,7 @@ class FederationManager(ABC):
     @abstractmethod
     def get_federations(self, flwr_aid: str) -> list[str]:
         """Get federations of which the account is a member."""
+
+    @abstractmethod
+    def get_details(self, federation: str) -> Federation:
+        """Get details of the federation."""
