@@ -108,7 +108,7 @@ def run(
         if (app_str := str(app)).startswith("@"):
             if not re.match(APP_ID_PATTERN, app_str):
                 raise typer.BadParameter(
-                    "Invalid remote app ID. Expected format: '@account/app'."
+                    "Invalid remote app ID. Expected format: '@account_name/app_name'."
                 )
             app_id = app_str
         is_remote_app = app_id is not None
@@ -212,7 +212,7 @@ def _run_with_control_api(
             if is_remote_app:
                 typer.secho(
                     "❌ Failed to start run. Please check that the provided "
-                    "app identifier (@account/app) is correct.",
+                    "app identifier (@account_name/app_name) is correct.",
                     fg=typer.colors.RED,
                 )
             else:
