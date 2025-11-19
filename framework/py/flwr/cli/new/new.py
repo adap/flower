@@ -214,7 +214,7 @@ if not re.match(APP_VERSION_PATTERN, app_version):
     m = re.match(APP_ID_PATTERN, app_id)
     if not m:
         raise typer.BadParameter(
-            "Invalid remote app ID. Expected format: '@account/app'."
+            "Invalid remote app ID. Expected format: '@account_name/app_name'."
         )
     app_name = m.group("app")
 
