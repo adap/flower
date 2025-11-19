@@ -202,8 +202,7 @@ def download_remote_app_via_api(app_spec: str) -> None:
         app_id, app_version = app_spec.split("==")
 
         # Validate app version format
-        m = re.match(APP_VERSION_PATTERN, app_version)
-        if not m:
+if not re.match(APP_VERSION_PATTERN, app_version):
             raise typer.BadParameter(
                 "Invalid app version. Expected format: x.x.x (digits only)."
             )
