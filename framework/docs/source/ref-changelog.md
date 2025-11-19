@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.24.0 (2025-11-19)
+## v1.24.0 (2025-11-20)
 
 ### Thanks to our contributors
 
