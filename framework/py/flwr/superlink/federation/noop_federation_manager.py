@@ -14,7 +14,9 @@
 # ==============================================================================
 """NoOp implementation of FederationManager."""
 
+
 from flwr.common.constant import NOOP_FLWR_AID
+from flwr.common.typing import Federation
 from flwr.supercore.constant import NOOP_FEDERATION
 
 from .federation_manager import FederationManager
@@ -50,3 +52,20 @@ class NoOpFederationManager(FederationManager):
         if flwr_aid != NOOP_FLWR_AID:
             return []
         return [NOOP_FEDERATION]
+
+    def get_details(self, federation: str) -> Federation:
+        """Get details of the federation."""
+        if federation != NOOP_FEDERATION:
+            raise ValueError(f"Federation '{federation}' does not exist.")
+
+        run_ids = self.linkstate.get_run_ids(flwr_aid=NOOP_FLWR_AID)
+        nodes = list(self.linkstate.get_node_info(owner_aids=[NOOP_FLWR_AID]))
+        runs = [
+            run for run_id in run_ids if (run := self.linkstate.get_run(run_id=run_id))
+        ]
+        return Federation(
+            name=NOOP_FEDERATION,
+            member_aids=[NOOP_FLWR_AID],
+            nodes=nodes,
+            runs=runs,
+        )
