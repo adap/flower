@@ -17,7 +17,7 @@
 
 import io
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 from rich.console import Console
@@ -127,7 +127,7 @@ def _show_federation(
     runs = [run_from_proto(run_proto) for run_proto in fed_proto.runs]
     formatted_runs = format_runs(runs, res.now)
 
-    return fed_proto.member_aids, fed_proto.nodes, formatted_runs
+    return list(fed_proto.member_aids), list(fed_proto.nodes), formatted_runs
 
 
 def _to_members_table(members_aid: list[str]) -> Table:
@@ -217,9 +217,9 @@ def _to_json(
     members: list[str], nodes: list[NodeInfo], runs: list[RunRow]
 ) -> list[list[dict[str, str]]]:
     """Format the provided federation information to JSON serializable format."""
-    members_list: list[dict[str, str]] = []
-    nodes_list: list[dict[str, str]] = []
-    runs_list: list[dict[str, str]] = []
+    members_list: list[dict[str, Any]] = []
+    nodes_list: list[dict[str, Any]] = []
+    runs_list: list[dict[str, Any]] = []
 
     for member in members:
         members_list.append({"member_id": member, "role": "Member"})
