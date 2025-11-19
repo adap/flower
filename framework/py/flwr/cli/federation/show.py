@@ -132,10 +132,10 @@ def _show_federation(
 
 def _to_members_table(members_aid: list[str]) -> Table:
     """Format the provided list of federation members as a rich Table."""
-    table = Table(header_style="bold cyan", show_lines=True)
+    table = Table(title="Federation Members", header_style="bold cyan", show_lines=True)
 
     table.add_column(
-        Text("Member ID", justify="center"), style="bright_black", no_wrap=True
+        Text("Account ID", justify="center"), style="bright_black", no_wrap=True
     )
     table.add_column(Text("Role", justify="center"), style="bright_black", no_wrap=True)
 
@@ -147,7 +147,9 @@ def _to_members_table(members_aid: list[str]) -> Table:
 
 def _to_nodes_table(nodes: list[NodeInfo]) -> Table:
     """Format the provided list of federation nodes as a rich Table."""
-    table = Table(header_style="bold cyan", show_lines=True)
+    table = Table(
+        title="SuperNodes in the Federation", header_style="bold cyan", show_lines=True
+    )
 
     # Add columns
     table.add_column(
@@ -187,7 +189,9 @@ def _to_nodes_table(nodes: list[NodeInfo]) -> Table:
 
 def _to_runs_table(run_list: list[RunRow]) -> Table:
     """Format the provided list of federation runs as a rich Table."""
-    table = Table(header_style="bold cyan", show_lines=True)
+    table = Table(
+        title="Runs in the Federation", header_style="bold cyan", show_lines=True
+    )
 
     # Add columns
     table.add_column(Text("Run ID", justify="center"), no_wrap=True)
