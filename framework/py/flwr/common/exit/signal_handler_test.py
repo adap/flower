@@ -21,7 +21,11 @@ import unittest
 from unittest.mock import Mock, patch
 
 from ..telemetry import EventType
-from .exit_handler import add_exit_handler, registered_exit_handlers, trigger_exit_handlers
+from .exit_handler import (
+    add_exit_handler,
+    registered_exit_handlers,
+    trigger_exit_handlers,
+)
 from .signal_handler import register_signal_handlers
 
 
