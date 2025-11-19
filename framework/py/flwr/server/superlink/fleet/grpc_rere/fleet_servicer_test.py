@@ -181,12 +181,12 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
             self.state.acknowledge_node_heartbeat(node_id, heartbeat_interval=30)
         return node_id
 
-    def _create_dummy_run(self, running: bool = True) -> int:
+    def _create_dummy_run(self, running: bool = True, fab_hash: str = "") -> int:
         """Create a dummy run."""
         run_id = self.state.create_run(
             fab_id="",
             fab_version="",
-            fab_hash="",
+            fab_hash=fab_hash,
             override_config={},
             federation=NOOP_FEDERATION,
             federation_options=ConfigRecord(),
@@ -504,12 +504,9 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         node_id = self._create_dummy_node()
         fab_content = b"content"
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
-        run_id = self.state.create_run(
-            "", "", fab_hash, {}, NOOP_FEDERATION, ConfigRecord(), ""
-        )
+        run_id = self._create_dummy_run(fab_hash=fab_hash)
 
         # Transition status to running. GetFab RPC is only allowed in running status.
-        self._transition_run_status(run_id, 2)
         request = GetFabRequest(
             node=Node(node_id=node_id), hash_str=fab_hash, run_id=run_id
         )
@@ -548,9 +545,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         node_id = self._create_dummy_node()
         fab_content = b"content"
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
-        run_id = self.state.create_run(
-            "", "", fab_hash, {}, NOOP_FEDERATION, ConfigRecord(), ""
-        )
+        run_id = self._create_dummy_run(running=False, fab_hash=fab_hash)
 
         self._transition_run_status(run_id, num_transitions)
 
@@ -563,12 +558,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         node_id = self._create_dummy_node()
         fab_content = b"content"
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
-        run_id = self.state.create_run(
-            "", "", fab_hash, {}, NOOP_FEDERATION, ConfigRecord(), ""
-        )
-
-        # Transition status to running
-        self._transition_run_status(run_id, 2)
+        run_id = self._create_dummy_run(fab_hash=fab_hash)
 
         # Mock federation manager to exclude the node
         mock_has_node = Mock(return_value=False)
