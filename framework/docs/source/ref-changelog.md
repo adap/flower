@@ -10,72 +10,27 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### What's new?
 
-- **Improve the `flwr list` view** ([#6117](https://github.com/adap/flower/pull/6117))
-
-  `flwr list` now shows fewer details by default, while providing expanded information when using the `--run-id` flag.
-
-- **Update CI workflows and development tooling** ([#5242](https://github.com/adap/flower/pull/5242), [#6053](https://github.com/adap/flower/pull/6053), [#6080](https://github.com/adap/flower/pull/6080), [#6089](https://github.com/adap/flower/pull/6089), [#6108](https://github.com/adap/flower/pull/6108), [#6129](https://github.com/adap/flower/pull/6129), [#6130](https://github.com/adap/flower/pull/6130), [#6131](https://github.com/adap/flower/pull/6131), [#6135](https://github.com/adap/flower/pull/6135), [#6138](https://github.com/adap/flower/pull/6138), [#6142](https://github.com/adap/flower/pull/6142), [#6144](https://github.com/adap/flower/pull/6144), [#6156](https://github.com/adap/flower/pull/6156))
-
 - **Add Python 3.13 support** ([#6116](https://github.com/adap/flower/pull/6116), [#6119](https://github.com/adap/flower/pull/6119), [#6132](https://github.com/adap/flower/pull/6132))
 
   `flwr` now supports Python 3.13, with CI and dataset tests updated accordingly and `ray` bumped to ensure compatibility.
 
+- **Improve the `flwr list` view** ([#6117](https://github.com/adap/flower/pull/6117))
+
+  `flwr list` now shows fewer details by default, while providing expanded information when using the `--run-id` flag.
+
+- **Extend federation commands and internal APIs** ([#6067](https://github.com/adap/flower/pull/6067), [#6068](https://github.com/adap/flower/pull/6068), [#6078](https://github.com/adap/flower/pull/6078), [#6082](https://github.com/adap/flower/pull/6082), [#6086](https://github.com/adap/flower/pull/6086), [#6087](https://github.com/adap/flower/pull/6087), [#6088](https://github.com/adap/flower/pull/6088), [#6090](https://github.com/adap/flower/pull/6090), [#6091](https://github.com/adap/flower/pull/6091), [#6092](https://github.com/adap/flower/pull/6092), [#6093](https://github.com/adap/flower/pull/6093), [#6094](https://github.com/adap/flower/pull/6094), [#6098](https://github.com/adap/flower/pull/6098), [#6103](https://github.com/adap/flower/pull/6103), [#6105](https://github.com/adap/flower/pull/6105), [#6121](https://github.com/adap/flower/pull/6121), [#6122](https://github.com/adap/flower/pull/6122), [#6143](https://github.com/adap/flower/pull/6143), [#6152](https://github.com/adap/flower/pull/6152), [#6153](https://github.com/adap/flower/pull/6153), [#6154](https://github.com/adap/flower/pull/6154))
+
+  These updates refine and extend the existing federation concept. `flwr federation show default` and `flwr federation list` now provide clearer visibility into SuperNodes and runs in the default federation. Internally, federation-related components are streamlined under a unified `FederationManager`, improving validation, error handling, and data flow.
+
 - **Improve import performance** ([#6102](https://github.com/adap/flower/pull/6102))
+
+- **Update CI workflows and development tooling** ([#5242](https://github.com/adap/flower/pull/5242), [#6053](https://github.com/adap/flower/pull/6053), [#6080](https://github.com/adap/flower/pull/6080), [#6089](https://github.com/adap/flower/pull/6089), [#6108](https://github.com/adap/flower/pull/6108), [#6129](https://github.com/adap/flower/pull/6129), [#6130](https://github.com/adap/flower/pull/6130), [#6131](https://github.com/adap/flower/pull/6131), [#6135](https://github.com/adap/flower/pull/6135), [#6138](https://github.com/adap/flower/pull/6138), [#6142](https://github.com/adap/flower/pull/6142), [#6144](https://github.com/adap/flower/pull/6144), [#6156](https://github.com/adap/flower/pull/6156))
 
 - **Update documentation** ([#6115](https://github.com/adap/flower/pull/6115), [#6081](https://github.com/adap/flower/pull/6081), [#6110](https://github.com/adap/flower/pull/6110), [#6137](https://github.com/adap/flower/pull/6137), [#6146](https://github.com/adap/flower/pull/6146))
 
-### General
+- **General improvements** ([#6077](https://github.com/adap/flower/pull/6077), [#6083](https://github.com/adap/flower/pull/6083), [#6084](https://github.com/adap/flower/pull/6084), [#6095](https://github.com/adap/flower/pull/6095), [#6100](https://github.com/adap/flower/pull/6100), [#6109](https://github.com/adap/flower/pull/6109), [#6114](https://github.com/adap/flower/pull/6114), [#6123](https://github.com/adap/flower/pull/6123), [#6127](https://github.com/adap/flower/pull/6127), [#6139](https://github.com/adap/flower/pull/6139), [#6140](https://github.com/adap/flower/pull/6140), [#6150](https://github.com/adap/flower/pull/6150), [#6151](https://github.com/adap/flower/pull/6151), [#6157](https://github.com/adap/flower/pull/6157), [#6160](https://github.com/adap/flower/pull/6160), [#6162](https://github.com/adap/flower/pull/6162))
 
-- **refactor(framework): Update** `torch` **template** ([#6109](https://github.com/adap/flower/pull/6109))
-- **refactor(framework): Improve** `flwr_exit` **command** ([#6150](https://github.com/adap/flower/pull/6150))
-- **refactor(framework): Replace** `OrderedDict` **with** `dict` **in** `ArrayRecord` ([#6140](https://github.com/adap/flower/pull/6140))
-- **fix(framework): Update** `app_id` **variable name** ([#6095](https://github.com/adap/flower/pull/6095))
-- **refactor(framework): Add app version & refactor downloading function for flwr new** ([#6100](https://github.com/adap/flower/pull/6100))
-- **fix(framework): Prevent SuperNode from hanging in** `grpc-adapter` **when handling the exit command** ([#6151](https://github.com/adap/flower/pull/6151))
-- **refactor(framework): Log** `SuperNode` **id upon connection** ([#6157](https://github.com/adap/flower/pull/6157))
-- **refactor(framework): Improve** `ContextVar` **handling** ([#6139](https://github.com/adap/flower/pull/6139))
-- **refactor(datasets): Remove warning when untested dataset is used** ([#6127](https://github.com/adap/flower/pull/6127))
-- **refactor(framework): Send** `flwr` **version in** `flwr new` ([#6114](https://github.com/adap/flower/pull/6114))
-- **refactor(framework): Move run formatting functions to its own module** ([#6123](https://github.com/adap/flower/pull/6123))
-- **feat(framework): Update SuperNode to support trusted entities verification** ([#6084](https://github.com/adap/flower/pull/6084))
-- **feat(framework): Add fab error code** ([#6077](https://github.com/adap/flower/pull/6077))
-- **feat(framework): Update** `flwr run` ([#6083](https://github.com/adap/flower/pull/6083))
-- **fix(framework): Fix typo in** `ClientAppIoServicer` ([#6162](https://github.com/adap/flower/pull/6162))
-- **refactor(framework): Fix run creation in tests and the** `flwr_exit` **issue in** `signal_handler_test.py` ([#6160](https://github.com/adap/flower/pull/6160))
-
-
-### multi-federation
-
-- **feat(framework): Introduce** `flwr federation show` **command** ([#6143](https://github.com/adap/flower/pull/6143))
-- **feat(framework): Filter nodes by federation in** `LinkState` ([#6094](https://github.com/adap/flower/pull/6094))
-- **refactor(framework): Record** `account_name` **in** `NodeInfo` ([#6087](https://github.com/adap/flower/pull/6087))
-- **refactor(framework): Check federation exists in** `NoOpFederationManager` ([#6154](https://github.com/adap/flower/pull/6154))
-- **feat(framework): Prepare** `flwr federation list` ([#6103](https://github.com/adap/flower/pull/6103))
-- **refactor(framework): Do** `grcp.abort` **upon exception in** `ControlServicer.StartRun` ([#6093](https://github.com/adap/flower/pull/6093))
-- **feat(framework): Prepare usage of** `NoOpFederationManager` ([#6068](https://github.com/adap/flower/pull/6068))
-- **refactor(framework): Pass** `FederationManager` **to** `LinkState` ([#6082](https://github.com/adap/flower/pull/6082))
-- **feat(framework): Add** `federation: str` **to** `Run` **dataclass** ([#6086](https://github.com/adap/flower/pull/6086))
-- **feat(framework): Read** `federation` **field from TOML when executing** `flwr run` ([#6091](https://github.com/adap/flower/pull/6091))
-- **refactor(framework): Introduce** `federation` **string in** `Run` **and** `StartRunRequest` ([#6078](https://github.com/adap/flower/pull/6078))
-- **feat(framework): Introduce** `flwr federation list` **command** ([#6105](https://github.com/adap/flower/pull/6105))
-- **refactor(framework): Fix** `flwr federation ls` ([#6122](https://github.com/adap/flower/pull/6122))
-- **feat(framework): Introduce base** `FederationManager` ([#6067](https://github.com/adap/flower/pull/6067))
-- **feat(framework): Add** `federation` **argument to** `LinkState.create_run` ([#6090](https://github.com/adap/flower/pull/6090))
-- **feat(framework): Prepare** `flwr federation show` **in** `Control API` ([#6121](https://github.com/adap/flower/pull/6121))
-- **refactor(framework): Change signature in** `FederationManager` ([#6088](https://github.com/adap/flower/pull/6088))
-- **feat(framework): Check SuperNode's federation affiliation in Fleet API** ([#6098](https://github.com/adap/flower/pull/6098))
-- **refactor(framework): Use** `FederationManager` **in** `ControlServicer.StartRun` ([#6092](https://github.com/adap/flower/pull/6092))
-- **feat(framework): Make** `LinkState` **accessible in** `FederationManager` ([#6152](https://github.com/adap/flower/pull/6152))
-- **feat(framework): Introduce** `FederationManager.get_details` ([#6153](https://github.com/adap/flower/pull/6153))
-
-### DELETE THIS (Flower intelligence)
-
-- **build(deps-dev): Bump js-yaml from 4.1.0 to 4.1.1 in /intelligence/ts/examples/nextjs-web-chats** ([#6141](https://github.com/adap/flower/pull/6141))
-- **build(deps): Bump min-document from 2.19.0 to 2.19.2 in /intelligence/ts/examples/nextjs-web-chats** ([#6120](https://github.com/adap/flower/pull/6120))
-- **build(deps): Bump min-document from 2.19.0 to 2.19.2 in /intelligence/ts/examples/hello-world-js** ([#6111](https://github.com/adap/flower/pull/6111))
-- **build(deps): Bump glob and minizlib in /intelligence/ts/examples/nextjs-web-chats** ([#6145](https://github.com/adap/flower/pull/6145))
-- **build(deps): Bump glob from 10.4.5 to 10.5.0 in /intelligence/ts/examples/hello-world-js** ([#6155](https://github.com/adap/flower/pull/6155))
-- **build(deps): Bump min-document from 2.19.0 to 2.19.2 in /intelligence/ts/templates/node-js** ([#6128](https://github.com/adap/flower/pull/6128))
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
 ### Incompatible changes
 
