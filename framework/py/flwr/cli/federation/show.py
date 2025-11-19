@@ -40,6 +40,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
+from flwr.supercore.constant import NOOP_FEDERATION
 
 from ..run_utils import RunRow, format_runs
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
@@ -78,14 +79,14 @@ def show(  # pylint: disable=R0914, R0913, R0917
             federation, config
         )
         exit_if_no_address(federation_config, "federation show")
-        federation_name = federation_config.get("federation", "")
+        real_federation: str = federation_config.get("federation", NOOP_FEDERATION)
         channel = None
         try:
             auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
             channel = init_channel(app, federation_config, auth_plugin)
             stub = ControlStub(channel)
-            typer.echo(f"📄 Showing '{federation_name}' federation ...")
-            members, nodes, runs = _show_federation(stub, federation_name)
+            typer.echo(f"📄 Showing '{real_federation}' federation ...")
+            members, nodes, runs = _show_federation(stub, real_federation)
             restore_output()
             if output_format == CliOutputFormat.JSON:
                 Console().print_json(data=_to_json(members, nodes, runs))
