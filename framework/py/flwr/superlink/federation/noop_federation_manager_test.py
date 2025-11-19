@@ -15,7 +15,7 @@
 """Tests for NoOpFederationManager."""
 
 
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 
 import pytest
 
@@ -31,7 +31,7 @@ def test_get_details_with_valid_federation() -> None:
     """Test get_details returns correct Federation details."""
     # Prepare
     manager = NoOpFederationManager()
-    mock_linkstate = MagicMock()
+    mock_linkstate = Mock()
     manager.linkstate = mock_linkstate
 
     # Mock data
@@ -108,7 +108,7 @@ def test_get_details_with_invalid_federation() -> None:
     """Test get_details raises ValueError for invalid federation."""
     # Prepare
     manager = NoOpFederationManager()
-    mock_linkstate = MagicMock()
+    mock_linkstate = Mock()
     manager.linkstate = mock_linkstate
     invalid_federation = "invalid_federation"
 
@@ -121,7 +121,7 @@ def test_get_details_with_no_runs() -> None:
     """Test get_details returns empty runs list when no runs exist."""
     # Prepare
     manager = NoOpFederationManager()
-    mock_linkstate = MagicMock()
+    mock_linkstate = Mock()
     manager.linkstate = mock_linkstate
 
     # Configure mocks for empty runs
