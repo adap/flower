@@ -22,6 +22,8 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Improve import performance** ([#6102](https://github.com/adap/flower/pull/6102))
 
+- **Update documentation** ([#6115](https://github.com/adap/flower/pull/6115), [#6081](https://github.com/adap/flower/pull/6081), [#6110](https://github.com/adap/flower/pull/6110), [#6137](https://github.com/adap/flower/pull/6137), [#6146](https://github.com/adap/flower/pull/6146))
+
 ### General
 
 - **refactor(framework): Update** `torch` **template** ([#6109](https://github.com/adap/flower/pull/6109))
@@ -38,17 +40,13 @@ We would like to give our special thanks to all the contributors who made the ne
 - **feat(framework): Update SuperNode to support trusted entities verification** ([#6084](https://github.com/adap/flower/pull/6084))
 - **feat(framework): Add fab error code** ([#6077](https://github.com/adap/flower/pull/6077))
 - **feat(framework): Update** `flwr run` ([#6083](https://github.com/adap/flower/pull/6083))
+- **fix(framework): Fix typo in** `ClientAppIoServicer` ([#6162](https://github.com/adap/flower/pull/6162))
+- **refactor(framework): Fix run creation in tests and the** `flwr_exit` **issue in** `signal_handler_test.py` ([#6160](https://github.com/adap/flower/pull/6160))
 
-### Documentation improvements
-
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6115](https://github.com/adap/flower/pull/6115))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6081](https://github.com/adap/flower/pull/6081))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6110](https://github.com/adap/flower/pull/6110))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6137](https://github.com/adap/flower/pull/6137))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6146](https://github.com/adap/flower/pull/6146))
 
 ### multi-federation
 
+- **feat(framework): Introduce** `flwr federation show` **command** ([#6143](https://github.com/adap/flower/pull/6143))
 - **feat(framework): Filter nodes by federation in** `LinkState` ([#6094](https://github.com/adap/flower/pull/6094))
 - **refactor(framework): Record** `account_name` **in** `NodeInfo` ([#6087](https://github.com/adap/flower/pull/6087))
 - **refactor(framework): Check federation exists in** `NoOpFederationManager` ([#6154](https://github.com/adap/flower/pull/6154))
@@ -68,6 +66,7 @@ We would like to give our special thanks to all the contributors who made the ne
 - **feat(framework): Check SuperNode's federation affiliation in Fleet API** ([#6098](https://github.com/adap/flower/pull/6098))
 - **refactor(framework): Use** `FederationManager` **in** `ControlServicer.StartRun` ([#6092](https://github.com/adap/flower/pull/6092))
 - **feat(framework): Make** `LinkState` **accessible in** `FederationManager` ([#6152](https://github.com/adap/flower/pull/6152))
+- **feat(framework): Introduce** `FederationManager.get_details` ([#6153](https://github.com/adap/flower/pull/6153))
 
 ### DELETE THIS (Flower intelligence)
 
