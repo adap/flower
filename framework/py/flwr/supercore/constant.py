@@ -24,7 +24,7 @@ EXEC_PLUGIN_SECTION = "exec_plugin"
 FLWR_IN_MEMORY_DB_NAME = ":flwr-in-memory:"
 
 # Constants for Hub
-APP_ID_PATTERN = r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$"
+APP_ID_PATTERN = r"^@(?P<account>[^/]+)/(?P<app>[^/]+)$"
 APP_VERSION_PATTERN = r"^\d+\.\d+\.\d+$"
 PLATFORM_API_URL = "https://api.flower.ai/v1"
 

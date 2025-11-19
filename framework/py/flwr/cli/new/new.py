@@ -195,28 +195,26 @@ def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
     return buf
 
 
-def download_remote_app_via_api(app_str: str) -> None:
+def download_remote_app_via_api(app_spec: str) -> None:
     """Download App from Platform API."""
     # Extract app version info
-    if "==" in app_str:
-        app_id = app_str.split("==")[0]
-        version = app_str.split("==")[1]
+    if "==" in app_spec:
+        app_id, app_version = app_spec.split("==")
 
         # Validate app version format
-        m = re.match(APP_VERSION_PATTERN, version)
-        if not m:
+        if not re.match(APP_VERSION_PATTERN, app_version):
             raise typer.BadParameter(
                 "Invalid app version. Expected format: x.x.x (digits only)."
             )
     else:
-        app_id = app_str
-        version = None
+        app_id = app_spec
+        app_version = None
 
     # Validate app_id format
     m = re.match(APP_ID_PATTERN, app_id)
     if not m:
         raise typer.BadParameter(
-            "Invalid remote app ID. Expected format: '@user_name/app_name'."
+            "Invalid remote app ID. Expected format: '@account_name/app_name'."
         )
     app_name = m.group("app")
 
@@ -240,7 +238,7 @@ def download_remote_app_via_api(app_str: str) -> None:
     )
     # Fetch ZIP downloading URL
     url = f"{PLATFORM_API_URL}/hub/fetch-zip"
-    presigned_url = request_download_link(app_id, version, url, "zip_url")
+    presigned_url = request_download_link(app_id, app_version, url, "zip_url")
 
     print(
         typer.style(
@@ -269,7 +267,8 @@ def new(
     app_name: Annotated[
         str | None,
         typer.Argument(
-            help="Flower app name. For remote apps, use the format '@user/app==1.0.0'. "
+            help="Flower app name. For remote apps, use the format "
+            "'@account_name/app_name' or '@account_name/app_name==x.y.z'. "
             "Version is optional (defaults to latest)."
         ),
     ] = None,
