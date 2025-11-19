@@ -37,7 +37,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 from flwr.server.superlink.utils import _STATUS_TO_MSG
-from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
 from flwr.supercore.ffs import FfsFactory
 from flwr.superlink.federation import NoOpFederationManager
 
@@ -92,7 +92,9 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
             _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
 
     def _create_dummy_run(self) -> int:
-        run_id = self.state.create_run("", "", "", {}, "", ConfigRecord(), "")
+        run_id = self.state.create_run(
+            "", "", "", {}, NOOP_FEDERATION, ConfigRecord(), ""
+        )
         return run_id
 
     def test_push_simulation_outputs_successful_if_running(self) -> None:
