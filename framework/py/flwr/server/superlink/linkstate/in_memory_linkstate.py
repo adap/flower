@@ -96,6 +96,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.node_public_keys: set[bytes] = set()
 
         self.lock = threading.RLock()
+        federation_manager.linkstate = self
         self._federation_manager = federation_manager
 
     @property

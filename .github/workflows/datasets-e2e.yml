@@ -41,7 +41,7 @@ jobs:
         working-directory: datasets/e2e/${{ matrix.directory }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:

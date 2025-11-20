@@ -412,7 +412,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
 
 
 def request_download_link(
-    app_id: str, version: str | None, in_url: str, out_url: str
+    app_id: str, app_version: str | None, in_url: str, out_url: str
 ) -> str:
     """Request download link from Flower platform API."""
     headers = {
@@ -421,7 +421,7 @@ def request_download_link(
     }
     body = {
         "app_id": app_id,  # send raw string of app_id
-        "app_version": version,
+        "app_version": app_version,
         "flwr_version": flwr_version,
     }
     try:

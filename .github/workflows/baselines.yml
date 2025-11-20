@@ -23,7 +23,7 @@ jobs:
     outputs:
       baselines: ${{ steps.filter.outputs.changes }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - shell: bash
         run: |
@@ -69,7 +69,7 @@ jobs:
       matrix:
         baseline: ${{ fromJSON(needs.changes.outputs.baselines) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
