@@ -111,12 +111,13 @@ def run(
                     "Invalid remote app ID. Expected format: '@account_name/app_name'."
                 )
             app_id = app_str
+            app = Path(".")
         is_remote_app = app_id is not None
 
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
         # Disable the validation for remote apps
-        pyproject_path = app / "pyproject.toml" if not is_remote_app else None
+        pyproject_path = app / "pyproject.toml"
         # `./pyproject.toml` will be loaded when `pyproject_path` is None
         config, errors, warnings = load_and_validate(
             pyproject_path, check_module=not is_remote_app
