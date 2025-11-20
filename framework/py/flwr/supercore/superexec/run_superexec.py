@@ -16,7 +16,7 @@
 
 
 import time
-from logging import WARN
+from logging import DEBUG, WARN
 from typing import Any
 
 from flwr.common.config import get_flwr_dir
@@ -139,11 +139,13 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
 
             # Apply for a token if a run ID was selected
             if run_id is not None:
+                log(DEBUG, "Requested token for run ID %d", run_id)
                 tk_req = RequestTokenRequest(run_id=run_id)
                 tk_res = stub.RequestToken(tk_req)
 
                 # Launch the app if a token was granted; do nothing if not
                 if tk_res.token:
+                    log(DEBUG, "Received token: %s for run ID %d", tk_res.token, run_id)
                     plugin.launch_app(token=tk_res.token, run_id=run_id)
 
             # Sleep for a while before checking again

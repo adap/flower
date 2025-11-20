@@ -140,6 +140,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Attempt to create a token for the provided run ID
         token = state.create_token(request.run_id)
 
+        if token:
+            log(DEBUG, "Generated token for run ID %d", request.run_id)
+
         # Return the token
         return RequestTokenResponse(token=token or "")
 
