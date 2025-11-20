@@ -220,8 +220,9 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         if request.messages_list:
             log(
                 INFO,
-                "[Fleet.PushMessages] Push replies from node_id=%s",
+                "[Fleet.PushMessages] Push replies from node_id=%s, message ID=%s",
                 request.messages_list[0].metadata.src_node_id,
+                request.messages_list[0].metadata.message_id,
             )
         else:
             log(INFO, "[Fleet.PushMessages] No replies to push")

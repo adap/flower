@@ -15,6 +15,9 @@
 """Utils for ObjectStore."""
 
 
+from logging import DEBUG
+
+from flwr.common.logger import log
 from flwr.proto.appio_pb2 import PushAppMessagesRequest  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import PushMessagesRequest  # pylint: disable=E0611
 
@@ -35,6 +38,12 @@ def store_mapping_and_register_objects(
     for object_tree in request.message_object_trees:
         # Preregister
         unavailable_obj_ids = store.preregister(run_id, object_tree)
+        log(
+            DEBUG,
+            "Pre-registered object ID: %s, unavailable objects: %s",
+            object_tree.object_id,
+            unavailable_obj_ids,
+        )
         # Keep track of objects that need to be pushed
         objects_to_push |= set(unavailable_obj_ids)
 

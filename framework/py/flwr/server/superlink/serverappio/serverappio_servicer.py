@@ -210,6 +210,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             )
             # Store
             message_id: str | None = state.store_message_ins(message=message)
+            log(DEBUG, "Stored message ID: %s", message_id)
             message_ids.append(message_id)
 
         # Store Message object to descendants mapping and preregister objects
@@ -283,6 +284,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 obj_tree = store.get_object_tree(msg_object_id)
                 # Add message and object tree to the response
                 messages_list.append(message_to_proto(msg))
+                log(DEBUG, "Pulled message ID: %s", msg_object_id)
                 trees.append(obj_tree)
             except NoObjectInStoreError as e:
                 log(ERROR, e.message)
@@ -463,7 +465,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         self, request: PushObjectRequest, context: grpc.ServicerContext
     ) -> PushObjectResponse:
         """Push an object to the ObjectStore."""
-        log(DEBUG, "ServerAppIoServicer.PushObject")
+        log(DEBUG, "ServerAppIoServicer.PushObject: %s", request.object_id)
 
         # Init state and store
         state = self.state_factory.state()
@@ -499,7 +501,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         self, request: PullObjectRequest, context: grpc.ServicerContext
     ) -> PullObjectResponse:
         """Pull an object from the ObjectStore."""
-        log(DEBUG, "ServerAppIoServicer.PullObject")
+        log(DEBUG, "ServerAppIoServicer.PullObject: %s", request.object_id)
 
         # Init state and store
         state = self.state_factory.state()
@@ -533,7 +535,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         self, request: ConfirmMessageReceivedRequest, context: grpc.ServicerContext
     ) -> ConfirmMessageReceivedResponse:
         """Confirm message received."""
-        log(DEBUG, "ServerAppIoServicer.ConfirmMessageReceived")
+        log(
+            DEBUG,
+            "ServerAppIoServicer.ConfirmMessageReceived: %s",
+            request.message_object_id,
+        )
 
         # Init state and store
         state = self.state_factory.state()

@@ -317,6 +317,7 @@ class GrpcGrid(Grid):
                 res.messages_list, res.message_object_trees, strict=True
             ):
                 msg_id = msg_proto.metadata.message_id
+                log(DEBUG, "Pulling message ID: %s", msg_id)
                 try:
                     all_object_contents = pull_objects(
                         object_ids=[

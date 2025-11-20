@@ -20,8 +20,10 @@ import random
 import threading
 import time
 from collections.abc import Callable, Iterable, Iterator
+from logging import DEBUG
 from typing import TypeVar
 
+from flwr.common.logger import log
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 from .constant import (
@@ -257,6 +259,7 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
     err_to_raise: Exception | None = None
     early_stop = threading.Event()
     start = time.monotonic()
+    log(DEBUG, "Starting to pull objects: %s", object_ids)
 
     def pull_with_retries(object_id: str) -> None:
         """Attempt to pull a single object with retry and backoff."""
@@ -266,9 +269,11 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
 
         while not early_stop.is_set():
             try:
+                log(DEBUG, "Pulling object ID: %s (try %d)", object_id, tries + 1)
                 object_content = pull_object_fn(object_id)
                 with results_lock:
                     results[object_id] = object_content
+                    log(DEBUG, "Successfully pulled object ID: %s", object_id)
                 return
 
             except ObjectUnavailableError as err:
