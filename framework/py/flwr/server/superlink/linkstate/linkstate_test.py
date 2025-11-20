@@ -59,7 +59,7 @@ from flwr.server.superlink.linkstate import (
     LinkState,
     SqliteLinkState,
 )
-from flwr.supercore.constant import NodeStatus
+from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.federation import NoOpFederationManager
@@ -1737,7 +1737,7 @@ def create_dummy_run(  # pylint: disable=too-many-positional-arguments
     fab_version: str | None = "mock_fab_version",
     fab_hash: str | None = "mock_fab_hash",
     override_config: UserConfig | None = None,
-    federation: str = "mock_federation",
+    federation: str = NOOP_FEDERATION,
     federation_options: ConfigRecord | None = None,
     flwr_aid: str | None = "mock_flwr_aid",
 ) -> int:
