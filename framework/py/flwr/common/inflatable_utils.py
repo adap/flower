@@ -191,7 +191,16 @@ def push_object_contents_from_iterable(
         """Push a single object."""
         obj_id, obj_content = args
         # Push the object using the provided function
-        push_object_fn(obj_id, obj_content)
+        while True:
+            try:
+                push_object_fn(obj_id, obj_content)
+                break
+            except Exception as err:
+                log(
+                    DEBUG,
+                    f"Failed to push object ID: {obj_id} with error: {err!r}",
+                )
+            time.sleep(2)
         log(DEBUG, "Pushed object ID: %s", obj_id)
 
     # Push all object contents concurrently
