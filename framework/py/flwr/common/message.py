@@ -105,7 +105,7 @@ class Message(InflatableObject):
     """
 
     @overload
-    def __init__(  # pylint: disable=too-many-arguments  # noqa: E704
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         content: RecordDict,
         dst_node_id: int,
@@ -116,12 +116,12 @@ class Message(InflatableObject):
     ) -> None: ...
 
     @overload
-    def __init__(  # noqa: E704
+    def __init__(
         self, content: RecordDict, *, reply_to: Message, ttl: float | None = None
     ) -> None: ...
 
     @overload
-    def __init__(  # noqa: E704
+    def __init__(
         self, error: Error, *, reply_to: Message, ttl: float | None = None
     ) -> None: ...
 
