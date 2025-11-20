@@ -108,7 +108,13 @@ class TestControlServicer(unittest.TestCase):
 
     def _create_dummy_run(self, flwr_aid: str | None) -> int:
         return self.state.create_run(
-            "flwr/demo", "v0.0.1", "hash123", {}, "mock-fed", ConfigRecord(), flwr_aid
+            "flwr/demo",
+            "v0.0.1",
+            "hash123",
+            {},
+            NOOP_FEDERATION,
+            ConfigRecord(),
+            flwr_aid,
         )
 
     def test_start_run(self) -> None:
@@ -328,7 +334,13 @@ class TestControlServicerAuth(unittest.TestCase):
 
     def _create_dummy_run(self, flwr_aid: str | None) -> int:
         return self.state.create_run(
-            "flwr/demo", "v0.0.1", "hash123", {}, "mock-fed", ConfigRecord(), flwr_aid
+            "flwr/demo",
+            "v0.0.1",
+            "hash123",
+            {},
+            NOOP_FEDERATION,
+            ConfigRecord(),
+            flwr_aid,
         )
 
     def make_context(self) -> MagicMock:

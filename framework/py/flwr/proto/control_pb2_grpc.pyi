@@ -99,6 +99,12 @@ class ControlStub:
     ]
     """List Federations"""
 
+    ShowFederation: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.ShowFederationRequest,
+        flwr.proto.control_pb2.ShowFederationResponse,
+    ]
+    """Show Federation"""
+
 class ControlAsyncStub:
     StartRun: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.StartRunRequest,
@@ -165,6 +171,12 @@ class ControlAsyncStub:
         flwr.proto.control_pb2.ListFederationsResponse,
     ]
     """List Federations"""
+
+    ShowFederation: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.ShowFederationRequest,
+        flwr.proto.control_pb2.ShowFederationResponse,
+    ]
+    """Show Federation"""
 
 class ControlServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -254,5 +266,13 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.control_pb2.ListFederationsResponse, collections.abc.Awaitable[flwr.proto.control_pb2.ListFederationsResponse]]:
         """List Federations"""
+
+    @abc.abstractmethod
+    def ShowFederation(
+        self,
+        request: flwr.proto.control_pb2.ShowFederationRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.control_pb2.ShowFederationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.ShowFederationResponse]]:
+        """Show Federation"""
 
 def add_ControlServicer_to_server(servicer: ControlServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

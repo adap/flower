@@ -6,7 +6,7 @@ case "$1" in
     rest_arg="--rest"
     server_app_address="http://localhost:9091"
     server_address="http://localhost:9093"
-    db_arg="--database :flwr-in-memory-state:"
+    db_arg="--database :flwr-in-memory:"
     ;;
   sqlite)
     rest_arg=""
@@ -18,7 +18,7 @@ case "$1" in
     rest_arg=""
     server_address="127.0.0.1:9092"
     server_app_address="127.0.0.1:9091"
-    db_arg="--database :flwr-in-memory-state:"
+    db_arg="--database :flwr-in-memory:"
     ;;
 esac
 

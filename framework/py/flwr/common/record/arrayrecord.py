@@ -127,20 +127,20 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
     """
 
     @overload
-    def __init__(self) -> None: ...  # noqa: E704
+    def __init__(self) -> None: ...
 
     @overload
-    def __init__(  # noqa: E704
+    def __init__(
         self, array_dict: dict[str, Array], *, keep_input: bool = True
     ) -> None: ...
 
     @overload
-    def __init__(  # noqa: E704
+    def __init__(
         self, numpy_ndarrays: list[NDArray], *, keep_input: bool = True
     ) -> None: ...
 
     @overload
-    def __init__(  # noqa: E704
+    def __init__(
         self,
         # `Any` is required for PyTorch state dict because they are not strongly typed
         torch_state_dict: dict[str, torch.Tensor] | dict[str, Any],

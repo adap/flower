@@ -67,6 +67,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsResponse,
     RegisterNodeRequest,
     RegisterNodeResponse,
+    ShowFederationRequest,
+    ShowFederationResponse,
     StartRunRequest,
     StartRunResponse,
     StopRunRequest,
@@ -559,6 +561,44 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         return ListFederationsResponse(
             federations=[Federation(name=fed) for fed in federations]
+        )
+
+    def ShowFederation(
+        self, request: ShowFederationRequest, context: grpc.ServicerContext
+    ) -> ShowFederationResponse:
+        """Show details of a specific Federation."""
+        log(INFO, "ControlServicer.ShowFederation")
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Get federations the account is a member of
+        federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
+
+        # Ensure flwr_aid is a member of the requested federation
+        federation = request.federation_name
+        if federation not in federations:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                f"Federation '{federation}' does not exist or you are "
+                "not a member of it.",
+            )
+
+        # Fetch federation details
+        details = state.federation_manager.get_details(federation)
+
+        # Build Federation proto object
+        federation_proto = Federation(
+            name=federation,
+            member_aids=details.member_aids,
+            nodes=details.nodes,
+            runs=[run_to_proto(run) for run in details.runs],
+        )
+        return ShowFederationResponse(
+            federation=federation_proto, now=now().isoformat()
         )
 
 

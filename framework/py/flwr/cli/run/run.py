@@ -46,7 +46,7 @@ from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_
 from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.supercore.constant import NOOP_FEDERATION
+from flwr.supercore.constant import APP_ID_PATTERN, NOOP_FEDERATION
 
 from ..log import start_stream
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
@@ -106,9 +106,9 @@ def run(
         # Determine if app is remote
         app_id = None
         if (app_str := str(app)).startswith("@"):
-            if not re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", app_str):
+            if not re.match(APP_ID_PATTERN, app_str):
                 raise typer.BadParameter(
-                    "Invalid remote app ID. Expected format: '@user_name/app_name'."
+                    "Invalid remote app ID. Expected format: '@account_name/app_name'."
                 )
             app_id = app_str
         is_remote_app = app_id is not None
@@ -212,7 +212,7 @@ def _run_with_control_api(
             if is_remote_app:
                 typer.secho(
                     "❌ Failed to start run. Please check that the provided "
-                    "app identifier (@user_name/app_name) is correct, "
+                    "app identifier (@account_name/app_name) is correct, "
                     "or that it is not using an unsupported gRPC adapter.",
                     fg=typer.colors.RED,
                 )
