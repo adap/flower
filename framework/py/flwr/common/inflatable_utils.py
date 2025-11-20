@@ -192,6 +192,7 @@ def push_object_contents_from_iterable(
         obj_id, obj_content = args
         # Push the object using the provided function
         push_object_fn(obj_id, obj_content)
+        log(DEBUG, "Pushed object ID: %s", obj_id)
 
     # Push all object contents concurrently
     num_workers = get_num_workers(max_concurrent_pushes)

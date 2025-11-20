@@ -23,7 +23,7 @@ import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from functools import partial
-from logging import ERROR, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from typing import cast
 
@@ -468,9 +468,11 @@ def _push_messages(
 
         # Send the message
         try:
+            log(DEBUG, "Message ID: %s", message.metadata.message_id)
             # Send the reply message with its ObjectTree
             # Get the IDs of objects to send
             ids_obj_to_send = send(message, object_tree)
+            log(DEBUG, "Object IDs to send: %s", ids_obj_to_send)
 
             # Push object contents from the ObjectStore
             run_id = message.metadata.run_id
