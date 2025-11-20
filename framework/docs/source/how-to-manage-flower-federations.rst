@@ -8,9 +8,9 @@
 
 .. note::
 
-    Flower Federation management is a new feature introduced in Flower 1.24.0. It gain
-    new functionality in subsequen releases. Changes to the functionality described in
-    this guide is also expected as the features provided via the ``flwr federation``
+    Flower Federation management is a new feature introduced in Flower 1.24.0. It gains
+    new functionality in subsequent releases. Changes to the functionality described in
+    this guide are also expected as the features provided via the ``flwr federation``
     commands mature.
 
 ###########################
@@ -43,8 +43,6 @@ In this case there is only one federation named ``default``:
 
 .. code-block:: shell
 
-    Loading project configuration...
-    Success
     📄 Listing federations...
     ┏━━━━━━━━━━━━┓
     ┃ Federation ┃
@@ -65,7 +63,7 @@ will be able to see the following information about a federation:
 - The runs executed via the federation.
 
 The ``flwr federation show`` command requires the name of the federation to inspect as
-an argument. this can be specified as part of your `pyproject.toml` configuration. For
+an argument. This can be specified as part of your ``pyproject.toml`` configuration. For
 example:
 
 .. code-block:: toml
@@ -82,6 +80,40 @@ by running:
 
 .. code-block:: shell
 
-    $ flwr federation show local-deployment
+    $ flwr federation show . local-deployment
 
-Assuming the ``default`` federation has ...
+Then, assuming that there are two ``SuperNodes`` connected and that three runs have been
+submitted through the federation, a representative output would be similar to:
+
+.. code-block:: shell
+
+    📄 Showing 'default' federation ...
+    Federation Members
+    ┏━━━━━━━━━━━━┳━━━━━━━━┓
+    ┃ Account ID ┃  Role  ┃
+    ┡━━━━━━━━━━━━╇━━━━━━━━┩
+    │ <id:none>  │ Member │
+    └────────────┴────────┘
+            SuperNodes in the Federation
+    ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━┓
+    ┃       Node ID        ┃    Owner    ┃ Status ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━┩
+    │ 1277309880252492806  │ <name:none> │ online │
+    ├──────────────────────┼─────────────┼────────┤
+    │ 13280365719060659445 │ <name:none> │ online │
+    └──────────────────────┴─────────────┴────────┘
+                                Runs in the Federation
+    ┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┓
+    ┃       Run ID        ┃             App            ┃       Status       ┃ Elapsed  ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━┩
+    │ 6665860355925098787 │ @flwrlabs/vision==1.0.0    │ finished:completed │ 00:00:24 │
+    ├─────────────────────┼────────────────────────────┼────────────────────┼──────────┤
+    │ 6896250833792831197 │ @flwrlabs/analytics==2.0.0 │ finished:stopped   │ 00:00:08 │
+    ├─────────────────────┼────────────────────────────┼────────────────────┼──────────┤
+    │ 3918106370412458251 │ @flwrlabs/llm==1.5.0       │ running            │ 00:00:02 │
+    └─────────────────────┴────────────────────────────┴────────────────────┴──────────┘
+
+Note how the ``SuperNodes`` table shows a subset of the information available via the
+command ``flwr supernode list`` (Learn more about this command in the
+:doc:`how-to-authenticate-supernodes` guide) . Similarly, the ``Runs`` table shows a
+subset of the information available via the ``flwr list`` command.
