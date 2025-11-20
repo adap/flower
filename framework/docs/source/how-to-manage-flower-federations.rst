@@ -17,7 +17,7 @@
  Manage Flower Federations
 ###########################
 
-A Flower federation is comprised by a set of users and some or all the SuperNodes they
+A Flower federation is comprised of a set of users and some or all the SuperNodes they
 own that are registered with the same SuperLink. Members of a Flower federation can
 execute runs (e.g. to federate the training of an AI model) across all SuperNodes that
 are part of it.
@@ -115,5 +115,5 @@ submitted through the federation, a representative output would be similar to:
 
 Note how the ``SuperNodes`` table shows a subset of the information available via the
 command ``flwr supernode list`` (Learn more about this command in the
-:doc:`how-to-authenticate-supernodes` guide) . Similarly, the ``Runs`` table shows a
+:doc:`how-to-authenticate-supernodes` guide). Similarly, the ``Runs`` table shows a
 subset of the information available via the ``flwr list`` command.
