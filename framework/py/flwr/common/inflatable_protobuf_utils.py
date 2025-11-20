@@ -16,7 +16,9 @@
 
 
 from collections.abc import Callable
+from logging import DEBUG
 
+from flwr.common.logger import log
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
     ConfirmMessageReceivedResponse,
@@ -100,6 +102,7 @@ def make_push_object_fn_protobuf(
         request = PushObjectRequest(
             node=node, run_id=run_id, object_id=object_id, object_content=object_content
         )
+        log(DEBUG, "Grpc pushing object ID: %s", object_id)
         response: PushObjectResponse = push_object_protobuf(request)
         if not response.stored:
             raise ObjectIdNotPreregisteredError(object_id)

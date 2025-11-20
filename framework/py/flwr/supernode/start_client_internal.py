@@ -457,8 +457,10 @@ def _push_messages(
             _obj_tree: ObjectTree, obj_id_set: set[str]
         ) -> Iterator[tuple[str, bytes]]:
             for tree in iterate_object_tree(_obj_tree):
+                log(DEBUG, "Considering object ID: %s", tree.object_id)
                 if tree.object_id not in obj_id_set:
                     continue
+                log(DEBUG, "Preparing to send object ID: %s", tree.object_id)
                 while (content := object_store.get(tree.object_id)) == b"":
                     # Wait for the content to be available
                     time.sleep(0.5)
