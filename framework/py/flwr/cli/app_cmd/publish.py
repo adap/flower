@@ -147,6 +147,13 @@ def _compile_gitignore(root: Path) -> Callable[[Path], bool]:
     return ignored
 
 
+def _get_publish_exclude_pathspec(root: Path) -> pathspec.PathSpec:
+    """Get the PathSpec for files to exclude based on .gitignore."""
+    # Exclude .flwr/ directory by default
+    exclude_patterns = [f"{FLWR_DIR}/"]
+    return get_exclude_pathspec()
+
+
 def _get_include_extensions_pathspec() -> pathspec.PathSpec:
     """Get the PathSpec for files to include."""
     return build_pathspec(ALLOWED_EXTS)

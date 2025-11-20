@@ -463,6 +463,37 @@ def get_exclude_pathspec(
     return build_pathspec(patterns)
 
 
+def load_gitignore_patterns(root: Path) -> list[str]:
+    """Load gitignore patterns from root/.gitignore file.
+
+    Parameters
+    ----------
+    root : Path
+        Root directory containing the .gitignore file.
+
+    Returns
+    -------
+    list[str]
+        List of gitignore patterns from root/.gitignore.
+        Returns empty list if .gitignore doesn't exist or can't be read.
+    """
+    gitignore_path = root / ".gitignore"
+    
+    if not gitignore_path.is_file():
+        return []
+    
+    try:
+        content = gitignore_path.read_text(encoding="utf-8")
+        patterns = [
+            line.strip()
+            for line in content.splitlines()
+            if line.strip() and not line.strip().startswith("#")
+        ]
+        return patterns
+    except (OSError, UnicodeDecodeError):
+        return []
+
+
 def to_bytes(content: bytes | Path) -> bytes:
     """Convert a Path or bytes object to bytes."""
     return content.read_bytes() if isinstance(content, Path) else content
