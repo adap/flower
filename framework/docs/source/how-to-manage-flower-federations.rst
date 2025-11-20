@@ -27,9 +27,9 @@ In this how-to guide, you will:
 - Learn how to see the federations you are part of.
 - Learn how to display information about a specific federation.
 
-*********************
+*****************
  List Federations
-*********************
+*****************
 
 With the |flower_cli_federation_link|_, you can easily inspect the federations your
 Flower account is part of:
@@ -50,9 +50,9 @@ In this case there is only one federation named ``default``:
     │ default    │
     └────────────┘
 
-*************************
+*********************
  Inspect a Federation
-*************************
+*********************
 
 You can inspect a specific federation by using the ``flwr federation show`` command,
 another command provided by the |flower_cli_federation_link|_. With this command, you
