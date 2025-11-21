@@ -17,7 +17,6 @@
 
 import hashlib
 import zipfile
-from collections.abc import Iterable
 from io import BytesIO
 from pathlib import Path
 from typing import Annotated, Any
@@ -37,7 +36,7 @@ from flwr.common.constant import (
 )
 
 from .config_utils import load_and_validate
-from .utils import is_valid_project_name
+from .utils import build_pathspec, is_valid_project_name, load_gitignore_patterns
 
 
 def write_to_zip(
@@ -267,11 +266,6 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     return fab_bytes
 
 
-def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:
-    """Build a PathSpec from a list of patterns."""
-    return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
-
-
 def get_fab_include_pathspec() -> pathspec.PathSpec:
     """Get the PathSpec for files to include in a FAB."""
     return build_pathspec(FAB_INCLUDE_PATTERNS)
@@ -285,5 +279,5 @@ def get_fab_exclude_pathspec(gitignore_content: bytes | None) -> pathspec.PathSp
     """
     patterns = list(FAB_EXCLUDE_PATTERNS)
     if gitignore_content:
-        patterns += gitignore_content.decode("UTF-8").splitlines()
+        patterns += load_gitignore_patterns(gitignore_content)
     return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
