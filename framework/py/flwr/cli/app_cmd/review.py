@@ -1,0 +1,261 @@
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Flower command line interface `app review` command."""
+
+
+import base64
+import hashlib
+import re
+import time
+from pathlib import Path
+from typing import Annotated
+
+import requests
+import typer
+from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.hazmat.primitives.asymmetric import ed25519
+
+from flwr.common.config import get_flwr_dir
+from flwr.common.constant import CREDENTIALS_DIR, FLWR_DIR
+from flwr.supercore.constant import (
+    APP_ID_PATTERN,
+    APP_VERSION_PATTERN,
+    PLATFORM_API_URL,
+)
+from flwr.supercore.primitives.asymmetric_ed25519 import (
+    create_message_to_sign,
+    load_private_key,
+    sign_message,
+)
+
+from ..install import install_from_fab
+from ..utils import request_download_link, validate_credentials_content
+
+
+# pylint: disable-next=too-many-locals, too-many-statements
+def review(
+    app_spec: Annotated[
+        str,
+        typer.Argument(
+            help="App identifier (e.g., '@account/app' or '@account/app==1.0.0'). "
+            "Version is optional; defaults to the latest."
+        ),
+    ],
+    app_dir_login: Annotated[
+        Path,
+        typer.Argument(
+            help="Project directory to used for login before reviewing app."
+        ),
+    ] = Path("."),
+    federation: Annotated[
+        str | None,
+        typer.Argument(
+            help="Name of the federation used for login before reviewing app."
+        ),
+    ] = None,
+) -> None:
+    """Download a FAB for <APP-ID>, unpack it for manual review, and upon confirmation
+    sign & submit the review to the Platform."""
+    if not app_dir_login or not federation:
+        typer.secho(
+            "❌ Missing project directory or federation used for login.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Load and validate credentials
+    creds_path = (
+        app_dir_login.absolute() / FLWR_DIR / CREDENTIALS_DIR / f"{federation}.json"
+    )
+    if not creds_path.is_file():
+        typer.secho(
+            "❌ Please log in before reviewing app.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    token = validate_credentials_content(creds_path)
+
+    # Validate app version format
+    if "==" in app_spec:
+        app_id, app_version = app_spec.split("==")
+
+        # Validate app version format
+        if not re.match(APP_VERSION_PATTERN, app_version):
+            typer.secho(
+                "❌ Invalid app version. Expected format: x.y.z (digits only).",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(code=1)
+    else:
+        app_id = app_spec
+        app_version = None
+
+    # Validate app_id format
+    if not re.match(APP_ID_PATTERN, app_id):
+        typer.secho(
+            "❌ Invalid remote app ID. Expected format: '@account/app'.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Download FAB
+    typer.secho("Downloading FAB... ", fg=typer.colors.BLUE)
+    url = f"{PLATFORM_API_URL}/hub/fetch-fab"
+    presigned_url = request_download_link(app_id, app_version, url, "fab_url")
+    fab_bytes = _download_fab(presigned_url)
+
+    # Unpack FAB
+    typer.secho("Unpacking FAB... ", fg=typer.colors.BLUE)
+    review_dir = _create_review_dir()
+    review_app_path = install_from_fab(fab_bytes, review_dir)
+
+    # Extract app version
+    version_pattern = re.compile(r"\b(\d+\.\d+\.\d+)\b")
+    match = version_pattern.search(str(review_app_path))
+    assert match is not None
+    app_version = match.group(1)
+
+    # Prompt to ask for sign
+    typer.secho(
+        f"""
+    Review the unpacked app in the following directory:
+
+        {typer.style(review_app_path, fg=typer.colors.GREEN, bold=True)}
+
+    If you have reviewed the app and want to continue to sign it,
+    type {typer.style("SIGN", fg=typer.colors.GREEN, bold=True)} or abort with CTRL+C.
+    """,
+        fg=typer.colors.BLUE,
+    )
+
+    confirmation = typer.prompt("Type SIGN to continue").strip()
+    if confirmation.upper() != "SIGN":
+        typer.secho("Aborted (user did not type SIGN).", fg=typer.colors.YELLOW)
+        raise typer.Exit(code=130)
+
+    # Ask for private key path (retry until valid)
+    while True:
+        try:
+            key_path_str = typer.prompt(
+                "Please specify the path of Ed25519 OpenSSH private key for signing"
+            )
+        except typer.Abort as e:
+            typer.secho("Aborted by user.", fg=typer.colors.YELLOW)
+            raise typer.Exit(code=130) from e
+
+        key_path = Path(key_path_str).expanduser().resolve()
+
+        if not key_path.is_file():
+            typer.secho(
+                f"❌ Private key not found: {key_path}",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            typer.secho(
+                "Please try again or press CTRL+C to abort.\n", fg=typer.colors.YELLOW
+            )
+            continue
+
+        break  # valid
+
+    # Load private key and sign FAB
+    try:
+        private_key = load_private_key(key_path)
+    except (OSError, ValueError, UnsupportedAlgorithm) as e:
+        typer.secho(
+            f"❌ Failed to load the private key: {e}", fg=typer.colors.RED, err=True
+        )
+        raise typer.Exit(code=1) from e
+
+    signature, signed_at = _sign_fab(fab_bytes, private_key)
+
+    # Submit review
+    _submit_review(app_id, app_version, signature, signed_at, token)
+
+
+def _create_review_dir() -> Path:
+    """Create a directory for reviewing code."""
+    home = get_flwr_dir()
+    review_dir = home / "reviews"
+    review_dir.mkdir(parents=True, exist_ok=True)
+    return review_dir
+
+
+def _download_fab(url: str) -> bytes:
+    """Download FAB file from given URL."""
+    try:
+        r = requests.get(url, timeout=60)
+        r.raise_for_status()
+    except requests.RequestException as e:
+        typer.secho(
+            f"❌ FAB download failed: {e}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from e
+    return r.content
+
+
+def _sign_fab(
+    fab_bytes: bytes, private_key: ed25519.Ed25519PrivateKey
+) -> tuple[bytes, int]:
+    """Sign the given FAB hash bytes."""
+    # Get current timestamp
+    timestamp = int(time.time())
+    message_to_sign = create_message_to_sign(
+        hashlib.sha256(fab_bytes).digest(),
+        timestamp,
+    )
+    return sign_message(private_key, message_to_sign), timestamp
+
+
+def _submit_review(
+    app_id: str, app_version: str, signature: bytes, signed_at: int, token: str
+) -> None:
+    """Submit review to Flower Platform API."""
+    signature_b64 = base64.urlsafe_b64encode(signature).rstrip(b"=").decode("ascii")
+    url = f"{PLATFORM_API_URL}/hub/apps/signature"
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    payload = {
+        "app_id": app_id,
+        "app_version": app_version,
+        "signature_b64": signature_b64,
+        "signed_at": signed_at,
+    }
+    try:
+        resp = requests.post(url, headers=headers, json=payload, timeout=120)
+    except requests.RequestException as e:
+        typer.secho(
+            f"❌ Network error while submitting review: {e}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from e
+
+    if resp.ok:
+        typer.secho("🎊 Review submitted", fg=typer.colors.GREEN, bold=True)
+        return
+
+    # Error path:
+    msg = f"❌ Review submission failed (HTTP {resp.status_code})"
+    if resp.text:
+        msg += f": {resp.text}"
+    typer.secho(msg, fg=typer.colors.RED, err=True)
+    raise typer.Exit(code=1)
