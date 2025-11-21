@@ -92,6 +92,7 @@ from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 
+import time
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     """ServerAppIo API servicer."""
@@ -208,6 +209,10 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             # Store
             message_id: str | None = state.store_message_ins(message=message)
             message_ids.append(message_id)
+        
+        log(INFO, "WAITING FOR 10 SECONDS TO SIMULATE PROCESSING TIME")
+        time.sleep(10)
+        log(INFO, "WAITING IS OVER")
 
         # Store Message object to descendants mapping and preregister objects
         objects_to_push = store_mapping_and_register_objects(store, request=request)
