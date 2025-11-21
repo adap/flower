@@ -18,16 +18,18 @@
 import hashlib
 import json
 import re
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, cast
 
 import grpc
+import pathspec
 import requests
 import typer
 
 from flwr.common.constant import (
+    ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
     CREDENTIALS_DIR,
     FLWR_DIR,
@@ -37,6 +39,7 @@ from flwr.common.constant import (
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
+    REFRESH_TOKEN_KEY,
     RUN_ID_NOT_FOUND_MESSAGE,
     AuthnType,
 )
@@ -439,3 +442,70 @@ def request_download_link(
     if out_url not in data:
         raise typer.BadParameter("Invalid response from Platform API")
     return str(data[out_url])
+
+
+def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:
+    """Build a PathSpec from a list of patterns."""
+    return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+
+
+def load_gitignore_patterns(file: Path | bytes) -> list[str]:
+    """Load gitignore patterns from .gitignore file bytes.
+
+    Parameters
+    ----------
+    file : Path | bytes
+        The path to a .gitignore file or its bytes content.
+
+    Returns
+    -------
+    list[str]
+        List of gitignore patterns.
+        Returns empty list if content can't be decoded or the file does not exist.
+    """
+    try:
+        if isinstance(file, Path):
+            content = file.read_text(encoding="utf-8")
+        else:
+            content = file.decode("utf-8")
+        patterns = [
+            line.strip()
+            for line in content.splitlines()
+            if line.strip() and not line.strip().startswith("#")
+        ]
+        return patterns
+    except (UnicodeDecodeError, OSError):
+        return []
+
+
+def validate_credentials_content(creds_path: Path) -> str:
+    """Load and validate the credentials file content.
+
+    Ensures required keys exist:
+      - AUTHN_TYPE_JSON_KEY
+      - ACCESS_TOKEN_KEY
+      - REFRESH_TOKEN_KEY
+    """
+    try:
+        creds: dict[str, str] = json.loads(creds_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as err:
+        typer.secho(
+            f"Invalid credentials file at '{creds_path}': {err}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from err
+
+    required_keys = [AUTHN_TYPE_JSON_KEY, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]
+    missing = [key for key in required_keys if key not in creds]
+
+    if missing:
+        typer.secho(
+            f"Credentials file '{creds_path}' is missing "
+            f"required key(s): {', '.join(missing)}. Please log in again.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    return creds[ACCESS_TOKEN_KEY]
