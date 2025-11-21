@@ -14,12 +14,14 @@
 # ==============================================================================
 """InflatableObject utilities."""
 
+
 import concurrent.futures
 import os
 import random
 import threading
 import time
 from collections.abc import Callable, Iterable, Iterator
+from queue import Queue
 from typing import TypeVar
 
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
@@ -184,12 +186,21 @@ def push_object_contents_from_iterable(
     max_concurrent_pushes : int (default: FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PUSHES)
         The maximum number of concurrent pushes to perform.
     """
+    error_event = threading.Event()
+    err_queue: Queue[Exception] = Queue()
 
     def push(args: tuple[str, bytes]) -> None:
         """Push a single object."""
+        if error_event.is_set():
+            return
         obj_id, obj_content = args
         # Push the object using the provided function
-        push_object_fn(obj_id, obj_content)
+        try:
+            push_object_fn(obj_id, obj_content)
+        except Exception as err:  # pylint: disable=broad-except
+            # Unexpected error during pushing
+            error_event.set()
+            err_queue.put(err)
 
     # Push all object contents concurrently
     num_workers = get_num_workers(max_concurrent_pushes)
@@ -204,6 +215,10 @@ def push_object_contents_from_iterable(
 
     # Remove the executor from the list of tracked executors
     _untrack_executor(executor)
+
+    # If an error occurred during pushing, raise it
+    if not err_queue.empty():
+        raise err_queue.get()
 
 
 def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
@@ -254,13 +269,16 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
 
     results: dict[str, bytes] = {}
     results_lock = threading.Lock()
-    err_to_raise: Exception | None = None
+    err_queue: Queue[Exception] = Queue()
     early_stop = threading.Event()
     start = time.monotonic()
 
+    def stop_on_error(err: Exception) -> None:
+        early_stop.set()
+        err_queue.put(err)
+
     def pull_with_retries(object_id: str) -> None:
         """Attempt to pull a single object with retry and backoff."""
-        nonlocal err_to_raise
         tries = 0
         delay = initial_backoff
 
@@ -278,10 +296,7 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
                     or time.monotonic() - start >= max_time
                 ):
                     # Stop all work if one object exhausts retries
-                    early_stop.set()
-                    with results_lock:
-                        if err_to_raise is None:
-                            err_to_raise = err
+                    stop_on_error(err)
                     return
 
                 # Apply exponential backoff with ±20% jitter
@@ -291,10 +306,12 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
 
             except ObjectIdNotPreregisteredError as err:
                 # Permanent failure: object ID is invalid
-                early_stop.set()
-                with results_lock:
-                    if err_to_raise is None:
-                        err_to_raise = err
+                stop_on_error(err)
+                return
+
+            except Exception as err:  # pylint: disable=broad-except
+                # Permanent failure: unexpected error
+                stop_on_error(err)
                 return
 
     # Submit all pull tasks concurrently
@@ -312,8 +329,8 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
     _untrack_executor(executor)
 
     # If an error occurred during pulling, raise it
-    if err_to_raise is not None:
-        raise err_to_raise
+    if not err_queue.empty():
+        raise err_queue.get()
 
     return results
 
