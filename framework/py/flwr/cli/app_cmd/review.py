@@ -95,8 +95,7 @@ def review(
         app_id, app_version = app_spec.split("==")
 
         # Validate app version format
-        m = re.match(APP_VERSION_PATTERN, app_version)
-        if not m:
+        if not re.match(APP_VERSION_PATTERN, app_version):
             typer.secho(
                 "❌ Invalid app version. Expected format: x.y.z (digits only).",
                 fg=typer.colors.RED,
@@ -108,8 +107,7 @@ def review(
         app_version = None
 
     # Validate app_id format
-    m = re.match(APP_ID_PATTERN, app_id)
-    if not m:
+    if not re.match(APP_ID_PATTERN, app_id):
         typer.secho(
             "❌ Invalid remote app ID. Expected format: '@account/app'.",
             fg=typer.colors.RED,
@@ -229,7 +227,7 @@ def _sign_fab(
 
 
 def _submit_review(
-    app_id: str, version: str, signature: bytes, signed_at: int, token: str
+    app_id: str, app_version: str, signature: bytes, signed_at: int, token: str
 ) -> None:
     """Submit review to Flower Platform API."""
     signature_b64 = base64.urlsafe_b64encode(signature).rstrip(b"=").decode("ascii")
@@ -237,7 +235,7 @@ def _submit_review(
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     payload = {
         "app_id": app_id,
-        "version": version,
+        "app_version": app_version,
         "signature_b64": signature_b64,
         "signed_at": signed_at,
     }

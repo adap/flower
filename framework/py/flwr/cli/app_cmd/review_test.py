@@ -116,7 +116,7 @@ def test_submit_review_success_and_errors(
     assert captured["url"].endswith("/hub/apps/signature")
     assert captured["headers"]["Authorization"] == "Bearer TKN"
     assert captured["json"]["app_id"] == "@u/a"
-    assert captured["json"]["version"] == "1.2.3"
+    assert captured["json"]["app_version"] == "1.2.3"
     assert captured["json"]["signature_b64"] == base64.urlsafe_b64encode(
         b"sigbytes"
     ).rstrip(b"=").decode("ascii")
