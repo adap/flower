@@ -15,7 +15,9 @@
 """Flower command line interface `app` command."""
 
 from .review import review as review
+from .publish import publish as publish
 
 __all__ = [
     "review",
+    "publish",
 ]
