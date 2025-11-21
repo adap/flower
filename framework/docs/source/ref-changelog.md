@@ -1,6 +1,50 @@
 # Changelog
 
-## Unreleased
+## v1.24.0 (2025-11-20)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Heng Pan`, `Javier`, `Patrick Foley`, `Robert Steiner`, `Yan Gao` <!---TOKEN_v1.24.0-->
+
+### What's new?
+
+- **Add Python 3.13 support** ([#6116](https://github.com/adap/flower/pull/6116), [#6119](https://github.com/adap/flower/pull/6119), [#6132](https://github.com/adap/flower/pull/6132))
+
+  `flwr` now supports Python 3.13, with CI and dataset tests updated accordingly and `ray` bumped to ensure compatibility.
+
+- **Improve the `flwr list` view** ([#6117](https://github.com/adap/flower/pull/6117))
+
+  `flwr list` now shows fewer details by default, while providing expanded information when using the `--run-id` flag.
+
+- **Extend federation commands and internal APIs** ([#6067](https://github.com/adap/flower/pull/6067), [#6068](https://github.com/adap/flower/pull/6068), [#6078](https://github.com/adap/flower/pull/6078), [#6082](https://github.com/adap/flower/pull/6082), [#6086](https://github.com/adap/flower/pull/6086), [#6087](https://github.com/adap/flower/pull/6087), [#6088](https://github.com/adap/flower/pull/6088), [#6090](https://github.com/adap/flower/pull/6090), [#6091](https://github.com/adap/flower/pull/6091), [#6092](https://github.com/adap/flower/pull/6092), [#6093](https://github.com/adap/flower/pull/6093), [#6094](https://github.com/adap/flower/pull/6094), [#6098](https://github.com/adap/flower/pull/6098), [#6103](https://github.com/adap/flower/pull/6103), [#6105](https://github.com/adap/flower/pull/6105), [#6121](https://github.com/adap/flower/pull/6121), [#6122](https://github.com/adap/flower/pull/6122), [#6143](https://github.com/adap/flower/pull/6143), [#6152](https://github.com/adap/flower/pull/6152), [#6153](https://github.com/adap/flower/pull/6153), [#6154](https://github.com/adap/flower/pull/6154), [#6158](https://github.com/adap/flower/pull/6158), [#6165](https://github.com/adap/flower/pull/6165))
+
+  These updates refine and extend the existing federation concept. `flwr federation show` and `flwr federation list` now provide clearer visibility into SuperNodes and runs in the default federation. Internally, federation-related components are streamlined under a unified `FederationManager`, improving validation, error handling, and data flow.
+
+- **Improve import performance** ([#6102](https://github.com/adap/flower/pull/6102))
+
+- **Update CI workflows and development tooling** ([#5242](https://github.com/adap/flower/pull/5242), [#6053](https://github.com/adap/flower/pull/6053), [#6080](https://github.com/adap/flower/pull/6080), [#6089](https://github.com/adap/flower/pull/6089), [#6108](https://github.com/adap/flower/pull/6108), [#6129](https://github.com/adap/flower/pull/6129), [#6130](https://github.com/adap/flower/pull/6130), [#6131](https://github.com/adap/flower/pull/6131), [#6135](https://github.com/adap/flower/pull/6135), [#6138](https://github.com/adap/flower/pull/6138), [#6142](https://github.com/adap/flower/pull/6142), [#6144](https://github.com/adap/flower/pull/6144), [#6156](https://github.com/adap/flower/pull/6156))
+
+- **Update documentation** ([#6115](https://github.com/adap/flower/pull/6115), [#6081](https://github.com/adap/flower/pull/6081), [#6110](https://github.com/adap/flower/pull/6110), [#6137](https://github.com/adap/flower/pull/6137), [#6146](https://github.com/adap/flower/pull/6146))
+
+- **General improvements** ([#6077](https://github.com/adap/flower/pull/6077), [#6083](https://github.com/adap/flower/pull/6083), [#6084](https://github.com/adap/flower/pull/6084), [#6095](https://github.com/adap/flower/pull/6095), [#6100](https://github.com/adap/flower/pull/6100), [#6109](https://github.com/adap/flower/pull/6109), [#6114](https://github.com/adap/flower/pull/6114), [#6123](https://github.com/adap/flower/pull/6123), [#6127](https://github.com/adap/flower/pull/6127), [#6139](https://github.com/adap/flower/pull/6139), [#6140](https://github.com/adap/flower/pull/6140), [#6150](https://github.com/adap/flower/pull/6150), [#6151](https://github.com/adap/flower/pull/6151), [#6157](https://github.com/adap/flower/pull/6157), [#6159](https://github.com/adap/flower/pull/6159), [#6160](https://github.com/adap/flower/pull/6160), [#6162](https://github.com/adap/flower/pull/6162), [#6164](https://github.com/adap/flower/pull/6164))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
+
+### Incompatible changes
+
+- **Drop Python 3.9 support** ([#6118](https://github.com/adap/flower/pull/6118), [#6136](https://github.com/adap/flower/pull/6136), [#6147](https://github.com/adap/flower/pull/6147))
+
+  `flwr` now requires Python 3.10 as the minimum supported version, with baselines and development scripts updated accordingly.
+
+- **Bump protobuf to 5.x** ([#6104](https://github.com/adap/flower/pull/6104))
+
+  Upgrades `protobuf` to `>=5.29.0`, ensuring `flwr` uses the latest gRPC stack and remains compatible with TensorFlow 2.20+. Note that this version is incompatible with TensorFlow versions earlier than 2.18.
+
+- **Deprecate `flwr.server.utils.tensorboard`** ([#6113](https://github.com/adap/flower/pull/6113))
+
+  The `flwr.server.utils.tensorboard` function is now deprecated, and a slow import issue occurring when `tensorflow` is installed has been resolved.
 
 ## v1.23.0 (2025-11-03)
 
