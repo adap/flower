@@ -14,10 +14,10 @@
 # ==============================================================================
 """Flower command line interface `app` command."""
 
-from .review import review as review
 from .publish import publish as publish
+from .review import review as review
 
 __all__ = [
-    "review",
     "publish",
+    "review",
 ]

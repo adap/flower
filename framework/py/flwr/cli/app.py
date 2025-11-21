@@ -19,8 +19,8 @@ from typer.main import get_command
 
 from flwr.common.version import package_version
 
-from .app_cmd import review as app_review
 from .app_cmd import publish as app_publish
+from .app_cmd import review as app_review
 from .build import build
 from .federation import ls as federation_list
 from .federation import show as federation_show
