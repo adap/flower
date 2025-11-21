@@ -21,7 +21,6 @@ from pathlib import Path
 import pytest
 import typer
 
-from flwr.common.constant import FLWR_DIR
 from flwr.supercore.constant import (
     MAX_DIR_DEPTH,
     MAX_FILE_BYTES,
@@ -31,11 +30,9 @@ from flwr.supercore.constant import (
 
 from .publish import (
     _build_multipart_files_param,
-    _collect_files,
-    _compile_gitignore,
+    _collect_file_paths,
     _depth_of,
     _detect_mime,
-    _load_gitignore,
     _validate_files,
 )
 
@@ -49,35 +46,6 @@ def write(tmp: Path, file_name: str, data: bytes) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(data)
     return path
-
-
-def test_load_gitignore(tmp_path: Path) -> None:
-    """Test '.gitignore' loading."""
-    (tmp_path / ".gitignore").write_text("*.log\nsecret/\n", encoding="utf-8")
-    raw = _load_gitignore(tmp_path)
-
-    assert raw is not None
-    assert isinstance(raw, bytes)
-
-    lines = raw.decode("utf-8").splitlines()
-    assert lines == ["*.log", "secret/"]
-
-
-def test_compile_gitignore_ignores_flwr_dir(tmp_path: Path) -> None:
-    """Test if the specified files are ignored."""
-    flwr_dir = FLWR_DIR
-    (tmp_path / ".gitignore").write_text("*.tmp\n", encoding="utf-8")
-
-    ignored = _compile_gitignore(tmp_path)
-
-    file_tmp = write(tmp_path, "a.tmp", b"ok")
-    assert ignored(file_tmp) is True
-
-    write(tmp_path, f"{flwr_dir}/creds.json", b"{}")
-    assert ignored(tmp_path / flwr_dir / "creds.json") is True
-
-    normal = write(tmp_path, "good.py", b"print('x')")
-    assert ignored(normal) is False
 
 
 @pytest.mark.parametrize(
@@ -109,7 +77,7 @@ def test_collect_files_depth_limit(tmp_path: Path) -> None:
     write(tmp_path, deep.as_posix(), b"x")
 
     with pytest.raises(typer.Exit) as exc:
-        _collect_files(tmp_path)
+        _collect_file_paths(tmp_path)
     assert exc.value.exit_code == 2
 
 
@@ -120,7 +88,7 @@ def test_collect_files_count_limit(tmp_path: Path) -> None:
         write(tmp_path, f"f{i}{TEXT_EXT}", b"x")
 
     with pytest.raises(typer.Exit) as exc:
-        _validate_files(_collect_files(tmp_path))
+        _validate_files(_collect_file_paths(tmp_path))
     assert exc.value.exit_code == 2
 
 
@@ -131,7 +99,7 @@ def test_collect_files_total_bytes_limit(tmp_path: Path) -> None:
     write(tmp_path, f"big{TEXT_EXT}", data)
 
     with pytest.raises(typer.Exit) as exc:
-        _validate_files(_collect_files(tmp_path))
+        _validate_files(_collect_file_paths(tmp_path))
     assert exc.value.exit_code == 2
 
 
@@ -141,7 +109,7 @@ def test_collect_files_per_file_size_limit(tmp_path: Path) -> None:
     write(tmp_path, f"too_big{ALT_TEXT_EXT}", data)
 
     with pytest.raises(typer.Exit) as exc:
-        _validate_files(_collect_files(tmp_path))
+        _validate_files(_collect_file_paths(tmp_path))
     assert exc.value.exit_code == 2
 
 
@@ -151,17 +119,16 @@ def test_collect_files_non_utf8_raises_for_text(tmp_path: Path) -> None:
     write(tmp_path, f"bad{TEXT_EXT}", b"\xff\xfe\xfa")
 
     with pytest.raises(typer.Exit) as exc:
-        _validate_files(_collect_files(tmp_path))
+        _validate_files(_collect_file_paths(tmp_path))
     assert exc.value.exit_code == 2
 
 
 def test_build_multipart_files_param(tmp_path: Path) -> None:
     """Test multipart files building."""
     f1 = write(tmp_path, f"a{TEXT_EXT}", b"hello")
-    files = [(f1, Path(f"a{TEXT_EXT}"))]
 
     with ExitStack() as stack:
-        parts = _build_multipart_files_param(files, stack)
+        parts = _build_multipart_files_param(tmp_path, [f1], stack)
         assert len(parts) == 1
         key, (fname, fobj, mime) = parts[0]
         assert key == "files"

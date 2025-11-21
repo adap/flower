@@ -17,6 +17,8 @@
 
 from __future__ import annotations
 
+from flwr.common.constant import FLWR_DIR
+
 # Top-level key in YAML config for exec plugin settings
 EXEC_PLUGIN_SECTION = "exec_plugin"
 
@@ -28,11 +30,15 @@ APP_ID_PATTERN = r"^@(?P<account>[^/]+)/(?P<app>[^/]+)$"
 APP_VERSION_PATTERN = r"^\d+\.\d+\.\d+$"
 PLATFORM_API_URL = "https://api.flower.ai/v1"
 
-# App spec
-ALLOWED_EXTS = (
+# Specification for app publishing
+APP_PUBLISH_INCLUDE_PATTERNS = (
     "**/*.py",
     "**/*.toml",
     "**/*.md",
+)
+APP_PUBLISH_EXCLUDE_PATTERNS = FAB_EXCLUDE_PATTERNS = (
+    f"{FLWR_DIR}/**",  # Exclude the .flwr directory
+    "**/__pycache__/**",
 )
 MAX_TOTAL_BYTES = 10 * 1024 * 1024  # 10 MB
 MAX_FILE_BYTES = 1 * 1024 * 1024  # 1 MB
