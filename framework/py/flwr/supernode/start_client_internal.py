@@ -328,7 +328,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             log(INFO, "[RUN %s]", message.metadata.run_id)
         log(
             INFO,
-            "Received: %s message %s",
+            "Receiving: %s message %s",
             message.metadata.message_type,
             message.metadata.message_id,
         )
@@ -388,16 +388,27 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
         # Store the message in the state (note this message has no content)
         state.store_message(message)
 
-        # Pull and store objects of the message in the ObjectStore
-        obj_contents = pull_objects(
-            obj_ids_to_pull,
-            pull_object_fn=lambda obj_id: pull_object(run_id, obj_id),
-        )
-        for obj_id in list(obj_contents.keys()):
-            object_store.put(obj_id, obj_contents.pop(obj_id))
+        try:
+            # Pull and store objects of the message in the ObjectStore
+            obj_contents = pull_objects(
+                obj_ids_to_pull,
+                pull_object_fn=lambda obj_id: pull_object(run_id, obj_id),
+            )
+            for obj_id in list(obj_contents.keys()):
+                object_store.put(obj_id, obj_contents.pop(obj_id))
 
-        # Confirm that the message was received
-        confirm_message_received(run_id, message.metadata.message_id)
+            # Confirm that the message was received
+            confirm_message_received(run_id, message.metadata.message_id)
+            log(INFO, "Received successfully")
+        except Exception as err:  # pylint: disable=broad-except
+            log(
+                ERROR,
+                "Failed to receive message %s: %s",
+                message.metadata.message_id,
+                err,
+            )
+            state.delete_messages(message_ids=[message.metadata.message_id])
+            object_store.delete(message.metadata.message_id)
 
     except RunNotRunningException:
         if message is None:
@@ -490,7 +501,7 @@ def _push_messages(
                 message.metadata.run_id,
                 message.metadata.message_id,
             )
-        except Exception as err:
+        except Exception as err:  # pylint: disable=broad-except
             log(
                 ERROR,
                 "Failed to send message %s: %s",

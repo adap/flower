@@ -16,8 +16,6 @@
 
 
 import concurrent.futures
-from logging import ERROR
-from flwr.common.logger import log
 import os
 import random
 import threading
