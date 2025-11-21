@@ -187,7 +187,6 @@ def push_object_contents_from_iterable(
         The maximum number of concurrent pushes to perform.
     """
     error_event = threading.Event()
-    err_lock = threading.Lock()
     err_queue: Queue[Exception] = Queue()
 
     def push(args: tuple[str, bytes]) -> None:
@@ -201,9 +200,7 @@ def push_object_contents_from_iterable(
         except Exception as err:  # pylint: disable=broad-except
             # Unexpected error during pushing
             error_event.set()
-            with err_lock:
-                if err_queue.empty():
-                    err_queue.put(err)
+            err_queue.put(err)
 
     # Push all object contents concurrently
     num_workers = get_num_workers(max_concurrent_pushes)
@@ -278,9 +275,7 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
 
     def stop_on_error(err: Exception) -> None:
         early_stop.set()
-        with results_lock:
-            if err_queue.empty():
-                err_queue.put(err)
+        err_queue.put(err)
 
     def pull_with_retries(object_id: str) -> None:
         """Attempt to pull a single object with retry and backoff."""
