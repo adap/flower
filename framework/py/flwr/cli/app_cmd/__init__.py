@@ -12,13 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `federation` command."""
+"""Flower command line interface `app` command."""
 
 
-from .ls import ls as ls
-from .show import show as show
+from .publish import publish as publish
 
 __all__ = [
-    "ls",
-    "show",
+    "publish",
 ]

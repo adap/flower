@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-18 00:08+0000\n"
+"POT-Creation-Date: 2025-11-21 00:08+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -2977,6 +2977,7 @@ msgstr "``pyproject.toml``에 다음 버전 제약 조건을 설정했는지 확
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:63
 #: ../../source/docker/tutorial-quickstart-docker.rst:310
 #: ../../source/how-to-enable-tls-connections.rst:127
+#: ../../source/how-to-manage-flower-federations.rst:69
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:179
 #: ../../source/how-to-upgrade-to-message-api.rst:132
 #, fuzzy
@@ -11010,6 +11011,119 @@ msgstr ""
 "가상 클라이언트 엔진을 사용하는 시뮬레이션의 경우, ``flwr-nightly``를 ``simulation`` extr와 함께 "
 "설치해야 합니다::"
 
+#: ../../source/how-to-manage-flower-federations.rst:-1
+msgid "Guide to manage Flower federations using the Deployment Engine."
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:11
+msgid ""
+"Flower Federation management is a new feature introduced in Flower "
+"1.24.0. It gains new functionality in subsequent releases. Changes to the"
+" functionality described in this guide are also expected as the features "
+"provided via the ``flwr federation`` commands mature."
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:18
+#, fuzzy
+msgid "Manage Flower Federations"
+msgstr "시뮬레이션 실행"
+
+#: ../../source/how-to-manage-flower-federations.rst:20
+msgid ""
+"A Flower federation is comprised of a set of users and some or all the "
+"SuperNodes they own that are registered with the same SuperLink. Members "
+"of a Flower federation can execute runs (e.g. to federate the training of"
+" an AI model) across all SuperNodes that are part of it."
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:25
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:13
+msgid "In this how-to guide, you will:"
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:27
+msgid "Learn how to see the federations you are part of."
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:28
+msgid "Learn how to display information about a specific federation."
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:32
+#, fuzzy
+msgid "List Federations"
+msgstr "시뮬레이션 실행"
+
+#: ../../source/how-to-manage-flower-federations.rst:34
+msgid ""
+"With the |flower_cli_federation_link|_, you can easily inspect the "
+"federations your Flower account is part of:"
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:41
+msgid ""
+"The above command will display a table with a row for each federation you"
+" are part of. In this case there is only one federation named "
+"``default``:"
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:55
+#, fuzzy
+msgid "Inspect a Federation"
+msgstr "시뮬레이션 실행"
+
+#: ../../source/how-to-manage-flower-federations.rst:57
+msgid ""
+"You can inspect a specific federation by using the ``flwr federation "
+"show`` command, another command provided by the "
+"|flower_cli_federation_link|_. With this command, you will be able to see"
+" the following information about a federation:"
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:61
+#, fuzzy
+msgid "The members of the federation."
+msgstr "flower 초연결"
+
+#: ../../source/how-to-manage-flower-federations.rst:62
+#, fuzzy
+msgid "The SuperNodes registered with the federation and their status."
+msgstr "flower 초연결"
+
+#: ../../source/how-to-manage-flower-federations.rst:63
+#, fuzzy
+msgid "The runs executed via the federation."
+msgstr "flower 초연결"
+
+#: ../../source/how-to-manage-flower-federations.rst:65
+msgid ""
+"The ``flwr federation show`` command requires the name of the federation "
+"to inspect as an argument. This can be specified as part of your "
+"``pyproject.toml`` configuration. For example:"
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:78
+msgid ""
+"In this example, the federation named ``default`` is specified. You can "
+"now inspect it by running:"
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:85
+msgid ""
+"Then, assuming that there are two ``SuperNodes`` connected and that three"
+" runs have been submitted through the federation, a representative output"
+" would be similar to:"
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:116
+msgid ""
+"Note how the ``SuperNodes`` table shows a subset of the information "
+"available via the command ``flwr supernode list`` (Learn more about this "
+"command in the :doc:`how-to-authenticate-supernodes` guide). Similarly, "
+"the ``Runs`` table shows a subset of the information available via the "
+"``flwr list`` command."
+msgstr ""
+
 #: ../../source/how-to-migrate-from-openfl.rst:-1
 msgid "Migrate your OpenFL workloads to Flower in this step-by-step tutorial"
 msgstr ""
@@ -13142,10 +13256,6 @@ msgid ""
 "Deployment Engine using minimal configurations to illustrate the "
 "workflow. This is a complementary guide to the :doc:`docker/index` "
 "guides."
-msgstr ""
-
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:13
-msgid "In this how-to guide, you will:"
 msgstr ""
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:15
@@ -16167,20 +16277,22 @@ msgstr ""
 msgid "Manage Federations"
 msgstr "시뮬레이션 실행"
 
-#: ../../flwr federation list:1 supernode
+#: ../../flwr federation list:1
 #, fuzzy
-msgid "List SuperNodes in the federation."
-msgstr "flower 초연결"
+msgid "List available federations."
+msgstr "시뮬레이션 실행"
 
-#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
+#: ../../flwr federation list:1 register:1 run:1 show:1 stop:1 supernode
+#: unregister:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
-#: ../../flwr federation list log register run stop supernode unregister
+#: ../../flwr federation list log register run show stop supernode unregister
 msgid "default"
 msgstr ""
 
-#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
+#: ../../flwr federation list:1 register:1 run:1 show:1 stop:1 supernode
+#: unregister:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "``flwr/base``"
@@ -16191,19 +16303,24 @@ msgid "Arguments"
 msgstr "빌드 전달인자"
 
 #: ../../flwr federation install:1 list:1 log:1 login:1 new:1 pull:1 register:1
-#: run:1 stop:1 supernode unregister:1
+#: run:1 show:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "선택적 개선 사항"
 
-#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
+#: ../../flwr federation list:1 register:1 show:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Path of the Flower project"
 msgstr "Flower 기본 이미지의 태그."
 
-#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
+#: ../../flwr federation list:1 register:1 show:1 stop:1 supernode unregister:1
 msgid "Name of the federation"
 msgstr ""
+
+#: ../../flwr federation show:1
+#, fuzzy
+msgid "Show details of a federation."
+msgstr "flower 초연결"
 
 #: ../../flwr install:1
 #, fuzzy
@@ -16402,8 +16519,9 @@ msgstr ""
 
 #: ../../flwr new:1
 msgid ""
-"Flower app name. For remote apps, use the format '@user/app==1.0.0'. "
-"Version is optional (defaults to latest)."
+"Flower app name. For remote apps, use the format '@account_name/app_name'"
+" or '@account_name/app_name==x.y.z'. Version is optional (defaults to "
+"latest)."
 msgstr ""
 
 #: ../../flwr pull:1
@@ -16467,6 +16585,11 @@ msgstr "Flower 커뮤니티 가입하기"
 #, fuzzy
 msgid "Manage SuperNodes"
 msgstr "SuperNodes 인증하기"
+
+#: ../../flwr list:1 supernode
+#, fuzzy
+msgid "List SuperNodes in the federation."
+msgstr "flower 초연결"
 
 #: ../../flwr list:1 supernode
 #, fuzzy
@@ -59309,5 +59432,11 @@ msgstr ""
 #~ " can be viewed as an equivalent "
 #~ "to PyTorch's ``state_dict``, but it "
 #~ "holds arrays in a serialized form."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Flower app name. For remote apps, "
+#~ "use the format '@user/app==1.0.0'. Version "
+#~ "is optional (defaults to latest)."
 #~ msgstr ""
 

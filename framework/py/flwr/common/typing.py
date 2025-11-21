@@ -23,6 +23,8 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 
+from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
+
 NDArray = npt.NDArray[Any]
 NDArrayInt = npt.NDArray[np.int_]
 NDArrayFloat = npt.NDArray[np.float64]
@@ -328,3 +330,13 @@ class LogEntry:
     actor: Actor
     event: Event
     status: str
+
+
+@dataclass
+class Federation:
+    """Federation details."""
+
+    name: str
+    member_aids: list[str]
+    nodes: list[NodeInfo]
+    runs: list[Run]

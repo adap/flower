@@ -239,6 +239,7 @@ def start_client_internal(
         ) = conn
         # Store node_id in state
         state.set_node_id(node_id)
+        log(INFO, "SuperNode ID: %s", node_id)
 
         # pylint: disable=too-many-nested-blocks
         while True:
@@ -327,7 +328,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             log(INFO, "[RUN %s]", message.metadata.run_id)
         log(
             INFO,
-            "Received: %s message %s",
+            "Receiving: %s message (ID: %s)",
             message.metadata.message_type,
             message.metadata.message_id,
         )
@@ -387,16 +388,27 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
         # Store the message in the state (note this message has no content)
         state.store_message(message)
 
-        # Pull and store objects of the message in the ObjectStore
-        obj_contents = pull_objects(
-            obj_ids_to_pull,
-            pull_object_fn=lambda obj_id: pull_object(run_id, obj_id),
-        )
-        for obj_id in list(obj_contents.keys()):
-            object_store.put(obj_id, obj_contents.pop(obj_id))
+        try:
+            # Pull and store objects of the message in the ObjectStore
+            obj_contents = pull_objects(
+                obj_ids_to_pull,
+                pull_object_fn=lambda obj_id: pull_object(run_id, obj_id),
+            )
+            for obj_id in list(obj_contents.keys()):
+                object_store.put(obj_id, obj_contents.pop(obj_id))
 
-        # Confirm that the message was received
-        confirm_message_received(run_id, message.metadata.message_id)
+            # Confirm that the message was received
+            confirm_message_received(run_id, message.metadata.message_id)
+            log(INFO, "Received successfully")
+        except Exception as err:  # pylint: disable=broad-except
+            log(
+                ERROR,
+                "Failed to receive message %s: %s",
+                message.metadata.message_id,
+                err,
+            )
+            state.delete_messages(message_ids=[message.metadata.message_id])
+            object_store.delete(message.metadata.message_id)
 
     except RunNotRunningException:
         if message is None:
@@ -443,8 +455,9 @@ def _push_messages(
             log(INFO, "[RUN %s]", message.metadata.run_id)
         log(
             INFO,
-            "Sending: %s message",
+            "Sending: %s message (ID: %s)",
             message.metadata.message_type,
+            message.metadata.message_id,
         )
 
         # Get the object tree for the message
@@ -488,6 +501,13 @@ def _push_messages(
                 "Run ID %s is not in `RUNNING` status. Ignoring reply message %s.",
                 message.metadata.run_id,
                 message.metadata.message_id,
+            )
+        except Exception as err:  # pylint: disable=broad-except
+            log(
+                ERROR,
+                "Failed to send message %s: %s",
+                message.metadata.message_id,
+                err,
             )
         finally:
             # Delete the message from the state

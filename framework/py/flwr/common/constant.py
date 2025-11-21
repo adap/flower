@@ -88,6 +88,7 @@ FAB_INCLUDE_PATTERNS = (
 )
 # FAB file exclude patterns (gitignore-style patterns)
 FAB_EXCLUDE_PATTERNS = (
+    f"{FLWR_DIR}/**",  # Exclude the .flwr directory
     "**/__pycache__/**",
     FAB_CONFIG_FILE,  # Exclude the original pyproject.toml
 )
@@ -320,5 +321,5 @@ class ExecPluginType:
 
 
 # Constants for No-op auth plugins
-NOOP_FLWR_AID = "<none>"
-NOOP_ACCOUNT_NAME = "<none>"
+NOOP_FLWR_AID = "<id:none>"
+NOOP_ACCOUNT_NAME = "<name:none>"
