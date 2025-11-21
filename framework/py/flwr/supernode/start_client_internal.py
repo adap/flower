@@ -490,6 +490,13 @@ def _push_messages(
                 message.metadata.run_id,
                 message.metadata.message_id,
             )
+        except Exception as err:
+            log(
+                ERROR,
+                "Failed to send message %s: %s",
+                message.metadata.message_id,
+                err,
+            )
         finally:
             # Delete the message from the state
             state.delete_messages(

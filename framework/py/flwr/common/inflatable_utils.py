@@ -14,7 +14,10 @@
 # ==============================================================================
 """InflatableObject utilities."""
 
+
 import concurrent.futures
+from logging import ERROR
+from flwr.common.logger import log
 import os
 import random
 import threading
@@ -184,12 +187,23 @@ def push_object_contents_from_iterable(
     max_concurrent_pushes : int (default: FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PUSHES)
         The maximum number of concurrent pushes to perform.
     """
+    error_event = threading.Event()
+    error_lock = threading.Lock()
+    error_to_raise: Exception | None = None
 
     def push(args: tuple[str, bytes]) -> None:
         """Push a single object."""
+        if error_event.is_set():
+            return
         obj_id, obj_content = args
         # Push the object using the provided function
-        push_object_fn(obj_id, obj_content)
+        try:
+            push_object_fn(obj_id, obj_content)
+        except Exception as err:
+            error_event.set()
+            with error_lock:
+                if error_to_raise is None:
+                    error_to_raise = err
 
     # Push all object contents concurrently
     num_workers = get_num_workers(max_concurrent_pushes)
@@ -204,6 +218,10 @@ def push_object_contents_from_iterable(
 
     # Remove the executor from the list of tracked executors
     _untrack_executor(executor)
+
+    # If an error occurred during pushing, raise it
+    if error_to_raise is not None:
+        raise error_to_raise
 
 
 def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
@@ -291,6 +309,14 @@ def pull_objects(  # pylint: disable=too-many-arguments,too-many-locals
 
             except ObjectIdNotPreregisteredError as err:
                 # Permanent failure: object ID is invalid
+                early_stop.set()
+                with results_lock:
+                    if err_to_raise is None:
+                        err_to_raise = err
+                return
+
+            except Exception as err:
+                # Permanent failure: unexpected error
                 early_stop.set()
                 with results_lock:
                     if err_to_raise is None:
