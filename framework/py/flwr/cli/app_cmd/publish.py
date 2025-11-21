@@ -23,13 +23,10 @@ import requests
 import typer
 from requests import Response
 
-from flwr.common.constant import (
-    CREDENTIALS_DIR,
-    FAB_EXCLUDE_PATTERNS,
-    FAB_INCLUDE_PATTERNS,
-    FLWR_DIR,
-)
+from flwr.common.constant import CREDENTIALS_DIR, FLWR_DIR
 from flwr.supercore.constant import (
+    APP_PUBLISH_EXCLUDE_PATTERNS,
+    APP_PUBLISH_INCLUDE_PATTERNS,
     MAX_DIR_DEPTH,
     MAX_FILE_BYTES,
     MAX_FILE_COUNT,
@@ -141,13 +138,12 @@ def _collect_file_paths(root: Path) -> list[Path]:
     # Note: This should be a temporary solution until we have a complete mechanism
     # for configurable inclusion and exclusion rules.
     # Note: Unlike Git, we do not support nested .gitignore files in subdirectories.
-    exclude_pathspec = build_pathspec(
-        load_gitignore_patterns(root / ".gitignore") + list(FAB_EXCLUDE_PATTERNS)
-    )
-    include_pathspec = build_pathspec(FAB_INCLUDE_PATTERNS)
-    file_paths: list[Path] = []
+    gitignore_patterns = tuple(load_gitignore_patterns(root / ".gitignore"))
+    exclude_pathspec = build_pathspec(gitignore_patterns + APP_PUBLISH_EXCLUDE_PATTERNS)
+    include_pathspec = build_pathspec(APP_PUBLISH_INCLUDE_PATTERNS)
 
     # Walk the directory tree
+    file_paths: list[Path] = []
     for path in root.rglob("*"):
         if not path.is_file():
             continue
