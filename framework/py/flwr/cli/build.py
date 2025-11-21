@@ -36,7 +36,7 @@ from flwr.common.constant import (
 )
 
 from .config_utils import load_and_validate
-from .utils import build_pathspec, get_exclude_pathspec, is_valid_project_name, to_bytes
+from .utils import build_pathspec, is_valid_project_name, load_gitignore_patterns
 
 
 def write_to_zip(
@@ -194,6 +194,10 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
         }
         fab_bytes = build_fab_from_files(files)
     """
+
+    def to_bytes(content: bytes | Path) -> bytes:
+        return content.read_bytes() if isinstance(content, Path) else content
+
     # Extract, load, and parse pyproject.toml
     if FAB_CONFIG_FILE not in files:
         raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
@@ -273,4 +277,7 @@ def get_fab_exclude_pathspec(gitignore_content: bytes | None) -> pathspec.PathSp
     If gitignore_content is provided, its patterns will be combined with the default
     exclude patterns.
     """
-    return get_exclude_pathspec(FAB_EXCLUDE_PATTERNS, gitignore_content)
+    patterns = list(FAB_EXCLUDE_PATTERNS)
+    if gitignore_content:
+        patterns += load_gitignore_patterns(gitignore_content)
+    return pathspec.PathSpec.from_lines("gitwildmatch", patterns)

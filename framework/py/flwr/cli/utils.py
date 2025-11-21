@@ -449,54 +449,33 @@ def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:
     return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
 
 
-def get_exclude_pathspec(
-    default_content: Iterable[str], gitignore_content: bytes | None
-) -> pathspec.PathSpec:
-    """Get the PathSpec for files to exclude.
-
-    If gitignore_content is provided, its patterns will be combined with the default
-    exclude patterns.
-    """
-    patterns = list(default_content)
-    if gitignore_content:
-        patterns += gitignore_content.decode("UTF-8").splitlines()
-    return build_pathspec(patterns)
-
-
-def load_gitignore_patterns(root: Path) -> list[str]:
-    """Load gitignore patterns from root/.gitignore file.
+def load_gitignore_patterns(file: Path | bytes) -> list[str]:
+    """Load gitignore patterns from .gitignore file bytes.
 
     Parameters
     ----------
-    root : Path
-        Root directory containing the .gitignore file.
+    file : Path | bytes
+        The path to a .gitignore file or its bytes content.
 
     Returns
     -------
     list[str]
-        List of gitignore patterns from root/.gitignore.
-        Returns empty list if .gitignore doesn't exist or can't be read.
+        List of gitignore patterns.
+        Returns empty list if content can't be decoded or the file does not exist.
     """
-    gitignore_path = root / ".gitignore"
-    
-    if not gitignore_path.is_file():
-        return []
-    
     try:
-        content = gitignore_path.read_text(encoding="utf-8")
+        if isinstance(file, Path):
+            content = file.read_text(encoding="utf-8")
+        else:
+            content = file.decode("utf-8")
         patterns = [
             line.strip()
             for line in content.splitlines()
             if line.strip() and not line.strip().startswith("#")
         ]
         return patterns
-    except (OSError, UnicodeDecodeError):
+    except (UnicodeDecodeError, OSError):
         return []
-
-
-def to_bytes(content: bytes | Path) -> bytes:
-    """Convert a Path or bytes object to bytes."""
-    return content.read_bytes() if isinstance(content, Path) else content
 
 
 def validate_credentials_content(creds_path: Path) -> str:
