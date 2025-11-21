@@ -328,7 +328,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             log(INFO, "[RUN %s]", message.metadata.run_id)
         log(
             INFO,
-            "Receiving: %s message %s",
+            "Receiving: %s message (ID: %s)",
             message.metadata.message_type,
             message.metadata.message_id,
         )
@@ -455,8 +455,9 @@ def _push_messages(
             log(INFO, "[RUN %s]", message.metadata.run_id)
         log(
             INFO,
-            "Sending: %s message",
+            "Sending: %s message (ID: %s)",
             message.metadata.message_type,
+            message.metadata.message_id,
         )
 
         # Get the object tree for the message
