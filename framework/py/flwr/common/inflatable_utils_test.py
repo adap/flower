@@ -17,11 +17,14 @@
 
 from unittest.mock import Mock
 
+import pytest
+
 from .inflatable import get_object_tree
 from .inflatable_test import CustomDataClass
 from .inflatable_utils import (
     inflatable_class_registry,
     pull_and_inflate_object_from_tree,
+    pull_objects,
     push_object_contents_from_iterable,
 )
 
@@ -80,3 +83,39 @@ def test_push_object_contents_from_iterable() -> None:
     # Assert: Check that the push function was called with the correct objects
     for obj_id, obj_content in fake_pairs:
         mock_push_object.assert_any_call(obj_id, obj_content)
+
+
+def test_pull_objects_reraises_exception() -> None:
+    """Test that exceptions from pull_object_fn are re-raised."""
+    # Prepare: Create a list of fake object IDs
+    fake_object_ids = [f"fake_obj_id_{i}" for i in range(10)]
+
+    # Prepare: Mock the pull function to raise an exception
+    test_exception = RuntimeError("Test exception from pull_object_fn")
+    side_effects = [b"fake_content"] * 2 + [test_exception]
+    mock_pull_object = Mock(side_effect=side_effects)
+
+    # Execute and Assert: Verify the exception is re-raised
+    with pytest.raises(RuntimeError, match=str(test_exception)):
+        pull_objects(
+            object_ids=fake_object_ids,
+            pull_object_fn=mock_pull_object,
+        )
+
+
+def test_push_object_contents_from_iterable_reraises_exception() -> None:
+    """Test that exceptions from push_object_fn are re-raised."""
+    # Prepare: Create a list of fake object pairs
+    fake_pairs = [(f"fake_obj_id_{i}", b"fake_content_{i}") for i in range(10)]
+
+    # Prepare: Mock the push function to raise an exception
+    test_exception = RuntimeError("Test exception from push_object_fn")
+    side_effects = [None, None, test_exception]
+    mock_push_object = Mock(side_effect=side_effects)
+
+    # Execute and Assert: Verify the exception is re-raised
+    with pytest.raises(RuntimeError, match=str(test_exception)):
+        push_object_contents_from_iterable(
+            object_contents=fake_pairs,
+            push_object_fn=mock_push_object,
+        )
