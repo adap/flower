@@ -142,7 +142,7 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
 
     def on_exit() -> None:
         # Stop heartbeat sender
-        if heartbeat_sender:
+        if heartbeat_sender and heartbeat_sender.is_running:
             heartbeat_sender.stop()
 
         # Stop log uploader for this run and upload final logs

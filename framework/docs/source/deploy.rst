@@ -25,5 +25,6 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-run-flower-on-multiple-openshift-clusters
     how-to-authenticate-accounts
     how-to-configure-audit-logging
+    how-to-manage-flower-federations
     docker/index
     helm/index
