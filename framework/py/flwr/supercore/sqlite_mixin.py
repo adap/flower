@@ -96,6 +96,9 @@ class SqliteMixin(ABC):
         self._conn.execute("PRAGMA journal_mode = WAL;")
         self._conn.execute("PRAGMA synchronous = NORMAL;")
         self._conn.execute("PRAGMA foreign_keys = ON;")
+        self._conn.execute("PRAGMA cache_size = -64000;")  # 64MB cache
+        self._conn.execute("PRAGMA temp_store = MEMORY;")  # In-memory temp tables
+        self._conn.execute("PRAGMA mmap_size = 268435456;")  # 256MB memory-mapped I/O
         self._conn.row_factory = dict_factory
 
         if log_queries:
