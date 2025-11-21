@@ -16,12 +16,16 @@
 
 
 import hashlib
+import json
+import os
+import re
 import time
 from collections.abc import Generator, Sequence
 from logging import ERROR, INFO
 from typing import Any, cast
 
 import grpc
+import requests
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
@@ -36,6 +40,7 @@ from flwr.common.constant import (
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
+    TRANSPORT_TYPE_GRPC_ADAPTER,
     Status,
     SubStatus,
 )
@@ -76,6 +81,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
@@ -96,6 +102,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         is_simulation: bool,
         authn_plugin: ControlAuthnPlugin,
         artifact_provider: ArtifactProvider | None = None,
+        fleet_api_type: str | None = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
@@ -103,8 +110,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self.is_simulation = is_simulation
         self.authn_plugin = authn_plugin
         self.artifact_provider = artifact_provider
+        self.fleet_api_type = fleet_api_type
 
-    def StartRun(  # pylint: disable=too-many-locals
+    def StartRun(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         self, request: StartRunRequest, context: grpc.ServicerContext
     ) -> StartRunResponse:
         """Create run ID."""
@@ -112,7 +120,40 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
         ffs = self.ffs_factory.ffs()
 
-        if len(request.fab.content) > FAB_MAX_SIZE:
+        verification_dict: dict[str, str] = {}
+        if request.app_id.startswith("@"):
+            if self.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
+                log(
+                    ERROR,
+                    "FAB downloading is not supported when using the gRPC adapter.",
+                )
+                return StartRunResponse()
+
+            m = re.match(APP_ID_PATTERN, request.app_id)
+            if not m:
+                log(
+                    ERROR,
+                    "Invalid remote app ID. Expected format: '@user_name/app_name'.",
+                )
+                return StartRunResponse()
+
+            # Request download link
+            url, verifications = _request_download_link(request.app_id, context)
+            verification_dict = _format_verification(verifications, verification_dict)
+
+            # Download FAB from Flower platform API
+            try:
+                r = requests.get(url, timeout=60)
+                r.raise_for_status()
+            except requests.RequestException as e:
+                log(ERROR, "FAB download failed: %s", str(e))
+                return StartRunResponse()
+            fab_file = r.content
+
+        else:
+            fab_file = request.fab.content
+
+        if len(fab_file) > FAB_MAX_SIZE:
             log(
                 ERROR,
                 "FAB size exceeds maximum allowed size of %d bytes.",
@@ -124,7 +165,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
-        fab_file = request.fab.content
 
         try:
             # Check that num-supernodes is set
@@ -150,9 +190,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             fab = Fab(
                 hashlib.sha256(fab_file).hexdigest(),
                 fab_file,
-                dict(request.fab.verifications),
+                verification_dict,
             )
-            fab_hash = ffs.put(fab.content, {})
+            fab_hash = ffs.put(fab.content, fab.verifications)
+
             if fab_hash != fab.hash_str:
                 raise RuntimeError(
                     f"FAB ({fab.hash_str}) hash from request doesn't match contents"
@@ -608,3 +649,66 @@ def _check_flwr_aid_in_run(
             grpc.StatusCode.PERMISSION_DENIED,
             "⛔️ Run ID does not belong to the account",
         )
+
+
+def _request_download_link(
+    app_id: str, context: grpc.ServicerContext
+) -> tuple[str, list[dict[str, str]] | None]:
+    """Request download link from Flower platform API."""
+    url = f"{PLATFORM_API_URL}/hub/fetch-fab"
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    body = {
+        "app_id": app_id,  # send raw string of app_id
+        "flwr_license_key": os.getenv("FLWR_LICENSE_KEY"),
+    }
+
+    try:
+        resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
+    except requests.RequestException as e:
+        context.abort(
+            grpc.StatusCode.UNAVAILABLE,
+            f"Unable to connect to Flower platform API: {e}",
+        )
+
+    if resp.status_code == 404:
+        context.abort(
+            grpc.StatusCode.NOT_FOUND,
+            f"'{app_id}' not found in Flower platform API",
+        )
+    if not resp.ok:
+        context.abort(
+            grpc.StatusCode.UNAVAILABLE,
+            f"Flower platform API request failed with status {resp.status_code}. "
+            f"Details: {resp.text}",
+        )
+
+    data = resp.json()
+    if "fab_url" not in data:
+        context.abort(
+            grpc.StatusCode.DATA_LOSS,
+            "Invalid response from Flower platform API",
+        )
+    verifications = data["verifications"] if "verifications" in data else None
+
+    return data["fab_url"], verifications
+
+
+def _format_verification(
+    verifications: list[dict[str, str]] | None, verification_dict: dict[str, str]
+) -> dict[str, str]:
+    """Format verification information for FAB."""
+    if verifications is not None:
+        # Convert verifications to dict[str, str] type
+        verification_dict = {
+            item["public_key_id"]: json.dumps(
+                {k: v for k, v in item.items() if k != "public_key_id"}
+            )
+            for item in verifications
+        }
+    valid_license = "" if verifications is None else "Valid"
+    verification_dict.update({"valid_license": valid_license})
+
+    return verification_dict
