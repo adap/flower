@@ -24,7 +24,33 @@ from flwr.common.typing import Run
 
 @dataclass
 class RunRow:  # pylint: disable=too-many-instance-attributes
-    """Represents a single run's data for display."""
+    """Represents a single run's data for display.
+
+    Attributes
+    ----------
+    run_id : int
+        The unique identifier for the run.
+    federation : str
+        The federation name.
+    fab_id : str
+        The Flower App Bundle identifier.
+    fab_version : str
+        The FAB version string.
+    fab_hash : str
+        The SHA-256 hash of the FAB.
+    status_text : str
+        The formatted status text.
+    elapsed : str
+        The formatted elapsed time.
+    pending_at : str
+        Timestamp when run entered pending state.
+    starting_at : str
+        Timestamp when run entered starting state.
+    running_at : str
+        Timestamp when run entered running state.
+    finished_at : str
+        Timestamp when run finished.
+    """
 
     run_id: int
     federation: str
@@ -40,7 +66,20 @@ class RunRow:  # pylint: disable=too-many-instance-attributes
 
 
 def format_runs(runs: list[Run], now_isoformat: str) -> list[RunRow]:
-    """Format runs to a list of RunRow objects."""
+    """Format runs to a list of RunRow objects.
+
+    Parameters
+    ----------
+    runs : list[Run]
+        List of Run objects to format.
+    now_isoformat : str
+        Current timestamp in ISO format for calculating elapsed time.
+
+    Returns
+    -------
+    list[RunRow]
+        List of formatted RunRow objects sorted by pending_at timestamp.
+    """
 
     def _format_datetime(dt: datetime | None) -> str:
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"

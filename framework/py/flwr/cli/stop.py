@@ -70,7 +70,11 @@ def stop(  # pylint: disable=R0914
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """Stop a run."""
+    """Stop a Flower run.
+
+    This command stops a running Flower App execution by sending a stop request
+    to the SuperLink via the Control API.
+    """
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:
@@ -124,7 +128,17 @@ def stop(  # pylint: disable=R0914
 
 
 def _stop_run(stub: ControlStub, run_id: int, output_format: str) -> None:
-    """Stop a run."""
+    """Stop a run and display result.
+
+    Parameters
+    ----------
+    stub : ControlStub
+        The gRPC stub for Control API communication.
+    run_id : int
+        The unique identifier of the run to stop.
+    output_format : str
+        Output format ('default' or 'json').
+    """
     with flwr_cli_grpc_exc_handler():
         response: StopRunResponse = stub.StopRun(request=StopRunRequest(run_id=run_id))
     if response.success:

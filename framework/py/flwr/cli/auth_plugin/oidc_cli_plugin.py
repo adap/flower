@@ -40,7 +40,11 @@ from .auth_plugin import CliAuthPlugin, LoginError
 
 
 class OidcCliPlugin(CliAuthPlugin):
-    """Flower OIDC auth plugin for CLI."""
+    """Flower OIDC authentication plugin for CLI.
+
+    This plugin implements OpenID Connect (OIDC) device flow authentication
+    for CLI access to Flower SuperLink.
+    """
 
     def __init__(self, credentials_path: Path):
         self.access_token: str | None = None
@@ -52,7 +56,25 @@ class OidcCliPlugin(CliAuthPlugin):
         login_details: AccountAuthLoginDetails,
         control_stub: ControlStub,
     ) -> AccountAuthCredentials:
-        """Authenticate the account and retrieve authentication credentials."""
+        """Authenticate the account and retrieve authentication credentials.
+
+        Parameters
+        ----------
+        login_details : AccountAuthLoginDetails
+            Login details containing device code and verification URI.
+        control_stub : ControlStub
+            Control stub for making authentication requests.
+
+        Returns
+        -------
+        AccountAuthCredentials
+            The access and refresh tokens.
+
+        Raises
+        ------
+        LoginError
+            If authentication times out.
+        """
         typer.secho(
             "Please log into your Flower account here: "
             f"{login_details.verification_uri_complete}",

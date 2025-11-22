@@ -60,7 +60,22 @@ def prompt_text(
     predicate: Callable[[str], bool] = lambda _: True,
     default: str | None = None,
 ) -> str:
-    """Ask user to enter text input."""
+    """Ask user to enter text input.
+
+    Parameters
+    ----------
+    text : str
+        The prompt text to display to the user.
+    predicate : Callable[[str], bool]
+        A function to validate the user input. Default accepts all non-empty strings.
+    default : str | None
+        Default value to use if user presses enter without input. Default is None.
+
+    Returns
+    -------
+    str
+        The validated user input.
+    """
     while True:
         result = typer.prompt(
             typer.style(f"\n💬 {text}", fg=typer.colors.MAGENTA, bold=True),
@@ -74,7 +89,20 @@ def prompt_text(
 
 
 def prompt_options(text: str, options: list[str]) -> str:
-    """Ask user to select one of the given options and return the selected item."""
+    """Ask user to select one of the given options and return the selected item.
+
+    Parameters
+    ----------
+    text : str
+        The prompt text to display to the user.
+    options : list[str]
+        List of options to present to the user.
+
+    Returns
+    -------
+    str
+        The selected option from the list.
+    """
     # Turn options into a list with index as in " [ 0] quickstart-pytorch"
     options_formatted = [
         " [ "
@@ -132,9 +160,19 @@ def is_valid_project_name(name: str) -> bool:
 def sanitize_project_name(name: str) -> str:
     """Sanitize the given string to make it a valid Python project name.
 
-    This version replaces spaces, dots, slashes, and underscores with dashes, removes
+    This function replaces spaces, dots, slashes, and underscores with dashes, removes
     any characters not allowed in Python project names, makes the string lowercase, and
     ensures it starts with a valid character.
+
+    Parameters
+    ----------
+    name : str
+        The project name to sanitize.
+
+    Returns
+    -------
+    str
+        The sanitized project name that is valid for Python projects.
     """
     # Replace whitespace with '_'
     name_with_hyphens = re.sub(r"[ ./_]", "-", name)
@@ -160,7 +198,18 @@ def sanitize_project_name(name: str) -> str:
 
 
 def get_sha256_hash(file_path_or_int: Path | int) -> str:
-    """Calculate the SHA-256 hash of a file."""
+    """Calculate the SHA-256 hash of a file or integer.
+
+    Parameters
+    ----------
+    file_path_or_int : Path | int
+        Either a path to a file to hash, or an integer to convert to string and hash.
+
+    Returns
+    -------
+    str
+        The SHA-256 hash as a hexadecimal string.
+    """
     sha256 = hashlib.sha256()
     if isinstance(file_path_or_int, Path):
         with open(file_path_or_int, "rb") as f:
@@ -226,7 +275,18 @@ def get_account_auth_config_path(root_dir: Path, federation: str) -> Path:
 
 
 def account_auth_enabled(federation_config: dict[str, Any]) -> bool:
-    """Check if account authentication is enabled in the federation config."""
+    """Check if account authentication is enabled in the federation config.
+
+    Parameters
+    ----------
+    federation_config : dict[str, Any]
+        The federation configuration dictionary.
+
+    Returns
+    -------
+    bool
+        True if account authentication is enabled, False otherwise.
+    """
     enabled: bool = federation_config.get("enable-user-auth", False)
     enabled |= federation_config.get("enable-account-auth", False)
     if "enable-user-auth" in federation_config:
@@ -240,7 +300,18 @@ def account_auth_enabled(federation_config: dict[str, Any]) -> bool:
 
 
 def retrieve_authn_type(config_path: Path) -> str:
-    """Retrieve the auth type from the config file or return NOOP if not found."""
+    """Retrieve the auth type from the config file or return NOOP if not found.
+
+    Parameters
+    ----------
+    config_path : Path
+        Path to the authentication configuration file.
+
+    Returns
+    -------
+    str
+        The authentication type string, or AuthnType.NOOP if not found.
+    """
     try:
         with config_path.open("r", encoding="utf-8") as file:
             json_file = json.load(file)
@@ -256,7 +327,29 @@ def load_cli_auth_plugin(
     federation_config: dict[str, Any],
     authn_type: str | None = None,
 ) -> CliAuthPlugin:
-    """Load the CLI-side account auth plugin for the given authn type."""
+    """Load the CLI-side account auth plugin for the given authn type.
+
+    Parameters
+    ----------
+    root_dir : Path
+        Root directory of the Flower project.
+    federation : str
+        Name of the federation.
+    federation_config : dict[str, Any]
+        Federation configuration dictionary.
+    authn_type : str | None
+        Authentication type. If None, will be determined from config.
+
+    Returns
+    -------
+    CliAuthPlugin
+        The loaded authentication plugin instance.
+
+    Raises
+    ------
+    typer.Exit
+        If the authentication type is unknown.
+    """
     # Find the path to the account auth config file
     config_path = get_account_auth_config_path(root_dir, federation)
 
@@ -280,7 +373,22 @@ def load_cli_auth_plugin(
 def init_channel(
     app: Path, federation_config: dict[str, Any], auth_plugin: CliAuthPlugin
 ) -> grpc.Channel:
-    """Initialize gRPC channel to the Control API."""
+    """Initialize gRPC channel to the Control API.
+
+    Parameters
+    ----------
+    app : Path
+        Path to the Flower app directory.
+    federation_config : dict[str, Any]
+        Federation configuration dictionary containing address and TLS settings.
+    auth_plugin : CliAuthPlugin
+        Authentication plugin instance for handling credentials.
+
+    Returns
+    -------
+    grpc.Channel
+        Configured gRPC channel with authentication interceptors.
+    """
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
         app, federation_config
     )
@@ -304,9 +412,22 @@ def init_channel(
 def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-branches
     """Context manager to handle specific gRPC errors.
 
-    It catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED,
-    UNAVAILABLE, and PERMISSION_DENIED statuses, informs the user, and exits the
-    application. All other exceptions will be allowed to escape.
+    Catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED,
+    UNAVAILABLE, PERMISSION_DENIED, NOT_FOUND, and FAILED_PRECONDITION statuses,
+    informs the user, and exits the application. All other exceptions will be
+    allowed to escape.
+
+    Yields
+    ------
+    None
+        Context manager yields nothing.
+
+    Raises
+    ------
+    typer.Exit
+        On handled gRPC error statuses with appropriate exit code.
+    grpc.RpcError
+        For unhandled gRPC error statuses.
     """
     try:
         yield
@@ -415,7 +536,29 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
 def request_download_link(
     app_id: str, app_version: str | None, in_url: str, out_url: str
 ) -> str:
-    """Request download link from Flower platform API."""
+    """Request download link from Flower platform API.
+
+    Parameters
+    ----------
+    app_id : str
+        The application identifier.
+    app_version : str | None
+        The application version, or None for latest.
+    in_url : str
+        The API endpoint URL.
+    out_url : str
+        The key name for the download URL in the response.
+
+    Returns
+    -------
+    str
+        The download URL for the application.
+
+    Raises
+    ------
+    typer.BadParameter
+        If connection fails, app not found, or API request fails.
+    """
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
@@ -445,7 +588,18 @@ def request_download_link(
 
 
 def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:
-    """Build a PathSpec from a list of patterns."""
+    """Build a PathSpec from a list of patterns.
+
+    Parameters
+    ----------
+    patterns : Iterable[str]
+        Iterable of gitignore-style pattern strings.
+
+    Returns
+    -------
+    pathspec.PathSpec
+        Compiled PathSpec object for pattern matching.
+    """
     return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
 
 

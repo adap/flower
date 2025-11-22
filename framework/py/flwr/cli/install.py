@@ -87,7 +87,27 @@ def install_from_fab(
     flwr_dir: Path | None,
     skip_prompt: bool = False,
 ) -> Path:
-    """Install from a FAB file after extracting and validating."""
+    """Install from a FAB file after extracting and validating.
+
+    Parameters
+    ----------
+    fab_file : Path | bytes
+        Either a path to the FAB file or the FAB file content as bytes.
+    flwr_dir : Path | None
+        Target installation directory, or None to use default.
+    skip_prompt : bool
+        If True, skip confirmation prompts. Default is False.
+
+    Returns
+    -------
+    Path
+        Path to the installed application directory.
+
+    Raises
+    ------
+    typer.Exit
+        If FAB format is invalid or hash verification fails.
+    """
     fab_file_archive: Path | IO[bytes]
     fab_name: str | None
     if isinstance(fab_file, bytes):
@@ -143,7 +163,31 @@ def validate_and_install(
     flwr_dir: Path | None,
     skip_prompt: bool = False,
 ) -> Path:
-    """Validate TOML files and install the project to the desired directory."""
+    """Validate TOML files and install the project to the desired directory.
+
+    Parameters
+    ----------
+    project_dir : Path
+        Path to the extracted project directory.
+    fab_hash : str
+        SHA-256 hash of the FAB file.
+    fab_name : str | None
+        Name of the FAB file, or None if installing from bytes.
+    flwr_dir : Path | None
+        Target installation directory, or None to use default.
+    skip_prompt : bool
+        If True, skip confirmation prompts. Default is False.
+
+    Returns
+    -------
+    Path
+        Path to the installed application directory.
+
+    Raises
+    ------
+    typer.Exit
+        If configuration is invalid or metadata doesn't match.
+    """
     config, _, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
 
     if config is None:
@@ -198,7 +242,20 @@ def validate_and_install(
 
 
 def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
-    """Verify file hashes based on the LIST content."""
+    """Verify file hashes based on the CONTENT manifest.
+
+    Parameters
+    ----------
+    list_content : str
+        Content of the CONTENT manifest file with hash information.
+    tmpdir : Path
+        Temporary directory containing extracted files.
+
+    Returns
+    -------
+    bool
+        True if all file hashes match, False otherwise.
+    """
     for line in list_content.strip().split("\n"):
         rel_path, hash_expected, _ = line.split(",")
         file_path = tmpdir / rel_path
@@ -210,7 +267,20 @@ def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
 def _validate_fab_and_config_metadata(
     fab_name: str, config_metadata: tuple[str, str, str, str]
 ) -> None:
-    """Validate metadata from the FAB filename and config."""
+    """Validate metadata from the FAB filename and config.
+
+    Parameters
+    ----------
+    fab_name : str
+        The FAB filename (with or without .fab extension).
+    config_metadata : tuple[str, str, str, str]
+        Tuple of (publisher, project_name, version, fab_hash).
+
+    Raises
+    ------
+    typer.Exit
+        If filename format is incorrect or hash doesn't match.
+    """
     publisher, project_name, version, fab_hash = config_metadata
 
     fab_name = fab_name.removesuffix(".fab")
