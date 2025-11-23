@@ -55,7 +55,7 @@ def write_to_zip(
 
     Returns
     -------
-    zipfile.ZipFile
+    ZipFile
         The modified ZipFile object.
     """
     zip_info = zipfile.ZipInfo(filename)
