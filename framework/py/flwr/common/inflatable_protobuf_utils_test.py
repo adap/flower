@@ -17,7 +17,6 @@
 
 import unittest
 from itertools import product
-from typing import Union
 from unittest.mock import Mock
 
 import numpy as np
@@ -98,7 +97,7 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
     @parameterized.expand(product([case[0] for case in base_cases], [True, False]))  # type: ignore
     def test_push_objects(
         self,
-        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
+        records: dict[str, ArrayRecord | ConfigRecord | MetricRecord],
         filter_by_obj_ids: bool,
     ) -> None:
         """Test pushing objects with push_objects helper function."""
@@ -128,7 +127,7 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
     @parameterized.expand(base_cases)  # type: ignore
     def test_pull_objects_success(
         self,
-        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
+        records: dict[str, ArrayRecord | ConfigRecord | MetricRecord],
     ) -> None:
         """Test pulling objects with pull_objects helper function."""
         # Prepare
@@ -151,7 +150,7 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
     @parameterized.expand(base_cases)  # type: ignore
     def test_pull_objects_no_preregistration_failure(
         self,
-        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
+        records: dict[str, ArrayRecord | ConfigRecord | MetricRecord],
     ) -> None:
         """Test pulling objects without pre-registering them."""
         # Prepare
@@ -174,7 +173,7 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
     @parameterized.expand(base_cases)  # type: ignore
     def test_pull_objects_exceeding_max_time_failure(
         self,
-        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
+        records: dict[str, ArrayRecord | ConfigRecord | MetricRecord],
     ) -> None:
         """Test pulling objects exceeding max time."""
         # Prepare
@@ -200,7 +199,7 @@ class TestInflatableStubHelpers(unittest.TestCase):  # pylint: disable=R0902
     @parameterized.expand(base_cases)  # type: ignore
     def test_pull_objects_exceeding_max_tries_failure(
         self,
-        records: dict[str, Union[ArrayRecord, ConfigRecord, MetricRecord]],
+        records: dict[str, ArrayRecord | ConfigRecord | MetricRecord],
     ) -> None:
         """Test pulling objects exceeding max tries."""
         # Prepare

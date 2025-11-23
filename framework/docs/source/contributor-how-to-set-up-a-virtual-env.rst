@@ -1,16 +1,17 @@
-Set up a virtual env
-====================
+######################
+ Set up a virtual env
+######################
 
 It is recommended to run your Python setup within a virtual environment. This guide
 shows three different examples how to create a virtual environment with pyenv
 virtualenv, poetry, or Anaconda. You can follow the instructions or choose your
 preferred setup.
 
-Python Version
---------------
+****************
+ Python Version
+****************
 
-Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, but `Python 3.10
-<https://docs.python.org/3.10/>`_ or above is recommended.
+Flower requires at least `Python 3.10 <https://docs.python.org/3.10/>`_.
 
 .. note::
 
@@ -18,8 +19,9 @@ Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, but `Pyth
     currently recommend utilizing at most `Python 3.11 <https://docs.python.org/3.11/>`_
     for running Flower simulations.
 
-Virtualenv with Pyenv/Virtualenv
---------------------------------
+**********************************
+ Virtualenv with Pyenv/Virtualenv
+**********************************
 
 One of the recommended virtual environment is `pyenv
 <https://github.com/pyenv/pyenv>`_/`virtualenv
@@ -31,22 +33,23 @@ Once Pyenv is set up, you can use it to install `Python Version 3.10
 
 .. code-block:: shell
 
-    pyenv install 3.10.12
+    pyenv install 3.10.19
 
 Create the virtualenv with:
 
 .. code-block:: shell
 
-    pyenv virtualenv 3.10.12 flower-3.10.12
+    pyenv virtualenv 3.10.19 flower-3.10.19
 
 Activate the virtualenv by running the following command:
 
 .. code-block:: shell
 
-    echo flower-3.10.12 > .python-version
+    echo flower-3.10.19 > .python-version
 
-Virtualenv with Poetry
-----------------------
+************************
+ Virtualenv with Poetry
+************************
 
 The Flower examples are based on `Poetry <https://python-poetry.org/docs/>`_ to manage
 dependencies. After installing Poetry you simply create a virtual environment with:
@@ -62,8 +65,9 @@ with the following command:
 
     source $(poetry env info --path)/bin/activate
 
-Virtualenv with Anaconda
-------------------------
+**************************
+ Virtualenv with Anaconda
+**************************
 
 If you prefer to use Anaconda for your virtual environment then install and setup the
 `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`_
@@ -71,10 +75,10 @@ package. After setting it up you can create a virtual environment with:
 
 .. code-block:: shell
 
-    conda create -n flower-3.10.12 python=3.10.12
+    conda create -n flower-3.10.19 python=3.10.19
 
 and activate the virtual environment with:
 
 .. code-block:: shell
 
-    conda activate flower-3.10.12
+    conda activate flower-3.10.19

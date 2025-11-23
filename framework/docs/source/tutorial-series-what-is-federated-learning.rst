@@ -1,5 +1,6 @@
-What is Federated Learning?
-===========================
+#############################
+ What is Federated Learning?
+#############################
 
 Welcome to the Flower federated learning tutorial!
 
@@ -26,8 +27,9 @@ Only a basic understanding of data science and Python programming is assumed.
 
 Let's get started!
 
-Classical Machine Learning
---------------------------
+****************************
+ Classical Machine Learning
+****************************
 
 Before we begin discussing federated learning, let us quickly recap how most machine
 learning works today.
@@ -98,8 +100,9 @@ we've basically always relied on.
       />
     </div>
 
-Challenges of classical machine learning
-----------------------------------------
+******************************************
+ Challenges of classical machine learning
+******************************************
 
 This classical machine learning approach we've just seen can be used in some cases.
 Great examples include categorizing holiday photos, or analyzing web traffic. Cases,
@@ -160,8 +163,9 @@ such an alternative exists. But what can we do to apply machine learning and dat
 science to these cases to utilize private data? After all, these are all areas that
 would benefit significantly from recent advances in AI.
 
-Federated Learning
-------------------
+********************
+ Federated Learning
+********************
 
 Federated Learning simply reverses this approach. It enables machine learning on
 distributed data by moving the training to the data, instead of moving the data to the
@@ -183,10 +187,10 @@ amounts of previously inaccessible data.
 So how does Federated Learning work, exactly? Let's start with an intuitive explanation.
 
 Federated learning in five steps
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+================================
 
 Step 0: Initialize global model
-+++++++++++++++++++++++++++++++
+-------------------------------
 
 We start by initializing the model on the server. This is exactly the same in classic
 centralized learning: we initialize the model parameters, either randomly or from a
@@ -201,7 +205,7 @@ previously saved checkpoint.
     </div>
 
 Step 1: Send model to a number of connected organizations/devices (client nodes)
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+--------------------------------------------------------------------------------
 
 Next, we send the parameters of the global model to the connected client nodes (think:
 edge devices like smartphones or servers belonging to organizations). This is to ensure
@@ -216,7 +220,7 @@ is that selecting more and more client nodes has diminishing returns.
     </div>
 
 Step 2: Train model locally on the data of each organization/device (client node)
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------------------------------------------
 
 Now that all (selected) client nodes have the latest version of the global model
 parameters, they start the local training. They use their own local dataset to train
@@ -231,7 +235,7 @@ even just a few steps (mini-batches).
     </div>
 
 Step 3: Return model updates back to the server
-+++++++++++++++++++++++++++++++++++++++++++++++
+-----------------------------------------------
 
 After local training, each client node has a slightly different version of the model
 parameters they originally received. The parameters are all different because each
@@ -246,7 +250,7 @@ full model parameters or just the gradients that were accumulated during local t
     </div>
 
 Step 4: Aggregate model updates into a new global model
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-------------------------------------------------------
 
 The server receives model updates from the selected client nodes. If it selected 100
 client nodes, it now has 100 slightly different versions of the original global model,
@@ -274,7 +278,7 @@ as each of the 100 examples.
     </div>
 
 Step 5: Repeat steps 1 to 4 until the model converges
-+++++++++++++++++++++++++++++++++++++++++++++++++++++
+-----------------------------------------------------
 
 Steps 1 to 4 are what we call a single round of federated learning. The global model
 parameters get sent to the participating client nodes (step 1), the client nodes train
@@ -290,7 +294,7 @@ eventually arrive at a fully trained model that performs well across the data of
 client nodes.
 
 Conclusion
-~~~~~~~~~~
+==========
 
 Congratulations, you now understand the basics of federated learning. There's a lot more
 to discuss, of course, but that was federated learning in a nutshell. In later parts of
@@ -299,7 +303,7 @@ select the best client nodes that should participate in the next round? What's t
 way to aggregate model updates? How can we handle failing client nodes (stragglers)?
 
 Federated Evaluation
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 Just like we can train a model on the decentralized data of different client nodes, we
 can also evaluate the model on that data to receive valuable metrics. This is called
@@ -307,7 +311,7 @@ federated evaluation, sometimes abbreviated as FE. In fact, federated evaluation
 integral part of most federated learning systems.
 
 Federated Analytics
-~~~~~~~~~~~~~~~~~~~
+===================
 
 In many cases, machine learning isn't necessary to derive value from data. Data analysis
 can yield valuable insights, but again, there's often not enough data to get a clear
@@ -318,7 +322,7 @@ aggregation to prevent the server from seeing the results submitted by individua
 nodes.
 
 Differential Privacy
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 Differential privacy (DP) is often mentioned in the context of Federated Learning. It is
 a privacy-preserving method used when analyzing and sharing statistical data, ensuring
@@ -327,8 +331,9 @@ the model updates, ensuring any individual participants' information cannot be
 distinguished or re-identified. This technique can be considered an optimization that
 provides a quantifiable privacy protection measure.
 
-Flower
-------
+********
+ Flower
+********
 
 Federated learning, federated evaluation, and federated analytics require infrastructure
 to move machine learning models back and forth, train and evaluate them on local data,
@@ -347,8 +352,9 @@ workload, any ML framework, and any programming language.
     />
     </div>
 
-Final Remarks
--------------
+***************
+ Final Remarks
+***************
 
 Congratulations, you just learned the basics of federated learning and how it relates to
 the classic (centralized) machine learning!
@@ -356,8 +362,9 @@ the classic (centralized) machine learning!
 In the next part of this tutorial, we are going to build a first federated learning
 system with Flower.
 
-Next steps
-----------
+************
+ Next steps
+************
 
 Before you continue, make sure to join the Flower community on Flower Discuss (`Join
 Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack

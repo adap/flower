@@ -2,8 +2,9 @@
 .. meta::
     :description: Upgrade seamlessly to Flower 1.13 with this guide for transitioning your setup to the latest features and enhancements.
 
-Upgrade to Flower 1.13
-======================
+########################
+ Upgrade to Flower 1.13
+########################
 
 Welcome to the migration guide for updating Flower to Flower 1.13! Whether you're a
 seasoned user or just getting started, this guide will help you smoothly transition your
@@ -49,8 +50,9 @@ Let's dive in!
 
 .. _serverapp_link: ref-api/flwr.server.ServerApp.html
 
-Install update
---------------
+****************
+ Install update
+****************
 
 Here's how to update an existing installation of Flower to Flower 1.13 with ``pip``:
 
@@ -88,8 +90,9 @@ or ``pyproject.toml``:
         "flwr[simulation]>=1.13,2.0",
     ]
 
-Required changes
-----------------
+******************
+ Required changes
+******************
 
 Starting with Flower 1.8, the *infrastructure* and *application layers* have been
 decoupled. Flower 1.13 enforces this separation further. Among other things, this allows
@@ -111,7 +114,7 @@ project both in the traditional (now deprecated) way and in the new (recommended
 1.13 way:
 
 |clientapp_link|_
-~~~~~~~~~~~~~~~~~
+=================
 
 - Wrap your existing client with |clientapp_link|_ instead of launching it via
   ``start_client()``. Here's an example:
@@ -148,7 +151,7 @@ project both in the traditional (now deprecated) way and in the new (recommended
         )
 
 |serverapp_link|_
-~~~~~~~~~~~~~~~~~
+=================
 
 - Wrap your existing strategy with |serverapp_link|_ instead of starting the server via
   ``start_server()``. Here's an example:
@@ -188,7 +191,7 @@ project both in the traditional (now deprecated) way and in the new (recommended
         )
 
 Deployment
-~~~~~~~~~~
+==========
 
 - In a terminal window, start the SuperLink using |flower_superlink_link|_. Then, in two
   additional terminal windows, start two SuperNodes using |flower_supernode_link|_ (2x).
@@ -249,7 +252,7 @@ Deployment
          <other-args>
 
 Simulation (CLI)
-~~~~~~~~~~~~~~~~
+================
 
 Wrap your existing client and strategy with |clientapp_link|_ and |serverapp_link|_,
 respectively. There is no need to use ``start_simulation()`` anymore. Here's an example:
@@ -379,7 +382,7 @@ Depending on your Flower version, you can also define the default resources as f
         )
 
 Simulation (Notebook)
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 To run your simulation from within a notebook, please consider the following examples
 depending on your Flower version:
@@ -454,8 +457,9 @@ depending on your Flower version:
         client_resources=backend_config["client_resources"],
     )
 
-Further help
-------------
+**************
+ Further help
+**************
 
 Most official `Flower code examples <https://flower.ai/docs/examples/>`_ are already
 updated to Flower 1.13 so they can serve as a reference for using the Flower 1.13 API.

@@ -15,7 +15,7 @@
 """Flower client."""
 
 
-from flwr.clientapp import ClientApp
+from flwr.clientapp.client_app import ClientApp
 
 from ..compat.client.app import start_client as start_client  # Deprecated
 from ..compat.client.app import start_numpy_client as start_numpy_client  # Deprecated

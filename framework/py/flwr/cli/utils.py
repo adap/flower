@@ -18,15 +18,18 @@
 import hashlib
 import json
 import re
-from collections.abc import Iterator
+from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Optional, Union, cast
+from typing import Any, cast
 
 import grpc
+import pathspec
+import requests
 import typer
 
 from flwr.common.constant import (
+    ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
     CREDENTIALS_DIR,
     FLWR_DIR,
@@ -36,6 +39,7 @@ from flwr.common.constant import (
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
+    REFRESH_TOKEN_KEY,
     RUN_ID_NOT_FOUND_MESSAGE,
     AuthnType,
 )
@@ -44,6 +48,7 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
+from flwr.common.version import package_version as flwr_version
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
@@ -53,7 +58,7 @@ from .config_utils import validate_certificate_in_federation_config
 def prompt_text(
     text: str,
     predicate: Callable[[str], bool] = lambda _: True,
-    default: Optional[str] = None,
+    default: str | None = None,
 ) -> str:
     """Ask user to enter text input."""
     while True:
@@ -154,7 +159,7 @@ def sanitize_project_name(name: str) -> str:
     return sanitized_name
 
 
-def get_sha256_hash(file_path_or_int: Union[Path, int]) -> str:
+def get_sha256_hash(file_path_or_int: Path | int) -> str:
     """Calculate the SHA-256 hash of a file."""
     sha256 = hashlib.sha256()
     if isinstance(file_path_or_int, Path):
@@ -249,7 +254,7 @@ def load_cli_auth_plugin(
     root_dir: Path,
     federation: str,
     federation_config: dict[str, Any],
-    authn_type: Optional[str] = None,
+    authn_type: str | None = None,
 ) -> CliAuthPlugin:
     """Load the CLI-side account auth plugin for the given authn type."""
     # Find the path to the account auth config file
@@ -405,3 +410,102 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
             )
             raise typer.Exit(code=1) from None
         raise
+
+
+def request_download_link(
+    app_id: str, app_version: str | None, in_url: str, out_url: str
+) -> str:
+    """Request download link from Flower platform API."""
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    body = {
+        "app_id": app_id,  # send raw string of app_id
+        "app_version": app_version,
+        "flwr_version": flwr_version,
+    }
+    try:
+        resp = requests.post(in_url, headers=headers, data=json.dumps(body), timeout=20)
+    except requests.RequestException as e:
+        raise typer.BadParameter(f"Unable to connect to Platform API: {e}") from e
+
+    if resp.status_code == 404:
+        raise typer.BadParameter(f"'{app_id}' not found in Platform API")
+    if not resp.ok:
+        raise typer.BadParameter(
+            f"Platform API request failed with "
+            f"status {resp.status_code}. Details: {resp.text}"
+        )
+
+    data = resp.json()
+    if out_url not in data:
+        raise typer.BadParameter("Invalid response from Platform API")
+    return str(data[out_url])
+
+
+def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:
+    """Build a PathSpec from a list of patterns."""
+    return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+
+
+def load_gitignore_patterns(file: Path | bytes) -> list[str]:
+    """Load gitignore patterns from .gitignore file bytes.
+
+    Parameters
+    ----------
+    file : Path | bytes
+        The path to a .gitignore file or its bytes content.
+
+    Returns
+    -------
+    list[str]
+        List of gitignore patterns.
+        Returns empty list if content can't be decoded or the file does not exist.
+    """
+    try:
+        if isinstance(file, Path):
+            content = file.read_text(encoding="utf-8")
+        else:
+            content = file.decode("utf-8")
+        patterns = [
+            line.strip()
+            for line in content.splitlines()
+            if line.strip() and not line.strip().startswith("#")
+        ]
+        return patterns
+    except (UnicodeDecodeError, OSError):
+        return []
+
+
+def validate_credentials_content(creds_path: Path) -> str:
+    """Load and validate the credentials file content.
+
+    Ensures required keys exist:
+      - AUTHN_TYPE_JSON_KEY
+      - ACCESS_TOKEN_KEY
+      - REFRESH_TOKEN_KEY
+    """
+    try:
+        creds: dict[str, str] = json.loads(creds_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as err:
+        typer.secho(
+            f"Invalid credentials file at '{creds_path}': {err}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from err
+
+    required_keys = [AUTHN_TYPE_JSON_KEY, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]
+    missing = [key for key in required_keys if key not in creds]
+
+    if missing:
+        typer.secho(
+            f"Credentials file '{creds_path}' is missing "
+            f"required key(s): {', '.join(missing)}. Please log in again.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    return creds[ACCESS_TOKEN_KEY]

@@ -18,7 +18,7 @@
 import time
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
-from typing import Annotated, Any, Optional, cast
+from typing import Annotated, Any, cast
 
 import grpc
 import typer
@@ -143,11 +143,11 @@ def log(
         typer.Argument(help="Path of the Flower project to run"),
     ] = Path("."),
     federation: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(help="Name of the federation to run the app on"),
     ] = None,
     federation_config_overrides: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option(
             "--federation-config",
             help=FEDERATION_CONFIG_HELP_MESSAGE,

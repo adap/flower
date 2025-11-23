@@ -22,6 +22,7 @@ import "flwr/proto/transport.proto";
 import "flwr/proto/recorddict.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/node.proto";
+import "flwr/proto/federation.proto";
 
 service Control {
   // Start run upon request
@@ -54,6 +55,13 @@ service Control {
 
   // List SuperNodes
   rpc ListNodes(ListNodesRequest) returns (ListNodesResponse) {}
+
+  // List Federations
+  rpc ListFederations(ListFederationsRequest)
+      returns (ListFederationsResponse) {}
+
+  // Show Federation
+  rpc ShowFederation(ShowFederationRequest) returns (ShowFederationResponse) {}
 }
 
 message StartRunRequest {
@@ -108,5 +116,14 @@ message UnregisterNodeResponse {}
 message ListNodesRequest {}
 message ListNodesResponse {
   repeated NodeInfo nodes_info = 1;
+  string now = 2;
+}
+
+message ListFederationsRequest {}
+message ListFederationsResponse { repeated Federation federations = 1; }
+
+message ShowFederationRequest { string federation_name = 1; }
+message ShowFederationResponse {
+  Federation federation = 1;
   string now = 2;
 }

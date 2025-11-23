@@ -21,7 +21,7 @@ import unittest
 from collections import OrderedDict
 from io import BytesIO
 from types import ModuleType
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import Mock, call, patch
 
 import numpy as np
@@ -99,14 +99,12 @@ class TestArrayRecord(unittest.TestCase):
         """Test creating a ArrayRecord from a PyTorch state_dict."""
         # Prepare
         # Mock state_dict with tensor mocks
-        state_dict = OrderedDict(
-            [
-                ("weight", TorchTensor()),
-                ("bias", TorchTensor()),
-            ]
-        )
+        state_dict = {
+            "weight": TorchTensor(),
+            "bias": TorchTensor(),
+        }
         ndarrays = [np.array([1, 2]), np.array([3, 4])]
-        for tensor_mock, numpy_array in zip(state_dict.values(), ndarrays):
+        for tensor_mock, numpy_array in zip(state_dict.values(), ndarrays, strict=True):
             tensor_mock.detach.return_value = tensor_mock
             tensor_mock.cpu.return_value = tensor_mock
             tensor_mock.numpy.return_value = numpy_array
@@ -134,7 +132,7 @@ class TestArrayRecord(unittest.TestCase):
         """Test `ArrayRecord.from_torch_state_dict` without PyTorch."""
         with patch.dict("sys.modules", {}, clear=True):
             with self.assertRaises(RuntimeError) as cm:
-                ArrayRecord.from_torch_state_dict(OrderedDict())
+                ArrayRecord.from_torch_state_dict({})
             self.assertIn("PyTorch is required", str(cm.exception))
 
     def test_to_numpy_ndarrays(self) -> None:
@@ -143,7 +141,7 @@ class TestArrayRecord(unittest.TestCase):
         record = ArrayRecord()
         numpy_arrays = [np.array([1, 2]), np.array([3, 4])]
         mock_arrays = [Mock(spec=Array), Mock(spec=Array)]
-        for mock_arr, arr in zip(mock_arrays, numpy_arrays):
+        for mock_arr, arr in zip(mock_arrays, numpy_arrays, strict=True):
             mock_arr.numpy.return_value = arr
         record["0"] = mock_arrays[0]
         record["1"] = mock_arrays[1]
@@ -165,7 +163,7 @@ class TestArrayRecord(unittest.TestCase):
         record = ArrayRecord()
         ndarrays = [np.array([1, 2]), np.array([3, 4])]
         mock_arrays = [Mock(spec=Array), Mock(spec=Array)]
-        for mock_arr, arr in zip(mock_arrays, ndarrays):
+        for mock_arr, arr in zip(mock_arrays, ndarrays, strict=True):
             mock_arr.numpy.return_value = arr
         record["weight"] = mock_arrays[0]
         record["bias"] = mock_arrays[1]
@@ -221,7 +219,7 @@ class TestArrayRecord(unittest.TestCase):
         """Test initializing with an array_dict and keep_input=False."""
         # Prepare
         arr = Array(dtype="float32", shape=(2, 2), stype=SType.NUMPY, data=b"data")
-        arr_dict: OrderedDict[str, Array] = OrderedDict({"x": arr})
+        arr_dict = {"x": arr}
 
         # Execute
         if use_keyword:
@@ -235,16 +233,16 @@ class TestArrayRecord(unittest.TestCase):
 
     @parameterized.expand(  # type: ignore
         [
-            ("array_dict", OrderedDict({"x": Array("mock", (1,), "np", b"data")})),
-            (None, OrderedDict({"x": Array("mock", (1,), "np", b"data")})),
-            ("torch_state_dict", OrderedDict({"x": MOCK_TORCH_TENSOR})),
-            (None, OrderedDict({"x": MOCK_TORCH_TENSOR})),
+            ("array_dict", {"x": Array("mock", (1,), "np", b"data")}),
+            (None, {"x": Array("mock", (1,), "np", b"data")}),
+            ("torch_state_dict", {"x": MOCK_TORCH_TENSOR}),
+            (None, {"x": MOCK_TORCH_TENSOR}),
             ("numpy_ndarrays", [np.array([1, 2, 3])]),
             (None, [np.array([1, 2, 3])]),
         ]
     )
     def test_init_keep_input_true_and_false(
-        self, keyword: Optional[str], input_arg: Any
+        self, keyword: str | None, input_arg: Any
     ) -> None:
         """Test initializing with keep_input=True/False."""
         # Prepare
@@ -273,7 +271,7 @@ class TestArrayRecord(unittest.TestCase):
         """Test initializing with an array_dict and keep_input=True."""
         # Prepare
         arr = Array(dtype="float32", shape=(2, 2), stype=SType.NUMPY, data=b"data")
-        arr_dict: OrderedDict[str, Array] = OrderedDict({"x": arr})
+        arr_dict = {"x": arr}
 
         # Execute
         if use_keyword:
@@ -290,7 +288,7 @@ class TestArrayRecord(unittest.TestCase):
         self, use_keyword: bool
     ) -> None:
         """Test initializing with a state_dict."""
-        state_dict = OrderedDict({"layer.weight": MOCK_TORCH_TENSOR})
+        state_dict = {"layer.weight": MOCK_TORCH_TENSOR}
         with patch.object(
             ArrayRecord,
             "from_torch_state_dict",
@@ -421,6 +419,6 @@ def test_count_bytes(shape: tuple[int, ...], dtype: str) -> None:
         data=buffer,
     )
     key_name = "data"
-    arr_record = ArrayRecord(OrderedDict({key_name: array_instance}))
+    arr_record = ArrayRecord({key_name: array_instance})
 
     assert len(buff) + len(key_name) == arr_record.count_bytes()

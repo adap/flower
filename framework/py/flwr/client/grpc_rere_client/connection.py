@@ -15,11 +15,10 @@
 """Contextmanager for a gRPC request-response channel to the Flower server."""
 
 
-from collections.abc import Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from contextlib import contextmanager
 from logging import ERROR
 from pathlib import Path
-from typing import Callable, Optional, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -75,15 +74,15 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     insecure: bool,
     retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[Union[bytes, str]] = None,
-    authentication_keys: Optional[
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
-    ] = None,
-    adapter_cls: Optional[Union[type[FleetStub], type[GrpcAdapter]]] = None,
+    root_certificates: bytes | str | None = None,
+    authentication_keys: (
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+    ) = None,
+    adapter_cls: type[FleetStub] | type[GrpcAdapter] | None = None,
 ) -> Iterator[
     tuple[
         int,
-        Callable[[], Optional[tuple[Message, ObjectTree]]],
+        Callable[[], tuple[Message, ObjectTree] | None],
         Callable[[Message, ObjectTree], set[str]],
         Callable[[int], Run],
         Callable[[str, int], Fab],
@@ -163,7 +162,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     if adapter_cls is None:
         adapter_cls = FleetStub
     stub = adapter_cls(channel)
-    node: Optional[Node] = None
+    node: Node | None = None
 
     # Wrap stub
     _wrap_stub(stub, retry_invoker)
@@ -253,7 +252,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Cleanup
         node = None
 
-    def receive() -> Optional[tuple[Message, ObjectTree]]:
+    def receive() -> tuple[Message, ObjectTree] | None:
         """Pull a message with its ObjectTree from SuperLink."""
         # Get Node
         if node is None:

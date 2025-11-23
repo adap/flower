@@ -15,8 +15,6 @@
 """Utils for ObjectStore."""
 
 
-from typing import Union
-
 from flwr.proto.appio_pb2 import PushAppMessagesRequest  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import PushMessagesRequest  # pylint: disable=E0611
 
@@ -24,7 +22,7 @@ from . import ObjectStore
 
 
 def store_mapping_and_register_objects(
-    store: ObjectStore, request: Union[PushAppMessagesRequest, PushMessagesRequest]
+    store: ObjectStore, request: PushAppMessagesRequest | PushMessagesRequest
 ) -> set[str]:
     """Store Message object to descendants mapping and preregister objects."""
     if not request.messages_list:

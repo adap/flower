@@ -17,7 +17,7 @@
 
 import time
 from collections.abc import Iterable
-from typing import Optional, cast
+from typing import cast
 from uuid import uuid4
 
 from flwr.common import Message, RecordDict
@@ -48,7 +48,7 @@ class InMemoryGrid(Grid):
         state_factory: LinkStateFactory,
         pull_interval: float = 0.1,
     ) -> None:
-        self._run: Optional[Run] = None
+        self._run: Run | None = None
         self.state = state_factory.state()
         self.pull_interval = pull_interval
         self.node = Node(node_id=SUPERLINK_NODE_ID)
@@ -81,7 +81,7 @@ class InMemoryGrid(Grid):
         message_type: str,
         dst_node_id: int,
         group_id: str,
-        ttl: Optional[float] = None,
+        ttl: float | None = None,
     ) -> Message:
         """Create a new message with specified parameters.
 
@@ -143,7 +143,7 @@ class InMemoryGrid(Grid):
         self,
         messages: Iterable[Message],
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> Iterable[Message]:
         """Push messages to specified node IDs and pull the reply messages.
 

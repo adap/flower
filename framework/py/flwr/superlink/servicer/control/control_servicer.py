@@ -19,7 +19,7 @@ import hashlib
 import time
 from collections.abc import Generator, Sequence
 from logging import ERROR, INFO
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import grpc
 
@@ -52,6 +52,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
+    ListFederationsRequest,
+    ListFederationsResponse,
     ListNodesRequest,
     ListNodesResponse,
     ListRunsRequest,
@@ -60,6 +62,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsResponse,
     RegisterNodeRequest,
     RegisterNodeResponse,
+    ShowFederationRequest,
+    ShowFederationResponse,
     StartRunRequest,
     StartRunResponse,
     StopRunRequest,
@@ -69,6 +73,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     UnregisterNodeRequest,
     UnregisterNodeResponse,
 )
+from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.ffs import FfsFactory
@@ -77,7 +82,7 @@ from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin
 
-from .control_account_auth_interceptor import shared_account_info
+from .control_account_auth_interceptor import get_current_account_info
 
 
 class ControlServicer(control_pb2_grpc.ControlServicer):
@@ -90,7 +95,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         objectstore_factory: ObjectStoreFactory,
         is_simulation: bool,
         authn_plugin: ControlAuthnPlugin,
-        artifact_provider: Optional[ArtifactProvider] = None,
+        artifact_provider: ArtifactProvider | None = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
@@ -115,7 +120,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
             return StartRunResponse()
 
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
@@ -212,7 +217,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=cast(Run, run), context=context)
 
         after_timestamp = request.after_timestamp + 1e-6
@@ -251,7 +256,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         if not request.HasField("run_id"):
             # If no `run_id` is specified and account auth is enabled,
             # return run IDs for the authenticated account
-            flwr_aid = shared_account_info.get().flwr_aid
+            flwr_aid = get_current_account_info().flwr_aid
             _check_flwr_aid_exists(flwr_aid, context)
             run_ids = state.get_run_ids(flwr_aid=flwr_aid)
         # Build a set of run IDs for `flwr ls --run-id <run_id>`
@@ -266,7 +271,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 raise grpc.RpcError()  # This line is unreachable
 
             # Check if `flwr_aid` matches the run's `flwr_aid`
-            flwr_aid = shared_account_info.get().flwr_aid
+            flwr_aid = get_current_account_info().flwr_aid
             _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
             run_ids = {run_id}
@@ -292,7 +297,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             raise grpc.RpcError()  # This line is unreachable
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
         run_status = state.get_run_status({run_id})[run_id]
@@ -402,7 +407,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
         # Call artifact provider
@@ -432,10 +437,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
         node_id = 0
 
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         # Account name exists if `flwr_aid` exists
-        account_name = cast(str, shared_account_info.get().account_name)
+        account_name = cast(str, get_current_account_info().account_name)
         try:
             node_id = state.create_node(
                 owner_aid=flwr_aid,
@@ -463,7 +468,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         try:
             state.delete_node(owner_aid=flwr_aid, node_id=request.node_id)
@@ -491,12 +496,69 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         # Retrieve all nodes for the account
         nodes_info = state.get_node_info(owner_aids=[flwr_aid])
 
         return ListNodesResponse(nodes_info=nodes_info, now=now().isoformat())
+
+    def ListFederations(
+        self, request: ListFederationsRequest, context: grpc.ServicerContext
+    ) -> ListFederationsResponse:
+        """List all SuperNodes."""
+        log(INFO, "ControlServicer.ListFederations")
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Get federations the account is a member of
+        federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
+
+        return ListFederationsResponse(
+            federations=[Federation(name=fed) for fed in federations]
+        )
+
+    def ShowFederation(
+        self, request: ShowFederationRequest, context: grpc.ServicerContext
+    ) -> ShowFederationResponse:
+        """Show details of a specific Federation."""
+        log(INFO, "ControlServicer.ShowFederation")
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Get federations the account is a member of
+        federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
+
+        # Ensure flwr_aid is a member of the requested federation
+        federation = request.federation_name
+        if federation not in federations:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                f"Federation '{federation}' does not exist or you are "
+                "not a member of it.",
+            )
+
+        # Fetch federation details
+        details = state.federation_manager.get_details(federation)
+
+        # Build Federation proto object
+        federation_proto = Federation(
+            name=federation,
+            member_aids=details.member_aids,
+            nodes=details.nodes,
+            runs=[run_to_proto(run) for run in details.runs],
+        )
+        return ShowFederationResponse(
+            federation=federation_proto, now=now().isoformat()
+        )
 
 
 def _create_list_runs_response(
@@ -516,9 +578,7 @@ def _create_list_runs_response(
     )
 
 
-def _check_flwr_aid_exists(
-    flwr_aid: Optional[str], context: grpc.ServicerContext
-) -> str:
+def _check_flwr_aid_exists(flwr_aid: str | None, context: grpc.ServicerContext) -> str:
     """Guard clause to check if `flwr_aid` exists."""
     if flwr_aid is None:
         context.abort(
@@ -530,7 +590,7 @@ def _check_flwr_aid_exists(
 
 
 def _check_flwr_aid_in_run(
-    flwr_aid: Optional[str], run: Run, context: grpc.ServicerContext
+    flwr_aid: str | None, run: Run, context: grpc.ServicerContext
 ) -> None:
     """Guard clause to check if `flwr_aid` matches the run's `flwr_aid`."""
     _check_flwr_aid_exists(flwr_aid, context)

@@ -19,7 +19,6 @@ Paper: arxiv.org/pdf/1905.03871.pdf
 
 
 import math
-from typing import Optional, Union
 
 import numpy as np
 
@@ -49,7 +48,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         server_side_noising: bool = True,
         clip_norm_lr: float = 0.2,
         clip_norm_target_quantile: float = 0.5,
-        clip_count_stddev: Optional[float] = None,
+        clip_count_stddev: float | None = None,
     ) -> None:
         warn_deprecated_feature("`DPFedAvgAdaptive` wrapper")
         super().__init__(
@@ -119,8 +118,8 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate training results as in DPFedAvgFixed and update clip norms."""
         if failures:
             return None, {}

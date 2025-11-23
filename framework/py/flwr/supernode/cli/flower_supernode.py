@@ -18,11 +18,12 @@
 import argparse
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Optional
 
+import yaml
 from cryptography.exceptions import UnsupportedAlgorithm
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 from cryptography.hazmat.primitives.serialization import load_ssh_private_key
+from cryptography.hazmat.primitives.serialization.ssh import load_ssh_public_key
 
 from flwr.common import EventType, event
 from flwr.common.args import try_obtain_root_certificates
@@ -58,6 +59,9 @@ def flower_supernode() -> None:
             "Ignoring `--flwr-dir`.",
         )
 
+    trusted_entities = _try_obtain_trusted_entities(args.trusted_entities)
+    if trusted_entities:
+        _validate_public_keys_ed25519(trusted_entities)
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     authentication_keys = _try_setup_client_authentication(args)
 
@@ -85,6 +89,7 @@ def flower_supernode() -> None:
         isolation=args.isolation,
         clientappio_api_address=args.clientappio_api_address,
         health_server_address=args.health_server_address,
+        trusted_entities=trusted_entities,
     )
 
 
@@ -123,6 +128,18 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         default=CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
         help="ClientAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
         f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
+    )
+    parser.add_argument(
+        "--trusted-entities",
+        type=Path,
+        default=None,
+        metavar="YAML_FILE",
+        help=(
+            "Path to a YAML file defining trusted entities. "
+            "The file must map public key IDs to public keys. "
+            "Example: { fpk_UUID1: 'ssh-ed25519 <key1> [comment1]', "
+            "fpk_UUID2: 'ssh-ed25519 <key2> [comment2]' }"
+        ),
     )
     add_args_health(parser)
 
@@ -210,7 +227,7 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
 
 def _try_setup_client_authentication(
     args: argparse.Namespace,
-) -> Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+) -> tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None:
     if not args.auth_supernode_private_key:
         return None
 
@@ -235,3 +252,41 @@ def _try_setup_client_authentication(
             "private key provided by `--auth-supernode-private-key`.",
         )
     return ssh_private_key, ssh_private_key.public_key()
+
+
+def _try_obtain_trusted_entities(
+    trusted_entities_path: Path | None,
+) -> dict[str, str] | None:
+    """Validate and return the trust entities."""
+    if not trusted_entities_path:
+        return None
+    if not trusted_entities_path.is_file():
+        flwr_exit(
+            ExitCode.SUPERNODE_INVALID_TRUSTED_ENTITIES,
+            "Path argument `--trusted-entities` does not point to a file.",
+        )
+    try:
+        with trusted_entities_path.open("r", encoding="utf-8") as f:
+            trusted_entities = yaml.safe_load(f)
+        if not isinstance(trusted_entities, dict):
+            raise ValueError("Invalid trusted entities format.")
+    except (yaml.YAMLError, ValueError) as e:
+        flwr_exit(
+            ExitCode.SUPERNODE_INVALID_TRUSTED_ENTITIES,
+            f"Failed to read YAML file '{trusted_entities_path}': {e}",
+        )
+    return trusted_entities
+
+
+def _validate_public_keys_ed25519(trusted_entities: dict[str, str]) -> None:
+    """Validate public keys for the trust entities are Ed25519."""
+    for public_key_id in trusted_entities.keys():
+        verifier_public_key = load_ssh_public_key(
+            trusted_entities[public_key_id].encode("utf-8")
+        )
+        if not isinstance(verifier_public_key, ed25519.Ed25519PublicKey):
+            flwr_exit(
+                ExitCode.SUPERNODE_INVALID_TRUSTED_ENTITIES,
+                "The provided public key associated with "
+                f"trusted entity {public_key_id} is not Ed25519.",
+            )

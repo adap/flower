@@ -16,7 +16,6 @@
 
 
 from dataclasses import dataclass
-from typing import Optional
 
 from .client_manager import ClientManager
 from .server import Server
@@ -46,7 +45,7 @@ class ServerAppComponents:  # pylint: disable=too-many-instance-attributes
         will be used.
     """
 
-    server: Optional[Server] = None
-    config: Optional[ServerConfig] = None
-    strategy: Optional[Strategy] = None
-    client_manager: Optional[ClientManager] = None
+    server: Server | None = None
+    config: ServerConfig | None = None
+    strategy: Strategy | None = None
+    client_manager: ClientManager | None = None

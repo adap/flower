@@ -6,8 +6,9 @@
 
 .. _flower_cli_supernode_link: ref-api-cli.html#flwr-supernode
 
-Authenticate SuperNodes
-=======================
+#########################
+ Authenticate SuperNodes
+#########################
 
 When running a Flower Federation (see :doc:`ref-flower-network-communication`) it is
 fundamental that an authentication mechanism is available between the SuperLink and the
@@ -53,8 +54,9 @@ enabled:
     <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_ example
     for a complete self-contained example on how to setup TLS and node authentication.
 
-Generate authentication keys
-----------------------------
+******************************
+ Generate authentication keys
+******************************
 
 To establish an authentication mechanism by which only authorized SuperNodes can connect
 to a running SuperLink, a set of key pairs for both SuperLink and SuperNodes need to be
@@ -75,8 +77,9 @@ This will generate the keys in a new ``keys/`` directory. By default it creates 
 pair for the SuperLink and one for each SuperNode. Copy this directory into the
 directory of your app (e.g. a directory generated earlier via ``flwr new``).
 
-Enable node authentication in SuperLink
----------------------------------------
+*****************************************
+ Enable node authentication in SuperLink
+*****************************************
 
 To launch a SuperLink with SuperNode authentication enabled, you need to provide three
 aditional files in addition to the certificates needed for the TLS connections. Recall
@@ -95,8 +98,9 @@ that the authentication feature can only be enabled in the presence of TLS.
 
     * ``--enable-supernode-auth``: Enables SuperNode authentication therefore only Supernodes that are first register on the SuperLink will be able to establish a connection.
 
-Register SuperNodes
--------------------
+*********************
+ Register SuperNodes
+*********************
 
 Once your SuperLink is running, the next step is to register the SuperNodes that will be
 allowed to connect to it. This process is handled through the
@@ -131,16 +135,17 @@ You should see a table similar to the following:
     ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
     ┃       Node ID        ┃   Owner    ┃   Status   ┃ Elapsed  ┃   Status Changed @   ┃
     ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-    │ 16019329408659850374 │   <none>   │ registered │          │ N/A                  │
+    │ 16019329408659850374 │<name:none> │ registered │          │ N/A                  │
     ├──────────────────────┼────────────┼────────────┼──────────┼──────────────────────┤
-    │ 8392976743692794070  │   <none>   │ registered │          │ N/A                  │
+    │ 8392976743692794070  │<name:none> │ registered │          │ N/A                  │
     └──────────────────────┴────────────┴────────────┴──────────┴──────────────────────┘
 
 The status of the SuperNodes will change after they connect to the SuperLink. Let's
 proceed and laucnh the SuperNodes.
 
-Enable node authentication in SuperNode
----------------------------------------
+*****************************************
+ Enable node authentication in SuperNode
+*****************************************
 
 Connecting a SuperNode to a SuperLink that has node authentication enabled requires
 passing one additional argument (i.e. the private key of the SuperNode) in addition to
@@ -183,13 +188,14 @@ will notice their status is now ``online``:
     ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
     ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
     ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-    │ 16019329408659850374 │   <none>   │ online  │ 00:00:30 │ 2025-10-13 13:40:47Z │
+    │ 16019329408659850374 │<name:none> │ online  │ 00:00:30 │ 2025-10-13 13:40:47Z │
     ├──────────────────────┼────────────┼─────────┼──────────┼──────────────────────┤
-    │ 8392976743692794070  │   <none>   │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
+    │ 8392976743692794070  │<name:none> │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
     └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
 
-Unregister SuperNodes
----------------------
+***********************
+ Unregister SuperNodes
+***********************
 
 .. warning::
 
@@ -217,7 +223,7 @@ SuperNodes again:
     ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
     ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
     ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-    │ 8392976743692794070  │   <none>   │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
+    │ 8392976743692794070  │<name:none> │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
     └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
 
 If you pass the ``--verbose`` flag to the previous command you'll see that the status of
@@ -232,13 +238,14 @@ right, **if you wish to connect a second SuperNode a new EC key pair is needed.*
     ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
     ┃       Node ID        ┃   Owner    ┃    Status   ┃ Elapsed  ┃   Status Changed @   ┃
     ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-    │ 16019329408659850374 │   <none>   │    online   │ 00:00:30 │ 2025-10-13 13:40:47Z │
+    │ 16019329408659850374 │<name:none> │    online   │ 00:00:30 │ 2025-10-13 13:40:47Z │
     ├──────────────────────┼────────────┼─────────────┼──────────┼──────────────────────┤
-    │ 8392976743692794070  │   <none>   │ unregisterd │ 00:00:22 │ 2025-10-13 13:52:21Z │
+    │ 8392976743692794070  │<name:none> │ unregisterd │ 00:00:22 │ 2025-10-13 13:52:21Z │
     └──────────────────────┴────────────┴─────────────┴──────────┴──────────────────────┘
 
-Security notice
----------------
+*****************
+ Security notice
+*****************
 
 The system's security relies on the credentials of the SuperLink and each SuperNode.
 Therefore, it is imperative to safeguard and safely store the credentials to avoid
@@ -246,8 +253,9 @@ security risks such as Public Key Infrastructure (PKI) impersonation attacks. Th
 authentication mechanism also involves human interaction, so please ensure that all of
 the communication is done in a secure manner, using trusted communication methods.
 
-Conclusion
-----------
+************
+ Conclusion
+************
 
 You should now have learned how to start a long-running Flower SuperLink and SuperNode
 with node authentication enabled. You should also know the significance of the private

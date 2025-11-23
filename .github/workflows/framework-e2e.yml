@@ -22,7 +22,7 @@ jobs:
     outputs:
       framework: ${{ steps.filter.outputs.framework }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Filter changed paths
         id: filter
@@ -39,14 +39,14 @@ jobs:
     runs-on: ubuntu-22.04
     name: Build, test and upload wheel
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory only)
         run: |
           cd framework
           python -m poetry install --all-extras
-          python -m pip install -U setuptools==70.3.0
+          python -m pip install -U setuptools==80.9.0
       - name: Build wheel
         run: ./framework/dev/build.sh
       - name: Test wheel
@@ -79,7 +79,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
         directory: [e2e-bare-auth]
         connection: [secure, insecure]
         engine: [deployment-engine, simulation-engine]
@@ -97,7 +97,7 @@ jobs:
       run:
         working-directory: framework/e2e/${{ matrix.directory }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: ./.github/actions/bootstrap
@@ -162,8 +162,8 @@ jobs:
           - directory: e2e-tensorflow
             e2e: e2e_tensorflow
             dataset: |
-              import tensorflow_datasets as tfds
-              tfds.load('cifar10', split=['train', 'test'], as_supervised=True)
+              import tensorflow as tf
+              tf.keras.datasets.cifar10.load_data()
 
           - directory: e2e-opacus
             e2e: e2e_opacus
@@ -198,10 +198,10 @@ jobs:
         working-directory: framework/e2e/${{ matrix.directory }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.10'
       - name: Install build tools
@@ -276,7 +276,7 @@ jobs:
         working-directory: framework/e2e/strategies
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: ./.github/actions/bootstrap
@@ -314,7 +314,7 @@ jobs:
     name: Template / ${{ matrix.framework }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: ./.github/actions/bootstrap
@@ -334,6 +334,8 @@ jobs:
           flwr new tmp-${CLEAN_FRAMEWORK} --framework="${{ matrix.framework }}" --username gh_ci
           cd tmp-${CLEAN_FRAMEWORK}
           sed -i 's/"flwr\[[^]]*\][^"]*", *//g' pyproject.toml
+          # Replace tensorflow with tensorflow-cpu to avoid GPU warnings in CI
+          sed -i 's/"tensorflow\([^"]*\)"/"tensorflow-cpu\1"/g' pyproject.toml
           pip install flwr[simulation]
           pip install .
       - name: Run project
@@ -353,7 +355,7 @@ jobs:
     strategy:
       matrix:
         framework: ["numpy"]
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     name: |
       Build & Install /
@@ -361,7 +363,7 @@ jobs:
       ${{ matrix.framework }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: ./.github/actions/bootstrap
@@ -409,7 +411,7 @@ jobs:
       run:
         working-directory: framework/e2e/${{ matrix.directory }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: ./.github/actions/bootstrap
@@ -454,10 +456,10 @@ jobs:
     name: Windows compatibility test
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.10'
       - name: Install build tools
@@ -481,7 +483,7 @@ jobs:
     strategy:
       matrix:
         engine: [deployment, simulation]
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10"]
 
     if: ${{ needs.changes.outputs.framework == 'true' }}
 
@@ -490,9 +492,9 @@ jobs:
       Python ${{ matrix.python-version }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install build tools

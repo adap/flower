@@ -1,5 +1,6 @@
-Use CLI JSON output
-===================
+#####################
+ Use CLI JSON output
+#####################
 
 The `Flower CLIs <ref-api-cli.html>`_ come with a built-in JSON output mode. This mode
 is useful when you want to consume the output of a Flower CLI programmatically. For
@@ -28,8 +29,9 @@ each of these commands.
 
 .. _flwr_stop: ref-api-cli.html#flwr-stop
 
-``flwr run`` JSON output
-------------------------
+**************************
+ ``flwr run`` JSON output
+**************************
 
 The |flwr_run|_ command runs a Flower app from a provided directory. Note that if the
 app path argument is not passed to ``flwr run``, the current working directory is used
@@ -83,8 +85,9 @@ name of the federation on the SuperLink, the output will look like this:
       "error-message": "Loading project configuration... \nSuccess\n There is no `[missing]` federation declared in the `pyproject.toml`.\n The following federations were found:\n\nfed-existing-1\nfed-existing-2\n\n"
     }
 
-``flwr ls`` JSON output
------------------------
+*************************
+ ``flwr ls`` JSON output
+*************************
 
 The |flwr_ls|_ command lists all the runs in the current project. Similar to ``flwr
 run``, if the app path argument is not passed to ``flwr ls``, the current working
@@ -162,8 +165,9 @@ command fails, the JSON output will return two fields, ``success`` and
 ``error-message``, as shown in :ref:`the above example <json_error_output>`. Note that
 the content of the error message will be different depending on the error that occurred.
 
-``flwr stop`` JSON output
--------------------------
+***************************
+ ``flwr stop`` JSON output
+***************************
 
 The |flwr_stop|_ command stops a running Flower app for a provided run ID. Similar to
 ``flwr run``, if the app path argument is not passed to ``flwr stop``, the current

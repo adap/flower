@@ -15,7 +15,6 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from collections import OrderedDict
 from typing import Any, cast
 
 # pylint: disable=E0611
@@ -410,9 +409,9 @@ def array_record_from_proto(
 ) -> ArrayRecord:
     """Deserialize ArrayRecord from ProtoBuf."""
     return ArrayRecord(
-        array_dict=OrderedDict(
-            {item.key: array_from_proto(item.value) for item in record_proto.items}
-        ),
+        array_dict={
+            item.key: array_from_proto(item.value) for item in record_proto.items
+        },
         keep_input=False,
     )
 

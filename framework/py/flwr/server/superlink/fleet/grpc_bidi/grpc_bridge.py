@@ -19,7 +19,6 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum
 from threading import Condition
-from typing import Optional
 
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
@@ -32,7 +31,7 @@ class InsWrapper:
     """Instruction wrapper class for a single server message."""
 
     server_message: ServerMessage
-    timeout: Optional[float]
+    timeout: float | None
 
 
 @dataclass
@@ -70,8 +69,8 @@ class GrpcBridge:
         # pylint: disable=unsubscriptable-object
         self._cv = Condition()  # cv stands for condition variable
         self._status = Status.AWAITING_INS_WRAPPER
-        self._ins_wrapper: Optional[InsWrapper] = None
-        self._res_wrapper: Optional[ResWrapper] = None
+        self._ins_wrapper: InsWrapper | None = None
+        self._res_wrapper: ResWrapper | None = None
 
     def _is_closed(self) -> bool:
         """Return True if closed and False otherwise."""

@@ -17,10 +17,9 @@
 
 import json
 import random
-from collections import OrderedDict
 from logging import INFO
 from time import sleep
-from typing import Optional, cast
+from typing import cast
 
 import numpy as np
 
@@ -49,8 +48,8 @@ def config_to_str(config: ConfigRecord) -> str:
 def log_strategy_start_info(
     num_rounds: int,
     arrays: ArrayRecord,
-    train_config: Optional[ConfigRecord],
-    evaluate_config: Optional[ConfigRecord],
+    train_config: ConfigRecord | None,
+    evaluate_config: ConfigRecord | None,
 ) -> None:
     """Log information about the strategy start."""
     log(INFO, "\t├── Number of rounds: %d", num_rounds)
@@ -92,7 +91,7 @@ def aggregate_arrayrecords(
     # Perform weighted aggregation
     aggregated_np_arrays: dict[str, NDArray] = {}
 
-    for record, weight in zip(records, weight_factors):
+    for record, weight in zip(records, weight_factors, strict=True):
         for record_item in record.array_records.values():
             # aggregate in-place
             for key, value in record_item.items():
@@ -102,7 +101,7 @@ def aggregate_arrayrecords(
                     aggregated_np_arrays[key] += value.numpy() * weight
 
     return ArrayRecord(
-        OrderedDict({k: Array(np.asarray(v)) for k, v in aggregated_np_arrays.items()})
+        {k: Array(np.asarray(v)) for k, v in aggregated_np_arrays.items()}
     )
 
 
@@ -125,7 +124,7 @@ def aggregate_metricrecords(
     weight_factors = [w / total_weight for w in weights]
 
     aggregated_metrics = MetricRecord()
-    for record, weight in zip(records, weight_factors):
+    for record, weight in zip(records, weight_factors, strict=True):
         for record_item in record.metric_records.values():
             # aggregate in-place
             for key, value in record_item.items():
@@ -142,7 +141,7 @@ def aggregate_metricrecords(
                         current_list = cast(list[float], aggregated_metrics[key])
                         aggregated_metrics[key] = [
                             curr + val * weight
-                            for curr, val in zip(current_list, value)
+                            for curr, val in zip(current_list, value, strict=True)
                         ]
                     else:
                         current_value = cast(float, aggregated_metrics[key])

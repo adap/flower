@@ -16,7 +16,7 @@
 
 
 import warnings
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 import numpy as np
 
@@ -104,7 +104,7 @@ class PathologicalPartitioner(Partitioner):
             "random", "deterministic", "first-deterministic"
         ] = "random",
         shuffle: bool = True,
-        seed: Optional[int] = 42,
+        seed: int | None = 42,
     ) -> None:
         super().__init__()
         self._num_partitions = num_partitions

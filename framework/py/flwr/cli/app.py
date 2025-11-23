@@ -19,7 +19,10 @@ from typer.main import get_command
 
 from flwr.common.version import package_version
 
+from .app_cmd import publish as app_publish
 from .build import build
+from .federation import ls as federation_list
+from .federation import show as federation_show
 from .install import install
 from .log import log
 from .login import login
@@ -62,6 +65,20 @@ supernode_app.command("list")(supernode_list)
 # Hide "ls" command (left as alias)
 supernode_app.command(hidden=True)(supernode_list)
 app.add_typer(supernode_app, name="supernode")
+
+# Create app command group
+app_app = typer.Typer(help="Manage Apps")
+app_app.command()(app_publish)
+app.add_typer(app_app, name="app")
+
+# Create federation command group
+federation_app = typer.Typer(help="Manage Federations")
+# Make it appear as "list"
+federation_app.command("list")(federation_list)
+# Hide "ls" command (left as alias)
+federation_app.command(hidden=True)(federation_list)
+app.add_typer(federation_app, name="federation")
+federation_app.command()(federation_show)
 
 typer_click_object = get_command(app)
 

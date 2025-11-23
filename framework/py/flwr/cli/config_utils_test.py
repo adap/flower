@@ -18,7 +18,7 @@
 import os
 import textwrap
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import click
 import pytest
@@ -275,7 +275,7 @@ def test_validate_federation_in_project_config_with_overrides() -> None:
 def test_validate_federation_in_project_config_fail() -> None:
     """Test that validate_federation_in_config fails correctly."""
 
-    def run_and_assert_exit(federation: Optional[str], config: dict[str, Any]) -> None:
+    def run_and_assert_exit(federation: str | None, config: dict[str, Any]) -> None:
         """Execute validation and assert exit code is 1."""
         with pytest.raises(click.exceptions.Exit) as excinfo:
             validate_federation_in_project_config(federation, config)
@@ -343,7 +343,7 @@ def test_validate_federation_in_project_config_fail() -> None:
     ],
 )
 def test_validate_certificate_in_federation_config(
-    tmp_path: Path, config: dict[str, Any], expected: tuple[bool, Optional[bytes]]
+    tmp_path: Path, config: dict[str, Any], expected: tuple[bool, bytes | None]
 ) -> None:
     """Test that validate_certificate_in_federation_config succeeds correctly."""
     # Prepare

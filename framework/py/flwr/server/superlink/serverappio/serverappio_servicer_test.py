@@ -18,7 +18,6 @@
 import tempfile
 import unittest
 from datetime import timedelta
-from typing import Optional
 from unittest.mock import patch
 
 import grpc
@@ -83,7 +82,7 @@ from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from flwr.server.superlink.serverappio.serverappio_servicer import _raise_if
 from flwr.server.superlink.utils import _STATUS_TO_MSG
-from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
@@ -238,7 +237,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
 
     def _create_dummy_run(self, running: bool = True) -> int:
-        run_id = self.state.create_run("", "", "", {}, "", ConfigRecord(), "")
+        run_id = self.state.create_run(
+            "", "", "", {}, NOOP_FEDERATION, ConfigRecord(), ""
+        )
         if running:
             self._transition_run_status(run_id, 2)
         return run_id
@@ -425,7 +426,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         ]
     )  # type: ignore
     def test_successful_pull_messages_deletes_messages_in_linkstate(
-        self, content: Optional[RecordDict], error: Optional[Error]
+        self, content: RecordDict | None, error: Error | None
     ) -> None:
         """Test `PullMessages` deletes messages from LinkState."""
         # Prepare

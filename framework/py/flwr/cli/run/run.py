@@ -21,7 +21,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
-from typing import Annotated, Any, Optional, cast
+from typing import Annotated, Any, cast
 
 import typer
 from rich.console import Console
@@ -46,7 +46,7 @@ from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_
 from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.supercore.constant import NOOP_FEDERATION
+from flwr.supercore.constant import APP_ID_PATTERN, NOOP_FEDERATION
 
 from ..log import start_stream
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
@@ -61,11 +61,11 @@ def run(
         typer.Argument(help="Path of the Flower App to run."),
     ] = Path("."),
     federation: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(help="Name of the federation to run the app on."),
     ] = None,
     run_config_overrides: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option(
             "--run-config",
             "-c",
@@ -73,7 +73,7 @@ def run(
         ),
     ] = None,
     federation_config_overrides: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option(
             "--federation-config",
             help=FEDERATION_CONFIG_HELP_MESSAGE,
@@ -106,9 +106,9 @@ def run(
         # Determine if app is remote
         app_id = None
         if (app_str := str(app)).startswith("@"):
-            if not re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", app_str):
+            if not re.match(APP_ID_PATTERN, app_str):
                 raise typer.BadParameter(
-                    "Invalid remote app ID. Expected format: '@user_name/app_name'."
+                    "Invalid remote app ID. Expected format: '@account_name/app_name'."
                 )
             app_id = app_str
         is_remote_app = app_id is not None
@@ -163,10 +163,10 @@ def _run_with_control_api(
     app: Path,
     federation: str,
     federation_config: dict[str, Any],
-    config_overrides: Optional[list[str]],
+    config_overrides: list[str] | None,
     stream: bool,
     output_format: str,
-    app_id: Optional[str],
+    app_id: str | None,
 ) -> None:
     channel = None
     is_remote_app = app_id is not None
@@ -212,7 +212,7 @@ def _run_with_control_api(
             if is_remote_app:
                 typer.secho(
                     "❌ Failed to start run. Please check that the provided "
-                    "app identifier (@user_name/app_name) is correct.",
+                    "app identifier (@account_name/app_name) is correct.",
                     fg=typer.colors.RED,
                 )
             else:
@@ -246,14 +246,14 @@ def _run_with_control_api(
 
 
 def _run_without_control_api(
-    app: Optional[Path],
+    app: Path | None,
     federation_config: dict[str, Any],
-    config_overrides: Optional[list[str]],
+    config_overrides: list[str] | None,
     federation: str,
 ) -> None:
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]
-        verbose: Optional[bool] = federation_config["options"].get("verbose")
+        verbose: bool | None = federation_config["options"].get("verbose")
         backend_cfg = federation_config["options"].get("backend", {})
     except KeyError as err:
         typer.secho(

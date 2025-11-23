@@ -133,7 +133,7 @@ def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
         return False
 
     # Iterate over each row and check for equality
-    for row1, row2 in zip(ds1, ds2):
+    for row1, row2 in zip(ds1, ds2, strict=False):
         if row1 != row2:
             return False
 
