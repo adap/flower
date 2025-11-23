@@ -300,7 +300,7 @@ def get_fab_include_pathspec() -> pathspec.PathSpec:
 
     Returns
     -------
-    pathspec.PathSpec
+    PathSpec
         PathSpec object with default include patterns for FAB files.
     """
     return build_pathspec(FAB_INCLUDE_PATTERNS)
