@@ -319,7 +319,7 @@ def get_fab_exclude_pathspec(gitignore_content: bytes | None) -> pathspec.PathSp
 
     Returns
     -------
-    pathspec.PathSpec
+    PathSpec
         PathSpec object with combined exclude patterns.
     """
     patterns = list(FAB_EXCLUDE_PATTERNS)
