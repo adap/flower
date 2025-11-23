@@ -45,6 +45,11 @@ class NoOpCliAuthPlugin(CliAuthPlugin):
         control_stub : ControlStub
             Control stub (unused).
 
+        Returns
+        -------
+        AccountAuthCredentials
+            This method never returns as it always raises an exception.
+
         Raises
         ------
         LoginError
