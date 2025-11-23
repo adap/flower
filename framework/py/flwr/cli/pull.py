@@ -63,8 +63,8 @@ def pull(  # pylint: disable=R0914
 ) -> None:
     """Pull artifacts from a Flower run.
 
-    Retrieve a download URL for artifacts generated during a completed Flower run.
-    The artifacts can then be downloaded from the provided URL.
+    Retrieve a download URL for artifacts generated during a completed Flower run. The
+    artifacts can then be downloaded from the provided URL.
     """
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 

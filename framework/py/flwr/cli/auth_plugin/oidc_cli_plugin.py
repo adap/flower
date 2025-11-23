@@ -42,8 +42,8 @@ from .auth_plugin import CliAuthPlugin, LoginError
 class OidcCliPlugin(CliAuthPlugin):
     """Flower OIDC authentication plugin for CLI.
 
-    This plugin implements OpenID Connect (OIDC) device flow authentication
-    for CLI access to Flower SuperLink.
+    This plugin implements OpenID Connect (OIDC) device flow authentication for CLI
+    access to Flower SuperLink.
     """
 
     def __init__(self, credentials_path: Path):

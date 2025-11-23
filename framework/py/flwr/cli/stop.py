@@ -72,8 +72,8 @@ def stop(  # pylint: disable=R0914
 ) -> None:
     """Stop a Flower run.
 
-    This command stops a running Flower App execution by sending a stop request
-    to the SuperLink via the Control API.
+    This command stops a running Flower App execution by sending a stop request to the
+    SuperLink via the Control API.
     """
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()

@@ -27,8 +27,8 @@ from .auth_plugin import CliAuthPlugin, LoginError
 class NoOpCliAuthPlugin(CliAuthPlugin):
     """No-operation implementation of the CliAuthPlugin.
 
-    This plugin is used when account authentication is not enabled. It provides
-    stub implementations of all authentication methods that perform no actions.
+    This plugin is used when account authentication is not enabled. It provides stub
+    implementations of all authentication methods that perform no actions.
     """
 
     @staticmethod

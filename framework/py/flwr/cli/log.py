@@ -41,8 +41,8 @@ from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 class AllLogsRetrieved(BaseException):
     """Exception raised when all available logs have been retrieved.
 
-    This exception is used internally to signal that the log stream has reached
-    the end and all logs have been successfully retrieved.
+    This exception is used internally to signal that the log stream has reached the end
+    and all logs have been successfully retrieved.
     """
 
 
@@ -187,8 +187,8 @@ def log(
 ) -> None:
     """Get logs from a Flower project run.
 
-    Retrieve and display logs from a Flower run. Logs can be streamed in real-time
-    (with --stream) or printed once (with --show).
+    Retrieve and display logs from a Flower run. Logs can be streamed in real-time (with
+    --stream) or printed once (with --show).
     """
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 

@@ -35,8 +35,8 @@ class CliAccountAuthInterceptor(
 ):
     """CLI interceptor for account authentication.
 
-    This interceptor adds authentication tokens to gRPC metadata for CLI requests
-    and handles token refresh from response metadata.
+    This interceptor adds authentication tokens to gRPC metadata for CLI requests and
+    handles token refresh from response metadata.
     """
 
     def __init__(self, auth_plugin: CliAuthPlugin):
