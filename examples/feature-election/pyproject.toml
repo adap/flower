@@ -1,0 +1,93 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "feature-election-flower"
+version = "0.9.0"
+description = "Feature Election - Federated Feature Selection with Flower"
+authors = [
+    {name = "NVIDIA CORPORATION", email = "flare@nvidia.com"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "flwr[simulation]>=1.13.0",
+    "scikit-learn>=1.0.0",
+    "pandas>=1.3.0",
+    "numpy>=1.21.0",
+    "PyImpetus>=0.0.6",
+    "seaborn",
+    "tqdm"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=0.990",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "Ioannis Christofilogiannis"
+
+# Define app components
+[tool.flwr.app.components]
+serverapp = "server_app:app"
+clientapp = "client_app:app"
+
+# Runtime configuration
+[tool.flwr.app.config]
+# Feature Election parameters
+freedom-degree = 0.4          # 0=intersection, 1=union
+aggregation-mode = "weighted" # "weighted" or "uniform"
+fs-method = "lasso"           # Feature selection method
+eval-metric = "f1"            # Evaluation metric
+
+# Federated learning parameters
+num-clients = 10              # Total number of clients
+num-rounds = 1                # Number of rounds (typically 1 for feature election)
+fraction-fit = 1.0            # Fraction of clients to sample for training
+fraction-evaluate = 1.0       # Fraction of clients to sample for evaluation
+min-fit-clients = 2           # Minimum clients for training
+min-evaluate-clients = 2      # Minimum clients for evaluation
+
+# Data parameters
+split-strategy = "random"     # "stratified", "random", "non-iid"
+test-size = 0.2               # Validation set size
+
+# Dataset parameters
+n-samples = 1000              # Samples per client
+n-features = 100              # Total features
+n-informative = 20            # Informative features
+n-redundant = 30              # Redundant features
+
+# Define simulation resources
+[tool.flwr.federations]
+default = "local-sim"
+
+[tool.flwr.federations.local-sim]
+options.num-supernodes = 10   # Must match num-clients
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.0
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
