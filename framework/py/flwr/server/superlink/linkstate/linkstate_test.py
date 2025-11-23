@@ -57,9 +57,10 @@ from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 from flwr.server.superlink.linkstate import (
     InMemoryLinkState,
     LinkState,
+    LinkStateFactory,
     SqliteLinkState,
 )
-from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION, NodeStatus
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.federation import NoOpFederationManager
@@ -1823,6 +1824,63 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
 
         # Assert
         assert len(result) == 20
+
+
+class LinkStateFactoryTest(unittest.TestCase):
+    """Test LinkStateFactory singleton pattern."""
+
+    def test_linkstate_factory_singleton_inmemory(self) -> None:
+        """Test that LinkStateFactory returns the same InMemoryLinkState instance."""
+        # Prepare
+        factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager())
+
+        # Execute
+        state1 = factory.state()
+        state2 = factory.state()
+        state3 = factory.state()
+
+        # Assert
+        self.assertIsInstance(state1, InMemoryLinkState)
+        self.assertIs(state1, state2)
+        self.assertIs(state2, state3)
+
+    def test_linkstate_factory_singleton_sqlite_file(self) -> None:
+        """Test that LinkStateFactory returns the same SqliteLinkState instance."""
+        # Prepare
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp_file:
+            db_path = tmp_file.name
+
+        factory = LinkStateFactory(db_path, NoOpFederationManager())
+
+        # Execute
+        state1 = factory.state()
+        state2 = factory.state()
+        state3 = factory.state()
+
+        # Assert
+        self.assertIsInstance(state1, SqliteLinkState)
+        self.assertIs(state1, state2)
+        self.assertIs(state2, state3)
+
+        # Cleanup
+        import os
+
+        os.unlink(db_path)
+
+    def test_linkstate_factory_singleton_sqlite_memory(self) -> None:
+        """Test that SQLite :memory: database also uses singleton pattern."""
+        # Prepare
+        factory = LinkStateFactory(":memory:", NoOpFederationManager())
+
+        # Execute
+        state1 = factory.state()
+        state2 = factory.state()
+        state3 = factory.state()
+
+        # Assert
+        self.assertIsInstance(state1, SqliteLinkState)
+        self.assertIs(state1, state2)
+        self.assertIs(state2, state3)
 
 
 if __name__ == "__main__":
