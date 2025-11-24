@@ -27,7 +27,7 @@ from logging import ERROR, WARNING
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     FLWR_APP_TOKEN_LENGTH,
-    HEARTBEAT_INTERVAL_INF,
+    HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -623,7 +623,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                             sub_status=SubStatus.FAILED,
                             details=RUN_FAILURE_DETAILS_NO_HEARTBEAT,
                         )
-                        record.run.finished_at = now().isoformat()
+                        record.run.finished_at = datetime.fromtimestamp(
+                            record.active_until, tz=timezone.utc
+                        ).isoformat()
 
     def get_run(self, run_id: int) -> Run | None:
         """Retrieve information about the run with the specified `run_id`."""
@@ -686,7 +688,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             current = now()
             run_record = self.run_ids[run_id]
             if new_status.status in (Status.STARTING, Status.RUNNING):
-                run_record.heartbeat_interval = HEARTBEAT_INTERVAL_INF
+                run_record.heartbeat_interval = HEARTBEAT_DEFAULT_INTERVAL
                 run_record.active_until = (
                     current.timestamp() + run_record.heartbeat_interval
                 )
