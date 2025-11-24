@@ -238,13 +238,6 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             data[0], ["run_id", "src_node_id", "dst_node_id"]
         )
 
-        # Validate run_id
-        query = "SELECT federation FROM run WHERE run_id = ?;"
-        if not (rows := self.query(query, (data[0]["run_id"],))):
-            log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
-            return None
-        federation: str = rows[0]["federation"]
-
         # Validate source node ID
         if message.metadata.src_node_id != SUPERLINK_NODE_ID:
             log(
@@ -253,6 +246,13 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 message.metadata.src_node_id,
             )
             return None
+
+        # Validate run_id
+        query = "SELECT federation FROM run WHERE run_id = ?;"
+        if not (rows := self.query(query, (data[0]["run_id"],))):
+            log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
+            return None
+        federation: str = rows[0]["federation"]
 
         # Validate destination node ID
         query = "SELECT node_id FROM node WHERE node_id = ? AND status IN (?, ?);"
