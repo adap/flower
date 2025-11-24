@@ -150,7 +150,16 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Retrieve context, run and fab for this run
         context = cast(Context, state.get_context(run_id))
         run = cast(Run, state.get_run(run_id))
-        fab = Fab(run.fab_hash, ffs.get(run.fab_hash)[0], ffs.get(run.fab_hash)[1])  # type: ignore
+
+        # Retrieve FAB from FFS
+        if result := ffs.get(run.fab_hash):
+            fab = Fab(run.fab_hash, result[0], result[1])
+        else:
+            context.abort(
+                grpc.StatusCode.NOT_FOUND,
+                f"FAB with hash {run.fab_hash} not found in FFS.",
+            )
+            raise RuntimeError("This line should never be reached.")
 
         return PullAppInputsResponse(
             context=context_to_proto(context),
