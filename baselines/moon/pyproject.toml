@@ -1,6 +1,6 @@
 [build-system]
 requires = ["poetry-core>=2.2.1"]
-build-backend = "poetry.masonry.api"
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "moon" # <----- Ensure it matches the name of your baseline directory containing all the source code
