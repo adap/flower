@@ -29,6 +29,7 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import CREDENTIALS_DIR, FLWR_DIR
+from flwr.common.version import package_version as flwr_version
 from flwr.supercore.constant import (
     APP_ID_PATTERN,
     APP_VERSION_PATTERN,
@@ -238,6 +239,7 @@ def _submit_review(
         "app_version": app_version,
         "signature_b64": signature_b64,
         "signed_at": signed_at,
+        "flwr_version": flwr_version,
     }
     try:
         resp = requests.post(url, headers=headers, json=payload, timeout=120)
