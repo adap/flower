@@ -66,10 +66,10 @@ def prompt_text(
     ----------
     text : str
         The prompt text to display to the user.
-    predicate : Callable[[str], bool]
+    predicate : Callable[[str], bool] (default: lambda _: True)
         A function to validate the user input. Default accepts all non-empty strings.
-    default : str | None
-        Default value to use if user presses enter without input. Default is None.
+    default : str | None (default: None)
+        Default value to use if user presses enter without input.
 
     Returns
     -------
@@ -536,7 +536,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
 def request_download_link(
     app_id: str, app_version: str | None, in_url: str, out_url: str
 ) -> str:
-    """Request download link from Flower platform API.
+    """Request a download link for the given app from the Flower platform API.
 
     Parameters
     ----------
@@ -588,12 +588,12 @@ def request_download_link(
 
 
 def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:
-    """Build a PathSpec from a list of patterns.
+    """Build a PathSpec from a list of GitIgnore-style patterns.
 
     Parameters
     ----------
     patterns : Iterable[str]
-        Iterable of gitignore-style pattern strings.
+        Iterable of GitIgnore-style pattern strings.
 
     Returns
     -------

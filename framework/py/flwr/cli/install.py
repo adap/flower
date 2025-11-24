@@ -175,8 +175,8 @@ def validate_and_install(
         Name of the FAB file, or None if installing from bytes.
     flwr_dir : Path | None
         Target installation directory, or None to use default.
-    skip_prompt : bool
-        If True, skip confirmation prompts. Default is False.
+    skip_prompt : bool (default: False)
+        If True, skip confirmation prompts.
 
     Returns
     -------

@@ -57,8 +57,8 @@ def start_stream(
         The unique identifier of the run to stream logs from.
     channel : grpc.Channel
         The gRPC channel for communication.
-    refresh_period : int
-        Connection refresh period in seconds. Default is CONN_REFRESH_PERIOD.
+    refresh_period : int (default: CONN_REFRESH_PERIOD)
+        Connection refresh period in seconds.
     """
     stub = ControlStub(channel)
     after_timestamp = 0.0
@@ -185,7 +185,7 @@ def log(
         ),
     ] = True,
 ) -> None:
-    """Get logs from a Flower project run.
+    """Get logs from a run.
 
     Retrieve and display logs from a Flower run. Logs can be streamed in real-time (with
     --stream) or printed once (with --show).

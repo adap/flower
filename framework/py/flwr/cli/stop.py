@@ -128,7 +128,7 @@ def stop(  # pylint: disable=R0914
 
 
 def _stop_run(stub: ControlStub, run_id: int, output_format: str) -> None:
-    """Stop a run and display result.
+    """Stop a run and display the result.
 
     Parameters
     ----------
