@@ -231,9 +231,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             raise RuntimeError("This line should never be reached.")
 
         # Store Message object to descendants mapping and preregister objects
-        objects_to_push = store.preregister(
-            request.run_id, request.message_object_trees[0]
-        )
+        objects_to_push: set[str] = set()
+        for object_tree in request.message_object_trees:
+            objects_to_push |= set(store.preregister(run_id, object_tree))
         # Save the message to the state
         state.store_message(message_from_proto(request.messages_list[0]))
 
