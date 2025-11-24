@@ -163,7 +163,18 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
 
 
 def _get_status_style(status_text: str) -> str:
-    """Determine the display style/color for a status."""
+    """Determine the display style/color for a status.
+
+    Parameters
+    ----------
+    status_text : str
+        The status text to determine color for.
+
+    Returns
+    -------
+    str
+        Color name for rich console styling (e.g., 'green', 'red', 'blue').
+    """
     status = status_text.lower()
     sub_status = status_text.rsplit(":", maxsplit=1)[-1]
 
@@ -179,7 +190,18 @@ def _get_status_style(status_text: str) -> str:
 
 
 def _to_table(run_list: list[RunRow]) -> Table:
-    """Format the provided run list to a rich Table."""
+    """Format the provided run list to a rich Table.
+
+    Parameters
+    ----------
+    run_list : list[RunRow]
+        List of run information to display.
+
+    Returns
+    -------
+    Table
+        Rich Table object with formatted run information.
+    """
     table = Table(header_style="bold cyan", show_lines=True)
 
     # Add columns
@@ -217,7 +239,18 @@ def _to_table(run_list: list[RunRow]) -> Table:
 
 
 def _to_detail_table(run: RunRow) -> Table:
-    """Format a single run's details in a vertical table layout."""
+    """Format a single run's details in a vertical table layout.
+
+    Parameters
+    ----------
+    run : RunRow
+        The run information to display.
+
+    Returns
+    -------
+    Table
+        Rich Table object with detailed run information in vertical format.
+    """
     status_style = _get_status_style(run.status_text)
 
     # Create vertical table with field names on the left
@@ -241,7 +274,18 @@ def _to_detail_table(run: RunRow) -> Table:
 
 
 def _to_json(run_list: list[RunRow]) -> str:
-    """Format run status list to a JSON formatted string."""
+    """Format run status list to a JSON formatted string.
+
+    Parameters
+    ----------
+    run_list : list[RunRow]
+        List of run information to serialize.
+
+    Returns
+    -------
+    str
+        JSON string containing formatted run information.
+    """
     runs_list = []
     for row in run_list:
         runs_list.append(
@@ -265,7 +309,18 @@ def _to_json(run_list: list[RunRow]) -> str:
 
 
 def _list_runs(stub: ControlStub) -> list[RunRow]:
-    """List all runs."""
+    """List all runs.
+
+    Parameters
+    ----------
+    stub : ControlStub
+        The gRPC stub for Control API communication.
+
+    Returns
+    -------
+    list[RunRow]
+        List of formatted run information for all runs.
+    """
     with flwr_cli_grpc_exc_handler():
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     runs = [run_from_proto(proto) for proto in res.run_dict.values()]
@@ -274,7 +329,25 @@ def _list_runs(stub: ControlStub) -> list[RunRow]:
 
 
 def _display_one_run(stub: ControlStub, run_id: int) -> list[RunRow]:
-    """Display information about a specific run."""
+    """Display information about a specific run.
+
+    Parameters
+    ----------
+    stub : ControlStub
+        The gRPC stub for Control API communication.
+    run_id : int
+        The unique identifier of the run to display.
+
+    Returns
+    -------
+    list[RunRow]
+        List containing the formatted run information (single item).
+
+    Raises
+    ------
+    ValueError
+        If the run_id is not found.
+    """
     with flwr_cli_grpc_exc_handler():
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
     if not res.run_dict:

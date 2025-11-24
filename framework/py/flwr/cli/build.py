@@ -42,7 +42,22 @@ from .utils import build_pathspec, is_valid_project_name, load_gitignore_pattern
 def write_to_zip(
     zipfile_obj: zipfile.ZipFile, filename: str, contents: bytes | str
 ) -> zipfile.ZipFile:
-    """Set a fixed date and write contents to a zip file."""
+    """Set a fixed date and write contents to a zip file.
+
+    Parameters
+    ----------
+    zipfile_obj : zipfile.ZipFile
+        The ZipFile object to write to.
+    filename : str
+        Name of the file within the zip archive.
+    contents : bytes | str
+        The file contents to write.
+
+    Returns
+    -------
+    ZipFile
+        The modified ZipFile object.
+    """
     zip_info = zipfile.ZipInfo(filename)
     zip_info.date_time = FAB_DATE
     zipfile_obj.writestr(zip_info, contents)
@@ -50,7 +65,21 @@ def write_to_zip(
 
 
 def get_fab_filename(config: dict[str, Any], fab_hash: str) -> str:
-    """Get the FAB filename based on the given config and FAB hash."""
+    """Get the FAB filename based on the given config and FAB hash.
+
+    Parameters
+    ----------
+    config : dict[str, Any]
+        The project configuration dictionary.
+    fab_hash : str
+        The SHA-256 hash of the FAB file.
+
+    Returns
+    -------
+    str
+        The formatted FAB filename in the pattern:
+        <publisher>.<name>.<version>.<hash_prefix>.fab
+    """
     publisher = config["tool"]["flwr"]["app"]["publisher"]
     name = config["project"]["name"]
     version = config["project"]["version"].replace(".", "-")
@@ -267,7 +296,13 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
 
 
 def get_fab_include_pathspec() -> pathspec.PathSpec:
-    """Get the PathSpec for files to include in a FAB."""
+    """Get the PathSpec for files to include in a FAB.
+
+    Returns
+    -------
+    PathSpec
+        PathSpec object with default include patterns for FAB files.
+    """
     return build_pathspec(FAB_INCLUDE_PATTERNS)
 
 
@@ -276,6 +311,16 @@ def get_fab_exclude_pathspec(gitignore_content: bytes | None) -> pathspec.PathSp
 
     If gitignore_content is provided, its patterns will be combined with the default
     exclude patterns.
+
+    Parameters
+    ----------
+    gitignore_content : bytes | None
+        Optional gitignore file content as bytes.
+
+    Returns
+    -------
+    PathSpec
+        PathSpec object with combined exclude patterns.
     """
     patterns = list(FAB_EXCLUDE_PATTERNS)
     if gitignore_content:
