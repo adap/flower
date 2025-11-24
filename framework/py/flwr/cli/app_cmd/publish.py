@@ -24,6 +24,7 @@ import typer
 from requests import Response
 
 from flwr.common.constant import CREDENTIALS_DIR, FLWR_DIR
+from flwr.common.version import package_version as flwr_version
 from flwr.supercore.constant import (
     APP_PUBLISH_EXCLUDE_PATTERNS,
     APP_PUBLISH_INCLUDE_PATTERNS,
@@ -273,6 +274,9 @@ def _post_files(
     """POST multipart with one part per file."""
     url = f"{PLATFORM_API_URL}/hub/apps/publish"
     headers = {"Authorization": f"Bearer {token}"}
+    body = {"flwr_version": flwr_version}
 
-    resp = requests.post(url, files=files_param, headers=headers, timeout=120)
+    resp = requests.post(
+        url, files=files_param, headers=headers, json=body, timeout=120
+    )
     return resp
