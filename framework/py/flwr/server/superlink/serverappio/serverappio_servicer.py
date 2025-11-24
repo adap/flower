@@ -208,9 +208,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 detail="`Message.metadata` has mismatched `run_id`",
             )
             # Store objects
-            unavailable_obj_ids = store.preregister(request.run_id, object_tree)
-            # Keep track of objects that need to be pushed
-            objects_to_push |= set(unavailable_obj_ids)
+            objects_to_push |= set(store.preregister(request.run_id, object_tree))
             # Store message
             message_id: str | None = state.store_message_ins(message=message)
             message_ids.append(message_id)
