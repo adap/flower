@@ -153,7 +153,15 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
 
         # Retrieve FAB from FFS
         if result := ffs.get(run.fab_hash):
-            fab = Fab(run.fab_hash, result[0], result[1])
+            content, verifications = result
+            log(
+                DEBUG,
+                "Retrieved FAB: hash=%s, content_len=%d, verifications=%s",
+                run.fab_hash,
+                len(content),
+                verifications,
+            )
+            fab = Fab(run.fab_hash, content, verifications)
         else:
             context.abort(
                 grpc.StatusCode.NOT_FOUND,
