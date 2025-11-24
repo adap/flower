@@ -65,7 +65,6 @@ from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
 from flwr.supercore.ffs import Ffs
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStore
-from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 
 
 class InvalidHeartbeatIntervalError(Exception):
@@ -169,10 +168,11 @@ def push_messages(
     """Push Messages handler."""
     # Convert Message from proto
     msg = message_from_proto(message_proto=request.messages_list[0])
+    run_id = msg.metadata.run_id
 
     # Abort if the run is not running
     abort_msg = check_abort(
-        msg.metadata.run_id,
+        run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
         store,
@@ -180,11 +180,10 @@ def push_messages(
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
 
+    # Store Message object to descendants mapping and preregister objects
+    objects_to_push = store.preregister(run_id, request.message_object_trees[0])
     # Store Message in State
     message_id: str | None = state.store_message_res(message=msg)
-
-    # Store Message object to descendants mapping and preregister objects
-    objects_to_push = store_mapping_and_register_objects(store, request=request)
 
     # Build response
     response = PushMessagesResponse(

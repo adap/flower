@@ -62,7 +62,6 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 # pylint: disable=E0601
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
-from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 from flwr.supernode.nodestate import NodeStateFactory
 
 
@@ -231,11 +230,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             )
             raise RuntimeError("This line should never be reached.")
 
+        # Store Message object to descendants mapping and preregister objects
+        objects_to_push = store.preregister(
+            request.run_id, request.message_object_trees[0]
+        )
         # Save the message to the state
         state.store_message(message_from_proto(request.messages_list[0]))
-
-        # Store Message object to descendants mapping and preregister objects
-        objects_to_push = store_mapping_and_register_objects(store, request=request)
 
         return PushAppMessagesResponse(objects_to_push=objects_to_push)
 
