@@ -1,0 +1,20 @@
+####################################
+ [203] SERVERAPP_RUN_START_REJECTED
+####################################
+
+*************
+ Description
+*************
+
+The SuperLink rejected the request to start the run. This may occur if the run has been
+stopped, the run failed to start within the allowed time, or the run ID or FAB is
+invalid.
+
+****************
+ How to Resolve
+****************
+
+1. Check if the run has been stopped by another process or user.
+2. Verify that the SuperExec can start the ServerApp within the allowed time. Slow
+   imports in the ServerApp may cause timeouts.
+3. Ensure the SuperLink database is in the correct state and not corrupted.
