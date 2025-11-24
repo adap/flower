@@ -51,6 +51,7 @@ from flwr.common.serde import (
     user_config_from_proto,
 )
 from flwr.common.typing import Fab, Run, RunStatus
+from flwr.common.version import package_version as flwr_version
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
@@ -663,6 +664,7 @@ def _request_download_link(
     body = {
         "app_id": app_id,  # send raw string of app_id
         "flwr_license_key": os.getenv("FLWR_LICENSE_KEY"),
+        "flwr_version": flwr_version,
     }
 
     try:
