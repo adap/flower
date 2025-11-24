@@ -90,7 +90,6 @@ from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
-from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
@@ -199,7 +198,10 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             detail="`messages_list` must not be empty",
         )
         message_ids: list[str | None] = []
-        for message_proto in request.messages_list:
+        objects_to_push: set[str] = set()
+        for message_proto, object_tree in zip(
+            request.messages_list, request.message_object_trees, strict=True
+        ):
             message = message_from_proto(message_proto=message_proto)
             validation_errors = validate_message(message, is_reply_message=False)
             _raise_if(
@@ -212,12 +214,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 request_name="PushMessages",
                 detail="`Message.metadata` has mismatched `run_id`",
             )
-            # Store
+            # Store objects
+            objects_to_push |= set(store.preregister(request.run_id, object_tree))
+            # Store message
             message_id: str | None = state.store_message_ins(message=message)
             message_ids.append(message_id)
-
-        # Store Message object to descendants mapping and preregister objects
-        objects_to_push = store_mapping_and_register_objects(store, request=request)
 
         return PushAppMessagesResponse(
             message_ids=[

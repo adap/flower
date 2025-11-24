@@ -62,7 +62,6 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 # pylint: disable=E0601
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
-from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 from flwr.supernode.nodestate import NodeStateFactory
 
 
@@ -151,7 +150,24 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Retrieve context, run and fab for this run
         context = cast(Context, state.get_context(run_id))
         run = cast(Run, state.get_run(run_id))
-        fab = Fab(run.fab_hash, ffs.get(run.fab_hash)[0], ffs.get(run.fab_hash)[1])  # type: ignore
+
+        # Retrieve FAB from FFS
+        if result := ffs.get(run.fab_hash):
+            content, verifications = result
+            log(
+                DEBUG,
+                "Retrieved FAB: hash=%s, content_len=%d, verifications=%s",
+                run.fab_hash,
+                len(content),
+                verifications,
+            )
+            fab = Fab(run.fab_hash, content, verifications)
+        else:
+            context.abort(
+                grpc.StatusCode.NOT_FOUND,
+                f"FAB with hash {run.fab_hash} not found in FFS.",
+            )
+            raise RuntimeError("This line should never be reached.")
 
         return PullAppInputsResponse(
             context=context_to_proto(context),
@@ -231,11 +247,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             )
             raise RuntimeError("This line should never be reached.")
 
+        # Store Message object to descendants mapping and preregister objects
+        objects_to_push: set[str] = set()
+        for object_tree in request.message_object_trees:
+            objects_to_push |= set(store.preregister(run_id, object_tree))
         # Save the message to the state
         state.store_message(message_from_proto(request.messages_list[0]))
-
-        # Store Message object to descendants mapping and preregister objects
-        objects_to_push = store_mapping_and_register_objects(store, request=request)
 
         return PushAppMessagesResponse(objects_to_push=objects_to_push)
 
