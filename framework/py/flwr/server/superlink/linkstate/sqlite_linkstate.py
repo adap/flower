@@ -1304,7 +1304,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 WHERE message_id = :message_id
             """
             data = {"message_id": message_id}
-            rows = self.conn.execute(query, data).fetchall()
+            rows: list[dict[str, Any]] = self.conn.execute(query, data).fetchall()
             if not rows:
                 # Message does not exist
                 return None
