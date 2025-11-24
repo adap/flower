@@ -42,7 +42,7 @@ scikit-learn = "1.5.0"
 torch = { url = "https://download.pytorch.org/whl/cu117/torch-2.0.1%2Bcu117-cp310-cp310-linux_x86_64.whl" }
 torchvision = { url = "https://download.pytorch.org/whl/cu117/torchvision-0.15.2%2Bcu117-cp310-cp310-linux_x86_64.whl" }
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.13.2"
 black = "==24.2.0"
 docformatter = "==1.7.5"

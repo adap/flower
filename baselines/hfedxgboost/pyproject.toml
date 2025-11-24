@@ -45,7 +45,7 @@ tqdm = "4.66.3"
 torchvision = "0.21.0"
 wandb = "0.15.12"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.13.2"
 black = "==24.2.0"
 docformatter = "==1.7.5"

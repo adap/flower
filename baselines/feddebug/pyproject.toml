@@ -42,7 +42,7 @@ torch = "2.6.0"
 torchvision = "0.21.0"
 flwr-datasets = "0.3.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.13.2"
 black = "==24.2.0"
 docformatter = "==1.7.5"

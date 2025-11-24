@@ -51,7 +51,7 @@ pandas = "^1.5.3"
 pyhamcrest = "^2.0.4"
 pillow = "==10.2.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.13.2"
 black = "==24.2.0"
 docformatter = "==1.7.5"

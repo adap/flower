@@ -46,7 +46,7 @@ tensorboard = "2.18.0"
 numpy = "1.23.0"
 mmcv-full = { url = "https://download.openmmlab.com/mmcv/dist/cu117/torch1.13.0/mmcv_full-1.7.1-cp310-cp310-manylinux1_x86_64.whl" }
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.13.2"
 black = "==24.2.0"
 docformatter = "==1.7.5"

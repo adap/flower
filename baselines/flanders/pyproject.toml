@@ -52,7 +52,7 @@ ipykernel = "^6.27.1"
 natsort = "^8.4.0"
 seaborn = "^0.13.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.11.5"
 black = "==23.1.0"
 docformatter = "==1.5.1"

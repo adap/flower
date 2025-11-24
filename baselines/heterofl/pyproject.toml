@@ -43,7 +43,7 @@ anytree = "^2.12.1"
 types-six = "^1.16.21.9"
 tqdm = "4.66.3"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.13.2"
 black = "==24.2.0"
 docformatter = "==1.7.5"

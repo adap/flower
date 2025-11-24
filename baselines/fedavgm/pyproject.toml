@@ -42,7 +42,7 @@ cython = "^3.0.0"
 tensorflow = "2.12.1"
 matplotlib = "^3.7.2"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.13.2"
 black = "==24.2.0"
 docformatter = "==1.7.5"

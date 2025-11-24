@@ -41,7 +41,7 @@ tensorflow = "2.12.1"
 matplotlib = "3.7.1"
 psutil = "5.9.5" # this is just to log some info about memory usage
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.13.2"
 black = "==24.2.0"
 docformatter = "==1.7.5"
