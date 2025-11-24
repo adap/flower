@@ -93,19 +93,20 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
         # Pull Message, Context, Run and (optional) FAB from SuperNode
         message, context, run, fab = pull_clientappinputs(stub=stub, token=token)
 
-        # Install FAB, if provided
-        if fab:
-            log(DEBUG, "[flwr-clientapp] Start FAB installation.")
-            install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
-
-        load_client_app_fn = get_load_client_app_fn(
-            default_app_ref="",
-            app_path=None,
-            multi_app=True,
-            flwr_dir=str(flwr_dir_),
-        )
-
         try:
+
+            # Install FAB, if provided
+            if fab:
+                log(DEBUG, "[flwr-clientapp] Start FAB installation.")
+                install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
+
+            load_client_app_fn = get_load_client_app_fn(
+                default_app_ref="",
+                app_path=None,
+                multi_app=True,
+                flwr_dir=str(flwr_dir_),
+            )
+
             # Load ClientApp
             log(DEBUG, "[flwr-clientapp] Start `ClientApp` Loading.")
             client_app: ClientApp = load_client_app_fn(
