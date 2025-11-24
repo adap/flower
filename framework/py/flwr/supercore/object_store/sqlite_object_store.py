@@ -126,7 +126,9 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
                 "SELECT object_id FROM objects WHERE object_id=?", (object_id,)
             ).fetchone()
             if not row:
-                raise NoObjectInStoreError(f"Object {object_id} not found.")
+                raise NoObjectInStoreError(
+                    f"Object {object_id} was not pre-registered."
+                )
             children = self.query(
                 "SELECT child_id FROM object_children WHERE parent_id=?", (object_id,)
             )
