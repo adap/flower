@@ -27,7 +27,7 @@ from typing import Any, cast
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     FLWR_APP_TOKEN_LENGTH,
-    HEARTBEAT_INTERVAL_INF,
+    HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -238,13 +238,6 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             data[0], ["run_id", "src_node_id", "dst_node_id"]
         )
 
-        # Validate run_id
-        query = "SELECT federation FROM run WHERE run_id = ?;"
-        if not (rows := self.query(query, (data[0]["run_id"],))):
-            log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
-            return None
-        federation: str = rows[0]["federation"]
-
         # Validate source node ID
         if message.metadata.src_node_id != SUPERLINK_NODE_ID:
             log(
@@ -253,6 +246,13 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 message.metadata.src_node_id,
             )
             return None
+
+        # Validate run_id
+        query = "SELECT federation FROM run WHERE run_id = ?;"
+        if not (rows := self.query(query, (data[0]["run_id"],))):
+            log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
+            return None
+        federation: str = rows[0]["federation"]
 
         # Validate destination node ID
         query = "SELECT node_id FROM node WHERE node_id = ? AND status IN (?, ?);"
@@ -943,14 +943,17 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         if they have not sent a heartbeat before `active_until`.
         """
         sint_run_ids = [uint64_to_int64(run_id) for run_id in run_ids]
-        query = "UPDATE run SET finished_at = ?, sub_status = ?, details = ? "
-        query += "WHERE starting_at != '' AND finished_at = '' AND active_until < ?"
-        query += f" AND run_id IN ({','.join(['?'] * len(run_ids))});"
+        query = f"""
+            UPDATE run SET sub_status = ?, details = ?,
+            finished_at =
+            strftime("%Y-%m-%dT%H:%M:%f+00:00", active_until, "unixepoch")
+            WHERE starting_at != '' AND finished_at = '' AND active_until < ?
+            AND run_id IN ({','.join(['?'] * len(run_ids))});
+        """
         current = now()
         self.query(
             query,
             (
-                current.isoformat(),
                 SubStatus.FAILED,
                 RUN_FAILURE_DETAILS_NO_HEARTBEAT,
                 current.timestamp(),
@@ -1061,7 +1064,7 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         # when switching to starting or running
         current = now()
         if new_status.status in (Status.STARTING, Status.RUNNING):
-            heartbeat_interval = HEARTBEAT_INTERVAL_INF
+            heartbeat_interval = HEARTBEAT_DEFAULT_INTERVAL
             active_until = current.timestamp() + heartbeat_interval
         else:
             heartbeat_interval = 0

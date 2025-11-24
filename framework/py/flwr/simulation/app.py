@@ -140,10 +140,11 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         root_certificates=certificates,
     )
 
-    # Resolve directory where FABs are installed
+    # Initialize variables for finally block
     flwr_dir = get_flwr_dir(flwr_dir_)
     log_uploader = None
     heartbeat_sender = None
+    run = None
     run_status = None
 
     try:
@@ -190,12 +191,6 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
             "Flower will load ClientApp `%s` in %s",
             client_app_attr,
             app_path,
-        )
-
-        # Change status to Running
-        run_status_proto = run_status_to_proto(RunStatus(Status.RUNNING, "", ""))
-        conn._stub.UpdateRunStatus(
-            UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
         )
 
         # Pull Federation Options
@@ -265,7 +260,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
 
     finally:
         # Stop heartbeat sender
-        if heartbeat_sender:
+        if heartbeat_sender and heartbeat_sender.is_running:
             heartbeat_sender.stop()
 
         # Stop log uploader for this run and upload final logs
@@ -273,7 +268,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
             stop_log_uploader(log_queue, log_uploader)
 
         # Update run status
-        if run_status:
+        if run and run_status:
             run_status_proto = run_status_to_proto(run_status)
             conn._stub.UpdateRunStatus(
                 UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
