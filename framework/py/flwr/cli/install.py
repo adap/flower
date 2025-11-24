@@ -163,7 +163,7 @@ def validate_and_install(
     flwr_dir: Path | None,
     skip_prompt: bool = False,
 ) -> Path:
-    """Validate TOML files and install the project to the desired directory.
+    """Validate the TOML file and install the project to the desired directory.
 
     Parameters
     ----------
