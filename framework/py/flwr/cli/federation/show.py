@@ -147,12 +147,12 @@ def _show_federation(
     return list(fed_proto.member_aids), list(fed_proto.nodes), formatted_runs
 
 
-def _to_members_table(members_aid: list[str]) -> Table:
+def _to_members_table(member_aids: list[str]) -> Table:
     """Format the provided list of federation members as a rich Table.
 
     Parameters
     ----------
-    members_aid : list[str]
+    member_aids : list[str]
         List of member account identifiers.
 
     Returns
@@ -167,7 +167,7 @@ def _to_members_table(members_aid: list[str]) -> Table:
     )
     table.add_column(Text("Role", justify="center"), style="bright_black", no_wrap=True)
 
-    for member_aid in members_aid:
+    for member_aid in member_aids:
         table.add_row(member_aid, "Member")
 
     return table
