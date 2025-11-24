@@ -184,6 +184,9 @@ def pull_clientappinputs(
         log(ERROR, "[PullClientAppInputs] gRPC error occurred: %s", str(e))
         raise e
 
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+        raise ex
+
 
 def push_clientappoutputs(
     stub: ClientAppIoStub, token: str, message: Message, context: Context
@@ -237,3 +240,6 @@ def push_clientappoutputs(
     except grpc.RpcError as e:
         log(ERROR, "[PushClientAppOutputs] gRPC error occurred: %s", str(e))
         raise e
+
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+        raise ex
