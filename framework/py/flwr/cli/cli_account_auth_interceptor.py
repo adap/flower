@@ -55,7 +55,7 @@ class CliAccountAuthInterceptor(
         continuation : Callable[[Any, Any], Any]
             The next interceptor or handler in the chain.
         client_call_details : grpc.ClientCallDetails
-            Details of the RPC call.
+            Details of the RPC call as a NamedTuple.
         request : Request
             The RPC request object.
 
