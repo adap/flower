@@ -55,7 +55,7 @@ def review(
     app_spec: Annotated[
         str,
         typer.Argument(
-            help="App identifier (e.g., '@account/app' or '@account/app==1.0.0'). "
+            help="App specifier (e.g., '@account/app' or '@account/app==1.0.0'). "
             "Version is optional; defaults to the latest."
         ),
     ],
