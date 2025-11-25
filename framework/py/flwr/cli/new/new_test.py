@@ -156,10 +156,10 @@ def test_new_incorrect_name(tmp_path: str) -> None:
 @pytest.mark.parametrize(
     "value",
     [
-        "user/app==1.2.3",       # missing '@'
-        "@accountapp==1.2.3",    # missing slash
-        "@account/app==1.2",     # bad version
-        "@account/app==1.2.3.4", # bad version
+        "user/app==1.2.3",  # missing '@'
+        "@accountapp==1.2.3",  # missing slash
+        "@account/app==1.2",  # bad version
+        "@account/app==1.2.3.4",  # bad version
         "@account*/app==1.2.3",  # bad user id chars
         "@account/app*==1.2.3",  # bad app id chars
     ],
