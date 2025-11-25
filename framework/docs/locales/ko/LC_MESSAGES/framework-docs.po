@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-21 00:08+0000\n"
+"POT-Creation-Date: 2025-11-25 00:06+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -373,12 +373,12 @@ msgstr "빌드 전달인자"
 #: ../../source/ref-exit-codes/102.rst:7 ../../source/ref-exit-codes/103.rst:7
 #: ../../source/ref-exit-codes/104.rst:7 ../../source/ref-exit-codes/2.rst:7
 #: ../../source/ref-exit-codes/200.rst:23 ../../source/ref-exit-codes/201.rst:7
-#: ../../source/ref-exit-codes/202.rst:7 ../../source/ref-exit-codes/3.rst:7
-#: ../../source/ref-exit-codes/300.rst:7 ../../source/ref-exit-codes/302.rst:7
-#: ../../source/ref-exit-codes/303.rst:7 ../../source/ref-exit-codes/304.rst:7
-#: ../../source/ref-exit-codes/400.rst:7 ../../source/ref-exit-codes/500.rst:7
-#: ../../source/ref-exit-codes/600.rst:7 ../../source/ref-exit-codes/601.rst:7
-#: ../../source/ref-exit-codes/602.rst:7
+#: ../../source/ref-exit-codes/202.rst:7 ../../source/ref-exit-codes/203.rst:7
+#: ../../source/ref-exit-codes/3.rst:7 ../../source/ref-exit-codes/300.rst:7
+#: ../../source/ref-exit-codes/302.rst:7 ../../source/ref-exit-codes/303.rst:7
+#: ../../source/ref-exit-codes/304.rst:7 ../../source/ref-exit-codes/400.rst:7
+#: ../../source/ref-exit-codes/500.rst:7 ../../source/ref-exit-codes/600.rst:7
+#: ../../source/ref-exit-codes/601.rst:7 ../../source/ref-exit-codes/602.rst:7
 msgid "Description"
 msgstr "설명"
 
@@ -6482,47 +6482,40 @@ msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:685
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:240
-#: flwr.app.error.Error flwr.app.metadata.Metadata
+#: ../../source/ref-api/flwr.app.Array.rst
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst
+#: ../../source/ref-api/flwr.app.Context.rst
+#: ../../source/ref-api/flwr.app.Error.rst
+#: ../../source/ref-api/flwr.app.Message.rst
+#: ../../source/ref-api/flwr.app.Metadata.rst
+#: ../../source/ref-api/flwr.app.MetricRecord.rst
+#: ../../source/ref-api/flwr.app.RecordDict.rst
+#: ../../source/ref-api/flwr.clientapp.mod.LocalDpMod.rst
+#: ../../source/ref-api/flwr.serverapp.Grid.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Bulyan.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdagrad.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdam.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAvgM.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedMedian.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedProx.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedTrimmedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbCyclic.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedYogi.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Krum.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.MultiKrum.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.QFedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Strategy.rst
 #: flwr.clientapp.client_app.ClientApp.evaluate
 #: flwr.clientapp.client_app.ClientApp.query
 #: flwr.clientapp.client_app.ClientApp.train
-#: flwr.clientapp.mod.localdp_mod.LocalDpMod flwr.common.context.Context
-#: flwr.common.message.Message flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
-#: flwr.common.record.array.Array flwr.common.record.array.Array.inflate
-#: flwr.common.record.arrayrecord.ArrayRecord
-#: flwr.common.record.arrayrecord.ArrayRecord.inflate
-#: flwr.common.record.configrecord.ConfigRecord
-#: flwr.common.record.configrecord.ConfigRecord.inflate
-#: flwr.common.record.metricrecord.MetricRecord
-#: flwr.common.record.metricrecord.MetricRecord.inflate
-#: flwr.common.record.recorddict.RecordDict
-#: flwr.common.record.recorddict.RecordDict.inflate
-#: flwr.server.grid.grid.Grid.create_message
-#: flwr.server.grid.grid.Grid.pull_messages
-#: flwr.server.grid.grid.Grid.push_messages
-#: flwr.server.grid.grid.Grid.send_and_receive
-#: flwr.server.grid.grid.Grid.set_run flwr.serverapp.strategy.bulyan.Bulyan
-#: flwr.serverapp.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping
-#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping
-#: flwr.serverapp.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping
-#: flwr.serverapp.strategy.fedadagrad.FedAdagrad
-#: flwr.serverapp.strategy.fedadam.FedAdam
-#: flwr.serverapp.strategy.fedavg.FedAvg
-#: flwr.serverapp.strategy.fedavgm.FedAvgM
-#: flwr.serverapp.strategy.fedmedian.FedMedian
-#: flwr.serverapp.strategy.fedprox.FedProx
-#: flwr.serverapp.strategy.fedtrimmedavg.FedTrimmedAvg
-#: flwr.serverapp.strategy.fedxgb_bagging.FedXgbBagging
-#: flwr.serverapp.strategy.fedxgb_cyclic.FedXgbCyclic
-#: flwr.serverapp.strategy.fedyogi.FedYogi flwr.serverapp.strategy.krum.Krum
-#: flwr.serverapp.strategy.multikrum.MultiKrum
-#: flwr.serverapp.strategy.qfedavg.QFedAvg
-#: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate
-#: flwr.serverapp.strategy.strategy.Strategy.aggregate_train
-#: flwr.serverapp.strategy.strategy.Strategy.configure_evaluate
-#: flwr.serverapp.strategy.strategy.Strategy.configure_train
-#: flwr.serverapp.strategy.strategy.Strategy.start of
+#: flwr.server.grid.grid.Grid.send_and_receive of
 msgid "Parameters"
 msgstr "파라미터"
 
@@ -16252,6 +16245,45 @@ msgid ""
 "installation."
 msgstr ""
 
+#: ../../flwr app:1
+#, fuzzy
+msgid "Manage Apps"
+msgstr "시뮬레이션 실행"
+
+#: ../../flwr app publish:1
+#, fuzzy
+msgid "Publish a Flower App to the Flower Platform."
+msgstr "Flower SuperNode를 실행합니다."
+
+#: ../../flwr app publish:1
+msgid ""
+"This command uploads your app project to the Flower Platform. Files are "
+"filtered based on .gitignore patterns and allowed file extensions."
+msgstr ""
+
+#: ../../flwr app publish:1
+msgid "Bearer token for Platform API."
+msgstr ""
+
+#: ../../source/ref-api-cli.rst
+#, fuzzy
+msgid "Arguments"
+msgstr "빌드 전달인자"
+
+#: ../../flwr app federation install:1 list:1 log:1 login:1 new:1 publish:1
+#: pull:1 register:1 run:1 show:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "Optional argument"
+msgstr "선택적 개선 사항"
+
+#: ../../flwr app publish:1
+msgid "Project directory to upload (defaults to current directory)."
+msgstr ""
+
+#: ../../flwr app publish:1
+msgid "Name of the federation used for login before publishing app."
+msgstr ""
+
 #: ../../flwr build:1
 msgid "Build a Flower App into a Flower App Bundle (FAB)."
 msgstr ""
@@ -16297,17 +16329,6 @@ msgstr ""
 msgid "``'default'``"
 msgstr "``flwr/base``"
 
-#: ../../source/ref-api-cli.rst
-#, fuzzy
-msgid "Arguments"
-msgstr "빌드 전달인자"
-
-#: ../../flwr federation install:1 list:1 log:1 login:1 new:1 pull:1 register:1
-#: run:1 show:1 stop:1 supernode unregister:1
-#, fuzzy
-msgid "Optional argument"
-msgstr "선택적 개선 사항"
-
 #: ../../flwr federation list:1 register:1 show:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Path of the Flower project"
@@ -16321,6 +16342,12 @@ msgstr ""
 #, fuzzy
 msgid "Show details of a federation."
 msgstr "flower 초연결"
+
+#: ../../flwr federation show:1
+msgid ""
+"Display comprehensive information about a federation including its "
+"members, registered SuperNodes, and runs."
+msgstr ""
 
 #: ../../flwr install:1
 #, fuzzy
@@ -16449,7 +16476,13 @@ msgid "Specific run ID to display"
 msgstr ""
 
 #: ../../flwr log:1
-msgid "Get logs from a Flower project run."
+msgid "Get logs from a run."
+msgstr ""
+
+#: ../../flwr log:1
+msgid ""
+"Retrieve and display logs from a Flower run. Logs can be streamed in "
+"real-time (with --stream) or printed once (with --show)."
 msgstr ""
 
 #: ../../flwr log:1
@@ -16529,6 +16562,12 @@ msgid "Pull artifacts from a Flower run."
 msgstr ""
 
 #: ../../flwr pull:1
+msgid ""
+"Retrieve a download URL for artifacts generated during a completed Flower"
+" run. The artifacts can then be downloaded from the provided URL."
+msgstr ""
+
+#: ../../flwr pull:1
 msgid "**Required** Run ID to pull artifacts from."
 msgstr ""
 
@@ -16573,7 +16612,14 @@ msgid "Name of the federation to run the app on."
 msgstr ""
 
 #: ../../flwr stop:1
-msgid "Stop a run."
+#, fuzzy
+msgid "Stop a Flower run."
+msgstr "flower 초연결"
+
+#: ../../flwr stop:1
+msgid ""
+"This command stops a running Flower App execution by sending a stop "
+"request to the SuperLink via the Control API."
 msgstr ""
 
 #: ../../flwr stop:1
@@ -16650,7 +16696,7 @@ msgstr "Modules"
 
 #: ../../source/ref-api/flwr.rst:34:<autosummary>:1
 #, fuzzy
-msgid ":py:obj:`flwr.app <flwr.app>`\\"
+msgid ":py:obj:`app <flwr.app>`\\"
 msgstr ":py:obj:`flwr <flwr>`\\"
 
 #: ../../source/ref-api/flwr.rst:34:<autosummary>:1 flwr.app:1 of
@@ -16660,7 +16706,7 @@ msgstr "Flower 서버."
 
 #: ../../source/ref-api/flwr.rst:34:<autosummary>:1
 #, fuzzy
-msgid ":py:obj:`flwr.clientapp <flwr.clientapp>`\\"
+msgid ":py:obj:`clientapp <flwr.clientapp>`\\"
 msgstr ":py:obj:`flwr.client <flwr.client>`\\"
 
 #: ../../source/ref-api/flwr.rst:34:<autosummary>:1 flwr.clientapp:1 of
@@ -16670,7 +16716,7 @@ msgstr "Flower ClientApp."
 
 #: ../../source/ref-api/flwr.rst:34:<autosummary>:1
 #, fuzzy
-msgid ":py:obj:`flwr.serverapp <flwr.serverapp>`\\"
+msgid ":py:obj:`serverapp <flwr.serverapp>`\\"
 msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 
 #: ../../source/ref-api/flwr.rst:34:<autosummary>:1 flwr.serverapp:1 of
@@ -17120,25 +17166,36 @@ msgid ""
 "children will raise a ``ValueError``."
 msgstr ""
 
+#: ../../source/ref-api/flwr.app.Array.rst
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst
+#: ../../source/ref-api/flwr.app.Message.rst
+#: ../../source/ref-api/flwr.app.MetricRecord.rst
+#: ../../source/ref-api/flwr.app.RecordDict.rst
+#: ../../source/ref-api/flwr.serverapp.Grid.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Bulyan.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdagrad.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdam.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAvgM.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedMedian.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedProx.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedTrimmedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbCyclic.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedYogi.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Krum.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.MultiKrum.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.QFedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Strategy.rst
 #: flwr.clientapp.client_app.ClientApp.evaluate
 #: flwr.clientapp.client_app.ClientApp.query
 #: flwr.clientapp.client_app.ClientApp.train
-#: flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
-#: flwr.common.record.array.Array.inflate
-#: flwr.common.record.arrayrecord.ArrayRecord.inflate
-#: flwr.common.record.configrecord.ConfigRecord.inflate
-#: flwr.common.record.metricrecord.MetricRecord.inflate
-#: flwr.common.record.recorddict.RecordDict.inflate
-#: flwr.server.grid.grid.Grid.create_message
-#: flwr.server.grid.grid.Grid.pull_messages
-#: flwr.server.grid.grid.Grid.push_messages
-#: flwr.server.grid.grid.Grid.send_and_receive
-#: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate
-#: flwr.serverapp.strategy.strategy.Strategy.aggregate_train
-#: flwr.serverapp.strategy.strategy.Strategy.configure_evaluate
-#: flwr.serverapp.strategy.strategy.Strategy.configure_train
-#: flwr.serverapp.strategy.strategy.Strategy.start of
+#: flwr.server.grid.grid.Grid.send_and_receive of
 msgid "Returns"
 msgstr "반환"
 
@@ -17146,25 +17203,36 @@ msgstr "반환"
 msgid "The inflated Array."
 msgstr ""
 
+#: ../../source/ref-api/flwr.app.Array.rst
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst
+#: ../../source/ref-api/flwr.app.Message.rst
+#: ../../source/ref-api/flwr.app.MetricRecord.rst
+#: ../../source/ref-api/flwr.app.RecordDict.rst
+#: ../../source/ref-api/flwr.serverapp.Grid.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Bulyan.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdagrad.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdam.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAvgM.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedMedian.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedProx.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedTrimmedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbCyclic.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedYogi.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Krum.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.MultiKrum.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.QFedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Strategy.rst
 #: flwr.clientapp.client_app.ClientApp.evaluate
 #: flwr.clientapp.client_app.ClientApp.query
 #: flwr.clientapp.client_app.ClientApp.train
-#: flwr.common.message.Message.create_error_reply
-#: flwr.common.message.Message.create_reply flwr.common.message.Message.inflate
-#: flwr.common.record.array.Array.inflate
-#: flwr.common.record.arrayrecord.ArrayRecord.inflate
-#: flwr.common.record.configrecord.ConfigRecord.inflate
-#: flwr.common.record.metricrecord.MetricRecord.inflate
-#: flwr.common.record.recorddict.RecordDict.inflate
-#: flwr.server.grid.grid.Grid.create_message
-#: flwr.server.grid.grid.Grid.pull_messages
-#: flwr.server.grid.grid.Grid.push_messages
-#: flwr.server.grid.grid.Grid.send_and_receive
-#: flwr.serverapp.strategy.strategy.Strategy.aggregate_evaluate
-#: flwr.serverapp.strategy.strategy.Strategy.aggregate_train
-#: flwr.serverapp.strategy.strategy.Strategy.configure_evaluate
-#: flwr.serverapp.strategy.strategy.Strategy.configure_train
-#: flwr.serverapp.strategy.strategy.Strategy.start of
+#: flwr.server.grid.grid.Grid.send_and_receive of
 msgid "Return type"
 msgstr "반환 타입"
 
@@ -18645,7 +18713,7 @@ msgstr "Flower ClientApp."
 
 #: ../../source/ref-api/flwr.clientapp.rst:40:<autosummary>:1
 #, fuzzy
-msgid ":py:obj:`flwr.clientapp.mod <flwr.clientapp.mod>`\\"
+msgid ":py:obj:`mod <flwr.clientapp.mod>`\\"
 msgstr ":py:obj:`flwr.client.mod <flwr.client.mod>`\\"
 
 #: ../../source/ref-api/flwr.clientapp.rst:40:<autosummary>:1
@@ -19032,7 +19100,7 @@ msgstr "Flower 서버."
 
 #: ../../source/ref-api/flwr.serverapp.rst:41:<autosummary>:1
 #, fuzzy
-msgid ":py:obj:`flwr.serverapp.strategy <flwr.serverapp.strategy>`\\"
+msgid ":py:obj:`strategy <flwr.serverapp.strategy>`\\"
 msgstr ":py:obj:`state <flwr.common.Context.state>`\\"
 
 #: ../../source/ref-api/flwr.serverapp.rst:41:<autosummary>:1
@@ -30632,6 +30700,7 @@ msgstr ""
 #: ../../source/ref-exit-codes/200.rst:32
 #: ../../source/ref-exit-codes/201.rst:13
 #: ../../source/ref-exit-codes/202.rst:13
+#: ../../source/ref-exit-codes/203.rst:15
 #: ../../source/ref-exit-codes/300.rst:14
 #: ../../source/ref-exit-codes/302.rst:15
 #: ../../source/ref-exit-codes/303.rst:14
@@ -30847,6 +30916,31 @@ msgstr ""
 msgid ""
 "Check the logs for more details on the specific aggregation error "
 "encountered."
+msgstr ""
+
+#: ../../source/ref-exit-codes/203.rst:3
+msgid "[203] SERVERAPP_RUN_START_REJECTED"
+msgstr ""
+
+#: ../../source/ref-exit-codes/203.rst:9
+msgid ""
+"The SuperLink rejected the request to start the run. This may occur if "
+"the run has been stopped, the run failed to start within the allowed "
+"time, or the run ID or FAB is invalid."
+msgstr ""
+
+#: ../../source/ref-exit-codes/203.rst:17
+msgid "Check if the run has been stopped by another process or user."
+msgstr ""
+
+#: ../../source/ref-exit-codes/203.rst:18
+msgid ""
+"Verify that the SuperExec can start the ServerApp within the allowed "
+"time. Slow imports in the ServerApp may cause timeouts."
+msgstr ""
+
+#: ../../source/ref-exit-codes/203.rst:20
+msgid "Ensure the SuperLink database is in the correct state and not corrupted."
 msgstr ""
 
 #: ../../source/ref-exit-codes/3.rst:3
@@ -59439,4 +59533,10 @@ msgstr ""
 #~ "use the format '@user/app==1.0.0'. Version "
 #~ "is optional (defaults to latest)."
 #~ msgstr ""
+
+#~ msgid "Stop a run."
+#~ msgstr ""
+
+#~ msgid ":py:obj:`flwr.serverapp.strategy <flwr.serverapp.strategy>`\\"
+#~ msgstr ":py:obj:`state <flwr.common.Context.state>`\\"
 
