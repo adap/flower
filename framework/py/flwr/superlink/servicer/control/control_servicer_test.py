@@ -491,7 +491,7 @@ def _make_dummy_context() -> MagicMock:
     return ctx
 
 
-def test__request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) -> None:
     """Single table-driven test covering all major outcomes."""
     ctx: MagicMock = _make_dummy_context()
     app_id: str = "@user/app"
@@ -599,7 +599,7 @@ def test__request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) -
         current_case["data"] = case
         if "raises" in case:
             with pytest.raises(RuntimeError) as exc:
-                _ = _request_download_link(app_id, ctx)
+                _ = _request_download_link(app_id, None, ctx)
             msg: str = str(exc.value)
             assert case["raises"] in msg
             if case["name"] == "http_404_not_found":
@@ -607,12 +607,12 @@ def test__request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) -
         else:
             # Expect a (fab_url, verifications) tuple
             result2: tuple[str, list[dict[str, str]] | None] = _request_download_link(
-                app_id, ctx
+                app_id, None, ctx
             )
             assert case["assert"](result2), f"Assertion failed for {case['name']}"
 
 
-def test__format_verification_compact() -> None:
+def test_format_verification_compact() -> None:
     """One test covering both 'with entries' and 'None' input."""
     # Case 1: verifications list present
     verifications: list[dict[str, str]] = [

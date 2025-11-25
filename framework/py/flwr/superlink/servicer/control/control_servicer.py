@@ -82,7 +82,11 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from flwr.supercore.constant import APP_ID_PATTERN, PLATFORM_API_URL
+from flwr.supercore.constant import (
+    APP_ID_PATTERN,
+    APP_VERSION_PATTERN,
+    PLATFORM_API_URL,
+)
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
@@ -130,16 +134,28 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 )
                 return StartRunResponse()
 
-            m = re.match(APP_ID_PATTERN, request.app_id)
-            if not m:
+            # Parse app specification
+            app_id, app_version = _parse_app_spec(request.app_id)
+
+            # Validate app version format
+            if app_version:
+                if not re.match(APP_VERSION_PATTERN, app_version):
+                    log(
+                        ERROR,
+                        "Invalid app version. Expected format: x.y.z (digits only).",
+                    )
+                    return StartRunResponse()
+
+            # Validate app ID format
+            if not re.match(APP_ID_PATTERN, app_id):
                 log(
                     ERROR,
-                    "Invalid remote app ID. Expected format: '@user_name/app_name'.",
+                    "Invalid remote app ID. Expected format: '@account_name/app_name'.",
                 )
                 return StartRunResponse()
 
             # Request download link
-            url, verifications = _request_download_link(request.app_id, context)
+            url, verifications = _request_download_link(app_id, app_version, context)
             verification_dict = _format_verification(verifications, verification_dict)
 
             # Download FAB from Flower platform API
@@ -653,7 +669,7 @@ def _check_flwr_aid_in_run(
 
 
 def _request_download_link(
-    app_id: str, context: grpc.ServicerContext
+    app_id: str, app_version: str | None, context: grpc.ServicerContext
 ) -> tuple[str, list[dict[str, str]] | None]:
     """Request download link from Flower platform API."""
     url = f"{PLATFORM_API_URL}/hub/fetch-fab"
@@ -663,6 +679,7 @@ def _request_download_link(
     }
     body = {
         "app_id": app_id,  # send raw string of app_id
+        "app_version": app_version,
         "flwr_license_key": os.getenv("FLWR_LICENSE_KEY"),
         "flwr_version": flwr_version,
     }
@@ -714,3 +731,13 @@ def _format_verification(
     verification_dict.update({"valid_license": valid_license})
 
     return verification_dict
+
+
+def _parse_app_spec(app_spec: str) -> tuple[str, str | None]:
+    """Parse app specification string into app ID and version."""
+    if "==" in app_spec:
+        app_id, app_version = app_spec.split("==")
+    else:
+        app_id = app_spec
+        app_version = None
+    return app_id, app_version
