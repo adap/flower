@@ -23,7 +23,7 @@ import requests
 import typer
 from requests import Response
 
-from flwr.common.constant import CREDENTIALS_DIR, FLWR_DIR
+from flwr.common.constant import FAB_CONFIG_FILE
 from flwr.common.version import package_version as flwr_version
 from flwr.supercore.constant import (
     APP_PUBLISH_EXCLUDE_PATTERNS,
@@ -37,11 +37,14 @@ from flwr.supercore.constant import (
     UTF8,
 )
 
-from ..utils import (
-    build_pathspec,
-    load_gitignore_patterns,
-    validate_credentials_content,
+from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
+from ..config_utils import (
+    load_and_validate,
+    process_loaded_project_config,
+    validate_federation_in_project_config,
 )
+from ..constant import FEDERATION_CONFIG_HELP_MESSAGE
+from ..utils import build_pathspec, load_cli_auth_plugin, load_gitignore_patterns
 
 
 def publish(
@@ -57,11 +60,11 @@ def publish(
             help="Name of the federation used for login before publishing app."
         ),
     ] = None,
-    token: Annotated[
-        str | None,
+    federation_config_overrides: Annotated[
+        list[str] | None,
         typer.Option(
-            "--token",
-            help="Bearer token for Platform API.",
+            "--federation-config",
+            help=FEDERATION_CONFIG_HELP_MESSAGE,
         ),
     ] = None,
 ) -> None:
@@ -70,28 +73,27 @@ def publish(
     This command uploads your app project to the Flower Platform. Files are filtered
     based on .gitignore patterns and allowed file extensions.
     """
-    # Check the credentials path
-    if not token:
-        if not federation:
-            typer.secho(
-                "❌ Please specify the federation used for "
-                "login before publishing app.",
-                fg=typer.colors.RED,
-                err=True,
-            )
-            raise typer.Exit(code=1)
+    # Load configs
+    pyproject_path = app / FAB_CONFIG_FILE if app else None
+    config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
+    config = process_loaded_project_config(config, errors, warnings)
+    federation, federation_config = validate_federation_in_project_config(
+        federation, config, federation_config_overrides
+    )
 
-        creds_path = app.absolute() / FLWR_DIR / CREDENTIALS_DIR / f"{federation}.json"
-        if not creds_path.is_file():
-            typer.secho(
-                "❌ Please log in before publishing app.",
-                fg=typer.colors.RED,
-                err=True,
-            )
-            raise typer.Exit(code=1)
+    # Load the authentication plugin (This is also shared util for loading auth plugin)
+    auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
+    if not isinstance(auth_plugin, OidcCliPlugin):
+        typer.secho(
+            "❌ Please log in before reviewing app.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
 
-        # Load and validate credentials
-        token = validate_credentials_content(creds_path)
+    # Load token from the plugin
+    auth_plugin.load_tokens()
+    token = auth_plugin.access_token
 
     # Collect & validate app files
     file_paths = _collect_file_paths(app)
@@ -269,7 +271,7 @@ def _build_multipart_files_param(
 
 def _post_files(
     files_param: list[tuple[str, tuple[str, IO[bytes], str]]],
-    token: str,
+    token: str | None,
 ) -> Response:
     """POST multipart with one part per file."""
     url = f"{PLATFORM_API_URL}/hub/apps/publish"
