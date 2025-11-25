@@ -18,7 +18,6 @@
 from __future__ import annotations
 
 import base64
-import time
 from typing import Any
 
 import pytest
@@ -26,40 +25,69 @@ import requests
 import typer
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
+from flwr.common import now
+
 from .review import _download_fab, _sign_fab, _submit_review
 
 
-def test_download_fab_success_and_failure(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Test _download_fab() returns bytes on success and exits on network failure."""
+class FakeResp:
+    """Lightweight mock of `requests.Response` used for testing review helpers.
 
-    # --- success ---
-    class FakeResp:
-        """A minimal stand-in for `requests.Response` used in tests."""
+    It supports the minimal surface used by the code under test:
 
-        def __init__(self, content: bytes):
-            self._content = content
-            self.status_code = 200
-            self.ok = True
+      * `ok` – boolean success flag
+      * `status_code` – HTTP status code
+      * `text` – response body for error reporting
+      * `content` – optional raw bytes payload (for _download_fab)
+      * `raise_for_status()` – no-op to mimic successful responses
+    """
 
-        def raise_for_status(self) -> None:
-            """Mimic a successful HTTP 200 response."""
-            return None
+    def __init__(
+        self,
+        *,
+        content: bytes | None = None,
+        ok: bool = True,
+        status: int = 200,
+        text: str = "",
+    ) -> None:
+        """Initialize a fake response."""
+        self._content = content
+        self.ok = ok
+        self.status_code = status
+        self.text = text
 
-        @property
-        def content(self) -> bytes:
-            """Return the stored byte content for the fake response."""
-            return self._content
+    def raise_for_status(self) -> None:
+        """Mimic a successful HTTP 2xx response."""
+        return None
 
+    @property
+    def content(self) -> bytes:
+        """Return the stored byte content for the fake response."""
+        if self._content is None:
+            # In tests we only access .content when we've provided it.
+            raise RuntimeError("FakeResp.content accessed but no content was set")
+        return self._content
+
+
+def test_download_fab_success(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that _download_fab() returns bytes when the HTTP GET succeeds."""
     payload = b"FABDATA"
+
+    # Patch requests.get to return successful fake response
     monkeypatch.setattr(
-        requests, "get", lambda url, timeout=60: FakeResp(payload), raising=True
+        requests,
+        "get",
+        lambda url, timeout=60: FakeResp(content=payload),
+        raising=True,
     )
+
     out = _download_fab("https://example.ai/fab")
     assert out == payload
 
-    # --- failure (network error) ---
+
+def test_download_fab_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that _download_fab() exits with typer.Exit when the GET request fails."""
+
     class Boom(requests.RequestException):
         """Custom RequestException subclass used to simulate network errors in tests."""
 
@@ -67,18 +95,21 @@ def test_download_fab_success_and_failure(
         """Raise a Boom(RequestException) to simulate a network failure."""
         raise Boom("net down")
 
+    # Patch requests.get to raise an exception
     monkeypatch.setattr(requests, "get", boom, raising=True)
+
     with pytest.raises(typer.Exit) as exc:
         _download_fab("https://example.ai/fab")
+
     assert exc.value.exit_code == 1
 
 
 def test_sign_fab_returns_signature_and_timestamp() -> None:
     """Test _sign_fab() returns valid signature bytes and a current timestamp."""
     key = ed25519.Ed25519PrivateKey.generate()
-    before = int(time.time())
+    before = int(now().timestamp())
     sig, ts = _sign_fab(b"hello fab", key)
-    after = int(time.time())
+    after = int(now().timestamp())
     assert isinstance(sig, (bytes, bytearray))
     assert before <= ts <= after
 
@@ -88,15 +119,6 @@ def test_submit_review_success_and_errors(
 ) -> None:
     """Test _submit_review() on success, HTTP error, and network exception."""
     captured: dict[str, Any] = {}
-
-    class FakeResp:
-        """Lightweight mock of `requests.Response` used for testing `_submit_review`."""
-
-        def __init__(self, ok: bool, status: int = 200, text: str = ""):
-            """Initialize a fake response with minimal HTTP-like attributes."""
-            self.ok = ok
-            self.status_code = status
-            self.text = text
 
     # --- success ---
     def fake_post(
@@ -109,7 +131,7 @@ def test_submit_review_success_and_errors(
         captured["url"] = url
         captured["headers"] = headers
         captured["json"] = json
-        return FakeResp(True)
+        return FakeResp(ok=True)
 
     monkeypatch.setattr(requests, "post", fake_post, raising=True)
     _submit_review("@u/a", "1.2.3", b"sigbytes", 123, "TKN")
@@ -128,7 +150,7 @@ def test_submit_review_success_and_errors(
         **_kwargs: Any,
     ) -> FakeResp:
         """Simulate a non-OK HTTP response from the review submission endpoint."""
-        return FakeResp(False, 503, "oops")
+        return FakeResp(ok=False, status=503, text="oops")
 
     monkeypatch.setattr(requests, "post", fake_post_fail, raising=True)
     with pytest.raises(typer.Exit) as exc:

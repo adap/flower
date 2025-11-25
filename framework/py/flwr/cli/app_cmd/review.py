@@ -18,7 +18,6 @@
 import base64
 import hashlib
 import re
-import time
 from pathlib import Path
 from typing import Annotated
 
@@ -27,22 +26,28 @@ import typer
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
+from flwr.common import now
 from flwr.common.config import get_flwr_dir
-from flwr.common.constant import CREDENTIALS_DIR, FLWR_DIR
+from flwr.common.constant import FAB_CONFIG_FILE
 from flwr.common.version import package_version as flwr_version
-from flwr.supercore.constant import (
-    APP_ID_PATTERN,
-    APP_VERSION_PATTERN,
-    PLATFORM_API_URL,
-)
+from flwr.supercore.constant import PLATFORM_API_URL
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_message_to_sign,
     load_private_key,
     sign_message,
 )
 
+from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
+from ..config_utils import (
+    load_and_validate,
+    process_loaded_project_config,
+    validate_federation_in_project_config,
+)
+from ..constant import FEDERATION_CONFIG_HELP_MESSAGE
 from ..install import install_from_fab
-from ..utils import request_download_link, validate_credentials_content
+from ..utils import load_cli_auth_plugin, parse_app_spec, request_download_link
+
+TRY_AGAIN_MESSAGE = "Please try again or press CTRL+C to abort.\n"
 
 
 # pylint: disable-next=too-many-locals, too-many-statements
@@ -66,22 +71,27 @@ def review(
             help="Name of the federation used for login before reviewing app."
         ),
     ] = None,
+    federation_config_overrides: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--federation-config",
+            help=FEDERATION_CONFIG_HELP_MESSAGE,
+        ),
+    ] = None,
 ) -> None:
     """Download a FAB for <APP-ID>, unpack it for manual review, and upon confirmation
     sign & submit the review to the Platform."""
-    if not app_dir_login or not federation:
-        typer.secho(
-            "❌ Missing project directory or federation used for login.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
-
-    # Load and validate credentials
-    creds_path = (
-        app_dir_login.absolute() / FLWR_DIR / CREDENTIALS_DIR / f"{federation}.json"
+    # Load configs
+    pyproject_path = app_dir_login / FAB_CONFIG_FILE if app_dir_login else None
+    config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
+    config = process_loaded_project_config(config, errors, warnings)
+    federation, federation_config = validate_federation_in_project_config(
+        federation, config, federation_config_overrides
     )
-    if not creds_path.is_file():
+
+    # Load the authentication plugin (This is also shared util for loading auth plugin)
+    auth_plugin = load_cli_auth_plugin(app_dir_login, federation, federation_config)
+    if not isinstance(auth_plugin, OidcCliPlugin):
         typer.secho(
             "❌ Please log in before reviewing app.",
             fg=typer.colors.RED,
@@ -89,32 +99,12 @@ def review(
         )
         raise typer.Exit(code=1)
 
-    token = validate_credentials_content(creds_path)
+    # Load token from the plugin
+    auth_plugin.load_tokens()
+    token = auth_plugin.access_token
 
-    # Validate app version format
-    if "==" in app_spec:
-        app_id, app_version = app_spec.split("==")
-
-        # Validate app version format
-        if not re.match(APP_VERSION_PATTERN, app_version):
-            typer.secho(
-                "❌ Invalid app version. Expected format: x.y.z (digits only).",
-                fg=typer.colors.RED,
-                err=True,
-            )
-            raise typer.Exit(code=1)
-    else:
-        app_id = app_spec
-        app_version = None
-
-    # Validate app_id format
-    if not re.match(APP_ID_PATTERN, app_id):
-        typer.secho(
-            "❌ Invalid remote app ID. Expected format: '@account/app'.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
+    # Validate app version and ID format
+    app_id, app_version = parse_app_spec(app_spec)
 
     # Download FAB
     typer.secho("Downloading FAB... ", fg=typer.colors.BLUE)
@@ -169,22 +159,21 @@ def review(
                 fg=typer.colors.RED,
                 err=True,
             )
-            typer.secho(
-                "Please try again or press CTRL+C to abort.\n", fg=typer.colors.YELLOW
-            )
+            typer.secho(TRY_AGAIN_MESSAGE, fg=typer.colors.YELLOW)
             continue
 
+        # Load private key
+        try:
+            private_key = load_private_key(key_path)
+        except (OSError, ValueError, UnsupportedAlgorithm) as e:
+            typer.secho(
+                f"❌ Failed to load the private key: {e}", fg=typer.colors.RED, err=True
+            )
+            typer.secho(TRY_AGAIN_MESSAGE, fg=typer.colors.YELLOW)
+            continue
         break  # valid
 
-    # Load private key and sign FAB
-    try:
-        private_key = load_private_key(key_path)
-    except (OSError, ValueError, UnsupportedAlgorithm) as e:
-        typer.secho(
-            f"❌ Failed to load the private key: {e}", fg=typer.colors.RED, err=True
-        )
-        raise typer.Exit(code=1) from e
-
+    # Sign FAB
     signature, signed_at = _sign_fab(fab_bytes, private_key)
 
     # Submit review
@@ -219,7 +208,7 @@ def _sign_fab(
 ) -> tuple[bytes, int]:
     """Sign the given FAB hash bytes."""
     # Get current timestamp
-    timestamp = int(time.time())
+    timestamp = int(now().timestamp())
     message_to_sign = create_message_to_sign(
         hashlib.sha256(fab_bytes).digest(),
         timestamp,
@@ -228,7 +217,7 @@ def _sign_fab(
 
 
 def _submit_review(
-    app_id: str, app_version: str, signature: bytes, signed_at: int, token: str
+    app_id: str, app_version: str, signature: bytes, signed_at: int, token: str | None
 ) -> None:
     """Submit review to Flower Platform API."""
     signature_b64 = base64.urlsafe_b64encode(signature).rstrip(b"=").decode("ascii")
