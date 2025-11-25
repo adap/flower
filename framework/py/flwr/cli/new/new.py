@@ -27,13 +27,12 @@ import requests
 import typer
 
 from flwr.supercore.constant import (
-    APP_ID_PATTERN,
-    APP_VERSION_PATTERN,
     PLATFORM_API_URL,
 )
 
 from ..utils import (
     is_valid_project_name,
+    parse_app_spec,
     prompt_options,
     prompt_text,
     request_download_link,
@@ -197,26 +196,9 @@ def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
 
 def download_remote_app_via_api(app_spec: str) -> None:
     """Download App from Platform API."""
-    # Extract app version info
-    if "==" in app_spec:
-        app_id, app_version = app_spec.split("==")
-
-        # Validate app version format
-        if not re.match(APP_VERSION_PATTERN, app_version):
-            raise typer.BadParameter(
-                "Invalid app version. Expected format: x.x.x (digits only)."
-            )
-    else:
-        app_id = app_spec
-        app_version = None
-
-    # Validate app_id format
-    m = re.match(APP_ID_PATTERN, app_id)
-    if not m:
-        raise typer.BadParameter(
-            "Invalid remote app ID. Expected format: '@account_name/app_name'."
-        )
-    app_name = m.group("app")
+    # Validate app version and ID format
+    app_id, app_version = parse_app_spec(app_spec)
+    app_name = app_id.split("/")[1]
 
     project_dir = Path.cwd() / app_name
     if project_dir.exists():
