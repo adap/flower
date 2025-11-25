@@ -84,7 +84,8 @@ def publish(
 
     # Load the authentication plugin
     auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
-    if not isinstance(auth_plugin, OidcCliPlugin):
+    auth_plugin.load_tokens()
+    if not isinstance(auth_plugin, OidcCliPlugin) or not auth_plugin.access_token:
         typer.secho(
             "❌ Please log in before publishing app.",
             fg=typer.colors.RED,
@@ -93,7 +94,6 @@ def publish(
         raise typer.Exit(code=1)
 
     # Load token from the plugin
-    auth_plugin.load_tokens()
     token = auth_plugin.access_token
 
     # Collect & validate app files
@@ -272,7 +272,7 @@ def _build_multipart_files_param(
 
 def _post_files(
     files_param: list[tuple[str, tuple[str, IO[bytes], str]]],
-    token: str | None,
+    token: str,
 ) -> Response:
     """POST multipart with one part per file."""
     url = f"{PLATFORM_API_URL}/hub/apps/publish"
