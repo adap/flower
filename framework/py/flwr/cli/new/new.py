@@ -26,9 +26,7 @@ from typing import Annotated
 import requests
 import typer
 
-from flwr.supercore.constant import (
-    PLATFORM_API_URL,
-)
+from flwr.supercore.constant import PLATFORM_API_URL
 
 from ..utils import (
     is_valid_project_name,
