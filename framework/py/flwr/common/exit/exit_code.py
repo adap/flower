@@ -38,6 +38,7 @@ class ExitCode:
     SERVERAPP_STRATEGY_PRECONDITION_UNMET = 200
     SERVERAPP_EXCEPTION = 201
     SERVERAPP_STRATEGY_AGGREGATION_ERROR = 202
+    SERVERAPP_RUN_START_REJECTED = 203
 
     # SuperNode-specific exit codes (300-399)
     SUPERNODE_REST_ADDRESS_INVALID = 300
@@ -101,6 +102,11 @@ EXIT_CODE_HELP = {
     ExitCode.SERVERAPP_STRATEGY_AGGREGATION_ERROR: (
         "The strategy encountered an error during aggregation. Please check the logs "
         "for more details."
+    ),
+    ExitCode.SERVERAPP_RUN_START_REJECTED: (
+        "The SuperLink rejected the request to start the run. This may occur if the "
+        "run has been stopped, the run ID or FAB is invalid, or the run failed to "
+        "start within the allowed time."
     ),
     # SuperNode-specific exit codes (300-399)
     ExitCode.SUPERNODE_REST_ADDRESS_INVALID: (
