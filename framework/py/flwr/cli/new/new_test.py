@@ -156,15 +156,18 @@ def test_new_incorrect_name(tmp_path: str) -> None:
 @pytest.mark.parametrize(
     "value",
     [
-        "user/app==1.2.3",  # missing '@'
-        "@accountapp==1.2.3",  # missing slash
-        "@account/app==1.2",  # bad version
-        "@account/app==1.2.3.4",  # bad version
+        "user/app==1.2.3",       # missing '@'
+        "@accountapp==1.2.3",    # missing slash
+        "@account/app==1.2",     # bad version
+        "@account/app==1.2.3.4", # bad version
         "@account*/app==1.2.3",  # bad user id chars
         "@account/app*==1.2.3",  # bad app id chars
     ],
 )
 def test_download_remote_app_via_api_rejects_invalid_formats(value: str) -> None:
-    """For an invalid string, the function should fail fast with BadParameter."""
-    with pytest.raises(typer.BadParameter):
+    """For an invalid string, the function should fail fast with typer.Exit(code=1)."""
+    with pytest.raises(typer.Exit) as exc:
         download_remote_app_via_api(value)
+
+    # Ensure we specifically exited with code 1
+    assert exc.value.exit_code == 1
