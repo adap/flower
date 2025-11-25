@@ -89,7 +89,7 @@ def review(
         federation, config, federation_config_overrides
     )
 
-    # Load the authentication plugin (This is also shared util for loading auth plugin)
+    # Load the authentication plugin
     auth_plugin = load_cli_auth_plugin(app_dir_login, federation, federation_config)
     if not isinstance(auth_plugin, OidcCliPlugin):
         typer.secho(
