@@ -82,11 +82,11 @@ def publish(
         federation, config, federation_config_overrides
     )
 
-    # Load the authentication plugin (This is also shared util for loading auth plugin)
+    # Load the authentication plugin
     auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
     if not isinstance(auth_plugin, OidcCliPlugin):
         typer.secho(
-            "❌ Please log in before reviewing app.",
+            "❌ Please log in before publishing app.",
             fg=typer.colors.RED,
             err=True,
         )
