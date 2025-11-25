@@ -91,7 +91,8 @@ def review(
 
     # Load the authentication plugin
     auth_plugin = load_cli_auth_plugin(app_dir_login, federation, federation_config)
-    if not isinstance(auth_plugin, OidcCliPlugin):
+    auth_plugin.load_tokens()
+    if not isinstance(auth_plugin, OidcCliPlugin) or not auth_plugin.access_token:
         typer.secho(
             "❌ Please log in before reviewing app.",
             fg=typer.colors.RED,
@@ -100,7 +101,6 @@ def review(
         raise typer.Exit(code=1)
 
     # Load token from the plugin
-    auth_plugin.load_tokens()
     token = auth_plugin.access_token
 
     # Validate app version and ID format
@@ -217,7 +217,7 @@ def _sign_fab(
 
 
 def _submit_review(
-    app_id: str, app_version: str, signature: bytes, signed_at: int, token: str | None
+    app_id: str, app_version: str, signature: bytes, signed_at: int, token: str
 ) -> None:
     """Submit review to Flower Platform API."""
     signature_b64 = base64.urlsafe_b64encode(signature).rstrip(b"=").decode("ascii")
