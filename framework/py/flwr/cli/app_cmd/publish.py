@@ -47,6 +47,7 @@ from ..constant import FEDERATION_CONFIG_HELP_MESSAGE
 from ..utils import build_pathspec, load_cli_auth_plugin, load_gitignore_patterns
 
 
+# pylint: disable=too-many-locals
 def publish(
     app: Annotated[
         Path,
