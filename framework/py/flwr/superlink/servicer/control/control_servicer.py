@@ -693,8 +693,19 @@ def _request_download_link(
         )
 
     if resp.status_code == 404:
-        available_app_versions = resp.json()["detail"]["available_app_versions"]
-        available_versions_str = ", ".join(map(str, available_app_versions))
+        # Try to parse JSON safely
+        try:
+            payload = resp.json()
+        except json.JSONDecodeError:
+            payload = {}
+        available_app_versions = (
+            payload.get("detail", {}).get("available_app_versions") or []
+        )
+        available_versions_str = (
+            ", ".join(map(str, available_app_versions))
+            if available_app_versions
+            else "none"
+        )
         context.abort(
             grpc.StatusCode.NOT_FOUND,
             f"{app_id} not found in Platform API. "
