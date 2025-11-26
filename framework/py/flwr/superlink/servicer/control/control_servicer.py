@@ -704,7 +704,7 @@ def _request_download_link(
         available_versions_str = (
             ", ".join(map(str, available_app_versions))
             if available_app_versions
-            else "none"
+            else "None"
         )
         context.abort(
             grpc.StatusCode.NOT_FOUND,

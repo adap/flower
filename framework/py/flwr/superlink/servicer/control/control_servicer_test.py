@@ -495,6 +495,7 @@ def test_request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) ->
     """Single table-driven test covering all major outcomes."""
     ctx: MagicMock = _make_dummy_context()
     app_id: str = "@user/app"
+    app_version: str | None = "1.0.0"
 
     # Table of scenarios
     scenarios: list[dict[str, Any]] = [
@@ -553,7 +554,7 @@ def test_request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) ->
     class _FakeResp:
         ok: bool
         status_code: int
-        _json: dict[str, Any] | None
+        _json: dict[str, Any]
         text: str
 
         def __init__(
@@ -565,10 +566,11 @@ def test_request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) ->
         ) -> None:
             self.ok = ok
             self.status_code = status
-            self._json = json_data
+            # Default to empty dict if no JSON payload is given
+            self._json = json_data or {}
             self.text = text
 
-        def json(self) -> dict[str, Any] | None:
+        def json(self) -> dict[str, Any]:
             """Return JSON data."""
             return self._json
 
@@ -599,7 +601,7 @@ def test_request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) ->
         current_case["data"] = case
         if "raises" in case:
             with pytest.raises(RuntimeError) as exc:
-                _ = _request_download_link(app_id, None, ctx)
+                _ = _request_download_link(app_id, app_version, ctx)
             msg: str = str(exc.value)
             assert case["raises"] in msg
             if case["name"] == "http_404_not_found":
@@ -607,7 +609,7 @@ def test_request_download_link_all_scenarios(monkeypatch: pytest.MonkeyPatch) ->
         else:
             # Expect a (fab_url, verifications) tuple
             result2: tuple[str, list[dict[str, str]] | None] = _request_download_link(
-                app_id, None, ctx
+                app_id, app_version, ctx
             )
             assert case["assert"](result2), f"Assertion failed for {case['name']}"
 
