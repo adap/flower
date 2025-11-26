@@ -18,7 +18,6 @@
 import hashlib
 import io
 import json
-import re
 import subprocess
 from pathlib import Path
 from typing import Annotated, Any, cast
@@ -46,10 +45,15 @@ from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_
 from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.supercore.constant import APP_ID_PATTERN, NOOP_FEDERATION
+from flwr.supercore.constant import NOOP_FEDERATION
 
 from ..log import start_stream
-from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
+from ..utils import (
+    flwr_cli_grpc_exc_handler,
+    init_channel,
+    load_cli_auth_plugin,
+    parse_app_spec,
+)
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -104,14 +108,12 @@ def run(
             redirect_output(captured_output)
 
         # Determine if app is remote
-        app_id = None
+        app_spec = None
         if (app_str := str(app)).startswith("@"):
-            if not re.match(APP_ID_PATTERN, app_str):
-                raise typer.BadParameter(
-                    "Invalid remote app ID. Expected format: '@account_name/app_name'."
-                )
-            app_id = app_str
-        is_remote_app = app_id is not None
+            # Validate app version and ID format
+            _ = parse_app_spec(app_str)
+            app_spec = app_str
+        is_remote_app = app_spec is not None
 
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
@@ -135,7 +137,7 @@ def run(
                 run_config_overrides,
                 stream,
                 output_format,
-                app_id,
+                app_spec,
             )
         else:
             _run_without_control_api(
@@ -166,10 +168,10 @@ def _run_with_control_api(
     config_overrides: list[str] | None,
     stream: bool,
     output_format: str,
-    app_id: str | None,
+    app_spec: str | None,
 ) -> None:
     channel = None
-    is_remote_app = app_id is not None
+    is_remote_app = app_spec is not None
     try:
         auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
         channel = init_channel(app, federation_config, auth_plugin)
@@ -199,7 +201,7 @@ def _run_with_control_api(
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
             federation=real_federation,
             federation_options=config_record_to_proto(c_record),
-            app_id=app_id or "",
+            app_spec=app_spec or "",
         )
         with flwr_cli_grpc_exc_handler():
             res = stub.StartRun(req)
