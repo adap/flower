@@ -701,7 +701,7 @@ def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
 
     Raises
     ------
-    typer.Exit(code=1)
+    typer.Exit
         If the app specification format is invalid.
     """
     if "==" in app_spec:
