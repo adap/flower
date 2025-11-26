@@ -266,7 +266,7 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         log(ERROR, "Failed to start run.")
         exit_code = ExitCode.SERVERAPP_RUN_START_REJECTED
 
-    except Exception as ex:  # pylint: disable=broad-exception-caught
+    except (Exception, BaseException) as ex:  # pylint: disable=broad-exception-caught
         exc_entity = "ServerApp"
         log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
         run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
