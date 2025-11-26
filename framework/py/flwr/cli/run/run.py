@@ -111,7 +111,7 @@ def run(
         app_spec = None
         if (app_str := str(app)).startswith("@"):
             # Validate app version and ID format
-            parse_app_spec(app_str)
+            _ = parse_app_spec(app_str)
             app_spec = app_str
         is_remote_app = app_spec is not None
 
