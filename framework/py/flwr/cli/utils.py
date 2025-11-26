@@ -557,7 +557,7 @@ def request_download_link(
 
     Raises
     ------
-    typer.BadParameter
+    typer.Exit
         If connection fails, app not found, or API request fails.
     """
     headers = {
@@ -572,19 +572,38 @@ def request_download_link(
     try:
         resp = requests.post(in_url, headers=headers, data=json.dumps(body), timeout=20)
     except requests.RequestException as e:
-        raise typer.BadParameter(f"Unable to connect to Platform API: {e}") from e
+        typer.secho(
+            f"Unable to connect to Platform API: {e}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from e
 
     if resp.status_code == 404:
-        raise typer.BadParameter(f"'{app_id}' not found in Platform API")
-    if not resp.ok:
-        raise typer.BadParameter(
-            f"Platform API request failed with "
-            f"status {resp.status_code}. Details: {resp.text}"
+        typer.secho(
+            f"'{app_id}' not found in Platform API",
+            fg=typer.colors.RED,
+            err=True,
         )
+        raise typer.Exit(code=1)
+
+    if not resp.ok:
+        typer.secho(
+            f"Platform API request failed with "
+            f"status {resp.status_code}. Details: {resp.text}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
 
     data = resp.json()
     if out_url not in data:
-        raise typer.BadParameter("Invalid response from Platform API")
+        typer.secho(
+            "Invalid response from Platform API",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
     return str(data[out_url])
 
 
