@@ -201,7 +201,7 @@ def _run_with_control_api(
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
             federation=real_federation,
             federation_options=config_record_to_proto(c_record),
-            app_id=app_spec or "",
+            app_spec=app_spec or "",
         )
         with flwr_cli_grpc_exc_handler():
             res = stub.StartRun(req)
