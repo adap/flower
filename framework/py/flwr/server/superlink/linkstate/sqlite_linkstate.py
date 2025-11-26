@@ -18,7 +18,6 @@
 # pylint: disable=too-many-lines
 
 import json
-import secrets
 import sqlite3
 from collections.abc import Sequence
 from logging import ERROR, WARNING
@@ -26,7 +25,6 @@ from typing import Any, cast
 
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
-    FLWR_APP_TOKEN_LENGTH,
     HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
@@ -51,7 +49,7 @@ from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 # pylint: enable=E0611
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.constant import NodeStatus
-from flwr.supercore.sqlite_mixin import SqliteMixin
+from flwr.supercore.corestate.sqlite_corestate import SqliteCoreState
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 from flwr.superlink.federation import FederationManager
 
@@ -182,15 +180,8 @@ CREATE TABLE IF NOT EXISTS message_res(
 );
 """
 
-SQL_CREATE_TABLE_TOKEN_STORE = """
-CREATE TABLE IF NOT EXISTS token_store (
-    run_id                  INTEGER PRIMARY KEY,
-    token                   TEXT UNIQUE NOT NULL
-);
-"""
 
-
-class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
+class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
     """SQLite-based LinkState implementation."""
 
     def __init__(
@@ -210,7 +201,6 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             SQL_CREATE_TABLE_MESSAGE_RES,
             SQL_CREATE_TABLE_NODE,
             SQL_CREATE_TABLE_PUBLIC_KEY,
-            SQL_CREATE_TABLE_TOKEN_STORE,
             SQL_CREATE_INDEX_ONLINE_UNTIL,
             SQL_CREATE_INDEX_OWNER_AID,
             SQL_CREATE_INDEX_NODE_STATUS,
@@ -1310,41 +1300,6 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 return None
 
         return rows[0]
-
-    def create_token(self, run_id: int) -> str | None:
-        """Create a token for the given run ID."""
-        token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
-        query = "INSERT INTO token_store (run_id, token) VALUES (:run_id, :token);"
-        data = {"run_id": uint64_to_int64(run_id), "token": token}
-        try:
-            self.query(query, data)
-        except sqlite3.IntegrityError:
-            return None  # Token already created for this run ID
-        return token
-
-    def verify_token(self, run_id: int, token: str) -> bool:
-        """Verify a token for the given run ID."""
-        query = "SELECT token FROM token_store WHERE run_id = :run_id;"
-        data = {"run_id": uint64_to_int64(run_id)}
-        rows = self.query(query, data)
-        if not rows:
-            return False
-        return cast(str, rows[0]["token"]) == token
-
-    def delete_token(self, run_id: int) -> None:
-        """Delete the token for the given run ID."""
-        query = "DELETE FROM token_store WHERE run_id = :run_id;"
-        data = {"run_id": uint64_to_int64(run_id)}
-        self.query(query, data)
-
-    def get_run_id_by_token(self, token: str) -> int | None:
-        """Get the run ID associated with a given token."""
-        query = "SELECT run_id FROM token_store WHERE token = :token;"
-        data = {"token": token}
-        rows = self.query(query, data)
-        if not rows:
-            return None
-        return int64_to_uint64(rows[0]["run_id"])
 
 
 def message_to_dict(message: Message) -> dict[str, Any]:

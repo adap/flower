@@ -15,14 +15,13 @@
 """In-memory NodeState implementation."""
 
 
-import secrets
 from collections.abc import Sequence
 from dataclasses import dataclass
 from threading import Lock
 
 from flwr.common import Context, Message
-from flwr.common.constant import FLWR_APP_TOKEN_LENGTH
 from flwr.common.typing import Run
+from flwr.supercore.corestate.in_memory_corestate import InMemoryCoreState
 
 from .nodestate import NodeState
 
@@ -35,10 +34,11 @@ class MessageEntry:
     is_retrieved: bool = False
 
 
-class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attributes
+class InMemoryNodeState(NodeState, InMemoryCoreState):  # pylint: disable=too-many-instance-attributes
     """In-memory NodeState implementation."""
 
     def __init__(self) -> None:
+        super().__init__()
         # Store node_id
         self.node_id: int | None = None
         # Store Object ID to MessageEntry mapping
@@ -50,10 +50,6 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
         # Store run ID to Context mapping
         self.ctx_store: dict[int, Context] = {}
         self.lock_ctx_store = Lock()
-        # Store run ID to token mapping and token to run ID mapping
-        self.token_store: dict[int, str] = {}
-        self.token_to_run_id: dict[str, int] = {}
-        self.lock_token_store = Lock()
 
     def set_node_id(self, node_id: int | None) -> None:
         """Set the node ID."""
@@ -169,30 +165,3 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
         with self.lock_token_store:
             ret -= set(self.token_store.keys())
             return list(ret)
-
-    def create_token(self, run_id: int) -> str | None:
-        """Create a token for the given run ID."""
-        token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
-        with self.lock_token_store:
-            if run_id in self.token_store:
-                return None  # Token already created for this run ID
-            self.token_store[run_id] = token
-            self.token_to_run_id[token] = run_id
-        return token
-
-    def verify_token(self, run_id: int, token: str) -> bool:
-        """Verify a token for the given run ID."""
-        with self.lock_token_store:
-            return self.token_store.get(run_id) == token
-
-    def delete_token(self, run_id: int) -> None:
-        """Delete the token for the given run ID."""
-        with self.lock_token_store:
-            token = self.token_store.pop(run_id, None)
-            if token is not None:
-                self.token_to_run_id.pop(token, None)
-
-    def get_run_id_by_token(self, token: str) -> int | None:
-        """Get the run ID associated with a given token."""
-        with self.lock_token_store:
-            return self.token_to_run_id.get(token)

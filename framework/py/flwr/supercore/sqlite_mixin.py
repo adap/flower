@@ -69,6 +69,19 @@ class SqliteMixin(ABC):
                 )
         """
 
+    def get_sql_statements(self) -> tuple[str, ...]:
+        """Return SQL statements for this class.
+
+        Subclasses can override this to provide their SQL CREATE statements.
+        The base implementation returns an empty tuple.
+
+        Returns
+        -------
+        tuple[str, ...]
+            SQL CREATE TABLE/INDEX statements for this class.
+        """
+        return ()
+
     def _ensure_initialized(
         self,
         *create_statements: str,
@@ -77,7 +90,8 @@ class SqliteMixin(ABC):
         """Connect to the DB, enable FK support, and create tables if needed.
 
         Subclasses should call this with their own CREATE TABLE/INDEX statements in
-        their `.initialize()` methods.
+        their `.initialize()` methods. This method will automatically collect and
+        include SQL statements from parent classes that define `get_sql_statements()`.
 
         Parameters
         ----------
@@ -104,9 +118,20 @@ class SqliteMixin(ABC):
         if log_queries:
             self._conn.set_trace_callback(lambda q: log(DEBUG, q))
 
+        # Collect SQL statements from inheritance hierarchy
+        inherited_sql: list[str] = []
+        for cls in type(self).__mro__:
+            if hasattr(cls, 'get_sql_statements') and cls is not SqliteMixin:
+                # Get SQL from this class in the MRO
+                sql = cls.get_sql_statements(self)
+                if sql:
+                    # Prepend to maintain parent-before-child order
+                    inherited_sql = list(sql) + inherited_sql
+
         # Create tables and indexes
         cur = self._conn.cursor()
-        for sql in create_statements:
+        # First execute inherited SQL statements, then the provided ones
+        for sql in inherited_sql + list(create_statements):
             cur.execute(sql)
         res = cur.execute("SELECT name FROM sqlite_schema;")
         return res.fetchall()
