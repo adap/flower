@@ -126,7 +126,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         ffs = self.ffs_factory.ffs()
 
         verification_dict: dict[str, str] = {}
-        if request.app_id.startswith("@"):
+        if request.app_spec.startswith("@"):
             if self.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
                 log(
                     ERROR,
@@ -135,7 +135,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 return StartRunResponse()
 
             # Parse app specification
-            app_id, app_version = _parse_app_spec(request.app_id)
+            app_id, app_version = _parse_app_spec(request.app_spec)
 
             # Validate app version format
             if app_version:
