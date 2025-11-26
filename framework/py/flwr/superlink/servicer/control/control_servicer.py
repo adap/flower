@@ -693,9 +693,12 @@ def _request_download_link(
         )
 
     if resp.status_code == 404:
+        available_app_versions = resp.json()["detail"]["available_app_versions"]
+        available_versions_str = ", ".join(map(str, available_app_versions))
         context.abort(
             grpc.StatusCode.NOT_FOUND,
-            f"'{app_id}' not found in Flower platform API",
+            f"{app_id} not found in Platform API. "
+            f"Available app versions: {available_versions_str}",
         )
     if not resp.ok:
         context.abort(
