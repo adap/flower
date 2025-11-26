@@ -116,6 +116,9 @@ class StateTest(CoreStateTest):
             ({"run_ids": [2, 3]}, {"msg3", "msg4"}),
             ({"is_reply": True}, {"msg1", "msg4"}),
             ({"is_reply": True, "limit": 1}, {"msg1", "msg4"}),
+            ({"is_retrieved": False}, {"msg1", "msg2", "msg3", "msg4"}),
+            ({"is_retrieved": True}, set()),
+            ({"run_ids": [1], "is_retrieved": False}, {"msg1", "msg2"}),
         ]
     )
     def test_get_message_with_filters(
@@ -158,6 +161,33 @@ class StateTest(CoreStateTest):
         msg_ids = {msg.metadata.message_id for msg in msgs}
         self.assertNotIn("msg1", msg_ids)
         self.assertIn("msg2", msg_ids)
+
+    def test_get_messages_is_retrieved_filter(self) -> None:
+        """Test retrieving messages based on is_retrieved status."""
+        # Prepare: store messages
+        self.state.store_message(make_dummy_message(1, False, "msg1"))
+        self.state.store_message(make_dummy_message(2, False, "msg2"))
+        self.state.store_message(make_dummy_message(3, False, "msg3"))
+
+        # Execute: retrieve msg1 and msg2
+        result1 = self.state.get_messages(run_ids=[1, 2], is_retrieved=False)
+        self.assertEqual(len(result1), 2)
+
+        # Assert: can retrieve already retrieved messages with is_retrieved=True
+        result2 = self.state.get_messages(is_retrieved=True)
+        result2_ids = {msg.metadata.message_id for msg in result2}
+        self.assertEqual(result2_ids, {"msg1", "msg2"})
+
+        # Assert: msg3 is still not retrieved
+        result3 = self.state.get_messages(is_retrieved=False)
+        result3_ids = {msg.metadata.message_id for msg in result3}
+        self.assertEqual(result3_ids, {"msg3"})
+
+        # Assert: can retrieve all messages with is_retrieved=None
+        result4 = self.state.get_messages(is_retrieved=None)
+        result4_ids = {msg.metadata.message_id for msg in result4}
+        # All three messages should be returned
+        self.assertEqual(result4_ids, {"msg1", "msg2", "msg3"})
 
     def test_get_run_ids_with_pending_messages(self) -> None:
         """Test retrieving run IDs with pending messages."""

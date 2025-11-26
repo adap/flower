@@ -79,6 +79,7 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
         *,
         run_ids: Sequence[int] | None = None,
         is_reply: bool | None = None,
+        is_retrieved: bool | None = False,
         limit: int | None = None,
     ) -> Sequence[Message]:
         """Retrieve messages based on the specified filters."""
@@ -90,9 +91,10 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
                 entry = self.msg_store[object_id]
                 message = entry.message
 
-                # Skip messages that have already been retrieved
-                if entry.is_retrieved:
-                    continue
+                # Filter by retrieved status if specified
+                if is_retrieved is not None:
+                    if entry.is_retrieved != is_retrieved:
+                        continue
 
                 # Skip messages whose run_id doesn't match the filter
                 if run_ids is not None:
