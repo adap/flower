@@ -15,7 +15,7 @@
 """Flower application exceptions."""
 
 
-class AppExitException(BaseException):
+class AppExitException(Exception):
     """Base exception for all application-level errors in ServerApp and ClientApp.
 
     When raised, the process will exit and report a telemetry event with the associated
