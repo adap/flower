@@ -693,9 +693,9 @@ def _request_download_link(
         )
 
     if resp.status_code == 404:
-        payload = resp.json()["detail"]
+        payload = resp.json().get("detail", {})
         if isinstance(payload, dict):
-            available_app_versions = payload["available_app_versions"]
+            available_app_versions = payload.get("available_app_versions", [])
             available_versions_str = (
                 ", ".join(map(str, available_app_versions))
                 if available_app_versions
