@@ -15,7 +15,15 @@
 """Tests all CoreState implementations have to conform to."""
 
 
+import time
 import unittest
+from datetime import timedelta
+from unittest.mock import patch
+
+from flwr.common import now
+from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
+from flwr.supercore.corestate.in_memory_corestate import InMemoryCoreState
+from flwr.supercore.corestate.sqlite_corestate import SqliteCoreState
 
 from . import CoreState
 
@@ -77,3 +85,118 @@ class StateTest(unittest.TestCase):
         # Assert: should return the correct run ID
         self.assertEqual(retrieved_run_id1, run_id)
         self.assertIsNone(retrieved_run_id2)
+
+    def test_acknowledge_app_heartbeat_success(self) -> None:
+        """Test successfully acknowledging an app heartbeat."""
+        # Prepare
+        state = self.state_factory()
+        run_id = 42
+        token = state.create_token(run_id)
+        assert token is not None
+
+        # Execute: acknowledge heartbeat
+        result = state.acknowledge_app_heartbeat(token)
+
+        # Assert: should return True
+        self.assertTrue(result)
+
+        # Assert: token should still be valid
+        self.assertTrue(state.verify_token(run_id, token))
+
+    def test_acknowledge_app_heartbeat_nonexistent_token(self) -> None:
+        """Test acknowledging heartbeat with nonexistent token."""
+        # Prepare
+        state = self.state_factory()
+
+        # Execute: acknowledge heartbeat with invalid token
+        result = state.acknowledge_app_heartbeat("nonexistent_token")
+
+        # Assert: should return False
+        self.assertFalse(result)
+
+    def test_acknowledge_app_heartbeat_extends_expiration(self) -> None:
+        """Test that acknowledging heartbeat extends token expiration."""
+        # Prepare
+        state = self.state_factory()
+        run_id = 42
+        token = state.create_token(run_id)
+        assert token is not None
+
+        # Mock time to advance past initial expiration but before extended expiration
+        with patch("flwr.common.now") as mock_now:
+            # Set initial time
+            base_time = time.time()
+            mock_now.return_value.timestamp.return_value = base_time
+
+            # Acknowledge heartbeat (should extend expiration)
+            result = state.acknowledge_app_heartbeat(token)
+            self.assertTrue(result)
+
+            # Advance time to just after initial expiration
+            # (HEARTBEAT_DEFAULT_INTERVAL) but before extended expiration
+            # (HEARTBEAT_PATIENCE * HEARTBEAT_DEFAULT_INTERVAL)
+            mock_now.return_value.timestamp.return_value = (
+                base_time + HEARTBEAT_DEFAULT_INTERVAL + 1
+            )
+
+            # Token should still be valid because we extended it
+            self.assertTrue(state.verify_token(run_id, token))
+
+    def test_acknowledge_app_heartbeat_extends_expiration_and_cleanup(self) -> None:
+        """Test that acknowledging app heartbeat extends token expiration and cleanup is
+        performed when expired."""
+        # Prepare
+        state = self.state_factory()
+        created_at = now()
+        run_id1 = 42
+        run_id2 = 123
+        token1 = state.create_token(run_id1)
+        token2 = state.create_token(run_id2)
+        assert token1 is not None and token2 is not None
+
+        # Execute: send heartbeat for token2 to keep it alive
+        state.acknowledge_app_heartbeat(token2)
+
+        # Mock datetime to simulate time passage
+        # token1 should expire in HEARTBEAT_DEFAULT_INTERVAL
+        # token2 should expire in HEARTBEAT_PATIENCE * HEARTBEAT_DEFAULT_INTERVAL
+        with patch("datetime.datetime") as mock_dt:
+            # Advance time just before token1 expiration
+            mock_dt.now.return_value = created_at + timedelta(
+                seconds=HEARTBEAT_DEFAULT_INTERVAL - 1
+            )
+
+            # Verify tokens are valid
+            self.assertTrue(state.verify_token(run_id1, token1))
+            self.assertTrue(state.verify_token(run_id2, token2))
+
+            # Advance time past token1 expiration
+            mock_dt.now.return_value = created_at + timedelta(
+                seconds=HEARTBEAT_DEFAULT_INTERVAL + 1
+            )
+
+            # Assert: token1 should be cleaned up, token2 should still be valid
+            self.assertFalse(state.verify_token(run_id1, token1))
+            self.assertTrue(state.verify_token(run_id2, token2))
+
+
+class InMemoryCoreStateTest(StateTest):
+    """Test InMemoryCoreState implementation."""
+
+    __test__ = True
+
+    def state_factory(self) -> CoreState:
+        """Provide InMemoryCoreState implementation to test."""
+        return InMemoryCoreState()
+
+
+class SqliteCoreStateTest(StateTest):
+    """Test SqliteCoreState implementation."""
+
+    __test__ = True
+
+    def state_factory(self) -> CoreState:
+        """Provide SqliteCoreState implementation to test."""
+        state = SqliteCoreState(database_path=":memory:")
+        state.initialize()
+        return state
