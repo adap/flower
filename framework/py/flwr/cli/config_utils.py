@@ -147,6 +147,7 @@ def process_loaded_project_config(
             + "\n".join([f"- {line}" for line in errors]),
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -199,6 +200,7 @@ def validate_federation_in_project_config(
             "`options.num-supernodes` value).",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -214,6 +216,7 @@ def validate_federation_in_project_config(
             + "\n".join(available_feds),
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -259,6 +262,7 @@ def validate_certificate_in_federation_config(
                 "is set to `True`.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1)
 
@@ -270,6 +274,7 @@ def validate_certificate_in_federation_config(
                 f"❌ Failed to read certificate file `{root_certificates}`: {e}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1) from e
     else:
@@ -299,6 +304,7 @@ def exit_if_no_address(federation_config: dict[str, Any], cmd: str) -> None:
             "correct SuperLink (Control API) address is provided in `pyproject.toml`.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -333,5 +339,6 @@ def get_insecure_flag(federation_config: dict[str, Any]) -> bool:
         "(`insecure = true` or `insecure = false`)",
         fg=typer.colors.RED,
         bold=True,
+        err=True,
     )
     raise typer.Exit(code=1)

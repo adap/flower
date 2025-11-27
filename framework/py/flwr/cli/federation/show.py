@@ -111,6 +111,7 @@ def show(  # pylint: disable=R0914, R0913, R0917
                 f"{err}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
     finally:
         if suppress_output:

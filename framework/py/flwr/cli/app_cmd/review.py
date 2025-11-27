@@ -148,7 +148,7 @@ def review(
                 "Please specify the path of Ed25519 OpenSSH private key for signing"
             )
         except typer.Abort as e:
-            typer.secho("Aborted by user.", fg=typer.colors.YELLOW)
+            typer.secho("Aborted by user.", fg=typer.colors.YELLOW, err=True)
             raise typer.Exit(code=130) from e
 
         key_path = Path(key_path_str).expanduser().resolve()
