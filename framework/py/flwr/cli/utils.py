@@ -570,7 +570,7 @@ def request_download_link(
 
     Raises
     ------
-    typer.BadParameter
+    typer.Exit
         If connection fails, app not found, or API request fails.
     """
     headers = {
@@ -585,19 +585,53 @@ def request_download_link(
     try:
         resp = requests.post(in_url, headers=headers, data=json.dumps(body), timeout=20)
     except requests.RequestException as e:
-        raise typer.BadParameter(f"Unable to connect to Platform API: {e}") from e
+        typer.secho(
+            f"Unable to connect to Platform API: {e}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from e
 
     if resp.status_code == 404:
-        raise typer.BadParameter(f"'{app_id}' not found in Platform API")
+        error_message = resp.json()["detail"]
+        if isinstance(error_message, dict):
+            available_app_versions = error_message["available_app_versions"]
+            available_versions_str = (
+                ", ".join(map(str, available_app_versions))
+                if available_app_versions
+                else "None"
+            )
+            typer.secho(
+                f"{app_id}=={app_version} not found in Platform API. "
+                f"Available app versions for {app_id}: {available_versions_str}",
+                fg=typer.colors.RED,
+                err=True,
+            )
+        else:
+            typer.secho(
+                f"{app_id} not found in Platform API.",
+                fg=typer.colors.RED,
+                err=True,
+            )
+        raise typer.Exit(code=1)
+
     if not resp.ok:
-        raise typer.BadParameter(
+        typer.secho(
             f"Platform API request failed with "
-            f"status {resp.status_code}. Details: {resp.text}"
+            f"status {resp.status_code}. Details: {resp.text}",
+            fg=typer.colors.RED,
+            err=True,
         )
+        raise typer.Exit(code=1)
 
     data = resp.json()
     if out_url not in data:
-        raise typer.BadParameter("Invalid response from Platform API")
+        typer.secho(
+            "Invalid response from Platform API",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
     return str(data[out_url])
 
 
@@ -695,7 +729,7 @@ def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
 
     Raises
     ------
-    typer.Exit(code=1)
+    typer.Exit
         If the app specification format is invalid.
     """
     if "==" in app_spec:
