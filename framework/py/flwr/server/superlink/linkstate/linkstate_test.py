@@ -218,7 +218,7 @@ class StateTest(CoreStateTest):
         run_id = create_dummy_run(state)
         # Transition run status to STARTING or RUNNING
         transition_run_status(state, run_id, num_transitions)
-        state.acknowledge_app_heartbeat(run_id, 2)
+        state.acknowledge_app_heartbeat_deprecated(run_id, 2)
 
         # Execute
         # The run should be marked as failed after HEARTBEAT_PATIENCE * 2s
@@ -1054,8 +1054,8 @@ class StateTest(CoreStateTest):
         transition_run_status(state, run_id1, 2)
         transition_run_status(state, run_id2, 2)
         # Heartbeat from run_id1
-        state.acknowledge_app_heartbeat(run_id1, 30)
-        state.acknowledge_app_heartbeat(run_id2, 2)
+        state.acknowledge_app_heartbeat_deprecated(run_id1, 30)
+        state.acknowledge_app_heartbeat_deprecated(run_id2, 2)
 
         # Execute
         # The run_id1 should be marked as inactive after HEARTBEAT_PATIENCE * 30s,
@@ -1092,7 +1092,9 @@ class StateTest(CoreStateTest):
         state: LinkState = self.state_factory()
 
         # Execute
-        is_successful = state.acknowledge_app_heartbeat(61016, heartbeat_interval=30)
+        is_successful = state.acknowledge_app_heartbeat_deprecated(
+            61016, heartbeat_interval=30
+        )
 
         # Assert
         assert not is_successful

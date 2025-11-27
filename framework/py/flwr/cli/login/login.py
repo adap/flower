@@ -82,6 +82,7 @@ def login(  # pylint: disable=R0914
             "in the federation configuration.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
     # Check if insecure flag is set to `True`
@@ -92,6 +93,7 @@ def login(  # pylint: disable=R0914
             "`true` in the federation configuration.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -127,6 +129,7 @@ def login(  # pylint: disable=R0914
             f"❌ Login failed: {e.message}",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1) from None
 
