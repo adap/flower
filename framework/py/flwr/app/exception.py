@@ -19,7 +19,8 @@ class AppExitException(Exception):
     """Base exception for all application-level errors in ServerApp and ClientApp.
 
     When raised, the process will exit and report a telemetry event with the associated
-    exit code. This is not intended to be caught by user code.
+   When raised (and not suppressed), the process will exit and report a telemetry event with the associated
+   exit code.
     """
 
     # Default exit code — subclasses must override
