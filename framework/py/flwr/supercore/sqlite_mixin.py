@@ -17,7 +17,7 @@
 
 import re
 import sqlite3
-from abc import ABC, abstractmethod
+from abc import ABC
 from collections.abc import Sequence
 from logging import DEBUG, ERROR
 from typing import Any
@@ -41,34 +41,6 @@ class SqliteMixin(ABC):
             raise AttributeError("Database not initialized. Call initialize() first.")
         return self._conn
 
-    @abstractmethod
-    def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
-        """Connect to the DB, enable FK support, and create tables if needed.
-
-        Parameters
-        ----------
-        log_queries : bool
-            Log each query which is executed.
-
-        Returns
-        -------
-        list[tuple[str]]
-            The list of all tables in the DB.
-
-        Examples
-        --------
-        Implement in subclass:
-
-        .. code:: python
-
-            def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
-                return self._ensure_initialized(
-                    SQL_CREATE_TABLE_FOO,
-                    SQL_CREATE_TABLE_BAR,
-                    log_queries=log_queries
-                )
-        """
-
     def get_sql_statements(self) -> tuple[str, ...]:
         """Return SQL statements for this class.
 
@@ -82,21 +54,13 @@ class SqliteMixin(ABC):
         """
         return ()
 
-    def _ensure_initialized(
-        self,
-        *create_statements: str,
-        log_queries: bool = False,
-    ) -> list[tuple[str]]:
+    def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Connect to the DB, enable FK support, and create tables if needed.
 
-        Subclasses should call this with their own CREATE TABLE/INDEX statements in
-        their `.initialize()` methods. This method will automatically collect and
-        include SQL statements from parent classes that define `get_sql_statements()`.
+        This method executes SQL statements returned by `get_sql_statements()`.
 
         Parameters
         ----------
-        create_statements : str
-            SQL statements to create tables and indexes.
         log_queries : bool
             Log each query which is executed.
 
@@ -104,6 +68,28 @@ class SqliteMixin(ABC):
         -------
         list[tuple[str]]
             The list of all tables in the DB.
+
+        Examples
+        --------
+        Override `get_sql_statements()` in your subclass:
+
+        .. code:: python
+
+            def get_sql_statements(self) -> tuple[str, ...]:
+                return (
+                    SQL_CREATE_TABLE_FOO,
+                    SQL_CREATE_TABLE_BAR,
+                )
+
+        To include parent SQL statements, call super():
+
+        .. code:: python
+
+            def get_sql_statements(self) -> tuple[str, ...]:
+                return super().get_sql_statements() + (
+                    SQL_CREATE_TABLE_FOO,
+                    SQL_CREATE_TABLE_BAR,
+                )
         """
         self._conn = sqlite3.connect(self.database_path)
         # Enable Write-Ahead Logging (WAL) for better concurrency
@@ -130,8 +116,7 @@ class SqliteMixin(ABC):
 
         # Create tables and indexes
         cur = self._conn.cursor()
-        # First execute inherited SQL statements, then the provided ones
-        for sql in inherited_sql + list(create_statements):
+        for sql in self.get_sql_statements():
             cur.execute(sql)
         res = cur.execute("SELECT name FROM sqlite_schema;")
         return res.fetchall()
