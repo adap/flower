@@ -753,7 +753,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return True
             return False
 
-    def acknowledge_app_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
+    def acknowledge_app_heartbeat_deprecated(
+        self, run_id: int, heartbeat_interval: float
+    ) -> bool:
         """Acknowledge a heartbeat received from a ServerApp for a given run.
 
         A run with status `"running"` is considered alive as long as it sends heartbeats

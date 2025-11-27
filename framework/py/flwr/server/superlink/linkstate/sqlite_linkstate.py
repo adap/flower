@@ -1180,7 +1180,9 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             self.conn.execute(query, params)
             return True
 
-    def acknowledge_app_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
+    def acknowledge_app_heartbeat_deprecated(
+        self, run_id: int, heartbeat_interval: float
+    ) -> bool:
         """Acknowledge a heartbeat received from a ServerApp for a given run.
 
         A run with status `"running"` is considered alive as long as it sends heartbeats
