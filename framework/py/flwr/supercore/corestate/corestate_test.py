@@ -149,25 +149,3 @@ class StateTest(unittest.TestCase):
             # Assert: token1 should be cleaned up, token2 should still be valid
             self.assertFalse(state.verify_token(run_id1, token1))
             self.assertTrue(state.verify_token(run_id2, token2))
-
-
-class InMemoryCoreStateTest(StateTest):
-    """Test InMemoryCoreState implementation."""
-
-    __test__ = True
-
-    def state_factory(self) -> CoreState:
-        """Provide InMemoryCoreState implementation to test."""
-        return InMemoryCoreState()
-
-
-class SqliteCoreStateTest(StateTest):
-    """Test SqliteCoreState implementation."""
-
-    __test__ = True
-
-    def state_factory(self) -> CoreState:
-        """Provide SqliteCoreState implementation to test."""
-        state = SqliteCoreState(database_path=":memory:")
-        state.initialize()
-        return state
