@@ -26,7 +26,7 @@ import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from queue import Empty, Queue
-from typing import Any
+from typing import Any, cast
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
@@ -445,7 +445,9 @@ def _run_simulation(
 
     if backend_config:
         # Backend config internally operates with `_` not with `-`
-        backend_config = _replace_keys(backend_config, match="-", target="_")
+        backend_config = cast(
+            BackendConfig, _replace_keys(backend_config, match="-", target="_")
+        )
         log(DEBUG, "backend_config: %s", backend_config)
 
     if "init_args" not in backend_config:
