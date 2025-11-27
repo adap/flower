@@ -203,7 +203,7 @@ def log(
     try:
         _log_with_control_api(app, federation, federation_config, run_id, stream)
     except Exception as err:  # pylint: disable=broad-except
-        typer.secho(str(err), fg=typer.colors.RED, bold=True)
+        typer.secho(str(err), fg=typer.colors.RED, bold=True, err=True)
         raise typer.Exit(code=1) from None
 
 

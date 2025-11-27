@@ -249,7 +249,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         )
         if running:
             self._transition_run_status(run_id, 2)
-            self.state.acknowledge_app_heartbeat(run_id, 1e9)
+            self.state.acknowledge_app_heartbeat_deprecated(run_id, 1e9)
         return run_id
 
     def test_successful_get_node_if_running(self) -> None:
