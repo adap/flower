@@ -67,7 +67,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
-from flwr.simulation.run_simulation import _run_simulation
+from flwr.simulation.run_simulation import _run_simulation, _replace_keys
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 from flwr.supercore.app_utils import start_parent_process_monitor
 from flwr.supercore.superexec.plugin import SimulationExecPlugin
@@ -207,6 +207,10 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         if num_supernodes is None:
             raise ValueError("Federation options expects `num-supernodes` to be set.")
         backend_config: BackendConfig = fed_opt.get("backend", {})
+        if backend_config:
+            # Backend config internally operates with `_` not with `-`
+            backend_config = _replace_keys(backend_config, match="-", target="_")
+            log(DEBUG, "backend_config: %s", backend_config)
         verbose: bool = fed_opt.get("verbose", False)
         enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
 
