@@ -193,7 +193,7 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
     def get_sql_statements(self) -> tuple[str, ...]:
         """Return SQL statements for LinkState tables."""
-        return (
+        return super().get_sql_statements() + (
             SQL_CREATE_TABLE_RUN,
             SQL_CREATE_TABLE_LOGS,
             SQL_CREATE_TABLE_CONTEXT,

@@ -34,7 +34,9 @@ class MessageEntry:
     is_retrieved: bool = False
 
 
-class InMemoryNodeState(NodeState, InMemoryCoreState):  # pylint: disable=too-many-instance-attributes
+class InMemoryNodeState(
+    NodeState, InMemoryCoreState
+):  # pylint: disable=too-many-instance-attributes
     """In-memory NodeState implementation."""
 
     def __init__(self) -> None:

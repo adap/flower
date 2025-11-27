@@ -107,7 +107,7 @@ class SqliteMixin(ABC):
         # Collect SQL statements from inheritance hierarchy
         inherited_sql: list[str] = []
         for cls in type(self).__mro__:
-            if hasattr(cls, 'get_sql_statements') and cls is not SqliteMixin:
+            if hasattr(cls, "get_sql_statements") and cls is not SqliteMixin:
                 # Get SQL from this class in the MRO
                 sql = cls.get_sql_statements(self)
                 if sql:
