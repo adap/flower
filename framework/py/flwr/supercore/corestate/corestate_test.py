@@ -21,8 +21,6 @@ from unittest.mock import patch
 
 from flwr.common import now
 from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
-from flwr.supercore.corestate.in_memory_corestate import InMemoryCoreState
-from flwr.supercore.corestate.sqlite_corestate import SqliteCoreState
 
 from . import CoreState
 
