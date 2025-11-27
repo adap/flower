@@ -74,3 +74,7 @@ class SqliteCoreState(CoreState, SqliteMixin):
         if not rows:
             return None
         return int64_to_uint64(rows[0]["run_id"])
+
+    def acknowledge_app_heartbeat(self, token: str) -> bool:
+        """Acknowledge an app heartbeat with the provided token."""
+        raise NotImplementedError
