@@ -200,9 +200,9 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
         federation_manager.linkstate = self
         self._federation_manager = federation_manager
 
-    def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
-        """Connect to the DB, enable FK support, and create tables if needed."""
-        return self._ensure_initialized(
+    def get_sql_statements(self) -> tuple[str, ...]:
+        """Return SQL statements for LinkState tables."""
+        return (
             SQL_CREATE_TABLE_RUN,
             SQL_CREATE_TABLE_LOGS,
             SQL_CREATE_TABLE_CONTEXT,
@@ -214,7 +214,6 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             SQL_CREATE_INDEX_ONLINE_UNTIL,
             SQL_CREATE_INDEX_OWNER_AID,
             SQL_CREATE_INDEX_NODE_STATUS,
-            log_queries=log_queries,
         )
 
     @property
