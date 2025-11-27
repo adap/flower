@@ -104,16 +104,6 @@ class SqliteMixin(ABC):
         if log_queries:
             self._conn.set_trace_callback(lambda q: log(DEBUG, q))
 
-        # Collect SQL statements from inheritance hierarchy
-        inherited_sql: list[str] = []
-        for cls in type(self).__mro__:
-            if hasattr(cls, "get_sql_statements") and cls is not SqliteMixin:
-                # Get SQL from this class in the MRO
-                sql = cls.get_sql_statements(self)
-                if sql:
-                    # Prepend to maintain parent-before-child order
-                    inherited_sql = list(sql) + inherited_sql
-
         # Create tables and indexes
         cur = self._conn.cursor()
         for sql in self.get_sql_statements():
