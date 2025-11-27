@@ -100,12 +100,7 @@ def run_simulation_from_cli() -> None:
     _check_ray_support(args.backend)
 
     # Load JSON config
-    backend_config_dict = json.loads(args.backend_config)
-
-    if backend_config_dict:
-        # Backend config internally operates with `_` not with `-`
-        backend_config_dict = _replace_keys(backend_config_dict, match="-", target="_")
-        log(DEBUG, "backend_config_dict: %s", backend_config_dict)
+    backend_config = json.loads(args.backend_config)
 
     run_id = (
         generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
@@ -160,7 +155,7 @@ def run_simulation_from_cli() -> None:
         client_app_attr=client_app_attr,
         num_supernodes=args.num_supernodes,
         backend_name=args.backend,
-        backend_config=backend_config_dict,
+        backend_config=backend_config,
         app_dir=args.app,
         run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
@@ -447,6 +442,11 @@ def _run_simulation(
     """Launch the Simulation Engine."""
     if backend_config is None:
         backend_config = {}
+
+    if backend_config:
+        # Backend config internally operates with `_` not with `-`
+        backend_config = _replace_keys(backend_config, match="-", target="_")
+        log(DEBUG, "backend_config: %s", backend_config)
 
     if "init_args" not in backend_config:
         backend_config["init_args"] = {}
