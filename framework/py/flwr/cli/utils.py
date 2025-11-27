@@ -269,6 +269,7 @@ def get_account_auth_config_path(root_dir: Path, federation: str) -> Path:
             f"Please check the permissions of `{gitignore_path}` and try again.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1) from err
 
@@ -439,6 +440,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                 " to authenticate and try again.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.UNIMPLEMENTED:
@@ -447,12 +449,14 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "❌ Account authentication is not enabled on this SuperLink.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
             elif e.details() == NO_ARTIFACT_PROVIDER_MESSAGE:  # pylint: disable=E1101
                 typer.secho(
                     "❌ The SuperLink does not support `flwr pull` command.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
             else:
                 typer.secho(
@@ -462,6 +466,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "the CLI and SuperLink are compatible.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
@@ -469,6 +474,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                 "❌ Permission denied.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             # pylint: disable-next=E1101
             typer.secho(e.details(), fg=typer.colors.RED, bold=True)
@@ -479,6 +485,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                 "connection and 'address' in the federation configuration.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.NOT_FOUND:
@@ -487,6 +494,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "❌ Run ID not found.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from None
             if e.details() == NODE_NOT_FOUND_MESSAGE:  # pylint: disable=E1101
@@ -494,6 +502,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "❌ Node ID not found for this account.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.FAILED_PRECONDITION:
@@ -503,6 +512,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "the run is finished. You can check the run status with `flwr ls`.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from None
             if (
@@ -513,6 +523,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "SuperNode.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from None
             if e.details() == PUBLIC_KEY_NOT_VALID:  # pylint: disable=E1101
@@ -521,6 +532,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "NIST EC public key.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from None
 
@@ -529,6 +541,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                 f"❌ {e.details()}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1) from None
         raise
