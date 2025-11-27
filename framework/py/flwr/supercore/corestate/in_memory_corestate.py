@@ -58,3 +58,7 @@ class InMemoryCoreState(CoreState):
         """Get the run ID associated with a given token."""
         with self.lock_token_store:
             return self.token_to_run_id.get(token)
+
+    def acknowledge_app_heartbeat(self, token: str) -> bool:
+        """Acknowledge an app heartbeat with the provided token."""
+        raise NotImplementedError
