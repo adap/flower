@@ -1,4 +1,3 @@
-from datasets import load_dataset
 from flwr.common import Context, Metrics, ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common.logger import log
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
@@ -7,17 +6,17 @@ from flwr.server.strategy import FedAvg
 from flwr.common.crypto.config_cripto import NET, ACCURACY
 from flwr.common import NDArrays, Scalar
 from typing import  OrderedDict
-from typing import Dict, Optional, Tuple
 from collections import OrderedDict
 import torch
-import numpy as np
 from flwr.common import Context, NDArrays, Scalar, parameters_to_ndarrays
 
 from flwr.common.crypto.log_file import log_time
-# Importa le tue utility
+
 from .task import get_model, get_weights, set_weights, test, get_validation_data
 from flwr.common.crypto.config_cripto import NET,EVALUATION_SIDE  # o "resnet18" se preferisci esplicitarlo
 
+from flwr.server.history import History
+from flwr.common.crypto.config_cripto import ACCURACY
 
 
 # ------------------------------
@@ -28,12 +27,6 @@ def weighted_average(metrics):
     examples = [num_examples for num_examples, _ in metrics]
     return {"accuracy": sum(accuracies) / sum(examples)}
 
-
-# ------------------------------
-# STRATEGIA CON VALUTAZIONE SERVER-SIDE
-# ------------------------------
-from flwr.server.history import History
-from flwr.common.crypto.config_cripto import ACCURACY
 
 class FedAvgWithServerEval(FedAvg):
     def __init__(self, **kwargs):
@@ -117,8 +110,6 @@ def server_evaluate(server_round: int, parameters: NDArrays):
     accuracy = correct / total
     print(f"✅ [Round {server_round}] Server-side accuracy: {accuracy:.4f} | loss: {avg_loss:.4f}")
     return avg_loss, {"accuracy": accuracy}
-
-
 
 
 # ------------------------------

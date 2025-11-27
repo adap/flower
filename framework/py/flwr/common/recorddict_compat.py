@@ -70,6 +70,9 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
     parameters : Parameters
         The parameters in the legacy format Parameters.
     """
+
+    tot_decrypto = 0.0
+    start_tot=time.perf_counter()
     proc = psutil.Process(os.getpid())
 
     # Wall-clock start
@@ -77,69 +80,43 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
     # CPU time start
     start_cpu = proc.cpu_times().user + proc.cpu_times().system
 
-    start_tot=time.perf_counter()
+
     parameters = Parameters(tensors=[], tensor_type="")
 
     for key in list(record.keys()):
         if key != EMPTY_TENSOR_KEY:
+
             tensor = record[key].data
+            start_decrypt = time.perf_counter()
             if INTEGRITY_ENABLED:
                 tensor = check_integrity(tensor, INTEGRITY_METHOD)
             if ENCRYPTION_ENABLED:
                 tensor = decrypt(tensor, ENCRYPTION_METHOD)
+            end_decrypt = time.perf_counter()
+            tot_decrypto += (end_decrypt - start_decrypt)
             parameters.tensors.append(tensor)
 
         if not parameters.tensor_type:
-            # Setting from first array in record. Recall the warning in the docstrings
-            # of this function.
             parameters.tensor_type = record[key].stype
 
         if not keep_input:
             del record[key]
-    end_wall = time.perf_counter()
-    end_cpu = proc.cpu_times().user + proc.cpu_times().system
 
-    wall_time = end_wall - start_wall
-    cpu_time = end_cpu - start_cpu
     end_tot = time.perf_counter();
     tot = end_tot - start_tot
-    # log_time(
-    #     f"[{time.strftime('%H:%M:%S')}.{int(time.time()*1e6)%1_000_000:06d}] "
-    #     f"Tempo totale deserializzazione (wall): {wall_time:.5f} s | "
-    #     f"CPU time (decrypt+check): {cpu_time:.5f} s"
-    # )
+    tot_senza_decrypto = tot - tot_decrypto
+    log_time("totale tempo decripto: %.5f s", tot_decrypto)
+    log_time("Tempo totale serializzazione con decrittografia: %.5f s", tot)
+    log_time("Tempo totale serializzazione senza decrittografia: %.5f s", tot_senza_decrypto)
     return parameters
 
 
 def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> ArrayRecord:
 
-    """Convert legacy Parameters into a single ArrayRecord.
+    start_tot_serializzazione = time.perf_counter()
+    tot_crypto = 0.0
 
-    Because there is no concept of names in the legacy Parameters, arbitrary keys will
-    be used when constructing the ArrayRecord. Similarly, the shape and data type
-    won't be recorded in the Array objects.
-
-    Parameters
-    ----------
-    parameters : Parameters
-        Parameters object to be represented as a ArrayRecord.
-    keep_input : bool
-        A boolean indicating whether parameters should be deleted from the input
-        Parameters object (i.e. a list of serialized NumPy arrays) immediately after
-        adding them to the record.
-
-    Returns
-    -------
-    ArrayRecord
-        The ArrayRecord containing the provided parameters.
-    """
-    global encrypted
-    proc = psutil.Process(os.getpid())
-    start_wall = time.perf_counter()
-    start_cpu = proc.cpu_times().user + proc.cpu_times().system
-    start_tot = time.perf_counter()
     tensor_type = parameters.tensor_type
-
     num_arrays = len(parameters.tensors)
     ordered_dict = OrderedDict()
     for idx in range(num_arrays):
@@ -147,13 +124,14 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
             tensor = parameters.tensors[idx]
         else:
             tensor = parameters.tensors.pop(0)
-        #TO-D0
         dataR = tensor
-
+        start_crypto = time.perf_counter()
         if ENCRYPTION_ENABLED:
             dataR = encrypt(dataR, ENCRYPTION_METHOD)
         if INTEGRITY_ENABLED:
             dataR = add_integrity(dataR, INTEGRITY_METHOD)
+        end_crypto = time.perf_counter()
+        tot_crypto += (end_crypto - start_crypto)
         ordered_dict[str(idx)] = Array(
             data=dataR, dtype="", stype=tensor_type, shape=()
         )
@@ -162,18 +140,15 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
         ordered_dict[EMPTY_TENSOR_KEY] = Array(
             data=b"", dtype="", stype=tensor_type, shape=()
         )
-    end_tot = time.perf_counter()
-    tot = end_tot - start_tot
-    end_wall = time.perf_counter()
-    end_cpu = proc.cpu_times().user + proc.cpu_times().system
 
-    wall_time = end_wall - start_wall
-    cpu_time = end_cpu - start_cpu
-    # log_time(
-    #     f"[{time.strftime('%H:%M:%S')}.{int(time.time()*1e6)%1_000_000:06d}] "
-    #     f"Tempo totale serializzazione (wall): {wall_time:.5f}s | "
-    #     f"CPU time (encrypt+serialize): {cpu_time:.5f}s"
-    # )
+    end_tot = time.perf_counter()
+    tot = end_tot - start_tot_serializzazione
+    tot_senza_crypto = tot - tot_crypto  # Tempo totale meno il tempo accumulato di crittografia
+
+    log_time("totale tempo cripto: %.5f s", tot_crypto)
+    log_time("Tempo totale serializzazione con crittografia: %.5f s", tot)
+    log_time("Tempo totale serializzazione senza crittografia: %.5f s", tot_senza_crypto)
+
     return ArrayRecord(ordered_dict, keep_input=keep_input)
 
 
@@ -245,8 +220,8 @@ def _extract_status_from_recorddict(res_str: str, recorddict: RecordDict) -> Sta
     status = recorddict.config_records[f"{res_str}.status"]
     code = cast(int, status["code"])
     return Status(code=Code(code), message=str(status["message"]))
-
-
+import inspect
+import traceback
 def recorddict_to_fitins(recorddict: RecordDict, keep_input: bool) -> FitIns:
     """Derive FitIns from a RecordDict object."""
     # log_time("Client deserializza")
@@ -258,33 +233,14 @@ def recorddict_to_fitins(recorddict: RecordDict, keep_input: bool) -> FitIns:
 
     return FitIns(parameters=parameters, config=config)
 
-    log_time("CIAO")
-    log_time(f"Lunghezza della lista:  {len(fitins.parameters.tensors)}" )
-    log_time(f"tipo: {fitins.parameters.tensor_type}")
-    for i, tensor_bytes in enumerate(fitins.parameters.tensors):
-        n_bytes = len(tensor_bytes)
-        print(f"tipo tensore {tensor_bytes.dtype}" )
-    print(f"tipo tensore {tensor_bytes.dtype}" )
-    print(f"Tensore {i}: {n_bytes} byte")
 def fitins_to_recorddict(fitins: FitIns, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a FitIns object."""
-    import io
-    import numpy as np
-
-    total_bytes = 0
-    # log_time(f"Numero tensors: {len(fitins.parameters.tensors)}")
-    # for i, tensor_bytes in enumerate(fitins.parameters.tensors):
-    #     # Deserializza il tensore NumPy
-    #
-    #     tensor = np.load(io.BytesIO(tensor_bytes))
-    #     n_bytes = tensor.nbytes  # byte in memoria
-    #     total_bytes += n_bytes
-    #     log_time(f"Tensore {i}: dtype={tensor.dtype}, shape={tensor.shape}, byte in memoria={n_bytes}")
-    #
-    # log_time(f"Totale byte modello (in memoria): {total_bytes} byte ({total_bytes/1024:.2f} KB)")
     recorddict = _fit_or_evaluate_ins_to_recorddict(fitins, keep_input)
     from .crypto.utils import log_serialization_size
     log_serialization_size(recorddict, tag="fitins", mtu=1500)
+    # print("=== STACK COMPLETO DELLE CHIAMATE ===")
+    # traceback.print_stack()
+    # print("======================================")
     #("Server serializza")
     return recorddict
 
@@ -314,20 +270,6 @@ def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
 def fitres_to_recorddict(fitres: FitRes, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a FitRes object."""
   #  log_time("Client serializza")
-    import io
-    import numpy as np
-
-    # total_bytes = 0
-    # for i, tensor_bytes in enumerate(fitres.parameters.tensors):
-    #     # Deserializza il tensore NumPy
-    #     log_time(f"Numero tensors: {len(fitres.parameters.tensors)}")
-    #     tensor = np.load(io.BytesIO(tensor_bytes))
-    #     n_bytes = tensor.nbytes  # byte in memoria
-    #     total_bytes += n_bytes
-    #     log_time(f"Tensore {i}: dtype={tensor.dtype}, shape={tensor.shape}, byte in memoria={n_bytes}")
-    #
-
-
     recorddict = RecordDict()
 
     res_str = "fitres"

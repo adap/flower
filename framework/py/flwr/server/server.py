@@ -89,6 +89,8 @@ class Server:
     # pylint: disable=too-many-locals
     def fit(self, num_rounds: int, timeout: Optional[float]) -> tuple[History, float]:
         """Run federated averaging for a number of rounds."""
+        log(INFO, "inizio1")
+        start_time = timeit.default_timer()
         history = History()
         if hasattr(self.strategy, "history"):
                 self.strategy.history = history
@@ -112,7 +114,6 @@ class Server:
             log(INFO, "Evaluation returned no results (`None`)")
 
         # Run federated learning for num_rounds
-        start_time = timeit.default_timer()
 
         for current_round in range(1, num_rounds + 1):
             if getattr(self.strategy, "stop_triggered", False):
@@ -120,7 +121,6 @@ class Server:
                 log_time("Early stopping triggered at round %s, stopping server.", current_round - 1)
                 break
 
-            log(INFO, "")
             round_start = timeit.default_timer()
             log(INFO, "[ROUND %s]", current_round)
             log_time(f"[ROUND {current_round}]")
@@ -161,7 +161,9 @@ class Server:
                        log_time("Round %s Accuracy (federated): %.4f", current_round, evaluate_metrics_fed["accuracy"])
             # Fine round: calcolo e log del tempo
             round_elapsed = timeit.default_timer() - round_start
+
             log_time("Tempo totale round %s: %.2f s", current_round, round_elapsed)
+
             history.add_metrics_centralized(
                 server_round=current_round,
                 metrics={"round_time": round_elapsed}
@@ -169,7 +171,8 @@ class Server:
 
         # Bookkeeping
         end_time = timeit.default_timer()
-        elapsed = end_time - start_time
+
+        elapsed= end_time - start_time
         return history, elapsed
 
     def evaluate_round(
