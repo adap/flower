@@ -583,8 +583,8 @@ def request_download_link(
         available_app_versions = resp.json()["detail"]["available_app_versions"]
         available_versions_str = ", ".join(map(str, available_app_versions))
         typer.secho(
-            f"{app_id} not found in Platform API. "
-            f"Available app versions: {available_versions_str}",
+            f"{app_id}=={app_version} not found in Platform API. "
+            f"Available app versions for {app_id}: {available_versions_str}",
             fg=typer.colors.RED,
             err=True,
         )
