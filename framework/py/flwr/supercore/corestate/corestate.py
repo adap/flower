@@ -78,3 +78,18 @@ class CoreState(ABC):
         Optional[int]
             The run ID if the token is valid, otherwise None.
         """
+
+    @abstractmethod
+    def acknowledge_app_heartbeat(self, token: str) -> bool:
+        """Acknowledge an app heartbeat with the provided token.
+
+        Parameters
+        ----------
+        token : str
+            The token associated with the app.
+
+        Returns
+        -------
+        bool
+            True if the heartbeat is acknowledged successfully, False otherwise.
+        """

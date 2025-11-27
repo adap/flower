@@ -68,6 +68,7 @@ def install(
             f"❌ The source {source} does not exist or is not a file.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -76,6 +77,7 @@ def install(
             f"❌ The source {source} is not a `.fab` file.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -131,6 +133,7 @@ def install_from_fab(
                     "❌ FAB file has incorrect format.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1)
 
@@ -143,6 +146,7 @@ def install_from_fab(
                     "❌ File hashes couldn't be verified.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1)
 
@@ -195,6 +199,7 @@ def validate_and_install(
             "❌ Invalid config inside FAB file.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -299,6 +304,7 @@ def _validate_fab_and_config_metadata(
             "`<publisher>.<project_name>.<version>.<8hexchars>.fab`.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -310,6 +316,7 @@ def _validate_fab_and_config_metadata(
             f"❌ FAB file has an invalid hexadecimal string `{fab_shorthash}`.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1) from e
 
@@ -319,5 +326,6 @@ def _validate_fab_and_config_metadata(
             "❌ The hash in the FAB file name does not match the hash of the FAB.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
