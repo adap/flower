@@ -67,7 +67,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
-from flwr.simulation.run_simulation import _run_simulation, _replace_keys
+from flwr.simulation.run_simulation import _replace_keys, _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 from flwr.supercore.app_utils import start_parent_process_monitor
 from flwr.supercore.superexec.plugin import SimulationExecPlugin
