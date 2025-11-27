@@ -92,6 +92,7 @@ def pull(  # pylint: disable=R0914
                 "obtained.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1)
 

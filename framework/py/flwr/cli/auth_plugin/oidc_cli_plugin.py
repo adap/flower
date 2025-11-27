@@ -138,6 +138,7 @@ class OidcCliPlugin(CliAuthPlugin):
                 "❌ Missing authentication tokens. Please login first.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1)
 

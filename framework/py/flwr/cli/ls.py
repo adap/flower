@@ -155,6 +155,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
                 f"{err}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
     finally:
         if suppress_output:
