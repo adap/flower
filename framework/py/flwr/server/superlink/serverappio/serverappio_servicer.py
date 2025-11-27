@@ -461,7 +461,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Acknowledge the heartbeat
         # The app heartbeat can only be acknowledged if the run is in
         # starting or running status.
-        success = state.acknowledge_app_heartbeat(
+        success = state.acknowledge_app_heartbeat_deprecated(
             run_id=request.run_id,
             heartbeat_interval=request.heartbeat_interval,
         )
