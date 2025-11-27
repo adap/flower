@@ -15,7 +15,6 @@
 """Tests all CoreState implementations have to conform to."""
 
 
-import time
 import unittest
 from datetime import timedelta
 from unittest.mock import patch
@@ -113,34 +112,6 @@ class StateTest(unittest.TestCase):
 
         # Assert: should return False
         self.assertFalse(result)
-
-    def test_acknowledge_app_heartbeat_extends_expiration(self) -> None:
-        """Test that acknowledging heartbeat extends token expiration."""
-        # Prepare
-        state = self.state_factory()
-        run_id = 42
-        token = state.create_token(run_id)
-        assert token is not None
-
-        # Mock time to advance past initial expiration but before extended expiration
-        with patch("flwr.common.now") as mock_now:
-            # Set initial time
-            base_time = time.time()
-            mock_now.return_value.timestamp.return_value = base_time
-
-            # Acknowledge heartbeat (should extend expiration)
-            result = state.acknowledge_app_heartbeat(token)
-            self.assertTrue(result)
-
-            # Advance time to just after initial expiration
-            # (HEARTBEAT_DEFAULT_INTERVAL) but before extended expiration
-            # (HEARTBEAT_PATIENCE * HEARTBEAT_DEFAULT_INTERVAL)
-            mock_now.return_value.timestamp.return_value = (
-                base_time + HEARTBEAT_DEFAULT_INTERVAL + 1
-            )
-
-            # Token should still be valid because we extended it
-            self.assertTrue(state.verify_token(run_id, token))
 
     def test_acknowledge_app_heartbeat_extends_expiration_and_cleanup(self) -> None:
         """Test that acknowledging app heartbeat extends token expiration and cleanup is
