@@ -324,11 +324,8 @@ def load_custom_dataset(
         df, client_id, num_clients, split_strategy, random_state
     )
 
-    # Separate features and target
     X = client_df.drop(columns=[target_col]).values
     y = client_df[target_col].values
-
-    # Encode target if needed
     if y.dtype == object or y.dtype.name.startswith('str'):
         le = LabelEncoder()
         y = le.fit_transform(y)

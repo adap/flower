@@ -3,16 +3,17 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "feature-election-flower"
-version = "0.9.0"
+name = "feature-election"
+version = "1.0.0"
 description = "Feature Election - Federated Feature Selection with Flower"
 authors = [
-    {name = "NVIDIA CORPORATION", email = "flare@nvidia.com"}
+    {name = "Ioannis Christofilogiannis", email = "jchr2001@gmail.com"}
 ]
+license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
-    "flwr[simulation]>=1.13.0",
+    "flwr[simulation]>=1.21.0",
     "scikit-learn>=1.0.0",
     "pandas>=1.3.0",
     "numpy>=1.21.0",
@@ -31,54 +32,64 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["."]
+packages = ["feature_election"]
+
+[tool.hatch.build.targets.sdist]
+include = ["feature_election"]
 
 [tool.flwr.app]
 publisher = "Ioannis Christofilogiannis"
 
 # Define app components
 [tool.flwr.app.components]
-serverapp = "server_app:app"
-clientapp = "client_app:app"
+serverapp = "feature_election.server_app:app"
+clientapp = "feature_election.client_app:app"
 
 # Runtime configuration
 [tool.flwr.app.config]
 # Feature Election parameters
-freedom-degree = 0.4          # 0=intersection, 1=union
-aggregation-mode = "weighted" # "weighted" or "uniform"
-fs-method = "lasso"           # Feature selection method
-eval-metric = "f1"            # Evaluation metric
+skip-feature-election = false
+auto-tune = true
+tuning-rounds = 4             # Number of rounds to spend searching for best FD
+freedom-degree = 0.6          # Starting point for search
+aggregation-mode = "weighted"
+fs-method = "mutual_info"
+eval-metric = "f1"
 
 # Federated learning parameters
-num-clients = 10              # Total number of clients
-num-rounds = 1                # Number of rounds (typically 1 for feature election)
-fraction-fit = 1.0            # Fraction of clients to sample for training
-fraction-evaluate = 1.0       # Fraction of clients to sample for evaluation
-min-fit-clients = 2           # Minimum clients for training
-min-evaluate-clients = 2      # Minimum clients for evaluation
+num-rounds = 15
+fraction-train = 1.0
+fraction-evaluate = 1.0
+min-train-nodes = 2
+min-evaluate-nodes = 2
 
 # Data parameters
-split-strategy = "random"     # "stratified", "random", "non-iid"
-test-size = 0.2               # Validation set size
+split-strategy = "random"
+test-size = 0.2
 
-# Dataset parameters
-n-samples = 1000              # Samples per client
-n-features = 100              # Total features
-n-informative = 20            # Informative features
-n-redundant = 30              # Redundant features
+# Dataset parameters - only useful for synthetic dataset example
+n-samples = 1000
+n-features = 100
+n-informative = 20
+n-redundant = 50
 
 # Define simulation resources
 [tool.flwr.federations]
 default = "local-sim"
 
 [tool.flwr.federations.local-sim]
-options.num-supernodes = 10   # Must match num-clients
+options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 0.0
 
+[tool.flwr.federations.local-sim-gpu]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.5
+
 [tool.black]
 line-length = 100
-target-version = ['py38', 'py39', 'py310', 'py311']
+target-version = ['py310', 'py311', 'py312']
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -87,7 +98,7 @@ python_classes = "Test*"
 python_functions = "test_*"
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
