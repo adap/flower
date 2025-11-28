@@ -119,26 +119,29 @@ class SqliteCoreState(CoreState, SqliteMixin):
         current = now().timestamp()
 
         with self.conn:
-            # Delete expired tokens and get their run_ids
+            # Delete expired tokens and get their run_ids and active_until timestamps
             query = """
                 DELETE FROM token_store
                 WHERE active_until < :current
-                RETURNING run_id;
+                RETURNING run_id, active_until;
             """
             rows = self.conn.execute(query, {"current": current}).fetchall()
-            expired_run_ids = [int64_to_uint64(row["run_id"]) for row in rows]
+            expired_records = [
+                (int64_to_uint64(row["run_id"]), row["active_until"]) for row in rows
+            ]
 
             # Hook for subclasses
-            if expired_run_ids:
-                self._on_tokens_expired(expired_run_ids)
+            if expired_records:
+                self._on_tokens_expired(expired_records)
 
-    def _on_tokens_expired(self, expired_run_ids: list[int]) -> None:
+    def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
         """Handle cleanup of expired tokens.
 
         Override in subclasses to add custom cleanup logic.
 
         Parameters
         ----------
-        expired_run_ids : list[int]
-            List of run IDs whose tokens have expired.
+        expired_records : list[tuple[int, float]]
+            List of tuples containing (run_id, active_until timestamp)
+            for expired tokens.
         """

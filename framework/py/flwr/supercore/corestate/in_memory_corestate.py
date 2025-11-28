@@ -106,25 +106,26 @@ class InMemoryCoreState(CoreState):
         """
         with self.lock_token_store:
             current = now().timestamp()
-            expired_run_ids: list[int] = []
+            expired_records: list[tuple[int, float]] = []
             for run_id, record in list(self.token_store.items()):
                 if record.active_until < current:
-                    expired_run_ids.append(run_id)
+                    expired_records.append((run_id, record.active_until))
                     # Remove from both stores
                     del self.token_store[run_id]
                     self.token_to_run_id.pop(record.token, None)
 
             # Hook for subclasses
-            if expired_run_ids:
-                self._on_tokens_expired(expired_run_ids)
+            if expired_records:
+                self._on_tokens_expired(expired_records)
 
-    def _on_tokens_expired(self, expired_run_ids: list[int]) -> None:
+    def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
         """Handle cleanup of expired tokens.
 
         Override in subclasses to add custom cleanup logic.
 
         Parameters
         ----------
-        expired_run_ids : list[int]
-            List of run IDs whose tokens have expired.
+        expired_records : list[tuple[int, float]]
+            List of tuples containing (run_id, active_until timestamp)
+            for expired tokens.
         """
