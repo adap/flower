@@ -35,7 +35,7 @@ from flwr.common.typing import Fab, Run
 
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2_grpc
-from flwr.proto.appio_pb2 import (  # pylint: disable=E0401
+from flwr.proto.appio_pb2 import (
     ListAppsToLaunchRequest,
     ListAppsToLaunchResponse,
     PullAppInputsRequest,
@@ -49,6 +49,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0401
     RequestTokenRequest,
     RequestTokenResponse,
 )
+from flwr.proto.heartbeat_pb2 import SendAppHeartbeatRequest, SendAppHeartbeatResponse
 from flwr.proto.message_pb2 import (
     ConfirmMessageReceivedRequest,
     ConfirmMessageReceivedResponse,
@@ -57,7 +58,7 @@ from flwr.proto.message_pb2 import (
     PushObjectRequest,
     PushObjectResponse,
 )
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse
 
 # pylint: disable=E0601
 from flwr.supercore.ffs import FfsFactory
@@ -255,6 +256,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         state.store_message(message_from_proto(request.messages_list[0]))
 
         return PushAppMessagesResponse(objects_to_push=objects_to_push)
+
+    def SendAppHeartbeat(
+        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
+    ) -> SendAppHeartbeatResponse:
+        """Handle a heartbeat from an app process."""
+        raise NotImplementedError
 
     def PushObject(
         self, request: PushObjectRequest, context: grpc.ServicerContext
