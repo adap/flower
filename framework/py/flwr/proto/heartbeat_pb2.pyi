@@ -64,7 +64,7 @@ global___SendNodeHeartbeatResponse = SendNodeHeartbeatResponse
 
 @typing.final
 class SendAppHeartbeatDeprecatedRequest(google.protobuf.message.Message):
-    """App Heartbeat messages"""
+    """App Heartbeat messages (deprecated)"""
 
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
