@@ -61,7 +61,8 @@ class InMemoryCoreState(CoreState):
 
     def verify_token(self, run_id: int, token: str) -> bool:
         """Verify a token for the given run ID."""
-        self._cleanup_expired_tokens()
+        # UNCOMMENT THIS WHEN HEARTBEAT IS ENABLED
+        # self._cleanup_expired_tokens()
         with self.lock_token_store:
             record = self.token_store.get(run_id)
             return record is not None and record.token == token
@@ -75,7 +76,8 @@ class InMemoryCoreState(CoreState):
 
     def get_run_id_by_token(self, token: str) -> int | None:
         """Get the run ID associated with a given token."""
-        self._cleanup_expired_tokens()
+        # UNCOMMENT THIS WHEN HEARTBEAT IS ENABLED
+        # self._cleanup_expired_tokens()
         with self.lock_token_store:
             return self.token_to_run_id.get(token)
 
