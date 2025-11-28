@@ -38,7 +38,7 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.heartbeat import HeartbeatSender, get_grpc_app_heartbeat_fn
+from flwr.common.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -220,13 +220,9 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         )
 
         # Set up heartbeat sender
-        heartbeat_fn = get_grpc_app_heartbeat_fn(
-            conn._stub,
-            run.run_id,
-            failure_message="Heartbeat failed unexpectedly. The SuperLink could "
-            "not find the provided run ID, or the run status is invalid.",
+        heartbeat_sender = HeartbeatSender(
+            make_app_heartbeat_fn_grpc(conn._stub, token)
         )
-        heartbeat_sender = HeartbeatSender(heartbeat_fn)
         heartbeat_sender.start()
 
         # Launch the simulation
