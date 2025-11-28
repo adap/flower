@@ -290,7 +290,14 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
     ) -> SendAppHeartbeatResponse:
         """Handle a heartbeat from an app process."""
-        raise NotImplementedError
+        log(DEBUG, "SimultionIoServicer.SendAppHeartbeat")
+
+        # Init state
+        state = self.state_factory.state()
+
+        # Acknowledge the heartbeat
+        success = state.acknowledge_app_heartbeat(request.token)
+        return SendAppHeartbeatResponse(success=success)
 
     def _verify_token(self, token: str, context: grpc.ServicerContext) -> int:
         """Verify the token and return the associated run ID."""
