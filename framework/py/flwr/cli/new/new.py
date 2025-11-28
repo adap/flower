@@ -182,12 +182,22 @@ def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
         r = requests.get(presigned_url, timeout=60)
         r.raise_for_status()
     except requests.RequestException as e:
-        raise typer.BadParameter(f"ZIP download failed: {e}") from e
+        typer.secho(
+            f"ZIP download failed: {e}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from e
 
     buf = io.BytesIO(r.content)
     # Validate it's a zip
     if not zipfile.is_zipfile(buf):
-        raise typer.BadParameter("Downloaded file is not a valid ZIP")
+        typer.secho(
+            "Downloaded file is not a valid ZIP",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
     buf.seek(0)
     return buf
 

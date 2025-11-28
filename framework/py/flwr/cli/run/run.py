@@ -154,6 +154,7 @@ def run(
                 f"{err}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
     finally:
         if suppress_output:
@@ -218,9 +219,10 @@ def _run_with_control_api(
                     "app identifier (@account_name/app_name) is correct, "
                     "or that it is not using an unsupported gRPC adapter.",
                     fg=typer.colors.RED,
+                    err=True,
                 )
             else:
-                typer.secho("❌ Failed to start run", fg=typer.colors.RED)
+                typer.secho("❌ Failed to start run", fg=typer.colors.RED, err=True)
             raise typer.Exit(code=1)
 
         if output_format == CliOutputFormat.JSON:
@@ -268,6 +270,7 @@ def _run_without_control_api(
             "options.num-supernodes = 10\n",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1) from err
 

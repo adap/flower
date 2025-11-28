@@ -269,6 +269,7 @@ def get_account_auth_config_path(root_dir: Path, federation: str) -> Path:
             f"Please check the permissions of `{gitignore_path}` and try again.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1) from err
 
@@ -439,6 +440,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                 " to authenticate and try again.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.UNIMPLEMENTED:
@@ -447,12 +449,14 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "❌ Account authentication is not enabled on this SuperLink.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
             elif e.details() == NO_ARTIFACT_PROVIDER_MESSAGE:  # pylint: disable=E1101
                 typer.secho(
                     "❌ The SuperLink does not support `flwr pull` command.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
             else:
                 typer.secho(
@@ -462,6 +466,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "the CLI and SuperLink are compatible.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
@@ -469,6 +474,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                 "❌ Permission denied.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             # pylint: disable-next=E1101
             typer.secho(e.details(), fg=typer.colors.RED, bold=True)
@@ -479,6 +485,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                 "connection and 'address' in the federation configuration.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.NOT_FOUND:
@@ -487,6 +494,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "❌ Run ID not found.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from None
             if e.details() == NODE_NOT_FOUND_MESSAGE:  # pylint: disable=E1101
@@ -494,6 +502,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "❌ Node ID not found for this account.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from None
         if e.code() == grpc.StatusCode.FAILED_PRECONDITION:
@@ -503,6 +512,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "the run is finished. You can check the run status with `flwr ls`.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from None
             if (
@@ -513,6 +523,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "SuperNode.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from None
             if e.details() == PUBLIC_KEY_NOT_VALID:  # pylint: disable=E1101
@@ -521,6 +532,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "NIST EC public key.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from None
 
@@ -529,6 +541,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                 f"❌ {e.details()}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1) from None
         raise
@@ -557,7 +570,7 @@ def request_download_link(
 
     Raises
     ------
-    typer.BadParameter
+    typer.Exit
         If connection fails, app not found, or API request fails.
     """
     headers = {
@@ -572,19 +585,53 @@ def request_download_link(
     try:
         resp = requests.post(in_url, headers=headers, data=json.dumps(body), timeout=20)
     except requests.RequestException as e:
-        raise typer.BadParameter(f"Unable to connect to Platform API: {e}") from e
+        typer.secho(
+            f"Unable to connect to Platform API: {e}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from e
 
     if resp.status_code == 404:
-        raise typer.BadParameter(f"'{app_id}' not found in Platform API")
+        error_message = resp.json()["detail"]
+        if isinstance(error_message, dict):
+            available_app_versions = error_message["available_app_versions"]
+            available_versions_str = (
+                ", ".join(map(str, available_app_versions))
+                if available_app_versions
+                else "None"
+            )
+            typer.secho(
+                f"{app_id}=={app_version} not found in Platform API. "
+                f"Available app versions for {app_id}: {available_versions_str}",
+                fg=typer.colors.RED,
+                err=True,
+            )
+        else:
+            typer.secho(
+                f"{app_id} not found in Platform API.",
+                fg=typer.colors.RED,
+                err=True,
+            )
+        raise typer.Exit(code=1)
+
     if not resp.ok:
-        raise typer.BadParameter(
+        typer.secho(
             f"Platform API request failed with "
-            f"status {resp.status_code}. Details: {resp.text}"
+            f"status {resp.status_code}. Details: {resp.text}",
+            fg=typer.colors.RED,
+            err=True,
         )
+        raise typer.Exit(code=1)
 
     data = resp.json()
     if out_url not in data:
-        raise typer.BadParameter("Invalid response from Platform API")
+        typer.secho(
+            "Invalid response from Platform API",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
     return str(data[out_url])
 
 
@@ -682,7 +729,7 @@ def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
 
     Raises
     ------
-    typer.Exit(code=1)
+    typer.Exit
         If the app specification format is invalid.
     """
     if "==" in app_spec:
