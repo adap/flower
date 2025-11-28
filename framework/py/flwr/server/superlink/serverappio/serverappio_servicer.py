@@ -59,6 +59,8 @@ from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatDeprecatedRequest,
     SendAppHeartbeatDeprecatedResponse,
+    SendAppHeartbeatRequest,
+    SendAppHeartbeatResponse,
 )
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
@@ -467,6 +469,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         return SendAppHeartbeatDeprecatedResponse(success=success)
+
+    def SendAppHeartbeat(
+        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
+    ) -> SendAppHeartbeatResponse:
+        """Handle a heartbeat from an app process."""
+        raise NotImplementedError
 
     def PushObject(
         self, request: PushObjectRequest, context: grpc.ServicerContext
