@@ -39,13 +39,27 @@ from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 
 
 class AllLogsRetrieved(BaseException):
-    """Raised when all logs are retrieved."""
+    """Exception raised when all available logs have been retrieved.
+
+    This exception is used internally to signal that the log stream has reached the end
+    and all logs have been successfully retrieved.
+    """
 
 
 def start_stream(
     run_id: int, channel: grpc.Channel, refresh_period: int = CONN_REFRESH_PERIOD
 ) -> None:
-    """Start log streaming for a given run ID."""
+    """Start log streaming for a given run ID.
+
+    Parameters
+    ----------
+    run_id : int
+        The unique identifier of the run to stream logs from.
+    channel : grpc.Channel
+        The gRPC channel for communication.
+    refresh_period : int (default: CONN_REFRESH_PERIOD)
+        Connection refresh period in seconds.
+    """
     stub = ControlStub(channel)
     after_timestamp = 0.0
     try:
@@ -111,7 +125,17 @@ def stream_logs(
 
 
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
-    """Print logs from the beginning of a run."""
+    """Print logs from the beginning of a run.
+
+    Parameters
+    ----------
+    run_id : int
+        The unique identifier of the run to retrieve logs from.
+    channel : grpc.Channel
+        The gRPC channel for communication.
+    timeout : int
+        Timeout duration in seconds for the log retrieval request.
+    """
     stub = ControlStub(channel)
     req = StreamLogsRequest(run_id=run_id, after_timestamp=0.0)
 
@@ -161,11 +185,15 @@ def log(
         ),
     ] = True,
 ) -> None:
-    """Get logs from a Flower project run."""
+    """Get logs from a run.
+
+    Retrieve and display logs from a Flower run. Logs can be streamed in real-time (with
+    --stream) or printed once (with --show).
+    """
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = app / "pyproject.toml" if app else None
-    config, errors, warnings = load_and_validate(path=pyproject_path)
+    config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
     config = process_loaded_project_config(config, errors, warnings)
     federation, federation_config = validate_federation_in_project_config(
         federation, config, federation_config_overrides
@@ -186,6 +214,21 @@ def _log_with_control_api(
     run_id: int,
     stream: bool,
 ) -> None:
+    """Retrieve logs using the Control API.
+
+    Parameters
+    ----------
+    app : Path
+        Path to the Flower app directory.
+    federation : str
+        Name of the federation.
+    federation_config : dict[str, Any]
+        Federation configuration dictionary.
+    run_id : int
+        The unique identifier of the run to retrieve logs from.
+    stream : bool
+        If True, stream logs continuously; if False, print once.
+    """
     auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
     channel = init_channel(app, federation_config, auth_plugin)
 

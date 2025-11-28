@@ -90,7 +90,6 @@ from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
-from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
@@ -139,6 +138,13 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Attempt to create a token for the provided run ID
         token = state.create_token(request.run_id)
+
+        # Transition the run to STARTING if token creation was successful
+        if token:
+            state.update_run_status(
+                run_id=request.run_id,
+                new_status=RunStatus(Status.STARTING, "", ""),
+            )
 
         # Return the token
         return RequestTokenResponse(token=token or "")
@@ -192,7 +198,10 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             detail="`messages_list` must not be empty",
         )
         message_ids: list[str | None] = []
-        for message_proto in request.messages_list:
+        objects_to_push: set[str] = set()
+        for message_proto, object_tree in zip(
+            request.messages_list, request.message_object_trees, strict=True
+        ):
             message = message_from_proto(message_proto=message_proto)
             validation_errors = validate_message(message, is_reply_message=False)
             _raise_if(
@@ -205,12 +214,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 request_name="PushMessages",
                 detail="`Message.metadata` has mismatched `run_id`",
             )
-            # Store
+            # Store objects
+            objects_to_push |= set(store.preregister(request.run_id, object_tree))
+            # Store message
             message_id: str | None = state.store_message_ins(message=message)
             message_ids.append(message_id)
-
-        # Store Message object to descendants mapping and preregister objects
-        objects_to_push = store_mapping_and_register_objects(store, request=request)
 
         return PushAppMessagesResponse(
             message_ids=[
@@ -344,8 +352,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 if result := ffs.get(run.fab_hash):
                     fab = Fab(run.fab_hash, result[0], result[1])
             if run and fab and serverapp_ctxt:
-                # Update run status to STARTING
-                if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
+                # Update run status to RUNNING
+                if state.update_run_status(run_id, RunStatus(Status.RUNNING, "", "")):
                     log(INFO, "Starting run %d", run_id)
                     return PullAppInputsResponse(
                         context=context_to_proto(serverapp_ctxt),
@@ -354,8 +362,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                     )
 
         # Raise an exception if the Run or Fab is not found,
-        # or if the status cannot be updated to STARTING
-        raise RuntimeError(f"Failed to start run {run_id}")
+        # or if the status cannot be updated to RUNNING
+        context.abort(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            f"Failed to start run {run_id}",
+        )
+        raise RuntimeError("Unreachable code")  # for mypy
 
     def PushAppOutputs(
         self, request: PushAppOutputsRequest, context: grpc.ServicerContext

@@ -64,7 +64,11 @@ def show(  # pylint: disable=R0914, R0913, R0917
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """Show details of a federation."""
+    """Show details of a federation.
+
+    Display comprehensive information about a federation including its members,
+    registered SuperNodes, and runs.
+    """
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:
@@ -73,7 +77,7 @@ def show(  # pylint: disable=R0914, R0913, R0917
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
         pyproject_path = app / FAB_CONFIG_FILE if app else None
-        config, errors, warnings = load_and_validate(path=pyproject_path)
+        config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
         config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
             federation, config
@@ -117,7 +121,20 @@ def show(  # pylint: disable=R0914, R0913, R0917
 def _show_federation(
     stub: ControlStub, federation: str
 ) -> tuple[list[str], list[NodeInfo], list[RunRow]]:
-    """Show federation details."""
+    """Show federation details.
+
+    Parameters
+    ----------
+    stub : ControlStub
+        The gRPC stub for Control API communication.
+    federation : str
+        Name of the federation to show.
+
+    Returns
+    -------
+    tuple[list[str], list[NodeInfo], list[RunRow]]
+        A tuple containing (member_account_ids, nodes, runs).
+    """
     with flwr_cli_grpc_exc_handler():
         res: ShowFederationResponse = stub.ShowFederation(
             ShowFederationRequest(federation_name=federation)
@@ -130,8 +147,19 @@ def _show_federation(
     return list(fed_proto.member_aids), list(fed_proto.nodes), formatted_runs
 
 
-def _to_members_table(members_aid: list[str]) -> Table:
-    """Format the provided list of federation members as a rich Table."""
+def _to_members_table(member_aids: list[str]) -> Table:
+    """Format the provided list of federation members as a rich Table.
+
+    Parameters
+    ----------
+    member_aids : list[str]
+        List of member account identifiers.
+
+    Returns
+    -------
+    Table
+        Rich Table object with formatted member information.
+    """
     table = Table(title="Federation Members", header_style="bold cyan", show_lines=True)
 
     table.add_column(
@@ -139,14 +167,30 @@ def _to_members_table(members_aid: list[str]) -> Table:
     )
     table.add_column(Text("Role", justify="center"), style="bright_black", no_wrap=True)
 
-    for member_aid in members_aid:
+    for member_aid in member_aids:
         table.add_row(member_aid, "Member")
 
     return table
 
 
 def _to_nodes_table(nodes: list[NodeInfo]) -> Table:
-    """Format the provided list of federation nodes as a rich Table."""
+    """Format the provided list of federation nodes as a rich Table.
+
+    Parameters
+    ----------
+    nodes : list[NodeInfo]
+        List of NodeInfo objects containing node details.
+
+    Returns
+    -------
+    Table
+        Rich Table object with formatted node information.
+
+    Raises
+    ------
+    ValueError
+        If an unexpected node status is encountered.
+    """
     table = Table(
         title="SuperNodes in the Federation", header_style="bold cyan", show_lines=True
     )
@@ -188,7 +232,18 @@ def _to_nodes_table(nodes: list[NodeInfo]) -> Table:
 
 
 def _to_runs_table(run_list: list[RunRow]) -> Table:
-    """Format the provided list of federation runs as a rich Table."""
+    """Format the provided list of federation runs as a rich Table.
+
+    Parameters
+    ----------
+    run_list : list[RunRow]
+        List of RunRow objects containing run details.
+
+    Returns
+    -------
+    Table
+        Rich Table object with formatted run information.
+    """
     table = Table(
         title="Runs in the Federation", header_style="bold cyan", show_lines=True
     )
@@ -216,7 +271,22 @@ def _to_runs_table(run_list: list[RunRow]) -> Table:
 def _to_json(
     members: list[str], nodes: list[NodeInfo], runs: list[RunRow]
 ) -> list[list[dict[str, str]]]:
-    """Format the provided federation information to JSON serializable format."""
+    """Format the provided federation information to JSON serializable format.
+
+    Parameters
+    ----------
+    members : list[str]
+        List of member account identifiers.
+    nodes : list[NodeInfo]
+        List of NodeInfo objects.
+    runs : list[RunRow]
+        List of RunRow objects.
+
+    Returns
+    -------
+    list[list[dict[str, str]]]
+        Nested list containing dictionaries for members, nodes, and runs.
+    """
     members_list: list[dict[str, Any]] = []
     nodes_list: list[dict[str, Any]] = []
     runs_list: list[dict[str, Any]] = []
