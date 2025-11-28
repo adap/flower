@@ -111,11 +111,17 @@ class ServerAppIoStub:
     ]
     """Push ServerApp logs"""
 
+    SendAppHeartbeatDeprecated: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedRequest,
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse,
+    ]
+    """Heartbeat"""
+
     SendAppHeartbeat: grpc.UnaryUnaryMultiCallable[
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
     ]
-    """Heartbeat"""
+    """App heartbeat"""
 
     PushObject: grpc.UnaryUnaryMultiCallable[
         flwr.proto.message_pb2.PushObjectRequest,
@@ -208,11 +214,17 @@ class ServerAppIoAsyncStub:
     ]
     """Push ServerApp logs"""
 
+    SendAppHeartbeatDeprecated: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedRequest,
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse,
+    ]
+    """Heartbeat"""
+
     SendAppHeartbeat: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
     ]
-    """Heartbeat"""
+    """App heartbeat"""
 
     PushObject: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.message_pb2.PushObjectRequest,
@@ -330,12 +342,20 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         """Push ServerApp logs"""
 
     @abc.abstractmethod
+    def SendAppHeartbeatDeprecated(
+        self,
+        request: flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse, collections.abc.Awaitable[flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse]]:
+        """Heartbeat"""
+
+    @abc.abstractmethod
     def SendAppHeartbeat(
         self,
         request: flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse, collections.abc.Awaitable[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse]]:
-        """Heartbeat"""
+        """App heartbeat"""
 
     @abc.abstractmethod
     def PushObject(

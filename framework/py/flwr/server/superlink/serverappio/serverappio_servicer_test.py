@@ -55,8 +55,8 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     RequestTokenResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
-    SendAppHeartbeatRequest,
-    SendAppHeartbeatResponse,
+    SendAppHeartbeatDeprecatedRequest,
+    SendAppHeartbeatDeprecatedResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
@@ -195,10 +195,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             request_serializer=UpdateRunStatusRequest.SerializeToString,
             response_deserializer=UpdateRunStatusResponse.FromString,
         )
-        self._send_app_heartbeat = self._channel.unary_unary(
-            "/flwr.proto.ServerAppIo/SendAppHeartbeat",
-            request_serializer=SendAppHeartbeatRequest.SerializeToString,
-            response_deserializer=SendAppHeartbeatResponse.FromString,
+        self._send_app_heartbeat_deprecated = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/SendAppHeartbeatDeprecated",
+            request_serializer=SendAppHeartbeatDeprecatedRequest.SerializeToString,
+            response_deserializer=SendAppHeartbeatDeprecatedResponse.FromString,
         )
         self._push_object = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PushObject",
@@ -672,33 +672,42 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         assert e.exception.details() == self.status_to_msg[run_status.status]
 
     @parameterized.expand([(1,), (2,)])  # type: ignore
-    def test_successful_send_app_heartbeat(self, num_transitions: int) -> None:
-        """Test `SendAppHeartbeat` success."""
+    def test_successful_send_app_heartbeat_deprecated(
+        self, num_transitions: int
+    ) -> None:
+        """Test `SendAppHeartbeatDeprecated` success."""
         # Prepare
         run_id = self._create_dummy_run(running=False)
         # Transition status to starting or running.
         self._transition_run_status(run_id, num_transitions)
-        request = SendAppHeartbeatRequest(run_id=run_id, heartbeat_interval=30)
+        request = SendAppHeartbeatDeprecatedRequest(
+            run_id=run_id, heartbeat_interval=30
+        )
 
         # Execute
-        response, call = self._send_app_heartbeat.with_call(request=request)
+        response, call = self._send_app_heartbeat_deprecated.with_call(request=request)
 
         # Assert
-        assert isinstance(response, SendAppHeartbeatResponse)
+        assert isinstance(response, SendAppHeartbeatDeprecatedResponse)
         assert grpc.StatusCode.OK == call.code()
         assert response.success
 
     @parameterized.expand([(0,), (3,)])  # type: ignore
-    def test_send_app_heartbeat_not_successful(self, num_transitions: int) -> None:
-        """Test `SendAppHeartbeat` not successful when status is pending or finished."""
+    def test_send_app_heartbeat_deprecated_not_successful(
+        self, num_transitions: int
+    ) -> None:
+        """Test `SendAppHeartbeatDeprecated` not successful when status is pending or
+        finished."""
         # Prepare
         run_id = self._create_dummy_run(running=False)
         # Stay in pending or transition to finished
         self._transition_run_status(run_id, num_transitions)
-        request = SendAppHeartbeatRequest(run_id=run_id, heartbeat_interval=30)
+        request = SendAppHeartbeatDeprecatedRequest(
+            run_id=run_id, heartbeat_interval=30
+        )
 
         # Execute
-        response, _ = self._send_app_heartbeat.with_call(request=request)
+        response, _ = self._send_app_heartbeat_deprecated.with_call(request=request)
 
         # Assert
         assert not response.success

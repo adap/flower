@@ -90,11 +90,17 @@ class SimulationIoStub:
     ]
     """Get Run Status"""
 
+    SendAppHeartbeatDeprecated: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedRequest,
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse,
+    ]
+    """Heartbeat"""
+
     SendAppHeartbeat: grpc.UnaryUnaryMultiCallable[
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
     ]
-    """Heartbeat"""
+    """App heartbeat"""
 
 class SimulationIoAsyncStub:
     ListAppsToLaunch: grpc.aio.UnaryUnaryMultiCallable[
@@ -151,11 +157,17 @@ class SimulationIoAsyncStub:
     ]
     """Get Run Status"""
 
+    SendAppHeartbeatDeprecated: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedRequest,
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse,
+    ]
+    """Heartbeat"""
+
     SendAppHeartbeat: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
     ]
-    """Heartbeat"""
+    """App heartbeat"""
 
 class SimulationIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -231,11 +243,19 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         """Get Run Status"""
 
     @abc.abstractmethod
+    def SendAppHeartbeatDeprecated(
+        self,
+        request: flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse, collections.abc.Awaitable[flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse]]:
+        """Heartbeat"""
+
+    @abc.abstractmethod
     def SendAppHeartbeat(
         self,
         request: flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse, collections.abc.Awaitable[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse]]:
-        """Heartbeat"""
+        """App heartbeat"""
 
 def add_SimulationIoServicer_to_server(servicer: SimulationIoServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...
