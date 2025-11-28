@@ -22,7 +22,7 @@ from collections.abc import Callable
 import grpc
 
 # pylint: disable=E0611
-from flwr.proto.heartbeat_pb2 import SendAppHeartbeatRequest
+from flwr.proto.heartbeat_pb2 import SendAppHeartbeatDeprecatedRequest
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 
@@ -141,14 +141,14 @@ def get_grpc_app_heartbeat_fn(
         Function that sends a heartbeat to the gRPC endpoint.
     """
     # Construct the heartbeat request
-    req = SendAppHeartbeatRequest(
+    req = SendAppHeartbeatDeprecatedRequest(
         run_id=run_id, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
     )
 
     def fn() -> bool:
         # Call ServerAppIo API
         try:
-            res = stub.SendAppHeartbeat(req)
+            res = stub.SendAppHeartbeatDeprecated(req)
         except grpc.RpcError as e:
             status_code = e.code()
             if status_code == grpc.StatusCode.UNAVAILABLE:
