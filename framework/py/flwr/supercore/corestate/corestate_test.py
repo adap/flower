@@ -135,6 +135,9 @@ class StateTest(unittest.TestCase):
                 seconds=HEARTBEAT_DEFAULT_INTERVAL - 1
             )
 
+            # REMOVE THIS WHEN HEARTBEAT IS ENABLED
+            state._cleanup_expired_tokens()  # type: ignore # pylint: disable=W0212
+
             # Verify tokens are valid
             self.assertTrue(state.verify_token(run_id1, token1))
             self.assertTrue(state.verify_token(run_id2, token2))
@@ -143,6 +146,9 @@ class StateTest(unittest.TestCase):
             mock_dt.now.return_value = created_at + timedelta(
                 seconds=HEARTBEAT_DEFAULT_INTERVAL + 1
             )
+
+            # REMOVE THIS WHEN HEARTBEAT IS ENABLED
+            state._cleanup_expired_tokens()  # type: ignore # pylint: disable=W0212
 
             # Assert: token1 should be cleaned up, token2 should still be valid
             self.assertFalse(state.verify_token(run_id1, token1))
