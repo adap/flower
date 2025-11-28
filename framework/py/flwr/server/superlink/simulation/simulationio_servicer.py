@@ -290,7 +290,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
     ) -> SendAppHeartbeatResponse:
         """Handle a heartbeat from an app process."""
-        log(DEBUG, "SimultionIoServicer.SendAppHeartbeat")
+        log(DEBUG, "SimulationIoServicer.SendAppHeartbeat")
 
         # Init state
         state = self.state_factory.state()
