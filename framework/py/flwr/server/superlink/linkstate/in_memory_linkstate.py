@@ -577,6 +577,8 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         flwr_aid=flwr_aid if flwr_aid else "",
                         federation=federation,
                     ),
+                    # REMOVE THIS WHEN HEARTBEAT IS ENABLED
+                    active_until=1e10,
                 )
                 self.run_ids[run_id] = run_record
                 # Add run_id to the flwr_aid_to_run_ids mapping if flwr_aid is provided
@@ -786,6 +788,26 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             record.active_until = current + HEARTBEAT_PATIENCE * heartbeat_interval
             record.heartbeat_interval = heartbeat_interval
             return True
+
+    def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
+        """Transition runs with expired tokens to failed status.
+
+        Parameters
+        ----------
+        expired_records : list[tuple[int, float]]
+            List of tuples containing (run_id, active_until timestamp)
+            for expired tokens.
+        """
+        for run_id, active_until in expired_records:
+            run_record = self.run_ids[run_id]
+            with run_record.lock:
+                run_record.run.status = RunStatus(
+                    status=Status.FINISHED,
+                    sub_status=SubStatus.FAILED,
+                    details=RUN_FAILURE_DETAILS_NO_HEARTBEAT,
+                )
+                active_until_dt = datetime.fromtimestamp(active_until, tz=timezone.utc)
+                run_record.run.finished_at = active_until_dt.isoformat()
 
     def get_serverapp_context(self, run_id: int) -> Context | None:
         """Get the context for the specified `run_id`."""
