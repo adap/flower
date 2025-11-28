@@ -45,6 +45,8 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     RequestTokenResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendAppHeartbeatDeprecatedRequest,
+    SendAppHeartbeatDeprecatedResponse,
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
 )
@@ -265,11 +267,11 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
             federation_options=config_record_to_proto(federation_options)
         )
 
-    def SendAppHeartbeat(
-        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
-    ) -> SendAppHeartbeatResponse:
+    def SendAppHeartbeatDeprecated(
+        self, request: SendAppHeartbeatDeprecatedRequest, context: grpc.ServicerContext
+    ) -> SendAppHeartbeatDeprecatedResponse:
         """Handle a heartbeat from the ServerApp in simulation."""
-        log(DEBUG, "SimultionIoServicer.SendAppHeartbeat")
+        log(DEBUG, "SimultionIoServicer.SendAppHeartbeatDeprecated")
 
         # Init state
         state = self.state_factory.state()
@@ -282,7 +284,13 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
             heartbeat_interval=request.heartbeat_interval,
         )
 
-        return SendAppHeartbeatResponse(success=success)
+        return SendAppHeartbeatDeprecatedResponse(success=success)
+
+    def SendAppHeartbeat(
+        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
+    ) -> SendAppHeartbeatResponse:
+        """Handle a heartbeat from an app process."""
+        raise NotImplementedError
 
     def _verify_token(self, token: str, context: grpc.ServicerContext) -> int:
         """Verify the token and return the associated run ID."""
