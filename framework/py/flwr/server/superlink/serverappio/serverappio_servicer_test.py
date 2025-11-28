@@ -43,6 +43,8 @@ from flwr.common.typing import RunStatus
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     ListAppsToLaunchRequest,
     ListAppsToLaunchResponse,
+    PullAppInputsRequest,
+    PullAppInputsResponse,
     PullAppMessagesRequest,
     PullAppMessagesResponse,
     PushAppMessagesRequest,
@@ -223,6 +225,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             request_serializer=RequestTokenRequest.SerializeToString,
             response_deserializer=RequestTokenResponse.FromString,
         )
+        self._pull_app_inputs = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PullAppInputs",
+            request_serializer=PullAppInputsRequest.SerializeToString,
+            response_deserializer=PullAppInputsResponse.FromString,
+        )
 
     def tearDown(self) -> None:
         """Clean up grpc server."""
@@ -236,13 +243,13 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         if num_transitions > 2:
             _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
 
-    def _create_dummy_run(self, running: bool = True) -> int:
+    def _create_dummy_run(self, running: bool = True, *, fab_hash: str = "") -> int:
         run_id = self.state.create_run(
-            "", "", "", {}, NOOP_FEDERATION, ConfigRecord(), ""
+            "", "", fab_hash, {}, NOOP_FEDERATION, ConfigRecord(), ""
         )
         if running:
             self._transition_run_status(run_id, 2)
-            self.state.acknowledge_app_heartbeat(run_id, 1e9)
+            self.state.acknowledge_app_heartbeat_deprecated(run_id, 1e9)
         return run_id
 
     def test_successful_get_node_if_running(self) -> None:
@@ -896,3 +903,35 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Assert: Only one token is issued
         assert response1.token != ""
         assert response2.token == ""
+
+    def test_run_status_transitions(self) -> None:
+        """Test `RequestToken` and `PullAppInputs` transitions run status from PENDING
+        to STARTING to RUNNING."""
+        # Prepare: Create a run with FAB
+        fab_hash = self.ffs.put(b"mock fab content", {})
+        run_id = self._create_dummy_run(running=False, fab_hash=fab_hash)
+
+        # Set serverapp context
+        context = Context(run_id, SUPERLINK_NODE_ID, {}, RecordDict(), {})
+        self.state.set_serverapp_context(run_id, context)
+
+        # Request token to transition to STARTING
+        token_request = RequestTokenRequest(run_id=run_id)
+        token_response, call = self._request_token.with_call(request=token_request)
+        token = token_response.token
+
+        # Assert: Response is successful and run status is STARTING
+        assert isinstance(token_response, RequestTokenResponse)
+        assert grpc.StatusCode.OK == call.code()
+        run_status = self.state.get_run_status({run_id})[run_id]
+        assert run_status.status == Status.STARTING
+
+        # Execute: Pull app inputs
+        request = PullAppInputsRequest(token=token)
+        response, call = self._pull_app_inputs.with_call(request=request)
+
+        # Assert: Response is successful and run status is now RUNNING
+        assert isinstance(response, PullAppInputsResponse)
+        assert grpc.StatusCode.OK == call.code()
+        run_status = self.state.get_run_status({run_id})[run_id]
+        assert run_status.status == Status.RUNNING
