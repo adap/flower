@@ -66,8 +66,8 @@ service ServerAppIo {
   rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
 
   // Heartbeat
-  rpc SendAppHeartbeat(SendAppHeartbeatRequest)
-      returns (SendAppHeartbeatResponse) {}
+  rpc SendAppHeartbeatDeprecated(SendAppHeartbeatDeprecatedRequest)
+      returns (SendAppHeartbeatDeprecatedResponse) {}
 
   // Push Object
   rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}

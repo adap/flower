@@ -111,9 +111,9 @@ class ServerAppIoStub:
     ]
     """Push ServerApp logs"""
 
-    SendAppHeartbeat: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
-        flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
+    SendAppHeartbeatDeprecated: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedRequest,
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse,
     ]
     """Heartbeat"""
 
@@ -208,9 +208,9 @@ class ServerAppIoAsyncStub:
     ]
     """Push ServerApp logs"""
 
-    SendAppHeartbeat: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
-        flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
+    SendAppHeartbeatDeprecated: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedRequest,
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse,
     ]
     """Heartbeat"""
 
@@ -330,11 +330,11 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         """Push ServerApp logs"""
 
     @abc.abstractmethod
-    def SendAppHeartbeat(
+    def SendAppHeartbeatDeprecated(
         self,
-        request: flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
+        request: flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedRequest,
         context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse, collections.abc.Awaitable[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse]]:
+    ) -> typing.Union[flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse, collections.abc.Awaitable[flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse]]:
         """Heartbeat"""
 
     @abc.abstractmethod

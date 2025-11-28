@@ -82,10 +82,10 @@ class SimulationIoStub(object):
                 request_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
                 _registered_method=True)
-        self.SendAppHeartbeat = channel.unary_unary(
-                '/flwr.proto.SimulationIo/SendAppHeartbeat',
-                request_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatResponse.FromString,
+        self.SendAppHeartbeatDeprecated = channel.unary_unary(
+                '/flwr.proto.SimulationIo/SendAppHeartbeatDeprecated',
+                request_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatDeprecatedRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatDeprecatedResponse.FromString,
                 _registered_method=True)
 
 
@@ -155,7 +155,7 @@ class SimulationIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SendAppHeartbeat(self, request, context):
+    def SendAppHeartbeatDeprecated(self, request, context):
         """Heartbeat
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -210,10 +210,10 @@ def add_SimulationIoServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.SerializeToString,
             ),
-            'SendAppHeartbeat': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendAppHeartbeat,
-                    request_deserializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatResponse.SerializeToString,
+            'SendAppHeartbeatDeprecated': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendAppHeartbeatDeprecated,
+                    request_deserializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatDeprecatedRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatDeprecatedResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -470,7 +470,7 @@ class SimulationIo(object):
             _registered_method=True)
 
     @staticmethod
-    def SendAppHeartbeat(request,
+    def SendAppHeartbeatDeprecated(request,
             target,
             options=(),
             channel_credentials=None,
@@ -483,9 +483,9 @@ class SimulationIo(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/flwr.proto.SimulationIo/SendAppHeartbeat',
-            flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatRequest.SerializeToString,
-            flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatResponse.FromString,
+            '/flwr.proto.SimulationIo/SendAppHeartbeatDeprecated',
+            flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatDeprecatedRequest.SerializeToString,
+            flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatDeprecatedResponse.FromString,
             options,
             channel_credentials,
             insecure,
