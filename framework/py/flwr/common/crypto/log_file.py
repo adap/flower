@@ -23,13 +23,25 @@ def init_csv():
 def log_time(msg: str, *args) -> None:
     """
     Scrive il messaggio su console e su CSV.
-    Gestisce sia f-string già formattate sia placeholder con args.
+    Può usare:
+      - placeholder stile % -> msg % args
+      - placeholder stile {} -> msg.format(*args)
+      - oppure msg + args concatenati se non sono placeholder validi
     """
     csv_path = init_csv()  # crea il file solo alla prima chiamata
 
-    try:
-        output = msg % args if args else msg
-    except TypeError:
+    if args:
+        # 1) prova stile printf: "valore: %.2f" % 1.23
+        try:
+            output = msg % args
+        except (TypeError, ValueError):
+            # 2) prova stile format: "valore: {:.2f}".format(1.23)
+            try:
+                output = msg.format(*args)
+            except Exception:
+                # 3) fallback: concatena tutto
+                output = " ".join([msg, *[str(a) for a in args]])
+    else:
         output = msg
 
     print(output, flush=True)

@@ -106,8 +106,12 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
     tot = end_tot - start_tot
     tot_senza_decrypto = tot - tot_decrypto
    ## log_time("TEMPO TOTALE DECRITTOGRAFIA: %.5f s", tot_decrypto)
-    log_time("TEMPO TOTALE DESERIALIZZAZIONE CON DECRYPT: %.5f s", tot)
-    log_time("TEMPO TOTALE DESERIALIZZAZIONE SENZA DECRYPT: %.5f s", tot_senza_decrypto)
+    log_time(
+        "TEMPO TOTALE DESERIALIZZAZIONE CON DECRYPT: %.5f s | "
+        "SENZA DECRYPT: %.5f s",
+        tot,
+        tot_senza_decrypto,
+    )
     return parameters
 
 
@@ -145,8 +149,12 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
     tot_senza_crypto = tot - tot_crypto  # Tempo totale meno il tempo accumulato di crittografia
 
    # log_time("TEMPO TOTALE CRITTOGRAFIA: %.5f s", tot_crypto)
-    log_time("TEMPO TOTALE SERIALIZZAZIONE CON CRITTOGRAFIA: %.5f s", tot)
-    log_time("TEMPO TOTALE SERIALIZZAZIONE SENZA CRITTOGRAFIA: %.5f s", tot_senza_crypto)
+    log_time(
+        "TEMPO TOTALE SERIALIZZAZIONE CON CRITTOGRAFIA: %.5f s | "
+        "SENZA CRITTOGRAFIA: %.5f s",
+        tot,
+        tot_senza_crypto,
+    )
 
     return ArrayRecord(ordered_dict, keep_input=keep_input)
 
