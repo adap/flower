@@ -63,41 +63,6 @@ class SendNodeHeartbeatResponse(google.protobuf.message.Message):
 global___SendNodeHeartbeatResponse = SendNodeHeartbeatResponse
 
 @typing.final
-class SendAppHeartbeatDeprecatedRequest(google.protobuf.message.Message):
-    """App Heartbeat messages (deprecated)"""
-
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
-    RUN_ID_FIELD_NUMBER: builtins.int
-    HEARTBEAT_INTERVAL_FIELD_NUMBER: builtins.int
-    run_id: builtins.int
-    heartbeat_interval: builtins.float
-    def __init__(
-        self,
-        *,
-        run_id: builtins.int = ...,
-        heartbeat_interval: builtins.float = ...,
-    ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["heartbeat_interval", b"heartbeat_interval", "run_id", b"run_id"]) -> None: ...
-
-global___SendAppHeartbeatDeprecatedRequest = SendAppHeartbeatDeprecatedRequest
-
-@typing.final
-class SendAppHeartbeatDeprecatedResponse(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
-    SUCCESS_FIELD_NUMBER: builtins.int
-    success: builtins.bool
-    def __init__(
-        self,
-        *,
-        success: builtins.bool = ...,
-    ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["success", b"success"]) -> None: ...
-
-global___SendAppHeartbeatDeprecatedResponse = SendAppHeartbeatDeprecatedResponse
-
-@typing.final
 class SendAppHeartbeatRequest(google.protobuf.message.Message):
     """App Heartbeat messages"""
 
