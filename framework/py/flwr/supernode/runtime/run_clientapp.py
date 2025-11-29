@@ -79,7 +79,6 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
     if parent_pid is not None:
         start_parent_process_monitor(parent_pid)
 
-    # Trigger telemetry event
     event(EventType.FLWR_CLIENTAPP_RUN_ENTER)
 
     channel = create_channel(
