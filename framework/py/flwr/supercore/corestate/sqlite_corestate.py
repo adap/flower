@@ -68,8 +68,7 @@ class SqliteCoreState(CoreState, SqliteMixin):
 
     def verify_token(self, run_id: int, token: str) -> bool:
         """Verify a token for the given run ID."""
-        # UNCOMMENT THIS WHEN HEARTBEAT IS ENABLED
-        # self._cleanup_expired_tokens()
+        self._cleanup_expired_tokens()
         query = "SELECT token FROM token_store WHERE run_id = :run_id;"
         data = {"run_id": uint64_to_int64(run_id)}
         rows = self.query(query, data)
@@ -85,8 +84,7 @@ class SqliteCoreState(CoreState, SqliteMixin):
 
     def get_run_id_by_token(self, token: str) -> int | None:
         """Get the run ID associated with a given token."""
-        # UNCOMMENT THIS WHEN HEARTBEAT IS ENABLED
-        # self._cleanup_expired_tokens()
+        self._cleanup_expired_tokens()
         query = "SELECT run_id FROM token_store WHERE token = :token;"
         data = {"token": token}
         rows = self.query(query, data)
