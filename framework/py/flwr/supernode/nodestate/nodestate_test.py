@@ -23,6 +23,7 @@ from flwr.common import ConfigRecord, Context, Message, Metadata, RecordDict
 from flwr.common.message import make_message
 from flwr.common.typing import Run
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
+from flwr.supercore.object_store import ObjectStoreFactory
 
 from . import InMemoryNodeState, NodeState
 
@@ -210,4 +211,4 @@ class InMemoryStateTest(StateTest):
 
     def state_factory(self) -> NodeState:
         """Return InMemoryState."""
-        return InMemoryNodeState()
+        return InMemoryNodeState(ObjectStoreFactory().store())

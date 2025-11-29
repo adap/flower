@@ -46,6 +46,7 @@ from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.compat.client.grpc_client.connection import grpc_connection
+from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supernode.nodestate import NodeStateFactory
 
 
@@ -343,7 +344,7 @@ def start_client_internal(
 
     # DeprecatedRunInfoStore gets initialized when the first connection is established
     run_info_store: DeprecatedRunInfoStore | None = None
-    state_factory = NodeStateFactory()
+    state_factory = NodeStateFactory(objectstore_factory=ObjectStoreFactory())
     state = state_factory.state()
 
     runs: dict[int, Run] = {}

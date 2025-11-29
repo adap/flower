@@ -50,6 +50,7 @@ from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.constant import NodeStatus
 from flwr.supercore.corestate.sqlite_corestate import SqliteCoreState
+from flwr.supercore.object_store.object_store import ObjectStore
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 from flwr.superlink.federation import FederationManager
 
@@ -183,9 +184,12 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
     """SQLite-based LinkState implementation."""
 
     def __init__(
-        self, database_path: str, federation_manager: FederationManager
+        self,
+        database_path: str,
+        federation_manager: FederationManager,
+        object_store: ObjectStore,
     ) -> None:
-        super().__init__(database_path)
+        super().__init__(database_path, object_store)
         federation_manager.linkstate = self
         self._federation_manager = federation_manager
 

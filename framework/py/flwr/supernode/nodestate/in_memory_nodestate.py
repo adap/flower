@@ -22,6 +22,7 @@ from threading import Lock
 from flwr.common import Context, Message
 from flwr.common.typing import Run
 from flwr.supercore.corestate.in_memory_corestate import InMemoryCoreState
+from flwr.supercore.object_store import ObjectStore
 
 from .nodestate import NodeState
 
@@ -39,8 +40,8 @@ class InMemoryNodeState(
 ):  # pylint: disable=too-many-instance-attributes
     """In-memory NodeState implementation."""
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, object_store: ObjectStore) -> None:
+        super().__init__(object_store)
         # Store node_id
         self.node_id: int | None = None
         # Store Object ID to MessageEntry mapping
