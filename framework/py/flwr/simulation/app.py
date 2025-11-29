@@ -38,7 +38,11 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
+from flwr.common.heartbeat import (
+    HeartbeatSender,
+    get_grpc_app_heartbeat_fn,
+    make_app_heartbeat_fn_grpc,
+)
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -143,6 +147,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     # Initialize variables for finally block
     flwr_dir = get_flwr_dir(flwr_dir_)
     log_uploader = None
+    heartbeat_sender_deprecated = None
     heartbeat_sender = None
     run = None
     run_status = None
@@ -220,6 +225,14 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         )
 
         # Set up heartbeat sender
+        heartbeat_fn_deprecated = get_grpc_app_heartbeat_fn(
+            conn._stub,
+            run.run_id,
+            failure_message="Heartbeat failed unexpectedly. The SuperLink could "
+            "not find the provided run ID, or the run status is invalid.",
+        )
+        heartbeat_sender_deprecated = HeartbeatSender(heartbeat_fn_deprecated)
+        heartbeat_sender_deprecated.start()
         heartbeat_sender = HeartbeatSender(
             make_app_heartbeat_fn_grpc(conn._stub, token)
         )
@@ -256,6 +269,8 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
 
     finally:
         # Stop heartbeat sender
+        if heartbeat_sender_deprecated and heartbeat_sender_deprecated.is_running:
+            heartbeat_sender_deprecated.stop()
         if heartbeat_sender and heartbeat_sender.is_running:
             heartbeat_sender.stop()
 
