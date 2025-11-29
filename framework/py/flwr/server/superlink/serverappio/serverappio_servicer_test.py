@@ -147,13 +147,13 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         self.temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         self.addCleanup(self.temp_dir.cleanup)  # Ensures cleanup after test
 
+        objectstore_factory = ObjectStoreFactory()
         state_factory = LinkStateFactory(
-            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
         )
         self.state = state_factory.state()
         ffs_factory = FfsFactory(self.temp_dir.name)
         self.ffs = ffs_factory.ffs()
-        objectstore_factory = ObjectStoreFactory()
         self.store = objectstore_factory.store()
         self.node_pk = b"fake public key"
         self.node_id = self.state.create_node(

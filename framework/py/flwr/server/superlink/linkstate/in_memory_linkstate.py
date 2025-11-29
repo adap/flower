@@ -42,6 +42,7 @@ from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
 from flwr.supercore.constant import NodeStatus
 from flwr.supercore.corestate.in_memory_corestate import InMemoryCoreState
+from flwr.supercore.object_store.object_store import ObjectStore
 from flwr.superlink.federation import FederationManager
 
 from .utils import (
@@ -69,8 +70,10 @@ class RunRecord:  # pylint: disable=R0902
 class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,R0904
     """In-memory LinkState implementation."""
 
-    def __init__(self, federation_manager: FederationManager) -> None:
-        super().__init__()
+    def __init__(
+        self, federation_manager: FederationManager, object_store: ObjectStore
+    ) -> None:
+        super().__init__(object_store)
 
         # Map node_id to NodeInfo
         self.nodes: dict[int, NodeInfo] = {}

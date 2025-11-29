@@ -61,6 +61,7 @@ from flwr.server.superlink.linkstate import (
 )
 from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
+from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.federation import NoOpFederationManager
 
@@ -1762,7 +1763,7 @@ class InMemoryStateTest(StateTest):
 
     def state_factory(self) -> InMemoryLinkState:
         """Return InMemoryState."""
-        return InMemoryLinkState(NoOpFederationManager())
+        return InMemoryLinkState(NoOpFederationManager(), ObjectStoreFactory().store())
 
     def test_owner_aid_index(self) -> None:
         """Test that the owner_aid index works correctly."""
@@ -1784,7 +1785,11 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
 
     def state_factory(self) -> SqliteLinkState:
         """Return SqliteState with in-memory database."""
-        state = SqliteLinkState(":memory:", federation_manager=NoOpFederationManager())
+        state = SqliteLinkState(
+            ":memory:",
+            federation_manager=NoOpFederationManager(),
+            object_store=ObjectStoreFactory().store(),
+        )
         state.initialize()
         return state
 
@@ -1810,7 +1815,9 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         # pylint: disable-next=consider-using-with,attribute-defined-outside-init
         self.tmp_file = tempfile.NamedTemporaryFile()
         state = SqliteLinkState(
-            database_path=self.tmp_file.name, federation_manager=NoOpFederationManager()
+            database_path=self.tmp_file.name,
+            federation_manager=NoOpFederationManager(),
+            object_store=ObjectStoreFactory().store(),
         )
         state.initialize()
         return state
