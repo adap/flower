@@ -234,7 +234,8 @@ def make_dummy_message(
     msg = make_message(metadata, content)
     # Set message ID if not provided
     if msg_id == "":
-        msg.metadata._message_id = msg.object_id
+        # pylint: disable-next=W0212
+        msg.metadata._message_id = msg.object_id  # type: ignore
     return msg
 
 

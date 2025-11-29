@@ -182,7 +182,7 @@ class InMemoryNodeState(
             ret -= set(self.token_store.keys())
             return list(ret)
 
-    def _on_tokens_expired(self, expired_records: list[tuple[int, str]]) -> None:
+    def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
         """Insert error replies for messages associated with expired tokens."""
         with self.lock_msg_store:
             # Find all retrieved messages associated with expired run IDs
@@ -199,7 +199,8 @@ class InMemoryNodeState(
 
                 # Insert objects of the error reply into the object store
                 with no_object_id_recompute():
-                    error_reply.metadata._message_id = error_reply.object_id
+                    # pylint: disable-next=W0212
+                    error_reply.metadata._message_id = error_reply.object_id  # type: ignore
                     object_tree = get_object_tree(error_reply)
                     self.object_store.preregister(msg.metadata.run_id, object_tree)
                     for obj_id, obj in get_all_nested_objects(error_reply).items():
