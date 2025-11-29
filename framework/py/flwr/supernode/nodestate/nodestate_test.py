@@ -15,11 +15,14 @@
 """Tests all NodeState implementations have to conform to."""
 
 
+from datetime import timedelta
 from typing import Any
+from unittest.mock import patch
 
 from parameterized import parameterized
 
-from flwr.common import ConfigRecord, Context, Message, Metadata, RecordDict
+from flwr.common import ConfigRecord, Context, Message, Metadata, RecordDict, now
+from flwr.common.constant import ErrorCode
 from flwr.common.message import make_message
 from flwr.common.typing import Run
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
@@ -183,6 +186,33 @@ class StateTest(CoreStateTest):
         # Assert: run 1 and run 5 should be returned
         self.assertEqual(set(run_ids), {1, 5})
 
+    def test_get_error_reply_when_token_expires(self) -> None:
+        """Test that error replies are created when tokens expire."""
+        # Prepare: Create a token for a run
+        run_id = 110
+        created_at = now()
+        token = self.state.create_token(run_id)
+        assert token is not None
+
+        # Prepare: store and retrieve a message for the run
+        msg = make_dummy_message(run_id=run_id)
+        self.state.store_message(msg)
+        assert self.state.get_messages(run_ids=[run_id])
+
+        # Execute: retrieve
+        with patch("datetime.datetime") as mock_datetime:
+            # Simulate time passage beyond token TTL
+            mock_datetime.now.return_value = created_at + timedelta(seconds=1e5)
+
+            # Retrieve replies
+            replies = self.state.get_messages(is_reply=True)
+
+        # Assert: error replies should be created for the message
+        self.assertEqual(len(replies), 1)
+        self.assertEqual(replies[0].metadata.reply_to_message_id, msg.object_id)
+        self.assertTrue(replies[0].has_error())
+        self.assertEqual(replies[0].error.code, ErrorCode.CLIENT_APP_CRASHED)
+
 
 def make_dummy_message(
     run_id: int = 110, is_reply: bool = False, msg_id: str = ""
@@ -201,7 +231,11 @@ def make_dummy_message(
         message_type="query",
     )
     content = RecordDict({"cfg": ConfigRecord({"key": "value"})})
-    return make_message(metadata, content)
+    msg = make_message(metadata, content)
+    # Set message ID if not provided
+    if msg_id == "":
+        msg.metadata._message_id = msg.object_id
+    return msg
 
 
 class InMemoryStateTest(StateTest):

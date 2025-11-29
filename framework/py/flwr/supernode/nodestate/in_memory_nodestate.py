@@ -17,14 +17,24 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from threading import Lock
+from threading import RLock
 
-from flwr.common import Context, Message
+from flwr.common import Context, Error, Message
+from flwr.common.constant import ErrorCode
+from flwr.common.inflatable import (
+    get_all_nested_objects,
+    get_object_tree,
+    no_object_id_recompute,
+)
 from flwr.common.typing import Run
 from flwr.supercore.corestate.in_memory_corestate import InMemoryCoreState
 from flwr.supercore.object_store import ObjectStore
 
 from .nodestate import NodeState
+
+CLIENT_APP_CRASHED_ERROR = Error(
+    ErrorCode.CLIENT_APP_CRASHED, "ClientApp stopped responding."
+)
 
 
 @dataclass
@@ -46,13 +56,13 @@ class InMemoryNodeState(
         self.node_id: int | None = None
         # Store Object ID to MessageEntry mapping
         self.msg_store: dict[str, MessageEntry] = {}
-        self.lock_msg_store = Lock()
+        self.lock_msg_store = RLock()
         # Store run ID to Run mapping
         self.run_store: dict[int, Run] = {}
-        self.lock_run_store = Lock()
+        self.lock_run_store = RLock()
         # Store run ID to Context mapping
         self.ctx_store: dict[int, Context] = {}
-        self.lock_ctx_store = Lock()
+        self.lock_ctx_store = RLock()
 
     def set_node_id(self, node_id: int | None) -> None:
         """Set the node ID."""
@@ -66,6 +76,8 @@ class InMemoryNodeState(
 
     def store_message(self, message: Message) -> str | None:
         """Store a message."""
+        # No need to check for expired tokens here
+        # The ClientAppIo servicer will first verify the token before storing messages
         with self.lock_msg_store:
             msg_id = message.metadata.message_id
             if msg_id == "" or msg_id in self.msg_store:
@@ -81,8 +93,9 @@ class InMemoryNodeState(
         limit: int | None = None,
     ) -> Sequence[Message]:
         """Retrieve messages based on the specified filters."""
-        selected_messages: list[Message] = []
+        self._cleanup_expired_tokens()
 
+        selected_messages: list[Message] = []
         with self.lock_msg_store:
             # Iterate through all messages in the store
             for object_id in list(self.msg_store.keys()):
@@ -168,3 +181,29 @@ class InMemoryNodeState(
         with self.lock_token_store:
             ret -= set(self.token_store.keys())
             return list(ret)
+
+    def _on_tokens_expired(self, expired_records: list[tuple[int, str]]) -> None:
+        """Insert error replies for messages associated with expired tokens."""
+        with self.lock_msg_store:
+            # Find all retrieved messages associated with expired run IDs
+            expired_run_ids = {run_id for run_id, _ in expired_records}
+            messages_to_reply: list[Message] = []
+            for entry in self.msg_store.values():
+                msg = entry.message
+                if msg.metadata.run_id in expired_run_ids and entry.is_retrieved:
+                    messages_to_reply.append(msg)
+
+            # Create and store error replies for each message
+            for msg in messages_to_reply:
+                error_reply = Message(CLIENT_APP_CRASHED_ERROR, reply_to=msg)
+
+                # Insert objects of the error reply into the object store
+                with no_object_id_recompute():
+                    error_reply.metadata._message_id = error_reply.object_id
+                    object_tree = get_object_tree(error_reply)
+                    self.object_store.preregister(msg.metadata.run_id, object_tree)
+                    for obj_id, obj in get_all_nested_objects(error_reply).items():
+                        self.object_store.put(obj_id, obj.deflate())
+
+                # Store the error reply message
+                self.store_message(error_reply)
