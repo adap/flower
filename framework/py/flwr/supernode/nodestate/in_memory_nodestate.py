@@ -17,7 +17,7 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from threading import RLock
+from threading import Lock, RLock
 
 from flwr.common import Context, Error, Message
 from flwr.common.constant import ErrorCode
@@ -59,10 +59,10 @@ class InMemoryNodeState(
         self.lock_msg_store = RLock()
         # Store run ID to Run mapping
         self.run_store: dict[int, Run] = {}
-        self.lock_run_store = RLock()
+        self.lock_run_store = Lock()
         # Store run ID to Context mapping
         self.ctx_store: dict[int, Context] = {}
-        self.lock_ctx_store = RLock()
+        self.lock_ctx_store = Lock()
 
     def set_node_id(self, node_id: int | None) -> None:
         """Set the node ID."""
