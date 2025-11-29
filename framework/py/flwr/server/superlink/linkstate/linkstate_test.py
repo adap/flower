@@ -22,7 +22,6 @@ import time
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timedelta, timezone
-from itertools import product
 from unittest.mock import Mock, patch
 from uuid import uuid4
 
@@ -38,7 +37,6 @@ from flwr.common import (
     now,
 )
 from flwr.common.constant import (
-    HEARTBEAT_PATIENCE,
     HEARTBEAT_DEFAULT_INTERVAL,
     RUN_FAILURE_DETAILS_NO_HEARTBEAT,
     SUPERLINK_NODE_ID,
@@ -210,9 +208,7 @@ class StateTest(CoreStateTest):
     @parameterized.expand(
         [("get_run",), ("get_run_status",), ("update_run_status",)]
     )  # type: ignore
-    def test_run_failed_due_to_heartbeat(
-        self, test_method: str
-    ) -> None:
+    def test_run_failed_due_to_heartbeat(self, test_method: str) -> None:
         """Test methods work correctly when the run has no heartbeat."""
         # Prepare
         state = self.state_factory()
