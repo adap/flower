@@ -307,6 +307,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 f"Run ID {run_id} is already finished",
             )
 
+        # Delete the token associated with the run to stop further operations
+        state.delete_token(run_id)
+
+        # Update run status to finished:stopped
         update_success = state.update_run_status(
             run_id=run_id,
             new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),

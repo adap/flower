@@ -37,7 +37,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.exit import ExitCode, flwr_exit
+from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -147,6 +147,28 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     run = None
     run_status = None
 
+    def on_exit() -> None:
+        # Stop heartbeat sender
+        if heartbeat_sender and heartbeat_sender.is_running:
+            heartbeat_sender.stop()
+
+        # Stop log uploader for this run and upload final logs
+        if log_uploader:
+            stop_log_uploader(log_queue, log_uploader)
+
+        # Update run status
+        if run and run_status:
+            run_status_proto = run_status_to_proto(run_status)
+            conn._stub.UpdateRunStatus(
+                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
+            )
+
+    register_signal_handlers(
+        event_type=EventType.FLWR_SIMULATION_RUN_LEAVE,
+        exit_message="Run stopped by user.",
+        exit_handlers=[on_exit],
+    )
+
     try:
         # Pull SimulationInputs from LinkState
         req = PullAppInputsRequest(token=token)
@@ -254,27 +276,10 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
         run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
 
-    finally:
-        # Stop heartbeat sender
-        if heartbeat_sender and heartbeat_sender.is_running:
-            heartbeat_sender.stop()
-
-        # Stop log uploader for this run and upload final logs
-        if log_uploader:
-            stop_log_uploader(log_queue, log_uploader)
-
-        # Update run status
-        if run and run_status:
-            run_status_proto = run_status_to_proto(run_status)
-            conn._stub.UpdateRunStatus(
-                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
-            )
-
-        # Clean up the Context if it exists
-        try:
-            del updated_context
-        except NameError:
-            pass
+    flwr_exit(
+        code=ExitCode.SUCCESS,
+        event_type=EventType.FLWR_SIMULATION_RUN_LEAVE,
+    )
 
 
 def _parse_args_run_flwr_simulation() -> argparse.ArgumentParser:
