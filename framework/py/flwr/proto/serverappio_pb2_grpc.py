@@ -100,6 +100,11 @@ class ServerAppIoStub(object):
                 request_serializer=flwr_dot_proto_dot_log__pb2.PushLogsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_log__pb2.PushLogsResponse.FromString,
                 _registered_method=True)
+        self.SendAppHeartbeatDeprecated = channel.unary_unary(
+                '/flwr.proto.ServerAppIo/SendAppHeartbeatDeprecated',
+                request_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatDeprecatedRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatDeprecatedResponse.FromString,
+                _registered_method=True)
         self.SendAppHeartbeat = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/SendAppHeartbeat',
                 request_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatRequest.SerializeToString,
@@ -209,8 +214,15 @@ class ServerAppIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SendAppHeartbeat(self, request, context):
+    def SendAppHeartbeatDeprecated(self, request, context):
         """Heartbeat
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SendAppHeartbeat(self, request, context):
+        """App heartbeat
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -299,6 +311,11 @@ def add_ServerAppIoServicer_to_server(servicer, server):
                     servicer.PushLogs,
                     request_deserializer=flwr_dot_proto_dot_log__pb2.PushLogsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_log__pb2.PushLogsResponse.SerializeToString,
+            ),
+            'SendAppHeartbeatDeprecated': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendAppHeartbeatDeprecated,
+                    request_deserializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatDeprecatedRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatDeprecatedResponse.SerializeToString,
             ),
             'SendAppHeartbeat': grpc.unary_unary_rpc_method_handler(
                     servicer.SendAppHeartbeat,
@@ -645,6 +662,33 @@ class ServerAppIo(object):
             '/flwr.proto.ServerAppIo/PushLogs',
             flwr_dot_proto_dot_log__pb2.PushLogsRequest.SerializeToString,
             flwr_dot_proto_dot_log__pb2.PushLogsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SendAppHeartbeatDeprecated(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/flwr.proto.ServerAppIo/SendAppHeartbeatDeprecated',
+            flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatDeprecatedRequest.SerializeToString,
+            flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatDeprecatedResponse.FromString,
             options,
             channel_credentials,
             insecure,

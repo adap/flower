@@ -62,6 +62,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.supercore.app_utils import start_parent_process_monitor
+from flwr.supercore.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
 from flwr.supercore.utils import mask_string
 
 
@@ -83,12 +84,17 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
         root_certificates=certificates,
     )
     channel.subscribe(on_channel_state_change)
+    heartbeat_sender = None
 
     # Resolve directory where FABs are installed
     flwr_dir_ = get_flwr_dir(flwr_dir)
     try:
         stub = ClientAppIoStub(channel)
         _wrap_stub(stub, _make_simple_grpc_retry_invoker())
+
+        # Start app heartbeat
+        heartbeat_sender = HeartbeatSender(make_app_heartbeat_fn_grpc(stub, token))
+        heartbeat_sender.start()
 
         # Pull Message, Context, Run and (optional) FAB from SuperNode
         message, context, run, fab = pull_clientappinputs(stub=stub, token=token)
@@ -143,6 +149,8 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
     except grpc.RpcError as e:
         log(ERROR, "GRPC error occurred: %s", str(e))
     finally:
+        if heartbeat_sender is not None and heartbeat_sender.is_running:
+            heartbeat_sender.stop()
         channel.close()
 
 

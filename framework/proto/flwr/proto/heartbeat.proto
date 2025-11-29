@@ -26,9 +26,13 @@ message SendNodeHeartbeatRequest {
 }
 message SendNodeHeartbeatResponse { bool success = 1; }
 
-// App Heartbeat messages
-message SendAppHeartbeatRequest {
+// App Heartbeat messages (deprecated)
+message SendAppHeartbeatDeprecatedRequest {
   uint64 run_id = 1;
   double heartbeat_interval = 2;
 }
+message SendAppHeartbeatDeprecatedResponse { bool success = 1; }
+
+// App Heartbeat messages
+message SendAppHeartbeatRequest { string token = 1; }
 message SendAppHeartbeatResponse { bool success = 1; }

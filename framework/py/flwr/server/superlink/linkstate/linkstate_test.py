@@ -22,7 +22,6 @@ import time
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timedelta, timezone
-from itertools import product
 from unittest.mock import Mock, patch
 from uuid import uuid4
 
@@ -38,7 +37,7 @@ from flwr.common import (
     now,
 )
 from flwr.common.constant import (
-    HEARTBEAT_PATIENCE,
+    HEARTBEAT_DEFAULT_INTERVAL,
     RUN_FAILURE_DETAILS_NO_HEARTBEAT,
     SUPERLINK_NODE_ID,
     ErrorCode,
@@ -61,6 +60,7 @@ from flwr.server.superlink.linkstate import (
 )
 from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
+from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.federation import NoOpFederationManager
 
@@ -207,22 +207,19 @@ class StateTest(CoreStateTest):
         assert status2.status == Status.RUNNING
 
     @parameterized.expand(
-        product([1, 2], ["get_run", "get_run_status", "update_run_status"])
+        [("get_run",), ("get_run_status",), ("update_run_status",)]
     )  # type: ignore
-    def test_run_failed_due_to_heartbeat(
-        self, num_transitions: int, test_method: str
-    ) -> None:
+    def test_run_failed_due_to_heartbeat(self, test_method: str) -> None:
         """Test methods work correctly when the run has no heartbeat."""
         # Prepare
         state = self.state_factory()
         run_id = create_dummy_run(state)
-        # Transition run status to STARTING or RUNNING
-        transition_run_status(state, run_id, num_transitions)
-        state.acknowledge_app_heartbeat_deprecated(run_id, 2)
+        assert state.create_token(run_id) is not None
+        state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
 
         # Execute
-        # The run should be marked as failed after HEARTBEAT_PATIENCE * 2s
-        patched_dt = now() + timedelta(seconds=HEARTBEAT_PATIENCE * 2 + 1)
+        # The run should be marked as failed after HEARTBEAT_DEFAULT_INTERVAL
+        patched_dt = now() + timedelta(seconds=HEARTBEAT_DEFAULT_INTERVAL + 1)
 
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = patched_dt
@@ -1044,35 +1041,6 @@ class StateTest(CoreStateTest):
                 actual = datetime.fromisoformat(node.last_deactivated_at).timestamp()
                 self.assertAlmostEqual(actual, expected_deactivated_at, 1)
 
-    def test_acknowledge_app_heartbeat(self) -> None:
-        """Test if acknowledge_app_heartbeat works."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        run_id1 = create_dummy_run(state)
-        run_id2 = create_dummy_run(state)
-        # Switch to "running" status
-        transition_run_status(state, run_id1, 2)
-        transition_run_status(state, run_id2, 2)
-        # Heartbeat from run_id1
-        state.acknowledge_app_heartbeat_deprecated(run_id1, 30)
-        state.acknowledge_app_heartbeat_deprecated(run_id2, 2)
-
-        # Execute
-        # The run_id1 should be marked as inactive after HEARTBEAT_PATIENCE * 30s,
-        # and the run_id2 after HEARTBEAT_PATIENCE * 2s.
-        future_dt = now() + timedelta(seconds=20)
-        with patch("datetime.datetime") as mock_dt:
-            mock_dt.now.return_value = future_dt
-            run_status_dict = state.get_run_status({run_id1, run_id2})
-            status1 = run_status_dict[run_id1]
-            status2 = run_status_dict[run_id2]
-
-        # Assert
-        assert status1.status == Status.RUNNING
-        assert status2.status == Status.FINISHED
-        assert status2.sub_status == SubStatus.FAILED
-        assert status2.details == RUN_FAILURE_DETAILS_NO_HEARTBEAT
-
     def test_acknowledge_node_heartbeat_failed(self) -> None:
         """Test that acknowledge_node_heartbeat returns False when the heartbeat
         fails."""
@@ -1081,20 +1049,6 @@ class StateTest(CoreStateTest):
 
         # Execute
         is_successful = state.acknowledge_node_heartbeat(0, heartbeat_interval=30)
-
-        # Assert
-        assert not is_successful
-
-    def test_acknowledge_app_heartbeat_failed(self) -> None:
-        """Test that acknowledge_app_heartbeat returns False when the heartbeat
-        fails."""
-        # Prepare
-        state: LinkState = self.state_factory()
-
-        # Execute
-        is_successful = state.acknowledge_app_heartbeat_deprecated(
-            61016, heartbeat_interval=30
-        )
 
         # Assert
         assert not is_successful
@@ -1762,7 +1716,7 @@ class InMemoryStateTest(StateTest):
 
     def state_factory(self) -> InMemoryLinkState:
         """Return InMemoryState."""
-        return InMemoryLinkState(NoOpFederationManager())
+        return InMemoryLinkState(NoOpFederationManager(), ObjectStoreFactory().store())
 
     def test_owner_aid_index(self) -> None:
         """Test that the owner_aid index works correctly."""
@@ -1784,7 +1738,11 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
 
     def state_factory(self) -> SqliteLinkState:
         """Return SqliteState with in-memory database."""
-        state = SqliteLinkState(":memory:", federation_manager=NoOpFederationManager())
+        state = SqliteLinkState(
+            ":memory:",
+            federation_manager=NoOpFederationManager(),
+            object_store=ObjectStoreFactory().store(),
+        )
         state.initialize()
         return state
 
@@ -1810,7 +1768,9 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         # pylint: disable-next=consider-using-with,attribute-defined-outside-init
         self.tmp_file = tempfile.NamedTemporaryFile()
         state = SqliteLinkState(
-            database_path=self.tmp_file.name, federation_manager=NoOpFederationManager()
+            database_path=self.tmp_file.name,
+            federation_manager=NoOpFederationManager(),
+            object_store=ObjectStoreFactory().store(),
         )
         state.initialize()
         return state

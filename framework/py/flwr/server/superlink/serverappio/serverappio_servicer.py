@@ -57,6 +57,8 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
+    SendAppHeartbeatDeprecatedRequest,
+    SendAppHeartbeatDeprecatedResponse,
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
 )
@@ -449,11 +451,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         }
         return GetRunStatusResponse(run_status_dict=run_status_dict)
 
-    def SendAppHeartbeat(
-        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
-    ) -> SendAppHeartbeatResponse:
+    def SendAppHeartbeatDeprecated(
+        self, request: SendAppHeartbeatDeprecatedRequest, context: grpc.ServicerContext
+    ) -> SendAppHeartbeatDeprecatedResponse:
         """Handle a heartbeat from the ServerApp."""
-        log(DEBUG, "ServerAppIoServicer.SendAppHeartbeat")
+        log(DEBUG, "ServerAppIoServicer.SendAppHeartbeatDeprecated")
 
         # Init state
         state = self.state_factory.state()
@@ -466,6 +468,19 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             heartbeat_interval=request.heartbeat_interval,
         )
 
+        return SendAppHeartbeatDeprecatedResponse(success=success)
+
+    def SendAppHeartbeat(
+        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
+    ) -> SendAppHeartbeatResponse:
+        """Handle a heartbeat from an app process."""
+        log(DEBUG, "ServerAppIoServicer.SendAppHeartbeat")
+
+        # Init state
+        state = self.state_factory.state()
+
+        # Acknowledge the heartbeat
+        success = state.acknowledge_app_heartbeat(request.token)
         return SendAppHeartbeatResponse(success=success)
 
     def PushObject(

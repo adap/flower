@@ -55,6 +55,10 @@ service SimulationIo {
   rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
 
   // Heartbeat
+  rpc SendAppHeartbeatDeprecated(SendAppHeartbeatDeprecatedRequest)
+      returns (SendAppHeartbeatDeprecatedResponse) {}
+
+  // App heartbeat
   rpc SendAppHeartbeat(SendAppHeartbeatRequest)
       returns (SendAppHeartbeatResponse) {}
 }

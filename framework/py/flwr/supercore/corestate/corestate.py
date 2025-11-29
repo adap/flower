@@ -17,9 +17,16 @@
 
 from abc import ABC, abstractmethod
 
+from ..object_store import ObjectStore
+
 
 class CoreState(ABC):
     """Abstract base class for core state."""
+
+    @property
+    @abstractmethod
+    def object_store(self) -> ObjectStore:
+        """Return the ObjectStore instance used by this CoreState."""
 
     @abstractmethod
     def create_token(self, run_id: int) -> str | None:
@@ -77,4 +84,19 @@ class CoreState(ABC):
         -------
         Optional[int]
             The run ID if the token is valid, otherwise None.
+        """
+
+    @abstractmethod
+    def acknowledge_app_heartbeat(self, token: str) -> bool:
+        """Acknowledge an app heartbeat with the provided token.
+
+        Parameters
+        ----------
+        token : str
+            The token associated with the app.
+
+        Returns
+        -------
+        bool
+            True if the heartbeat is acknowledged successfully, False otherwise.
         """
