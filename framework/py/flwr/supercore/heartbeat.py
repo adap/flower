@@ -32,13 +32,13 @@ from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 
 # pylint: enable=E0611
-from .constant import (
+from ..common.constant import (
     HEARTBEAT_BASE_MULTIPLIER,
     HEARTBEAT_CALL_TIMEOUT,
     HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_RANDOM_RANGE,
 )
-from .retry_invoker import RetryInvoker, exponential
+from ..common.retry_invoker import RetryInvoker, exponential
 
 
 class HeartbeatFailure(Exception):

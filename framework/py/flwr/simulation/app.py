@@ -38,11 +38,6 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.heartbeat import (
-    HeartbeatSender,
-    get_grpc_app_heartbeat_fn,
-    make_app_heartbeat_fn_grpc,
-)
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -74,6 +69,11 @@ from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 from flwr.supercore.app_utils import start_parent_process_monitor
+from flwr.supercore.heartbeat import (
+    HeartbeatSender,
+    get_grpc_app_heartbeat_fn,
+    make_app_heartbeat_fn_grpc,
+)
 from flwr.supercore.superexec.plugin import SimulationExecPlugin
 from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 

@@ -27,7 +27,6 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.inflatable_protobuf_utils import (
     make_confirm_message_received_fn_protobuf,
     make_pull_object_fn_protobuf,
@@ -73,6 +72,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.supercore.heartbeat import HeartbeatSender
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 
 try:
