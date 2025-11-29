@@ -21,19 +21,23 @@ from collections.abc import Callable
 
 import grpc
 
-# pylint: disable=E0611
-from flwr.proto.heartbeat_pb2 import SendAppHeartbeatDeprecatedRequest
-from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
-from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
-
 # pylint: enable=E0611
-from .constant import (
+from flwr.common.constant import (
     HEARTBEAT_BASE_MULTIPLIER,
     HEARTBEAT_CALL_TIMEOUT,
     HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_RANDOM_RANGE,
 )
-from .retry_invoker import RetryInvoker, exponential
+from flwr.common.retry_invoker import RetryInvoker, exponential
+from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
+
+# pylint: disable=E0611
+from flwr.proto.heartbeat_pb2 import (
+    SendAppHeartbeatDeprecatedRequest,
+    SendAppHeartbeatRequest,
+)
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 
 
 class HeartbeatFailure(Exception):
@@ -160,6 +164,47 @@ def get_grpc_app_heartbeat_fn(
         # Check if not successful
         if not res.success:
             raise RuntimeError(failure_message)
+        return True
+
+    return fn
+
+
+def make_app_heartbeat_fn_grpc(
+    stub: ServerAppIoStub | SimulationIoStub | ClientAppIoStub,
+    token: str,
+) -> Callable[[], bool]:
+    """Get the function to send a heartbeat to gRPC endpoint from an app process.
+
+    Parameters
+    ----------
+    stub : Union[ServerAppIoStub, SimulationIoStub]
+        gRPC stub to send the heartbeat.
+    token : str
+        The token to use in the heartbeat request.
+
+    Returns
+    -------
+    Callable[[], bool]
+        Function that sends a heartbeat to the gRPC endpoint.
+    """
+    # Construct the heartbeat request
+    req = SendAppHeartbeatRequest(token=token)
+
+    def fn() -> bool:
+        # Call ServerAppIo API
+        try:
+            res = stub.SendAppHeartbeat(req)
+        except grpc.RpcError as e:
+            status_code = e.code()
+            if status_code == grpc.StatusCode.UNAVAILABLE:
+                return False
+            if status_code == grpc.StatusCode.DEADLINE_EXCEEDED:
+                return False
+            raise
+
+        # Check if not successful
+        if not res.success:
+            raise RuntimeError("Heartbeat failed unexpectedly.")
         return True
 
     return fn

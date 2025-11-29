@@ -18,7 +18,7 @@
 import tempfile
 import unittest
 from datetime import timedelta
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import grpc
 from parameterized import parameterized
@@ -57,6 +57,8 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatDeprecatedRequest,
     SendAppHeartbeatDeprecatedResponse,
+    SendAppHeartbeatRequest,
+    SendAppHeartbeatResponse,
 )
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
@@ -199,6 +201,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             "/flwr.proto.ServerAppIo/SendAppHeartbeatDeprecated",
             request_serializer=SendAppHeartbeatDeprecatedRequest.SerializeToString,
             response_deserializer=SendAppHeartbeatDeprecatedResponse.FromString,
+        )
+        self._send_app_heartbeat = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/SendAppHeartbeat",
+            request_serializer=SendAppHeartbeatRequest.SerializeToString,
+            response_deserializer=SendAppHeartbeatResponse.FromString,
         )
         self._push_object = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PushObject",
@@ -711,6 +718,23 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
 
         # Assert
         assert not response.success
+
+    @parameterized.expand([(True,), (False,)])  # type: ignore
+    def test_send_app_heartbeat(self, success: bool) -> None:
+        """Test sending an app heartbeat."""
+        # Prepare
+        token = "test-token"
+        request = SendAppHeartbeatRequest(token=token)
+        mock_ack_method = Mock(return_value=success)
+        self.state.acknowledge_app_heartbeat = mock_ack_method  # type: ignore
+
+        # Execute
+        response, _ = self._send_app_heartbeat.with_call(request=request)
+
+        # Assert
+        self.assertIsInstance(response, SendAppHeartbeatResponse)
+        self.assertEqual(response.success, success)
+        mock_ack_method.assert_called_once_with(token)
 
     def test_push_object_succesful(self) -> None:
         """Test `PushObject`."""

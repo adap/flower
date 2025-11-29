@@ -474,7 +474,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
     ) -> SendAppHeartbeatResponse:
         """Handle a heartbeat from an app process."""
-        raise NotImplementedError
+        log(DEBUG, "ServerAppIoServicer.SendAppHeartbeat")
+
+        # Init state
+        state = self.state_factory.state()
+
+        # Acknowledge the heartbeat
+        success = state.acknowledge_app_heartbeat(request.token)
+        return SendAppHeartbeatResponse(success=success)
 
     def PushObject(
         self, request: PushObjectRequest, context: grpc.ServicerContext
