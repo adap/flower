@@ -602,32 +602,10 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                 return set(self.flwr_aid_to_run_ids.get(flwr_aid, ()))
             return set(self.run_ids.keys())
 
-    def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
-        """Check if any runs are no longer active.
-
-        Marks runs with status 'starting' or 'running' as failed
-        if they have not sent a heartbeat before `active_until`.
-        """
-        current = now()
-        for record in (self.run_ids.get(run_id) for run_id in run_ids):
-            if record is None:
-                continue
-            with record.lock:
-                if record.run.status.status in (Status.STARTING, Status.RUNNING):
-                    if record.active_until < current.timestamp():
-                        record.run.status = RunStatus(
-                            status=Status.FINISHED,
-                            sub_status=SubStatus.FAILED,
-                            details=RUN_FAILURE_DETAILS_NO_HEARTBEAT,
-                        )
-                        record.run.finished_at = datetime.fromtimestamp(
-                            record.active_until, tz=timezone.utc
-                        ).isoformat()
-
     def get_run(self, run_id: int) -> Run | None:
         """Retrieve information about the run with the specified `run_id`."""
-        # Check if runs are still active
-        self._check_and_tag_inactive_run(run_ids={run_id})
+        # Clean up expired tokens; this will flag inactive runs as needed
+        self._cleanup_expired_tokens()
 
         with self.lock:
             if run_id not in self.run_ids:
@@ -637,8 +615,8 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
-        # Check if runs are still active
-        self._check_and_tag_inactive_run(run_ids=run_ids)
+        # Clean up expired tokens; this will flag inactive runs as needed
+        self._cleanup_expired_tokens()
 
         with self.lock:
             return {
@@ -649,8 +627,8 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
 
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
-        # Check if runs are still active
-        self._check_and_tag_inactive_run(run_ids={run_id})
+        # Clean up expired tokens; this will flag inactive runs as needed
+        self._cleanup_expired_tokens()
 
         with self.lock:
             # Check if the run_id exists
@@ -769,10 +747,10 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                 log(ERROR, "`run_id` is invalid")
                 return False
 
-        with record.lock:
-            # Check if runs are still active
-            self._check_and_tag_inactive_run(run_ids={run_id})
+        # Clean up expired tokens; this will flag inactive runs as needed
+        self._cleanup_expired_tokens()
 
+        with record.lock:
             # Check if the run is of status "running"/"starting"
             current_status = record.run.status
             if current_status.status not in (Status.RUNNING, Status.STARTING):
