@@ -46,6 +46,7 @@ class FlowerClient(NumPyClient):
         t = self.proc.cpu_times()
         return t.user + t.system
     def fit(self, parameters, config):
+        print(f"[CLIENT {os.getpid()}] fit() STARTED", flush=True)
         try:
             set_weights(self.net, parameters)
 
