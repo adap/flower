@@ -7,7 +7,7 @@ import psutil
 import torch
 ##Per resnet 34ù
 ##Per resnet 34
-torch.set_num_threads(4)
+torch.set_num_threads(3)
 ##Per resnet 18
 #torch.set_num_threads(6)
 torch.set_num_interop_threads(1)
