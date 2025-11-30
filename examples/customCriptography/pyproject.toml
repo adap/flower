@@ -43,3 +43,11 @@ insecure = true
 #options.backend.client-resources.num-cpus = 3
 #options.backend.client-resources.num-gpus = 0
 
+
+[tool.flwr.federations.my-federation.backend]
+type = "ray"
+
+[tool.flwr.federations.my-federation.backend.ray]
+client-cpus = 3
+client-gpus = 0
+
