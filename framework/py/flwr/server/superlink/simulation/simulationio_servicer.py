@@ -45,8 +45,6 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     RequestTokenResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
-    SendAppHeartbeatDeprecatedRequest,
-    SendAppHeartbeatDeprecatedResponse,
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
 )
@@ -266,25 +264,6 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         return GetFederationOptionsResponse(
             federation_options=config_record_to_proto(federation_options)
         )
-
-    def SendAppHeartbeatDeprecated(
-        self, request: SendAppHeartbeatDeprecatedRequest, context: grpc.ServicerContext
-    ) -> SendAppHeartbeatDeprecatedResponse:
-        """Handle a heartbeat from the ServerApp in simulation."""
-        log(DEBUG, "SimultionIoServicer.SendAppHeartbeatDeprecated")
-
-        # Init state
-        state = self.state_factory.state()
-
-        # Acknowledge the heartbeat
-        # The app heartbeat can only be acknowledged if the run is in
-        # starting or running status.
-        success = state.acknowledge_app_heartbeat_deprecated(
-            run_id=request.run_id,
-            heartbeat_interval=request.heartbeat_interval,
-        )
-
-        return SendAppHeartbeatDeprecatedResponse(success=success)
 
     def SendAppHeartbeat(
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext

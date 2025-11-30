@@ -1134,18 +1134,6 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             self.conn.execute(query, params)
             return True
 
-    def acknowledge_app_heartbeat_deprecated(
-        self, run_id: int, heartbeat_interval: float
-    ) -> bool:
-        """Acknowledge a heartbeat received from a ServerApp for a given run.
-
-        A run with status `"running"` is considered alive as long as it sends heartbeats
-        within the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
-        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before the run is
-        marked as `"completed:failed"`.
-        """
-        return True
-
     def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
         """Transition runs with expired tokens to failed status.
 

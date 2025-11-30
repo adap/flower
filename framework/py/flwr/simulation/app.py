@@ -37,7 +37,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.exit import ExitCode, flwr_exit
+from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -69,11 +69,7 @@ from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 from flwr.supercore.app_utils import start_parent_process_monitor
-from flwr.supercore.heartbeat import (
-    HeartbeatSender,
-    get_grpc_app_heartbeat_fn,
-    make_app_heartbeat_fn_grpc,
-)
+from flwr.supercore.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
 from flwr.supercore.superexec.plugin import SimulationExecPlugin
 from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 
@@ -147,10 +143,31 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     # Initialize variables for finally block
     flwr_dir = get_flwr_dir(flwr_dir_)
     log_uploader = None
-    heartbeat_sender_deprecated = None
     heartbeat_sender = None
     run = None
     run_status = None
+
+    def on_exit() -> None:
+        # Stop heartbeat sender
+        if heartbeat_sender and heartbeat_sender.is_running:
+            heartbeat_sender.stop()
+
+        # Stop log uploader for this run and upload final logs
+        if log_uploader:
+            stop_log_uploader(log_queue, log_uploader)
+
+        # Update run status
+        if run and run_status:
+            run_status_proto = run_status_to_proto(run_status)
+            conn._stub.UpdateRunStatus(
+                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
+            )
+
+    register_signal_handlers(
+        event_type=EventType.FLWR_SIMULATION_RUN_LEAVE,
+        exit_message="Run stopped by user.",
+        exit_handlers=[on_exit],
+    )
 
     try:
         # Pull SimulationInputs from LinkState
@@ -225,14 +242,6 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         )
 
         # Set up heartbeat sender
-        heartbeat_fn_deprecated = get_grpc_app_heartbeat_fn(
-            conn._stub,
-            run.run_id,
-            failure_message="Heartbeat failed unexpectedly. The SuperLink could "
-            "not find the provided run ID, or the run status is invalid.",
-        )
-        heartbeat_sender_deprecated = HeartbeatSender(heartbeat_fn_deprecated)
-        heartbeat_sender_deprecated.start()
         heartbeat_sender = HeartbeatSender(
             make_app_heartbeat_fn_grpc(conn._stub, token)
         )
@@ -267,29 +276,10 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
         run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
 
-    finally:
-        # Stop heartbeat sender
-        if heartbeat_sender_deprecated and heartbeat_sender_deprecated.is_running:
-            heartbeat_sender_deprecated.stop()
-        if heartbeat_sender and heartbeat_sender.is_running:
-            heartbeat_sender.stop()
-
-        # Stop log uploader for this run and upload final logs
-        if log_uploader:
-            stop_log_uploader(log_queue, log_uploader)
-
-        # Update run status
-        if run and run_status:
-            run_status_proto = run_status_to_proto(run_status)
-            conn._stub.UpdateRunStatus(
-                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
-            )
-
-        # Clean up the Context if it exists
-        try:
-            del updated_context
-        except NameError:
-            pass
+    flwr_exit(
+        code=ExitCode.SUCCESS,
+        event_type=EventType.FLWR_SIMULATION_RUN_LEAVE,
+    )
 
 
 def _parse_args_run_flwr_simulation() -> argparse.ArgumentParser:
