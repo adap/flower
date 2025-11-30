@@ -233,12 +233,13 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         verbose: bool = fed_opt.get("verbose", False)
         enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
 
+        run_id_hash = get_sha256_hash(run.run_id)
         event(
             EventType.FLWR_SIMULATION_RUN_ENTER,
             event_details={
                 "backend": "ray",
                 "num-supernodes": num_supernodes,
-                "run-id-hash": get_sha256_hash(run.run_id),
+                "run-id-hash": run_id_hash,
             },
         )
 
@@ -283,6 +284,10 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     flwr_exit(
         code=exit_code,
         event_type=EventType.FLWR_SIMULATION_RUN_LEAVE,
+        event_details={
+            "run-id-hash": run_id_hash,
+            "success": exit_code == ExitCode.SUCCESS,
+        },
     )
 
 
