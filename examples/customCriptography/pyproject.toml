@@ -39,6 +39,3 @@ default = "my-federation"
 address = "127.0.0.1:9093" # Address of the Control API
 #root-certificates = "certificates/ca.crt"
 insecure = true
-options.backend.client-resources.num-cpus = 6
-options.backend.client-resources.num-gpus = 0
-options.num-supernodes = 5
