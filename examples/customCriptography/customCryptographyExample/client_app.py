@@ -5,12 +5,14 @@ import os
 import numpy as np
 import psutil
 import torch
-# ##Per resnet 34ù
-# # ##Per resnet 34
+
 torch.set_num_threads(3)
-# # ##Per resnet 18
-# # #torch.set_num_threads(6)
 torch.set_num_interop_threads(1)
+
+os.environ["OMP_NUM_THREADS"] = "3"
+os.environ["MKL_NUM_THREADS"] = "3"
+os.environ["OPENBLAS_NUM_THREADS"] = "3"
+os.environ["NUMEXPR_NUM_THREADS"] = "3"
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 # Ora puoi fare un import assoluto
@@ -45,6 +47,11 @@ class FlowerClient(NumPyClient):
         self.lr = learning_rate
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.proc = psutil.Process(os.getpid())
+        try:
+            self.proc.cpu_affinity([0, 1, 2])
+            print(f"[CLIENT {os.getpid()}] CPU affinity impostata sui core [0,1,2]")
+        except Exception as e:
+            print(f"[CLIENT {os.getpid()}] Affinity non supportata: {e}")
 
     def _cpu_time(self):
         t = self.proc.cpu_times()
