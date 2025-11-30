@@ -42,6 +42,4 @@ insecure = true
 #options.num-supernodes = 1
 #options.backend.client-resources.num-cpus = 3
 #options.backend.client-resources.num-gpus = 0
-[tool.flwr.federations.my-federation.options.backend.client-resources]
-num-cpus = 4
-num-gpus = 0.0
+
