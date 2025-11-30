@@ -5,7 +5,11 @@ import os
 import numpy as np
 import psutil
 import torch
-torch.set_num_threads(6)
+##Per resnet 34ù
+##Per resnet 34
+torch.set_num_threads(4)
+##Per resnet 18
+#torch.set_num_threads(6)
 torch.set_num_interop_threads(1)
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
