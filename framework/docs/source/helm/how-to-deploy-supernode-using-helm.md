@@ -1,17 +1,16 @@
 ---
 myst:
   html_meta:
-    description: Deploy Flower's SuperNode Helm chart to install client 
-      federated learning components. Default config mirrors official releases 
-      for seamless integration.
-    property:og:description: Deploy Flower's SuperNode Helm chart to install 
-      client federated learning components. Default config mirrors official 
-      releases for seamless integration.
+    description: Deploy Flower's SuperNode Helm chart to install client federated
+      learning components. Default config mirrors official releases for seamless integration.
+    property:og:description: Deploy Flower's SuperNode Helm chart to install client
+      federated learning components. Default config mirrors official releases for
+      seamless integration.
 ---
 
 # Deploy SuperNode using Helm
 
-```{note}
+```[!NOTE]
 Flower Helm charts are a Flower Enterprise feature. See [Flower Enterprise](https://flower.ai/enterprise) for details.
 ```
 
