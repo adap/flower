@@ -16,6 +16,7 @@
 
 
 import random
+import signal
 import threading
 from collections.abc import Callable
 
@@ -151,9 +152,9 @@ def make_app_heartbeat_fn_grpc(
                 return False
             raise
 
-        # Check if not successful
+        # Raise SIGINT to trigger graceful shutdown if heartbeat failed
         if not res.success:
-            raise RuntimeError("Heartbeat failed unexpectedly.")
+            signal.raise_signal(signal.SIGINT)
         return True
 
     return fn

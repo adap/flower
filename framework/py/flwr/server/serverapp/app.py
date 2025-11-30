@@ -39,7 +39,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.exit import ExitCode, add_exit_handler, flwr_exit
+from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -163,7 +163,12 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         if grid:
             grid.close()
 
-    add_exit_handler(on_exit)
+    # Register signal handlers for graceful shutdown
+    register_signal_handlers(
+        event_type=EventType.FLWR_SERVERAPP_RUN_LEAVE,
+        exit_message="Run stopped by user.",
+        exit_handlers=[on_exit],
+    )
 
     try:
         # Initialize the GrpcGrid
