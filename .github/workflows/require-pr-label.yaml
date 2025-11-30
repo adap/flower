@@ -1,0 +1,40 @@
+name: Require PR Label
+
+on:
+  pull_request:
+    branches:
+      - main
+
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  ensure-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add General label if no topic label
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = pr.labels.map(l => l.name);
+
+            // Labels you DON'T want to count as topic labels
+            const exempt = ["Maintainer", "Contributor", "Bot"];
+
+            const topicLabels = labels.filter(l => !exempt.includes(l));
+
+            if (topicLabels.length === 0) {
+              console.log(`No topic label found, adding "General" to PR #${pr.number}`);
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: ["General"],
+              });
+            } else {
+              console.log(`PR #${pr.number} already has topic labels: ${topicLabels.join(", ")}`);
+            }
