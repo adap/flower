@@ -156,7 +156,7 @@ class SimulationIoServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def SendAppHeartbeat(self, request, context):
-        """Heartbeat
+        """App heartbeat
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')

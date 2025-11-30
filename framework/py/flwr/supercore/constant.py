@@ -17,6 +17,8 @@
 
 from __future__ import annotations
 
+from flwr.common.constant import FLWR_DIR
+
 # Top-level key in YAML config for exec plugin settings
 EXEC_PLUGIN_SECTION = "exec_plugin"
 
@@ -24,9 +26,30 @@ EXEC_PLUGIN_SECTION = "exec_plugin"
 FLWR_IN_MEMORY_DB_NAME = ":flwr-in-memory:"
 
 # Constants for Hub
-APP_ID_PATTERN = r"^@(?P<account>[^/]+)/(?P<app>[^/]+)$"
+APP_ID_PATTERN = r"^@[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
 APP_VERSION_PATTERN = r"^\d+\.\d+\.\d+$"
 PLATFORM_API_URL = "https://api.flower.ai/v1"
+
+# Specification for app publishing
+APP_PUBLISH_INCLUDE_PATTERNS = (
+    "**/*.py",
+    "**/*.toml",
+    "**/*.md",
+)
+APP_PUBLISH_EXCLUDE_PATTERNS = FAB_EXCLUDE_PATTERNS = (
+    f"{FLWR_DIR}/**",  # Exclude the .flwr directory
+    "**/__pycache__/**",
+)
+MAX_TOTAL_BYTES = 10 * 1024 * 1024  # 10 MB
+MAX_FILE_BYTES = 1 * 1024 * 1024  # 1 MB
+MAX_FILE_COUNT = 1000
+MAX_DIR_DEPTH = 10  # relative depth (number of parts in relpath)
+UTF8 = "utf-8"
+MIME_MAP = {
+    ".py": "text/x-python; charset=utf-8",
+    ".md": "text/markdown; charset=utf-8",
+    ".toml": "application/toml; charset=utf-8",
+}
 
 # Constants for federations
 NOOP_FEDERATION = "default"

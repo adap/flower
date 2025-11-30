@@ -91,14 +91,14 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.node_sk, self.node_pk = generate_key_pairs()
         self.node_pk_bytes = public_key_to_bytes(self.node_pk)
 
+        objectstore_factory = ObjectStoreFactory()
         state_factory = LinkStateFactory(
-            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
         )
         self.state = state_factory.state()
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         ffs_factory = FfsFactory(self.tmp_dir.name)
         self.ffs = ffs_factory.ffs()
-        objectstore_factory = ObjectStoreFactory()
         self.store = objectstore_factory.store()
 
         self._server_interceptor = NodeAuthServerInterceptor(state_factory)

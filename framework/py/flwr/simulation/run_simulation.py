@@ -26,7 +26,7 @@ import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from queue import Empty, Queue
-from typing import Any
+from typing import Any, cast
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
@@ -52,6 +52,7 @@ from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
+from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 
 
@@ -100,12 +101,7 @@ def run_simulation_from_cli() -> None:
     _check_ray_support(args.backend)
 
     # Load JSON config
-    backend_config_dict = json.loads(args.backend_config)
-
-    if backend_config_dict:
-        # Backend config internally operates with `_` not with `-`
-        backend_config_dict = _replace_keys(backend_config_dict, match="-", target="_")
-        log(DEBUG, "backend_config_dict: %s", backend_config_dict)
+    backend_config = json.loads(args.backend_config)
 
     run_id = (
         generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
@@ -160,7 +156,7 @@ def run_simulation_from_cli() -> None:
         client_app_attr=client_app_attr,
         num_supernodes=args.num_supernodes,
         backend_name=args.backend,
-        backend_config=backend_config_dict,
+        backend_config=backend_config,
         app_dir=args.app,
         run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
@@ -339,7 +335,9 @@ def _main_loop(
 ) -> Context:
     """Start ServerApp on a separate thread, then launch Simulation Engine."""
     # Initialize StateFactory
-    state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager())
+    state_factory = LinkStateFactory(
+        FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), ObjectStoreFactory()
+    )
 
     f_stop = threading.Event()
     # A Threading event to indicate if an exception was raised in the ServerApp thread
@@ -447,29 +445,28 @@ def _run_simulation(
     """Launch the Simulation Engine."""
     if backend_config is None:
         backend_config = {}
+    elif backend_config:
+        # Backend config internally operates with `_` not with `-`
+        backend_config = cast(
+            BackendConfig, _replace_keys(backend_config, match="-", target="_")
+        )
+        log(DEBUG, "backend_config: %s", backend_config)
 
-    if "init_args" not in backend_config:
-        backend_config["init_args"] = {}
-
+    # Set default init_args if not passed
+    backend_config.setdefault("init_args", {})
     # Set default client_resources if not passed
-    if "client_resources" not in backend_config:
-        backend_config["client_resources"] = {"num_cpus": 2, "num_gpus": 0}
-
+    backend_config.setdefault("client_resources", {"num_cpus": 2, "num_gpus": 0})
     # Initialization of backend config to enable GPU growth globally when set
-    if "actor" not in backend_config:
-        backend_config["actor"] = {"tensorflow": 0}
+    backend_config.setdefault("actor", {"tensorflow": 0})
 
     # Set logging level
     logger = logging.getLogger("flwr")
     if verbose_logging:
         update_console_handler(level=DEBUG, timestamps=True, colored=True)
     else:
-        backend_config["init_args"]["logging_level"] = backend_config["init_args"].get(
-            "logging_level", WARNING
-        )
-        backend_config["init_args"]["log_to_driver"] = backend_config["init_args"].get(
-            "log_to_driver", True
-        )
+        init_args = backend_config["init_args"]
+        init_args.setdefault("logging_level", WARNING)
+        init_args.setdefault("log_to_driver", True)
 
     if enable_tf_gpu_growth:
         # Check that Backend config has also enabled using GPU growth

@@ -85,7 +85,7 @@ def register(  # pylint: disable=R0914
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
         pyproject_path = app / FAB_CONFIG_FILE if app else None
-        config, errors, warnings = load_and_validate(path=pyproject_path)
+        config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
         config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
             federation, config
@@ -107,6 +107,7 @@ def register(  # pylint: disable=R0914
                 f"❌ {err}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1) from err
         finally:
@@ -123,6 +124,7 @@ def register(  # pylint: disable=R0914
                 f"{err}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
     finally:
         if suppress_output:
@@ -151,7 +153,9 @@ def _register_node(stub: ControlStub, public_key: bytes, output_format: str) -> 
             restore_output()
             Console().print_json(run_output)
     else:
-        typer.secho("❌ SuperNode couldn't be registered.", fg=typer.colors.RED)
+        typer.secho(
+            "❌ SuperNode couldn't be registered.", fg=typer.colors.RED, err=True
+        )
 
 
 def try_load_public_key(public_key_path: Path) -> bytes:
@@ -161,6 +165,7 @@ def try_load_public_key(public_key_path: Path) -> bytes:
             f"❌ Public key file '{public_key_path}' does not exist.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 

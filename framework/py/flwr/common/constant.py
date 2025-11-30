@@ -88,6 +88,7 @@ FAB_INCLUDE_PATTERNS = (
 )
 # FAB file exclude patterns (gitignore-style patterns)
 FAB_EXCLUDE_PATTERNS = (
+    f"{FLWR_DIR}/**",  # Exclude the .flwr directory
     "**/__pycache__/**",
     FAB_CONFIG_FILE,  # Exclude the original pyproject.toml
 )
@@ -228,6 +229,7 @@ class ErrorCode:
     NODE_UNAVAILABLE = 5
     MOD_FAILED_PRECONDITION = 6
     INVALID_FAB = 7
+    CLIENT_APP_CRASHED = 8
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""

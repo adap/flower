@@ -16,10 +16,20 @@
 
 
 import random
+import signal
 import threading
 from collections.abc import Callable
 
 import grpc
+
+from flwr.common.constant import (
+    HEARTBEAT_BASE_MULTIPLIER,
+    HEARTBEAT_CALL_TIMEOUT,
+    HEARTBEAT_DEFAULT_INTERVAL,
+    HEARTBEAT_RANDOM_RANGE,
+)
+from flwr.common.retry_invoker import RetryInvoker, exponential
+from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 
 # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import SendAppHeartbeatRequest
@@ -27,13 +37,6 @@ from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 
 # pylint: enable=E0611
-from .constant import (
-    HEARTBEAT_BASE_MULTIPLIER,
-    HEARTBEAT_CALL_TIMEOUT,
-    HEARTBEAT_DEFAULT_INTERVAL,
-    HEARTBEAT_RANDOM_RANGE,
-)
-from .retry_invoker import RetryInvoker, exponential
 
 
 class HeartbeatFailure(Exception):
@@ -116,24 +119,18 @@ class HeartbeatSender:
                 raise HeartbeatFailure
 
 
-def get_grpc_app_heartbeat_fn(
-    stub: ServerAppIoStub | SimulationIoStub,
-    run_id: int,
-    *,
-    failure_message: str,
+def make_app_heartbeat_fn_grpc(
+    stub: ServerAppIoStub | SimulationIoStub | ClientAppIoStub,
+    token: str,
 ) -> Callable[[], bool]:
-    """Get the function to send a heartbeat to gRPC endpoint.
-
-    This function is for app heartbeats only. It is not used for node heartbeats.
+    """Get the function to send a heartbeat to gRPC endpoint from an app process.
 
     Parameters
     ----------
     stub : Union[ServerAppIoStub, SimulationIoStub]
         gRPC stub to send the heartbeat.
-    run_id : int
-        The run ID to use in the heartbeat request.
-    failure_message : str
-        Error message to raise if the heartbeat fails.
+    token : str
+        The token to use in the heartbeat request.
 
     Returns
     -------
@@ -141,9 +138,7 @@ def get_grpc_app_heartbeat_fn(
         Function that sends a heartbeat to the gRPC endpoint.
     """
     # Construct the heartbeat request
-    req = SendAppHeartbeatRequest(
-        run_id=run_id, heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL
-    )
+    req = SendAppHeartbeatRequest(token=token)
 
     def fn() -> bool:
         # Call ServerAppIo API
@@ -157,9 +152,9 @@ def get_grpc_app_heartbeat_fn(
                 return False
             raise
 
-        # Check if not successful
+        # Raise SIGINT to trigger graceful shutdown if heartbeat failed
         if not res.success:
-            raise RuntimeError(failure_message)
+            signal.raise_signal(signal.SIGINT)
         return True
 
     return fn

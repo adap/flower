@@ -54,7 +54,7 @@ service SimulationIo {
   // Get Run Status
   rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
 
-  // Heartbeat
+  // App heartbeat
   rpc SendAppHeartbeat(SendAppHeartbeatRequest)
       returns (SendAppHeartbeatResponse) {}
 }
