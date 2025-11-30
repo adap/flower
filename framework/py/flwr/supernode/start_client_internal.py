@@ -177,9 +177,9 @@ def start_client_internal(
         )
 
     # Initialize factories
-    state_factory = NodeStateFactory()
-    ffs_factory = FfsFactory(get_flwr_dir(flwr_path) / "supernode" / "ffs")  # type: ignore
     object_store_factory = ObjectStoreFactory()
+    state_factory = NodeStateFactory(objectstore_factory=object_store_factory)
+    ffs_factory = FfsFactory(get_flwr_dir(flwr_path) / "supernode" / "ffs")  # type: ignore
 
     # Launch ClientAppIo API server
     grpc_servers = []
