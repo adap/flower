@@ -242,6 +242,7 @@ def parse_config_args(config: list[str] | None, flatten: bool = True) -> dict[st
                     "space-separated key-value pairs.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from err
 

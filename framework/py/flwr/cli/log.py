@@ -193,7 +193,7 @@ def log(
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = app / "pyproject.toml" if app else None
-    config, errors, warnings = load_and_validate(path=pyproject_path)
+    config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
     config = process_loaded_project_config(config, errors, warnings)
     federation, federation_config = validate_federation_in_project_config(
         federation, config, federation_config_overrides
@@ -203,7 +203,7 @@ def log(
     try:
         _log_with_control_api(app, federation, federation_config, run_id, stream)
     except Exception as err:  # pylint: disable=broad-except
-        typer.secho(str(err), fg=typer.colors.RED, bold=True)
+        typer.secho(str(err), fg=typer.colors.RED, bold=True, err=True)
         raise typer.Exit(code=1) from None
 
 

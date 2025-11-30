@@ -268,20 +268,14 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
     def SendAppHeartbeat(
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
     ) -> SendAppHeartbeatResponse:
-        """Handle a heartbeat from the ServerApp in simulation."""
-        log(DEBUG, "SimultionIoServicer.SendAppHeartbeat")
+        """Handle a heartbeat from an app process."""
+        log(DEBUG, "SimulationIoServicer.SendAppHeartbeat")
 
         # Init state
         state = self.state_factory.state()
 
         # Acknowledge the heartbeat
-        # The app heartbeat can only be acknowledged if the run is in
-        # starting or running status.
-        success = state.acknowledge_app_heartbeat(
-            run_id=request.run_id,
-            heartbeat_interval=request.heartbeat_interval,
-        )
-
+        success = state.acknowledge_app_heartbeat(request.token)
         return SendAppHeartbeatResponse(success=success)
 
     def _verify_token(self, token: str, context: grpc.ServicerContext) -> int:

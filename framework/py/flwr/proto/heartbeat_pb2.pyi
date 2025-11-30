@@ -68,17 +68,14 @@ class SendAppHeartbeatRequest(google.protobuf.message.Message):
 
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
-    RUN_ID_FIELD_NUMBER: builtins.int
-    HEARTBEAT_INTERVAL_FIELD_NUMBER: builtins.int
-    run_id: builtins.int
-    heartbeat_interval: builtins.float
+    TOKEN_FIELD_NUMBER: builtins.int
+    token: builtins.str
     def __init__(
         self,
         *,
-        run_id: builtins.int = ...,
-        heartbeat_interval: builtins.float = ...,
+        token: builtins.str = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["heartbeat_interval", b"heartbeat_interval", "run_id", b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["token", b"token"]) -> None: ...
 
 global___SendAppHeartbeatRequest = SendAppHeartbeatRequest
 

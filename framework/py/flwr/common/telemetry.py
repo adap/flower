@@ -161,6 +161,10 @@ class EventType(str, Enum):
     FLWR_SERVERAPP_RUN_ENTER = auto()
     FLWR_SERVERAPP_RUN_LEAVE = auto()
 
+    # CLI: flwr-clientapp
+    FLWR_CLIENTAPP_RUN_ENTER = auto()
+    FLWR_CLIENTAPP_RUN_LEAVE = auto()
+
     # --- Simulation Engine ------------------------------------------------------------
 
     # CLI: flower-simulation
