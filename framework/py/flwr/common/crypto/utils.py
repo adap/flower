@@ -20,7 +20,7 @@ def log_serialization_size(obj, tag: str, mtu: int = 1500, header_overhead: int 
         payload_per_packet = mtu - header_overhead
         n_packets = math.ceil(size_bytes / payload_per_packet)
 
-        print(f"[NET-DEBUG] {tag}: {size_bytes/1024:.2f} KB "
-              f"→ ~{n_packets} pacchetti TCP/IP (MTU={mtu})")
+        #print(f"[NET-DEBUG] {tag}: {size_bytes/1024:.2f} KB "
+            #  f"→ ~{n_packets} pacchetti TCP/IP (MTU={mtu})")
     except Exception as e:
-        print(f"[NET-DEBUG] {tag}: errore stima size - {e}", file=sys.stderr)
+       print(f"[NET-DEBUG] {tag}: errore stima size - {e}", file=sys.stderr)

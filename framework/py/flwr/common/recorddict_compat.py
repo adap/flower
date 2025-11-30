@@ -48,113 +48,117 @@ import time
 
 
 def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Parameters:
-    """Convert ParameterRecord to legacy Parameters.
-
-    Warnings
-    --------
-    Because `Array`s in `ArrayRecord` encode more information of the
-    array-like or tensor-like data (e.g their datatype, shape) than `Parameters` it
-    might not be possible to reconstruct such data structures from `Parameters` objects
-    alone. Additional information or metadata must be provided from elsewhere.
-
-    Parameters
-    ----------
-    record : ArrayRecord
-        The record to be conveted into Parameters.
-    keep_input : bool
-        A boolean indicating whether entries in the record should be deleted from the
-        input dictionary immediately after adding them to the record.
-
-    Returns
-    -------
-    parameters : Parameters
-        The parameters in the legacy format Parameters.
     """
-
-    tot_decrypto = 0.0
-    start_tot=time.perf_counter()
-    proc = psutil.Process(os.getpid())
-
-    # Wall-clock start
-    start_wall = time.perf_counter()
-    # CPU time start
-    start_cpu = proc.cpu_times().user + proc.cpu_times().system
-
+    Convert ArrayRecord back into Parameters.
+    """
 
     parameters = Parameters(tensors=[], tensor_type="")
 
+    total_deser_time = 0.0   # tempo per costruire gli oggetti Parameters (no decrypt)
+    total_decrypt_time = 0.0 # tempo per decrypt + integrity
+
+    # Iteriamo direttamente sulle chiavi senza creare copie costose
     for key in list(record.keys()):
-        if key != EMPTY_TENSOR_KEY:
 
-            tensor = record[key].data
-            start_decrypt = time.perf_counter()
-            if INTEGRITY_ENABLED:
-                tensor = check_integrity(tensor, INTEGRITY_METHOD)
-            if ENCRYPTION_ENABLED:
-                tensor = decrypt(tensor, ENCRYPTION_METHOD)
-            end_decrypt = time.perf_counter()
-            tot_decrypto += (end_decrypt - start_decrypt)
-            parameters.tensors.append(tensor)
+        start_deser = time.perf_counter()
 
+        array_obj = record[key]
+
+        # tipo tensor
         if not parameters.tensor_type:
-            parameters.tensor_type = record[key].stype
+            parameters.tensor_type = array_obj.stype
 
+        # estrai i dati RAW
+        data = array_obj.data
+
+        end_deser = time.perf_counter()
+        total_deser_time += (end_deser - start_deser)
+
+        # --- DECRYPT + INTEGRITY ---
+        if INTEGRITY_ENABLED or ENCRYPTION_ENABLED:
+            start_decrypt = time.perf_counter()
+
+            if INTEGRITY_ENABLED:
+                data = check_integrity(data, INTEGRITY_METHOD)
+
+            if ENCRYPTION_ENABLED:
+                data = decrypt(data, ENCRYPTION_METHOD)
+
+            end_decrypt = time.perf_counter()
+            total_decrypt_time += (end_decrypt - start_decrypt)
+
+        # aggiungi il tensor
+        parameters.tensors.append(data)
+
+        # rimuovi se keep_input = False
         if not keep_input:
             del record[key]
 
-    end_tot = time.perf_counter();
-    tot = end_tot - start_tot
-    tot_senza_decrypto = tot - tot_decrypto
-   ## log_time("TEMPO TOTALE DECRITTOGRAFIA: %.5f s", tot_decrypto)
-    log_time(
-        "TEMPO TOTALE DESERIALIZZAZIONE CON DECRYPT: %.5f s | "
-        "SENZA DECRYPT: %.5f s",
-        tot,
-        tot_senza_decrypto,
-    )
-    return parameters
+    # LOG TEMPI REALI
+    total_time = total_deser_time + total_decrypt_time
 
+    log_time(
+        "DESERIALIZZAZIONE PURA: %.5f s | DECRYPT/INTEGRITY: %.5f s | TOTALE: %.5f s",
+        total_deser_time,
+        total_decrypt_time,
+        total_time,
+    )
+
+    return parameters
 
 def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> ArrayRecord:
 
-    start_tot_serializzazione = time.perf_counter()
-    tot_crypto = 0.0
     tensor_type = parameters.tensor_type
     num_arrays = len(parameters.tensors)
     ordered_dict = OrderedDict()
+
+    # Tempi separati
+    tot_serial_time = 0.0
+    tot_crypto_time = 0.0
+
     for idx in range(num_arrays):
-        if keep_input:
-            tensor = parameters.tensors[idx]
-        else:
-            tensor = parameters.tensors.pop(0)
+
+        # --- SERIALIZZAZIONE PURA ---
+        start_serial = time.perf_counter()
+
+        # Prendi il tensor SENZA usare pop(0), che è O(n)!
+        tensor = parameters.tensors[idx] if keep_input else parameters.tensors[idx]
         dataR = tensor
-        start_crypto = time.perf_counter()
-        if ENCRYPTION_ENABLED:
-            dataR = encrypt(dataR, ENCRYPTION_METHOD)
-        if INTEGRITY_ENABLED:
-            dataR = add_integrity(dataR, INTEGRITY_METHOD)
-        end_crypto = time.perf_counter()
-        tot_crypto += (end_crypto - start_crypto)
+
+        end_serial = time.perf_counter()
+        tot_serial_time += (end_serial - start_serial)
+
+        # --- CRITTOGRAFIA ---
+        if ENCRYPTION_ENABLED or INTEGRITY_ENABLED:
+            start_crypto = time.perf_counter()
+
+            if ENCRYPTION_ENABLED:
+                dataR = encrypt(dataR, ENCRYPTION_METHOD)
+
+            if INTEGRITY_ENABLED:
+                dataR = add_integrity(dataR, INTEGRITY_METHOD)
+
+            end_crypto = time.perf_counter()
+            tot_crypto_time += (end_crypto - start_crypto)
+
+        # --- COSTRUZIONE ARRAY ---
         ordered_dict[str(idx)] = Array(
             data=dataR, dtype="", stype=tensor_type, shape=()
         )
 
+    # Caso senza tensori
     if num_arrays == 0:
         ordered_dict[EMPTY_TENSOR_KEY] = Array(
             data=b"", dtype="", stype=tensor_type, shape=()
         )
 
-    end_tot = time.perf_counter()
-    tot = end_tot - start_tot_serializzazione
-    tot_senza_crypto = tot - tot_crypto  # Tempo totale meno il tempo accumulato di crittografia
-
-   # log_time("TEMPO TOTALE CRITTOGRAFIA: %.5f s", tot_crypto)
+    # LOG
     log_time(
-        "TEMPO TOTALE SERIALIZZAZIONE CON CRITTOGRAFIA: %.5f s | "
-        "SENZA CRITTOGRAFIA: %.5f s",
-        tot,
-        tot_senza_crypto,
-    )
+        "SERIALIZZAZIONE PURA: %.5f s | CRITTOGRAFIA: %.5f s | TOTALE: %.5f s",
+        tot_serial_time,
+        tot_crypto_time,
+        tot_serial_time + tot_crypto_time,
+        )
 
     return ArrayRecord(ordered_dict, keep_input=keep_input)
 
