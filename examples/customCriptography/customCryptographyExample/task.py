@@ -155,7 +155,7 @@ def load_data_from_disk(path: str, batch_size: int, resize=None):
 
     partition_train_test = partition_train_test.with_transform(apply_transforms)
     trainloader = DataLoader(
-        partition_train_test["train"], batch_size=batch_size, shuffle=True
+        partition_train_test["train"], batch_size=batch_size, shuffle=True,  num_workers=0,
     )
     testloader = DataLoader(partition_train_test["test"], batch_size=batch_size)
     return trainloader, testloader
