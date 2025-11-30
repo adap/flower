@@ -56,14 +56,12 @@ class InMemoryObjectStore(ObjectStore):
 
     def preregister(self, run_id: int, object_tree: ObjectTree) -> list[str]:
         """Identify and preregister missing objects."""
-
         new_objects = []
         if run_id not in self.run_objects_mapping:
             self.run_objects_mapping[run_id] = set()
 
         for tree_node in iterate_object_tree(object_tree):
             obj_id = tree_node.object_id
-            print("[PREREGISTER] run:", run_id, "add:", obj_id)
             # Verify object ID format (must be a valid sha256 hash)
             if not is_valid_sha256_hash(obj_id):
                 raise ValueError(f"Invalid object ID format: {obj_id}")
@@ -147,7 +145,6 @@ class InMemoryObjectStore(ObjectStore):
         with self.lock_store:
             # Only allow adding the object if it has been preregistered
             if object_id not in self.store:
-                print("[PUT ERROR] missing:", object_id)
                 raise NoObjectInStoreError(
                     f"Object with ID '{object_id}' was not pre-registered."
                 )
@@ -194,26 +191,25 @@ class InMemoryObjectStore(ObjectStore):
 
     def delete_objects_in_run(self, run_id: int) -> None:
         """Delete all objects that were registered in a specific run."""
-        return
-        # with self.lock_store:
-        #     if run_id not in self.run_objects_mapping:
-        #         return
-        #     for object_id in list(self.run_objects_mapping[run_id]):
-        #         # Check if the object is still in the store
-        #         if (object_entry := self.store.get(object_id)) is None:
-        #             continue
-        #
-        #         # Remove the run ID from the object's runs
-        #         object_entry.runs.discard(run_id)
-        #
-        #         # Only message objects are allowed to have a `ref_count` of 0,
-        #         # and every message object must have a `ref_count` of 0
-        #         if object_entry.ref_count == 0:
-        #             # Delete the message object and its unreferenced descendants
-        #             self.delete(object_id)
-        #
-        #     # Remove the run from the mapping
-        #     del self.run_objects_mapping[run_id]
+        with self.lock_store:
+            if run_id not in self.run_objects_mapping:
+                return
+            for object_id in list(self.run_objects_mapping[run_id]):
+                # Check if the object is still in the store
+                if (object_entry := self.store.get(object_id)) is None:
+                    continue
+
+                # Remove the run ID from the object's runs
+                object_entry.runs.discard(run_id)
+
+                # Only message objects are allowed to have a `ref_count` of 0,
+                # and every message object must have a `ref_count` of 0
+                if object_entry.ref_count == 0:
+                    # Delete the message object and its unreferenced descendants
+                    self.delete(object_id)
+
+            # Remove the run from the mapping
+            del self.run_objects_mapping[run_id]
 
     def clear(self) -> None:
         """Clear the store."""
