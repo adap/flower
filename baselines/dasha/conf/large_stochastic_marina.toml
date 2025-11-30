@@ -1,0 +1,21 @@
+[dataset]
+type = "cifar10"
+name = "cifar10"
+train-url = "none"
+
+[method]
+name = "stochastic_marina"
+step-size = 0.01
+strict-load = false
+evaluate-accuracy = true
+mega-batch-size = 10
+stochastic-momentum = 0.1
+batch-size = 25
+device = "cuda"
+
+[compressor]
+number-of-coordinates = 2000000
+
+[model]
+name = "resnet_18_with_logistic_loss"
+init-with-zeros = false

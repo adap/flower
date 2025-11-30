@@ -1,10 +1,17 @@
-"""Defines Flower Strategies."""
+"""dasha: A Flower Baseline."""
 
 import time
 from logging import INFO, WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
+
+from dasha.client_app import CompressionClient, DashaClient, MarinaClient
+from dasha.compressors import (
+    IdentityUnbiasedCompressor,
+    decompress,
+    estimate_size,
+)
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -21,9 +28,6 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import weighted_loss_avg
 from flwr.server.strategy.strategy import Strategy
 
-from dasha.client import CompressionClient, DashaClient, MarinaClient
-from dasha.compressors import IdentityUnbiasedCompressor, decompress, estimate_size
-
 
 class _CompressionAggregator(Strategy):
     _EMPTY_CONFIG: Dict[str, Scalar] = {}
@@ -32,25 +36,36 @@ class _CompressionAggregator(Strategy):
     SQUARED_GRADIENT_NORM = "squared_gradient_norm"
     RECEIVED_BYTES = "received_bytes"
 
-    def __init__(self, step_size, num_clients):
+    def __init__(self, step_size, num_clients, initial_parameters):
         self._step_size = step_size
         self._parameters = None
         self._gradient_estimator = None
         self._num_clients = num_clients
         self._total_received_bytes_per_client_during_fit = 0
+        self.initial_parameters = initial_parameters
 
     def initialize_parameters(
         self, client_manager: ClientManager
     ) -> Optional[Parameters]:
-        return None
+        initial_parameters = self.initial_parameters
+        self.initial_parameters = (
+            None  # Don't keep initial parameters in memory
+        )
+        return initial_parameters
 
     def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager,
     ) -> List[Tuple[ClientProxy, FitIns]]:
         raise NotImplementedError()
 
     def configure_evaluate(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager,
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         evel_ins = EvaluateIns(parameters, self._EMPTY_CONFIG)
         return [(client, evel_ins) for client in client_manager.all().values()]
@@ -67,11 +82,15 @@ class _CompressionAggregator(Strategy):
         """
         assert len(failures) == 0, failures
         if len(results) != self._num_clients:
-            log(WARNING, "not all clients have sent results. Waiting and repeating...")
+            log(
+                WARNING,
+                "not all clients have sent results. Waiting and repeating...",
+            )
             time.sleep(1.0)
             return ndarrays_to_parameters([self._parameters]), {}
         parsed_results = [
-            parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results
+            parameters_to_ndarrays(fit_res.parameters)
+            for _, fit_res in results
         ]
         expect_compressor = (
             IdentityUnbiasedCompressor.name()
@@ -79,7 +98,8 @@ class _CompressionAggregator(Strategy):
             else None
         )
         estimated_sizes = [
-            estimate_size(compressed_params) for compressed_params in parsed_results
+            estimate_size(compressed_params)
+            for compressed_params in parsed_results
         ]
         max_estimated_size = int(np.max(estimated_sizes))
         self._total_received_bytes_per_client_during_fit += max_estimated_size
@@ -108,17 +128,19 @@ class _CompressionAggregator(Strategy):
         )
         log(INFO, "Round: %i", server_round)
         log(INFO, "Aggregated loss: %f", loss_aggregated)
-        metrics = {
-            self.RECEIVED_BYTES: self._total_received_bytes_per_client_during_fit
-        }
+        send_metric = self._total_received_bytes_per_client_during_fit
+        metrics = {self.RECEIVED_BYTES: send_metric}
         if CompressionClient.GRADIENT in results[0][1].metrics:
             gradients: List[bytes] = []
             for _, evaluate_res in results:
-                gradient_unparsed = evaluate_res.metrics[CompressionClient.GRADIENT]
+                gradient_unparsed = evaluate_res.metrics[
+                    CompressionClient.GRADIENT
+                ]
                 assert isinstance(gradient_unparsed, bytes)
                 gradients.append(gradient_unparsed)
             gradients_parsed = [
-                np.frombuffer(gradient, dtype=np.float32) for gradient in gradients
+                np.frombuffer(gradient, dtype=np.float32)
+                for gradient in gradients
             ]
             gradient = np.add.reduce(gradients_parsed) / len(gradients_parsed)
             norm_square = float(np.linalg.norm(gradient) ** 2)
@@ -138,7 +160,10 @@ class _CompressionAggregator(Strategy):
     def evaluate(  # pylint: disable=useless-return
         self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        """Initialize the parameters on the server using parameters from a node."""
+        """Initialize the parameters on the server using parameters from a.
+
+        node.
+        """
         if server_round == 0:
             ndarrays = parameters_to_ndarrays(parameters)
             assert len(ndarrays) == 1
@@ -150,7 +175,10 @@ class DashaAggregator(_CompressionAggregator):
     """Standard Flower strategy."""
 
     def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager,
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Run configure_fit logic."""
         fit_ins = FitIns(
@@ -170,16 +198,25 @@ class MarinaAggregator(_CompressionAggregator):
         self._prob = None
 
     def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager,
     ) -> List[Tuple[ClientProxy, FitIns]]:
-        """MARINA asks the nodes to send noncompressed vectors some probability."""
+        """MARINA asks the nodes to send noncompressed vectors some.
+
+        probability.
+        """
         if self._gradient_estimator is not None:
             prob = self._get_prob()
             if self._bernoulli_sample(self._generator, prob):
                 self._gradient_estimator = None
         fit_ins = FitIns(
             parameters,
-            {MarinaClient.SEND_FULL_GRADIENT: self._gradient_estimator is None},
+            {
+                MarinaClient.SEND_FULL_GRADIENT: self._gradient_estimator
+                is None
+            },
         )
         return [(client, fit_ins) for client in client_manager.all().values()]
 
@@ -214,3 +251,10 @@ class MarinaAggregator(_CompressionAggregator):
         if prob == 0.0:
             return False
         return random_generator.random() < prob
+
+
+def define_strategy(method_name: str):
+    """Define the strategy for the requested method."""
+    if "dasha" in method_name:
+        return DashaAggregator
+    return MarinaAggregator
