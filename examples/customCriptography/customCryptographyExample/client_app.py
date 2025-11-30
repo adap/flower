@@ -6,6 +6,7 @@ import numpy as np
 import psutil
 import torch
 
+# Limite dei thread PyTorch e BLAS
 torch.set_num_threads(3)
 torch.set_num_interop_threads(1)
 
@@ -13,9 +14,9 @@ os.environ["OMP_NUM_THREADS"] = "3"
 os.environ["MKL_NUM_THREADS"] = "3"
 os.environ["OPENBLAS_NUM_THREADS"] = "3"
 os.environ["NUMEXPR_NUM_THREADS"] = "3"
+
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
-# Ora puoi fare un import assoluto
 from flwr.common.crypto.config_cripto import NET
 
 from .task import (
@@ -27,41 +28,46 @@ from .task import (
     train,
 )
 
-
-
-# Logger dedicato solo per CPU
+# Logger CPU
 cpu_logger = logging.getLogger("cpu_logger")
 cpu_logger.setLevel(logging.INFO)
 file_handler = logging.FileHandler("cpu_usage.log", mode="a")
 formatter = logging.Formatter("%(asctime)s [INFO] Client %(pid)d CPU time durante fit: %(message)s s")
 file_handler.setFormatter(formatter)
 cpu_logger.addHandler(file_handler)
-# Define Flower Client
+
+
+# -------------------------------------------------------------------
+# CLIENT CON ASSEGNAZIONE AUTOMATICA DEI CORE
+# -------------------------------------------------------------------
 class FlowerClient(NumPyClient):
-    import logging
-    def __init__(self, trainloader, valloader, local_epochs, learning_rate):
+
+    def __init__(self, trainloader, valloader, local_epochs, learning_rate, core_list):
         self.net = get_model(NET, num_classes=10, pretrained=False)
         self.trainloader = trainloader
         self.valloader = valloader
         self.local_epochs = local_epochs
         self.lr = learning_rate
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+        # Impostazione affinity
         self.proc = psutil.Process(os.getpid())
         try:
-            self.proc.cpu_affinity([0, 1, 2])
-            print(f"[CLIENT {os.getpid()}] CPU affinity impostata sui core [0,1,2]")
+            self.proc.cpu_affinity(core_list)
+            print(f"[CLIENT {os.getpid()}] CPU affinity impostata su: {core_list}")
         except Exception as e:
             print(f"[CLIENT {os.getpid()}] Affinity non supportata: {e}")
 
     def _cpu_time(self):
         t = self.proc.cpu_times()
         return t.user + t.system
+
     def fit(self, parameters, config):
         print(f"[CLIENT {os.getpid()}] fit() STARTED", flush=True)
         try:
             set_weights(self.net, parameters)
 
-            # inizio misurazione CPU
+            # misurazione CPU
             start_cpu = self._cpu_time()
 
             results = train(
@@ -73,7 +79,6 @@ class FlowerClient(NumPyClient):
                 self.device,
             )
 
-            # fine misurazione CPU
             end_cpu = self._cpu_time()
             cpu_time = end_cpu - start_cpu
             cpu_logger.info(f"{cpu_time:.3f}", extra={"pid": os.getpid()})
@@ -84,27 +89,37 @@ class FlowerClient(NumPyClient):
             raise
 
     def evaluate(self, parameters, config):
-        """Evaluate the model on the data this client has."""
         set_weights(self.net, parameters)
         loss, accuracy = test(self.net, self.valloader, self.device)
         return loss, len(self.valloader.dataset), {"accuracy": accuracy}
 
 
+# -------------------------------------------------------------------
+# CREAZIONE CLIENT - ASSEGNAZIONE CORES PER CLIENT
+# -------------------------------------------------------------------
 def client_fn(context: Context):
-    """Construct a Client that will be run in a ClientApp."""
 
-    # Read the node_config to get the path to the dataset the SuperNode running
-    # this ClientApp has access to
     dataset_path = context.node_config["dataset-path"]
 
-    # Read run_config to fetch hyperparameters relevant to this run
     batch_size = context.run_config["batch-size"]
     trainloader, valloader = load_data_from_disk(dataset_path, batch_size)
     local_epochs = context.run_config["local-epochs"]
     learning_rate = context.run_config["learning-rate"]
 
-    # Return Client instance
-    return FlowerClient(trainloader, valloader, local_epochs, learning_rate).to_client()
+    # -----------------------------
+    # Assegnazione dinamica core
+    # -----------------------------
+    CORES_PER_CLIENT = 3
+    client_id = context.node_id  # ID univoco del client
+
+    start = client_id * CORES_PER_CLIENT
+    end = start + CORES_PER_CLIENT
+    core_list = list(range(start, end))
+
+    print(f"[SuperNode] Client {client_id} -> core assegnati: {core_list}")
+
+    # Crea il client con l'affinity impostata
+    return FlowerClient(trainloader, valloader, local_epochs, learning_rate, core_list).to_client()
 
 
 # Flower ClientApp
