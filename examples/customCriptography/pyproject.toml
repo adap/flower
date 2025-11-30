@@ -39,9 +39,4 @@ default = "my-federation"
 address = "127.0.0.1:9093" # Address of the Control API
 #root-certificates = "certificates/ca.crt"
 insecure = true
-#options.num-supernodes = 1
-#options.backend.client-resources.num-cpus = 3
-#options.backend.client-resources.num-gpus = 0
-[tool.flwr.federations.my-federation-gpu]
-options.num-supernodes = 1
 options.backend.client-resources.num-cpus = 3
