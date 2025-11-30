@@ -9,7 +9,7 @@ from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 # Ora puoi fare un import assoluto
 from flwr.common.crypto.config_cripto import NET
-torch.set_num_threads(4)          # <-- QUI
+torch.set_num_threads(6)          # <-- QUI
 torch.set_num_interop_threads(1)  # <-- QUI
 
 from .task import (
