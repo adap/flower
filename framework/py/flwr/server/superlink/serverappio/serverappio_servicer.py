@@ -250,7 +250,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 with no_object_id_recompute():
                     all_objects = get_all_nested_objects(msg_res)
                     # Preregister
-                    store.preregister(request.run_id, get_object_tree(msg_res))
+                    store.preregister(request.run_id, msg_res.object_tree)
                     # Store objects
                     for obj_id, obj in all_objects.items():
                         store.put(obj_id, obj.deflate())
