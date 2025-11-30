@@ -9,7 +9,7 @@
 The provided public key file is invalid. Authentication requires a valid elliptic curve
 public key in the ssh format. This error occurs when either:
 
-- The public key file specified passed to `flwr supernode create` is invalid or
+- The public key file specified passed to `flwr supernode register` is invalid or
   unreadable.
 
 ****************

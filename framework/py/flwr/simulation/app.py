@@ -146,6 +146,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     heartbeat_sender = None
     run = None
     run_status = None
+    exit_code = ExitCode.SUCCESS
 
     def on_exit() -> None:
         # Stop heartbeat sender
@@ -232,12 +233,13 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         verbose: bool = fed_opt.get("verbose", False)
         enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
 
+        run_id_hash = get_sha256_hash(run.run_id)
         event(
             EventType.FLWR_SIMULATION_RUN_ENTER,
             event_details={
                 "backend": "ray",
                 "num-supernodes": num_supernodes,
-                "run-id-hash": get_sha256_hash(run.run_id),
+                "run-id-hash": run_id_hash,
             },
         )
 
@@ -276,9 +278,16 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
         run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
 
+        # General exit code
+        exit_code = ExitCode.SIMULATION_EXCEPTION
+
     flwr_exit(
-        code=ExitCode.SUCCESS,
+        code=exit_code,
         event_type=EventType.FLWR_SIMULATION_RUN_LEAVE,
+        event_details={
+            "run-id-hash": run_id_hash,
+            "success": exit_code == ExitCode.SUCCESS,
+        },
     )
 
 
