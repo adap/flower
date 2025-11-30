@@ -46,27 +46,30 @@ class FlowerClient(NumPyClient):
         t = self.proc.cpu_times()
         return t.user + t.system
     def fit(self, parameters, config):
-        set_weights(self.net, parameters)
+        try:
+            set_weights(self.net, parameters)
 
-        # inizio misurazione CPU
-        start_cpu = self._cpu_time()
+            # inizio misurazione CPU
+            start_cpu = self._cpu_time()
 
-        results = train(
-            self.net,
-            self.trainloader,
-            self.valloader,
-            self.local_epochs,
-            self.lr,
-            self.device,
-        )
+            results = train(
+                self.net,
+                self.trainloader,
+                self.valloader,
+                self.local_epochs,
+                self.lr,
+                self.device,
+            )
 
-        # fine misurazione CPU
-        end_cpu = self._cpu_time()
-        cpu_time = end_cpu - start_cpu
-        cpu_logger.info(f"{cpu_time:.3f}", extra={"pid": os.getpid()})
+            # fine misurazione CPU
+            end_cpu = self._cpu_time()
+            cpu_time = end_cpu - start_cpu
+            cpu_logger.info(f"{cpu_time:.3f}", extra={"pid": os.getpid()})
 
-        return get_weights(self.net), len(self.trainloader.dataset), {"cpu_fit": cpu_time}
-
+            return get_weights(self.net), len(self.trainloader.dataset), {"cpu_fit": cpu_time}
+        except Exception:
+            logging.exception("ERRORE in fit() sul client, il client sta crashando!")
+            raise
 
     def evaluate(self, parameters, config):
         """Evaluate the model on the data this client has."""
