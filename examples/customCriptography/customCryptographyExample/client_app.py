@@ -5,12 +5,12 @@ import os
 import numpy as np
 import psutil
 import torch
+torch.set_num_threads(6)
+torch.set_num_interop_threads(1)
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 # Ora puoi fare un import assoluto
 from flwr.common.crypto.config_cripto import NET
-torch.set_num_threads(6)          # <-- QUI
-torch.set_num_interop_threads(1)  # <-- QUI
 
 from .task import (
     get_model,
