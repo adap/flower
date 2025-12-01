@@ -20,7 +20,7 @@
 ## Supported tags
 
 - `latest`
-  - points to `1.24.0-py3.12-ubuntu24.04`
+  - points to `1.24.0-py3.13-ubuntu24.04`
   - uses Python 3.12 and Ubuntu 24.04
 - `unstable`
   - points to the last successful build of the `main` branch
