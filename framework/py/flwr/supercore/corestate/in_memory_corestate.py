@@ -26,6 +26,7 @@ from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
 )
 
+from ..object_store import ObjectStore
 from .corestate import CoreState
 
 
@@ -40,11 +41,17 @@ class TokenRecord:
 class InMemoryCoreState(CoreState):
     """In-memory CoreState implementation."""
 
-    def __init__(self) -> None:
+    def __init__(self, object_store: ObjectStore) -> None:
+        self._object_store = object_store
         # Store run ID to token mapping and token to run ID mapping
         self.token_store: dict[int, TokenRecord] = {}
         self.token_to_run_id: dict[str, int] = {}
         self.lock_token_store = Lock()
+
+    @property
+    def object_store(self) -> ObjectStore:
+        """Return the ObjectStore instance used by this CoreState."""
+        return self._object_store
 
     def create_token(self, run_id: int) -> str | None:
         """Create a token for the given run ID."""

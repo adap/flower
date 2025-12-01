@@ -17,9 +17,16 @@
 
 from abc import ABC, abstractmethod
 
+from ..object_store import ObjectStore
+
 
 class CoreState(ABC):
     """Abstract base class for core state."""
+
+    @property
+    @abstractmethod
+    def object_store(self) -> ObjectStore:
+        """Return the ObjectStore instance used by this CoreState."""
 
     @abstractmethod
     def create_token(self, run_id: int) -> str | None:

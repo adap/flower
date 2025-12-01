@@ -28,6 +28,7 @@ from flwr.common.constant import (
 from flwr.supercore.sqlite_mixin import SqliteMixin
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 
+from ..object_store import ObjectStore
 from .corestate import CoreState
 
 SQL_CREATE_TABLE_TOKEN_STORE = """
@@ -41,6 +42,15 @@ CREATE TABLE IF NOT EXISTS token_store (
 
 class SqliteCoreState(CoreState, SqliteMixin):
     """SQLite-based CoreState implementation."""
+
+    def __init__(self, database_path: str, object_store: ObjectStore) -> None:
+        super().__init__(database_path)
+        self._object_store = object_store
+
+    @property
+    def object_store(self) -> ObjectStore:
+        """Return the ObjectStore instance used by this CoreState."""
+        return self._object_store
 
     def get_sql_statements(self) -> tuple[str, ...]:
         """Return SQL statements needed for CoreState tables."""

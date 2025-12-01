@@ -90,12 +90,6 @@ class SimulationIoStub:
     ]
     """Get Run Status"""
 
-    SendAppHeartbeatDeprecated: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedRequest,
-        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse,
-    ]
-    """Heartbeat"""
-
     SendAppHeartbeat: grpc.UnaryUnaryMultiCallable[
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
@@ -156,12 +150,6 @@ class SimulationIoAsyncStub:
         flwr.proto.run_pb2.GetRunStatusResponse,
     ]
     """Get Run Status"""
-
-    SendAppHeartbeatDeprecated: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedRequest,
-        flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse,
-    ]
-    """Heartbeat"""
 
     SendAppHeartbeat: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
@@ -241,14 +229,6 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.run_pb2.GetRunStatusResponse, collections.abc.Awaitable[flwr.proto.run_pb2.GetRunStatusResponse]]:
         """Get Run Status"""
-
-    @abc.abstractmethod
-    def SendAppHeartbeatDeprecated(
-        self,
-        request: flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedRequest,
-        context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse, collections.abc.Awaitable[flwr.proto.heartbeat_pb2.SendAppHeartbeatDeprecatedResponse]]:
-        """Heartbeat"""
 
     @abc.abstractmethod
     def SendAppHeartbeat(
