@@ -6,14 +6,10 @@ import numpy as np
 import psutil
 import torch
 
-# Limite dei thread PyTorch e BLAS
-torch.set_num_threads(3)
+
+torch.set_num_threads(8)
 torch.set_num_interop_threads(1)
 
-os.environ["OMP_NUM_THREADS"] = "3"
-os.environ["MKL_NUM_THREADS"] = "3"
-os.environ["OPENBLAS_NUM_THREADS"] = "3"
-os.environ["NUMEXPR_NUM_THREADS"] = "3"
 
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
