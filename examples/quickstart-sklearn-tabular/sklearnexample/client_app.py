@@ -4,7 +4,6 @@ import warnings
 
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
-from flwr.common import Context
 from sklearn.metrics import log_loss
 
 from sklearnexample.task import (
