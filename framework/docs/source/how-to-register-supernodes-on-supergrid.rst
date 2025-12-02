@@ -2,30 +2,34 @@
 .. meta::
     :description: Learn how to register SuperNodes to the Flower SuperGrid with authentication keys using this comprehensive step-by-step guide.
 
-#######################################################
- Register SuperNodes on the Flower SuperGrid
-#######################################################
+Register SuperNodes on the Flower SuperGrid
+===========================================
 
-This guide provides a complete, step-by-step procedure for registering SuperNodes to a SuperGrid utilizing authentication keys.
+This guide provides a complete, step-by-step procedure for registering SuperNodes to a
+SuperGrid utilizing authentication keys.
 
-*****************
- Prerequisites
-*****************
+Prerequisites
+-------------
 
-Before initiating the registration process, the following prerequisites must be fulfilled:
+Before initiating the registration process, the following prerequisites must be
+fulfilled:
 
 Flower Account Creation
-=======================
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Navigate to the `flower.ai <https://flower.ai>`_ website, select the **Sign Up / Sign In** option located in the upper right quadrant of the landing page, and complete the required registration procedure.
+Navigate to the `flower.ai <https://flower.ai>`_ website, select the **Sign Up / Sign
+In** option located in the upper right quadrant of the landing page, and complete the
+required registration procedure.
 
 Federations Dashboard Access
-=============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Proceed to the `Federations Dashboard <https://flower.ai/federations>`_. This dashboard serves as the central repository for your defined federation names, a list of associated members, currently registered SuperNodes, and a history of previous workflow executions.
+Proceed to the `Federations Dashboard <https://flower.ai/federations>`_. This dashboard
+serves as the central repository for your defined federation names, a list of associated
+members, currently registered SuperNodes, and a history of previous workflow executions.
 
 Required Tools Installation
-============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Verify the installation and operational status of the following essential tools:
 
@@ -37,16 +41,20 @@ Verify the installation and operational status of the following essential tools:
     # Verify Docker daemon is running
     docker --version
 
-********************************
- Authentication Key Generation
-********************************
+Authentication Key Generation
+-----------------------------
 
-SuperNode registration mandates the creation of authentication keys, which is accomplished via the official Flower authentication example.
+SuperNode registration mandates the creation of authentication keys, which is
+accomplished via the official Flower authentication example.
 
 Certificate Configuration Adjustment
-=====================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Flower authentication example can be cloned from the `Flower GitHub repository <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_. The ``certificate.conf`` file in this example requires modification to incorporate SuperGrid DNS support. This specific line is not included by default in the Flower GitHub repository.
+Flower authentication example can be cloned from the `Flower GitHub repository
+<https://github.com/adap/flower/tree/main/examples/flower-authentication>`_. The
+``certificate.conf`` file in this example requires modification to incorporate SuperGrid
+DNS support. This specific line is not included by default in the Flower GitHub
+repository.
 
 Open ``certificate.conf`` and insert ``DNS.2 = fleet-supergrid.flower.ai`` as follows:
 
@@ -75,9 +83,10 @@ Open ``certificate.conf`` and insert ``DNS.2 = fleet-supergrid.flower.ai`` as fo
     IP.2 = 127.0.0.1
 
 Number of Keys Specification
-=============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Edit the ``generate_auth_keys.sh`` script (specifically line 15) to define the exact quantity of SuperNode key pairs to be generated:
+Edit the ``generate_auth_keys.sh`` script (specifically line 15) to define the exact
+quantity of SuperNode key pairs to be generated:
 
 .. code-block:: bash
 
@@ -89,10 +98,11 @@ Edit the ``generate_auth_keys.sh`` script (specifically line 15) to define the e
         done
     }
 
-**Example:** To produce 5 key pairs, replace ``<NUM_SUPERNODES>`` with the numeral ``5``.
+**Example:** To produce 5 key pairs, replace ``<NUM_SUPERNODES>`` with the numeral
+``5``.
 
 Execution of Key Generation Script
-===================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Execute the script to create your authentication keys:
 
@@ -100,19 +110,24 @@ Execute the script to create your authentication keys:
 
     bash <PATH>/generate_auth_keys.sh
 
-This operation populates the ``/keys`` directory with key pairs, such as ``client_credentials_1`` (the private key) and ``client_credentials_1.pub`` (the public key). Subsequent pairs, such as ``client_credentials_2`` / ``client_credentials_2.pub``, will also be generated.
+This operation populates the ``/keys`` directory with key pairs, such as
+``client_credentials_1`` (the private key) and ``client_credentials_1.pub`` (the public
+key). Subsequent pairs, such as ``client_credentials_2`` / ``client_credentials_2.pub``,
+will also be generated.
 
 .. warning::
 
     **IMPORTANT SECURITY NOTE:**
 
-    The generated keys must be stored in secure, protected storage. The script should **NOT** be executed multiple times without first backing up existing keys, as this action will overwrite them. Immediate backup of all generated keys is mandatory.
+    The generated keys must be stored in secure, protected storage. The script should
+    **NOT** be executed multiple times without first backing up existing keys, as this
+    action will overwrite them. Immediate backup of all generated keys is mandatory.
 
-*************************
- Project Configuration
-*************************
+Project Configuration
+---------------------
 
-Incorporate the following configuration block into your project's ``pyproject.toml`` file:
+Incorporate the following configuration block into your project's ``pyproject.toml``
+file:
 
 .. code-block:: toml
 
@@ -123,14 +138,15 @@ Incorporate the following configuration block into your project's ``pyproject.to
 
 .. note::
 
-    Substitute ``<FEDERATION_NAME>`` with the actual federation name retrieved from your `flower.ai/federations <https://flower.ai/federations>`_ dashboard (e.g., ``"flowerlabs"``).
+    Substitute ``<FEDERATION_NAME>`` with the actual federation name retrieved from your
+    `flower.ai/federations <https://flower.ai/federations>`_ dashboard (e.g.,
+    ``"flowerlabs"``).
 
-********************
- SuperGrid Login
-********************
+SuperGrid Login
+---------------
 
 Login Command
-=============
+~~~~~~~~~~~~~
 
 Run the login command from your project's root directory:
 
@@ -138,10 +154,11 @@ Run the login command from your project's root directory:
 
     flwr login . supergrid
 
-A browser prompt will request authorization to grant access to Flower SuperGrid. Select **"Yes"** to confirm authorization.
+A browser prompt will request authorization to grant access to Flower SuperGrid. Select
+**"Yes"** to confirm authorization.
 
 Login Verification
-==================
+~~~~~~~~~~~~~~~~~~
 
 Confirm successful login status by executing the following commands:
 
@@ -153,11 +170,11 @@ Confirm successful login status by executing the following commands:
     # View detailed account, node, and run IDs
     flwr federation show . supergrid
 
-The expected output is the display of your federation information and any existing workflow runs.
+The expected output is the display of your federation information and any existing
+workflow runs.
 
-***************************
- SuperNode Registration
-***************************
+SuperNode Registration
+----------------------
 
 Each SuperNode is registered using its corresponding public key:
 
@@ -166,7 +183,7 @@ Each SuperNode is registered using its corresponding public key:
     flwr supernode register <PATH>/keys/client_credentials_1.pub . supergrid
 
 Node ID Preservation
-====================
+~~~~~~~~~~~~~~~~~~~~
 
 The registration command output will include a unique Node ID.
 
@@ -174,10 +191,12 @@ The registration command output will include a unique Node ID.
 
     **CRITICAL ACTION REQUIRED:**
 
-    Record each Node ID immediately, and inform the designated Flower Labs team members by sharing the Node IDs. The Flower Labs team is for now responsible for registering these SuperNodes on the backend system.
+    Record each Node ID immediately, and inform the designated Flower Labs team members
+    by sharing the Node IDs. The Flower Labs team is for now responsible for registering
+    these SuperNodes on the backend system.
 
 Registration of Multiple SuperNodes
-====================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Repeat the registration process for every remaining key pair, for example:
 
@@ -193,18 +212,20 @@ Repeat the registration process for every remaining key pair, for example:
     flwr supernode register <PATH>/keys/client_credentials_4.pub . supergrid
 
 Confirmation Protocol
-=====================
+~~~~~~~~~~~~~~~~~~~~~
 
-Following the submission of Node IDs to the Flower Labs team, await formal confirmation that the SuperNodes have been registered. Verify the status on the `flower.ai/federations <https://flower.ai/federations>`_ dashboard, where registered SuperNodes should be listed with a status of **"Registered."**
+Following the submission of Node IDs to the Flower Labs team, await formal confirmation
+that the SuperNodes have been registered. Verify the status on the
+`flower.ai/federations <https://flower.ai/federations>`_ dashboard, where registered
+SuperNodes should be listed with a status of **"Registered."**
 
-*******************************************
- SuperNode Initialization with Docker
-*******************************************
+SuperNode Initialization with Docker
+------------------------------------
 
 Utilize the official Flower Docker images to launch each SuperNode.
 
 Start SuperNode 1
-=================
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -216,7 +237,7 @@ Start SuperNode 1
       --auth-supernode-private-key keys/client_credentials_1
 
 Initiate Additional SuperNodes
-===============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -237,27 +258,32 @@ Initiate Additional SuperNodes
       --auth-supernode-private-key keys/client_credentials_3
 
 Command Argument Summary
-========================
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-- ``--rm -d``: Runs the container in detached mode and automatically removes it upon exit.
+- ``--rm -d``: Runs the container in detached mode and automatically removes it upon
+  exit.
 - ``--name supernode_X``: Assigns a user-friendly name for container identification.
-- ``--volume ./keys/:/app/keys/:ro``: Mounts the local ``./keys/`` directory into the container as read-only.
-- ``flwr/supernode:1.24.0-py3.13-ubuntu24.04``: Specifies the official Flower Docker image.
-- ``--superlink fleet-supergrid.flower.ai:443``: Defines the SuperGrid endpoint for connection.
-- ``--auth-supernode-private-key keys/client_credentials_X``: Provides the private key necessary for SuperNode authentication.
+- ``--volume ./keys/:/app/keys/:ro``: Mounts the local ``./keys/`` directory into the
+  container as read-only.
+- ``flwr/supernode:1.24.0-py3.13-ubuntu24.04``: Specifies the official Flower Docker
+  image.
+- ``--superlink fleet-supergrid.flower.ai:443``: Defines the SuperGrid endpoint for
+  connection.
+- ``--auth-supernode-private-key keys/client_credentials_X``: Provides the private key
+  necessary for SuperNode authentication.
 
-*****************************
- Online Status Verification
-*****************************
+Online Status Verification
+--------------------------
 
-Consult the `flower.ai/federations <https://flower.ai/federations>`_ dashboard. Your SuperNodes should display an **"Online"** status, indicating they are prepared to execute federated learning tasks.
+Consult the `flower.ai/federations <https://flower.ai/federations>`_ dashboard. Your
+SuperNodes should display an **"Online"** status, indicating they are prepared to
+execute federated learning tasks.
 
-******************************
- Federated Task Execution
-******************************
+Federated Task Execution
+------------------------
 
 Create New Project (If Needed)
-===============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If an existing project is unavailable, initialize a new one:
 
@@ -271,7 +297,7 @@ If an existing project is unavailable, initialize a new one:
     # - Input the desired project name and other metadata
 
 Login in New Directory (If Applicable)
-=======================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If a new project directory was created, re-authentication may be necessary:
 
@@ -280,7 +306,7 @@ If a new project directory was created, re-authentication may be necessary:
     flwr login . supergrid
 
 Federated Workflow Execution
-=============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Run your defined federated task on the SuperGrid:
 
@@ -289,20 +315,24 @@ Run your defined federated task on the SuperGrid:
     flwr run . supergrid --stream
 
 Workflow Execution Description
-===============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Your application is deployed to all currently connected SuperNodes. The federated workflow commences execution across all online nodes. Results are collected, aggregated, and displayed. The ``--stream`` flag enables the display of real-time execution logs.
+Your application is deployed to all currently connected SuperNodes. The federated
+workflow commences execution across all online nodes. Results are collected, aggregated,
+and displayed. The ``--stream`` flag enables the display of real-time execution logs.
 
-********************
- Troubleshooting
-********************
+Troubleshooting
+---------------
 
 Common Issue: "Read-only file system" Error
-============================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If the error message ``OSError: [Errno 30] Read-only file system: 'final_model.npz'`` is encountered, it is because the ServerApp is attempting to persist model weights to a file system location lacking write permissions.
+If the error message ``OSError: [Errno 30] Read-only file system: 'final_model.npz'`` is
+encountered, it is because the ServerApp is attempting to persist model weights to a
+file system location lacking write permissions.
 
-**Corrective Action:** Comment out or remove the code responsible for weight-saving within ``server_app.py``:
+**Corrective Action:** Comment out or remove the code responsible for weight-saving
+within ``server_app.py``:
 
 .. code-block:: python
 
@@ -316,13 +346,14 @@ After implementing this change, re-execute the workflow:
     flwr run . supergrid --stream
 
 Other Frequently Encountered Issues
-====================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **"Not logged in"**
     Re-run the login command: ``flwr login . supergrid``.
 
 **"Public key already registered"**
-    The key has been previously used. Verify your documented Node IDs. If necessary, generate and utilize a distinct key file.
+    The key has been previously used. Verify your documented Node IDs. If necessary,
+    generate and utilize a distinct key file.
 
 **SuperNode Fails to Display Online Status**
     - Inspect Docker logs for the specific container (``docker logs supernode_1``).
@@ -334,9 +365,8 @@ Other Frequently Encountered Issues
     - Confirm the federation name in ``pyproject.toml`` is correct.
     - Verify current login status: ``flwr federation show . supergrid``.
 
-**********************
- Summary Checklist
-**********************
+Summary Checklist
+-----------------
 
 The full workflow is summarized below:
 
@@ -349,7 +379,8 @@ The full workflow is summarized below:
 7. Securely back up all generated keys.
 8. Add the SuperGrid federation configuration to ``pyproject.toml``.
 9. Run the login command: ``flwr login . supergrid``.
-10. Register each SuperNode: ``flwr supernode register keys/client_credentials_X.pub . supergrid``.
+10. Register each SuperNode: ``flwr supernode register keys/client_credentials_X.pub .
+    supergrid``.
 11. Record and transmit Node IDs to the Flower Labs team.
 12. Await official confirmation from the team.
 13. Start SuperNode Docker containers, providing the private keys.
@@ -357,9 +388,8 @@ The full workflow is summarized below:
 15. Initiate the federated task: ``flwr run . supergrid --stream``.
 16. Monitor execution results and logs.
 
-****************************
- Quick Reference Commands
-****************************
+Quick Reference Commands
+------------------------
 
 .. code-block:: bash
 
@@ -392,13 +422,14 @@ The full workflow is summarized below:
     # Show detailed federation information
     flwr federation show . supergrid
 
-*************************
- Additional Resources
-*************************
+Additional Resources
+--------------------
 
 - `Flower Documentation <https://flower.ai/docs/>`_
-- `Authentication Example <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_
+- `Authentication Example
+  <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_
 - `SuperGrid Information <https://flower.ai/federations>`_
 - `Flower Community <https://flower.ai/join-slack>`_
 
-For assistance, please contact the Flower Labs team or visit the community Slack channel.
+For assistance, please contact the Flower Labs team or visit the community Slack
+channel.
