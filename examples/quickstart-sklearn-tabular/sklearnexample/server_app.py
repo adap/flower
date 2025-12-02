@@ -1,6 +1,5 @@
 """sklearnexample: A Flower / sklearn app."""
 
-
 import joblib
 from flwr.app import ArrayRecord, Context
 from flwr.serverapp import Grid, ServerApp

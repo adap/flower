@@ -1,6 +1,5 @@
 """sklearnexample: A Flower / sklearn app."""
 
-
 import warnings
 
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
