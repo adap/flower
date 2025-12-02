@@ -130,9 +130,20 @@ def _partition_data_vertically(df, all_keywords):
 
 
 class ClientModel(nn.Module):
-    def __init__(self, input_size):
+    def __init__(self, input_size, out_feat_dim):
         super().__init__()
-        self.fc = nn.Linear(input_size, 4)
+        self.fc = nn.Linear(input_size, out_feat_dim)
 
     def forward(self, x):
         return self.fc(x)
+
+
+class ServerModel(nn.Module):
+    def __init__(self, input_size):
+        super(ServerModel, self).__init__()
+        self.fc = nn.Linear(input_size, 1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.fc(x)
+        return self.sigmoid(x)
