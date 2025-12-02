@@ -38,12 +38,14 @@ class ExitCode:
     SERVERAPP_STRATEGY_PRECONDITION_UNMET = 200
     SERVERAPP_EXCEPTION = 201
     SERVERAPP_STRATEGY_AGGREGATION_ERROR = 202
+    SERVERAPP_RUN_START_REJECTED = 203
 
     # SuperNode-specific exit codes (300-399)
     SUPERNODE_REST_ADDRESS_INVALID = 300
     # SUPERNODE_NODE_AUTH_KEYS_REQUIRED = 301 --- DELETED ---
     SUPERNODE_NODE_AUTH_KEY_INVALID = 302
     SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED = 303
+    SUPERNODE_INVALID_TRUSTED_ENTITIES = 304
 
     # SuperExec-specific exit codes (400-499)
     SUPEREXEC_INVALID_PLUGIN_CONFIG = 400
@@ -55,6 +57,9 @@ class ExitCode:
     COMMON_ADDRESS_INVALID = 600
     COMMON_MISSING_EXTRA_REST = 601
     COMMON_TLS_NOT_SUPPORTED = 602
+
+    # Simulation exit codes (700-799)
+    SIMULATION_EXCEPTION = 700
 
     def __new__(cls) -> ExitCode:
         """Prevent instantiation."""
@@ -101,6 +106,11 @@ EXIT_CODE_HELP = {
         "The strategy encountered an error during aggregation. Please check the logs "
         "for more details."
     ),
+    ExitCode.SERVERAPP_RUN_START_REJECTED: (
+        "The SuperLink rejected the request to start the run. This may occur if the "
+        "run has been stopped, the run ID or FAB is invalid, or the run failed to "
+        "start within the allowed time."
+    ),
     # SuperNode-specific exit codes (300-399)
     ExitCode.SUPERNODE_REST_ADDRESS_INVALID: (
         "When using the REST API, please provide `https://` or "
@@ -114,6 +124,11 @@ EXIT_CODE_HELP = {
     ExitCode.SUPERNODE_STARTED_WITHOUT_TLS_BUT_NODE_AUTH_ENABLED: (
         "The private key for SuperNode authentication was provided, but TLS is not "
         "enabled. Node authentication can only be used when TLS is enabled."
+    ),
+    ExitCode.SUPERNODE_INVALID_TRUSTED_ENTITIES: (
+        "Failed to read the trusted entities YAML file. "
+        "Please ensure that a valid file is provided using "
+        "the `--trusted-entities` option."
     ),
     # SuperExec-specific exit codes (400-499)
     ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG: (
@@ -138,4 +153,8 @@ To use the REST API, install `flwr` with the `rest` extra:
     `pip install "flwr[rest]"`.
 """,
     ExitCode.COMMON_TLS_NOT_SUPPORTED: "Please use the '--insecure' flag.",
+    # Simulation exit codes (700-799)
+    ExitCode.SIMULATION_EXCEPTION: (
+        "An unhandled exception occurred when running the simulation."
+    ),
 }

@@ -15,7 +15,8 @@
 """GrpcAdapter implementation."""
 
 
-import sys
+import signal
+import time
 from logging import DEBUG
 from typing import Any, TypeVar, cast
 
@@ -34,14 +35,18 @@ from flwr.common.constant import (
 from flwr.common.version import package_name, package_version
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    CreateNodeResponse,
-    DeleteNodeRequest,
-    DeleteNodeResponse,
+    ActivateNodeRequest,
+    ActivateNodeResponse,
+    DeactivateNodeRequest,
+    DeactivateNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    RegisterNodeFleetRequest,
+    RegisterNodeFleetResponse,
+    UnregisterNodeFleetRequest,
+    UnregisterNodeFleetResponse,
 )
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
@@ -58,6 +63,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.supercore.constant import FORCE_EXIT_TIMEOUT_SECONDS
 
 T = TypeVar("T", bound=GrpcMessage)
 
@@ -104,7 +110,9 @@ class GrpcAdapter:
                 DEBUG,
                 'Received shutdown signal: exit flag is set to ``"true"``. Exiting...',
             )
-            sys.exit(0)
+            signal.raise_signal(signal.SIGTERM)
+            # Give some time to handle the signal
+            time.sleep(FORCE_EXIT_TIMEOUT_SECONDS + 1)
 
         # Check the grpc_message_name of the response
         if container_res.grpc_message_name != response_type.__qualname__:
@@ -118,17 +126,29 @@ class GrpcAdapter:
         response.ParseFromString(container_res.grpc_message_content)
         return response
 
-    def CreateNode(  # pylint: disable=C0103
-        self, request: CreateNodeRequest, **kwargs: Any
-    ) -> CreateNodeResponse:
+    def RegisterNode(  # pylint: disable=C0103
+        self, request: RegisterNodeFleetRequest, **kwargs: Any
+    ) -> RegisterNodeFleetResponse:
         """."""
-        return self._send_and_receive(request, CreateNodeResponse, **kwargs)
+        return self._send_and_receive(request, RegisterNodeFleetResponse, **kwargs)
 
-    def DeleteNode(  # pylint: disable=C0103
-        self, request: DeleteNodeRequest, **kwargs: Any
-    ) -> DeleteNodeResponse:
+    def ActivateNode(  # pylint: disable=C0103
+        self, request: ActivateNodeRequest, **kwargs: Any
+    ) -> ActivateNodeResponse:
         """."""
-        return self._send_and_receive(request, DeleteNodeResponse, **kwargs)
+        return self._send_and_receive(request, ActivateNodeResponse, **kwargs)
+
+    def DeactivateNode(  # pylint: disable=C0103
+        self, request: DeactivateNodeRequest, **kwargs: Any
+    ) -> DeactivateNodeResponse:
+        """."""
+        return self._send_and_receive(request, DeactivateNodeResponse, **kwargs)
+
+    def UnregisterNode(  # pylint: disable=C0103
+        self, request: UnregisterNodeFleetRequest, **kwargs: Any
+    ) -> UnregisterNodeFleetResponse:
+        """."""
+        return self._send_and_receive(request, UnregisterNodeFleetResponse, **kwargs)
 
     def SendNodeHeartbeat(  # pylint: disable=C0103
         self, request: SendNodeHeartbeatRequest, **kwargs: Any

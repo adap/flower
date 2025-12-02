@@ -16,7 +16,6 @@
 
 
 from logging import INFO
-from typing import Optional
 
 import grpc
 
@@ -38,7 +37,7 @@ def run_serverappio_api_grpc(
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
-    certificates: Optional[tuple[bytes, bytes, bytes]],
+    certificates: tuple[bytes, bytes, bytes] | None,
 ) -> grpc.Server:
     """Run ServerAppIo API (gRPC, request-response)."""
     # Create ServerAppIo API gRPC server

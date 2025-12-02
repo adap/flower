@@ -134,6 +134,8 @@ def test_aggregate_n_closest_weights_mean() -> None:
     assert all(
         (
             np.array_equal(expected, result)
-            for expected, result in zip(expected_averaged, beta_closest_weights)
+            for expected, result in zip(
+                expected_averaged, beta_closest_weights, strict=True
+            )
         )
     )

@@ -16,7 +16,6 @@
 
 
 import abc
-from typing import Optional
 
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
@@ -89,7 +88,7 @@ class ObjectStore(abc.ABC):
         """
 
     @abc.abstractmethod
-    def get(self, object_id: str) -> Optional[bytes]:
+    def get(self, object_id: str) -> bytes | None:
         """Get an object from the store.
 
         Parameters

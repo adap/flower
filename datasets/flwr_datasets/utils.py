@@ -16,7 +16,7 @@
 
 
 import warnings
-from typing import Optional, Union, cast
+from typing import cast
 
 from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
@@ -57,7 +57,7 @@ tested_datasets = [
 
 
 def _instantiate_partitioners(
-    partitioners: dict[str, Union[Partitioner, int]]
+    partitioners: dict[str, Partitioner | int],
 ) -> dict[str, Partitioner]:
     """Transform the partitioners from the initial format to instantiated objects.
 
@@ -95,26 +95,17 @@ def _instantiate_partitioners(
 
 
 def _instantiate_merger_if_needed(
-    merger: Optional[Union[Preprocessor, dict[str, tuple[str, ...]]]]
-) -> Optional[Preprocessor]:
+    merger: Preprocessor | dict[str, tuple[str, ...]] | None,
+) -> Preprocessor | None:
     """Instantiate `Merger` if preprocessor is merge_config."""
     if merger and isinstance(merger, dict):
         merger = Merger(merge_config=merger)
-    return cast(Optional[Preprocessor], merger)
-
-
-def _check_if_dataset_tested(dataset: str) -> None:
-    """Check if the dataset is in the narrowed down list of the tested datasets."""
-    if dataset not in tested_datasets:
-        warnings.warn(
-            f"The currently tested dataset are {tested_datasets}. Given: {dataset}.",
-            stacklevel=1,
-        )
+    return cast(Preprocessor | None, merger)
 
 
 def divide_dataset(
-    dataset: Dataset, division: Union[list[float], tuple[float, ...], dict[str, float]]
-) -> Union[list[Dataset], DatasetDict]:
+    dataset: Dataset, division: list[float] | tuple[float, ...] | dict[str, float]
+) -> list[Dataset] | DatasetDict:
     """Divide the dataset according to the `division`.
 
     The division support varying number of splits, which you can name. The splits are
@@ -161,14 +152,14 @@ def divide_dataset(
     _check_division_config_correctness(division)
     dataset_length = len(dataset)
     ranges = _create_division_indices_ranges(dataset_length, division)
-    if isinstance(division, (list, tuple)):
+    if isinstance(division, (list | tuple)):
         split_partition: list[Dataset] = []
         for single_range in ranges:
             split_partition.append(dataset.select(single_range))
         return split_partition
     if isinstance(division, dict):
         split_partition_dict: dict[str, Dataset] = {}
-        for split_name, single_range in zip(division.keys(), ranges):
+        for split_name, single_range in zip(division.keys(), ranges, strict=False):
             split_partition_dict[split_name] = dataset.select(single_range)
         return DatasetDict(split_partition_dict)
     raise TypeError(
@@ -179,10 +170,10 @@ def divide_dataset(
 
 def _create_division_indices_ranges(
     dataset_length: int,
-    division: Union[list[float], tuple[float, ...], dict[str, float]],
+    division: list[float] | tuple[float, ...] | dict[str, float],
 ) -> list[range]:
     ranges = []
-    if isinstance(division, (list, tuple)):
+    if isinstance(division, (list | tuple)):
         start_idx = 0
         end_idx = 0
         for fraction in division:
@@ -206,9 +197,9 @@ def _create_division_indices_ranges(
 
 
 def _check_division_config_types_correctness(
-    division: Union[list[float], tuple[float, ...], dict[str, float]]
+    division: list[float] | tuple[float, ...] | dict[str, float],
 ) -> None:
-    if isinstance(division, (list, tuple)):
+    if isinstance(division, (list | tuple)):
         if not all(isinstance(x, float) for x in division):
             raise TypeError(
                 "List or tuple values of `division` must contain only floats, "
@@ -225,9 +216,9 @@ def _check_division_config_types_correctness(
 
 
 def _check_division_config_values_correctness(
-    division: Union[list[float], tuple[float, ...], dict[str, float]]
+    division: list[float] | tuple[float, ...] | dict[str, float],
 ) -> None:
-    if isinstance(division, (list, tuple)):
+    if isinstance(division, (list | tuple)):
         if not all(0 < x <= 1 for x in division):
             raise ValueError(
                 "All fractions for the division must be greater than 0 and smaller or "
@@ -263,7 +254,7 @@ def _check_division_config_values_correctness(
 
 
 def _check_division_config_correctness(
-    division: Union[list[float], tuple[float, ...], dict[str, float]]
+    division: list[float] | tuple[float, ...] | dict[str, float],
 ) -> None:
     _check_division_config_types_correctness(division)
     _check_division_config_values_correctness(division)
@@ -271,8 +262,8 @@ def _check_division_config_correctness(
 
 def concatenate_divisions(
     partitioner: Partitioner,
-    partition_division: Union[list[float], tuple[float, ...], dict[str, float]],
-    division_id: Union[int, str],
+    partition_division: list[float] | tuple[float, ...] | dict[str, float],
+    division_id: int | str,
 ) -> Dataset:
     """Create a dataset by concatenation of divisions from all partitions.
 
@@ -334,7 +325,7 @@ def concatenate_divisions(
     zero_len_divisions = 0
     for partition_id in range(partitioner.num_partitions):
         partition = partitioner.load_partition(partition_id)
-        if isinstance(partition_division, (list, tuple)):
+        if isinstance(partition_division, (list | tuple)):
             if not isinstance(division_id, int):
                 raise TypeError(
                     "The `division_id` needs to be an int in case of "

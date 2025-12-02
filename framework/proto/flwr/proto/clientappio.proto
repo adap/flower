@@ -17,7 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/fab.proto";
+import "flwr/proto/heartbeat.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/message.proto";
 import "flwr/proto/appio.proto";
@@ -47,6 +47,10 @@ service ClientAppIo {
 
   // Pull Message
   rpc PullMessage(PullAppMessagesRequest) returns (PullAppMessagesResponse) {}
+
+  // App heartbeat
+  rpc SendAppHeartbeat(SendAppHeartbeatRequest)
+      returns (SendAppHeartbeatResponse) {}
 
   // Push Object
   rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}

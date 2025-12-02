@@ -19,10 +19,10 @@ import itertools
 import random
 import threading
 import time
-from collections.abc import Generator, Iterable
+from collections.abc import Callable, Generator, Iterable
 from dataclasses import dataclass
 from logging import INFO, WARN
-from typing import Any, Callable, Optional, Union, cast
+from typing import Any, cast
 
 import grpc
 
@@ -39,7 +39,7 @@ from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 def exponential(
     base_delay: float = 1,
     multiplier: float = 2,
-    max_delay: Optional[int] = None,
+    max_delay: int | None = None,
 ) -> Generator[float, None, None]:
     """Wait time generator for exponential backoff strategy.
 
@@ -66,7 +66,7 @@ def exponential(
 
 
 def constant(
-    interval: Union[float, Iterable[float]] = 1,
+    interval: float | Iterable[float] = 1,
 ) -> Generator[float, None, None]:
     """Wait time generator for specified intervals.
 
@@ -114,8 +114,8 @@ class RetryState:
     kwargs: dict[str, Any]
     tries: int
     elapsed_time: float
-    exception: Optional[Exception] = None
-    actual_wait: Optional[float] = None
+    exception: Exception | None = None
+    actual_wait: float | None = None
 
 
 # pylint: disable-next=too-many-instance-attributes
@@ -184,16 +184,16 @@ class RetryInvoker:
     def __init__(
         self,
         wait_gen_factory: Callable[[], Generator[float, None, None]],
-        recoverable_exceptions: Union[type[Exception], tuple[type[Exception], ...]],
-        max_tries: Optional[int],
-        max_time: Optional[float],
+        recoverable_exceptions: type[Exception] | tuple[type[Exception], ...],
+        max_tries: int | None,
+        max_time: float | None,
         *,
-        on_success: Optional[Callable[[RetryState], None]] = None,
-        on_backoff: Optional[Callable[[RetryState], None]] = None,
-        on_giveup: Optional[Callable[[RetryState], None]] = None,
-        jitter: Optional[Callable[[float], float]] = full_jitter,
-        should_giveup: Optional[Callable[[Exception], bool]] = None,
-        wait_function: Optional[Callable[[float], None]] = None,
+        on_success: Callable[[RetryState], None] | None = None,
+        on_backoff: Callable[[RetryState], None] | None = None,
+        on_giveup: Callable[[RetryState], None] | None = None,
+        jitter: Callable[[float], float] | None = full_jitter,
+        should_giveup: Callable[[Exception], bool] | None = None,
+        wait_function: Callable[[float], None] | None = None,
     ) -> None:
         self.wait_gen_factory = wait_gen_factory
         self.recoverable_exceptions = recoverable_exceptions
@@ -253,7 +253,7 @@ class RetryInvoker:
         """
 
         def try_call_event_handler(
-            handler: Optional[Callable[[RetryState], None]]
+            handler: Callable[[RetryState], None] | None,
         ) -> None:
             if handler is not None:
                 handler(cast(RetryState, ref_state[0]))
@@ -261,7 +261,7 @@ class RetryInvoker:
         try_cnt = 0
         wait_generator = self.wait_gen_factory()
         start = time.monotonic()
-        ref_state: list[Optional[RetryState]] = [None]
+        ref_state: list[RetryState | None] = [None]
 
         while True:
             try_cnt += 1
@@ -387,9 +387,9 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
 
 
 def _wrap_stub(
-    stub: Union[
-        ServerAppIoStub, ClientAppIoStub, SimulationIoStub, FleetStub, GrpcAdapter
-    ],
+    stub: (
+        ServerAppIoStub | ClientAppIoStub | SimulationIoStub | FleetStub | GrpcAdapter
+    ),
     retry_invoker: RetryInvoker,
 ) -> None:
     """Wrap a gRPC stub with a retry invoker."""

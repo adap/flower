@@ -15,7 +15,7 @@
 """Comparison of label distribution plotting."""
 
 
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -33,20 +33,20 @@ from flwr_datasets.visualization.label_distribution import plot_label_distributi
 # mypy: disable-error-code="call-overload"
 def plot_comparison_label_distribution(  # pylint: disable=R0917
     partitioner_list: list[Partitioner],
-    label_name: Union[str, list[str]],
+    label_name: str | list[str],
     plot_type: Literal["bar", "heatmap"] = "bar",
     size_unit: Literal["percent", "absolute"] = "percent",
-    max_num_partitions: Optional[int] = 30,
+    max_num_partitions: int | None = 30,
     partition_id_axis: Literal["x", "y"] = "y",
-    figsize: Optional[tuple[float, float]] = None,
+    figsize: tuple[float, float] | None = None,
     subtitle: str = "Comparison of Per Partition Label Distribution",
-    titles: Optional[list[str]] = None,
-    cmap: Optional[Union[str, mcolors.Colormap]] = None,
+    titles: list[str] | None = None,
+    cmap: str | mcolors.Colormap | None = None,
     legend: bool = False,
-    legend_title: Optional[str] = None,
+    legend_title: str | None = None,
     verbose_labels: bool = True,
-    plot_kwargs_list: Optional[list[Optional[dict[str, Any]]]] = None,
-    legend_kwargs: Optional[dict[str, Any]] = None,
+    plot_kwargs_list: list[dict[str, Any] | None] | None = None,
+    legend_kwargs: dict[str, Any] | None = None,
 ) -> tuple[Figure, list[Axes], list[pd.DataFrame]]:
     """Compare the label distribution across multiple partitioners.
 
@@ -169,7 +169,7 @@ def plot_comparison_label_distribution(  # pylint: disable=R0917
 
     dataframe_list = []
     for idx, (partitioner, single_label_name, plot_kwargs) in enumerate(
-        zip(partitioner_list, label_name, plot_kwargs_list)
+        zip(partitioner_list, label_name, plot_kwargs_list, strict=False)
     ):
         if idx == (num_partitioners - 1):
             *_, dataframe = plot_label_distributions(
@@ -224,7 +224,7 @@ def plot_comparison_label_distribution(  # pylint: disable=R0917
 
 
 def _initialize_comparison_figsize(
-    figsize: Optional[tuple[float, float]], num_partitioners: int
+    figsize: tuple[float, float] | None, num_partitioners: int
 ) -> tuple[float, float]:
     if figsize is not None:
         return figsize

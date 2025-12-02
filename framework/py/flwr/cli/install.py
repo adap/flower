@@ -21,7 +21,7 @@ import tempfile
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Annotated, Optional, Union
+from typing import IO, Annotated
 
 import typer
 
@@ -34,11 +34,11 @@ from .utils import get_sha256_hash
 
 def install(
     source: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Argument(metavar="source", help="The source FAB file to install."),
     ] = None,
     flwr_dir: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(help="The desired install path."),
     ] = None,
 ) -> None:
@@ -68,6 +68,7 @@ def install(
             f"❌ The source {source} does not exist or is not a file.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -76,6 +77,7 @@ def install(
             f"❌ The source {source} is not a `.fab` file.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -83,13 +85,33 @@ def install(
 
 
 def install_from_fab(
-    fab_file: Union[Path, bytes],
-    flwr_dir: Optional[Path],
+    fab_file: Path | bytes,
+    flwr_dir: Path | None,
     skip_prompt: bool = False,
 ) -> Path:
-    """Install from a FAB file after extracting and validating."""
-    fab_file_archive: Union[Path, IO[bytes]]
-    fab_name: Optional[str]
+    """Install from a FAB file after extracting and validating.
+
+    Parameters
+    ----------
+    fab_file : Path | bytes
+        Either a path to the FAB file or the FAB file content as bytes.
+    flwr_dir : Path | None
+        Target installation directory, or None to use default.
+    skip_prompt : bool
+        If True, skip confirmation prompts. Default is False.
+
+    Returns
+    -------
+    Path
+        Path to the installed application directory.
+
+    Raises
+    ------
+    typer.Exit
+        If FAB format is invalid or hash verification fails.
+    """
+    fab_file_archive: Path | IO[bytes]
+    fab_name: str | None
     if isinstance(fab_file, bytes):
         fab_file_archive = BytesIO(fab_file)
         fab_hash = hashlib.sha256(fab_file).hexdigest()
@@ -111,6 +133,7 @@ def install_from_fab(
                     "❌ FAB file has incorrect format.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1)
 
@@ -123,6 +146,7 @@ def install_from_fab(
                     "❌ File hashes couldn't be verified.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1)
 
@@ -139,11 +163,35 @@ def install_from_fab(
 def validate_and_install(
     project_dir: Path,
     fab_hash: str,
-    fab_name: Optional[str],
-    flwr_dir: Optional[Path],
+    fab_name: str | None,
+    flwr_dir: Path | None,
     skip_prompt: bool = False,
 ) -> Path:
-    """Validate TOML files and install the project to the desired directory."""
+    """Validate the TOML file and install the project to the desired directory.
+
+    Parameters
+    ----------
+    project_dir : Path
+        Path to the extracted project directory.
+    fab_hash : str
+        SHA-256 hash of the FAB file.
+    fab_name : str | None
+        Name of the FAB file, or None if installing from bytes.
+    flwr_dir : Path | None
+        Target installation directory, or None to use default.
+    skip_prompt : bool (default: False)
+        If True, skip confirmation prompts.
+
+    Returns
+    -------
+    Path
+        Path to the installed application directory.
+
+    Raises
+    ------
+    typer.Exit
+        If configuration is invalid or metadata doesn't match.
+    """
     config, _, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
 
     if config is None:
@@ -151,6 +199,7 @@ def validate_and_install(
             "❌ Invalid config inside FAB file.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -198,7 +247,20 @@ def validate_and_install(
 
 
 def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
-    """Verify file hashes based on the LIST content."""
+    """Verify file hashes based on the CONTENT manifest.
+
+    Parameters
+    ----------
+    list_content : str
+        Content of the CONTENT manifest file with hash information.
+    tmpdir : Path
+        Temporary directory containing extracted files.
+
+    Returns
+    -------
+    bool
+        True if all file hashes match, False otherwise.
+    """
     for line in list_content.strip().split("\n"):
         rel_path, hash_expected, _ = line.split(",")
         file_path = tmpdir / rel_path
@@ -210,7 +272,20 @@ def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
 def _validate_fab_and_config_metadata(
     fab_name: str, config_metadata: tuple[str, str, str, str]
 ) -> None:
-    """Validate metadata from the FAB filename and config."""
+    """Validate metadata from the FAB filename and config.
+
+    Parameters
+    ----------
+    fab_name : str
+        The FAB filename (with or without .fab extension).
+    config_metadata : tuple[str, str, str, str]
+        Tuple of (publisher, project_name, version, fab_hash).
+
+    Raises
+    ------
+    typer.Exit
+        If filename format is incorrect or hash doesn't match.
+    """
     publisher, project_name, version, fab_hash = config_metadata
 
     fab_name = fab_name.removesuffix(".fab")
@@ -229,6 +304,7 @@ def _validate_fab_and_config_metadata(
             "`<publisher>.<project_name>.<version>.<8hexchars>.fab`.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -240,6 +316,7 @@ def _validate_fab_and_config_metadata(
             f"❌ FAB file has an invalid hexadecimal string `{fab_shorthash}`.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1) from e
 
@@ -249,5 +326,6 @@ def _validate_fab_and_config_metadata(
             "❌ The hash in the FAB file name does not match the hash of the FAB.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)

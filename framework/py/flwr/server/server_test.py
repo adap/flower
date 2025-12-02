@@ -15,8 +15,6 @@
 """Flower server tests."""
 
 
-from typing import Optional
-
 import numpy as np
 
 from flwr.common import (
@@ -45,20 +43,18 @@ class SuccessClient(ClientProxy):
     """Test class."""
 
     def get_properties(
-        self, ins: GetPropertiesIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: GetPropertiesIns, timeout: float | None, group_id: int | None
     ) -> GetPropertiesRes:
         """Raise an error because this method is not expected to be called."""
         raise NotImplementedError()
 
     def get_parameters(
-        self, ins: GetParametersIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: GetParametersIns, timeout: float | None, group_id: int | None
     ) -> GetParametersRes:
         """Raise a error because this method is not expected to be called."""
         raise NotImplementedError()
 
-    def fit(
-        self, ins: FitIns, timeout: Optional[float], group_id: Optional[int]
-    ) -> FitRes:
+    def fit(self, ins: FitIns, timeout: float | None, group_id: int | None) -> FitRes:
         """Simulate fit by returning a success FitRes with simple set of weights."""
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
@@ -70,7 +66,7 @@ class SuccessClient(ClientProxy):
         )
 
     def evaluate(
-        self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: EvaluateIns, timeout: float | None, group_id: int | None
     ) -> EvaluateRes:
         """Simulate evaluate by returning a success EvaluateRes with loss
         1.0."""
@@ -82,7 +78,7 @@ class SuccessClient(ClientProxy):
         )
 
     def reconnect(
-        self, ins: ReconnectIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: ReconnectIns, timeout: float | None, group_id: int | None
     ) -> DisconnectRes:
         """Simulate reconnect by returning a DisconnectRes with UNKNOWN reason."""
         return DisconnectRes(reason="UNKNOWN")
@@ -92,31 +88,29 @@ class FailingClient(ClientProxy):
     """Test class."""
 
     def get_properties(
-        self, ins: GetPropertiesIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: GetPropertiesIns, timeout: float | None, group_id: int | None
     ) -> GetPropertiesRes:
         """Raise a NotImplementedError to simulate failure in the client."""
         raise NotImplementedError()
 
     def get_parameters(
-        self, ins: GetParametersIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: GetParametersIns, timeout: float | None, group_id: int | None
     ) -> GetParametersRes:
         """Raise a NotImplementedError to simulate failure in the client."""
         raise NotImplementedError()
 
-    def fit(
-        self, ins: FitIns, timeout: Optional[float], group_id: Optional[int]
-    ) -> FitRes:
+    def fit(self, ins: FitIns, timeout: float | None, group_id: int | None) -> FitRes:
         """Raise a NotImplementedError to simulate failure in the client."""
         raise NotImplementedError()
 
     def evaluate(
-        self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: EvaluateIns, timeout: float | None, group_id: int | None
     ) -> EvaluateRes:
         """Raise a NotImplementedError to simulate failure in the client."""
         raise NotImplementedError()
 
     def reconnect(
-        self, ins: ReconnectIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: ReconnectIns, timeout: float | None, group_id: int | None
     ) -> DisconnectRes:
         """Raise a NotImplementedError to simulate failure in the client."""
         raise NotImplementedError()

@@ -14,7 +14,7 @@
 # ==============================================================================
 """InnerDirichlet partitioner."""
 import warnings
-from typing import Optional, Union, cast
+from typing import cast
 
 import numpy as np
 
@@ -70,17 +70,17 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
     def __init__(  # pylint: disable=R0913, R0917
         self,
-        partition_sizes: Union[list[int], NDArrayInt],
+        partition_sizes: list[int] | NDArrayInt,
         partition_by: str,
-        alpha: Union[int, float, list[float], NDArrayFloat],
+        alpha: int | float | list[float] | NDArrayFloat,
         shuffle: bool = True,
-        seed: Optional[int] = 42,
+        seed: int | None = 42,
     ) -> None:
         super().__init__()
         # Attributes based on the constructor
         self._partition_sizes = _instantiate_partition_sizes(partition_sizes)
         self._initial_alpha = alpha
-        self._alpha: Optional[NDArrayFloat] = None
+        self._alpha: NDArrayFloat | None = None
         self._partition_by = partition_by
         self._shuffle = shuffle
         self._seed = seed
@@ -89,8 +89,8 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._initialized_alpha = False
         self._rng = np.random.default_rng(seed=self._seed)  # NumPy random generator
         # The attributes below are determined during the first call to load_partition
-        self._unique_classes: Optional[Union[list[int], list[str]]] = None
-        self._num_unique_classes: Optional[int] = None
+        self._unique_classes: list[int] | list[str] | None = None
+        self._num_unique_classes: int | None = None
         self._num_partitions = len(self._partition_sizes)
 
         self._partition_id_to_indices: dict[int, list[int]] = {}
@@ -132,7 +132,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         return self._num_partitions
 
     def _initialize_alpha_if_needed(
-        self, alpha: Union[int, float, list[float], NDArrayFloat]
+        self, alpha: int | float | list[float] | NDArrayFloat
     ) -> NDArrayFloat:
         """Convert alpha to the used format in the code a NDArrayFloat.
 
@@ -214,7 +214,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
         # Node id to number of sample left for allocation for that partition id
         partition_id_to_left_to_allocate = dict(
-            zip(range(self._num_partitions), self._partition_sizes)
+            zip(range(self._num_partitions), self._partition_sizes, strict=False)
         )
 
         not_full_partition_ids = list(range(self._num_partitions))
@@ -307,7 +307,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
 
 def _instantiate_partition_sizes(
-    partition_sizes: Union[list[int], NDArrayInt],
+    partition_sizes: list[int] | NDArrayInt,
 ) -> NDArrayInt:
     """Transform list to the ndarray of ints if needed."""
     if isinstance(partition_sizes, list):

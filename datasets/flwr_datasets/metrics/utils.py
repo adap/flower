@@ -16,7 +16,6 @@
 
 
 import warnings
-from typing import Optional, Union
 
 import pandas as pd
 
@@ -27,7 +26,7 @@ def compute_counts(
     partitioner: Partitioner,
     column_name: str,
     verbose_names: bool = False,
-    max_num_partitions: Optional[int] = None,
+    max_num_partitions: int | None = None,
 ) -> pd.DataFrame:
     """Compute the counts of unique values in a given column in the partitions.
 
@@ -141,7 +140,7 @@ def compute_frequencies(
     partitioner: Partitioner,
     column_name: str,
     verbose_names: bool = False,
-    max_num_partitions: Optional[int] = None,
+    max_num_partitions: int | None = None,
 ) -> pd.DataFrame:
     """Compute the frequencies of unique values in a given column in the partitions.
 
@@ -206,7 +205,7 @@ def compute_frequencies(
 
 
 def _compute_counts(
-    labels: Union[list[int], list[str]], unique_labels: Union[list[int], list[str]]
+    labels: list[int] | list[str], unique_labels: list[int] | list[str]
 ) -> pd.Series:
     """Compute the count of labels when taking into account all possible labels.
 
@@ -237,7 +236,7 @@ def _compute_counts(
 
 
 def _compute_frequencies(
-    labels: Union[list[int], list[str]], unique_labels: Union[list[int], list[str]]
+    labels: list[int] | list[str], unique_labels: list[int] | list[str]
 ) -> pd.Series:
     """Compute the distribution of labels when taking into account all possible labels.
 

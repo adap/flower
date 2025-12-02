@@ -15,7 +15,6 @@
 """Clipping modifiers for central DP with client-side clipping."""
 
 
-from collections import OrderedDict
 from logging import ERROR, INFO
 from typing import cast
 
@@ -105,14 +104,14 @@ def fixedclipping_mod(
     )
     # Replace outgoing ArrayRecord's Array while preserving their keys
     out_msg.content.array_records[new_array_record_key] = ArrayRecord(
-        OrderedDict(
-            {
-                k: Array(v)
-                for k, v in zip(
-                    client_to_server_arrecord.keys(), client_to_server_ndarrays
-                )
-            }
-        )
+        {
+            k: Array(v)
+            for k, v in zip(
+                client_to_server_arrecord.keys(),
+                client_to_server_ndarrays,
+                strict=True,
+            )
+        }
     )
     return out_msg
 
@@ -192,14 +191,14 @@ def adaptiveclipping_mod(
     )
     # Replace outgoing ArrayRecord's Array while preserving their keys
     out_msg.content.array_records[new_array_record_key] = ArrayRecord(
-        OrderedDict(
-            {
-                k: Array(v)
-                for k, v in zip(
-                    client_to_server_arrecord.keys(), client_to_server_ndarrays
-                )
-            }
-        )
+        {
+            k: Array(v)
+            for k, v in zip(
+                client_to_server_arrecord.keys(),
+                client_to_server_ndarrays,
+                strict=True,
+            )
+        }
     )
     # Add to the MetricRecords the norm bit (recall reply messages only contain
     # one MetricRecord)

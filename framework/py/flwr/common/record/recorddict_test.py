@@ -17,9 +17,9 @@
 
 import json
 import pickle
-from collections import OrderedDict
+from collections.abc import Callable
 from copy import deepcopy
-from typing import Callable, Union, cast
+from typing import cast
 from unittest.mock import Mock, PropertyMock, patch
 
 import numpy as np
@@ -120,7 +120,7 @@ def test_parameters_to_arrayrecord_and_back(
     ndarrays_ = parameters_to_ndarrays(parameters=parameters_)
 
     # Validate returned NDArrays match those at the beginning
-    for arr, arr_ in zip(ndarrays, ndarrays_):
+    for arr, arr_ in zip(ndarrays, ndarrays_, strict=True):
         assert np.array_equal(arr, arr_), "no"
 
     # Validate initial Parameters object has been handled according to `keep_input`
@@ -130,9 +130,9 @@ def test_parameters_to_arrayrecord_and_back(
 def test_set_parameters_while_keeping_intputs() -> None:
     """Test keep_input functionality in ArrayRecord."""
     # Adding parameters to a record that doesn't erase entries in the input `array_dict`
-    array_dict = OrderedDict(
-        {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
-    )
+    array_dict = {
+        str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())
+    }
     arr_record = ArrayRecord(array_dict, keep_input=True)
 
     # Creating a second ArrayRecord passing the same `array_dict` (not erased)
@@ -146,9 +146,9 @@ def test_set_parameters_while_keeping_intputs() -> None:
 def test_set_parameters_with_correct_types() -> None:
     """Test adding dictionary of Arrays to ArrayRecord."""
     arr_record = ArrayRecord()
-    array_dict = OrderedDict(
-        {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
-    )
+    array_dict = {
+        str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())
+    }
     arr_record.update(array_dict)
 
 
@@ -163,8 +163,8 @@ def test_set_parameters_with_correct_types() -> None:
     ],
 )
 def test_set_parameters_with_incorrect_types(
-    key_type: type[Union[int, str]],
-    value_fn: Callable[[NDArray], Union[NDArray, list[float]]],
+    key_type: type[int | str],
+    value_fn: Callable[[NDArray], NDArray | list[float]],
 ) -> None:
     """Test adding dictionary of unsupported types to ArrayRecord."""
     arr_record = ArrayRecord()
@@ -197,9 +197,10 @@ def test_set_metrics_to_metricrecord_with_correct_types(
     labels = [1, 2.0]
     arrays = get_ndarrays()
 
-    my_metrics = OrderedDict(
-        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
-    )
+    my_metrics = {
+        key_type(label): value_fn(arr)
+        for label, arr in zip(labels, arrays, strict=True)
+    }
 
     # Add metric
     m_record.update(my_metrics)
@@ -241,8 +242,8 @@ def test_set_metrics_to_metricrecord_with_correct_types(
     ],
 )
 def test_set_metrics_to_metricrecord_with_incorrect_types(
-    key_type: type[Union[str, int, float, bool]],
-    value_fn: Callable[[NDArray], Union[NDArray, dict[str, NDArray], list[float]]],
+    key_type: type[str | int | float | bool],
+    value_fn: Callable[[NDArray], NDArray | dict[str, NDArray] | list[float]],
 ) -> None:
     """Test adding metrics of various unsupported types to a MetricRecord."""
     m_record = MetricRecord()
@@ -250,9 +251,10 @@ def test_set_metrics_to_metricrecord_with_incorrect_types(
     labels = [1, 2.0]
     arrays = get_ndarrays()
 
-    my_metrics = OrderedDict(
-        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
-    )
+    my_metrics = {
+        key_type(label): value_fn(arr)
+        for label, arr in zip(labels, arrays, strict=True)
+    }
 
     with pytest.raises(TypeError):
         m_record.update(my_metrics)  # type: ignore
@@ -274,7 +276,10 @@ def test_set_metrics_to_metricrecord_with_and_without_keeping_input(
     arrays = get_ndarrays()
     my_metrics = cast(
         dict[str, MetricRecordValues],
-        {str(label): arr.flatten().tolist() for label, arr in zip(labels, arrays)},
+        {
+            str(label): arr.flatten().tolist()
+            for label, arr in zip(labels, arrays, strict=True)
+        },
     )
     my_metrics_copy = my_metrics.copy()
 
@@ -314,10 +319,10 @@ def test_set_configs_to_configrecord_with_correct_types(
     labels = [1, 2.0]
     arrays = get_ndarrays()
 
-    my_configs = OrderedDict(
-        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
-    )
-
+    my_configs = {
+        key_type(label): value_fn(arr)
+        for label, arr in zip(labels, arrays, strict=True)
+    }
     c_record = ConfigRecord(my_configs)
 
     # check values are actually there
@@ -351,8 +356,8 @@ def test_set_configs_to_configrecord_with_correct_types(
     ],
 )
 def test_set_configs_to_configrecord_with_incorrect_types(
-    key_type: type[Union[str, int, float]],
-    value_fn: Callable[[NDArray], Union[NDArray, dict[str, NDArray], list[float]]],
+    key_type: type[str | int | float],
+    value_fn: Callable[[NDArray], NDArray | dict[str, NDArray] | list[float]],
 ) -> None:
     """Test adding configs of various unsupported types to a ConfigRecord."""
     c_record = ConfigRecord()
@@ -360,10 +365,10 @@ def test_set_configs_to_configrecord_with_incorrect_types(
     labels = [1, 2.0]
     arrays = get_ndarrays()
 
-    my_configs = OrderedDict(
-        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
-    )
-
+    my_configs = {
+        key_type(label): value_fn(arr)
+        for label, arr in zip(labels, arrays, strict=True)
+    }
     with pytest.raises(TypeError):
         c_record.update(my_configs)  # type: ignore
 
@@ -375,7 +380,7 @@ def test_count_bytes_metricrecord() -> None:
     bytes_in_dict += 4  # represnting the keys
 
     m_record = MetricRecord()
-    m_record.update(OrderedDict(data))
+    m_record.update(data)  # type: ignore
     record_bytest_count = m_record.count_bytes()
     assert bytes_in_dict == record_bytest_count
 
@@ -401,7 +406,7 @@ def test_count_bytes_configrecord() -> None:
     bytes_in_dict = int(bytes_in_dict)
 
     c_record = ConfigRecord()
-    c_record.update(OrderedDict(data))
+    c_record.update(data)  # type: ignore
 
     record_bytest_count = c_record.count_bytes()
     assert bytes_in_dict == record_bytest_count
@@ -474,9 +479,7 @@ def test_recorddict_set_get_del_item() -> None:
 def test_constructor_with_deprecated_arguments() -> None:
     """Test constructor with deprecated arguments."""
     # Prepare
-    array_rec = ArrayRecord(
-        OrderedDict({"weights": Array("mock", (2, 3), "mock", b"123")})
-    )
+    array_rec = ArrayRecord({"weights": Array("mock", (2, 3), "mock", b"123")})
     metric_rec = MetricRecord({"accuracy": 0.95})
     config_rec = ConfigRecord({"lr": 0.01})
 
@@ -564,9 +567,9 @@ def test_configs_records_delegation_and_return() -> None:
     ],
 )
 def test_metric_and_config_record_deflate_and_inflate(
-    record_type: type[Union[ConfigRecord, MetricRecord]],
-    record_data: dict[str, Union[ConfigRecordValues, MetricRecordValues]],
-    proto_conversion_fn: Callable[[Union[ConfigRecord, MetricRecord]], bytes],
+    record_type: type[ConfigRecord | MetricRecord],
+    record_data: dict[str, ConfigRecordValues | MetricRecordValues],
+    proto_conversion_fn: Callable[[ConfigRecord | MetricRecord], bytes],
 ) -> None:
     """Ensure an MetricRecord and ConfigRecord can be (de)inflated correctly."""
     record = record_type(record_data)  # type: ignore[arg-type]
@@ -624,7 +627,7 @@ def test_metric_and_config_record_deflate_and_inflate(
     ],
 )
 def test_recorddict_deflate_and_inflate(
-    records: dict[str, Union[ConfigRecord, MetricRecord, ArrayRecord]],
+    records: dict[str, ConfigRecord | MetricRecord | ArrayRecord],
 ) -> None:
     """Test that a RecordDict can be (de)inflated correctly."""
     record = RecordDict(records)
@@ -712,7 +715,7 @@ def test_copy_recorddict() -> None:
         ArrayRecord([np.array([1, 2]), np.array([3, 4])]),
     ],
 )
-def test_copy_record(original: Union[ConfigRecord, MetricRecord, ArrayRecord]) -> None:
+def test_copy_record(original: ConfigRecord | MetricRecord | ArrayRecord) -> None:
     """Test copying a Record."""
     # Execute
     copy = original.copy()

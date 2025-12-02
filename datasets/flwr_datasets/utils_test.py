@@ -14,7 +14,6 @@
 # ==============================================================================
 """Utils tests."""
 import unittest
-from typing import Union
 
 from parameterized import parameterized_class
 
@@ -62,9 +61,9 @@ from flwr_datasets.utils import concatenate_divisions, divide_dataset
 class UtilsTests(unittest.TestCase):
     """Utils for tests."""
 
-    partition_division: Union[list[float], tuple[float, ...], dict[str, float]]
+    partition_division: list[float] | tuple[float, ...] | dict[str, float]
     sizes: tuple[int]
-    division_id: Union[int, str]
+    division_id: int | str
     expected_concatenation_size: int
 
     def setUp(self) -> None:
@@ -74,7 +73,7 @@ class UtilsTests(unittest.TestCase):
     def test_correct_sizes(self) -> None:
         """Test correct size of the division."""
         divided_dataset = divide_dataset(self.dataset, self.partition_division)
-        if isinstance(divided_dataset, (list, tuple)):
+        if isinstance(divided_dataset, (list | tuple)):
             lengths = [len(split) for split in divided_dataset]
         else:
             lengths = [len(split) for split in divided_dataset.values()]
@@ -84,7 +83,7 @@ class UtilsTests(unittest.TestCase):
     def test_correct_return_types(self) -> None:
         """Test correct types of the divided dataset based on the config."""
         divided_dataset = divide_dataset(self.dataset, self.partition_division)
-        if isinstance(self.partition_division, (list, tuple)):
+        if isinstance(self.partition_division, (list | tuple)):
             self.assertIsInstance(divided_dataset, list)
         else:
             self.assertIsInstance(divided_dataset, DatasetDict)

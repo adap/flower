@@ -21,7 +21,6 @@ from json import JSONDecodeError
 from math import pi
 from pathlib import Path
 from time import sleep
-from typing import Optional
 from unittest import TestCase
 
 from flwr.client import Client, NumPyClient
@@ -51,6 +50,8 @@ from flwr.server.superlink.fleet.vce.vce_api import (
 from flwr.server.superlink.linkstate import InMemoryLinkState, LinkStateFactory
 from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.superlink.federation import NoOpFederationManager
 
 
 class DummyClient(NumPyClient):
@@ -92,7 +93,9 @@ def init_state_factory_nodes_mapping(
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
     run_id = 1234
-    state_factory = LinkStateFactory(FLWR_IN_MEMORY_DB_NAME)
+    state_factory = LinkStateFactory(
+        FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), ObjectStoreFactory()
+    )
 
     # Register a few nodes
     nodes_mapping = _register_nodes(num_nodes=num_nodes, state_factory=state_factory)
@@ -132,6 +135,7 @@ def register_messages_into_state(
                 details="",
             ),
             flwr_aid="user123",
+            federation="mock-fed",
         ),
     )
     # Artificially add Messages to state so they can be processed
@@ -184,11 +188,11 @@ def _autoresolve_app_dir(rel_client_app_dir: str = "backend") -> str:
 # pylint: disable=too-many-arguments,too-many-positional-arguments
 def start_and_shutdown(
     backend: str = "ray",
-    client_app_attr: Optional[str] = None,
+    client_app_attr: str | None = None,
     app_dir: str = "",
-    num_supernodes: Optional[int] = None,
-    state_factory: Optional[LinkStateFactory] = None,
-    nodes_mapping: Optional[NodeToPartitionMapping] = None,
+    num_supernodes: int | None = None,
+    state_factory: LinkStateFactory | None = None,
+    nodes_mapping: NodeToPartitionMapping | None = None,
     duration: int = 0,
     backend_config: str = "{}",
 ) -> None:

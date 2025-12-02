@@ -19,9 +19,7 @@ package flwr.proto;
 
 import "flwr/proto/heartbeat.proto";
 import "flwr/proto/log.proto";
-import "flwr/proto/message.proto";
 import "flwr/proto/run.proto";
-import "flwr/proto/fab.proto";
 import "flwr/proto/appio.proto";
 
 service SimulationIo {
@@ -56,7 +54,7 @@ service SimulationIo {
   // Get Run Status
   rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
 
-  // Heartbeat
+  // App heartbeat
   rpc SendAppHeartbeat(SendAppHeartbeatRequest)
       returns (SendAppHeartbeatResponse) {}
 }

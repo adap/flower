@@ -128,9 +128,9 @@ flwr supernode list . my-federation
 ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
 ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-│ 16019329408659850374 │   <none>   │ created │          │ N/A                  │
+│ 16019329408659850374 │<name:none> │ created │          │ N/A                  │
 ├──────────────────────┼────────────┼─────────┼──────────┼──────────────────────┤
-│ 8392976743692794070  │   <none>   │ created │          │ N/A                  │
+│ 8392976743692794070  │<name:none> │ created │          │ N/A                  │
 └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
 ```
 
@@ -144,7 +144,6 @@ In a new terminal window, start the first long-running Flower client (SuperNode)
 flower-supernode \
     --root-certificates certificates/ca.crt \
     --auth-supernode-private-key keys/client_credentials_1 \
-    --auth-supernode-public-key keys/client_credentials_1.pub \
     --node-config 'dataset-path="datasets/cifar10_part_1"' \
     --clientappio-api-address="0.0.0.0:9094"
 ```
@@ -155,7 +154,6 @@ In yet another new terminal window, start the second long-running Flower client:
 flower-supernode \
     --root-certificates certificates/ca.crt \
     --auth-supernode-private-key keys/client_credentials_2 \
-    --auth-supernode-public-key keys/client_credentials_2.pub \
     --node-config 'dataset-path="datasets/cifar10_part_2"' \
     --clientappio-api-address="0.0.0.0:9095"
 ```
@@ -168,9 +166,9 @@ flwr supernode list . my-federation
 ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
 ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-│ 16019329408659850374 │   <none>   │ online  │ 00:00:30 │ 2025-10-13 13:40:47Z │
+│ 16019329408659850374 │<name:none> │ online  │ 00:00:30 │ 2025-10-13 13:40:47Z │
 ├──────────────────────┼────────────┼─────────┼──────────┼──────────────────────┤
-│ 8392976743692794070  │   <none>   │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
+│ 8392976743692794070  │<name:none> │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
 └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
 ```
 

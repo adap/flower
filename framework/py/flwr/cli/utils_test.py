@@ -16,12 +16,28 @@
 
 
 import hashlib
+import json
 import os
 import tempfile
 import unittest
 from pathlib import Path
 
-from flwr.cli.utils import get_sha256_hash
+import pytest
+import typer
+
+from flwr.cli.utils import (
+    build_pathspec,
+    get_sha256_hash,
+    load_gitignore_patterns,
+    parse_app_spec,
+    validate_credentials_content,
+)
+from flwr.common.constant import (
+    ACCESS_TOKEN_KEY,
+    AUTHN_TYPE_JSON_KEY,
+    FLWR_DIR,
+    REFRESH_TOKEN_KEY,
+)
 
 
 class TestGetSHA256Hash(unittest.TestCase):
@@ -107,3 +123,62 @@ class TestGetSHA256Hash(unittest.TestCase):
         # Execute & assert
         with self.assertRaises(FileNotFoundError):
             get_sha256_hash(nonexistent_path)
+
+
+def test_validate_credentials_content_success(tmp_path: Path) -> None:
+    """Test the credentials content loading."""
+    creds = {
+        AUTHN_TYPE_JSON_KEY: "userpass",
+        ACCESS_TOKEN_KEY: "abc",
+        REFRESH_TOKEN_KEY: "def",
+    }
+    path = tmp_path / "creds.json"
+    path.write_text(json.dumps(creds), encoding="utf-8")
+    token = validate_credentials_content(path)
+    assert token == "abc"
+
+
+def test_load_gitignore_patterns(tmp_path: Path) -> None:
+    """Test gitignore pattern loading."""
+    path = tmp_path / ".gitignore"
+    path.write_text("*.log\nsecret/\n# comment\n\n", encoding="utf-8")
+    patterns_from_path = load_gitignore_patterns(path)
+    patterns_from_bytes = load_gitignore_patterns(path.read_bytes())
+
+    assert patterns_from_path == ["*.log", "secret/"]
+    assert patterns_from_bytes == ["*.log", "secret/"]
+
+
+def test_load_gitignore_patterns_with_pathspec() -> None:
+    """Test gitignore patterns with pathspec matching."""
+    patterns = load_gitignore_patterns(b"*.tmp\n")
+    spec = build_pathspec(patterns + [f"{FLWR_DIR}/"])
+
+    # Should match .tmp files
+    assert spec.match_file("a.tmp") is True
+
+    # Should match FLWR_DIR
+    assert spec.match_file(f"{FLWR_DIR}/creds.json") is True
+
+    # Should not match normal files
+    assert spec.match_file("good.py") is False
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "user/app==1.2.3",  # missing '@'
+        "@accountapp==1.2.3",  # missing slash
+        "@account/app==1.2",  # bad version
+        "@account/app==1.2.3.4",  # bad version
+        "@account*/app==1.2.3",  # bad user id chars
+        "@account/app*==1.2.3",  # bad app id chars
+    ],
+)
+def test_parse_app_spec_rejects_invalid_formats(value: str) -> None:
+    """For an invalid string, the function should fail fast with typer.Exit(code=1)."""
+    with pytest.raises(typer.Exit) as exc:
+        parse_app_spec(value)
+
+    # Ensure we specifically exited with code 1
+    assert exc.value.exit_code == 1

@@ -22,9 +22,7 @@ import time
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timedelta, timezone
-from itertools import product
-from typing import Optional
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 from uuid import uuid4
 
 from parameterized import parameterized
@@ -39,7 +37,7 @@ from flwr.common import (
     now,
 )
 from flwr.common.constant import (
-    HEARTBEAT_PATIENCE,
+    HEARTBEAT_DEFAULT_INTERVAL,
     RUN_FAILURE_DETAILS_NO_HEARTBEAT,
     SUPERLINK_NODE_ID,
     ErrorCode,
@@ -47,7 +45,7 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.serde import message_from_proto, message_to_proto
-from flwr.common.typing import RunStatus
+from flwr.common.typing import RunStatus, UserConfig
 
 # pylint: disable=E0611
 from flwr.proto.message_pb2 import Message as ProtoMessage
@@ -60,9 +58,11 @@ from flwr.server.superlink.linkstate import (
     LinkState,
     SqliteLinkState,
 )
-from flwr.supercore.constant import NodeStatus
+from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
+from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
+from flwr.superlink.federation import NoOpFederationManager
 
 
 class StateTest(CoreStateTest):
@@ -90,6 +90,7 @@ class StateTest(CoreStateTest):
             None,
             "9f86d08",
             {"test_key": "test_value"},
+            "health-federation",
             ConfigRecord(),
             "i1r9f",
         )
@@ -101,6 +102,7 @@ class StateTest(CoreStateTest):
         assert run is not None
         assert run.run_id == run_id
         assert run.fab_hash == "9f86d08"
+        assert run.federation == "health-federation"
         assert run.override_config["test_key"] == "test_value"
         assert run.flwr_aid == "i1r9f"
 
@@ -108,12 +110,8 @@ class StateTest(CoreStateTest):
         """Test if get_run_ids works correctly."""
         # Prepare
         state = self.state_factory()
-        run_id1 = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord(), "i1r9f"
-        )
-        run_id2 = state.create_run(
-            None, None, "fffffff", {"mock_key": "mock_value"}, ConfigRecord(), ""
-        )
+        run_id1 = create_dummy_run(state)
+        run_id2 = create_dummy_run(state)
 
         # Execute
         run_ids = state.get_run_ids(None)
@@ -138,9 +136,9 @@ class StateTest(CoreStateTest):
         state = self.state_factory()
 
         # Prepare - Create three runs with different flwr_aid values
-        run_id1 = state.create_run(None, None, "hash1", {}, ConfigRecord(), "userA")
-        run_id2 = state.create_run(None, None, "hash2", {}, ConfigRecord(), "userB")
-        run_id3 = state.create_run(None, None, "hash3", {}, ConfigRecord(), "userA")
+        run_id1 = create_dummy_run(state, flwr_aid="userA")
+        run_id2 = create_dummy_run(state, flwr_aid="userB")
+        run_id3 = create_dummy_run(state, flwr_aid="userA")
 
         # Execute - Only the runs for "userA" should be returned
         result_userA = state.get_run_ids("userA")
@@ -159,9 +157,7 @@ class StateTest(CoreStateTest):
         state = self.state_factory()
 
         # Prepare - Seed with one run under "existing"
-        existing_id = state.create_run(
-            None, None, "somehash", {}, ConfigRecord(), "existing"
-        )
+        existing_id = create_dummy_run(state, flwr_aid="existing")
 
         # Execute - Query with a flwr_aid that has no runs
         result = state.get_run_ids("nonexistent")
@@ -176,12 +172,8 @@ class StateTest(CoreStateTest):
         """Test if get_pending_run_id works correctly."""
         # Prepare
         state = self.state_factory()
-        _ = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord(), "i1r9f"
-        )
-        run_id2 = state.create_run(
-            None, None, "fffffff", {"mock_key": "mock_value"}, ConfigRecord(), ""
-        )
+        _ = create_dummy_run(state)
+        run_id2 = create_dummy_run(state)
         state.update_run_status(run_id2, RunStatus(Status.STARTING, "", ""))
 
         # Execute
@@ -200,12 +192,8 @@ class StateTest(CoreStateTest):
         """Test if get_run_status and update_run_status work correctly."""
         # Prepare
         state = self.state_factory()
-        run_id1 = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord(), "i1r9f"
-        )
-        run_id2 = state.create_run(
-            None, None, "fffffff", {"mock_key": "mock_value"}, ConfigRecord(), ""
-        )
+        run_id1 = create_dummy_run(state)
+        run_id2 = create_dummy_run(state)
         state.update_run_status(run_id2, RunStatus(Status.STARTING, "", ""))
         state.update_run_status(run_id2, RunStatus(Status.RUNNING, "", ""))
 
@@ -219,24 +207,19 @@ class StateTest(CoreStateTest):
         assert status2.status == Status.RUNNING
 
     @parameterized.expand(
-        product([1, 2], ["get_run", "get_run_status", "update_run_status"])
+        [("get_run",), ("get_run_status",), ("update_run_status",)]
     )  # type: ignore
-    def test_run_failed_due_to_heartbeat(
-        self, num_transitions: int, test_method: str
-    ) -> None:
+    def test_run_failed_due_to_heartbeat(self, test_method: str) -> None:
         """Test methods work correctly when the run has no heartbeat."""
         # Prepare
         state = self.state_factory()
-        run_id = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord(), "i1r9f"
-        )
-        # Transition run status to STARTING or RUNNING
-        transition_run_status(state, run_id, num_transitions)
-        state.acknowledge_app_heartbeat(run_id, 2)
+        run_id = create_dummy_run(state)
+        assert state.create_token(run_id) is not None
+        state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
 
         # Execute
-        # The run should be marked as failed after HEARTBEAT_PATIENCE * 2s
-        patched_dt = now() + timedelta(seconds=HEARTBEAT_PATIENCE * 2 + 1)
+        # The run should be marked as failed after HEARTBEAT_DEFAULT_INTERVAL
+        patched_dt = now() + timedelta(seconds=HEARTBEAT_DEFAULT_INTERVAL + 1)
 
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = patched_dt
@@ -268,9 +251,7 @@ class StateTest(CoreStateTest):
         """Test valid run status transactions."""
         # Prepare
         state = self.state_factory()
-        run_id = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord(), "i1r9f"
-        )
+        run_id = create_dummy_run(state)
 
         # Execute and assert
         status = state.get_run_status({run_id})[run_id]
@@ -297,9 +278,7 @@ class StateTest(CoreStateTest):
         """Test invalid run status transitions."""
         # Prepare
         state = self.state_factory()
-        run_id = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigRecord(), "i1r9f"
-        )
+        run_id = create_dummy_run(state)
         run_statuses = [
             RunStatus(Status.PENDING, "", ""),
             RunStatus(Status.STARTING, "", ""),
@@ -355,7 +334,7 @@ class StateTest(CoreStateTest):
         state = self.state_factory()
         dt = datetime.now(tz=timezone.utc)
         node_id = create_dummy_node(state)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         msg = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
@@ -384,8 +363,13 @@ class StateTest(CoreStateTest):
         # Prepare
         state = self.state_factory()
         node_id = create_dummy_node(state)
-        invalid_node_id = 61016 if node_id != 61016 else 61017
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        node_id2 = create_dummy_node(state)
+        state.delete_node("mock_flwr_aid", node_id2)
+        node_id3 = create_dummy_node(state, activate=False)
+        node_id4 = create_dummy_node(state)
+        invalid_node_id = 61016
+        assert invalid_node_id not in {node_id, node_id2, node_id3, node_id4}
+        run_id = create_dummy_run(state)
         # A message for a node that doesn't exist
         msg = message_from_proto(
             create_ins_message(
@@ -398,17 +382,40 @@ class StateTest(CoreStateTest):
         msg2 = message_from_proto(
             create_ins_message(src_node_id=61016, dst_node_id=node_id, run_id=run_id)
         )
+        # A message for a node that is unregistered
+        msg3 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id2, run_id=run_id
+            )
+        )
+        # A message for a node of "registered" status
+        msg4 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id3, run_id=run_id
+            )
+        )
+        # A message for a node outside the federation
+        mock_has_node = Mock(side_effect=lambda nid, _: nid != node_id4)
+        state.federation_manager.has_node = mock_has_node  # type: ignore
+        msg5 = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id4, run_id=run_id
+            )
+        )
 
         # Execute and assert
         assert state.store_message_ins(msg) is None
         assert state.store_message_ins(msg2) is None
+        assert state.store_message_ins(msg3) is None
+        assert state.store_message_ins(msg4) is None
+        assert state.store_message_ins(msg5) is None
 
     def test_store_and_delete_messages(self) -> None:
         """Test delete_message."""
         # Prepare
         state = self.state_factory()
         node_id = create_dummy_node(state)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         msg0 = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID,
@@ -483,7 +490,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state = self.state_factory()
         node_id = create_dummy_node(state)
-        run_id_0 = state.create_run(None, None, "8g13kl7", {}, ConfigRecord(), "i1r9f")
+        run_id_0 = create_dummy_run(state)
         # Insert Message with the same run_id
         msg0 = message_from_proto(
             create_ins_message(
@@ -501,7 +508,7 @@ class StateTest(CoreStateTest):
         )
         # Insert a Message with a different run_id
         # then, ensure it does not appear in result
-        run_id_1 = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id_1 = create_dummy_run(state)
         msg2 = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID,
@@ -542,7 +549,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state = self.state_factory()
         node_id = create_dummy_node(state)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         msg = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID,
@@ -565,7 +572,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state = self.state_factory()
         node_id = create_dummy_node(state)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         msg = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID,
@@ -618,7 +625,7 @@ class StateTest(CoreStateTest):
         """Test retrieving all node_ids and empty initial state."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
 
         # Execute
         retrieved_node_ids = state.get_nodes(run_id)
@@ -630,7 +637,7 @@ class StateTest(CoreStateTest):
         """Test creating nodes and get activated nodes."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         node_ids = []
 
         # Execute
@@ -642,6 +649,27 @@ class StateTest(CoreStateTest):
         for i in retrieved_node_ids:
             assert i in node_ids
 
+    def test_get_nodes_filtered_by_federation(self) -> None:
+        """Test that get_nodes respects federation manager filtering."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id = create_dummy_run(state, federation="test-federation")
+
+        # Create 5 nodes
+        node_ids = [create_dummy_node(state) for _ in range(5)]
+
+        # Mock filter_nodes to return only a subset (first 2 nodes)
+        subset_node_ids = set(node_ids[:2])
+        mock_filter = Mock(return_value=subset_node_ids)
+        state.federation_manager.filter_nodes = mock_filter  # type: ignore
+
+        # Execute
+        retrieved_node_ids = state.get_nodes(run_id)
+
+        # Assert
+        mock_filter.assert_called_once_with(set(node_ids), "test-federation")
+        assert retrieved_node_ids == subset_node_ids
+
     def test_create_node_public_key(self) -> None:
         """Test creating a client node with public key."""
         # Prepare
@@ -650,7 +678,7 @@ class StateTest(CoreStateTest):
 
         # Execute
         expected_registered_at = now().timestamp()
-        node_id = state.create_node("fake_aid", public_key, 10)
+        node_id = state.create_node("fake_aid", "fake_name", public_key, 10)
         node = state.get_node_info(node_ids=[node_id])[0]
         actual_registered_at = datetime.fromisoformat(node.registered_at).timestamp()
 
@@ -664,11 +692,11 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        node_id = state.create_node("fake_aid", public_key, 10)
+        node_id = state.create_node("fake_aid", "fake_name", public_key, 10)
 
         # Execute
         with self.assertRaises(ValueError):
-            state.create_node("fake_aid2", public_key, 10)
+            state.create_node("fake_aid2", "fake_name", public_key, 10)
         retrieved_nodes = state.get_node_info()
         retrieved_public_key = state.get_node_public_key(node_id)
 
@@ -786,20 +814,66 @@ class StateTest(CoreStateTest):
         """Test deleting a client node with owner mismatch."""
         # Prepare
         state: LinkState = self.state_factory()
-        _ = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        _ = create_dummy_run(state)
         node_id = create_dummy_node(state)
 
         # Execute
         with self.assertRaises(ValueError):
             state.delete_node("wrong_owner_aid", node_id)
 
+    def test_activate_node(self) -> None:
+        """Test node activation transitions."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        heartbeat_interval = 30.0
+
+        # Test successful activation from REGISTERED
+        node_id = create_dummy_node(state, activate=False)
+        assert state.activate_node(node_id, heartbeat_interval)
+        assert state.get_node_info(node_ids=[node_id])[0].status == NodeStatus.ONLINE
+
+        # Test successful activation from OFFLINE
+        state.deactivate_node(node_id)
+        assert state.activate_node(node_id, heartbeat_interval)
+        assert state.get_node_info(node_ids=[node_id])[0].status == NodeStatus.ONLINE
+
+        # Test failed activation when already ONLINE
+        assert not state.activate_node(node_id, heartbeat_interval)
+
+        # Test failed activation when UNREGISTERED
+        state.delete_node("mock_flwr_aid", node_id)
+        assert not state.activate_node(node_id, heartbeat_interval)
+
+    def test_deactivate_node(self) -> None:
+        """Test node deactivation transitions."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        node_id = create_dummy_node(state)
+
+        # Test successful deactivation from ONLINE
+        assert state.deactivate_node(node_id)
+        assert state.get_node_info(node_ids=[node_id])[0].status == NodeStatus.OFFLINE
+
+        # Test failed deactivation when already OFFLINE
+        assert not state.deactivate_node(node_id)
+
+        # Test failed deactivation from REGISTERED
+        node_id2 = create_dummy_node(state, activate=False)
+        assert not state.deactivate_node(node_id2)
+
+        # Test failed deactivation when UNREGISTERED
+        state.delete_node("mock_flwr_aid", node_id)
+        assert not state.deactivate_node(node_id)
+
     def test_delete_node_public_key(self) -> None:
         """Test deleting a client node with public key."""
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        node_id = state.create_node("fake_aid", public_key, heartbeat_interval=10)
+        run_id = create_dummy_run(state)
+        node_id = state.create_node(
+            "fake_aid", "fake_name", public_key, heartbeat_interval=10
+        )
 
         # Execute
         state.delete_node("fake_aid", node_id)
@@ -814,7 +888,7 @@ class StateTest(CoreStateTest):
         """Test retrieving all node_ids with invalid run_id."""
         # Prepare
         state: LinkState = self.state_factory()
-        state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        create_dummy_run(state)
         invalid_run_id = 61016
         create_dummy_node(state)
 
@@ -829,7 +903,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        node_id = state.create_node("fake_aid", public_key, 10)
+        node_id = state.create_node("fake_aid", "fake_name", public_key, 10)
 
         # Execute
         retrieved_node_id = state.get_node_id_by_public_key(public_key)
@@ -843,7 +917,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        node_id = state.create_node("fake_aid", public_key, 10)
+        node_id = state.create_node("fake_aid", "fake_name", public_key, 10)
 
         # Execute
         state.delete_node("fake_aid", node_id)
@@ -857,7 +931,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state: LinkState = self.state_factory()
         node_id = create_dummy_node(state)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         msg0 = message_from_proto(
             create_ins_message(
                 src_node_id=SUPERLINK_NODE_ID,
@@ -888,7 +962,7 @@ class StateTest(CoreStateTest):
         replies."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         node_id = create_dummy_node(state)
 
         msg0 = message_from_proto(
@@ -967,35 +1041,6 @@ class StateTest(CoreStateTest):
                 actual = datetime.fromisoformat(node.last_deactivated_at).timestamp()
                 self.assertAlmostEqual(actual, expected_deactivated_at, 1)
 
-    def test_acknowledge_app_heartbeat(self) -> None:
-        """Test if acknowledge_app_heartbeat works."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        run_id1 = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
-        run_id2 = state.create_run(None, None, "9abcdef", {}, ConfigRecord(), "i1r9f")
-        # Switch to "running" status
-        transition_run_status(state, run_id1, 2)
-        transition_run_status(state, run_id2, 2)
-        # Heartbeat from run_id1
-        state.acknowledge_app_heartbeat(run_id1, 30)
-        state.acknowledge_app_heartbeat(run_id2, 2)
-
-        # Execute
-        # The run_id1 should be marked as inactive after HEARTBEAT_PATIENCE * 30s,
-        # and the run_id2 after HEARTBEAT_PATIENCE * 2s.
-        future_dt = now() + timedelta(seconds=20)
-        with patch("datetime.datetime") as mock_dt:
-            mock_dt.now.return_value = future_dt
-            run_status_dict = state.get_run_status({run_id1, run_id2})
-            status1 = run_status_dict[run_id1]
-            status2 = run_status_dict[run_id2]
-
-        # Assert
-        assert status1.status == Status.RUNNING
-        assert status2.status == Status.FINISHED
-        assert status2.sub_status == SubStatus.FAILED
-        assert status2.details == RUN_FAILURE_DETAILS_NO_HEARTBEAT
-
     def test_acknowledge_node_heartbeat_failed(self) -> None:
         """Test that acknowledge_node_heartbeat returns False when the heartbeat
         fails."""
@@ -1008,23 +1053,11 @@ class StateTest(CoreStateTest):
         # Assert
         assert not is_successful
 
-    def test_acknowledge_app_heartbeat_failed(self) -> None:
-        """Test that acknowledge_app_heartbeat returns False when the heartbeat
-        fails."""
-        # Prepare
-        state: LinkState = self.state_factory()
-
-        # Execute
-        is_successful = state.acknowledge_app_heartbeat(61016, heartbeat_interval=30)
-
-        # Assert
-        assert not is_successful
-
     def test_node_unavailable_error(self) -> None:  # pylint: disable=too-many-locals
         """Test if get_message_res return Message containing node unavailable error."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         node_id_0 = create_dummy_node(state)
         node_id_1 = create_dummy_node(state)
         node_id_2 = create_dummy_node(state)
@@ -1102,7 +1135,7 @@ class StateTest(CoreStateTest):
         expired."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         node_id = create_dummy_node(state)
         # Create and store a message
         msg = message_from_proto(
@@ -1160,9 +1193,7 @@ class StateTest(CoreStateTest):
 
             # Prepare
             state: LinkState = self.state_factory()
-            run_id = state.create_run(
-                None, None, "9f86d08", {}, ConfigRecord(), "i1r9f"
-            )
+            run_id = create_dummy_run(state)
             node_id = create_dummy_node(state)
 
             # Create message, tweak created_at and store
@@ -1190,12 +1221,45 @@ class StateTest(CoreStateTest):
             else:
                 assert res is None
 
+    def test_store_message_res_node_removed_from_federation(self) -> None:
+        """Test that store_message_res returns None if destination node is removed from
+        federation after message was stored."""
+        # Prepare
+        state = self.state_factory()
+        node_id = create_dummy_node(state)
+        run_id = create_dummy_run(state)
+
+        # Store message for node and retrieve
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        state.store_message_ins(message=msg)
+        assert state.get_message_ins(node_id=node_id, limit=None)
+
+        # Mock removal of node from federation
+        state.federation_manager.filter_nodes = Mock(return_value=set())  # type: ignore
+
+        # Create reply message
+        reply_msg = Message(RecordDict(), reply_to=msg)
+        reply_msg.metadata.__dict__["_message_id"] = reply_msg.object_id
+
+        # Execute
+        result = state.store_message_res(reply_msg)
+
+        # Assert
+        # Should return None since node is no longer in federation
+        assert result is None
+        assert state.num_message_res() == 0
+        assert state.num_message_ins() == 0
+
     def test_get_message_ins_not_return_expired(self) -> None:
         """Test get_message_ins not to return expired Messages."""
         # Prepare
         state = self.state_factory()
         node_id = create_dummy_node(state)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         # Create message, tweak created_at, ttl and store
         msg = message_from_proto(
             create_ins_message(
@@ -1215,13 +1279,41 @@ class StateTest(CoreStateTest):
             message_list = state.get_message_ins(node_id=2, limit=None)
             assert len(message_list) == 0
 
+    def test_get_message_ins_node_removed_from_federation(self) -> None:
+        """Test that get_message_ins returns nothing if node is removed from federation
+        after message was stored."""
+        # Prepare
+        state = self.state_factory()
+        node_id = create_dummy_node(state)
+        run_id = create_dummy_run(state)
+
+        # Store message for node
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        assert state.store_message_ins(message=msg)
+
+        # Mock removal of node from federation
+        state.federation_manager.filter_nodes = Mock(return_value=set())  # type: ignore
+
+        # Execute
+        message_ins_list = state.get_message_ins(node_id=node_id, limit=None)
+
+        # Assert
+        # Should return empty list since node is no longer in federation
+        assert len(message_ins_list) == 0
+        # Message should still be deleted
+        assert state.num_message_ins() == 0
+
     def test_get_message_res_expired_message_ins(self) -> None:
         """Test get_message_res to return error Message if the inquired message has
         expired."""
         # Prepare
         state = self.state_factory()
         node_id = create_dummy_node(state)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
 
         # A message that will expire before it gets pulled
         msg1 = message_from_proto(
@@ -1245,7 +1337,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state = self.state_factory()
         node_id = create_dummy_node(state)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
 
         msg = message_from_proto(
             create_ins_message(
@@ -1276,12 +1368,49 @@ class StateTest(CoreStateTest):
         assert message_res_list[0].has_error()
         assert message_res_list[0].error.code == ErrorCode.MESSAGE_UNAVAILABLE
 
+    def test_get_message_res_node_removed_from_federation(self) -> None:
+        """Test that when node is removed from federation after storing message_ins and
+        message_res, both are deleted and get_message_res returns error."""
+        # Prepare
+        state = self.state_factory()
+        node_id = create_dummy_node(state)
+        run_id = create_dummy_run(state)
+
+        # Store message_ins and retrieve
+        msg = message_from_proto(
+            create_ins_message(
+                src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            )
+        )
+        assert state.store_message_ins(msg)
+        state.get_message_ins(node_id=node_id, limit=None)
+
+        # Store message_res
+        res_msg = Message(RecordDict(), reply_to=msg)
+        res_msg.metadata.__dict__["_message_id"] = res_msg.object_id
+        assert state.store_message_res(res_msg)
+
+        # Mock removal of node from federation
+        state.federation_manager.filter_nodes = Mock(return_value=set())  # type: ignore
+
+        # Execute
+        message_res_list = state.get_message_res(message_ids={msg.object_id})
+
+        # Assert
+        # Should return error message since node is no longer in federation
+        assert len(message_res_list) == 1
+        assert message_res_list[0].has_error()
+        assert message_res_list[0].error.code == ErrorCode.MESSAGE_UNAVAILABLE
+        # Both message_ins and message_res should be deleted
+        assert state.num_message_ins() == 0
+        assert state.num_message_res() == 0
+
     def test_get_message_res_return_successful(self) -> None:
         """Test get_message_res returns correct Message."""
         # Prepare
         state = self.state_factory()
         node_id = create_dummy_node(state)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
 
         msg = message_from_proto(
             create_ins_message(
@@ -1315,7 +1444,7 @@ class StateTest(CoreStateTest):
         # Prepare
         state = self.state_factory()
         node_id = create_dummy_node(state)
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
 
         msg = message_from_proto(
             create_ins_message(
@@ -1351,7 +1480,7 @@ class StateTest(CoreStateTest):
             state=RecordDict(),
             run_config={"test": "test"},
         )
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
 
         # Execute
         init = state.get_serverapp_context(run_id)
@@ -1403,7 +1532,7 @@ class StateTest(CoreStateTest):
         """Test adding and retrieving serverapp logs."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         log_entry_1 = "Log entry 1"
         log_entry_2 = "Log entry 2"
         timestamp = now().timestamp()
@@ -1423,7 +1552,7 @@ class StateTest(CoreStateTest):
         """Test retrieving serverapp logs after a specific timestamp."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         log_entry_1 = "Log entry 1"
         log_entry_2 = "Log entry 2"
         state.add_serverapp_log(run_id, log_entry_1)
@@ -1448,7 +1577,7 @@ class StateTest(CoreStateTest):
         found."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigRecord(), "i1r9f")
+        run_id = create_dummy_run(state)
         log_entry = "Log entry"
         state.add_serverapp_log(run_id, log_entry)
         timestamp = now().timestamp()
@@ -1468,14 +1597,7 @@ class StateTest(CoreStateTest):
         state = self.state_factory()
         # A run w/ federation options
         fed_options = ConfigRecord({"setting-a": 123, "setting-b": [4, 5, 6]})
-        run_id = state.create_run(
-            None,
-            None,
-            "fffffff",
-            {"mock_key": "mock_value"},
-            federation_options=fed_options,
-            flwr_aid="i1r9f",
-        )
+        run_id = create_dummy_run(state, federation_options=fed_options)
         state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
 
         # Execute
@@ -1487,6 +1609,11 @@ class StateTest(CoreStateTest):
         # Generate a run_id that doesn't exist. Then check None is returned
         unique_int = next(num for num in range(0, 1) if num not in {run_id})
         assert state.get_federation_options(run_id=unique_int) is None
+
+    def test_set_linkstate_of_federation_manager(self) -> None:
+        """Test that setting the LinkState of the FederationManager works."""
+        state: LinkState = self.state_factory()
+        assert state.federation_manager.linkstate is state
 
 
 def create_ins_message(
@@ -1516,7 +1643,7 @@ def create_res_message(
     src_node_id: int,
     dst_node_id: int,
     run_id: int,
-    error: Optional[Error] = None,
+    error: Error | None = None,
 ) -> ProtoMessage:
     """Create a (reply) Message for testing."""
     in_msg_proto = create_ins_message(
@@ -1548,13 +1675,38 @@ def create_dummy_node(
     state: LinkState,
     heartbeat_interval: int = 1000,
     owner_aid: str = "mock_flwr_aid",
+    owner_name: str = "mock_flwr_name",
     activate: bool = True,
 ) -> int:
     """Create a dummy node."""
-    node_id = state.create_node(owner_aid, secrets.token_bytes(32), heartbeat_interval)
+    node_id = state.create_node(
+        owner_aid, owner_name, secrets.token_bytes(32), heartbeat_interval
+    )
     if activate:
         state.acknowledge_node_heartbeat(node_id, heartbeat_interval)
     return node_id
+
+
+def create_dummy_run(  # pylint: disable=too-many-positional-arguments
+    state: LinkState,
+    fab_id: str | None = "mock_fab_id",
+    fab_version: str | None = "mock_fab_version",
+    fab_hash: str | None = "mock_fab_hash",
+    override_config: UserConfig | None = None,
+    federation: str = NOOP_FEDERATION,
+    federation_options: ConfigRecord | None = None,
+    flwr_aid: str | None = "mock_flwr_aid",
+) -> int:
+    """Create a dummy run."""
+    return state.create_run(
+        fab_id=fab_id,
+        fab_version=fab_version,
+        fab_hash=fab_hash,
+        override_config=override_config or {},
+        federation=federation,
+        federation_options=federation_options or ConfigRecord(),
+        flwr_aid=flwr_aid,
+    )
 
 
 class InMemoryStateTest(StateTest):
@@ -1564,15 +1716,15 @@ class InMemoryStateTest(StateTest):
 
     def state_factory(self) -> InMemoryLinkState:
         """Return InMemoryState."""
-        return InMemoryLinkState()
+        return InMemoryLinkState(NoOpFederationManager(), ObjectStoreFactory().store())
 
     def test_owner_aid_index(self) -> None:
         """Test that the owner_aid index works correctly."""
         # Prepare
         state = self.state_factory()
-        node_id1 = state.create_node("aid1", b"key1", 10)
-        node_id2 = state.create_node("aid1", b"key2", 10)
-        node_id3 = state.create_node("aid2", b"key3", 10)
+        node_id1 = state.create_node("aid1", "owner1", b"key1", 10)
+        node_id2 = state.create_node("aid1", "owner2", b"key2", 10)
+        node_id3 = state.create_node("aid2", "owner3", b"key3", 10)
 
         # Assert
         self.assertSetEqual(state.owner_to_node_ids["aid1"], {node_id1, node_id2})
@@ -1586,7 +1738,11 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
 
     def state_factory(self) -> SqliteLinkState:
         """Return SqliteState with in-memory database."""
-        state = SqliteLinkState(":memory:")
+        state = SqliteLinkState(
+            ":memory:",
+            federation_manager=NoOpFederationManager(),
+            object_store=ObjectStoreFactory().store(),
+        )
         state.initialize()
         return state
 
@@ -1599,7 +1755,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 19
+        assert len(result) == 20
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1611,7 +1767,11 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         """Return SqliteState with file-based database."""
         # pylint: disable-next=consider-using-with,attribute-defined-outside-init
         self.tmp_file = tempfile.NamedTemporaryFile()
-        state = SqliteLinkState(database_path=self.tmp_file.name)
+        state = SqliteLinkState(
+            database_path=self.tmp_file.name,
+            federation_manager=NoOpFederationManager(),
+            object_store=ObjectStoreFactory().store(),
+        )
         state.initialize()
         return state
 
@@ -1624,7 +1784,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 19
+        assert len(result) == 20
 
 
 if __name__ == "__main__":

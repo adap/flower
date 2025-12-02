@@ -15,11 +15,10 @@
 """Contextmanager for a REST request-response channel to the Flower server."""
 
 
-import secrets
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from logging import ERROR, WARN
-from typing import Callable, Optional, TypeVar, Union
+from typing import TypeVar
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
@@ -28,7 +27,6 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.inflatable_protobuf_utils import (
     make_confirm_message_received_fn_protobuf,
     make_pull_object_fn_protobuf,
@@ -46,14 +44,18 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    CreateNodeResponse,
-    DeleteNodeRequest,
-    DeleteNodeResponse,
+    ActivateNodeRequest,
+    ActivateNodeResponse,
+    DeactivateNodeRequest,
+    DeactivateNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    RegisterNodeFleetRequest,
+    RegisterNodeFleetResponse,
+    UnregisterNodeFleetRequest,
+    UnregisterNodeFleetResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
@@ -70,6 +72,8 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.supercore.heartbeat import HeartbeatSender
+from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 
 try:
     import requests
@@ -77,8 +81,10 @@ except ModuleNotFoundError:
     flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
 
-PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
-PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
+PATH_REGISTER_NODE: str = "/api/v0/fleet/register-node"
+PATH_ACTIVATE_NODE: str = "/api/v0/fleet/activate-node"
+PATH_DEACTIVATE_NODE: str = "/api/v0/fleet/deactivate-node"
+PATH_UNREGISTER_NODE: str = "/api/v0/fleet/unregister-node"
 PATH_PULL_MESSAGES: str = "/api/v0/fleet/pull-messages"
 PATH_PUSH_MESSAGES: str = "/api/v0/fleet/push-messages"
 PATH_PULL_OBJECT: str = "/api/v0/fleet/pull-object"
@@ -97,18 +103,15 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     insecure: bool,  # pylint: disable=unused-argument
     retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[
-        Union[bytes, str]
-    ] = None,  # pylint: disable=unused-argument
-    authentication_keys: Optional[  # pylint: disable=unused-argument
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
-    ] = None,
+    root_certificates: bytes | str | None = None,  # pylint: disable=unused-argument
+    authentication_keys: (
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+    ) = None,
 ) -> Iterator[
     tuple[
-        Callable[[], Optional[tuple[Message, ObjectTree]]],
+        int,
+        Callable[[], tuple[Message, ObjectTree] | None],
         Callable[[Message, ObjectTree], set[str]],
-        Callable[[], Optional[int]],
-        Callable[[], None],
         Callable[[int], Run],
         Callable[[str, int], Fab],
         Callable[[int, str], bytes],
@@ -140,15 +143,15 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
     authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
-        Client authentication is not supported for this transport type.
+        SuperNode authentication is not supported for this transport type.
 
     Returns
     -------
-    receive : Callable
-    send : Callable
-    create_node : Optional[Callable]
-    delete_node : Optional[Callable]
-    get_run : Optional[Callable]
+    node_id : int
+    receive : Callable[[], Optional[tuple[Message, ObjectTree]]]
+    send : Callable[[Message, ObjectTree], set[str]]
+    get_run : Callable[[int], Run]
+    get_fab : Callable[[str, int], Fab]
     pull_object : Callable[[str], bytes]
     push_object : Callable[[str, bytes], None]
     confirm_message_received : Callable[[str], None]
@@ -167,7 +170,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     # Otherwise any server can fake its identity
     # Please refer to:
     # https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
-    verify: Union[bool, str] = True
+    verify: bool | str = True
     if isinstance(root_certificates, str):
         verify = root_certificates
     elif isinstance(root_certificates, bytes):
@@ -177,21 +180,28 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             "must be provided as a string path to the client.",
         )
     if authentication_keys is not None:
-        log(ERROR, "Client authentication is not supported for this transport type.")
+        log(ERROR, "SuperNode authentication is not supported for this transport type.")
+
+    # REST does NOT support node authentication
+    self_registered = False
+    if authentication_keys is None:
+        self_registered = True
+        authentication_keys = generate_key_pairs()
+    node_pk = public_key_to_bytes(authentication_keys[1])
 
     # Shared variables for inner functions
-    node: Optional[Node] = None
+    node: Node | None = None
 
     # Remove should_giveup from RetryInvoker as REST does not support gRPC status codes
     retry_invoker.should_giveup = None
 
     ###########################################################################
-    # heartbeat/create_node/delete_node/receive/send/get_run functions
+    # SuperNode functions
     ###########################################################################
 
     def _request(
         req: GrpcMessage, res_type: type[T], api_path: str, retry: bool = True
-    ) -> Optional[T]:
+    ) -> T | None:
         # Serialize the request
         req_bytes = req.SerializeToString()
 
@@ -296,28 +306,35 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     heartbeat_sender = HeartbeatSender(send_node_heartbeat)
 
-    def create_node() -> Optional[int]:
-        """Set create_node."""
-        req = CreateNodeRequest(
-            # REST does not support node authentication;
-            # random bytes are used instead
-            public_key=secrets.token_bytes(32),
+    def register_node() -> None:
+        """Register node with SuperLink."""
+        req = RegisterNodeFleetRequest(public_key=node_pk)
+
+        # Send the request
+        res = _request(req, RegisterNodeFleetResponse, PATH_REGISTER_NODE)
+        if res is None:
+            raise RuntimeError("Failed to register node")
+
+    def activate_node() -> int:
+        """Activate node and start heartbeat."""
+        req = ActivateNodeRequest(
+            public_key=node_pk,
             heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
         )
 
         # Send the request
-        res = _request(req, CreateNodeResponse, PATH_CREATE_NODE)
+        res = _request(req, ActivateNodeResponse, PATH_ACTIVATE_NODE)
         if res is None:
-            return None
+            raise RuntimeError("Failed to activate node")
 
         # Remember the node and start the heartbeat sender
         nonlocal node
-        node = res.node
+        node = Node(node_id=res.node_id)
         heartbeat_sender.start()
         return node.node_id
 
-    def delete_node() -> None:
-        """Set delete_node."""
+    def deactivate_node() -> None:
+        """Deactivate node and stop heartbeat."""
         nonlocal node
         if node is None:
             raise RuntimeError("Node instance missing")
@@ -325,18 +342,32 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Stop the heartbeat sender
         heartbeat_sender.stop()
 
-        # Send DeleteNode request
-        req = DeleteNodeRequest(node=node)
+        # Send DeactivateNode request
+        req = DeactivateNodeRequest(node_id=node.node_id)
 
         # Send the request
-        res = _request(req, DeleteNodeResponse, PATH_DELETE_NODE)
+        res = _request(req, DeactivateNodeResponse, PATH_DEACTIVATE_NODE)
         if res is None:
-            return
+            raise RuntimeError("Failed to deactivate node")
+
+    def unregister_node() -> None:
+        """Unregister node from SuperLink."""
+        nonlocal node
+        if node is None:
+            raise RuntimeError("Node instance missing")
+
+        # Send UnregisterNode request
+        req = UnregisterNodeFleetRequest(node_id=node.node_id)
+
+        # Send the request
+        res = _request(req, UnregisterNodeFleetResponse, PATH_UNREGISTER_NODE)
+        if res is None:
+            raise RuntimeError("Failed to unregister node")
 
         # Cleanup
         node = None
 
-    def receive() -> Optional[tuple[Message, ObjectTree]]:
+    def receive() -> tuple[Message, ObjectTree] | None:
         """Pull a message with its ObjectTree from SuperLink."""
         # Get Node
         if node is None:
@@ -447,12 +478,14 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         fn(object_id)
 
     try:
+        if self_registered:
+            register_node()
+        node_id = activate_node()
         # Yield methods
         yield (
+            node_id,
             receive,
             send,
-            create_node,
-            delete_node,
             get_run,
             get_fab,
             pull_object,
@@ -467,6 +500,8 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             if node is not None:
                 # Disable retrying
                 retry_invoker.max_tries = 1
-                delete_node()
+                deactivate_node()
+                if self_registered:
+                    unregister_node()
         except RequestsConnectionError:
             pass
