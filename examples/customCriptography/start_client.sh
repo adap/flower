@@ -32,7 +32,7 @@ sleep 2
 # ==========================
 
 # Limite thread CPU per PyTorch/BLAS
-CPU_THREADS=8  # <-- cambia qui il numero di core per client
+CPU_THREADS=2 # <-- cambia qui il numero di core per client
 
 for ((i=1; i<=NUM_CLIENTS; i++)); do
     PORT=$((9093 + i))
