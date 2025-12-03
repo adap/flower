@@ -9,21 +9,16 @@ NUM_CLIENTS=$(python3 -c "from flwr.common.crypto.config_cripto import NUM_CLIEN
 LOG_DIR="logs"
 mkdir -p "$LOG_DIR"
 
-echo "[*] Numero client: $NUM_CLIENTS"
-echo "[*] TLS: $TLS"
-
 # ==========================
-#  Avvio SuperLink
+#  Avvio del superlink
 # ==========================
 if [ "$TLS" = "True" ]; then
-    echo "[*] Avvio SuperLink in modalità TLS + AUTH"
+    echo "[*] Avvio superlink in modalità TLS + AUTH"
     flower-superlink \
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
-        --auth-list-public-keys keys/client_public_keys.csv \
-        > "$LOG_DIR/superlink.log" 2>&1 &
-
+        | tee "$LOG_DIR/superlink.log" &
     TLS_FLAG="--root-certificates certificates/ca.crt"
     AUTH_ENABLED=true
 
@@ -48,36 +43,22 @@ for ((i=1; i<=NUM_CLIENTS; i++)); do
     DATASET="datasets/cifar10_part_$i"
     LOG_FILE="$LOG_DIR/client_$i.log"
 
-    echo "[*] Avvio client $i su porta $PORT"
+    echo "[*] Avvio client $i con max $CPU_THREADS thread CPU"
 
-    CMD="flower-supernode \
-        --superlink 127.0.0.1:9092 \
-        --clientappio-api-address 0.0.0.0:${PORT} \
-        $TLS_FLAG \
-        --node-config dataset-path=\"$DATASET\""
-
-    # Aggiungi autenticazione SOLO se TLS è attivo
-    if [ "$AUTH_ENABLED" = true ]; then
-        CMD="$CMD \
-            --auth-supernode-private-key keys/client_credentials_${i} \
-            --auth-supernode-public-key keys/client_credentials_${i}.pub"
-    fi
-
-    # Avvio processo
     OMP_NUM_THREADS=$CPU_THREADS \
     MKL_NUM_THREADS=$CPU_THREADS \
     OPENBLAS_NUM_THREADS=$CPU_THREADS \
     NUMEXPR_NUM_THREADS=$CPU_THREADS \
     VECLIB_MAXIMUM_THREADS=$CPU_THREADS \
     torch_num_threads=$CPU_THREADS \
-    bash -c "$CMD" > "$LOG_FILE" 2>&1 &
+    flower-supernode \
+        --superlink 127.0.0.1:9092 \
+        --clientappio-api-address 0.0.0.0:${PORT} \
+        $TLS_FLAG \
+        --node-config "dataset-path=\"$DATASET\"" \
+        | tee "$LOG_FILE" &
 
-    if [ "$AUTH_ENABLED" = true ]; then
-        echo "[✓] Client $i AVVIATO (TLS + AUTH), dataset=$DATASET (porta $PORT)"
-    else
-        echo "[✓] Client $i AVVIATO (INSECURE), dataset=$DATASET (porta $PORT)"
-    fi
-
+    echo "[✓] Avviato client $i su porta $PORT con dataset $DATASET (log: $LOG_FILE)"
 done
 
 wait
