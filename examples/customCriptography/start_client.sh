@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Recupero variabili da Python
 TLS=$(python3 -c "from flwr.common.crypto.config_cripto import TLS; print(TLS)")
 NUM_CLIENTS=$(python3 -c "from flwr.common.crypto.config_cripto import NUM_CLIENTS; print(NUM_CLIENTS)")
 
@@ -7,7 +8,7 @@ LOG_DIR="logs"
 mkdir -p "$LOG_DIR"
 
 # ==========================
-#  Avvio del superlink
+#  Avvio del superlink con AUTH
 # ==========================
 if [ "$TLS" = "True" ]; then
     echo "[*] Avvio superlink in modalità TLS + AUTH"
@@ -15,16 +16,12 @@ if [ "$TLS" = "True" ]; then
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
-        --enable-supernode-auth \
+        --auth-list-public-keys keys/client_public_keys.csv \
         | tee "$LOG_DIR/superlink.log" &
     TLS_FLAG="--root-certificates certificates/ca.crt"
 else
-    echo "[*] Avvio superlink in modalità INSECURE + AUTH"
-    flower-superlink \
-        --insecure \
-        --enable-supernode-auth \
-        | tee "$LOG_DIR/superlink.log" &
-    TLS_FLAG="--insecure"
+    echo "[*] Avvio superlink in modalità INSECURE (auth richiede TLS!)"
+    exit 1
 fi
 
 sleep 2
@@ -33,7 +30,7 @@ sleep 2
 #  Avvio dei supernode
 # ==========================
 
-CPU_THREADS=2
+CPU_THREADS=6  # Limite thread CPU per client
 
 for ((i=1; i<=NUM_CLIENTS; i++)); do
     PORT=$((9093 + i))
@@ -52,11 +49,12 @@ for ((i=1; i<=NUM_CLIENTS; i++)); do
         --superlink 127.0.0.1:9092 \
         --clientappio-api-address 0.0.0.0:${PORT} \
         $TLS_FLAG \
-        --auth-supernode-private-key keys/client_credentials_$i \
+        --auth-supernode-private-key keys/client_credentials_${i} \
+        --auth-supernode-public-key keys/client_credentials_${i}.pub \
         --node-config "dataset-path=\"$DATASET\"" \
         | tee "$LOG_FILE" &
 
-    echo "[✓] Avviato client $i su porta $PORT con key keys/client_credentials_$i"
+    echo "[✓] Avviato client $i su porta $PORT usando keys/client_credentials_${i}"
 done
 
 wait
