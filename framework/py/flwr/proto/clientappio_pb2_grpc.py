@@ -4,6 +4,7 @@ import grpc
 import warnings
 
 from flwr.proto import appio_pb2 as flwr_dot_proto_dot_appio__pb2
+from flwr.proto import heartbeat_pb2 as flwr_dot_proto_dot_heartbeat__pb2
 from flwr.proto import message_pb2 as flwr_dot_proto_dot_message__pb2
 from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
 
@@ -70,6 +71,11 @@ class ClientAppIoStub(object):
                 '/flwr.proto.ClientAppIo/PullMessage',
                 request_serializer=flwr_dot_proto_dot_appio__pb2.PullAppMessagesRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_appio__pb2.PullAppMessagesResponse.FromString,
+                _registered_method=True)
+        self.SendAppHeartbeat = channel.unary_unary(
+                '/flwr.proto.ClientAppIo/SendAppHeartbeat',
+                request_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatResponse.FromString,
                 _registered_method=True)
         self.PushObject = channel.unary_unary(
                 '/flwr.proto.ClientAppIo/PushObject',
@@ -140,6 +146,13 @@ class ClientAppIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SendAppHeartbeat(self, request, context):
+        """App heartbeat
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def PushObject(self, request, context):
         """Push Object
         """
@@ -198,6 +211,11 @@ def add_ClientAppIoServicer_to_server(servicer, server):
                     servicer.PullMessage,
                     request_deserializer=flwr_dot_proto_dot_appio__pb2.PullAppMessagesRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_appio__pb2.PullAppMessagesResponse.SerializeToString,
+            ),
+            'SendAppHeartbeat': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendAppHeartbeat,
+                    request_deserializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatResponse.SerializeToString,
             ),
             'PushObject': grpc.unary_unary_rpc_method_handler(
                     servicer.PushObject,
@@ -404,6 +422,33 @@ class ClientAppIo(object):
             '/flwr.proto.ClientAppIo/PullMessage',
             flwr_dot_proto_dot_appio__pb2.PullAppMessagesRequest.SerializeToString,
             flwr_dot_proto_dot_appio__pb2.PullAppMessagesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SendAppHeartbeat(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/flwr.proto.ClientAppIo/SendAppHeartbeat',
+            flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatRequest.SerializeToString,
+            flwr_dot_proto_dot_heartbeat__pb2.SendAppHeartbeatResponse.FromString,
             options,
             channel_credentials,
             insecure,

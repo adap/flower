@@ -93,6 +93,7 @@ def unregister(  # pylint: disable=R0914
                 f"❌ {err}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1) from err
         finally:
@@ -109,6 +110,7 @@ def unregister(  # pylint: disable=R0914
                 f"{err}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
     finally:
         if suppress_output:

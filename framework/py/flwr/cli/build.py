@@ -111,6 +111,7 @@ def build(
             f"❌ The path {app} is not a valid path to a Flower app.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -121,6 +122,7 @@ def build(
             "and can only contain letters, digits, and hyphens.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -131,6 +133,7 @@ def build(
             + "\n".join([f"- {line}" for line in errors]),
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 

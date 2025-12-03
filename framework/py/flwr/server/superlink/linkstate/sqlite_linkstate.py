@@ -18,16 +18,14 @@
 # pylint: disable=too-many-lines
 
 import json
-import secrets
 import sqlite3
 from collections.abc import Sequence
+from datetime import datetime, timezone
 from logging import ERROR, WARNING
 from typing import Any, cast
 
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
-    FLWR_APP_TOKEN_LENGTH,
-    HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -51,7 +49,8 @@ from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 # pylint: enable=E0611
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.constant import NodeStatus
-from flwr.supercore.sqlite_mixin import SqliteMixin
+from flwr.supercore.corestate.sqlite_corestate import SqliteCoreState
+from flwr.supercore.object_store.object_store import ObjectStore
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 from flwr.superlink.federation import FederationManager
 
@@ -108,8 +107,6 @@ CREATE INDEX IF NOT EXISTS idx_node_status ON node(status);
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
     run_id                INTEGER UNIQUE,
-    active_until          REAL,
-    heartbeat_interval    REAL,
     fab_id                TEXT,
     fab_version           TEXT,
     fab_hash              TEXT,
@@ -182,27 +179,23 @@ CREATE TABLE IF NOT EXISTS message_res(
 );
 """
 
-SQL_CREATE_TABLE_TOKEN_STORE = """
-CREATE TABLE IF NOT EXISTS token_store (
-    run_id                  INTEGER PRIMARY KEY,
-    token                   TEXT UNIQUE NOT NULL
-);
-"""
 
-
-class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
+class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
     """SQLite-based LinkState implementation."""
 
     def __init__(
-        self, database_path: str, federation_manager: FederationManager
+        self,
+        database_path: str,
+        federation_manager: FederationManager,
+        object_store: ObjectStore,
     ) -> None:
-        super().__init__(database_path)
+        super().__init__(database_path, object_store)
         federation_manager.linkstate = self
         self._federation_manager = federation_manager
 
-    def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
-        """Connect to the DB, enable FK support, and create tables if needed."""
-        return self._ensure_initialized(
+    def get_sql_statements(self) -> tuple[str, ...]:
+        """Return SQL statements for LinkState tables."""
+        return super().get_sql_statements() + (
             SQL_CREATE_TABLE_RUN,
             SQL_CREATE_TABLE_LOGS,
             SQL_CREATE_TABLE_CONTEXT,
@@ -210,11 +203,9 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             SQL_CREATE_TABLE_MESSAGE_RES,
             SQL_CREATE_TABLE_NODE,
             SQL_CREATE_TABLE_PUBLIC_KEY,
-            SQL_CREATE_TABLE_TOKEN_STORE,
             SQL_CREATE_INDEX_ONLINE_UNTIL,
             SQL_CREATE_INDEX_OWNER_AID,
             SQL_CREATE_INDEX_NODE_STATUS,
-            log_queries=log_queries,
         )
 
     @property
@@ -911,17 +902,15 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             if row["COUNT(*)"] == 0:
                 query = """
                     INSERT INTO run
-                    (run_id, active_until, heartbeat_interval, fab_id, fab_version,
+                    (run_id, fab_id, fab_version,
                     fab_hash, override_config, federation, federation_options,
                     pending_at, starting_at, running_at, finished_at, sub_status,
                     details, flwr_aid)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """
                 override_config_json = json.dumps(override_config)
                 data = [
                     sint64_run_id,  # run_id
-                    0,  # active_until (not used until the run is started)
-                    0,  # heartbeat_interval (not used until the run is started)
                     fab_id,  # fab_id
                     fab_version,  # fab_version
                     fab_hash,  # fab_hash
@@ -955,35 +944,10 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             rows = self.query("SELECT run_id FROM run;", ())
         return {int64_to_uint64(row["run_id"]) for row in rows}
 
-    def _check_and_tag_inactive_run(self, run_ids: set[int]) -> None:
-        """Check if any runs are no longer active.
-
-        Marks runs with status 'starting' or 'running' as failed
-        if they have not sent a heartbeat before `active_until`.
-        """
-        sint_run_ids = [uint64_to_int64(run_id) for run_id in run_ids]
-        query = f"""
-            UPDATE run SET sub_status = ?, details = ?,
-            finished_at =
-            strftime("%Y-%m-%dT%H:%M:%f+00:00", active_until, "unixepoch")
-            WHERE starting_at != '' AND finished_at = '' AND active_until < ?
-            AND run_id IN ({','.join(['?'] * len(run_ids))});
-        """
-        current = now()
-        self.query(
-            query,
-            (
-                SubStatus.FAILED,
-                RUN_FAILURE_DETAILS_NO_HEARTBEAT,
-                current.timestamp(),
-                *sint_run_ids,
-            ),
-        )
-
     def get_run(self, run_id: int) -> Run | None:
         """Retrieve information about the run with the specified `run_id`."""
-        # Check if runs are still active
-        self._check_and_tag_inactive_run(run_ids={run_id})
+        # Clean up expired tokens; this will flag inactive runs as needed
+        self._cleanup_expired_tokens()
 
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = uint64_to_int64(run_id)
@@ -1014,8 +978,8 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
-        # Check if runs are still active
-        self._check_and_tag_inactive_run(run_ids=run_ids)
+        # Clean up expired tokens; this will flag inactive runs as needed
+        self._cleanup_expired_tokens()
 
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_ids = (uint64_to_int64(run_id) for run_id in set(run_ids))
@@ -1034,10 +998,10 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
 
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
-        with self.conn:
-            # Check if runs are still active
-            self._check_and_tag_inactive_run(run_ids={run_id})
+        # Clean up expired tokens; this will flag inactive runs as needed
+        self._cleanup_expired_tokens()
 
+        with self.conn:
             # Convert the uint64 value to sint64 for SQLite
             sint64_run_id = uint64_to_int64(run_id)
             query = "SELECT * FROM run WHERE run_id = ?;"
@@ -1075,20 +1039,12 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 return False
 
             # Update the status
-            query = "UPDATE run SET %s= ?, sub_status = ?, details = ?, "
-            query += "active_until = ?, heartbeat_interval = ? "
-            query += "WHERE run_id = ?;"
+            query = """
+                UPDATE run SET %s= ?, sub_status = ?, details = ? WHERE run_id = ?;
+            """
 
             # Prepare data for query
-            # Initialize heartbeat_interval and active_until
-            # when switching to starting or running
             current = now()
-            if new_status.status in (Status.STARTING, Status.RUNNING):
-                heartbeat_interval = HEARTBEAT_DEFAULT_INTERVAL
-                active_until = current.timestamp() + heartbeat_interval
-            else:
-                heartbeat_interval = 0
-                active_until = 0
 
             # Determine the timestamp field based on the new status
             timestamp_fld = ""
@@ -1103,8 +1059,6 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 current.isoformat(),
                 new_status.sub_status,
                 new_status.details,
-                active_until,
-                heartbeat_interval,
                 uint64_to_int64(run_id),
             )
             self.conn.execute(query % timestamp_fld, data)
@@ -1180,44 +1134,34 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
             self.conn.execute(query, params)
             return True
 
-    def acknowledge_app_heartbeat(self, run_id: int, heartbeat_interval: float) -> bool:
-        """Acknowledge a heartbeat received from a ServerApp for a given run.
+    def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
+        """Transition runs with expired tokens to failed status.
 
-        A run with status `"running"` is considered alive as long as it sends heartbeats
-        within the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
-        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before the run is
-        marked as `"completed:failed"`.
+        Parameters
+        ----------
+        expired_records : list[tuple[int, float]]
+            List of tuples containing (run_id, active_until timestamp)
+            for expired tokens.
         """
+        if not expired_records:
+            return
+
         with self.conn:
-            # Check if runs are still active
-            self._check_and_tag_inactive_run(run_ids={run_id})
-
-            # Search for the run
-            sint_run_id = uint64_to_int64(run_id)
-            query = "SELECT * FROM run WHERE run_id = ?;"
-            rows = self.conn.execute(query, (sint_run_id,)).fetchall()
-
-            if not rows:
-                log(ERROR, "`run_id` is invalid")
-                return False
-
-            # Check if the run is of status "running"/"starting"
-            row = rows[0]
-            status = determine_run_status(row)
-            if status not in (Status.RUNNING, Status.STARTING):
-                log(
-                    ERROR,
-                    'Cannot acknowledge heartbeat for run with status "%s"',
-                    status,
+            query = """
+                UPDATE run
+                SET sub_status = ?, details = ?, finished_at = ?
+                WHERE run_id = ?;
+            """
+            data = [
+                (
+                    SubStatus.FAILED,
+                    RUN_FAILURE_DETAILS_NO_HEARTBEAT,
+                    datetime.fromtimestamp(active_until, tz=timezone.utc).isoformat(),
+                    uint64_to_int64(run_id),
                 )
-                return False
-
-            # Update the `active_until` and `heartbeat_interval` for the given run
-            active_until = now().timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval
-            query = "UPDATE run SET active_until = ?, heartbeat_interval = ? "
-            query += "WHERE run_id = ?"
-            self.conn.execute(query, (active_until, heartbeat_interval, sint_run_id))
-        return True
+                for run_id, active_until in expired_records
+            ]
+            self.conn.executemany(query, data)
 
     def get_serverapp_context(self, run_id: int) -> Context | None:
         """Get the context for the specified `run_id`."""
@@ -1310,41 +1254,6 @@ class SqliteLinkState(LinkState, SqliteMixin):  # pylint: disable=R0904
                 return None
 
         return rows[0]
-
-    def create_token(self, run_id: int) -> str | None:
-        """Create a token for the given run ID."""
-        token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
-        query = "INSERT INTO token_store (run_id, token) VALUES (:run_id, :token);"
-        data = {"run_id": uint64_to_int64(run_id), "token": token}
-        try:
-            self.query(query, data)
-        except sqlite3.IntegrityError:
-            return None  # Token already created for this run ID
-        return token
-
-    def verify_token(self, run_id: int, token: str) -> bool:
-        """Verify a token for the given run ID."""
-        query = "SELECT token FROM token_store WHERE run_id = :run_id;"
-        data = {"run_id": uint64_to_int64(run_id)}
-        rows = self.query(query, data)
-        if not rows:
-            return False
-        return cast(str, rows[0]["token"]) == token
-
-    def delete_token(self, run_id: int) -> None:
-        """Delete the token for the given run ID."""
-        query = "DELETE FROM token_store WHERE run_id = :run_id;"
-        data = {"run_id": uint64_to_int64(run_id)}
-        self.query(query, data)
-
-    def get_run_id_by_token(self, token: str) -> int | None:
-        """Get the run ID associated with a given token."""
-        query = "SELECT run_id FROM token_store WHERE token = :token;"
-        data = {"token": token}
-        rows = self.query(query, data)
-        if not rows:
-            return None
-        return int64_to_uint64(rows[0]["run_id"])
 
 
 def message_to_dict(message: Message) -> dict[str, Any]:
