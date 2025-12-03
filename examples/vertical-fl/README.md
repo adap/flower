@@ -13,34 +13,6 @@ more details below, but the main idea of Vertical Federated Learning is that
 each client is holding different feature sets of the same dataset and that the
 server is holding the labels of this dataset.
 
-In this example we use the [VerticalSizePartitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.VerticalSizePartitioner.html#flwr_datasets.partitioner.VerticalSizePartitioner) from [Flower Datasets](https://flower.ai/docs/datasets/) to vertically split the dataset into 3 partitions (one for each client) with the target column (i.e. whether the passenger survived the Titanic sinking) being available at the `ServerApp` only.
-
-```python
-from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import VerticalSizePartitioner
-
-partitioner = VerticalSizePartitioner(
-    partition_sizes=[2, 3, 2], # three partitions with 2,3 and 2 features
-    active_party_columns="Survived", # the target
-    active_party_columns_mode="create_as_last" # An additional partition will be created 
-)                                              # that only contains the target column
-
-fds = FederatedDataset(
-    dataset="julien-c/titanic-survival",
-    partitioners={"train": partitioner}
-)
-# Load all partitions
-partitions = [fds.load_partition(i) for i in range(fds.partitioners["train"].num_partitions)]
-
-for partition in partitions:
-        print(partition.column_names)
-
-# ['Age', 'Sex'] <----------------------------------- ClientApp #0
-# ['Fare', 'Siblings/Spouses Aboard', 'Name'] <------ ClientApp #1
-# ['Parents/Children Aboard', 'Pclass'] <------------ ClientApp #2
-# ['Survived'] <--------------------------------------ServerApp
-```
-
 |                       | Horizontal Federated Learning (HFL or just FL)                                                                                                                                                         | Vertical Federated Learning (VFL)                                                                                                                                                                                                                                                                                                                                   |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Data Distribution     | Clients have different data instances but share the same feature space. Think of different hospitals having different patients' data (samples) but recording the same types of information (features). | Each client holds different features for the same instances. Imagine different institutions holding various tests or measurements for the same group of patients.                                                                                                                                                                                                   |
@@ -87,6 +59,38 @@ Install the dependencies defined in `pyproject.toml` as well as the `vertical_fl
 ```bash
 pip install -e .
 ```
+
+## Vertical data partitioning
+
+In this example we use the [VerticalSizePartitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.VerticalSizePartitioner.html#flwr_datasets.partitioner.VerticalSizePartitioner) from [Flower Datasets](https://flower.ai/docs/datasets/) to vertically split the dataset into 3 partitions (one for each client) with the target column (i.e. whether the passenger survived the Titanic sinking) being available at the `ServerApp` only.
+
+```python
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import VerticalSizePartitioner
+
+partitioner = VerticalSizePartitioner(
+    partition_sizes=[2, 3, 2], # three partitions with 2,3 and 2 features
+    active_party_columns="Survived", # the target
+    active_party_columns_mode="create_as_last" # An additional partition will be created 
+)                                              # that only contains the target column
+
+fds = FederatedDataset(
+    dataset="julien-c/titanic-survival",
+    partitioners={"train": partitioner}
+)
+# Load all partitions
+partitions = [fds.load_partition(i) for i in range(fds.partitioners["train"].num_partitions)]
+
+for partition in partitions:
+        print(partition.column_names)
+
+# ['Age', 'Sex'] <----------------------------------- ClientApp #0
+# ['Fare', 'Siblings/Spouses Aboard', 'Name'] <------ ClientApp #1
+# ['Parents/Children Aboard', 'Pclass'] <------------ ClientApp #2
+# ['Survived'] <--------------------------------------ServerApp
+```
+
+You control the number of partitions as well as how many features each have by modifying `feature-splits` (defatuls to \[`2,3,2`\]) in the `[tool.flwr.app.config]` section of the `pyproject.toml`.
 
 ## Run the project
 
