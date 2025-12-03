@@ -41,7 +41,7 @@ def main(grid: Grid, context: Context) -> None:
     accuracies: list[tuple[int, float]] = []
     losses: list[tuple[int, float]] = []
 
-    for i in range(num_rounds):
+    for i in range(1, num_rounds + 1):
         log(INFO, "")
         log(INFO, f"--- ServerApp Round {i} / {num_rounds} ---")
 
