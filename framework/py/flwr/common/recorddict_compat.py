@@ -97,12 +97,12 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
     # LOG TEMPI REALI
     total_time = total_deser_time + total_decrypt_time
 
-    # log_time(
-    #     "DESERIALIZZAZIONE PURA: %.5f s | DECRYPT/INTEGRITY: %.5f s | TOTALE: %.5f s",
-    #     total_deser_time,
-    #     total_decrypt_time,
-    #     total_time,
-    # )
+    log_time(
+        "DESERIALIZZAZIONE PURA: %.5f s | DECRYPT/INTEGRITY: %.5f s | TOTALE: %.5f s",
+        total_deser_time,
+        total_decrypt_time,
+        total_time,
+    )
 
     return parameters
 
@@ -153,12 +153,12 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
         )
 
     # LOG
-    # log_time(
-    #     "SERIALIZZAZIONE PURA: %.5f s | CRITTOGRAFIA: %.5f s | TOTALE: %.5f s",
-    #     tot_serial_time,
-    #     tot_crypto_time,
-    #     tot_serial_time + tot_crypto_time,
-    #     )
+    log_time(
+        "SERIALIZZAZIONE PURA: %.5f s | CRITTOGRAFIA: %.5f s | TOTALE: %.5f s",
+        tot_serial_time,
+        tot_crypto_time,
+        tot_serial_time + tot_crypto_time,
+        )
 
     return ArrayRecord(ordered_dict, keep_input=keep_input)
 
@@ -235,7 +235,7 @@ import inspect
 import traceback
 def recorddict_to_fitins(recorddict: RecordDict, keep_input: bool) -> FitIns:
     """Derive FitIns from a RecordDict object."""
-    #log_time("Client deserializza")
+    log_time("Client deserializza")
     parameters, config = _recorddict_to_fit_or_evaluate_ins_components(
         recorddict,
         ins_str="fitins",
@@ -253,13 +253,13 @@ def fitins_to_recorddict(fitins: FitIns, keep_input: bool) -> RecordDict:
     # traceback.print_stack()
     # print("======================================")
     #("Server serializza")
-    #log_time("SERVER SERIALIZZA ")
+    log_time("SERVER SERIALIZZA ")
     return recorddict
 
 
 def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
     """Derive FitRes from a RecordDict object."""
-    #log_time("Server deserializza")
+    log_time("Server deserializza")
     ins_str = "fitres"
 
     parameters = arrayrecord_to_parameters(
@@ -281,7 +281,7 @@ def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
 
 def fitres_to_recorddict(fitres: FitRes, keep_input: bool) -> RecordDict:
     """Construct a RecordDict from a FitRes object."""
-   # log_time("Client serializza")
+    log_time("Client serializza")
     recorddict = RecordDict()
 
     res_str = "fitres"
