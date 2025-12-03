@@ -42,3 +42,6 @@ FEDERATION_CONFIG_HELP_MESSAGE = CONFIG_HELP_MESSAGE.format(
     "[tool.flwr.federations.<YOUR-FEDERATION>]",
     "",
 )
+
+# CLI configuration file name
+CLI_CONFIG_FILE = "config.yml"

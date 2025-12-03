@@ -757,3 +757,6 @@ def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
         raise typer.Exit(code=1)
 
     return app_id, app_version
+
+
+def read_cli_global_config()

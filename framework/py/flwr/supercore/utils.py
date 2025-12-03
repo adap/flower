@@ -15,6 +15,11 @@
 """Utility functions for the infrastructure."""
 
 
+import os
+from flwr.common.constant import FLWR_DIR, FLWR_HOME
+from pathlib import Path
+
+
 def mask_string(value: str, head: int = 4, tail: int = 4) -> str:
     """Mask a string by preserving only the head and tail characters.
 
@@ -50,3 +55,14 @@ def int64_to_uint64(signed: int) -> int:
     if signed < 0:
         return signed + (1 << 64)
     return signed
+
+
+def get_flwr_home() -> Path:
+    """Get the Flower home directory path.
+
+    Returns FLWR_HOME environment variable if set, otherwise returns
+    a default subdirectory in the user's home directory.
+    """
+    if flwr_home := os.getenv(FLWR_HOME):
+        return Path(flwr_home)
+    return Path.home() / FLWR_DIR
