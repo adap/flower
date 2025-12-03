@@ -21,12 +21,12 @@ from .task import (
 )
 
 # Logger CPU
-cpu_logger = logging.getLogger("cpu_logger")
-cpu_logger.setLevel(logging.INFO)
-file_handler = logging.FileHandler("cpu_usage.log", mode="a")
-formatter = logging.Formatter("%(asctime)s [INFO] Client %(pid)d CPU time durante fit: %(message)s s")
-file_handler.setFormatter(formatter)
-cpu_logger.addHandler(file_handler)
+# cpu_logger = logging.getLogger("cpu_logger")
+# cpu_logger.setLevel(logging.INFO)
+# file_handler = logging.FileHandler("cpu_usage.log", mode="a")
+# formatter = logging.Formatter("%(asctime)s [INFO] Client %(pid)d CPU time durante fit: %(message)s s")
+# file_handler.setFormatter(formatter)
+# cpu_logger.addHandler(file_handler)
 
 
 # -------------------------------------------------------------------
@@ -42,17 +42,7 @@ class FlowerClient(NumPyClient):
         self.lr = learning_rate
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        # Impostazione affinity
-        self.proc = psutil.Process(os.getpid())
-        try:
-            self.proc.cpu_affinity(core_list)
-            print(f"[CLIENT {os.getpid()}] CPU affinity impostata su: {core_list}")
-        except Exception as e:
-            print(f"[CLIENT {os.getpid()}] Affinity non supportata: {e}")
 
-    def _cpu_time(self):
-        t = self.proc.cpu_times()
-        return t.user + t.system
 
     def fit(self, parameters, config):
         print(f"[CLIENT {os.getpid()}] fit() STARTED", flush=True)
@@ -73,7 +63,7 @@ class FlowerClient(NumPyClient):
 
             end_cpu = self._cpu_time()
             cpu_time = end_cpu - start_cpu
-            cpu_logger.info(f"{cpu_time:.3f}", extra={"pid": os.getpid()})
+            # cpu_logger.info(f"{cpu_time:.3f}", extra={"pid": os.getpid()})
 
             return get_weights(self.net), len(self.trainloader.dataset), {"cpu_fit": cpu_time}
         except Exception:
