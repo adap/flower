@@ -53,9 +53,7 @@ def main(grid: Grid, context: Context) -> None:
             # The server model's input size is determined by the number of clients
             # and the output feature dimension of each embedding produced by the clients
             head = ServerModel(input_size=out_feature_dim_clientapp * len(node_ids))
-            optimizer = torch.optim.SGD(head.parameters(), lr=0.001)
-
-        optimizer.zero_grad()
+            optimizer = torch.optim.SGD(head.parameters(), lr=0.1)
 
         # 1. Get embeddings from all clients
         embeddings, node_pos_mapping = get_remote_embeddings(
@@ -66,33 +64,37 @@ def main(grid: Grid, context: Context) -> None:
         )
 
         # 2. Complete forward pass and compute loss
+        optimizer.zero_grad()  # Clear gradients before backward pass
         output = head(embeddings)
         loss = criterion(output, labels)
         loss.backward()
 
+        # 4. Extract gradients w.r.t. embeddings
+        embeddings_grad = embeddings.grad.split(
+            [out_feature_dim_clientapp] * len(node_ids), dim=1
+        )
+
+        # Update the head model
         optimizer.step()
-        optimizer.zero_grad()
 
         # 3. Compute accuracy using updated head model
         with torch.no_grad():
             correct = 0
-            output = head(embeddings)
+            # Re-compute embeddings for accuracy (detached from grad)
+            embeddings_eval = embeddings.detach()
+            output = head(embeddings_eval)
             predicted = (output > 0.5).float()
             correct += (predicted == labels).sum().item()
             accuracy = correct / len(labels) * 100
 
         print(f"Round {i+1}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.2f}%")
-
-        # 4. Compute gradients w.r.t. embeddings (updated clients' models)
-        embeddings_grad = embeddings.grad.split(
-            [out_feature_dim_clientapp] * len(node_ids), dim=1
-        )
+        # 5. Send gradients to clients
         messages = []
         for node_id, pos in node_pos_mapping.items():
             arrc = ArrayRecord({"local-gradients": Array(embeddings_grad[pos].numpy())})
             message = Message(
                 content=RecordDict({"gradients": arrc}),
-                message_type="train.apply_gradients",  # target `query` method in ClientApp
+                message_type="train.apply_gradients",  # target `train` method in ClientApp
                 dst_node_id=node_id,
             )
             messages.append(message)
