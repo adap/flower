@@ -90,7 +90,7 @@ for partition in partitions:
 # ['Survived'] <--------------------------------------ServerApp
 ```
 
-You can control the number of partitions as well as how many features each have by modifying `feature-splits` (defatuls to \[`2,3,2`\]) in the `[tool.flwr.app.config]` section of the `pyproject.toml`.
+You can control the number of partitions as well as how many features each have by modifying `feature-splits` (defaults to \[`2,3,2`\]) in the `[tool.flwr.app.config]` section of the `pyproject.toml`.
 
 ## Run the project
 
@@ -101,7 +101,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 > [!NOTE]
 > Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
 
-By default, the example runs for 250 rounds using three clients. Launch it with defaul settings with:
+By default, the example runs for 250 rounds using three clients. Launch it with default settings with:
 
 ```bash
 flwr run .
