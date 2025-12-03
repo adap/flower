@@ -5,24 +5,26 @@ Provides various feature selection methods and evaluation utilities.
 """
 
 import logging
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_selection import (
+
+# Type ignores added to bypass missing stub errors
+from sklearn.ensemble import RandomForestClassifier  # type: ignore
+from sklearn.feature_selection import (  # type: ignore
     RFE,
     SelectKBest,
     chi2,
     f_classif,
     mutual_info_classif,
 )
-from sklearn.linear_model import ElasticNet, Lasso, LogisticRegression
-from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
-from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import ElasticNet, Lasso, LogisticRegression  # type: ignore
+from sklearn.metrics import accuracy_score, f1_score, roc_auc_score  # type: ignore
+from sklearn.preprocessing import StandardScaler  # type: ignore
 
 # Try to import PyImpetus
 try:
-    from PyImpetus import PPIMBC
+    from PyImpetus import PPIMBC  # type: ignore
 
     PYIMPETUS_AVAILABLE = True
 except ImportError:
@@ -70,9 +72,9 @@ class FeatureSelector:
         # Set default parameters
         self._set_default_params()
 
-    def _set_default_params(self):
+    def _set_default_params(self) -> None:
         """Set default parameters for each method."""
-        defaults = {
+        defaults: Dict[str, Dict[str, Any]] = {
             "lasso": {"alpha": 0.01, "max_iter": 1000},
             "elastic_net": {"alpha": 0.01, "l1_ratio": 0.5, "max_iter": 1000},
             "mutual_info": {"n_neighbors": 3, "random_state": 42},
@@ -397,7 +399,7 @@ class FeatureSelector:
             else:
                 score = f1_score(y_val, y_pred, average="weighted")
 
-            return max(score, 0.0)
+            return float(max(score, 0.0))
 
         except Exception as e:
             logger.warning(f"Model evaluation failed: {e}, returning default score")

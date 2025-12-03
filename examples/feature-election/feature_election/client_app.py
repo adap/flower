@@ -3,14 +3,14 @@ Feature Election Client for Flower
 """
 
 import logging
-from typing import List, Optional
+from typing import List, Optional, cast
 
 import numpy as np
-from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.app import ArrayRecord, ConfigRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from flwr.common.record import Array
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression  # type: ignore
+from sklearn.preprocessing import StandardScaler  # type: ignore
 
 from .feature_election_utils import FeatureSelector
 from .task import load_client_data
@@ -49,8 +49,13 @@ def save_global_mask_to_state(state: RecordDict, global_mask: np.ndarray) -> Non
 def load_global_mask_from_state(state: RecordDict) -> Optional[np.ndarray]:
     if GLOBAL_MASK_KEY in state:
         mask_arr = state[GLOBAL_MASK_KEY]
-        if "mask" in mask_arr:
-            return mask_arr["mask"].numpy().astype(bool)
+        # Mypy requires casting before accessing specific types from a RecordDict
+        if isinstance(mask_arr, dict) and "mask" in mask_arr:
+            # We assume it's an ArrayRecord-like structure, but state stores values.
+            # If state stores ArrayRecord directly:
+            arr_val = mask_arr["mask"]
+            if isinstance(arr_val, Array):
+                return arr_val.numpy().astype(bool)
     return None
 
 
@@ -68,16 +73,16 @@ def set_model_weights(model: LogisticRegression, weights: List[np.ndarray]) -> N
 @app.train()
 def train(msg: Message, context: Context) -> Message:
     # Get configuration
-    partition_id = int(context.node_config["partition-id"])
-    num_partitions = int(context.node_config["num-partitions"])
+    partition_id = int(str(context.node_config["partition-id"]))
+    num_partitions = int(str(context.node_config["num-partitions"]))
     run_config = context.run_config
-    fs_method = run_config.get("fs-method", "lasso")
-    eval_metric = run_config.get("eval-metric", "f1")
+    fs_method = str(run_config.get("fs-method", "lasso"))
+    eval_metric = str(run_config.get("eval-metric", "f1"))
 
     # Get message config
-    config = msg.content.get("config", {})
-    server_round = config.get("server_round", 1)
-    phase = config.get("phase", "feature_selection")
+    config = cast(ConfigRecord, msg.content.get("config", ConfigRecord()))
+    server_round = int(str(config.get("server_round", 1)))
+    phase = str(config.get("phase", "feature_selection"))
 
     logger.info(f"Client {partition_id} | Round {server_round} | Phase: {phase}")
 
@@ -91,7 +96,14 @@ def train(msg: Message, context: Context) -> Message:
         return _handle_fl_training(msg, context, partition_id, num_partitions)
 
 
-def _handle_feature_selection(msg, context, partition_id, num_partitions, fs_method, eval_metric):
+def _handle_feature_selection(
+    msg: Message,
+    context: Context,
+    partition_id: int,
+    num_partitions: int,
+    fs_method: str,
+    eval_metric: str,
+) -> Message:
     try:
         X_train, y_train, X_val, y_val, _ = load_client_data(partition_id, num_partitions)
         selector = FeatureSelector(fs_method=fs_method, eval_metric=eval_metric)
@@ -130,7 +142,9 @@ def _handle_feature_selection(msg, context, partition_id, num_partitions, fs_met
         return Message(content=RecordDict(), reply_to=msg)
 
 
-def _handle_tuning_eval(msg, context, partition_id, num_partitions):
+def _handle_tuning_eval(
+    msg: Message, context: Context, partition_id: int, num_partitions: int
+) -> Message:
     """
     Quickly train a model on the provided mask and return validation accuracy.
     Used by server to auto-tune freedom_degree.
@@ -143,7 +157,9 @@ def _handle_tuning_eval(msg, context, partition_id, num_partitions):
         if "feature_mask" not in arrays:
             raise ValueError("No mask provided for tuning eval")
 
-        mask = arrays["feature_mask"].numpy().astype(bool)
+        # FIX: Explicit cast to Array to satisfy Mypy
+        mask_array = cast(Array, arrays["feature_mask"])
+        mask = mask_array.numpy().astype(bool)
 
         # Apply mask
         X_train_sel = X_train[:, mask]
@@ -171,7 +187,9 @@ def _handle_tuning_eval(msg, context, partition_id, num_partitions):
         return Message(content=RecordDict(), reply_to=msg)
 
 
-def _handle_fl_training(msg, context, partition_id, num_partitions):
+def _handle_fl_training(
+    msg: Message, context: Context, partition_id: int, num_partitions: int
+) -> Message:
     try:
         X_train, y_train, X_val, y_val, _ = load_client_data(partition_id, num_partitions)
 
@@ -181,7 +199,9 @@ def _handle_fl_training(msg, context, partition_id, num_partitions):
 
         global_mask = None
         if "feature_mask" in arrays:
-            global_mask = arrays["feature_mask"].numpy().astype(bool)
+            # FIX: Explicit cast
+            mask_array = cast(Array, arrays["feature_mask"])
+            global_mask = mask_array.numpy().astype(bool)
             save_global_mask_to_state(context.state, global_mask)
         else:
             global_mask = load_global_mask_from_state(context.state)
@@ -210,7 +230,9 @@ def _handle_fl_training(msg, context, partition_id, num_partitions):
             weights_list = []
             i = 0
             while f"weight_{i}" in arrays:
-                weights_list.append(arrays[f"weight_{i}"].numpy())
+                # FIX: Explicit cast
+                w_arr = cast(Array, arrays[f"weight_{i}"])
+                weights_list.append(w_arr.numpy())
                 i += 1
 
             if len(weights_list) == 2:
@@ -258,8 +280,8 @@ def _handle_fl_training(msg, context, partition_id, num_partitions):
 
 @app.evaluate()
 def evaluate(msg: Message, context: Context) -> Message:
-    partition_id = int(context.node_config["partition-id"])
-    num_partitions = int(context.node_config["num-partitions"])
+    partition_id = int(str(context.node_config["partition-id"]))
+    num_partitions = int(str(context.node_config["num-partitions"]))
 
     try:
         X_train, y_train, X_val, y_val, _ = load_client_data(partition_id, num_partitions)
@@ -268,7 +290,9 @@ def evaluate(msg: Message, context: Context) -> Message:
         # Determine mask
         global_mask = None
         if "feature_mask" in arrays:
-            global_mask = arrays["feature_mask"].numpy().astype(bool)
+            # FIX: Explicit cast
+            mask_array = cast(Array, arrays["feature_mask"])
+            global_mask = mask_array.numpy().astype(bool)
 
         if global_mask is None:
             global_mask = load_global_mask_from_state(context.state)
@@ -293,7 +317,9 @@ def evaluate(msg: Message, context: Context) -> Message:
             weights_list = []
             i = 0
             while f"weight_{i}" in arrays:
-                weights_list.append(arrays[f"weight_{i}"].numpy())
+                # FIX: Explicit cast
+                w_arr = cast(Array, arrays[f"weight_{i}"])
+                weights_list.append(w_arr.numpy())
                 i += 1
 
             if len(weights_list) == 2:

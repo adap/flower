@@ -11,16 +11,10 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, Iterable, Optional, cast
 
 import numpy as np
-from flwr.app import (
-    ArrayRecord,
-    ConfigRecord,
-    Context,
-    Message,
-    MetricRecord,
-)
+from flwr.app import ArrayRecord, ConfigRecord, Context, Message, MetricRecord
 from flwr.common import log
 from flwr.common.record import Array
 from flwr.serverapp import Grid, ServerApp
@@ -47,9 +41,10 @@ def create_run_dir(config: dict) -> tuple[Path, str]:
     return save_path, run_dir
 
 
-def aggregate_model_weights(results: List[Message]) -> Optional[ArrayRecord]:
+def aggregate_model_weights(results: Iterable[Message]) -> Optional[ArrayRecord]:
     """Aggregate model weights using FedAvg."""
-    valid_results = [msg for msg in results if msg.has_content()]
+    results_list = list(results)
+    valid_results = [msg for msg in results_list if msg.has_content()]
 
     if not valid_results:
         return None
@@ -69,13 +64,19 @@ def aggregate_model_weights(results: List[Message]) -> Optional[ArrayRecord]:
         weights_list = []
         i = 0
         while f"weight_{i}" in arrays:
-            weights_list.append(arrays[f"weight_{i}"].numpy())
+            w_arr = cast(Array, arrays[f"weight_{i}"])
+            weights_list.append(w_arr.numpy())
             i += 1
 
         if len(weights_list) < 2:
             continue
 
-        num_samples = int(metrics.get("num-examples", 1))
+        num_ex = metrics.get("num-examples", 1)
+        if isinstance(num_ex, (int, float)):
+            num_samples = int(num_ex)
+        else:
+            num_samples = 1
+
         all_weights.append((weights_list, num_samples))
         total_samples += num_samples
 
@@ -103,9 +104,10 @@ def aggregate_model_weights(results: List[Message]) -> Optional[ArrayRecord]:
     return result
 
 
-def aggregate_fl_metrics(results: List[Message]) -> Optional[MetricRecord]:
+def aggregate_fl_metrics(results: Iterable[Message]) -> Optional[MetricRecord]:
     """Aggregate FL training metrics."""
-    valid_results = [msg for msg in results if msg.has_content()]
+    results_list = list(results)
+    valid_results = [msg for msg in results_list if msg.has_content()]
 
     if not valid_results:
         return None
@@ -117,12 +119,25 @@ def aggregate_fl_metrics(results: List[Message]) -> Optional[MetricRecord]:
 
     for msg in valid_results:
         metrics = msg.content.get("metrics", MetricRecord())
-        num_samples = int(metrics.get("num-examples", 0))
+        num_ex = metrics.get("num-examples", 0)
+
+        if isinstance(num_ex, (int, float)):
+            num_samples = int(num_ex)
+        else:
+            num_samples = 0
 
         if num_samples > 0:
-            total_train_acc += float(metrics.get("train_accuracy", 0)) * num_samples
-            total_val_acc += float(metrics.get("val_accuracy", 0)) * num_samples
-            total_loss += float(metrics.get("train_loss", 0)) * num_samples
+            train_acc_raw = metrics.get("train_accuracy", 0)
+            val_acc_raw = metrics.get("val_accuracy", 0)
+            train_loss_raw = metrics.get("train_loss", 0)
+
+            train_acc = float(train_acc_raw) if isinstance(train_acc_raw, (int, float)) else 0.0
+            val_acc = float(val_acc_raw) if isinstance(val_acc_raw, (int, float)) else 0.0
+            train_loss = float(train_loss_raw) if isinstance(train_loss_raw, (int, float)) else 0.0
+
+            total_train_acc += train_acc * num_samples
+            total_val_acc += val_acc * num_samples
+            total_loss += train_loss * num_samples
             total_samples += num_samples
 
     if total_samples == 0:
@@ -150,15 +165,15 @@ def main(grid: Grid, context: Context) -> None:
 
     skip_feature_election = bool(run_config.get("skip-feature-election", False))
     auto_tune = bool(run_config.get("auto-tune", False))
-    tuning_rounds = int(run_config.get("tuning-rounds", 0))
+    tuning_rounds = int(str(run_config.get("tuning-rounds", 0)))
     freedom_degree = float(run_config.get("freedom-degree", 0.5))
     aggregation_mode = str(run_config.get("aggregation-mode", "weighted"))
 
-    num_rounds = int(run_config.get("num-rounds", 5))
+    num_rounds = int(str(run_config.get("num-rounds", 5)))
     fraction_train = float(run_config.get("fraction-train", 1.0))
     fraction_evaluate = float(run_config.get("fraction-evaluate", 1.0))
-    min_train_nodes = int(run_config.get("min-train-nodes", 2))
-    min_evaluate_nodes = int(run_config.get("min-evaluate-nodes", 2))
+    min_train_nodes = int(str(run_config.get("min-train-nodes", 2)))
+    min_evaluate_nodes = int(str(run_config.get("min-evaluate-nodes", 2)))
     fs_method = str(run_config.get("fs-method", "lasso"))
 
     save_path, run_dir = create_run_dir(dict(run_config))
@@ -192,7 +207,7 @@ def main(grid: Grid, context: Context) -> None:
     global_feature_mask = None
     global_model_weights = None
 
-    results_history = {
+    results_history: Dict[str, Dict] = {
         "feature_selection": {},
         "tuning": {},
         "fl_training": {},
@@ -245,7 +260,9 @@ def main(grid: Grid, context: Context) -> None:
             agg_arrays, agg_metrics = strategy.aggregate_train(current_round, train_replies)
 
             if agg_arrays is not None and "feature_mask" in agg_arrays:
-                global_feature_mask = agg_arrays["feature_mask"].numpy().astype(bool)
+                # FIX: Explicit cast
+                mask_arr = cast(Array, agg_arrays["feature_mask"])
+                global_feature_mask = mask_arr.numpy().astype(bool)
                 num_sel = np.sum(global_feature_mask)
                 log(logging.INFO, f"  Current global feature mask: {num_sel} features")
 
@@ -254,7 +271,8 @@ def main(grid: Grid, context: Context) -> None:
 
                 # Format bytes to MB
                 total_bytes = metrics_dict.get("total_bytes_transmitted", 0)
-                metrics_dict["total_mb_transmitted"] = float(f"{total_bytes / (1024*1024):.2f}")
+                if isinstance(total_bytes, (int, float)):
+                    metrics_dict["total_mb_transmitted"] = float(f"{total_bytes / (1024*1024):.2f}")
 
                 if current_round == 1:
                     log(logging.INFO, f"  Election Metrics: {metrics_dict}")
@@ -318,9 +336,10 @@ def main(grid: Grid, context: Context) -> None:
 
                         # Format bytes
                         total_bytes = metrics_dict.get("total_bytes_transmitted", 0)
-                        metrics_dict["total_mb_transmitted"] = float(
-                            f"{total_bytes / (1024*1024):.2f}"
-                        )
+                        if isinstance(total_bytes, (int, float)):
+                            metrics_dict["total_mb_transmitted"] = float(
+                                f"{total_bytes / (1024*1024):.2f}"
+                            )
 
                         log(logging.INFO, f"  Evaluation metrics: {metrics_dict}")
                         results_history["evaluation"][current_round] = metrics_dict
@@ -346,7 +365,8 @@ def main(grid: Grid, context: Context) -> None:
         weights_to_save = {}
         for key in global_model_weights:
             if key.startswith("weight_"):
-                weights_to_save[key] = global_model_weights[key].numpy().tolist()
+                w_arr = cast(Array, global_model_weights[key])
+                weights_to_save[key] = w_arr.numpy().tolist()
         with open(save_path / "final_model_weights.json", "w") as f:
             json.dump(weights_to_save, f, indent=2)
 

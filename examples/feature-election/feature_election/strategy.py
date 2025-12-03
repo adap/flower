@@ -9,7 +9,7 @@ Supports iterative auto-tuning via Hill Climbing.
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple, cast
 
 import numpy as np
 from flwr.app import ArrayRecord, ConfigRecord, Message, MetricRecord, RecordDict
@@ -77,7 +77,7 @@ class FeatureElectionStrategy(Strategy):
         # Metrics: Communication Cost Tracking
         self.cumulative_communication_bytes: int = 0
 
-    def summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> Dict[str, Any]:
         """Return a summary of the strategy configuration."""
         return {
             "freedom_degree": self.freedom_degree,
@@ -89,7 +89,14 @@ class FeatureElectionStrategy(Strategy):
             "total_bytes_transmitted": self.cumulative_communication_bytes,
         }
 
-    def set_save_path(self, path: Path):
+    def summary(self) -> None:
+        """
+        Required by the base Strategy class.
+        """
+        # We log the info so it's still useful, but return None to satisfy Mypy/Flower
+        logger.info(f"Strategy Configuration: {self.get_summary()}")
+
+    def set_save_path(self, path: Path) -> None:
         """Set the path where results will be saved."""
         self.save_path = path
 
@@ -97,7 +104,7 @@ class FeatureElectionStrategy(Strategy):
         """Helper to calculate size in bytes of an ArrayRecord."""
         total_bytes = 0
         for key in arrays.keys():
-            arr = arrays[key].numpy()
+            arr = cast(Array, arrays[key]).numpy()
             total_bytes += arr.nbytes
         return total_bytes
 
@@ -181,7 +188,7 @@ class FeatureElectionStrategy(Strategy):
     def aggregate_train(
         self,
         server_round: int,
-        results: List[Message],
+        results: Iterable[Message],
     ) -> Tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
         """
         Aggregate results from clients.
@@ -189,14 +196,16 @@ class FeatureElectionStrategy(Strategy):
         if not results:
             return None, None
 
-        valid_results = [msg for msg in results if msg.has_content()]
+        # Convert Iterable to List for multiple iterations
+        results_list = list(results)
+        valid_results = [msg for msg in results_list if msg.has_content()]
         if not valid_results:
             return None, None
 
         # --- METRIC: Track Upstream Bytes ---
         round_upstream_bytes = 0
         for msg in valid_results:
-            arrays = msg.content.get("arrays", ArrayRecord())
+            arrays = cast(ArrayRecord, msg.content.get("arrays", ArrayRecord()))
             round_upstream_bytes += self._calculate_payload_size(arrays)
 
         self.cumulative_communication_bytes += round_upstream_bytes
@@ -227,7 +236,11 @@ class FeatureElectionStrategy(Strategy):
                 self.freedom_degree = self._calculate_next_fd(first_step=True)
 
             agg_arrays = ArrayRecord(
-                {"feature_mask": Array(self.global_feature_mask.astype(np.float32))}
+                {
+                    "feature_mask": Array(
+                        cast(np.ndarray, self.global_feature_mask).astype(np.float32)
+                    )
+                }
             )
 
             metrics = MetricRecord(
@@ -245,8 +258,15 @@ class FeatureElectionStrategy(Strategy):
             total_score = 0.0
             count = 0
             for msg in valid_results:
-                metrics = msg.content.get("metrics", MetricRecord())
-                total_score += float(metrics.get("val_accuracy", 0.0))
+                metrics = cast(MetricRecord, msg.content.get("metrics", MetricRecord()))
+                val_acc_raw = metrics.get("val_accuracy", 0.0)
+
+                if isinstance(val_acc_raw, (float, int)):
+                    val_acc = float(val_acc_raw)
+                else:
+                    val_acc = 0.0
+
+                total_score += val_acc
                 count += 1
 
             avg_score = total_score / count if count > 0 else 0.0
@@ -264,9 +284,9 @@ class FeatureElectionStrategy(Strategy):
                 self.global_feature_mask = self._aggregate_selections(self.cached_client_selections)
                 self._calculate_statistics(self.cached_client_selections)
 
-            agg_arrays = ArrayRecord(
-                {"feature_mask": Array(self.global_feature_mask.astype(np.float32))}
-            )
+            agg_arrays = ArrayRecord()
+            if self.global_feature_mask is not None:
+                agg_arrays["feature_mask"] = Array(self.global_feature_mask.astype(np.float32))
             metrics = MetricRecord(
                 {
                     "val_accuracy": avg_score,
@@ -289,7 +309,7 @@ class FeatureElectionStrategy(Strategy):
 
         if first_step:
             new_fd = self.freedom_degree + self.search_step
-            return np.clip(new_fd, MIN_FD, MAX_FD)
+            return float(np.clip(new_fd, MIN_FD, MAX_FD))
 
         if len(self.tuning_history) < 2:
             return self.freedom_degree
@@ -310,7 +330,7 @@ class FeatureElectionStrategy(Strategy):
             self.search_step *= 0.5
             new_fd = prev_fd + (self.current_direction * self.search_step)
 
-        return np.clip(new_fd, MIN_FD, MAX_FD)
+        return float(np.clip(new_fd, MIN_FD, MAX_FD))
 
     def configure_evaluate(
         self,
@@ -356,20 +376,23 @@ class FeatureElectionStrategy(Strategy):
     def aggregate_evaluate(
         self,
         server_round: int,
-        results: List[Message],
+        results: Iterable[Message],
     ) -> Optional[MetricRecord]:
-        """Aggregate evaluation metrics."""
+        """
+        Aggregate evaluation metrics.
+        """
         if not results:
             return None
 
-        valid_results = [msg for msg in results if msg.has_content()]
+        results_list = list(results)
+        valid_results = [msg for msg in results_list if msg.has_content()]
         if not valid_results:
             return None
 
         # --- METRIC: Track Upstream Bytes (Evaluation) ---
         round_upstream_bytes = 0
         for msg in valid_results:
-            arrays = msg.content.get("arrays", ArrayRecord())
+            arrays = cast(ArrayRecord, msg.content.get("arrays", ArrayRecord()))
             round_upstream_bytes += self._calculate_payload_size(arrays)
         self.cumulative_communication_bytes += round_upstream_bytes
 
@@ -382,12 +405,25 @@ class FeatureElectionStrategy(Strategy):
         total_samples = 0
 
         for msg in valid_results:
-            metrics = msg.content.get("metrics", MetricRecord())
-            num_examples = int(metrics.get("num-examples", 0))
+            metrics = cast(MetricRecord, msg.content.get("metrics", MetricRecord()))
+            num_ex = metrics.get("num-examples", 0)
+
+            if isinstance(num_ex, (int, float)):
+                num_examples = int(num_ex)
+            else:
+                num_examples = 0
 
             if num_examples > 0:
-                total_loss += float(metrics.get("eval_loss", 0)) * num_examples
-                total_accuracy += float(metrics.get("eval_accuracy", 0)) * num_examples
+                eval_loss_raw = metrics.get("eval_loss", 0)
+                eval_accuracy_raw = metrics.get("eval_accuracy", 0)
+
+                eval_loss = float(eval_loss_raw) if isinstance(eval_loss_raw, (int, float)) else 0.0
+                eval_accuracy = (
+                    float(eval_accuracy_raw) if isinstance(eval_accuracy_raw, (int, float)) else 0.0
+                )
+
+                total_loss += eval_loss * num_examples
+                total_accuracy += eval_accuracy * num_examples
                 total_samples += num_examples
 
         if total_samples == 0:
@@ -415,20 +451,36 @@ class FeatureElectionStrategy(Strategy):
                 if "feature_mask" not in arrays or "feature_scores" not in arrays:
                     continue
 
-                selected_features = arrays["feature_mask"].numpy().astype(bool)
-                feature_scores = arrays["feature_scores"].numpy().astype(float)
-                num_samples = int(metrics.get("num-examples", 0))
+                mask_arr = cast(Array, arrays["feature_mask"])
+                score_arr = cast(Array, arrays["feature_scores"])
+
+                selected_features = mask_arr.numpy().astype(bool)
+                feature_scores = score_arr.numpy().astype(float)
+
+                num_ex = metrics.get("num-examples", 0)
+                if isinstance(num_ex, (int, float)):
+                    num_samples = int(num_ex)
+                else:
+                    num_samples = 0
 
                 # Set num_features if not set
                 if self.num_features is None:
                     self.num_features = len(selected_features)
 
+                init_score_raw = metrics.get("initial_score", 0.0)
+                fs_score_raw = metrics.get("fs_score", 0.0)
+
+                init_score = (
+                    float(init_score_raw) if isinstance(init_score_raw, (int, float)) else 0.0
+                )
+                fs_score = float(fs_score_raw) if isinstance(fs_score_raw, (int, float)) else 0.0
+
                 client_selections[str(msg.metadata.src_node_id)] = {
                     "selected_features": selected_features,
                     "feature_scores": feature_scores,
                     "num_samples": num_samples,
-                    "initial_score": float(metrics.get("initial_score", 0.0)),
-                    "fs_score": float(metrics.get("fs_score", 0.0)),
+                    "initial_score": init_score,
+                    "fs_score": fs_score,
                 }
             except Exception as e:
                 logger.error(f"Error processing message: {e}")
@@ -440,27 +492,27 @@ class FeatureElectionStrategy(Strategy):
         """Aggregate client selections based on current self.freedom_degree."""
         masks = []
         scores = []
-        weights = []
+        weights_list = []
         total_samples = 0
 
         for client_name, selection in client_selections.items():
             masks.append(selection["selected_features"])
             scores.append(selection["feature_scores"])
             num_samples = selection["num_samples"]
-            weights.append(num_samples)
+            weights_list.append(num_samples)
             total_samples += num_samples
 
-        masks = np.array(masks)
-        scores = np.array(scores)
+        masks_np = np.array(masks)
+        scores_np = np.array(scores)
         # Avoid division by zero
         weights = (
-            np.array(weights) / total_samples
+            np.array(weights_list) / total_samples
             if total_samples > 0
-            else np.ones(len(weights)) / len(weights)
+            else np.ones(len(weights_list)) / len(weights_list)
         )
 
-        intersection_mask = self._get_intersection(masks)
-        union_mask = self._get_union(masks)
+        intersection_mask = self._get_intersection(masks_np)
+        union_mask = self._get_union(masks_np)
 
         if self.freedom_degree == 0:
             global_mask = intersection_mask
@@ -468,7 +520,7 @@ class FeatureElectionStrategy(Strategy):
             global_mask = union_mask
         else:
             global_mask = self._weighted_election(
-                masks, scores, weights, intersection_mask, union_mask
+                masks_np, scores_np, weights, intersection_mask, union_mask
             )
 
         return global_mask
@@ -522,23 +574,23 @@ class FeatureElectionStrategy(Strategy):
             if len(diff_scores) > 0:
                 # Top-k selection
                 k = -min(n_additional, len(diff_scores))
-                top_indices = np.argpartition(diff_scores, k)[k:]
+                top_indices: np.ndarray = np.argpartition(diff_scores, k)[k:]
 
                 selected_difference = np.zeros_like(difference_mask)
                 selected_difference[diff_indices[top_indices]] = True
 
-                global_mask = intersection_mask | selected_difference
+                global_mask: np.ndarray = intersection_mask | selected_difference
                 return global_mask
 
         return intersection_mask
 
     @staticmethod
     def _get_intersection(masks: np.ndarray) -> np.ndarray:
-        return np.all(masks, axis=0)
+        return cast(np.ndarray, np.all(masks, axis=0))
 
     @staticmethod
     def _get_union(masks: np.ndarray) -> np.ndarray:
-        return np.any(masks, axis=0)
+        return cast(np.ndarray, np.any(masks, axis=0))
 
     def _calculate_statistics(self, client_selections: Dict[str, Dict]) -> None:
         masks = np.array([sel["selected_features"] for sel in client_selections.values()])

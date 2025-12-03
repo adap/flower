@@ -30,14 +30,12 @@ def main():
     # Test 1: Import check
     print("1. Testing core imports...")
     try:
+        from flwr.app import ArrayRecord, ConfigRecord
+        from flwr.common.record import Array
+
         from feature_election.feature_election_utils import FeatureSelector
         from feature_election.strategy import FeatureElectionStrategy
         from feature_election.task import create_synthetic_dataset
-        from flwr.app import (
-            ArrayRecord,
-            ConfigRecord,
-        )
-        from flwr.common.record import Array
 
         print("   ✓ All imports successful")
     except ImportError as e:

@@ -6,13 +6,13 @@ for federated feature selection.
 """
 
 import logging
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, cast
 
 import numpy as np
 import pandas as pd
-from sklearn.datasets import make_classification
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
+from sklearn.datasets import make_classification # type: ignore[import-untyped]
+from sklearn.model_selection import train_test_split # type: ignore[import-untyped]
+from sklearn.preprocessing import LabelEncoder # type: ignore[import-untyped]
 
 logger = logging.getLogger(__name__)
 
@@ -210,7 +210,7 @@ def _split_non_iid(
         le = LabelEncoder()
         y = le.fit_transform(y)
 
-    num_classes = len(np.unique(y))
+    num_classes = len(np.unique(cast(np.ndarray, y)))
 
     # Assign classes to this client
     classes_for_client = []
@@ -219,7 +219,7 @@ def _split_non_iid(
         classes_for_client.append(class_idx)
 
     # Get indices for these classes
-    client_indices = []
+    client_indices: List[int] = []
     for class_idx in classes_for_client:
         class_indices = np.where(y == class_idx)[0]
 
