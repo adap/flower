@@ -9,11 +9,10 @@ Supports iterative auto-tuning via Hill Climbing.
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple, Any
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
 from flwr.app import ArrayRecord, ConfigRecord, Message, MetricRecord, RecordDict
-from flwr.common import log
 from flwr.common.record import Array
 from flwr.serverapp import Grid
 from flwr.serverapp.strategy import Strategy
@@ -71,7 +70,7 @@ class FeatureElectionStrategy(Strategy):
         self.cached_client_selections: Dict[str, Dict] = {}
 
         # State for Tuning Search (Hill Climbing)
-        self.tuning_history: List[Tuple[float, float]] = [] # [(fd, score)]
+        self.tuning_history: List[Tuple[float, float]] = []  # [(fd, score)]
         self.search_step = 0.1
         self.current_direction = 1  # 1 for increasing FD, -1 for decreasing
 
@@ -112,8 +111,8 @@ class FeatureElectionStrategy(Strategy):
         """Configure the next round of training."""
 
         # --- Logic to determine Phase ---
-        is_collection = (server_round == 1)
-        is_tuning = (1 < server_round <= 1 + self.tuning_rounds)
+        is_collection = server_round == 1
+        is_tuning = 1 < server_round <= 1 + self.tuning_rounds
 
         # Determine number of nodes to sample
         all_node_ids = list(grid.get_node_ids())
@@ -121,6 +120,7 @@ class FeatureElectionStrategy(Strategy):
         num_nodes = max(int(num_available * self.fraction_train), self.min_train_nodes)
 
         import random
+
         if num_nodes < num_available:
             node_ids = random.sample(all_node_ids, num_nodes)
         else:
@@ -146,7 +146,9 @@ class FeatureElectionStrategy(Strategy):
             # Generate mask on the fly
             current_mask = self._aggregate_selections(self.cached_client_selections)
             payload_arrays["feature_mask"] = Array(current_mask.astype(np.float32))
-            logger.info(f"Tuning Round {server_round}: Testing freedom_degree={self.freedom_degree:.4f}")
+            logger.info(
+                f"Tuning Round {server_round}: Testing freedom_degree={self.freedom_degree:.4f}"
+            )
 
         else:
             # Standard FL Phase
@@ -200,10 +202,12 @@ class FeatureElectionStrategy(Strategy):
         self.cumulative_communication_bytes += round_upstream_bytes
         mb_recv = round_upstream_bytes / (MEGABYTE_SIZE * MEGABYTE_SIZE)
         total_mb = self.cumulative_communication_bytes / (MEGABYTE_SIZE * MEGABYTE_SIZE)
-        logger.info(f"Round {server_round} Upstream: {mb_recv:.4f} MB. Total Session: {total_mb:.2f} MB")
+        logger.info(
+            f"Round {server_round} Upstream: {mb_recv:.4f} MB. Total Session: {total_mb:.2f} MB"
+        )
 
-        is_collection = (server_round == 1)
-        is_tuning = (1 < server_round <= 1 + self.tuning_rounds)
+        is_collection = server_round == 1
+        is_tuning = 1 < server_round <= 1 + self.tuning_rounds
 
         if is_collection:
             # --- PHASE 1: COLLECT VOTES ---
@@ -222,14 +226,18 @@ class FeatureElectionStrategy(Strategy):
             if self.tuning_rounds > 0:
                 self.freedom_degree = self._calculate_next_fd(first_step=True)
 
-            agg_arrays = ArrayRecord({"feature_mask": Array(self.global_feature_mask.astype(np.float32))})
+            agg_arrays = ArrayRecord(
+                {"feature_mask": Array(self.global_feature_mask.astype(np.float32))}
+            )
 
-            metrics = MetricRecord({
-                "num_features_selected": int(np.sum(self.global_feature_mask)),
-                "num_features_original": int(len(self.global_feature_mask)),
-                "freedom_degree": float(self.freedom_degree),
-                "total_bytes_transmitted": self.cumulative_communication_bytes
-            })
+            metrics = MetricRecord(
+                {
+                    "num_features_selected": int(np.sum(self.global_feature_mask)),
+                    "num_features_original": int(len(self.global_feature_mask)),
+                    "freedom_degree": float(self.freedom_degree),
+                    "total_bytes_transmitted": self.cumulative_communication_bytes,
+                }
+            )
             return agg_arrays, metrics
 
         elif is_tuning:
@@ -256,12 +264,16 @@ class FeatureElectionStrategy(Strategy):
                 self.global_feature_mask = self._aggregate_selections(self.cached_client_selections)
                 self._calculate_statistics(self.cached_client_selections)
 
-            agg_arrays = ArrayRecord({"feature_mask": Array(self.global_feature_mask.astype(np.float32))})
-            metrics = MetricRecord({
-                "val_accuracy": avg_score,
-                "freedom_degree": self.freedom_degree,
-                "total_bytes_transmitted": self.cumulative_communication_bytes
-            })
+            agg_arrays = ArrayRecord(
+                {"feature_mask": Array(self.global_feature_mask.astype(np.float32))}
+            )
+            metrics = MetricRecord(
+                {
+                    "val_accuracy": avg_score,
+                    "freedom_degree": self.freedom_degree,
+                    "total_bytes_transmitted": self.cumulative_communication_bytes,
+                }
+            )
             return agg_arrays, metrics
 
         else:
@@ -289,7 +301,9 @@ class FeatureElectionStrategy(Strategy):
             logger.info("Score improved! Continuing direction.")
             new_fd = curr_fd + (self.current_direction * self.search_step)
         else:
-            logger.info(f"Score dropped (curr={curr_score:.4f} < prev={prev_score:.4f}). Reversing and refining.")
+            logger.info(
+                f"Score dropped (curr={curr_score:.4f} < prev={prev_score:.4f}). Reversing and refining."
+            )
             # Reverse Direction
             self.current_direction *= -1
             # Decay Step Size
@@ -313,6 +327,7 @@ class FeatureElectionStrategy(Strategy):
         num_nodes = max(int(len(all_node_ids) * self.fraction_evaluate), self.min_evaluate_nodes)
 
         import random
+
         if num_nodes < len(all_node_ids):
             node_ids = random.sample(all_node_ids, num_nodes)
         else:
@@ -378,16 +393,16 @@ class FeatureElectionStrategy(Strategy):
         if total_samples == 0:
             return None
 
-        return MetricRecord({
-            "eval_loss": total_loss / total_samples,
-            "eval_accuracy": total_accuracy / total_samples,
-            "num-examples": total_samples,
-            "total_bytes_transmitted": self.cumulative_communication_bytes
-        })
+        return MetricRecord(
+            {
+                "eval_loss": total_loss / total_samples,
+                "eval_accuracy": total_accuracy / total_samples,
+                "num-examples": total_samples,
+                "total_bytes_transmitted": self.cumulative_communication_bytes,
+            }
+        )
 
-    def _extract_client_selections(
-        self, results: List[Message]
-    ) -> Dict[str, Dict]:
+    def _extract_client_selections(self, results: List[Message]) -> Dict[str, Dict]:
         """Extract client selection data from messages."""
         client_selections = {}
 
@@ -413,7 +428,7 @@ class FeatureElectionStrategy(Strategy):
                     "feature_scores": feature_scores,
                     "num_samples": num_samples,
                     "initial_score": float(metrics.get("initial_score", 0.0)),
-                    "fs_score": float(metrics.get("fs_score", 0.0))
+                    "fs_score": float(metrics.get("fs_score", 0.0)),
                 }
             except Exception as e:
                 logger.error(f"Error processing message: {e}")
@@ -438,7 +453,11 @@ class FeatureElectionStrategy(Strategy):
         masks = np.array(masks)
         scores = np.array(scores)
         # Avoid division by zero
-        weights = np.array(weights) / total_samples if total_samples > 0 else np.ones(len(weights)) / len(weights)
+        weights = (
+            np.array(weights) / total_samples
+            if total_samples > 0
+            else np.ones(len(weights)) / len(weights)
+        )
 
         intersection_mask = self._get_intersection(masks)
         union_mask = self._get_union(masks)
@@ -526,7 +545,9 @@ class FeatureElectionStrategy(Strategy):
         intersection_mask = self._get_intersection(masks)
         union_mask = self._get_union(masks)
 
-        num_sel = int(np.sum(self.global_feature_mask)) if self.global_feature_mask is not None else 0
+        num_sel = (
+            int(np.sum(self.global_feature_mask)) if self.global_feature_mask is not None else 0
+        )
         total = int(self.num_features) if self.num_features else 1
 
         self.election_stats = {
@@ -542,10 +563,12 @@ class FeatureElectionStrategy(Strategy):
     def get_results(self) -> Dict:
         """Get results dictionary."""
         return {
-            "global_feature_mask": self.global_feature_mask.tolist() if self.global_feature_mask is not None else None,
+            "global_feature_mask": (
+                self.global_feature_mask.tolist() if self.global_feature_mask is not None else None
+            ),
             "election_stats": self.election_stats,
             "tuning_history": self.tuning_history,
-            "total_bytes_transmitted": self.cumulative_communication_bytes
+            "total_bytes_transmitted": self.cumulative_communication_bytes,
         }
 
     def save_results(self, filename: str = "feature_election_results.json") -> None:

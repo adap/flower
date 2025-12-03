@@ -91,13 +91,9 @@ def train(msg: Message, context: Context) -> Message:
         return _handle_fl_training(msg, context, partition_id, num_partitions)
 
 
-def _handle_feature_selection(
-    msg, context, partition_id, num_partitions, fs_method, eval_metric
-):
+def _handle_feature_selection(msg, context, partition_id, num_partitions, fs_method, eval_metric):
     try:
-        X_train, y_train, X_val, y_val, _ = load_client_data(
-            partition_id, num_partitions
-        )
+        X_train, y_train, X_val, y_val, _ = load_client_data(partition_id, num_partitions)
         selector = FeatureSelector(fs_method=fs_method, eval_metric=eval_metric)
 
         # Select
@@ -119,19 +115,20 @@ def _handle_feature_selection(
         arrays["feature_mask"] = Array(selected_mask.astype(np.float32))
         arrays["feature_scores"] = Array(feature_scores.astype(np.float32))
 
-        metrics = MetricRecord({
-            "initial_score": float(initial_score),
-            "fs_score": float(fs_score),
-            "num_selected": n_selected,
-            "num-examples": len(X_train),
-        })
-
-        return Message(
-            content=RecordDict({"arrays": arrays, "metrics": metrics}), reply_to=msg
+        metrics = MetricRecord(
+            {
+                "initial_score": float(initial_score),
+                "fs_score": float(fs_score),
+                "num_selected": n_selected,
+                "num-examples": len(X_train),
+            }
         )
+
+        return Message(content=RecordDict({"arrays": arrays, "metrics": metrics}), reply_to=msg)
     except Exception as e:
         logger.error(f"Selection failed: {e}")
         return Message(content=RecordDict(), reply_to=msg)
+
 
 def _handle_tuning_eval(msg, context, partition_id, num_partitions):
     """
@@ -158,17 +155,14 @@ def _handle_tuning_eval(msg, context, partition_id, num_partitions):
         X_val_sel = scaler.transform(X_val_sel)
 
         # Quick Train (lower iterations for speed during tuning)
-        model = LogisticRegression(max_iter=200, solver='lbfgs', random_state=42)
+        model = LogisticRegression(max_iter=200, solver="lbfgs", random_state=42)
         model.fit(X_train_sel, y_train)
 
         # Score
         val_score = model.score(X_val_sel, y_val)
 
         # Return ONLY metrics
-        metrics = MetricRecord({
-            "val_accuracy": float(val_score),
-            "num-examples": len(X_train)
-        })
+        metrics = MetricRecord({"val_accuracy": float(val_score), "num-examples": len(X_train)})
 
         return Message(content=RecordDict({"metrics": metrics}), reply_to=msg)
 
@@ -176,11 +170,10 @@ def _handle_tuning_eval(msg, context, partition_id, num_partitions):
         logger.error(f"Tuning eval failed: {e}")
         return Message(content=RecordDict(), reply_to=msg)
 
+
 def _handle_fl_training(msg, context, partition_id, num_partitions):
     try:
-        X_train, y_train, X_val, y_val, _ = load_client_data(
-            partition_id, num_partitions
-        )
+        X_train, y_train, X_val, y_val, _ = load_client_data(partition_id, num_partitions)
 
         # 1. Retrieve Global Mask
         content = msg.content
@@ -244,16 +237,16 @@ def _handle_fl_training(msg, context, partition_id, num_partitions):
             res_arrays[f"weight_{i}"] = Array(w)
         res_arrays["model_weights"] = Array(np.array([1.0], dtype=np.float32))
 
-        metrics = MetricRecord({
-            "train_accuracy": float(train_score),
-            "val_accuracy": float(val_score),
-            "train_loss": float(1.0 - train_score),
-            "num-examples": len(X_train),
-        })
-
-        return Message(
-            content=RecordDict({"arrays": res_arrays, "metrics": metrics}), reply_to=msg
+        metrics = MetricRecord(
+            {
+                "train_accuracy": float(train_score),
+                "val_accuracy": float(val_score),
+                "train_loss": float(1.0 - train_score),
+                "num-examples": len(X_train),
+            }
         )
+
+        return Message(content=RecordDict({"arrays": res_arrays, "metrics": metrics}), reply_to=msg)
 
     except Exception as e:
         logger.error(f"FL Training failed: {e}")
@@ -269,9 +262,7 @@ def evaluate(msg: Message, context: Context) -> Message:
     num_partitions = int(context.node_config["num-partitions"])
 
     try:
-        X_train, y_train, X_val, y_val, _ = load_client_data(
-            partition_id, num_partitions
-        )
+        X_train, y_train, X_val, y_val, _ = load_client_data(partition_id, num_partitions)
         arrays = msg.content.get("arrays", ArrayRecord())
 
         # Determine mask
@@ -316,11 +307,13 @@ def evaluate(msg: Message, context: Context) -> Message:
             score = selector.evaluate_model(X_train_sel, y_train, X_val_sel, y_val)
             loss = 1.0 - score
 
-        metrics = MetricRecord({
-            "eval_loss": float(loss),
-            "eval_accuracy": float(score),
-            "num-examples": len(X_val),
-        })
+        metrics = MetricRecord(
+            {
+                "eval_loss": float(loss),
+                "eval_accuracy": float(score),
+                "num-examples": len(X_val),
+            }
+        )
         return Message(content=RecordDict({"metrics": metrics}), reply_to=msg)
 
     except Exception as e:

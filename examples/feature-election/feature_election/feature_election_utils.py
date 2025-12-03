@@ -93,9 +93,7 @@ class FeatureSelector:
         if self.fs_method in defaults:
             self.fs_params = {**defaults[self.fs_method], **self.fs_params}
 
-    def select_features(
-        self, X: np.ndarray, y: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def select_features(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """
         Perform feature selection.
 
@@ -175,9 +173,7 @@ class FeatureSelector:
         selected_mask = feature_scores > 1e-6
         return selected_mask, feature_scores
 
-    def _select_elastic_net(
-        self, X: np.ndarray, y: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_elastic_net(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Elastic Net feature selection."""
         selector = ElasticNet(**self.fs_params)
         selector.fit(X, y)
@@ -185,9 +181,7 @@ class FeatureSelector:
         selected_mask = feature_scores > 1e-6
         return selected_mask, feature_scores
 
-    def _select_mutual_info(
-        self, X: np.ndarray, y: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_mutual_info(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Mutual information feature selection."""
         n_features = X.shape[1]
         feature_scores = mutual_info_classif(
@@ -214,9 +208,7 @@ class FeatureSelector:
         selected_mask[selected_indices] = True
         return selected_mask, feature_scores
 
-    def _select_f_classif(
-        self, X: np.ndarray, y: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_f_classif(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """F-statistic feature selection."""
         n_features = X.shape[1]
         feature_scores, _ = f_classif(X, y)
@@ -242,9 +234,7 @@ class FeatureSelector:
         feature_scores = 1.0 / feature_scores
         return selected_mask, feature_scores
 
-    def _select_random_forest(
-        self, X: np.ndarray, y: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_random_forest(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Random Forest feature importance."""
         n_features = X.shape[1]
         rf = RandomForestClassifier(**self.fs_params)
@@ -256,9 +246,7 @@ class FeatureSelector:
         selected_mask[selected_indices] = True
         return selected_mask, feature_scores
 
-    def _select_selectkbest(
-        self, X: np.ndarray, y: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_selectkbest(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """SelectKBest feature selection."""
         n_features = X.shape[1]
         score_func_name = self.fs_params.get("score_func", "f_classif")
@@ -282,9 +270,7 @@ class FeatureSelector:
         feature_scores = selector.scores_
         return selected_mask, feature_scores
 
-    def _select_pyimpetus(
-        self, X: np.ndarray, y: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_pyimpetus(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """PyImpetus feature selection."""
         if not PYIMPETUS_AVAILABLE:
             logger.error("PyImpetus not available. Install with: pip install PyImpetus")
@@ -310,9 +296,7 @@ class FeatureSelector:
                     max_iter=1000, random_state=random_state, solver="liblinear"
                 )
             else:
-                base_model = RandomForestClassifier(
-                    n_estimators=100, random_state=random_state
-                )
+                base_model = RandomForestClassifier(n_estimators=100, random_state=random_state)
 
             # Use PPIMBC for feature selection
             selector = PPIMBC(
@@ -331,9 +315,9 @@ class FeatureSelector:
             # Convert feature names to indices
             selected_indices = []
             for name in selected_feature_names:
-                if isinstance(name, str) and name.startswith('Column'):
+                if isinstance(name, str) and name.startswith("Column"):
                     try:
-                        idx = int(name.replace('Column', ''))
+                        idx = int(name.replace("Column", ""))
                         if 0 <= idx < n_features:
                             selected_indices.append(idx)
                     except ValueError:
@@ -394,7 +378,7 @@ class FeatureSelector:
 
         # Train simple model with increased max_iter to avoid convergence warnings
         max_iter = 500 if self.quick_eval else 2000
-        model = LogisticRegression(max_iter=max_iter, random_state=42, solver='lbfgs')
+        model = LogisticRegression(max_iter=max_iter, random_state=42, solver="lbfgs")
 
         try:
             model.fit(X_train, y_train)

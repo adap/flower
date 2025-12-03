@@ -14,7 +14,13 @@ from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
-from flwr.app import ArrayRecord, ConfigRecord, Context, Message, MetricRecord, RecordDict
+from flwr.app import (
+    ArrayRecord,
+    ConfigRecord,
+    Context,
+    Message,
+    MetricRecord,
+)
 from flwr.common import log
 from flwr.common.record import Array
 from flwr.serverapp import Grid, ServerApp
@@ -122,12 +128,14 @@ def aggregate_fl_metrics(results: List[Message]) -> Optional[MetricRecord]:
     if total_samples == 0:
         return None
 
-    return MetricRecord({
-        "train_accuracy": total_train_acc / total_samples,
-        "val_accuracy": total_val_acc / total_samples,
-        "train_loss": total_loss / total_samples,
-        "num-examples": total_samples,
-    })
+    return MetricRecord(
+        {
+            "train_accuracy": total_train_acc / total_samples,
+            "val_accuracy": total_val_acc / total_samples,
+            "train_loss": total_loss / total_samples,
+            "num-examples": total_samples,
+        }
+    )
 
 
 @app.main()
@@ -201,11 +209,14 @@ def main(grid: Grid, context: Context) -> None:
     for current_round in range(1, num_rounds + 1):
         log(logging.INFO, "")
 
-        is_setup_phase = (current_round <= total_setup_rounds)
+        is_setup_phase = current_round <= total_setup_rounds
         input_arrays = ArrayRecord()
 
         if is_setup_phase:
-            log(logging.INFO, f"[ROUND {current_round}/{num_rounds}] - FEATURE ELECTION / TUNING PHASE")
+            log(
+                logging.INFO,
+                f"[ROUND {current_round}/{num_rounds}] - FEATURE ELECTION / TUNING PHASE",
+            )
         else:
             log(logging.INFO, f"[ROUND {current_round}/{num_rounds}] - FL TRAINING PHASE")
 
@@ -222,9 +233,7 @@ def main(grid: Grid, context: Context) -> None:
 
         # Configure Train
         train_config = ConfigRecord()
-        train_messages = strategy.configure_train(
-            current_round, input_arrays, train_config, grid
-        )
+        train_messages = strategy.configure_train(current_round, input_arrays, train_config, grid)
 
         train_replies = grid.send_and_receive(
             messages=train_messages,
@@ -309,7 +318,9 @@ def main(grid: Grid, context: Context) -> None:
 
                         # Format bytes
                         total_bytes = metrics_dict.get("total_bytes_transmitted", 0)
-                        metrics_dict["total_mb_transmitted"] = float(f"{total_bytes / (1024*1024):.2f}")
+                        metrics_dict["total_mb_transmitted"] = float(
+                            f"{total_bytes / (1024*1024):.2f}"
+                        )
 
                         log(logging.INFO, f"  Evaluation metrics: {metrics_dict}")
                         results_history["evaluation"][current_round] = metrics_dict

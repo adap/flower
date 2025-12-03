@@ -199,3 +199,4 @@ pyrightconfig.json
 # ruff Python linter
 .ruff_cache/
 /examples/feature-election/outputs
+examples/feature-election/.flake8

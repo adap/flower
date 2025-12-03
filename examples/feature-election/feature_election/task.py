@@ -81,7 +81,7 @@ def load_client_data(
     # Create or load dataset
     if dataset_params is None:
         dataset_params = {
-            "n_samples": 1000 * num_clients, # Generate enough data for all clients
+            "n_samples": 1000 * num_clients,  # Generate enough data for all clients
             "n_features": 100,
             "n_informative": 20,
             "n_redundant": 30,
@@ -91,9 +91,7 @@ def load_client_data(
     # FIX: Use a fixed random_state for dataset generation so all clients
     # share the same underlying feature structure (informative/redundant features).
     # Only the data partitioning should be client-specific.
-    df, feature_names = create_synthetic_dataset(
-        random_state=random_state, **dataset_params
-    )
+    df, feature_names = create_synthetic_dataset(random_state=random_state, **dataset_params)
 
     # Split data among clients
     client_df = split_data_for_client(
@@ -113,9 +111,7 @@ def load_client_data(
         X, y, test_size=test_size, random_state=random_state + client_id, stratify=y
     )
 
-    logger.info(
-        f"Client {client_id}: {len(X_train)} train, {len(X_val)} val samples"
-    )
+    logger.info(f"Client {client_id}: {len(X_train)} train, {len(X_val)} val samples")
 
     return X_train, y_train, X_val, y_val, feature_names
 
@@ -210,7 +206,7 @@ def _split_non_iid(
     y = df[target_col].values
 
     # Encode labels if needed
-    if y.dtype == object or y.dtype.name.startswith('str'):
+    if y.dtype == object or y.dtype.name.startswith("str"):
         le = LabelEncoder()
         y = le.fit_transform(y)
 
@@ -266,13 +262,10 @@ def prepare_federated_dataset(
         List of (X_train, y_train, X_val, y_val) for each client
     """
     client_datasets = []
-    feature_names = [col for col in df.columns if col != target_col]
 
     for client_id in range(num_clients):
         # Split data for this client
-        client_df = split_data_for_client(
-            df, client_id, num_clients, split_strategy, random_state
-        )
+        client_df = split_data_for_client(df, client_id, num_clients, split_strategy, random_state)
 
         # Separate features and target
         X = client_df.drop(columns=[target_col]).values
@@ -320,13 +313,11 @@ def load_custom_dataset(
     feature_names = [col for col in df.columns if col != target_col]
 
     # Split for this client
-    client_df = split_data_for_client(
-        df, client_id, num_clients, split_strategy, random_state
-    )
+    client_df = split_data_for_client(df, client_id, num_clients, split_strategy, random_state)
 
     X = client_df.drop(columns=[target_col]).values
     y = client_df[target_col].values
-    if y.dtype == object or y.dtype.name.startswith('str'):
+    if y.dtype == object or y.dtype.name.startswith("str"):
         le = LabelEncoder()
         y = le.fit_transform(y)
 
