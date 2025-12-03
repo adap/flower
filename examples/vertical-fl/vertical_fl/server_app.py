@@ -37,9 +37,14 @@ def main(grid: Grid, context: Context) -> None:
     optimizer = None
     criterion = torch.nn.BCELoss()
 
+    # Track metrics
+    eval_every = 25
+    accuracies: list[tuple[int, float]] = []
+    losses: list[tuple[int, float]] = []
+
     for i in range(num_rounds):
         log(INFO, "")
-        log(INFO, f"--- ServerApp Round {i + 1} ---")
+        log(INFO, f"--- ServerApp Round {i} / {num_rounds} ---")
 
         node_ids = list(grid.get_node_ids())
 
@@ -53,7 +58,7 @@ def main(grid: Grid, context: Context) -> None:
             # The server model's input size is determined by the number of clients
             # and the output feature dimension of each embedding produced by the clients
             head = ServerModel(input_size=out_feature_dim_clientapp * len(node_ids))
-            optimizer = torch.optim.SGD(head.parameters(), lr=0.1)
+            optimizer = torch.optim.Adam(head.parameters(), lr=0.01)
 
         # 1. Get embeddings from all clients
         embeddings, node_pos_mapping = get_remote_embeddings(
@@ -78,33 +83,61 @@ def main(grid: Grid, context: Context) -> None:
         optimizer.step()
 
         # 3. Compute accuracy using updated head model
-        with torch.no_grad():
-            correct = 0
-            # Re-compute embeddings for accuracy (detached from grad)
-            embeddings_eval = embeddings.detach()
-            output = head(embeddings_eval)
-            predicted = (output > 0.5).float()
-            correct += (predicted == labels).sum().item()
-            accuracy = correct / len(labels) * 100
+        if i % eval_every == 0 or i == num_rounds - 1:
+            accuracy = evaluate_model(head, embeddings, labels)
+            log(INFO, f"Round {i}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.2f}%")
+            accuracies.append((i, accuracy))
+            losses.append((i, loss.item()))
 
-        print(f"Round {i+1}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.2f}%")
         # 5. Send gradients to clients
-        messages = []
-        for node_id, pos in node_pos_mapping.items():
-            arrc = ArrayRecord({"local-gradients": Array(embeddings_grad[pos].numpy())})
-            message = Message(
-                content=RecordDict({"gradients": arrc}),
-                message_type="train.apply_gradients",  # target `train` method in ClientApp
-                dst_node_id=node_id,
-            )
-            messages.append(message)
+        send_gradients_to_clients(grid, node_pos_mapping, embeddings_grad)
 
-        # Send messages and wait for all results
-        log(INFO, "Sending gradients to %s nodes...", len(messages))
-        replies = grid.send_and_receive(messages)
-        log(INFO, "\tReceived %s/%s results", len(replies), len(messages))
+    # Log final results
+    log(INFO, "")
+    log(INFO, "=== Final Results ===")
+    for (round_num, accuracy), (_, loss_value) in zip(accuracies, losses):
+        log(
+            INFO,
+            f"Round {round_num} -> Loss: {loss_value:.4f} | Accuracy: {accuracy:.2f}%",
+        )
 
-        log(INFO, f"--- End of Round {i + 1} ---")
+
+def evaluate_model(
+    head: ServerModel, embeddings: torch.Tensor, labels: torch.Tensor
+) -> float:
+    """Compute accuracy of head."""
+    head.eval()
+    with torch.no_grad():
+        correct = 0
+        # Re-compute embeddings for accuracy (detached from grad)
+        embeddings_eval = embeddings.detach()
+        output = head(embeddings_eval)
+        predicted = (output > 0.5).float()
+        correct += (predicted == labels).sum().item()
+        accuracy = correct / len(labels) * 100
+
+    return accuracy
+
+
+def send_gradients_to_clients(
+    grid: Grid,
+    node_pos_mapping: dict[int, int],
+    embeddings_grad: list[torch.Tensor],
+) -> None:
+    """Send gradients to clients."""
+    messages = []
+    for node_id, pos in node_pos_mapping.items():
+        arrc = ArrayRecord({"local-gradients": Array(embeddings_grad[pos].numpy())})
+        message = Message(
+            content=RecordDict({"gradients": arrc}),
+            message_type="train.apply_gradients",  # target `train` method in ClientApp
+            dst_node_id=node_id,
+        )
+        messages.append(message)
+
+    # Send messages, but don't wait for results (no replies expected)
+    log(INFO, "Sending gradients to %s nodes...", len(messages))
+    grid.push_messages(messages)
 
 
 def get_remote_embeddings(

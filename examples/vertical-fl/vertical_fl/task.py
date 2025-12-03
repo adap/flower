@@ -113,18 +113,26 @@ def load_data(partition_id: int, feature_splits: list[int]):
 class ClientModel(nn.Module):
     def __init__(self, input_size, out_feat_dim):
         super().__init__()
-        self.fc = nn.Linear(input_size, out_feat_dim)
+        self.fc1 = nn.Linear(input_size, 128)
+        self.fc2 = nn.Linear(128, out_feat_dim)
 
     def forward(self, x):
-        return self.fc(x)
+        x = self.fc1(x)
+        x = nn.functional.relu(x)
+        return self.fc2(x)
 
 
 class ServerModel(nn.Module):
     def __init__(self, input_size):
         super(ServerModel, self).__init__()
-        self.fc = nn.Linear(input_size, 1)
+        self.hidden = nn.Linear(input_size, 96)
+        self.fc = nn.Linear(96, 1)
+        self.bn = nn.BatchNorm1d(96)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
+        x = self.hidden(x)
+        x = nn.functional.relu(x)
+        x = self.bn(x)
         x = self.fc(x)
         return self.sigmoid(x)

@@ -27,9 +27,9 @@ serverapp = "vertical_fl.server_app:app"
 clientapp = "vertical_fl.client_app:app"
 
 [tool.flwr.app.config]
-num-server-rounds = 3
-learning-rate = 0.1
-out-feature-dim-clientapp = 32 # Output feature dimension for client app
+num-server-rounds = 250
+learning-rate = 0.01
+out-feature-dim-clientapp = 64 # Output feature dimension for client app
 # ['Age', 'Sex', 'Fare','Siblings/Spouses Aboard', 'Name', 'Parents/Children Aboard', 'Pclass']
 feature-splits = "2,3,2" # Comma-separated number of features per client (they must add up to 7)
                          # And there must be as many entries as num-supernodes configured below

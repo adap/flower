@@ -58,12 +58,12 @@ def f(msg: Message, context: Context):
     model = ClientModel(
         input_size=data.shape[1], out_feat_dim=out_feature_dim_clientapp
     )
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer.zero_grad()
 
     # Load model from state if available
     if model_record := context.state.get("model", None):
         model.load_state_dict(model_record.to_torch_state_dict())
-
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
 
     # Do forward pass
     embedding = model(data)
@@ -76,6 +76,8 @@ def f(msg: Message, context: Context):
 
     # Save updated model in state for next round
     context.state["model"] = ArrayRecord(model.state_dict())
+    # ? Optionally you might want to also store the optimizer's state_dict
+    # ? into the context and load it in the next round. Skipped for simplicity
 
     # Construct and return reply Message
     return Message(content=RecordDict(), reply_to=msg)

@@ -101,14 +101,40 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 > [!NOTE]
 > Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
 
+By default, the example runs for 250 rounds using three clients. Launch it with defaul settings with:
+
 ```bash
 flwr run .
+```
+
+The expected last lines of the log should look like:
+
+```shell
+...
+INFO :      --- ServerApp Round 250 / 250 ---
+INFO :      Requesting embeddings from 3 nodes...
+INFO :          Received 3/3 results
+INFO :      Round 249, Loss: 0.3892, Accuracy: 80.83%
+INFO :      Sending gradients to 3 nodes...
+INFO :      
+INFO :      === Final Results ===
+INFO :      Round 0 -> Loss: 0.7235 | Accuracy: 56.03%
+INFO :      Round 25 -> Loss: 0.6482 | Accuracy: 63.25%
+INFO :      Round 50 -> Loss: 0.6141 | Accuracy: 65.61%
+INFO :      Round 75 -> Loss: 0.5654 | Accuracy: 69.22%
+INFO :      Round 100 -> Loss: 0.5161 | Accuracy: 72.60%
+INFO :      Round 125 -> Loss: 0.4967 | Accuracy: 73.51%
+INFO :      Round 150 -> Loss: 0.4562 | Accuracy: 75.31%
+INFO :      Round 175 -> Loss: 0.4392 | Accuracy: 77.56%
+INFO :      Round 200 -> Loss: 0.4222 | Accuracy: 79.14%
+INFO :      Round 225 -> Loss: 0.4043 | Accuracy: 78.92%
+INFO :      Round 249 -> Loss: 0.3892 | Accuracy: 81.83%
 ```
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
+flwr run . --run-config "num-server-rounds=500 learning-rate=0.05"
 ```
 
 ### Run with the Deployment Engine
