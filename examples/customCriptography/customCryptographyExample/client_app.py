@@ -41,6 +41,7 @@ class FlowerClient(NumPyClient):
         self.local_epochs = local_epochs
         self.lr = learning_rate
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.process = psutil.Process(os.getpid())
 
 
     def _cpu_time(self):
