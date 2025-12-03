@@ -90,7 +90,7 @@ for partition in partitions:
 # ['Survived'] <--------------------------------------ServerApp
 ```
 
-You control the number of partitions as well as how many features each have by modifying `feature-splits` (defatuls to \[`2,3,2`\]) in the `[tool.flwr.app.config]` section of the `pyproject.toml`.
+You can control the number of partitions as well as how many features each have by modifying `feature-splits` (defatuls to \[`2,3,2`\]) in the `[tool.flwr.app.config]` section of the `pyproject.toml`.
 
 ## Run the project
 
