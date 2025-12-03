@@ -54,7 +54,7 @@ for ((i=1; i<=NUM_CLIENTS; i++)); do
         --superlink 127.0.0.1:9092 \
         --clientappio-api-address 0.0.0.0:${PORT} \
         $TLS_FLAG \
-         --node-config "dataset_path=\"$DATASET\""
+        --node-config "dataset_path=\"$DATASET\""
 
 
     # Se TLS è attivo, aggiungi autenticazione
