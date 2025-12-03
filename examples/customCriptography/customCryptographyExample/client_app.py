@@ -43,7 +43,9 @@ class FlowerClient(NumPyClient):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-
+    def _cpu_time(self):
+        t = self.process.cpu_times()
+        return t.user + t.system
     def fit(self, parameters, config):
         print(f"[CLIENT {os.getpid()}] fit() STARTED", flush=True)
         try:
