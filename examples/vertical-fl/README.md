@@ -1,5 +1,5 @@
 ---
-tags: [vertical, tabular, advanced]
+tags: [vertical, tabular, advanced, fds]
 dataset: [Titanic]
 framework: [torch, pandas, scikit-learn]
 ---
@@ -7,7 +7,7 @@ framework: [torch, pandas, scikit-learn]
 # Vertical Federated Learning with Flower
 
 This example will showcase how you can perform Vertical Federated Learning using
-Flower. We'll be using the [Titanic dataset](https://www.kaggle.com/competitions/titanic/data)
+Flower. We'll be using the [Titanic dataset](https://huggingface.co/datasets/julien-c/titanic-survival)
 to train simple regression models for binary classification. We will go into
 more details below, but the main idea of Vertical Federated Learning is that
 each client is holding different feature sets of the same dataset and that the
@@ -48,10 +48,8 @@ vertical-fl
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
-│   ├── strategy.py     # Defines your Strategy
 │   └── task.py         # Defines your model, training and data loading
 ├── pyproject.toml      # Project metadata like dependencies and configs
-├── data/train.csv
 └── README.md
 ```
 

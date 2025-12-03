@@ -1,132 +1,113 @@
-from logging import WARN
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 import torch.nn as nn
-from datasets import Dataset
-from flwr.common.logger import log
-from flwr_datasets.partitioner import IidPartitioner
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import VerticalSizePartitioner
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-NUM_VERTICAL_SPLITS = 3
-
-
-def _bin_age(age_series):
-    bins = [-np.inf, 10, 40, np.inf]
-    labels = ["Child", "Adult", "Elderly"]
-    return (
-        pd.cut(age_series, bins=bins, labels=labels, right=True)
-        .astype(str)
-        .replace("nan", "Unknown")
-    )
-
-
-def _extract_title(name_series):
-    titles = name_series.str.extract(r" ([A-Za-z]+)\.", expand=False)
-    rare_titles = {
-        "Lady",
-        "Countess",
-        "Capt",
-        "Col",
-        "Don",
-        "Dr",
-        "Major",
-        "Rev",
-        "Sir",
-        "Jonkheer",
-        "Dona",
-    }
-    titles = titles.replace(list(rare_titles), "Rare")
-    titles = titles.replace({"Mlle": "Miss", "Ms": "Miss", "Mme": "Mrs"})
-    return titles
+FEATURE_COLUMNS = [
+    "Age",
+    "Sex",
+    "Fare",
+    "Siblings/Spouses Aboard",
+    "Name",
+    "Parents/Children Aboard",
+    "Pclass",
+]
 
 
-def _create_features(df):
-    # Convert 'Age' to numeric, coercing errors to NaN
-    df["Age"] = pd.to_numeric(df["Age"], errors="coerce")
-    df["Age"] = _bin_age(df["Age"])
-    df["Cabin"] = df["Cabin"].str[0].fillna("Unknown")
-    df["Title"] = _extract_title(df["Name"])
-    df.drop(columns=["PassengerId", "Name", "Ticket"], inplace=True)
-    all_keywords = set(df.columns)
-    df = pd.get_dummies(
-        df, columns=["Sex", "Pclass", "Embarked", "Title", "Cabin", "Age"]
-    )
-    return df, all_keywords
+def load_and_preprocess(
+    dataframe: pd.DataFrame,
+):
+    """Preprocess a subset of the titanic-survival dataset columns into a purely
+    numerical numpy array suitable for model training."""
 
+    # Make a copy to avoid modifying the original
+    X_df = dataframe.copy()
 
-def process_dataset():
+    # Identify which columns are present
+    available_cols = set(X_df.columns)
 
-    df = pd.read_csv(Path(__file__).parents[1] / "data/train.csv")
-    processed_df = df.dropna(subset=["Embarked", "Fare"]).copy()
-    return _create_features(processed_df)
+    # ----------------------------------------------------------------------
+    # FEATURE ENGINEERING ON NAME (if present)
+    # ----------------------------------------------------------------------
+    if "Name" in available_cols:
+        X_df["Title"] = X_df["Name"].str.extract(r"([A-Za-z]+)\.", expand=False)
+        X_df["NameLength"] = X_df["Name"].str.len()
+        X_df = X_df.drop(columns=["Name"])
 
+    # ----------------------------------------------------------------------
+    # IDENTIFY NUMERIC + CATEGORICAL COLUMNS
+    # ----------------------------------------------------------------------
+    categorical_cols = []
+    if "Sex" in X_df.columns:
+        categorical_cols.append("Sex")
+    if "Title" in X_df.columns:
+        categorical_cols.append("Title")
+    if "Pclass" in X_df.columns:
+        categorical_cols.append("Pclass")
 
-def load_data(partition_id: int, num_partitions: int):
-    """Partition the data vertically and then horizontally.
+    numeric_cols = [c for c in X_df.columns if c not in categorical_cols]
 
-    We create three sets of features representing three types of nodes participating in
-    the federation.
+    # ----------------------------------------------------------------------
+    # HANDLE MISSING VALUES
+    # ----------------------------------------------------------------------
+    if numeric_cols:
+        X_df[numeric_cols] = X_df[numeric_cols].fillna(X_df[numeric_cols].median())
 
-    [{'Cabin', 'Parch', 'Pclass'}, {'Sex', 'Title'}, {'Age', 'Embarked', 'Fare',
-    'SibSp', 'Survived'}]
-
-    Once the whole dataset is split vertically and a set of features is selected based
-    on mod(partition_id, 3), it is split horizontally into `ceil(num_partitions/3)`
-    partitions. This function returns the partition with index `partition_id % 3`.
-    """
-
-    if num_partitions != NUM_VERTICAL_SPLITS:
-        log(
-            WARN,
-            "To run this example with num_partitions other than 3, you need to update how "
-            "the Vertical FL training is performed. This is because the shapes of the "
-            "gradients migh not be the same along the first dimension.",
+    # ----------------------------------------------------------------------
+    # PREPROCESSOR (TRANSFORM TO PURE NUMERIC)
+    # ----------------------------------------------------------------------
+    transformers = []
+    if numeric_cols:
+        transformers.append(("num", StandardScaler(), numeric_cols))
+    if categorical_cols:
+        transformers.append(
+            (
+                "cat",
+                OneHotEncoder(handle_unknown="ignore", sparse_output=False),
+                categorical_cols,
+            )
         )
 
-    # Read whole dataset and process
-    processed_df, features_set = process_dataset()
+    preprocessor = ColumnTransformer(transformers=transformers)
 
-    # Vertical Split and select
-    v_partitions = _partition_data_vertically(processed_df, features_set)
-    v_split_id = np.mod(partition_id, NUM_VERTICAL_SPLITS)
-    v_partition = v_partitions[v_split_id]
+    # ----------------------------------------------------------------------
+    # FIT TRANSFORMER & CONVERT TO NUMPY
+    # ----------------------------------------------------------------------
+    X_full = preprocessor.fit_transform(X_df)
 
-    # Comvert to HuggingFace dataset
-    dataset = Dataset.from_pandas(v_partition)
+    # Ensure output is always a dense numpy array
+    if hasattr(X_full, "toarray"):
+        X_full = X_full.toarray()
 
-    # Split horizontally with Flower Dataset partitioner
-    num_h_partitions = int(np.ceil(num_partitions / NUM_VERTICAL_SPLITS))
-    partitioner = IidPartitioner(num_partitions=num_h_partitions)
-    partitioner.dataset = dataset
-
-    # Extract partition of the `ClientApp` calling this function
-    partition = partitioner.load_partition(partition_id % num_h_partitions)
-    partition.remove_columns(["Survived"])
-
-    return partition.to_pandas(), v_split_id
+    return X_full.astype(np.float32)
 
 
-def _partition_data_vertically(df, all_keywords):
-    partitions = []
-    keywords_sets = [{"Parch", "Cabin", "Pclass"}, {"Sex", "Title"}]
-    keywords_sets.append(all_keywords - keywords_sets[0] - keywords_sets[1])
+fds = None  # Cache FederatedDataset
 
-    for keywords in keywords_sets:
-        partitions.append(
-            df[
-                list(
-                    {
-                        col
-                        for col in df.columns
-                        for kw in keywords
-                        if kw in col or "Survived" in col
-                    }
-                )
-            ]
+
+def load_data(partition_id: int, feature_splits: list[int]):
+    """..."""
+
+    global fds
+    if fds is None:
+        partitioner = VerticalSizePartitioner(
+            partition_sizes=feature_splits,
+            active_party_columns="Survived",
+            active_party_columns_mode="create_as_last",
         )
 
-    return partitions
+        fds = FederatedDataset(
+            dataset="julien-c/titanic-survival", partitioners={"train": partitioner}
+        )
+
+    # Load partition
+    partition = fds.load_partition(partition_id)
+
+    # Process partition
+    return load_and_preprocess(dataframe=partition.to_pandas())
 
 
 class ClientModel(nn.Module):

@@ -1,35 +1,12 @@
-
 from logging import INFO
-from flwr.common import Context
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-
-from vertical_fl.strategy import Strategy
-from vertical_fl.task import process_dataset, ServerModel
-
-
-# def server_fn(context: Context) -> ServerAppComponents:
-#     """Construct components that set the ServerApp behaviour."""
-
-#     # Get dataset
-#     processed_df, _ = process_dataset()
-
-#     # Define the strategy
-#     strategy = Strategy(processed_df["Survived"].values)
-
-#     # Construct ServerConfig
-#     num_rounds = context.run_config["num-server-rounds"]
-#     config = ServerConfig(num_rounds=num_rounds)
-
-#     return ServerAppComponents(strategy=strategy, config=config)
-
-
-# # Start Flower server
-# app = ServerApp(server_fn=server_fn)
 
 import torch
+from datasets import load_dataset
 from flwr.app import Array, ArrayRecord, Context, Message, RecordDict
 from flwr.common import log
 from flwr.serverapp import Grid, ServerApp
+
+from vertical_fl.task import FEATURE_COLUMNS, ServerModel
 
 # Create ServerApp
 app = ServerApp()
@@ -43,14 +20,17 @@ def main(grid: Grid, context: Context) -> None:
     num_rounds: int = context.run_config["num-server-rounds"]
     feature_splits: str = context.run_config["feature-splits"]
     in_feature_dim_clientapp = [int(dim) for dim in feature_splits.split(",")]
+    if sum(in_feature_dim_clientapp) != len(FEATURE_COLUMNS):
+        raise ValueError(
+            "Sum of feature splits must be equal to total number of features."
+            f" Got {sum(in_feature_dim_clientapp)} and {len(FEATURE_COLUMNS)}."
+        )
     out_feature_dim_clientapp: int = context.run_config["out-feature-dim-clientapp"]
 
-
     # Get dataset
-    processed_df, _ = process_dataset()
-    labels = processed_df["Survived"].values
+    dataset = load_dataset("julien-c/titanic-survival", split="train")
+    labels = dataset["Survived"]
     labels = torch.tensor(labels).float().unsqueeze(1)
-
 
     # Serverapp model
     head = None
@@ -68,7 +48,7 @@ def main(grid: Grid, context: Context) -> None:
                 "Number of feature splits must be equal to number of nodes."
                 f" Got {len(in_feature_dim_clientapp)} splits and {len(node_ids)} nodes."
             )
-        
+
         if head is None:
             # The server model's input size is determined by the number of clients
             # and the output feature dimension of each embedding produced by the clients
@@ -77,59 +57,52 @@ def main(grid: Grid, context: Context) -> None:
 
         optimizer.zero_grad()
 
-        # Get embeddings from all clients
+        # 1. Get embeddings from all clients
         embeddings, node_pos_mapping = get_remote_embeddings(
             grid=grid,
             node_ids=node_ids,
-            num_nodes=len(processed_df),
+            num_nodes=len(labels),
             embedding_dim=out_feature_dim_clientapp,
         )
 
-
-        # Complete forward pass and compute loss
+        # 2. Complete forward pass and compute loss
         output = head(embeddings)
         loss = criterion(output, labels)
         loss.backward()
 
         optimizer.step()
         optimizer.zero_grad()
-    
+
+        # 3. Compute accuracy using updated head model
         with torch.no_grad():
             correct = 0
             output = head(embeddings)
             predicted = (output > 0.5).float()
-
             correct += (predicted == labels).sum().item()
-
             accuracy = correct / len(labels) * 100
 
         print(f"Round {i+1}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.2f}%")
 
+        # 4. Compute gradients w.r.t. embeddings (updated clients' models)
+        embeddings_grad = embeddings.grad.split(
+            [out_feature_dim_clientapp] * len(node_ids), dim=1
+        )
+        messages = []
+        for node_id, pos in node_pos_mapping.items():
+            arrc = ArrayRecord({"local-gradients": Array(embeddings_grad[pos].numpy())})
+            message = Message(
+                content=RecordDict({"gradients": arrc}),
+                message_type="train.apply_gradients",  # target `query` method in ClientApp
+                dst_node_id=node_id,
+            )
+            messages.append(message)
 
-        # # Compute gradients w.r.t. embeddings
-        # embeddings_grad = embeddings.grad.split(
-        #     [out_feature_dim_clientapp] * len(node_ids), dim=1
-        # )
-        # messages = []
-        # for node_id, pos in node_pos_mapping.items():
-        #     arrc = ArrayRecord({"local-gradients": Array(embeddings_grad[pos].numpy())})
-        #     message = Message(
-        #         content=RecordDict({"gradients": arrc}),
-        #         message_type="train.apply_gradients",  # target `query` method in ClientApp
-        #         dst_node_id=node_id,
-        #     )
-        #     messages.append(message)
+        # Send messages and wait for all results
+        log(INFO, "Sending gradients to %s nodes...", len(messages))
+        replies = grid.send_and_receive(messages)
+        log(INFO, "\tReceived %s/%s results", len(replies), len(messages))
 
-        # # Send messages and wait for all results
-        # log(INFO, "Sending gradients to %s nodes...", len(messages))
-        # replies = grid.send_and_receive(messages)
-        # log(INFO, "\tReceived %s/%s results", len(replies), len(messages))
-
-        # # # Send gradients to clients
-
-        # log(INFO, f"--- End of Round {i + 1} ---")
-
-
+        log(INFO, f"--- End of Round {i + 1} ---")
 
 
 def get_remote_embeddings(
