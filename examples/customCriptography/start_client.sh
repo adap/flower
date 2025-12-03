@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Recupero variabili da Python
 TLS=$(python3 -c "from flwr.common.crypto.config_cripto import TLS; print(TLS)")
 NUM_CLIENTS=$(python3 -c "from flwr.common.crypto.config_cripto import NUM_CLIENTS; print(NUM_CLIENTS)")
 
@@ -11,28 +10,30 @@ mkdir -p "$LOG_DIR"
 #  Avvio del superlink
 # ==========================
 if [ "$TLS" = "True" ]; then
-    echo "[*] Avvio superlink in modalità TLS"
+    echo "[*] Avvio superlink in modalità TLS + AUTH"
     flower-superlink \
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
+        --enable-supernode-auth \
         | tee "$LOG_DIR/superlink.log" &
     TLS_FLAG="--root-certificates certificates/ca.crt"
 else
-    echo "[*] Avvio superlink in modalità INSECURE"
-    flower-superlink --insecure | tee "$LOG_DIR/superlink.log" &
+    echo "[*] Avvio superlink in modalità INSECURE + AUTH"
+    flower-superlink \
+        --insecure \
+        --enable-supernode-auth \
+        | tee "$LOG_DIR/superlink.log" &
     TLS_FLAG="--insecure"
 fi
 
 sleep 2
 
 # ==========================
-#  Avvio dei supernode (client FL)
-#  con limiti CPU per processo
+#  Avvio dei supernode
 # ==========================
 
-# Limite thread CPU per PyTorch/BLAS
-CPU_THREADS=2 # <-- cambia qui il numero di core per client
+CPU_THREADS=2
 
 for ((i=1; i<=NUM_CLIENTS; i++)); do
     PORT=$((9093 + i))
@@ -51,10 +52,11 @@ for ((i=1; i<=NUM_CLIENTS; i++)); do
         --superlink 127.0.0.1:9092 \
         --clientappio-api-address 0.0.0.0:${PORT} \
         $TLS_FLAG \
+        --auth-supernode-private-key keys/client_credentials_$i \
         --node-config "dataset-path=\"$DATASET\"" \
         | tee "$LOG_FILE" &
 
-    echo "[✓] Avviato client $i su porta $PORT con dataset $DATASET (log: $LOG_FILE)"
+    echo "[✓] Avviato client $i su porta $PORT con key keys/client_credentials_$i"
 done
 
 wait
