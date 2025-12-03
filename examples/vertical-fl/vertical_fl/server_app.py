@@ -15,15 +15,14 @@ app = ServerApp()
 @app.main()
 def main(grid: Grid, context: Context) -> None:
     """Main entry point for the ServerApp."""
-
     # Read run config
     num_rounds: int = context.run_config["num-server-rounds"]
     feature_splits: str = context.run_config["feature-splits"]
     in_feature_dim_clientapp = [int(dim) for dim in feature_splits.split(",")]
     if sum(in_feature_dim_clientapp) != len(FEATURE_COLUMNS):
         raise ValueError(
-            "Sum of feature splits must be equal to total number of features."
-            f" Got {sum(in_feature_dim_clientapp)} and {len(FEATURE_COLUMNS)}."
+            "The sum of feature splits must equal the total number of features "
+            f"(got {sum(in_feature_dim_clientapp)} vs. {len(FEATURE_COLUMNS)})."
         )
     out_feature_dim_clientapp: int = context.run_config["out-feature-dim-clientapp"]
 
@@ -38,7 +37,7 @@ def main(grid: Grid, context: Context) -> None:
     criterion = torch.nn.BCELoss()
 
     # Track metrics
-    eval_every = 25
+    eval_interval = 25  # Evaluate the model every 25 rounds
     accuracies: list[tuple[int, float]] = []
     losses: list[tuple[int, float]] = []
 
@@ -50,8 +49,8 @@ def main(grid: Grid, context: Context) -> None:
 
         if len(node_ids) != len(in_feature_dim_clientapp):
             raise ValueError(
-                "Number of feature splits must be equal to number of nodes."
-                f" Got {len(in_feature_dim_clientapp)} splits and {len(node_ids)} nodes."
+                "The number of feature splits must equal the number of nodes "
+                f"(got {len(in_feature_dim_clientapp)} vs. {len(node_ids)})."
             )
 
         if head is None:
@@ -83,7 +82,7 @@ def main(grid: Grid, context: Context) -> None:
         optimizer.step()
 
         # 3. Compute accuracy using updated head model
-        if i % eval_every == 0 or i == num_rounds - 1:
+        if i % eval_every == 0 or i == num_rounds:
             accuracy = evaluate_model(head, embeddings, labels)
             log(INFO, f"Round {i}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.2f}%")
             accuracies.append((i, accuracy))
