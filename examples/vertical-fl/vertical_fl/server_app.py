@@ -82,7 +82,7 @@ def main(grid: Grid, context: Context) -> None:
         optimizer.step()
 
         # 3. Compute accuracy using updated head model
-        if i % eval_every == 0 or i == num_rounds:
+        if i % eval_interval == 0 or i == num_rounds:
             accuracy = evaluate_model(head, embeddings, labels)
             log(INFO, f"Round {i}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.2f}%")
             accuracies.append((i, accuracy))
