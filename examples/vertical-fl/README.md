@@ -13,6 +13,34 @@ more details below, but the main idea of Vertical Federated Learning is that
 each client is holding different feature sets of the same dataset and that the
 server is holding the labels of this dataset.
 
+In this example we use the [VerticalSizePartitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.VerticalSizePartitioner.html#flwr_datasets.partitioner.VerticalSizePartitioner) from [Flower Datasets](https://flower.ai/docs/datasets/) to vertically split the dataset into 3 partitions (one for each client) with the target column (i.e. whether the passenger survived the Titanic sinking) being available at the `ServerApp` only.
+
+```python
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import VerticalSizePartitioner
+
+partitioner = VerticalSizePartitioner(
+    partition_sizes=[2, 3, 2], # three partitions with 2,3 and 2 features
+    active_party_columns="Survived", # the target
+    active_party_columns_mode="create_as_last" # An additional partition will be created 
+)                                              # that only contains the target column
+
+fds = FederatedDataset(
+    dataset="julien-c/titanic-survival",
+    partitioners={"train": partitioner}
+)
+# Load all partitions
+partitions = [fds.load_partition(i) for i in range(fds.partitioners["train"].num_partitions)]
+
+for partition in partitions:
+        print(partition.column_names)
+
+# ['Age', 'Sex'] <----------------------------------- ClientApp #0
+# ['Fare', 'Siblings/Spouses Aboard', 'Name'] <------ ClientApp #1
+# ['Parents/Children Aboard', 'Pclass'] <------------ ClientApp #2
+# ['Survived'] <--------------------------------------ServerApp
+```
+
 |                       | Horizontal Federated Learning (HFL or just FL)                                                                                                                                                         | Vertical Federated Learning (VFL)                                                                                                                                                                                                                                                                                                                                   |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Data Distribution     | Clients have different data instances but share the same feature space. Think of different hospitals having different patients' data (samples) but recording the same types of information (features). | Each client holds different features for the same instances. Imagine different institutions holding various tests or measurements for the same group of patients.                                                                                                                                                                                                   |
@@ -40,7 +68,6 @@ git clone --depth=1 https://github.com/adap/flower.git _tmp \
 ```
 
 This will create a new directory called `vertical-fl` with the following structure:
-following files:
 
 ```shell
 vertical-fl
@@ -55,7 +82,7 @@ vertical-fl
 
 ### Install dependencies and project
 
-Install the dependencies defined in `pyproject.toml` as well as the `mlxexample` package.
+Install the dependencies defined in `pyproject.toml` as well as the `vertical_fl` package.
 
 ```bash
 pip install -e .
@@ -83,5 +110,5 @@ flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
 ### Run with the Deployment Engine
 
 Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
-
+Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be interested in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
 If you are already familiar with how the Deployment Engine works, you may want to learn how to run it using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.
