@@ -46,7 +46,11 @@ from flwr.common.constant import (
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
-from flwr.common.inflatable import iterate_object_tree
+from flwr.common.inflatable import (
+    get_all_nested_objects,
+    get_object_tree,
+    iterate_object_tree,
+)
 from flwr.common.inflatable_utils import (
     pull_objects,
     push_object_contents_from_iterable,
@@ -54,7 +58,11 @@ from flwr.common.inflatable_utils import (
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, _make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
-from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
+from flwr.supercore.object_store import (
+    NoObjectInStoreError,
+    ObjectStore,
+    ObjectStoreFactory,
+)
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
@@ -362,8 +370,19 @@ def _push_messages(
             message.metadata.message_type,
         )
 
-        # Get the object tree for the message
-        object_tree = object_store.get_object_tree(message.metadata.message_id)
+        # Get or (if needed) preregister the object tree for the message
+        try:
+            object_tree = object_store.get_object_tree(message.metadata.message_id)
+        except NoObjectInStoreError:
+            object_tree = get_object_tree(message)
+            missing_obj_ids = set(
+                object_store.preregister(message.metadata.run_id, object_tree)
+            )
+
+            # Ensure message objects are available in the ObjectStore before pushing
+            for obj_id, obj in get_all_nested_objects(message).items():
+                if obj_id in missing_obj_ids or obj_id not in object_store:
+                    object_store.put(obj_id, obj.deflate())
 
         # Define the iterator for yielding object contents
         # This will yield (object_id, content) pairs
