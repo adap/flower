@@ -22,7 +22,7 @@ else
     TLS_FLAG="--insecure"
 fi
 
-sleep 5
+sleep 2
 
 # Limite thread CPU per client
 CPU_THREADS=6
