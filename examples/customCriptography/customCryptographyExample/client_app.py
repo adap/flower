@@ -34,7 +34,7 @@ from .task import (
 # -------------------------------------------------------------------
 class FlowerClient(NumPyClient):
 
-    def __init__(self, trainloader, valloader, local_epochs, learning_rate, core_list):
+    def __init__(self, trainloader, valloader, local_epochs, learning_rate):
         self.net = get_model(NET, num_classes=10, pretrained=False)
         self.trainloader = trainloader
         self.valloader = valloader
