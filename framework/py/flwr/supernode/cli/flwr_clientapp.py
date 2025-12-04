@@ -52,14 +52,14 @@ def flwr_clientapp() -> None:
         )
         return
 
-    log(INFO, "Start `flwr-clientapp` process")
-    log(
-        DEBUG,
-        "`flwr-clientapp` will attempt to connect to SuperNode's "
-        "ClientAppIo API at %s with token %s",
-        args.clientappio_api_address,
-        mask_string(args.token) if args.token else "None",
-    )
+    # log(INFO, "Start `flwr-clientapp` process")
+    # log(
+    #     DEBUG,
+    #     "`flwr-clientapp` will attempt to connect to SuperNode's "
+    #     "ClientAppIo API at %s with token %s",
+    #     args.clientappio_api_address,
+    #     mask_string(args.token) if args.token else "None",
+    # )
     run_clientapp(
         clientappio_api_address=args.clientappio_api_address,
         token=args.token,
