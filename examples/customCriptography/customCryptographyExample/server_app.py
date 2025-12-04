@@ -148,7 +148,7 @@ def server_fn(context: Context):
         stop_criteria={"metric_ge": ("accuracy", ACCURACY),
         },
     )
-    config = ServerConfig(num_rounds=num_rounds, round_timeout=300)
+    config = ServerConfig(num_rounds=num_rounds)
     return ServerAppComponents(strategy=strategy, config=config)
 # ------------------------------
 # AVVIO SERVER
