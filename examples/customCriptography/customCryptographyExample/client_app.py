@@ -48,7 +48,6 @@ class FlowerClient(NumPyClient):
         t = self.process.cpu_times()
         return t.user + t.system
     def fit(self, parameters, config):
-        print(f"[CLIENT {os.getpid()}] fit() STARTED", flush=True)
         try:
             set_weights(self.net, parameters)
 
@@ -91,20 +90,9 @@ def client_fn(context: Context):
     local_epochs = context.run_config["local-epochs"]
     learning_rate = context.run_config["learning-rate"]
 
-    # -----------------------------
-    # Assegnazione dinamica core
-    # -----------------------------
-    CORES_PER_CLIENT = 3
-    client_id = context.node_id  # ID univoco del client
-
-    start = client_id * CORES_PER_CLIENT
-    end = start + CORES_PER_CLIENT
-    core_list = list(range(start, end))
-
-    print(f"[SuperNode] Client {client_id} -> core assegnati: {core_list}")
 
     # Crea il client con l'affinity impostata
-    return FlowerClient(trainloader, valloader, local_epochs, learning_rate, core_list).to_client()
+    return FlowerClient(trainloader, valloader, local_epochs, learning_rate).to_client()
 
 
 # Flower ClientApp
