@@ -55,6 +55,7 @@ class NodeState(CoreState):
         *,
         run_ids: Sequence[int] | None = None,
         is_reply: bool | None = None,
+        is_retrieved: bool | None = False,
         limit: int | None = None,
     ) -> Sequence[Message]:
         """Retrieve messages based on the specified filters.
@@ -70,6 +71,9 @@ class NodeState(CoreState):
         is_reply : Optional[bool] (default: None)
             If True, filter for reply messages; if False, filter for non-reply
             (instruction) messages.
+        is_retrieved : Optional[bool] (default: False)
+            If True, retrieve only messages that have already been retrieved.
+            If False, retrieve only messages that have not yet been retrieved.
         limit : Optional[int] (default: None)
             Maximum number of messages to return. If None, no limit is applied.
 
@@ -77,11 +81,6 @@ class NodeState(CoreState):
         -------
         Sequence[Message]
             A sequence of messages matching the specified filters.
-
-        Notes
-        -----
-        **IMPORTANT:** Retrieved messages will **NOT** be returned again by subsequent
-        calls to this method, even if the filters match them.
         """
 
     @abstractmethod
