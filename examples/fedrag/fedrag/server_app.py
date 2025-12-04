@@ -101,7 +101,7 @@ def submit_question(
 
     # Send messages and wait for all results
     replies = grid.send_and_receive(messages)
-    print("Received {}/{} results".format(len(replies), len(messages)))
+    # print("Received {}/{} results".format(len(replies), len(messages)))
 
     documents, scores = [], []
     for reply in replies:
