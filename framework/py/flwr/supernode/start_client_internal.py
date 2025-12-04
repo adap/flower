@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Main loop for Flower SuperNode."""
-
+from __future__ import annotations
 
 import os
 import subprocess
@@ -371,6 +371,7 @@ def _push_messages(
             "Sending: %s message",
             message.metadata.message_type,
         )
+
 
         # Get or (if needed) preregister the object tree for the message
         try:
