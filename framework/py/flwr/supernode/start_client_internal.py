@@ -70,7 +70,7 @@ from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 
-from framework.py.flwr.common.typing import RunNotRunningException
+
 
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 
