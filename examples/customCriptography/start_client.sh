@@ -45,7 +45,7 @@ for ((i=1; i<=NUM_CLIENTS; i++)); do
       --superlink 127.0.0.1:9092 \
       --clientappio-api-address 0.0.0.0:${PORT} \
       $TLS_FLAG \
-      --node-config "dataset-path='$DATASET' fit_timeout=300 evaluate_timeout=120" \
+      --node-config "dataset-path='$DATASET' fit_timeout=300 evaluate_timeout=120 ray_timeout=600 connect_timeout=60" \
       | tee "$LOG_FILE" &
 
     echo "[✓] Avviato client $i su porta $PORT con dataset $DATASET (log: $LOG_FILE)"
