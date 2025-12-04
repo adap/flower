@@ -17,7 +17,6 @@
 
 import threading
 from dataclasses import dataclass
-from typing import Optional
 
 from flwr.common.inflatable import (
     get_object_id,
@@ -48,9 +47,6 @@ class InMemoryObjectStore(ObjectStore):
         self.verify = verify
         self.store: dict[str, ObjectEntry] = {}
         self.lock_store = threading.RLock()
-        # Mapping the Object ID of a message to the list of descendant object IDs
-        self.msg_descendant_objects_mapping: dict[str, list[str]] = {}
-        self.lock_msg_mapping = threading.RLock()
         # Mapping each run ID to a set of object IDs that are used in that run
         self.run_objects_mapping: dict[int, set[str]] = {}
 
@@ -157,7 +153,7 @@ class InMemoryObjectStore(ObjectStore):
             self.store[object_id].content = object_content
             self.store[object_id].is_available = True
 
-    def get(self, object_id: str) -> Optional[bytes]:
+    def get(self, object_id: str) -> bytes | None:
         """Get an object from the store."""
         with self.lock_store:
             # Check if the object ID is pre-registered
@@ -215,7 +211,6 @@ class InMemoryObjectStore(ObjectStore):
         """Clear the store."""
         with self.lock_store:
             self.store.clear()
-            self.msg_descendant_objects_mapping.clear()
             self.run_objects_mapping.clear()
 
     def __contains__(self, object_id: str) -> bool:

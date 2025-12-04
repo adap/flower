@@ -19,7 +19,7 @@ import json
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 import typer
 
@@ -40,11 +40,15 @@ from .auth_plugin import CliAuthPlugin, LoginError
 
 
 class OidcCliPlugin(CliAuthPlugin):
-    """Flower OIDC auth plugin for CLI."""
+    """Flower OIDC authentication plugin for CLI.
+
+    This plugin implements OpenID Connect (OIDC) device flow authentication for CLI
+    access to Flower SuperLink.
+    """
 
     def __init__(self, credentials_path: Path):
-        self.access_token: Optional[str] = None
-        self.refresh_token: Optional[str] = None
+        self.access_token: str | None = None
+        self.refresh_token: str | None = None
         self.credentials_path = credentials_path
 
     @staticmethod
@@ -52,7 +56,25 @@ class OidcCliPlugin(CliAuthPlugin):
         login_details: AccountAuthLoginDetails,
         control_stub: ControlStub,
     ) -> AccountAuthCredentials:
-        """Authenticate the account and retrieve authentication credentials."""
+        """Authenticate the account and retrieve authentication credentials.
+
+        Parameters
+        ----------
+        login_details : AccountAuthLoginDetails
+            Login details containing device code and verification URI.
+        control_stub : ControlStub
+            Control stub for making authentication requests.
+
+        Returns
+        -------
+        AccountAuthCredentials
+            The access and refresh tokens.
+
+        Raises
+        ------
+        LoginError
+            If authentication times out.
+        """
         typer.secho(
             "Please log into your Flower account here: "
             f"{login_details.verification_uri_complete}",
@@ -108,14 +130,15 @@ class OidcCliPlugin(CliAuthPlugin):
             self.refresh_token = refresh_token
 
     def write_tokens_to_metadata(
-        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Sequence[tuple[str, Union[str, bytes]]]:
+        self, metadata: Sequence[tuple[str, str | bytes]]
+    ) -> Sequence[tuple[str, str | bytes]]:
         """Write authentication tokens to the provided metadata."""
         if self.access_token is None or self.refresh_token is None:
             typer.secho(
                 "❌ Missing authentication tokens. Please login first.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1)
 
@@ -125,8 +148,8 @@ class OidcCliPlugin(CliAuthPlugin):
         ]
 
     def read_tokens_from_metadata(
-        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Optional[AccountAuthCredentials]:
+        self, metadata: Sequence[tuple[str, str | bytes]]
+    ) -> AccountAuthCredentials | None:
         """Read authentication tokens from the provided metadata."""
         metadata_dict = dict(metadata)
         access_token = metadata_dict.get(ACCESS_TOKEN_KEY)

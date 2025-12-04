@@ -15,17 +15,16 @@
 """Mixin providing common SQLite connection and initialization logic."""
 
 
-import contextlib
 import re
 import sqlite3
-from abc import ABC, abstractmethod
-from collections.abc import Iterator, Sequence
+from abc import ABC
+from collections.abc import Sequence
 from logging import DEBUG, ERROR
-from typing import Any, Optional, Union
+from typing import Any
 
 from flwr.common.logger import log
 
-DictOrTuple = Union[tuple[Any, ...], dict[str, Any]]
+DictOrTuple = tuple[Any, ...] | dict[str, Any]
 
 
 class SqliteMixin(ABC):
@@ -33,7 +32,7 @@ class SqliteMixin(ABC):
 
     def __init__(self, database_path: str) -> None:
         self.database_path = database_path
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
 
     @property
     def conn(self) -> sqlite3.Connection:
@@ -42,44 +41,24 @@ class SqliteMixin(ABC):
             raise AttributeError("Database not initialized. Call initialize() first.")
         return self._conn
 
-    @contextlib.contextmanager
-    def transaction(self) -> Iterator[None]:
-        """Context manager for a transaction.
+    def get_sql_statements(self) -> tuple[str, ...]:
+        """Return SQL statements for this class.
 
-        This allows nesting of transactions by checking if a transaction is
-        already in progress.
+        Subclasses can override this to provide their SQL CREATE statements.
+        The base implementation returns an empty tuple.
 
-        Examples
-        --------
-        ::
-
-            with self.transaction():
-                # Do some DB operations here
-                ...
-                with self.transaction():
-                    # Do some more DB operations here
-                    ...
+        Returns
+        -------
+        tuple[str, ...]
+            SQL CREATE TABLE/INDEX statements for this class.
         """
-        if self._conn is None:
-            raise AttributeError("Database not initialized. Call initialize() first.")
+        return ()
 
-        # Start a transaction if not already in one
-        if not self._conn.in_transaction:
-            self._conn.execute("BEGIN")
-            try:
-                yield
-                self._conn.commit()
-            except Exception:
-                self._conn.rollback()
-                raise
-        # Do nothing if already in a transaction
-        else:
-            yield
-
-    @abstractmethod
     def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Connect to the DB, enable FK support, and create tables if needed.
 
+        This method executes SQL statements returned by `get_sql_statements()`.
+
         Parameters
         ----------
         log_queries : bool
@@ -92,42 +71,34 @@ class SqliteMixin(ABC):
 
         Examples
         --------
-        Implement in subclass:
+        Override `get_sql_statements()` in your subclass:
 
         .. code:: python
 
-            def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
-                return self._ensure_initialized(
+            def get_sql_statements(self) -> tuple[str, ...]:
+                return (
                     SQL_CREATE_TABLE_FOO,
                     SQL_CREATE_TABLE_BAR,
-                    log_queries=log_queries
+                )
+
+        To include parent SQL statements, call super():
+
+        .. code:: python
+
+            def get_sql_statements(self) -> tuple[str, ...]:
+                return super().get_sql_statements() + (
+                    SQL_CREATE_TABLE_FOO,
+                    SQL_CREATE_TABLE_BAR,
                 )
         """
-
-    def _ensure_initialized(
-        self,
-        *create_statements: str,
-        log_queries: bool = False,
-    ) -> list[tuple[str]]:
-        """Connect to the DB, enable FK support, and create tables if needed.
-
-        Subclasses should call this with their own CREATE TABLE/INDEX statements in
-        their `.initialize()` methods.
-
-        Parameters
-        ----------
-        create_statements : str
-            SQL statements to create tables and indexes.
-        log_queries : bool
-            Log each query which is executed.
-
-        Returns
-        -------
-        list[tuple[str]]
-            The list of all tables in the DB.
-        """
         self._conn = sqlite3.connect(self.database_path)
+        # Enable Write-Ahead Logging (WAL) for better concurrency
+        self._conn.execute("PRAGMA journal_mode = WAL;")
+        self._conn.execute("PRAGMA synchronous = NORMAL;")
         self._conn.execute("PRAGMA foreign_keys = ON;")
+        self._conn.execute("PRAGMA cache_size = -64000;")  # 64MB cache
+        self._conn.execute("PRAGMA temp_store = MEMORY;")  # In-memory temp tables
+        self._conn.execute("PRAGMA mmap_size = 268435456;")  # 256MB memory-mapped I/O
         self._conn.row_factory = dict_factory
 
         if log_queries:
@@ -135,7 +106,7 @@ class SqliteMixin(ABC):
 
         # Create tables and indexes
         cur = self._conn.cursor()
-        for sql in create_statements:
+        for sql in self.get_sql_statements():
             cur.execute(sql)
         res = cur.execute("SELECT name FROM sqlite_schema;")
         return res.fetchall()
@@ -143,7 +114,7 @@ class SqliteMixin(ABC):
     def query(
         self,
         query: str,
-        data: Optional[Union[Sequence[DictOrTuple], DictOrTuple]] = None,
+        data: Sequence[DictOrTuple] | DictOrTuple | None = None,
     ) -> list[dict[str, Any]]:
         """Execute a SQL query and return the results as list of dicts."""
         if self._conn is None:
@@ -156,11 +127,11 @@ class SqliteMixin(ABC):
         query = re.sub(r"\s+", " ", query)
 
         try:
-            with self.transaction():
+            with self._conn:
                 if (
                     len(data) > 0
-                    and isinstance(data, (tuple, list))
-                    and isinstance(data[0], (tuple, dict))
+                    and isinstance(data, (tuple | list))
+                    and isinstance(data[0], (tuple | dict))
                 ):
                     rows = self._conn.executemany(query, data)
                 else:
@@ -185,4 +156,4 @@ def dict_factory(
     Less efficent for retrival of large amounts of data but easier to use.
     """
     fields = [column[0] for column in cursor.description]
-    return dict(zip(fields, row))
+    return dict(zip(fields, row, strict=True))

@@ -16,7 +16,7 @@
 
 
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 import tomli
 import typer
@@ -30,7 +30,7 @@ from flwr.common.config import (
 )
 
 
-def get_fab_metadata(fab_file: Union[Path, bytes]) -> tuple[str, str]:
+def get_fab_metadata(fab_file: Path | bytes) -> tuple[str, str]:
     """Extract the fab_id and the fab_version from a FAB file or path.
 
     Parameters
@@ -48,9 +48,9 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> tuple[str, str]:
 
 
 def load_and_validate(
-    path: Optional[Path] = None,
+    path: Path | None = None,
     check_module: bool = True,
-) -> tuple[Optional[dict[str, Any]], list[str], list[str]]:
+) -> tuple[dict[str, Any] | None, list[str], list[str]]:
     """Load and validate pyproject.toml as dict.
 
     Parameters
@@ -89,8 +89,20 @@ def load_and_validate(
     return (config, errors, warnings)
 
 
-def load(toml_path: Path) -> Optional[dict[str, Any]]:
-    """Load pyproject.toml and return as dict."""
+def load(toml_path: Path) -> dict[str, Any] | None:
+    """Load pyproject.toml and return as dict.
+
+    Parameters
+    ----------
+    toml_path : Path
+        Path to the pyproject.toml file.
+
+    Returns
+    -------
+    dict[str, Any] | None
+        Parsed TOML configuration as dictionary, or None if file doesn't exist
+        or has invalid TOML syntax.
+    """
     if not toml_path.is_file():
         return None
 
@@ -102,12 +114,31 @@ def load(toml_path: Path) -> Optional[dict[str, Any]]:
 
 
 def process_loaded_project_config(
-    config: Union[dict[str, Any], None], errors: list[str], warnings: list[str]
+    config: dict[str, Any] | None, errors: list[str], warnings: list[str]
 ) -> dict[str, Any]:
     """Process and return the loaded project configuration.
 
     This function handles errors and warnings from the `load_and_validate` function,
     exits on critical issues, and returns the validated configuration.
+
+    Parameters
+    ----------
+    config : dict[str, Any] | None
+        The loaded configuration dictionary, or None if loading failed.
+    errors : list[str]
+        List of error messages from validation.
+    warnings : list[str]
+        List of warning messages from validation.
+
+    Returns
+    -------
+    dict[str, Any]
+        The validated configuration dictionary.
+
+    Raises
+    ------
+    typer.Exit
+        If config is None or contains critical errors.
     """
     if config is None:
         typer.secho(
@@ -116,6 +147,7 @@ def process_loaded_project_config(
             + "\n".join([f"- {line}" for line in errors]),
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -133,11 +165,32 @@ def process_loaded_project_config(
 
 
 def validate_federation_in_project_config(
-    federation: Optional[str],
+    federation: str | None,
     config: dict[str, Any],
-    overrides: Optional[list[str]] = None,
+    overrides: list[str] | None = None,
 ) -> tuple[str, dict[str, Any]]:
-    """Validate the federation name in the Flower project configuration."""
+    """Validate the federation name in the Flower project configuration.
+
+    Parameters
+    ----------
+    federation : str | None
+        Name of the federation, or None to use default from config.
+    config : dict[str, Any]
+        The project configuration dictionary.
+    overrides : list[str] | None
+        List of configuration override strings. Default is None.
+
+    Returns
+    -------
+    tuple[str, dict[str, Any]]
+        A tuple of (federation_name, federation_config).
+
+    Raises
+    ------
+    typer.Exit
+        If no federation name provided and no default found, or if federation
+        doesn't exist in config.
+    """
     federation = federation or config["tool"]["flwr"]["federations"].get("default")
 
     if federation is None:
@@ -147,6 +200,7 @@ def validate_federation_in_project_config(
             "`options.num-supernodes` value).",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -162,6 +216,7 @@ def validate_federation_in_project_config(
             + "\n".join(available_feds),
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
@@ -175,7 +230,7 @@ def validate_federation_in_project_config(
 
 def validate_certificate_in_federation_config(
     app: Path, federation_config: dict[str, Any]
-) -> tuple[bool, Optional[bytes]]:
+) -> tuple[bool, bytes | None]:
     """Validate the certificates in the Flower project configuration.
 
     Accepted configurations:
@@ -207,6 +262,7 @@ def validate_certificate_in_federation_config(
                 "is set to `True`.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1)
 
@@ -218,6 +274,7 @@ def validate_certificate_in_federation_config(
                 f"❌ Failed to read certificate file `{root_certificates}`: {e}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1) from e
     else:
@@ -227,19 +284,49 @@ def validate_certificate_in_federation_config(
 
 
 def exit_if_no_address(federation_config: dict[str, Any], cmd: str) -> None:
-    """Exit if the provided federation_config has no "address" key."""
+    """Exit if the provided federation_config has no "address" key.
+
+    Parameters
+    ----------
+    federation_config : dict[str, Any]
+        The federation configuration dictionary to check.
+    cmd : str
+        The command name to display in the error message.
+
+    Raises
+    ------
+    typer.Exit
+        If 'address' key is not present in federation_config.
+    """
     if "address" not in federation_config:
         typer.secho(
             f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the "
             "correct SuperLink (Control API) address is provided in `pyproject.toml`.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1)
 
 
 def get_insecure_flag(federation_config: dict[str, Any]) -> bool:
-    """Extract and validate the `insecure` flag from the federation configuration."""
+    """Extract and validate the `insecure` flag from the federation configuration.
+
+    Parameters
+    ----------
+    federation_config : dict[str, Any]
+        The federation configuration dictionary.
+
+    Returns
+    -------
+    bool
+        The insecure flag value. Returns False if not specified.
+
+    Raises
+    ------
+    typer.Exit
+        If insecure value is not a boolean type.
+    """
     insecure_value = federation_config.get("insecure")
 
     if insecure_value is None:
@@ -252,5 +339,6 @@ def get_insecure_flag(federation_config: dict[str, Any]) -> bool:
         "(`insecure = true` or `insecure = false`)",
         fg=typer.colors.RED,
         bold=True,
+        err=True,
     )
     raise typer.Exit(code=1)

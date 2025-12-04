@@ -117,15 +117,15 @@ class Array(InflatableObject):
     data: bytes
 
     @overload
-    def __init__(  # noqa: E704
+    def __init__(
         self, dtype: str, shape: tuple[int, ...], stype: str, data: bytes
     ) -> None: ...
 
     @overload
-    def __init__(self, ndarray: NDArray) -> None: ...  # noqa: E704
+    def __init__(self, ndarray: NDArray) -> None: ...
 
     @overload
-    def __init__(self, torch_tensor: torch.Tensor) -> None: ...  # noqa: E704
+    def __init__(self, torch_tensor: torch.Tensor) -> None: ...
 
     def __init__(  # pylint: disable=too-many-arguments, too-many-locals
         self,

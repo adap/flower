@@ -29,7 +29,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.23.0"
+release = "1.25.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -74,6 +74,7 @@ redirects = {
     "custom-metrics": "index.html",
     "sklearn-logreg-mnist": "index.html",
     "pytorch-from-centralized-to-federated": "index.html",
+    "flower-via-docker-compose": "index.html",
 }
 
 

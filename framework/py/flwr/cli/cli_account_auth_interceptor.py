@@ -15,7 +15,8 @@
 """Flower run interceptor."""
 
 
-from typing import Any, Callable, Union
+from collections.abc import Callable
+from typing import Any
 
 import grpc
 
@@ -26,16 +27,17 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 
 from .auth_plugin import CliAuthPlugin
 
-Request = Union[
-    StartRunRequest,
-    StreamLogsRequest,
-]
+Request = StartRunRequest | StreamLogsRequest
 
 
 class CliAccountAuthInterceptor(
     grpc.UnaryUnaryClientInterceptor, grpc.UnaryStreamClientInterceptor  # type: ignore
 ):
-    """CLI interceptor for account authentication."""
+    """CLI interceptor for account authentication.
+
+    This interceptor adds authentication tokens to gRPC metadata for CLI requests and
+    handles token refresh from response metadata.
+    """
 
     def __init__(self, auth_plugin: CliAuthPlugin):
         self.auth_plugin = auth_plugin
@@ -46,7 +48,22 @@ class CliAccountAuthInterceptor(
         client_call_details: grpc.ClientCallDetails,
         request: Request,
     ) -> grpc.Call:
-        """Send and receive tokens via metadata."""
+        """Send and receive tokens via metadata.
+
+        Parameters
+        ----------
+        continuation : Callable[[Any, Any], Any]
+            The next interceptor or handler in the chain.
+        client_call_details : grpc.ClientCallDetails
+            Details of the RPC call as a NamedTuple.
+        request : Request
+            The RPC request object.
+
+        Returns
+        -------
+        grpc.Call
+            The RPC response.
+        """
         new_metadata = self.auth_plugin.write_tokens_to_metadata(
             client_call_details.metadata or []
         )

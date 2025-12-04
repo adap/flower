@@ -6,10 +6,6 @@ framework: [torch, torchvision]
 
 # Flower Federations with Authentication 🧪
 
-> [!NOTE]
-> 🧪 = This example covers experimental features that might change in future versions of Flower.
-> Please consult the regular PyTorch examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
-
 The following steps describe how to start a long-running Flower server (SuperLink) and a long-running Flower clients (SuperNode) with authentication enabled. The task is to train a simple CNN for image classification using PyTorch.
 
 > [!TIP]
@@ -65,7 +61,7 @@ The `generate_cert.sh` script generates certificates for creating a secure TLS c
 The `generate_auth_keys.sh` script generates two private–public key pairs for two SuperNodes by default. If you have more SuperNodes, you can specify the number of key pairs to generate.
 
 > [!NOTE]
-> Note that this script should only be used for development purposes and not for creating production key pairs. The script also generates a CSV file that includes each of the generated (client) public keys.
+> Note that this script should only be used for development purposes and not for creating production key pairs.
 
 ```bash
 # Generate two key pairs by default
@@ -77,8 +73,7 @@ The `generate_auth_keys.sh` script generates two private–public key pairs for 
 
 ## Start the long-running Flower server (SuperLink)
 
-Starting long-running Flower server component (SuperLink) and enable authentication is very easy; all you need to do is type
-`--auth-list-public-keys` containing file path to the known `client_public_keys.csv`. Notice that you can only enable authentication with a secure TLS connection.
+Starting long-running Flower server component (SuperLink) and enable authentication is very easy; all you need to do is to pass the `--enable-supernode-auth` flag. In this example we also enable secure TLS communications between `SuperLink`, the `SuperNodes` and the Flower CLI.
 
 Let's first launch the `SuperLink`:
 
@@ -87,7 +82,7 @@ flower-superlink \
     --ssl-ca-certfile certificates/ca.crt \
     --ssl-certfile certificates/server.pem \
     --ssl-keyfile certificates/server.key \
-    --auth-list-public-keys keys/client_public_keys.csv
+    --enable-supernode-auth
 ```
 
 At this point your server-side is idling. Next, let's connect two `SuperNode`s, and then we'll start a run.
@@ -101,13 +96,54 @@ At this point your server-side is idling. Next, let's connect two `SuperNode`s, 
 python prepare_dataset.py
 ```
 
+### Pre-registering SuperNodes
+
+Before connecting the `SuperNodes` we need to register them with the `SuperLink`. This means we'll tell the `SuperLink` about the identities of the `SuperNodes` that will be connected. We do this by sending to it the public keys of the `SuperNodes` that we want the `SuperLink` to authorize.
+
+Let's register the first `SuperNode`. The command below will send the public key to the `SuperLink` defined in the `my-federation` federation in the `pyproject.toml`.
+
+```shell
+flwr supernode register keys/client_credentials_1.pub . my-federation
+# It will print something like:
+# Loading project configuration...
+# Success
+# ✅ SuperNode 16019329408659850374 registered successfully.
+```
+
+Then, we register the second `SuperNode` using the other public key:
+
+```shell
+flwr supernode register keys/client_credentials_2.pub . my-federation
+# It will print something like:
+# Loading project configuration...
+# Success
+# ✅ SuperNode 8392976743692794070 registered successfully.
+```
+
+You could also use the Flower ClI to view the status of the `SuperNodes`.
+
+```shell
+flwr supernode list . my-federation
+📄 Listing all nodes...
+┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
+┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+│ 16019329408659850374 │<name:none> │ created │          │ N/A                  │
+├──────────────────────┼────────────┼─────────┼──────────┼──────────────────────┤
+│ 8392976743692794070  │<name:none> │ created │          │ N/A                  │
+└──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
+```
+
+Once the `SuperNodes` are connected, you'll see the status changes. Let's connect them !
+
+### Connecting SuperNodes
+
 In a new terminal window, start the first long-running Flower client (SuperNode):
 
 ```bash
 flower-supernode \
     --root-certificates certificates/ca.crt \
     --auth-supernode-private-key keys/client_credentials_1 \
-    --auth-supernode-public-key keys/client_credentials_1.pub \
     --node-config 'dataset-path="datasets/cifar10_part_1"' \
     --clientappio-api-address="0.0.0.0:9094"
 ```
@@ -118,13 +154,26 @@ In yet another new terminal window, start the second long-running Flower client:
 flower-supernode \
     --root-certificates certificates/ca.crt \
     --auth-supernode-private-key keys/client_credentials_2 \
-    --auth-supernode-public-key keys/client_credentials_2.pub \
     --node-config 'dataset-path="datasets/cifar10_part_2"' \
     --clientappio-api-address="0.0.0.0:9095"
 ```
 
+Now that you have connected the `SuperNodes`, you should see them with status `online`:
+
+```shell
+flwr supernode list . my-federation
+📄 Listing all nodes...
+┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
+┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+│ 16019329408659850374 │<name:none> │ online  │ 00:00:30 │ 2025-10-13 13:40:47Z │
+├──────────────────────┼────────────┼─────────┼──────────┼──────────────────────┤
+│ 8392976743692794070  │<name:none> │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
+└──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
+```
+
 If you generated more than 2 client credentials, you can add more clients by opening new terminal windows and running the command
-above. Don't forget to specify the correct client private and public keys for each client instance you created.
+above. Don't forget to specify the correct client private key for each client (SuperNode) you created.
 
 > [!TIP]
 > Note the `--node-config` passed when spawning the `SuperNode` is accessible to the `ClientApp` via the `context` argument, i.e., `context.node_config`. In this example, the `ClientApp` uses it to load the dataset and then proceed with the training of the model.

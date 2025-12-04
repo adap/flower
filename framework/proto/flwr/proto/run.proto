@@ -17,7 +17,6 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/fab.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/recorddict.proto";
 import "flwr/proto/transport.proto";
@@ -34,6 +33,7 @@ message Run {
   string finished_at = 9;
   RunStatus status = 10;
   string flwr_aid = 11;
+  string federation = 12;
 }
 
 message RunStatus {

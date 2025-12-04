@@ -25,7 +25,7 @@ import uuid
 from concurrent.futures import Future, ThreadPoolExecutor
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 from flwr.common.constant import FLWR_DIR
 from flwr.common.version import package_name, package_version
@@ -56,7 +56,7 @@ def _configure_logger(log_level: int) -> None:
 _configure_logger(LOGGER_LEVEL)
 
 
-def log(msg: Union[str, Exception]) -> None:
+def log(msg: str | Exception) -> None:
     """Log message using logger at DEBUG level."""
     logging.getLogger(LOGGER_NAME).log(LOGGER_LEVEL, msg)
 
@@ -161,6 +161,10 @@ class EventType(str, Enum):
     FLWR_SERVERAPP_RUN_ENTER = auto()
     FLWR_SERVERAPP_RUN_LEAVE = auto()
 
+    # CLI: flwr-clientapp
+    FLWR_CLIENTAPP_RUN_ENTER = auto()
+    FLWR_CLIENTAPP_RUN_LEAVE = auto()
+
     # --- Simulation Engine ------------------------------------------------------------
 
     # CLI: flower-simulation
@@ -188,7 +192,7 @@ class EventType(str, Enum):
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.
-state: dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
+state: dict[str, str | None | ThreadPoolExecutor | None] = {
     # Will be assigned ThreadPoolExecutor(max_workers=1)
     # in event() the first time it's required
     "executor": None,
@@ -200,7 +204,7 @@ state: dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
 
 def event(
     event_type: EventType,
-    event_details: Optional[dict[str, Any]] = None,
+    event_details: dict[str, Any] | None = None,
 ) -> Future:  # type: ignore
     """Submit create_event to ThreadPoolExecutor to avoid blocking."""
     if state["executor"] is None:
@@ -212,7 +216,7 @@ def event(
     return result
 
 
-def create_event(event_type: EventType, event_details: Optional[dict[str, Any]]) -> str:
+def create_event(event_type: EventType, event_details: dict[str, Any] | None) -> str:
     """Create telemetry event."""
     if state["source"] is None:
         state["source"] = _get_source_id()

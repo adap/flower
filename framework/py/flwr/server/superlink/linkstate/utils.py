@@ -16,7 +16,6 @@
 
 
 from os import urandom
-from typing import Optional
 
 from flwr.common import ConfigRecord, Context, Error, Message, Metadata, now, serde
 from flwr.common.constant import (
@@ -33,6 +32,7 @@ from flwr.common.typing import RunStatus
 # pylint: disable=E0611
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
+from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 
 # pylint: enable=E0611
 VALID_RUN_STATUS_TRANSITIONS = {
@@ -50,7 +50,8 @@ VALID_RUN_SUB_STATUSES = {
 }
 MESSAGE_UNAVAILABLE_ERROR_REASON = (
     "Error: Message Unavailable - The requested message could not be found in the "
-    "database. It may have expired due to its TTL or never existed."
+    "database. It may have expired due to its TTL, been deleted because the "
+    "destination SuperNode was removed from the federation, or never existed."
 )
 REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON = (
     "Error: Reply Message Unavailable - The reply message has expired."
@@ -62,7 +63,7 @@ NODE_UNAVAILABLE_ERROR_REASON = (
 
 
 def generate_rand_int_from_bytes(
-    num_bytes: int, exclude: Optional[list[int]] = None
+    num_bytes: int, exclude: list[int] | None = None
 ) -> int:
     """Generate a random unsigned integer from `num_bytes` bytes.
 
@@ -74,58 +75,6 @@ def generate_rand_int_from_bytes(
         while num in exclude:
             num = int.from_bytes(urandom(num_bytes), "little", signed=False)
     return num
-
-
-def convert_uint64_to_sint64(u: int) -> int:
-    """Convert a uint64 value to a sint64 value with the same bit sequence.
-
-    Parameters
-    ----------
-    u : int
-        The unsigned 64-bit integer to convert.
-
-    Returns
-    -------
-    int
-        The signed 64-bit integer equivalent.
-
-        The signed 64-bit integer will have the same bit pattern as the
-        unsigned 64-bit integer but may have a different decimal value.
-
-        For numbers within the range [0, `sint64` max value], the decimal
-        value remains the same. However, for numbers greater than the `sint64`
-        max value, the decimal value will differ due to the wraparound caused
-        by the sign bit.
-    """
-    if u >= (1 << 63):
-        return u - (1 << 64)
-    return u
-
-
-def convert_sint64_to_uint64(s: int) -> int:
-    """Convert a sint64 value to a uint64 value with the same bit sequence.
-
-    Parameters
-    ----------
-    s : int
-        The signed 64-bit integer to convert.
-
-    Returns
-    -------
-    int
-        The unsigned 64-bit integer equivalent.
-
-        The unsigned 64-bit integer will have the same bit pattern as the
-        signed 64-bit integer but may have a different decimal value.
-
-        For negative `sint64` values, the conversion adds 2^64 to the
-        signed value to obtain the equivalent `uint64` value. For non-negative
-        `sint64` values, the decimal value remains unchanged in the `uint64`
-        representation.
-    """
-    if s < 0:
-        return s + (1 << 64)
-    return s
 
 
 def convert_uint64_values_in_dict_to_sint64(
@@ -142,7 +91,7 @@ def convert_uint64_values_in_dict_to_sint64(
     """
     for key in keys:
         if key in data_dict:
-            data_dict[key] = convert_uint64_to_sint64(data_dict[key])
+            data_dict[key] = uint64_to_int64(data_dict[key])
 
 
 def convert_sint64_values_in_dict_to_uint64(
@@ -159,7 +108,7 @@ def convert_sint64_values_in_dict_to_uint64(
     """
     for key in keys:
         if key in data_dict:
-            data_dict[key] = convert_sint64_to_uint64(data_dict[key])
+            data_dict[key] = int64_to_uint64(data_dict[key])
 
 
 def context_to_bytes(context: Context) -> bytes:
@@ -308,7 +257,7 @@ def message_ttl_has_expired(message_metadata: Metadata, current_time: float) -> 
 def verify_message_ids(
     inquired_message_ids: set[str],
     found_message_ins_dict: dict[str, Message],
-    current_time: Optional[float] = None,
+    current_time: float | None = None,
     update_set: bool = True,
 ) -> dict[str, Message]:
     """Verify found Messages and generate error Messages for invalid ones.
@@ -351,7 +300,7 @@ def verify_found_message_replies(
     inquired_message_ids: set[str],
     found_message_ins_dict: dict[str, Message],
     found_message_res_list: list[Message],
-    current_time: Optional[float] = None,
+    current_time: float | None = None,
     update_set: bool = True,
 ) -> dict[str, Message]:
     """Verify found Message replies and generate error Message for invalid ones.
@@ -396,7 +345,7 @@ def check_node_availability_for_in_message(
     inquired_in_message_ids: set[str],
     found_in_message_dict: dict[str, Message],
     node_id_to_online_until: dict[int, float],
-    current_time: Optional[float] = None,
+    current_time: float | None = None,
     update_set: bool = True,
 ) -> dict[str, Message]:
     """Check node availability for given Message and generate error reply Message if

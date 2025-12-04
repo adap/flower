@@ -17,7 +17,6 @@
 
 # pylint: disable=W0212
 import unittest
-from typing import Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -29,7 +28,7 @@ from flwr_datasets.partitioner.dirichlet_partitioner import DirichletPartitioner
 
 def _dummy_setup(
     num_partitions: int,
-    alpha: Union[float, NDArray[np.float64]],
+    alpha: float | NDArray[np.float64],
     num_rows: int,
     partition_by: str,
     self_balancing: bool = True,

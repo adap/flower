@@ -18,6 +18,8 @@
 import unittest
 from unittest.mock import Mock
 
+from parameterized import parameterized
+
 from flwr.common import Context, typing
 from flwr.common.inflatable import (
     get_all_nested_objects,
@@ -32,6 +34,10 @@ from flwr.proto.appio_pb2 import (  # pylint:disable=E0611
     PullAppMessagesResponse,
     PushAppMessagesResponse,
     PushAppOutputsResponse,
+)
+from flwr.proto.heartbeat_pb2 import (  # pylint:disable=E0611
+    SendAppHeartbeatRequest,
+    SendAppHeartbeatResponse,
 )
 from flwr.proto.message_pb2 import Context as ProtoContext  # pylint:disable=E0611
 from flwr.proto.message_pb2 import (  # pylint:disable=E0611
@@ -54,9 +60,12 @@ class TestClientAppIoServicer(unittest.TestCase):
 
     def setUp(self) -> None:
         """Initialize."""
-        self.servicer = ClientAppIoServicer(Mock(), Mock(), Mock())
         self.maker = RecordMaker()
         self.mock_stub = Mock()
+        self.mock_state = Mock()
+        mock_state_factory = Mock()
+        mock_state_factory.state.return_value = self.mock_state
+        self.servicer = ClientAppIoServicer(mock_state_factory, Mock(), Mock())
 
     def test_pull_clientapp_inputs(self) -> None:
         """Test pulling messages from SuperNode."""
@@ -68,6 +77,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         mock_fab = typing.Fab(
             hash_str="abc123#$%",
             content=b"\xf3\xf5\xf8\x98",
+            verifications={"ab12#$%": "abc123#$%"},
         )
         mock_response = PullAppInputsResponse(
             context=ProtoContext(node_id=123),
@@ -157,3 +167,19 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.mock_stub.PushClientAppOutputs.assert_called_once()
         self.mock_stub.PushMessage.assert_called_once()
         self.assertSetEqual(pushed_obj_ids, set(all_obj_ids))
+
+    @parameterized.expand([(True,), (False,)])  # type: ignore
+    def test_send_app_heartbeat(self, success: bool) -> None:
+        """Test sending an app heartbeat."""
+        # Prepare
+        token = "test-token"
+        request = SendAppHeartbeatRequest(token=token)
+        self.mock_state.acknowledge_app_heartbeat.return_value = success
+
+        # Execute
+        response = self.servicer.SendAppHeartbeat(request, Mock())
+
+        # Assert
+        self.assertIsInstance(response, SendAppHeartbeatResponse)
+        self.assertEqual(response.success, success)
+        self.mock_state.acknowledge_app_heartbeat.assert_called_once_with(token)

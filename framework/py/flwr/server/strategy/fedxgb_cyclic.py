@@ -16,7 +16,7 @@
 
 
 from logging import WARNING
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Scalar
 from flwr.common.logger import log
@@ -34,7 +34,7 @@ class FedXgbCyclic(FedAvg):
         self,
         **kwargs: Any,
     ):
-        self.global_model: Optional[bytes] = None
+        self.global_model: bytes | None = None
         super().__init__(**kwargs)
 
     def __repr__(self) -> str:
@@ -46,8 +46,8 @@ class FedXgbCyclic(FedAvg):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
-        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
-    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate fit results using bagging."""
         if not results:
             return None, {}
@@ -70,8 +70,8 @@ class FedXgbCyclic(FedAvg):
         self,
         server_round: int,
         results: list[tuple[ClientProxy, EvaluateRes]],
-        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> tuple[Optional[float], dict[str, Scalar]]:
+        failures: list[tuple[ClientProxy, EvaluateRes] | BaseException],
+    ) -> tuple[float | None, dict[str, Scalar]]:
         """Aggregate evaluation metrics using average."""
         if not results:
             return None, {}

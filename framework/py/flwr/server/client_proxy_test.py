@@ -15,8 +15,6 @@
 """Tests for Flower ClientProxy."""
 
 
-from typing import Optional
-
 from flwr.common import (
     Code,
     DisconnectRes,
@@ -41,8 +39,8 @@ class CustomClientProxy(ClientProxy):
     def get_properties(
         self,
         ins: GetPropertiesIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> GetPropertiesRes:
         """Return the client's properties."""
         return GetPropertiesRes(status=Status(code=Code.OK, message=""), properties={})
@@ -50,8 +48,8 @@ class CustomClientProxy(ClientProxy):
     def get_parameters(
         self,
         ins: GetParametersIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> GetParametersRes:
         """Return the current local model parameters."""
         return GetParametersRes(
@@ -62,8 +60,8 @@ class CustomClientProxy(ClientProxy):
     def fit(
         self,
         ins: FitIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> FitRes:
         """Refine the provided weights using the locally held dataset."""
         return FitRes(
@@ -76,8 +74,8 @@ class CustomClientProxy(ClientProxy):
     def evaluate(
         self,
         ins: EvaluateIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
         return EvaluateRes(
@@ -87,8 +85,8 @@ class CustomClientProxy(ClientProxy):
     def reconnect(
         self,
         ins: ReconnectIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         return DisconnectRes(reason="")

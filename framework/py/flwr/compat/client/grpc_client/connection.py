@@ -16,12 +16,12 @@
 
 
 import uuid
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
-from typing import Callable, Optional, Union, cast
+from typing import cast
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -56,18 +56,18 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
     insecure: bool,
     retry_invoker: RetryInvoker,  # pylint: disable=unused-argument
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificates: Optional[Union[bytes, str]] = None,
-    authentication_keys: Optional[  # pylint: disable=unused-argument
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
-    ] = None,
+    root_certificates: bytes | str | None = None,
+    authentication_keys: (
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+    ) = None,
 ) -> Iterator[
     tuple[
-        Callable[[], Optional[Message]],
+        Callable[[], Message | None],
         Callable[[Message], None],
-        Optional[Callable[[], Optional[int]]],
-        Optional[Callable[[], None]],
-        Optional[Callable[[int], Run]],
-        Optional[Callable[[str, int], Fab]],
+        Callable[[], int | None] | None,
+        Callable[[], None] | None,
+        Callable[[int], Run] | None,
+        Callable[[str, int], Fab] | None,
     ]
 ]:
     """Establish a gRPC connection to a gRPC server.
@@ -96,7 +96,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
     authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
-        Client authentication is not supported for this transport type.
+        SuperNode authentication is not supported for this transport type.
 
     Returns
     -------
@@ -120,7 +120,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
     if authentication_keys is not None:
-        log(ERROR, "Client authentication is not supported for this transport type.")
+        log(ERROR, "SuperNode authentication is not supported for this transport type.")
 
     channel = create_channel(
         server_address=server_address,

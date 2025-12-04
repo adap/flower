@@ -9,7 +9,7 @@ UNIQUE_LABELS = [0, 1, 2]
 FEATURES = ["petal_length", "petal_width", "sepal_length", "sepal_width"]
 
 
-def get_model_parameters(model: LogisticRegression) -> NDArrays:
+def get_model_params(model: LogisticRegression) -> NDArrays:
     """Return the parameters of a sklearn LogisticRegression model."""
     if model.fit_intercept:
         params = [
@@ -74,4 +74,4 @@ def load_data(partition_id: int, num_partitions: int):
     # Split the on-edge data: 80% train, 20% test
     X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
     y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
-    return X_train, y_train, X_test, y_test
+    return X_train.values, y_train.values, X_test.values, y_test.values

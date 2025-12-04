@@ -15,11 +15,10 @@
 """Contextmanager for a gRPC request-response channel to the Flower server."""
 
 
-from collections.abc import Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from contextlib import contextmanager
 from logging import ERROR
 from pathlib import Path
-from typing import Callable, Optional, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -27,7 +26,6 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_CALL_TIMEOUT, HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.grpc import create_channel, on_channel_state_change
-from flwr.common.heartbeat import HeartbeatSender
 from flwr.common.inflatable_protobuf_utils import (
     make_confirm_message_received_fn_protobuf,
     make_pull_object_fn_protobuf,
@@ -36,16 +34,24 @@ from flwr.common.inflatable_protobuf_utils import (
 from flwr.common.logger import log
 from flwr.common.message import Message, remove_content_from_message
 from flwr.common.retry_invoker import RetryInvoker, _wrap_stub
-from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
+from flwr.common.serde import (
+    fab_from_proto,
+    message_from_proto,
+    message_to_proto,
+    run_from_proto,
+)
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    DeleteNodeRequest,
+    ActivateNodeRequest,
+    ActivateNodeResponse,
+    DeactivateNodeRequest,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    RegisterNodeFleetRequest,
+    UnregisterNodeFleetRequest,
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
@@ -55,6 +61,7 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.supercore.heartbeat import HeartbeatSender
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 
 from .grpc_adapter import GrpcAdapter
@@ -67,17 +74,16 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     insecure: bool,
     retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[Union[bytes, str]] = None,
-    authentication_keys: Optional[
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
-    ] = None,
-    adapter_cls: Optional[Union[type[FleetStub], type[GrpcAdapter]]] = None,
+    root_certificates: bytes | str | None = None,
+    authentication_keys: (
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+    ) = None,
+    adapter_cls: type[FleetStub] | type[GrpcAdapter] | None = None,
 ) -> Iterator[
     tuple[
-        Callable[[], Optional[tuple[Message, ObjectTree]]],
+        int,
+        Callable[[], tuple[Message, ObjectTree] | None],
         Callable[[Message, ObjectTree], set[str]],
-        Callable[[], Optional[int]],
-        Callable[[], None],
         Callable[[int], Run],
         Callable[[str, int], Fab],
         Callable[[int, str], bytes],
@@ -120,11 +126,11 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     Returns
     -------
-    receive : Callable
-    send : Callable
-    create_node : Optional[Callable]
-    delete_node : Optional[Callable]
-    get_run : Optional[Callable]
+    node_id : int
+    receive : Callable[[], Optional[tuple[Message, ObjectTree]]]
+    send : Callable[[Message, ObjectTree], set[str]]
+    get_run : Callable[[int], Run]
+    get_fab : Callable[[str, int], Fab]
     pull_object : Callable[[str], bytes]
     push_object : Callable[[str, bytes], None]
     confirm_message_received : Callable[[str], None]
@@ -133,7 +139,9 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         root_certificates = Path(root_certificates).read_bytes()
 
     # Automatic node auth: generate keys if user didn't provide any
+    self_registered = False
     if authentication_keys is None:
+        self_registered = True
         authentication_keys = generate_key_pairs()
 
     # Always configure auth interceptor, with either user-provided or generated keys
@@ -154,12 +162,12 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     if adapter_cls is None:
         adapter_cls = FleetStub
     stub = adapter_cls(channel)
-    node: Optional[Node] = None
+    node: Node | None = None
 
     # Wrap stub
     _wrap_stub(stub, retry_invoker)
     ###########################################################################
-    # send_node_heartbeat/create_node/delete_node/receive/send/get_run functions
+    # SuperNode functions
     ###########################################################################
 
     def send_node_heartbeat() -> bool:
@@ -196,23 +204,26 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     heartbeat_sender = HeartbeatSender(send_node_heartbeat)
 
-    def create_node() -> Optional[int]:
-        """Set create_node."""
-        # Call FleetAPI
-        create_node_request = CreateNodeRequest(
+    def register_node() -> None:
+        """Register node with SuperLink."""
+        stub.RegisterNode(RegisterNodeFleetRequest(public_key=node_pk))
+
+    def activate_node() -> int:
+        """Activate node and start heartbeat."""
+        req = ActivateNodeRequest(
             public_key=node_pk,
             heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
         )
-        create_node_response = stub.CreateNode(request=create_node_request)
+        res: ActivateNodeResponse = stub.ActivateNode(req)
 
         # Remember the node and start the heartbeat sender
         nonlocal node
-        node = cast(Node, create_node_response.node)
+        node = Node(node_id=res.node_id)
         heartbeat_sender.start()
         return node.node_id
 
-    def delete_node() -> None:
-        """Set delete_node."""
+    def deactivate_node() -> None:
+        """Deactivate node and stop heartbeat."""
         # Get Node
         nonlocal node
         if node is None:
@@ -223,13 +234,25 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         heartbeat_sender.stop()
 
         # Call FleetAPI
-        delete_node_request = DeleteNodeRequest(node=node)
-        stub.DeleteNode(request=delete_node_request)
+        req = DeactivateNodeRequest(node_id=node.node_id)
+        stub.DeactivateNode(req)
+
+    def unregister_node() -> None:
+        """Unregister node from SuperLink."""
+        # Get Node
+        nonlocal node
+        if node is None:
+            log(ERROR, "Node instance missing")
+            return
+
+        # Call FleetAPI
+        req = UnregisterNodeFleetRequest(node_id=node.node_id)
+        stub.UnregisterNode(req)
 
         # Cleanup
         node = None
 
-    def receive() -> Optional[tuple[Message, ObjectTree]]:
+    def receive() -> tuple[Message, ObjectTree] | None:
         """Pull a message with its ObjectTree from SuperLink."""
         # Get Node
         if node is None:
@@ -289,7 +312,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         get_fab_request = GetFabRequest(node=node, hash_str=fab_hash, run_id=run_id)
         get_fab_response: GetFabResponse = stub.GetFab(request=get_fab_request)
 
-        return Fab(get_fab_response.fab.hash_str, get_fab_response.fab.content)
+        return fab_from_proto(get_fab_response.fab)
 
     def pull_object(run_id: int, object_id: str) -> bytes:
         """Pull the object from the SuperLink."""
@@ -331,12 +354,14 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         fn(object_id)
 
     try:
+        if self_registered:
+            register_node()
+        node_id = activate_node()
         # Yield methods
         yield (
+            node_id,
             receive,
             send,
-            create_node,
-            delete_node,
             get_run,
             get_fab,
             pull_object,
@@ -351,7 +376,9 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             if node is not None:
                 # Disable retrying
                 retry_invoker.max_tries = 1
-                delete_node()
+                deactivate_node()
+                if self_registered:
+                    unregister_node()
         except grpc.RpcError:
             pass
         channel.close()

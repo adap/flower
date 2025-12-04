@@ -21,68 +21,12 @@ from flwr.common import Metadata, RecordDict, now
 from flwr.common.message import make_message
 from flwr.common.serde import message_to_proto
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    DeleteNodeRequest,
     PullMessagesRequest,
     PushMessagesRequest,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
-from .message_handler import create_node, delete_node, pull_messages, push_messages
-
-
-def test_create_node() -> None:
-    """Test create_node."""
-    # Prepare
-    request = CreateNodeRequest()
-    state = MagicMock()
-
-    # Execute
-    create_node(request=request, state=state)
-
-    # Assert
-    state.create_node.assert_called_once()
-    state.delete_node.assert_not_called()
-    state.store_message_ins.assert_not_called()
-    state.get_message_ins.assert_not_called()
-    state.store_message_res.assert_not_called()
-    state.get_message_res.assert_not_called()
-
-
-def test_delete_node_failure() -> None:
-    """Test delete_node."""
-    # Prepare
-    request = DeleteNodeRequest()
-    state = MagicMock()
-
-    # Execute
-    delete_node(request=request, state=state)
-
-    # Assert
-    state.create_node.assert_not_called()
-    state.delete_node.assert_not_called()
-    state.store_message_ins.assert_not_called()
-    state.get_message_ins.assert_not_called()
-    state.store_message_res.assert_not_called()
-    state.get_message_res.assert_not_called()
-
-
-def test_delete_node_success() -> None:
-    """Test delete_node."""
-    # Prepare
-    request = DeleteNodeRequest(node=Node(node_id=123))
-    state = MagicMock()
-
-    # Execute
-    delete_node(request=request, state=state)
-
-    # Assert
-    state.create_node.assert_not_called()
-    state.delete_node.assert_called_once()
-    state.store_message_ins.assert_not_called()
-    state.get_message_ins.assert_not_called()
-    state.store_message_res.assert_not_called()
-    state.get_message_res.assert_not_called()
+from .message_handler import pull_messages, push_messages
 
 
 def test_pull_messages() -> None:

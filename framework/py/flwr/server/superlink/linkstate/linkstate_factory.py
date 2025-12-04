@@ -16,9 +16,11 @@
 
 
 from logging import DEBUG
-from typing import Optional
 
 from flwr.common.logger import log
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.superlink.federation import FederationManager
 
 from .in_memory_linkstate import InMemoryLinkState
 from .linkstate import LinkState
@@ -35,23 +37,39 @@ class LinkStateFactory:
         Note that passing ':memory:' will open a connection to a database that is
         in RAM, instead of on disk. For more information on special in-memory
         databases, please refer to https://sqlite.org/inmemorydb.html.
+    federation_manager : FederationManager
+        An instance of FederationManager to manage federations.
+    objectstore_factory : ObjectStoreFactory
+        An instance of ObjectStoreFactory to create object stores.
     """
 
-    def __init__(self, database: str) -> None:
+    def __init__(
+        self,
+        database: str,
+        federation_manager: FederationManager,
+        objectstore_factory: ObjectStoreFactory,
+    ) -> None:
         self.database = database
-        self.state_instance: Optional[LinkState] = None
+        self.state_instance: LinkState | None = None
+        self.federation_manager = federation_manager
+        self.objectstore_factory = objectstore_factory
 
     def state(self) -> LinkState:
         """Return a State instance and create it, if necessary."""
+        # Get the ObjectStore instance
+        object_store = self.objectstore_factory.store()
+
         # InMemoryState
-        if self.database == ":flwr-in-memory-state:":
+        if self.database == FLWR_IN_MEMORY_DB_NAME:
             if self.state_instance is None:
-                self.state_instance = InMemoryLinkState()
+                self.state_instance = InMemoryLinkState(
+                    self.federation_manager, object_store
+                )
             log(DEBUG, "Using InMemoryState")
             return self.state_instance
 
         # SqliteState
-        state = SqliteLinkState(self.database)
+        state = SqliteLinkState(self.database, self.federation_manager, object_store)
         state.initialize()
         log(DEBUG, "Using SqliteState")
         return state

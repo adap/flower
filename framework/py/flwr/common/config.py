@@ -20,7 +20,7 @@ import re
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Any, Optional, TypeVar, Union, cast, get_args
+from typing import IO, Any, TypeVar, cast, get_args
 
 import tomli
 import typer
@@ -39,7 +39,7 @@ from . import ConfigRecord, object_ref
 T_dict = TypeVar("T_dict", bound=dict[str, Any])  # pylint: disable=invalid-name
 
 
-def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
+def get_flwr_dir(provided_path: str | None = None) -> Path:
     """Return the Flower home directory based on env variables."""
     if provided_path is None or not Path(provided_path).is_dir():
         return Path(
@@ -55,7 +55,7 @@ def get_project_dir(
     fab_id: str,
     fab_version: str,
     fab_hash: str,
-    flwr_dir: Optional[Union[str, Path]] = None,
+    flwr_dir: str | Path | None = None,
 ) -> Path:
     """Return the project directory based on the given fab_id and fab_version."""
     # Check the fab_id
@@ -73,7 +73,7 @@ def get_project_dir(
     )
 
 
-def get_project_config(project_dir: Union[str, Path]) -> dict[str, Any]:
+def get_project_config(project_dir: str | Path) -> dict[str, Any]:
     """Return pyproject.toml in the given project directory."""
     # Load pyproject.toml file
     toml_path = Path(project_dir) / FAB_CONFIG_FILE
@@ -134,7 +134,7 @@ def get_fused_config_from_dir(
     return fuse_dicts(flat_default_config, override_config)
 
 
-def get_fused_config_from_fab(fab_file: Union[Path, bytes], run: Run) -> UserConfig:
+def get_fused_config_from_fab(fab_file: Path | bytes, run: Run) -> UserConfig:
     """Fuse default config in a `FAB` with overrides in a `Run`.
 
     This enables obtaining a run-config without having to install the FAB. This
@@ -146,7 +146,7 @@ def get_fused_config_from_fab(fab_file: Union[Path, bytes], run: Run) -> UserCon
     return fuse_dicts(flat_config_flat, run.override_config)
 
 
-def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
+def get_fused_config(run: Run, flwr_dir: Path | None) -> UserConfig:
     """Merge the overrides from a `Run` with the config from a FAB.
 
     Get the config using the fab_id and the fab_version, remove the nesting by adding
@@ -165,9 +165,7 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
     return get_fused_config_from_dir(project_dir, run.override_config)
 
 
-def flatten_dict(
-    raw_dict: Optional[dict[str, Any]], parent_key: str = ""
-) -> UserConfig:
+def flatten_dict(raw_dict: dict[str, Any] | None, parent_key: str = "") -> UserConfig:
     """Flatten dict by joining nested keys with a given separator."""
     if raw_dict is None:
         return {}
@@ -205,9 +203,7 @@ def unflatten_dict(flat_dict: dict[str, Any]) -> dict[str, Any]:
     return unflattened_dict
 
 
-def parse_config_args(
-    config: Optional[list[str]], flatten: bool = True
-) -> dict[str, Any]:
+def parse_config_args(config: list[str] | None, flatten: bool = True) -> dict[str, Any]:
     """Parse separator separated list of key-value pairs separated by '='."""
     overrides: UserConfig = {}
 
@@ -246,6 +242,7 @@ def parse_config_args(
                     "space-separated key-value pairs.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from err
 
@@ -269,7 +266,7 @@ def user_config_to_configrecord(config: UserConfig) -> ConfigRecord:
     return c_record
 
 
-def get_fab_config(fab_file: Union[Path, bytes]) -> dict[str, Any]:
+def get_fab_config(fab_file: Path | bytes) -> dict[str, Any]:
     """Extract the config from a FAB file or path.
 
     Parameters
@@ -283,7 +280,7 @@ def get_fab_config(fab_file: Union[Path, bytes]) -> dict[str, Any]:
     Dict[str, Any]
         The `config` of the given Flower App Bundle.
     """
-    fab_file_archive: Union[Path, IO[bytes]]
+    fab_file_archive: Path | IO[bytes]
     if isinstance(fab_file, bytes):
         fab_file_archive = BytesIO(fab_file)
     elif isinstance(fab_file, Path):
@@ -319,7 +316,7 @@ def _validate_run_config(config_dict: dict[str, Any], errors: list[str]) -> None
 
 # pylint: disable=too-many-branches
 def validate_fields_in_config(
-    config: dict[str, Any]
+    config: dict[str, Any],
 ) -> tuple[bool, list[str], list[str]]:
     """Validate pyproject.toml fields."""
     errors = []
@@ -368,7 +365,7 @@ def validate_fields_in_config(
 def validate_config(
     config: dict[str, Any],
     check_module: bool = True,
-    project_dir: Optional[Union[str, Path]] = None,
+    project_dir: str | Path | None = None,
 ) -> tuple[bool, list[str], list[str]]:
     """Validate pyproject.toml."""
     is_valid, errors, warnings = validate_fields_in_config(config)

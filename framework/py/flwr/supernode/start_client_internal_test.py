@@ -61,6 +61,7 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
             get_fab=self.mock_get_fab,
             pull_object=self.mock_pull_object,
             confirm_message_received=self.mock_confirm_message_received,
+            trusted_entities={},
         )
 
         # Assert
@@ -131,6 +132,7 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
             get_fab=self.mock_get_fab,
             pull_object=self.mock_pull_object,
             confirm_message_received=self.mock_confirm_message_received,
+            trusted_entities={},
         )
 
         # Assert
@@ -154,6 +156,7 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
         fab = Fab(
             hash_str="abc123",
             content=b"test_fab_content",
+            verifications={"abc123": "abc123"},
         )
         mock_run = Mock(
             run_id=self.run_id,
@@ -179,6 +182,7 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
                 get_fab=self.mock_get_fab,
                 pull_object=self.mock_pull_object,
                 confirm_message_received=self.mock_confirm_message_received,
+                trusted_entities={},
             )
 
         # Assert
@@ -188,7 +192,7 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
         # Assert: the Run and FAB should be fetched and stored if run_id is unknown
         self.mock_get_run.assert_called_once_with(self.run_id)
         self.mock_get_fab.assert_called_once_with(fab.hash_str, self.run_id)
-        self.mock_ffs.put.assert_called_once_with(fab.content, {})
+        self.mock_ffs.put.assert_called_once_with(fab.content, fab.verifications)
         self.mock_state.store_run.assert_called_once_with(mock_run)
 
         # Assert: the Context should be created and stored if run_id is unknown

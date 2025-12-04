@@ -15,9 +15,7 @@
 """Flower ClientApp process."""
 
 
-import gc
 from logging import DEBUG, ERROR, INFO
-from typing import Optional
 
 import grpc
 
@@ -28,6 +26,7 @@ from flwr.clientapp.utils import get_load_client_app_fn
 from flwr.common import Context, Message
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import ErrorCode
+from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.inflatable import (
     get_all_nested_objects,
@@ -50,6 +49,7 @@ from flwr.common.serde import (
     message_to_proto,
     run_from_proto,
 )
+from flwr.common.telemetry import EventType, event
 from flwr.common.typing import Fab, Run
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PullAppInputsRequest,
@@ -63,20 +63,23 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.supercore.app_utils import start_parent_process_monitor
+from flwr.supercore.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
 from flwr.supercore.utils import mask_string
 
 
 def run_clientapp(  # pylint: disable=R0913, R0914, R0917
     clientappio_api_address: str,
     token: str,
-    flwr_dir: Optional[str] = None,
-    certificates: Optional[bytes] = None,
-    parent_pid: Optional[int] = None,
+    flwr_dir: str | None = None,
+    certificates: bytes | None = None,
+    parent_pid: int | None = None,
 ) -> None:
     """Run Flower ClientApp process."""
     # Monitor the main process in case of SIGKILL
     if parent_pid is not None:
         start_parent_process_monitor(parent_pid)
+
+    event(EventType.FLWR_CLIENTAPP_RUN_ENTER)
 
     channel = create_channel(
         server_address=clientappio_api_address,
@@ -84,6 +87,17 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
         root_certificates=certificates,
     )
     channel.subscribe(on_channel_state_change)
+    heartbeat_sender = None
+
+    def on_exit() -> None:
+        if heartbeat_sender is not None and heartbeat_sender.is_running:
+            heartbeat_sender.stop()
+        channel.close()
+
+    register_signal_handlers(
+        event_type=EventType.FLWR_CLIENTAPP_RUN_LEAVE,
+        exit_handlers=[on_exit],
+    )
 
     # Resolve directory where FABs are installed
     flwr_dir_ = get_flwr_dir(flwr_dir)
@@ -91,22 +105,27 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
         stub = ClientAppIoStub(channel)
         _wrap_stub(stub, _make_simple_grpc_retry_invoker())
 
+        # Start app heartbeat
+        heartbeat_sender = HeartbeatSender(make_app_heartbeat_fn_grpc(stub, token))
+        heartbeat_sender.start()
+
         # Pull Message, Context, Run and (optional) FAB from SuperNode
         message, context, run, fab = pull_clientappinputs(stub=stub, token=token)
 
-        # Install FAB, if provided
-        if fab:
-            log(DEBUG, "[flwr-clientapp] Start FAB installation.")
-            install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
-
-        load_client_app_fn = get_load_client_app_fn(
-            default_app_ref="",
-            app_path=None,
-            multi_app=True,
-            flwr_dir=str(flwr_dir_),
-        )
-
         try:
+
+            # Install FAB, if provided
+            if fab:
+                log(DEBUG, "[flwr-clientapp] Start FAB installation.")
+                install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
+
+            load_client_app_fn = get_load_client_app_fn(
+                default_app_ref="",
+                app_path=None,
+                multi_app=True,
+                flwr_dir=str(flwr_dir_),
+            )
+
             # Load ClientApp
             log(DEBUG, "[flwr-clientapp] Start `ClientApp` Loading.")
             client_app: ClientApp = load_client_app_fn(
@@ -137,18 +156,18 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
             stub=stub, token=token, message=reply_message, context=context
         )
 
-        del client_app, message, context, run, fab, reply_message
-        gc.collect()
-
     except grpc.RpcError as e:
         log(ERROR, "GRPC error occurred: %s", str(e))
-    finally:
-        channel.close()
+
+    flwr_exit(
+        code=ExitCode.SUCCESS,
+        event_type=EventType.FLWR_CLIENTAPP_RUN_LEAVE,
+    )
 
 
 def pull_clientappinputs(
     stub: ClientAppIoStub, token: str
-) -> tuple[Message, Context, Run, Optional[Fab]]:
+) -> tuple[Message, Context, Run, Fab | None]:
     """Pull ClientAppInputs from SuperNode."""
     masked_token = mask_string(token)
     log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", masked_token)

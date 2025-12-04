@@ -17,22 +17,26 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable
-from typing import Callable, TypeVar, cast
+from collections.abc import Awaitable, Callable
+from typing import TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    CreateNodeResponse,
-    DeleteNodeRequest,
-    DeleteNodeResponse,
+    ActivateNodeRequest,
+    ActivateNodeResponse,
+    DeactivateNodeRequest,
+    DeactivateNodeResponse,
     PullMessagesRequest,
     PullMessagesResponse,
     PushMessagesRequest,
     PushMessagesResponse,
+    RegisterNodeFleetRequest,
+    RegisterNodeFleetResponse,
+    UnregisterNodeFleetRequest,
+    UnregisterNodeFleetResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendNodeHeartbeatRequest,
@@ -69,6 +73,8 @@ GrpcResponse = TypeVar("GrpcResponse", bound=GrpcMessage)
 GrpcAsyncFunction = Callable[[GrpcRequest], Awaitable[GrpcResponse]]
 RestEndPoint = Callable[[Request], Awaitable[Response]]
 
+routes = []
+
 
 def rest_request_response(
     grpc_request_type: type[GrpcRequest],
@@ -76,6 +82,7 @@ def rest_request_response(
     """Convert an async gRPC-based function into a RESTful HTTP endpoint."""
 
     def decorator(func: GrpcAsyncFunction[GrpcRequest, GrpcResponse]) -> RestEndPoint:
+
         async def wrapper(request: Request) -> Response:
             _check_headers(request.headers)
 
@@ -91,33 +98,64 @@ def rest_request_response(
                 headers={"Content-Type": "application/protobuf"},
             )
 
+        # Register route
+        path = f"/api/v0/fleet/{func.__name__.replace('_', '-')}"
+        routes.append(Route(path, wrapper, methods=["POST"]))
         return wrapper
 
     return decorator
 
 
-@rest_request_response(CreateNodeRequest)
-async def create_node(request: CreateNodeRequest) -> CreateNodeResponse:
-    """Create Node."""
+@rest_request_response(RegisterNodeFleetRequest)
+async def register_node(
+    request: RegisterNodeFleetRequest,
+) -> RegisterNodeFleetResponse:
+    """Register a node (Fleet API only)."""
     # Get state from app
     state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
 
     # Handle message
-    return message_handler.create_node(request=request, state=state)
+    return message_handler.register_node(request=request, state=state)
 
 
-@rest_request_response(DeleteNodeRequest)
-async def delete_node(request: DeleteNodeRequest) -> DeleteNodeResponse:
-    """Delete Node Id."""
+@rest_request_response(ActivateNodeRequest)
+async def activate_node(
+    request: ActivateNodeRequest,
+) -> ActivateNodeResponse:
+    """Activate a node."""
     # Get state from app
     state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
 
     # Handle message
-    return message_handler.delete_node(request=request, state=state)
+    return message_handler.activate_node(request=request, state=state)
+
+
+@rest_request_response(DeactivateNodeRequest)
+async def deactivate_node(
+    request: DeactivateNodeRequest,
+) -> DeactivateNodeResponse:
+    """Deactivate a node."""
+    # Get state from app
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+
+    # Handle message
+    return message_handler.deactivate_node(request=request, state=state)
+
+
+@rest_request_response(UnregisterNodeFleetRequest)
+async def unregister_node(
+    request: UnregisterNodeFleetRequest,
+) -> UnregisterNodeFleetResponse:
+    """Unregister a node (Fleet API only)."""
+    # Get state from app
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+
+    # Handle message
+    return message_handler.unregister_node(request=request, state=state)
 
 
 @rest_request_response(PullMessagesRequest)
-async def pull_message(request: PullMessagesRequest) -> PullMessagesResponse:
+async def pull_messages(request: PullMessagesRequest) -> PullMessagesResponse:
     """Pull PullMessages."""
     # Get state from app
     state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
@@ -128,7 +166,7 @@ async def pull_message(request: PullMessagesRequest) -> PullMessagesResponse:
 
 
 @rest_request_response(PushMessagesRequest)
-async def push_message(request: PushMessagesRequest) -> PushMessagesResponse:
+async def push_messages(request: PushMessagesRequest) -> PushMessagesResponse:
     """Pull PushMessages."""
     # Get state from app
     state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
@@ -211,23 +249,6 @@ async def confirm_message_received(
         request=request, state=state, store=store
     )
 
-
-routes = [
-    Route("/api/v0/fleet/create-node", create_node, methods=["POST"]),
-    Route("/api/v0/fleet/delete-node", delete_node, methods=["POST"]),
-    Route("/api/v0/fleet/pull-messages", pull_message, methods=["POST"]),
-    Route("/api/v0/fleet/push-messages", push_message, methods=["POST"]),
-    Route("/api/v0/fleet/pull-object", pull_object, methods=["POST"]),
-    Route("/api/v0/fleet/push-object", push_object, methods=["POST"]),
-    Route("/api/v0/fleet/send-node-heartbeat", send_node_heartbeat, methods=["POST"]),
-    Route("/api/v0/fleet/get-run", get_run, methods=["POST"]),
-    Route("/api/v0/fleet/get-fab", get_fab, methods=["POST"]),
-    Route(
-        "/api/v0/fleet/confirm-message-received",
-        confirm_message_received,
-        methods=["POST"],
-    ),
-]
 
 app: Starlette = Starlette(
     debug=False,

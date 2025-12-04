@@ -17,7 +17,7 @@
 
 import unittest
 from collections import Counter
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 from parameterized import parameterized_class
@@ -45,7 +45,7 @@ def _dummy_distribution_setup(
     num_unique_labels_per_partition: int,
     num_unique_labels: int,
     random_mode: bool = False,
-) -> Union[NDArrayFloat, NDArrayInt]:
+) -> NDArrayFloat | NDArrayInt:
     """Create a dummy distribution for testing."""
     num_columns = num_unique_labels_per_partition * num_partitions / num_unique_labels
     if random_mode:

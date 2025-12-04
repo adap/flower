@@ -26,6 +26,8 @@ message Fab {
   string hash_str = 1;
   // This field contains the fab file contents a one bytes blob.
   bytes content = 2;
+  // Verifications.
+  map<string, string> verifications = 3;
 }
 
 message GetFabRequest {

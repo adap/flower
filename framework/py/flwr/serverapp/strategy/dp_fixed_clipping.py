@@ -17,11 +17,10 @@
 Papers: https://arxiv.org/abs/1712.07557, https://arxiv.org/abs/1710.06963
 """
 
+
 from abc import ABC
-from collections import OrderedDict
 from collections.abc import Iterable
 from logging import INFO, WARNING
-from typing import Optional
 
 from flwr.common import Array, ArrayRecord, ConfigRecord, Message, MetricRecord, log
 from flwr.common.differential_privacy import (
@@ -112,12 +111,12 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
         )
 
         return ArrayRecord(
-            OrderedDict(
-                {
-                    k: Array(v)
-                    for k, v in zip(aggregated_arrays.keys(), aggregated_ndarrays)
-                }
-            )
+            {
+                k: Array(v)
+                for k, v in zip(
+                    aggregated_arrays.keys(), aggregated_ndarrays, strict=True
+                )
+            }
         )
 
     def configure_evaluate(
@@ -130,7 +129,7 @@ class DifferentialPrivacyFixedClippingBase(Strategy, ABC):
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> Optional[MetricRecord]:
+    ) -> MetricRecord | None:
         """Aggregate MetricRecords in the received Messages."""
         return self.strategy.aggregate_evaluate(server_round, replies)
 
@@ -199,7 +198,7 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         if not validate_replies(replies, self.num_sampled_clients):
             return None, None
@@ -217,9 +216,7 @@ class DifferentialPrivacyServerSideFixedClipping(DifferentialPrivacyFixedClippin
                 )
                 # Replace content while preserving keys
                 reply.content[arr_name] = ArrayRecord(
-                    OrderedDict(
-                        {k: Array(v) for k, v in zip(record.keys(), reply_ndarrays)}
-                    )
+                    dict(zip(record.keys(), map(Array, reply_ndarrays), strict=True))
                 )
             log(
                 INFO,
@@ -302,7 +299,7 @@ class DifferentialPrivacyClientSideFixedClipping(DifferentialPrivacyFixedClippin
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         if not validate_replies(replies, self.num_sampled_clients):
             return None, None

@@ -14,10 +14,10 @@ description = ""
 license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
-    "flwr[simulation]>=1.23.0",
+    "flwr[simulation]>=1.25.0",
     "flwr-datasets[vision]>=0.5.0",
-    "torch==2.7.1",
-    "torchvision==0.22.1",
+    "torch>=2.7.1",
+    "torchvision>=0.22.1",
 ]
 
 [tool.hatch.build.targets.wheel]

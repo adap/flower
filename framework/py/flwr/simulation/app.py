@@ -18,7 +18,6 @@
 import argparse
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
-from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
@@ -38,8 +37,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.heartbeat import HeartbeatSender, get_grpc_app_heartbeat_fn
+from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -71,6 +69,7 @@ from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 from flwr.supercore.app_utils import start_parent_process_monitor
+from flwr.supercore.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
 from flwr.supercore.superexec.plugin import SimulationExecPlugin
 from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 
@@ -78,7 +77,7 @@ from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 def flwr_simulation() -> None:
     """Run process-isolated Flower Simulation."""
     # Capture stdout/stderr
-    log_queue: Queue[Optional[str]] = Queue()
+    log_queue: Queue[str | None] = Queue()
     mirror_output_to_queue(log_queue)
 
     args = _parse_args_run_flwr_simulation().parse_args()
@@ -125,11 +124,11 @@ def flwr_simulation() -> None:
 
 def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     simulationio_api_address: str,
-    log_queue: Queue[Optional[str]],
+    log_queue: Queue[str | None],
     token: str,
-    flwr_dir_: Optional[str] = None,
-    certificates: Optional[bytes] = None,
-    parent_pid: Optional[int] = None,
+    flwr_dir_: str | None = None,
+    certificates: bytes | None = None,
+    parent_pid: int | None = None,
 ) -> None:
     """Run Flower Simulation process."""
     # Start monitoring the parent process if a PID is provided
@@ -141,11 +140,35 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         root_certificates=certificates,
     )
 
-    # Resolve directory where FABs are installed
+    # Initialize variables for finally block
     flwr_dir = get_flwr_dir(flwr_dir_)
     log_uploader = None
     heartbeat_sender = None
+    run = None
     run_status = None
+    exit_code = ExitCode.SUCCESS
+
+    def on_exit() -> None:
+        # Stop heartbeat sender
+        if heartbeat_sender and heartbeat_sender.is_running:
+            heartbeat_sender.stop()
+
+        # Stop log uploader for this run and upload final logs
+        if log_uploader:
+            stop_log_uploader(log_queue, log_uploader)
+
+        # Update run status
+        if run and run_status:
+            run_status_proto = run_status_to_proto(run_status)
+            conn._stub.UpdateRunStatus(
+                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
+            )
+
+    register_signal_handlers(
+        event_type=EventType.FLWR_SIMULATION_RUN_LEAVE,
+        exit_message="Run stopped by user.",
+        exit_handlers=[on_exit],
+    )
 
     try:
         # Pull SimulationInputs from LinkState
@@ -193,12 +216,6 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
             app_path,
         )
 
-        # Change status to Running
-        run_status_proto = run_status_to_proto(RunStatus(Status.RUNNING, "", ""))
-        conn._stub.UpdateRunStatus(
-            UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
-        )
-
         # Pull Federation Options
         fed_opt_res: GetFederationOptionsResponse = conn._stub.GetFederationOptions(
             GetFederationOptionsRequest(run_id=run.run_id)
@@ -216,23 +233,20 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         verbose: bool = fed_opt.get("verbose", False)
         enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
 
+        run_id_hash = get_sha256_hash(run.run_id)
         event(
             EventType.FLWR_SIMULATION_RUN_ENTER,
             event_details={
                 "backend": "ray",
                 "num-supernodes": num_supernodes,
-                "run-id-hash": get_sha256_hash(run.run_id),
+                "run-id-hash": run_id_hash,
             },
         )
 
         # Set up heartbeat sender
-        heartbeat_fn = get_grpc_app_heartbeat_fn(
-            conn._stub,
-            run.run_id,
-            failure_message="Heartbeat failed unexpectedly. The SuperLink could "
-            "not find the provided run ID, or the run status is invalid.",
+        heartbeat_sender = HeartbeatSender(
+            make_app_heartbeat_fn_grpc(conn._stub, token)
         )
-        heartbeat_sender = HeartbeatSender(heartbeat_fn)
         heartbeat_sender.start()
 
         # Launch the simulation
@@ -264,27 +278,17 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
         run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
 
-    finally:
-        # Stop heartbeat sender
-        if heartbeat_sender:
-            heartbeat_sender.stop()
+        # General exit code
+        exit_code = ExitCode.SIMULATION_EXCEPTION
 
-        # Stop log uploader for this run and upload final logs
-        if log_uploader:
-            stop_log_uploader(log_queue, log_uploader)
-
-        # Update run status
-        if run_status:
-            run_status_proto = run_status_to_proto(run_status)
-            conn._stub.UpdateRunStatus(
-                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
-            )
-
-        # Clean up the Context if it exists
-        try:
-            del updated_context
-        except NameError:
-            pass
+    flwr_exit(
+        code=exit_code,
+        event_type=EventType.FLWR_SIMULATION_RUN_LEAVE,
+        event_details={
+            "run-id-hash": run_id_hash,
+            "success": exit_code == ExitCode.SUCCESS,
+        },
+    )
 
 
 def _parse_args_run_flwr_simulation() -> argparse.ArgumentParser:
