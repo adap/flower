@@ -22,8 +22,8 @@ from dataclasses import dataclass
 class ConnectionConfig:
     """Connection configuration for CLI commands."""
 
+    service: str
     address: str
     root_certificates: str | None
     insecure: bool
     enable_account_auth: bool
-

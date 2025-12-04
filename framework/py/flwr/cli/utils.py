@@ -27,6 +27,7 @@ import grpc
 import pathspec
 import requests
 import typer
+import yaml
 
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
@@ -49,11 +50,18 @@ from flwr.common.grpc import (
     on_channel_state_change,
 )
 from flwr.common.version import package_version as flwr_version
-from flwr.supercore.constant import APP_ID_PATTERN, APP_VERSION_PATTERN
+from flwr.supercore.constant import (
+    APP_ID_PATTERN,
+    APP_VERSION_PATTERN,
+    CONNECTION_CONFIG_FILE,
+    ConnectionConfigYamlKey,
+)
+from flwr.supercore.utils import get_flwr_home
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
 from .config_utils import validate_certificate_in_federation_config
+from .typing import ConnectionConfig
 
 
 def prompt_text(
@@ -759,4 +767,77 @@ def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
     return app_id, app_version
 
 
-def read_cli_global_config()
+def parse_connection_config(
+    conn_dict: dict[str, Any], service: str
+) -> ConnectionConfig:
+    """Parse connection configuration from a YAML dictionary.
+
+    Parameters
+    ----------
+    conn_dict : dict[str, Any]
+        The YAML configuration dictionary for the connection.
+    service : str
+        The name of the service.
+
+    Returns
+    -------
+    ConnectionConfig
+        The parsed connection configuration.
+    """
+    # Check required fields
+    address = conn_dict.get(ConnectionConfigYamlKey.ADDRESS)
+    root_certificates = conn_dict.get(ConnectionConfigYamlKey.ROOT_CERTIFICATES)
+    insecure = conn_dict.get(ConnectionConfigYamlKey.INSECURE)
+    enable_account_auth = conn_dict.get(ConnectionConfigYamlKey.ENABLE_ACCOUNT_AUTH)
+    if not (
+        isinstance(address, str)
+        and ConnectionConfigYamlKey.ROOT_CERTIFICATES in conn_dict
+        and isinstance(root_certificates, (str, type(None)))
+        and isinstance(insecure, bool)
+        and isinstance(enable_account_auth, bool)
+    ):
+        raise ValueError("Invalid connection configuration format.")
+
+    # Build and return ConnectionConfig
+    return ConnectionConfig(
+        service=service,
+        address=address,
+        root_certificates=root_certificates,
+        insecure=insecure,
+        enable_account_auth=enable_account_auth,
+    )
+
+
+def read_global_connection_config() -> ConnectionConfig | None:
+    """Read global connection configuration.
+
+    Returns
+    -------
+    ConnectionConfig | None
+        The global connection configuration, or None if not found.
+
+    Raises
+    ------
+    typer.Exit
+        Raised if the configuration file is corrupted.
+    """
+    config_path = get_flwr_home() / CONNECTION_CONFIG_FILE
+    if not config_path.exists():
+        return None
+
+    try:
+        with config_path.open("r", encoding="utf-8") as file:
+            yaml_dict = yaml.safe_load(file)
+        if not isinstance(yaml_dict, dict):
+            raise ValueError("Invalid YAML format.")
+        current_conn = yaml_dict[ConnectionConfigYamlKey.CURRENT_CONNECTION]
+        conns = yaml_dict[ConnectionConfigYamlKey.CONNECTIONS]
+        conn_dict = conns[current_conn]
+        return parse_connection_config(conn_dict, service=current_conn)
+    except (yaml.YAMLError, KeyError, ValueError) as err:
+        typer.secho(
+            f"❌ Global connection configuration is corrupted: {err}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from err

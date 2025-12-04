@@ -69,3 +69,23 @@ class NodeStatus:
     def __new__(cls) -> NodeStatus:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+# CLI connection configuration file name
+CONNECTION_CONFIG_FILE = "config.yml"
+
+
+class ConnectionConfigYamlKey:
+    """YAML keys for connection configuration."""
+
+    CURRENT_CONNECTION = "current-connection"
+    CONNECTIONS = "connections"
+    ADDRESS = "address"
+    ROOT_CERTIFICATES = "root-certificates"
+    INSECURE = "insecure"
+    ENABLE_ACCOUNT_AUTH = "enable-account-auth"
+
+
+# Credential keys
+CRED_ACCESS_TOKEN = "access-token"
+CRED_REFRESH_TOKEN = "refresh-token"
