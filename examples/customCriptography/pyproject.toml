@@ -30,7 +30,7 @@ fraction-evaluate = 0.5
 local-epochs = 1
 learning-rate = 0.01
 batch-size = 32
-fraction-fit = 0.2
+fraction-fit = 0.5
 
 [tool.flwr.federations]
 default = "my-federation"
