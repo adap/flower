@@ -114,21 +114,20 @@ The expected last lines of the log should look like:
 INFO :      --- ServerApp Round 250 / 250 ---
 INFO :      Requesting embeddings from 3 nodes...
 INFO :          Received 3/3 results
-INFO :      Round 249, Loss: 0.3892, Accuracy: 80.83%
+INFO :      Round 250, Loss: 0.3096, Accuracy: 84.94%
 INFO :      Sending gradients to 3 nodes...
 INFO :      
 INFO :      === Final Results ===
-INFO :      Round 0 -> Loss: 0.7235 | Accuracy: 56.03%
-INFO :      Round 25 -> Loss: 0.6482 | Accuracy: 63.25%
-INFO :      Round 50 -> Loss: 0.6141 | Accuracy: 65.61%
-INFO :      Round 75 -> Loss: 0.5654 | Accuracy: 69.22%
-INFO :      Round 100 -> Loss: 0.5161 | Accuracy: 72.60%
-INFO :      Round 125 -> Loss: 0.4967 | Accuracy: 73.51%
-INFO :      Round 150 -> Loss: 0.4562 | Accuracy: 75.31%
-INFO :      Round 175 -> Loss: 0.4392 | Accuracy: 77.56%
-INFO :      Round 200 -> Loss: 0.4222 | Accuracy: 79.14%
-INFO :      Round 225 -> Loss: 0.4043 | Accuracy: 78.92%
-INFO :      Round 249 -> Loss: 0.3892 | Accuracy: 81.83%
+INFO :      Round 25 -> Loss: 0.6458 | Accuracy: 61.89%
+INFO :      Round 50 -> Loss: 0.5888 | Accuracy: 67.76%
+INFO :      Round 75 -> Loss: 0.5265 | Accuracy: 72.49%
+INFO :      Round 100 -> Loss: 0.4939 | Accuracy: 74.41%
+INFO :      Round 125 -> Loss: 0.4499 | Accuracy: 78.13%
+INFO :      Round 150 -> Loss: 0.4012 | Accuracy: 81.51%
+INFO :      Round 175 -> Loss: 0.3691 | Accuracy: 82.07%
+INFO :      Round 200 -> Loss: 0.3710 | Accuracy: 82.75%
+INFO :      Round 225 -> Loss: 0.3172 | Accuracy: 84.44%
+INFO :      Round 250 -> Loss: 0.3096 | Accuracy: 84.94%
 ```
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:

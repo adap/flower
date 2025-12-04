@@ -1,3 +1,5 @@
+import io
+
 import torch
 from flwr.app import Array, ArrayRecord, ConfigRecord, Context, Message, RecordDict
 from flwr.clientapp import ClientApp
@@ -9,7 +11,7 @@ app = ClientApp()
 
 
 @app.query("generate_embeddings")
-def f(msg: Message, context: Context):
+def get_emb(msg: Message, context: Context):
     """Generate embeddings."""
 
     # Read from config
@@ -43,7 +45,7 @@ def f(msg: Message, context: Context):
 
 
 @app.train("apply_gradients")
-def f(msg: Message, context: Context):
+def apply_grad(msg: Message, context: Context):
     """Apply gradients to local model."""
 
     # Read from config
@@ -65,6 +67,11 @@ def f(msg: Message, context: Context):
     if model_record := context.state.get("model", None):
         model.load_state_dict(model_record.to_torch_state_dict())
 
+    # Load optimizer state from state if available
+    if optimizer_state_record := context.state.get("optimizer_state", None):
+        buffer = io.BytesIO(optimizer_state_record["serialized"])
+        optimizer.load_state_dict(torch.load(buffer))
+
     # Do forward pass
     embedding = model(data)
 
@@ -76,8 +83,9 @@ def f(msg: Message, context: Context):
 
     # Save updated model in state for next round
     context.state["model"] = ArrayRecord(model.state_dict())
-    # ? Optionally you might want to also store the optimizer's state_dict
-    # ? into the context and load it in the next round. Skipped for simplicity
+    # (Optional) Save the optimizer state. Not all optimizers have state, but Adam does.
+    torch.save(optimizer.state_dict(), buffer := io.BytesIO())
+    context.state["optimizer_state"] = ConfigRecord({"serialized": buffer.getvalue()})
 
     # Construct and return reply Message
     return Message(content=RecordDict(), reply_to=msg)

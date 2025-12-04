@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import torch
 import torch.nn as nn
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import VerticalSizePartitioner
@@ -136,3 +137,20 @@ class ServerModel(nn.Module):
         x = self.bn(x)
         x = self.fc(x)
         return self.sigmoid(x)
+
+
+def evaluate_head_model(
+    head: ServerModel, embeddings: torch.Tensor, labels: torch.Tensor
+) -> float:
+    """Compute accuracy of head."""
+    head.eval()
+    with torch.no_grad():
+        correct = 0
+        # Re-compute embeddings for accuracy (detached from grad)
+        embeddings_eval = embeddings.detach()
+        output = head(embeddings_eval)
+        predicted = (output > 0.5).float()
+        correct += (predicted == labels).sum().item()
+        accuracy = correct / len(labels) * 100
+
+    return accuracy

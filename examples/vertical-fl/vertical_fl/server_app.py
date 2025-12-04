@@ -6,7 +6,7 @@ from flwr.app import Array, ArrayRecord, Context, Message, RecordDict
 from flwr.common import log
 from flwr.serverapp import Grid, ServerApp
 
-from vertical_fl.task import FEATURE_COLUMNS, ServerModel
+from vertical_fl.task import FEATURE_COLUMNS, ServerModel, evaluate_head_model
 
 # Create ServerApp
 app = ServerApp()
@@ -83,7 +83,7 @@ def main(grid: Grid, context: Context) -> None:
 
         # 3. Compute accuracy using updated head model
         if i % eval_interval == 0 or i == num_rounds:
-            accuracy = evaluate_model(head, embeddings, labels)
+            accuracy = evaluate_head_model(head, embeddings, labels)
             log(INFO, f"Round {i}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.2f}%")
             accuracies.append((i, accuracy))
             losses.append((i, loss.item()))
@@ -101,35 +101,21 @@ def main(grid: Grid, context: Context) -> None:
         )
 
 
-def evaluate_model(
-    head: ServerModel, embeddings: torch.Tensor, labels: torch.Tensor
-) -> float:
-    """Compute accuracy of head."""
-    head.eval()
-    with torch.no_grad():
-        correct = 0
-        # Re-compute embeddings for accuracy (detached from grad)
-        embeddings_eval = embeddings.detach()
-        output = head(embeddings_eval)
-        predicted = (output > 0.5).float()
-        correct += (predicted == labels).sum().item()
-        accuracy = correct / len(labels) * 100
-
-    return accuracy
-
-
 def send_gradients_to_clients(
     grid: Grid,
     node_pos_mapping: dict[int, int],
     embeddings_grad: list[torch.Tensor],
 ) -> None:
     """Send gradients to clients."""
+
+    # Create messages that target method in ClientApp with
+    # @app.train("apply_gradients") decorator
     messages = []
     for node_id, pos in node_pos_mapping.items():
         arrc = ArrayRecord({"local-gradients": Array(embeddings_grad[pos].numpy())})
         message = Message(
             content=RecordDict({"gradients": arrc}),
-            message_type="train.apply_gradients",  # target `train` method in ClientApp
+            message_type="train.apply_gradients",
             dst_node_id=node_id,
         )
         messages.append(message)
@@ -147,7 +133,8 @@ def get_remote_embeddings(
 ) -> tuple[torch.Tensor, dict[int, int]]:
     """Get embeddings from sampled remote nodes."""
 
-    # Create messages
+    # Create messages that target method in ClientApp with
+    # @app.query("generate_embeddings") decorator
     messages = []
     for node_id in node_ids:  # one message for each node
         message = Message(
