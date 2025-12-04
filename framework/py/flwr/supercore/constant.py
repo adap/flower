@@ -84,8 +84,3 @@ class ConnectionConfigYamlKey:
     ROOT_CERTIFICATES = "root-certificates"
     INSECURE = "insecure"
     ENABLE_ACCOUNT_AUTH = "enable-account-auth"
-
-
-# Credential keys
-CRED_ACCESS_TOKEN = "access-token"
-CRED_REFRESH_TOKEN = "refresh-token"

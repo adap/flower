@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower type definitions for CLI."""
+"""Flower type definitions for infrastructure."""
 
 
 from dataclasses import dataclass

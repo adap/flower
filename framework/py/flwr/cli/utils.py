@@ -56,12 +56,12 @@ from flwr.supercore.constant import (
     CONNECTION_CONFIG_FILE,
     ConnectionConfigYamlKey,
 )
+from flwr.supercore.typing import ConnectionConfig
 from flwr.supercore.utils import get_flwr_home
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
 from .config_utils import validate_certificate_in_federation_config
-from .typing import ConnectionConfig
 
 
 def prompt_text(
