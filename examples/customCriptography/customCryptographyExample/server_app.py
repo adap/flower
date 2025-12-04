@@ -145,7 +145,8 @@ def server_fn(context: Context):
         evaluate_fn=server_side,
         initial_parameters=parameters,
         evaluate_metrics_aggregation_fn=weighted_average,
-        stop_criteria={"metric_ge": ("accuracy", ACCURACY)},
+        stop_criteria={"metric_ge": ("accuracy", ACCURACY),
+        },
     )
     config = ServerConfig(num_rounds=num_rounds)
     return ServerAppComponents(strategy=strategy, config=config)
