@@ -24,12 +24,23 @@ fi
 
 sleep 2
 
+# Limite thread CPU per client
+CPU_THREADS=6
+
 # Avvio dei supernode
 for ((i=1; i<=NUM_CLIENTS; i++)); do
     PORT=$((9093 + i))
     DATASET="datasets/cifar10_part_$i"
     LOG_FILE="$LOG_DIR/client_$i.log"
 
+    echo "[*] Avvio client $i con max $CPU_THREADS thread CPU su porta $PORT"
+
+    OMP_NUM_THREADS=$CPU_THREADS \
+    MKL_NUM_THREADS=$CPU_THREADS \
+    OPENBLAS_NUM_THREADS=$CPU_THREADS \
+    NUMEXPR_NUM_THREADS=$CPU_THREADS \
+    VECLIB_MAXIMUM_THREADS=$CPU_THREADS \
+    torch_num_threads=$CPU_THREADS \
     flower-supernode \
       --superlink 127.0.0.1:9092 \
       --clientappio-api-address 0.0.0.0:${PORT} \
