@@ -49,6 +49,7 @@ for ((i=1; i<=NUM_CLIENTS; i++)); do
       | tee "$LOG_FILE" &
 
     echo "[✓] Avviato client $i su porta $PORT con dataset $DATASET (log: $LOG_FILE)"
+    sleep 0.3
 done
 
 wait
