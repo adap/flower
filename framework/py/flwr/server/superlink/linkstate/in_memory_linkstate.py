@@ -576,6 +576,8 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         ),
                         flwr_aid=flwr_aid if flwr_aid else "",
                         federation=federation,
+                        bytes_sent=0,
+                        bytes_recv=0,
                     ),
                 )
                 self.run_ids[run_id] = run_record
@@ -771,3 +773,8 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             index = bisect_right(run.logs, (after_timestamp, ""))
             latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
             return "".join(log for _, log in run.logs[index:]), latest_timestamp
+
+    def store_traffic(
+        self, run_id: int, bytes_sent: int = 0, bytes_recv: int = 0
+    ) -> None:
+        """Store traffic data for the specified `run_id`."""

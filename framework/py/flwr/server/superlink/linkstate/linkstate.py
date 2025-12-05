@@ -480,3 +480,22 @@ class LinkState(CoreState):  # pylint: disable=R0904
             - The timestamp of the latest log entry in the returned logs.
               Returns `0` if no logs are returned.
         """
+
+    @abc.abstractmethod
+    def store_traffic(
+        self, run_id: int, bytes_sent: int = 0, bytes_recv: int = 0
+    ) -> None:
+        """Store traffic data for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to store traffic data.
+        bytes_sent : int (default: 0)
+            The number of bytes sent from SuperLink to SuperNodes to add to the run's
+            total (default: 0). A value of 0 means no bytes are added to the counter.
+        bytes_recv : int (default: 0)
+            The number of bytes received by SuperLink from SuperNodes to add to the
+            run's total (default: 0). A value of 0 means no bytes are added to the
+            counter.
+        """
