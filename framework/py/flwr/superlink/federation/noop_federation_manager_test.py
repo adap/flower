@@ -50,6 +50,8 @@ def test_get_details_with_valid_federation() -> None:
         status=RunStatus(status="running", sub_status="", details=""),
         flwr_aid=NOOP_FLWR_AID,
         federation=NOOP_FEDERATION,
+        bytes_sent=1024,
+        bytes_recv=512,
     )
     mock_run_2 = Run(
         run_id=run_id_2,
@@ -64,6 +66,8 @@ def test_get_details_with_valid_federation() -> None:
         status=RunStatus(status="finished", sub_status="", details=""),
         flwr_aid=NOOP_FLWR_AID,
         federation=NOOP_FEDERATION,
+        bytes_sent=2048,
+        bytes_recv=1024,
     )
     mock_node_1 = NodeInfo(
         node_id=1,
