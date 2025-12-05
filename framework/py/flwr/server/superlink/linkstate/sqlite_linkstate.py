@@ -1280,15 +1280,12 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         sint64_run_id = uint64_to_int64(run_id)
 
         with self.conn:
-            # Single query: update traffic and check run status in one operation
-            # Only update if run is RUNNING (running_at is set and finished_at is empty)
+            # Update traffic for the run
             query = """
                 UPDATE run
                 SET bytes_sent = bytes_sent + ?,
                     bytes_recv = bytes_recv + ?
                 WHERE run_id = ?
-                AND running_at != ''
-                AND finished_at = ''
                 RETURNING run_id;
             """
             rows = self.conn.execute(
@@ -1296,27 +1293,7 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             ).fetchall()
 
             if not rows:
-                # Check if run exists at all
-                query = "SELECT running_at, finished_at FROM run WHERE run_id = ?;"
-                check_rows = self.conn.execute(query, (sint64_run_id,)).fetchall()
-
-                if not check_rows:
-                    raise ValueError(f"Run {run_id} not found")
-
-                row = check_rows[0]
-                if row["finished_at"]:
-                    status = Status.FINISHED
-                elif row["running_at"]:
-                    status = Status.RUNNING
-                else:
-                    status = (
-                        Status.STARTING if row.get("starting_at") else Status.PENDING
-                    )
-
-                raise ValueError(
-                    f"Cannot store traffic for run {run_id} with status {status}. "
-                    "Traffic can only be stored for RUNNING runs."
-                )
+                raise ValueError(f"Run {run_id} not found")
 
 
 def message_to_dict(message: Message) -> dict[str, Any]:

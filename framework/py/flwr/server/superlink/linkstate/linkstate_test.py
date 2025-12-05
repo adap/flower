@@ -1697,29 +1697,6 @@ class StateTest(CoreStateTest):
         assert run.bytes_sent == 1001
         assert run.bytes_recv == 2001
 
-    @parameterized.expand(
-        [(Status.PENDING, 0), (Status.STARTING, 1), (Status.FINISHED, 3)]
-    )  # type: ignore
-    def test_store_traffic_non_running_status(
-        self, status: str, num_transitions: int
-    ) -> None:
-        """Test that traffic raises ValueError when status is not RUNNING."""
-        # Prepare
-        state = self.state_factory()
-        run_id = create_dummy_run(state)
-        transition_run_status(state, run_id, num_transitions)
-
-        # Execute & Assert
-        with self.assertRaises(ValueError):
-            state.store_traffic(run_id, bytes_sent=1002, bytes_recv=2002)
-
-        # Verify traffic was not updated
-        run = state.get_run(run_id)
-        assert run is not None
-        assert run.status.status == status
-        assert run.bytes_sent == 0
-        assert run.bytes_recv == 0
-
 
 def create_ins_message(
     src_node_id: int,

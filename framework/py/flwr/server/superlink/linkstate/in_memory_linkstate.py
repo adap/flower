@@ -795,13 +795,5 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                 raise ValueError(f"Run {run_id} not found")
 
             run = self.run_ids[run_id].run
-
-            # Skip if run status is not RUNNING
-            if run.status.status != Status.RUNNING:
-                raise ValueError(
-                    f"Cannot store traffic for run {run_id} with status "
-                    f"{run.status.status}. Traffic can only be stored for RUNNING runs."
-                )
-
             run.bytes_sent += bytes_sent
             run.bytes_recv += bytes_recv
