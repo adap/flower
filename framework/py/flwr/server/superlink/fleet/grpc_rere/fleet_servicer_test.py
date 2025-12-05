@@ -729,7 +729,71 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Assert: Message is removed from ObjectStore
         assert len(self.store) == 0
 
+    def test_push_object_records_traffic(self) -> None:
+        """Test `PushObject` records traffic data."""
+        # Prepare
+        run_id = self._create_dummy_run()
+        node_id = self._create_dummy_node()
+        obj = ConfigRecord({"a": 321, "b": [6, 5, 4]})
+        obj_b = obj.deflate()
 
+        # Pre-register object
+        self.store.preregister(run_id, get_object_tree(obj))
+
+        # Get initial traffic
+        run_before = self.state.get_run(run_id)
+        assert run_before is not None
+        bytes_recv_before = run_before.bytes_recv
+
+        # Execute
+        req = PushObjectRequest(
+            node=Node(node_id=node_id),
+            run_id=run_id,
+            object_id=obj.object_id,
+            object_content=obj_b,
+        )
+        res: PushObjectResponse = self._push_object(request=req)
+
+        # Assert
+        assert res.stored
+        run_after = self.state.get_run(run_id)
+        assert run_after is not None
+        # Verify traffic was recorded
+        assert run_after.bytes_recv == bytes_recv_before + len(obj_b)
+        assert run_after.bytes_sent == 0  # No bytes sent during push
+
+    def test_pull_object_records_traffic(self) -> None:
+        """Test `PullObject` records traffic data."""
+        # Prepare
+        run_id = self._create_dummy_run()
+        node_id = self._create_dummy_node()
+        obj = ConfigRecord({"a": 789, "b": [6, 7, 8]})
+        obj_b = obj.deflate()
+
+        # Preregister and store object
+        self.store.preregister(run_id, get_object_tree(obj))
+        self.store.put(object_id=obj.object_id, object_content=obj_b)
+
+        # Get initial traffic
+        run_before = self.state.get_run(run_id)
+        assert run_before is not None
+        bytes_sent_before = run_before.bytes_sent
+
+        # Execute
+        req = PullObjectRequest(
+            node=Node(node_id=node_id), run_id=run_id, object_id=obj.object_id
+        )
+        res: PullObjectResponse = self._pull_object(req)
+
+        # Assert
+        assert res.object_found
+        assert res.object_available
+        run_after = self.state.get_run(run_id)
+        assert run_after is not None
+        # Verify traffic was recorded
+        assert run_after.bytes_sent == bytes_sent_before + len(obj_b)
+        assert run_after.bytes_recv == 0  # No bytes received during pull
+    
 class TestFleetServicerWithNodeAuthEnabled(TestFleetServicer):
     """FleetServicer tests for allowed RunStatuses."""
 
