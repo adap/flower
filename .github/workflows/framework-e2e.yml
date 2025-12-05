@@ -357,6 +357,8 @@ jobs:
       ACCOUNT: 'flwrlabs'
       APP_NAME: 'numpy-ci'
 
+    name: flwr new @
+
     steps:
       - uses: actions/checkout@v5
       - name: Bootstrap
