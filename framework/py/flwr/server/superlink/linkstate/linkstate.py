@@ -492,8 +492,9 @@ class LinkState(CoreState):  # pylint: disable=R0904
         run_id : int
             The identifier of the run for which to store traffic data.
         bytes_sent : int (default: 0)
-            The number of bytes sent from SuperLink to SuperNodes to add to the run's
-            total (default: 0). A value of 0 means no bytes are added to the counter.
+            The number of bytes pulled by SuperNodes from the SuperLink to add to the
+            run's total (default: 0). A value of 0 means no bytes are added to the
+            counter.
         bytes_recv : int (default: 0)
             The number of bytes received by SuperLink from SuperNodes to add to the
             run's total (default: 0). A value of 0 means no bytes are added to the
