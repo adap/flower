@@ -576,6 +576,8 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         ),
                         flwr_aid=flwr_aid if flwr_aid else "",
                         federation=federation,
+                        bytes_sent=0,
+                        bytes_recv=0,
                     ),
                 )
                 self.run_ids[run_id] = run_record
