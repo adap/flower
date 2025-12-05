@@ -780,14 +780,10 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         """Store traffic data for the specified `run_id`."""
         # Validate non-negative values
         if bytes_sent < 0 or bytes_recv < 0:
-            log(
-                ERROR,
-                "Negative traffic values for run %d: bytes_sent=%d, bytes_recv=%d",
-                run_id,
-                bytes_sent,
-                bytes_recv,
+            raise ValueError(
+                f"Negative traffic values for run {run_id}: "
+                f"bytes_sent={bytes_sent}, bytes_recv={bytes_recv}"
             )
-            return
 
         # Skip if no traffic to record
         if bytes_sent == 0 and bytes_recv == 0:
@@ -796,21 +792,16 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
 
         with self.lock:
             if run_id not in self.run_ids:
-                log(ERROR, "`run_id` is invalid")
-                return
+                raise ValueError(f"Run {run_id} not found")
 
             run = self.run_ids[run_id].run
 
             # Skip if run status is not RUNNING
             if run.status.status != Status.RUNNING:
-                log(
-                    ERROR,
-                    "Cannot store traffic for run %d with status %s"
-                    "Traffic can only be stored for RUNNING runs.",
-                    run_id,
-                    run.status.status,
+                raise ValueError(
+                    f"Cannot store traffic for run {run_id} with status "
+                    f"{run.status.status}. Traffic can only be stored for RUNNING runs."
                 )
-                return
 
             run.bytes_sent += bytes_sent
             run.bytes_recv += bytes_recv
