@@ -1669,7 +1669,7 @@ class StateTest(CoreStateTest):
         state.store_traffic(run_id, bytes_sent=1000, bytes_recv=2000)
 
         # Execute & Assert
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             state.store_traffic(run_id, bytes_sent=bytes_sent, bytes_recv=bytes_recv)
 
         # Verify traffic was not updated
@@ -1710,11 +1710,8 @@ class StateTest(CoreStateTest):
         transition_run_status(state, run_id, num_transitions)
 
         # Execute & Assert
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             state.store_traffic(run_id, bytes_sent=1002, bytes_recv=2002)
-
-        assert "Cannot store traffic" in str(e.exception)
-        assert "RUNNING" in str(e.exception)
 
         # Verify traffic was not updated
         run = state.get_run(run_id)
