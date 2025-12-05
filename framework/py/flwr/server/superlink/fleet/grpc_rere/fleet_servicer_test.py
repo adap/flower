@@ -793,7 +793,8 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Verify traffic was recorded
         assert run_after.bytes_sent == bytes_sent_before + len(obj_b)
         assert run_after.bytes_recv == 0  # No bytes received during pull
-    
+
+
 class TestFleetServicerWithNodeAuthEnabled(TestFleetServicer):
     """FleetServicer tests for allowed RunStatuses."""
 
