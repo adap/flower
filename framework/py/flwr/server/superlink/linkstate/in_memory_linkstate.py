@@ -576,6 +576,8 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         ),
                         flwr_aid=flwr_aid if flwr_aid else "",
                         federation=federation,
+                        bytes_sent=0,
+                        bytes_recv=0,
                     ),
                 )
                 self.run_ids[run_id] = run_record
@@ -771,3 +773,44 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             index = bisect_right(run.logs, (after_timestamp, ""))
             latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
             return "".join(log for _, log in run.logs[index:]), latest_timestamp
+
+    def store_traffic(
+        self, run_id: int, bytes_sent: int = 0, bytes_recv: int = 0
+    ) -> None:
+        """Store traffic data for the specified `run_id`."""
+        # Validate non-negative values
+        if bytes_sent < 0 or bytes_recv < 0:
+            log(
+                WARNING,
+                "Negative traffic values for run %d: bytes_sent=%d, bytes_recv=%d",
+                run_id,
+                bytes_sent,
+                bytes_recv,
+            )
+            return
+
+        # Skip if no traffic to record
+        if bytes_sent == 0 and bytes_recv == 0:
+            log(WARNING, "No traffic data to store for run_id %d", run_id)
+            return
+
+        with self.lock:
+            if run_id not in self.run_ids:
+                log(ERROR, "`run_id` is invalid")
+                return
+
+            run = self.run_ids[run_id].run
+
+            # Skip if run status is not RUNNING
+            if run.status.status != Status.RUNNING:
+                log(
+                    ERROR,
+                    "Cannot store traffic for run %d with status %s"
+                    "Traffic can only be stored for RUNNING runs.",
+                    run_id,
+                    run.status.status,
+                )
+                return
+
+            run.bytes_sent += bytes_sent
+            run.bytes_recv += bytes_recv

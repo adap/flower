@@ -119,7 +119,9 @@ CREATE TABLE IF NOT EXISTS run(
     details               TEXT,
     federation            TEXT,
     federation_options    BLOB,
-    flwr_aid              TEXT
+    flwr_aid              TEXT,
+    bytes_sent            INTEGER DEFAULT 0,
+    bytes_recv            INTEGER DEFAULT 0
 );
 """
 
@@ -905,8 +907,8 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                     (run_id, fab_id, fab_version,
                     fab_hash, override_config, federation, federation_options,
                     pending_at, starting_at, running_at, finished_at, sub_status,
-                    details, flwr_aid)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    details, flwr_aid, bytes_sent, bytes_recv)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """
                 override_config_json = json.dumps(override_config)
                 data = [
@@ -924,6 +926,8 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                     "",  # sub_status
                     "",  # details
                     flwr_aid or "",  # flwr_aid
+                    0,  # bytes_sent
+                    0,  # bytes_recv
                 ]
                 self.conn.execute(query, tuple(data))
                 return uint64_run_id
@@ -972,6 +976,8 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                 ),
                 flwr_aid=row["flwr_aid"],
                 federation=row["federation"],
+                bytes_sent=row["bytes_sent"],
+                bytes_recv=row["bytes_recv"],
             )
         log(ERROR, "`run_id` does not exist.")
         return None
@@ -1254,6 +1260,72 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                 return None
 
         return rows[0]
+
+    def store_traffic(
+        self, run_id: int, bytes_sent: int = 0, bytes_recv: int = 0
+    ) -> None:
+        """Store traffic data for the specified `run_id`."""
+        # Validate non-negative values
+        if bytes_sent < 0 or bytes_recv < 0:
+            log(
+                WARNING,
+                "Negative traffic values for run %d: bytes_sent=%d, bytes_recv=%d",
+                run_id,
+                bytes_sent,
+                bytes_recv,
+            )
+            return
+
+        # Skip if no traffic to record
+        if bytes_sent == 0 and bytes_recv == 0:
+            log(WARNING, "No traffic data to store for run_id %d", run_id)
+            return
+
+        sint64_run_id = uint64_to_int64(run_id)
+
+        with self.conn:
+            # Single query: update traffic and check run status in one operation
+            # Only update if run is RUNNING (running_at is set and finished_at is empty)
+            query = """
+                UPDATE run
+                SET bytes_sent = bytes_sent + ?,
+                    bytes_recv = bytes_recv + ?
+                WHERE run_id = ?
+                AND running_at != ''
+                AND finished_at = ''
+                RETURNING run_id;
+            """
+            rows = self.conn.execute(
+                query, (bytes_sent, bytes_recv, sint64_run_id)
+            ).fetchall()
+
+            if not rows:
+                # Check if run exists at all
+                query = "SELECT running_at, finished_at FROM run WHERE run_id = ?;"
+                check_rows = self.conn.execute(query, (sint64_run_id,)).fetchall()
+
+                if not check_rows:
+                    log(ERROR, "`run_id` is invalid")
+                else:
+                    row = check_rows[0]
+                    if row["finished_at"]:
+                        status = Status.FINISHED
+                    elif row["running_at"]:
+                        status = Status.RUNNING
+                    else:
+                        status = (
+                            Status.STARTING
+                            if row.get("starting_at")
+                            else Status.PENDING
+                        )
+
+                    log(
+                        ERROR,
+                        "Cannot store traffic for run %d with status %s. "
+                        "Traffic can only be stored for RUNNING runs.",
+                        run_id,
+                        status,
+                    )
 
 
 def message_to_dict(message: Message) -> dict[str, Any]:
