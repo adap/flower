@@ -781,7 +781,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         # Validate non-negative values
         if bytes_sent < 0 or bytes_recv < 0:
             log(
-                WARNING,
+                ERROR,
                 "Negative traffic values for run %d: bytes_sent=%d, bytes_recv=%d",
                 run_id,
                 bytes_sent,

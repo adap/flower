@@ -1268,7 +1268,7 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         # Validate non-negative values
         if bytes_sent < 0 or bytes_recv < 0:
             log(
-                WARNING,
+                ERROR,
                 "Negative traffic values for run %d: bytes_sent=%d, bytes_recv=%d",
                 run_id,
                 bytes_sent,
