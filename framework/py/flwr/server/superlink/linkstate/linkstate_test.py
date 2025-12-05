@@ -1682,7 +1682,7 @@ class StateTest(CoreStateTest):
         [(Status.PENDING, 0), (Status.STARTING, 1), (Status.FINISHED, 3)]
     )  # type: ignore
     def test_store_traffic_non_running_status(
-        self, status: Status, num_transitions: int
+        self, status: str, num_transitions: int
     ) -> None:
         """Test that traffic cannot be stored when status is not RUNNING."""
         # Prepare
