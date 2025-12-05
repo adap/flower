@@ -1615,6 +1615,91 @@ class StateTest(CoreStateTest):
         state: LinkState = self.state_factory()
         assert state.federation_manager.linkstate is state
 
+    def test_store_traffic_basic(self) -> None:
+        """Test basic traffic storage functionality."""
+        # Prepare
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+        transition_run_status(state, run_id, 2)  # Transition to RUNNING
+
+        # Execute
+        state.store_traffic(run_id, bytes_sent=1000, bytes_recv=2000)
+        run = state.get_run(run_id)
+
+        # Assert
+        assert run is not None
+        assert run.bytes_sent == 1000
+        assert run.bytes_recv == 2000
+
+    def test_store_traffic_accumulation(self) -> None:
+        """Test that traffic accumulates correctly over multiple calls."""
+        # Prepare
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+        transition_run_status(state, run_id, 2)  # Transition to RUNNING
+
+        # Execute
+        state.store_traffic(run_id, bytes_sent=1000, bytes_recv=500)
+        state.store_traffic(run_id, bytes_sent=2000, bytes_recv=1500)
+        state.store_traffic(run_id, bytes_sent=500, bytes_recv=1000)
+        run = state.get_run(run_id)
+
+        # Assert
+        assert run is not None
+        assert run.bytes_sent == 3500
+        assert run.bytes_recv == 3000
+
+    @parameterized.expand(
+        [
+            (-1000, 2000),  # negative bytes_sent
+            (1000, -2000),  # negative bytes_recv
+            (-500, -1000),  # both negative
+            (0, 0),  # both zero
+        ]
+    )  # type: ignore
+    def test_store_traffic_negative_values(
+        self, bytes_sent: int, bytes_recv: int
+    ) -> None:
+        """Test that negative traffic values are rejected."""
+        # Prepare
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+        transition_run_status(state, run_id, 2)  # Transition to RUNNING
+
+        # Set initial traffic
+        state.store_traffic(run_id, bytes_sent=1000, bytes_recv=2000)
+
+        # Execute
+        state.store_traffic(run_id, bytes_sent=bytes_sent, bytes_recv=bytes_recv)
+        run = state.get_run(run_id)
+
+        # Assert - traffic should not be updated
+        assert run is not None
+        assert run.bytes_sent == 1000
+        assert run.bytes_recv == 2000
+
+    @parameterized.expand(
+        [(Status.PENDING, 0), (Status.STARTING, 1), (Status.FINISHED, 3)]
+    )  # type: ignore
+    def test_store_traffic_non_running_status(
+        self, status: Status, num_transitions: int
+    ) -> None:
+        """Test that traffic cannot be stored when status is not RUNNING."""
+        # Prepare
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+        transition_run_status(state, run_id, num_transitions)
+
+        # Execute - attempt to store traffic
+        state.store_traffic(run_id, bytes_sent=1000, bytes_recv=2000)
+        run = state.get_run(run_id)
+
+        # Assert - traffic should not be updated for non-RUNNING statuses
+        assert run is not None
+        assert run.status.status == status
+        assert run.bytes_sent == 0
+        assert run.bytes_recv == 0
+
 
 def create_ins_message(
     src_node_id: int,
