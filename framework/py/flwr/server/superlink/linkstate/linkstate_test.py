@@ -1654,13 +1654,12 @@ class StateTest(CoreStateTest):
             (-1000, 2000),  # negative bytes_sent
             (1000, -2000),  # negative bytes_recv
             (-500, -1000),  # both negative
-            (0, 0),  # both zero
         ]
     )  # type: ignore
     def test_store_traffic_negative_values(
         self, bytes_sent: int, bytes_recv: int
     ) -> None:
-        """Test that negative traffic values are rejected."""
+        """Test that negative traffic values raise ValueError."""
         # Prepare
         state = self.state_factory()
         run_id = create_dummy_run(state)
@@ -1669,14 +1668,34 @@ class StateTest(CoreStateTest):
         # Set initial traffic
         state.store_traffic(run_id, bytes_sent=1000, bytes_recv=2000)
 
-        # Execute
-        state.store_traffic(run_id, bytes_sent=bytes_sent, bytes_recv=bytes_recv)
+        # Execute & Assert
+        with self.assertRaises(ValueError):
+            state.store_traffic(run_id, bytes_sent=bytes_sent, bytes_recv=bytes_recv)
+
+        # Verify traffic was not updated
+        run = state.get_run(run_id)
+        assert run is not None
+        assert run.bytes_sent == 1000
+        assert run.bytes_recv == 2000
+
+    def test_store_traffic_zero_values(self) -> None:
+        """Test that zero traffic values are skipped with warning."""
+        # Prepare
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+        transition_run_status(state, run_id, 2)  # Transition to RUNNING
+
+        # Set initial traffic
+        state.store_traffic(run_id, bytes_sent=1001, bytes_recv=2001)
+
+        # Execute - attempt to store zero traffic (should be skipped)
+        state.store_traffic(run_id, bytes_sent=0, bytes_recv=0)
         run = state.get_run(run_id)
 
         # Assert - traffic should not be updated
         assert run is not None
-        assert run.bytes_sent == 1000
-        assert run.bytes_recv == 2000
+        assert run.bytes_sent == 1001
+        assert run.bytes_recv == 2001
 
     @parameterized.expand(
         [(Status.PENDING, 0), (Status.STARTING, 1), (Status.FINISHED, 3)]
@@ -1684,17 +1703,18 @@ class StateTest(CoreStateTest):
     def test_store_traffic_non_running_status(
         self, status: str, num_transitions: int
     ) -> None:
-        """Test that traffic cannot be stored when status is not RUNNING."""
+        """Test that traffic raises ValueError when status is not RUNNING."""
         # Prepare
         state = self.state_factory()
         run_id = create_dummy_run(state)
         transition_run_status(state, run_id, num_transitions)
 
-        # Execute - attempt to store traffic
-        state.store_traffic(run_id, bytes_sent=1000, bytes_recv=2000)
-        run = state.get_run(run_id)
+        # Execute & Assert
+        with self.assertRaises(ValueError):
+            state.store_traffic(run_id, bytes_sent=1002, bytes_recv=2002)
 
-        # Assert - traffic should not be updated for non-RUNNING statuses
+        # Verify traffic was not updated
+        run = state.get_run(run_id)
         assert run is not None
         assert run.status.status == status
         assert run.bytes_sent == 0

@@ -1267,14 +1267,10 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         """Store traffic data for the specified `run_id`."""
         # Validate non-negative values
         if bytes_sent < 0 or bytes_recv < 0:
-            log(
-                WARNING,
-                "Negative traffic values for run %d: bytes_sent=%d, bytes_recv=%d",
-                run_id,
-                bytes_sent,
-                bytes_recv,
+            raise ValueError(
+                f"Negative traffic values for run {run_id}: "
+                f"bytes_sent={bytes_sent}, bytes_recv={bytes_recv}"
             )
-            return
 
         # Skip if no traffic to record
         if bytes_sent == 0 and bytes_recv == 0:
@@ -1305,27 +1301,22 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                 check_rows = self.conn.execute(query, (sint64_run_id,)).fetchall()
 
                 if not check_rows:
-                    log(ERROR, "`run_id` is invalid")
-                else:
-                    row = check_rows[0]
-                    if row["finished_at"]:
-                        status = Status.FINISHED
-                    elif row["running_at"]:
-                        status = Status.RUNNING
-                    else:
-                        status = (
-                            Status.STARTING
-                            if row.get("starting_at")
-                            else Status.PENDING
-                        )
+                    raise ValueError(f"Run {run_id} not found")
 
-                    log(
-                        ERROR,
-                        "Cannot store traffic for run %d with status %s. "
-                        "Traffic can only be stored for RUNNING runs.",
-                        run_id,
-                        status,
+                row = check_rows[0]
+                if row["finished_at"]:
+                    status = Status.FINISHED
+                elif row["running_at"]:
+                    status = Status.RUNNING
+                else:
+                    status = (
+                        Status.STARTING if row.get("starting_at") else Status.PENDING
                     )
+
+                raise ValueError(
+                    f"Cannot store traffic for run {run_id} with status {status}. "
+                    "Traffic can only be stored for RUNNING runs."
+                )
 
 
 def message_to_dict(message: Message) -> dict[str, Any]:
