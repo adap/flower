@@ -785,11 +785,6 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                 f"bytes_sent={bytes_sent}, bytes_recv={bytes_recv}"
             )
 
-        # Skip if no traffic to record
-        if bytes_sent == 0 and bytes_recv == 0:
-            log(WARNING, "No traffic data to store for run_id %d", run_id)
-            return
-
         with self.lock:
             if run_id not in self.run_ids:
                 raise ValueError(f"Run {run_id} not found")

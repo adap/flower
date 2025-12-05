@@ -1272,11 +1272,6 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                 f"bytes_sent={bytes_sent}, bytes_recv={bytes_recv}"
             )
 
-        # Skip if no traffic to record
-        if bytes_sent == 0 and bytes_recv == 0:
-            log(WARNING, "No traffic data to store for run_id %d", run_id)
-            return
-
         sint64_run_id = uint64_to_int64(run_id)
 
         with self.conn:

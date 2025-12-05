@@ -1678,25 +1678,6 @@ class StateTest(CoreStateTest):
         assert run.bytes_sent == 1000
         assert run.bytes_recv == 2000
 
-    def test_store_traffic_zero_values(self) -> None:
-        """Test that zero traffic values are skipped with warning."""
-        # Prepare
-        state = self.state_factory()
-        run_id = create_dummy_run(state)
-        transition_run_status(state, run_id, 2)  # Transition to RUNNING
-
-        # Set initial traffic
-        state.store_traffic(run_id, bytes_sent=1001, bytes_recv=2001)
-
-        # Execute - attempt to store zero traffic (should be skipped)
-        state.store_traffic(run_id, bytes_sent=0, bytes_recv=0)
-        run = state.get_run(run_id)
-
-        # Assert - traffic should not be updated
-        assert run is not None
-        assert run.bytes_sent == 1001
-        assert run.bytes_recv == 2001
-
 
 def create_ins_message(
     src_node_id: int,
