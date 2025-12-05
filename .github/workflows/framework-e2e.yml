@@ -378,16 +378,12 @@ jobs:
         run: |
           flwr new @$ACCOUNT/$APP_NAME
           cd $APP_NAME
-          sed -i 's/"flwr\[[^]]*\][^"]*", *//g' pyproject.toml
-          # Replace tensorflow with tensorflow-cpu to avoid GPU warnings in CI
-          sed -i 's/"tensorflow\([^"]*\)"/"tensorflow-cpu\1"/g' pyproject.toml
-          pip install flwr[simulation]
           pip install .
       - name: Run project
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
           cd $APP_NAME
-          flwr run . local-simulation --run-config num-server-rounds=1 2>&1 | tee flwr_output.log 
+          flwr run . --run-config num-server-rounds=1 2>&1 | tee flwr_output.log 
           if grep -q "ERROR" flwr_output.log; then
             exit 1
           fi
