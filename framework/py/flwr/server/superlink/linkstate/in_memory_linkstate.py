@@ -775,7 +775,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             return "".join(log for _, log in run.logs[index:]), latest_timestamp
 
     def store_traffic(
-        self, run_id: int, bytes_sent: int = 0, bytes_recv: int = 0
+        self, run_id: int, *, bytes_sent: int, bytes_recv: int
     ) -> None:
         """Store traffic data for the specified `run_id`."""
         # Validate non-negative values
