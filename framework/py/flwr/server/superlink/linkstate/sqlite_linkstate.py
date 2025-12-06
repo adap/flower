@@ -1262,7 +1262,7 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         return rows[0]
 
     def store_traffic(
-        self, run_id: int, bytes_sent: int = 0, bytes_recv: int = 0
+        self, run_id: int, *, bytes_sent: int, bytes_recv: int
     ) -> None:
         """Store traffic data for the specified `run_id`."""
 
