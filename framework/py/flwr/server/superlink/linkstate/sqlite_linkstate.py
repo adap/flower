@@ -1261,6 +1261,9 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
         return rows[0]
 
+    def store_traffic(self, run_id: int, *, bytes_sent: int, bytes_recv: int) -> None:
+        """Store traffic data for the specified `run_id`."""
+
 
 def message_to_dict(message: Message) -> dict[str, Any]:
     """Transform Message to dict."""

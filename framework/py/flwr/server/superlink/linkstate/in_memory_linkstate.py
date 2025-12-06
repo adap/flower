@@ -773,3 +773,6 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             index = bisect_right(run.logs, (after_timestamp, ""))
             latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
             return "".join(log for _, log in run.logs[index:]), latest_timestamp
+
+    def store_traffic(self, run_id: int, *, bytes_sent: int, bytes_recv: int) -> None:
+        """Store traffic data for the specified `run_id`."""
