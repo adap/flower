@@ -1681,7 +1681,7 @@ class StateTest(CoreStateTest):
         """Test that invalid run_id raises ValueError."""
         # Prepare
         state = self.state_factory()
-        invalid_run_id = 99999  # Run ID that doesn't exist
+        invalid_run_id = 98889  # Run ID that doesn't exist
 
         # Execute & Assert
         with self.assertRaises(ValueError):
