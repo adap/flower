@@ -774,9 +774,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
             return "".join(log for _, log in run.logs[index:]), latest_timestamp
 
-    def store_traffic(
-        self, run_id: int, *, bytes_sent: int, bytes_recv: int
-    ) -> None:
+    def store_traffic(self, run_id: int, *, bytes_sent: int, bytes_recv: int) -> None:
         """Store traffic data for the specified `run_id`."""
         # Validate non-negative values
         if bytes_sent < 0 or bytes_recv < 0:
@@ -785,10 +783,24 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                 f"bytes_sent={bytes_sent}, bytes_recv={bytes_recv}"
             )
 
+        if bytes_sent == 0 and bytes_recv == 0:
+            raise ValueError(
+                f"Both bytes_sent and bytes_recv cannot be zero for run {run_id}"
+            )
+
         with self.lock:
             if run_id not in self.run_ids:
                 raise ValueError(f"Run {run_id} not found")
+            run_record = self.run_ids[run_id]
 
-            run = self.run_ids[run_id].run
+        with run_record.lock:
+            run = run_record.run
+
+            # Check for integer overflow
+            if run.bytes_sent + bytes_sent < 0 or run.bytes_recv + bytes_recv < 0:
+                raise ValueError(
+                    f"Traffic update would cause integer overflow for run {run_id}"
+                )
+
             run.bytes_sent += bytes_sent
             run.bytes_recv += bytes_recv
