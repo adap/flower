@@ -288,8 +288,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 state=self.state_factory.state(),
                 store=self.objectstore_factory.store(),
             )
-        except InvalidRunStatusException as e:
-            abort_grpc_context(e.message, context)
+            # Record traffic
+            bytes_recv = len(request.object_content)
+            state = self.state_factory.state()
+            state.store_traffic(request.run_id, bytes_recv=bytes_recv)
+        except (InvalidRunStatusException, ValueError) as e:
+            abort_grpc_context(str(e), context)
         except UnexpectedObjectContentError as e:
             # Object content is not valid
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
@@ -313,8 +317,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 state=self.state_factory.state(),
                 store=self.objectstore_factory.store(),
             )
-        except InvalidRunStatusException as e:
-            abort_grpc_context(e.message, context)
+            # Record traffic
+            bytes_sent = len(res.object_content)
+            state = self.state_factory.state()
+            state.store_traffic(request.run_id, bytes_sent=bytes_sent)
+        except (InvalidRunStatusException, ValueError) as e:
+            abort_grpc_context(str(e), context)
 
         return res
 
