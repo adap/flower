@@ -1261,9 +1261,7 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
         return rows[0]
 
-    def store_traffic(
-        self, run_id: int, *, bytes_sent: int, bytes_recv: int
-    ) -> None:
+    def store_traffic(self, run_id: int, *, bytes_sent: int, bytes_recv: int) -> None:
         """Store traffic data for the specified `run_id`."""
         # Validate non-negative values
         if bytes_sent < 0 or bytes_recv < 0:
@@ -1272,23 +1270,53 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                 f"bytes_sent={bytes_sent}, bytes_recv={bytes_recv}"
             )
 
+        if bytes_sent == 0 and bytes_recv == 0:
+            raise ValueError(
+                f"Both bytes_sent and bytes_recv cannot be zero for run {run_id}"
+            )
+
         sint64_run_id = uint64_to_int64(run_id)
 
         with self.conn:
-            # Update traffic for the run
+            # Update and validate in a single query using CASE for conditional updates
             query = """
                 UPDATE run
-                SET bytes_sent = bytes_sent + ?,
-                    bytes_recv = bytes_recv + ?
+                SET bytes_sent = CASE 
+                    WHEN bytes_sent + ? < 0 THEN bytes_sent
+                    ELSE bytes_sent + ?
+                END,
+                bytes_recv = CASE 
+                    WHEN bytes_recv + ? < 0 THEN bytes_recv
+                    ELSE bytes_recv + ?
+                END
                 WHERE run_id = ?
-                RETURNING run_id;
+                RETURNING run_id, 
+                        bytes_sent + ? < 0 AS sent_overflow,
+                        bytes_recv + ? < 0 AS recv_overflow;
             """
             rows = self.conn.execute(
-                query, (bytes_sent, bytes_recv, sint64_run_id)
+                query,
+                (
+                    bytes_sent,
+                    bytes_sent,
+                    bytes_recv,
+                    bytes_recv,
+                    sint64_run_id,
+                    bytes_sent,
+                    bytes_recv,
+                ),
             ).fetchall()
 
             if not rows:
                 raise ValueError(f"Run {run_id} not found")
+
+            row = rows[0]
+
+            # Check if overflow was detected
+            if row["sent_overflow"] or row["recv_overflow"]:
+                raise ValueError(
+                    f"Traffic update would cause integer overflow for run {run_id}"
+                )
 
 
 def message_to_dict(message: Message) -> dict[str, Any]:
