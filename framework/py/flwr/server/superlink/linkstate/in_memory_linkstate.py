@@ -795,12 +795,5 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
 
         with run_record.lock:
             run = run_record.run
-
-            # Check for integer overflow
-            if run.bytes_sent + bytes_sent < 0 or run.bytes_recv + bytes_recv < 0:
-                raise ValueError(
-                    f"Traffic update would cause integer overflow for run {run_id}"
-                )
-
             run.bytes_sent += bytes_sent
             run.bytes_recv += bytes_recv
