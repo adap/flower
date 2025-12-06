@@ -1649,6 +1649,44 @@ class StateTest(CoreStateTest):
         assert run.bytes_sent == 3500
         assert run.bytes_recv == 3000
 
+    @parameterized.expand(
+        [
+            (-1000, 2000),  # negative bytes_sent
+            (1000, -2000),  # negative bytes_recv
+            (-500, -1000),  # both negative
+        ]
+    )  # type: ignore
+    def test_store_traffic_negative_values(
+        self, bytes_sent: int, bytes_recv: int
+    ) -> None:
+        """Test that negative traffic values raise ValueError."""
+        # Prepare
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+
+        # Set initial traffic
+        state.store_traffic(run_id, bytes_sent=1000, bytes_recv=2000)
+
+        # Execute & Assert
+        with self.assertRaises(ValueError):
+            state.store_traffic(run_id, bytes_sent=bytes_sent, bytes_recv=bytes_recv)
+
+        # Verify traffic was not updated
+        run = state.get_run(run_id)
+        assert run is not None
+        assert run.bytes_sent == 1000
+        assert run.bytes_recv == 2000
+
+    def test_store_traffic_invalid_run_id(self) -> None:
+        """Test that invalid run_id raises ValueError."""
+        # Prepare
+        state = self.state_factory()
+        invalid_run_id = 99999  # Run ID that doesn't exist
+
+        # Execute & Assert
+        with self.assertRaises(ValueError):
+            state.store_traffic(invalid_run_id, bytes_sent=1000, bytes_recv=2000)
+
 
 def create_ins_message(
     src_node_id: int,

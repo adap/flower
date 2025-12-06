@@ -1265,6 +1265,13 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         self, run_id: int, bytes_sent: int = 0, bytes_recv: int = 0
     ) -> None:
         """Store traffic data for the specified `run_id`."""
+        # Validate non-negative values
+        if bytes_sent < 0 or bytes_recv < 0:
+            raise ValueError(
+                f"Negative traffic values for run {run_id}: "
+                f"bytes_sent={bytes_sent}, bytes_recv={bytes_recv}"
+            )
+
         sint64_run_id = uint64_to_int64(run_id)
 
         with self.conn:

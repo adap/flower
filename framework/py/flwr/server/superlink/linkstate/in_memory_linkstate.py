@@ -778,6 +778,13 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         self, run_id: int, bytes_sent: int = 0, bytes_recv: int = 0
     ) -> None:
         """Store traffic data for the specified `run_id`."""
+        # Validate non-negative values
+        if bytes_sent < 0 or bytes_recv < 0:
+            raise ValueError(
+                f"Negative traffic values for run {run_id}: "
+                f"bytes_sent={bytes_sent}, bytes_recv={bytes_recv}"
+            )
+
         with self.lock:
             if run_id not in self.run_ids:
                 raise ValueError(f"Run {run_id} not found")
