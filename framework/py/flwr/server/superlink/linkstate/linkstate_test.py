@@ -1649,6 +1649,60 @@ class StateTest(CoreStateTest):
         assert run.bytes_sent == 3500
         assert run.bytes_recv == 3000
 
+    @parameterized.expand(
+        [
+            (-1000, 2000),  # negative bytes_sent
+            (1000, -2000),  # negative bytes_recv
+            (-500, -1000),  # both negative
+        ]
+    )  # type: ignore
+    def test_store_traffic_negative_values(
+        self, bytes_sent: int, bytes_recv: int
+    ) -> None:
+        """Test that negative traffic values raise ValueError."""
+        # Prepare
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+
+        # Set initial traffic
+        state.store_traffic(run_id, bytes_sent=1000, bytes_recv=2000)
+
+        # Execute & Assert
+        with self.assertRaises(ValueError):
+            state.store_traffic(run_id, bytes_sent=bytes_sent, bytes_recv=bytes_recv)
+
+        # Verify traffic was not updated
+        run = state.get_run(run_id)
+        assert run is not None
+        assert run.bytes_sent == 1000
+        assert run.bytes_recv == 2000
+
+    def test_store_traffic_invalid_run_id(self) -> None:
+        """Test that invalid run_id raises ValueError."""
+        # Prepare
+        state = self.state_factory()
+        invalid_run_id = 98889  # Run ID that doesn't exist
+
+        # Execute & Assert
+        with self.assertRaises(ValueError):
+            state.store_traffic(invalid_run_id, bytes_sent=1000, bytes_recv=2000)
+
+    def test_store_traffic_both_zero(self) -> None:
+        """Test that both bytes_sent and bytes_recv being zero raises ValueError."""
+        # Prepare
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+
+        # Execute & Assert
+        with self.assertRaises(ValueError) as context:
+            state.store_traffic(run_id, bytes_sent=0, bytes_recv=0)
+
+        assert "cannot be zero" in str(context.exception)
+        run = state.get_run(run_id)
+        assert run is not None
+        assert run.bytes_sent == 0
+        assert run.bytes_recv == 0
+
 
 def create_ins_message(
     src_node_id: int,
