@@ -493,8 +493,8 @@ class LinkState(CoreState):  # pylint: disable=R0904
             The identifier of the run for which to store traffic data.
         bytes_sent : int
             The number of bytes pulled by SuperNodes from the SuperLink to add to the
-            run's total. Must be greater than 0.
+            run's total.
         bytes_recv : int
             The number of bytes received by SuperLink from SuperNodes to add to the
-            run's total. Must be greater than 0.
+            run's total.
         """
