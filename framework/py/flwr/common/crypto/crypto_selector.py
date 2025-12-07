@@ -1,7 +1,7 @@
 from cryptography.hazmat.primitives.asymmetric.ec import ECDSA
 
 from .algorithms import (
-    AES, HMAC, CHACHA_AEAD, CHACHA, AES_GCM)
+    AES, HMAC, CHACHA_AEAD, CHACHA, AES_GCM, KOBLITZ)
 
 def encrypt(data: bytes, method: str, ecc_pubkey=None) -> bytes:
     if method == "AES":
@@ -14,6 +14,8 @@ def encrypt(data: bytes, method: str, ecc_pubkey=None) -> bytes:
         return CHACHA_AEAD.encrypt(data)
     elif method == "AES_GCM":
         return AES_GCM.encrypt(data)
+    elif method in KOBLITZ.SUPPORTED_CURVES:
+        return KOBLITZ.encrypt(data, method)
 
 
     else:
@@ -31,6 +33,8 @@ def decrypt(data: bytes, method: str, ecc_privkey=None) -> bytes:
         return CHACHA_AEAD.decrypt(data)
     elif method == "AES_GCM":
         return AES_GCM.decrypt(data)
+    elif method in KOBLITZ.SUPPORTED_CURVES:
+        return KOBLITZ.decrypt(data, method)
 
 
     else:

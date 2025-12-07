@@ -5,7 +5,15 @@ import os
 CONFIG_FILE = "config_cripto.py"
 
 # Opzioni disponibili
-ENCRYPTION_METHODS = ["AES", "CHACHA", "CHACHA_AEAD", "AES_GCM"]
+ENCRYPTION_METHODS = [
+    "AES",
+    "CHACHA",
+    "CHACHA_AEAD",
+    "AES_GCM",
+    "KOBLITZ_112",
+    "KOBLITZ_256",
+    "KOBLITZ_512",
+]
 INTEGRITY_METHODS = ["HMAC"]
 NET_OPTIONS = ["custom_cnn", "resnet18", "resnet34", "tiny_cnn", "squeezenet"]
 EVALUATION_OPTIONS = ["server", "client"]
