@@ -40,7 +40,7 @@ sleep 2
 #   LIMITAZIONE RISORSE CPU PER I CLIENT
 # ============================================================
 
-CPU_THREADS=1
+CPU_THREADS=6
 
 echo "[*] Ogni client userà massimo $CPU_THREADS thread CPU"
 
