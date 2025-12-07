@@ -1,54 +1,83 @@
 #!/bin/bash
 
-# Recupero variabili da Python
+# ============================================================
+#   LETTURA CONFIG DA PYTHON
+# ============================================================
+
 TLS=$(python3 -c "from flwr.common.crypto.config_cripto import TLS; print(TLS)")
 NUM_CLIENTS=$(python3 -c "from flwr.common.crypto.config_cripto import NUM_CLIENTS; print(NUM_CLIENTS)")
 
 LOG_DIR="logs"
 mkdir -p "$LOG_DIR"
 
-# Avvio del superlink
+echo "[*] Avvio con TLS=$TLS, NUM_CLIENTS=$NUM_CLIENTS"
+
+
+# ============================================================
+#   AVVIO SUPERLINK
+# ============================================================
+
 if [ "$TLS" = "True" ]; then
     echo "[*] Avvio superlink in modalità TLS"
     flower-superlink \
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
-        | tee "$LOG_DIR/superlink.log" &
+        2>&1 | tee "$LOG_DIR/superlink.log" &
     TLS_FLAG="--root-certificates certificates/ca.crt"
 else
     echo "[*] Avvio superlink in modalità INSECURE"
-    flower-superlink --insecure | tee "$LOG_DIR/superlink.log" &
+    flower-superlink \
+        --insecure \
+        2>&1 | tee "$LOG_DIR/superlink.log" &
     TLS_FLAG="--insecure"
 fi
 
 sleep 2
 
-# Limite thread CPU per client
+
+# ============================================================
+#   LIMITAZIONE RISORSE CPU PER I CLIENT
+# ============================================================
+
 CPU_THREADS=6
 
-# Avvio dei supernode
+echo "[*] Ogni client userà massimo $CPU_THREADS thread CPU"
+
+
+# ============================================================
+#   AVVIO CLIENT (SUPERNODE)
+# ============================================================
+
 for ((i=1; i<=NUM_CLIENTS; i++)); do
     PORT=$((9093 + i))
     DATASET="datasets/cifar10_part_$i"
     LOG_FILE="$LOG_DIR/client_$i.log"
 
-    echo "[*] Avvio client $i con max $CPU_THREADS thread CPU su porta $PORT"
+    echo "[*] Avvio client $i su porta $PORT con dataset $DATASET"
 
-    OMP_NUM_THREADS=$CPU_THREADS \
-    MKL_NUM_THREADS=$CPU_THREADS \
-    OPENBLAS_NUM_THREADS=$CPU_THREADS \
-    NUMEXPR_NUM_THREADS=$CPU_THREADS \
-    VECLIB_MAXIMUM_THREADS=$CPU_THREADS \
-    torch_num_threads=$CPU_THREADS \
+    # Imposta limiti CPU
+    export OMP_NUM_THREADS=$CPU_THREADS
+    export MKL_NUM_THREADS=$CPU_THREADS
+    export OPENBLAS_NUM_THREADS=$CPU_THREADS
+    export NUMEXPR_NUM_THREADS=$CPU_THREADS
+    export VECLIB_MAXIMUM_THREADS=$CPU_THREADS
+    export torch_num_threads=$CPU_THREADS
+
+    # Avvio supernode con logging COMPLETO
     flower-supernode \
-      --superlink 127.0.0.1:9092 \
-      --clientappio-api-address 0.0.0.0:${PORT} \
-      $TLS_FLAG \
-      --node-config "dataset-path='$DATASET' fit_timeout=300 evaluate_timeout=120 ray_timeout=600 connect_timeout=60" \
-      | tee "$LOG_FILE" &
+        --superlink 127.0.0.1:9092 \
+        --clientappio-api-address 0.0.0.0:${PORT} \
+        $TLS_FLAG \
+        --node-config "dataset-path='$DATASET' fit_timeout=2000 evaluate_timeout=120 ray_timeout=600 connect_timeout=60" \
+        2>&1 | tee "$LOG_FILE" &
 
-    echo "[✓] Avviato client $i su porta $PORT con dataset $DATASET (log: $LOG_FILE)"
+    echo "[✓] Client $i avviato (log: $LOG_FILE)"
 done
+
+
+# ============================================================
+#   ATTESA TERMINAZIONE
+# ============================================================
 
 wait
