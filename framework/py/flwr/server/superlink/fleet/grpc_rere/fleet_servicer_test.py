@@ -17,7 +17,7 @@
 
 import tempfile
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import grpc
 from parameterized import parameterized
@@ -652,16 +652,18 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Preregister object
         self.store.preregister(run_id, get_object_tree(obj))
 
-        # Pull
-        req = PullObjectRequest(
-            node=Node(node_id=node_id), run_id=run_id, object_id=obj.object_id
-        )
-        res: PullObjectResponse = self._pull_object(req)
+        # Mock store_traffic to avoid validation error when object_content is empty
+        with patch.object(self.state, "store_traffic"):
+            # Pull
+            req = PullObjectRequest(
+                node=Node(node_id=node_id), run_id=run_id, object_id=obj.object_id
+            )
+            res: PullObjectResponse = self._pull_object(req)
 
-        # Assert object content is b"" (it was never pushed)
-        assert res.object_found
-        assert not res.object_available
-        assert res.object_content == b""
+            # Assert object content is b"" (it was never pushed)
+            assert res.object_found
+            assert not res.object_available
+            assert res.object_content == b""
 
         # Put object in store, then check it can be pulled
         self.store.put(object_id=obj.object_id, object_content=obj_b)
@@ -687,10 +689,13 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Attempt pulling object that doesn't exist
         self._transition_run_status(run_id, 2)
         node_id = self._create_dummy_node()
-        req = PullObjectRequest(
-            node=Node(node_id=node_id), run_id=run_id, object_id="1234"
-        )
-        res: PullObjectResponse = self._pull_object(req)
+        # Mock store_traffic to avoid validation error when object_content is empty
+        with patch.object(self.state, "store_traffic"):
+            req = PullObjectRequest(
+                node=Node(node_id=node_id), run_id=run_id, object_id="1234"
+            )
+            res: PullObjectResponse = self._pull_object(req)
+
         # Empty response
         assert not res.object_found
 

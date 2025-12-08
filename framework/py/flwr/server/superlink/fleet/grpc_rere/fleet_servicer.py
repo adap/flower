@@ -291,7 +291,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             # Record traffic
             bytes_recv = len(request.object_content)
             state = self.state_factory.state()
-            state.store_traffic(request.run_id, bytes_recv=bytes_recv)
+            state.store_traffic(request.run_id, bytes_sent=0, bytes_recv=bytes_recv)
         except (InvalidRunStatusException, ValueError) as e:
             abort_grpc_context(str(e), context)
         except UnexpectedObjectContentError as e:
@@ -320,7 +320,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             # Record traffic
             bytes_sent = len(res.object_content)
             state = self.state_factory.state()
-            state.store_traffic(request.run_id, bytes_sent=bytes_sent)
+            state.store_traffic(request.run_id, bytes_sent=bytes_sent, bytes_recv=0)
         except (InvalidRunStatusException, ValueError) as e:
             abort_grpc_context(str(e), context)
 

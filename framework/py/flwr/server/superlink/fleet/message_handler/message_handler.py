@@ -127,7 +127,7 @@ def send_node_heartbeat(
     return SendNodeHeartbeatResponse(success=res)
 
 
-def pull_messages(
+def pull_messages(  # pylint: disable=too-many-locals
     request: PullMessagesRequest,
     state: LinkState,
     store: ObjectStore,
@@ -143,6 +143,8 @@ def pull_messages(
     # Convert to Messages
     msg_proto = []
     trees = []
+    run_id_to_record: int | None = None
+
     for msg in message_list:
         try:
             # Retrieve Message object tree from ObjectStore
@@ -152,12 +154,26 @@ def pull_messages(
             # Add Message and its object tree to the response
             msg_proto.append(message_to_proto(msg))
             trees.append(obj_tree)
+
+            # Track run_id for traffic recording
+            run_id = msg.metadata.run_id
+
         except NoObjectInStoreError as e:
             log(ERROR, e.message)
             # Delete message ins from state
             state.delete_messages(message_ins_ids={msg_object_id})
 
-    return PullMessagesResponse(messages_list=msg_proto, message_object_trees=trees)
+    response = PullMessagesResponse(messages_list=msg_proto, message_object_trees=trees)
+
+    # Record traffic only if message was successfully processed
+    if run_id_to_record is not None:
+        bytes_sent = len(response.SerializeToString())
+        try:
+            state.store_traffic(run_id, bytes_sent=bytes_sent, bytes_recv=0)
+        except ValueError as e:
+            log(ERROR, "Failed to record traffic for run %s: %s", run_id, e)
+
+    return response
 
 
 def push_messages(
@@ -169,6 +185,9 @@ def push_messages(
     # Convert Message from proto
     msg = message_from_proto(message_proto=request.messages_list[0])
     run_id = msg.metadata.run_id
+
+    # Record incoming traffic size
+    bytes_recv = len(request.SerializeToString())
 
     # Abort if the run is not running
     abort_msg = check_abort(
@@ -193,6 +212,13 @@ def push_messages(
         results={str(message_id): 0},
         objects_to_push=objects_to_push,
     )
+
+    # Record traffic
+    try:
+        state.store_traffic(run_id, bytes_sent=0, bytes_recv=bytes_recv)
+    except ValueError as e:
+        log(ERROR, "Failed to record traffic for run %s: %s", run_id, e)
+
     return response
 
 
