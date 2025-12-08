@@ -46,6 +46,7 @@ def test_pull_messages() -> None:
     state.get_message_ins.assert_called_once()
     state.store_message_res.assert_not_called()
     state.get_message_res.assert_not_called()
+    state.store_traffic.assert_not_called()
 
 
 def test_push_messages() -> None:
@@ -80,3 +81,4 @@ def test_push_messages() -> None:
     state.get_message_ins.assert_not_called()
     state.store_message_res.assert_called_once()
     state.get_message_res.assert_not_called()
+    state.store_traffic.assert_called_once()
