@@ -1280,11 +1280,11 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         with self.conn:
             # Check if run exists, performing the update only if it does
             update_query = """
-            UPDATE run
-            SET bytes_sent = bytes_sent + ?,
-                bytes_recv = bytes_recv + ?
-            WHERE run_id = ?
-            RETURNING run_id;
+                UPDATE run
+                SET bytes_sent = bytes_sent + ?,
+                    bytes_recv = bytes_recv + ?
+                WHERE run_id = ?
+                RETURNING run_id;
             """
             rows = self.conn.execute(
                 update_query, (bytes_sent, bytes_recv, sint64_run_id)
