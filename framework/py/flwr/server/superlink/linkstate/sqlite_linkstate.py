@@ -1263,6 +1263,35 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
     def store_traffic(self, run_id: int, *, bytes_sent: int, bytes_recv: int) -> None:
         """Store traffic data for the specified `run_id`."""
+        # Validate non-negative values
+        if bytes_sent < 0 or bytes_recv < 0:
+            raise ValueError(
+                f"Negative traffic values for run {run_id}: "
+                f"bytes_sent={bytes_sent}, bytes_recv={bytes_recv}"
+            )
+
+        if bytes_sent == 0 and bytes_recv == 0:
+            raise ValueError(
+                f"Both bytes_sent and bytes_recv cannot be zero for run {run_id}"
+            )
+
+        sint64_run_id = uint64_to_int64(run_id)
+
+        with self.conn:
+            # Check if run exists, performing the update only if it does
+            update_query = """
+                UPDATE run
+                SET bytes_sent = bytes_sent + ?,
+                    bytes_recv = bytes_recv + ?
+                WHERE run_id = ?
+                RETURNING run_id;
+            """
+            rows = self.conn.execute(
+                update_query, (bytes_sent, bytes_recv, sint64_run_id)
+            ).fetchall()
+
+            if not rows:
+                raise ValueError(f"Run {run_id} not found")
 
 
 def message_to_dict(message: Message) -> dict[str, Any]:
