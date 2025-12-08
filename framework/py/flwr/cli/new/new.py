@@ -192,6 +192,4 @@ def new(
         app_name = prompt_text("Please provide the app id")
 
     # Download remote app
-    if app_name and app_name.startswith("@"):
-        download_remote_app_via_api(app_name)
-        return
+    download_remote_app_via_api(app_name)
