@@ -1294,7 +1294,8 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                     UPDATE run
                     SET bytes_sent = bytes_sent + ?,
                         bytes_recv = bytes_recv + ?
-                    WHERE run_id = ?;
+                    WHERE run_id = ?
+                    RETURNING run_id;
                 """
             self.conn.execute(update_query, (bytes_sent, bytes_recv, sint64_run_id))
 
