@@ -15,8 +15,8 @@ app = ServerApp()
 def main(grid: Grid, context: Context) -> None:
     """Run entry point for the ServerApp."""
     # Read from config
-    num_rounds = context.run_config["num-server-rounds"]
-    fraction_train = context.run_config["fraction-train"]
+    num_rounds: int = int(context.run_config["num-server-rounds"])
+    fraction_train: float = float(context.run_config["fraction-train"])
 
     # Load global model
     global_model = Net()
