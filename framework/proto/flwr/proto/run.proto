@@ -34,6 +34,8 @@ message Run {
   RunStatus status = 10;
   string flwr_aid = 11;
   string federation = 12;
+  uint64 bytes_sent = 13;
+  uint64 bytes_recv = 14;
 }
 
 message RunStatus {

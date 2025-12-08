@@ -576,6 +576,8 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         ),
                         flwr_aid=flwr_aid if flwr_aid else "",
                         federation=federation,
+                        bytes_sent=0,
+                        bytes_recv=0,
                     ),
                 )
                 self.run_ids[run_id] = run_record
@@ -771,3 +773,27 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             index = bisect_right(run.logs, (after_timestamp, ""))
             latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
             return "".join(log for _, log in run.logs[index:]), latest_timestamp
+
+    def store_traffic(self, run_id: int, *, bytes_sent: int, bytes_recv: int) -> None:
+        """Store traffic data for the specified `run_id`."""
+        # Validate non-negative values
+        if bytes_sent < 0 or bytes_recv < 0:
+            raise ValueError(
+                f"Negative traffic values for run {run_id}: "
+                f"bytes_sent={bytes_sent}, bytes_recv={bytes_recv}"
+            )
+
+        if bytes_sent == 0 and bytes_recv == 0:
+            raise ValueError(
+                f"Both bytes_sent and bytes_recv cannot be zero for run {run_id}"
+            )
+
+        with self.lock:
+            if run_id not in self.run_ids:
+                raise ValueError(f"Run {run_id} not found")
+            run_record = self.run_ids[run_id]
+
+        with run_record.lock:
+            run = run_record.run
+            run.bytes_sent += bytes_sent
+            run.bytes_recv += bytes_recv
