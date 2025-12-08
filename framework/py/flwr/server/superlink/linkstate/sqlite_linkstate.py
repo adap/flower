@@ -1278,25 +1278,20 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         sint64_run_id = uint64_to_int64(run_id)
 
         with self.conn:
-            # Check if run exists
-            query = """
-                    SELECT run_id
-                    FROM run
-                    WHERE run_id = ?;
-                """
-            rows = self.conn.execute(query, (sint64_run_id,)).fetchall()
+            # Check if run exists, performing the update only if it does
+            update_query = """
+            UPDATE run
+            SET bytes_sent = bytes_sent + ?,
+                bytes_recv = bytes_recv + ?
+            WHERE run_id = ?
+            RETURNING run_id;
+            """
+            rows = self.conn.execute(
+                update_query, (bytes_sent, bytes_recv, sint64_run_id)
+            ).fetchall()
 
             if not rows:
                 raise ValueError(f"Run {run_id} not found")
-
-            # Perform the update
-            update_query = """
-                    UPDATE run
-                    SET bytes_sent = bytes_sent + ?,
-                        bytes_recv = bytes_recv + ?
-                    WHERE run_id = ?;
-                """
-            self.conn.execute(update_query, (bytes_sent, bytes_recv, sint64_run_id))
 
 
 def message_to_dict(message: Message) -> dict[str, Any]:
