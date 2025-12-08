@@ -11,7 +11,6 @@ We use [Flower Datasets](https://flower.dev/docs/datasets/) to download, partiti
 Flower's Simulation Engine is used to simulate the LLM fine-tuning process in federated way,
 which allows users to perform the training on a single GPU.
 
-
 ## Methodology
 
 This baseline performs federated LLM fine-tuning with [LoRA](https://arxiv.org/pdf/2106.09685) using the [🤗PEFT](https://huggingface.co/docs/peft/en/index) library.
@@ -51,7 +50,6 @@ All settings are defined in `pyproject.toml`.
 > [!IMPORTANT]
 > Please note that `[tool.flwr.app.config.static]` and `options.num-supernodes` under `[tool.flwr.federations.local-simulation]` are not allowed to be modified for fair competition if you plan to participated in the [LLM leaderboard](https://flower.ai/benchmarks/llm-leaderboard).
 
-
 ## Running the challenge
 
 First make sure that you have got the access to [Mistral-7B](https://huggingface.co/mistralai/Mistral-7B-v0.3) model with your Hugging-Face account. You can request access directly from the Hugging-Face website.
@@ -72,12 +70,11 @@ flwr run
 
 We use Mistral-7B model with 4-bit quantization as default. The estimated VRAM consumption per client for each challenge is shown below:
 
-| Challenges | GeneralNLP |   Finance  |   Medical  |    Code    |
-| :--------: | :--------: | :--------: | :--------: | :--------: |
-|    VRAM    | ~25.50 GB  | ~17.30 GB  | ~22.80 GB  | ~17.40 GB  |
+| Challenges | GeneralNLP |  Finance  |  Medical  |   Code    |
+| :--------: | :--------: | :-------: | :-------: | :-------: |
+|    VRAM    | ~25.50 GB  | ~17.30 GB | ~22.80 GB | ~17.40 GB |
 
 You can adjust the CPU/GPU resources you assign to each of the clients based on your device, which are specified with `options.backend.client-resources.num-cpus` and `options.backend.client-resources.num-gpus` under `[tool.flwr.federations.local-simulation]` entry in `pyproject.toml`.
-
 
 ## Model saving
 

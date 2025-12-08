@@ -21,8 +21,7 @@ def cosine_annealing(
 
 
 def get_model(model_cfg: DictConfig):
-    """Load model with appropriate quantization config and other optimizations.
-    """
+    """Load model with appropriate quantization config and other optimizations."""
     if model_cfg.quantization == 4:
         quantization_config = BitsAndBytesConfig(load_in_4bit=True)
     elif model_cfg.quantization == 8:
