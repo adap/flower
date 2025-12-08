@@ -13,8 +13,7 @@ app = ServerApp()
 
 @app.main()
 def main(grid: Grid, context: Context) -> None:
-    """Main entry point for the ServerApp."""
-
+    """Run entry point for the ServerApp."""
     # Read from config
     num_rounds = context.run_config["num-server-rounds"]
     fraction_train = context.run_config["fraction-train"]
