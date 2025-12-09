@@ -156,7 +156,7 @@ def pull_messages(  # pylint: disable=too-many-locals
             trees.append(obj_tree)
 
             # Track run_id for traffic recording
-            run_id = msg.metadata.run_id
+            run_id_to_record = msg.metadata.run_id
 
         except NoObjectInStoreError as e:
             log(ERROR, e.message)
@@ -169,9 +169,9 @@ def pull_messages(  # pylint: disable=too-many-locals
     if run_id_to_record is not None:
         bytes_sent = len(response.SerializeToString())
         try:
-            state.store_traffic(run_id, bytes_sent=bytes_sent, bytes_recv=0)
+            state.store_traffic(run_id_to_record, bytes_sent=bytes_sent, bytes_recv=0)
         except ValueError as e:
-            log(ERROR, "Failed to record traffic for run %s: %s", run_id, e)
+            log(ERROR, "Failed to record traffic for run %s: %s", run_id_to_record, e)
 
     return response
 
