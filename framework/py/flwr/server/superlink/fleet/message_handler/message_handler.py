@@ -283,6 +283,10 @@ def push_object(
     try:
         store.put(request.object_id, request.object_content)
         stored = True
+        # Record bytes traffic pushed from SuperNode
+        state.store_traffic(
+            request.run_id, bytes_sent=0, bytes_recv=len(request.object_content)
+        )
     except (NoObjectInStoreError, ValueError) as e:
         log(ERROR, str(e))
     except UnexpectedObjectContentError as e:
@@ -309,6 +313,11 @@ def pull_object(
     content = store.get(request.object_id)
     if content is not None:
         object_available = content != b""
+        try:
+            # Record bytes traffic pulled by SuperNode
+            state.store_traffic(request.run_id, bytes_sent=len(content), bytes_recv=0)
+        except ValueError as e:
+            log(ERROR, str(e))
         return PullObjectResponse(
             object_found=True,
             object_available=object_available,
