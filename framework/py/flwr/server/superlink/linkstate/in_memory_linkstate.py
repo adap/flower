@@ -797,3 +797,6 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             run = run_record.run
             run.bytes_sent += bytes_sent
             run.bytes_recv += bytes_recv
+
+    def store_clientapps_runtime(self, run_id, runtime) -> None:
+        """Store ClientApps runtime for the specified `run_id`."""
