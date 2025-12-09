@@ -281,16 +281,15 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             request.object_id,
         )
 
-        state = self.state_factory.state()
         try:
             # Insert in Store
             res = message_handler.push_object(
                 request=request,
-                state=state,
+                state=self.state_factory.state(),
                 store=self.objectstore_factory.store(),
             )
         except InvalidRunStatusException as e:
-            abort_grpc_context(str(e), context)
+            abort_grpc_context(e.message, context)
         except UnexpectedObjectContentError as e:
             # Object content is not valid
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
@@ -315,7 +314,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 store=self.objectstore_factory.store(),
             )
         except InvalidRunStatusException as e:
-            abort_grpc_context(str(e), context)
+            abort_grpc_context(e.message, context)
 
         return res
 

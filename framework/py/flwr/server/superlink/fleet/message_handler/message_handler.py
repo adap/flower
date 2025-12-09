@@ -168,10 +168,7 @@ def pull_messages(  # pylint: disable=too-many-locals
     # Record traffic only if message was successfully processed
     if run_id_to_record is not None:
         bytes_sent = len(response.SerializeToString())
-        try:
-            state.store_traffic(run_id_to_record, bytes_sent=bytes_sent, bytes_recv=0)
-        except ValueError as e:
-            log(ERROR, "Failed to record traffic for run %s: %s", run_id_to_record, e)
+        state.store_traffic(run_id_to_record, bytes_sent=bytes_sent, bytes_recv=0)
 
     return response
 
@@ -214,10 +211,7 @@ def push_messages(
     )
 
     # Record traffic
-    try:
-        state.store_traffic(run_id, bytes_sent=0, bytes_recv=bytes_recv)
-    except ValueError as e:
-        log(ERROR, "Failed to record traffic for run %s: %s", run_id, e)
+    state.store_traffic(run_id, bytes_sent=0, bytes_recv=bytes_recv)
 
     return response
 
@@ -313,11 +307,8 @@ def pull_object(
     content = store.get(request.object_id)
     if content is not None:
         object_available = content != b""
-        try:
-            # Record bytes traffic pulled by SuperNode
-            state.store_traffic(request.run_id, bytes_sent=len(content), bytes_recv=0)
-        except ValueError as e:
-            log(ERROR, str(e))
+        # Record bytes traffic pulled by SuperNode
+        state.store_traffic(request.run_id, bytes_sent=len(content), bytes_recv=0)
         return PullObjectResponse(
             object_found=True,
             object_available=object_available,
