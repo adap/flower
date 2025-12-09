@@ -95,8 +95,7 @@ class InMemoryNodeState(
             if msg_id == "" or msg_id in self.msg_store:
                 return None
             self.msg_store[msg_id] = MessageEntry(message=message)
-
-        return msg_id
+            return msg_id
 
     def get_messages(
         self,
