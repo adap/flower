@@ -16,6 +16,7 @@
 
 
 from collections.abc import Callable
+from dataclasses import dataclass
 
 from flwr.common import Context, Message
 
@@ -27,3 +28,11 @@ ClientFnExt = Callable[[Context], Client]
 
 ClientAppCallable = Callable[[Message, Context], Message]
 Mod = Callable[[Message, Context, ClientAppCallable], Message]
+
+
+@dataclass
+class MessageSendContext:
+    """Container for Message and associated runtime context."""
+
+    message: Message
+    clientapp_runtime: float
