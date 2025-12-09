@@ -1293,7 +1293,7 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             if not rows:
                 raise ValueError(f"Run {run_id} not found")
 
-    def store_clientapps_runtime(self, run_id, runtime) -> None:
+    def store_clientapps_runtime(self, run_id: int, runtime: float) -> None:
         """Store ClientApps runtime for the specified `run_id`."""
 
 
