@@ -486,6 +486,7 @@ def test_run_serialization_deserialization() -> None:
         federation="mock-fed",
         bytes_sent=2048,
         bytes_recv=1024,
+        clientapp_runtime=3.14,
     )
 
     # Execute
