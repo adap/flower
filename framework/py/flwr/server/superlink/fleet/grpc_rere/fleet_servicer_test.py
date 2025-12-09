@@ -653,6 +653,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         self.store.preregister(run_id, get_object_tree(obj))
 
         # Mock store_traffic to avoid validation error when object_content is empty
+        # This is because the object has been preregistered but not yet pushed
         with patch.object(self.state, "store_traffic"):
             # Pull
             req = PullObjectRequest(
@@ -690,6 +691,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         self._transition_run_status(run_id, 2)
         node_id = self._create_dummy_node()
         # Mock store_traffic to avoid validation error when object_content is empty
+        # This is because the object has been preregistered but not yet pushed
         with patch.object(self.state, "store_traffic"):
             req = PullObjectRequest(
                 node=Node(node_id=node_id), run_id=run_id, object_id="1234"

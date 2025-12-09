@@ -280,6 +280,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             node=Node(node_id=node_id), run_id=run_id, object_id="1234"
         )
         # Mock store_traffic to avoid validation error when object_content is empty
+        # This is because the object has been preregistered but not yet pushed
         with patch.object(self.state, "store_traffic"):
             return self._pull_object.with_call(request=req, metadata=metadata)
 
@@ -294,6 +295,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             object_content=b"1234",
         )
         # Mock store_traffic to avoid validation error when object_content is empty
+        # This is because the object has been preregistered but not yet pushed
         with patch.object(self.state, "store_traffic"):
             return self._push_object.with_call(request=req, metadata=metadata)
 

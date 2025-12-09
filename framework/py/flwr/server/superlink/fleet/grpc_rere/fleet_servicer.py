@@ -281,16 +281,16 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             request.object_id,
         )
 
+        state = self.state_factory.state()
         try:
             # Insert in Store
             res = message_handler.push_object(
                 request=request,
-                state=self.state_factory.state(),
+                state=state,
                 store=self.objectstore_factory.store(),
             )
             # Record traffic
             bytes_recv = len(request.object_content)
-            state = self.state_factory.state()
             state.store_traffic(request.run_id, bytes_sent=0, bytes_recv=bytes_recv)
         except (InvalidRunStatusException, ValueError) as e:
             abort_grpc_context(str(e), context)
