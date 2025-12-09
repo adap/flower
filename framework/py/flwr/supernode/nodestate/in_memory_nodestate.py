@@ -208,3 +208,12 @@ class InMemoryNodeState(
 
                 # Store the error reply message
                 self.store_message(error_reply)
+
+    def record_message_processing_start(self, msg_id: str) -> None:
+        """Record the start time of message processing based on the message ID."""
+
+    def record_message_processing_end(self, msg_id: str) -> None:
+        """Record the end time of message processing based on the message ID."""
+
+    def get_message_processing_duration(self, msg_id: str) -> float | None:
+        """Get the message processing duration based on the message ID."""
