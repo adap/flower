@@ -266,6 +266,7 @@ def _to_detail_table(run: RunRow) -> Table:
     table.add_row("FAB Hash", f"{run.fab_hash[:8]}...{run.fab_hash[-8:]}")
     table.add_row("Status", f"[{status_style}]{run.status_text}[/{status_style}]")
     table.add_row("Traffic (GB)", f"[blue]{run.traffic:.3f}[/blue]")
+    table.add_row("Runtime (Hours)", f"[blue]{run.runtime:.3f}[/blue]")
     table.add_row("Elapsed", f"[blue]{run.elapsed}[/blue]")
     table.add_row("Pending At", run.pending_at)
     table.add_row("Starting At", run.starting_at)
@@ -300,6 +301,7 @@ def _to_json(run_list: list[RunRow]) -> str:
                 "fab-hash": row.fab_hash[:8],
                 "status": row.status_text,
                 "traffic-gb": f"{row.traffic:.3f}",
+                "runtime-hrs": f"{row.runtime:.3f}",
                 "elapsed": row.elapsed,
                 "pending-at": row.pending_at,
                 "starting-at": row.starting_at,

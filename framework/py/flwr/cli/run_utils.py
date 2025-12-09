@@ -53,6 +53,8 @@ class RunRow:  # pylint: disable=too-many-instance-attributes
     traffic : float
         The total traffic (in Gigabytes) used during the run. It includes the
         traffic from SuperLink to SuperNodes and vice versa.
+    runtime: float
+        The total runtime (in hours) of the ServerApp and ClientApps during the run.
     """
 
     run_id: int
@@ -67,6 +69,7 @@ class RunRow:  # pylint: disable=too-many-instance-attributes
     running_at: str
     finished_at: str
     traffic: float
+    runtime: float
 
 
 def format_runs(runs: list[Run], now_isoformat: str) -> list[RunRow]:
@@ -130,6 +133,7 @@ def format_runs(runs: list[Run], now_isoformat: str) -> list[RunRow]:
             running_at=_format_datetime(running_at),
             finished_at=_format_datetime(finished_at),
             traffic=(run.bytes_sent + run.bytes_recv) / (1024**3),  # in GB
+            runtime=(elapsed_time.total_seconds() + run.clientapp_runtime) / 3600,
         )
         run_list.append(row)
     return run_list
