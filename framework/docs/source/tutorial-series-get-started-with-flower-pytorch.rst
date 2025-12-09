@@ -96,7 +96,6 @@ It should have the following structure:
 .. code-block:: shell
 
     flower-tutorial
-    ├── README.md
     ├── flower_tutorial
     │   ├── __init__.py
     │   ├── client_app.py   # Defines your ClientApp
