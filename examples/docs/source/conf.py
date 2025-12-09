@@ -75,6 +75,7 @@ redirects = {
     "sklearn-logreg-mnist": "index.html",
     "pytorch-from-centralized-to-federated": "index.html",
     "flower-via-docker-compose": "index.html",
+    "quickstart-sklearn-tabular": "quickstart-sklearn.html",
 }
 
 
