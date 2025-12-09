@@ -16,6 +16,7 @@
 
 
 from datetime import timedelta
+from time import sleep
 from typing import Any
 from unittest.mock import patch
 
@@ -212,6 +213,102 @@ class StateTest(CoreStateTest):
         self.assertEqual(replies[0].metadata.reply_to_message_id, msg.object_id)
         self.assertTrue(replies[0].has_error())
         self.assertEqual(replies[0].error.code, ErrorCode.CLIENT_APP_CRASHED)
+
+    def test_record_message_processing_timing(self) -> None:
+        """Test recording message processing start and end times."""
+        # Prepare
+        msg_id = "test_msg_123"
+
+        # Execute: record start time
+        self.state.record_message_processing_start(msg_id)
+
+        # Simulate some processing time
+        sleep(0.01)
+
+        # Execute: record end time
+        self.state.record_message_processing_end(msg_id)
+
+        # Execute: get duration
+        duration = self.state.get_message_processing_duration(msg_id)
+
+        # Assert
+        assert duration is not None
+        self.assertGreater(duration, 0.0)
+
+    def test_get_message_processing_duration_missing_message(self) -> None:
+        """Test getting duration for non-existent message raises error."""
+        # Execute and assert
+        with self.assertRaises(ValueError):
+            self.state.get_message_processing_duration("non_existent_msg")
+
+    def test_record_message_processing_end_missing_start(self) -> None:
+        """Test recording end time without start time raises error."""
+        # Execute and assert
+        with self.assertRaises(ValueError):
+            self.state.record_message_processing_end("msg_without_start")
+
+    def test_get_message_processing_duration_incomplete_timing(self) -> None:
+        """Test getting duration when only start time is recorded raises error."""
+        # Prepare
+        msg_id = "incomplete_msg"
+        self.state.record_message_processing_start(msg_id)
+
+        # Execute and assert: should raise error since end time is missing
+        with self.assertRaises(ValueError):
+            self.state.get_message_processing_duration(msg_id)
+
+    def test_message_processing_timing_multiple_messages(self) -> None:
+        """Test recording timing for multiple messages independently."""
+        # Prepare
+        msg1_id = "msg1"
+        msg2_id = "msg2"
+
+        # Execute: record timing for first message
+        self.state.record_message_processing_start(msg1_id)
+        sleep(0.01)
+        self.state.record_message_processing_end(msg1_id)
+
+        # Execute: record timing for second message
+        self.state.record_message_processing_start(msg2_id)
+        sleep(0.02)
+        self.state.record_message_processing_end(msg2_id)
+
+        # Get durations
+        duration1 = self.state.get_message_processing_duration(msg1_id)
+        duration2 = self.state.get_message_processing_duration(msg2_id)
+
+        # Assert
+        assert duration1 is not None
+        assert duration2 is not None
+        self.assertGreater(duration2, duration1)
+
+    def test_cleanup_old_message_times(self) -> None:
+        """Test that old message timing entries are cleaned up."""
+        # Prepare
+        old_msg_id = "old_msg"
+        recent_msg_id = "recent_msg"
+
+        # Record timing for an "old" message
+        with patch("flwr.supernode.nodestate.in_memory_nodestate.now") as mock_now:
+            # Simulate message from 2 hours ago
+            old_time = now() - timedelta(hours=2)
+            mock_now.return_value = old_time
+            self.state.record_message_processing_start(old_msg_id)
+            self.state.record_message_processing_end(old_msg_id)
+
+        # Record timing for a recent message (current time)
+        self.state.record_message_processing_start(recent_msg_id)
+        self.state.record_message_processing_end(recent_msg_id)
+
+        # Execute: get duration for recent message (triggers cleanup)
+        recent_duration = self.state.get_message_processing_duration(recent_msg_id)
+
+        # Assert: recent message should return duration
+        self.assertIsNotNone(recent_duration)
+
+        # Assert: old message should be cleaned up and raise error
+        with self.assertRaises(ValueError):
+            self.state.get_message_processing_duration(old_msg_id)
 
 
 def make_dummy_message(

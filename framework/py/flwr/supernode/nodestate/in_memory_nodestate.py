@@ -17,9 +17,10 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from threading import Lock, RLock
 
-from flwr.common import Context, Error, Message
+from flwr.common import Context, Error, Message, now
 from flwr.common.constant import ErrorCode
 from flwr.common.inflatable import (
     get_all_nested_objects,
@@ -45,6 +46,14 @@ class MessageEntry:
     is_retrieved: bool = False
 
 
+@dataclass
+class TimeEntry:
+    """Data class to represent a time entry."""
+
+    starting_at: str | None = None
+    finished_at: str | None = None
+
+
 class InMemoryNodeState(
     NodeState, InMemoryCoreState
 ):  # pylint: disable=too-many-instance-attributes
@@ -63,6 +72,9 @@ class InMemoryNodeState(
         # Store run ID to Context mapping
         self.ctx_store: dict[int, Context] = {}
         self.lock_ctx_store = Lock()
+        # Store msg ID to TimeEntry mapping
+        self.time_store: dict[str, TimeEntry] = {}
+        self.lock_time_store = Lock()
 
     def set_node_id(self, node_id: int | None) -> None:
         """Set the node ID."""
@@ -208,3 +220,50 @@ class InMemoryNodeState(
 
                 # Store the error reply message
                 self.store_message(error_reply)
+
+    def record_message_processing_start(self, msg_id: str) -> None:
+        """Record the start time of message processing based on the message ID."""
+        with self.lock_time_store:
+            self.time_store[msg_id] = TimeEntry(starting_at=now().isoformat())
+
+    def record_message_processing_end(self, msg_id: str) -> None:
+        """Record the end time of message processing based on the message ID."""
+        with self.lock_time_store:
+            if msg_id not in self.time_store:
+                raise ValueError(
+                    f"Cannot record end time: Message ID {msg_id} not found."
+                )
+            entry = self.time_store[msg_id]
+            entry.finished_at = now().isoformat()
+
+    def get_message_processing_duration(self, msg_id: str) -> float | None:
+        """Get the message processing duration based on the message ID."""
+        # Cleanup old message processing times
+        self._cleanup_old_message_times()
+        with self.lock_time_store:
+            if msg_id not in self.time_store:
+                raise ValueError(f"Message ID {msg_id} not found.")
+
+            entry = self.time_store[msg_id]
+            if entry.starting_at is None or entry.finished_at is None:
+                raise ValueError(
+                    f"Start time or end time for message ID {msg_id} is missing."
+                )
+
+            starting_at = datetime.fromisoformat(entry.starting_at)
+            finished_at = datetime.fromisoformat(entry.finished_at)
+            duration = (finished_at - starting_at).total_seconds()
+
+            return duration
+
+    def _cleanup_old_message_times(self, max_age_seconds: float = 3600) -> None:
+        """Remove time entries older than max_age_seconds."""
+        with self.lock_time_store:
+            cutoff = (now() - timedelta(seconds=max_age_seconds)).isoformat()
+            to_delete = [
+                msg_id
+                for msg_id, entry in self.time_store.items()
+                if entry.starting_at and entry.starting_at < cutoff
+            ]
+            for msg_id in to_delete:
+                del self.time_store[msg_id]
