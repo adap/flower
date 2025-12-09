@@ -232,7 +232,7 @@ class StateTest(CoreStateTest):
         duration = self.state.get_message_processing_duration(msg_id)
 
         # Assert
-        self.assertIsNotNone(duration)
+        assert duration is not None
         self.assertGreater(duration, 0.0)
 
     def test_get_message_processing_duration_missing_message(self) -> None:
@@ -278,8 +278,8 @@ class StateTest(CoreStateTest):
         duration2 = self.state.get_message_processing_duration(msg2_id)
 
         # Assert
-        self.assertIsNotNone(duration1)
-        self.assertIsNotNone(duration2)
+        assert duration1 is not None
+        assert duration2 is not None
         self.assertGreater(duration2, duration1)
 
     def test_cleanup_old_message_times(self) -> None:
