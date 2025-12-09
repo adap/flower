@@ -496,3 +496,15 @@ class LinkState(CoreState):  # pylint: disable=R0904
             The number of bytes received by SuperLink from SuperNodes to add to the
             run's total.
         """
+
+    @abc.abstractmethod
+    def store_clientapps_runtime(self, run_id: int, runtime: float) -> None:
+        """Store ClientApps runtime for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to store ClientApps runtime.
+        runtime : float
+            The runtime of the ClientApps in seconds.
+        """
