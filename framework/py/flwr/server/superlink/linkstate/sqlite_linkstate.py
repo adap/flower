@@ -1296,6 +1296,22 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             if not rows:
                 raise ValueError(f"Run {run_id} not found")
 
+    def store_clientapps_runtime(self, run_id: int, runtime: float) -> None:
+        """Store ClientApps runtime for the specified `run_id`."""
+        sint64_run_id = uint64_to_int64(run_id)
+        with self.conn:
+            # Check if run exists, performing the update only if it does
+            update_query = """
+                UPDATE run
+                SET clientapp_runtime = clientapp_runtime + ?
+                WHERE run_id = ?
+                RETURNING run_id;
+            """
+            rows = self.conn.execute(update_query, (runtime, sint64_run_id)).fetchall()
+
+            if not rows:
+                raise ValueError(f"Run {run_id} not found")
+
 
 def message_to_dict(message: Message) -> dict[str, Any]:
     """Transform Message to dict."""
