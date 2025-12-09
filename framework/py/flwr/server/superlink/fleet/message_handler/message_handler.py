@@ -166,6 +166,7 @@ def pull_messages(  # pylint: disable=too-many-locals
     response = PullMessagesResponse(messages_list=msg_proto, message_object_trees=trees)
 
     # Record traffic only if message was successfully processed
+    # All messages in this request are assumed to belong to the same run
     if run_id_to_record is not None:
         bytes_sent = len(response.SerializeToString())
         state.store_traffic(run_id_to_record, bytes_sent=bytes_sent, bytes_recv=0)
@@ -210,7 +211,8 @@ def push_messages(
         objects_to_push=objects_to_push,
     )
 
-    # Record traffic
+    # Record traffic only if message was successfully processed
+    # All messages in this request are assumed to belong to the same run
     state.store_traffic(run_id, bytes_sent=0, bytes_recv=bytes_recv)
 
     return response
