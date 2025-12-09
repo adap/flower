@@ -36,6 +36,7 @@ message Run {
   string federation = 12;
   uint64 bytes_sent = 13;
   uint64 bytes_recv = 14;
+  double clientapp_runtime = 15;
 }
 
 message RunStatus {
