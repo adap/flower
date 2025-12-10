@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "sklearnexample"
+name = "quickstart-sklearn"
 version = "1.0.0"
 description = "Federated Learning with scikit-learn and Flower (Quickstart Example)"
 license = "Apache-2.0"
