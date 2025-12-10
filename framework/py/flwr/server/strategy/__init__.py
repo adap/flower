@@ -39,7 +39,6 @@ from .fedavgm import FedAvgM as FedAvgM
 from .fedmedian import FedMedian as FedMedian
 from .fedopt import FedOpt as FedOpt
 from .fedprox import FedProx as FedProx
-from .fedrdf import FedRDF as FedRDF
 from .fedtrimmedavg import FedTrimmedAvg as FedTrimmedAvg
 from .fedxgb_bagging import FedXgbBagging as FedXgbBagging
 from .fedxgb_cyclic import FedXgbCyclic as FedXgbCyclic
@@ -65,8 +64,7 @@ __all__ = [
     "FedAvgM",
     "FedMedian",
     "FedOpt",
-    "FedProx",
-    "FedRDF",
+    "FedProx"
     "FedTrimmedAvg",
     "FedXgbBagging",
     "FedXgbCyclic",
