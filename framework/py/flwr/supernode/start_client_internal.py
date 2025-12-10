@@ -482,9 +482,8 @@ def _push_messages(
         # Send the message
         try:
             clientapp_runtime = state.get_message_processing_duration(
-                msg_id=message.metadata.reply_to_message_id,
+                message_id=message.metadata.reply_to_message_id,
             )
-            clientapp_runtime = clientapp_runtime or 0.0
             # Send the reply message with its ObjectTree
             # Get the IDs of objects to send
             ids_obj_to_send = send(
