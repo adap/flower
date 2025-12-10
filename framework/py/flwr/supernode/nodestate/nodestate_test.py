@@ -347,7 +347,7 @@ class StateTest(CoreStateTest):
             self.state.get_message_processing_duration(msg_id)
 
         # Verify it was cleaned up (not just missing end time)
-        self.assertIn("not found", str(ctx.exception))
+        self.assertIn(f"Message ID {msg_id} not found.", str(ctx.exception))
 
     def test_cleanup_orphaned_message_times(self) -> None:
         """Test that timing entries without corresponding messages are cleaned up."""
@@ -374,7 +374,7 @@ class StateTest(CoreStateTest):
         # Assert: orphaned message should be cleaned up
         with self.assertRaises(ValueError) as ctx:
             self.state.get_message_processing_duration(orphan_msg_id)
-        self.assertIn(f"Message ID {orphan_msg_id} not found", str(ctx.exception))
+        self.assertIn(f"Message ID {orphan_msg_id} not found.", str(ctx.exception))
 
 
 def make_dummy_message(
