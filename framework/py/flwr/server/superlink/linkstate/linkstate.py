@@ -496,3 +496,19 @@ class LinkState(CoreState):  # pylint: disable=R0904
             The number of bytes received by SuperLink from SuperNodes to add to the
             run's total.
         """
+
+    @abc.abstractmethod
+    def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
+        """Add ClientApp runtime to the cumulative total for the specified `run_id`.
+
+        This method accumulates the runtime by adding the provided value to the
+        existing total runtime for the run. Multiple ClientApps can contribute
+        to the same run's total runtime.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to store each ClientApp's runtime.
+        runtime : float
+            The runtime in seconds to add to the `run_id`'s cumulative total.
+        """
