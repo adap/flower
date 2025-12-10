@@ -17,7 +17,6 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import datetime, timedelta
 from threading import Lock, RLock
 
 from flwr.common import Context, Error, Message, now
