@@ -217,6 +217,8 @@ class StateTest(CoreStateTest):
         """Test recording message processing start and end times."""
         # Prepare
         msg_id = "test_msg_123"
+        msg = make_dummy_message(msg_id=msg_id)
+        self.state.store_message(msg)
 
         # Execute: record start time
         self.state.record_message_processing_start(msg_id)
@@ -238,30 +240,49 @@ class StateTest(CoreStateTest):
     def test_get_message_processing_duration_missing_message(self) -> None:
         """Test getting duration for non-existent message raises error."""
         # Execute and assert
-        with self.assertRaises(ValueError):
-            self.state.get_message_processing_duration("non_existent_msg")
+        msg_id = "non_existent_msg"
+        with self.assertRaises(ValueError) as ctx:
+            self.state.get_message_processing_duration(msg_id)
+        self.assertIn(f"Message ID {msg_id} not found", str(ctx.exception))
 
     def test_record_message_processing_end_missing_start(self) -> None:
         """Test recording end time without start time raises error."""
         # Execute and assert
-        with self.assertRaises(ValueError):
-            self.state.record_message_processing_end("msg_without_start")
+        msg_id = "msg_without_start"
+        with self.assertRaises(ValueError) as ctx:
+            self.state.record_message_processing_end(msg_id)
+        self.assertIn(
+            f"Cannot record end time: Message ID {msg_id} not found.",
+            str(ctx.exception),
+        )
 
     def test_get_message_processing_duration_incomplete_timing(self) -> None:
         """Test getting duration when only start time is recorded raises error."""
         # Prepare
         msg_id = "incomplete_msg"
+        msg = make_dummy_message(msg_id=msg_id)
+        self.state.store_message(msg)
+
         self.state.record_message_processing_start(msg_id)
 
         # Execute and assert: should raise error since end time is missing
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as ctx:
             self.state.get_message_processing_duration(msg_id)
+        self.assertIn(
+            f"Start time or end time for message ID {msg_id} is missing.",
+            str(ctx.exception),
+        )
 
     def test_message_processing_timing_multiple_messages(self) -> None:
         """Test recording timing for multiple messages independently."""
         # Prepare
         msg1_id = "msg1"
+        msg1 = make_dummy_message(msg_id=msg1_id)
+        self.state.store_message(msg1)
+
         msg2_id = "msg2"
+        msg2 = make_dummy_message(msg_id=msg2_id)
+        self.state.store_message(msg2)
 
         # Execute: record timing for first message
         self.state.record_message_processing_start(msg1_id)
@@ -287,32 +308,73 @@ class StateTest(CoreStateTest):
         assert duration2 is not None
         self.assertGreater(duration2, duration1)
 
+    def test_long_running_message_processing_not_cleaned_up(self) -> None:
+        """Test that long-running message timing entries are not cleaned up."""
+        # Prepare
+        msg_id = "test_msg_123"
+        msg = make_dummy_message(msg_id=msg_id)
+        self.state.store_message(msg)
+
+        # Execute & Assert
+        self.state.record_message_processing_start(msg_id)
+        patched_dt = now() + timedelta(hours=12)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = patched_dt
+            self.state.record_message_processing_end(msg_id)
+            duration = self.state.get_message_processing_duration(msg_id)
+
+            assert duration is not None
+            self.assertGreater(duration, 0.0)
+
     def test_cleanup_old_message_times(self) -> None:
         """Test that old message timing entries are cleaned up."""
         # Prepare
-        old_msg_id = "old_msg"
-        recent_msg_id = "recent_msg"
+        msg_id = "old_test_msg_123"
+        msg = make_dummy_message(msg_id=msg_id)
+        self.state.store_message(msg)
 
-        # Record timing for an "old" message
+        # Record timing for an "old" completed message (2 hours ago)
         patched_dt = now() - timedelta(hours=2)
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = patched_dt
-            self.state.record_message_processing_start(old_msg_id)
-            self.state.record_message_processing_end(old_msg_id)
-
-        # Record timing for a recent message (current time)
-        self.state.record_message_processing_start(recent_msg_id)
-        self.state.record_message_processing_end(recent_msg_id)
-
-        # Execute: get duration for recent message (triggers cleanup)
-        recent_duration = self.state.get_message_processing_duration(recent_msg_id)
-
-        # Assert: recent message should return duration
-        self.assertIsNotNone(recent_duration)
+            self.state.record_message_processing_start(msg_id)
+            # Finish 1 second later
+            mock_dt.now.return_value = patched_dt + timedelta(seconds=1)
+            self.state.record_message_processing_end(msg_id)
 
         # Assert: old message should be cleaned up and raise error
-        with self.assertRaises(ValueError):
-            self.state.get_message_processing_duration(old_msg_id)
+        with self.assertRaises(ValueError) as ctx:
+            self.state.get_message_processing_duration(msg_id)
+
+        # Verify it was cleaned up (not just missing end time)
+        self.assertIn(f"Message ID {msg_id} not found.", str(ctx.exception))
+
+    def test_cleanup_orphaned_message_times(self) -> None:
+        """Test that timing entries without corresponding messages are cleaned up."""
+        # Prepare: create a timing entry
+        orphan_msg_id = "orphaned_msg_123"
+        msg = make_dummy_message(msg_id=orphan_msg_id)
+        self.state.store_message(msg)
+        self.state.record_message_processing_start(orphan_msg_id)
+        self.state.record_message_processing_end(orphan_msg_id)
+
+        # Delete the message from msg_store (simulating orphaned timing entry)
+        self.state.delete_messages(message_ids=[orphan_msg_id])
+
+        # Create another message to trigger cleanup
+        other_msg_id = "other_msg"
+        other_msg = make_dummy_message(msg_id=other_msg_id)
+        self.state.store_message(other_msg)
+        self.state.record_message_processing_start(other_msg_id)
+        self.state.record_message_processing_end(other_msg_id)
+
+        # Execute: accessing duration should trigger cleanup
+        self.state.get_message_processing_duration(other_msg_id)
+
+        # Assert: orphaned message should be cleaned up
+        with self.assertRaises(ValueError) as ctx:
+            self.state.get_message_processing_duration(orphan_msg_id)
+        self.assertIn(f"Message ID {orphan_msg_id} not found.", str(ctx.exception))
 
 
 def make_dummy_message(
