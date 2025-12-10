@@ -28,6 +28,7 @@ from flwr.common.inflatable import (
     no_object_id_recompute,
 )
 from flwr.common.typing import Run
+from flwr.supercore.constant import MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS
 from flwr.supercore.corestate.in_memory_corestate import InMemoryCoreState
 from flwr.supercore.object_store import ObjectStore
 
@@ -256,7 +257,9 @@ class InMemoryNodeState(
 
             return duration
 
-    def _cleanup_old_message_times(self, max_age_seconds: float = 3600) -> None:
+    def _cleanup_old_message_times(
+        self, max_age_seconds: float = MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS
+    ) -> None:
         """Remove time entries older than max_age_seconds."""
         with self.lock_time_store:
             cutoff = (now() - timedelta(seconds=max_age_seconds)).isoformat()
