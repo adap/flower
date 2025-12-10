@@ -79,11 +79,11 @@ class InMemoryNodeState(
         # No need to check for expired tokens here
         # The ClientAppIo servicer will first verify the token before storing messages
         with self.lock_msg_store:
-            msg_id = message.metadata.message_id
-            if msg_id == "" or msg_id in self.msg_store:
+            message_id = message.metadata.message_id
+            if message_id == "" or message_id in self.msg_store:
                 return None
-            self.msg_store[msg_id] = MessageEntry(message=message)
-            return msg_id
+            self.msg_store[message_id] = MessageEntry(message=message)
+            return message_id
 
     def get_messages(
         self,
@@ -143,8 +143,8 @@ class InMemoryNodeState(
                 return
 
             # Remove specified messages from the store
-            for msg_id in message_ids:
-                self.msg_store.pop(msg_id, None)
+            for message_id in message_ids:
+                self.msg_store.pop(message_id, None)
 
     def store_run(self, run: Run) -> None:
         """Store a run."""
@@ -209,11 +209,11 @@ class InMemoryNodeState(
                 # Store the error reply message
                 self.store_message(error_reply)
 
-    def record_message_processing_start(self, msg_id: str) -> None:
+    def record_message_processing_start(self, message_id: str) -> None:
         """Record the start time of message processing based on the message ID."""
 
-    def record_message_processing_end(self, msg_id: str) -> None:
+    def record_message_processing_end(self, message_id: str) -> None:
         """Record the end time of message processing based on the message ID."""
 
-    def get_message_processing_duration(self, msg_id: str) -> float | None:
+    def get_message_processing_duration(self, message_id: str) -> float | None:
         """Get the message processing duration based on the message ID."""
