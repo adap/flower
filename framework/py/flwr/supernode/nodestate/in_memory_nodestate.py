@@ -253,12 +253,10 @@ class InMemoryNodeState(
             duration = entry.finished_at - entry.starting_at
             return duration
 
-    def _cleanup_old_message_times(
-        self, max_age_seconds: float = MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS
-    ) -> None:
-        """Remove time entries older than max_age_seconds."""
+    def _cleanup_old_message_times(self) -> None:
+        """Remove time entries older than MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS."""
         with self.lock_time_store:
-            cutoff = now().timestamp() - max_age_seconds
+            cutoff = now().timestamp() - MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS
             to_delete = [
                 msg_id
                 for msg_id, entry in self.time_store.items()
