@@ -201,6 +201,10 @@ class NodeState(CoreState):
         Returns
         -------
         Optional[float]
-            The processing duration in seconds. Returns None if message ID not found,
-            or if start/end times are missing.
+            The processing duration in seconds.
+
+        Raises
+        ------
+        ValueError
+            If the message ID is not found, or if start/end times are missing.
         """
