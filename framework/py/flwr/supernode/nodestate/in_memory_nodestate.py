@@ -262,9 +262,7 @@ class InMemoryNodeState(
             to_delete = [
                 msg_id
                 for msg_id, entry in self.time_store.items()
-                if entry.starting_at
-                and entry.finished_at
-                and entry.finished_at < cutoff
+                if entry.finished_at and entry.finished_at < cutoff
             ]
 
             # Also include msg_ids in time_store that don't exist in msg_store
