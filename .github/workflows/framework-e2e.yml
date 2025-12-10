@@ -313,7 +313,7 @@ jobs:
           - example: quickstart-pytorch
           - example: quickstart-tensorflow
           - example: quickstart-jax
-          - example: quickstart-sklearn-tabular
+          - example: quickstart-sklearn
           - example: quickstart-numpy
           - example: quickstart-pytorch-deprecated
 
