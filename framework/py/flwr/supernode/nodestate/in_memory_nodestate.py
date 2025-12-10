@@ -215,5 +215,5 @@ class InMemoryNodeState(
     def record_message_processing_end(self, message_id: str) -> None:
         """Record the end time of message processing based on the message ID."""
 
-    def get_message_processing_duration(self, message_id: str) -> float | None:
+    def get_message_processing_duration(self, message_id: str) -> float:
         """Get the message processing duration based on the message ID."""
