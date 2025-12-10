@@ -224,16 +224,16 @@ class InMemoryNodeState(
     def record_message_processing_start(self, message_id: str) -> None:
         """Record the start time of message processing based on the message ID."""
         with self.lock_time_store:
-            self.time_store[msg_id] = TimeEntry(starting_at=now().isoformat())
+            self.time_store[message_id] = TimeEntry(starting_at=now().isoformat())
 
     def record_message_processing_end(self, message_id: str) -> None:
         """Record the end time of message processing based on the message ID."""
         with self.lock_time_store:
-            if msg_id not in self.time_store:
+            if message_id not in self.time_store:
                 raise ValueError(
-                    f"Cannot record end time: Message ID {msg_id} not found."
+                    f"Cannot record end time: Message ID {message_id} not found."
                 )
-            entry = self.time_store[msg_id]
+            entry = self.time_store[message_id]
             entry.finished_at = now().isoformat()
 
     def get_message_processing_duration(self, message_id: str) -> float | None:
@@ -241,13 +241,13 @@ class InMemoryNodeState(
         # Cleanup old message processing times
         self._cleanup_old_message_times()
         with self.lock_time_store:
-            if msg_id not in self.time_store:
-                raise ValueError(f"Message ID {msg_id} not found.")
+            if message_id not in self.time_store:
+                raise ValueError(f"Message ID {message_id} not found.")
 
-            entry = self.time_store[msg_id]
+            entry = self.time_store[message_id]
             if entry.starting_at is None or entry.finished_at is None:
                 raise ValueError(
-                    f"Start time or end time for message ID {msg_id} is missing."
+                    f"Start time or end time for message ID {message_id} is missing."
                 )
 
             starting_at = datetime.fromisoformat(entry.starting_at)
