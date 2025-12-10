@@ -28,10 +28,10 @@ Fetch the app:
 flwr new @flwrlabs/quickstart-sklearn
 ```
 
-This will create a new directory called `quickstart-sklearn-tabular` with the following structure:
+This will create a new directory called `quickstart-sklearn` with the following structure:
 
 ```shell
-quickstart-sklearn-tabular
+quickstart-sklearn
 ├── sklearnexample
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
