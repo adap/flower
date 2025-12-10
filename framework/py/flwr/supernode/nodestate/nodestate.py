@@ -195,7 +195,7 @@ class NodeState(CoreState):
         """
 
     @abstractmethod
-    def get_message_processing_duration(self, message_id: str) -> float | None:
+    def get_message_processing_duration(self, message_id: str) -> float:
         """Get the message processing duration based on the message ID.
 
         Parameters
