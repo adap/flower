@@ -412,7 +412,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             node=node,
             messages_list=[message_to_proto(message)],
             message_object_trees=[object_tree],
-            clientapp_runtime=[clientapp_runtime],
+            clientapp_runtime_list=[clientapp_runtime],
         )
         res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
         if res is None:
