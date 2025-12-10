@@ -50,3 +50,64 @@ def int64_to_uint64(signed: int) -> int:
     if signed < 0:
         return signed + (1 << 64)
     return signed
+
+
+def humanize_duration(seconds: float) -> str:
+    """Convert a duration in seconds to a human-friendly string.
+
+    Rules:
+      - < 90 seconds: show seconds
+      - < 1 hour: show minutes + seconds
+      - < 1 day: show hours + minutes
+      - >= 1 day: show days + hours
+    """
+    seconds = int(seconds)
+
+    # Under 90 seconds → Seconds only
+    if seconds < 90:
+        return f"{seconds} s"
+
+    # Under 1 hour → Minutes and seconds
+    minutes, sec = divmod(seconds, 60)
+    if minutes < 60:
+        return f"{minutes} m {sec} s"
+
+    # Under 1 day → Hours and minutes
+    hours, minutes = divmod(minutes, 60)
+    if hours < 24:
+        return f"{hours} h {minutes} m"
+
+    # 1+ days → Days and hours
+    days, hours = divmod(hours, 24)
+    return f"{days} d {hours} h"
+
+
+def humanize_bytes(num_bytes: int) -> str:
+    """Convert a number of bytes to a human-friendly string.
+
+    Uses 1024-based units and 0-1 decimal precision.
+    Rules:
+      - < 1 KB: bytes
+      - < 1 MB: KB
+      - < 1 GB: MB
+      - < 1 TB: GB
+    """
+    value = float(num_bytes)
+
+    for suffix in ["B", "KB", "MB", "GB", "TB"]:
+        if value < 1024 or suffix == "TB":
+            # Bytes → no decimals
+            if suffix == "B":
+                return f"{int(value)} B"
+
+            # Decide precision: 1 decimal for <10, otherwise no decimal
+            if value < 10:
+                formatted = f"{value:.1f}"
+            else:
+                formatted = f"{int(value)}"
+
+            return f"{formatted} {suffix}"
+
+        value /= 1024
+
+    raise RuntimeError("Unreachable code")  # Make mypy happy

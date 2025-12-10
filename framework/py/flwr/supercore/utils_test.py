@@ -17,7 +17,13 @@
 
 from parameterized import parameterized
 
-from .utils import int64_to_uint64, mask_string, uint64_to_int64
+from .utils import (
+    humanize_bytes,
+    humanize_duration,
+    int64_to_uint64,
+    mask_string,
+    uint64_to_int64,
+)
 
 
 def test_mask_string() -> None:
@@ -88,3 +94,30 @@ def test_uint64_to_sint64_to_uint64(expected: int) -> None:
     """Test conversion from sint64 to uint64."""
     actual = int64_to_uint64(uint64_to_int64(expected))
     assert actual == expected
+
+
+@parameterized.expand(  # type: ignore
+    [
+        (24, "24 s"),  # seconds
+        (90, "1 m 30 s"),  # min + sec
+        (3723, "1 h 2 m"),  # hour + min
+        (90000, "1 d 1 h"),  # day + hour
+    ]
+)
+def test_humanize_duration(seconds, expected) -> None:
+    """Test the humanize_duration function."""
+    assert humanize_duration(seconds) == expected
+
+
+@parameterized.expand(  # type: ignore
+    [
+        (800, "800 B"),  # bytes
+        (2048, "2.0 KB"),  # KB < 10 → 1 decimal
+        (10 * 1024, "10 KB"),  # KB >= 10 → no decimal
+        (5 * 1024**2, "5.0 MB"),  # MB < 10
+        (3 * 1024**3, "3.0 GB"),  # GB < 10
+    ]
+)
+def test_humanize_bytes(num_bytes, expected) -> None:
+    """Test the humanize_bytes function."""
+    assert humanize_bytes(num_bytes) == expected
