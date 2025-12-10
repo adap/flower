@@ -119,7 +119,7 @@ def run(
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
         # Disable the validation for remote apps
-        pyproject_path = app / "pyproject.toml"
+        pyproject_path = app / "pyproject.toml" if not is_remote_app else None
         # `./pyproject.toml` will be loaded when `pyproject_path` is None
         config, errors, warnings = load_and_validate(
             pyproject_path, check_module=not is_remote_app
@@ -217,7 +217,7 @@ def _run_with_control_api(
                 typer.secho(
                     "❌ Failed to start run. Please check that the provided "
                     "app identifier (@account_name/app_name) is correct, "
-                    "or that it is not using an unsupported gRPC adapter.",
+                    "or connection to the SuperLink is unavailable.",
                     fg=typer.colors.RED,
                     err=True,
                 )

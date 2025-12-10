@@ -127,46 +127,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         verification_dict: dict[str, str] = {}
         if request.app_spec.startswith("@"):
-            if self.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
-                log(
-                    ERROR,
-                    "FAB downloading is not supported when using the gRPC adapter.",
-                )
-                return StartRunResponse()
-
-            # Parse app specification
-            app_id, app_version = _parse_app_spec(request.app_spec)
-
-            # Validate app version format
-            if app_version:
-                if not re.match(APP_VERSION_PATTERN, app_version):
-                    log(
-                        ERROR,
-                        "Invalid app version. Expected format: x.y.z (digits only).",
-                    )
-                    return StartRunResponse()
-
-            # Validate app ID format
-            if not re.match(APP_ID_PATTERN, app_id):
-                log(
-                    ERROR,
-                    "Invalid remote app ID. Expected format: '@account_name/app_name'.",
-                )
-                return StartRunResponse()
-
-            # Request download link
-            url, verifications = _request_download_link(app_id, app_version, context)
-            verification_dict = _format_verification(verifications, verification_dict)
-
-            # Download FAB from Flower platform API
-            try:
-                r = requests.get(url, timeout=60)
-                r.raise_for_status()
-            except requests.RequestException as e:
-                log(ERROR, "FAB download failed: %s", str(e))
-                return StartRunResponse()
-            fab_file = r.content
-
+            fab_file = _get_remote_fab(
+                self.fleet_api_type, request.app_spec, context, verification_dict
+            )
         else:
             fab_file = request.fab.content
 
@@ -688,7 +651,7 @@ def _request_download_link(
         resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
     except requests.RequestException as e:
         context.abort(
-            grpc.StatusCode.UNAVAILABLE,
+            grpc.StatusCode.FAILED_PRECONDITION,
             f"Unable to connect to Flower platform API: {e}",
         )
 
@@ -713,7 +676,7 @@ def _request_download_link(
         )
     if not resp.ok:
         context.abort(
-            grpc.StatusCode.UNAVAILABLE,
+            grpc.StatusCode.FAILED_PRECONDITION,
             f"Flower platform API request failed with status {resp.status_code}. "
             f"Details: {resp.text}",
         )
@@ -755,3 +718,51 @@ def _parse_app_spec(app_spec: str) -> tuple[str, str | None]:
         app_id = app_spec
         app_version = None
     return app_id, app_version
+
+
+def _get_remote_fab(
+    fleet_api_type: str | None,
+    app_spec: str,
+    context: grpc.ServicerContext,
+    verification_dict: dict[str, str],
+) -> bytes:
+    """Get remote FAB from Flower platform API."""
+    if fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
+        context.abort(
+            grpc.StatusCode.UNAVAILABLE,
+            "Connection to the SuperLink is unavailable.",
+        )
+
+    # Parse app specification
+    app_id, app_version = _parse_app_spec(app_spec)
+
+    # Validate app version format
+    if app_version:
+        if not re.match(APP_VERSION_PATTERN, app_version):
+            context.abort(
+                grpc.StatusCode.NOT_FOUND,
+                "Invalid app version. Expected format: x.y.z (digits only).",
+            )
+
+    # Validate app ID format
+    if not re.match(APP_ID_PATTERN, app_id):
+        context.abort(
+            grpc.StatusCode.NOT_FOUND,
+            "Invalid remote app ID. Expected format: '@account_name/app_name'.",
+        )
+
+    # Request download link
+    url, verifications = _request_download_link(app_id, app_version, context)
+    verification_dict = _format_verification(verifications, verification_dict)
+
+    # Download FAB from Flower platform API
+    try:
+        r = requests.get(url, timeout=60)
+        r.raise_for_status()
+    except requests.RequestException as e:
+        context.abort(
+            grpc.StatusCode.NOT_FOUND,
+            f"FAB download failed: {str(e)}",
+        )
+    fab_file = r.content
+    return fab_file
