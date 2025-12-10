@@ -237,7 +237,7 @@ class InMemoryNodeState(
             entry = self.time_store[message_id]
             entry.finished_at = now().isoformat()
 
-    def get_message_processing_duration(self, message_id: str) -> float | None:
+    def get_message_processing_duration(self, message_id: str) -> float:
         """Get the message processing duration based on the message ID."""
         # Cleanup old message processing times
         self._cleanup_old_message_times()

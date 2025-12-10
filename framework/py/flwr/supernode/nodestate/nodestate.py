@@ -205,7 +205,7 @@ class NodeState(CoreState):
 
         Returns
         -------
-        Optional[float]
+        float
             The processing duration in seconds.
 
         Raises
