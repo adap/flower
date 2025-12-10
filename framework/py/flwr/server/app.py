@@ -300,14 +300,16 @@ def run_superlink() -> None:
     fed_config_path = getattr(args, "federations_config", None)
     federation_manager = get_federation_manager(fed_config_path)
 
+    # Initialize ObjectStoreFactory
+    objectstore_factory = ObjectStoreFactory(args.database)
+
     # Initialize StateFactory
-    state_factory = LinkStateFactory(args.database, federation_manager)
+    state_factory = LinkStateFactory(
+        args.database, federation_manager, objectstore_factory
+    )
 
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
-
-    # Initialize ObjectStoreFactory
-    objectstore_factory = ObjectStoreFactory(args.database)
 
     # Start Control API
     is_simulation = args.simulation

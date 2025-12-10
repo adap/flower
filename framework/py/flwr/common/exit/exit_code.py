@@ -58,6 +58,9 @@ class ExitCode:
     COMMON_MISSING_EXTRA_REST = 601
     COMMON_TLS_NOT_SUPPORTED = 602
 
+    # Simulation exit codes (700-799)
+    SIMULATION_EXCEPTION = 700
+
     def __new__(cls) -> ExitCode:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
@@ -150,4 +153,8 @@ To use the REST API, install `flwr` with the `rest` extra:
     `pip install "flwr[rest]"`.
 """,
     ExitCode.COMMON_TLS_NOT_SUPPORTED: "Please use the '--insecure' flag.",
+    # Simulation exit codes (700-799)
+    ExitCode.SIMULATION_EXCEPTION: (
+        "An unhandled exception occurred when running the simulation."
+    ),
 }

@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Federated Learning with MONAI and Flower (Quickstart Example)"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.23.0",
+    "flwr[simulation]>=1.24.0",
     "flwr-datasets[vision]>=0.5.0",
     "monai==1.5.1",
     "filelock==3.15.4",

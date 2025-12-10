@@ -452,20 +452,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     def SendAppHeartbeat(
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
     ) -> SendAppHeartbeatResponse:
-        """Handle a heartbeat from the ServerApp."""
+        """Handle a heartbeat from an app process."""
         log(DEBUG, "ServerAppIoServicer.SendAppHeartbeat")
 
         # Init state
         state = self.state_factory.state()
 
         # Acknowledge the heartbeat
-        # The app heartbeat can only be acknowledged if the run is in
-        # starting or running status.
-        success = state.acknowledge_app_heartbeat_deprecated(
-            run_id=request.run_id,
-            heartbeat_interval=request.heartbeat_interval,
-        )
-
+        success = state.acknowledge_app_heartbeat(request.token)
         return SendAppHeartbeatResponse(success=success)
 
     def PushObject(

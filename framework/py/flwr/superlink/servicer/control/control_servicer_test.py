@@ -87,12 +87,13 @@ class TestControlServicer(unittest.TestCase):
         """Set up test fixtures."""
         self.store = Mock()
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        objectstore_factory = Mock(store=Mock(return_value=self.store))
         self.servicer = ControlServicer(
             linkstate_factory=LinkStateFactory(
-                FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+                FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
             ),
             ffs_factory=FfsFactory(self.tmp_dir.name),
-            objectstore_factory=Mock(store=Mock(return_value=self.store)),
+            objectstore_factory=objectstore_factory,
             is_simulation=False,
             authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
         )
@@ -319,7 +320,7 @@ class TestControlServicerAuth(unittest.TestCase):
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         self.servicer = ControlServicer(
             linkstate_factory=LinkStateFactory(
-                FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+                FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), Mock()
             ),
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(),

@@ -229,6 +229,7 @@ class ErrorCode:
     NODE_UNAVAILABLE = 5
     MOD_FAILED_PRECONDITION = 6
     INVALID_FAB = 7
+    CLIENT_APP_CRASHED = 8
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
