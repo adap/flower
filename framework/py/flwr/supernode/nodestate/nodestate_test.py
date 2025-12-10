@@ -343,11 +343,38 @@ class StateTest(CoreStateTest):
             self.state.record_message_processing_end(msg_id)
 
         # Assert: old message should be cleaned up and raise error
-        with self.assertRaises(ValueError) as context:
+        with self.assertRaises(ValueError) as ctx:
             self.state.get_message_processing_duration(msg_id)
 
         # Verify it was cleaned up (not just missing end time)
-        self.assertIn("not found", str(context.exception))
+        self.assertIn("not found", str(ctx.exception))
+
+    def test_cleanup_orphaned_message_times(self) -> None:
+        """Test that timing entries without corresponding messages are cleaned up."""
+        # Prepare: create a timing entry
+        orphan_msg_id = "orphaned_msg_123"
+        msg = make_dummy_message(msg_id=orphan_msg_id)
+        self.state.store_message(msg)
+        self.state.record_message_processing_start(orphan_msg_id)
+        self.state.record_message_processing_end(orphan_msg_id)
+
+        # Delete the message from msg_store (simulating orphaned timing entry)
+        self.state.delete_messages(message_ids=[orphan_msg_id])
+
+        # Create another message to trigger cleanup
+        other_msg_id = "other_msg"
+        other_msg = make_dummy_message(msg_id=other_msg_id)
+        self.state.store_message(other_msg)
+        self.state.record_message_processing_start(other_msg_id)
+        self.state.record_message_processing_end(other_msg_id)
+
+        # Execute: accessing duration should trigger cleanup
+        self.state.get_message_processing_duration(other_msg_id)
+
+        # Assert: orphaned message should be cleaned up
+        with self.assertRaises(ValueError) as ctx:
+            self.state.get_message_processing_duration(orphan_msg_id)
+        self.assertIn(f"Message ID {orphan_msg_id} not found", str(ctx.exception))
 
 
 def make_dummy_message(
