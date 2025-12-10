@@ -287,32 +287,42 @@ class StateTest(CoreStateTest):
         assert duration2 is not None
         self.assertGreater(duration2, duration1)
 
+    def test_long_running_message_processing_not_cleaned_up(self) -> None:
+        """Test that long-running message timing entries are not cleaned up."""
+        # Prepare
+        msg_id = "test_msg_123"
+
+        # Execute & Assert
+        self.state.record_message_processing_start(msg_id)
+        patched_dt = now() + timedelta(hours=12)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = patched_dt
+            self.state.record_message_processing_end(msg_id)
+            duration = self.state.get_message_processing_duration(msg_id)
+
+            assert duration is not None
+            self.assertGreater(duration, 0.0)
+
     def test_cleanup_old_message_times(self) -> None:
         """Test that old message timing entries are cleaned up."""
         # Prepare
-        old_msg_id = "old_msg"
-        recent_msg_id = "recent_msg"
+        msg_id = "old_test_msg_123"
 
-        # Record timing for an "old" message
+        # Record timing for an "old" completed message (2 hours ago)
         patched_dt = now() - timedelta(hours=2)
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = patched_dt
-            self.state.record_message_processing_start(old_msg_id)
-            self.state.record_message_processing_end(old_msg_id)
-
-        # Record timing for a recent message (current time)
-        self.state.record_message_processing_start(recent_msg_id)
-        self.state.record_message_processing_end(recent_msg_id)
-
-        # Execute: get duration for recent message (triggers cleanup)
-        recent_duration = self.state.get_message_processing_duration(recent_msg_id)
-
-        # Assert: recent message should return duration
-        self.assertIsNotNone(recent_duration)
+            self.state.record_message_processing_start(msg_id)
+            # Finish 1 second later
+            mock_dt.now.return_value = patched_dt + timedelta(seconds=1)
+            self.state.record_message_processing_end(msg_id)
 
         # Assert: old message should be cleaned up and raise error
-        with self.assertRaises(ValueError):
-            self.state.get_message_processing_duration(old_msg_id)
+        with self.assertRaises(ValueError) as context:
+            self.state.get_message_processing_duration(msg_id)
+
+        # Verify it was cleaned up (not just missing end time)
+        self.assertIn("not found", str(context.exception))
 
 
 def make_dummy_message(
