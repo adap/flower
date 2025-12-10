@@ -1296,8 +1296,8 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             if not rows:
                 raise ValueError(f"Run {run_id} not found")
 
-    def store_clientapps_runtime(self, run_id: int, runtime: float) -> None:
-        """Store ClientApps runtime for the specified `run_id`."""
+    def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
+        """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
         sint64_run_id = uint64_to_int64(run_id)
         with self.conn:
             # Check if run exists, performing the update only if it does
