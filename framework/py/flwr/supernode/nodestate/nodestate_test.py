@@ -16,7 +16,6 @@
 
 
 from datetime import timedelta
-from time import sleep
 from typing import Any
 from unittest.mock import patch
 
@@ -222,18 +221,19 @@ class StateTest(CoreStateTest):
         # Execute: record start time
         self.state.record_message_processing_start(msg_id)
 
-        # Simulate some processing time
-        sleep(0.01)
+        patched_dt = now() + timedelta(seconds=10)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = patched_dt
 
-        # Execute: record end time
-        self.state.record_message_processing_end(msg_id)
+            # Execute: record end time
+            self.state.record_message_processing_end(msg_id)
 
-        # Execute: get duration
-        duration = self.state.get_message_processing_duration(msg_id)
+            # Execute: get duration
+            duration = self.state.get_message_processing_duration(msg_id)
 
-        # Assert
-        assert duration is not None
-        self.assertGreater(duration, 0.0)
+            # Assert
+            assert duration is not None
+            self.assertGreater(duration, 0.0)
 
     def test_get_message_processing_duration_missing_message(self) -> None:
         """Test getting duration for non-existent message raises error."""
@@ -265,13 +265,18 @@ class StateTest(CoreStateTest):
 
         # Execute: record timing for first message
         self.state.record_message_processing_start(msg1_id)
-        sleep(0.01)
-        self.state.record_message_processing_end(msg1_id)
+        patched_dt_1 = now() + timedelta(seconds=10)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = patched_dt_1
+            self.state.record_message_processing_end(msg1_id)
 
         # Execute: record timing for second message
         self.state.record_message_processing_start(msg2_id)
-        sleep(0.02)
-        self.state.record_message_processing_end(msg2_id)
+
+        patched_dt_2 = now() + timedelta(seconds=20)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = patched_dt_2
+            self.state.record_message_processing_end(msg2_id)
 
         # Get durations
         duration1 = self.state.get_message_processing_duration(msg1_id)
@@ -289,10 +294,9 @@ class StateTest(CoreStateTest):
         recent_msg_id = "recent_msg"
 
         # Record timing for an "old" message
-        with patch("flwr.supernode.nodestate.in_memory_nodestate.now") as mock_now:
-            # Simulate message from 2 hours ago
-            old_time = now() - timedelta(hours=2)
-            mock_now.return_value = old_time
+        patched_dt = now() - timedelta(hours=2)
+        with patch("datetime.datetime") as mock_dt:
+            mock_dt.now.return_value = patched_dt
             self.state.record_message_processing_start(old_msg_id)
             self.state.record_message_processing_end(old_msg_id)
 
