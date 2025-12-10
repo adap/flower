@@ -17,7 +17,6 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import datetime, timedelta
 from threading import Lock, RLock
 
 from flwr.common import Context, Error, Message, now
@@ -51,8 +50,8 @@ class MessageEntry:
 class TimeEntry:
     """Data class to represent a time entry."""
 
-    starting_at: str | None = None
-    finished_at: str | None = None
+    starting_at: float | None = None
+    finished_at: float | None = None
 
 
 class InMemoryNodeState(
@@ -225,7 +224,7 @@ class InMemoryNodeState(
     def record_message_processing_start(self, message_id: str) -> None:
         """Record the start time of message processing based on the message ID."""
         with self.lock_time_store:
-            self.time_store[message_id] = TimeEntry(starting_at=now().isoformat())
+            self.time_store[message_id] = TimeEntry(starting_at=now().timestamp())
 
     def record_message_processing_end(self, message_id: str) -> None:
         """Record the end time of message processing based on the message ID."""
@@ -235,7 +234,7 @@ class InMemoryNodeState(
                     f"Cannot record end time: Message ID {message_id} not found."
                 )
             entry = self.time_store[message_id]
-            entry.finished_at = now().isoformat()
+            entry.finished_at = now().timestamp()
 
     def get_message_processing_duration(self, message_id: str) -> float:
         """Get the message processing duration based on the message ID."""
@@ -251,10 +250,7 @@ class InMemoryNodeState(
                     f"Start time or end time for message ID {message_id} is missing."
                 )
 
-            starting_at = datetime.fromisoformat(entry.starting_at)
-            finished_at = datetime.fromisoformat(entry.finished_at)
-            duration = (finished_at - starting_at).total_seconds()
-
+            duration = entry.finished_at - entry.starting_at
             return duration
 
     def _cleanup_old_message_times(
@@ -262,7 +258,7 @@ class InMemoryNodeState(
     ) -> None:
         """Remove time entries older than max_age_seconds."""
         with self.lock_time_store:
-            cutoff = (now() - timedelta(seconds=max_age_seconds)).isoformat()
+            cutoff = now().timestamp() - max_age_seconds
             to_delete = [
                 msg_id
                 for msg_id, entry in self.time_store.items()
