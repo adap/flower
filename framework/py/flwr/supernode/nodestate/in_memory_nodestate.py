@@ -257,23 +257,14 @@ class InMemoryNodeState(
         """Remove time entries older than MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS."""
         with self.lock_time_store:
             cutoff = now().timestamp() - MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS
-            # Find message IDs for entries that have a starting and finished time
-            # and that started before the cutoff
+            # Find message IDs for entries that have a finishing_at time
+            # before the cutoff, and those that don't exist in msg_store
             to_delete = [
                 msg_id
                 for msg_id, entry in self.time_store.items()
-                if entry.finished_at and entry.finished_at < cutoff
+                if (entry.finished_at and entry.finished_at < cutoff)
+                or msg_id not in self.msg_store
             ]
-
-            # Also include msg_ids in time_store that don't exist in msg_store
-            with self.lock_msg_store:
-                to_delete.extend(
-                    [
-                        msg_id
-                        for msg_id in self.time_store
-                        if msg_id not in self.msg_store
-                    ]
-                )
 
             # Delete the identified entries
             for msg_id in to_delete:
