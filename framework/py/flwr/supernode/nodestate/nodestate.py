@@ -187,6 +187,11 @@ class NodeState(CoreState):
         ----------
         message_id : str
             The ID of the message associated with the end time.
+
+        Raises
+        ------
+        ValueError
+            If the message ID is not found.
         """
 
     @abstractmethod
