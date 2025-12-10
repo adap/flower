@@ -79,11 +79,11 @@ class InMemoryNodeState(
         # No need to check for expired tokens here
         # The ClientAppIo servicer will first verify the token before storing messages
         with self.lock_msg_store:
-            message_id = message.metadata.message_id
-            if message_id == "" or message_id in self.msg_store:
+            msg_id = message.metadata.message_id
+            if msg_id == "" or msg_id in self.msg_store:
                 return None
-            self.msg_store[message_id] = MessageEntry(message=message)
-            return message_id
+            self.msg_store[msg_id] = MessageEntry(message=message)
+            return msg_id
 
     def get_messages(
         self,
@@ -143,8 +143,8 @@ class InMemoryNodeState(
                 return
 
             # Remove specified messages from the store
-            for message_id in message_ids:
-                self.msg_store.pop(message_id, None)
+            for msg_id in message_ids:
+                self.msg_store.pop(msg_id, None)
 
     def store_run(self, run: Run) -> None:
         """Store a run."""
