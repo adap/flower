@@ -124,7 +124,7 @@ Quickstart examples:
 - [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)
 - [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart-jax)
 - [Quickstart (MONAI)](https://github.com/adap/flower/tree/main/examples/quickstart-monai)
-- [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
+- [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/quickstart-sklearn)
 - [Quickstart (Android [TFLite])](https://github.com/adap/flower/tree/main/examples/android)
 - [Quickstart (iOS [CoreML])](https://github.com/adap/flower/tree/main/examples/ios)
 - [Quickstart (MLX)](https://github.com/adap/flower/tree/main/examples/quickstart-mlx)
