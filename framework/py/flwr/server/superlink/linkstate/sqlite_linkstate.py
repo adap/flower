@@ -1293,6 +1293,10 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             if not rows:
                 raise ValueError(f"Run {run_id} not found")
 
+    def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
+        """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
+        raise NotImplementedError("Method not yet implemented.")
+
 
 def message_to_dict(message: Message) -> dict[str, Any]:
     """Transform Message to dict."""
