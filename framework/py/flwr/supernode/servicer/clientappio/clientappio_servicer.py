@@ -223,6 +223,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Retrieve message for this run
         message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
 
+        # Record message processing start time
+        state.record_message_processing_start(message_id=message.metadata.message_id)
+
         # Retrieve the object tree for the message
         object_tree = store.get_object_tree(message.metadata.message_id)
 
@@ -254,7 +257,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             objects_to_push |= set(store.preregister(run_id, object_tree))
         # Save the message to the state
         state.store_message(message_from_proto(request.messages_list[0]))
-
+        # Record message processing end time
+        state.record_message_processing_end(
+            message_id=request.messages_list[0].metadata.reply_to_message_id
+        )
         return PushAppMessagesResponse(objects_to_push=objects_to_push)
 
     def SendAppHeartbeat(
