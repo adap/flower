@@ -217,6 +217,8 @@ class StateTest(CoreStateTest):
         """Test recording message processing start and end times."""
         # Prepare
         msg_id = "test_msg_123"
+        msg = make_dummy_message(msg_id=msg_id)
+        self.state.store_message(msg)
 
         # Execute: record start time
         self.state.record_message_processing_start(msg_id)
@@ -238,30 +240,49 @@ class StateTest(CoreStateTest):
     def test_get_message_processing_duration_missing_message(self) -> None:
         """Test getting duration for non-existent message raises error."""
         # Execute and assert
-        with self.assertRaises(ValueError):
-            self.state.get_message_processing_duration("non_existent_msg")
+        msg_id = "non_existent_msg"
+        with self.assertRaises(ValueError) as ctx:
+            self.state.get_message_processing_duration(msg_id)
+        self.assertIn(f"Message ID {msg_id} not found", str(ctx.exception))
 
     def test_record_message_processing_end_missing_start(self) -> None:
         """Test recording end time without start time raises error."""
         # Execute and assert
-        with self.assertRaises(ValueError):
-            self.state.record_message_processing_end("msg_without_start")
+        msg_id = "msg_without_start"
+        with self.assertRaises(ValueError) as ctx:
+            self.state.record_message_processing_end(msg_id)
+        self.assertIn(
+            f"Cannot record end time: Message ID {msg_id} not found.",
+            str(ctx.exception),
+        )
 
     def test_get_message_processing_duration_incomplete_timing(self) -> None:
         """Test getting duration when only start time is recorded raises error."""
         # Prepare
         msg_id = "incomplete_msg"
+        msg = make_dummy_message(msg_id=msg_id)
+        self.state.store_message(msg)
+
         self.state.record_message_processing_start(msg_id)
 
         # Execute and assert: should raise error since end time is missing
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as ctx:
             self.state.get_message_processing_duration(msg_id)
+        self.assertIn(
+            f"Start time or end time for message ID {msg_id} is missing.",
+            str(ctx.exception),
+        )
 
     def test_message_processing_timing_multiple_messages(self) -> None:
         """Test recording timing for multiple messages independently."""
         # Prepare
         msg1_id = "msg1"
+        msg1 = make_dummy_message(msg_id=msg1_id)
+        self.state.store_message(msg1)
+
         msg2_id = "msg2"
+        msg2 = make_dummy_message(msg_id=msg2_id)
+        self.state.store_message(msg2)
 
         # Execute: record timing for first message
         self.state.record_message_processing_start(msg1_id)
@@ -291,6 +312,8 @@ class StateTest(CoreStateTest):
         """Test that long-running message timing entries are not cleaned up."""
         # Prepare
         msg_id = "test_msg_123"
+        msg = make_dummy_message(msg_id=msg_id)
+        self.state.store_message(msg)
 
         # Execute & Assert
         self.state.record_message_processing_start(msg_id)
@@ -307,6 +330,8 @@ class StateTest(CoreStateTest):
         """Test that old message timing entries are cleaned up."""
         # Prepare
         msg_id = "old_test_msg_123"
+        msg = make_dummy_message(msg_id=msg_id)
+        self.state.store_message(msg)
 
         # Record timing for an "old" completed message (2 hours ago)
         patched_dt = now() - timedelta(hours=2)

@@ -50,7 +50,7 @@ class MessageEntry:
 class TimeEntry:
     """Data class to represent a time entry."""
 
-    starting_at: float | None = None
+    starting_at: float
     finished_at: float | None = None
 
 
@@ -266,5 +266,17 @@ class InMemoryNodeState(
                 and entry.finished_at
                 and entry.finished_at < cutoff
             ]
+
+            # Also include msg_ids in time_store that don't exist in msg_store
+            with self.lock_msg_store:
+                to_delete.extend(
+                    [
+                        msg_id
+                        for msg_id in self.time_store
+                        if msg_id not in self.msg_store
+                    ]
+                )
+
+            # Delete the identified entries
             for msg_id in to_delete:
                 del self.time_store[msg_id]
