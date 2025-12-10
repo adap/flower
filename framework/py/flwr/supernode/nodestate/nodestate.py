@@ -170,32 +170,32 @@ class NodeState(CoreState):
         """
 
     @abstractmethod
-    def record_message_processing_start(self, msg_id: str) -> None:
+    def record_message_processing_start(self, message_id: str) -> None:
         """Record the start time of message processing based on the message ID.
 
         Parameters
         ----------
-        msg_id : str
+        message_id : str
             The ID of the message associated with the start time.
         """
 
     @abstractmethod
-    def record_message_processing_end(self, msg_id: str) -> None:
+    def record_message_processing_end(self, message_id: str) -> None:
         """Record the end time of message processing based on the message ID.
 
         Parameters
         ----------
-        msg_id : str
+        message_id : str
             The ID of the message associated with the end time.
         """
 
     @abstractmethod
-    def get_message_processing_duration(self, msg_id: str) -> float | None:
+    def get_message_processing_duration(self, message_id: str) -> float | None:
         """Get the message processing duration based on the message ID.
 
         Parameters
         ----------
-        msg_id : str
+        message_id : str
             The ID of the message.
 
         Returns
