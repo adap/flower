@@ -217,3 +217,4 @@ class InMemoryNodeState(
 
     def get_message_processing_duration(self, message_id: str) -> float:
         """Get the message processing duration based on the message ID."""
+        raise NotImplementedError("This method is not yet implemented")
