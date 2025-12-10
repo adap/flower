@@ -19,13 +19,13 @@ download, partition and preprocess the dataset.
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-sklearn-tabular . && rm -rf flower && cd quickstart-sklearn-tabular
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-sklearn . && rm -rf flower && cd quickstart-sklearn
 ```
 
-This will create a new directory called `quickstart-sklearn-tabular` with the following structure:
+This will create a new directory called `quickstart-sklearn` with the following structure:
 
 ```shell
-quickstart-sklearn-tabular
+quickstart-sklearn
 ├── sklearnexample
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
