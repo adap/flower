@@ -212,7 +212,7 @@ def new(
         typer.secho(
             "❌ The --framework and --username options are deprecated and will be "
             "removed in future versions of Flower. Please use the app spec format "
-            " instead, e.g., '@account_name/app_name' or "
+            " after `flwr new` instead, e.g., '@account_name/app_name' or "
             "'@account_name/app_name==x.y.z'.",
             fg=typer.colors.RED,
             bold=True,
