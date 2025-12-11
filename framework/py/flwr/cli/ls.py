@@ -293,15 +293,15 @@ def _to_json(run_list: list[RunRow]) -> str:
     for row in run_list:
         runs_list.append(
             {
-                "run-id": row.run_id,
+                "run-id": f"{row.run_id}",
                 "federation": row.federation,
                 "fab-id": row.fab_id,
                 "fab-name": row.fab_id.split("/")[-1],
                 "fab-version": row.fab_version,
                 "fab-hash": row.fab_hash[:8],
                 "status": row.status_text,
-                "traffic-gb": f"{row.traffic:.3f}",
-                "runtime-hrs": f"{row.runtime:.3f}",
+                "traffic-gb": row.traffic,
+                "runtime-hr": row.runtime,
                 "elapsed": row.elapsed,
                 "pending-at": row.pending_at,
                 "starting-at": row.starting_at,
