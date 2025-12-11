@@ -634,6 +634,7 @@ def run_to_proto(run: typing.Run) -> ProtoRun:
         federation=run.federation,
         bytes_sent=run.bytes_sent,
         bytes_recv=run.bytes_recv,
+        clientapp_runtime=run.clientapp_runtime,
     )
     return proto
 
@@ -655,6 +656,7 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         federation=run_proto.federation,
         bytes_sent=run_proto.bytes_sent,
         bytes_recv=run_proto.bytes_recv,
+        clientapp_runtime=run_proto.clientapp_runtime,
     )
     return run
 

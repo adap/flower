@@ -578,6 +578,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         federation=federation,
                         bytes_sent=0,
                         bytes_recv=0,
+                        clientapp_runtime=0.0,
                     ),
                 )
                 self.run_ids[run_id] = run_record
@@ -797,3 +798,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             run = run_record.run
             run.bytes_sent += bytes_sent
             run.bytes_recv += bytes_recv
+
+    def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
+        """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
+        raise NotImplementedError("Method not yet implemented.")
