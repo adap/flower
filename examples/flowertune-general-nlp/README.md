@@ -28,7 +28,7 @@ pip install flwr
 Fetch the app:
 
 ```shell
-flwr new @flwrlabs/flowertune-generalnlp
+flwr new @flwrlabs/flowertune-general-nlp
 ```
 
 ## Environments setup
