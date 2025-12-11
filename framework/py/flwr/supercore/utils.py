@@ -15,6 +15,16 @@
 """Utility functions for the infrastructure."""
 
 
+import json
+import re
+
+import requests
+
+from flwr.common.version import package_version as flwr_version
+
+from .constant import APP_ID_PATTERN, APP_VERSION_PATTERN
+
+
 def mask_string(value: str, head: int = 4, tail: int = 4) -> str:
     """Mask a string by preserving only the head and tail characters.
 
@@ -50,6 +60,125 @@ def int64_to_uint64(signed: int) -> int:
     if signed < 0:
         return signed + (1 << 64)
     return signed
+
+
+def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
+    """Parse app specification string into app ID and version.
+
+    Parameters
+    ----------
+    app_spec : str
+        The app specification string in the format '@account/app' or
+        '@account/app==x.y.z' (digits only).
+
+    Returns
+    -------
+    tuple[str, str | None]
+        A tuple containing the app ID and optional version.
+
+    Raises
+    ------
+    ValueError
+        If the app specification format is invalid.
+    """
+    if "==" in app_spec:
+        app_id, app_version = app_spec.split("==", 1)
+
+        if not re.match(APP_VERSION_PATTERN, app_version):
+            raise ValueError(
+                "Invalid app version. Expected format: x.y.z (digits only)."
+            )
+    else:
+        app_id = app_spec
+        app_version = None
+
+    if not re.match(APP_ID_PATTERN, app_id):
+        raise ValueError(
+            "Invalid remote app ID. Expected format: '@account_name/app_name'."
+        )
+
+    return app_id, app_version
+
+
+def request_download_link(
+    app_id: str, app_version: str | None, in_url: str, out_url: str
+) -> tuple[str, list[dict[str, str]] | None]:
+    """Request a download link for the given app from the Flower Platform API.
+
+    Parameters
+    ----------
+    app_id : str
+        The application identifier in the format '@account/app'.
+    app_version : str | None
+        The application version (e.g., '1.2.3'), or None to request the latest version.
+    in_url : str
+        The Platform API endpoint URL to query.
+    out_url : str
+        The key name in the response that contains the download URL.
+
+    Returns
+    -------
+    tuple[str, list[dict[str, str]] | None]
+        A tuple containing:
+        - The download URL for the application.
+        - A list of verification dictionaries if provided by the API, otherwise None.
+
+    Raises
+    ------
+    ValueError
+        If the API connection fails, the application or version is not found,
+        the API returns a non-200 response, or the response format is invalid.
+    """
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    body = {
+        "app_id": app_id,  # send raw string of app_id
+        "app_version": app_version,
+        "flwr_version": flwr_version,
+    }
+
+    try:
+        resp = requests.post(in_url, headers=headers, data=json.dumps(body), timeout=20)
+    except requests.RequestException as e:
+        raise ValueError(f"Unable to connect to Platform API: {e}") from e
+
+    if resp.status_code == 404:
+        # Expecting a JSON body with a "detail" field
+        try:
+            error_message = resp.json().get("detail")
+        except ValueError:
+            # JSON parsing failed
+            raise ValueError(f"{app_id} not found in Platform API.") from None
+
+        if isinstance(error_message, dict):
+            available_app_versions = error_message.get("available_app_versions", [])
+            available_versions_str = (
+                ", ".join(map(str, available_app_versions))
+                if available_app_versions
+                else "None"
+            )
+            raise ValueError(
+                f"{app_id}=={app_version} not found in Platform API. "
+                f"Available app versions for {app_id}: {available_versions_str}"
+            )
+
+        raise ValueError(f"{app_id} not found in Platform API.")
+
+    if not resp.ok:
+        raise ValueError(
+            f"Platform API request failed with status {resp.status_code}. "
+            f"Details: {resp.text}"
+        )
+
+    data = resp.json()
+    if out_url not in data:
+        raise ValueError("Invalid response from Platform API")
+
+    verifications = data["verifications"] if "verifications" in data else None
+
+    return str(data[out_url]), verifications
 
 
 def humanize_duration(seconds: float) -> str:
