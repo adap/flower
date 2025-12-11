@@ -212,7 +212,6 @@ def push_messages(
     )
 
     # Record traffic only if message was successfully processed
-    # All messages in this request are assumed to belong to the same run
     # Only one message is processed per request
     state.store_traffic(run_id, bytes_sent=0, bytes_recv=bytes_recv)
     if request.clientapp_runtime_list:
