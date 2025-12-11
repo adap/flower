@@ -483,8 +483,7 @@ def test_format_verification_compact() -> None:
         {"public_key_id": "key1", "sig": "abc", "algo": "ed25519"},
         {"public_key_id": "key2", "sig": "def", "algo": "ed25519"},
     ]
-    base: dict[str, str] = {}
-    out: dict[str, str] = _format_verification(verifications, base)
+    out: dict[str, str] = _format_verification(verifications)
 
     # Should mark valid
     assert out["valid_license"] == "Valid"
@@ -493,8 +492,3 @@ def test_format_verification_compact() -> None:
     v2: dict[str, str] = json.loads(out["key2"])
     assert v1 == {"sig": "abc", "algo": "ed25519"}
     assert v2 == {"sig": "def", "algo": "ed25519"}
-
-    # Case 2: verifications None -> only valid_license is set to "" and base preserved
-    out2: dict[str, str] = _format_verification(None, {"x": "y"})
-    assert out2["x"] == "y"
-    assert out2["valid_license"] == ""
