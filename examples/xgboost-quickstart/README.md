@@ -14,21 +14,24 @@ This project provides a minimal code example to enable you to get started quickl
 
 ## Set up the project
 
-### Clone the project
+### Fetch the app
 
-Start by cloning the example project:
+Install Flower:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git _tmp \
-        && mv _tmp/examples/xgboost-quickstart . \
-        && rm -rf _tmp \
-        && cd xgboost-quickstart
+pip install flwr
 ```
 
-This will create a new directory called `xgboost-quickstart` with the following structure:
+Fetch the app:
 
 ```shell
-xgboost-quickstart
+flwr new @flwrlabs/quickstart-xgboost
+```
+
+This will create a new directory called `quickstart-xgboost` with the following structure:
+
+```shell
+quickstart-xgboost
 ├── xgboost_quickstart
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
