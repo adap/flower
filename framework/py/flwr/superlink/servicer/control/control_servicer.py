@@ -121,8 +121,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         verification_dict: dict[str, str] = {}
         if request.app_spec.startswith("@"):
-            fab_file = _get_remote_fab(
-                self.fleet_api_type, request.app_spec, context, verification_dict
+            fab_file, verification_dict = _get_remote_fab(
+                self.fleet_api_type, request.app_spec, context
             )
         else:
             fab_file = request.fab.content
@@ -629,20 +629,16 @@ def _check_flwr_aid_in_run(
         )
 
 
-def _format_verification(
-    verifications: list[dict[str, str]] | None, verification_dict: dict[str, str]
-) -> dict[str, str]:
+def _format_verification(verifications: list[dict[str, str]]) -> dict[str, str]:
     """Format verification information for FAB."""
-    if verifications is not None:
-        # Convert verifications to dict[str, str] type
-        verification_dict = {
-            item["public_key_id"]: json.dumps(
-                {k: v for k, v in item.items() if k != "public_key_id"}
-            )
-            for item in verifications
-        }
-    valid_license = "" if verifications is None else "Valid"
-    verification_dict.update({"valid_license": valid_license})
+    # Convert verifications to dict[str, str] type
+    verification_dict = {
+        item["public_key_id"]: json.dumps(
+            {k: v for k, v in item.items() if k != "public_key_id"}
+        )
+        for item in verifications
+    }
+    verification_dict.update({"valid_license": "Valid"})
 
     return verification_dict
 
@@ -651,8 +647,7 @@ def _get_remote_fab(
     fleet_api_type: str | None,
     app_spec: str,
     context: grpc.ServicerContext,
-    verification_dict: dict[str, str],
-) -> bytes:
+) -> tuple[bytes, dict[str, str]]:
     """Get remote FAB from Flower platform API."""
     if fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
         context.abort(
@@ -683,7 +678,9 @@ def _get_remote_fab(
         )
 
     # Format verification information
-    verification_dict = _format_verification(verifications, verification_dict)
+    verification_dict = (
+        _format_verification(verifications) if verifications else {"valid_license": ""}
+    )
 
     # Download FAB from Flower platform API
     try:
@@ -695,4 +692,4 @@ def _get_remote_fab(
             f"FAB download failed: {str(e)}",
         )
     fab_file = r.content
-    return fab_file
+    return fab_file, verification_dict
