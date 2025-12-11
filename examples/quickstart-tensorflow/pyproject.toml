@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "tfexample"
+name = "quickstart-tensorflow"
 version = "1.0.0"
 description = "Federated Learning with Tensorflow/Keras and Flower (Quickstart Example)"
 license = "Apache-2.0"
