@@ -1,7 +1,7 @@
 ---
 tags: [flowertune, llm, finetuning, lora]
 dataset: [alpaca-gpt4]
-framework: [torch, huggingface, peft]
+framework: [torch, transformers, peft]
 ---
 
 # FlowerTune LLM on General NLP Dataset
