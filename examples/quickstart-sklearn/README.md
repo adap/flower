@@ -14,18 +14,24 @@ download, partition and preprocess the dataset.
 
 ## Set up the project
 
-### Clone the project
+### Fetch the app
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+Install Flower:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-sklearn-tabular . && rm -rf flower && cd quickstart-sklearn-tabular
+pip install flwr
 ```
 
-This will create a new directory called `quickstart-sklearn-tabular` with the following structure:
+Fetch the app:
 
 ```shell
-quickstart-sklearn-tabular
+flwr new @flwrlabs/quickstart-sklearn
+```
+
+This will create a new directory called `quickstart-sklearn` with the following structure:
+
+```shell
+quickstart-sklearn
 ├── sklearnexample
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp

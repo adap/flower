@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-01 00:09+0000\n"
+"POT-Creation-Date: 2025-12-09 00:08+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -1001,24 +1001,20 @@ msgid "Open Jupyter Notebooks on Google Colab"
 msgstr "在谷歌 Colab 上打开 Jupyter 笔记本"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:66
+msgid "Open the notebook ``examples/flower-in-30-minutes/tutorial.ipynb``:"
+msgstr ""
+
+#: ../../source/contributor-how-to-install-development-versions.rst:68
 #, fuzzy
 msgid ""
-"Open the notebook ``framework/docs/source/tutorial-series-get-started-"
-"with-flower-pytorch.ipynb``:"
+"https://colab.research.google.com/github/adap/flower/blob/main/examples"
+"/flower-in-30-minutes/tutorial.ipynb"
 msgstr ""
-"打开笔记本 ``framework/docs/source/tutorial-get-started-with-flower-"
-"pytorch.ipynb``："
+"`Flower 模拟 PyTorch "
+"<https://colab.research.google.com/github/adap/flower/blob/main/examples"
+"/simulation-pytorch/sim.ipynb>`_"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:69
-#, fuzzy
-msgid ""
-"https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
-"/tutorial-series-get-started-with-flower-pytorch.ipynb"
-msgstr ""
-"https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
-"/tutorial-get-started-with-flower-pytorch.ipynb"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:71
+#: ../../source/contributor-how-to-install-development-versions.rst:70
 msgid ""
 "Open a development version of the same notebook from branch `branch-name`"
 " by changing ``main`` to ``branch-name`` (right after ``blob``):"
@@ -1026,32 +1022,31 @@ msgstr ""
 "将 ``main`` 改为 ``branch-name``（紧跟在 ``blob``之后），从分支 `branch-name` "
 "打开同一笔记本的开发版本："
 
-#: ../../source/contributor-how-to-install-development-versions.rst:74
+#: ../../source/contributor-how-to-install-development-versions.rst:73
 #, fuzzy
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
-"name/framework/docs/source/tutorial-series-get-started-with-flower-"
-"pytorch.ipynb"
+"name/examples/flower-in-30-minutes/tutorial.ipynb"
 msgstr ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
 "name/framework/docs/source/tutorial-get-started-with-flower-pytorch.ipynb"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:76
+#: ../../source/contributor-how-to-install-development-versions.rst:75
 msgid "Install a `whl` on Google Colab:"
 msgstr "在 Google Colab 上安装 `whl`："
 
-#: ../../source/contributor-how-to-install-development-versions.rst:78
+#: ../../source/contributor-how-to-install-development-versions.rst:77
 msgid ""
 "In the vertical icon grid on the left hand side, select ``Files`` > "
 "``Upload to session storage``"
 msgstr "在左侧的垂直图标网格中，选择 \"文件\">\"上传到会话存储\""
 
-#: ../../source/contributor-how-to-install-development-versions.rst:80
+#: ../../source/contributor-how-to-install-development-versions.rst:79
 #, fuzzy
 msgid "Upload the whl (e.g., ``flwr-1.8.0-py3-none-any.whl``)"
 msgstr "更新 whl (e.g., ``flwr-1.7.0-py3-none-any.whl``)"
 
-#: ../../source/contributor-how-to-install-development-versions.rst:81
+#: ../../source/contributor-how-to-install-development-versions.rst:80
 #, fuzzy
 msgid ""
 "Change ``!pip install -q 'flwr[simulation]' torch torchvision "
@@ -2170,7 +2165,7 @@ msgstr "祝贺你 🥳 您现在正式成为 \"Flower \"贡献者！"
 #: ../../source/contributor-tutorial-contribute-on-github.rst:353
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:401
 #: ../../source/tutorial-series-customize-the-client-pytorch.rst:337
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:700
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:699
 #: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:441
 #: ../../source/tutorial-series-what-is-federated-learning.rst:367
 msgid "Next steps"
@@ -10816,7 +10811,7 @@ msgstr ""
 "federated.html>`_ 做少量改动。"
 
 #: ../../source/how-to-implement-fedbn.rst:18
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:196
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:195
 #, fuzzy
 msgid "Model"
 msgstr "模块"
@@ -34589,30 +34584,21 @@ msgid ""
 msgstr "是的，它可以！Flower 甚至还进行了一些底层优化，使其在 Colab 上运行得更好。下面是一个快速启动示例："
 
 #: ../../source/ref-faq.rst:12
+#, fuzzy
 msgid ""
-"`Flower simulation PyTorch "
+"`Flower 30-minute tutorial "
 "<https://colab.research.google.com/github/adap/flower/blob/main/examples"
-"/simulation-pytorch/sim.ipynb>`_"
+"/flower-in-30-minutes/tutorial.ipynb>`_"
 msgstr ""
 "`Flower 模拟 PyTorch "
 "<https://colab.research.google.com/github/adap/flower/blob/main/examples"
 "/simulation-pytorch/sim.ipynb>`_"
 
-#: ../../source/ref-faq.rst:13
-msgid ""
-"`Flower simulation TensorFlow/Keras "
-"<https://colab.research.google.com/github/adap/flower/blob/main/examples"
-"/simulation-tensorflow/sim.ipynb>`_"
-msgstr ""
-"`Flower模拟TensorFlow/Keras "
-"<https://colab.research.google.com/github/adap/flower/blob/main/examples"
-"/simulation-tensorflow/sim.ipynb>`_"
-
 #: ../../source/ref-faq.rst
 msgid ":fa:`eye,mr-1` How can I run Federated Learning on a Raspberry Pi?"
 msgstr ":fa:`eye,mr-1` 如何在 Raspberry Pi 上运行联邦学习？"
 
-#: ../../source/ref-faq.rst:17
+#: ../../source/ref-faq.rst:16
 msgid ""
 "Find the `blog post about federated learning on embedded device here "
 "<https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_"
@@ -34628,7 +34614,7 @@ msgstr ""
 msgid ":fa:`eye,mr-1` Does Flower support federated learning on Android devices?"
 msgstr ":fa:`eye,mr-1` Flower 是否支持安卓设备上的联邦学习？"
 
-#: ../../source/ref-faq.rst:21
+#: ../../source/ref-faq.rst:20
 msgid ""
 "Yes, it does. Please take a look at our `blog post "
 "<https://flower.ai/blog/2021-12-15-federated-learning-on-android-devices-"
@@ -34637,13 +34623,13 @@ msgstr ""
 "是的，确实如此。请查看我们的 \"博客文章 <https://flower.ai/blog/2021-12-15-federated-"
 "learning-on-android-devices-with-flower>`_\" 或查看代码示例："
 
-#: ../../source/ref-faq.rst:23
+#: ../../source/ref-faq.rst:22
 msgid ""
 "`Android Kotlin example <https://flower.ai/docs/examples/android-"
 "kotlin.html>`_"
 msgstr "`Android Kotlin 示例 <https://flower.ai/docs/examples/android-kotlin.html>`_"
 
-#: ../../source/ref-faq.rst:24
+#: ../../source/ref-faq.rst:23
 msgid "`Android Java example <https://flower.ai/docs/examples/android.html>`_"
 msgstr "Android Java 示例 <https://flower.ai/docs/examples/android.html>`_"
 
@@ -34651,26 +34637,26 @@ msgstr "Android Java 示例 <https://flower.ai/docs/examples/android.html>`_"
 msgid ":fa:`eye,mr-1` Can I combine federated learning with blockchain?"
 msgstr ":fa:`eye,mr-1` 我可以将联邦学习与区块链结合起来吗？"
 
-#: ../../source/ref-faq.rst:28
+#: ../../source/ref-faq.rst:27
 msgid ""
 "Yes, of course. A list of available examples using Flower within a "
 "blockchain environment is available here:"
 msgstr "当然可以。有关在区块链环境中使用 Flower 的可用示例列表，请点击此处："
 
-#: ../../source/ref-faq.rst:30
+#: ../../source/ref-faq.rst:29
 msgid "`FLock: A Decentralised AI Training Platform <https://www.flock.io/#/>`_."
 msgstr ""
 
-#: ../../source/ref-faq.rst:31
+#: ../../source/ref-faq.rst:30
 msgid "Contribute to on-chain training the model and earn rewards."
 msgstr ""
 
-#: ../../source/ref-faq.rst:32
+#: ../../source/ref-faq.rst:31
 #, fuzzy
 msgid "Local blockchain with federated learning simulation."
 msgstr "扩大联邦学习的规模"
 
-#: ../../source/ref-faq.rst:33
+#: ../../source/ref-faq.rst:32
 msgid ""
 "`Flower meets Nevermined GitHub Repository <https://github.com"
 "/nevermined-io/fl-demo/tree/master/image-classification-flower>`_."
@@ -34678,7 +34664,7 @@ msgstr ""
 "`Flower meets Nevermined GitHub Repository <https://github.com"
 "/nevermined-io/fl-demo/tree/master/image-classification-flower>`_."
 
-#: ../../source/ref-faq.rst:34
+#: ../../source/ref-faq.rst:33
 msgid ""
 "`Flower meets Nevermined YouTube video "
 "<https://www.youtube.com/watch?v=A0A9hSlPhKI>`_."
@@ -34686,7 +34672,7 @@ msgstr ""
 "`Flower meets Nevermined YouTube 视频 "
 "<https://www.youtube.com/watch?v=A0A9hSlPhKI>`_."
 
-#: ../../source/ref-faq.rst:35
+#: ../../source/ref-faq.rst:34
 #, fuzzy
 msgid ""
 "`Flower meets KOSMoS <https://www.isw-sites.de/kosmos/wp-"
@@ -34695,7 +34681,7 @@ msgstr ""
 "`Flower meets KOSMoS <https://www.kosmos-bmbf.de/wp-"
 "content/uploads/sites/13/2021/05/Talk-Flower-Summit-2021.pdf>`_."
 
-#: ../../source/ref-faq.rst:36
+#: ../../source/ref-faq.rst:35
 msgid ""
 "`Flower meets Talan blog post <https://www.linkedin.com/pulse/federated-"
 "learning-same-mask-different-faces-imen-"
@@ -34705,7 +34691,7 @@ msgstr ""
 "same-mask-different-faces-imen-"
 "ayari/?trackingId=971oIlxLQ9%2BA9RB0IQ73XQ%3D%3D>`_ 。"
 
-#: ../../source/ref-faq.rst:37
+#: ../../source/ref-faq.rst:36
 msgid ""
 "`Flower meets Talan GitHub Repository "
 "<https://gitlab.com/Talan_Innovation_Factory/food-waste-prevention>`_ ."
@@ -35644,7 +35630,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:170
 #: ../../source/tutorial-quickstart-scikitlearn.rst:172
 #: ../../source/tutorial-quickstart-tensorflow.rst:161
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:626
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:625
 msgid ""
 "You can also override the parameters defined in the "
 "``[tool.flwr.app.config]`` section in ``pyproject.toml`` like this:"
@@ -35958,7 +35944,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-scikitlearn.rst:332
 #: ../../source/tutorial-quickstart-tensorflow.rst:337
 #: ../../source/tutorial-quickstart-xgboost.rst:407
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:491
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:490
 msgid ""
 "a ``Grid`` object that will be used to interface with the nodes running "
 "the ``ClientApp`` to involve them in a round of train/evaluate/query or "
@@ -36536,7 +36522,7 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:432
 #: ../../source/tutorial-quickstart-xgboost.rst:404
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:488
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:487
 msgid ""
 "To construct a |serverapp_link|_, we define its ``@app.main()`` method. "
 "This method receives as input arguments:"
@@ -37395,7 +37381,7 @@ msgstr ""
 
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:403
 #: ../../source/tutorial-series-customize-the-client-pytorch.rst:339
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:702
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:701
 #: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:443
 #: ../../source/tutorial-series-what-is-federated-learning.rst:369
 #, fuzzy
@@ -37409,7 +37395,7 @@ msgstr ""
 
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:407
 #: ../../source/tutorial-series-customize-the-client-pytorch.rst:343
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:706
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:705
 #: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:447
 #: ../../source/tutorial-series-what-is-federated-learning.rst:373
 #, fuzzy
@@ -37672,13 +37658,13 @@ msgid ""
 "everything we need."
 msgstr "在开始编写实际代码之前，让我们先确保我们已经准备好了所需的一切。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:108
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:107
 msgid ""
 "Next, we install the project and its dependencies, which are specified in"
 " the ``pyproject.toml`` file."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:116
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:115
 msgid ""
 "Before we dive into federated learning, we'll take a look at the dataset "
 "that we'll be using for this tutorial, which is the `CIFAR-10 "
@@ -37686,11 +37672,11 @@ msgid ""
 " centralized training pipeline using PyTorch."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:122
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:121
 msgid "The ``CIFAR-10`` dataset"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:124
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:123
 #, fuzzy
 msgid ""
 "Federated learning can be applied to many different types of tasks across"
@@ -37704,7 +37690,7 @@ msgstr ""
 "联邦学习可应用于不同领域的多种不同类型任务。在本教程中，我们将通过在流行的 CIFAR-10 数据集上训练一个简单的卷积神经网络 (CNN) "
 "来介绍联合学习。CIFAR-10 可用于训练图像分类器，以区分来自十个不同类别的图像："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:131
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:130
 #, fuzzy
 msgid ""
 "We simulate having multiple datasets from multiple organizations (also "
@@ -37718,7 +37704,7 @@ msgstr ""
 "我们通过将原始 CIFAR-10 数据集拆分成多个分区来模拟来自多个组织的多个数据集（也称为联邦学习中的 \"跨分区 "
 "\"设置）。每个分区代表一个组织的数据。我们这样做纯粹是为了实验目的，在现实世界中不需要拆分数据，因为每个组织都已经有了自己的数据（所以数据是自然分区的）。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:138
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:137
 #, fuzzy
 msgid ""
 "Each organization will act as a client in the federated learning system. "
@@ -37726,7 +37712,7 @@ msgid ""
 "clients connected to the federated learning server."
 msgstr "每个组织都将充当联邦学习系统中的客户端。因此，有十个组织参与联邦学习，就意味着有十个客户端连接到联邦学习服务器："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:142
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:141
 #, fuzzy
 msgid ""
 "We use the `Flower Datasets <https://flower.ai/docs/datasets/>`_ library "
@@ -37738,7 +37724,7 @@ msgstr ""
 "现在，让我们从 ``flwr-datasets`` 中创建 Federated Dataset 抽象，以分割 "
 "CIFAR-10。我们将为每个边缘设备创建小型训练集和测试集，并将它们分别封装到 PyTorch ``DataLoader`` 中："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:177
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:176
 #, fuzzy
 msgid ""
 "We now have a function that can return a training set and validation set "
@@ -37754,12 +37740,12 @@ msgstr ""
 "``trainloader``/``valloader`` 都包含 4500 个训练示例和 500 个验证数据。还有一个单独的 "
 "``测试加载器``（我们没有拆分测试集）。同样，这只有在构建研究或教育系统时才有必要，实际的联邦学习系统的数据自然分布在多个分区中。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:187
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:186
 #, fuzzy
 msgid "The model, training, and test functions"
 msgstr "让我们继续进行常规的训练和测试功能："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:189
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:188
 #, fuzzy
 msgid ""
 "Next, we're going to use PyTorch to define a simple convolutional neural "
@@ -37773,28 +37759,28 @@ msgstr ""
 "minute blitz "
 "<https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html>`__。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:198
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:197
 msgid ""
 "We will use the simple CNN described in the aforementioned PyTorch "
 "tutorial (The following code is already defined in ``task.py``):"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:224
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:223
 #, fuzzy
 msgid "Training and test functions"
 msgstr "使用评估函数评估模型参数。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:226
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:225
 #, fuzzy
 msgid "The PyTorch template also provides the usual training and test functions:"
 msgstr "让我们继续进行常规的训练和测试功能："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:268
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:267
 #, fuzzy
 msgid "Federated Learning with Flower"
 msgstr "步骤 2：使用 Flower 联邦学习"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:270
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:269
 #, fuzzy
 msgid ""
 "In federated learning, the server sends global model parameters to the "
@@ -37805,11 +37791,11 @@ msgid ""
 "gradients back to the server, not the full model parameters)."
 msgstr "在联邦学习中，服务器将全局模型参数发送给客户端，客户端根据从服务器接收到的参数更新本地模型。然后，客户端根据本地数据对模型进行训练（在本地更改模型参数），并将更新/更改后的模型参数发回服务器（或者，客户端只将梯度参数发回服务器，而不是全部模型参数）。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:277
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:276
 msgid "Constructing Messages"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:279
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:278
 msgid ""
 "In Flower, the server and clients communicate by sending and receiving "
 "|message_link|_ objects. A ``Message`` carries a ``RecordDict`` as its "
@@ -37818,39 +37804,39 @@ msgid ""
 "of records:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:284
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:283
 #, fuzzy
 msgid ""
 "|arrayrecord_link|_: Contains model parameters as a dictionary of NumPy "
 "arrays"
 msgstr "**parameters** -- NumPy ndarrays 的本地模型参数列表。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:285
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:284
 msgid ""
 "|metricrecord_link|_: Contains training or evaluation metrics as a "
 "dictionary of integers, floats, lists of integers, or lists of floats."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:287
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:286
 msgid ""
 "|configrecord_link|_: Contains configuration parameters as a dictionary "
 "of integers, floats, strings, booleans, or bytes. Lists of these types "
 "are also supported."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:290
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:289
 msgid ""
 "Let's see a few examples of how to work with these types of records and, "
 "ultimately, construct a ``RecordDict`` that can be sent over a "
 "``Message``."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:316
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:315
 #, fuzzy
 msgid "Define the Flower ClientApp"
 msgstr "Flower 客户端。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:318
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:317
 #, fuzzy
 msgid ""
 "Federated learning systems consist of a server and multiple nodes or "
@@ -37861,7 +37847,7 @@ msgstr ""
 "``flwr.client.Client`` 或 ``flwr.client.NumPyClient`` "
 "的子类来创建客户端。在本教程中，我们使用``NumPyClient``，因为它更容易实现，需要我们编写的模板也更少。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:322
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:321
 msgid ""
 "The core functionality of the ``ClientApp`` is to perform some action "
 "with the local data that the node it runs from (e.g. an edge device, a "
@@ -37870,12 +37856,12 @@ msgid ""
 "using the local training and validation data."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:328
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:327
 #, fuzzy
 msgid "Training"
 msgstr "集中式训练"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:330
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:329
 msgid ""
 "We can define how the ``ClientApp`` performs training by wrapping a "
 "function with the ``@app.train()`` decorator. In this case we name this "
@@ -37883,20 +37869,20 @@ msgid ""
 "data. The function always expects two arguments:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:334
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:333
 msgid ""
 "A |message_link|_: The message received from the server. It contains the "
 "model parameters and any other configuration information sent by the "
 "server."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:336
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:335
 msgid ""
 "A |context_link|_: The context object that contains information about the"
 " node executing the ``ClientApp`` and about the current run."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:339
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:338
 msgid ""
 "Through the context you can retrieve the config settings defined in the "
 "``pyproject.toml`` of your app. The context can be used to persist the "
@@ -37906,7 +37892,7 @@ msgid ""
 "communicated back to the server."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:345
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:344
 msgid ""
 "Let's see an implementation of ``ClientApp`` that uses the previously "
 "defined PyTorch CNN model, applies the parameters received from the "
@@ -37916,7 +37902,7 @@ msgid ""
 "metrics of interest."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:393
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:392
 msgid ""
 "Note that the ``train_fn`` is simply an alias name pointing to the train "
 "function defined earlier in this tutorial (where we defined the PyTorch "
@@ -37930,25 +37916,25 @@ msgid ""
 "``lr`` from the run config via the ``Context`` is also perfectly valid."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:403
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:402
 msgid ""
 "Once training is completed, the ``ClientApp`` constructs a reply "
 "``Message``. This reply typically includes a ``RecordDict`` with two "
 "records:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:406
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:405
 #, fuzzy
 msgid "An ``ArrayRecord`` containing the updated model parameters"
 msgstr "``get_parameters``： 返回当前本地模型参数"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:407
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:406
 msgid ""
 "A ``MetricRecord`` with relevant metrics (in this case, the training loss"
 " and the number of examples used for training)"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:412
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:411
 msgid ""
 "Returning the number of examples under the ``\"num-examples\"`` key is "
 "**required**, because strategies such as |fedavg_link|_ used by the "
@@ -37957,18 +37943,18 @@ msgid ""
 "example: ``FedAvg(weighted_by=\"my-different-key\")``)."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:418
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:417
 msgid ""
 "After constructing the reply ``Message``, the ``ClientApp`` returns it. "
 "Flower then handles sending the reply back to the server automatically."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:422
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:421
 #, fuzzy
 msgid "Evaluation"
 msgstr "说明"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:424
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:423
 msgid ""
 "In a typical federated learning setup, the ``ClientApp`` would also "
 "implement an ``@app.evaluate()`` function to evaluate the model received "
@@ -37983,7 +37969,7 @@ msgid ""
 "``evaluate`` function looks like:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:471
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:470
 msgid ""
 "As you can see the ``evaluate`` implementation is near identical to the "
 "``train`` implementation, except that it calls the ``test_fn`` function "
@@ -37994,12 +37980,12 @@ msgid ""
 "evaluation metrics correctly."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:479
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:478
 #, fuzzy
 msgid "Define the Flower ServerApp"
 msgstr "Flower 服务器。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:481
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:480
 #, fuzzy
 msgid ""
 "On the server side, we need to configure a strategy which encapsulates "
@@ -38014,11 +38000,11 @@ msgstr ""
 "Flower 有许多内置策略，但我们也可以使用自己的策略实现来定制联邦学习方法的几乎所有方面。在本例中，我们使用内置的 ``FedAvg`` "
 "实现，并使用一些基本参数对其进行定制。最后一步是实际调用 ``start_simulation``开始模拟："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:493
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:492
 msgid "a |context_link|_ object that provides access to the run configuration."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:495
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:494
 msgid ""
 "Before launching the strategy via the |strategy_start_link|_ method, we "
 "want to initialize the global model. This will be the model that gets "
@@ -38030,7 +38016,7 @@ msgid ""
 "method."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:502
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:501
 msgid ""
 "We can also optionally pass to the ``start()`` method a ``ConfigRecord`` "
 "containing settings that we would like to communicate to the clients. "
@@ -38038,7 +38024,7 @@ msgid ""
 " parameters."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:540
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:539
 msgid ""
 "Most of the execution of the ``ServerApp`` happens inside the "
 "``strategy.start()`` method. After the specified number of rounds "
@@ -38048,19 +38034,19 @@ msgid ""
 "model to disk for later use."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:547
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:546
 #, fuzzy
 msgid "Run the training"
 msgstr "开始训练"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:549
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:548
 msgid ""
 "With all of these components in place, we can now run the federated "
 "learning simulation with Flower! The last step is to run our simulation "
 "in the command line, as follows:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:556
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:555
 msgid ""
 "This will execute the federated learning simulation with 10 clients, or "
 "SuperNodes, defined in the ``[tool.flwr.federations.local-simulation]`` "
@@ -38068,73 +38054,73 @@ msgid ""
 "similar to this:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:636
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:635
 msgid ""
 "Learn more about how to configure the execution of your Flower App by "
 "checking the `pyproject.toml <how-to-configure-pyproject-toml.html>`_ "
 "guide."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:640
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:639
 msgid "Behind the scenes"
 msgstr "幕后"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:642
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:641
 msgid "So how does this work? How does Flower execute this simulation?"
 msgstr "那么它是如何工作的呢？Flower 如何进行模拟？"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:644
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:643
 msgid ""
 "When we execute ``flwr run``, we tell Flower that there are 10 clients "
 "(``options.num-supernodes = 10``, where each SuperNode launches one "
 "``ClientApp``)."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:647
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:646
 msgid ""
 "Flower then asks the ``ServerApp`` to issue instructions to those nodes "
 "using the ``FedAvg`` strategy. In this example, ``FedAvg`` is configured "
 "with two key parameters:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:650
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:649
 #, python-format
 msgid "``fraction-train=0.5`` → select 50% of the available clients for training"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:651
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:650
 #, fuzzy, python-format
 msgid ""
 "``fraction-evaluate=1.0`` → select 100% of the available clients for "
 "evaluation"
 msgstr "使用部分可用客户进行评估。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:653
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:652
 msgid ""
 "This means in our example, 5 out of 10 clients will be selected for "
 "training, and all 10 clients will later participate in evaluation."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:656
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:655
 #, fuzzy
 msgid "A typical round looks like this:"
 msgstr "一个典型的修改函数可能是这样的："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:658
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:657
 #, fuzzy
 msgid "**Training**"
 msgstr "停用"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:660
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:659
 #, python-format
 msgid "``FedAvg`` randomly selects 5 clients (50% of 10)."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:661
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:660
 msgid "Flower sends a ``TRAIN`` message to each selected ``ClientApp``."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:662
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:661
 msgid ""
 "Each ``ClientApp`` calls the function decorated with ``@app.train()``, "
 "then returns a ``Message`` containing an ``ArrayRecord`` (the updated "
@@ -38142,53 +38128,53 @@ msgid ""
 " examples)."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:665
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:676
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:664
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:675
 msgid "The ``ServerApp`` receives all replies."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:666
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:665
 msgid ""
 "``FedAvg`` aggregates all ``ArrayRecord`` into a new ``ArrayRecord`` "
 "representing the new global model and combines all ``MetricRecord``."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:669
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:668
 #, fuzzy
 msgid "**Evaluation**"
 msgstr "说明"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:671
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:670
 msgid "``FedAvg`` selects all 10 clients (100%)."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:672
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:671
 msgid "Flower sends an ``EVALUATE`` message to each ``ClientApp``."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:673
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:672
 msgid ""
 "Each ``ClientApp`` calls the function decorated with ``@app.evaluate()`` "
 "and returns a ``Message`` containing a ``MetricRecord`` (the evaluation "
 "loss, accuracy, and number of examples)."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:677
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:676
 msgid "``FedAvg`` aggregates all ``MetricRecord``."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:679
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:678
 msgid ""
 "Once both training and evaluation are done, the next round begins: "
 "another training step, then another evaluation step, and so on, until the"
 " configured number of rounds is reached."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:685
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:684
 msgid "Final remarks"
 msgstr "结束语"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:687
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:686
 #, fuzzy
 msgid ""
 "Congratulations, you just trained a convolutional neural network, "
@@ -38202,7 +38188,7 @@ msgstr ""
 "进行联邦学习的基础知识。你所看到的方法同样适用于其他机器学习框架（不只是 PyTorch）和任务（不只是 CIFAR-10 图像分类），例如使用 "
 "Hugging Face Transformers 的 NLP 或使用 SpeechBrain 的语音。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:693
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:692
 #, fuzzy
 msgid ""
 "In the next tutorial, we're going to cover some more advanced concepts. "
@@ -38211,7 +38197,7 @@ msgid ""
 "the server side? We'll cover all this and more in the next tutorial."
 msgstr "在下一个笔记中，我们将介绍一些更先进的概念。想定制你的策略吗？在服务器端初始化参数？或者在服务器端评估聚合模型？我们将在下一个教程中介绍所有这些内容以及更多。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:709
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:708
 #, fuzzy
 msgid ""
 "The :doc:`Flower Federated Learning Tutorial - Part 2 <tutorial-series-"
@@ -64040,4 +64026,30 @@ msgstr ""
 #~ "to `flwr supernode create` is invalid"
 #~ " or unreadable."
 #~ msgstr ""
+
+#~ msgid ""
+#~ "Open the notebook ``framework/docs/source"
+#~ "/tutorial-series-get-started-with-"
+#~ "flower-pytorch.ipynb``:"
+#~ msgstr ""
+#~ "打开笔记本 ``framework/docs/source/tutorial-get-"
+#~ "started-with-flower-pytorch.ipynb``："
+
+#~ msgid ""
+#~ "https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
+#~ "/tutorial-series-get-started-with-"
+#~ "flower-pytorch.ipynb"
+#~ msgstr ""
+#~ "https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
+#~ "/tutorial-get-started-with-flower-"
+#~ "pytorch.ipynb"
+
+#~ msgid ""
+#~ "`Flower simulation TensorFlow/Keras "
+#~ "<https://colab.research.google.com/github/adap/flower/blob/main/examples"
+#~ "/simulation-tensorflow/sim.ipynb>`_"
+#~ msgstr ""
+#~ "`Flower模拟TensorFlow/Keras "
+#~ "<https://colab.research.google.com/github/adap/flower/blob/main/examples"
+#~ "/simulation-tensorflow/sim.ipynb>`_"
 
