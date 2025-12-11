@@ -224,7 +224,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
 
         # Record message processing start time
-        state.record_message_processing_start(msg_id=message.metadata.message_id)
+        state.record_message_processing_start(message_id=message.metadata.message_id)
 
         # Retrieve the object tree for the message
         object_tree = store.get_object_tree(message.metadata.message_id)
@@ -259,7 +259,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         state.store_message(message_from_proto(request.messages_list[0]))
         # Record message processing end time
         state.record_message_processing_end(
-            msg_id=request.messages_list[0].metadata.reply_to_message_id
+            message_id=request.messages_list[0].metadata.reply_to_message_id
         )
         return PushAppMessagesResponse(objects_to_push=objects_to_push)
 

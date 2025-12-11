@@ -14,12 +14,18 @@ download, partition and preprocess the dataset.
 
 ## Set up the project
 
-### Clone the project
+### Fetch the app
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+Install Flower:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-sklearn . && rm -rf flower && cd quickstart-sklearn
+pip install flwr
+```
+
+Fetch the app:
+
+```shell
+flwr new @flwrlabs/quickstart-sklearn
 ```
 
 This will create a new directory called `quickstart-sklearn` with the following structure:

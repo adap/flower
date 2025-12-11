@@ -24,7 +24,6 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
-from flwr.client.typing import MessageSendContext
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
 from flwr.common.exit import ExitCode, flwr_exit
@@ -112,7 +111,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     tuple[
         int,
         Callable[[], tuple[Message, ObjectTree] | None],
-        Callable[[MessageSendContext, ObjectTree], set[str]],
+        Callable[[Message, ObjectTree, float], set[str]],
         Callable[[int], Run],
         Callable[[str, int], Fab],
         Callable[[int, str], bytes],
@@ -150,7 +149,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     -------
     node_id : int
     receive : Callable[[], Optional[tuple[Message, ObjectTree]]]
-    send : Callable[[MessageSendContext, ObjectTree], set[str]]
+    send : Callable[[Message, ObjectTree, float], set[str]]
     get_run : Callable[[int], Run]
     get_fab : Callable[[str, int], Fab]
     pull_object : Callable[[str], bytes]
@@ -394,15 +393,13 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Return the Message and its object tree
         return in_message, object_tree
 
-    def send(message_ctx: MessageSendContext, object_tree: ObjectTree) -> set[str]:
+    def send(
+        message: Message, object_tree: ObjectTree, clientapp_runtime: float
+    ) -> set[str]:
         """Send the message with its ObjectTree to SuperLink."""
         # Get Node
         if node is None:
             raise RuntimeError("Node instance missing")
-
-        message = message_ctx.message
-        clientapp_runtime = message_ctx.clientapp_runtime
-
         # Remove the content from the message if it has
         if message.has_content():
             message = remove_content_from_message(message)
@@ -412,7 +409,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             node=node,
             messages_list=[message_to_proto(message)],
             message_object_trees=[object_tree],
-            clientapp_runtime=[clientapp_runtime],
+            clientapp_runtime_list=[clientapp_runtime],
         )
         res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
         if res is None:

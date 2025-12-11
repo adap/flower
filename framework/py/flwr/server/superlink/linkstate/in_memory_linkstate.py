@@ -799,13 +799,9 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             run.bytes_sent += bytes_sent
             run.bytes_recv += bytes_recv
 
-    def store_clientapps_runtime(self, run_id: int, runtime: float) -> None:
-        """Store ClientApps runtime for the specified `run_id`."""
+    def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
+        """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
         with self.lock:
             if run_id not in self.run_ids:
                 raise ValueError(f"Run {run_id} not found")
-            run_record = self.run_ids[run_id]
-
-        with run_record.lock:
-            run = run_record.run
-            run.clientapp_runtime += runtime
+            self.run_ids[run_id].run.clientapp_runtime += runtime
