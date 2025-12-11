@@ -1,4 +1,4 @@
-"""xgboost_quickstart: A Flower / XGBoost app."""
+"""quickstart_xgboost: A Flower / XGBoost app."""
 
 import xgboost as xgb
 from flwr_datasets import FederatedDataset
