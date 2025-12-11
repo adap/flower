@@ -1,7 +1,7 @@
 ---
 tags: [flowertune, llm, finetuning, lora, medical]
 dataset: [medical-meadow-flashcards]
-framework: [torch, huggingface, peft]
+framework: [torch, transformers, peft]
 ---
 
 # FlowerTune LLM on Medical Dataset
