@@ -1703,6 +1703,18 @@ class StateTest(CoreStateTest):
         assert run.bytes_sent == 0
         assert run.bytes_recv == 0
 
+    def test_add_clientapp_runtime_invalid_run_id(self) -> None:
+        """Test that invalid run_id raises ValueError for add_clientapp_runtime."""
+        # Prepare
+        state = self.state_factory()
+        invalid_run_id = 57775  # Run ID that doesn't exist
+
+        # Execute & Assert
+        with self.assertRaises(ValueError) as context:
+            state.add_clientapp_runtime(invalid_run_id, runtime=10.5)
+
+        assert f"Run {invalid_run_id} not found" in str(context.exception)
+
 
 def create_ins_message(
     src_node_id: int,
