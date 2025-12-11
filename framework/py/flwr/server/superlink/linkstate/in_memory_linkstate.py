@@ -804,8 +804,4 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         with self.lock:
             if run_id not in self.run_ids:
                 raise ValueError(f"Run {run_id} not found")
-            run_record = self.run_ids[run_id]
-
-        with run_record.lock:
-            run = run_record.run
-            run.clientapp_runtime += runtime
+            self.run_ids[run_id].run.clientapp_runtime += runtime
