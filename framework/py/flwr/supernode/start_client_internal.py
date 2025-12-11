@@ -432,7 +432,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 def _push_messages(
     state: NodeState,
     object_store: ObjectStore,
-    send: Callable[[Message, ObjectTree], set[str]],
+    send: Callable[[Message, ObjectTree, float], set[str]],
     push_object: Callable[[int, str, bytes], None],
 ) -> None:
     """Push reply messages to the SuperLink."""
@@ -480,9 +480,12 @@ def _push_messages(
 
         # Send the message
         try:
-            # Send the reply message with its ObjectTree
+            clientapp_runtime = state.get_message_processing_duration(
+                message_id=message.metadata.reply_to_message_id,
+            )
+            # Send the reply message with its ObjectTree and ClientApp runtime
             # Get the IDs of objects to send
-            ids_obj_to_send = send(message, object_tree)
+            ids_obj_to_send = send(message, object_tree, clientapp_runtime)
 
             # Push object contents from the ObjectStore
             run_id = message.metadata.run_id
@@ -539,7 +542,7 @@ def _init_connection(  # pylint: disable=too-many-positional-arguments
     tuple[
         int,
         Callable[[], tuple[Message, ObjectTree] | None],
-        Callable[[Message, ObjectTree], set[str]],
+        Callable[[Message, ObjectTree, float], set[str]],
         Callable[[int], Run],
         Callable[[str, int], Fab],
         Callable[[int, str], bytes],
