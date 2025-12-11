@@ -657,7 +657,8 @@ def _get_remote_fab(
     if fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
         context.abort(
             grpc.StatusCode.FAILED_PRECONDITION,
-            "Connection to the SuperLink is unavailable.",
+            "The selected SuperLink transport type is not "
+            "supported for connecting to Flower Platform.",
         )
 
     # Parse and validate app specification
