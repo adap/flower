@@ -26,7 +26,7 @@ import typer
 from flwr.supercore.constant import PLATFORM_API_URL
 from flwr.supercore.utils import parse_app_spec, request_download_link
 
-from ..utils import prompt_text
+from ..utils import prompt_options, prompt_text
 
 
 def print_success_prompt(package_name: str) -> None:
@@ -237,7 +237,7 @@ def new(
         )
         raise typer.Exit(code=1)
 
-    if app_name is None:
+    if app_spec is None:
         # Fetch recommended apps
         print(
             typer.style(
@@ -253,11 +253,11 @@ def new(
                 "No recommended apps found. Please provide an app spec manually.",
                 fg=typer.colors.YELLOW,
             )
-            app_name = prompt_text("Please provide the app id")
+            app_spec = prompt_text("Please provide the app id")
         else:
             # Extract app_ids and show selection menu
             app_ids = [app["app_id"] for app in apps]
-            app_name = prompt_options("Select a Flower App to create", app_ids)
+            app_spec = prompt_options("Select a Flower App to create", app_ids)
 
     if app_spec is None:
         app_spec = prompt_text("Please provide the app specifier")
