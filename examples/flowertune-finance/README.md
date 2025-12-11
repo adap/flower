@@ -1,7 +1,7 @@
 ---
 tags: [flowertune, llm, finetuning, lora, finance]
 dataset: [fingpt-sentiment]
-framework: [torch, huggingface, peft]
+framework: [torch, transformers, peft]
 ---
 
 # FlowerTune LLM on Finance Dataset
