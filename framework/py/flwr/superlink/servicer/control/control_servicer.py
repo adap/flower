@@ -17,8 +17,6 @@
 
 import hashlib
 import json
-import os
-import re
 import time
 from collections.abc import Generator, Sequence
 from logging import ERROR, INFO
@@ -51,7 +49,6 @@ from flwr.common.serde import (
     user_config_from_proto,
 )
 from flwr.common.typing import Fab, Run, RunStatus
-from flwr.common.version import package_version as flwr_version
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
@@ -82,14 +79,11 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from flwr.supercore.constant import (
-    APP_ID_PATTERN,
-    APP_VERSION_PATTERN,
-    PLATFORM_API_URL,
-)
+from flwr.supercore.constant import PLATFORM_API_URL
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
+from flwr.supercore.utils import parse_app_spec, request_download_link
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin
 
@@ -635,67 +629,6 @@ def _check_flwr_aid_in_run(
         )
 
 
-def _request_download_link(
-    app_id: str, app_version: str | None, context: grpc.ServicerContext
-) -> tuple[str, list[dict[str, str]] | None]:
-    """Request download link from Flower platform API."""
-    url = f"{PLATFORM_API_URL}/hub/fetch-fab"
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
-    body = {
-        "app_id": app_id,  # send raw string of app_id
-        "app_version": app_version,
-        "flwr_license_key": os.getenv("FLWR_LICENSE_KEY"),
-        "flwr_version": flwr_version,
-    }
-
-    try:
-        resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=20)
-    except requests.RequestException as e:
-        context.abort(
-            grpc.StatusCode.FAILED_PRECONDITION,
-            f"Unable to connect to Flower platform API: {e}",
-        )
-
-    if resp.status_code == 404:
-        payload = resp.json().get("detail", {})
-        if isinstance(payload, dict):
-            available_app_versions = payload.get("available_app_versions", [])
-            available_versions_str = (
-                ", ".join(map(str, available_app_versions))
-                if available_app_versions
-                else "None"
-            )
-            error_message = (
-                f"{app_id}=={app_version} not found in Platform API. "
-                f"Available app versions for {app_id}: {available_versions_str}"
-            )
-        else:
-            error_message = f"{app_id} not found in Platform API."
-        context.abort(
-            grpc.StatusCode.NOT_FOUND,
-            error_message,
-        )
-    if not resp.ok:
-        context.abort(
-            grpc.StatusCode.FAILED_PRECONDITION,
-            f"Flower platform API request failed with status {resp.status_code}. "
-            f"Details: {resp.text}",
-        )
-
-    data = resp.json()
-    if "fab_url" not in data:
-        context.abort(
-            grpc.StatusCode.DATA_LOSS,
-            "Invalid response from Flower platform API",
-        )
-    verifications = data["verifications"] if "verifications" in data else None
-
-    return data["fab_url"], verifications
-
-
 def _format_verification(
     verifications: list[dict[str, str]] | None, verification_dict: dict[str, str]
 ) -> dict[str, str]:
@@ -714,16 +647,6 @@ def _format_verification(
     return verification_dict
 
 
-def _parse_app_spec(app_spec: str) -> tuple[str, str | None]:
-    """Parse app specification string into app ID and version."""
-    if "==" in app_spec:
-        app_id, app_version = app_spec.split("==")
-    else:
-        app_id = app_spec
-        app_version = None
-    return app_id, app_version
-
-
 def _get_remote_fab(
     fleet_api_type: str | None,
     app_spec: str,
@@ -733,39 +656,41 @@ def _get_remote_fab(
     """Get remote FAB from Flower platform API."""
     if fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
         context.abort(
-            grpc.StatusCode.UNAVAILABLE,
+            grpc.StatusCode.FAILED_PRECONDITION,
             "Connection to the SuperLink is unavailable.",
         )
 
-    # Parse app specification
-    app_id, app_version = _parse_app_spec(app_spec)
-
-    # Validate app version format
-    if app_version:
-        if not re.match(APP_VERSION_PATTERN, app_version):
-            context.abort(
-                grpc.StatusCode.NOT_FOUND,
-                "Invalid app version. Expected format: x.y.z (digits only).",
-            )
-
-    # Validate app ID format
-    if not re.match(APP_ID_PATTERN, app_id):
+    # Parse and validate app specification
+    try:
+        app_id, app_version = parse_app_spec(app_spec)
+    except ValueError as e:
         context.abort(
-            grpc.StatusCode.NOT_FOUND,
-            "Invalid remote app ID. Expected format: '@account_name/app_name'.",
+            grpc.StatusCode.FAILED_PRECONDITION,
+            f"{e}",
         )
 
-    # Request download link
-    url, verifications = _request_download_link(app_id, app_version, context)
+    # Request download link and verification information
+    url = f"{PLATFORM_API_URL}/hub/fetch-fab"
+    try:
+        presigned_url, verifications = request_download_link(
+            app_id, app_version, url, "fab_url"
+        )
+    except ValueError as e:
+        context.abort(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            f"{e}",
+        )
+
+    # Format verification information
     verification_dict = _format_verification(verifications, verification_dict)
 
     # Download FAB from Flower platform API
     try:
-        r = requests.get(url, timeout=60)
+        r = requests.get(presigned_url, timeout=60)
         r.raise_for_status()
     except requests.RequestException as e:
         context.abort(
-            grpc.StatusCode.NOT_FOUND,
+            grpc.StatusCode.FAILED_PRECONDITION,
             f"FAB download failed: {str(e)}",
         )
     fab_file = r.content
