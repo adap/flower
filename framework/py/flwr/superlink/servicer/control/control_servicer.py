@@ -679,7 +679,9 @@ def _get_remote_fab(
 
     # Format verification information
     verification_dict = (
-        _format_verification(verifications) if verifications else {"valid_license": ""}
+        _format_verification(verifications)
+        if verifications is not None
+        else {"valid_license": ""}
     )
 
     # Download FAB from Flower platform API
