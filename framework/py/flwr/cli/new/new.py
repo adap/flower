@@ -156,7 +156,7 @@ def download_remote_app_via_api(app_spec: str) -> None:
 
     print(
         typer.style(
-            "⬇️  Downloading ZIP into memory...",
+            "⬇️ Downloading ZIP into memory...",
             fg=typer.colors.GREEN,
             bold=True,
         )
