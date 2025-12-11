@@ -1,7 +1,7 @@
 ---
 tags: [flowertune, llm, finetuning, lora, code]
 dataset: [code-alpaca-20k]
-framework: [torch, huggingface, peft]
+framework: [torch, transformers, peft]
 ---
 
 # FlowerTune LLM on Code Dataset
