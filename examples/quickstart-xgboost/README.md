@@ -32,7 +32,7 @@ This will create a new directory called `quickstart-xgboost` with the following 
 
 ```shell
 quickstart-xgboost
-├── xgboost_quickstart
+├── quickstart_xgboost
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
@@ -43,7 +43,7 @@ quickstart-xgboost
 
 ### Install dependencies and project
 
-Install the dependencies defined in `pyproject.toml` as well as the `xgboost_quickstart` package.
+Install the dependencies defined in `pyproject.toml` as well as the `quickstart_xgboost` package.
 
 ```bash
 pip install -e .

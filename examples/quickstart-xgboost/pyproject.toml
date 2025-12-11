@@ -20,8 +20,8 @@ packages = ["."]
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "xgboost_quickstart.server_app:app"
-clientapp = "xgboost_quickstart.client_app:app"
+serverapp = "quickstart_xgboost.server_app:app"
+clientapp = "quickstart_xgboost.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
@@ -44,3 +44,7 @@ default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 20
+
+[tool.flwr.federations.supergrid-deployment]
+address = "supergrid.flower.ai"
+enable-account-auth = true
