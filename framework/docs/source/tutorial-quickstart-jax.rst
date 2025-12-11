@@ -32,8 +32,8 @@ Then, run the command below:
 
     $ flwr new @flwrlabs/quickstart-jax
 
-After running it you'll notice a new directory named ``quickstart-jax`` has been created.
-It should have the following structure:
+After running it you'll notice a new directory named ``quickstart-jax`` has been
+created. It should have the following structure:
 
 .. code-block:: shell
 

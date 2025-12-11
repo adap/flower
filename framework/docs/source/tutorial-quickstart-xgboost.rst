@@ -74,8 +74,8 @@ Then, run the command below:
 
     $ flwr new @flwrlabs/quickstart-xgboost
 
-After running it you'll notice a new directory named ``quickstart-xgboost`` has been created.
-It should have the following structure:
+After running it you'll notice a new directory named ``quickstart-xgboost`` has been
+created. It should have the following structure:
 
 .. code-block:: shell
 

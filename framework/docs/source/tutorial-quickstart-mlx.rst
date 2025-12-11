@@ -68,8 +68,8 @@ Then, run the command below:
 
     $ flwr new @flwrlabs/quickstart-mlx
 
-After running it you'll notice a new directory named ``quickstart-mlx`` has been created.
-It should have the following structure:
+After running it you'll notice a new directory named ``quickstart-mlx`` has been
+created. It should have the following structure:
 
 .. code-block:: shell
 
