@@ -83,7 +83,7 @@ def test_pull_messages_records_traffic_when_messages_found() -> None:
     call_args = state.store_traffic.call_args
     assert call_args[0][0] == 234  # run_id
     assert call_args[1]["bytes_sent"] > 0
-    assert call_args[1]["bytes_recv"] == 0
+    assert call_args[1]["bytes_recv"] > 0
 
 
 def test_push_messages() -> None:
