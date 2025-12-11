@@ -10,7 +10,7 @@ build-backend = "hatchling.build"
 [project]
 name = "baseline"
 version = "1.0.0"
-description = ""
+description = "Base app to create a Flower Baseline"
 license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
