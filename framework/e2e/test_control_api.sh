@@ -44,8 +44,8 @@ esac
 
 
 # Create and install Flower app
-flwr new e2e-tmp-test --framework numpy --username flwrlabs
-cd e2e-tmp-test
+flwr new @flwrlabs/numpy-ci
+cd numpy-ci
 # Remove flwr dependency from `pyproject.toml`. Seems necessary so that it does
 # not override the wheel dependency
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -79,8 +79,8 @@ sleep 2
 
 if [ "$2" = "client-auth" ] && [ "$3" = "deployment-engine" ]; then
   # Register two SuperNodes using the Flower CLI
-  flwr supernode register ../keys/client_credentials_1.pub ../e2e-tmp-test e2e
-  flwr supernode register ../keys/client_credentials_2.pub ../e2e-tmp-test e2e
+  flwr supernode register ../keys/client_credentials_1.pub ../numpy-ci e2e
+  flwr supernode register ../keys/client_credentials_2.pub ../numpy-ci e2e
 fi
 
 if [ "$3" = "deployment-engine" ]; then
@@ -99,7 +99,7 @@ if [ "$3" = "deployment-engine" ]; then
   sleep 2
 fi
 
-timeout 1m flwr run --run-config num-server-rounds=1 ../e2e-tmp-test e2e
+timeout 1m flwr run --run-config num-server-rounds=1 ../numpy-ci e2e
 
 # Initialize a flag to track if training is successful
 found_success=false

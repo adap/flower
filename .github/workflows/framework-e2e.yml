@@ -425,9 +425,8 @@ jobs:
       - name: Create project, build, and install it
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
-          flwr new tmp-${CLEAN_FRAMEWORK} --framework ${{ matrix.framework }} --username gh_ci
-          cd tmp-${CLEAN_FRAMEWORK}
+          flwr new @flwrlabs/numpy-ci
+          cd numpy-ci
           flwr build
           flwr install *.fab
 
