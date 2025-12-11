@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Create and install Flower app
-flwr new e2e-tmp-test --framework numpy --username flwrlabs
-cd e2e-tmp-test
+flwr new @flwrlabs/numpy-ci
+cd numpy-ci
 
 # Modify the config file
 echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
