@@ -191,7 +191,7 @@ def new(
     app_spec: Annotated[
         str | None,
         typer.Argument(
-            help="Flower app spec. Use the format "
+            help="Flower app specifier. Use the format "
             "'@account_name/app_name' or '@account_name/app_name==x.y.z'. "
             "Version is optional (defaults to latest)."
         ),
@@ -220,8 +220,8 @@ def new(
         )
         raise typer.Exit(code=1)
 
-    if app_name is None:
-        app_name = prompt_text("Please provide the app id")
+    if app_spec is None:
+        app_spec = prompt_text("Please provide the app specifier")
 
     # Download remote app
-    download_remote_app_via_api(app_name)
+    download_remote_app_via_api(app_spec)
