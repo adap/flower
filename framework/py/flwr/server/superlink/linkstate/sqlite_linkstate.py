@@ -121,7 +121,8 @@ CREATE TABLE IF NOT EXISTS run(
     federation_options    BLOB,
     flwr_aid              TEXT,
     bytes_sent            INTEGER DEFAULT 0,
-    bytes_recv            INTEGER DEFAULT 0
+    bytes_recv            INTEGER DEFAULT 0,
+    clientapp_runtime     REAL DEFAULT 0.0
 );
 """
 
@@ -907,8 +908,8 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                     (run_id, fab_id, fab_version,
                     fab_hash, override_config, federation, federation_options,
                     pending_at, starting_at, running_at, finished_at, sub_status,
-                    details, flwr_aid, bytes_sent, bytes_recv)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    details, flwr_aid, bytes_sent, bytes_recv, clientapp_runtime)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """
                 override_config_json = json.dumps(override_config)
                 data = [
@@ -928,6 +929,7 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                     flwr_aid or "",  # flwr_aid
                     0,  # bytes_sent
                     0,  # bytes_recv
+                    0,  # clientapp_runtime
                 ]
                 self.conn.execute(query, tuple(data))
                 return uint64_run_id
@@ -978,6 +980,7 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                 federation=row["federation"],
                 bytes_sent=row["bytes_sent"],
                 bytes_recv=row["bytes_recv"],
+                clientapp_runtime=row["clientapp_runtime"],
             )
         log(ERROR, "`run_id` does not exist.")
         return None
@@ -1289,6 +1292,22 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             rows = self.conn.execute(
                 update_query, (bytes_sent, bytes_recv, sint64_run_id)
             ).fetchall()
+
+            if not rows:
+                raise ValueError(f"Run {run_id} not found")
+
+    def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
+        """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
+        sint64_run_id = uint64_to_int64(run_id)
+        with self.conn:
+            # Check if run exists, performing the update only if it does
+            update_query = """
+                UPDATE run
+                SET clientapp_runtime = clientapp_runtime + ?
+                WHERE run_id = ?
+                RETURNING run_id;
+            """
+            rows = self.conn.execute(update_query, (runtime, sint64_run_id)).fetchall()
 
             if not rows:
                 raise ValueError(f"Run {run_id} not found")
