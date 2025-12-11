@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pytorchexample"
+name = "quickstart-pytorch"
 version = "1.0.0"
 description = "Federated Learning with PyTorch and Flower (Quickstart Example)"
 license = "Apache-2.0"
