@@ -25,7 +25,7 @@ import typer
 
 from flwr.supercore.constant import PLATFORM_API_URL
 
-from ..utils import parse_app_spec, prompt_text, request_download_link
+from ..utils import parse_app_spec, prompt_options, prompt_text, request_download_link
 
 
 def print_success_prompt(package_name: str) -> None:
@@ -63,6 +63,23 @@ def print_success_prompt(package_name: str) -> None:
     )
 
     print(prompt)
+
+
+def fetch_recommended_apps() -> list[dict[str, str]]:
+    """Fetch recommended apps from Platform API."""
+    url = f"{PLATFORM_API_URL}/hub/apps?tag=recommended"
+    try:
+        response = requests.get(url, headers={"accept": "application/json"}, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        return data.get("apps", [])
+    except requests.RequestException as e:
+        typer.secho(
+            f"Failed to fetch recommended apps: {e}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from e
 
 
 # Security: prevent zip-slip
@@ -210,7 +227,26 @@ def new(
         return
 
     if app_name is None:
-        app_name = prompt_text("Please provide the app id")
+        # Fetch recommended apps
+        print(
+            typer.style(
+                "\n🌸 Fetching recommended apps...",
+                fg=typer.colors.GREEN,
+                bold=True,
+            )
+        )
+        apps = fetch_recommended_apps()
+
+        if not apps:
+            typer.secho(
+                "No recommended apps found. Please provide an app spec manually.",
+                fg=typer.colors.YELLOW,
+            )
+            app_name = prompt_text("Please provide the app id")
+        else:
+            # Extract app_ids and show selection menu
+            app_ids = [app["app_id"] for app in apps]
+            app_name = prompt_options("Select a Flower App to create", app_ids)
 
     # Download remote app
     download_remote_app_via_api(app_name)
