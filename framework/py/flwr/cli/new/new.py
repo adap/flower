@@ -181,13 +181,34 @@ def new(
     app_name: Annotated[
         str | None,
         typer.Argument(
-            help="Flower app id. Use the format "
+            help="Flower app spec. Use the format "
             "'@account_name/app_name' or '@account_name/app_name==x.y.z'. "
             "Version is optional (defaults to latest)."
         ),
     ] = None,
+    framework: Annotated[
+        str | None,
+        typer.Option(case_sensitive=False, help="Deprecated. The ML framework to use"),
+    ] = None,
+    username: Annotated[
+        str | None,
+        typer.Option(
+            case_sensitive=False, help="Deprecated. The Flower username of the author"
+        ),
+    ] = None,
 ) -> None:
     """Create new Flower App."""
+    if framework is not None or username is not None:
+        typer.secho(
+            "❌ The --framework and --username options are deprecated and will be "
+            "removed in future versions of Flower. Please use the app spec format "
+            " instead, e.g., '@account_name/app_name' or "
+            "'@account_name/app_name==x.y.z'.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        return
+
     if app_name is None:
         app_name = prompt_text("Please provide the app id")
 
