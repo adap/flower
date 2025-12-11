@@ -215,16 +215,7 @@ def _run_with_control_api(
                 f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN
             )
         else:
-            if is_remote_app:
-                typer.secho(
-                    "❌ Failed to start run. Please verify that the "
-                    "app identifier (@account_name/app_name) "
-                    "is correct and that the SuperLink is reachable.",
-                    fg=typer.colors.RED,
-                    err=True,
-                )
-            else:
-                typer.secho("❌ Failed to start run", fg=typer.colors.RED, err=True)
+            typer.secho("❌ Failed to start run", fg=typer.colors.RED, err=True)
             raise typer.Exit(code=1)
 
         if output_format == CliOutputFormat.JSON:
