@@ -95,7 +95,7 @@ Next, we install the project and its dependencies, which are specified in the
 
 .. code-block:: shell
 
-    $ cd flower-tutorial
+    $ cd quickstart-pytorch
     $ pip install -e .
 
 .. note::

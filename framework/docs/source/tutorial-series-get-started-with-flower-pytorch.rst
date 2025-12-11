@@ -108,7 +108,7 @@ Next, we install the project and its dependencies, which are specified in the
 
 .. code-block:: shell
 
-    $ cd flower-tutorial
+    $ cd quickstart-pytorch
     $ pip install -e .
 
 Before we dive into federated learning, we'll take a look at the dataset that we'll be
