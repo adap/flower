@@ -72,21 +72,19 @@ First, we install the Flower package ``flwr``:
     # In a new Python environment
     $ pip install -U "flwr[simulation]"
 
-Then, we create a new Flower app called ``flower-tutorial`` using the PyTorch template.
-We also specify a username (``flwrlabs``) for the project:
+Then, run the command below:
 
 .. code-block:: shell
 
-    $ flwr new flower-tutorial --framework pytorch --username flwrlabs
+    $ flwr new @flwrlabs/quickstart-pytorch
 
-After running the command, a new directory called ``flower-tutorial`` will be created.
+After running it you'll notice a new directory named ``quickstart-pytorch`` has been created.
 It should have the following structure:
 
 .. code-block:: shell
 
-    flower-tutorial
-    ├── README.md
-    ├── flower_tutorial
+    quickstart-pytorch
+    ├── pytorchexample
     │   ├── __init__.py
     │   ├── client_app.py   # Defines your ClientApp
     │   ├── server_app.py   # Defines your ServerApp
