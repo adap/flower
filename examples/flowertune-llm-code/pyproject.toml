@@ -8,9 +8,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "flowertune-general-nlp"
+name = "flowertune-llm-code"
 version = "1.0.0"
-description = "Base App for the General NLP challenge in the FlowerTune LLM Leaderboard"
+description = "Base App for the Code challenge in the FlowerTune LLM Leaderboard"
 license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
@@ -36,8 +36,8 @@ publisher = "flwrlabs"
 # Point to your ServerApp and ClientApp objects
 # Format: "<module>:<object>"
 [tool.flwr.app.components]
-serverapp = "flowertune_generalnlp.server_app:app"
-clientapp = "flowertune_generalnlp.client_app:app"
+serverapp = "flowertune_code.server_app:app"
+clientapp = "flowertune_code.client_app:app"
 
 # Custom config values accessible via `context.run_config`
 [tool.flwr.app.config]
@@ -61,20 +61,20 @@ train.training-arguments.save-steps = 1000
 train.training-arguments.save-total-limit = 10
 train.training-arguments.gradient-checkpointing = true
 train.training-arguments.lr-scheduler-type = "constant"
-strategy.fraction-train = 0.1
+strategy.fraction-train = 0.2
 strategy.fraction-evaluate = 0.0
 num-server-rounds = 200
 
 # Dataset config (static for FlowerTune LLM Leaderboard)
 [tool.flwr.app.config.static]
-dataset.name = "flwrlabs/alpaca-gpt4"
+dataset.name = "flwrlabs/code-alpaca-20k"
 
 # Default federation to use when running the app
 [tool.flwr.federations]
 default = "local-simulation"
 
-# Local simulation federation with 20 virtual SuperNodes
+# Local simulation federation with 10 virtual SuperNodes
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 20
+options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 6
 options.backend.client-resources.num-gpus = 1.0

@@ -1,12 +1,12 @@
 ---
-tags: [flowertune, llm, finetuning, lora]
-dataset: [alpaca-gpt4]
+tags: [flowertune, llm, finetuning, lora, medical]
+dataset: [medical-meadow-flashcards]
 framework: [torch, transformers, peft]
 ---
 
-# FlowerTune LLM on General NLP Dataset
+# FlowerTune LLM on Medical Dataset
 
-This directory conducts federated instruction tuning with a pretrained [Mistral-7B](https://huggingface.co/mistralai/Mistral-7B-v0.3) model on a [General NLP dataset](https://huggingface.co/datasets/flwrlabs/alpaca-gpt4).
+This directory conducts federated instruction tuning with a pretrained [Mistral-7B](https://huggingface.co/mistralai/Mistral-7B-v0.3) model on a [Medical dataset](https://huggingface.co/datasets/flwrlabs/medical-meadow-medical-flashcards).
 We use [Flower Datasets](https://flower.dev/docs/datasets/) to download, partition and preprocess the dataset.
 Flower's Simulation Engine is used to simulate the LLM fine-tuning process in federated way,
 which allows users to perform the training on a single GPU.
@@ -15,7 +15,7 @@ which allows users to perform the training on a single GPU.
 
 This baseline performs federated LLM fine-tuning with [LoRA](https://arxiv.org/pdf/2106.09685) using the [🤗PEFT](https://huggingface.co/docs/peft/en/index) library.
 The clients' models are aggregated with FedAvg strategy.
-This provides a baseline performance for the leaderboard of General NLP challenge.
+This provides a baseline performance for the leaderboard of Medical challenge.
 
 ## Fetch the app
 
@@ -28,7 +28,7 @@ pip install flwr
 Fetch the app:
 
 ```shell
-flwr new @flwrlabs/flowertune-general-nlp
+flwr new @flwrlabs/flowertune-llm-medical
 ```
 
 ## Environments setup
