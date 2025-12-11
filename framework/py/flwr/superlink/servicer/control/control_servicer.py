@@ -120,7 +120,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         ffs = self.ffs_factory.ffs()
 
         verification_dict: dict[str, str] = {}
-        if request.app_spec.startswith("@"):
+        if request.app_spec:
             fab_file, verification_dict = _get_remote_fab(
                 self.fleet_api_type, request.app_spec, context
             )
