@@ -24,8 +24,9 @@ import requests
 import typer
 
 from flwr.supercore.constant import PLATFORM_API_URL
+from flwr.supercore.utils import parse_app_spec, request_download_link
 
-from ..utils import parse_app_spec, prompt_options, prompt_text, request_download_link
+from ..utils import prompt_text
 
 
 def print_success_prompt(package_name: str) -> None:
@@ -146,7 +147,12 @@ def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
 def download_remote_app_via_api(app_spec: str) -> None:
     """Download App from Platform API."""
     # Validate app version and ID format
-    app_id, app_version = parse_app_spec(app_spec)
+    try:
+        app_id, app_version = parse_app_spec(app_spec)
+    except ValueError as e:
+        typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1) from e
+
     app_name = app_id.split("/")[1]
 
     project_dir = Path.cwd() / app_name
@@ -169,7 +175,11 @@ def download_remote_app_via_api(app_spec: str) -> None:
     )
     # Fetch ZIP downloading URL
     url = f"{PLATFORM_API_URL}/hub/fetch-zip"
-    presigned_url = request_download_link(app_id, app_version, url, "zip_url")
+    try:
+        presigned_url, _ = request_download_link(app_id, app_version, url, "zip_url")
+    except ValueError as e:
+        typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1) from e
 
     print(
         typer.style(
@@ -195,10 +205,10 @@ def download_remote_app_via_api(app_spec: str) -> None:
 
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
 def new(
-    app_name: Annotated[
+    app_spec: Annotated[
         str | None,
         typer.Argument(
-            help="Flower app spec. Use the format "
+            help="Flower app specifier. Use the format "
             "'@account_name/app_name' or '@account_name/app_name==x.y.z'. "
             "Version is optional (defaults to latest)."
         ),
@@ -218,13 +228,14 @@ def new(
     if framework is not None or username is not None:
         typer.secho(
             "❌ The --framework and --username options are deprecated and will be "
-            "removed in future versions of Flower. Please use the app spec format "
-            " instead, e.g., '@account_name/app_name' or "
+            "removed in future versions of Flower. Please provide an app specifier "
+            "after `flwr new` instead, e.g., '@account_name/app_name' or "
             "'@account_name/app_name==x.y.z'.",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
-        return
+        raise typer.Exit(code=1)
 
     if app_name is None:
         # Fetch recommended apps
@@ -248,5 +259,8 @@ def new(
             app_ids = [app["app_id"] for app in apps]
             app_name = prompt_options("Select a Flower App to create", app_ids)
 
+    if app_spec is None:
+        app_spec = prompt_text("Please provide the app specifier")
+
     # Download remote app
-    download_remote_app_via_api(app_name)
+    download_remote_app_via_api(app_spec)

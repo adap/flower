@@ -1,4 +1,4 @@
-"""xgboost_quickstart: A Flower / XGBoost app."""
+"""quickstart_xgboost: A Flower / XGBoost app."""
 
 import numpy as np
 import xgboost as xgb
@@ -7,7 +7,7 @@ from flwr.common.config import unflatten_dict
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedXgbBagging
 
-from xgboost_quickstart.task import replace_keys
+from quickstart_xgboost.task import replace_keys
 
 # Create ServerApp
 app = ServerApp()
