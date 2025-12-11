@@ -324,6 +324,7 @@ def run_superlink() -> None:
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
         artifact_provider=artifact_provider,
+        fleet_api_type=args.fleet_api_type,
     )
     grpc_servers = [control_server]
     bckg_threads: list[threading.Thread] = []

@@ -27,13 +27,12 @@ import requests
 import typer
 
 from flwr.supercore.constant import PLATFORM_API_URL
+from flwr.supercore.utils import parse_app_spec, request_download_link
 
 from ..utils import (
     is_valid_project_name,
-    parse_app_spec,
     prompt_options,
     prompt_text,
-    request_download_link,
     sanitize_project_name,
 )
 
@@ -205,7 +204,12 @@ def _download_zip_to_memory(presigned_url: str) -> io.BytesIO:
 def download_remote_app_via_api(app_spec: str) -> None:
     """Download App from Platform API."""
     # Validate app version and ID format
-    app_id, app_version = parse_app_spec(app_spec)
+    try:
+        app_id, app_version = parse_app_spec(app_spec)
+    except ValueError as e:
+        typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1) from e
+
     app_name = app_id.split("/")[1]
 
     project_dir = Path.cwd() / app_name
@@ -228,7 +232,11 @@ def download_remote_app_via_api(app_spec: str) -> None:
     )
     # Fetch ZIP downloading URL
     url = f"{PLATFORM_API_URL}/hub/fetch-zip"
-    presigned_url = request_download_link(app_id, app_version, url, "zip_url")
+    try:
+        presigned_url, _ = request_download_link(app_id, app_version, url, "zip_url")
+    except ValueError as e:
+        typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1) from e
 
     print(
         typer.style(
