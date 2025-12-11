@@ -83,7 +83,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     tuple[
         int,
         Callable[[], tuple[Message, ObjectTree] | None],
-        Callable[[Message, ObjectTree], set[str]],
+        Callable[[Message, ObjectTree, float], set[str]],
         Callable[[int], Run],
         Callable[[str, int], Fab],
         Callable[[int, str], bytes],
@@ -128,7 +128,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     -------
     node_id : int
     receive : Callable[[], Optional[tuple[Message, ObjectTree]]]
-    send : Callable[[Message, ObjectTree], set[str]]
+    send : Callable[[Message, ObjectTree, float], set[str]]
     get_run : Callable[[int], Run]
     get_fab : Callable[[str, int], Fab]
     pull_object : Callable[[str], bytes]
@@ -277,7 +277,9 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Return the Message and its object tree
         return in_message, object_tree
 
-    def send(message: Message, object_tree: ObjectTree) -> set[str]:
+    def send(
+        message: Message, object_tree: ObjectTree, clientapp_runtime: float
+    ) -> set[str]:
         """Send the message with its ObjectTree to SuperLink."""
         # Get Node
         if node is None:
@@ -293,6 +295,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             node=node,
             messages_list=[message_to_proto(message)],
             message_object_trees=[object_tree],
+            clientapp_runtime_list=[clientapp_runtime],
         )
         response: PushMessagesResponse = stub.PushMessages(request=request)
 
