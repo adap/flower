@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "xgboost_quickstart"
+name = "quickstart-xgboost"
 version = "1.0.0"
 description = "Federated Learning with XGBoost and Flower (Quickstart Example)"
 license = "Apache-2.0"
