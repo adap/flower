@@ -426,9 +426,6 @@ jobs:
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
           flwr new @flwrlabs/numpy-ci
-          cd numpy-ci
-          flwr build
-          flwr install *.fab
 
   numpy:
     runs-on: ubuntu-22.04
