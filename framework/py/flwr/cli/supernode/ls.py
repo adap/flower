@@ -225,7 +225,11 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
                 else f"[dim]{owner_name}[/dim]"
             ),
             f"[{status_style}]{status}",
-            f"[cyan]{humanize_duration(elapse_activated)}[/cyan]" if status == "online" else "",
+            (
+                f"[cyan]{humanize_duration(elapse_activated)}[/cyan]"
+                if status == "online"
+                else ""
+            ),
             time_at,
         )
         table.add_row(*formatted_row)
