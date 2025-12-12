@@ -1,12 +1,17 @@
-"""
-Feature Election Client for Flower
-"""
+"""Feature Election Client for Flower."""
 
 import logging
 from typing import List, Optional, cast
 
 import numpy as np
-from flwr.app import ArrayRecord, ConfigRecord, Context, Message, MetricRecord, RecordDict
+from flwr.app import (
+    ArrayRecord,
+    ConfigRecord,
+    Context,
+    Message,
+    MetricRecord,
+    RecordDict,
+)
 from flwr.clientapp import ClientApp
 from flwr.common.record import Array
 from sklearn.linear_model import LogisticRegression  # type: ignore
@@ -105,7 +110,9 @@ def _handle_feature_selection(
     eval_metric: str,
 ) -> Message:
     try:
-        X_train, y_train, X_val, y_val, _ = load_client_data(partition_id, num_partitions)
+        X_train, y_train, X_val, y_val, _ = load_client_data(
+            partition_id, num_partitions
+        )
         selector = FeatureSelector(fs_method=fs_method, eval_metric=eval_metric)
 
         # Select
@@ -136,7 +143,9 @@ def _handle_feature_selection(
             }
         )
 
-        return Message(content=RecordDict({"arrays": arrays, "metrics": metrics}), reply_to=msg)
+        return Message(
+            content=RecordDict({"arrays": arrays, "metrics": metrics}), reply_to=msg
+        )
     except Exception as e:
         logger.error(f"Selection failed: {e}")
         return Message(content=RecordDict(), reply_to=msg)
@@ -145,12 +154,14 @@ def _handle_feature_selection(
 def _handle_tuning_eval(
     msg: Message, context: Context, partition_id: int, num_partitions: int
 ) -> Message:
-    """
-    Quickly train a model on the provided mask and return validation accuracy.
+    """Quickly train a model on the provided mask and return validation accuracy.
+
     Used by server to auto-tune freedom_degree.
     """
     try:
-        X_train, y_train, X_val, y_val, _ = load_client_data(partition_id, num_partitions)
+        X_train, y_train, X_val, y_val, _ = load_client_data(
+            partition_id, num_partitions
+        )
 
         # Get mask from server
         arrays = msg.content.get("arrays", ArrayRecord())
@@ -178,7 +189,9 @@ def _handle_tuning_eval(
         val_score = model.score(X_val_sel, y_val)
 
         # Return ONLY metrics
-        metrics = MetricRecord({"val_accuracy": float(val_score), "num-examples": len(X_train)})
+        metrics = MetricRecord(
+            {"val_accuracy": float(val_score), "num-examples": len(X_train)}
+        )
 
         return Message(content=RecordDict({"metrics": metrics}), reply_to=msg)
 
@@ -191,7 +204,9 @@ def _handle_fl_training(
     msg: Message, context: Context, partition_id: int, num_partitions: int
 ) -> Message:
     try:
-        X_train, y_train, X_val, y_val, _ = load_client_data(partition_id, num_partitions)
+        X_train, y_train, X_val, y_val, _ = load_client_data(
+            partition_id, num_partitions
+        )
 
         # 1. Retrieve Global Mask
         content = msg.content
@@ -268,7 +283,9 @@ def _handle_fl_training(
             }
         )
 
-        return Message(content=RecordDict({"arrays": res_arrays, "metrics": metrics}), reply_to=msg)
+        return Message(
+            content=RecordDict({"arrays": res_arrays, "metrics": metrics}), reply_to=msg
+        )
 
     except Exception as e:
         logger.error(f"FL Training failed: {e}")
@@ -284,7 +301,9 @@ def evaluate(msg: Message, context: Context) -> Message:
     num_partitions = int(str(context.node_config["num-partitions"]))
 
     try:
-        X_train, y_train, X_val, y_val, _ = load_client_data(partition_id, num_partitions)
+        X_train, y_train, X_val, y_val, _ = load_client_data(
+            partition_id, num_partitions
+        )
         arrays = msg.content.get("arrays", ArrayRecord())
 
         # Determine mask

@@ -1,8 +1,7 @@
-"""
-Feature Election for Flower
+"""Feature Election for Flower.
 
-Federated feature selection framework for tabular datasets.
-Uses the Flower Message API for communication.
+Federated feature selection framework for tabular datasets. Uses the Flower Message API
+for communication.
 """
 
 __version__ = "1.0.0"

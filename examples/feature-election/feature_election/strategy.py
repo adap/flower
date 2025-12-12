@@ -1,8 +1,7 @@
-"""
-Feature Election Strategy for Flower
+"""Feature Election Strategy for Flower.
 
-Implements the Feature Election algorithm for federated feature selection.
-Aggregates client feature selection decisions using weighted voting based on freedom_degree.
+Implements the Feature Election algorithm for federated feature selection. Aggregates
+client feature selection decisions using weighted voting based on freedom_degree.
 Supports iterative auto-tuning via Hill Climbing.
 """
 
@@ -22,9 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class FeatureElectionStrategy(Strategy):
-    """
-    Feature Election Strategy for Flower using Message API.
-    """
+    """Feature Election Strategy for Flower using Message API."""
 
     def __init__(
         self,
@@ -90,9 +87,7 @@ class FeatureElectionStrategy(Strategy):
         }
 
     def summary(self) -> None:
-        """
-        Required by the base Strategy class.
-        """
+        """Required by the base Strategy class."""
         # We log the info so it's still useful, but return None to satisfy Mypy/Flower
         logger.info(f"Strategy Configuration: {self.get_summary()}")
 
@@ -147,7 +142,9 @@ class FeatureElectionStrategy(Strategy):
             train_config["phase"] = "tuning_eval"
 
             if not self.cached_client_selections:
-                logger.error("No cached votes found for tuning phase! Did Round 1 fail?")
+                logger.error(
+                    "No cached votes found for tuning phase! Did Round 1 fail?"
+                )
                 return []
 
             # Generate mask on the fly
@@ -170,7 +167,9 @@ class FeatureElectionStrategy(Strategy):
 
         # Human readable logging
         mb_sent = total_downstream / (MEGABYTE_SIZE * MEGABYTE_SIZE)
-        logger.info(f"Round {server_round} Downstream: {mb_sent:.4f} MB ({len(node_ids)} clients)")
+        logger.info(
+            f"Round {server_round} Downstream: {mb_sent:.4f} MB ({len(node_ids)} clients)"
+        )
 
         # Construct Messages
         content = RecordDict({"arrays": payload_arrays, "config": train_config})
@@ -190,9 +189,7 @@ class FeatureElectionStrategy(Strategy):
         server_round: int,
         results: Iterable[Message],
     ) -> Tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
-        """
-        Aggregate results from clients.
-        """
+        """Aggregate results from clients."""
         if not results:
             return None, None
 
@@ -221,13 +218,17 @@ class FeatureElectionStrategy(Strategy):
         if is_collection:
             # --- PHASE 1: COLLECT VOTES ---
             logger.info("Aggregating Round 1: Extracting Feature Votes")
-            self.cached_client_selections = self._extract_client_selections(valid_results)
+            self.cached_client_selections = self._extract_client_selections(
+                valid_results
+            )
 
             if not self.cached_client_selections:
                 logger.warning("No valid selections found in Round 1")
                 return None, None
 
-            self.global_feature_mask = self._aggregate_selections(self.cached_client_selections)
+            self.global_feature_mask = self._aggregate_selections(
+                self.cached_client_selections
+            )
             self._calculate_statistics(self.cached_client_selections)
 
             self.tuning_history.append((self.freedom_degree, 0.0))
@@ -271,22 +272,30 @@ class FeatureElectionStrategy(Strategy):
 
             avg_score = total_score / count if count > 0 else 0.0
 
-            logger.info(f"Tuning Result: FD={self.freedom_degree:.4f} -> Score={avg_score:.4f}")
+            logger.info(
+                f"Tuning Result: FD={self.freedom_degree:.4f} -> Score={avg_score:.4f}"
+            )
             self.tuning_history.append((self.freedom_degree, avg_score))
 
             if server_round < 1 + self.tuning_rounds:
                 self.freedom_degree = self._calculate_next_fd(first_step=False)
             else:
                 best_fd, best_score = max(self.tuning_history, key=lambda x: x[1])
-                logger.info(f"Tuning Complete. Winner: FD={best_fd:.4f} (Score={best_score:.4f})")
+                logger.info(
+                    f"Tuning Complete. Winner: FD={best_fd:.4f} (Score={best_score:.4f})"
+                )
 
                 self.freedom_degree = best_fd
-                self.global_feature_mask = self._aggregate_selections(self.cached_client_selections)
+                self.global_feature_mask = self._aggregate_selections(
+                    self.cached_client_selections
+                )
                 self._calculate_statistics(self.cached_client_selections)
 
             agg_arrays = ArrayRecord()
             if self.global_feature_mask is not None:
-                agg_arrays["feature_mask"] = Array(self.global_feature_mask.astype(np.float32))
+                agg_arrays["feature_mask"] = Array(
+                    self.global_feature_mask.astype(np.float32)
+                )
             metrics = MetricRecord(
                 {
                     "val_accuracy": avg_score,
@@ -301,9 +310,7 @@ class FeatureElectionStrategy(Strategy):
             return None, None
 
     def _calculate_next_fd(self, first_step: bool = False) -> float:
-        """
-        Hill Climbing Logic with Step Decay
-        """
+        """Hill Climbing Logic with Step Decay."""
         MIN_FD = 0.05
         MAX_FD = 1.0
 
@@ -344,7 +351,9 @@ class FeatureElectionStrategy(Strategy):
             return []
 
         all_node_ids = list(grid.get_node_ids())
-        num_nodes = max(int(len(all_node_ids) * self.fraction_evaluate), self.min_evaluate_nodes)
+        num_nodes = max(
+            int(len(all_node_ids) * self.fraction_evaluate), self.min_evaluate_nodes
+        )
 
         import random
 
@@ -378,9 +387,7 @@ class FeatureElectionStrategy(Strategy):
         server_round: int,
         results: Iterable[Message],
     ) -> Optional[MetricRecord]:
-        """
-        Aggregate evaluation metrics.
-        """
+        """Aggregate evaluation metrics."""
         if not results:
             return None
 
@@ -398,7 +405,9 @@ class FeatureElectionStrategy(Strategy):
 
         # Log total cost
         total_mb = self.cumulative_communication_bytes / (MEGABYTE_SIZE * MEGABYTE_SIZE)
-        logger.info(f"Total Communication Cost (Round {server_round}): {total_mb:.2f} MB")
+        logger.info(
+            f"Total Communication Cost (Round {server_round}): {total_mb:.2f} MB"
+        )
 
         total_loss = 0.0
         total_accuracy = 0.0
@@ -417,9 +426,15 @@ class FeatureElectionStrategy(Strategy):
                 eval_loss_raw = metrics.get("eval_loss", 0)
                 eval_accuracy_raw = metrics.get("eval_accuracy", 0)
 
-                eval_loss = float(eval_loss_raw) if isinstance(eval_loss_raw, (int, float)) else 0.0
+                eval_loss = (
+                    float(eval_loss_raw)
+                    if isinstance(eval_loss_raw, (int, float))
+                    else 0.0
+                )
                 eval_accuracy = (
-                    float(eval_accuracy_raw) if isinstance(eval_accuracy_raw, (int, float)) else 0.0
+                    float(eval_accuracy_raw)
+                    if isinstance(eval_accuracy_raw, (int, float))
+                    else 0.0
                 )
 
                 total_loss += eval_loss * num_examples
@@ -471,9 +486,15 @@ class FeatureElectionStrategy(Strategy):
                 fs_score_raw = metrics.get("fs_score", 0.0)
 
                 init_score = (
-                    float(init_score_raw) if isinstance(init_score_raw, (int, float)) else 0.0
+                    float(init_score_raw)
+                    if isinstance(init_score_raw, (int, float))
+                    else 0.0
                 )
-                fs_score = float(fs_score_raw) if isinstance(fs_score_raw, (int, float)) else 0.0
+                fs_score = (
+                    float(fs_score_raw)
+                    if isinstance(fs_score_raw, (int, float))
+                    else 0.0
+                )
 
                 client_selections[str(msg.metadata.src_node_id)] = {
                     "selected_features": selected_features,
@@ -593,12 +614,16 @@ class FeatureElectionStrategy(Strategy):
         return cast(np.ndarray, np.any(masks, axis=0))
 
     def _calculate_statistics(self, client_selections: Dict[str, Dict]) -> None:
-        masks = np.array([sel["selected_features"] for sel in client_selections.values()])
+        masks = np.array(
+            [sel["selected_features"] for sel in client_selections.values()]
+        )
         intersection_mask = self._get_intersection(masks)
         union_mask = self._get_union(masks)
 
         num_sel = (
-            int(np.sum(self.global_feature_mask)) if self.global_feature_mask is not None else 0
+            int(np.sum(self.global_feature_mask))
+            if self.global_feature_mask is not None
+            else 0
         )
         total = int(self.num_features) if self.num_features else 1
 
@@ -616,7 +641,9 @@ class FeatureElectionStrategy(Strategy):
         """Get results dictionary."""
         return {
             "global_feature_mask": (
-                self.global_feature_mask.tolist() if self.global_feature_mask is not None else None
+                self.global_feature_mask.tolist()
+                if self.global_feature_mask is not None
+                else None
             ),
             "election_stats": self.election_stats,
             "tuning_history": self.tuning_history,

@@ -14,28 +14,30 @@ Feature Election enables multiple clients with tabular datasets to collaborative
 This work originates from **FLASH**: A framework for Federated Learning with Attribute Selection and Hyperparameter optimization, presented at [FLTA IEEE 2025](https://flta-conference.org/flta-2025/) (Best Student Paper Award).
 
 **Key Features:**
+
 - **Privacy-preserving**: Clients only share feature selections and scores, not raw data
 - **Multiple FS methods**: Lasso, Random Forest, Mutual Information, RFE, and more
 - **Configurable aggregation**: Control the balance between intersection and union of features
 
 ## Feature Selection Methods
 
-| Method | Description | Speed |
-|--------|-------------|-------|
-| `lasso` | L1-regularized regression (sparse) | Fast |
-| `elastic_net` | Elastic Net regularization | Fast |
-| `random_forest` | Random Forest importance | Medium |
-| `mutual_info` | Mutual information | Medium |
-| `f_classif` | F-statistic | Fast |
-| `chi2` | Chi-squared test | Fast |
-| `rfe` | Recursive Feature Elimination | Slow |
-| `pyimpetus` | PyImpetus Markov Blanket | Slow |
+| Method          | Description                        | Speed  |
+| --------------- | ---------------------------------- | ------ |
+| `lasso`         | L1-regularized regression (sparse) | Fast   |
+| `elastic_net`   | Elastic Net regularization         | Fast   |
+| `random_forest` | Random Forest importance           | Medium |
+| `mutual_info`   | Mutual information                 | Medium |
+| `f_classif`     | F-statistic                        | Fast   |
+| `chi2`          | Chi-squared test                   | Fast   |
+| `rfe`           | Recursive Feature Elimination      | Slow   |
+| `pyimpetus`     | PyImpetus Markov Blanket           | Slow   |
 
 ## Key Parameters
 
 ### Freedom Degree (α)
 
 Controls feature selection strategy (α ∈ [0,1]):
+
 - **α = 0.0**: Intersection — only features selected by ALL clients
 - **α = 1.0**: Union — features selected by ANY client
 - **α = 0.5**: Balanced selection (recommended)
@@ -63,14 +65,14 @@ feature-election/
 
 ## Installation
 
-```bash
+````bash
 # Clone the repository
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/feature-election . && rm -rf flower && feature-election
 
 # Install dependencies
 pip install -e .
-```
+````
 
 ## Running the Project
 
@@ -118,20 +120,20 @@ num-rounds = 1
 
 ### Feature Election Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `freedom-degree` | float | 0.5 | Selection strategy (0=intersection, 1=union) |
-| `aggregation-mode` | str | "weighted" | "weighted" or "uniform" |
-| `fs-method` | str | "lasso" | Feature selection method |
-| `eval-metric` | str | "f1" | Evaluation metric ("f1", "accuracy", "auc") |
+| Parameter          | Type  | Default    | Description                                  |
+| ------------------ | ----- | ---------- | -------------------------------------------- |
+| `freedom-degree`   | float | 0.5        | Selection strategy (0=intersection, 1=union) |
+| `aggregation-mode` | str   | "weighted" | "weighted" or "uniform"                      |
+| `fs-method`        | str   | "lasso"    | Feature selection method                     |
+| `eval-metric`      | str   | "f1"       | Evaluation metric ("f1", "accuracy", "auc")  |
 
 ### Federated Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `num-rounds` | int | 1 | Number of FL rounds |
-| `fraction-train` | float | 1.0 | Fraction of nodes for training |
-| `fraction-evaluate` | float | 1.0 | Fraction of nodes for evaluation |
+| Parameter           | Type  | Default | Description                      |
+| ------------------- | ----- | ------- | -------------------------------- |
+| `num-rounds`        | int   | 1       | Number of FL rounds              |
+| `fraction-train`    | float | 1.0     | Fraction of nodes for training   |
+| `fraction-evaluate` | float | 1.0     | Fraction of nodes for evaluation |
 
 ## Results
 
@@ -157,10 +159,10 @@ After running, results are saved to `outputs/<date>/<time>/`:
 ## Algorithm
 
 1. **Client Selection**: Each client performs local feature selection
-2. **Score Calculation**: Clients compute feature importance scores
-3. **Submission**: Clients send binary masks and scores (not raw data)
-4. **Aggregation**: Server aggregates using weighted voting based on `freedom_degree`
-5. **Distribution**: Server broadcasts global mask to clients
+1. **Score Calculation**: Clients compute feature importance scores
+1. **Submission**: Clients send binary masks and scores (not raw data)
+1. **Aggregation**: Server aggregates using weighted voting based on `freedom_degree`
+1. **Distribution**: Server broadcasts global mask to clients
 
 ## Citation
 

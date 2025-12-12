@@ -10,9 +10,9 @@ from typing import Any, List, Optional, Tuple, cast
 
 import numpy as np
 import pandas as pd
-from sklearn.datasets import make_classification # type: ignore[import-untyped]
-from sklearn.model_selection import train_test_split # type: ignore[import-untyped]
-from sklearn.preprocessing import LabelEncoder # type: ignore[import-untyped]
+from sklearn.datasets import make_classification  # type: ignore[import-untyped]
+from sklearn.model_selection import train_test_split  # type: ignore[import-untyped]
+from sklearn.preprocessing import LabelEncoder  # type: ignore[import-untyped]
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +25,7 @@ def create_synthetic_dataset(
     n_repeated: int = 10,
     random_state: int = 42,
 ) -> Tuple[pd.DataFrame, List[str]]:
-    """
-    Create a synthetic high-dimensional dataset for testing.
+    """Create a synthetic high-dimensional dataset for testing.
 
     Args:
         n_samples: Number of samples
@@ -52,7 +51,9 @@ def create_synthetic_dataset(
     df = pd.DataFrame(X, columns=feature_names)
     df["target"] = y
 
-    logger.info(f"Created synthetic dataset: {n_samples} samples, {n_features} features")
+    logger.info(
+        f"Created synthetic dataset: {n_samples} samples, {n_features} features"
+    )
     return df, feature_names
 
 
@@ -64,8 +65,7 @@ def load_client_data(
     random_state: int = 42,
     dataset_params: Optional[dict] = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[str]]:
-    """
-    Load data for a specific client.
+    """Load data for a specific client.
 
     Args:
         client_id: Client identifier (0 to num_clients-1)
@@ -91,7 +91,9 @@ def load_client_data(
     # FIX: Use a fixed random_state for dataset generation so all clients
     # share the same underlying feature structure (informative/redundant features).
     # Only the data partitioning should be client-specific.
-    df, feature_names = create_synthetic_dataset(random_state=random_state, **dataset_params)
+    df, feature_names = create_synthetic_dataset(
+        random_state=random_state, **dataset_params
+    )
 
     # Split data among clients
     client_df = split_data_for_client(
@@ -123,8 +125,7 @@ def split_data_for_client(
     strategy: str = "stratified",
     random_state: int = 42,
 ) -> pd.DataFrame:
-    """
-    Split dataset for a specific client based on strategy.
+    """Split dataset for a specific client based on strategy.
 
     Args:
         df: Full dataset
@@ -189,8 +190,7 @@ def _split_non_iid(
     random_state: int,
     classes_per_client: int = 2,
 ) -> pd.DataFrame:
-    """
-    Non-IID split where each client has data from limited classes.
+    """Non-IID split where each client has data from limited classes.
 
     Args:
         df: Full dataset
@@ -247,8 +247,7 @@ def prepare_federated_dataset(
     test_size: float = 0.2,
     random_state: int = 42,
 ) -> List[Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
-    """
-    Prepare dataset for all clients in federated learning.
+    """Prepare dataset for all clients in federated learning.
 
     Args:
         df: Full dataset
@@ -265,7 +264,9 @@ def prepare_federated_dataset(
 
     for client_id in range(num_clients):
         # Split data for this client
-        client_df = split_data_for_client(df, client_id, num_clients, split_strategy, random_state)
+        client_df = split_data_for_client(
+            df, client_id, num_clients, split_strategy, random_state
+        )
 
         # Separate features and target
         X = client_df.drop(columns=[target_col]).values
@@ -291,8 +292,7 @@ def load_custom_dataset(
     test_size: float = 0.2,
     random_state: int = 42,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[str]]:
-    """
-    Load a custom dataset from file and prepare for a client.
+    """Load a custom dataset from file and prepare for a client.
 
     Args:
         filepath: Path to CSV file
@@ -313,7 +313,9 @@ def load_custom_dataset(
     feature_names = [col for col in df.columns if col != target_col]
 
     # Split for this client
-    client_df = split_data_for_client(df, client_id, num_clients, split_strategy, random_state)
+    client_df = split_data_for_client(
+        df, client_id, num_clients, split_strategy, random_state
+    )
 
     X = client_df.drop(columns=[target_col]).values
     y = client_df[target_col].values

@@ -1,5 +1,4 @@
-"""
-Feature Election Server for Flower
+"""Feature Election Server for Flower.
 
 Implements a multi-phase workflow:
 1. Feature Election (Round 1): Collect feature votes.
@@ -131,9 +130,17 @@ def aggregate_fl_metrics(results: Iterable[Message]) -> Optional[MetricRecord]:
             val_acc_raw = metrics.get("val_accuracy", 0)
             train_loss_raw = metrics.get("train_loss", 0)
 
-            train_acc = float(train_acc_raw) if isinstance(train_acc_raw, (int, float)) else 0.0
-            val_acc = float(val_acc_raw) if isinstance(val_acc_raw, (int, float)) else 0.0
-            train_loss = float(train_loss_raw) if isinstance(train_loss_raw, (int, float)) else 0.0
+            train_acc = (
+                float(train_acc_raw) if isinstance(train_acc_raw, (int, float)) else 0.0
+            )
+            val_acc = (
+                float(val_acc_raw) if isinstance(val_acc_raw, (int, float)) else 0.0
+            )
+            train_loss = (
+                float(train_loss_raw)
+                if isinstance(train_loss_raw, (int, float))
+                else 0.0
+            )
 
             total_train_acc += train_acc * num_samples
             total_val_acc += val_acc * num_samples
@@ -155,9 +162,7 @@ def aggregate_fl_metrics(results: Iterable[Message]) -> Optional[MetricRecord]:
 
 @app.main()
 def main(grid: Grid, context: Context) -> None:
-    """
-    Main entry point for the Feature Election + FL ServerApp.
-    """
+    """Main entry point for the Feature Election + FL ServerApp."""
     # =======================================================
     # Read Configuration
     # =======================================================
@@ -233,14 +238,22 @@ def main(grid: Grid, context: Context) -> None:
                 f"[ROUND {current_round}/{num_rounds}] - FEATURE ELECTION / TUNING PHASE",
             )
         else:
-            log(logging.INFO, f"[ROUND {current_round}/{num_rounds}] - FL TRAINING PHASE")
+            log(
+                logging.INFO,
+                f"[ROUND {current_round}/{num_rounds}] - FL TRAINING PHASE",
+            )
 
             if not skip_feature_election and global_feature_mask is None:
-                log(logging.ERROR, "Cannot proceed to FL: Feature election failed (no mask).")
+                log(
+                    logging.ERROR,
+                    "Cannot proceed to FL: Feature election failed (no mask).",
+                )
                 break
 
             if global_feature_mask is not None:
-                input_arrays["feature_mask"] = Array(global_feature_mask.astype(np.float32))
+                input_arrays["feature_mask"] = Array(
+                    global_feature_mask.astype(np.float32)
+                )
 
             if global_model_weights is not None:
                 for key in global_model_weights:
@@ -248,7 +261,9 @@ def main(grid: Grid, context: Context) -> None:
 
         # Configure Train
         train_config = ConfigRecord()
-        train_messages = strategy.configure_train(current_round, input_arrays, train_config, grid)
+        train_messages = strategy.configure_train(
+            current_round, input_arrays, train_config, grid
+        )
 
         train_replies = grid.send_and_receive(
             messages=train_messages,
@@ -257,7 +272,9 @@ def main(grid: Grid, context: Context) -> None:
 
         # Aggregation
         if is_setup_phase:
-            agg_arrays, agg_metrics = strategy.aggregate_train(current_round, train_replies)
+            agg_arrays, agg_metrics = strategy.aggregate_train(
+                current_round, train_replies
+            )
 
             if agg_arrays is not None and "feature_mask" in agg_arrays:
                 # FIX: Explicit cast
@@ -272,7 +289,9 @@ def main(grid: Grid, context: Context) -> None:
                 # Format bytes to MB
                 total_bytes = metrics_dict.get("total_bytes_transmitted", 0)
                 if isinstance(total_bytes, (int, float)):
-                    metrics_dict["total_mb_transmitted"] = float(f"{total_bytes / (1024*1024):.2f}")
+                    metrics_dict["total_mb_transmitted"] = float(
+                        f"{total_bytes / (1024*1024):.2f}"
+                    )
 
                 if current_round == 1:
                     log(logging.INFO, f"  Election Metrics: {metrics_dict}")
@@ -282,7 +301,10 @@ def main(grid: Grid, context: Context) -> None:
                     results_history["tuning"][current_round] = metrics_dict
 
             if current_round == total_setup_rounds:
-                log(logging.INFO, "  Setup phase complete. Finalizing feature election results.")
+                log(
+                    logging.INFO,
+                    "  Setup phase complete. Finalizing feature election results.",
+                )
                 strategy.save_results("feature_election_results.json")
 
         else:
@@ -297,7 +319,10 @@ def main(grid: Grid, context: Context) -> None:
                 global_model_weights = current_weights
                 log(logging.INFO, "  Global model weights updated via FedAvg")
             else:
-                log(logging.WARNING, "  Could not aggregate weights this round (insufficient data)")
+                log(
+                    logging.WARNING,
+                    "  Could not aggregate weights this round (insufficient data)",
+                )
 
             fl_metrics = aggregate_fl_metrics(train_replies)
             if fl_metrics is not None:
@@ -305,7 +330,9 @@ def main(grid: Grid, context: Context) -> None:
 
                 # --- Inject Communication Metrics ---
                 total_bytes = strategy.cumulative_communication_bytes
-                metrics_dict["total_mb_transmitted"] = float(f"{total_bytes / (1024*1024):.2f}")
+                metrics_dict["total_mb_transmitted"] = float(
+                    f"{total_bytes / (1024*1024):.2f}"
+                )
 
                 log(logging.INFO, f"  FL Training metrics: {metrics_dict}")
                 results_history["fl_training"][current_round] = metrics_dict
@@ -314,7 +341,9 @@ def main(grid: Grid, context: Context) -> None:
             if fraction_evaluate > 0 and global_model_weights is not None:
                 eval_arrays = ArrayRecord()
                 if global_feature_mask is not None:
-                    eval_arrays["feature_mask"] = Array(global_feature_mask.astype(np.float32))
+                    eval_arrays["feature_mask"] = Array(
+                        global_feature_mask.astype(np.float32)
+                    )
                 for key in global_model_weights:
                     eval_arrays[key] = global_model_weights[key]
 
@@ -329,7 +358,9 @@ def main(grid: Grid, context: Context) -> None:
                         messages=eval_messages,
                         timeout=3600,
                     )
-                    eval_metrics = strategy.aggregate_evaluate(current_round, eval_replies)
+                    eval_metrics = strategy.aggregate_evaluate(
+                        current_round, eval_replies
+                    )
 
                     if eval_metrics is not None:
                         metrics_dict = dict(eval_metrics)
@@ -353,7 +384,10 @@ def main(grid: Grid, context: Context) -> None:
 
     final_bytes = strategy.cumulative_communication_bytes
     final_mb = final_bytes / (1024 * 1024)
-    log(logging.INFO, f"Total Communication Cost: {final_mb:.2f} MB ({final_bytes} bytes)")
+    log(
+        logging.INFO,
+        f"Total Communication Cost: {final_mb:.2f} MB ({final_bytes} bytes)",
+    )
 
     log(logging.INFO, "=" * 50)
 

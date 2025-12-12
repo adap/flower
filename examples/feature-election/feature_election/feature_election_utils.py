@@ -1,5 +1,4 @@
-"""
-Feature Selection Utilities for Feature Election
+"""Feature Selection Utilities for Feature Election.
 
 Provides various feature selection methods and evaluation utilities.
 """
@@ -34,8 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 class FeatureSelector:
-    """
-    Feature selector supporting multiple methods.
+    """Feature selector supporting multiple methods.
 
     Supported methods:
     - lasso: L1-regularized linear regression
@@ -55,8 +53,7 @@ class FeatureSelector:
         eval_metric: str = "f1",
         quick_eval: bool = True,
     ):
-        """
-        Initialize Feature Selector.
+        """Initialize Feature Selector.
 
         Args:
             fs_method: Feature selection method
@@ -95,9 +92,10 @@ class FeatureSelector:
         if self.fs_method in defaults:
             self.fs_params = {**defaults[self.fs_method], **self.fs_params}
 
-    def select_features(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Perform feature selection.
+    def select_features(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Perform feature selection.
 
         Args:
             X: Feature matrix
@@ -167,7 +165,9 @@ class FeatureSelector:
 
         return selected_mask, feature_scores
 
-    def _select_lasso(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_lasso(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Lasso feature selection."""
         selector = Lasso(**self.fs_params)
         selector.fit(X, y)
@@ -175,7 +175,9 @@ class FeatureSelector:
         selected_mask = feature_scores > 1e-6
         return selected_mask, feature_scores
 
-    def _select_elastic_net(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_elastic_net(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Elastic Net feature selection."""
         selector = ElasticNet(**self.fs_params)
         selector.fit(X, y)
@@ -183,7 +185,9 @@ class FeatureSelector:
         selected_mask = feature_scores > 1e-6
         return selected_mask, feature_scores
 
-    def _select_mutual_info(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_mutual_info(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Mutual information feature selection."""
         n_features = X.shape[1]
         feature_scores = mutual_info_classif(
@@ -198,7 +202,9 @@ class FeatureSelector:
         selected_mask[selected_indices] = True
         return selected_mask, feature_scores
 
-    def _select_chi2(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_chi2(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Chi-squared feature selection."""
         n_features = X.shape[1]
         # Chi2 requires non-negative features
@@ -210,7 +216,9 @@ class FeatureSelector:
         selected_mask[selected_indices] = True
         return selected_mask, feature_scores
 
-    def _select_f_classif(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_f_classif(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """F-statistic feature selection."""
         n_features = X.shape[1]
         feature_scores, _ = f_classif(X, y)
@@ -220,13 +228,17 @@ class FeatureSelector:
         selected_mask[selected_indices] = True
         return selected_mask, feature_scores
 
-    def _select_rfe(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_rfe(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Recursive Feature Elimination."""
         n_features = X.shape[1]
         estimator = LogisticRegression(max_iter=1000, random_state=42)
         selector = RFE(
             estimator,
-            n_features_to_select=min(self.fs_params.get("n_features_to_select", 10), n_features),
+            n_features_to_select=min(
+                self.fs_params.get("n_features_to_select", 10), n_features
+            ),
             step=self.fs_params.get("step", 1),
         )
         selector.fit(X, y)
@@ -236,7 +248,9 @@ class FeatureSelector:
         feature_scores = 1.0 / feature_scores
         return selected_mask, feature_scores
 
-    def _select_random_forest(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_random_forest(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Random Forest feature importance."""
         n_features = X.shape[1]
         rf = RandomForestClassifier(**self.fs_params)
@@ -248,7 +262,9 @@ class FeatureSelector:
         selected_mask[selected_indices] = True
         return selected_mask, feature_scores
 
-    def _select_selectkbest(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_selectkbest(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """SelectKBest feature selection."""
         n_features = X.shape[1]
         score_func_name = self.fs_params.get("score_func", "f_classif")
@@ -272,7 +288,9 @@ class FeatureSelector:
         feature_scores = selector.scores_
         return selected_mask, feature_scores
 
-    def _select_pyimpetus(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _select_pyimpetus(
+        self, X: np.ndarray, y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """PyImpetus feature selection."""
         if not PYIMPETUS_AVAILABLE:
             logger.error("PyImpetus not available. Install with: pip install PyImpetus")
@@ -298,7 +316,9 @@ class FeatureSelector:
                     max_iter=1000, random_state=random_state, solver="liblinear"
                 )
             else:
-                base_model = RandomForestClassifier(n_estimators=100, random_state=random_state)
+                base_model = RandomForestClassifier(
+                    n_estimators=100, random_state=random_state
+                )
 
             # Use PPIMBC for feature selection
             selector = PPIMBC(
@@ -334,13 +354,18 @@ class FeatureSelector:
                 selected_mask[selected_indices] = True
             else:
                 # Fallback if no features selected
-                logger.warning("PyImpetus selected no features, falling back to mutual_info")
+                logger.warning(
+                    "PyImpetus selected no features, falling back to mutual_info"
+                )
                 return self._select_mutual_info(X, y)
 
             # Create feature scores
             # PyImpetus returns feat_imp_scores for selected features only
             feature_scores = np.zeros(n_features)
-            if hasattr(selector, "feat_imp_scores") and len(selector.feat_imp_scores) > 0:
+            if (
+                hasattr(selector, "feat_imp_scores")
+                and len(selector.feat_imp_scores) > 0
+            ):
                 # Assign importance scores to selected features
                 for idx, score in zip(selected_indices, selector.feat_imp_scores):
                     if idx < n_features:
@@ -362,8 +387,7 @@ class FeatureSelector:
         X_val: np.ndarray,
         y_val: np.ndarray,
     ) -> float:
-        """
-        Quick evaluation of model performance.
+        """Quick evaluation of model performance.
 
         Args:
             X_train: Training features

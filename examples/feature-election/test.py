@@ -47,9 +47,15 @@ def main():
     print("\n2. Creating synthetic dataset...")
     try:
         df, feature_names = create_synthetic_dataset(
-            n_samples=100, n_features=35, n_informative=15, n_redundant=10, n_repeated=10
+            n_samples=100,
+            n_features=35,
+            n_informative=15,
+            n_redundant=10,
+            n_repeated=10,
         )
-        print(f"   ✓ Dataset created: {df.shape[0]} samples, {len(feature_names)} features")
+        print(
+            f"   ✓ Dataset created: {df.shape[0]} samples, {len(feature_names)} features"
+        )
     except Exception as e:
         print(f"   ✗ Dataset creation failed: {e}")
         return 1
@@ -132,7 +138,9 @@ def main():
     # Test 7: Hill Climbing Logic
     print("7. Testing Hill Climbing (Auto-Tuning) Logic...")
     try:
-        strategy = FeatureElectionStrategy(freedom_degree=0.5, tuning_rounds=3, auto_tune=True)
+        strategy = FeatureElectionStrategy(
+            freedom_degree=0.5, tuning_rounds=3, auto_tune=True
+        )
 
         # --- Scenario A: Improvement -> Continue ---
         # History: Round T-1 (0.5 -> 0.80 acc), Round T (0.6 -> 0.82 acc)
@@ -160,7 +168,9 @@ def main():
         expected_fd = 0.45
 
         if abs(next_fd - expected_fd) < 1e-6:
-            print(f"   ✓ Scenario B (Degradation): Correctly reversed/decayed to {next_fd:.2f}")
+            print(
+                f"   ✓ Scenario B (Degradation): Correctly reversed/decayed to {next_fd:.2f}"
+            )
         else:
             print(f"   ✗ Scenario B Failed: Expected {expected_fd}, got {next_fd}")
             return 1
