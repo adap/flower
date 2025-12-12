@@ -46,14 +46,10 @@ from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.supercore.constant import NOOP_FEDERATION
+from flwr.supercore.utils import parse_app_spec
 
 from ..log import start_stream
-from ..utils import (
-    flwr_cli_grpc_exc_handler,
-    init_channel,
-    load_cli_auth_plugin,
-    parse_app_spec,
-)
+from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -111,8 +107,15 @@ def run(
         app_spec = None
         if (app_str := str(app)).startswith("@"):
             # Validate app version and ID format
-            _ = parse_app_spec(app_str)
+            try:
+                _ = parse_app_spec(app_str)
+            except ValueError as e:
+                typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
+                raise typer.Exit(code=1) from e
+
             app_spec = app_str
+            # Set `app` to current directory for credential storage
+            app = Path(".")
         is_remote_app = app_spec is not None
 
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
@@ -212,15 +215,7 @@ def _run_with_control_api(
                 f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN
             )
         else:
-            if is_remote_app:
-                typer.secho(
-                    "❌ Failed to start run. Please check that the provided "
-                    "app identifier (@account_name/app_name) is correct.",
-                    fg=typer.colors.RED,
-                    err=True,
-                )
-            else:
-                typer.secho("❌ Failed to start run", fg=typer.colors.RED, err=True)
+            typer.secho("❌ Failed to start run", fg=typer.colors.RED, err=True)
             raise typer.Exit(code=1)
 
         if output_format == CliOutputFormat.JSON:

@@ -1,4 +1,4 @@
-"""$project_name: A Flower / $framework_str app."""
+"""quickstart_xgboost: A Flower / XGBoost app."""
 
 import xgboost as xgb
 from flwr_datasets import FederatedDataset

@@ -1,4 +1,4 @@
-"""$project_name: A Flower / $framework_str app."""
+"""quickstart-xgboost: A Flower / XGBoost app."""
 
 import warnings
 
@@ -8,7 +8,7 @@ from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from flwr.common.config import unflatten_dict
 
-from $import_name.task import load_data, replace_keys
+from quickstart_xgboost.task import load_data, replace_keys
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
