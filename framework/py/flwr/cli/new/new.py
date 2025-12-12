@@ -83,7 +83,11 @@ def new(
         else:
             # Extract app_ids and show selection menu
             app_ids = [app["app_id"] for app in apps]
-            app_spec = prompt_options("Select a Flower App to create", app_ids)
+            app_spec = prompt_options(
+                "Select a Flower App to create by entering "
+                "the number from the list below:",
+                app_ids,
+            )
 
     if app_spec is None:
         app_spec = prompt_text("Please provide the app specifier")
@@ -141,7 +145,7 @@ def fetch_recommended_apps() -> list[dict[str, str]]:
 
     except requests.RequestException as e:
         typer.secho(
-            f"Failed to fetch recommended apps: {e}",
+            f"❌ Failed to fetch recommended apps: {e}",
             fg=typer.colors.RED,
             err=True,
         )
@@ -248,7 +252,7 @@ def download_remote_app_via_api(app_spec: str) -> None:
 
     print(
         typer.style(
-            "⬇️ Downloading ZIP into memory...",
+            "⬇️  Downloading ZIP into memory...",
             fg=typer.colors.GREEN,
             bold=True,
         )
