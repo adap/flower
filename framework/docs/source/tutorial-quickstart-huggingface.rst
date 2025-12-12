@@ -171,12 +171,12 @@ to create dataloaders with the data that correspond to their data partition.
     # Divide data: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_name, model_max_length=512)
 
 
     def tokenize_function(examples):
         return tokenizer(
-            examples["text"], truncation=True, add_special_tokens=True, max_length=512
+            examples["text"], truncation=True, add_special_tokens=True
         )
 
 
@@ -208,7 +208,7 @@ have access to larger GPUs, feel free to use larger models!
 .. code-block:: python
 
     net = AutoModelForSequenceClassification.from_pretrained(
-        model_name, num_labels=num_labels
+        model_name, num_labels=2
     )
 
 Note that here, ``model_name`` is a string that will be loaded from the ``Context`` in
@@ -224,7 +224,7 @@ use standard training/testing functions to perform local training or evaluation:
 
 .. code-block:: python
 
-    def train(net, trainloader, epochs, device):
+    def train_fn(net, trainloader, epochs, device) -> None:
         optimizer = AdamW(net.parameters(), lr=5e-5)
         net.train()
         for _ in range(epochs):
@@ -237,7 +237,7 @@ use standard training/testing functions to perform local training or evaluation:
                 optimizer.zero_grad()
 
 
-    def test(net, testloader, device):
+    def test_fn(net, testloader, device) -> tuple[Any | float, Any]:
         metric = load_metric("accuracy")
         loss = 0
         net.eval()
@@ -265,19 +265,17 @@ conversions:
 .. code-block:: python
 
     # Load the model
-    net = AutoModelForSequenceClassification.from_pretrained(
-        model_name, num_labels=num_labels
-    )
+    model = get_model(model_name)
 
-    # Extract ArrayRecord from Message and convert to PyTorch state_dict,
-    state_dict = msg.content["arrays"].to_torch_state_dict()
+    # Extract ArrayRecord from Message and convert to PyTorch state_dict
+    arrays = msg.content["arrays"]
     # Load state_dict into the model
-    net.load_state_dict(state_dict)
+    model.load_state_dict(arrays.to_torch_state_dict(), strict=True)
 
     # ... do some training
 
     # Convert state_dict back into an ArrayRecord
-    model_record = ArrayRecord(net.state_dict())
+    model_record = ArrayRecord(model.state_dict())
 
 The rest of the functionality is directly inspired by the centralized case. The
 |clientapp_link|_ comes with three core methods (``train``, ``evaluate``, and ``query``)
@@ -307,7 +305,7 @@ Runtime and is not directly configurable during simulations.
 
 
     @app.train()
-    def train(msg: Message, context: Context):
+    def train(msg: Message, context: Context) -> Message:
         """Train the model on local data."""
 
         # Get this client's dataset partition
@@ -317,32 +315,22 @@ Runtime and is not directly configurable during simulations.
         trainloader, _ = load_data(partition_id, num_partitions, model_name)
 
         # Load model
-        num_labels = context.run_config["num-labels"]
-        net = AutoModelForSequenceClassification.from_pretrained(
-            model_name, num_labels=num_labels
-        )
+        model = get_model(model_name)
 
         # Initialize it with the received weights
-        net.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+        arrays = msg.content["arrays"]
+        model.load_state_dict(arrays.to_torch_state_dict(), strict=True)
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        net.to(device)
+        model.to(device)
 
         # Train the model on local data
-        train_loss = train_fn(
-            net,
-            trainloader,
-            context.run_config["local-steps"],
-            device,
-        )
+        train_fn(model, trainloader, epochs=1, device=device)
 
         # Construct and return reply Message
-        model_record = ArrayRecord(net.state_dict())
-        metrics = {
-            "train_loss": train_loss,
-            "num-examples": len(trainloader.dataset),
-        }
-        metric_record = MetricRecord(metrics)
-        content = RecordDict({"arrays": model_record, "metrics": metric_record})
+        model_record = ArrayRecord(model.state_dict())
+        metrics = MetricRecord({"num-examples": len(trainloader)})
+        # Construct RecordDict and add ArrayRecord and MetricRecord
+        content = RecordDict({"arrays": model_record, "metrics": metrics})
         return Message(content=content, reply_to=msg)
 
 The ``@app.evaluate()`` method would be near identical with two exceptions: (1) the
@@ -381,24 +369,22 @@ invoking its |strategy_start_link|_ method. To it we pass:
 
     @app.main()
     def main(grid: Grid, context: Context) -> None:
-        """Main entry point for the ServerApp."""
 
-        # Read from config
-        num_rounds = context.run_config["num-server-rounds"]
-        fraction_train = context.run_config["fraction-train"]
-
-        # Initialize global model
+        # Define model to federate and extract parameters
         model_name = context.run_config["model-name"]
-        num_labels = context.run_config["num-labels"]
-        net = AutoModelForSequenceClassification.from_pretrained(
-            model_name, num_labels=num_labels
+        model = get_model(model_name)
+        arrays = ArrayRecord(model.state_dict())
+
+        # Instantiate strategy
+        fraction_train = context.run_config["fraction-train"]
+        fraction_evaluate = context.run_config["fraction-evaluate"]
+        strategy = FedAvg(
+            fraction_train=fraction_train,
+            fraction_evaluate=fraction_evaluate,
         )
-        arrays = ArrayRecord(net.state_dict())
 
-        # Initialize FedAvg strategy
-        strategy = FedAvg(fraction_train=fraction_train)
-
-        # Start strategy, run FedAvg for `num_rounds`
+        num_rounds = context.run_config["num-server-rounds"]
+        # Start the strategy
         result = strategy.start(
             grid=grid,
             initial_arrays=arrays,
