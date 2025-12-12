@@ -29,23 +29,23 @@ Before you start, make sure that:
 
    .. code-block:: console
 
-        $ flwr new @flwrlabs/quickstart-pytorch
+       $ flwr new @flwrlabs/quickstart-pytorch
 
-        🔗 Requesting download link for @flwrlabs/quickstart-pytorch...
-        🔽 Downloading ZIP into memory...
-        📦 Unpacking into /Users/alice/quickstart-pytorch...
-        🎊 Flower App creation successful.
+       🔗 Requesting download link for @flwrlabs/quickstart-pytorch...
+       🔽 Downloading ZIP into memory...
+       📦 Unpacking into /Users/alice/quickstart-pytorch...
+       🎊 Flower App creation successful.
 
-        To run your Flower App, first install its dependencies:
+       To run your Flower App, first install its dependencies:
 
-                cd quickstart-pytorch && pip install -e .
+               cd quickstart-pytorch && pip install -e .
 
-        then, run the app:
+       then, run the app:
 
-                flwr run .
+               flwr run .
 
-        💡 Check the README in your app directory to learn how to
-        customize it and how to run it using the Deployment Runtime.
+       💡 Check the README in your app directory to learn how to
+       customize it and how to run it using the Deployment Runtime.
 
        $ cd quickstart-pytorch
 
