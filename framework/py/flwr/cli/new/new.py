@@ -18,7 +18,7 @@
 import io
 import zipfile
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, cast
 
 import requests
 import typer
@@ -136,7 +136,9 @@ def fetch_recommended_apps() -> list[dict[str, str]]:
         response = requests.get(url, headers={"accept": "application/json"}, timeout=10)
         response.raise_for_status()
         data = response.json()
-        return data.get("apps", [])
+        apps = data.get("apps", [])
+        return cast(list[dict[str, str]], apps)
+
     except requests.RequestException as e:
         typer.secho(
             f"Failed to fetch recommended apps: {e}",
