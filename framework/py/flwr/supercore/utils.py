@@ -194,21 +194,21 @@ def humanize_duration(seconds: float) -> str:
 
     # Under 90 seconds → Seconds only
     if seconds < 90:
-        return f"{seconds:>2}s"
+        return f"{seconds}s"
 
     # Under 1 hour → Minutes and seconds
     minutes, sec = divmod(seconds, 60)
     if minutes < 60:
-        return f"{minutes:>2}m {sec:>2}s"
+        return f"{minutes}m {sec}s"
 
     # Under 1 day → Hours and minutes
     hours, minutes = divmod(minutes, 60)
     if hours < 24:
-        return f"{hours:>2}h {minutes:>2}m"
+        return f"{hours}h {minutes}m"
 
     # 1+ days → Days and hours
     days, hours = divmod(hours, 24)
-    return f"{days}d {hours:>2}h"
+    return f"{days}d {hours}h"
 
 
 def humanize_bytes(num_bytes: int) -> str:
