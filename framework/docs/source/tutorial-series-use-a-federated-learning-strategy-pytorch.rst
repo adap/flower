@@ -126,16 +126,16 @@ lines in your ``server_app.py`` to switch from ``FedAvg`` to |fedadagrad_link|_.
         """Main entry point for the ServerApp."""
 
         # Read run config
-        fraction_train: float = context.run_config["fraction-train"]
+        fraction_evaluate: float = context.run_config["fraction-evaluate"]
         num_rounds: int = context.run_config["num-server-rounds"]
-        lr: float = context.run_config["lr"]
+        lr: float = context.run_config["learning-rate"]
 
         # Load global model
         global_model = Net()
         arrays = ArrayRecord(global_model.state_dict())
 
         # Initialize FedAdagrad strategy
-        strategy = FedAdagrad(fraction_train=fraction_train)
+        strategy = FedAdagrad(fraction_evaluate=fraction_evaluate)
 
         # Start strategy, run FedAdagrad for `num_rounds`
         result = strategy.start(
@@ -143,6 +143,7 @@ lines in your ``server_app.py`` to switch from ``FedAvg`` to |fedadagrad_link|_.
             initial_arrays=arrays,
             train_config=ConfigRecord({"lr": lr}),
             num_rounds=num_rounds,
+            evaluate_fn=global_evaluate,
         )
 
         # Save final model to disk
@@ -187,12 +188,12 @@ function wrapped with the ``@app.evaluate`` decorator in your ``ClientApp``). No
 see how we can evaluate the aggregated model parameters on the server side.
 
 To do so, we need to create a new function in ``task.py`` that we can name
-``central_evaluate``. This function is a callback that will be passed to the
+``global_evaluate``. This function is a callback that will be passed to the
 |strategy_start_link|_ method of our strategy. This means that the strategy will call
 this function after every round of federated learning passing two arguments: the current
 round of federated learning and the aggregated model parameters.
 
-Our ``central_evaluate`` function performs the following steps:
+Our ``global_evaluate`` function performs the following steps:
 
 1. Load the aggregated model parameters into a PyTorch model
 2. Load the entire CIFAR10 test dataset
@@ -201,12 +202,11 @@ Our ``central_evaluate`` function performs the following steps:
 
 .. code-block:: python
 
-    from datasets import load_dataset
     from flwr.app import ArrayRecord, MetricRecord
 
 
-    def central_evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
-        """Evaluate model on the server side."""
+    def global_evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
+        """Evaluate model on central data."""
 
         # Load the model and initialize it with the received weights
         model = Net()
@@ -214,34 +214,22 @@ Our ``central_evaluate`` function performs the following steps:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         model.to(device)
 
-        # Load the entire CIFAR10 test dataset
-        # It's a huggingface dataset, so we can load it directly and apply transforms
-        cifar10_test = load_dataset("cifar10", split="test")
-        pytorch_transforms = Compose(
-            [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-        )
+        # Load entire test set
+        test_dataloader = load_centralized_dataset()
 
-        # Define transforms and construct DataLoader for the test set
-        def apply_transforms(batch):
-            batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
-            return batch
-
-        testset = cifar10_test.with_transform(apply_transforms)
-        testloader = DataLoader(testset, batch_size=64)
-
-        # Evaluate the model on the test set
-        loss, accuracy = test(model, testloader, device)
+        # Evaluate the global model on the test set
+        test_loss, test_acc = test(model, test_dataloader, device)
 
         # Return the evaluation metrics
-        return MetricRecord({"accuracy": accuracy, "loss": loss})
+        return MetricRecord({"accuracy": test_acc, "loss": test_loss})
 
-Remember we mentioned this ``central_evaluate`` will be called by the strategy. To do so
+Remember we mentioned this ``global_evaluate`` will be called by the strategy. To do so
 we need to pass it to the strategy's ``start`` method as shown below.
 
 .. code-block:: python
     :emphasize-lines: 1,16
 
-    from flower_tutorial.task import central_evaluate
+    from pytorchexample.task import global_evaluate
 
 
     @app.main()
@@ -256,7 +244,7 @@ we need to pass it to the strategy's ``start`` method as shown below.
             initial_arrays=arrays,
             train_config=ConfigRecord({"lr": lr}),
             num_rounds=num_rounds,
-            evaluate_fn=central_evaluate,
+            evaluate_fn=global_evaluate,
         )
 
         # .. unchanged
@@ -298,7 +286,7 @@ and embed such logic.
 To do so, we create a new class inheriting from |fedadagrad_link|_ and override the
 ``configure_train`` method. We then use this new strategy in our ``ServerApp``. Let's
 see how this looks like in code. Create a new file called ``custom_strategy.py`` in the
-``flower_tutorial`` directory and add the following code:
+``pytorchexample`` directory and add the following code:
 
 .. code-block:: python
     :emphasize-lines: 13,14
@@ -316,8 +304,8 @@ see how this looks like in code. Create a new file called ``custom_strategy.py``
             """Configure the next round of federated training and maybe do LR decay."""
             # Decrease learning rate by a factor of 0.5 every 5 rounds
             if server_round % 5 == 0 and server_round > 0:
-                config["lr"] *= 0.5
-                print("LR decreased to:", config["lr"])
+                config["learning-rate"] *= 0.5
+                print("LR decreased to:", config["learning-rate"])
             # Pass the updated config and the rest of arguments to the parent class
             return super().configure_train(server_round, arrays, config, grid)
 
@@ -382,15 +370,21 @@ We now have 1000 partitions, each holding 45 training and 5 validation examples.
 that the number of training examples on each client is quite small, we should probably
 train the model a bit longer, so we configure the clients to perform 3 local training
 epochs. We should also adjust the fraction of clients selected for training during each
-round (we don't want all 1000 clients participating in every round), so we adjust
-``fraction_train`` to ``0.025``, which means that only 2.5% of available clients (so 25
-clients) will be selected for training each round. We update the ``fraction-train``
-value in the ``pyproject.toml``:
+round (we don't want all 1000 clients participating in every round), so we add
+``franction-train = 0.025`` and adjust ``fraction_evaluate`` to ``0.05``, which means
+that only 2.5% of available clients will be selected for training each round (so 25
+clients) and 5% of them for evaluation (so 50 clients). We can add and adjust values in
+the ``pyproject.toml`` for ease of experimentation:
 
 .. code-block:: toml
 
     [tool.flwr.app.config]
-    fraction-train = 0.025
+    num-server-rounds = 3
+    franction-train = 0.025  # <-- new
+    fraction-evaluate = 0.05 # <-- updated
+    local-epochs = 1
+    learning-rate = 0.1
+    batch-size = 32
 
 Then, we update the initialization of our strategy in ``server_app.py`` to the
 following:
@@ -402,12 +396,12 @@ following:
         """Main entry point for the ServerApp."""
 
         # ... unchanged
+        fraction_train: float = context.run_config["franction-train"]
         # Initialize FedAdagrad strategy
         strategy = CustomFedAdagrad(
             fraction_train=fraction_train,
-            fraction_evaluate=0.05,  # Evaluate on 50 clients (each round)
-            min_train_nodes=20,  # Optional config
-            min_evaluate_nodes=40,  # Optional config
+            fraction_evaluate=fraction_evaluate,
+            min_evaluate_nodes=20,  # Optional config
             min_available_nodes=1000,  # Optional config
         )
 
