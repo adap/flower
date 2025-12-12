@@ -49,7 +49,7 @@ Network on CIFAR-10 using Flower and PyTorch. It is recommended to create a virt
 environment and run everything within a :doc:`virtualenv
 <contributor-how-to-set-up-a-virtual-env>`.
 
-Let's use `flwr new` to create a complete Flower+PyTorch project. It will generate all
+Let's use ``flwr new`` to create a complete Flower+PyTorch project. It will generate all
 the files needed to run, by default with the Flower Simulation Engine, a federation of
 10 nodes using |fedavg_link|_. The dataset will be partitioned using Flower Dataset's
 `IidPartitioner
@@ -63,21 +63,19 @@ install Flower in your new environment:
     # In a new Python environment
     $ pip install flwr
 
-Then, run the command below. You will be prompted to select one of the available
-templates (choose ``PyTorch``), give a name to your project, and type in your developer
-name:
+Then, run the command below:
 
 .. code-block:: shell
 
-    $ flwr new
+    $ flwr new @flwrlabs/quickstart-pytorch
 
-After running it you'll notice a new directory with your project name has been created.
-It should have the following structure:
+After running it you'll notice a new directory named ``quickstart-pytorch`` has been
+created. It should have the following structure:
 
 .. code-block:: shell
 
-    <your-project-name>
-    ├── <your-project-name>
+    quickstart-pytorch
+    ├── pytorchexample
     │   ├── __init__.py
     │   ├── client_app.py   # Defines your ClientApp
     │   ├── server_app.py   # Defines your ServerApp
@@ -210,9 +208,12 @@ the data that correspond to their data partition.
         return batch
 
 
+    # Construct dataloaders
     partition_train_test = partition_train_test.with_transform(apply_transforms)
-    trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
-    testloader = DataLoader(partition_train_test["test"], batch_size=32)
+    trainloader = DataLoader(
+        partition_train_test["train"], batch_size=batch_size, shuffle=True
+    )
+    testloader = DataLoader(partition_train_test["test"], batch_size=batch_size)
 
 ***********
  The Model
@@ -257,7 +258,7 @@ training/testing functions to perform local training or evaluation:
         """Train the model on the training set."""
         net.to(device)  # move model to GPU if available
         criterion = torch.nn.CrossEntropyLoss().to(device)
-        optimizer = torch.optim.Adam(net.parameters(), lr=lr)
+        optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9)
         net.train()
         running_loss = 0.0
         for _ in range(epochs):
@@ -355,7 +356,8 @@ Deployment Runtime and is not directly configurable during simulations.
         # Load the data
         partition_id = context.node_config["partition-id"]
         num_partitions = context.node_config["num-partitions"]
-        trainloader, _ = load_data(partition_id, num_partitions)
+        batch_size = context.run_config["batch-size"]
+        trainloader, _ = load_data(partition_id, num_partitions, batch_size)
 
         # Call the training function
         train_loss = train_fn(
@@ -399,17 +401,19 @@ receive as input arguments:
 - a ``Context`` object that provides access to the run configuration.
 
 In this example we use the |fedavg_link|_ and configure it with a specific value of
-``fraction_train`` which is read from the run config. You can find the default value
+``fraction_evaluate`` which is read from the run config. You can find the default value
 defined in the ``pyproject.toml``. Then, the execution of the strategy is launched when
 invoking its |strategy_start_link|_ method. To it we pass:
 
 - the ``Grid`` object.
 - an ``ArrayRecord`` carrying a randomly initialized model that will serve as the global
-  model to federated.
+  model to federate.
 - a ``ConfigRecord`` with the training hyperparameters to be sent to the clients. The
   strategy will also insert the current round number in this config before sending it to
   the participating nodes.
 - the ``num_rounds`` parameter specifying how many rounds of ``FedAvg`` to perform.
+- an ``evaluate_fn`` function that will be called to evaluate the global model on
+  centralized test data after each round.
 
 .. code-block:: python
 
@@ -422,16 +426,16 @@ invoking its |strategy_start_link|_ method. To it we pass:
         """Main entry point for the ServerApp."""
 
         # Read run config
-        fraction_train: float = context.run_config["fraction-train"]
+        fraction_evaluate: float = context.run_config["fraction-evaluate"]
         num_rounds: int = context.run_config["num-server-rounds"]
-        lr: float = context.run_config["lr"]
+        lr: float = context.run_config["learning-rate"]
 
         # Load global model
         global_model = Net()
         arrays = ArrayRecord(global_model.state_dict())
 
         # Initialize FedAvg strategy
-        strategy = FedAvg(fraction_train=fraction_train)
+        strategy = FedAvg(fraction_evaluate=fraction_evaluate)
 
         # Start strategy, run FedAvg for `num_rounds`
         result = strategy.start(
@@ -439,6 +443,7 @@ invoking its |strategy_start_link|_ method. To it we pass:
             initial_arrays=arrays,
             train_config=ConfigRecord({"lr": lr}),
             num_rounds=num_rounds,
+            evaluate_fn=global_evaluate,
         )
 
         # Save final model to disk
