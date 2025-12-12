@@ -1,4 +1,10 @@
-# Feature Election for Flower
+---
+tags: [feature-election, tabular]
+dataset: [synthetic]
+framework: [sklearn, pandas]
+---
+
+# Federated Feature Election with Flower
 
 A federated feature selection framework for tabular datasets using the Flower Message API.
 
