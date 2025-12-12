@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## v1.25.0 (<REPLACE-WITH-ACTUAL-DATE>)
 
 ### Thanks to our contributors
