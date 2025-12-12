@@ -1,6 +1,6 @@
-:og:description: Learn how to train a logistic regression on MNIST using federated learning with Flower and scikit-learn in this step-by-step tutorial.
+:og:description: Learn how to train a logistic regression on the Iris dataset using federated learning with Flower and scikit-learn in this step-by-step tutorial.
 .. meta::
-    :description: Learn how to train a logistic regression on MNIST using federated learning with Flower and scikit-learn in this step-by-step tutorial.
+    :description: Learn how to train a logistic regression on the Iris dataset using federated learning with Flower and scikit-learn in this step-by-step tutorial.
 
 .. _quickstart-pytorch:
 
@@ -37,8 +37,9 @@
 #########################
 
 In this federated learning tutorial we will learn how to train a Logistic Regression on
-MNIST using Flower and scikit-learn. It is recommended to create a virtual environment
-and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+the Iris dataset using Flower and scikit-learn. It is recommended to create a virtual
+environment and run everything within a :doc:`virtualenv
+<contributor-how-to-set-up-a-virtual-env>`.
 
 Let's use ``flwr new`` to create a complete Flower+scikit-learn project. It will
 generate all the files needed to run, by default with the Flower Simulation Engine, a
@@ -201,6 +202,7 @@ partition. Note that in this example only a subset of the columns are going to b
     # Split the on-edge data: 80% train, 20% test
     X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
     y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
+    return X_train.values, y_train.values, X_test.values, y_test.values
 
 ***********
  The Model
@@ -347,7 +349,7 @@ invoking its |strategy_start_link|_ method. To it we pass:
 
 - the ``Grid`` object.
 - an ``ArrayRecord`` carrying a randomly initialized model that will serve as the global
-  model to federated.
+  model to federate.
 - a ``ConfigRecord`` with the training hyperparameters to be sent to the clients. The
   strategy will also insert the current round number in this config before sending it to
   the participating nodes.
@@ -388,7 +390,7 @@ invoking its |strategy_start_link|_ method. To it we pass:
         joblib.dump(model, "logreg_model.pkl")
 
 Congratulations! You've successfully built and run your first federated learning system
-in scikit-learn on the MNIST dataset using the new Message API.
+in scikit-learn on the Iris dataset using the new Message API.
 
 .. note::
 
@@ -419,4 +421,4 @@ in scikit-learn on the MNIST dataset using the new Message API.
 .. _otherpartitioners: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html
 
 .. meta::
-    :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a linear regression model.
+    :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a logistic regression model.
