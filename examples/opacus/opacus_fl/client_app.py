@@ -3,11 +3,11 @@
 import warnings
 
 import torch
-from opacus import PrivacyEngine
-from opacus_fl.task import Net, load_data, test, train
-
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
+
+from opacus import PrivacyEngine
+from opacus_fl.task import Net, load_data, test, train
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
