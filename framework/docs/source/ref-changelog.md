@@ -18,9 +18,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Refactors `flwr new` to fetch applications directly from the Flower platform (see the [usage reference](https://flower.ai/docs/framework/ref-api-cli.html#flwr-new)). This introduces new and updated quickstart examples (including NumPy and Flowertune LLM), renames and updates existing examples, aligns CI to run against platform-backed examples, and updates related documentation and benchmark instructions.
 
-- **Migrate examples to the Message API and remove out-dated compose example** ([#6232](https://github.com/adap/flower/pull/6232), [#6233](https://github.com/adap/flower/pull/6233), [#6238](https://github.com/adap/flower/pull/6238))
+- **Migrate examples to the Message API and remove out-dated compose example** ([#6232](https://github.com/adap/flower/pull/6232), [#6233](https://github.com/adap/flower/pull/6233), [#6238](https://github.com/adap/flower/pull/6238), [#6297](https://github.com/adap/flower/pull/6297))
 
-  Migrates the Scikit-learn and Vertical FL examples to the Message API, with the Vertical FL example also updated to use `flwr-datasets`. The out-dated Docker Compose example is removed.
+  Migrates the Scikit-learn, Vertical FL, and Opacus examples to the Message API, with the Vertical FL example also updated to use `flwr-datasets`. The out-dated Docker Compose example is removed.
 
 - **Improve CLI output with human-readable durations** ([#6277](https://github.com/adap/flower/pull/6277), [#6296](https://github.com/adap/flower/pull/6296))
 
