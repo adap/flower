@@ -265,10 +265,10 @@ def test_request_download_link_all_scenarios(
 
 @parameterized.expand(  # type: ignore
     [
-        (24, "24 s"),  # seconds
-        (90, "1 m 30 s"),  # min + sec
-        (3723, "1 h 2 m"),  # hour + min
-        (90000, "1 d 1 h"),  # day + hour
+        (24, "24s"),  # seconds
+        (90, "1m 30s"),  # min + sec
+        (3723, "1h 2m"),  # hour + min
+        (90000, "1d 1h"),  # day + hour
     ]
 )
 def test_humanize_duration(seconds, expected) -> None:
