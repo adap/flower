@@ -2,10 +2,11 @@
 
 import logging
 
+from opacus_fl.task import Net
+
 from flwr.app import ArrayRecord, Context, MetricRecord, RecordDict
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
-from opacus_fl.task import Net
 
 # Opacus logger seems to change the flwr logger to DEBUG level. Set back to INFO
 logging.getLogger("flwr").setLevel(logging.INFO)
