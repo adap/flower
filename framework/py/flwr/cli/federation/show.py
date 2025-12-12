@@ -299,7 +299,7 @@ def _to_json(
     for node in nodes:
         nodes_list.append(
             {
-                "node_id": node.node_id,
+                "node_id": f"{node.node_id}",
                 "owner": node.owner_name,
                 "status": node.status,
             }
@@ -308,7 +308,7 @@ def _to_json(
     for run in runs:
         runs_list.append(
             {
-                "run_id": run.run_id,
+                "run_id": f"{run.run_id}",
                 "app": f"@{run.fab_id}=={run.fab_version}",
                 "status": run.status_text,
                 "elapsed": run.elapsed,
