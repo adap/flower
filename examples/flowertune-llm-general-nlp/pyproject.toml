@@ -21,7 +21,7 @@ dependencies = [
     "bitsandbytes==0.45.4",
     "scipy==1.13.0",
     "peft==0.6.2",
-    "transformers==4.50.3",
+    "transformers==4.53.0",
     "sentencepiece==0.2.0",
     "omegaconf==2.3.0",
     "hf_transfer==0.1.8",
