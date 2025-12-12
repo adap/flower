@@ -29,6 +29,69 @@ from flwr.supercore.utils import parse_app_spec, request_download_link
 from ..utils import prompt_options, prompt_text
 
 
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements
+def new(
+    app_spec: Annotated[
+        str | None,
+        typer.Argument(
+            help="Flower app specifier. Use the format "
+            "'@account_name/app_name' or '@account_name/app_name==x.y.z'. "
+            "Version is optional (defaults to latest)."
+        ),
+    ] = None,
+    framework: Annotated[
+        str | None,
+        typer.Option(case_sensitive=False, help="Deprecated. The ML framework to use"),
+    ] = None,
+    username: Annotated[
+        str | None,
+        typer.Option(
+            case_sensitive=False, help="Deprecated. The Flower username of the author"
+        ),
+    ] = None,
+) -> None:
+    """Create new Flower App."""
+    if framework is not None or username is not None:
+        typer.secho(
+            "❌ The --framework and --username options are deprecated and will be "
+            "removed in future versions of Flower. Please provide an app specifier "
+            "after `flwr new` instead, e.g., '@account_name/app_name' or "
+            "'@account_name/app_name==x.y.z'.",
+            fg=typer.colors.RED,
+            bold=True,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    if app_spec is None:
+        # Fetch recommended apps
+        print(
+            typer.style(
+                "\n🌸 Fetching recommended apps...",
+                fg=typer.colors.GREEN,
+                bold=True,
+            )
+        )
+        apps = fetch_recommended_apps()
+
+        if not apps:
+            typer.secho(
+                "No recommended apps found. Please provide an app spec manually.",
+                fg=typer.colors.YELLOW,
+            )
+            app_spec = prompt_text("Please provide the app id")
+        else:
+            # Extract app_ids and show selection menu
+            app_ids = [app["app_id"] for app in apps]
+            app_spec = prompt_options("Select a Flower App to create", app_ids)
+
+    if app_spec is None:
+        app_spec = prompt_text("Please provide the app specifier")
+
+    # Download remote app
+    download_remote_app_via_api(app_spec)
+
+
 def print_success_prompt(package_name: str) -> None:
     """Print styled setup instructions for running a new Flower App after creation."""
     prompt = typer.style(
@@ -201,66 +264,3 @@ def download_remote_app_via_api(app_spec: str) -> None:
         _safe_extract_zip(zf, Path.cwd())
 
     print_success_prompt(app_name)
-
-
-# pylint: disable=too-many-locals,too-many-branches,too-many-statements
-def new(
-    app_spec: Annotated[
-        str | None,
-        typer.Argument(
-            help="Flower app specifier. Use the format "
-            "'@account_name/app_name' or '@account_name/app_name==x.y.z'. "
-            "Version is optional (defaults to latest)."
-        ),
-    ] = None,
-    framework: Annotated[
-        str | None,
-        typer.Option(case_sensitive=False, help="Deprecated. The ML framework to use"),
-    ] = None,
-    username: Annotated[
-        str | None,
-        typer.Option(
-            case_sensitive=False, help="Deprecated. The Flower username of the author"
-        ),
-    ] = None,
-) -> None:
-    """Create new Flower App."""
-    if framework is not None or username is not None:
-        typer.secho(
-            "❌ The --framework and --username options are deprecated and will be "
-            "removed in future versions of Flower. Please provide an app specifier "
-            "after `flwr new` instead, e.g., '@account_name/app_name' or "
-            "'@account_name/app_name==x.y.z'.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
-        )
-        raise typer.Exit(code=1)
-
-    if app_spec is None:
-        # Fetch recommended apps
-        print(
-            typer.style(
-                "\n🌸 Fetching recommended apps...",
-                fg=typer.colors.GREEN,
-                bold=True,
-            )
-        )
-        apps = fetch_recommended_apps()
-
-        if not apps:
-            typer.secho(
-                "No recommended apps found. Please provide an app spec manually.",
-                fg=typer.colors.YELLOW,
-            )
-            app_spec = prompt_text("Please provide the app id")
-        else:
-            # Extract app_ids and show selection menu
-            app_ids = [app["app_id"] for app in apps]
-            app_spec = prompt_options("Select a Flower App to create", app_ids)
-
-    if app_spec is None:
-        app_spec = prompt_text("Please provide the app specifier")
-
-    # Download remote app
-    download_remote_app_via_api(app_spec)
