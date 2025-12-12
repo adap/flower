@@ -401,7 +401,8 @@ following:
         strategy = CustomFedAdagrad(
             fraction_train=fraction_train,
             fraction_evaluate=fraction_evaluate,
-            min_evaluate_nodes=20,  # Optional config
+            min_train_nodes=20,  # Optional config
+            min_evaluate_nodes=40,  # Optional config
             min_available_nodes=1000,  # Optional config
         )
 
