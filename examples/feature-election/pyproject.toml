@@ -33,7 +33,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["feature_election"]
+packages = ["."]
 
 [tool.hatch.build.targets.sdist]
 include = ["feature_election"]
