@@ -106,7 +106,7 @@ def print_success_prompt(package_name: str) -> None:
     )
 
     prompt += typer.style(
-        f"	cd {package_name} && pip install -e .\n",
+        f"	cd {package_name} && pip install -e .\n\n",
         fg=typer.colors.BRIGHT_CYAN,
         bold=True,
     )
@@ -235,12 +235,10 @@ def download_remote_app_via_api(app_spec: str) -> None:
         ):
             return
 
-    print(
-        typer.style(
-            f"\n🔗 Requesting download link for {app_id}...",
-            fg=typer.colors.GREEN,
-            bold=True,
-        )
+    typer.secho(
+        f"\n🔗 Requesting download link for {app_id}...",
+        fg=typer.colors.GREEN,
+        bold=True,
     )
     # Fetch ZIP downloading URL
     url = f"{PLATFORM_API_URL}/hub/fetch-zip"
@@ -250,21 +248,17 @@ def download_remote_app_via_api(app_spec: str) -> None:
         typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1) from e
 
-    print(
-        typer.style(
-            "⬇️  Downloading ZIP into memory...",
-            fg=typer.colors.GREEN,
-            bold=True,
-        )
+    typer.secho(
+        "🔽 Downloading ZIP into memory...",
+        fg=typer.colors.GREEN,
+        bold=True,
     )
     zip_buf = _download_zip_to_memory(presigned_url)
 
-    print(
-        typer.style(
-            f"📦 Unpacking into {project_dir}...",
-            fg=typer.colors.GREEN,
-            bold=True,
-        )
+    typer.secho(
+        f"📦 Unpacking into {project_dir}...",
+        fg=typer.colors.GREEN,
+        bold=True,
     )
     with zipfile.ZipFile(zip_buf) as zf:
         _safe_extract_zip(zf, Path.cwd())
