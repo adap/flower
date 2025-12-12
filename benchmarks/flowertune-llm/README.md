@@ -19,7 +19,7 @@ Then, create a new Python environment and install Flower.
 pip install flwr
 ```
 
-In the new environment, create a new Flower project using the `FlowerTune` template by running `flwr new`:
+In the new environment, create a new Flower project using one of the `FlowerTune` apps as your starting point via the `flwr new` command:
 
 ```shell
 # For general NLP challenge
