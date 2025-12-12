@@ -76,10 +76,10 @@ def new(
 
         if not apps:
             typer.secho(
-                "No recommended apps found. Please provide an app spec manually.",
+                "No recommended apps found. Please provide an app specifier manually.",
                 fg=typer.colors.YELLOW,
             )
-            app_spec = prompt_text("Please provide the app id")
+            app_spec = prompt_text("Please provide the app specifier")
         else:
             # Extract app_ids and show selection menu
             app_ids = [app["app_id"] for app in apps]
