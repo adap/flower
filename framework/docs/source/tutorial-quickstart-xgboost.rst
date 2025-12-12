@@ -374,17 +374,16 @@ follows:
 
 .. code-block:: python
 
-    def _local_boost(self, bst_input):
+    def _local_boost(bst_input, num_local_round, train_dmatrix):
         # Update trees based on local training data.
-        for i in range(self.num_local_round):
-            bst_input.update(self.train_dmatrix, bst_input.num_boosted_rounds())
+        for i in range(num_local_round):
+            bst_input.update(train_dmatrix, bst_input.num_boosted_rounds())
 
         # Bagging: extract the last N=num_local_round trees for sever aggregation
         bst = bst_input[
             bst_input.num_boosted_rounds()
-            - self.num_local_round : bst_input.num_boosted_rounds()
+            - num_local_round : bst_input.num_boosted_rounds()
         ]
-
         return bst
 
 Given ``num_local_round``, we update trees by calling ``bst_input.update`` method. After
