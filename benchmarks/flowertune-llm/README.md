@@ -19,9 +19,20 @@ Then, create a new Python environment and install Flower.
 pip install flwr
 ```
 
-In the new environment, create a new Flower project using the `FlowerTune` template. You will be prompted for a name to give to your app/project, your username, and for your choice of LLM challenge:
+In the new environment, create a new Flower project using the `FlowerTune` template by running `flwr new`:
+
 ```shell
-flwr new --framework=FlowerTune
+# For general NLP challenge
+flwr new @flwrlabs/flowertune-llm-general-nlp
+
+# For finance challenge
+flwr new @flwrlabs/flowertune-llm-finance
+
+# For medical challenge
+flwr new @flwrlabs/flowertune-llm-medical
+
+# For code challenge
+flwr new @flwrlabs/flowertune-llm-code
 ```
 
 The `flwr new` command will generate a directory with the following structure:
