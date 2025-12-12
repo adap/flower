@@ -32,13 +32,14 @@ Before you start, make sure that:
         $ flwr new @flwrlabs/quickstart-pytorch
 
         🔗 Requesting download link for @flwrlabs/quickstart-pytorch...
-        ⬇️  Downloading ZIP into memory...
-        📦 Unpacking into /Users/javier/quickstart-pytorch...
+        🔽 Downloading ZIP into memory...
+        📦 Unpacking into /home/pan/flower/quickstart-pytorch...
         🎊 Flower App creation successful.
 
         To run your Flower App, first install its dependencies:
 
                 cd quickstart-pytorch && pip install -e .
+
         then, run the app:
 
                 flwr run .
