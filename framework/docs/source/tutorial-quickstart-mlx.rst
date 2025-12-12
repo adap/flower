@@ -170,7 +170,7 @@ in the ``pyproject.toml`` like this:
 .. code-block:: shell
 
     # Override some arguments
-    $ flwr run . --run-config "num-server-rounds=5 lr=0.05"
+    $ flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
 
 What follows is an explanation of each component in the project you just created:
 dataset partitioning, the model, defining the ``ClientApp``, and defining the
@@ -193,6 +193,7 @@ Flower Datasets:
     fds = FederatedDataset(
         dataset="ylecun/mnist",
         partitioners={"train": partitioner},
+        trust_remote_code=True,
     )
     partition = fds.load_partition(partition_id)
     partition_splits = partition.train_test_split(test_size=0.2, seed=42)
@@ -351,7 +352,7 @@ local data partition.
         input_dim = context.run_config["input-dim"]
         hidden_dim = context.run_config["hidden-dim"]
         batch_size = context.run_config["batch-size"]
-        learning_rate = context.run_config["lr"]
+        learning_rate = context.run_config["learning-rate"]
         num_epochs = context.run_config["local-epochs"]
 
         # Instantiate model and apply global parameters
@@ -368,7 +369,7 @@ local data partition.
         num_partitions = context.node_config["num-partitions"]
         train_images, train_labels, _, _ = load_data(partition_id, num_partitions)
 
-        # Train the model on local data
+        # Train on local data
         for _ in range(num_epochs):
             for X, y in batch_iterate(batch_size, train_images, train_labels):
                 _, grads = loss_and_grad_fn(model, X, y)
@@ -435,14 +436,14 @@ receives as input arguments:
   ``ClientApp`` to involve them in a round of train/evaluate/query or other.
 - a ``Context`` object that provides access to the run configuration.
 
-In this example we use the |fedavg_link|_ and left with its default parameters. Then,
+In this example we use the |fedavg_link|_ and left it with its default parameters. Then,
 after initializing the ``MLP`` that would serve as global model in the first round, the
 execution of the strategy is launched when invoking its |strategy_start_link|_ method.
 To it we pass:
 
 - the ``Grid`` object.
 - an ``ArrayRecord`` carrying a randomly initialized model that will serve as the global
-      model to federate.
+  model to federate.
 - the ``num_rounds`` parameter specifying how many rounds of ``FedAvg`` to perform.
 
 .. code-block:: python
