@@ -43,7 +43,7 @@ Controls feature selection strategy (α ∈ [0,1]):
 ## Project Structure
 
 ```
-feature_election/
+feature-election/
 ├── feature_election/          # Package directory
 │   ├── __init__.py
 │   ├── client_app.py          # ClientApp with @app.train() and @app.evaluate()
