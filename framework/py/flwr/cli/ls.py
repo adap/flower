@@ -40,6 +40,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListRunsResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
+from flwr.supercore.utils import humanize_bytes, humanize_duration
 
 from .run_utils import RunRow, format_runs
 from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
@@ -231,7 +232,7 @@ def _to_table(run_list: list[RunRow]) -> Table:
             row.federation,
             f"@{row.fab_id}=={row.fab_version}",
             f"[{status_style}]{row.status_text}[/{status_style}]",
-            row.elapsed,
+            humanize_duration(row.elapsed),
             status_changed_at,
         )
         table.add_row(*formatted_row)
@@ -265,12 +266,39 @@ def _to_detail_table(run: RunRow) -> Table:
     table.add_row("App", f"@{run.fab_id}=={run.fab_version}")
     table.add_row("FAB Hash", f"{run.fab_hash[:8]}...{run.fab_hash[-8:]}")
     table.add_row("Status", f"[{status_style}]{run.status_text}[/{status_style}]")
-    table.add_row("Traffic (GB)", f"[blue]{run.traffic:.3f}[/blue]")
-    table.add_row("Elapsed", f"[blue]{run.elapsed}[/blue]")
+    table.add_row("Elapsed", f"[blue]{humanize_duration(run.elapsed)}[/blue]")
     table.add_row("Pending At", run.pending_at)
     table.add_row("Starting At", run.starting_at)
     table.add_row("Running At", run.running_at)
     table.add_row("Finished At", run.finished_at)
+    table.add_row(
+        "Network traffic (inbound)",
+        f"[blue]{humanize_bytes(run.network_traffic_inbound)}[/blue]",
+    )
+    table.add_row(
+        "Network traffic (outbound)",
+        f"[blue]{humanize_bytes(run.network_traffic_outbound)}[/blue]",
+    )
+    table.add_row(
+        "Network Traffic (total)",
+        "[blue]"
+        f"{humanize_bytes(run.network_traffic_inbound + run.network_traffic_outbound)}"
+        "[/blue]",
+    )
+    table.add_row(
+        "Compute Time (ServerApp)",
+        f"[blue]{humanize_duration(run.compute_time_serverapp)}[/blue]",
+    )
+    table.add_row(
+        "Compute Time (ClientApp)",
+        f"[blue]{humanize_duration(run.compute_time_clientapp)}[/blue]",
+    )
+    table.add_row(
+        "Compute Time (total)",
+        "[blue]"
+        f"{humanize_duration(run.compute_time_serverapp + run.compute_time_clientapp)}"
+        "[/blue]",
+    )
 
     return table
 
@@ -292,19 +320,30 @@ def _to_json(run_list: list[RunRow]) -> str:
     for row in run_list:
         runs_list.append(
             {
-                "run-id": row.run_id,
+                "run-id": f"{row.run_id}",
                 "federation": row.federation,
                 "fab-id": row.fab_id,
                 "fab-name": row.fab_id.split("/")[-1],
                 "fab-version": row.fab_version,
                 "fab-hash": row.fab_hash[:8],
                 "status": row.status_text,
-                "traffic-gb": f"{row.traffic:.3f}",
                 "elapsed": row.elapsed,
                 "pending-at": row.pending_at,
                 "starting-at": row.starting_at,
                 "running-at": row.running_at,
                 "finished-at": row.finished_at,
+                "network-traffic": {
+                    "inbound-bytes": row.network_traffic_inbound,
+                    "outbound-bytes": row.network_traffic_outbound,
+                    "total-bytes": row.network_traffic_inbound
+                    + row.network_traffic_outbound,
+                },
+                "compute-time": {
+                    "serverapp-seconds": row.compute_time_serverapp,
+                    "clientapp-seconds": row.compute_time_clientapp,
+                    "total-seconds": row.compute_time_serverapp
+                    + row.compute_time_clientapp,
+                },
             }
         )
 
