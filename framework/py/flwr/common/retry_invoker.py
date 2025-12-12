@@ -21,7 +21,7 @@ import threading
 import time
 from collections.abc import Callable, Generator, Iterable
 from dataclasses import dataclass
-from logging import INFO, WARN
+from logging import ERROR, INFO, WARN
 from typing import Any, cast
 
 import grpc
@@ -351,7 +351,12 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
             raise RunNotRunningException
         if e.code() == grpc.StatusCode.UNAVAILABLE:  # type: ignore
-            return False
+            # Check if this is an SSL handshake failure - these should fail fast
+            error_details = str(e.details()) if hasattr(e, "details") else str(e)
+            if "handshake failed" in error_details.lower():
+                log(ERROR, "SSL/TLS handshake error detected.")
+                return True  # Give up on SSL/TLS handshake errors
+            return False  # Retry on other UNAVAILABLE errors (network issues)
         return True
 
     def _wait(wait_time: float) -> None:
