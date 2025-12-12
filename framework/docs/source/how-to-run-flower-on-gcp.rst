@@ -264,7 +264,7 @@ Once we have created the required Dockerfile, we build the Docker Image as follo
 
 .. code-block:: bash
 
-    docker build --platform linux/amd64 -f superexec.Dockerfile -t flower_numpy_example_superexec:0.0.1 .
+    docker build --platform linux/amd64 -f superexec.Dockerfile -t quickstart_numpy_superexec:0.0.1 .
 
 Tag Docker Images
 =================
@@ -273,7 +273,7 @@ Before we are able to push our two newly locally created Docker images, we need 
 them with the Google Artifact Registry repository name and image name we created during
 the previous steps. If you have followed the earlier naming suggestions, the repository
 name is ``flower-gcp-example-artifacts``, the local Docker image name is
-``flower_numpy_example_superexec:0.0.1``, and the region is ``us-central1``. Please note
+``quickstart_numpy_superexec:0.0.1``, and the region is ``us-central1``. Please note
 that the ``<YOUR_PROJECT_ID>`` is different from user to user, so in the commands below
 we use the ``<YOUR_PROJECT_ID>`` placeholder. Putting all this together, the final
 command you need to run to tag the ``SuperExec`` Docker image is:
@@ -283,7 +283,7 @@ command you need to run to tag the ``SuperExec`` Docker image is:
     # docker tag YOUR_IMAGE_NAME YOUR_REGION-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY_NAME/YOUR_IMAGE_NAME:YOUR_TAG
 
     # please change <YOUR_PROJECT_ID> to point to your project identifier
-    docker tag flower_numpy_example_superexec:0.0.1 us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_superexec:0.0.1
+    docker tag quickstart_numpy_superexec:0.0.1 us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/quickstart_numpy_superexec:0.0.1
 
 Push Docker Images
 ==================
@@ -296,7 +296,7 @@ repository using the ``docker push`` command with the tagged name:
     # docker push YOUR_REGION-docker.pkg.dev/<YOUR_PROJECT_ID>/YOUR_REPOSITORY_NAME/YOUR_IMAGE_NAME:YOUR_TAG
 
     # please change <YOUR_PROJECT_ID> to point to your project identifier
-    docker push us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_superexec:0.0.1
+    docker push us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/quickstart_numpy_superexec:0.0.1
 
 ******************************
  Deploy Flower Infrastructure
@@ -475,7 +475,7 @@ provide the definition of the six ``yaml`` files that are necessary to deploy th
               containers:
               - name: superexec-serverapp
                 # please change <YOUR_PROJECT_ID> to point to your project identifier
-                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_superexec:0.0.1
+                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/quickstart_numpy_superexec:0.0.1
                 args:
                   - "--insecure"
                   - "--appio-api-address"
@@ -504,7 +504,7 @@ provide the definition of the six ``yaml`` files that are necessary to deploy th
               containers:
               - name: superexec-clientapp
                 # please change <YOUR_PROJECT_ID> to point to your project identifier
-                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_superexec:0.0.1
+                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/quickstart_numpy_superexec:0.0.1
                 args:
                   - "--insecure"
                   - "--appio-api-address"
@@ -533,7 +533,7 @@ provide the definition of the six ``yaml`` files that are necessary to deploy th
               containers:
               - name: superexec-clientapp
                 # please change <YOUR_PROJECT_ID> to point to your project identifier
-                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/flower_numpy_example_superexec:0.0.1
+                image: us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/flower-gcp-example-artifacts/quickstart_numpy_superexec:0.0.1
                 args:
                   - "--insecure"
                   - "--appio-api-address"
