@@ -56,7 +56,7 @@ First make sure that you have got the access to [Mistral-7B](https://huggingface
 Then, follow the instruction [here](https://huggingface.co/docs/huggingface_hub/en/quick-start#login-command) to log in your account. Note you only need to complete this stage once in your development machine:
 
 ```bash
-huggingface-cli login
+hf auth login
 ```
 
 Run the challenge with default config values.
