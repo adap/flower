@@ -11,7 +11,6 @@ This work originates from **FLASH**: A framework for Federated Learning with Att
 - **Privacy-preserving**: Clients only share feature selections and scores, not raw data
 - **Multiple FS methods**: Lasso, Random Forest, Mutual Information, RFE, and more
 - **Configurable aggregation**: Control the balance between intersection and union of features
-- **Message API**: Uses Flower's latest communication patterns for better extensibility
 
 ## Feature Selection Methods
 
