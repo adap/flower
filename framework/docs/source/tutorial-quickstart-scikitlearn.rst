@@ -187,7 +187,7 @@ This tutorial uses |flowerdatasets|_ to easily download and partition the `Iris
 make use of the |iidpartitioner|_ to generate ``num_partitions`` partitions. You can
 choose |otherpartitioners|_ available in Flower Datasets. Each ``ClientApp`` will call
 this function to create dataloaders with the data that correspond to their data
-partition. Note that in this example only as subset of the column are going to be used.
+partition. Note that in this example only a subset of the columns are going to be used.
 
 .. code-block:: python
 
@@ -245,7 +245,7 @@ these conversions:
         # Create LogisticRegression Model
         model = create_log_reg_and_instantiate_parameters(penalty)
 
-        # Apply received pararameters
+        # Apply received parameters
         ndarrays = msg.content["arrays"].to_numpy_ndarrays()
         set_model_params(model, ndarrays)
 
@@ -292,7 +292,7 @@ Runtime and is not directly configurable during simulations.
         # Create LogisticRegression Model
         model = create_log_reg_and_instantiate_parameters(penalty)
 
-        # Apply received pararameters
+        # Apply received parameters
         ndarrays = msg.content["arrays"].to_numpy_ndarrays()
         set_model_params(model, ndarrays)
 
