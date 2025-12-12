@@ -59,13 +59,14 @@ case. Create a new Flower app (PyTorch), and follow the instructions show upon e
     $ flwr new @flwrlabs/quickstart-pytorch
 
     🔗 Requesting download link for @flwrlabs/quickstart-pytorch...
-    ⬇️  Downloading ZIP into memory...
-    📦 Unpacking into /Users/javier/quickstart-pytorch...
+    🔽 Downloading ZIP into memory...
+    📦 Unpacking into /Users/alice/quickstart-pytorch...
     🎊 Flower App creation successful.
 
     To run your Flower App, first install its dependencies:
 
             cd quickstart-pytorch && pip install -e .
+
     then, run the app:
 
             flwr run .
