@@ -51,7 +51,7 @@ Before you start, make sure that:
 
 Although you could write a Flower app from scratch, it is often easier to start from one
 of the available quickstart apps via ``flwr new`` and then customize it to your use
-case. Create a new Flower app (PyTorch), and follow the instructions show upon executing
+case. Create a new Flower app (PyTorch), and follow the instructions shown upon executing
 ``flwr new``:
 
 .. code-block:: bash

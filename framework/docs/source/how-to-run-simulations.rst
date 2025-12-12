@@ -159,7 +159,7 @@ multiple apps to choose from. The example below uses the ``PyTorch`` quickstart 
 
 .. code-block:: shell
 
-    # or simply execute `flwr run` for a list of recommended apps to choose from
+    # or simply execute `flwr new` for a list of recommended apps to choose from
     flwr new @flwrlabs/quickstart-pytorch
 
 Then, follow the instructions shown after completing the |flwr_new_link|_ command. When
