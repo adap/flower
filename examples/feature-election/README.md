@@ -4,7 +4,7 @@ A federated feature selection framework for tabular datasets using the Flower Me
 
 ## Overview
 
-Feature Election enables multiple clients with tabular datasets to collaboratively identify the most relevant features without sharing raw data. This implementation uses Flower's new Message API (≥1.23).
+Feature Election enables multiple clients with tabular datasets to collaboratively identify the most relevant features without sharing raw data.
 This work originates from **FLASH**: A framework for Federated Learning with Attribute Selection and Hyperparameter optimization, presented at [FLTA IEEE 2025](https://flta-conference.org/flta-2025/) (Best Student Paper Award).
 
 **Key Features:**
