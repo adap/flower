@@ -352,8 +352,7 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
             raise RunNotRunningException
         if e.code() == grpc.StatusCode.UNAVAILABLE:  # type: ignore
             # Check if this is an SSL handshake failure - these should fail fast
-            error_details = str(e.details()) if hasattr(e, "details") else str(e)
-            if "handshake failed" in error_details.lower():
+            if "handshake failed" in str(e.details()).lower():  # type: ignore
                 log(ERROR, "SSL/TLS handshake error detected.")
                 return True  # Give up on SSL/TLS handshake errors
             return False  # Retry on other UNAVAILABLE errors (network issues)
