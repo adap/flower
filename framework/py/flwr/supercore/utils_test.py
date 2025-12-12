@@ -23,6 +23,8 @@ import requests
 from parameterized import parameterized
 
 from .utils import (
+    humanize_bytes,
+    humanize_duration,
     int64_to_uint64,
     mask_string,
     parse_app_spec,
@@ -259,3 +261,30 @@ def test_request_download_link_all_scenarios(
                 app_id, app_version, in_url, out_url
             )
             assert case["assert"](result), f"Assertion failed for {case['name']}"
+
+
+@parameterized.expand(  # type: ignore
+    [
+        (24, "24s"),  # seconds
+        (90, "1m 30s"),  # min + sec
+        (3723, "1h 2m"),  # hour + min
+        (90000, "1d 1h"),  # day + hour
+    ]
+)
+def test_humanize_duration(seconds, expected) -> None:
+    """Test the humanize_duration function."""
+    assert humanize_duration(seconds) == expected
+
+
+@parameterized.expand(  # type: ignore
+    [
+        (800, "800 B"),  # bytes
+        (2048, "2.0 KB"),  # KB < 10 → 1 decimal
+        (10 * 1024, "10 KB"),  # KB >= 10 → no decimal
+        (5 * 1024**2, "5.0 MB"),  # MB < 10
+        (3 * 1024**3, "3.0 GB"),  # GB < 10
+    ]
+)
+def test_humanize_bytes(num_bytes, expected) -> None:
+    """Test the humanize_bytes function."""
+    assert humanize_bytes(num_bytes) == expected

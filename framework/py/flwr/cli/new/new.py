@@ -16,12 +16,9 @@
 
 
 import io
-import re
 import zipfile
-from enum import Enum
 from pathlib import Path
-from string import Template
-from typing import Annotated
+from typing import Annotated, cast
 
 import requests
 import typer
@@ -29,79 +26,74 @@ import typer
 from flwr.supercore.constant import PLATFORM_API_URL
 from flwr.supercore.utils import parse_app_spec, request_download_link
 
-from ..utils import (
-    is_valid_project_name,
-    prompt_options,
-    prompt_text,
-    sanitize_project_name,
-)
+from ..utils import prompt_options, prompt_text
 
 
-class MlFramework(str, Enum):
-    """Available frameworks."""
-
-    PYTORCH = "PyTorch"
-    TENSORFLOW = "TensorFlow"
-    SKLEARN = "sklearn"
-    HUGGINGFACE = "HuggingFace"
-    JAX = "JAX"
-    MLX = "MLX"
-    NUMPY = "NumPy"
-    XGBOOST = "XGBoost"
-    FLOWERTUNE = "FlowerTune"
-    BASELINE = "Flower Baseline"
-    PYTORCH_LEGACY_API = "PyTorch (Legacy API, deprecated)"
-
-
-class LlmChallengeName(str, Enum):
-    """Available LLM challenges."""
-
-    GENERALNLP = "GeneralNLP"
-    FINANCE = "Finance"
-    MEDICAL = "Medical"
-    CODE = "Code"
-
-
-class TemplateNotFound(Exception):
-    """Raised when template does not exist."""
-
-
-def load_template(name: str) -> str:
-    """Load template from template directory and return as text."""
-    tpl_dir = (Path(__file__).parent / "templates").absolute()
-    tpl_file_path = tpl_dir / name
-
-    if not tpl_file_path.is_file():
-        raise TemplateNotFound(f"Template '{name}' not found")
-
-    with open(tpl_file_path, encoding="utf-8") as tpl_file:
-        return tpl_file.read()
-
-
-def render_template(template: str, data: dict[str, str]) -> str:
-    """Render template."""
-    tpl_file = load_template(template)
-    tpl = Template(tpl_file)
-    if ".gitignore" not in template:
-        return tpl.substitute(data)
-    return tpl.template
-
-
-def create_file(file_path: Path, content: str) -> None:
-    """Create file including all nessecary directories and write content into file."""
-    file_path.parent.mkdir(exist_ok=True)
-    file_path.write_text(content, encoding="utf-8")
-
-
-def render_and_create(file_path: Path, template: str, context: dict[str, str]) -> None:
-    """Render template and write to file."""
-    content = render_template(template, context)
-    create_file(file_path, content)
-
-
-def print_success_prompt(
-    package_name: str, llm_challenge_str: str | None = None
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements
+def new(
+    app_spec: Annotated[
+        str | None,
+        typer.Argument(
+            help="Flower app specifier. Use the format "
+            "'@account_name/app_name' or '@account_name/app_name==x.y.z'. "
+            "Version is optional (defaults to latest)."
+        ),
+    ] = None,
+    framework: Annotated[
+        str | None,
+        typer.Option(case_sensitive=False, help="Deprecated. The ML framework to use"),
+    ] = None,
+    username: Annotated[
+        str | None,
+        typer.Option(
+            case_sensitive=False, help="Deprecated. The Flower username of the author"
+        ),
+    ] = None,
 ) -> None:
+    """Create new Flower App."""
+    if framework is not None or username is not None:
+        typer.secho(
+            "❌ The --framework and --username options are deprecated and will be "
+            "removed in future versions of Flower. Please provide an app specifier "
+            "after `flwr new` instead, e.g., '@account_name/app_name' or "
+            "'@account_name/app_name==x.y.z'.",
+            fg=typer.colors.RED,
+            bold=True,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    if app_spec is None:
+        # Fetch recommended apps
+        print(
+            typer.style(
+                "\n🌸 Fetching recommended apps...",
+                fg=typer.colors.GREEN,
+                bold=True,
+            )
+        )
+        apps = fetch_recommended_apps()
+
+        if not apps:
+            typer.secho(
+                "No recommended apps found. Please provide an app specifier manually.",
+                fg=typer.colors.YELLOW,
+            )
+            app_spec = prompt_text("Please provide the app specifier")
+        else:
+            # Extract app_ids and show selection menu
+            app_ids = [app["app_id"] for app in apps]
+            app_spec = prompt_options(
+                "Select a Flower App to create by entering "
+                "the number from the list below:",
+                app_ids,
+            )
+
+    # Download remote app
+    download_remote_app_via_api(app_spec)
+
+
+def print_success_prompt(package_name: str) -> None:
     """Print styled setup instructions for running a new Flower App after creation."""
     prompt = typer.style(
         "🎊 Flower App creation successful.\n\n"
@@ -110,10 +102,8 @@ def print_success_prompt(
         bold=True,
     )
 
-    _add = "	huggingface-cli login\n" if llm_challenge_str else ""
-
     prompt += typer.style(
-        f"	cd {package_name} && pip install -e .\n" + _add + "\n",
+        f"	cd {package_name} && pip install -e .\n\n",
         fg=typer.colors.BRIGHT_CYAN,
         bold=True,
     )
@@ -138,6 +128,25 @@ def print_success_prompt(
     )
 
     print(prompt)
+
+
+def fetch_recommended_apps() -> list[dict[str, str]]:
+    """Fetch recommended apps from Platform API."""
+    url = f"{PLATFORM_API_URL}/hub/apps?tag=recommended"
+    try:
+        response = requests.get(url, headers={"accept": "application/json"}, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        apps = data.get("apps", [])
+        return cast(list[dict[str, str]], apps)
+
+    except requests.RequestException as e:
+        typer.secho(
+            f"❌ Failed to fetch recommended apps: {e}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from e
 
 
 # Security: prevent zip-slip
@@ -223,12 +232,10 @@ def download_remote_app_via_api(app_spec: str) -> None:
         ):
             return
 
-    print(
-        typer.style(
-            f"\n🔗 Requesting download link for {app_id}...",
-            fg=typer.colors.GREEN,
-            bold=True,
-        )
+    typer.secho(
+        f"\n🔗 Requesting download link for {app_id}...",
+        fg=typer.colors.GREEN,
+        bold=True,
     )
     # Fetch ZIP downloading URL
     url = f"{PLATFORM_API_URL}/hub/fetch-zip"
@@ -238,225 +245,19 @@ def download_remote_app_via_api(app_spec: str) -> None:
         typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1) from e
 
-    print(
-        typer.style(
-            "⬇️  Downloading ZIP into memory...",
-            fg=typer.colors.GREEN,
-            bold=True,
-        )
+    typer.secho(
+        "🔽 Downloading ZIP into memory...",
+        fg=typer.colors.GREEN,
+        bold=True,
     )
     zip_buf = _download_zip_to_memory(presigned_url)
 
-    print(
-        typer.style(
-            f"📦 Unpacking into {project_dir}...",
-            fg=typer.colors.GREEN,
-            bold=True,
-        )
+    typer.secho(
+        f"📦 Unpacking into {project_dir}...",
+        fg=typer.colors.GREEN,
+        bold=True,
     )
     with zipfile.ZipFile(zip_buf) as zf:
         _safe_extract_zip(zf, Path.cwd())
 
     print_success_prompt(app_name)
-
-
-# pylint: disable=too-many-locals,too-many-branches,too-many-statements
-def new(
-    app_name: Annotated[
-        str | None,
-        typer.Argument(
-            help="Flower app name. For remote apps, use the format "
-            "'@account_name/app_name' or '@account_name/app_name==x.y.z'. "
-            "Version is optional (defaults to latest)."
-        ),
-    ] = None,
-    framework: Annotated[
-        MlFramework | None,
-        typer.Option(case_sensitive=False, help="The ML framework to use"),
-    ] = None,
-    username: Annotated[
-        str | None,
-        typer.Option(case_sensitive=False, help="The Flower username of the author"),
-    ] = None,
-) -> None:
-    """Create new Flower App."""
-    if app_name is None:
-        app_name = prompt_text("Please provide the app name")
-
-    # Download remote app
-    if app_name and app_name.startswith("@"):
-        download_remote_app_via_api(app_name)
-        return
-
-    if not is_valid_project_name(app_name):
-        app_name = prompt_text(
-            "Please provide a name that only contains "
-            "characters in {'-', a-zA-Z', '0-9'}",
-            predicate=is_valid_project_name,
-            default=sanitize_project_name(app_name),
-        )
-
-    # Set project directory path
-    package_name = re.sub(r"[-_.]+", "-", app_name).lower()
-    import_name = package_name.replace("-", "_")
-    project_dir = Path.cwd() / package_name
-
-    if project_dir.exists():
-        if not typer.confirm(
-            typer.style(
-                f"\n💬 {app_name} already exists, do you want to override it?",
-                fg=typer.colors.MAGENTA,
-                bold=True,
-            )
-        ):
-            return
-
-    if username is None:
-        username = prompt_text("Please provide your Flower username")
-
-    if framework is not None:
-        framework_str = str(framework.value)
-    else:
-        framework_str = prompt_options(
-            "Please select ML framework by typing in the number",
-            [mlf.value for mlf in MlFramework],
-        )
-
-    llm_challenge_str = None
-    if framework_str == MlFramework.FLOWERTUNE:
-        llm_challenge_value = prompt_options(
-            "Please select LLM challenge by typing in the number",
-            sorted([challenge.value for challenge in LlmChallengeName]),
-        )
-        llm_challenge_str = llm_challenge_value.lower()
-
-    if framework_str == MlFramework.BASELINE:
-        framework_str = "baseline"
-
-    if framework_str == MlFramework.PYTORCH_LEGACY_API:
-        framework_str = "pytorch_legacy_api"
-
-    print(
-        typer.style(
-            f"\n🔨 Creating Flower App {app_name}...",
-            fg=typer.colors.GREEN,
-            bold=True,
-        )
-    )
-
-    context = {
-        "framework_str": framework_str,
-        "import_name": import_name.replace("-", "_"),
-        "package_name": package_name,
-        "project_name": app_name,
-        "username": username,
-    }
-
-    template_name = framework_str.lower()
-
-    # List of files to render
-    if llm_challenge_str:
-        files = {
-            ".gitignore": {"template": "app/.gitignore.tpl"},
-            "pyproject.toml": {"template": f"app/pyproject.{template_name}.toml.tpl"},
-            "README.md": {"template": f"app/README.{template_name}.md.tpl"},
-            f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-            f"{import_name}/server_app.py": {
-                "template": "app/code/flwr_tune/server_app.py.tpl"
-            },
-            f"{import_name}/client_app.py": {
-                "template": "app/code/flwr_tune/client_app.py.tpl"
-            },
-            f"{import_name}/models.py": {
-                "template": "app/code/flwr_tune/models.py.tpl"
-            },
-            f"{import_name}/dataset.py": {
-                "template": "app/code/flwr_tune/dataset.py.tpl"
-            },
-            f"{import_name}/strategy.py": {
-                "template": "app/code/flwr_tune/strategy.py.tpl"
-            },
-        }
-
-        # Challenge specific context
-        fraction_train = "0.2" if llm_challenge_str == "code" else "0.1"
-        if llm_challenge_str == "generalnlp":
-            challenge_name = "General NLP"
-            num_clients = "20"
-            dataset_name = "flwrlabs/alpaca-gpt4"
-        elif llm_challenge_str == "finance":
-            challenge_name = "Finance"
-            num_clients = "50"
-            dataset_name = "flwrlabs/fingpt-sentiment-train"
-        elif llm_challenge_str == "medical":
-            challenge_name = "Medical"
-            num_clients = "20"
-            dataset_name = "flwrlabs/medical-meadow-medical-flashcards"
-        else:
-            challenge_name = "Code"
-            num_clients = "10"
-            dataset_name = "flwrlabs/code-alpaca-20k"
-
-        context["llm_challenge_str"] = llm_challenge_str
-        context["fraction_train"] = fraction_train
-        context["challenge_name"] = challenge_name
-        context["num_clients"] = num_clients
-        context["dataset_name"] = dataset_name
-    else:
-        files = {
-            ".gitignore": {"template": "app/.gitignore.tpl"},
-            "README.md": {"template": "app/README.md.tpl"},
-            "pyproject.toml": {"template": f"app/pyproject.{template_name}.toml.tpl"},
-            f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-            f"{import_name}/server_app.py": {
-                "template": f"app/code/server.{template_name}.py.tpl"
-            },
-            f"{import_name}/client_app.py": {
-                "template": f"app/code/client.{template_name}.py.tpl"
-            },
-        }
-
-        # Depending on the framework, generate task.py file
-        frameworks_with_tasks = [
-            MlFramework.PYTORCH.value,
-            MlFramework.JAX.value,
-            MlFramework.HUGGINGFACE.value,
-            MlFramework.MLX.value,
-            MlFramework.TENSORFLOW.value,
-            MlFramework.SKLEARN.value,
-            MlFramework.NUMPY.value,
-            MlFramework.XGBOOST.value,
-            "pytorch_legacy_api",
-        ]
-        if framework_str in frameworks_with_tasks:
-            files[f"{import_name}/task.py"] = {
-                "template": f"app/code/task.{template_name}.py.tpl"
-            }
-
-        if framework_str == "pytorch_legacy_api":
-            # Use custom __init__ that better captures name of framework
-            files[f"{import_name}/__init__.py"] = {
-                "template": f"app/code/__init__.{framework_str}.py.tpl"
-            }
-
-        if framework_str == "baseline":
-            # Include additional files for baseline template
-            for file_name in ["model", "dataset", "strategy", "utils", "__init__"]:
-                files[f"{import_name}/{file_name}.py"] = {
-                    "template": f"app/code/{file_name}.{template_name}.py.tpl"
-                }
-
-            # Replace README.md
-            files["README.md"]["template"] = f"app/README.{template_name}.md.tpl"
-
-            # Add LICENSE
-            files["LICENSE"] = {"template": "app/LICENSE.tpl"}
-
-    for file_path, value in files.items():
-        render_and_create(
-            file_path=project_dir / file_path,
-            template=value["template"],
-            context=context,
-        )
-
-    print_success_prompt(package_name, llm_challenge_str)

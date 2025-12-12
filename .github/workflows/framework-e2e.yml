@@ -220,7 +220,7 @@ jobs:
           key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
       - name: Install dependencies
         if: ${{ needs.changes.outputs.framework == 'true' }}
-        run: python -m pip install --upgrade .
+        run: python -m pip install --upgrade . --extra-index-url https://download.pytorch.org/whl/cpu
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
@@ -425,9 +425,8 @@ jobs:
       - name: Create project, build, and install it
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          CLEAN_FRAMEWORK=$(echo "${{ matrix.framework }}" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
-          flwr new tmp-${CLEAN_FRAMEWORK} --framework ${{ matrix.framework }} --username gh_ci
-          cd tmp-${CLEAN_FRAMEWORK}
+          flwr new @flwrlabs/numpy-ci
+          cd numpy-ci
           flwr build
           flwr install *.fab
 
