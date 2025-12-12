@@ -34,13 +34,13 @@ This work originates from **FLASH**: A framework for Federated Learning with Att
 
 ## Key Parameters
 
-### Freedom Degree (α)
+### Freedom Degree (alpha)
 
-Controls feature selection strategy (α ∈ [0,1]):
+Controls feature selection strategy (alpha in [0,1]):
 
-- **α = 0.0**: Intersection — only features selected by ALL clients
-- **α = 1.0**: Union — features selected by ANY client
-- **α = 0.5**: Balanced selection (recommended)
+- **alpha = 0.0**: Intersection - only features selected by ALL clients
+- **alpha = 1.0**: Union - features selected by ANY client
+- **alpha = 0.5**: Balanced selection (recommended)
 
 ### Aggregation Mode
 
@@ -49,7 +49,7 @@ Controls feature selection strategy (α ∈ [0,1]):
 
 ## Project Structure
 
-```
+```text
 feature-election/
 ├── feature_election/          # Package directory
 │   ├── __init__.py
@@ -65,14 +65,13 @@ feature-election/
 
 ## Installation
 
-````bash
+```bash
 # Clone the repository
-```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/feature-election . && rm -rf flower && feature-election
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/feature-election . && rm -rf flower && cd feature-election
 
 # Install dependencies
 pip install -e .
-````
+```
 
 ## Running the Project
 
@@ -159,10 +158,10 @@ After running, results are saved to `outputs/<date>/<time>/`:
 ## Algorithm
 
 1. **Client Selection**: Each client performs local feature selection
-1. **Score Calculation**: Clients compute feature importance scores
-1. **Submission**: Clients send binary masks and scores (not raw data)
-1. **Aggregation**: Server aggregates using weighted voting based on `freedom_degree`
-1. **Distribution**: Server broadcasts global mask to clients
+2. **Score Calculation**: Clients compute feature importance scores
+3. **Submission**: Clients send binary masks and scores (not raw data)
+4. **Aggregation**: Server aggregates using weighted voting based on `freedom_degree`
+5. **Distribution**: Server broadcasts global mask to clients
 
 ## Citation
 
