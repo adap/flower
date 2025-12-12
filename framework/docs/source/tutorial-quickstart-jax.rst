@@ -8,15 +8,16 @@
  Quickstart JAX
 ################
 
-In this federated learning tutorial we will learn how to train a linear regression model
-using Flower and `JAX <https://jax.readthedocs.io/en/latest/>`_. It is recommended to
+In this federated learning tutorial we will learn how to train a CNN model on the MNIST
+dataset using Flower and `JAX <https://jax.readthedocs.io/en/latest/>`_ with the `Flax
+<https://flax.readthedocs.io/en/latest/index.html>`_ library. It is recommended to
 create a virtual environment and run everything within a :doc:`virtualenv
 <contributor-how-to-set-up-a-virtual-env>`.
 
 Let's use ``flwr new`` to create a complete Flower+JAX project. It will generate all the
-files needed to run, by default with the Flower Simulation Engine, a federation of 10
-nodes using |fedavg|_. A random regression dataset will be loaded from scikit-learn's
-|makeregression|_ function.
+files needed to run, by default with the Flower Simulation Engine, a federation of 100
+nodes using |fedavg|_. The MNIST dataset will be partitioned using |flowerdatasets|_'s
+|iidpartitioner|_.
 
 Now that we have a rough idea of what this example is about, let's get started. First,
 install Flower in your new environment:
@@ -134,7 +135,7 @@ in ``pyproject.toml`` like this:
 .. code-block:: shell
 
     # Override some arguments
-    $ flwr run . --run-config "num-server-rounds=5 input-dim=5"
+    $ flwr run . --run-config "num-server-rounds=5 batch-size=64"
 
 What follows is an explanation of each component in the project you just created:
 dataset partition, the model, defining the ``ClientApp`` and defining the ``ServerApp``.
@@ -143,59 +144,126 @@ dataset partition, the model, defining the ``ClientApp`` and defining the ``Serv
  The Data
 **********
 
-This tutorial uses scikit-learn's |makeregression|_ function to generate a random
-regression problem.
+This tutorial uses |flowerdatasets|_ to easily download and partition the MNIST dataset.
+In this example you'll make use of the |iidpartitioner|_ to generate ``num_partitions``
+partitions. You can choose |otherpartitioners|_ available in Flower Datasets.
 
 .. code-block:: python
 
-    def load_data():
-        # Load dataset
-        X, y = make_regression(n_features=3, random_state=0)
-        X, X_test, y, y_test = train_test_split(X, y)
-        return X, y, X_test, y_test
+    partitioner = IidPartitioner(num_partitions=num_partitions)
+    fds = FederatedDataset(
+        dataset="mnist",
+        partitioners={"train": partitioner},
+    )
+    partition = fds.load_partition(partition_id)
+
+    # Divide data on each node: 80% train, 20% test
+    partition = partition.train_test_split(test_size=0.2)
+
+    partition["train"].set_format("jax")
+    partition["test"].set_format("jax")
+
+
+    def apply_transforms(batch):
+        """Apply transforms to the partition from FederatedDataset."""
+        batch["image"] = [
+            jnp.expand_dims(jnp.float32(img), 3) / 255 for img in batch["image"]
+        ]
+        batch["label"] = [jnp.int16(label) for label in batch["label"]]
+        return batch
+
+
+    train_partition = (
+        partition["train"]
+        .batch(batch_size, num_proc=2, drop_last_batch=True)
+        .with_transform(apply_transforms)
+    )
+    test_partition = (
+        partition["test"]
+        .batch(batch_size, num_proc=2, drop_last_batch=True)
+        .with_transform(apply_transforms)
+    )
 
 ***********
  The Model
 ***********
 
-We defined a simple linear regression model to demonstrate how to create a JAX model,
-but feel free to replace it with a more sophisticated JAX model if you'd like, (such as
-with NN-based `Flax <https://flax.readthedocs.io/en/latest/index.html>`_):
+We use `Flax <https://flax.readthedocs.io/en/latest/index.html>`_ to define a simple CNN
+model for image classification:
 
 .. code-block:: python
 
-    def load_model(model_shape):
-        # Extract model parameters
-        params = {"b": jax.random.uniform(key), "w": jax.random.uniform(key, model_shape)}
-        return params
+    class CNN(nn.Module):
+        """A simple CNN model."""
 
-In addition to defining the model architecture, we also include two utility functions to
-perform both training (i.e. ``train()``) and evaluation (i.e. ``evaluation()``) using
-the above model.
+        @nn.compact
+        def __call__(self, x):
+            x = nn.Conv(features=6, kernel_size=(5, 5))(x)
+            x = nn.relu(x)
+            x = nn.avg_pool(x, window_shape=(2, 2), strides=(2, 2))
+            x = nn.Conv(features=16, kernel_size=(5, 5))(x)
+            x = nn.relu(x)
+            x = nn.avg_pool(x, window_shape=(2, 2), strides=(2, 2))
+            x = x.reshape((x.shape[0], -1))  # flatten
+            x = nn.Dense(features=120)(x)
+            x = nn.relu(x)
+            x = nn.Dense(features=84)(x)
+            x = nn.relu(x)
+            x = nn.Dense(features=10)(x)
+            return x
+
+
+    def create_train_state(learning_rate: float) -> TrainState:
+        """Creates initial `TrainState`."""
+
+        tx = optax.sgd(learning_rate, momentum=0.9)
+        model, model_params = create_model(rng)
+        return TrainState.create(apply_fn=model.apply, params=model_params, tx=tx)
+
+In addition to defining the model architecture, we also include utility functions to
+perform both training (i.e. ``train()``) and evaluation using the above model.
 
 .. code-block:: python
 
-    def loss_fn(params, X, y):
-        # Return MSE as loss
-        err = jnp.dot(X, params["w"]) + params["b"] - y
-        return jnp.mean(jnp.square(err))
+    @jax.jit
+    def apply_model(
+        state: TrainState, images: Array, labels: Array
+    ) -> Tuple[Any, Array, Array]:
+        """Computes gradients, loss and accuracy for a single batch."""
+
+        def loss_fn(params):
+            logits = state.apply_fn({"params": params}, images)
+            one_hot = jax.nn.one_hot(labels, 10)
+            loss = jnp.mean(optax.softmax_cross_entropy(logits=logits, labels=one_hot))
+            return loss, logits
+
+        grad_fn = jax.value_and_grad(loss_fn, has_aux=True)
+        (loss, logits), grads = grad_fn(state.params)
+        accuracy = jnp.mean(jnp.argmax(logits, -1) == labels)
+        return grads, loss, accuracy
 
 
-    def train(params, grad_fn, X, y):
-        loss = 1_000_000
-        num_examples = X.shape[0]
-        for epochs in range(50):
-            grads = grad_fn(params, X, y)
-            params = jax.tree.map(lambda p, g: p - 0.05 * g, params, grads)
-            loss = loss_fn(params, X, y)
-        return params, loss, num_examples
+    @jax.jit
+    def update_model(state: TrainState, grads: Any) -> TrainState:
+        return state.apply_gradients(grads=grads)
 
 
-    def evaluation(params, grad_fn, X_test, y_test):
-        num_examples = X_test.shape[0]
-        err_test = loss_fn(params, X_test, y_test)
-        loss_test = jnp.mean(jnp.square(err_test))
-        return loss_test, num_examples
+    def train(state: TrainState, train_ds) -> Tuple[TrainState, float, float]:
+        """Train for a single epoch."""
+
+        epoch_loss = []
+        epoch_accuracy = []
+
+        for batch in train_ds:
+            batch_images = batch["image"]
+            batch_labels = batch["label"]
+            grads, loss, accuracy = apply_model(state, batch_images, batch_labels)
+            state = update_model(state, grads)
+            epoch_loss.append(loss)
+            epoch_accuracy.append(accuracy)
+        train_loss = np.mean(epoch_loss)
+        train_accuracy = np.mean(epoch_accuracy)
+        return state, float(train_loss), float(train_accuracy)
 
 ***************
  The ClientApp
@@ -207,36 +275,41 @@ when generating the reply ``Message`` from the ClientApp. We also have to introd
 ``get_params()`` and ``set_params()`` functions for setting parameter values for the JAX
 model. In ``get_params()``, JAX model parameters are extracted and represented as a list
 of NumPy arrays. The ``set_params()`` function is the opposite: given a list of NumPy
-arrays it applies them to an existing JAX model. We will combine these functions with
-the built-in methods in the ``ArrayRecord`` to make these conversions:
+arrays it creates a new ``TrainState`` with those parameters. We will combine these
+functions with the built-in methods in the ``ArrayRecord`` to make these conversions:
 
 .. code-block:: python
 
-    def get_params(params):
-        parameters = []
-        for _, val in params.items():
-            parameters.append(np.array(val))
-        return parameters
+    def get_params(params: Any) -> List[npt.NDArray[Any]]:
+        """Get model parameters as list of numpy arrays."""
+        return [np.array(param) for param in jax.tree_util.tree_leaves(params)]
 
 
-    def set_params(local_params, global_params):
-        for key, value in list(zip(local_params.keys(), global_params)):
-            local_params[key] = value
+    def set_params(
+        train_state: TrainState, global_params: Sequence[npt.NDArray[Any]]
+    ) -> TrainState:
+        """Create a new trainstate with the global_params."""
+        new_params_dict = jax.tree_util.tree_unflatten(
+            jax.tree_util.tree_structure(train_state.params), list(global_params)
+        )
+        return train_state.replace(params=new_params_dict)
 
 .. code-block:: python
 
-    # Load the model
-    model = load_model((input_dim,))
+    # Create train state object (model + optimizer)
+    lr = float(context.run_config["learning-rate"])
+    train_state = create_train_state(lr)
 
     # Extract ArrayRecord from Message and convert to NumPy arrays
     ndarrays = msg.content["arrays"].to_numpy_ndarrays()
     # Set JAX model parameters using the converted NumPy arrays
-    set_params(model, ndarrays)
+    train_state = set_params(train_state, ndarrays)
 
     # ... do some training
 
     # Extract NumPy arrays from the JAX model and convert back into an ArrayRecord
-    model_record = ArrayRecord(get_params(model))
+    params = get_params(train_state.params)
+    model_record = ArrayRecord(params)
 
 The rest of the functionality is directly inspired by the centralized case. The
 |clientapp_link|_ comes with three core methods (``train``, ``evaluate``, and ``query``)
@@ -269,26 +342,28 @@ Runtime and is not directly configurable during simulations.
     def train(msg: Message, context: Context):
         """Train the model on local data."""
 
-        # Read from config
-        input_dim = context.run_config["input-dim"]
-
-        # Load data and model
-        train_x, train_y, _, _ = load_data()
-        model = load_model((input_dim,))
-        grad_fn = jax.grad(loss_fn)
-
-        # Set model parameters
+        # Create train state object (model + optimizer)
+        lr = float(context.run_config["learning-rate"])
+        train_state = create_train_state(lr)
+        # Extract numpy arrays from ArrayRecord before applying
         ndarrays = msg.content["arrays"].to_numpy_ndarrays()
-        set_params(model, ndarrays)
+        train_state = set_params(train_state, ndarrays)
 
-        # Train the model on local data
-        model, loss, num_examples = train_fn(model, grad_fn, train_x, train_y)
+        # Load the data
+        partition_id = int(context.node_config["partition-id"])
+        num_partitions = int(context.node_config["num-partitions"])
+        batch_size = int(context.run_config["batch-size"])
+        trainloader, _ = load_data(partition_id, num_partitions, batch_size)
+
+        train_state, loss, acc = jax_train(train_state, trainloader)
+        params = get_params(train_state.params)
 
         # Construct and return reply Message
-        model_record = ArrayRecord(get_params(model))
+        model_record = ArrayRecord(params)
         metrics = {
             "train_loss": float(loss),
-            "num-examples": num_examples,
+            "train_acc": float(acc),
+            "num-examples": int(len(trainloader) * batch_size),
         }
         metric_record = MetricRecord(metrics)
         content = RecordDict({"arrays": model_record, "metrics": metric_record})
@@ -310,20 +385,18 @@ receive as input arguments:
   ``ClientApp`` to involve them in a round of train/evaluate/query or other.
 - a ``Context`` object that provides access to the run configuration.
 
-In this example we use the |fedavg|_ and configure it with a specific value of
-``input_dim`` which is read from the run config. You can find the default value defined
-in the ``pyproject.toml``. Then, the execution of the strategy is launched when invoking
-its |strategy_start_link|_ method. To it we pass:
+In this example we use the |fedavg|_ and configure it with specific values read from the
+run config. You can find the default values defined in the ``pyproject.toml``. Then, the
+execution of the strategy is launched when invoking its |strategy_start_link|_ method.
+To it we pass:
 
 - the ``Grid`` object.
 - an ``ArrayRecord`` carrying a randomly initialized model that will serve as the global
   model to be federated.
+- a ``ConfigRecord`` with the training hyperparameters (learning rate) to be sent to the
+  clients. The strategy will also insert the current round number in this config before
+  sending it to the participating nodes.
 - the ``num_rounds`` parameter specifying how many rounds of ``FedAvg`` to perform.
-
-You may also pass a ``ConfigRecord`` with the training hyperparameters to be sent to the
-clients. The strategy will also insert the current round number in this config before
-sending it to the participating nodes. An example where a ``ConfigRecord`` is passed can
-be found in the :doc:`Quickstart PyTorch <tutorial-quickstart-pytorch>` tutorial.
 
 .. code-block:: python
 
@@ -335,21 +408,27 @@ be found in the :doc:`Quickstart PyTorch <tutorial-quickstart-pytorch>` tutorial
     def main(grid: Grid, context: Context) -> None:
         """Main entry point for the ServerApp."""
 
-        # Read from config
-        num_rounds = context.run_config["num-server-rounds"]
-        input_dim = context.run_config["input-dim"]
+        # Read run config
+        fraction_evaluate: float = float(context.run_config["fraction-evaluate"])
+        num_rounds: int = int(context.run_config["num-server-rounds"])
+        lr: float = float(context.run_config["learning-rate"])
 
-        # Load global model
-        model = load_model((input_dim,))
-        arrays = ArrayRecord(get_params(model))
+        rng = random.PRNGKey(0)
+        rng, _ = random.split(rng)
+        _, model_params = create_model(rng)
+        params = get_params(model_params)
 
         # Initialize FedAvg strategy
-        strategy = FedAvg()
+        strategy = FedAvg(
+            fraction_train=0.4,
+            fraction_evaluate=fraction_evaluate,
+        )
 
         # Start strategy, run FedAvg for `num_rounds`
         result = strategy.start(
             grid=grid,
-            initial_arrays=arrays,
+            initial_arrays=ArrayRecord(params),
+            train_config=ConfigRecord({"lr": lr}),
             num_rounds=num_rounds,
         )
 
@@ -377,9 +456,17 @@ for JAX with Flower!
 
 .. _fedavg: ref-api/flwr.serverapp.strategy.FedAvg.html
 
-.. |makeregression| replace:: ``make_regression()``
+.. |flowerdatasets| replace:: Flower Datasets
 
-.. _makeregression: https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_regression.html
+.. _flowerdatasets: https://flower.ai/docs/datasets/
+
+.. |iidpartitioner| replace:: ``IidPartitioner``
+
+.. _iidpartitioner: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner
+
+.. |otherpartitioners| replace:: other partitioners
+
+.. _otherpartitioners: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html
 
 .. |quickstart_jax_link| replace:: ``examples/quickstart-jax``
 
