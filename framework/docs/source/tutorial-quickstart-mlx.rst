@@ -48,7 +48,7 @@ In this federated learning tutorial, we will learn how to train a simple MLP on 
 using Flower and MLX. It is recommended to create a virtual environment and run
 everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
-Let's use `flwr new` to create a complete Flower+MLX project. It will generate all the
+Let's use ``flwr new`` to create a complete Flower+MLX project. It will generate all the
 files needed to run, by default with the Simulation Engine, a federation of 10 nodes
 using |fedavg_link|_. The dataset will be partitioned using Flower Dataset's
 `IidPartitioner

@@ -49,7 +49,7 @@ classifier on Higgs dataset using Flower and XGBoost. It is recommended to creat
 virtual environment and run everything within a :doc:`virtualenv
 <contributor-how-to-set-up-a-virtual-env>`.
 
-Let's use `flwr new` to create a complete Flower+XGBoost project. It will generate all
+Let's use ``flwr new`` to create a complete Flower+XGBoost project. It will generate all
 the files needed to run, by default with the Simulation Engine, a federation of 10 nodes
 using |fedxgbbagging_link|_ strategy. The dataset will be partitioned using Flower
 Dataset's `IidPartitioner
