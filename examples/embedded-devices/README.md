@@ -6,7 +6,7 @@ framework: [torch]
 
 # Federated AI with Embedded Devices using Flower
 
-This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use Raspberry Pi as Flower clients, or better said, `SuperNodes`. The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) example, but you could adjust it to follow [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) if you prefere using TensorFlow. The main difference compare to those examples is that here you'll learn how to use Flower's Deployment Engine to run FL across multiple embedded devices.
+This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use Raspberry Pi as Flower clients, or better said, `SuperNodes`. The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) example, but you could adjust it to follow [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) if you prefere using TensorFlow. The main difference compare to those examples is that here you'll learn how to use Flower's Deployment Engine to run FL across multiple embedded devices.
 
 ![Different was of running Flower FL on embedded devices](_static/diagram.png)
 
