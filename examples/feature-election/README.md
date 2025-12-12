@@ -60,7 +60,8 @@ feature_election/
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+```shell
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/feature-election . && rm -rf flower && feature-election
 
 # Install dependencies
 pip install -e .
