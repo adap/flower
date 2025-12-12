@@ -61,7 +61,6 @@ feature_election/
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd feature_election
 
 # Install dependencies
 pip install -e .
