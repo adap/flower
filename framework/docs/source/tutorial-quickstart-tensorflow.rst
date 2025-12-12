@@ -215,8 +215,9 @@ free to replace it with a more sophisticated model if you'd like:
                 layers.Dense(10, activation="softmax"),
             ]
         )
+        optimizer = keras.optimizers.Adam(learning_rate)
         model.compile(
-            "adam",
+            optimizer=optimizer,
             loss="sparse_categorical_crossentropy",
             metrics=["accuracy"],
         )
