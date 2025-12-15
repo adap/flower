@@ -80,8 +80,8 @@ def flwr_run() -> str:
     data = json.loads(result.stdout)
     assert data["success"], "flwr run failed\n" + str(data)
 
-    # Return the run ID as string (it's a string in the JSON)
-    return str(data["run-id"])
+    # Return the run ID
+    return data["run-id"]
 
 
 def flwr_ls() -> dict[str, str]:
@@ -104,8 +104,8 @@ def flwr_ls() -> dict[str, str]:
     data = json.loads(result.stdout)
     assert data["success"], "flwr ls failed"
 
-    # Return a dictionary mapping run_id to status (run-id is a string)
-    return {str(entry["run-id"]): entry["status"] for entry in data["runs"]}
+    # Return a dictionary mapping run_id to status
+    return {entry["run-id"]: entry["status"] for entry in data["runs"]}
 
 
 def get_pids(command: str) -> list[int]:
