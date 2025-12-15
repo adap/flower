@@ -66,7 +66,7 @@ def run_superexec() -> subprocess.Popen:
     return subprocess.Popen(cmd)
 
 
-def flwr_run() -> int:
+def flwr_run() -> str:
     """Run the `flwr run` command and return `run_id`."""
     # Run the command
     result = subprocess.run(
@@ -80,16 +80,16 @@ def flwr_run() -> int:
     data = json.loads(result.stdout)
     assert data["success"], "flwr run failed\n" + str(data)
 
-    # Return the run ID
-    return data["run-id"]
+    # Return the run ID as string (it's a string in the JSON)
+    return str(data["run-id"])
 
 
-def flwr_ls() -> dict[int, str]:
+def flwr_ls() -> dict[str, str]:
     """Run `flwr ls` command and return a mapping of run_id to status.
 
     Returns
     -------
-    dict[int, str]
+    dict[str, str]
         A dictionary where keys are run IDs and values are their statuses.
     """
     # Run the command
@@ -104,8 +104,8 @@ def flwr_ls() -> dict[int, str]:
     data = json.loads(result.stdout)
     assert data["success"], "flwr ls failed"
 
-    # Return a dictionary mapping run_id to status
-    return {entry["run-id"]: entry["status"] for entry in data["runs"]}
+    # Return a dictionary mapping run_id to status (run-id is a string)
+    return {str(entry["run-id"]): entry["status"] for entry in data["runs"]}
 
 
 def get_pids(command: str) -> list[int]:
