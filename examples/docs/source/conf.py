@@ -77,6 +77,7 @@ redirects = {
     "flower-via-docker-compose": "index.html",
     "quickstart-sklearn-tabular": "quickstart-sklearn.html",
     "xgboost-quickstart": "quickstart-xgboost.html",
+    "tensorflow-privacy": "index.html",
 }
 
 
