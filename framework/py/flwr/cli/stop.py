@@ -149,7 +149,7 @@ def _stop_run(stub: ControlStub, run_id: int, output_format: str) -> None:
             run_output = json.dumps(
                 {
                     "success": True,
-                    "run-id": run_id,
+                    "run-id": f"{run_id}",
                 }
             )
             restore_output()

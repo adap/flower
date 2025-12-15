@@ -222,7 +222,7 @@ def _run_with_control_api(
             # Only include FAB metadata if we actually built a local FAB
             payload: dict[str, Any] = {
                 "success": res.HasField("run_id"),
-                "run-id": res.run_id if res.HasField("run_id") else None,
+                "run-id": f"{res.run_id}" if res.HasField("run_id") else None,
             }
             if not is_remote_app:
                 payload.update(
