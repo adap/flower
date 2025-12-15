@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.25.0 (<REPLACE-WITH-ACTUAL-DATE>)
+## v1.25.0 (2025-12-15)
 
 ### Thanks to our contributors
 
@@ -12,15 +12,15 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Track compute time and network traffic for runs** ([#6241](https://github.com/adap/flower/pull/6241), [#6242](https://github.com/adap/flower/pull/6242), [#6243](https://github.com/adap/flower/pull/6243), [#6244](https://github.com/adap/flower/pull/6244), [#6245](https://github.com/adap/flower/pull/6245), [#6249](https://github.com/adap/flower/pull/6249), [#6266](https://github.com/adap/flower/pull/6266), [#6267](https://github.com/adap/flower/pull/6267), [#6268](https://github.com/adap/flower/pull/6268), [#6269](https://github.com/adap/flower/pull/6269), [#6270](https://github.com/adap/flower/pull/6270), [#6271](https://github.com/adap/flower/pull/6271), [#6272](https://github.com/adap/flower/pull/6272), [#6273](https://github.com/adap/flower/pull/6273), [#6274](https://github.com/adap/flower/pull/6274), [#6275](https://github.com/adap/flower/pull/6275), [#6276](https://github.com/adap/flower/pull/6276), [#6279](https://github.com/adap/flower/pull/6279))
 
-  Flower now records compute time and network traffic for a run. The run detail view shown by `flwr list --run-id <run-id>` displays traffic exchanged between SuperLink and SuperNode, as well as compute time consumed on the ServerApp side and the ClientApp sides.
+  Flower now records compute time and network traffic for a run. The run detail view shown by `flwr list --run-id <run-id>` displays traffic exchanged between SuperLink and SuperNode, as well as compute time consumed on the ServerApp side and the ClientApps sides.
 
 - **Refactor `flwr new` to pull apps from the Flower platform** ([#6251](https://github.com/adap/flower/pull/6251), [#6252](https://github.com/adap/flower/pull/6252), [#6258](https://github.com/adap/flower/pull/6258), [#6259](https://github.com/adap/flower/pull/6259), [#6260](https://github.com/adap/flower/pull/6260), [#6263](https://github.com/adap/flower/pull/6263), [#6265](https://github.com/adap/flower/pull/6265), [#6283](https://github.com/adap/flower/pull/6283), [#6284](https://github.com/adap/flower/pull/6284), [#6285](https://github.com/adap/flower/pull/6285), [#6292](https://github.com/adap/flower/pull/6292), [#6294](https://github.com/adap/flower/pull/6294), [#6302](https://github.com/adap/flower/pull/6302))
 
   Refactors `flwr new` to fetch applications directly from the Flower platform (see the [usage reference](https://flower.ai/docs/framework/ref-api-cli.html#flwr-new)). This introduces new and updated quickstart examples (including NumPy and Flowertune LLM), renames and updates existing examples, aligns CI to run against platform-backed examples, and updates related documentation and benchmark instructions.
 
-- **Migrate examples to the Message API and remove out-dated compose example** ([#6232](https://github.com/adap/flower/pull/6232), [#6233](https://github.com/adap/flower/pull/6233), [#6238](https://github.com/adap/flower/pull/6238), [#6297](https://github.com/adap/flower/pull/6297))
+- **Migrate examples to the Message API and remove out-dated Docker Compose as well as Tensorflow Privacy examples** ([#6232](https://github.com/adap/flower/pull/6232), [#6233](https://github.com/adap/flower/pull/6233), [#6238](https://github.com/adap/flower/pull/6238), [#6297](https://github.com/adap/flower/pull/6297), [#6304](https://github.com/adap/flower/pull/6304))
 
-  Migrates the Scikit-learn, Vertical FL, and Opacus examples to the Message API, with the Vertical FL example also updated to use `flwr-datasets`. The out-dated Docker Compose example is removed.
+  Migrates the scikit-learn, Vertical FL, and Opacus examples to the Message API, with the Vertical FL example also updated to use `flwr-datasets`. The out-dated Docker Compose and Tensorflow Privacy examples are removed.
 
 - **Improve CLI output with human-readable durations** ([#6277](https://github.com/adap/flower/pull/6277), [#6296](https://github.com/adap/flower/pull/6296))
 
@@ -30,7 +30,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Improve documentation** ([#6229](https://github.com/adap/flower/pull/6229), [#6230](https://github.com/adap/flower/pull/6230), [#6255](https://github.com/adap/flower/pull/6255), [#6262](https://github.com/adap/flower/pull/6262))
 
-- **Update CI/CD configuration** ([#6168](https://github.com/adap/flower/pull/6168), [#6246](https://github.com/adap/flower/pull/6246), [#6295](https://github.com/adap/flower/pull/6295))
+- **Update CI/CD configuration** ([#6168](https://github.com/adap/flower/pull/6168), [#6246](https://github.com/adap/flower/pull/6246), [#6295](https://github.com/adap/flower/pull/6295), [#6305](https://github.com/adap/flower/pull/6305))
 
 - **General improvements** ([#6056](https://github.com/adap/flower/pull/6056), [#6085](https://github.com/adap/flower/pull/6085), [#6176](https://github.com/adap/flower/pull/6176), [#6235](https://github.com/adap/flower/pull/6235), [#6236](https://github.com/adap/flower/pull/6236), [#6254](https://github.com/adap/flower/pull/6254), [#6278](https://github.com/adap/flower/pull/6278), [#6299](https://github.com/adap/flower/pull/6299))
 
