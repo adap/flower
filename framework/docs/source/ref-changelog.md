@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.25.0 (<REPLACE-WITH-ACTUAL-DATE>)
+## v1.25.0 (2025-12-16)
 
 ### Thanks to our contributors
 
