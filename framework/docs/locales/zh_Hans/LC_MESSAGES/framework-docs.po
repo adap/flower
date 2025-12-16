@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-13 00:08+0000\n"
+"POT-Creation-Date: 2025-12-16 00:09+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -11188,7 +11188,7 @@ msgstr "首先，我们安装必要的软件包："
 
 #: ../../source/how-to-migrate-from-openfl.rst:69
 #: ../../source/tutorial-quickstart-huggingface.rst:29
-#: ../../source/tutorial-quickstart-jax.rst:29
+#: ../../source/tutorial-quickstart-jax.rst:30
 #: ../../source/tutorial-quickstart-mlx.rst:65
 #: ../../source/tutorial-quickstart-pytorch.rst:66
 #: ../../source/tutorial-quickstart-scikitlearn.rst:57
@@ -15872,12 +15872,10 @@ msgstr "使用隐私引擎进行本地培训"
 #, fuzzy
 msgid ""
 "For ensuring data instance-level privacy during local model training on "
-"the client side, consider leveraging privacy engines such as Opacus and "
-"TensorFlow Privacy. For examples of using Flower with these engines, "
-"please refer to the Flower examples directory (`Opacus "
-"<https://github.com/adap/flower/tree/main/examples/opacus>`_, `Tensorflow"
-" Privacy <https://github.com/adap/flower/tree/main/examples/tensorflow-"
-"privacy>`_)."
+"the client side, consider leveraging privacy engines such as Opacus. For "
+"examples of using Flower with these engines, please refer to the Flower "
+"examples directory (`Opacus "
+"<https://github.com/adap/flower/tree/main/examples/opacus>`_)."
 msgstr ""
 "要在客户端本地模型训练期间确保数据实例级隐私，可考虑利用 Opacus 和 TensorFlow Privacy 等隐私引擎。有关将 Flower"
 " 与这些引擎结合使用的示例，请参阅 Flower 示例目录（`Opacus "
@@ -35608,7 +35606,7 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-fastai.rst:59
 #: ../../source/tutorial-quickstart-huggingface.rst:63
-#: ../../source/tutorial-quickstart-jax.rst:63
+#: ../../source/tutorial-quickstart-jax.rst:64
 #: ../../source/tutorial-quickstart-pytorch-lightning.rst:56
 #: ../../source/tutorial-quickstart-pytorch.rst:100
 #: ../../source/tutorial-quickstart-scikitlearn.rst:91
@@ -35618,7 +35616,7 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-fastai.rst:125
 #: ../../source/tutorial-quickstart-huggingface.rst:141
-#: ../../source/tutorial-quickstart-jax.rst:131
+#: ../../source/tutorial-quickstart-jax.rst:152
 #: ../../source/tutorial-quickstart-pytorch-lightning.rst:134
 #: ../../source/tutorial-quickstart-pytorch.rst:168
 #: ../../source/tutorial-quickstart-scikitlearn.rst:171
@@ -35673,7 +35671,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:21
-#: ../../source/tutorial-quickstart-jax.rst:21
+#: ../../source/tutorial-quickstart-jax.rst:22
 #: ../../source/tutorial-quickstart-mlx.rst:57
 #: ../../source/tutorial-quickstart-pytorch.rst:58
 #: ../../source/tutorial-quickstart-scikitlearn.rst:49
@@ -35692,7 +35690,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:49
-#: ../../source/tutorial-quickstart-jax.rst:49
+#: ../../source/tutorial-quickstart-jax.rst:50
 #: ../../source/tutorial-quickstart-mlx.rst:85
 #: ../../source/tutorial-quickstart-pytorch.rst:86
 #: ../../source/tutorial-quickstart-scikitlearn.rst:77
@@ -35704,7 +35702,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:56
-#: ../../source/tutorial-quickstart-jax.rst:56
+#: ../../source/tutorial-quickstart-jax.rst:57
 #: ../../source/tutorial-quickstart-pytorch.rst:93
 #: ../../source/tutorial-quickstart-scikitlearn.rst:84
 #: ../../source/tutorial-quickstart-tensorflow.rst:85
@@ -35722,7 +35720,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:149
-#: ../../source/tutorial-quickstart-jax.rst:139
+#: ../../source/tutorial-quickstart-jax.rst:160
 #: ../../source/tutorial-quickstart-pytorch.rst:176
 #: ../../source/tutorial-quickstart-scikitlearn.rst:179
 msgid ""
@@ -35732,7 +35730,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:153
-#: ../../source/tutorial-quickstart-jax.rst:144
+#: ../../source/tutorial-quickstart-jax.rst:165
 #: ../../source/tutorial-quickstart-mlx.rst:181
 #: ../../source/tutorial-quickstart-pytorch.rst:181
 #: ../../source/tutorial-quickstart-scikitlearn.rst:184
@@ -35756,7 +35754,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:200
-#: ../../source/tutorial-quickstart-jax.rst:159
+#: ../../source/tutorial-quickstart-jax.rst:209
 #: ../../source/tutorial-quickstart-mlx.rst:224
 #: ../../source/tutorial-quickstart-pytorch.rst:220
 #: ../../source/tutorial-quickstart-scikitlearn.rst:209
@@ -35798,7 +35796,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:257
-#: ../../source/tutorial-quickstart-jax.rst:202
+#: ../../source/tutorial-quickstart-jax.rst:290
 #: ../../source/tutorial-quickstart-mlx.rst:268
 #: ../../source/tutorial-quickstart-pytorch.rst:295
 #: ../../source/tutorial-quickstart-scikitlearn.rst:231
@@ -35818,7 +35816,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:280
-#: ../../source/tutorial-quickstart-jax.rst:241
+#: ../../source/tutorial-quickstart-jax.rst:334
 #: ../../source/tutorial-quickstart-pytorch.rst:319
 #: ../../source/tutorial-quickstart-scikitlearn.rst:262
 #: ../../source/tutorial-quickstart-tensorflow.rst:253
@@ -35835,7 +35833,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:288
-#: ../../source/tutorial-quickstart-jax.rst:249
+#: ../../source/tutorial-quickstart-jax.rst:342
 #: ../../source/tutorial-quickstart-pytorch.rst:327
 #: ../../source/tutorial-quickstart-scikitlearn.rst:270
 #: ../../source/tutorial-quickstart-tensorflow.rst:261
@@ -35847,7 +35845,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:291
-#: ../../source/tutorial-quickstart-jax.rst:252
+#: ../../source/tutorial-quickstart-jax.rst:345
 #: ../../source/tutorial-quickstart-pytorch.rst:330
 #: ../../source/tutorial-quickstart-scikitlearn.rst:273
 #: ../../source/tutorial-quickstart-tensorflow.rst:264
@@ -35859,7 +35857,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:293
-#: ../../source/tutorial-quickstart-jax.rst:254
+#: ../../source/tutorial-quickstart-jax.rst:347
 #: ../../source/tutorial-quickstart-pytorch.rst:332
 #: ../../source/tutorial-quickstart-scikitlearn.rst:275
 #: ../../source/tutorial-quickstart-tensorflow.rst:266
@@ -35871,7 +35869,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:296
-#: ../../source/tutorial-quickstart-jax.rst:257
+#: ../../source/tutorial-quickstart-jax.rst:350
 #: ../../source/tutorial-quickstart-scikitlearn.rst:278
 #: ../../source/tutorial-quickstart-tensorflow.rst:269
 msgid ""
@@ -35883,7 +35881,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:336
-#: ../../source/tutorial-quickstart-jax.rst:297
+#: ../../source/tutorial-quickstart-jax.rst:392
 #: ../../source/tutorial-quickstart-pytorch.rst:387
 #: ../../source/tutorial-quickstart-tensorflow.rst:324
 #: ../../source/tutorial-quickstart-xgboost.rst:392
@@ -35896,7 +35894,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:342
-#: ../../source/tutorial-quickstart-jax.rst:304
+#: ../../source/tutorial-quickstart-jax.rst:399
 #: ../../source/tutorial-quickstart-mlx.rst:426
 #: ../../source/tutorial-quickstart-mlx.rst:430
 #: ../../source/tutorial-quickstart-pytorch.rst:394
@@ -35908,7 +35906,7 @@ msgid "The ServerApp"
 msgstr "服务器"
 
 #: ../../source/tutorial-quickstart-huggingface.rst:344
-#: ../../source/tutorial-quickstart-jax.rst:306
+#: ../../source/tutorial-quickstart-jax.rst:401
 #: ../../source/tutorial-quickstart-pytorch.rst:396
 #: ../../source/tutorial-quickstart-scikitlearn.rst:338
 #: ../../source/tutorial-quickstart-tensorflow.rst:333
@@ -35918,7 +35916,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:347
-#: ../../source/tutorial-quickstart-jax.rst:309
+#: ../../source/tutorial-quickstart-jax.rst:404
 #: ../../source/tutorial-quickstart-mlx.rst:435
 #: ../../source/tutorial-quickstart-pytorch.rst:399
 #: ../../source/tutorial-quickstart-scikitlearn.rst:341
@@ -35932,7 +35930,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:349
-#: ../../source/tutorial-quickstart-jax.rst:311
+#: ../../source/tutorial-quickstart-jax.rst:406
 #: ../../source/tutorial-quickstart-mlx.rst:437
 #: ../../source/tutorial-quickstart-pytorch.rst:401
 #: ../../source/tutorial-quickstart-scikitlearn.rst:343
@@ -35951,7 +35949,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:356
-#: ../../source/tutorial-quickstart-jax.rst:318
+#: ../../source/tutorial-quickstart-jax.rst:413
 #: ../../source/tutorial-quickstart-mlx.rst:444
 #: ../../source/tutorial-quickstart-pytorch.rst:408
 #: ../../source/tutorial-quickstart-scikitlearn.rst:350
@@ -35961,7 +35959,7 @@ msgid "the ``Grid`` object."
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:357
-#: ../../source/tutorial-quickstart-jax.rst:319
+#: ../../source/tutorial-quickstart-jax.rst:414
 msgid ""
 "an ``ArrayRecord`` carrying a randomly initialized model that will serve "
 "as the global model to be federated."
@@ -35977,7 +35975,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:362
-#: ../../source/tutorial-quickstart-jax.rst:321
+#: ../../source/tutorial-quickstart-jax.rst:419
 #: ../../source/tutorial-quickstart-mlx.rst:447
 #: ../../source/tutorial-quickstart-pytorch.rst:414
 #: ../../source/tutorial-quickstart-scikitlearn.rst:356
@@ -36236,52 +36234,52 @@ msgstr "快速入门 JAX"
 #: ../../source/tutorial-quickstart-jax.rst:11
 #, fuzzy
 msgid ""
-"In this federated learning tutorial we will learn how to train a linear "
-"regression model using Flower and `JAX "
-"<https://jax.readthedocs.io/en/latest/>`_. It is recommended to create a "
-"virtual environment and run everything within a :doc:`virtualenv "
-"<contributor-how-to-set-up-a-virtual-env>`."
+"In this federated learning tutorial we will learn how to train a CNN "
+"model on the MNIST dataset using Flower and `JAX "
+"<https://jax.readthedocs.io/en/latest/>`_ with the `Flax "
+"<https://flax.readthedocs.io/en/latest/index.html>`_ library. It is "
+"recommended to create a virtual environment and run everything within a "
+":doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`."
 msgstr ""
 "首先，建议创建一个虚拟环境，并在 `virtualenv <https://flower.ai/docs/recommended-env-"
 "setup.html>`_ 中运行一切。"
 
-#: ../../source/tutorial-quickstart-jax.rst:16
+#: ../../source/tutorial-quickstart-jax.rst:17
 msgid ""
 "Let's use ``flwr new`` to create a complete Flower+JAX project. It will "
 "generate all the files needed to run, by default with the Flower "
-"Simulation Engine, a federation of 10 nodes using |fedavg|_. A random "
-"regression dataset will be loaded from scikit-learn's |makeregression|_ "
-"function."
+"Simulation Engine, a federation of 50 nodes using |fedavg|_. The MNIST "
+"dataset will be partitioned using |flowerdatasets|_'s |iidpartitioner|_."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:35
+#: ../../source/tutorial-quickstart-jax.rst:36
 msgid ""
 "After running it you'll notice a new directory named ``quickstart-jax`` "
 "has been created. It should have the following structure:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:146
+#: ../../source/tutorial-quickstart-jax.rst:167
 msgid ""
-"This tutorial uses scikit-learn's |makeregression|_ function to generate "
-"a random regression problem."
+"This tutorial uses |flowerdatasets|_ to easily download and partition the"
+" MNIST dataset. In this example you'll make use of the |iidpartitioner|_ "
+"to generate ``num_partitions`` partitions. You can choose "
+"|otherpartitioners|_ available in Flower Datasets."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:161
+#: ../../source/tutorial-quickstart-jax.rst:211
 msgid ""
-"We defined a simple linear regression model to demonstrate how to create "
-"a JAX model, but feel free to replace it with a more sophisticated JAX "
-"model if you'd like, (such as with NN-based `Flax "
-"<https://flax.readthedocs.io/en/latest/index.html>`_):"
+"We use `Flax <https://flax.readthedocs.io/en/latest/index.html>`_ to "
+"define a simple CNN model for image classification:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:172
+#: ../../source/tutorial-quickstart-jax.rst:243
 msgid ""
-"In addition to defining the model architecture, we also include two "
-"utility functions to perform both training (i.e. ``train()``) and "
-"evaluation (i.e. ``evaluation()``) using the above model."
+"In addition to defining the model architecture, we also include utility "
+"functions to perform both training (i.e. ``train()``) and evaluation "
+"using the above model."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:204
+#: ../../source/tutorial-quickstart-jax.rst:292
 msgid ""
 "The main changes we have to make to use JAX with Flower have to do with "
 "converting the |arrayrecord_link|_ received in the |message_link|_ into "
@@ -36290,30 +36288,28 @@ msgid ""
 "``set_params()`` functions for setting parameter values for the JAX "
 "model. In ``get_params()``, JAX model parameters are extracted and "
 "represented as a list of NumPy arrays. The ``set_params()`` function is "
-"the opposite: given a list of NumPy arrays it applies them to an existing"
-" JAX model. We will combine these functions with the built-in methods in "
-"the ``ArrayRecord`` to make these conversions:"
+"the opposite: given a list of NumPy arrays it creates a new "
+"``TrainState`` with those parameters. We will combine these functions "
+"with the built-in methods in the ``ArrayRecord`` to make these "
+"conversions:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:313
+#: ../../source/tutorial-quickstart-jax.rst:408
 msgid ""
-"In this example we use the |fedavg|_ and configure it with a specific "
-"value of ``input_dim`` which is read from the run config. You can find "
-"the default value defined in the ``pyproject.toml``. Then, the execution "
-"of the strategy is launched when invoking its |strategy_start_link|_ "
-"method. To it we pass:"
+"In this example we use the |fedavg|_ and configure it with specific "
+"values read from the run config. You can find the default values defined "
+"in the ``pyproject.toml``. Then, the execution of the strategy is "
+"launched when invoking its |strategy_start_link|_ method. To it we pass:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:323
+#: ../../source/tutorial-quickstart-jax.rst:416
 msgid ""
-"You may also pass a ``ConfigRecord`` with the training hyperparameters to"
-" be sent to the clients. The strategy will also insert the current round "
-"number in this config before sending it to the participating nodes. An "
-"example where a ``ConfigRecord`` is passed can be found in the "
-":doc:`Quickstart PyTorch <tutorial-quickstart-pytorch>` tutorial."
+"a ``ConfigRecord`` with the training hyperparameters (learning rate) to "
+"be sent to the clients. The strategy will also insert the current round "
+"number in this config before sending it to the participating nodes."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:361
+#: ../../source/tutorial-quickstart-jax.rst:460
 msgid ""
 "Note the ``start`` method of the strategy returns a result object. This "
 "object contains all the relevant information about the FL process, "
@@ -36324,13 +36320,13 @@ msgid ""
 "model NumPy arrays using ``np.savez()`` as shown above."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:368
+#: ../../source/tutorial-quickstart-jax.rst:467
 msgid ""
 "Congratulations! You've successfully built and run your first federated "
 "learning system for JAX with Flower!"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:373
+#: ../../source/tutorial-quickstart-jax.rst:472
 #, fuzzy
 msgid ""
 "Check the source code of the extended version of this tutorial in "
@@ -64434,5 +64430,89 @@ msgstr ""
 #~ " new file called ``custom_strategy.py`` in"
 #~ " the ``flower_tutorial`` directory and add"
 #~ " the following code:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's use ``flwr new`` to create a"
+#~ " complete Flower+JAX project. It will "
+#~ "generate all the files needed to "
+#~ "run, by default with the Flower "
+#~ "Simulation Engine, a federation of 10"
+#~ " nodes using |fedavg|_. A random "
+#~ "regression dataset will be loaded from"
+#~ " scikit-learn's |makeregression|_ function."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This tutorial uses scikit-learn's "
+#~ "|makeregression|_ function to generate a "
+#~ "random regression problem."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "We defined a simple linear regression"
+#~ " model to demonstrate how to create"
+#~ " a JAX model, but feel free to"
+#~ " replace it with a more sophisticated"
+#~ " JAX model if you'd like, (such "
+#~ "as with NN-based `Flax "
+#~ "<https://flax.readthedocs.io/en/latest/index.html>`_):"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In addition to defining the model "
+#~ "architecture, we also include two "
+#~ "utility functions to perform both "
+#~ "training (i.e. ``train()``) and evaluation "
+#~ "(i.e. ``evaluation()``) using the above "
+#~ "model."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The main changes we have to make"
+#~ " to use JAX with Flower have to"
+#~ " do with converting the |arrayrecord_link|_"
+#~ " received in the |message_link|_ into "
+#~ "NumPy arrays and vice versa when "
+#~ "generating the reply ``Message`` from "
+#~ "the ClientApp. We also have to "
+#~ "introduce the ``get_params()`` and "
+#~ "``set_params()`` functions for setting "
+#~ "parameter values for the JAX model. "
+#~ "In ``get_params()``, JAX model parameters "
+#~ "are extracted and represented as a "
+#~ "list of NumPy arrays. The "
+#~ "``set_params()`` function is the opposite: "
+#~ "given a list of NumPy arrays it"
+#~ " applies them to an existing JAX "
+#~ "model. We will combine these functions"
+#~ " with the built-in methods in "
+#~ "the ``ArrayRecord`` to make these "
+#~ "conversions:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this example we use the "
+#~ "|fedavg|_ and configure it with a "
+#~ "specific value of ``input_dim`` which is"
+#~ " read from the run config. You "
+#~ "can find the default value defined "
+#~ "in the ``pyproject.toml``. Then, the "
+#~ "execution of the strategy is launched"
+#~ " when invoking its |strategy_start_link|_ "
+#~ "method. To it we pass:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You may also pass a ``ConfigRecord`` "
+#~ "with the training hyperparameters to be"
+#~ " sent to the clients. The strategy"
+#~ " will also insert the current round"
+#~ " number in this config before sending"
+#~ " it to the participating nodes. An"
+#~ " example where a ``ConfigRecord`` is "
+#~ "passed can be found in the "
+#~ ":doc:`Quickstart PyTorch <tutorial-quickstart-"
+#~ "pytorch>` tutorial."
 #~ msgstr ""
 
