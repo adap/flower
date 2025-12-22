@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "federated-analytics"
+version = "1.0.0"
+description = "Federated Health Analytics with Pandas and Flower"
+license = "Apache-2.0"
+authors = [
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+]
+dependencies = [
+    "flwr>=1.25.0",
+    "pandas==2.3.3",
+    "SQLAlchemy==2.0.44",
+    "psycopg[binary]==3.2.13",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "fed_analytics_app.server_app:app"
+clientapp = "fed_analytics_app.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 1
+fraction-sample = 1.0
+selected-features = "age,bmi,systolic_bp,diastolic_bp,ldl_cholesterol,hba1c"
+feature-aggregation = "mean,std"
+
+[tool.flwr.federations]
+default = "local"
+
+[tool.flwr.federations.local]
+address = "127.0.0.1:9093"
+insecure = true
