@@ -38,13 +38,13 @@ pip install -e .
 ### Start PostgreSQL databases
 
 Run the following to start two PostgreSQL databases and initialize the dataset for each:
+
 ```shell
 ./db_start.sh
 ```
 
 > [!NOTE]
 > To start more than two databases, pass the desired number as the first argument to the script, e.g. `./db_start.sh 3`.
-
 
 ### Run with the Deployment Engine
 

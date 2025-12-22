@@ -4,9 +4,8 @@ from collections.abc import Iterable
 
 import numpy as np
 import pandas as pd
-from sqlalchemy import create_engine
-
 from flwr.app import Message
+from sqlalchemy import create_engine
 
 
 def query_database(  # pylint: disable=too-many-arguments, too-many-positional-arguments

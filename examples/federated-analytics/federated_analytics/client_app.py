@@ -2,9 +2,10 @@
 
 import warnings
 
-from federated_analytics.task import query_database
 from flwr.app import Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
+
+from federated_analytics.task import query_database
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
