@@ -2,7 +2,7 @@
 
 set -e
 
-N=${1:-3}   # number of databases (default = 3)
+N=${1:-2}   # number of PostgreSQL databases (default = 2)
 BASE_PORT=5433
 
 {
@@ -17,9 +17,9 @@ BASE_PORT=5433
     image: postgres:18
     container_name: postgres_$i
     environment:
-      POSTGRES_USER: omop
-      POSTGRES_PASSWORD: omop
-      POSTGRES_DB: omop
+      POSTGRES_USER: flwrlabs
+      POSTGRES_PASSWORD: flwrlabs
+      POSTGRES_DB: flwrlabs
       DB_SEED: $SEED
     ports:
       - "$PORT:5432"

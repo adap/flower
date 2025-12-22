@@ -19,9 +19,9 @@ def query(msg: Message, context: Context) -> Message:
     # Get database connection details from node config
     db_host: str = context.node_config.get("db-host", "localhost")
     db_port: int = context.node_config.get("db-port", 5432)
-    db_name: str = context.node_config.get("db-name", "omop")
-    db_user: str = context.node_config.get("db-user", "omop")
-    db_password: str = context.node_config.get("db-password", "omop")
+    db_name: str = context.node_config.get("db-name", "flwrlabs")
+    db_user: str = context.node_config.get("db-user", "flwrlabs")
+    db_password: str = context.node_config.get("db-password", "flwrlabs")
     table_name: str = context.node_config.get("table-name", "person_measurements")
 
     selected_features: list[str] = msg.content["config"]["selected_features"]

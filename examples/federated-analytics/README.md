@@ -17,7 +17,7 @@ After cloning the project, this will create a new directory called `federated-an
 ```shell
 federated-analytics
 ├── db_init.sh          # Defines an artificial OMOP CDM table
-├── db_start.sh         # Generates and starts Postgres containers with OMOP CDM data
+├── db_start.sh         # Generates and starts PostgreSQL containers with OMOP CDM data
 ├── federated-analytics
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
@@ -35,6 +35,17 @@ Install the dependencies defined in `pyproject.toml` as well as the `federated-a
 pip install -e .
 ```
 
+### Start PostgreSQL databases
+
+Run the following to start two PostgreSQL databases and initialize the dataset for each:
+```shell
+./db_start.sh
+```
+
+> [!NOTE]
+> To start more than two databases, pass the desired number as the first argument to the script, e.g. `./db_start.sh 3`.
+
+
 ### Run with the Deployment Engine
 
 For a basic execution of this federated analytics app, activate your environment and start the SuperLink process in insecure mode:
@@ -43,7 +54,7 @@ For a basic execution of this federated analytics app, activate your environment
 flower-superlink --insecure
 ```
 
-Next, start two Supernodes and connect them to the SuperLink. You will need to specify different `--node-config` values so that each SuperNode will connect to different Postgres databases.
+Next, start two Supernodes and connect them to the SuperLink. You will need to specify different `--node-config` values so that each SuperNode will connect to different PostgreSQL databases.
 
 ```shell
 flower-supernode \
