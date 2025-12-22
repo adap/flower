@@ -24,8 +24,8 @@ packages = ["."]
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "fed_analytics_app.server_app:app"
-clientapp = "fed_analytics_app.client_app:app"
+serverapp = "federated_analytics.server_app:app"
+clientapp = "federated_analytics.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 1
@@ -34,8 +34,8 @@ selected-features = "age,bmi,systolic_bp,diastolic_bp,ldl_cholesterol,hba1c"
 feature-aggregation = "mean,std"
 
 [tool.flwr.federations]
-default = "local"
+default = "federated-analytics"
 
-[tool.flwr.federations.local]
+[tool.flwr.federations.federated-analytics]
 address = "127.0.0.1:9093"
 insecure = true
