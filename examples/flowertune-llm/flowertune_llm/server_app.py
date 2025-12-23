@@ -12,6 +12,7 @@ from peft import get_peft_model_state_dict, set_peft_model_state_dict
 
 from flowertune_llm.dataset import replace_keys
 from flowertune_llm.models import get_model
+from flowertune_llm.fedavgstreaming import FedAvgStreaming
 
 # Create ServerApp
 app = ServerApp()
@@ -32,10 +33,11 @@ def main(grid: Grid, context: Context) -> None:
 
     # Get initial model weights
     init_model = get_model(cfg.model)
-    arrays = ArrayRecord(get_peft_model_state_dict(init_model))
+    #arrays = ArrayRecord(get_peft_model_state_dict(init_model))
+    arrays = ArrayRecord(init_model.state_dict())
 
     # Define strategy
-    strategy = FedAvg(
+    strategy = FedAvgStreaming(
         fraction_train=cfg.strategy.fraction_train,
         fraction_evaluate=cfg.strategy.fraction_evaluate,
     )
@@ -64,9 +66,10 @@ def get_evaluate_fn(model_cfg, save_every_round, total_round, save_path):
         ):
             # Init model
             model = get_model(model_cfg)
-            set_peft_model_state_dict(model, arrays.to_torch_state_dict())
+            #set_peft_model_state_dict(model, arrays.to_torch_state_dict())
+            model.load_state_dict(arrays.to_torch_state_dict())
 
-            model.save_pretrained(f"{save_path}/peft_{server_round}")
+            model.save_pretrained(f"{save_path}/{server_round}")
 
         return MetricRecord()
 

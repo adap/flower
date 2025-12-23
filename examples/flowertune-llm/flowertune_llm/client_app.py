@@ -48,7 +48,8 @@ def train(msg: Message, context: Context):
 
     # Load the model and initialize it with the received weights
     model = get_model(cfg.model)
-    set_peft_model_state_dict(model, msg.content["arrays"].to_torch_state_dict())
+    #set_peft_model_state_dict(model, msg.content["arrays"].to_torch_state_dict())
+    model.load_state_dict(msg.content["arrays"].to_torch_state_dict(), strict=True)
 
     # Set learning rate for current round
     new_lr = cosine_annealing(
@@ -62,25 +63,46 @@ def train(msg: Message, context: Context):
     training_arguments.output_dir = msg.content["config"]["save_path"]
 
     # Construct trainer
-    trainer = SFTTrainer(
-        model=model,
-        tokenizer=tokenizer,
-        args=training_arguments,
-        max_seq_length=cfg.train.seq_length,
-        train_dataset=trainset,
-        formatting_func=formatting_prompts_func,
-        data_collator=data_collator,
-    )
+    #trainer = SFTTrainer(
+    #    model=model,
+    #    tokenizer=tokenizer,
+    #    args=training_arguments,
+    #    max_seq_length=cfg.train.seq_length,
+    #    train_dataset=trainset,
+    #    formatting_func=formatting_prompts_func,
+    #    data_collator=data_collator,
+    #)
 
     # Do local training
-    results = trainer.train()
+    #results = trainer.train()
 
     # Construct and return reply Message
-    model_record = ArrayRecord(get_peft_model_state_dict(model))
+    #model_record = ArrayRecord(get_peft_model_state_dict(model))
+    print(f'model layers = {model.state_dict().keys()}')
+    model_record = ArrayRecord(model.state_dict())
+    #metrics = {
+    #    "train_loss": results.training_loss,
+    #    "num-examples": len(trainset),
+    #}
     metrics = {
-        "train_loss": results.training_loss,
+        "train_loss": 0.0,
         "num-examples": len(trainset),
     }
+
     metric_record = MetricRecord(metrics)
-    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    content = RecordDict({"metrics": metric_record})
+    #Save trained model as context for layer-wise sending
+    context.state["net_parameters"] = model_record
+    context.state["current_layer"] = MetricRecord({"idx":0})
+
     return Message(content=content, reply_to=msg)
+
+@app.train("layer_wise_communication")
+def train_comms(msg: Message, context: Context):
+    """Send the model layer by layer"""
+    model_dict = context.state["net_parameters"].to_torch_state_dict()
+    idx = context.state["current_layer"]["idx"]
+    send_complete = False
+    if idx == (len(model_dict.keys()) - 1):
+        send_complete = True
+    
