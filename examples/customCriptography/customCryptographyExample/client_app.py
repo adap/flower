@@ -32,6 +32,10 @@ from .task import (
 # -------------------------------------------------------------------
 # CLIENT CON ASSEGNAZIONE AUTOMATICA DEI CORE
 # -------------------------------------------------------------------
+import math  # mettilo in cima al file, insieme agli altri import
+
+MSS = 1460  # TCP payload tipico con MTU 1500 (IPv4)
+
 class FlowerClient(NumPyClient):
 
     def __init__(self, trainloader, valloader, local_epochs, learning_rate):
@@ -66,8 +70,18 @@ class FlowerClient(NumPyClient):
             end_cpu = self._cpu_time()
             cpu_time = end_cpu - start_cpu
             # cpu_logger.info(f"{cpu_time:.3f}", extra={"pid": os.getpid()})
+            weights = get_weights(self.net)
 
-            return get_weights(self.net), len(self.trainloader.dataset), {"cpu_fit": cpu_time}
+            size_bytes = sum(w.nbytes for w in weights)
+            packets = math.ceil(size_bytes / MSS)
+
+            logging.info(
+                f"UPLOAD model: {size_bytes} bytes "
+                f"(~{size_bytes/(1024*1024):.2f} MB) "
+                f"-> ~{packets} pacchetti TCP (MSS={MSS})"
+            )
+
+            return weights, len(self.trainloader.dataset), {"cpu_fit": cpu_time}
         except Exception:
             logging.exception("ERRORE in fit() sul client, il client sta crashando!")
             raise
