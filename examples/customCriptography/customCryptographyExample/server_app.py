@@ -128,10 +128,10 @@ def server_fn(context: Context):
         fraction_evaluate=context.run_config["fraction-evaluate"]
 
 
-    log_time(f"local-epochs:  {context.run_config["local-epochs"]}")
-    log_time(f"learning-rate:  {context.run_config["learning-rate"]}")
-    log_time(f"batch-size:  {context.run_config["batch-size"]}" )
-    log_time(f"fraction-evaluate:  {context.run_config["fraction-evaluate"]}" )
+    log_time(f"local-epochs:  {context.run_config['local-epochs']}")
+    log_time(f"learning-rate:  {context.run_config['learning-rate']}")
+    log_time(f"batch-size:  {context.run_config['batch-size']}" )
+    log_time(f"fraction-evaluate:  {context.run_config['fraction-evaluate']}" )
 
     if server_side is not None:
         log_time("SERVER SIDE EVALUATION")
