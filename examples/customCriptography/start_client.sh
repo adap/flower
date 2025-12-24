@@ -24,13 +24,11 @@ if [ "$TLS" = "True" ]; then
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
         2>&1 | tee "$LOG_DIR/superlink.log" &
-    TLS_FLAG="--root-certificates certificates/ca.crt"
 else
     echo "[*] Avvio superlink in modalità INSECURE"
     flower-superlink \
         --insecure \
         2>&1 | tee "$LOG_DIR/superlink.log" &
-    TLS_FLAG="--insecure"
 fi
 
 sleep 2
@@ -41,7 +39,6 @@ sleep 2
 # ============================================================
 
 CPU_THREADS=6
-
 echo "[*] Ogni client userà massimo $CPU_THREADS thread CPU"
 
 
@@ -56,7 +53,6 @@ for ((i=1; i<=NUM_CLIENTS; i++)); do
 
     echo "[*] Avvio client $i su porta $PORT con dataset $DATASET"
 
-    # Imposta limiti CPU
     export OMP_NUM_THREADS=$CPU_THREADS
     export MKL_NUM_THREADS=$CPU_THREADS
     export OPENBLAS_NUM_THREADS=$CPU_THREADS
@@ -64,13 +60,23 @@ for ((i=1; i<=NUM_CLIENTS; i++)); do
     export VECLIB_MAXIMUM_THREADS=$CPU_THREADS
     export torch_num_threads=$CPU_THREADS
 
-    # Avvio supernode con logging COMPLETO
-    flower-supernode \
-        --superlink 127.0.0.1:9092 \
-        --clientappio-api-address 0.0.0.0:${PORT} \
-        $TLS_FLAG \
-        --node-config "dataset-path='$DATASET' fit_timeout=2000 evaluate_timeout=120 ray_timeout=600 connect_timeout=60" \
-        2>&1 | tee "$LOG_FILE" &
+    if [ "$TLS" = "True" ]; then
+        flower-supernode \
+            --superlink 127.0.0.1:9092 \
+            --root-certificates certificates/ca.crt \
+            --auth-supernode-private-key keys/client_credentials_$i \
+            --auth-supernode-public-key keys/client_credentials_$i.pub \
+            --node-config "dataset-path='$DATASET' fit_timeout=2000 evaluate_timeout=120 ray_timeout=600 connect_timeout=60" \
+            --clientappio-api-address 0.0.0.0:${PORT} \
+            2>&1 | tee "$LOG_FILE" &
+    else
+        flower-supernode \
+            --superlink 127.0.0.1:9092 \
+            --insecure \
+            --node-config "dataset-path='$DATASET' fit_timeout=2000 evaluate_timeout=120 ray_timeout=600 connect_timeout=60" \
+            --clientappio-api-address 0.0.0.0:${PORT} \
+            2>&1 | tee "$LOG_FILE" &
+    fi
 
     echo "[✓] Client $i avviato (log: $LOG_FILE)"
 done
