@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower constants."""
+"""MessageType constants."""
 
 from __future__ import annotations
 
