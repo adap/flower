@@ -63,7 +63,6 @@ from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, _make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
-from flwr.common.version import package_version
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.ffs import Ffs, FfsFactory
@@ -74,6 +73,7 @@ from flwr.supercore.primitives.asymmetric_ed25519 import (
     decode_base64url,
     verify_signature,
 )
+from flwr.supercore.version import package_version
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 

@@ -16,7 +16,7 @@
 
 from typer.testing import CliRunner
 
-from flwr.common.version import package_version
+from flwr.supercore.version import package_version
 
 from .app import app
 

@@ -29,7 +29,6 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 from flwr.common import now
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import FAB_CONFIG_FILE
-from flwr.common.version import package_version as flwr_version
 from flwr.supercore.constant import PLATFORM_API_URL
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_message_to_sign,
@@ -37,6 +36,7 @@ from flwr.supercore.primitives.asymmetric_ed25519 import (
     sign_message,
 )
 from flwr.supercore.utils import parse_app_spec, request_download_link
+from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
 from ..config_utils import (

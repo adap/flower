@@ -24,7 +24,6 @@ import typer
 from requests import Response
 
 from flwr.common.constant import FAB_CONFIG_FILE
-from flwr.common.version import package_version as flwr_version
 from flwr.supercore.constant import (
     APP_PUBLISH_EXCLUDE_PATTERNS,
     APP_PUBLISH_INCLUDE_PATTERNS,
@@ -36,6 +35,7 @@ from flwr.supercore.constant import (
     PLATFORM_API_URL,
     UTF8,
 )
+from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
 from ..config_utils import (
