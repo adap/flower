@@ -9,8 +9,7 @@ Flower.
 
     Yes, it can! Flower even comes with a few under-the-hood optimizations to make it work even better on Colab. Here's a quickstart example:
 
-    * `Flower simulation PyTorch <https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation-pytorch/sim.ipynb>`_
-    * `Flower simulation TensorFlow/Keras <https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation-tensorflow/sim.ipynb>`_
+    * `Flower 30-minute tutorial <https://colab.research.google.com/github/adap/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb>`_
 
 .. dropdown:: :fa:`eye,mr-1` How can I run Federated Learning on a Raspberry Pi?
 

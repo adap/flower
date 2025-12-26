@@ -18,7 +18,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from flwr.common.date import format_timedelta, isoformat8601_utc
+from flwr.common.date import isoformat8601_utc
 from flwr.common.typing import Run
 
 
@@ -40,8 +40,8 @@ class RunRow:  # pylint: disable=too-many-instance-attributes
         The SHA-256 hash of the FAB.
     status_text : str
         The formatted status text.
-    elapsed : str
-        The formatted elapsed time.
+    elapsed : float
+        The elapsed time in seconds.
     pending_at : str
         Timestamp when run entered pending state.
     starting_at : str
@@ -50,6 +50,16 @@ class RunRow:  # pylint: disable=too-many-instance-attributes
         Timestamp when run entered running state.
     finished_at : str
         Timestamp when run finished.
+    network_traffic_inbound : int
+        The total inbound network traffic (in bytes) used during the run.
+        It includes the traffic from SuperNodes to SuperLink.
+    network_traffic_outbound : int
+        The total outbound network traffic (in bytes) used during the run.
+        It includes the traffic from SuperLink to SuperNodes.
+    compute_time_serverapp : float
+        The total compute time (in seconds) of the ServerApp during the run.
+    compute_time_clientapp : float
+        The total compute time (in seconds) of all ClientApps during the run.
     """
 
     run_id: int
@@ -58,11 +68,15 @@ class RunRow:  # pylint: disable=too-many-instance-attributes
     fab_version: str
     fab_hash: str
     status_text: str
-    elapsed: str
+    elapsed: float
     pending_at: str
     starting_at: str
     running_at: str
     finished_at: str
+    network_traffic_inbound: int
+    network_traffic_outbound: int
+    compute_time_serverapp: float
+    compute_time_clientapp: float
 
 
 def format_runs(runs: list[Run], now_isoformat: str) -> list[RunRow]:
@@ -120,11 +134,15 @@ def format_runs(runs: list[Run], now_isoformat: str) -> list[RunRow]:
             fab_version=run.fab_version,
             fab_hash=run.fab_hash,
             status_text=status_text,
-            elapsed=format_timedelta(elapsed_time),
+            elapsed=elapsed_time.total_seconds(),
             pending_at=_format_datetime(pending_at),
             starting_at=_format_datetime(starting_at),
             running_at=_format_datetime(running_at),
             finished_at=_format_datetime(finished_at),
+            network_traffic_inbound=run.bytes_recv,
+            network_traffic_outbound=run.bytes_sent,
+            compute_time_serverapp=elapsed_time.total_seconds(),
+            compute_time_clientapp=run.clientapp_runtime,
         )
         run_list.append(row)
     return run_list

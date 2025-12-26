@@ -17,7 +17,7 @@ Create a new Python environment (we recommend Python 3.11), activate it, then in
 pip install -r requirements.txt
 
 # Log in HuggingFace account
-huggingface-cli login
+hf auth login
 ```
 
 ## Generate model decision & calculate accuracy

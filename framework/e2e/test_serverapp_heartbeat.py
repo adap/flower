@@ -66,7 +66,7 @@ def run_superexec() -> subprocess.Popen:
     return subprocess.Popen(cmd)
 
 
-def flwr_run() -> int:
+def flwr_run() -> str:
     """Run the `flwr run` command and return `run_id`."""
     # Run the command
     result = subprocess.run(
@@ -84,12 +84,12 @@ def flwr_run() -> int:
     return data["run-id"]
 
 
-def flwr_ls() -> dict[int, str]:
+def flwr_ls() -> dict[str, str]:
     """Run `flwr ls` command and return a mapping of run_id to status.
 
     Returns
     -------
-    dict[int, str]
+    dict[str, str]
         A dictionary where keys are run IDs and values are their statuses.
     """
     # Run the command

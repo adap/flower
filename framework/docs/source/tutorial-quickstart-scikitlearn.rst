@@ -1,6 +1,6 @@
-:og:description: Learn how to train a logistic regression on MNIST using federated learning with Flower and scikit-learn in this step-by-step tutorial.
+:og:description: Learn how to train a logistic regression on the Iris dataset using federated learning with Flower and scikit-learn in this step-by-step tutorial.
 .. meta::
-    :description: Learn how to train a logistic regression on MNIST using federated learning with Flower and scikit-learn in this step-by-step tutorial.
+    :description: Learn how to train a logistic regression on the Iris dataset using federated learning with Flower and scikit-learn in this step-by-step tutorial.
 
 .. _quickstart-pytorch:
 
@@ -37,8 +37,9 @@
 #########################
 
 In this federated learning tutorial we will learn how to train a Logistic Regression on
-MNIST using Flower and scikit-learn. It is recommended to create a virtual environment
-and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+the Iris dataset using Flower and scikit-learn. It is recommended to create a virtual
+environment and run everything within a :doc:`virtualenv
+<contributor-how-to-set-up-a-virtual-env>`.
 
 Let's use ``flwr new`` to create a complete Flower+scikit-learn project. It will
 generate all the files needed to run, by default with the Flower Simulation Engine, a
@@ -53,21 +54,19 @@ install Flower in your new environment:
     # In a new Python environment
     $ pip install flwr
 
-Then, run the command below. You will be prompted to select one of the available
-templates (choose ``sklearn``), give a name to your project, and type in your developer
-name:
+Then, run the command below:
 
 .. code-block:: shell
 
-    $ flwr new
+    $ flwr new @flwrlabs/quickstart-sklearn
 
-After running it you'll notice a new directory with your project name has been created.
-It should have the following structure:
+After running it you'll notice a new directory named ``quickstart-sklearn`` has been
+created. It should have the following structure:
 
 .. code-block:: shell
 
-    <your-project-name>
-    ├── <your-project-name>
+    quickstart-sklearn
+    ├── sklearnexample
     │   ├── __init__.py
     │   ├── client_app.py   # Defines your ClientApp
     │   ├── server_app.py   # Defines your ServerApp
@@ -184,43 +183,48 @@ dataset partition, the model, defining the ``ClientApp`` and defining the ``Serv
  The Data
 **********
 
-This tutorial uses |flowerdatasets|_ to easily download and partition the `MNIST
-<https://huggingface.co/datasets/ylecun/mnist>`_ dataset. In this example you'll make
-use of the |iidpartitioner|_ to generate ``num_partitions`` partitions. You can choose
-|otherpartitioners|_ available in Flower Datasets. Each ``ClientApp`` will call this
-function to create dataloaders with the data that correspond to their data partition.
+This tutorial uses |flowerdatasets|_ to easily download and partition the `Iris
+<https://huggingface.co/datasets/scikit-learn/iris>`_ dataset. In this example you'll
+make use of the |iidpartitioner|_ to generate ``num_partitions`` partitions. You can
+choose |otherpartitioners|_ available in Flower Datasets. Each ``ClientApp`` will call
+this function to create dataloaders with the data that correspond to their data
+partition. Note that in this example only a subset of the columns are going to be used.
 
 .. code-block:: python
 
+    FEATURES = ["petal_length", "petal_width", "sepal_length", "sepal_width"]
+
     partitioner = IidPartitioner(num_partitions=num_partitions)
-    fds = FederatedDataset(
-        dataset="mnist",
-        partitioners={"train": partitioner},
-    )
-
-    dataset = fds.load_partition(partition_id, "train").with_format("numpy")
-
-    X, y = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
-
-    # Split the on edge data: 80% train, 20% test
+    fds = FederatedDataset(dataset="hitorilabs/iris", partitioners={"train": partitioner})
+    dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
+    X = dataset[FEATURES]
+    y = dataset["species"]
+    # Split the on-edge data: 80% train, 20% test
     X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
     y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
+    return X_train.values, y_train.values, X_test.values, y_test.values
 
 ***********
  The Model
 ***********
 
-We define the |logisticregression|_ model from scikit-learn in the ``get_model()``
-function:
+We define the |logisticregression|_ model from scikit-learn in the
+``create_log_reg_and_instantiate_parameters()`` function. This helper function also
+initializes the model parameters using the ``set_initial_params()`` utility function in
+the same file.
 
 .. code-block:: python
 
-    def get_model(penalty: str, local_epochs: int):
-        return LogisticRegression(
+    def create_log_reg_and_instantiate_parameters(penalty):
+        model = LogisticRegression(
             penalty=penalty,
-            max_iter=local_epochs,
-            warm_start=True,
+            max_iter=1,  # local epoch
+            warm_start=True,  # prevent refreshing weights when fitting,
+            solver="saga",
         )
+        # Setting initial parameters, akin to model.compile for keras models
+        set_initial_params(model, n_features=len(FEATURES), n_classes=len(UNIQUE_LABELS))
+        return model
 
 ***************
  The ClientApp
@@ -238,20 +242,22 @@ these conversions:
     @app.train()
     def train(msg: Message, context: Context):
 
-        # Load the model
-        model = get_model()  # construct your scikit-learn model
-        # Extract the ArrayRecord from Message and convert to numpy ndarrays
+        # Create LogisticRegression Model
+        penalty = context.run_config["penalty"]
+        # Create LogisticRegression Model
+        model = create_log_reg_and_instantiate_parameters(penalty)
+
+        # Apply received parameters
         ndarrays = msg.content["arrays"].to_numpy_ndarrays()
-        # Set the model parameters with auxhiliary function
         set_model_params(model, ndarrays)
 
         # Train the model
         ...
 
         # Extract the updated model parameters with auxhiliary function
-        updated_ndarrays = get_model_params(model)
+        ndarrays = get_model_params(model)
         # Pack the updated parameters into an ArrayRecord
-        model_record = ArrayRecord(updated_ndarrays)
+        model_record = ArrayRecord(ndarrays)
 
 The rest of the functionality is directly inspired by the centralized case. The
 |clientapp_link|_ comes with three core methods (``train``, ``evaluate``, and ``query``)
@@ -285,19 +291,17 @@ Runtime and is not directly configurable during simulations.
 
         # Create LogisticRegression Model
         penalty = context.run_config["penalty"]
-        local_epochs = context.run_config["local-epochs"]
-        model = get_model(penalty, local_epochs)
-        # Setting initial parameters, akin to model.compile for keras models
-        set_initial_params(model)
+        # Create LogisticRegression Model
+        model = create_log_reg_and_instantiate_parameters(penalty)
 
-        # Apply received pararameters
+        # Apply received parameters
         ndarrays = msg.content["arrays"].to_numpy_ndarrays()
         set_model_params(model, ndarrays)
 
         # Load the data
         partition_id = context.node_config["partition-id"]
         num_partitions = context.node_config["num-partitions"]
-        X_train, _, y_train, _ = load_data(partition_id, num_partitions)
+        X_train, y_train, _, _ = load_data(partition_id, num_partitions)
 
         # Ignore convergence failure due to low local epochs
         with warnings.catch_warnings():
@@ -307,12 +311,17 @@ Runtime and is not directly configurable during simulations.
 
         # Let's compute train loss
         y_train_pred_proba = model.predict_proba(X_train)
-        train_logloss = log_loss(y_train, y_train_pred_proba)
+        train_logloss = log_loss(y_train, y_train_pred_proba, labels=UNIQUE_LABELS)
+        accuracy = model.score(X_train, y_train)
 
         # Construct and return reply Message
         ndarrays = get_model_params(model)
         model_record = ArrayRecord(ndarrays)
-        metrics = {"num-examples": len(X_train), "train_logloss": train_logloss}
+        metrics = {
+            "num-examples": len(X_train),
+            "train_logloss": train_logloss,
+            "train_accuracy": accuracy,
+        }
         metric_record = MetricRecord(metrics)
         content = RecordDict({"arrays": model_record, "metrics": metric_record})
         return Message(content=content, reply_to=msg)
@@ -340,7 +349,7 @@ invoking its |strategy_start_link|_ method. To it we pass:
 
 - the ``Grid`` object.
 - an ``ArrayRecord`` carrying a randomly initialized model that will serve as the global
-  model to federated.
+  model to federate.
 - a ``ConfigRecord`` with the training hyperparameters to be sent to the clients. The
   strategy will also insert the current round number in this config before sending it to
   the participating nodes.
@@ -360,10 +369,7 @@ invoking its |strategy_start_link|_ method. To it we pass:
 
         # Create LogisticRegression Model
         penalty = context.run_config["penalty"]
-        local_epochs = context.run_config["local-epochs"]
-        model = get_model(penalty, local_epochs)
-        # Setting initial parameters, akin to model.compile for keras models
-        set_initial_params(model)
+        model = create_log_reg_and_instantiate_parameters(penalty)
         # Construct ArrayRecord representation
         arrays = ArrayRecord(get_model_params(model))
 
@@ -384,7 +390,7 @@ invoking its |strategy_start_link|_ method. To it we pass:
         joblib.dump(model, "logreg_model.pkl")
 
 Congratulations! You've successfully built and run your first federated learning system
-in scikit-learn on the MNIST dataset using the new Message API.
+in scikit-learn on the Iris dataset using the new Message API.
 
 .. note::
 
@@ -415,4 +421,4 @@ in scikit-learn on the MNIST dataset using the new Message API.
 .. _otherpartitioners: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html
 
 .. meta::
-    :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a linear regression model.
+    :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a logistic regression model.
