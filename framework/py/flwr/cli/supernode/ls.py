@@ -33,7 +33,6 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
 )
 from flwr.common.constant import FAB_CONFIG_FILE, NOOP_ACCOUNT_NAME, CliOutputFormat
-from flwr.common.date import isoformat8601_utc
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListNodesRequest,
@@ -41,6 +40,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
+from flwr.supercore.date import isoformat8601_utc
 from flwr.supercore.utils import humanize_duration
 
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
