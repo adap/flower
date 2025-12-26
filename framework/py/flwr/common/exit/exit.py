@@ -23,8 +23,8 @@ from logging import ERROR, INFO
 from typing import Any, NoReturn
 
 from flwr.common import EventType, event
-from flwr.common.version import package_version
 from flwr.supercore.constant import FORCE_EXIT_TIMEOUT_SECONDS
+from flwr.supercore.version import package_version
 
 from ..logger import log
 from .exit_code import EXIT_CODE_HELP

@@ -20,7 +20,7 @@ import re
 
 import requests
 
-from flwr.common.version import package_version as flwr_version
+from flwr.supercore.version import package_version as flwr_version
 
 from .constant import APP_ID_PATTERN, APP_VERSION_PATTERN
 
