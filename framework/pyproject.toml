@@ -182,7 +182,6 @@ patterns = ["*.py"]
 ignore_patterns = []
 
 [tool.mypy]
-plugins = ["numpy.typing.mypy_plugin"]
 ignore_missing_imports = true
 strict = true
 
