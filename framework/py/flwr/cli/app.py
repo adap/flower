@@ -17,7 +17,7 @@
 import typer
 from typer.main import get_command
 
-from flwr.common.version import package_version
+from flwr.supercore.version import package_version
 
 from .app_cmd import publish as app_publish
 from .app_cmd import review as app_review

@@ -23,7 +23,6 @@ from typing import Any, TypeVar, cast
 import pytest
 
 from flwr.common.constant import SUPERLINK_NODE_ID
-from flwr.common.date import now
 from flwr.common.message import make_message
 
 # pylint: disable=E0611
@@ -37,6 +36,7 @@ from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
 from flwr.proto.recorddict_pb2 import MetricRecord as ProtoMetricRecord
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 from flwr.proto.run_pb2 import Run as ProtoRun
+from flwr.supercore.date import now
 
 from ..app.error import Error
 from ..app.metadata import Metadata
