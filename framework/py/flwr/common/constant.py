@@ -184,19 +184,6 @@ PUBLIC_KEY_NOT_VALID = "The provided public key is not valid"
 NODE_NOT_FOUND_MESSAGE = "Node ID not found for account"
 
 
-class MessageType:
-    """Message type."""
-
-    TRAIN = "train"
-    EVALUATE = "evaluate"
-    QUERY = "query"
-    SYSTEM = "system"
-
-    def __new__(cls) -> MessageType:
-        """Prevent instantiation."""
-        raise TypeError(f"{cls.__name__} cannot be instantiated.")
-
-
 class MessageTypeLegacy:
     """Legacy message type."""
 

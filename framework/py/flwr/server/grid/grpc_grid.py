@@ -23,12 +23,12 @@ from typing import cast
 import grpc
 
 from flwr.app.error import Error
+from flwr.app.message_type import MessageType
 from flwr.common import Message, Metadata, RecordDict, now
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
     ErrorCode,
-    MessageType,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.inflatable import (

@@ -19,7 +19,9 @@ from __future__ import annotations
 
 from typing import cast
 
-from ..common.constant import MessageType, MessageTypeLegacy
+from flwr.app.message_type import MessageType
+
+from ..common.constant import MessageTypeLegacy
 
 
 class Metadata:  # pylint: disable=too-many-instance-attributes
