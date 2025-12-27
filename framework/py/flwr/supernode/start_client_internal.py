@@ -32,6 +32,7 @@ from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 from cryptography.hazmat.primitives.serialization.ssh import load_ssh_public_key
 from grpc import RpcError
 
+from flwr.app.user_config import UserConfig
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Error, Message, RecordDict
@@ -61,7 +62,7 @@ from flwr.common.inflatable_utils import (
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, _make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
-from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
+from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.address import parse_address

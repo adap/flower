@@ -25,6 +25,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
 from flwr.app.error import Error
+from flwr.app.user_config import UserConfig
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
@@ -43,7 +44,7 @@ from flwr.common.constant import (
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
+from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.compat.client.grpc_client.connection import grpc_connection
 from flwr.supercore.address import parse_address
 from flwr.supercore.object_store import ObjectStoreFactory
