@@ -31,7 +31,6 @@ import grpc
 import yaml
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
-from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
@@ -63,6 +62,7 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
+from flwr.supercore.address import parse_address
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls

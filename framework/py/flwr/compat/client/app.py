@@ -34,7 +34,6 @@ from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.client.typing import ClientFnExt
 from flwr.clientapp.client_app import ClientApp, LoadClientAppError
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
-from flwr.common.address import parse_address
 from flwr.common.constant import MAX_RETRY_DELAY, ErrorCode
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import log, warn_deprecated_feature
@@ -42,6 +41,7 @@ from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.compat.client.grpc_client.connection import grpc_connection
 from flwr.compat.common.constant import TRANSPORT_TYPE_GRPC_BIDI, TRANSPORT_TYPES_COMPAT
+from flwr.supercore.address import parse_address
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supernode.nodestate import NodeStateFactory
 
