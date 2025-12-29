@@ -18,7 +18,6 @@
 import socket
 from ipaddress import ip_address
 
-
 IPV6: int = 6
 
 
