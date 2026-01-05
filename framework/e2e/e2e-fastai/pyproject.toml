@@ -13,6 +13,7 @@ dependencies = [
     "torch>=2.1.0,<3.0.0",
     "spacy==3.8.7",
     "numpy<2.0.0",
+    "ipython>=8.0",
 ]
 
 [tool.hatch.build.targets.wheel]
