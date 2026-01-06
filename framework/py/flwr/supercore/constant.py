@@ -60,6 +60,9 @@ FORCE_EXIT_TIMEOUT_SECONDS = 5  # Used in `flwr_exit` function
 # Constants for message processing timing
 MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS = 3600
 
+# System message type
+SYSTEM_MESSAGE_TYPE = "system"
+
 
 class NodeStatus:
     """Event log writer types."""
