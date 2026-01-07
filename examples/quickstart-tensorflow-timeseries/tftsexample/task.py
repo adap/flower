@@ -15,10 +15,10 @@ def load_model():
     model = keras.Sequential(
         [
             keras.Input(shape=(12, 1)),
-            layers.LSTM(units=12, activation='relu', return_sequences=True),
+            layers.LSTM(units=12, activation='tanh', return_sequences=True),
             layers.Dropout(rate=0.005),
-            layers.LSTM(units=6, activation='relu'),
-            layers.Dense(units=1, activation="relu"),
+            layers.LSTM(units=6, activation='tanh'),
+            layers.Dense(units=1),
         ]
     )
     model.compile("adam", keras.losses.mean_squared_error, metrics=[keras.losses.mean_squared_error])
