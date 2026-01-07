@@ -12,32 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Public Flower App APIs."""
+"""MessageType constants."""
+
+from __future__ import annotations
 
 
-from flwr.common.context import Context
-from flwr.common.message import Message
-from flwr.common.record import (
-    Array,
-    ArrayRecord,
-    ConfigRecord,
-    MetricRecord,
-    RecordDict,
-)
+class MessageType:
+    """Message type."""
 
-from .error import Error
-from .message_type import MessageType
-from .metadata import Metadata
+    TRAIN = "train"
+    EVALUATE = "evaluate"
+    QUERY = "query"
 
-__all__ = [
-    "Array",
-    "ArrayRecord",
-    "ConfigRecord",
-    "Context",
-    "Error",
-    "Message",
-    "MessageType",
-    "Metadata",
-    "MetricRecord",
-    "RecordDict",
-]
+    def __new__(cls) -> MessageType:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")

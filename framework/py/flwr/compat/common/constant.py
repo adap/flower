@@ -12,32 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Public Flower App APIs."""
+"""Flower constants."""
 
-
-from flwr.common.context import Context
-from flwr.common.message import Message
-from flwr.common.record import (
-    Array,
-    ArrayRecord,
-    ConfigRecord,
-    MetricRecord,
-    RecordDict,
+from flwr.common.constant import (
+    TRANSPORT_TYPE_GRPC_RERE,
+    TRANSPORT_TYPE_REST,
+    TRANSPORT_TYPE_VCE,
 )
 
-from .error import Error
-from .message_type import MessageType
-from .metadata import Metadata
-
-__all__ = [
-    "Array",
-    "ArrayRecord",
-    "ConfigRecord",
-    "Context",
-    "Error",
-    "Message",
-    "MessageType",
-    "Metadata",
-    "MetricRecord",
-    "RecordDict",
+TRANSPORT_TYPE_GRPC_BIDI = "grpc-bidi"
+TRANSPORT_TYPES_COMPAT = [
+    TRANSPORT_TYPE_GRPC_BIDI,
+    TRANSPORT_TYPE_GRPC_RERE,
+    TRANSPORT_TYPE_REST,
+    TRANSPORT_TYPE_VCE,
 ]

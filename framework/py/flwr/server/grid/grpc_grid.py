@@ -28,7 +28,6 @@ from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
     ErrorCode,
-    MessageType,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.inflatable import (
@@ -69,6 +68,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesResponse,
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
+from flwr.supercore.constant import SYSTEM_MESSAGE_TYPE
 
 from .grid import Grid
 
@@ -341,7 +341,7 @@ class GrpcGrid(Grid):
                                 message_id="",
                                 src_node_id=self.node.node_id,
                                 dst_node_id=self.node.node_id,
-                                message_type=MessageType.SYSTEM,
+                                message_type=SYSTEM_MESSAGE_TYPE,
                                 group_id="",
                                 ttl=0,
                                 reply_to_message_id=msg_proto.metadata.reply_to_message_id,
