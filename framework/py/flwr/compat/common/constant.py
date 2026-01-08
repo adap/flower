@@ -1,4 +1,4 @@
-# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""MessageType constants."""
+"""Flower constants."""
 
-from __future__ import annotations
+from flwr.common.constant import (
+    TRANSPORT_TYPE_GRPC_RERE,
+    TRANSPORT_TYPE_REST,
+    TRANSPORT_TYPE_VCE,
+)
 
-
-class MessageType:
-    """Message type."""
-
-    TRAIN = "train"
-    EVALUATE = "evaluate"
-    QUERY = "query"
-
-    def __new__(cls) -> MessageType:
-        """Prevent instantiation."""
-        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+TRANSPORT_TYPE_GRPC_BIDI = "grpc-bidi"
+TRANSPORT_TYPES_COMPAT = [
+    TRANSPORT_TYPE_GRPC_BIDI,
+    TRANSPORT_TYPE_GRPC_RERE,
+    TRANSPORT_TYPE_REST,
+    TRANSPORT_TYPE_VCE,
+]

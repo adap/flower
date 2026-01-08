@@ -32,6 +32,7 @@ from flwr.common.typing import RunStatus
 # pylint: disable=E0611
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
+from flwr.supercore.constant import SYSTEM_MESSAGE_TYPE
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 
 # pylint: enable=E0611
@@ -233,7 +234,7 @@ def create_message_error_unavailable_ins_message(reply_to_message_id: str) -> Me
         dst_node_id=SUPERLINK_NODE_ID,
         reply_to_message_id=reply_to_message_id,
         group_id="",  # Unknown
-        message_type=MessageType.SYSTEM,
+        message_type=SYSTEM_MESSAGE_TYPE,
         created_at=now().timestamp(),
         ttl=0,
     )
