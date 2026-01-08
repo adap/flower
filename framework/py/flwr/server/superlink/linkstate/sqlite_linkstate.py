@@ -24,6 +24,7 @@ from datetime import datetime, timezone
 from logging import ERROR, WARNING
 from typing import Any, cast
 
+from flwr.app.user_config import UserConfig
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
@@ -39,7 +40,7 @@ from flwr.common.message import make_message
 from flwr.common.record import ConfigRecord
 from flwr.common.serde import recorddict_from_proto, recorddict_to_proto
 from flwr.common.serde_utils import error_from_proto, error_to_proto
-from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.common.typing import Run, RunStatus
 
 # pylint: disable=E0611
 from flwr.proto.error_pb2 import Error as ProtoError
