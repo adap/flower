@@ -23,7 +23,6 @@ from typing import cast
 import grpc
 
 from flwr.app.error import Error
-from flwr.app.message_type import MessageType
 from flwr.common import Message, Metadata, RecordDict, now
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,

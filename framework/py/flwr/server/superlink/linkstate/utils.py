@@ -17,7 +17,6 @@
 
 from os import urandom
 
-from flwr.app.message_type import MessageType
 from flwr.common import ConfigRecord, Context, Error, Message, Metadata, now, serde
 from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
