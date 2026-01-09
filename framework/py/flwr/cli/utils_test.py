@@ -20,8 +20,8 @@ import json
 import os
 import tempfile
 import unittest
-import unittest.mock
 from pathlib import Path
+from unittest.mock import patch
 
 from flwr.cli.utils import (
     build_pathspec,
@@ -172,7 +172,7 @@ class TestInitFlwrConfig(unittest.TestCase):
         # Prepare
         with tempfile.TemporaryDirectory() as tmp_dir:
             # Set FLWR_HOME to the temporary directory
-            with unittest.mock.patch.dict(os.environ, {FLWR_HOME: tmp_dir}):
+            with patch.dict(os.environ, {FLWR_HOME: tmp_dir}):
                 # Execute
                 init_flwr_config()
 
@@ -186,18 +186,17 @@ class TestInitFlwrConfig(unittest.TestCase):
 
     def test_init_flwr_config_does_not_overwrite(self) -> None:
         """Test that init_flwr_config does not overwrite existing config file."""
-        # Prepare
         with tempfile.TemporaryDirectory() as tmp_dir:
+            # Setup - create existing config
             config_path = Path(tmp_dir) / "config.toml"
-            existing_content = "existing_content"
-            config_path.write_text(existing_content, encoding="utf-8")
+            config_path.write_text("existing_content", encoding="utf-8")
 
-            # Set FLWR_HOME to the temporary directory
-            with unittest.mock.patch.dict(os.environ, {FLWR_HOME: tmp_dir}):
+            # Mock FLWR_HOME
+            with patch.dict(os.environ, {FLWR_HOME: tmp_dir}):
                 # Execute
                 init_flwr_config()
 
                 # Assert
                 self.assertEqual(
-                    config_path.read_text(encoding="utf-8"), existing_content
+                    config_path.read_text(encoding="utf-8"), "existing_content"
                 )
