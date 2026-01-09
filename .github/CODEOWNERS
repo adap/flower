@@ -50,7 +50,10 @@ README.md @jafermarq @tanertopal @danieljanes
 /framework/py/flwr/superlink/ @panh99 @tanertopal @danieljanes
 /framework/py/flwr/supernode/ @panh99 @tanertopal @danieljanes
 
-# Override for CLI
+# Override for `flower-` CLI
 /framework/py/flwr/supercore/cli/ @tanertopal @danieljanes
 /framework/py/flwr/superlink/cli/ @tanertopal @danieljanes
 /framework/py/flwr/supernode/cli/ @tanertopal @danieljanes
+
+# Flower `flwr` CLI
+/framework/py/flwr/cli/ @panh99 @tanertopal @danieljanes
