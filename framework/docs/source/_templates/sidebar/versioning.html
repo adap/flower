@@ -40,7 +40,8 @@ input[type='checkbox'] {
 }
 
 .toggle:checked + .lbl-toggle + .collapsible-content {
-  max-height: 100vh;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 .toggle:checked + .lbl-toggle::before {
@@ -54,6 +55,19 @@ input[type='checkbox'] {
 
 .content-inner {
   padding-bottom: 1rem;
+}
+
+.content-inner ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.content-inner li a {
+  display: block;
+  padding: 0.5rem 1rem 0.5rem 2.2rem;
+  text-decoration: none;
+  color: inherit;
 }
 </style>
 
@@ -86,8 +100,7 @@ function checkPageExistence(versionName, current_language, pagename) {
         {%- for item in versions %}
         <li>
           <a href="javascript:void(0);"
-             onclick="checkPageExistence('{{ item.name }}', '{{ current_language }}', '{{ pagename }}')"
-             style="text-decoration:none">
+             onclick="checkPageExistence('{{ item.name }}', '{{ current_language }}', '{{ pagename }}')">
              {{ item.name }}
           </a>
         </li>
