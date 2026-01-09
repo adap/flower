@@ -54,15 +54,15 @@ In this case there is only one federation named ``default``:
  Inspect a Federation
 **********************
 
-You can inspect a specific federation by using the ``flwr federation show`` command,
-another command provided by the |flower_cli_federation_link|_. With this command, you
-will be able to see the following information about a federation:
+You can inspect a specific federation by providing the name of the federation to the
+``flwr federation list`` command. With this command, you will be able to see the
+following information about a federation:
 
 - The members of the federation.
 - The SuperNodes registered with the federation and their status.
 - The runs executed via the federation.
 
-The ``flwr federation show`` command requires the name of the federation to inspect as
+The ``flwr federation list`` command requires the name of the federation to inspect as
 an argument. This can be specified as part of your ``pyproject.toml`` configuration. For
 example:
 
@@ -80,7 +80,7 @@ by running:
 
 .. code-block:: shell
 
-    $ flwr federation show . local-deployment
+    $ flwr federation list . local-deployment --federation default
 
 Then, assuming that there are two ``SuperNodes`` connected and that three runs have been
 submitted through the federation, a representative output would be similar to:
