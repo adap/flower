@@ -19,8 +19,8 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ConnectionConfig:
-    """Connection configuration for CLI commands."""
+class SuperLinkProfile:
+    """SuperLink profile configuration for CLI commands."""
 
     service: str
     address: str
