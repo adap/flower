@@ -14,6 +14,8 @@
 # ==============================================================================
 """Tests for the CLI."""
 
+from unittest.mock import patch
+
 from typer.testing import CliRunner
 
 from flwr.supercore.version import package_version
@@ -114,3 +116,31 @@ def test_invalid_command() -> None:
     result = runner.invoke(app, ["nonexistent-command"])
     assert result.exit_code != 0
     assert "No such command" in result.output
+
+
+def test_init_main_config_called() -> None:
+    """Test that init_main_config is called for various commands."""
+    # Get all registered commands
+    commands_to_test = [
+        [command.name or command.callback.__name__, "--help"]
+        for command in app.registered_commands
+    ]
+
+    # Get all registered groups (i.e. supernode, federation, app)
+    commands_to_test.extend(
+        [
+            [group.name or group.callback.__name__, "--help"]
+            for group in app.registered_groups
+        ]
+    )
+
+    # Add version flag
+    commands_to_test.append(["--version"])
+
+    with patch("flwr.cli.app.init_main_config") as mock_init:
+        for cmd in commands_to_test:
+            print("testing with command:", cmd)
+            if cmd[0]:  # Ensure command name is not None
+                runner.invoke(app, cmd)
+                mock_init.assert_called()
+                mock_init.reset_mock()
