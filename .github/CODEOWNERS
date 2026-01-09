@@ -1,59 +1,59 @@
 # Details: https://help.github.com/en/articles/about-code-owners
 
 # Default code owners
-* @tanertopal @danieljanes
+* @danieljanes @tanertopal
 
 # README.md
-README.md @jafermarq @tanertopal @danieljanes
+README.md @danieljanes @jafermarq @tanertopal
 
 # Flower Baselines
-/baselines @chongshenng @jafermarq @tanertopal @danieljanes
+/baselines @chongshenng @danieljanes @jafermarq @tanertopal
 
 # Flower Benchmarks
-/benchmarks @jafermarq @tanertopal @danieljanes
+/benchmarks @danieljanes @jafermarq @tanertopal
 
 # Flower Datasets
-/datasets @jafermarq @tanertopal @danieljanes
+/datasets @danieljanes @jafermarq @tanertopal
 
 # Flower Examples
-/examples @panh99 @chongshenng @jafermarq @tanertopal @danieljanes
+/examples @chongshenng @danieljanes @jafermarq @panh99 @tanertopal
 
 # Flower Intelligence
-/intelligence/dev @charlesbvll @tanertopal @danieljanes
-/intelligence/docs @charlesbvll @tanertopal @danieljanes
-/intelligence/ts @charlesbvll @tanertopal @danieljanes
+/intelligence/dev @charlesbvll @danieljanes @tanertopal
+/intelligence/docs @charlesbvll @danieljanes @tanertopal
+/intelligence/ts @charlesbvll @danieljanes @tanertopal
 
 # Flower Framework Docs
-/framework/docs @panh99 @tanertopal @danieljanes
+/framework/docs @danieljanes @panh99 @tanertopal
 
 # Flower Templates
-/framework/py/flwr/cli/new/templates @jafermarq @tanertopal @danieljanes
+/framework/py/flwr/cli/new/templates @danieljanes @jafermarq @tanertopal
 
 # Changelog
-/framework/docs/source/ref-changelog.md @jafermarq @tanertopal @danieljanes
+/framework/docs/source/ref-changelog.md @danieljanes @jafermarq @tanertopal
 
 # Translations
-/framework/docs/locales @charlesbvll @tanertopal @danieljanes
+/framework/docs/locales @charlesbvll @danieljanes @tanertopal
 
 # GitHub Actions and Workflows
-/.github/actions @Robert-Steiner @tanertopal @danieljanes
-/.github/workflows @Robert-Steiner @tanertopal @danieljanes
+/.github/actions @Robert-Steiner @danieljanes @tanertopal
+/.github/workflows @Robert-Steiner @danieljanes @tanertopal
 
 # Docker-related files
-**/*.Dockerfile @Robert-Steiner @Moep90 @tanertopal @danieljanes
-**/Dockerfile @Robert-Steiner @Moep90 @tanertopal @danieljanes
-/.devcontainer @Robert-Steiner @Moep90 @tanertopal @danieljanes
-/framework/docker @Robert-Steiner @Moep90 @tanertopal @danieljanes
+**/*.Dockerfile @Moep90 @Robert-Steiner @danieljanes @tanertopal
+**/Dockerfile @Moep90 @Robert-Steiner @danieljanes @tanertopal
+/.devcontainer @Moep90 @Robert-Steiner @danieljanes @tanertopal
+/framework/docker @Moep90 @Robert-Steiner @danieljanes @tanertopal
 
 # Flower Framework Infrastructure
-/framework/py/flwr/supercore/ @panh99 @tanertopal @danieljanes
-/framework/py/flwr/superlink/ @panh99 @tanertopal @danieljanes
-/framework/py/flwr/supernode/ @panh99 @tanertopal @danieljanes
+/framework/py/flwr/supercore/ @danieljanes @panh99 @tanertopal
+/framework/py/flwr/superlink/ @danieljanes @panh99 @tanertopal
+/framework/py/flwr/supernode/ @danieljanes @panh99 @tanertopal
 
 # Override for `flower-` CLI
-/framework/py/flwr/supercore/cli/ @tanertopal @danieljanes
-/framework/py/flwr/superlink/cli/ @tanertopal @danieljanes
-/framework/py/flwr/supernode/cli/ @tanertopal @danieljanes
+/framework/py/flwr/supercore/cli/ @danieljanes @tanertopal
+/framework/py/flwr/superlink/cli/ @danieljanes @tanertopal
+/framework/py/flwr/supernode/cli/ @danieljanes @tanertopal
 
 # Flower `flwr` CLI
 /framework/py/flwr/cli/ @danieljanes @jafermarq @panh99 @tanertopal
