@@ -48,7 +48,6 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
-from flwr.common.version import package_version as flwr_version
 from flwr.supercore.constant import (
     APP_ID_PATTERN,
     APP_VERSION_PATTERN,

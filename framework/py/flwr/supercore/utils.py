@@ -15,15 +15,14 @@
 """Utility functions for the infrastructure."""
 
 
-import os
-from pathlib import Path
-
-from flwr.common.constant import FLWR_DIR, FLWR_HOME
 import json
+import os
 import re
+from pathlib import Path
 
 import requests
 
+from flwr.common.constant import FLWR_DIR, FLWR_HOME
 from flwr.supercore.version import package_version as flwr_version
 
 from .constant import APP_ID_PATTERN, APP_VERSION_PATTERN
@@ -75,6 +74,8 @@ def get_flwr_home() -> Path:
     if flwr_home := os.getenv(FLWR_HOME):
         return Path(flwr_home)
     return Path.home() / FLWR_DIR
+
+
 def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
     """Parse app specification string into app ID and version.
 
