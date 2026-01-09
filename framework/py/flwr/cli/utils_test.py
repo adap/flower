@@ -20,11 +20,13 @@ import json
 import os
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 from flwr.cli.utils import (
     build_pathspec,
     get_sha256_hash,
+    init_main_config,
     load_gitignore_patterns,
     validate_credentials_content,
 )
@@ -32,8 +34,10 @@ from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
     FLWR_DIR,
+    FLWR_HOME,
     REFRESH_TOKEN_KEY,
 )
+from flwr.supercore.constant import DEFAULT_CONFIG_TOML
 
 
 class TestGetSHA256Hash(unittest.TestCase):
@@ -158,3 +162,41 @@ def test_load_gitignore_patterns_with_pathspec() -> None:
 
     # Should not match normal files
     assert spec.match_file("good.py") is False
+
+
+class TestInitMainConfig(unittest.TestCase):
+    """Test `init_main_config` function."""
+
+    def test_init_main_config_creates_file(self) -> None:
+        """Test that init_main_config creates the config file if it doesn't exist."""
+        # Prepare
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Set FLWR_HOME to the temporary directory
+            with unittest.mock.patch.dict(os.environ, {FLWR_HOME: tmp_dir}):
+                # Execute
+                init_main_config()
+
+                # Assert
+                config_path = Path(tmp_dir) / "config.toml"
+                self.assertTrue(config_path.exists())
+
+                self.assertEqual(
+                    config_path.read_text(encoding="utf-8"), DEFAULT_CONFIG_TOML
+                )
+
+    def test_init_main_config_does_not_overwrite(self) -> None:
+        """Test that init_main_config does not overwrite existing config file."""
+        # Prepare
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            config_path = Path(tmp_dir) / "config.toml"
+            existing_content = "existing_content"
+            config_path.write_text(existing_content, encoding="utf-8")
+
+            # Set FLWR_HOME to the temporary directory
+            with unittest.mock.patch.dict(os.environ, {FLWR_HOME: tmp_dir}):
+                init_main_config()
+
+                # Assert
+                self.assertEqual(
+                    config_path.read_text(encoding="utf-8"), existing_content
+                )

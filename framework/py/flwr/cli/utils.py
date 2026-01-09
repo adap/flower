@@ -17,6 +17,7 @@
 
 import hashlib
 import json
+import os
 import re
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
@@ -26,12 +27,16 @@ from typing import Any, cast
 import grpc
 import pathspec
 import typer
+from rich.console import Console, Group
+from rich.padding import Padding
+from rich.text import Text
 
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
     CREDENTIALS_DIR,
     FLWR_DIR,
+    FLWR_HOME,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
@@ -47,6 +52,7 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
+from flwr.supercore.constant import DEFAULT_CONFIG_TOML
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
@@ -620,3 +626,34 @@ def validate_credentials_content(creds_path: Path) -> str:
         raise typer.Exit(code=1)
 
     return creds[ACCESS_TOKEN_KEY]
+
+
+def init_main_config() -> None:
+    """Initialize the main configuration file."""
+    # Determine the FLWR_HOME directory
+    flwr_home_dir = Path(os.getenv(FLWR_HOME, Path.home() / FLWR_DIR))
+    flwr_home_dir.mkdir(parents=True, exist_ok=True)
+
+    config_path = flwr_home_dir / "config.toml"
+    if not config_path.exists():
+        config_path.write_text(DEFAULT_CONFIG_TOML, encoding="utf-8")
+
+        message = Group(
+            Text(
+                "----------------------------------------------------------------------",
+                style="bold yellow",
+            ),
+            Text("Welcome to Flower!", style="bold yellow"),
+            Text(""),
+            Text.from_markup(
+                f"Global configuration initialized: [bold]{config_path}[/]"
+            ),
+            Text("Available superlinks:"),
+            Padding("- 'supergrid'", (0, 0, 0, 2)),
+            Padding("- 'local-simulation' (default)", (0, 0, 0, 2)),
+            Text(
+                "----------------------------------------------------------------------",
+                style="bold yellow",
+            ),
+        )
+        Console().print(message)

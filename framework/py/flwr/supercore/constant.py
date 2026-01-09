@@ -75,3 +75,19 @@ class NodeStatus:
     def __new__(cls) -> NodeStatus:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+# The default configuration for the global config file
+DEFAULT_CONFIG_TOML = """[superlink]
+default = "local-simulation"
+
+[superlink.supergrid]
+address = "supergrid.flower.ai"
+enable-account-auth = true
+federation = "<federation-name>"
+
+[superlink.local-simulation]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 1
+options.backend.client-resources.num-gpus = 0
+"""
