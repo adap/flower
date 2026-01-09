@@ -27,6 +27,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
+from flwr.app.user_config import UserConfig
 from flwr.common import (
     DEFAULT_TTL,
     ConfigRecord,
@@ -45,7 +46,7 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.serde import message_from_proto, message_to_proto
-from flwr.common.typing import RunStatus, UserConfig
+from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
 from flwr.proto.message_pb2 import Message as ProtoMessage

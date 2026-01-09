@@ -12,35 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Public Flower App APIs."""
+"""UserConfig type definition."""
 
 
-from flwr.common.context import Context
-from flwr.common.message import Message
-from flwr.common.record import (
-    Array,
-    ArrayRecord,
-    ConfigRecord,
-    MetricRecord,
-    RecordDict,
-)
-
-from .error import Error
-from .message_type import MessageType
-from .metadata import Metadata
-from .user_config import UserConfig, UserConfigValue
-
-__all__ = [
-    "Array",
-    "ArrayRecord",
-    "ConfigRecord",
-    "Context",
-    "Error",
-    "Message",
-    "MessageType",
-    "Metadata",
-    "MetricRecord",
-    "RecordDict",
-    "UserConfig",
-    "UserConfigValue",
-]
+UserConfigValue = bool | float | int | str
+UserConfig = dict[str, UserConfigValue]

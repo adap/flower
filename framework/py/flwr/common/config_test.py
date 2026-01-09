@@ -24,7 +24,7 @@ from unittest.mock import patch
 
 import pytest
 
-from flwr.common.typing import UserConfig
+from flwr.app.user_config import UserConfig
 
 from .config import (
     flatten_dict,
