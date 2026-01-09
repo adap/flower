@@ -46,7 +46,7 @@ README.md @jafermarq @tanertopal @danieljanes
 /framework/docker @Robert-Steiner @Moep90 @tanertopal @danieljanes
 
 # Flower `flwr` CLI
-/framework/py/flwr/cli/ @danieljanes @jafermarq @panh99 @tanertopal
+/framework/py/flwr/cli/ @jafermarq @panh99 @tanertopal @danieljanes
 
 # Flower Framework Infrastructure
 /framework/py/flwr/supercore/ @panh99 @tanertopal @danieljanes
