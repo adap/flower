@@ -41,6 +41,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.constant import NOOP_FEDERATION
+from flwr.supercore.utils import humanize_duration
 
 from ..run_utils import RunRow, format_runs
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
@@ -262,7 +263,7 @@ def _to_runs_table(run_list: list[RunRow]) -> Table:
             f"[bold]{row.run_id}[/bold]",
             f"@{row.fab_id}=={row.fab_version}",
             f"[{status_style}]{row.status_text}[/{status_style}]",
-            row.elapsed,
+            f"{humanize_duration(row.elapsed)}",
         )
         table.add_row(*formatted_row)
 
@@ -298,7 +299,7 @@ def _to_json(
     for node in nodes:
         nodes_list.append(
             {
-                "node_id": node.node_id,
+                "node_id": f"{node.node_id}",
                 "owner": node.owner_name,
                 "status": node.status,
             }
@@ -307,7 +308,7 @@ def _to_json(
     for run in runs:
         runs_list.append(
             {
-                "run_id": run.run_id,
+                "run_id": f"{run.run_id}",
                 "app": f"@{run.fab_id}=={run.fab_version}",
                 "status": run.status_text,
                 "elapsed": run.elapsed,

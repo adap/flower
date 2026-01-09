@@ -136,6 +136,9 @@ def register_messages_into_state(
             ),
             flwr_aid="user123",
             federation="mock-fed",
+            bytes_sent=0,
+            bytes_recv=0,
+            clientapp_runtime=0.0,
         ),
     )
     # Artificially add Messages to state so they can be processed

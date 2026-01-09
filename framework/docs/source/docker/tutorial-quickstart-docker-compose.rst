@@ -37,18 +37,18 @@ Before you start, make sure that:
                    && mv _tmp/framework/docker/complete . \
                    && rm -rf _tmp && cd complete
 
-2. Create a new Flower project (PyTorch):
+2. Create a new Flower app (PyTorch):
 
    .. code-block:: bash
 
-       $ flwr new quickstart-compose --framework PyTorch --username flower
+       $ flwr new @flwrlabs/quickstart-pytorch
 
 3. Export the path of the newly created project. The path should be relative to the
    location of the Docker Compose files:
 
    .. code-block:: bash
 
-       $ export PROJECT_DIR=quickstart-compose
+       $ export PROJECT_DIR=quickstart-pytorch
 
    Setting the ``PROJECT_DIR`` helps Docker Compose locate the ``pyproject.toml`` file,
    allowing it to install dependencies in the ``ServerApp`` and ``ClientApp`` images
@@ -91,10 +91,10 @@ quickstart example.
 To ensure the ``flwr`` CLI connects to the SuperLink, you need to specify the SuperLink
 addresses in the ``pyproject.toml`` file.
 
-1. Add the following lines to the ``quickstart-compose/pyproject.toml``:
+1. Add the following lines to the ``quickstart-pytorch/pyproject.toml``:
 
    .. code-block:: toml
-       :caption: quickstart-compose/pyproject.toml
+       :caption: quickstart-pytorch/pyproject.toml
 
        [tool.flwr.federations.local-deployment]
        address = "127.0.0.1:9093"
@@ -105,7 +105,7 @@ addresses in the ``pyproject.toml`` file.
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose local-deployment --stream
+       $ flwr run quickstart-pytorch local-deployment --stream
 
 ********************************
  Step 4: Update the Application
@@ -113,12 +113,11 @@ addresses in the ``pyproject.toml`` file.
 
 In the next step, change the application code.
 
-1. For example, go to the ``task.py`` file in the
-   ``quickstart-compose/quickstart_compose/`` directory and add a ``print`` call in the
-   ``get_weights`` function:
+1. For example, go to the ``task.py`` file in the ``quickstart-pytorch/pytorchexample/``
+   directory and add a ``print`` call in the ``get_weights`` function:
 
    .. code-block:: python
-       :caption: quickstart-compose/quickstart_compose/task.py
+       :caption: quickstart-pytorch/pytorchexample/task.py
 
        # ...
        def get_weights(net):
@@ -147,7 +146,7 @@ In the next step, change the application code.
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose local-deployment --stream
+       $ flwr run quickstart-pytorch local-deployment --stream
 
    In the ``ServerApp`` logs, you should find the ``Get weights`` line:
 
@@ -157,7 +156,7 @@ In the next step, change the application code.
        INFO :      Starting logstream for run_id `10386255862566726253`
        INFO :      Starting Flower ServerApp
        WARNING :   Option `--insecure` was set. Starting insecure HTTP channel to superlink:9091.
-       🎊 Successfully installed quickstart-compose to /app/.flwr/apps/flower.quickstart-compose.1.0.0.35361a47.
+       🎊 Successfully installed quickstart-pytorch to /app/.flwr/apps/flower.quickstart-pytorch.1.0.0.35361a47.
        Get weights
        INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
 
@@ -192,11 +191,11 @@ service, ensuring that it maintains its state even after a restart.
        * ``--build``: Rebuild the images for each service if they don't already exist.
        * ``-d``: Detach the containers from the terminal and run them in the background.
 
-2. Rerun the ``quickstart-compose`` project:
+2. Rerun the ``quickstart-pytorch`` project:
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose local-deployment --stream
+       $ flwr run quickstart-pytorch local-deployment --stream
 
 3. Check the content of the ``state`` directory:
 
@@ -232,10 +231,10 @@ service, ensuring that it maintains its state even after a restart.
 
        $ docker compose -f certs.yml run --rm --build gen-certs
 
-2. Add the following lines to the ``quickstart-compose/pyproject.toml``:
+2. Add the following lines to the ``quickstart-pytorch/pyproject.toml``:
 
    .. code-block:: toml
-       :caption: quickstart-compose/pyproject.toml
+       :caption: quickstart-pytorch/pyproject.toml
 
        [tool.flwr.federations.local-deployment-tls]
        address = "127.0.0.1:9093"
@@ -247,11 +246,11 @@ service, ensuring that it maintains its state even after a restart.
 
        $ docker compose -f compose.yml -f with-tls.yml up --build -d
 
-4. Rerun the ``quickstart-compose`` project:
+4. Rerun the ``quickstart-pytorch`` project:
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose local-deployment-tls --stream
+       $ flwr run quickstart-pytorch local-deployment-tls --stream
 
 *********************************************
  Step 7: Add another SuperNode and ClientApp
@@ -382,11 +381,11 @@ To run Flower with persisted SuperLink state and enabled TLS, a slight change in
 
        $ docker compose -f compose.yml -f with-tls.yml -f with-state.yml up --build -d
 
-3. Rerun the ``quickstart-compose`` project:
+3. Rerun the ``quickstart-pytorch`` project:
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose local-deployment-tls --stream
+       $ flwr run quickstart-pytorch local-deployment-tls --stream
 
 **************************************
  Step 9: Merge Multiple Compose Files

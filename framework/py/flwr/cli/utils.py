@@ -25,7 +25,6 @@ from typing import Any, cast
 
 import grpc
 import pathspec
-import requests
 import typer
 import yaml
 
@@ -553,94 +552,6 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
             )
             raise typer.Exit(code=1) from None
         raise
-
-
-def request_download_link(
-    app_id: str, app_version: str | None, in_url: str, out_url: str
-) -> str:
-    """Request a download link for the given app from the Flower platform API.
-
-    Parameters
-    ----------
-    app_id : str
-        The application identifier.
-    app_version : str | None
-        The application version, or None for latest.
-    in_url : str
-        The API endpoint URL.
-    out_url : str
-        The key name for the download URL in the response.
-
-    Returns
-    -------
-    str
-        The download URL for the application.
-
-    Raises
-    ------
-    typer.Exit
-        If connection fails, app not found, or API request fails.
-    """
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
-    body = {
-        "app_id": app_id,  # send raw string of app_id
-        "app_version": app_version,
-        "flwr_version": flwr_version,
-    }
-    try:
-        resp = requests.post(in_url, headers=headers, data=json.dumps(body), timeout=20)
-    except requests.RequestException as e:
-        typer.secho(
-            f"Unable to connect to Platform API: {e}",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from e
-
-    if resp.status_code == 404:
-        error_message = resp.json()["detail"]
-        if isinstance(error_message, dict):
-            available_app_versions = error_message["available_app_versions"]
-            available_versions_str = (
-                ", ".join(map(str, available_app_versions))
-                if available_app_versions
-                else "None"
-            )
-            typer.secho(
-                f"{app_id}=={app_version} not found in Platform API. "
-                f"Available app versions for {app_id}: {available_versions_str}",
-                fg=typer.colors.RED,
-                err=True,
-            )
-        else:
-            typer.secho(
-                f"{app_id} not found in Platform API.",
-                fg=typer.colors.RED,
-                err=True,
-            )
-        raise typer.Exit(code=1)
-
-    if not resp.ok:
-        typer.secho(
-            f"Platform API request failed with "
-            f"status {resp.status_code}. Details: {resp.text}",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
-
-    data = resp.json()
-    if out_url not in data:
-        typer.secho(
-            "Invalid response from Platform API",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
-    return str(data[out_url])
 
 
 def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:

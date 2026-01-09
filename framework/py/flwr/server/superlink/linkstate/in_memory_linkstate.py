@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from logging import ERROR, WARNING
 
+from flwr.app.user_config import UserConfig
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
@@ -35,7 +36,7 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.record import ConfigRecord
-from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
@@ -576,6 +577,9 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         ),
                         flwr_aid=flwr_aid if flwr_aid else "",
                         federation=federation,
+                        bytes_sent=0,
+                        bytes_recv=0,
+                        clientapp_runtime=0.0,
                     ),
                 )
                 self.run_ids[run_id] = run_record
@@ -771,3 +775,34 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             index = bisect_right(run.logs, (after_timestamp, ""))
             latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
             return "".join(log for _, log in run.logs[index:]), latest_timestamp
+
+    def store_traffic(self, run_id: int, *, bytes_sent: int, bytes_recv: int) -> None:
+        """Store traffic data for the specified `run_id`."""
+        # Validate non-negative values
+        if bytes_sent < 0 or bytes_recv < 0:
+            raise ValueError(
+                f"Negative traffic values for run {run_id}: "
+                f"bytes_sent={bytes_sent}, bytes_recv={bytes_recv}"
+            )
+
+        if bytes_sent == 0 and bytes_recv == 0:
+            raise ValueError(
+                f"Both bytes_sent and bytes_recv cannot be zero for run {run_id}"
+            )
+
+        with self.lock:
+            if run_id not in self.run_ids:
+                raise ValueError(f"Run {run_id} not found")
+            run_record = self.run_ids[run_id]
+
+        with run_record.lock:
+            run = run_record.run
+            run.bytes_sent += bytes_sent
+            run.bytes_recv += bytes_recv
+
+    def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
+        """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
+        with self.lock:
+            if run_id not in self.run_ids:
+                raise ValueError(f"Run {run_id} not found")
+            self.run_ids[run_id].run.clientapp_runtime += runtime

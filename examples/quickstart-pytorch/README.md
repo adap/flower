@@ -10,15 +10,18 @@ This introductory example to Flower uses PyTorch, but deep knowledge of PyTorch 
 
 ## Set up the project
 
-### Clone the project
+### Fetch the app
 
-Start by cloning the example project:
+Install Flower:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git _tmp \
-        && mv _tmp/examples/quickstart-pytorch . \
-        && rm -rf _tmp \
-        && cd quickstart-pytorch
+pip install flwr
+```
+
+Fetch the app:
+
+```shell
+flwr new @flwrlabs/quickstart-pytorch
 ```
 
 This will create a new directory called `quickstart-pytorch` with the following structure:

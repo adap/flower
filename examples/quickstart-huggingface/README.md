@@ -8,18 +8,22 @@ framework: [transformers]
 
 This introductory example to using [🤗Transformers](https://huggingface.co/docs/transformers/en/index) with Flower. The training script closely follows the [HuggingFace course](https://huggingface.co/course/chapter3?fw=pt), so you are encouraged to check that out for a detailed explanation of the transformer pipeline.
 
-In this example, we will federated the training of a [BERT-tiny](https://huggingface.co/prajjwal1/bert-tiny) modle on the [IMDB](https://huggingface.co/datasets/stanfordnlp/imdb) dataset. The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/). This example runs best when a GPU is available.
+In this example, we will federated the training of a [BERT-tiny](https://huggingface.co/prajjwal1/bert-tiny) model on the [IMDB](https://huggingface.co/datasets/stanfordnlp/imdb) dataset. The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/). This example runs best when a GPU is available.
 
 ## Set up the project
 
-### Clone the project
+### Fetch the app
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+Install Flower:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git _tmp \
-		&& mv _tmp/examples/quickstart-huggingface . \
-		&& rm -rf _tmp && cd quickstart-huggingface
+pip install flwr
+```
+
+Fetch the app:
+
+```shell
+flwr new @flwrlabs/quickstart-huggingface
 ```
 
 This will create a new directory called `quickstart-huggingface` containing the following files:

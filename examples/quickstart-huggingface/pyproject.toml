@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "huggingface_example"
+name = "quickstart-huggingface"
 version = "1.0.0"
 description = "Federated Learning with Hugginface Transformers and Flower (Quickstart Example)"
 license = "Apache-2.0"
@@ -12,7 +12,7 @@ authors = [
     { name = "Kaushik Amar Das", email = "kaushik.das@iiitg.ac.in" },
 ]
 dependencies = [
-    "flwr[simulation]>=1.24.0",
+    "flwr[simulation]>=1.25.0",
     "flwr-datasets>=0.5.0",
     "torch==2.8.0",
     "transformers>=4.30.0,<5.0",

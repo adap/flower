@@ -29,13 +29,14 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 from flwr.common import now
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import FAB_CONFIG_FILE
-from flwr.common.version import package_version as flwr_version
 from flwr.supercore.constant import PLATFORM_API_URL
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_message_to_sign,
     load_private_key,
     sign_message,
 )
+from flwr.supercore.utils import parse_app_spec, request_download_link
+from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
 from ..config_utils import (
@@ -45,7 +46,7 @@ from ..config_utils import (
 )
 from ..constant import FEDERATION_CONFIG_HELP_MESSAGE
 from ..install import install_from_fab
-from ..utils import load_cli_auth_plugin, parse_app_spec, request_download_link
+from ..utils import load_cli_auth_plugin
 
 TRY_AGAIN_MESSAGE = "Please try again or press CTRL+C to abort.\n"
 
@@ -104,12 +105,21 @@ def review(
     token = auth_plugin.access_token
 
     # Validate app version and ID format
-    app_id, app_version = parse_app_spec(app_spec)
+    try:
+        app_id, app_version = parse_app_spec(app_spec)
+    except ValueError as e:
+        typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1) from e
 
     # Download FAB
     typer.secho("Downloading FAB... ", fg=typer.colors.BLUE)
     url = f"{PLATFORM_API_URL}/hub/fetch-fab"
-    presigned_url = request_download_link(app_id, app_version, url, "fab_url")
+    try:
+        presigned_url, _ = request_download_link(app_id, app_version, url, "fab_url")
+    except ValueError as e:
+        typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1) from e
+
     fab_bytes = _download_fab(presigned_url)
 
     # Unpack FAB
