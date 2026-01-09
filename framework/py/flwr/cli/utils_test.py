@@ -26,7 +26,7 @@ from pathlib import Path
 from flwr.cli.utils import (
     build_pathspec,
     get_sha256_hash,
-    init_main_config,
+    init_flwr_config,
     load_gitignore_patterns,
     validate_credentials_content,
 )
@@ -164,17 +164,17 @@ def test_load_gitignore_patterns_with_pathspec() -> None:
     assert spec.match_file("good.py") is False
 
 
-class TestInitMainConfig(unittest.TestCase):
-    """Test `init_main_config` function."""
+class TestInitFlwrConfig(unittest.TestCase):
+    """Test `init_flwr_config` function."""
 
-    def test_init_main_config_creates_file(self) -> None:
-        """Test that init_main_config creates the config file if it doesn't exist."""
+    def test_init_flwr_config_creates_file(self) -> None:
+        """Test that init_flwr_config creates the config file if it doesn't exist."""
         # Prepare
         with tempfile.TemporaryDirectory() as tmp_dir:
             # Set FLWR_HOME to the temporary directory
             with unittest.mock.patch.dict(os.environ, {FLWR_HOME: tmp_dir}):
                 # Execute
-                init_main_config()
+                init_flwr_config()
 
                 # Assert
                 config_path = Path(tmp_dir) / "config.toml"
@@ -184,8 +184,8 @@ class TestInitMainConfig(unittest.TestCase):
                     config_path.read_text(encoding="utf-8"), DEFAULT_CONFIG_TOML
                 )
 
-    def test_init_main_config_does_not_overwrite(self) -> None:
-        """Test that init_main_config does not overwrite existing config file."""
+    def test_init_flwr_config_does_not_overwrite(self) -> None:
+        """Test that init_flwr_config does not overwrite existing config file."""
         # Prepare
         with tempfile.TemporaryDirectory() as tmp_dir:
             config_path = Path(tmp_dir) / "config.toml"
@@ -194,7 +194,8 @@ class TestInitMainConfig(unittest.TestCase):
 
             # Set FLWR_HOME to the temporary directory
             with unittest.mock.patch.dict(os.environ, {FLWR_HOME: tmp_dir}):
-                init_main_config()
+                # Execute
+                init_flwr_config()
 
                 # Assert
                 self.assertEqual(

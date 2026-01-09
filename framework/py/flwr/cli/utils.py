@@ -628,8 +628,8 @@ def validate_credentials_content(creds_path: Path) -> str:
     return creds[ACCESS_TOKEN_KEY]
 
 
-def init_main_config() -> None:
-    """Initialize the main configuration file."""
+def init_flwr_config() -> None:
+    """Initialize the Flower configuration file."""
     # Determine the FLWR_HOME directory
     flwr_home_dir = Path(os.getenv(FLWR_HOME, Path.home() / FLWR_DIR))
     flwr_home_dir.mkdir(parents=True, exist_ok=True)
@@ -646,7 +646,7 @@ def init_main_config() -> None:
             Text("Welcome to Flower!", style="bold yellow"),
             Text(""),
             Text.from_markup(
-                f"Global configuration initialized: [bold]{config_path}[/]"
+                f"Flower configuration initialized: [bold]{config_path}[/]"
             ),
             Text("Available superlinks:"),
             Padding("- 'supergrid'", (0, 0, 0, 2)),

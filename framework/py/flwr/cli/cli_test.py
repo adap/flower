@@ -118,8 +118,8 @@ def test_invalid_command() -> None:
     assert "No such command" in result.output
 
 
-def test_init_main_config_called() -> None:
-    """Test that init_main_config is called for various commands."""
+def test_init_flwr_config_called() -> None:
+    """Test that init_flwr_config is called for various commands."""
     # Get all registered commands
     commands_to_test = [
         [command.callback.__name__, "--help"]
@@ -139,7 +139,7 @@ def test_init_main_config_called() -> None:
     # Add version flag
     commands_to_test.append(["--version"])
 
-    with patch("flwr.cli.app.init_main_config") as mock_init:
+    with patch("flwr.cli.app.init_flwr_config") as mock_init:
         for cmd in commands_to_test:
             if cmd[0]:  # Ensure command name is not None
                 runner.invoke(app, cmd)
