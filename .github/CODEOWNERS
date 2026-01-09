@@ -56,4 +56,4 @@ README.md @jafermarq @tanertopal @danieljanes
 /framework/py/flwr/supernode/cli/ @tanertopal @danieljanes
 
 # Flower `flwr` CLI
-/framework/py/flwr/cli/ @panh99 @tanertopal @danieljanes
+/framework/py/flwr/cli/ @danieljanes @jafermarq @panh99 @tanertopal
