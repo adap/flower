@@ -25,8 +25,8 @@ from typing import Any, cast
 
 import grpc
 import pathspec
+import tomli
 import typer
-import yaml
 
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
@@ -51,10 +51,10 @@ from flwr.common.grpc import (
 from flwr.supercore.constant import (
     APP_ID_PATTERN,
     APP_VERSION_PATTERN,
-    CONNECTION_CONFIG_FILE,
-    ConnectionConfigYamlKey,
+    FLOWER_CONFIG_FILE,
+    SuperlinkProfileTomlKey,
 )
-from flwr.supercore.typing import ConnectionConfig
+from flwr.supercore.typing import SuperLinkProfile
 from flwr.supercore.utils import get_flwr_home
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
@@ -677,40 +677,38 @@ def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
     return app_id, app_version
 
 
-def parse_connection_config(
-    conn_dict: dict[str, Any], service: str
-) -> ConnectionConfig:
-    """Parse connection configuration from a YAML dictionary.
+def parse_superlink_profile(conn_dict: dict[str, Any], name: str) -> SuperLinkProfile:
+    """Parse SuperLink profile configuration from a TOML dictionary.
 
     Parameters
     ----------
     conn_dict : dict[str, Any]
-        The YAML configuration dictionary for the connection.
-    service : str
-        The name of the service.
+        The TOML configuration dictionary for the connection.
+    name : str
+        The name of the profile.
 
     Returns
     -------
-    ConnectionConfig
-        The parsed connection configuration.
+    SuperLinkProfile
+        The parsed SuperLink profile configuration.
     """
     # Check required fields
-    address = conn_dict.get(ConnectionConfigYamlKey.ADDRESS)
-    root_certificates = conn_dict.get(ConnectionConfigYamlKey.ROOT_CERTIFICATES)
-    insecure = conn_dict.get(ConnectionConfigYamlKey.INSECURE)
-    enable_account_auth = conn_dict.get(ConnectionConfigYamlKey.ENABLE_ACCOUNT_AUTH)
+    address = conn_dict.get(SuperlinkProfileTomlKey.ADDRESS)
+    root_certificates = conn_dict.get(SuperlinkProfileTomlKey.ROOT_CERTIFICATES)
+    insecure = conn_dict.get(SuperlinkProfileTomlKey.INSECURE)
+    enable_account_auth = conn_dict.get(SuperlinkProfileTomlKey.ENABLE_ACCOUNT_AUTH)
     if not (
         isinstance(address, str)
-        and ConnectionConfigYamlKey.ROOT_CERTIFICATES in conn_dict
+        # root-certificates is optional in TOML (can be missing)
         and isinstance(root_certificates, (str, type(None)))
         and isinstance(insecure, bool)
         and isinstance(enable_account_auth, bool)
     ):
-        raise ValueError("Invalid connection configuration format.")
+        raise ValueError("Invalid SuperLink profile format.")
 
-    # Build and return ConnectionConfig
-    return ConnectionConfig(
-        service=service,
+    # Build and return SuperLinkProfile
+    return SuperLinkProfile(
+        name=name,
         address=address,
         root_certificates=root_certificates,
         insecure=insecure,
@@ -718,35 +716,71 @@ def parse_connection_config(
     )
 
 
-def read_global_connection_config() -> ConnectionConfig | None:
-    """Read global connection configuration.
+def read_superlink_profile(
+    profile_name: str | None = None,
+) -> SuperLinkProfile | None:
+    """Read a SuperLink profile from the Flower configuration file.
+
+    Parameters
+    ----------
+    profile_name : str | None
+        The name of the SuperLink profile to load. If None, the default profile
+        will be loaded.
 
     Returns
     -------
-    ConnectionConfig | None
-        The global connection configuration, or None if not found.
+    SuperLinkProfile | None
+        The SuperLink profile, or None if the config file is missing or the
+        requested profile (or default) cannot be found.
 
     Raises
     ------
     typer.Exit
-        Raised if the configuration file is corrupted.
+        Raised if the configuration file is corrupted, or if the requested
+        profile (or default) cannot be found.
     """
-    config_path = get_flwr_home() / CONNECTION_CONFIG_FILE
+    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
     if not config_path.exists():
         return None
 
     try:
-        with config_path.open("r", encoding="utf-8") as file:
-            yaml_dict = yaml.safe_load(file)
-        if not isinstance(yaml_dict, dict):
-            raise ValueError("Invalid YAML format.")
-        current_conn = yaml_dict[ConnectionConfigYamlKey.CURRENT_CONNECTION]
-        conns = yaml_dict[ConnectionConfigYamlKey.CONNECTIONS]
-        conn_dict = conns[current_conn]
-        return parse_connection_config(conn_dict, service=current_conn)
-    except (yaml.YAMLError, KeyError, ValueError) as err:
+        with config_path.open("rb") as file:
+            toml_dict = tomli.load(file)
+
+        superlink_config = toml_dict.get(SuperlinkProfileTomlKey.SUPERLINK, {})
+
+        # Load the default SuperLink profile when not provided
+        if profile_name is None:
+            profile_name = superlink_config.get(SuperlinkProfileTomlKey.DEFAULT)
+
+        # Exit when no profile name is available
+        if profile_name is None:
+            typer.secho(
+                "❌ No SuperLink profile set. A SuperLink profile needs to be "
+                "provided or one must be set as default in the Flower "
+                f"configuration file ({config_path}). Specify a default SuperLink "
+                "profile by adding: \n\n[superlink]\ndefault = 'profile_name'\n\n"
+                f"to the Flower configuration file ({config_path}).",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(code=1)
+
+        # Try to find the profile in the superlink dict
+        profile_config = superlink_config.get(profile_name)
+
+        if not profile_config:
+            error_msg = f"❌ {'Default ' if profile_name else ''} SuperLink profile "
+            error_msg += f"'{profile_name}' not found in Flower Config ({config_path})"
+
+            typer.secho(error_msg, fg=typer.colors.RED, err=True)
+            raise typer.Exit(code=1)
+
+        return parse_superlink_profile(profile_config, name=profile_name)
+
+    except (tomli.TOMLDecodeError, KeyError, ValueError) as err:
         typer.secho(
-            f"❌ Global connection configuration is corrupted: {err}",
+            f"❌ SuperLink profile is corrupted: {err}",
             fg=typer.colors.RED,
             err=True,
         )

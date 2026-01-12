@@ -78,14 +78,14 @@ class NodeStatus:
 
 
 # CLI connection configuration file name
-CONNECTION_CONFIG_FILE = "config.yml"
+FLOWER_CONFIG_FILE = "config.toml"
 
 
-class ConnectionConfigYamlKey:
-    """YAML keys for connection configuration."""
+class SuperlinkProfileTomlKey:
+    """TOML keys for SuperLink profile configuration."""
 
-    CURRENT_CONNECTION = "current-connection"
-    CONNECTIONS = "connections"
+    SUPERLINK = "superlink"
+    DEFAULT = "default"
     ADDRESS = "address"
     ROOT_CERTIFICATES = "root-certificates"
     INSECURE = "insecure"

@@ -19,10 +19,10 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ConnectionConfig:
-    """Connection configuration for CLI commands."""
+class SuperLinkProfile:
+    """SuperLink profile configuration for CLI commands."""
 
-    service: str
+    name: str
     address: str
     root_certificates: str | None
     insecure: bool
