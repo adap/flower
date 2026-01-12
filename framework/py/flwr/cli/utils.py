@@ -678,7 +678,7 @@ def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
 
 
 def parse_superlink_profile(
-    conn_dict: dict[str, Any], service: str
+    conn_dict: dict[str, Any], name: str
 ) -> SuperLinkProfile:
     """Parse SuperLink profile configuration from a TOML dictionary.
 
@@ -686,8 +686,8 @@ def parse_superlink_profile(
     ----------
     conn_dict : dict[str, Any]
         The TOML configuration dictionary for the connection.
-    service : str
-        The name of the service.
+    name : str
+        The name of the profile.
 
     Returns
     -------
@@ -710,7 +710,7 @@ def parse_superlink_profile(
 
     # Build and return SuperLinkProfile
     return SuperLinkProfile(
-        service=service,
+        name=name,
         address=address,
         root_certificates=root_certificates,
         insecure=insecure,
@@ -778,7 +778,7 @@ def read_superlink_profile(
             typer.secho(error_msg, fg=typer.colors.RED, err=True)
             raise typer.Exit(code=1)
 
-        return parse_superlink_profile(profile_config, service=profile_name)
+        return parse_superlink_profile(profile_config, name=profile_name)
 
     except (tomli.TOMLDecodeError, KeyError, ValueError) as err:
         typer.secho(

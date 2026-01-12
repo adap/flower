@@ -201,13 +201,13 @@ class TestSuperLinkProfile(unittest.TestCase):
             SuperlinkProfileTomlKey.INSECURE: False,
             SuperlinkProfileTomlKey.ENABLE_ACCOUNT_AUTH: True,
         }
-        service = "test_service"
+        name = "test_service"
 
         # Execute
-        config = parse_superlink_profile(conn_dict, service)
+        config = parse_superlink_profile(conn_dict, name)
 
         # Assert
-        self.assertEqual(config.service, service)
+        self.assertEqual(config.name, name)
         self.assertEqual(config.address, "127.0.0.1:8080")
         self.assertEqual(config.root_certificates, "root_cert.crt")
         self.assertFalse(config.insecure)
@@ -219,10 +219,10 @@ class TestSuperLinkProfile(unittest.TestCase):
         conn_dict = {
             SuperlinkProfileTomlKey.ADDRESS: "127.0.0.1:8080",
         }
-        service = "test_service"
+        name = "test_service"
 
         with self.assertRaises(ValueError):
-            parse_superlink_profile(conn_dict, service)
+            parse_superlink_profile(conn_dict, name)
 
     @patch("flwr.cli.utils.get_flwr_home")
     def test_read_superlink_profile_defaults(
@@ -258,7 +258,7 @@ class TestSuperLinkProfile(unittest.TestCase):
 
             # Assert
             assert config is not None
-            self.assertEqual(config.service, "mock-service-2")
+            self.assertEqual(config.name, "mock-service-2")
             self.assertEqual(config.address, "losthost:9093")
 
     @patch("flwr.cli.utils.get_flwr_home")
@@ -295,7 +295,7 @@ class TestSuperLinkProfile(unittest.TestCase):
 
             # Assert
             assert config is not None
-            self.assertEqual(config.service, "mock-service")
+            self.assertEqual(config.name, "mock-service")
             self.assertEqual(config.address, "losthost:1234")
 
     @patch("flwr.cli.utils.get_flwr_home")
