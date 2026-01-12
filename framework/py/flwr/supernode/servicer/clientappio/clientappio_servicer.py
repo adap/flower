@@ -251,16 +251,18 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             )
             raise RuntimeError("This line should never be reached.")
 
-        # Store Message object to descendants mapping and preregister objects
-        objects_to_push: set[str] = set()
-        for object_tree in request.message_object_trees:
-            objects_to_push |= set(store.preregister(run_id, object_tree))
-        # Save the message to the state
-        state.store_message(message_from_proto(request.messages_list[0]))
         # Record message processing end time
         state.record_message_processing_end(
             message_id=request.messages_list[0].metadata.reply_to_message_id
         )
+
+        # Store Message object to descendants mapping and preregister objects
+        objects_to_push: set[str] = set()
+        for object_tree in request.message_object_trees:
+            objects_to_push |= set(store.preregister(run_id, object_tree))
+
+        # Save the message to the state
+        state.store_message(message_from_proto(request.messages_list[0]))
         return PushAppMessagesResponse(objects_to_push=objects_to_push)
 
     def SendAppHeartbeat(
