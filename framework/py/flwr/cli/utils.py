@@ -732,7 +732,7 @@ def read_superlink_profile(
     Returns
     -------
     SuperLinkProfile | None
-        The SuperLink profile, or None if the config file is missing or the 
+        The SuperLink profile, or None if the config file is missing or the
         requested profile (or default) cannot be found.
 
     Raises
