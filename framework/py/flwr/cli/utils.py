@@ -718,10 +718,10 @@ def parse_superlink_profile(
     )
 
 
-def read_current_superlink_profile(
+def read_superlink_profile(
     superlink: str | None = None,
 ) -> SuperLinkProfile | None:
-    """Read the current SuperLink profile.
+    """Read a SuperLink profile from the Flower configuration file.
 
     Parameters
     ----------
@@ -732,7 +732,8 @@ def read_current_superlink_profile(
     Returns
     -------
     SuperLinkProfile | None
-        The SuperLink profile, or None if the config file is missing.
+        The SuperLink profile, or None if the config file is missing or the 
+        requested profile (or default) cannot be found.
 
     Raises
     ------

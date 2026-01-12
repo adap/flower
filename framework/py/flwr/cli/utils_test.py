@@ -40,7 +40,7 @@ from .utils import (
     load_gitignore_patterns,
     parse_app_spec,
     parse_superlink_profile,
-    read_current_superlink_profile,
+    read_superlink_profile,
     validate_credentials_content,
 )
 
@@ -225,10 +225,10 @@ class TestSuperLinkProfile(unittest.TestCase):
             parse_superlink_profile(conn_dict, service)
 
     @patch("flwr.cli.utils.get_flwr_home")
-    def test_read_current_superlink_profile_defaults(
+    def test_read_superlink_profile_defaults(
         self, mock_get_flwr_home: unittest.mock.Mock
     ) -> None:
-        """Test read_current_superlink_profile uses default when no arg provided."""
+        """Test read_superlink_profile uses default when no arg provided."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Prepare
             mock_get_flwr_home.return_value = Path(temp_dir)
@@ -240,12 +240,12 @@ class TestSuperLinkProfile(unittest.TestCase):
             default = "mock-service-2"
 
             [superlink.mock-service]
-            address = "losthost:9093"
+            address = "losthost:1234"
             insecure = false
             enable-account-auth = false
 
             [superlink.mock-service-2]
-            address = "losthost:9094"
+            address = "losthost:9093"
             insecure = true
             enable-account-auth = false
             """
@@ -254,18 +254,18 @@ class TestSuperLinkProfile(unittest.TestCase):
                 f.write(toml_content)
 
             # Execute
-            config = read_current_superlink_profile()
+            config = read_superlink_profile()
 
             # Assert
             assert config is not None
             self.assertEqual(config.service, "mock-service-2")
-            self.assertEqual(config.address, "losthost:9094")
+            self.assertEqual(config.address, "losthost:9093")
 
     @patch("flwr.cli.utils.get_flwr_home")
-    def test_read_current_superlink_profile_explicit(
+    def test_read_superlink_profile_explicit(
         self, mock_get_flwr_home: unittest.mock.Mock
     ) -> None:
-        """Test read_current_superlink_profile with explicit profile name."""
+        """Test read_superlink_profile with explicit profile name."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Prepare
             mock_get_flwr_home.return_value = Path(temp_dir)
@@ -277,12 +277,12 @@ class TestSuperLinkProfile(unittest.TestCase):
             default = "mock-service-2"
 
             [superlink.mock-service]
-            address = "losthost:9093"
+            address = "losthost:1234"
             insecure = false
             enable-account-auth = false
 
             [superlink.mock-service-2]
-            address = "losthost:9094"
+            address = "losthost:9093"
             insecure = true
             enable-account-auth = false
             """
@@ -291,18 +291,18 @@ class TestSuperLinkProfile(unittest.TestCase):
                 f.write(toml_content)
 
             # Execute
-            config = read_current_superlink_profile("mock-service")
+            config = read_superlink_profile("mock-service")
 
             # Assert
             assert config is not None
             self.assertEqual(config.service, "mock-service")
-            self.assertEqual(config.address, "losthost:9093")
+            self.assertEqual(config.address, "losthost:1234")
 
     @patch("flwr.cli.utils.get_flwr_home")
-    def test_read_current_superlink_profile_explicit_missing(
+    def test_read_superlink_profile_explicit_missing(
         self, mock_get_flwr_home: unittest.mock.Mock
     ) -> None:
-        """Test read_current_superlink_profile with explicit but missing profile."""
+        """Test read_superlink_profile with explicit but missing profile."""
         with tempfile.TemporaryDirectory() as temp_dir:
             mock_get_flwr_home.return_value = Path(temp_dir)
             config_path = Path(temp_dir) / FLOWER_CONFIG_FILE
@@ -323,10 +323,10 @@ class TestSuperLinkProfile(unittest.TestCase):
 
             # Execute & Assert
             with self.assertRaises(typer.Exit):
-                read_current_superlink_profile("missing-service")
+                read_superlink_profile("missing-service")
 
     @patch("flwr.cli.utils.get_flwr_home")
-    def test_read_current_superlink_profile_no_default_failure(
+    def test_read_superlink_profile_no_default_failure(
         self, mock_get_flwr_home: unittest.mock.Mock
     ) -> None:
         """Test failure when no default is set and no arg provided."""
@@ -350,10 +350,10 @@ class TestSuperLinkProfile(unittest.TestCase):
 
             # Execute & Assert
             with self.assertRaises(typer.Exit):
-                read_current_superlink_profile()
+                read_superlink_profile()
 
     @patch("flwr.cli.utils.get_flwr_home")
-    def test_read_current_superlink_profile_default_missing_profile(
+    def test_read_superlink_profile_default_missing_profile(
         self, mock_get_flwr_home: unittest.mock.Mock
     ) -> None:
         """Test failure when default is set but the profile block is missing."""
@@ -377,25 +377,25 @@ class TestSuperLinkProfile(unittest.TestCase):
 
             # Execute & Assert
             with self.assertRaises(typer.Exit):
-                read_current_superlink_profile()
+                read_superlink_profile()
 
     @patch("flwr.cli.utils.get_flwr_home")
-    def test_read_current_superlink_profile_no_file(
+    def test_read_superlink_profile_no_file(
         self, mock_get_flwr_home: unittest.mock.Mock
     ) -> None:
-        """Test read_current_superlink_profile when file does not exist."""
+        """Test read_superlink_profile when file does not exist."""
         with tempfile.TemporaryDirectory() as temp_dir:
             mock_get_flwr_home.return_value = Path(temp_dir)
 
-            config = read_current_superlink_profile()
+            config = read_superlink_profile()
 
             self.assertIsNone(config)
 
     @patch("flwr.cli.utils.get_flwr_home")
-    def test_read_current_superlink_profile_corrupted(
+    def test_read_superlink_profile_corrupted(
         self, mock_get_flwr_home: unittest.mock.Mock
     ) -> None:
-        """Test read_current_superlink_profile when file is corrupted."""
+        """Test read_superlink_profile when file is corrupted."""
         with tempfile.TemporaryDirectory() as temp_dir:
             mock_get_flwr_home.return_value = Path(temp_dir)
             config_path = Path(temp_dir) / FLOWER_CONFIG_FILE
@@ -405,4 +405,4 @@ class TestSuperLinkProfile(unittest.TestCase):
                 f.write("invalid = toml [ [")
 
             with self.assertRaises(typer.Exit):
-                read_current_superlink_profile()
+                read_superlink_profile()
