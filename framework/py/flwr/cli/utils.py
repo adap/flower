@@ -677,9 +677,7 @@ def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
     return app_id, app_version
 
 
-def parse_superlink_profile(
-    conn_dict: dict[str, Any], name: str
-) -> SuperLinkProfile:
+def parse_superlink_profile(conn_dict: dict[str, Any], name: str) -> SuperLinkProfile:
     """Parse SuperLink profile configuration from a TOML dictionary.
 
     Parameters
@@ -706,7 +704,7 @@ def parse_superlink_profile(
         and isinstance(insecure, bool)
         and isinstance(enable_account_auth, bool)
     ):
-        raise ValueError("Invalid connection configuration format.")
+        raise ValueError("Invalid SuperLink profile format.")
 
     # Build and return SuperLinkProfile
     return SuperLinkProfile(
@@ -719,13 +717,13 @@ def parse_superlink_profile(
 
 
 def read_superlink_profile(
-    superlink: str | None = None,
+    profile_name: str | None = None,
 ) -> SuperLinkProfile | None:
     """Read a SuperLink profile from the Flower configuration file.
 
     Parameters
     ----------
-    superlink : str | None
+    profile_name : str | None
         The name of the SuperLink profile to load. If None, the default profile
         will be loaded.
 
@@ -751,7 +749,6 @@ def read_superlink_profile(
 
         superlink_config = toml_dict.get(SuperlinkProfileTomlKey.SUPERLINK, {})
 
-        # Determine which profile to load
         # Load the default SuperLink profile when not provided
         if profile_name is None:
             profile_name = superlink_config.get(SuperlinkProfileTomlKey.DEFAULT)
@@ -759,21 +756,21 @@ def read_superlink_profile(
         # Exit when no profile name is available
         if profile_name is None:
             typer.secho(
-                    "❌ No SuperLink profile set. A SuperLink profile needs to be "
-                    "provided or one must be set as default in the Flower "
-                    f"configuration file ({config_path}). Specify a default SuperLink "
-                    "profile by adding: \n\n[superlink]\ndefault = 'profile_name'\n\n"
-                    f"to the Flower configuration file ({config_path}).",
-                    fg=typer.colors.RED,
-                    err=True,
-                )
-                raise typer.Exit(code=1)
+                "❌ No SuperLink profile set. A SuperLink profile needs to be "
+                "provided or one must be set as default in the Flower "
+                f"configuration file ({config_path}). Specify a default SuperLink "
+                "profile by adding: \n\n[superlink]\ndefault = 'profile_name'\n\n"
+                f"to the Flower configuration file ({config_path}).",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(code=1)
 
         # Try to find the profile in the superlink dict
         profile_config = superlink_config.get(profile_name)
 
         if not profile_config:
-            error_msg = f"❌ {'Default ' if superlink else ''} SuperLink profile "
+            error_msg = f"❌ {'Default ' if profile_name else ''} SuperLink profile "
             error_msg += f"'{profile_name}' not found in Flower Config ({config_path})"
 
             typer.secho(error_msg, fg=typer.colors.RED, err=True)
