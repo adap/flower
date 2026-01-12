@@ -31,7 +31,7 @@ from flwr.common.constant import (
     FLWR_DIR,
     REFRESH_TOKEN_KEY,
 )
-from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperlinkConnectionTomlKey
+from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperLinkConnectionTomlKey
 
 from .utils import (
     build_pathspec,
@@ -174,10 +174,10 @@ class TestSuperLinkConnection(unittest.TestCase):
         """Test parse_superlink_connection with valid input."""
         # Prepare
         conn_dict = {
-            SuperlinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
-            SuperlinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
-            SuperlinkConnectionTomlKey.INSECURE: False,
-            SuperlinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
+            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+            SuperLinkConnectionTomlKey.INSECURE: False,
+            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
         }
         name = "test_service"
 
@@ -195,7 +195,7 @@ class TestSuperLinkConnection(unittest.TestCase):
         """Test parse_superlink_connection with invalid input."""
         # Missing required fields
         conn_dict = {
-            SuperlinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
         }
         name = "test_service"
 
