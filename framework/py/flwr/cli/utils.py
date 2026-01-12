@@ -48,10 +48,7 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
-from flwr.supercore.constant import (
-    FLOWER_CONFIG_FILE,
-    SuperlinkProfileTomlKey,
-)
+from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperlinkProfileTomlKey
 from flwr.supercore.typing import SuperLinkProfile
 from flwr.supercore.utils import get_flwr_home
 
