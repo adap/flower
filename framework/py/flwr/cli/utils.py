@@ -27,9 +27,6 @@ from typing import Any, cast
 import grpc
 import pathspec
 import typer
-from rich.console import Console, Group
-from rich.padding import Padding
-from rich.text import Text
 
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
@@ -631,6 +628,7 @@ def validate_credentials_content(creds_path: Path) -> str:
 def init_flwr_config() -> None:
     """Initialize the Flower configuration file."""
     # Determine the FLWR_HOME directory
+    # TODO: To be updated with the logic and constnat in PR 6240
     flwr_home_dir = Path(os.getenv(FLWR_HOME, Path.home() / FLWR_DIR))
     flwr_home_dir.mkdir(parents=True, exist_ok=True)
 
@@ -638,22 +636,7 @@ def init_flwr_config() -> None:
     if not config_path.exists():
         config_path.write_text(DEFAULT_CONFIG_TOML, encoding="utf-8")
 
-        message = Group(
-            Text(
-                "----------------------------------------------------------------------",
-                style="bold yellow",
-            ),
-            Text("Welcome to Flower!", style="bold yellow"),
-            Text(""),
-            Text.from_markup(
-                f"Flower configuration initialized: [bold]{config_path}[/]"
-            ),
-            Text("Available superlinks:"),
-            Padding("- 'supergrid'", (0, 0, 0, 2)),
-            Padding("- 'local-simulation' (default)", (0, 0, 0, 2)),
-            Text(
-                "----------------------------------------------------------------------",
-                style="bold yellow",
-            ),
+        typer.secho(
+            f"\nFlower configuration not found. Created default configuration"
+            f" at {config_path}\n",
         )
-        Console().print(message)
