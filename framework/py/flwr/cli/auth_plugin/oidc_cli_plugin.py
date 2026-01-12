@@ -17,6 +17,7 @@
 
 import json
 import time
+import webbrowser
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -75,11 +76,17 @@ class OidcCliPlugin(CliAuthPlugin):
         LoginError
             If authentication times out.
         """
+        # Prompt user to login via browser
+        webbrowser.open(login_details.verification_uri_complete)
         typer.secho(
-            "Please log into your Flower account here: "
+            "A browser window has been opened for you to "
+            "log into your Flower account.\n"
+            "If it did not open automatically, use this URL:\n"
             f"{login_details.verification_uri_complete}",
             fg=typer.colors.BLUE,
         )
+
+        # Wait for user to complete login
         start_time = time.time()
         time.sleep(login_details.interval)
 
