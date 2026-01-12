@@ -31,7 +31,7 @@ from flwr.common.constant import (
     FLWR_DIR,
     REFRESH_TOKEN_KEY,
 )
-from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperlinkProfileTomlKey
+from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperlinkConnectionTomlKey
 
 from .utils import (
     build_pathspec,
@@ -174,10 +174,10 @@ class TestSuperLinkConnection(unittest.TestCase):
         """Test parse_superlink_connection with valid input."""
         # Prepare
         conn_dict = {
-            SuperlinkProfileTomlKey.ADDRESS: "127.0.0.1:8080",
-            SuperlinkProfileTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
-            SuperlinkProfileTomlKey.INSECURE: False,
-            SuperlinkProfileTomlKey.ENABLE_ACCOUNT_AUTH: True,
+            SuperlinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
+            SuperlinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+            SuperlinkConnectionTomlKey.INSECURE: False,
+            SuperlinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
         }
         name = "test_service"
 
@@ -195,7 +195,7 @@ class TestSuperLinkConnection(unittest.TestCase):
         """Test parse_superlink_connection with invalid input."""
         # Missing required fields
         conn_dict = {
-            SuperlinkProfileTomlKey.ADDRESS: "127.0.0.1:8080",
+            SuperlinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
         }
         name = "test_service"
 
@@ -243,7 +243,7 @@ class TestSuperLinkConnection(unittest.TestCase):
     def test_read_superlink_connection_explicit(
         self, mock_get_flwr_home: unittest.mock.Mock
     ) -> None:
-        """Test read_superlink_connection with explicit profile name."""
+        """Test read_superlink_connection with explicit connection name."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Prepare
             mock_get_flwr_home.return_value = Path(temp_dir)
@@ -280,7 +280,7 @@ class TestSuperLinkConnection(unittest.TestCase):
     def test_read_superlink_connection_explicit_missing(
         self, mock_get_flwr_home: unittest.mock.Mock
     ) -> None:
-        """Test read_superlink_connection with explicit but missing profile."""
+        """Test read_superlink_connection with explicit but missing connection."""
         with tempfile.TemporaryDirectory() as temp_dir:
             mock_get_flwr_home.return_value = Path(temp_dir)
             config_path = Path(temp_dir) / FLOWER_CONFIG_FILE
@@ -331,10 +331,10 @@ class TestSuperLinkConnection(unittest.TestCase):
                 read_superlink_connection()
 
     @patch("flwr.cli.utils.get_flwr_home")
-    def test_read_superlink_connection_default_missing_profile(
+    def test_read_superlink_connection_default_missing_connection(
         self, mock_get_flwr_home: unittest.mock.Mock
     ) -> None:
-        """Test failure when default is set but the profile block is missing."""
+        """Test failure when default is set but the connection block is missing."""
         with tempfile.TemporaryDirectory() as temp_dir:
             mock_get_flwr_home.return_value = Path(temp_dir)
             config_path = Path(temp_dir) / FLOWER_CONFIG_FILE

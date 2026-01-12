@@ -81,7 +81,7 @@ class NodeStatus:
 FLOWER_CONFIG_FILE = "config.toml"
 
 
-class SuperlinkProfileTomlKey:
+class SuperlinkConnectionTomlKey:
     """TOML keys for SuperLink profile configuration."""
 
     SUPERLINK = "superlink"

@@ -48,7 +48,7 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
-from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperlinkProfileTomlKey
+from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperlinkConnectionTomlKey
 from flwr.supercore.typing import SuperLinkConnection
 from flwr.supercore.utils import get_flwr_home
 
@@ -644,10 +644,10 @@ def parse_superlink_connection(
         The parsed SuperLink connection configuration.
     """
     # Check required fields
-    address = conn_dict.get(SuperlinkProfileTomlKey.ADDRESS)
-    root_certificates = conn_dict.get(SuperlinkProfileTomlKey.ROOT_CERTIFICATES)
-    insecure = conn_dict.get(SuperlinkProfileTomlKey.INSECURE)
-    enable_account_auth = conn_dict.get(SuperlinkProfileTomlKey.ENABLE_ACCOUNT_AUTH)
+    address = conn_dict.get(SuperlinkConnectionTomlKey.ADDRESS)
+    root_certificates = conn_dict.get(SuperlinkConnectionTomlKey.ROOT_CERTIFICATES)
+    insecure = conn_dict.get(SuperlinkConnectionTomlKey.INSECURE)
+    enable_account_auth = conn_dict.get(SuperlinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH)
     if not (
         isinstance(address, str)
         # root-certificates is optional in TOML (can be missing)
@@ -698,11 +698,11 @@ def read_superlink_connection(
         with config_path.open("rb") as file:
             toml_dict = tomli.load(file)
 
-        superlink_config = toml_dict.get(SuperlinkProfileTomlKey.SUPERLINK, {})
+        superlink_config = toml_dict.get(SuperlinkConnectionTomlKey.SUPERLINK, {})
 
         # Load the default SuperLink connection when not provided
         if connection_name is None:
-            connection_name = superlink_config.get(SuperlinkProfileTomlKey.DEFAULT)
+            connection_name = superlink_config.get(SuperlinkConnectionTomlKey.DEFAULT)
 
         # Exit when no connection name is available
         if connection_name is None:
