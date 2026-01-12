@@ -49,7 +49,7 @@ from flwr.common.grpc import (
     on_channel_state_change,
 )
 from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperlinkProfileTomlKey
-from flwr.supercore.typing import SuperLinkProfile
+from flwr.supercore.typing import SuperLinkConnection
 from flwr.supercore.utils import get_flwr_home
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
@@ -626,20 +626,22 @@ def validate_credentials_content(creds_path: Path) -> str:
     return creds[ACCESS_TOKEN_KEY]
 
 
-def parse_superlink_profile(conn_dict: dict[str, Any], name: str) -> SuperLinkProfile:
-    """Parse SuperLink profile configuration from a TOML dictionary.
+def parse_superlink_connection(
+    conn_dict: dict[str, Any], name: str
+) -> SuperLinkConnection:
+    """Parse SuperLink connection configuration from a TOML dictionary.
 
     Parameters
     ----------
     conn_dict : dict[str, Any]
         The TOML configuration dictionary for the connection.
     name : str
-        The name of the profile.
+        The name of the connection.
 
     Returns
     -------
-    SuperLinkProfile
-        The parsed SuperLink profile configuration.
+    SuperLinkConnection
+        The parsed SuperLink connection configuration.
     """
     # Check required fields
     address = conn_dict.get(SuperlinkProfileTomlKey.ADDRESS)
@@ -653,10 +655,10 @@ def parse_superlink_profile(conn_dict: dict[str, Any], name: str) -> SuperLinkPr
         and isinstance(insecure, bool)
         and isinstance(enable_account_auth, bool)
     ):
-        raise ValueError("Invalid SuperLink profile format.")
+        raise ValueError("Invalid SuperLink connection format.")
 
-    # Build and return SuperLinkProfile
-    return SuperLinkProfile(
+    # Build and return SuperLinkConnection
+    return SuperLinkConnection(
         name=name,
         address=address,
         root_certificates=root_certificates,
@@ -665,28 +667,28 @@ def parse_superlink_profile(conn_dict: dict[str, Any], name: str) -> SuperLinkPr
     )
 
 
-def read_superlink_profile(
-    profile_name: str | None = None,
-) -> SuperLinkProfile | None:
-    """Read a SuperLink profile from the Flower configuration file.
+def read_superlink_connection(
+    connection_name: str | None = None,
+) -> SuperLinkConnection | None:
+    """Read a SuperLink connection from the Flower configuration file.
 
     Parameters
     ----------
-    profile_name : str | None
-        The name of the SuperLink profile to load. If None, the default profile
+    connection_name : str | None
+        The name of the SuperLink connection to load. If None, the default connection
         will be loaded.
 
     Returns
     -------
-    SuperLinkProfile | None
-        The SuperLink profile, or None if the config file is missing or the
-        requested profile (or default) cannot be found.
+    SuperLinkConnection | None
+        The SuperLink connection, or None if the config file is missing or the
+        requested connection (or default) cannot be found.
 
     Raises
     ------
     typer.Exit
         Raised if the configuration file is corrupted, or if the requested
-        profile (or default) cannot be found.
+        connection (or default) cannot be found.
     """
     config_path = get_flwr_home() / FLOWER_CONFIG_FILE
     if not config_path.exists():
@@ -698,38 +700,42 @@ def read_superlink_profile(
 
         superlink_config = toml_dict.get(SuperlinkProfileTomlKey.SUPERLINK, {})
 
-        # Load the default SuperLink profile when not provided
-        if profile_name is None:
-            profile_name = superlink_config.get(SuperlinkProfileTomlKey.DEFAULT)
+        # Load the default SuperLink connection when not provided
+        if connection_name is None:
+            connection_name = superlink_config.get(SuperlinkProfileTomlKey.DEFAULT)
 
-        # Exit when no profile name is available
-        if profile_name is None:
+        # Exit when no connection name is available
+        if connection_name is None:
             typer.secho(
-                "❌ No SuperLink profile set. A SuperLink profile needs to be "
+                "❌ No SuperLink connection set. A SuperLink connection needs to be "
                 "provided or one must be set as default in the Flower "
                 f"configuration file ({config_path}). Specify a default SuperLink "
-                "profile by adding: \n\n[superlink]\ndefault = 'profile_name'\n\n"
+                "connection by adding: \n\n[superlink]\ndefault = 'connection_name'\n\n"
                 f"to the Flower configuration file ({config_path}).",
                 fg=typer.colors.RED,
                 err=True,
             )
             raise typer.Exit(code=1)
 
-        # Try to find the profile in the superlink dict
-        profile_config = superlink_config.get(profile_name)
+        # Try to find the connection in the superlink dict
+        connection_config = superlink_config.get(connection_name)
 
-        if not profile_config:
-            error_msg = f"❌ {'Default ' if profile_name else ''} SuperLink profile "
-            error_msg += f"'{profile_name}' not found in Flower Config ({config_path})"
+        if not connection_config:
+            error_msg = (
+                f"❌ {'Default ' if connection_name else ''} SuperLink connection "
+            )
+            error_msg += (
+                f"'{connection_name}' not found in Flower Config ({config_path})"
+            )
 
             typer.secho(error_msg, fg=typer.colors.RED, err=True)
             raise typer.Exit(code=1)
 
-        return parse_superlink_profile(profile_config, name=profile_name)
+        return parse_superlink_connection(connection_config, name=connection_name)
 
     except (tomli.TOMLDecodeError, KeyError, ValueError) as err:
         typer.secho(
-            f"❌ SuperLink profile is corrupted: {err}",
+            f"❌ SuperLink connection is corrupted: {err}",
             fg=typer.colors.RED,
             err=True,
         )
