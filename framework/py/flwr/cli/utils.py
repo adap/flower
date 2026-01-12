@@ -49,8 +49,6 @@ from flwr.common.grpc import (
     on_channel_state_change,
 )
 from flwr.supercore.constant import (
-    APP_ID_PATTERN,
-    APP_VERSION_PATTERN,
     FLOWER_CONFIG_FILE,
     SuperlinkProfileTomlKey,
 )
@@ -629,52 +627,6 @@ def validate_credentials_content(creds_path: Path) -> str:
         raise typer.Exit(code=1)
 
     return creds[ACCESS_TOKEN_KEY]
-
-
-def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
-    """Parse app specification string into app ID and version.
-
-    Parameters
-    ----------
-    app_spec : str
-        The app specification string in the format '@account/app' or
-        '@account/app==x.y.z' (digits only).
-
-    Returns
-    -------
-    tuple[str, str | None]
-        A tuple containing the app ID and optional version.
-
-    Raises
-    ------
-    typer.Exit
-        If the app specification format is invalid.
-    """
-    if "==" in app_spec:
-        app_id, app_version = app_spec.split("==")
-
-        # Validate app version format
-        if not re.match(APP_VERSION_PATTERN, app_version):
-            typer.secho(
-                "❌ Invalid app version. Expected format: x.y.z (digits only).",
-                fg=typer.colors.RED,
-                err=True,
-            )
-            raise typer.Exit(code=1)
-    else:
-        app_id = app_spec
-        app_version = None
-
-    # Validate app_id format
-    if not re.match(APP_ID_PATTERN, app_id):
-        typer.secho(
-            "❌ Invalid remote app ID. Expected format: '@account/app'.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
-
-    return app_id, app_version
 
 
 def parse_superlink_profile(conn_dict: dict[str, Any], name: str) -> SuperLinkProfile:

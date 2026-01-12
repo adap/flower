@@ -23,7 +23,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
 import typer
 
 from flwr.common.constant import (
@@ -38,7 +37,6 @@ from .utils import (
     build_pathspec,
     get_sha256_hash,
     load_gitignore_patterns,
-    parse_app_spec,
     parse_superlink_profile,
     read_superlink_profile,
     validate_credentials_content,
@@ -167,26 +165,6 @@ def test_load_gitignore_patterns_with_pathspec() -> None:
 
     # Should not match normal files
     assert spec.match_file("good.py") is False
-
-
-@pytest.mark.parametrize(
-    "value",
-    [
-        "user/app==1.2.3",  # missing '@'
-        "@accountapp==1.2.3",  # missing slash
-        "@account/app==1.2",  # bad version
-        "@account/app==1.2.3.4",  # bad version
-        "@account*/app==1.2.3",  # bad user id chars
-        "@account/app*==1.2.3",  # bad app id chars
-    ],
-)
-def test_parse_app_spec_rejects_invalid_formats(value: str) -> None:
-    """For an invalid string, the function should fail fast with typer.Exit(code=1)."""
-    with pytest.raises(typer.Exit) as exc:
-        parse_app_spec(value)
-
-    # Ensure we specifically exited with code 1
-    assert exc.value.exit_code == 1
 
 
 class TestSuperLinkProfile(unittest.TestCase):
