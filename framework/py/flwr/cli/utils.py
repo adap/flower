@@ -752,12 +752,13 @@ def read_superlink_profile(
         superlink_config = toml_dict.get(SuperlinkProfileTomlKey.SUPERLINK, {})
 
         # Determine which profile to load
-        if superlink:
-            profile_name = superlink
-        else:
+        # Load the default SuperLink profile when not provided
+        if profile_name is None:
             profile_name = superlink_config.get(SuperlinkProfileTomlKey.DEFAULT)
-            if not profile_name:
-                typer.secho(
+
+        # Exit when no profile name is available
+        if profile_name is None:
+            typer.secho(
                     "❌ No SuperLink profile set. A SuperLink profile needs to be "
                     "provided or one must be set as default in the Flower "
                     f"configuration file ({config_path}). Specify a default SuperLink "
