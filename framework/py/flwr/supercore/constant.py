@@ -82,7 +82,7 @@ FLOWER_CONFIG_FILE = "config.toml"
 
 
 class SuperlinkProfileTomlKey:
-    """TOML keys for ."""
+    """TOML keys for SuperLink profile configuration."""
 
     SUPERLINK = "superlink"
     DEFAULT = "default"
