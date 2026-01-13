@@ -35,6 +35,7 @@ from .stop import stop
 from .supernode import ls as supernode_list
 from .supernode import register as supernode_register
 from .supernode import unregister as supernode_unregister
+from .utils import init_flwr_config
 
 app = typer.Typer(
     help=typer.style(
@@ -86,8 +87,8 @@ typer_click_object = get_command(app)
 
 
 @app.callback(invoke_without_command=True)
-def version_callback(
-    ver: bool = typer.Option(
+def main(
+    version: bool = typer.Option(
         None,
         "-V",
         "--version",
@@ -95,8 +96,9 @@ def version_callback(
         help="Show the version and exit.",
     ),
 ) -> None:
-    """Print version."""
-    if ver:
+    """Flower CLI."""
+    init_flwr_config()
+    if version:
         typer.secho(f"Flower version: {package_version}", fg="blue")
         raise typer.Exit()
 
