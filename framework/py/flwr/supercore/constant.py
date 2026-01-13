@@ -89,6 +89,7 @@ class SuperLinkConnectionTomlKey:
     ROOT_CERTIFICATES = "root-certificates"
     INSECURE = "insecure"
     ENABLE_ACCOUNT_AUTH = "enable-account-auth"
+    FEDERATION = "federation"
     OPTIONS = "options"
 
 
@@ -134,6 +135,7 @@ DEFAULT_FLOWER_CONFIG_TOML = (
     f"[{SuperLinkConnectionTomlKey.SUPERLINK}.supergrid]\n"
     f'{SuperLinkConnectionTomlKey.ADDRESS} = "supergrid.flower.ai"\n'
     f"{SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH} = true\n"
+    f'{SuperLinkConnectionTomlKey.FEDERATION} = "YOUR-FEDERATION-HERE"\n'
     "\n"
     f"[{SuperLinkConnectionTomlKey.SUPERLINK}.local]\n"
     f"options.{SuperLinkSimulationOptionsTomlKey.NUM_SUPERNODES} = 10\n"

@@ -746,6 +746,7 @@ def parse_superlink_connection(
         enable_account_auth=conn_dict.get(
             SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH
         ),
+        federation=conn_dict.get(SuperLinkConnectionTomlKey.FEDERATION),
         options=simulation_options,
     )
 

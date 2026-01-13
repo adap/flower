@@ -97,6 +97,7 @@ class SuperLinkConnection:
     root_certificates: str | None = None
     insecure: bool | None = None
     enable_account_auth: bool | None = None
+    federation: str | None = None
     options: SuperLinkSimulationOptions | None = None
 
     def __post_init__(self) -> None:
@@ -126,6 +127,13 @@ class SuperLinkConnection:
                 "Invalid value for key "
                 f"'{SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH}': "
                 f"expected bool, but got {type(self.enable_account_auth).__name__}."
+            )
+
+        if self.federation is not None and not isinstance(self.federation, str):
+            raise ValueError(
+                "Invalid value for key "
+                f"'{SuperLinkConnectionTomlKey.FEDERATION}': "
+                f"expected str, but got {type(self.federation).__name__}."
             )
 
         # The connection needs to have either an address or options (or both).
