@@ -78,7 +78,7 @@ class NodeStatus:
 
 
 # The default configuration for the Flower config file
-DEFAULT_CONFIG_TOML = """[superlink]
+DEFAULT_FLOWER_CONFIG_TOML = """[superlink]
 default = "local-simulation"
 
 [superlink.supergrid]
