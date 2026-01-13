@@ -21,6 +21,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import typer
@@ -32,6 +33,12 @@ from flwr.common.constant import (
     REFRESH_TOKEN_KEY,
 )
 from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperLinkConnectionTomlKey
+from flwr.supercore.typing import (
+    SimulationBackendConfig,
+    SimulationClientResources,
+    SuperLinkConnection,
+    SuperLinkSimulationOptions,
+)
 
 from .utils import (
     build_pathspec,
@@ -200,6 +207,63 @@ class TestSuperLinkConnection(unittest.TestCase):
         name = "test_service"
 
         with self.assertRaises(ValueError):
+            parse_superlink_connection(conn_dict, name)
+
+    def test_parse_superlink_connection_simulation(self) -> None:
+        """Test parse_superlink_connection with simulation options."""
+        # Prepare
+        conn_dict = {
+            "options": {
+                "num-supernodes": 10,
+                "backend": {
+                    "client-resources": {"num-cpus": 1.0, "num-gpus": 0.5},
+                    "init-args": {"logging-level": "info", "log-to-drive": True},
+                    "name": "custom-backend",
+                },
+            }
+        }
+        name = "local-simulation"
+
+        # Execute
+        config = parse_superlink_connection(conn_dict, name)
+
+        # Assert
+        self.assertEqual(config.name, name)
+        self.assertIsNone(config.address)
+        self.assertIsNotNone(config.options)
+        assert config.options is not None
+        self.assertEqual(config.options.num_supernodes, 10)
+
+        # Check Backend
+        backend = config.options.backend
+        self.assertIsNotNone(backend)
+        assert backend is not None
+        self.assertIsNotNone(backend.client_resources)
+        assert backend.client_resources is not None
+        self.assertEqual(backend.client_resources.num_cpus, 1.0)
+        self.assertEqual(backend.client_resources.num_gpus, 0.5)
+
+        self.assertIsNotNone(backend.init_args)
+        assert backend.init_args is not None
+        self.assertEqual(backend.init_args.logging_level, "info")
+        self.assertTrue(backend.init_args.log_to_drive)
+        self.assertEqual(backend.name, "custom-backend")
+
+    def test_parse_superlink_connection_simulation_invalid_name(self) -> None:
+        """Test parse_superlink_connection with invalid name type."""
+        # Prepare
+        conn_dict = {
+            "options": {
+                "num-supernodes": 10,
+                "backend": {
+                    "name": 123,  # Invalid type, should be str
+                },
+            }
+        }
+        name = "local-simulation"
+
+        # Execute & Assert
+        with self.assertRaisesRegex(ValueError, "backend.name must be a string"):
             parse_superlink_connection(conn_dict, name)
 
     @patch("flwr.cli.utils.get_flwr_home")
@@ -384,3 +448,126 @@ class TestSuperLinkConnection(unittest.TestCase):
 
             with self.assertRaises(typer.Exit):
                 read_superlink_connection()
+
+    @patch("flwr.cli.utils.get_flwr_home")
+    def test_read_superlink_connection_simulation(
+        self, mock_get_flwr_home: unittest.mock.Mock
+    ) -> None:
+        """Test read_superlink_connection with simulation profile."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            mock_get_flwr_home.return_value = Path(temp_dir)
+            config_path = Path(temp_dir) / FLOWER_CONFIG_FILE
+
+            # Create TOML content
+            toml_content = """
+            [superlink]
+            default = "local-sim"
+
+            [superlink.local-sim]
+            options.num-supernodes = 2
+            options.backend.client-resources.num-cpus = 2.0
+            options.backend.init-args.num-cpus = 1
+            """
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                f.write(toml_content)
+
+            # Execute
+            config = read_superlink_connection()
+
+            # Assert
+            assert config is not None
+            self.assertEqual(config.name, "local-sim")
+            self.assertIsNone(config.address)
+            self.assertIsNotNone(config.options)
+            assert config.options is not None
+            self.assertEqual(config.options.num_supernodes, 2)
+            self.assertIsNotNone(config.options.backend)
+            assert config.options.backend is not None
+            self.assertIsNotNone(config.options.backend.client_resources)
+            assert config.options.backend.client_resources is not None
+            self.assertEqual(config.options.backend.client_resources.num_cpus, 2.0)
+            self.assertIsNotNone(config.options.backend.init_args)
+            assert config.options.backend.init_args is not None
+            self.assertEqual(config.options.backend.init_args.num_cpus, 1)
+            self.assertEqual(config.options.backend.name, "ray")
+
+    @patch("flwr.cli.utils.get_flwr_home")
+    def test_read_superlink_connection_simulation_unknown_key(
+        self, mock_get_flwr_home: unittest.mock.Mock
+    ) -> None:
+        """Test read_superlink_connection with unknown keys (should be ignored)."""
+        # Prepare
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            mock_get_flwr_home.return_value = Path(tmp_dir)
+            config_path = os.path.join(tmp_dir, "config.toml")
+            toml_content = """
+            [superlink]
+            default = 'local-sim'
+
+            [superlink.local-sim]
+            options.num-supernodes = 2
+            options.backend.client-resources.num-cpus = 2.0
+            options.backend.unknown-key = "unexpected"
+            """
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                f.write(toml_content)
+
+            name = "local-sim"
+            # Expected: a valid config that doesn't include keys
+            # that don't align with the scheema
+            expected_config = SuperLinkConnection(
+                name="local-sim",
+                options=SuperLinkSimulationOptions(
+                    num_supernodes=2,
+                    backend=SimulationBackendConfig(
+                        client_resources=SimulationClientResources(num_cpus=2.0),
+                    ),
+                ),
+            )
+
+            # Execute
+            config = read_superlink_connection(name)
+
+            # Assert
+            self.assertEqual(config, expected_config)
+
+    def test_parse_superlink_connection_mixed(self) -> None:
+        """Test with both address and options (should be valid)."""
+        # Prepare
+        conn_dict = {
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
+            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: None,
+            SuperLinkConnectionTomlKey.INSECURE: False,
+            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: False,
+            "options": {"num-supernodes": 5},
+        }
+        name = "mixed-connection"
+
+        # Execute
+        config = parse_superlink_connection(conn_dict, name)
+
+        # Assert
+        self.assertEqual(config.address, "127.0.0.1:8080")
+        self.assertIsNotNone(config.options)
+        assert config.options is not None
+        self.assertEqual(config.options.num_supernodes, 5)
+
+    def test_parse_superlink_connection_mixed_invalid(self) -> None:
+        """Test mixed connection missing required simulation field."""
+        # Prepare
+        conn_dict: dict[str, Any] = {
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
+            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: None,
+            SuperLinkConnectionTomlKey.INSECURE: False,
+            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: False,
+            "options": {},  # Missing num-supernodes
+        }
+        name = "mixed-invalid"
+
+        # Execute & Assert
+        with self.assertRaisesRegex(
+            ValueError, "Invalid simulation options: num-supernodes must be an integer"
+        ):
+            parse_superlink_connection(conn_dict, name)

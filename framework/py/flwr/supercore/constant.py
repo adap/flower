@@ -60,6 +60,9 @@ FORCE_EXIT_TIMEOUT_SECONDS = 5  # Used in `flwr_exit` function
 # Constants for message processing timing
 MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS = 3600
 
+# Constants for simulations
+DEFAULT_SIMULATION_BACKEND_NAME = "ray"
+
 # System message type
 SYSTEM_MESSAGE_TYPE = "system"
 
@@ -90,3 +93,34 @@ class SuperLinkConnectionTomlKey:
     ROOT_CERTIFICATES = "root-certificates"
     INSECURE = "insecure"
     ENABLE_ACCOUNT_AUTH = "enable-account-auth"
+
+
+class SimulationClientResourcesTomlKey:
+    """TOML keys for SimulationClientResources."""
+
+    NUM_CPUS = "num-cpus"
+    NUM_GPUS = "num-gpus"
+
+
+class SimulationInitArgsTomlKey:
+    """TOML keys for SimulationInitArgs."""
+
+    NUM_CPUS = "num-cpus"
+    NUM_GPUS = "num-gpus"
+    LOGGING_LEVEL = "logging-level"
+    LOG_TO_DRIVE = "log-to-drive"
+
+
+class SimulationBackendConfigTomlKey:
+    """TOML keys for SimulationBackendConfig."""
+
+    CLIENT_RESOURCES = "client-resources"
+    INIT_ARGS = "init-args"
+    NAME = "name"
+
+
+class SuperLinkSimulationOptionsTomlKey:
+    """TOML keys for SuperLinkSimulationOptions."""
+
+    NUM_SUPERNODES = "num-supernodes"
+    BACKEND = "backend"
