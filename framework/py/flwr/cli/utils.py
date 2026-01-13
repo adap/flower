@@ -49,7 +49,7 @@ from flwr.common.grpc import (
     on_channel_state_change,
 )
 from flwr.supercore.constant import (
-    DEFAULT_CONFIG_TOML,
+    DEFAULT_FLOWER_CONFIG_TOML,
     FLOWER_CONFIG_FILE,
     SuperLinkConnectionTomlKey,
 )
@@ -638,7 +638,7 @@ def init_flwr_config() -> None:
         # Create parent directory if it doesn't exist
         config_path.parent.mkdir(parents=True, exist_ok=True)
         # Write Flower config file
-        config_path.write_text(DEFAULT_CONFIG_TOML, encoding="utf-8")
+        config_path.write_text(DEFAULT_FLOWER_CONFIG_TOML, encoding="utf-8")
 
         typer.secho(
             f"\nFlower configuration not found. Created default configuration"

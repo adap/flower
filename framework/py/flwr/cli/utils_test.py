@@ -33,7 +33,7 @@ from flwr.common.constant import (
     REFRESH_TOKEN_KEY,
 )
 from flwr.supercore.constant import (
-    DEFAULT_CONFIG_TOML,
+    DEFAULT_FLOWER_CONFIG_TOML,
     FLOWER_CONFIG_FILE,
     SuperLinkConnectionTomlKey,
 )
@@ -190,7 +190,7 @@ class TestInitFlwrConfig(unittest.TestCase):
                 self.assertTrue(config_path.exists())
 
                 self.assertEqual(
-                    config_path.read_text(encoding="utf-8"), DEFAULT_CONFIG_TOML
+                    config_path.read_text(encoding="utf-8"), DEFAULT_FLOWER_CONFIG_TOML
                 )
 
     def test_init_flwr_config_does_not_overwrite(self) -> None:
