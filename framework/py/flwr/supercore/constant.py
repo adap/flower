@@ -77,7 +77,7 @@ class NodeStatus:
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
 
-# The default configuration for the global config file
+# The default configuration for the Flower config file
 DEFAULT_CONFIG_TOML = """[superlink]
 default = "local-simulation"
 
