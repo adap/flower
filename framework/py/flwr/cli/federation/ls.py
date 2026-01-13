@@ -72,7 +72,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
         typer.Option(
             "--federation",
             case_sensitive=False,
-            help="Name of the federation",
+            help="Name of the federation to display",
         ),
     ] = None,
 ) -> None:
