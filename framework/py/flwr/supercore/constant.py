@@ -80,10 +80,6 @@ class NodeStatus:
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
 
-# CLI connection configuration file name
-FLOWER_CONFIG_FILE = "config.toml"
-
-
 class SuperLinkConnectionTomlKey:
     """TOML keys for SuperLink connection configuration."""
 
@@ -124,3 +120,21 @@ class SuperLinkSimulationOptionsTomlKey:
 
     NUM_SUPERNODES = "num-supernodes"
     BACKEND = "backend"
+
+
+# CLI connection configuration file name
+FLOWER_CONFIG_FILE = "config.toml"
+
+# The default configuration for the Flower config file
+DEFAULT_FLOWER_CONFIG_TOML = f"""[{SuperLinkConnectionTomlKey.SUPERLINK}]
+{SuperLinkConnectionTomlKey.DEFAULT} = "local-simulation"
+
+[{SuperLinkConnectionTomlKey.SUPERLINK}.supergrid]
+{SuperLinkConnectionTomlKey.ADDRESS} = "supergrid.flower.ai"
+{SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH} = true
+
+[{SuperLinkConnectionTomlKey.SUPERLINK}.local-simulation]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 1
+options.backend.client-resources.num-gpus = 0
+"""
