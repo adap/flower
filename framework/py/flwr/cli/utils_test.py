@@ -23,14 +23,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from flwr.cli.utils import (
-    build_pathspec,
-    get_sha256_hash,
-    init_flwr_config,
-    load_gitignore_patterns,
-    validate_credentials_content,
-)
-
 import typer
 
 from flwr.common.constant import (
@@ -40,12 +32,16 @@ from flwr.common.constant import (
     FLWR_HOME,
     REFRESH_TOKEN_KEY,
 )
-from flwr.supercore.constant import DEFAULT_CONFIG_TOML
-from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperLinkConnectionTomlKey
+from flwr.supercore.constant import (
+    DEFAULT_CONFIG_TOML,
+    FLOWER_CONFIG_FILE,
+    SuperLinkConnectionTomlKey,
+)
 
 from .utils import (
     build_pathspec,
     get_sha256_hash,
+    init_flwr_config,
     load_gitignore_patterns,
     parse_superlink_connection,
     read_superlink_connection,

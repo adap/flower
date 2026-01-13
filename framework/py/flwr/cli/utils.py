@@ -17,7 +17,6 @@
 
 import hashlib
 import json
-import os
 import re
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
@@ -34,7 +33,6 @@ from flwr.common.constant import (
     AUTHN_TYPE_JSON_KEY,
     CREDENTIALS_DIR,
     FLWR_DIR,
-    FLWR_HOME,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
@@ -50,7 +48,11 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
-from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperLinkConnectionTomlKey
+from flwr.supercore.constant import (
+    DEFAULT_CONFIG_TOML,
+    FLOWER_CONFIG_FILE,
+    SuperLinkConnectionTomlKey,
+)
 from flwr.supercore.typing import SuperLinkConnection
 from flwr.supercore.utils import get_flwr_home
 
@@ -630,12 +632,8 @@ def validate_credentials_content(creds_path: Path) -> str:
 
 def init_flwr_config() -> None:
     """Initialize the Flower configuration file."""
-    # Determine the FLWR_HOME directory
-    # TODO: To be updated with the logic and constnat in PR 6240
-    flwr_home_dir = Path(os.getenv(FLWR_HOME, Path.home() / FLWR_DIR))
-    flwr_home_dir.mkdir(parents=True, exist_ok=True)
+    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
 
-    config_path = flwr_home_dir / "config.toml"
     if not config_path.exists():
         config_path.write_text(DEFAULT_CONFIG_TOML, encoding="utf-8")
 
