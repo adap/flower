@@ -123,6 +123,37 @@ class SuperLinkSimulationOptionsTomlKey:
     BACKEND = "backend"
 
 
+class SimulationClientResourcesTomlKey:
+    """TOML keys for SimulationClientResources."""
+
+    NUM_CPUS = "num-cpus"
+    NUM_GPUS = "num-gpus"
+
+
+class SimulationInitArgsTomlKey:
+    """TOML keys for SimulationInitArgs."""
+
+    NUM_CPUS = "num-cpus"
+    NUM_GPUS = "num-gpus"
+    LOGGING_LEVEL = "logging-level"
+    LOG_TO_DRIVE = "log-to-drive"
+
+
+class SimulationBackendConfigTomlKey:
+    """TOML keys for SimulationBackendConfig."""
+
+    CLIENT_RESOURCES = "client-resources"
+    INIT_ARGS = "init-args"
+    NAME = "name"
+
+
+class SuperLinkSimulationOptionsTomlKey:
+    """TOML keys for SuperLinkSimulationOptions."""
+
+    NUM_SUPERNODES = "num-supernodes"
+    BACKEND = "backend"
+
+
 # CLI connection configuration file name
 FLOWER_CONFIG_FILE = "config.toml"
 

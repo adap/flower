@@ -737,6 +737,11 @@ def parse_superlink_connection(
                 f"expected dict, but got {type(options).__name__}."
             )
 
+    simulation_options: SuperLinkSimulationOptions | None = None
+    if is_simulation_setup:
+        options = cast(dict[str, Any], options)
+        simulation_options = _parse_simulation_options(options)
+
     # Build and return SuperLinkConnection
     return SuperLinkConnection(
         name=name,
