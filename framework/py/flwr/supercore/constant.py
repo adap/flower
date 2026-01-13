@@ -98,7 +98,6 @@ DEFAULT_FLOWER_CONFIG_TOML = f"""[{SuperLinkConnectionTomlKey.SUPERLINK}]
 [{SuperLinkConnectionTomlKey.SUPERLINK}.supergrid]
 {SuperLinkConnectionTomlKey.ADDRESS} = "supergrid.flower.ai"
 {SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH} = true
-federation = "<federation-name>"
 
 [{SuperLinkConnectionTomlKey.SUPERLINK}.local-simulation]
 options.num-supernodes = 10
