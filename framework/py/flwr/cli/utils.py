@@ -635,6 +635,9 @@ def init_flwr_config() -> None:
     config_path = get_flwr_home() / FLOWER_CONFIG_FILE
 
     if not config_path.exists():
+        # Create parent directory if it doesn't exist
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        # Write Flower config file
         config_path.write_text(DEFAULT_CONFIG_TOML, encoding="utf-8")
 
         typer.secho(
