@@ -77,26 +77,6 @@ class NodeStatus:
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
 
-# The default configuration for the Flower config file
-DEFAULT_FLOWER_CONFIG_TOML = """[superlink]
-default = "local-simulation"
-
-[superlink.supergrid]
-address = "supergrid.flower.ai"
-enable-account-auth = true
-federation = "<federation-name>"
-
-[superlink.local-simulation]
-options.num-supernodes = 10
-options.backend.client-resources.num-cpus = 1
-options.backend.client-resources.num-gpus = 0
-"""
-
-
-# CLI connection configuration file name
-FLOWER_CONFIG_FILE = "config.toml"
-
-
 class SuperLinkConnectionTomlKey:
     """TOML keys for SuperLink connection configuration."""
 
@@ -106,3 +86,22 @@ class SuperLinkConnectionTomlKey:
     ROOT_CERTIFICATES = "root-certificates"
     INSECURE = "insecure"
     ENABLE_ACCOUNT_AUTH = "enable-account-auth"
+
+
+# CLI connection configuration file name
+FLOWER_CONFIG_FILE = "config.toml"
+
+# The default configuration for the Flower config file
+DEFAULT_FLOWER_CONFIG_TOML = f"""[{SuperLinkConnectionTomlKey.SUPERLINK}]
+{SuperLinkConnectionTomlKey.DEFAULT} = "local-simulation"
+
+[{SuperLinkConnectionTomlKey.SUPERLINK}.supergrid]
+{SuperLinkConnectionTomlKey.ADDRESS} = "supergrid.flower.ai"
+{SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH} = true
+federation = "<federation-name>"
+
+[{SuperLinkConnectionTomlKey.SUPERLINK}.local-simulation]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 1
+options.backend.client-resources.num-gpus = 0
+"""
