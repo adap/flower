@@ -50,10 +50,21 @@ from flwr.common.grpc import (
 )
 from flwr.supercore.constant import (
     DEFAULT_FLOWER_CONFIG_TOML,
+    DEFAULT_SIMULATION_BACKEND_NAME,
     FLOWER_CONFIG_FILE,
+    SimulationBackendConfigTomlKey,
+    SimulationClientResourcesTomlKey,
+    SimulationInitArgsTomlKey,
     SuperLinkConnectionTomlKey,
+    SuperLinkSimulationOptionsTomlKey,
 )
-from flwr.supercore.typing import SuperLinkConnection
+from flwr.supercore.typing import (
+    SimulationBackendConfig,
+    SimulationClientResources,
+    SimulationInitArgs,
+    SuperLinkConnection,
+    SuperLinkSimulationOptions,
+)
 from flwr.supercore.utils import get_flwr_home
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
@@ -630,6 +641,58 @@ def validate_credentials_content(creds_path: Path) -> str:
     return creds[ACCESS_TOKEN_KEY]
 
 
+def _parse_simulation_options(options: dict[str, Any]) -> SuperLinkSimulationOptions:
+    """Parse simulation options from a dictionary in a SuperLink connection."""
+    num_supernodes = options.get(SuperLinkSimulationOptionsTomlKey.NUM_SUPERNODES)
+    # Validation handled in SuperLinkSimulationOptions.__post_init__
+
+    backend_dict = options.get(SuperLinkSimulationOptionsTomlKey.BACKEND)
+    simulation_backend: SimulationBackendConfig | None = None
+
+    if isinstance(backend_dict, dict):
+        # Parse client resources
+        client_resources_dict = backend_dict.get(
+            SimulationBackendConfigTomlKey.CLIENT_RESOURCES
+        )
+        client_resources: SimulationClientResources | None = None
+        if isinstance(client_resources_dict, dict):
+            client_resources = SimulationClientResources(
+                num_cpus=client_resources_dict.get(
+                    SimulationClientResourcesTomlKey.NUM_CPUS
+                ),
+                num_gpus=client_resources_dict.get(
+                    SimulationClientResourcesTomlKey.NUM_GPUS
+                ),
+            )
+
+        # Parse init args
+        init_args_dict = backend_dict.get(SimulationBackendConfigTomlKey.INIT_ARGS)
+        init_args: SimulationInitArgs | None = None
+        if isinstance(init_args_dict, dict):
+            init_args = SimulationInitArgs(
+                num_cpus=init_args_dict.get(SimulationInitArgsTomlKey.NUM_CPUS),
+                num_gpus=init_args_dict.get(SimulationInitArgsTomlKey.NUM_GPUS),
+                logging_level=init_args_dict.get(
+                    SimulationInitArgsTomlKey.LOGGING_LEVEL
+                ),
+                log_to_drive=init_args_dict.get(SimulationInitArgsTomlKey.LOG_TO_DRIVE),
+            )
+
+        simulation_backend = SimulationBackendConfig(
+            name=backend_dict.get(
+                SimulationBackendConfigTomlKey.NAME, DEFAULT_SIMULATION_BACKEND_NAME
+            ),
+            client_resources=client_resources,
+            init_args=init_args,
+        )
+
+    # Note: validation happens in SuperLinkSimulationOptions.__post_init__
+    return SuperLinkSimulationOptions(
+        num_supernodes=cast(int, num_supernodes),
+        backend=simulation_backend,
+    )
+
+
 def init_flwr_config() -> None:
     """Initialize the Flower configuration file."""
     config_path = get_flwr_home() / FLOWER_CONFIG_FILE
@@ -663,19 +726,30 @@ def parse_superlink_connection(
     SuperLinkConnection
         The parsed SuperLink connection configuration.
     """
-    # Check required fields
+    # Check fields
     address = conn_dict.get(SuperLinkConnectionTomlKey.ADDRESS)
     root_certificates = conn_dict.get(SuperLinkConnectionTomlKey.ROOT_CERTIFICATES)
     insecure = conn_dict.get(SuperLinkConnectionTomlKey.INSECURE)
     enable_account_auth = conn_dict.get(SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH)
-    if not (
+    options = conn_dict.get("options")
+
+    is_address_setup = (
         isinstance(address, str)
         # root-certificates is optional in TOML (can be missing)
         and isinstance(root_certificates, (str, type(None)))
         and isinstance(insecure, bool)
         and isinstance(enable_account_auth, bool)
-    ):
+    )
+
+    is_simulation_setup = isinstance(options, dict)
+
+    if not (is_address_setup or is_simulation_setup):
         raise ValueError("Invalid SuperLink connection format.")
+
+    simulation_options: SuperLinkSimulationOptions | None = None
+    if is_simulation_setup:
+        options = cast(dict[str, Any], options)
+        simulation_options = _parse_simulation_options(options)
 
     # Build and return SuperLinkConnection
     return SuperLinkConnection(
@@ -684,6 +758,7 @@ def parse_superlink_connection(
         root_certificates=root_certificates,
         insecure=insecure,
         enable_account_auth=enable_account_auth,
+        options=simulation_options,
     )
 
 
