@@ -253,11 +253,71 @@ class TestSuperLinkConnection(unittest.TestCase):
         with self.assertRaises(ValueError):
             parse_superlink_connection(conn_dict, name)
 
+    def test_parse_superlink_connection_invalid_type(self) -> None:
+        """Test parse_superlink_connection with invalid type."""
+        conn_dict = {
+            SuperLinkConnectionTomlKey.ADDRESS: 123,  # Invalid type, should be str
+        }
+        name = "test_service"
+
+        with self.assertRaisesRegex(
+            ValueError, "Invalid value for key 'address': expected str, but got int"
+        ):
+            parse_superlink_connection(conn_dict, name)
+
+    def test_parse_superlink_connection_valid_cases(self) -> None:
+        """Test various valid connection configurations from valid.toml."""
+        # Case 1: SuperLink with address and enable-account-auth
+        conn_dict_1 = {
+            SuperLinkConnectionTomlKey.ADDRESS: "supergrid.flower.ai",
+            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
+        }
+        config_1 = parse_superlink_connection(conn_dict_1, "supergrid")
+        self.assertEqual(config_1.address, "supergrid.flower.ai")
+        self.assertTrue(config_1.enable_account_auth)
+        self.assertIsNone(config_1.options)
+
+        # Case 2: Local PoC with address and insecure
+        conn_dict_2 = {
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
+            SuperLinkConnectionTomlKey.INSECURE: True,
+        }
+        config_2 = parse_superlink_connection(conn_dict_2, "local-poc")
+        self.assertEqual(config_2.address, "127.0.0.1:9093")
+        self.assertTrue(config_2.insecure)
+
+        # Case 3: Local PoC Dev with address and root-certificates
+        conn_dict_3 = {
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
+            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+        }
+        config_3 = parse_superlink_connection(conn_dict_3, "local-poc-dev")
+        self.assertEqual(config_3.address, "127.0.0.1:9093")
+        self.assertEqual(config_3.root_certificates, "root_cert.crt")
+
+        # Case 4: Remote Sim with address, root-certificates, and options
+        conn_dict_4 = {
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
+            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+            SuperLinkConnectionTomlKey.OPTIONS: {
+                "num-supernodes": 10,
+                "backend": {
+                    "client-resources": {"num-cpus": 1},
+                },
+            },
+        }
+        config_4 = parse_superlink_connection(conn_dict_4, "remote-sim")
+        self.assertEqual(config_4.address, "127.0.0.1:9093")
+        self.assertEqual(config_4.root_certificates, "root_cert.crt")
+        self.assertIsNotNone(config_4.options)
+        assert config_4.options is not None
+        self.assertEqual(config_4.options.num_supernodes, 10)
+
     def test_parse_superlink_connection_simulation(self) -> None:
         """Test parse_superlink_connection with simulation options."""
         # Prepare
         conn_dict = {
-            "options": {
+            SuperLinkConnectionTomlKey.OPTIONS: {
                 "num-supernodes": 10,
                 "backend": {
                     "client-resources": {"num-cpus": 1.0, "num-gpus": 0.5},
@@ -365,7 +425,7 @@ class TestSuperLinkConnection(unittest.TestCase):
             [superlink.mock-service]
             address = "losthost:1234"
             insecure = false
-            enable-account-auth = false
+            enable-account-auth = true
 
             [superlink.mock-service-2]
             address = "losthost:9093"
@@ -582,9 +642,7 @@ class TestSuperLinkConnection(unittest.TestCase):
         # Prepare
         conn_dict = {
             SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
-            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: None,
-            SuperLinkConnectionTomlKey.INSECURE: False,
-            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: False,
+            SuperLinkConnectionTomlKey.INSECURE: True,
             "options": {"num-supernodes": 5},
         }
         name = "mixed-connection"
