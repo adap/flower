@@ -75,3 +75,18 @@ class NodeStatus:
     def __new__(cls) -> NodeStatus:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+# CLI connection configuration file name
+FLOWER_CONFIG_FILE = "config.toml"
+
+
+class SuperLinkConnectionTomlKey:
+    """TOML keys for SuperLink connection configuration."""
+
+    SUPERLINK = "superlink"
+    DEFAULT = "default"
+    ADDRESS = "address"
+    ROOT_CERTIFICATES = "root-certificates"
+    INSECURE = "insecure"
+    ENABLE_ACCOUNT_AUTH = "enable-account-auth"
