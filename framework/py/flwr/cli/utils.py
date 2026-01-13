@@ -49,6 +49,7 @@ from flwr.common.grpc import (
     on_channel_state_change,
 )
 from flwr.supercore.constant import (
+    DEFAULT_FLOWER_CONFIG_TOML,
     DEFAULT_SIMULATION_BACKEND_NAME,
     FLOWER_CONFIG_FILE,
     SimulationBackendConfigTomlKey,
@@ -64,11 +65,6 @@ from flwr.supercore.typing import (
     SuperLinkConnection,
     SuperLinkSimulationOptions,
 )
-    DEFAULT_FLOWER_CONFIG_TOML,
-    FLOWER_CONFIG_FILE,
-    SuperLinkConnectionTomlKey,
-)
-from flwr.supercore.typing import SuperLinkConnection
 from flwr.supercore.utils import get_flwr_home
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
@@ -695,6 +691,8 @@ def _parse_simulation_options(options: dict[str, Any]) -> SuperLinkSimulationOpt
         num_supernodes=cast(int, num_supernodes),
         backend=simulation_backend,
     )
+
+
 def init_flwr_config() -> None:
     """Initialize the Flower configuration file."""
     config_path = get_flwr_home() / FLOWER_CONFIG_FILE

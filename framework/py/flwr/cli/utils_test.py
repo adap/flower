@@ -33,16 +33,16 @@ from flwr.common.constant import (
     FLWR_HOME,
     REFRESH_TOKEN_KEY,
 )
-from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperLinkConnectionTomlKey
+from flwr.supercore.constant import (
+    DEFAULT_FLOWER_CONFIG_TOML,
+    FLOWER_CONFIG_FILE,
+    SuperLinkConnectionTomlKey,
+)
 from flwr.supercore.typing import (
     SimulationBackendConfig,
     SimulationClientResources,
     SuperLinkConnection,
     SuperLinkSimulationOptions,
-from flwr.supercore.constant import (
-    DEFAULT_FLOWER_CONFIG_TOML,
-    FLOWER_CONFIG_FILE,
-    SuperLinkConnectionTomlKey,
 )
 
 from .utils import (
