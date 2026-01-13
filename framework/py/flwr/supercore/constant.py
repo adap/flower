@@ -91,3 +91,18 @@ options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 1
 options.backend.client-resources.num-gpus = 0
 """
+
+
+# CLI connection configuration file name
+FLOWER_CONFIG_FILE = "config.toml"
+
+
+class SuperLinkConnectionTomlKey:
+    """TOML keys for SuperLink connection configuration."""
+
+    SUPERLINK = "superlink"
+    DEFAULT = "default"
+    ADDRESS = "address"
+    ROOT_CERTIFICATES = "root-certificates"
+    INSECURE = "insecure"
+    ENABLE_ACCOUNT_AUTH = "enable-account-auth"

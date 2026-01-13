@@ -30,6 +30,9 @@ from flwr.cli.utils import (
     load_gitignore_patterns,
     validate_credentials_content,
 )
+
+import typer
+
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
@@ -38,6 +41,16 @@ from flwr.common.constant import (
     REFRESH_TOKEN_KEY,
 )
 from flwr.supercore.constant import DEFAULT_CONFIG_TOML
+from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperLinkConnectionTomlKey
+
+from .utils import (
+    build_pathspec,
+    get_sha256_hash,
+    load_gitignore_patterns,
+    parse_superlink_connection,
+    read_superlink_connection,
+    validate_credentials_content,
+)
 
 
 class TestGetSHA256Hash(unittest.TestCase):
@@ -200,3 +213,222 @@ class TestInitFlwrConfig(unittest.TestCase):
                 self.assertEqual(
                     config_path.read_text(encoding="utf-8"), "existing_content"
                 )
+
+
+class TestSuperLinkConnection(unittest.TestCase):
+    """Unit tests for SuperLink connections."""
+
+    def test_parse_superlink_connection_valid(self) -> None:
+        """Test parse_superlink_connection with valid input."""
+        # Prepare
+        conn_dict = {
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
+            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+            SuperLinkConnectionTomlKey.INSECURE: False,
+            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
+        }
+        name = "test_service"
+
+        # Execute
+        config = parse_superlink_connection(conn_dict, name)
+
+        # Assert
+        self.assertEqual(config.name, name)
+        self.assertEqual(config.address, "127.0.0.1:8080")
+        self.assertEqual(config.root_certificates, "root_cert.crt")
+        self.assertFalse(config.insecure)
+        self.assertTrue(config.enable_account_auth)
+
+    def test_parse_superlink_connection_invalid(self) -> None:
+        """Test parse_superlink_connection with invalid input."""
+        # Missing required fields
+        conn_dict = {
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
+        }
+        name = "test_service"
+
+        with self.assertRaises(ValueError):
+            parse_superlink_connection(conn_dict, name)
+
+    @patch("flwr.cli.utils.get_flwr_home")
+    def test_read_superlink_connection_defaults(
+        self, mock_get_flwr_home: unittest.mock.Mock
+    ) -> None:
+        """Test read_superlink_connection uses default when no arg provided."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Prepare
+            mock_get_flwr_home.return_value = Path(temp_dir)
+            config_path = Path(temp_dir) / FLOWER_CONFIG_FILE
+
+            # Create TOML content
+            toml_content = """
+            [superlink]
+            default = "mock-service-2"
+
+            [superlink.mock-service]
+            address = "losthost:1234"
+            insecure = false
+            enable-account-auth = false
+
+            [superlink.mock-service-2]
+            address = "losthost:9093"
+            insecure = true
+            enable-account-auth = false
+            """
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                f.write(toml_content)
+
+            # Execute
+            config = read_superlink_connection()
+
+            # Assert
+            assert config is not None
+            self.assertEqual(config.name, "mock-service-2")
+            self.assertEqual(config.address, "losthost:9093")
+
+    @patch("flwr.cli.utils.get_flwr_home")
+    def test_read_superlink_connection_explicit(
+        self, mock_get_flwr_home: unittest.mock.Mock
+    ) -> None:
+        """Test read_superlink_connection with explicit connection name."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Prepare
+            mock_get_flwr_home.return_value = Path(temp_dir)
+            config_path = Path(temp_dir) / FLOWER_CONFIG_FILE
+
+            # Create TOML content
+            toml_content = """
+            [superlink]
+            default = "mock-service-2"
+
+            [superlink.mock-service]
+            address = "losthost:1234"
+            insecure = false
+            enable-account-auth = false
+
+            [superlink.mock-service-2]
+            address = "losthost:9093"
+            insecure = true
+            enable-account-auth = false
+            """
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                f.write(toml_content)
+
+            # Execute
+            config = read_superlink_connection("mock-service")
+
+            # Assert
+            assert config is not None
+            self.assertEqual(config.name, "mock-service")
+            self.assertEqual(config.address, "losthost:1234")
+
+    @patch("flwr.cli.utils.get_flwr_home")
+    def test_read_superlink_connection_explicit_missing(
+        self, mock_get_flwr_home: unittest.mock.Mock
+    ) -> None:
+        """Test read_superlink_connection with explicit but missing connection."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            mock_get_flwr_home.return_value = Path(temp_dir)
+            config_path = Path(temp_dir) / FLOWER_CONFIG_FILE
+
+            # Create TOML content
+            toml_content = """
+            [superlink]
+            default = "mock-service"
+
+            [superlink.mock-service]
+            address = "losthost:9093"
+            insecure = false
+            enable-account-auth = false
+            """
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                f.write(toml_content)
+
+            # Execute & Assert
+            with self.assertRaises(typer.Exit):
+                read_superlink_connection("missing-service")
+
+    @patch("flwr.cli.utils.get_flwr_home")
+    def test_read_superlink_connection_no_default_failure(
+        self, mock_get_flwr_home: unittest.mock.Mock
+    ) -> None:
+        """Test failure when no default is set and no arg provided."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            mock_get_flwr_home.return_value = Path(temp_dir)
+            config_path = Path(temp_dir) / FLOWER_CONFIG_FILE
+
+            # Create TOML content without default
+            toml_content = """
+            [superlink]
+            # No default
+
+            [superlink.mock-service]
+            address = "losthost:9093"
+            insecure = false
+            enable-account-auth = false
+            """
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                f.write(toml_content)
+
+            # Execute & Assert
+            with self.assertRaises(typer.Exit):
+                read_superlink_connection()
+
+    @patch("flwr.cli.utils.get_flwr_home")
+    def test_read_superlink_connection_default_missing_connection(
+        self, mock_get_flwr_home: unittest.mock.Mock
+    ) -> None:
+        """Test failure when default is set but the connection block is missing."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            mock_get_flwr_home.return_value = Path(temp_dir)
+            config_path = Path(temp_dir) / FLOWER_CONFIG_FILE
+
+            # Default points to "missing-service", which is not defined
+            toml_content = """
+            [superlink]
+            default = "missing-service"
+
+            [superlink.other-service]
+            address = "losthost:9093"
+            insecure = false
+            enable-account-auth = false
+            """
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                f.write(toml_content)
+
+            # Execute & Assert
+            with self.assertRaises(typer.Exit):
+                read_superlink_connection()
+
+    @patch("flwr.cli.utils.get_flwr_home")
+    def test_read_superlink_connection_no_file(
+        self, mock_get_flwr_home: unittest.mock.Mock
+    ) -> None:
+        """Test read_superlink_connection when file does not exist."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            mock_get_flwr_home.return_value = Path(temp_dir)
+
+            config = read_superlink_connection()
+
+            self.assertIsNone(config)
+
+    @patch("flwr.cli.utils.get_flwr_home")
+    def test_read_superlink_connection_corrupted(
+        self, mock_get_flwr_home: unittest.mock.Mock
+    ) -> None:
+        """Test read_superlink_connection when file is corrupted."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            mock_get_flwr_home.return_value = Path(temp_dir)
+            config_path = Path(temp_dir) / FLOWER_CONFIG_FILE
+
+            # Write invalid TOML
+            with open(config_path, "w", encoding="utf-8") as f:
+                f.write("invalid = toml [ [")
+
+            with self.assertRaises(typer.Exit):
+                read_superlink_connection()

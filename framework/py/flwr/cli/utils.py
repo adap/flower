@@ -26,6 +26,7 @@ from typing import Any, cast
 
 import grpc
 import pathspec
+import tomli
 import typer
 
 from flwr.common.constant import (
@@ -49,7 +50,9 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
-from flwr.supercore.constant import DEFAULT_CONFIG_TOML
+from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperLinkConnectionTomlKey
+from flwr.supercore.typing import SuperLinkConnection
+from flwr.supercore.utils import get_flwr_home
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
@@ -640,3 +643,119 @@ def init_flwr_config() -> None:
             f"\nFlower configuration not found. Created default configuration"
             f" at {config_path}\n",
         )
+
+
+def parse_superlink_connection(
+    conn_dict: dict[str, Any], name: str
+) -> SuperLinkConnection:
+    """Parse SuperLink connection configuration from a TOML dictionary.
+
+    Parameters
+    ----------
+    conn_dict : dict[str, Any]
+        The TOML configuration dictionary for the connection.
+    name : str
+        The name of the connection.
+
+    Returns
+    -------
+    SuperLinkConnection
+        The parsed SuperLink connection configuration.
+    """
+    # Check required fields
+    address = conn_dict.get(SuperLinkConnectionTomlKey.ADDRESS)
+    root_certificates = conn_dict.get(SuperLinkConnectionTomlKey.ROOT_CERTIFICATES)
+    insecure = conn_dict.get(SuperLinkConnectionTomlKey.INSECURE)
+    enable_account_auth = conn_dict.get(SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH)
+    if not (
+        isinstance(address, str)
+        # root-certificates is optional in TOML (can be missing)
+        and isinstance(root_certificates, (str, type(None)))
+        and isinstance(insecure, bool)
+        and isinstance(enable_account_auth, bool)
+    ):
+        raise ValueError("Invalid SuperLink connection format.")
+
+    # Build and return SuperLinkConnection
+    return SuperLinkConnection(
+        name=name,
+        address=address,
+        root_certificates=root_certificates,
+        insecure=insecure,
+        enable_account_auth=enable_account_auth,
+    )
+
+
+def read_superlink_connection(
+    connection_name: str | None = None,
+) -> SuperLinkConnection | None:
+    """Read a SuperLink connection from the Flower configuration file.
+
+    Parameters
+    ----------
+    connection_name : str | None
+        The name of the SuperLink connection to load. If None, the default connection
+        will be loaded.
+
+    Returns
+    -------
+    SuperLinkConnection | None
+        The SuperLink connection, or None if the config file is missing or the
+        requested connection (or default) cannot be found.
+
+    Raises
+    ------
+    typer.Exit
+        Raised if the configuration file is corrupted, or if the requested
+        connection (or default) cannot be found.
+    """
+    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
+    if not config_path.exists():
+        return None
+
+    try:
+        with config_path.open("rb") as file:
+            toml_dict = tomli.load(file)
+
+        superlink_config = toml_dict.get(SuperLinkConnectionTomlKey.SUPERLINK, {})
+
+        # Load the default SuperLink connection when not provided
+        if connection_name is None:
+            connection_name = superlink_config.get(SuperLinkConnectionTomlKey.DEFAULT)
+
+        # Exit when no connection name is available
+        if connection_name is None:
+            typer.secho(
+                "❌ No SuperLink connection set. A SuperLink connection needs to be "
+                "provided or one must be set as default in the Flower "
+                f"configuration file ({config_path}). Specify a default SuperLink "
+                "connection by adding: \n\n[superlink]\ndefault = 'connection_name'\n\n"
+                f"to the Flower configuration file ({config_path}).",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(code=1)
+
+        # Try to find the connection in the superlink dict
+        connection_config = superlink_config.get(connection_name)
+
+        if not connection_config:
+            error_msg = (
+                f"❌ {'Default ' if connection_name else ''} SuperLink connection "
+            )
+            error_msg += (
+                f"'{connection_name}' not found in Flower Config ({config_path})"
+            )
+
+            typer.secho(error_msg, fg=typer.colors.RED, err=True)
+            raise typer.Exit(code=1)
+
+        return parse_superlink_connection(connection_config, name=connection_name)
+
+    except (tomli.TOMLDecodeError, KeyError, ValueError) as err:
+        typer.secho(
+            f"❌ SuperLink connection is corrupted: {err}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from err
