@@ -48,7 +48,11 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
-from flwr.supercore.constant import FLOWER_CONFIG_FILE, SuperLinkConnectionTomlKey
+from flwr.supercore.constant import (
+    DEFAULT_FLOWER_CONFIG_TOML,
+    FLOWER_CONFIG_FILE,
+    SuperLinkConnectionTomlKey,
+)
 from flwr.supercore.typing import SuperLinkConnection
 from flwr.supercore.utils import get_flwr_home
 
@@ -624,6 +628,22 @@ def validate_credentials_content(creds_path: Path) -> str:
         raise typer.Exit(code=1)
 
     return creds[ACCESS_TOKEN_KEY]
+
+
+def init_flwr_config() -> None:
+    """Initialize the Flower configuration file."""
+    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
+
+    if not config_path.exists():
+        # Create parent directory if it doesn't exist
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        # Write Flower config file
+        config_path.write_text(DEFAULT_FLOWER_CONFIG_TOML, encoding="utf-8")
+
+        typer.secho(
+            f"\nFlower configuration not found. Created default configuration"
+            f" at {config_path}\n",
+        )
 
 
 def parse_superlink_connection(
