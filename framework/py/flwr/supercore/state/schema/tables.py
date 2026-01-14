@@ -15,6 +15,7 @@
 """SQLAlchemy Core Table definitions for LinkState."""
 
 from sqlalchemy import (
+    TIMESTAMP,
     Column,
     Float,
     ForeignKey,
@@ -40,10 +41,10 @@ node = Table(
     Column("owner_name", String),
     Column("status", String),
     Column("registered_at", String),
-    Column("last_activated_at", String),
-    Column("last_deactivated_at", String),
-    Column("unregistered_at", String),
-    Column("online_until", Float),
+    Column("last_activated_at", String, nullable=True),
+    Column("last_deactivated_at", String, nullable=True),
+    Column("unregistered_at", String, nullable=True),
+    Column("online_until", TIMESTAMP, nullable=True),
     Column("heartbeat_interval", Float),
     Column("public_key", LargeBinary, unique=True),
     # Indexes
@@ -137,8 +138,8 @@ message_ins = Table(
     Column("delivered_at", String),
     Column("ttl", Float),
     Column("message_type", String),
-    Column("content", LargeBinary),
-    Column("error", LargeBinary),
+    Column("content", LargeBinary, nullable=True),
+    Column("error", LargeBinary, nullable=True),
 )
 
 
@@ -158,6 +159,6 @@ message_res = Table(
     Column("delivered_at", String),
     Column("ttl", Float),
     Column("message_type", String),
-    Column("content", LargeBinary),
-    Column("error", LargeBinary),
+    Column("content", LargeBinary, nullable=True),
+    Column("error", LargeBinary, nullable=True),
 )

@@ -68,16 +68,21 @@ class SchemaParityTest(unittest.TestCase):
 
     def test_table_names_match(self) -> None:
         """Verify both schemas have the same table names."""
+        # Prepare
         raw_tables = set(self.raw_inspector.get_table_names())
         sqla_tables = set(self.sqla_inspector.get_table_names())
 
+        # Assert
         self.assertEqual(raw_tables, sqla_tables, "Table names do not match")
 
     def test_column_names_match(self) -> None:
         """Verify each table has the same column names."""
         for table_name in self.raw_inspector.get_table_names():
+            # Prepare
             raw_cols = {c["name"] for c in self.raw_inspector.get_columns(table_name)}
             sqla_cols = {c["name"] for c in self.sqla_inspector.get_columns(table_name)}
+            
+            # Assert
             self.assertEqual(
                 raw_cols,
                 sqla_cols,
@@ -87,8 +92,11 @@ class SchemaParityTest(unittest.TestCase):
     def test_column_order_matches(self) -> None:
         """Verify columns are in the same order (important for INSERT statements)."""
         for table_name in self.raw_inspector.get_table_names():
+            # Prepare
             raw_cols = [c["name"] for c in self.raw_inspector.get_columns(table_name)]
             sqla_cols = [c["name"] for c in self.sqla_inspector.get_columns(table_name)]
+
+            # Assert
             self.assertEqual(
                 raw_cols,
                 sqla_cols,
@@ -98,12 +106,15 @@ class SchemaParityTest(unittest.TestCase):
     def test_index_names_match(self) -> None:
         """Verify both schemas have the same indexes."""
         for table_name in self.raw_inspector.get_table_names():
+            # Prepare
             raw_indexes = {
                 idx["name"] for idx in self.raw_inspector.get_indexes(table_name)
             }
             sqla_indexes = {
                 idx["name"] for idx in self.sqla_inspector.get_indexes(table_name)
             }
+
+            # Assert
             self.assertEqual(
                 raw_indexes,
                 sqla_indexes,
@@ -113,8 +124,8 @@ class SchemaParityTest(unittest.TestCase):
     def test_unique_constraints_match(self) -> None:
         """Verify unique constraints are the same."""
         for table_name in self.raw_inspector.get_table_names():
-            # Get unique constraints from indexes (SQLite reports them as unique
-            # indexes)
+            # Prepare: Get unique constraints from indexes (SQLite reports them as
+            # unique indexes)
             raw_unique_cols = {
                 tuple(idx["column_names"])
                 for idx in self.raw_inspector.get_indexes(table_name)
@@ -125,6 +136,8 @@ class SchemaParityTest(unittest.TestCase):
                 for idx in self.sqla_inspector.get_indexes(table_name)
                 if idx["unique"]
             }
+
+            # Assert
             self.assertEqual(
                 raw_unique_cols,
                 sqla_unique_cols,
@@ -137,6 +150,9 @@ class SchemaParityTest(unittest.TestCase):
         Note: SQLite type affinity means types are loosely matched. We compare
         the type strings after normalizing common equivalences.
         """
+        # Keep this strict so new or renamed SQLite column types fail loudly.
+        expected_raw_types = {"INTEGER", "TEXT", "REAL", "BLOB", "TIMESTAMP"}
+        raw_types_seen: set[str] = set()
 
         # SQLite type affinity mapping: different spellings map to same affinity
         # TEXT, VARCHAR, String -> TEXT affinity
@@ -161,6 +177,7 @@ class SchemaParityTest(unittest.TestCase):
                 return "REAL"
             return type_upper
 
+        # Assert: Check types for each table
         for table_name in self.raw_inspector.get_table_names():
             raw_cols = {
                 c["name"]: normalize_type(str(c["type"]))
@@ -170,6 +187,10 @@ class SchemaParityTest(unittest.TestCase):
                 c["name"]: normalize_type(str(c["type"]))
                 for c in self.sqla_inspector.get_columns(table_name)
             }
+            raw_types_seen.update(
+                str(c["type"]).upper()
+                for c in self.raw_inspector.get_columns(table_name)
+            )
 
             for col_name in raw_cols:
                 self.assertEqual(
@@ -178,10 +199,16 @@ class SchemaParityTest(unittest.TestCase):
                     f"Type mismatch for column '{col_name}' in table '{table_name}': "
                     f"raw={raw_cols[col_name]}, sqla={sqla_cols[col_name]}",
                 )
+        self.assertEqual(
+            expected_raw_types,
+            raw_types_seen,
+            "Raw SQLite column types changed; update normalize_type or expectations.",
+        )
 
     def test_foreign_keys_match(self) -> None:
         """Verify foreign key constraints are the same."""
         for table_name in self.raw_inspector.get_table_names():
+            # Prepare
             raw_fks = {
                 (fk["referred_table"], tuple(fk["constrained_columns"]))
                 for fk in self.raw_inspector.get_foreign_keys(table_name)
@@ -190,6 +217,8 @@ class SchemaParityTest(unittest.TestCase):
                 (fk["referred_table"], tuple(fk["constrained_columns"]))
                 for fk in self.sqla_inspector.get_foreign_keys(table_name)
             }
+
+            # Assert
             self.assertEqual(
                 raw_fks,
                 sqla_fks,
@@ -199,6 +228,7 @@ class SchemaParityTest(unittest.TestCase):
     def test_nullable_constraints_match(self) -> None:
         """Verify nullable constraints are the same."""
         for table_name in self.raw_inspector.get_table_names():
+            # Prepare
             raw_nullable = {
                 c["name"]: c["nullable"]
                 for c in self.raw_inspector.get_columns(table_name)
@@ -208,6 +238,7 @@ class SchemaParityTest(unittest.TestCase):
                 for c in self.sqla_inspector.get_columns(table_name)
             }
 
+            # Assert
             for col_name in raw_nullable:
                 self.assertEqual(
                     raw_nullable[col_name],
