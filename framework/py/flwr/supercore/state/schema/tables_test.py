@@ -81,7 +81,7 @@ class SchemaParityTest(unittest.TestCase):
             # Prepare
             raw_cols = {c["name"] for c in self.raw_inspector.get_columns(table_name)}
             sqla_cols = {c["name"] for c in self.sqla_inspector.get_columns(table_name)}
-            
+
             # Assert
             self.assertEqual(
                 raw_cols,
