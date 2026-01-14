@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower type definitions for infrastructure."""
+"""Flower command line interface type definitions."""
 
 
 from dataclasses import dataclass
 
-from flwr.supercore.constant import (
+from flwr.cli.constant import (
     DEFAULT_SIMULATION_BACKEND_NAME,
     SuperLinkConnectionTomlKey,
 )

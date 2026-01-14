@@ -26,8 +26,7 @@ import tomli
 import typer
 from parameterized import parameterized
 
-from flwr.common.constant import FLWR_HOME
-from flwr.supercore.constant import (
+from flwr.cli.constant import (
     DEFAULT_FLOWER_CONFIG_TOML,
     FLOWER_CONFIG_FILE,
     SimulationBackendConfigTomlKey,
@@ -35,12 +34,13 @@ from flwr.supercore.constant import (
     SuperLinkConnectionTomlKey,
     SuperLinkSimulationOptionsTomlKey,
 )
-from flwr.supercore.typing import (
+from flwr.cli.typing import (
     SimulationBackendConfig,
     SimulationClientResources,
     SuperLinkConnection,
     SuperLinkSimulationOptions,
 )
+from flwr.common.constant import FLWR_HOME
 
 from .flower_config import (
     init_flwr_config,
