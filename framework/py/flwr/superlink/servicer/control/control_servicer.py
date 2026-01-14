@@ -196,7 +196,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Create an empty context for the Run
             context = Context(
                 run_id=run_id,
-                node_id=SUPERLINK_NODE_IDgit,
+                node_id=SUPERLINK_NODE_ID,
                 # Dict is invariant in mypy
                 node_config=node_config,  # type: ignore[arg-type]
                 state=RecordDict(),
