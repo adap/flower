@@ -17,7 +17,10 @@
 
 from dataclasses import dataclass
 
-from flwr.supercore.constant import DEFAULT_SIMULATION_BACKEND_NAME
+from flwr.supercore.constant import (
+    DEFAULT_SIMULATION_BACKEND_NAME,
+    SuperLinkConnectionTomlKey,
+)
 
 
 @dataclass
@@ -94,4 +97,50 @@ class SuperLinkConnection:
     root_certificates: str | None = None
     insecure: bool | None = None
     enable_account_auth: bool | None = None
+    federation: str | None = None
     options: SuperLinkSimulationOptions | None = None
+
+    def __post_init__(self) -> None:
+        """Validate SuperLink connection configuration."""
+        if self.address is not None and not isinstance(self.address, str):
+            raise ValueError(
+                f"Invalid value for key '{SuperLinkConnectionTomlKey.ADDRESS}': "
+                f"expected str, but got {type(self.address).__name__}."
+            )
+        if self.root_certificates is not None and not isinstance(
+            self.root_certificates, str
+        ):
+            raise ValueError(
+                "Invalid value for key "
+                f"'{SuperLinkConnectionTomlKey.ROOT_CERTIFICATES}': "
+                f"expected str, but got {type(self.root_certificates).__name__}."
+            )
+        if self.insecure is not None and not isinstance(self.insecure, bool):
+            raise ValueError(
+                f"Invalid value for key '{SuperLinkConnectionTomlKey.INSECURE}': "
+                f"but got {type(self.insecure).__name__}."
+            )
+        if self.enable_account_auth is not None and not isinstance(
+            self.enable_account_auth, bool
+        ):
+            raise ValueError(
+                "Invalid value for key "
+                f"'{SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH}': "
+                f"expected bool, but got {type(self.enable_account_auth).__name__}."
+            )
+
+        if self.federation is not None and not isinstance(self.federation, str):
+            raise ValueError(
+                "Invalid value for key "
+                f"'{SuperLinkConnectionTomlKey.FEDERATION}': "
+                f"expected str, but got {type(self.federation).__name__}."
+            )
+
+        # The connection needs to have either an address or options (or both).
+        if self.address is None and self.options is None:
+            raise ValueError(
+                "Invalid SuperLink connection format: "
+                f"'{SuperLinkConnectionTomlKey.ADDRESS}' and/or "
+                f"'{SuperLinkConnectionTomlKey.OPTIONS}' key "
+                "need to be specified."
+            )

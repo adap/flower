@@ -726,38 +726,27 @@ def parse_superlink_connection(
     SuperLinkConnection
         The parsed SuperLink connection configuration.
     """
-    # Check fields
-    address = conn_dict.get(SuperLinkConnectionTomlKey.ADDRESS)
-    root_certificates = conn_dict.get(SuperLinkConnectionTomlKey.ROOT_CERTIFICATES)
-    insecure = conn_dict.get(SuperLinkConnectionTomlKey.INSECURE)
-    enable_account_auth = conn_dict.get(SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH)
-    options = conn_dict.get("options")
-
-    is_address_setup = (
-        isinstance(address, str)
-        # root-certificates is optional in TOML (can be missing)
-        and isinstance(root_certificates, (str, type(None)))
-        and isinstance(insecure, bool)
-        and isinstance(enable_account_auth, bool)
-    )
-
-    is_simulation_setup = isinstance(options, dict)
-
-    if not (is_address_setup or is_simulation_setup):
-        raise ValueError("Invalid SuperLink connection format.")
-
     simulation_options: SuperLinkSimulationOptions | None = None
-    if is_simulation_setup:
-        options = cast(dict[str, Any], options)
-        simulation_options = _parse_simulation_options(options)
+    if SuperLinkConnectionTomlKey.OPTIONS in conn_dict:
+        options = conn_dict[SuperLinkConnectionTomlKey.OPTIONS]
+        if isinstance(options, dict):
+            simulation_options = _parse_simulation_options(options)
+        else:
+            raise ValueError(
+                f"Invalid value for key '{SuperLinkConnectionTomlKey.OPTIONS}': "
+                f"expected dict, but got {type(options).__name__}."
+            )
 
     # Build and return SuperLinkConnection
     return SuperLinkConnection(
         name=name,
-        address=address,
-        root_certificates=root_certificates,
-        insecure=insecure,
-        enable_account_auth=enable_account_auth,
+        address=conn_dict.get(SuperLinkConnectionTomlKey.ADDRESS),
+        root_certificates=conn_dict.get(SuperLinkConnectionTomlKey.ROOT_CERTIFICATES),
+        insecure=conn_dict.get(SuperLinkConnectionTomlKey.INSECURE),
+        enable_account_auth=conn_dict.get(
+            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH
+        ),
+        federation=conn_dict.get(SuperLinkConnectionTomlKey.FEDERATION),
         options=simulation_options,
     )
 

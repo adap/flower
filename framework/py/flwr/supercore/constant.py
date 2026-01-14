@@ -89,6 +89,15 @@ class SuperLinkConnectionTomlKey:
     ROOT_CERTIFICATES = "root-certificates"
     INSECURE = "insecure"
     ENABLE_ACCOUNT_AUTH = "enable-account-auth"
+    FEDERATION = "federation"
+    OPTIONS = "options"
+
+
+class SuperLinkSimulationOptionsTomlKey:
+    """TOML keys for SuperLinkSimulationOptions."""
+
+    NUM_SUPERNODES = "num-supernodes"
+    BACKEND = "backend"
 
 
 class SimulationClientResourcesTomlKey:
@@ -115,25 +124,19 @@ class SimulationBackendConfigTomlKey:
     NAME = "name"
 
 
-class SuperLinkSimulationOptionsTomlKey:
-    """TOML keys for SuperLinkSimulationOptions."""
-
-    NUM_SUPERNODES = "num-supernodes"
-    BACKEND = "backend"
-
-
 # CLI connection configuration file name
 FLOWER_CONFIG_FILE = "config.toml"
 
 # The default configuration for the Flower config file
-DEFAULT_FLOWER_CONFIG_TOML = f"""[{SuperLinkConnectionTomlKey.SUPERLINK}]
-{SuperLinkConnectionTomlKey.DEFAULT} = "local-simulation"
+DEFAULT_FLOWER_CONFIG_TOML = """[superlink]
+default = "local"
 
-[{SuperLinkConnectionTomlKey.SUPERLINK}.supergrid]
-{SuperLinkConnectionTomlKey.ADDRESS} = "supergrid.flower.ai"
-{SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH} = true
+[superlink.supergrid]
+address = "supergrid.flower.ai"
+enable-account-auth = true
+federation = "YOUR-FEDERATION-HERE"
 
-[{SuperLinkConnectionTomlKey.SUPERLINK}.local-simulation]
+[superlink.local]
 options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 1
 options.backend.client-resources.num-gpus = 0
