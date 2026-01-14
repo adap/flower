@@ -401,7 +401,7 @@ class TestSuperLinkConnection(unittest.TestCase):
         config = parse_superlink_connection(conn_dict, name)
         self.assertEqual(config, expected_config)
 
-    def test_parse_superlink_connection_simulation(self) -> None:
+    def test_parse_superlink_connection_simulation_full(self) -> None:
         """Test parse_superlink_connection with simulation options."""
         # Prepare
         conn_dict = {
