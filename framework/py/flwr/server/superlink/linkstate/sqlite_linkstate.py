@@ -87,12 +87,6 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
-SQL_CREATE_TABLE_PUBLIC_KEY = """
-CREATE TABLE IF NOT EXISTS public_key(
-    public_key      BLOB PRIMARY KEY
-);
-"""
-
 SQL_CREATE_INDEX_ONLINE_UNTIL = """
 CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 """
@@ -206,7 +200,6 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             SQL_CREATE_TABLE_MESSAGE_INS,
             SQL_CREATE_TABLE_MESSAGE_RES,
             SQL_CREATE_TABLE_NODE,
-            SQL_CREATE_TABLE_PUBLIC_KEY,
             SQL_CREATE_INDEX_ONLINE_UNTIL,
             SQL_CREATE_INDEX_OWNER_AID,
             SQL_CREATE_INDEX_NODE_STATUS,
