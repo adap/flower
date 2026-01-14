@@ -26,6 +26,9 @@ README.md @jafermarq @tanertopal @danieljanes
 # Flower Framework Docs
 /framework/docs @panh99 @tanertopal @danieljanes
 
+# Flower Framework E2E Tests
+/framework/e2e @panh99 @tanertopal @danieljanes
+
 # Flower Templates
 /framework/py/flwr/cli/new/templates @jafermarq @tanertopal @danieljanes
 
