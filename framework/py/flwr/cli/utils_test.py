@@ -26,6 +26,7 @@ from unittest.mock import patch
 
 import tomli
 import typer
+from parameterized import parameterized
 
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
@@ -290,17 +291,6 @@ class TestSuperLinkConnection(unittest.TestCase):
         self.assertFalse(config.insecure)
         self.assertTrue(config.enable_account_auth)
 
-    def test_parse_superlink_connection_invalid(self) -> None:
-        """Test parse_superlink_connection with invalid input."""
-        # Missing required fields
-        conn_dict = {
-            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
-        }
-        name = "test_service"
-
-        with self.assertRaises(ValueError):
-            parse_superlink_connection(conn_dict, name)
-
     def test_parse_superlink_connection_invalid_type(self) -> None:
         """Test parse_superlink_connection with invalid type."""
         conn_dict = {
@@ -313,53 +303,93 @@ class TestSuperLinkConnection(unittest.TestCase):
         ):
             parse_superlink_connection(conn_dict, name)
 
-    def test_parse_superlink_connection_valid_cases(self) -> None:
-        """Test various valid connection configurations from valid.toml."""
-        # Case 1: SuperLink with address and enable-account-auth
-        conn_dict_1 = {
-            SuperLinkConnectionTomlKey.ADDRESS: "supergrid.flower.ai",
-            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
-        }
-        config_1 = parse_superlink_connection(conn_dict_1, "supergrid")
-        self.assertEqual(config_1.address, "supergrid.flower.ai")
-        self.assertTrue(config_1.enable_account_auth)
-        self.assertIsNone(config_1.options)
-
-        # Case 2: Local PoC with address and insecure
-        conn_dict_2 = {
-            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
-            SuperLinkConnectionTomlKey.INSECURE: True,
-        }
-        config_2 = parse_superlink_connection(conn_dict_2, "local-poc")
-        self.assertEqual(config_2.address, "127.0.0.1:9093")
-        self.assertTrue(config_2.insecure)
-
-        # Case 3: Local PoC Dev with address and root-certificates
-        conn_dict_3 = {
-            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
-            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
-        }
-        config_3 = parse_superlink_connection(conn_dict_3, "local-poc-dev")
-        self.assertEqual(config_3.address, "127.0.0.1:9093")
-        self.assertEqual(config_3.root_certificates, "root_cert.crt")
-
-        # Case 4: Remote Sim with address, root-certificates, and options
-        conn_dict_4 = {
-            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
-            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
-            SuperLinkConnectionTomlKey.OPTIONS: {
-                "num-supernodes": 10,
-                "backend": {
-                    "client-resources": {"num-cpus": 1},
+    @parameterized.expand(  # type: ignore
+        [
+            (
+                "supergrid",
+                {
+                    SuperLinkConnectionTomlKey.ADDRESS: "supergrid.flower.ai",
+                    SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
                 },
-            },
-        }
-        config_4 = parse_superlink_connection(conn_dict_4, "remote-sim")
-        self.assertEqual(config_4.address, "127.0.0.1:9093")
-        self.assertEqual(config_4.root_certificates, "root_cert.crt")
-        self.assertIsNotNone(config_4.options)
-        assert config_4.options is not None
-        self.assertEqual(config_4.options.num_supernodes, 10)
+                SuperLinkConnection(
+                    name="supergrid",
+                    address="supergrid.flower.ai",
+                    enable_account_auth=True,
+                ),
+            ),
+            (
+                "local",
+                {
+                    SuperLinkConnectionTomlKey.OPTIONS: {
+                        "num-supernodes": 10,
+                    }
+                },
+                SuperLinkConnection(
+                    name="local",
+                    options=SuperLinkSimulationOptions(
+                        num_supernodes=10,
+                    ),
+                ),
+            ),
+            (
+                "local-poc",
+                {
+                    SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
+                    SuperLinkConnectionTomlKey.INSECURE: True,
+                },
+                SuperLinkConnection(
+                    name="local-poc",
+                    address="127.0.0.1:9093",
+                    insecure=True,
+                ),
+            ),
+            (
+                "local-poc-dev",
+                {
+                    SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
+                    SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+                },
+                SuperLinkConnection(
+                    name="local-poc-dev",
+                    address="127.0.0.1:9093",
+                    root_certificates="root_cert.crt",
+                ),
+            ),
+            (
+                "remote-sim",
+                {
+                    SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
+                    SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+                    SuperLinkConnectionTomlKey.OPTIONS: {
+                        "num-supernodes": 10,
+                        "backend": {
+                            "client-resources": {"num-cpus": 1},
+                        },
+                    },
+                },
+                SuperLinkConnection(
+                    name="remote-sim",
+                    address="127.0.0.1:9093",
+                    root_certificates="root_cert.crt",
+                    options=SuperLinkSimulationOptions(
+                        num_supernodes=10,
+                        backend=SimulationBackendConfig(
+                            client_resources=SimulationClientResources(num_cpus=1),
+                        ),
+                    ),
+                ),
+            ),
+        ]
+    )
+    def test_parse_superlink_connection_valid_cases(
+        self,
+        name: str,
+        conn_dict: dict[str, Any],
+        expected_config: SuperLinkConnection,
+    ) -> None:
+        """Test various valid connection configurations from valid.toml."""
+        config = parse_superlink_connection(conn_dict, name)
+        self.assertEqual(config, expected_config)
 
     def test_parse_superlink_connection_simulation(self) -> None:
         """Test parse_superlink_connection with simulation options."""

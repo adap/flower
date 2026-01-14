@@ -144,15 +144,3 @@ class SuperLinkConnection:
                 f"'{SuperLinkConnectionTomlKey.OPTIONS}' key "
                 "need to be specified."
             )
-
-        if self.address is not None and not self.insecure:
-            # If not insecure, the connection needs to have either root
-            # certificates or account auth enabled.
-            if self.root_certificates is None and not self.enable_account_auth:
-                raise ValueError(
-                    "Invalid SuperLink connection: When "
-                    f"'{SuperLinkConnectionTomlKey.INSECURE}' is not true, "
-                    f"either '{SuperLinkConnectionTomlKey.ROOT_CERTIFICATES}' "
-                    f"or '{SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH}' "
-                    "need to be specified."
-                )
