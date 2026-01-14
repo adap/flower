@@ -60,8 +60,6 @@ FORCE_EXIT_TIMEOUT_SECONDS = 5  # Used in `flwr_exit` function
 # Constants for message processing timing
 MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS = 3600
 
-# Constants for simulations
-DEFAULT_SIMULATION_BACKEND_NAME = "ray"
 
 # System message type
 SYSTEM_MESSAGE_TYPE = "system"
@@ -78,66 +76,3 @@ class NodeStatus:
     def __new__(cls) -> NodeStatus:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
-
-
-class SuperLinkConnectionTomlKey:
-    """TOML keys for SuperLink connection configuration."""
-
-    SUPERLINK = "superlink"
-    DEFAULT = "default"
-    ADDRESS = "address"
-    ROOT_CERTIFICATES = "root-certificates"
-    INSECURE = "insecure"
-    ENABLE_ACCOUNT_AUTH = "enable-account-auth"
-    FEDERATION = "federation"
-    OPTIONS = "options"
-
-
-class SuperLinkSimulationOptionsTomlKey:
-    """TOML keys for SuperLinkSimulationOptions."""
-
-    NUM_SUPERNODES = "num-supernodes"
-    BACKEND = "backend"
-
-
-class SimulationClientResourcesTomlKey:
-    """TOML keys for SimulationClientResources."""
-
-    NUM_CPUS = "num-cpus"
-    NUM_GPUS = "num-gpus"
-
-
-class SimulationInitArgsTomlKey:
-    """TOML keys for SimulationInitArgs."""
-
-    NUM_CPUS = "num-cpus"
-    NUM_GPUS = "num-gpus"
-    LOGGING_LEVEL = "logging-level"
-    LOG_TO_DRIVE = "log-to-drive"
-
-
-class SimulationBackendConfigTomlKey:
-    """TOML keys for SimulationBackendConfig."""
-
-    CLIENT_RESOURCES = "client-resources"
-    INIT_ARGS = "init-args"
-    NAME = "name"
-
-
-# CLI connection configuration file name
-FLOWER_CONFIG_FILE = "config.toml"
-
-# The default configuration for the Flower config file
-DEFAULT_FLOWER_CONFIG_TOML = """[superlink]
-default = "local"
-
-[superlink.supergrid]
-address = "supergrid.flower.ai"
-enable-account-auth = true
-federation = "YOUR-FEDERATION-HERE"
-
-[superlink.local]
-options.num-supernodes = 10
-options.backend.client-resources.num-cpus = 1
-options.backend.client-resources.num-gpus = 0
-"""

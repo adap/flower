@@ -20,7 +20,7 @@ from typing import Any, cast
 import tomli
 import typer
 
-from flwr.supercore.constant import (
+from flwr.cli.constant import (
     DEFAULT_FLOWER_CONFIG_TOML,
     DEFAULT_SIMULATION_BACKEND_NAME,
     FLOWER_CONFIG_FILE,
@@ -30,7 +30,7 @@ from flwr.supercore.constant import (
     SuperLinkConnectionTomlKey,
     SuperLinkSimulationOptionsTomlKey,
 )
-from flwr.supercore.typing import (
+from flwr.cli.typing import (
     SimulationBackendConfig,
     SimulationClientResources,
     SimulationInitArgs,
