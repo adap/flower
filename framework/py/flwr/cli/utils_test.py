@@ -24,7 +24,9 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
+import tomli
 import typer
+from parameterized import parameterized
 
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
@@ -36,7 +38,10 @@ from flwr.common.constant import (
 from flwr.supercore.constant import (
     DEFAULT_FLOWER_CONFIG_TOML,
     FLOWER_CONFIG_FILE,
+    SimulationBackendConfigTomlKey,
+    SimulationClientResourcesTomlKey,
     SuperLinkConnectionTomlKey,
+    SuperLinkSimulationOptionsTomlKey,
 )
 from flwr.supercore.typing import (
     SimulationBackendConfig,
@@ -200,6 +205,50 @@ class TestInitFlwrConfig(unittest.TestCase):
                     config_path.read_text(encoding="utf-8"), DEFAULT_FLOWER_CONFIG_TOML
                 )
 
+    def test_default_config_matches_constants(self) -> None:
+        """Verify that DEFAULT_FLOWER_CONFIG_TOML uses the correct keys."""
+        # Parse the default config string
+        config = tomli.loads(DEFAULT_FLOWER_CONFIG_TOML)
+
+        # 1. Check top-level [superlink]
+        self.assertIn(SuperLinkConnectionTomlKey.SUPERLINK, config)
+        superlink = config[SuperLinkConnectionTomlKey.SUPERLINK]
+
+        # 2. Check default = "local"
+        self.assertEqual(superlink[SuperLinkConnectionTomlKey.DEFAULT], "local")
+
+        # 3. Check [superlink.supergrid]
+        self.assertIn("supergrid", superlink)
+        supergrid = superlink["supergrid"]
+        self.assertEqual(
+            supergrid[SuperLinkConnectionTomlKey.ADDRESS], "supergrid.flower.ai"
+        )
+        self.assertTrue(supergrid[SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH])
+        self.assertEqual(
+            supergrid[SuperLinkConnectionTomlKey.FEDERATION], "YOUR-FEDERATION-HERE"
+        )
+
+        # 4. Check [superlink.local]
+        self.assertIn("local", superlink)
+        local = superlink["local"]
+
+        # In TOML `options.num-supernodes = 10` creates a nested dict
+        self.assertIn(SuperLinkConnectionTomlKey.OPTIONS, local)
+        options = local[SuperLinkConnectionTomlKey.OPTIONS]
+        self.assertEqual(options[SuperLinkSimulationOptionsTomlKey.NUM_SUPERNODES], 10)
+
+        # options.backend...
+        self.assertIn(SuperLinkSimulationOptionsTomlKey.BACKEND, options)
+        backend = options[SuperLinkSimulationOptionsTomlKey.BACKEND]
+
+        # ...client-resources...
+        self.assertIn(SimulationBackendConfigTomlKey.CLIENT_RESOURCES, backend)
+        resources = backend[SimulationBackendConfigTomlKey.CLIENT_RESOURCES]
+
+        # ...num-cpus / num-gpus
+        self.assertEqual(resources[SimulationClientResourcesTomlKey.NUM_CPUS], 1)
+        self.assertEqual(resources[SimulationClientResourcesTomlKey.NUM_GPUS], 0)
+
     def test_init_flwr_config_does_not_overwrite(self) -> None:
         """Test that init_flwr_config does not overwrite existing config file."""
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -242,22 +291,121 @@ class TestSuperLinkConnection(unittest.TestCase):
         self.assertFalse(config.insecure)
         self.assertTrue(config.enable_account_auth)
 
-    def test_parse_superlink_connection_invalid(self) -> None:
-        """Test parse_superlink_connection with invalid input."""
-        # Missing required fields
+    def test_parse_superlink_connection_invalid_type(self) -> None:
+        """Test parse_superlink_connection with invalid type."""
         conn_dict = {
-            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
+            SuperLinkConnectionTomlKey.ADDRESS: 123,  # Invalid type, should be str
         }
         name = "test_service"
 
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(
+            ValueError, "Invalid value for key 'address': expected str, but got int"
+        ):
             parse_superlink_connection(conn_dict, name)
 
-    def test_parse_superlink_connection_simulation(self) -> None:
+    @parameterized.expand(  # type: ignore
+        [
+            (
+                "supergrid",
+                {
+                    SuperLinkConnectionTomlKey.ADDRESS: "supergrid.flower.ai",
+                    SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
+                },
+                SuperLinkConnection(
+                    name="supergrid",
+                    address="supergrid.flower.ai",
+                    enable_account_auth=True,
+                ),
+            ),
+            (
+                "local",
+                {
+                    SuperLinkConnectionTomlKey.OPTIONS: {
+                        "num-supernodes": 10,
+                    }
+                },
+                SuperLinkConnection(
+                    name="local",
+                    options=SuperLinkSimulationOptions(
+                        num_supernodes=10,
+                    ),
+                ),
+            ),
+            (
+                "local-poc",
+                {
+                    SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
+                    SuperLinkConnectionTomlKey.INSECURE: True,
+                },
+                SuperLinkConnection(
+                    name="local-poc",
+                    address="127.0.0.1:9093",
+                    insecure=True,
+                ),
+            ),
+            (
+                "local-poc-dev",
+                {
+                    SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
+                    SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+                },
+                SuperLinkConnection(
+                    name="local-poc-dev",
+                    address="127.0.0.1:9093",
+                    root_certificates="root_cert.crt",
+                ),
+            ),
+            (
+                "local-poc-dev-sys-cert",
+                {
+                    SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
+                },
+                SuperLinkConnection(
+                    name="local-poc-dev-sys-cert",
+                    address="127.0.0.1:9093",
+                ),
+            ),
+            (
+                "remote-sim",
+                {
+                    SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
+                    SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+                    SuperLinkConnectionTomlKey.OPTIONS: {
+                        "num-supernodes": 10,
+                        "backend": {
+                            "client-resources": {"num-cpus": 1},
+                        },
+                    },
+                },
+                SuperLinkConnection(
+                    name="remote-sim",
+                    address="127.0.0.1:9093",
+                    root_certificates="root_cert.crt",
+                    options=SuperLinkSimulationOptions(
+                        num_supernodes=10,
+                        backend=SimulationBackendConfig(
+                            client_resources=SimulationClientResources(num_cpus=1),
+                        ),
+                    ),
+                ),
+            ),
+        ]
+    )
+    def test_parse_superlink_connection_valid_cases(
+        self,
+        name: str,
+        conn_dict: dict[str, Any],
+        expected_config: SuperLinkConnection,
+    ) -> None:
+        """Test various valid connection configurations from valid.toml."""
+        config = parse_superlink_connection(conn_dict, name)
+        self.assertEqual(config, expected_config)
+
+    def test_parse_superlink_connection_simulation_full(self) -> None:
         """Test parse_superlink_connection with simulation options."""
         # Prepare
         conn_dict = {
-            "options": {
+            SuperLinkConnectionTomlKey.OPTIONS: {
                 "num-supernodes": 10,
                 "backend": {
                     "client-resources": {"num-cpus": 1.0, "num-gpus": 0.5},
@@ -365,7 +513,7 @@ class TestSuperLinkConnection(unittest.TestCase):
             [superlink.mock-service]
             address = "losthost:1234"
             insecure = false
-            enable-account-auth = false
+            enable-account-auth = true
 
             [superlink.mock-service-2]
             address = "losthost:9093"
@@ -582,9 +730,7 @@ class TestSuperLinkConnection(unittest.TestCase):
         # Prepare
         conn_dict = {
             SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
-            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: None,
-            SuperLinkConnectionTomlKey.INSECURE: False,
-            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: False,
+            SuperLinkConnectionTomlKey.INSECURE: True,
             "options": {"num-supernodes": 5},
         }
         name = "mixed-connection"

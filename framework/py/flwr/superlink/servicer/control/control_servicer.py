@@ -38,6 +38,7 @@ from flwr.common.constant import (
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
+    SUPERLINK_NODE_ID,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     Status,
     SubStatus,
@@ -195,7 +196,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Create an empty context for the Run
             context = Context(
                 run_id=run_id,
-                node_id=0,
+                node_id=SUPERLINK_NODE_ID,
                 # Dict is invariant in mypy
                 node_config=node_config,  # type: ignore[arg-type]
                 state=RecordDict(),
