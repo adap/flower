@@ -73,7 +73,7 @@ def ls(
                     )
                 typer.echo()
 
-    except Exception as err:
+    except Exception as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
@@ -81,7 +81,7 @@ def ls(
         else:
             typer.secho(
                 f"❌ An unexpected error occurred while listing the SuperLink "
-                f"connections in the Flower configuration file ({config}). {err}",
+                f"connections in the Flower configuration file ({config}): {err}",
                 fg=typer.colors.RED,
                 err=True,
             )
