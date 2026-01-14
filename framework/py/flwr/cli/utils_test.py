@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
+import tomli
 import typer
 
 from flwr.common.constant import (
@@ -36,7 +37,10 @@ from flwr.common.constant import (
 from flwr.supercore.constant import (
     DEFAULT_FLOWER_CONFIG_TOML,
     FLOWER_CONFIG_FILE,
+    SimulationBackendConfigTomlKey,
+    SimulationClientResourcesTomlKey,
     SuperLinkConnectionTomlKey,
+    SuperLinkSimulationOptionsTomlKey,
 )
 from flwr.supercore.typing import (
     SimulationBackendConfig,
@@ -199,6 +203,50 @@ class TestInitFlwrConfig(unittest.TestCase):
                 self.assertEqual(
                     config_path.read_text(encoding="utf-8"), DEFAULT_FLOWER_CONFIG_TOML
                 )
+
+    def test_default_config_matches_constants(self) -> None:
+        """Verify that DEFAULT_FLOWER_CONFIG_TOML uses the correct keys."""
+        # Parse the default config string
+        config = tomli.loads(DEFAULT_FLOWER_CONFIG_TOML)
+
+        # 1. Check top-level [superlink]
+        self.assertIn(SuperLinkConnectionTomlKey.SUPERLINK, config)
+        superlink = config[SuperLinkConnectionTomlKey.SUPERLINK]
+
+        # 2. Check default = "local"
+        self.assertEqual(superlink[SuperLinkConnectionTomlKey.DEFAULT], "local")
+
+        # 3. Check [superlink.supergrid]
+        self.assertIn("supergrid", superlink)
+        supergrid = superlink["supergrid"]
+        self.assertEqual(
+            supergrid[SuperLinkConnectionTomlKey.ADDRESS], "supergrid.flower.ai"
+        )
+        self.assertTrue(supergrid[SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH])
+        self.assertEqual(
+            supergrid[SuperLinkConnectionTomlKey.FEDERATION], "YOUR-FEDERATION-HERE"
+        )
+
+        # 4. Check [superlink.local]
+        self.assertIn("local", superlink)
+        local = superlink["local"]
+
+        # In TOML `options.num-supernodes = 10` creates a nested dict
+        self.assertIn(SuperLinkConnectionTomlKey.OPTIONS, local)
+        options = local[SuperLinkConnectionTomlKey.OPTIONS]
+        self.assertEqual(options[SuperLinkSimulationOptionsTomlKey.NUM_SUPERNODES], 10)
+
+        # options.backend...
+        self.assertIn(SuperLinkSimulationOptionsTomlKey.BACKEND, options)
+        backend = options[SuperLinkSimulationOptionsTomlKey.BACKEND]
+
+        # ...client-resources...
+        self.assertIn(SimulationBackendConfigTomlKey.CLIENT_RESOURCES, backend)
+        resources = backend[SimulationBackendConfigTomlKey.CLIENT_RESOURCES]
+
+        # ...num-cpus / num-gpus
+        self.assertEqual(resources[SimulationClientResourcesTomlKey.NUM_CPUS], 1)
+        self.assertEqual(resources[SimulationClientResourcesTomlKey.NUM_GPUS], 0)
 
     def test_init_flwr_config_does_not_overwrite(self) -> None:
         """Test that init_flwr_config does not overwrite existing config file."""

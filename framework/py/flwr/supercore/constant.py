@@ -128,21 +128,16 @@ class SimulationBackendConfigTomlKey:
 FLOWER_CONFIG_FILE = "config.toml"
 
 # The default configuration for the Flower config file
-DEFAULT_FLOWER_CONFIG_TOML = (
-    f"[{SuperLinkConnectionTomlKey.SUPERLINK}]\n"
-    f'{SuperLinkConnectionTomlKey.DEFAULT} = "local"\n'
-    "\n"
-    f"[{SuperLinkConnectionTomlKey.SUPERLINK}.supergrid]\n"
-    f'{SuperLinkConnectionTomlKey.ADDRESS} = "supergrid.flower.ai"\n'
-    f"{SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH} = true\n"
-    f'{SuperLinkConnectionTomlKey.FEDERATION} = "YOUR-FEDERATION-HERE"\n'
-    "\n"
-    f"[{SuperLinkConnectionTomlKey.SUPERLINK}.local]\n"
-    f"options.{SuperLinkSimulationOptionsTomlKey.NUM_SUPERNODES} = 10\n"
-    f"options.{SuperLinkSimulationOptionsTomlKey.BACKEND}."
-    f"{SimulationBackendConfigTomlKey.CLIENT_RESOURCES}."
-    f"{SimulationClientResourcesTomlKey.NUM_CPUS} = 1\n"
-    f"options.{SuperLinkSimulationOptionsTomlKey.BACKEND}."
-    f"{SimulationBackendConfigTomlKey.CLIENT_RESOURCES}."
-    f"{SimulationClientResourcesTomlKey.NUM_GPUS} = 0\n"
-)
+DEFAULT_FLOWER_CONFIG_TOML = """[superlink]
+default = "local"
+
+[superlink.supergrid]
+address = "supergrid.flower.ai"
+enable-account-auth = true
+federation = "YOUR-FEDERATION-HERE"
+
+[superlink.local]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 1
+options.backend.client-resources.num-gpus = 0
+"""
