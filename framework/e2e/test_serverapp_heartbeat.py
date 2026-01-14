@@ -77,14 +77,7 @@ def flwr_run() -> str:
     )
 
     # Parse JSON output and ensure the command succeeded
-    try:
-        data = json.loads(result.stdout)
-    except json.JSONDecodeError as e:
-        raise AssertionError(
-            "flwr run did not return valid JSON output\n"
-            + f"stdout: {result.stdout}\n"
-            + f"stderr: {result.stderr}"
-        ) from e
+    data = json.loads(result.stdout)
     assert data["success"], "flwr run failed\n" + str(data)
 
     # Return the run ID
