@@ -130,7 +130,7 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     received_public_key
                 )
 
-                # Verify the public key
+                # Verify that the received node ID matches the actual node ID
                 if received_node_id != node_id:
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid node ID")
 
