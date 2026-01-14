@@ -23,6 +23,7 @@ from .app_cmd import publish as app_publish
 from .app_cmd import review as app_review
 from .build import build
 from .federation import ls as federation_list
+from .flower_config import init_flwr_config
 from .install import install
 from .log import log
 from .login import login
@@ -34,7 +35,6 @@ from .stop import stop
 from .supernode import ls as supernode_list
 from .supernode import register as supernode_register
 from .supernode import unregister as supernode_unregister
-from .utils import init_flwr_config
 
 app = typer.Typer(
     help=typer.style(
