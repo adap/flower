@@ -2,90 +2,95 @@
 
 This diagram shows the entity relationship diagram for the LinkState SQL schema. It should be updated whenever the schema changes.
 
+## Schema
+
+<!-- BEGIN_SQLALCHEMY_DOCS -->
 ```mermaid
 erDiagram
-    NODE {
-        int node_id UK
-        string owner_aid
-        string owner_name
-        string status
-        string registered_at
-        string last_activated_at
-        string last_deactivated_at
-        string unregistered_at
-        timestamp online_until
-        float heartbeat_interval
-        binary public_key UK
-    }
+  context {
+    INTEGER run_id FK "nullable"
+    BLOB context "nullable"
+  }
 
-    PUBLIC_KEY {
-        binary public_key UK
-    }
+  logs {
+    INTEGER run_id FK "nullable"
+    VARCHAR log "nullable"
+    INTEGER node_id "nullable"
+    FLOAT timestamp "nullable"
+  }
 
-    RUN {
-        int run_id UK
-        string fab_id
-        string fab_version
-        string fab_hash
-        string override_config
-        string pending_at
-        string starting_at
-        string running_at
-        string finished_at
-        string sub_status
-        string details
-        string federation
-        binary federation_options
-        string flwr_aid
-        int bytes_sent
-        int bytes_recv
-        float clientapp_runtime
-    }
+  message_ins {
+    INTEGER run_id FK "nullable"
+    BLOB content "nullable"
+    FLOAT created_at "nullable"
+    VARCHAR delivered_at "nullable"
+    INTEGER dst_node_id "nullable"
+    BLOB error "nullable"
+    VARCHAR group_id "nullable"
+    VARCHAR message_id UK "nullable"
+    VARCHAR message_type "nullable"
+    VARCHAR reply_to_message_id "nullable"
+    INTEGER src_node_id "nullable"
+    FLOAT ttl "nullable"
+  }
 
-    LOGS {
-        float timestamp
-        int run_id FK
-        int node_id
-        string log
-    }
+  message_res {
+    INTEGER run_id FK "nullable"
+    BLOB content "nullable"
+    FLOAT created_at "nullable"
+    VARCHAR delivered_at "nullable"
+    INTEGER dst_node_id "nullable"
+    BLOB error "nullable"
+    VARCHAR group_id "nullable"
+    VARCHAR message_id UK "nullable"
+    VARCHAR message_type "nullable"
+    VARCHAR reply_to_message_id "nullable"
+    INTEGER src_node_id "nullable"
+    FLOAT ttl "nullable"
+  }
 
-    CONTEXT {
-        int run_id UK, FK
-        binary context
-    }
+  node {
+    FLOAT heartbeat_interval "nullable"
+    VARCHAR last_activated_at "nullable"
+    VARCHAR last_deactivated_at "nullable"
+    INTEGER node_id UK "nullable"
+    TIMESTAMP online_until "nullable"
+    VARCHAR owner_aid "nullable"
+    VARCHAR owner_name "nullable"
+    BLOB public_key UK "nullable"
+    VARCHAR registered_at "nullable"
+    VARCHAR status "nullable"
+    VARCHAR unregistered_at "nullable"
+  }
 
-    MESSAGE_INS {
-        string message_id UK
-        string group_id
-        int run_id FK
-        int src_node_id
-        int dst_node_id
-        string reply_to_message_id
-        float created_at
-        string delivered_at
-        float ttl
-        string message_type
-        binary content
-        binary error
-    }
+  public_key {
+    BLOB public_key UK "nullable"
+  }
 
-    MESSAGE_RES {
-        string message_id UK
-        string group_id
-        int run_id FK
-        int src_node_id
-        int dst_node_id
-        string reply_to_message_id
-        float created_at
-        string delivered_at
-        float ttl
-        string message_type
-        binary content
-        binary error
-    }
+  run {
+    INTEGER bytes_recv "nullable"
+    INTEGER bytes_sent "nullable"
+    FLOAT clientapp_runtime "nullable"
+    VARCHAR details "nullable"
+    VARCHAR fab_hash "nullable"
+    VARCHAR fab_id "nullable"
+    VARCHAR fab_version "nullable"
+    VARCHAR federation "nullable"
+    BLOB federation_options "nullable"
+    VARCHAR finished_at "nullable"
+    VARCHAR flwr_aid "nullable"
+    VARCHAR override_config "nullable"
+    VARCHAR pending_at "nullable"
+    INTEGER run_id UK "nullable"
+    VARCHAR running_at "nullable"
+    VARCHAR starting_at "nullable"
+    VARCHAR sub_status "nullable"
+  }
 
-    RUN ||--o{ LOGS : has
-    RUN ||--|| CONTEXT : has
-    RUN ||--o{ MESSAGE_INS : has
-    RUN ||--o{ MESSAGE_RES : has
+  run ||--o| context : run_id
+  run ||--o{ logs : run_id
+  run ||--o{ message_ins : run_id
+  run ||--o{ message_res : run_id
+
 ```
+<!-- END_SQLALCHEMY_DOCS -->
