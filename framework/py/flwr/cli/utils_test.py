@@ -356,6 +356,16 @@ class TestSuperLinkConnection(unittest.TestCase):
                 ),
             ),
             (
+                "local-poc-dev-sys-cert",
+                {
+                    SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
+                },
+                SuperLinkConnection(
+                    name="local-poc-dev-sys-cert",
+                    address="127.0.0.1:9093",
+                ),
+            ),
+            (
                 "remote-sim",
                 {
                     SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
