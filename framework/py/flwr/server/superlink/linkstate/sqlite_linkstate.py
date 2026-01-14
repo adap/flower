@@ -843,22 +843,6 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
             return result
 
-    def get_node_public_key(self, node_id: int) -> bytes:
-        """Get `public_key` for the specified `node_id`."""
-        # Convert the uint64 value to sint64 for SQLite
-        sint64_node_id = uint64_to_int64(node_id)
-
-        # Query the public key for the given node_id
-        query = "SELECT public_key FROM node WHERE node_id = ? AND status != ?;"
-        rows = self.query(query, (sint64_node_id, NodeStatus.UNREGISTERED))
-
-        # If no result is found, return None
-        if not rows:
-            raise ValueError(f"Node ID {node_id} not found")
-
-        # Return the public key
-        return cast(bytes, rows[0]["public_key"])
-
     def get_node_id_by_public_key(self, public_key: bytes) -> int | None:
         """Get `node_id` for the specified `public_key` if it exists and is not
         deleted."""
