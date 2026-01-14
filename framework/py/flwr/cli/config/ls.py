@@ -58,7 +58,10 @@ def ls(
         connection_names = list(superlink_connections.keys())
         restore_output()
         if output_format == CliOutputFormat.JSON:
-            conn = {"connections": connection_names, "default": default}
+            conn = {
+                SuperLinkConnectionTomlKey.SUPERLINK: connection_names,
+                SuperLinkConnectionTomlKey.DEFAULT: default,
+            }
             Console().print_json(json.dumps(conn))
         else:
             typer.secho("SuperLink connections:", fg=typer.colors.BLUE)
