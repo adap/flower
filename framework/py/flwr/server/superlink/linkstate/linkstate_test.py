@@ -699,12 +699,11 @@ class StateTest(CoreStateTest):
         with self.assertRaises(ValueError):
             state.create_node("fake_aid2", "fake_name", public_key, 10)
         retrieved_nodes = state.get_node_info()
-        retrieved_public_key = state.get_node_public_key(node_id)
 
         # Assert
         assert len(retrieved_nodes) == 1
         assert retrieved_nodes[0].node_id == node_id
-        assert retrieved_public_key == public_key
+        assert retrieved_nodes[0].public_key == public_key
 
         # Assert node_ids and public_key_to_node_id are synced
         if isinstance(state, InMemoryLinkState):
@@ -865,25 +864,6 @@ class StateTest(CoreStateTest):
         # Test failed deactivation when UNREGISTERED
         state.delete_node("mock_flwr_aid", node_id)
         assert not state.deactivate_node(node_id)
-
-    def test_delete_node_public_key(self) -> None:
-        """Test deleting a client node with public key."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        public_key = b"mock"
-        run_id = create_dummy_run(state)
-        node_id = state.create_node(
-            "fake_aid", "fake_name", public_key, heartbeat_interval=10
-        )
-
-        # Execute
-        state.delete_node("fake_aid", node_id)
-        retrieved_node_ids = state.get_nodes(run_id)
-        with self.assertRaises(ValueError):
-            _ = state.get_node_public_key(node_id)
-
-        # Assert
-        assert len(retrieved_node_ids) == 0
 
     def test_get_nodes_invalid_run_id(self) -> None:
         """Test retrieving all node_ids with invalid run_id."""
@@ -1856,7 +1836,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 20
+        assert len(result) == 18
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1885,7 +1865,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 20
+        assert len(result) == 18
 
 
 if __name__ == "__main__":
