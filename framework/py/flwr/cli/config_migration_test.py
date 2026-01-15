@@ -114,8 +114,7 @@ class TestConfigMigration(unittest.TestCase):
     def test_migrate_pyproject_toml_to_flower_config(self) -> None:
         """Test `_migrate_pyproject_toml_to_flower_config` function."""
         # Execute
-        with patch("flwr.cli.config_migration.click.confirm", return_value=True):
-            _migrate_pyproject_toml_to_flower_config(self.app_path, None)
+        _migrate_pyproject_toml_to_flower_config(self.app_path, None)
         default_conn = read_superlink_connection()
 
         # Assert default is set from legacy config (local-poc)

@@ -71,17 +71,6 @@ def _migrate_pyproject_toml_to_flower_config(
     app: Path, toml_federation: str | None
 ) -> None:
     """Migrate old TOML configuration to Flower config."""
-    # Prompt user for confirmation
-    confirm = click.confirm(
-        f"Legacy TOML configuration detected at '{app}'. "
-        "Do you want to migrate it to Flower config?",
-        default=True,
-    )
-    if not confirm:
-        click.echo("Migration cancelled by user.")
-        raise typer.Exit(code=1)
-
-    # Perform migration
     # Load and validate the old TOML configuration
     toml_path = app / "pyproject.toml"
     config, _, _ = load_and_validate(toml_path, check_module=False)
@@ -146,9 +135,30 @@ def migrate_if_legacy_usage(
     if not _is_legacy_usage(superlink, args):
         return
 
+    # Check if pyproject.toml exists
+    app_path = Path(superlink)
+    if not (app_path / "pyproject.toml").exists():
+        raise click.ClickException(
+            "Legacy usage detected, but no pyproject.toml found "
+            f"at '{app_path.absolute()}'."
+        )
+    
+    # Prompt user for confirmation
+    confirm = typer.confirm(
+        typer.style(
+            f"\n💬 Legacy TOML configuration detected at '{app_path.absolute()}'. "
+            "Do you want to migrate it to Flower config?",
+            fg=typer.colors.MAGENTA,
+            bold=True,
+        ),
+        default=True,
+    )
+    if not confirm:
+        raise click.ClickException("Migration aborted by user.")
+
     try:
         _migrate_pyproject_toml_to_flower_config(
-            app=Path(superlink),
+            app=app_path,
             toml_federation=args[0] if args else None,
         )
     except Exception as e:
@@ -156,4 +166,4 @@ def migrate_if_legacy_usage(
             "Failed to migrate legacy TOML configuration to Flower config."
         ) from e
 
-    _comment_out_legacy_toml_config(Path(superlink))
+    _comment_out_legacy_toml_config(app_path)
