@@ -232,7 +232,7 @@ def read_superlink_connection(
     except Exception as err:
         typer.secho(
             f"❌ An unexpected error occurred while reading the Flower configuration "
-            f"file ({config_path}).\n{err}",
+            f"file ({config_path}). {err}",
             fg=typer.colors.RED,
             err=True,
         )
