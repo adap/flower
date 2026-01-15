@@ -143,9 +143,7 @@ def add() -> None:
                 ),
             ).ask()
             logging_level = questionary.text("Logging level (optional):").ask()
-            log_to_drive = questionary.confirm(
-                "Log to drive? (optional)", default=False
-            ).ask()
+            log_to_drive = questionary.confirm("Log to drive? (optional)").ask()
 
             init_args = SimulationInitArgs(
                 num_cpus=int(init_num_cpus) if init_num_cpus else None,
