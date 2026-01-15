@@ -44,6 +44,10 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python }}
+      - name: Install dependencies (system)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
       - name: Install dependencies (mandatory only)
         timeout-minutes: 5
         run: |
