@@ -126,7 +126,8 @@ def _comment_out_legacy_toml_config(app: Path) -> None:
                 if not notice_added:
                     f.write(CONFIG_MIGRATION_NOTICE)
                     notice_added = True
-                f.write(f"# {line}")
+                # Preserve empty lines and comment out others
+                f.write(f"# {line}" if line.strip() != "" else line)
             else:
                 f.write(line)
 
