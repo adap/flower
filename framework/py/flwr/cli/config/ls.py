@@ -26,7 +26,7 @@ from flwr.common.constant import CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 
 from ..constant import SuperLinkConnectionTomlKey
-from ..flower_config import load_flower_config
+from ..flower_config import read_flower_config
 
 
 def ls(
@@ -42,13 +42,14 @@ def ls(
     """List all SuperLink connections."""
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
-    config = None
-    try:
-        if suppress_output:
-            redirect_output(captured_output)
+    config_path = None
 
+    if suppress_output:
+        redirect_output(captured_output)
+
+    try:
         # Load Flower Config
-        config = load_flower_config()
+        config, config_path = read_flower_config()
 
         # Get `superlink` tables
         superlink_connections = config.get(SuperLinkConnectionTomlKey.SUPERLINK, {})
@@ -76,6 +77,13 @@ def ls(
                         nl=False,
                     )
                 typer.echo()
+    except typer.Exit as err:
+        # log the error if json format requested
+        # else do nothing since it will be logged by typer
+        if suppress_output:
+            restore_output()
+            e_message = captured_output.getvalue()
+            print_json_error(e_message, err)
 
     except Exception as err:  # pylint: disable=broad-except
         if suppress_output:
@@ -85,7 +93,7 @@ def ls(
         else:
             typer.secho(
                 f"❌ An unexpected error occurred while listing the SuperLink "
-                f"connections in the Flower configuration file ({config}): {err}",
+                f"connections in the Flower configuration file ({config_path}): {err}",
                 fg=typer.colors.RED,
                 err=True,
             )

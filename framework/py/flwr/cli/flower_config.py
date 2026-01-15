@@ -153,26 +153,6 @@ def parse_superlink_connection(
     )
 
 
-def load_flower_config() -> dict[str, Any]:
-    """Load the Flower configuration file."""
-    # Initialize config if it doesn't exist
-    init_flwr_config()
-    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
-    # Load config
-    with config_path.open("rb") as toml_file:
-        try:
-            return tomli.load(toml_file)
-        except tomli.TOMLDecodeError as err:
-            typer.secho(
-                f"❌ Failed to load the Flower configuration file ({config_path}). "
-                "Please ensure it is valid TOML.\n"
-                f"Error: {err}",
-                fg=typer.colors.RED,
-                err=True,
-            )
-            raise typer.Exit(code=1) from err
-
-
 def read_superlink_connection(
     connection_name: str | None = None,
 ) -> SuperLinkConnection | None:
@@ -253,6 +233,38 @@ def read_superlink_connection(
         typer.secho(
             f"❌ An unexpected error occurred while reading the Flower configuration "
             f"file ({config_path}). {err}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from err
+
+
+def read_flower_config() -> tuple[dict[str, Any], Path]:
+    """Read the Flower configuration file.
+
+    Returns
+    -------
+    tuple[dict[str, Any], Path]
+        A tuple containing the TOML configuration dictionary and the path to the
+        configuration file.
+
+    Raises
+    ------
+    typer.Exit
+        Raised if the configuration file is corrupted.
+    """
+    init_flwr_config()
+
+    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
+
+    try:
+        with config_path.open("rb") as file:
+            return tomli.load(file), config_path
+
+    except tomli.TOMLDecodeError as err:
+        typer.secho(
+            f"❌ Failed to read the Flower configuration file ({config_path}). "
+            "Please ensure it is valid TOML.",
             fg=typer.colors.RED,
             err=True,
         )
