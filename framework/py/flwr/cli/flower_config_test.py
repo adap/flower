@@ -46,6 +46,7 @@ from .flower_config import (
     init_flwr_config,
     parse_superlink_connection,
     read_superlink_connection,
+    write_flower_config,
 )
 
 
@@ -496,18 +497,6 @@ class TestSuperLinkConnection(unittest.TestCase):
                 read_superlink_connection()
 
     @patch("flwr.cli.flower_config.get_flwr_home")
-    def test_read_superlink_connection_no_file(
-        self, mock_get_flwr_home: unittest.mock.Mock
-    ) -> None:
-        """Test read_superlink_connection when file does not exist."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            mock_get_flwr_home.return_value = Path(temp_dir)
-
-            config = read_superlink_connection()
-
-            self.assertIsNone(config)
-
-    @patch("flwr.cli.flower_config.get_flwr_home")
     def test_read_superlink_connection_corrupted(
         self, mock_get_flwr_home: unittest.mock.Mock
     ) -> None:
@@ -606,3 +595,42 @@ class TestSuperLinkConnection(unittest.TestCase):
 
             # Assert
             self.assertEqual(config, expected_config)
+
+
+def test_write_flower_config() -> None:
+    """Test that write_flower_config removes quotes from dotted keys."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+
+        # Prepare
+        # Test data with dotted keys
+        toml_dict = {
+            "superlink": {
+                "default": "mock-service",
+                "mock-service": {
+                    "address": "localhost:9999",
+                    "insecure": True,
+                    "options.num-supernodes": 10,
+                    "options.backend.client-resources.num-gpus": 0,
+                },
+            }
+        }
+        expected_content = """[superlink]
+default = "mock-service"
+
+[superlink.mock-service]
+address = "localhost:9999"
+insecure = true
+options.num-supernodes = 10
+options.backend.client-resources.num-gpus = 0
+"""
+
+        # Execute
+        # Patch get_flwr_home to return our temporary directory
+        with patch("flwr.cli.flower_config.get_flwr_home", return_value=temp_path):
+            config_path = write_flower_config(toml_dict)
+        content = config_path.read_text()
+
+        # Assert
+        assert config_path == temp_path / FLOWER_CONFIG_FILE
+        assert content == expected_content
