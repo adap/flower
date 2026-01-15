@@ -20,7 +20,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import tomli
 import typer
@@ -47,6 +47,7 @@ from .flower_config import (
     parse_superlink_connection,
     read_superlink_connection,
     write_flower_config,
+    write_superlink_connection,
 )
 
 
@@ -342,9 +343,7 @@ class TestSuperLinkConnection(unittest.TestCase):
             parse_superlink_connection(conn_dict, name)
 
     @patch("flwr.cli.flower_config.get_flwr_home")
-    def test_read_superlink_connection_defaults(
-        self, mock_get_flwr_home: unittest.mock.Mock
-    ) -> None:
+    def test_read_superlink_connection_defaults(self, mock_get_flwr_home: Mock) -> None:
         """Test read_superlink_connection uses default when no arg provided."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Prepare
@@ -379,9 +378,7 @@ class TestSuperLinkConnection(unittest.TestCase):
             self.assertEqual(config.address, "losthost:9093")
 
     @patch("flwr.cli.flower_config.get_flwr_home")
-    def test_read_superlink_connection_explicit(
-        self, mock_get_flwr_home: unittest.mock.Mock
-    ) -> None:
+    def test_read_superlink_connection_explicit(self, mock_get_flwr_home: Mock) -> None:
         """Test read_superlink_connection with explicit connection name."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Prepare
@@ -417,7 +414,7 @@ class TestSuperLinkConnection(unittest.TestCase):
 
     @patch("flwr.cli.flower_config.get_flwr_home")
     def test_read_superlink_connection_explicit_missing(
-        self, mock_get_flwr_home: unittest.mock.Mock
+        self, mock_get_flwr_home: Mock
     ) -> None:
         """Test read_superlink_connection with explicit but missing connection."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -444,7 +441,7 @@ class TestSuperLinkConnection(unittest.TestCase):
 
     @patch("flwr.cli.flower_config.get_flwr_home")
     def test_read_superlink_connection_no_default_failure(
-        self, mock_get_flwr_home: unittest.mock.Mock
+        self, mock_get_flwr_home: Mock
     ) -> None:
         """Test failure when no default is set and no arg provided."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -471,7 +468,7 @@ class TestSuperLinkConnection(unittest.TestCase):
 
     @patch("flwr.cli.flower_config.get_flwr_home")
     def test_read_superlink_connection_default_missing_connection(
-        self, mock_get_flwr_home: unittest.mock.Mock
+        self, mock_get_flwr_home: Mock
     ) -> None:
         """Test failure when default is set but the connection block is missing."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -498,7 +495,7 @@ class TestSuperLinkConnection(unittest.TestCase):
 
     @patch("flwr.cli.flower_config.get_flwr_home")
     def test_read_superlink_connection_corrupted(
-        self, mock_get_flwr_home: unittest.mock.Mock
+        self, mock_get_flwr_home: Mock
     ) -> None:
         """Test read_superlink_connection when file is corrupted."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -514,7 +511,7 @@ class TestSuperLinkConnection(unittest.TestCase):
 
     @patch("flwr.cli.flower_config.get_flwr_home")
     def test_read_superlink_connection_simulation(
-        self, mock_get_flwr_home: unittest.mock.Mock
+        self, mock_get_flwr_home: Mock
     ) -> None:
         """Test read_superlink_connection with simulation profile."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -557,7 +554,7 @@ class TestSuperLinkConnection(unittest.TestCase):
 
     @patch("flwr.cli.flower_config.get_flwr_home")
     def test_read_superlink_connection_simulation_unknown_key(
-        self, mock_get_flwr_home: unittest.mock.Mock
+        self, mock_get_flwr_home: Mock
     ) -> None:
         """Test read_superlink_connection with unknown keys (should be ignored)."""
         # Prepare
@@ -595,6 +592,50 @@ class TestSuperLinkConnection(unittest.TestCase):
 
             # Assert
             self.assertEqual(config, expected_config)
+
+    @patch("flwr.cli.flower_config.get_flwr_home")
+    def test_write_superlink_connection(self, mock_get_flwr_home: Mock) -> None:
+        """Test write_superlink_connection updates the config file correctly."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            mock_get_flwr_home.return_value = temp_path
+
+            # Prepare
+            init_flwr_config()
+            config_path = temp_path / FLOWER_CONFIG_FILE
+            init_content = config_path.read_text()
+            added_content = """
+[superlink.new-service]
+address = "localhost:9999"
+insecure = false
+options.num-supernodes = 12
+options.backend.name = "ray"
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.5
+"""
+            new_conn = SuperLinkConnection(
+                name="new-service",
+                address="localhost:9999",
+                insecure=False,
+                options=SuperLinkSimulationOptions(
+                    num_supernodes=12,
+                    backend=SimulationBackendConfig(
+                        name="ray",
+                        client_resources=SimulationClientResources(
+                            num_cpus=2, num_gpus=0.5
+                        ),
+                    ),
+                ),
+            )
+
+            # Execute
+            write_superlink_connection(new_conn)
+            read_conn = read_superlink_connection("new-service")
+            updated_content = config_path.read_text()
+
+            # Assert
+            self.assertEqual(read_conn, new_conn)
+            self.assertEqual(updated_content, init_content + added_content)
 
 
 def test_write_flower_config() -> None:
