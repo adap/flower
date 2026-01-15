@@ -20,7 +20,7 @@ jobs:
       flwr-version: ${{ steps.publish.outputs.flwr-version }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
 

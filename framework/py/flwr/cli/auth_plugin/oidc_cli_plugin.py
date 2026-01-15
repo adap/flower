@@ -17,6 +17,7 @@
 
 import json
 import time
+import webbrowser
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -40,7 +41,11 @@ from .auth_plugin import CliAuthPlugin, LoginError
 
 
 class OidcCliPlugin(CliAuthPlugin):
-    """Flower OIDC auth plugin for CLI."""
+    """Flower OIDC authentication plugin for CLI.
+
+    This plugin implements OpenID Connect (OIDC) device flow authentication for CLI
+    access to Flower SuperLink.
+    """
 
     def __init__(self, credentials_path: Path):
         self.access_token: str | None = None
@@ -52,12 +57,36 @@ class OidcCliPlugin(CliAuthPlugin):
         login_details: AccountAuthLoginDetails,
         control_stub: ControlStub,
     ) -> AccountAuthCredentials:
-        """Authenticate the account and retrieve authentication credentials."""
+        """Authenticate the account and retrieve authentication credentials.
+
+        Parameters
+        ----------
+        login_details : AccountAuthLoginDetails
+            Login details containing device code and verification URI.
+        control_stub : ControlStub
+            Control stub for making authentication requests.
+
+        Returns
+        -------
+        AccountAuthCredentials
+            The access and refresh tokens.
+
+        Raises
+        ------
+        LoginError
+            If authentication times out.
+        """
+        # Prompt user to login via browser
+        webbrowser.open(login_details.verification_uri_complete)
         typer.secho(
-            "Please log into your Flower account here: "
+            "A browser window has been opened for you to "
+            "log into your Flower account.\n"
+            "If it did not open automatically, use this URL:\n"
             f"{login_details.verification_uri_complete}",
             fg=typer.colors.BLUE,
         )
+
+        # Wait for user to complete login
         start_time = time.time()
         time.sleep(login_details.interval)
 
@@ -116,6 +145,7 @@ class OidcCliPlugin(CliAuthPlugin):
                 "❌ Missing authentication tokens. Please login first.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1)
 

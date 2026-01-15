@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.24.0"
+version = "1.26.0"
 description = "Flower: A Friendly Federated AI Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -78,6 +78,7 @@ rich = "^13.5.0"
 pyyaml = "^6.0.2"
 requests = "^2.31.0"
 click = "<8.2.0"
+SQLAlchemy = "^2.0.45"
 # Optional dependencies (Simulation Engine)
 ray = [
     { version = "==2.51.1", optional = true, python = ">=3.10,<3.13" },
@@ -95,10 +96,10 @@ rest = ["starlette", "uvicorn"]
 types-dataclasses = "==0.6.6"
 types-protobuf = "==5.29.1.20250403"
 types-requests = "==2.31.0.20240125"
-types-setuptools = "==69.0.0.20240125"
+types-setuptools = "==80.9.0.20250822"
 clang-format = "==17.0.6"
 isort = "==5.13.2"
-black = { version = "==24.10.0", extras = ["jupyter"] }
+black = { version = "==25.11.0", extras = ["jupyter"] }
 taplo = "==0.9.3"
 docformatter = "==1.7.5"
 mypy = "==1.8.0"
@@ -124,7 +125,7 @@ furo = "==2024.8.6"
 sphinx-reredirects = "==0.1.5"
 nbsphinx = "==0.9.5"
 nbstripout = "==0.6.1"
-ruff = "==0.4.5"
+ruff = "==0.14.5"
 sphinx-argparse = "==0.4.0"
 pipreqs = "==0.4.13"
 mdformat = "==0.7.22"
@@ -142,7 +143,7 @@ licensecheck = "==2025.1.0"
 pre-commit = "==3.5.0"
 sphinx-substitution-extensions = "2022.02.16"
 sphinxext-opengraph = "==0.9.1"
-docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-2" }
+docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-2", python = ">=3.10,<4.0.0" }
 docsig = "==0.64.0"
 devtool = [{ path = "./devtool", develop = true }]
 
@@ -181,7 +182,6 @@ patterns = ["*.py"]
 ignore_patterns = []
 
 [tool.mypy]
-plugins = ["numpy.typing.mypy_plugin"]
 ignore_missing_imports = true
 strict = true
 

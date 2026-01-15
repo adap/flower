@@ -25,6 +25,7 @@ from typing import IO, Any, TypeVar, cast, get_args
 import tomli
 import typer
 
+from flwr.app.user_config import UserConfig, UserConfigValue
 from flwr.common.constant import (
     APP_DIR,
     FAB_CONFIG_FILE,
@@ -32,7 +33,7 @@ from flwr.common.constant import (
     FLWR_DIR,
     FLWR_HOME,
 )
-from flwr.common.typing import Run, UserConfig, UserConfigValue
+from flwr.common.typing import Run
 
 from . import ConfigRecord, object_ref
 
@@ -242,6 +243,7 @@ def parse_config_args(config: list[str] | None, flatten: bool = True) -> dict[st
                     "space-separated key-value pairs.",
                     fg=typer.colors.RED,
                     bold=True,
+                    err=True,
                 )
                 raise typer.Exit(code=1) from err
 
@@ -315,7 +317,7 @@ def _validate_run_config(config_dict: dict[str, Any], errors: list[str]) -> None
 
 # pylint: disable=too-many-branches
 def validate_fields_in_config(
-    config: dict[str, Any]
+    config: dict[str, Any],
 ) -> tuple[bool, list[str], list[str]]:
     """Validate pyproject.toml fields."""
     errors = []

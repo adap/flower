@@ -20,6 +20,7 @@ import tempfile
 import unittest
 from collections.abc import Callable
 from typing import Any
+from unittest.mock import patch
 
 import grpc
 from parameterized import parameterized
@@ -68,7 +69,7 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_res_message
-from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import (
@@ -91,14 +92,14 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.node_sk, self.node_pk = generate_key_pairs()
         self.node_pk_bytes = public_key_to_bytes(self.node_pk)
 
+        objectstore_factory = ObjectStoreFactory()
         state_factory = LinkStateFactory(
-            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
         )
         self.state = state_factory.state()
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         ffs_factory = FfsFactory(self.tmp_dir.name)
         self.ffs = ffs_factory.ffs()
-        objectstore_factory = ObjectStoreFactory()
         self.store = objectstore_factory.store()
 
         self._server_interceptor = NodeAuthServerInterceptor(state_factory)
@@ -253,7 +254,9 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def _create_dummy_run(self, running: bool = True) -> int:
         """Create a dummy run in linkstate and return the run_id."""
-        run_id = self.state.create_run("", "", "", {}, "", ConfigRecord(), "")
+        run_id = self.state.create_run(
+            "", "", "", {}, NOOP_FEDERATION, ConfigRecord(), ""
+        )
         if running:
             self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
             self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
@@ -276,7 +279,10 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         req = PullObjectRequest(
             node=Node(node_id=node_id), run_id=run_id, object_id="1234"
         )
-        return self._pull_object.with_call(request=req, metadata=metadata)
+        # Mock store_traffic to avoid validation error when object_content is empty
+        # This is because the object has been preregistered but not yet pushed
+        with patch.object(self.state, "store_traffic"):
+            return self._pull_object.with_call(request=req, metadata=metadata)
 
     def _test_push_object(self, metadata: list[Any]) -> Any:
         """Test PushObject."""
@@ -288,7 +294,10 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             object_id="1234",
             object_content=b"1234",
         )
-        return self._push_object.with_call(request=req, metadata=metadata)
+        # Mock store_traffic to avoid validation error when object_content is empty
+        # This is because the object has been preregistered but not yet pushed
+        with patch.object(self.state, "store_traffic"):
+            return self._push_object.with_call(request=req, metadata=metadata)
 
     def _test_get_run(self, metadata: list[Any]) -> Any:
         """Test GetRun."""

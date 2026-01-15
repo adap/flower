@@ -70,7 +70,11 @@ def stop(  # pylint: disable=R0914
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """Stop a run."""
+    """Stop a Flower run.
+
+    This command stops a running Flower App execution by sending a stop request to the
+    SuperLink via the Control API.
+    """
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:
@@ -81,7 +85,7 @@ def stop(  # pylint: disable=R0914
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
         pyproject_path = app / FAB_CONFIG_FILE if app else None
-        config, errors, warnings = load_and_validate(path=pyproject_path)
+        config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
         config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
             federation, config, federation_config_overrides
@@ -101,6 +105,7 @@ def stop(  # pylint: disable=R0914
                 f"❌ {err}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1) from err
         finally:
@@ -116,6 +121,7 @@ def stop(  # pylint: disable=R0914
                 f"{err}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
     finally:
         if suppress_output:
@@ -124,7 +130,17 @@ def stop(  # pylint: disable=R0914
 
 
 def _stop_run(stub: ControlStub, run_id: int, output_format: str) -> None:
-    """Stop a run."""
+    """Stop a run and display the result.
+
+    Parameters
+    ----------
+    stub : ControlStub
+        The gRPC stub for Control API communication.
+    run_id : int
+        The unique identifier of the run to stop.
+    output_format : str
+        Output format ('default' or 'json').
+    """
     with flwr_cli_grpc_exc_handler():
         response: StopRunResponse = stub.StopRun(request=StopRunRequest(run_id=run_id))
     if response.success:
@@ -133,10 +149,12 @@ def _stop_run(stub: ControlStub, run_id: int, output_format: str) -> None:
             run_output = json.dumps(
                 {
                     "success": True,
-                    "run-id": run_id,
+                    "run-id": f"{run_id}",
                 }
             )
             restore_output()
             Console().print_json(run_output)
     else:
-        typer.secho(f"❌ Run {run_id} couldn't be stopped.", fg=typer.colors.RED)
+        typer.secho(
+            f"❌ Run {run_id} couldn't be stopped.", fg=typer.colors.RED, err=True
+        )

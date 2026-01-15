@@ -17,6 +17,8 @@
 
 import threading
 
+from flwr.supercore.object_store import ObjectStoreFactory
+
 from .in_memory_nodestate import InMemoryNodeState
 from .nodestate import NodeState
 
@@ -24,7 +26,8 @@ from .nodestate import NodeState
 class NodeStateFactory:
     """Factory class that creates NodeState instances."""
 
-    def __init__(self) -> None:
+    def __init__(self, objectstore_factory: ObjectStoreFactory) -> None:
+        self.objectstore_factory = objectstore_factory
         self.state_instance: NodeState | None = None
         self.lock = threading.RLock()
 
@@ -33,5 +36,6 @@ class NodeStateFactory:
         # Lock access to NodeStateFactory to prevent returning different instances
         with self.lock:
             if self.state_instance is None:
-                self.state_instance = InMemoryNodeState()
+                object_store = self.objectstore_factory.store()
+                self.state_instance = InMemoryNodeState(object_store)
             return self.state_instance

@@ -38,7 +38,8 @@ from flwr.server.superlink.linkstate import (
 )
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
-from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
+from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 
 from .inmemory_grid import InMemoryGrid
@@ -103,6 +104,9 @@ class TestInMemoryGrid(unittest.TestCase):
             status=RunStatus(status=Status.PENDING, sub_status="", details=""),
             flwr_aid="user123",
             federation="mock-fed",
+            bytes_sent=0,
+            bytes_recv=0,
+            clientapp_runtime=0.0,
         )
         state_factory = MagicMock(state=lambda: self.state)
         self.grid = InMemoryGrid(state_factory=state_factory)
@@ -198,8 +202,10 @@ class TestInMemoryGrid(unittest.TestCase):
     def test_message_store_consistency_after_push_pull_sqlitestate(self) -> None:
         """Test messages are deleted in sqlite state once messages are pulled."""
         # Prepare
-        state = LinkStateFactory("", NoOpFederationManager()).state()
-        run_id = state.create_run("", "", "", {}, "", ConfigRecord(), "")
+        state = LinkStateFactory(
+            "", NoOpFederationManager(), ObjectStoreFactory()
+        ).state()
+        run_id = state.create_run("", "", "", {}, NOOP_FEDERATION, ConfigRecord(), "")
         self.grid = InMemoryGrid(MagicMock(state=lambda: state))
         self.grid.set_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.grid, self.num_nodes)
@@ -225,10 +231,10 @@ class TestInMemoryGrid(unittest.TestCase):
         """Test messages are deleted in in-memory state once messages are pulled."""
         # Prepare
         state_factory = LinkStateFactory(
-            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), ObjectStoreFactory()
         )
         state = state_factory.state()
-        run_id = state.create_run("", "", "", {}, "", ConfigRecord(), "")
+        run_id = state.create_run("", "", "", {}, NOOP_FEDERATION, ConfigRecord(), "")
         self.grid = InMemoryGrid(state_factory)
         self.grid.set_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.grid, self.num_nodes)

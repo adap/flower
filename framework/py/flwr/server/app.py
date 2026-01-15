@@ -31,7 +31,6 @@ import grpc
 import yaml
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
-from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
@@ -58,16 +57,17 @@ from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
-from flwr.common.version import package_version
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
+from flwr.supercore.address import parse_address
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.version import package_version
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import (
     ControlAuthnPlugin,
@@ -300,14 +300,16 @@ def run_superlink() -> None:
     fed_config_path = getattr(args, "federations_config", None)
     federation_manager = get_federation_manager(fed_config_path)
 
+    # Initialize ObjectStoreFactory
+    objectstore_factory = ObjectStoreFactory(args.database)
+
     # Initialize StateFactory
-    state_factory = LinkStateFactory(args.database, federation_manager)
+    state_factory = LinkStateFactory(
+        args.database, federation_manager, objectstore_factory
+    )
 
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
-
-    # Initialize ObjectStoreFactory
-    objectstore_factory = ObjectStoreFactory(args.database)
 
     # Start Control API
     is_simulation = args.simulation
@@ -322,6 +324,7 @@ def run_superlink() -> None:
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
         artifact_provider=artifact_provider,
+        fleet_api_type=args.fleet_api_type,
     )
     grpc_servers = [control_server]
     bckg_threads: list[threading.Thread] = []

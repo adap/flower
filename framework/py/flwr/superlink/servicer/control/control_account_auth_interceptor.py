@@ -46,9 +46,17 @@ Response = (
 )
 
 
-shared_account_info: contextvars.ContextVar[AccountInfo] = contextvars.ContextVar(
-    "account_info", default=AccountInfo(flwr_aid=None, account_name=None)
+shared_account_info: contextvars.ContextVar[AccountInfo | None] = (
+    contextvars.ContextVar("account_info", default=None)
 )
+
+
+def get_current_account_info() -> AccountInfo:
+    """Get the current account info from context, or return a default if not set."""
+    account_info = shared_account_info.get()
+    if account_info is None:
+        return AccountInfo(flwr_aid=None, account_name=None)
+    return account_info
 
 
 class ControlAccountAuthInterceptor(grpc.ServerInterceptor):  # type: ignore

@@ -15,8 +15,9 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from collections import OrderedDict
 from typing import Any, cast
+
+from flwr.app.user_config import UserConfig, UserConfigValue
 
 # pylint: disable=E0611
 from flwr.proto.fab_pb2 import Fab as ProtoFab
@@ -410,9 +411,9 @@ def array_record_from_proto(
 ) -> ArrayRecord:
     """Deserialize ArrayRecord from ProtoBuf."""
     return ArrayRecord(
-        array_dict=OrderedDict(
-            {item.key: array_from_proto(item.value) for item in record_proto.items}
-        ),
+        array_dict={
+            item.key: array_from_proto(item.value) for item in record_proto.items
+        },
         keep_input=False,
     )
 
@@ -514,7 +515,7 @@ def fab_from_proto(fab: ProtoFab) -> typing.Fab:
 # === User configs ===
 
 
-def user_config_to_proto(user_config: typing.UserConfig) -> Any:
+def user_config_to_proto(user_config: UserConfig) -> Any:
     """Serialize `UserConfig` to ProtoBuf."""
     proto = {}
     for key, value in user_config.items():
@@ -522,7 +523,7 @@ def user_config_to_proto(user_config: typing.UserConfig) -> Any:
     return proto
 
 
-def user_config_from_proto(proto: Any) -> typing.UserConfig:
+def user_config_from_proto(proto: Any) -> UserConfig:
     """Deserialize `UserConfig` from ProtoBuf."""
     metrics = {}
     for key, value in proto.items():
@@ -530,7 +531,7 @@ def user_config_from_proto(proto: Any) -> typing.UserConfig:
     return metrics
 
 
-def user_config_value_to_proto(user_config_value: typing.UserConfigValue) -> Scalar:
+def user_config_value_to_proto(user_config_value: UserConfigValue) -> Scalar:
     """Serialize `UserConfigValue` to ProtoBuf."""
     if isinstance(user_config_value, bool):
         return Scalar(bool=user_config_value)
@@ -549,11 +550,11 @@ def user_config_value_to_proto(user_config_value: typing.UserConfigValue) -> Sca
     )
 
 
-def user_config_value_from_proto(scalar_msg: Scalar) -> typing.UserConfigValue:
+def user_config_value_from_proto(scalar_msg: Scalar) -> UserConfigValue:
     """Deserialize `UserConfigValue` from ProtoBuf."""
     scalar_field = scalar_msg.WhichOneof("scalar")
     scalar = getattr(scalar_msg, cast(str, scalar_field))
-    return cast(typing.UserConfigValue, scalar)
+    return cast(UserConfigValue, scalar)
 
 
 # === Message messages ===
@@ -633,6 +634,9 @@ def run_to_proto(run: typing.Run) -> ProtoRun:
         status=run_status_to_proto(run.status),
         flwr_aid=run.flwr_aid,
         federation=run.federation,
+        bytes_sent=run.bytes_sent,
+        bytes_recv=run.bytes_recv,
+        clientapp_runtime=run.clientapp_runtime,
     )
     return proto
 
@@ -652,6 +656,9 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         status=run_status_from_proto(run_proto.status),
         flwr_aid=run_proto.flwr_aid,
         federation=run_proto.federation,
+        bytes_sent=run_proto.bytes_sent,
+        bytes_recv=run_proto.bytes_recv,
+        clientapp_runtime=run_proto.clientapp_runtime,
     )
     return run
 

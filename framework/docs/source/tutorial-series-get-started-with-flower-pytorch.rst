@@ -1,5 +1,6 @@
-Get started with Flower
-=======================
+#########################
+ Get started with Flower
+#########################
 
 .. |Grid_link| replace:: ``Grid``
 
@@ -66,13 +67,14 @@ loading. In part 2, we federate this PyTorch project using Flower.
 
 Let's get started! 🌼
 
-Preparation
------------
+*************
+ Preparation
+*************
 
 Before we begin with any actual code, let's make sure that we have everything we need.
 
 Install dependencies
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 First, we install the Flower package ``flwr``:
 
@@ -81,21 +83,19 @@ First, we install the Flower package ``flwr``:
     # In a new Python environment
     $ pip install -U "flwr[simulation]"
 
-Then, we create a new Flower app called ``flower-tutorial`` using the PyTorch template.
-We also specify a username (``flwrlabs``) for the project:
+Then, run the command below:
 
 .. code-block:: shell
 
-    $ flwr new flower-tutorial --framework pytorch --username flwrlabs
+    $ flwr new @flwrlabs/quickstart-pytorch
 
-After running the command, a new directory called ``flower-tutorial`` will be created.
-It should have the following structure:
+After running it you'll notice a new directory named ``quickstart-pytorch`` has been
+created. It should have the following structure:
 
 .. code-block:: shell
 
-    flower-tutorial
-    ├── README.md
-    ├── flower_tutorial
+    quickstart-pytorch
+    ├── pytorchexample
     │   ├── __init__.py
     │   ├── client_app.py   # Defines your ClientApp
     │   ├── server_app.py   # Defines your ServerApp
@@ -108,7 +108,7 @@ Next, we install the project and its dependencies, which are specified in the
 
 .. code-block:: shell
 
-    $ cd flower-tutorial
+    $ cd quickstart-pytorch
     $ pip install -e .
 
 Before we dive into federated learning, we'll take a look at the dataset that we'll be
@@ -117,7 +117,7 @@ using for this tutorial, which is the `CIFAR-10
 training pipeline using PyTorch.
 
 The ``CIFAR-10`` dataset
-~~~~~~~~~~~~~~~~~~~~~~~~
+========================
 
 Federated learning can be applied to many different types of tasks across different
 domains. In this tutorial, we introduce federated learning by training a simple
@@ -145,7 +145,7 @@ these into a PyTorch ``DataLoader``:
 
 .. code-block:: python
 
-    def load_data(partition_id: int, num_partitions: int):
+    def load_data(partition_id: int, num_partitions: int, batch_size: int):
         """Load partition CIFAR10 data."""
         # Only initialize `FederatedDataset` once
         global fds
@@ -168,8 +168,10 @@ these into a PyTorch ``DataLoader``:
             return batch
 
         partition_train_test = partition_train_test.with_transform(apply_transforms)
-        trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
-        testloader = DataLoader(partition_train_test["test"], batch_size=32)
+        trainloader = DataLoader(
+            partition_train_test["train"], batch_size=batch_size, shuffle=True
+        )
+        testloader = DataLoader(partition_train_test["test"], batch_size=batch_size)
         return trainloader, testloader
 
 We now have a function that can return a training set and validation set
@@ -180,8 +182,9 @@ test set). Again, this is only necessary for building research or educational sy
 actual federated learning systems have their data naturally distributed across multiple
 partitions.
 
-The model, training, and test functions
----------------------------------------
+*****************************************
+ The model, training, and test functions
+*****************************************
 
 Next, we're going to use PyTorch to define a simple convolutional neural network. This
 introduction assumes basic familiarity with PyTorch, so it doesn't cover the
@@ -190,7 +193,7 @@ recommend `this introductory tutorial
 <https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html>`_.
 
 Model
-~~~~~
+=====
 
 We will use the simple CNN described in the aforementioned PyTorch tutorial (The
 following code is already defined in ``task.py``):
@@ -218,9 +221,9 @@ following code is already defined in ``task.py``):
             return self.fc3(x)
 
 Training and test functions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===========================
 
-The PyTorch template also provides the usual training and test functions:
+The PyTorch quickstart also provides the usual training and test functions:
 
 .. code-block:: python
 
@@ -228,7 +231,7 @@ The PyTorch template also provides the usual training and test functions:
         """Train the model on the training set."""
         net.to(device)  # move model to GPU if available
         criterion = torch.nn.CrossEntropyLoss().to(device)
-        optimizer = torch.optim.Adam(net.parameters(), lr=lr)
+        optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9)
         net.train()
         running_loss = 0.0
         for _ in range(epochs):
@@ -260,8 +263,9 @@ The PyTorch template also provides the usual training and test functions:
         loss = loss / len(testloader)
         return loss, accuracy
 
-Federated Learning with Flower
-------------------------------
+********************************
+ Federated Learning with Flower
+********************************
 
 In federated learning, the server sends global model parameters to the client, and the
 client updates the local model with parameters received from the server. It then trains
@@ -270,7 +274,7 @@ updated/changed model parameters back to the server (or, alternatively, it sends
 the gradients back to the server, not the full model parameters).
 
 Constructing Messages
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 In Flower, the server and clients communicate by sending and receiving |message_link|_
 objects. A ``Message`` carries a ``RecordDict`` as its main payload. The ``RecordDict``
@@ -309,7 +313,7 @@ construct a ``RecordDict`` that can be sent over a ``Message``.
     rd = RecordDict({"my-config": config, "metrics": metrics, "my-model": array_record})
 
 Define the Flower ClientApp
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===========================
 
 Federated learning systems consist of a server and multiple nodes or clients. In Flower,
 we create a |serverapp_link|_ and a |clientapp_link|_ to run the server-side and
@@ -321,7 +325,7 @@ laptop) has access to. In this tutorial such action is to train and evaluate the
 CNN model defined earlier using the local training and validation data.
 
 Training
-++++++++
+--------
 
 We can define how the ``ClientApp`` performs training by wrapping a function with the
 ``@app.train()`` decorator. In this case we name this function ``train`` because we'll
@@ -365,7 +369,8 @@ metrics of interest.
         # Load the data
         partition_id = context.node_config["partition-id"]
         num_partitions = context.node_config["num-partitions"]
-        trainloader, _ = load_data(partition_id, num_partitions)
+        batch_size = context.run_config["batch-size"]
+        trainloader, _ = load_data(partition_id, num_partitions, batch_size)
 
         # Call the training function
         train_loss = train_fn(
@@ -415,7 +420,7 @@ After constructing the reply ``Message``, the ``ClientApp`` returns it. Flower t
 handles sending the reply back to the server automatically.
 
 Evaluation
-++++++++++
+----------
 
 In a typical federated learning setup, the ``ClientApp`` would also implement an
 ``@app.evaluate()`` function to evaluate the model received from the ``ServerApp`` on
@@ -445,7 +450,8 @@ evaluation). Here's how the ``evaluate`` function looks like:
         # Load the data
         partition_id = context.node_config["partition-id"]
         num_partitions = context.node_config["num-partitions"]
-        _, valloader = load_data(partition_id, num_partitions)
+        batch_size = context.run_config["batch-size"]
+        _, valloader = load_data(partition_id, num_partitions, batch_size)
 
         # Call the evaluation function
         eval_loss, eval_acc = test_fn(
@@ -472,7 +478,7 @@ also need to include the ``num-examples`` key in the metrics so the server can a
 the evaluation metrics correctly.
 
 Define the Flower ServerApp
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===========================
 
 On the server side, we need to configure a strategy which encapsulates the federated
 learning approach/algorithm, for example, *Federated Averaging* (FedAvg). Flower has a
@@ -509,16 +515,16 @@ the ``Message`` that also carries the model parameters.
         """Main entry point for the ServerApp."""
 
         # Read run config
-        fraction_train: float = context.run_config["fraction-train"]
+        fraction_evaluate: float = context.run_config["fraction-evaluate"]
         num_rounds: int = context.run_config["num-server-rounds"]
-        lr: float = context.run_config["lr"]
+        lr: float = context.run_config["learning-rate"]
 
         # Load global model
         global_model = Net()
         arrays = ArrayRecord(global_model.state_dict())
 
         # Initialize FedAvg strategy
-        strategy = FedAvg(fraction_train=fraction_train)
+        strategy = FedAvg(fraction_evaluate=fraction_evaluate)
 
         # Start strategy, run FedAvg for `num_rounds`
         result = strategy.start(
@@ -526,6 +532,7 @@ the ``Message`` that also carries the model parameters.
             initial_arrays=arrays,
             train_config=ConfigRecord({"lr": lr}),
             num_rounds=num_rounds,
+            evaluate_fn=global_evaluate,
         )
 
         # Save final model to disk
@@ -540,7 +547,7 @@ received from the clients or generated by the strategy itself. We can then save 
 final model to disk for later use.
 
 Run the training
-~~~~~~~~~~~~~~~~
+================
 
 With all of these components in place, we can now run the federated learning simulation
 with Flower! The last step is to run our simulation in the command line, as follows:
@@ -633,7 +640,7 @@ in ``pyproject.toml`` like this:
     `pyproject.toml <how-to-configure-pyproject-toml.html>`_ guide.
 
 Behind the scenes
-~~~~~~~~~~~~~~~~~
+=================
 
 So how does this work? How does Flower execute this simulation?
 
@@ -676,8 +683,9 @@ Once both training and evaluation are done, the next round begins: another train
 step, then another evaluation step, and so on, until the configured number of rounds is
 reached.
 
-Final remarks
--------------
+***************
+ Final remarks
+***************
 
 Congratulations, you just trained a convolutional neural network, federated over 10
 clients! With that, you understand the basics of federated learning with Flower. The
@@ -690,8 +698,9 @@ customize your strategy? Do learning rate decay at the strategy and communicate 
 the clients ? Or evaluate the aggregated model on the server side? We'll cover all this
 and more in the next tutorial.
 
-Next steps
-----------
+************
+ Next steps
+************
 
 Before you continue, make sure to join the Flower community on Flower Discuss (`Join
 Flower Discuss <https://discuss.flower.ai>`__) and on Slack (`Join Slack

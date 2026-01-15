@@ -11,10 +11,10 @@ authors = ["The Flower Authors <hello@flower.ai>"]
 packages = [{ include = "devtool", from = "./" }]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 clang-format = "==17.0.6"
 isort = "==5.13.2"
-black = { version = "==24.10.0" }
+black = { version = "==25.11.0" }
 taplo = "==0.9.3"
 docformatter = "==1.7.5"
 rope = "==1.13.0"
@@ -40,14 +40,14 @@ beautysh = "==6.1.0"
 GitPython = "==3.1.32"
 sphinx-substitution-extensions = "2022.02.16"
 sphinxext-opengraph = "==0.9.1"
-docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-2" }
+docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-2", python = ">=3.10,<4.0.0" }
 
 [tool.docstrfmt]
 extend_exclude = [
-    "../intelligence/docs/source/ts-ref-api/*",
-    "../intelligence/docs/source/swift-ref-api/*",
-    "../intelligence/docs/source/_templates/autosummary/*",
-    "../intelligence/docs/source/conf.py",
+    "**/ts-ref-api/*",
+    "**/swift-ref-api/*",
+    "**/conf.py",
+    "**/_templates/autosummary/*",
 ]
 
 [tool.isort]

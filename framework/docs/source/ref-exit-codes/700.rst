@@ -1,0 +1,19 @@
+############################
+ [700] SIMULATION_EXCEPTION
+############################
+
+*************
+ Description
+*************
+
+An unhandled exception occurred when running the simulation.
+
+****************
+ How to Resolve
+****************
+
+- Ensure the `SuperExec` environment launching the simulation has all necessary
+  dependencies installed and configured correctly.
+- Review the simulation logs to identify the specific exception and its cause.
+- Check the `how to run Simulations <../how-to-run-simulations.rst>`_ guide for best
+  practices and common pitfalls.

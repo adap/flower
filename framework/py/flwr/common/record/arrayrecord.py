@@ -63,7 +63,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
 
     A typed dictionary (``str`` to :class:`Array`) that can store named arrays,
     including model parameters, gradients, embeddings or non-parameter arrays.
-    Internally, this behaves similarly to an ``OrderedDict[str, Array]``.
+    Internally, this behaves similarly to an ``dict[str, Array]``.
     An ``ArrayRecord`` can be viewed as an equivalent to PyTorch's ``state_dict``,
     but it holds arrays in a serialized form.
 
@@ -80,13 +80,13 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
 
     Parameters
     ----------
-    array_dict : Optional[OrderedDict[str, Array]] (default: None)
+    array_dict : Optional[dict[str, Array]] (default: None)
         An existing dictionary containing named :class:`Array` instances. If
         provided, these entries will be used directly to populate the record.
     numpy_ndarrays : Optional[list[NDArray]] (default: None)
         A list of NumPy arrays. Each array will be automatically converted
         into an :class:`Array` and stored in this record with generated keys.
-    torch_state_dict : Optional[OrderedDict[str, torch.Tensor]] (default: None)
+    torch_state_dict : Optional[dict[str, torch.Tensor]] (default: None)
         A PyTorch ``state_dict`` (``str`` keys to ``torch.Tensor`` values). Each
         tensor will be converted into an :class:`Array` and stored in this record.
     keep_input : bool (default: True)
@@ -127,31 +127,23 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
     """
 
     @overload
-    def __init__(self) -> None: ...  # noqa: E704
+    def __init__(self) -> None: ...
 
     @overload
-    def __init__(  # noqa: E704
-        self, array_dict: OrderedDict[str, Array], *, keep_input: bool = True
+    def __init__(
+        self, array_dict: dict[str, Array], *, keep_input: bool = True
     ) -> None: ...
 
     @overload
-    def __init__(  # noqa: E704
+    def __init__(
         self, numpy_ndarrays: list[NDArray], *, keep_input: bool = True
     ) -> None: ...
 
     @overload
-    def __init__(  # noqa: E704
+    def __init__(
         self,
-        torch_state_dict: OrderedDict[str, torch.Tensor],
-        *,
-        keep_input: bool = True,
-    ) -> None: ...
-
-    # This is also required for PyTorch state dict because they are not strongly typed
-    @overload
-    def __init__(  # noqa: E704
-        self,
-        torch_state_dict: dict[str, Any],
+        # `Any` is required for PyTorch state dict because they are not strongly typed
+        torch_state_dict: dict[str, torch.Tensor] | dict[str, Any],
         *,
         keep_input: bool = True,
     ) -> None: ...
@@ -160,15 +152,15 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
         self,
         *args: Any,
         numpy_ndarrays: list[NDArray] | None = None,
-        torch_state_dict: OrderedDict[str, torch.Tensor] | dict[str, Any] | None = None,
-        array_dict: OrderedDict[str, Array] | None = None,
+        torch_state_dict: dict[str, torch.Tensor] | dict[str, Any] | None = None,
+        array_dict: dict[str, Array] | None = None,
         keep_input: bool = True,
     ) -> None:
         super().__init__(_check_key, _check_value)
 
         # Determine the initialization method and validates input arguments.
         # Support the following initialization formats:
-        # 1. cls(array_dict: OrderedDict[str, Array], keep_input: bool)
+        # 1. cls(array_dict: dict[str, Array], keep_input: bool)
         # 2. cls(numpy_ndarrays: list[NDArray], keep_input: bool)
         # 3. cls(torch_state_dict: dict[str, torch.Tensor], keep_input: bool)
 
@@ -213,7 +205,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
                 and all(isinstance(k, str) for k in arg.keys())
                 and all(isinstance(v, Array) for v in arg.values())
             ):
-                array_dict = cast(OrderedDict[str, Array], arg)
+                array_dict = cast(dict[str, Array], arg)
                 converted = self.from_array_dict(array_dict, keep_input=keep_input)
                 self.__dict__.update(converted.__dict__)
                 return
@@ -239,9 +231,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
                 and all(isinstance(k, str) for k in arg.keys())
                 and all(isinstance(v, torch.Tensor) for v in arg.values())
             ):
-                torch_state_dict = cast(
-                    OrderedDict[str, torch.Tensor], arg  # type: ignore
-                )
+                torch_state_dict = cast(dict[str, torch.Tensor], arg)  # type: ignore
                 converted = self.from_torch_state_dict(
                     torch_state_dict, keep_input=keep_input
                 )
@@ -253,7 +243,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
     @classmethod
     def from_array_dict(
         cls,
-        array_dict: OrderedDict[str, Array],
+        array_dict: dict[str, Array],
         *,
         keep_input: bool = True,
     ) -> ArrayRecord:
@@ -300,7 +290,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
     @classmethod
     def from_torch_state_dict(
         cls,
-        state_dict: OrderedDict[str, torch.Tensor],
+        state_dict: dict[str, torch.Tensor],
         *,
         keep_input: bool = True,
     ) -> ArrayRecord:
@@ -433,9 +423,7 @@ class ArrayRecord(TypedDict[str, Array], InflatableObject):
 
         # Instantiate new ArrayRecord
         return ArrayRecord(
-            OrderedDict(
-                {name: children[object_id] for name, object_id in array_refs.items()}
-            )
+            {name: children[object_id] for name, object_id in array_refs.items()}
         )
 
     @property

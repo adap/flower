@@ -33,7 +33,6 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
 )
 from flwr.common.constant import FAB_CONFIG_FILE, NOOP_ACCOUNT_NAME, CliOutputFormat
-from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListNodesRequest,
@@ -41,10 +40,12 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
+from flwr.supercore.date import isoformat8601_utc
+from flwr.supercore.utils import humanize_duration
 
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 
-_NodeListType = tuple[int, str, str, str, str, str, str, str, str]
+_NodeListType = tuple[int, str, str, str, str, str, str, str, float]
 
 
 def ls(  # pylint: disable=R0914, R0913, R0917
@@ -86,7 +87,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
         pyproject_path = app / FAB_CONFIG_FILE if app else None
-        config, errors, warnings = load_and_validate(path=pyproject_path)
+        config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
         config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
             federation, config
@@ -166,7 +167,7 @@ def _format_nodes(
                 _format_datetime(node.last_activated_at),
                 _format_datetime(node.last_deactivated_at),
                 _format_datetime(node.unregistered_at),
-                format_timedelta(elapsed_time_activated),
+                elapsed_time_activated.total_seconds(),
             )
         )
 
@@ -224,7 +225,11 @@ def _to_table(nodes_info: list[_NodeListType], verbose: bool) -> Table:
                 else f"[dim]{owner_name}[/dim]"
             ),
             f"[{status_style}]{status}",
-            f"[cyan]{elapse_activated}[/cyan]" if status == "online" else "",
+            (
+                f"[cyan]{humanize_duration(elapse_activated)}[/cyan]"
+                if status == "online"
+                else ""
+            ),
             time_at,
         )
         table.add_row(*formatted_row)
@@ -253,7 +258,7 @@ def _to_json(nodes_info: list[_NodeListType], verbose: bool) -> str:
 
         nodes_list.append(
             {
-                "node-id": node_id,
+                "node-id": f"{node_id}",
                 "owner-aid": owner_aid,
                 "owner-name": owner_name,
                 "status": status,

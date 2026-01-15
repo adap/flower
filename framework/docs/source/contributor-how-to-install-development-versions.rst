@@ -1,11 +1,13 @@
-Install development versions
-============================
+##############################
+ Install development versions
+##############################
 
-Install development versions of Flower
---------------------------------------
+****************************************
+ Install development versions of Flower
+****************************************
 
 Using Poetry (recommended)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================
 
 Install a ``flwr`` pre-release from PyPI: update the ``flwr`` dependency in
 ``pyproject.toml`` and then reinstall (don't forget to delete ``poetry.lock`` (``rm
@@ -30,7 +32,7 @@ Please refer to the Poetry documentation for further details: `Poetry Dependency
 Specification <https://python-poetry.org/docs/dependency-specification/>`_
 
 Using pip (recommended on Colab)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+================================
 
 Install a ``flwr`` pre-release from PyPI:
 
@@ -57,18 +59,18 @@ Install ``flwr`` from a specific GitHub branch (``branch-name``):
   'flwr[simulation]@git+https://github.com/adap/flower.git@branch-name#subdirectory=framework'``
   (with extras)
 
-Open Jupyter Notebooks on Google Colab
---------------------------------------
+****************************************
+ Open Jupyter Notebooks on Google Colab
+****************************************
 
-Open the notebook
-``framework/docs/source/tutorial-series-get-started-with-flower-pytorch.ipynb``:
+Open the notebook ``examples/flower-in-30-minutes/tutorial.ipynb``:
 
-- https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source/tutorial-series-get-started-with-flower-pytorch.ipynb
+- https://colab.research.google.com/github/adap/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb
 
 Open a development version of the same notebook from branch `branch-name` by changing
 ``main`` to ``branch-name`` (right after ``blob``):
 
-- https://colab.research.google.com/github/adap/flower/blob/branch-name/framework/docs/source/tutorial-series-get-started-with-flower-pytorch.ipynb
+- https://colab.research.google.com/github/adap/flower/blob/branch-name/examples/flower-in-30-minutes/tutorial.ipynb
 
 Install a `whl` on Google Colab:
 

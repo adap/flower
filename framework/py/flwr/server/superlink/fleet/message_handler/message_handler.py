@@ -65,7 +65,6 @@ from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
 from flwr.supercore.ffs import Ffs
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStore
-from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 
 
 class InvalidHeartbeatIntervalError(Exception):
@@ -128,7 +127,7 @@ def send_node_heartbeat(
     return SendNodeHeartbeatResponse(success=res)
 
 
-def pull_messages(
+def pull_messages(  # pylint: disable=too-many-locals
     request: PullMessagesRequest,
     state: LinkState,
     store: ObjectStore,
@@ -144,6 +143,8 @@ def pull_messages(
     # Convert to Messages
     msg_proto = []
     trees = []
+    run_id_to_record: int | None = None
+
     for msg in message_list:
         try:
             # Retrieve Message object tree from ObjectStore
@@ -153,12 +154,30 @@ def pull_messages(
             # Add Message and its object tree to the response
             msg_proto.append(message_to_proto(msg))
             trees.append(obj_tree)
+
+            # Track run_id for traffic recording
+            run_id_to_record = msg.metadata.run_id
+
         except NoObjectInStoreError as e:
             log(ERROR, e.message)
             # Delete message ins from state
             state.delete_messages(message_ins_ids={msg_object_id})
 
-    return PullMessagesResponse(messages_list=msg_proto, message_object_trees=trees)
+    response = PullMessagesResponse(messages_list=msg_proto, message_object_trees=trees)
+
+    # Record incoming traffic size
+    bytes_recv = len(request.SerializeToString())
+
+    # Record traffic only if message was successfully processed
+    # All messages in this request are assumed to belong to the same run
+    if run_id_to_record is not None:
+        # Record outgoing traffic size
+        bytes_sent = len(response.SerializeToString())
+        state.store_traffic(
+            run_id_to_record, bytes_sent=bytes_sent, bytes_recv=bytes_recv
+        )
+
+    return response
 
 
 def push_messages(
@@ -169,10 +188,14 @@ def push_messages(
     """Push Messages handler."""
     # Convert Message from proto
     msg = message_from_proto(message_proto=request.messages_list[0])
+    run_id = msg.metadata.run_id
+
+    # Record incoming traffic size
+    bytes_recv = len(request.SerializeToString())
 
     # Abort if the run is not running
     abort_msg = check_abort(
-        msg.metadata.run_id,
+        run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
         store,
@@ -180,11 +203,12 @@ def push_messages(
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
 
+    # Store Message object to descendants mapping and preregister objects
+    objects_to_push: set[str] = set()
+    for object_tree in request.message_object_trees:
+        objects_to_push |= set(store.preregister(run_id, object_tree))
     # Store Message in State
     message_id: str | None = state.store_message_res(message=msg)
-
-    # Store Message object to descendants mapping and preregister objects
-    objects_to_push = store_mapping_and_register_objects(store, request=request)
 
     # Build response
     response = PushMessagesResponse(
@@ -192,6 +216,16 @@ def push_messages(
         results={str(message_id): 0},
         objects_to_push=objects_to_push,
     )
+
+    # Record outgoing traffic size
+    bytes_sent = len(response.SerializeToString())
+
+    # Record traffic only if message was successfully processed
+    # Only one message is processed per request
+    state.store_traffic(run_id, bytes_sent=bytes_sent, bytes_recv=bytes_recv)
+    if request.clientapp_runtime_list:
+        state.add_clientapp_runtime(run_id, request.clientapp_runtime_list[0])
+
     return response
 
 
@@ -256,6 +290,10 @@ def push_object(
     try:
         store.put(request.object_id, request.object_content)
         stored = True
+        # Record bytes traffic pushed from SuperNode
+        state.store_traffic(
+            request.run_id, bytes_sent=0, bytes_recv=len(request.object_content)
+        )
     except (NoObjectInStoreError, ValueError) as e:
         log(ERROR, str(e))
     except UnexpectedObjectContentError as e:
@@ -282,6 +320,8 @@ def pull_object(
     content = store.get(request.object_id)
     if content is not None:
         object_available = content != b""
+        # Record bytes traffic pulled by SuperNode
+        state.store_traffic(request.run_id, bytes_sent=len(content), bytes_recv=0)
         return PullObjectResponse(
             object_found=True,
             object_available=object_available,

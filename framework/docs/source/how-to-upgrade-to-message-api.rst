@@ -46,8 +46,9 @@
 
 .. _recorddict_link: ref-api/flwr.common.RecordDict.html
 
-Upgrade to Message API
-======================
+########################
+ Upgrade to Message API
+########################
 
 Welcome to the migration guide for updating your Flower Apps to use Flower's Message
 API! This guide will walk you through the necessary steps to transition from Flower Apps
@@ -64,8 +65,9 @@ Let's dive in!
     take a look at the `quickstart-pytorch
     <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch>`_ example.
 
-Summary of changes
-------------------
+********************
+ Summary of changes
+********************
 
 Thousands of Flower Apps have been created using the Strategies and |numpyclient_link|_
 abstractions. With the introduction of the Message API, these apps can now take
@@ -120,8 +122,9 @@ to use the new message-based communication patterns. This guide will show you ho
     the specifics of each record type, but rather focus on the overall migration
     process.
 
-Install update
---------------
+****************
+ Install update
+****************
 
 The first step is to update the Flower version defined in the `pyproject.toml` in your
 app:
@@ -142,8 +145,9 @@ Then, run the following command to install the updated dependencies:
     # Install the app with updated dependencies
     $ pip install -e .
 
-Update your ``ServerApp``
--------------------------
+***************************
+ Update your ``ServerApp``
+***************************
 
 Starting with Flower 1.21, the ``ServerApp`` no longer requires a ``server_fn`` function
 to make use of strategies. This is because a new collection of strategies (all sharing
@@ -267,8 +271,9 @@ evaluation stages done at the ``ServerApp``.
         )
         print(result)
 
-Update your ClientApp
----------------------
+***********************
+ Update your ClientApp
+***********************
 
 Similar to the ``ServerApp``, the ``ClientApp`` no longer requires a helper function
 (i.e. ``client_fn`` ) that instantiates a |numpyclient_link|_ or base |client_link|_

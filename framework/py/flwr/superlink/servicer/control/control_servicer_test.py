@@ -16,6 +16,7 @@
 
 
 import hashlib
+import json
 import os
 import tempfile
 import unittest
@@ -57,7 +58,7 @@ from flwr.superlink.servicer.control.control_account_auth_interceptor import (
     shared_account_info,
 )
 
-from .control_servicer import ControlServicer
+from .control_servicer import ControlServicer, _format_verification
 
 FLWR_AID_MISMATCH_CASES = (
     # (context_flwr_aid, run_flwr_aid)
@@ -80,12 +81,13 @@ class TestControlServicer(unittest.TestCase):
         """Set up test fixtures."""
         self.store = Mock()
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        objectstore_factory = Mock(store=Mock(return_value=self.store))
         self.servicer = ControlServicer(
             linkstate_factory=LinkStateFactory(
-                FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+                FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
             ),
             ffs_factory=FfsFactory(self.tmp_dir.name),
-            objectstore_factory=Mock(store=Mock(return_value=self.store)),
+            objectstore_factory=objectstore_factory,
             is_simulation=False,
             authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
         )
@@ -101,7 +103,13 @@ class TestControlServicer(unittest.TestCase):
 
     def _create_dummy_run(self, flwr_aid: str | None) -> int:
         return self.state.create_run(
-            "flwr/demo", "v0.0.1", "hash123", {}, "mock-fed", ConfigRecord(), flwr_aid
+            "flwr/demo",
+            "v0.0.1",
+            "hash123",
+            {},
+            NOOP_FEDERATION,
+            ConfigRecord(),
+            flwr_aid,
         )
 
     def test_start_run(self) -> None:
@@ -283,10 +291,8 @@ class TestControlServicer(unittest.TestCase):
 
         # Execute
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(
-                get=lambda: SimpleNamespace(flwr_aid=flwr_aid_retrieving)
-            ),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=flwr_aid_retrieving),
         ):
             res: ListNodesResponse = self.servicer.ListNodes(ListNodesRequest(), Mock())
 
@@ -308,7 +314,7 @@ class TestControlServicerAuth(unittest.TestCase):
         self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         self.servicer = ControlServicer(
             linkstate_factory=LinkStateFactory(
-                FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+                FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), Mock()
             ),
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(),
@@ -323,7 +329,13 @@ class TestControlServicerAuth(unittest.TestCase):
 
     def _create_dummy_run(self, flwr_aid: str | None) -> int:
         return self.state.create_run(
-            "flwr/demo", "v0.0.1", "hash123", {}, "mock-fed", ConfigRecord(), flwr_aid
+            "flwr/demo",
+            "v0.0.1",
+            "hash123",
+            {},
+            NOOP_FEDERATION,
+            ConfigRecord(),
+            flwr_aid,
         )
 
     def make_context(self) -> MagicMock:
@@ -349,8 +361,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=context_flwr_aid),
         ):
             gen = self.servicer.StreamLogs(request, ctx)
             with self.assertRaises(RuntimeError) as cm:
@@ -378,8 +390,8 @@ class TestControlServicerAuth(unittest.TestCase):
                 },
             ),
             patch(
-                "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-                new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
+                "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+                return_value=SimpleNamespace(flwr_aid="user-123"),
             ),
         ):
             msgs = list(self.servicer.StreamLogs(request, ctx))
@@ -403,8 +415,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=context_flwr_aid),
         ):
             with self.assertRaises(RuntimeError) as cm:
                 self.servicer.StopRun(request, ctx)
@@ -419,8 +431,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid="user-123"),
         ):
             response = self.servicer.StopRun(request, ctx)
             self.assertTrue(response.success)
@@ -441,8 +453,8 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid=context_flwr_aid)),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=context_flwr_aid),
         ):
             with self.assertRaises(RuntimeError) as cm:
                 self.servicer.ListRuns(request, ctx)
@@ -457,8 +469,26 @@ class TestControlServicerAuth(unittest.TestCase):
 
         # Execute & Assert
         with patch(
-            "flwr.superlink.servicer.control.control_servicer.shared_account_info",
-            new=SimpleNamespace(get=lambda: SimpleNamespace(flwr_aid="user-123")),
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid="user-123"),
         ):
             response = self.servicer.ListRuns(request, ctx)
             self.assertEqual(set(response.run_dict.keys()), {run_id})
+
+
+def test_format_verification_compact() -> None:
+    """One test covering both 'with entries' and 'None' input."""
+    # Case 1: verifications list present
+    verifications: list[dict[str, str]] = [
+        {"public_key_id": "key1", "sig": "abc", "algo": "ed25519"},
+        {"public_key_id": "key2", "sig": "def", "algo": "ed25519"},
+    ]
+    out: dict[str, str] = _format_verification(verifications)
+
+    # Should mark valid
+    assert out["valid_license"] == "Valid"
+    # public_key_id -> JSON of remaining fields
+    v1: dict[str, str] = json.loads(out["key1"])
+    v2: dict[str, str] = json.loads(out["key2"])
+    assert v1 == {"sig": "abc", "algo": "ed25519"}
+    assert v2 == {"sig": "def", "algo": "ed25519"}

@@ -17,7 +17,6 @@
 
 import json
 import random
-from collections import OrderedDict
 from logging import INFO
 from time import sleep
 from typing import cast
@@ -102,7 +101,7 @@ def aggregate_arrayrecords(
                     aggregated_np_arrays[key] += value.numpy() * weight
 
     return ArrayRecord(
-        OrderedDict({k: Array(np.asarray(v)) for k, v in aggregated_np_arrays.items()})
+        {k: Array(np.asarray(v)) for k, v in aggregated_np_arrays.items()}
     )
 
 

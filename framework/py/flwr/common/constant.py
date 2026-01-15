@@ -19,13 +19,11 @@ from __future__ import annotations
 
 import os
 
-TRANSPORT_TYPE_GRPC_BIDI = "grpc-bidi"
 TRANSPORT_TYPE_GRPC_RERE = "grpc-rere"
 TRANSPORT_TYPE_GRPC_ADAPTER = "grpc-adapter"
 TRANSPORT_TYPE_REST = "rest"
 TRANSPORT_TYPE_VCE = "vce"
 TRANSPORT_TYPES = [
-    TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPE_VCE,
@@ -88,6 +86,7 @@ FAB_INCLUDE_PATTERNS = (
 )
 # FAB file exclude patterns (gitignore-style patterns)
 FAB_EXCLUDE_PATTERNS = (
+    f"{FLWR_DIR}/**",  # Exclude the .flwr directory
     "**/__pycache__/**",
     FAB_CONFIG_FILE,  # Exclude the original pyproject.toml
 )
@@ -183,19 +182,6 @@ PUBLIC_KEY_NOT_VALID = "The provided public key is not valid"
 NODE_NOT_FOUND_MESSAGE = "Node ID not found for account"
 
 
-class MessageType:
-    """Message type."""
-
-    TRAIN = "train"
-    EVALUATE = "evaluate"
-    QUERY = "query"
-    SYSTEM = "system"
-
-    def __new__(cls) -> MessageType:
-        """Prevent instantiation."""
-        raise TypeError(f"{cls.__name__} cannot be instantiated.")
-
-
 class MessageTypeLegacy:
     """Legacy message type."""
 
@@ -228,6 +214,7 @@ class ErrorCode:
     NODE_UNAVAILABLE = 5
     MOD_FAILED_PRECONDITION = 6
     INVALID_FAB = 7
+    CLIENT_APP_CRASHED = 8
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
@@ -320,5 +307,5 @@ class ExecPluginType:
 
 
 # Constants for No-op auth plugins
-NOOP_FLWR_AID = "<none>"
-NOOP_ACCOUNT_NAME = "<none>"
+NOOP_FLWR_AID = "<id:none>"
+NOOP_ACCOUNT_NAME = "<name:none>"

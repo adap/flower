@@ -25,11 +25,11 @@ from .sqlite_mixin import SqliteMixin
 class DummyDb(SqliteMixin):
     """Simple subclass for testing SqliteMixin behavior."""
 
-    def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
-        """Initialize the database with a simple test table."""
-        return self._ensure_initialized(
+    def get_sql_statements(self) -> tuple[str, ...]:
+        """Return SQL statements for test table."""
+        return (
             "CREATE TABLE IF NOT EXISTS test"
-            "(id INTEGER PRIMARY KEY AUTOINCREMENT, value INTEGER)"
+            "(id INTEGER PRIMARY KEY AUTOINCREMENT, value INTEGER)",
         )
 
 

@@ -2,8 +2,9 @@
 .. meta::
     :description: Configure the logging level for your Flower processes.
 
-Configure logging
-=================
+###################
+ Configure logging
+###################
 
 By default, the Flower logger uses logging level ``INFO``. This can be changed via the
 ``FLWR_LOG_LEVEL`` environment variable to any other levels that Python's `logging
@@ -35,8 +36,9 @@ example, to launch your ``SuperLink`` with ``DEBUG`` logs, use:
     :doc:`how-to-run-flower-with-deployment-engine`) or using the `flwr CLI
     <ref-api-cli.html>`_.
 
-Configure gRPC logging
-----------------------
+************************
+ Configure gRPC logging
+************************
 
 Flower uses `gRPC <https://grpc.io/>`_ to communicate between each component (see
 :doc:`ref-flower-network-communication`). You can set the verbosity level of ``gRPC``

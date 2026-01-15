@@ -94,7 +94,7 @@ class SimulationIoStub:
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
     ]
-    """Heartbeat"""
+    """App heartbeat"""
 
 class SimulationIoAsyncStub:
     ListAppsToLaunch: grpc.aio.UnaryUnaryMultiCallable[
@@ -155,7 +155,7 @@ class SimulationIoAsyncStub:
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
     ]
-    """Heartbeat"""
+    """App heartbeat"""
 
 class SimulationIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -236,6 +236,6 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse, collections.abc.Awaitable[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse]]:
-        """Heartbeat"""
+        """App heartbeat"""
 
 def add_SimulationIoServicer_to_server(servicer: SimulationIoServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

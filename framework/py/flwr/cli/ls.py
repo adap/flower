@@ -40,6 +40,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListRunsResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
+from flwr.supercore.utils import humanize_bytes, humanize_duration
 
 from .run_utils import RunRow, format_runs
 from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
@@ -110,7 +111,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
         pyproject_path = app / FAB_CONFIG_FILE if app else None
-        config, errors, warnings = load_and_validate(path=pyproject_path)
+        config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
         config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
             federation, config, federation_config_overrides
@@ -155,6 +156,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
                 f"{err}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
     finally:
         if suppress_output:
@@ -163,7 +165,18 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
 
 
 def _get_status_style(status_text: str) -> str:
-    """Determine the display style/color for a status."""
+    """Determine the display style/color for a status.
+
+    Parameters
+    ----------
+    status_text : str
+        The status text to determine color for.
+
+    Returns
+    -------
+    str
+        Color name for rich console styling (e.g., 'green', 'red', 'blue').
+    """
     status = status_text.lower()
     sub_status = status_text.rsplit(":", maxsplit=1)[-1]
 
@@ -179,7 +192,18 @@ def _get_status_style(status_text: str) -> str:
 
 
 def _to_table(run_list: list[RunRow]) -> Table:
-    """Format the provided run list to a rich Table."""
+    """Format the provided run list to a rich Table.
+
+    Parameters
+    ----------
+    run_list : list[RunRow]
+        List of run information to display.
+
+    Returns
+    -------
+    Table
+        Rich Table object with formatted run information.
+    """
     table = Table(header_style="bold cyan", show_lines=True)
 
     # Add columns
@@ -208,7 +232,7 @@ def _to_table(run_list: list[RunRow]) -> Table:
             row.federation,
             f"@{row.fab_id}=={row.fab_version}",
             f"[{status_style}]{row.status_text}[/{status_style}]",
-            row.elapsed,
+            humanize_duration(row.elapsed),
             status_changed_at,
         )
         table.add_row(*formatted_row)
@@ -217,7 +241,18 @@ def _to_table(run_list: list[RunRow]) -> Table:
 
 
 def _to_detail_table(run: RunRow) -> Table:
-    """Format a single run's details in a vertical table layout."""
+    """Format a single run's details in a vertical table layout.
+
+    Parameters
+    ----------
+    run : RunRow
+        The run information to display.
+
+    Returns
+    -------
+    Table
+        Rich Table object with detailed run information in vertical format.
+    """
     status_style = _get_status_style(run.status_text)
 
     # Create vertical table with field names on the left
@@ -231,22 +266,61 @@ def _to_detail_table(run: RunRow) -> Table:
     table.add_row("App", f"@{run.fab_id}=={run.fab_version}")
     table.add_row("FAB Hash", f"{run.fab_hash[:8]}...{run.fab_hash[-8:]}")
     table.add_row("Status", f"[{status_style}]{run.status_text}[/{status_style}]")
-    table.add_row("Elapsed", f"[blue]{run.elapsed}[/blue]")
+    table.add_row("Elapsed", f"[blue]{humanize_duration(run.elapsed)}[/blue]")
     table.add_row("Pending At", run.pending_at)
     table.add_row("Starting At", run.starting_at)
     table.add_row("Running At", run.running_at)
     table.add_row("Finished At", run.finished_at)
+    table.add_row(
+        "Network traffic (inbound)",
+        f"[blue]{humanize_bytes(run.network_traffic_inbound)}[/blue]",
+    )
+    table.add_row(
+        "Network traffic (outbound)",
+        f"[blue]{humanize_bytes(run.network_traffic_outbound)}[/blue]",
+    )
+    table.add_row(
+        "Network Traffic (total)",
+        "[blue]"
+        f"{humanize_bytes(run.network_traffic_inbound + run.network_traffic_outbound)}"
+        "[/blue]",
+    )
+    table.add_row(
+        "Compute Time (ServerApp)",
+        f"[blue]{humanize_duration(run.compute_time_serverapp)}[/blue]",
+    )
+    table.add_row(
+        "Compute Time (ClientApp)",
+        f"[blue]{humanize_duration(run.compute_time_clientapp)}[/blue]",
+    )
+    table.add_row(
+        "Compute Time (total)",
+        "[blue]"
+        f"{humanize_duration(run.compute_time_serverapp + run.compute_time_clientapp)}"
+        "[/blue]",
+    )
 
     return table
 
 
 def _to_json(run_list: list[RunRow]) -> str:
-    """Format run status list to a JSON formatted string."""
+    """Format run status list to a JSON formatted string.
+
+    Parameters
+    ----------
+    run_list : list[RunRow]
+        List of run information to serialize.
+
+    Returns
+    -------
+    str
+        JSON string containing formatted run information.
+    """
     runs_list = []
     for row in run_list:
         runs_list.append(
             {
-                "run-id": row.run_id,
+                "run-id": f"{row.run_id}",
                 "federation": row.federation,
                 "fab-id": row.fab_id,
                 "fab-name": row.fab_id.split("/")[-1],
@@ -258,6 +332,18 @@ def _to_json(run_list: list[RunRow]) -> str:
                 "starting-at": row.starting_at,
                 "running-at": row.running_at,
                 "finished-at": row.finished_at,
+                "network-traffic": {
+                    "inbound-bytes": row.network_traffic_inbound,
+                    "outbound-bytes": row.network_traffic_outbound,
+                    "total-bytes": row.network_traffic_inbound
+                    + row.network_traffic_outbound,
+                },
+                "compute-time": {
+                    "serverapp-seconds": row.compute_time_serverapp,
+                    "clientapp-seconds": row.compute_time_clientapp,
+                    "total-seconds": row.compute_time_serverapp
+                    + row.compute_time_clientapp,
+                },
             }
         )
 
@@ -265,22 +351,50 @@ def _to_json(run_list: list[RunRow]) -> str:
 
 
 def _list_runs(stub: ControlStub) -> list[RunRow]:
-    """List all runs."""
+    """List all runs.
+
+    Parameters
+    ----------
+    stub : ControlStub
+        The gRPC stub for Control API communication.
+
+    Returns
+    -------
+    list[RunRow]
+        List of formatted run information for all runs.
+    """
     with flwr_cli_grpc_exc_handler():
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
-    run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
+    runs = [run_from_proto(proto) for proto in res.run_dict.values()]
 
-    return format_runs(run_dict, res.now)
+    return format_runs(runs, res.now)
 
 
 def _display_one_run(stub: ControlStub, run_id: int) -> list[RunRow]:
-    """Display information about a specific run."""
+    """Display information about a specific run.
+
+    Parameters
+    ----------
+    stub : ControlStub
+        The gRPC stub for Control API communication.
+    run_id : int
+        The unique identifier of the run to display.
+
+    Returns
+    -------
+    list[RunRow]
+        List containing the formatted run information (single item).
+
+    Raises
+    ------
+    ValueError
+        If the run_id is not found.
+    """
     with flwr_cli_grpc_exc_handler():
         res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
     if not res.run_dict:
         # This won't be reached as an gRPC error is raised if run_id is invalid
         raise ValueError(f"Run ID {run_id} not found")
 
-    run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
-
-    return format_runs(run_dict, res.now)
+    runs = [run_from_proto(proto) for proto in res.run_dict.values()]
+    return format_runs(runs, res.now)

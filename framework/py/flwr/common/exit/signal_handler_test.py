@@ -21,7 +21,11 @@ import unittest
 from unittest.mock import Mock, patch
 
 from ..telemetry import EventType
-from .exit_handler import add_exit_handler, registered_exit_handlers
+from .exit_handler import (
+    add_exit_handler,
+    registered_exit_handlers,
+    trigger_exit_handlers,
+)
 from .signal_handler import register_signal_handlers
 
 
@@ -32,8 +36,8 @@ class TestExitHandlers(unittest.TestCase):
         """Clear all exit handlers before each test."""
         registered_exit_handlers.clear()
 
-    @patch("sys.exit")
-    def test_register_exit_handlers(self, mock_sys_exit: Mock) -> None:
+    @patch("flwr.common.exit.signal_handler.flwr_exit")
+    def test_register_exit_handlers(self, mock_flwr_exit: Mock) -> None:
         """Test register_exit_handlers."""
         # Prepare
         handlers = [Mock(), Mock(), Mock()]
@@ -42,11 +46,13 @@ class TestExitHandlers(unittest.TestCase):
 
         # Execute
         os.kill(os.getpid(), signal.SIGTERM)
+        # This should be called in `flwr_exit`, but we patched it above
+        trigger_exit_handlers()
 
         # Assert
+        mock_flwr_exit.assert_called_once()
         for handler in handlers:
-            handler.assert_called()
-        mock_sys_exit.assert_called()
+            handler.assert_called_once()
 
     def test_add_exit_handler(self) -> None:
         """Test add_exit_handler."""

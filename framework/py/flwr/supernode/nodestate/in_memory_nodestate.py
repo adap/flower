@@ -15,16 +15,27 @@
 """In-memory NodeState implementation."""
 
 
-import secrets
 from collections.abc import Sequence
 from dataclasses import dataclass
-from threading import Lock
+from threading import Lock, RLock
 
-from flwr.common import Context, Message
-from flwr.common.constant import FLWR_APP_TOKEN_LENGTH
+from flwr.common import Context, Error, Message, now
+from flwr.common.constant import ErrorCode
+from flwr.common.inflatable import (
+    get_all_nested_objects,
+    get_object_tree,
+    no_object_id_recompute,
+)
 from flwr.common.typing import Run
+from flwr.supercore.constant import MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS
+from flwr.supercore.corestate.in_memory_corestate import InMemoryCoreState
+from flwr.supercore.object_store import ObjectStore
 
 from .nodestate import NodeState
+
+CLIENT_APP_CRASHED_ERROR = Error(
+    ErrorCode.CLIENT_APP_CRASHED, "ClientApp stopped responding."
+)
 
 
 @dataclass
@@ -35,25 +46,35 @@ class MessageEntry:
     is_retrieved: bool = False
 
 
-class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attributes
+@dataclass
+class TimeEntry:
+    """Data class to represent a time entry."""
+
+    starting_at: float
+    finished_at: float | None = None
+
+
+class InMemoryNodeState(
+    NodeState, InMemoryCoreState
+):  # pylint: disable=too-many-instance-attributes
     """In-memory NodeState implementation."""
 
-    def __init__(self) -> None:
+    def __init__(self, object_store: ObjectStore) -> None:
+        super().__init__(object_store)
         # Store node_id
         self.node_id: int | None = None
         # Store Object ID to MessageEntry mapping
         self.msg_store: dict[str, MessageEntry] = {}
-        self.lock_msg_store = Lock()
+        self.lock_msg_store = RLock()
         # Store run ID to Run mapping
         self.run_store: dict[int, Run] = {}
         self.lock_run_store = Lock()
         # Store run ID to Context mapping
         self.ctx_store: dict[int, Context] = {}
         self.lock_ctx_store = Lock()
-        # Store run ID to token mapping and token to run ID mapping
-        self.token_store: dict[int, str] = {}
-        self.token_to_run_id: dict[str, int] = {}
-        self.lock_token_store = Lock()
+        # Store msg ID to TimeEntry mapping
+        self.time_store: dict[str, TimeEntry] = {}
+        self.lock_time_store = Lock()
 
     def set_node_id(self, node_id: int | None) -> None:
         """Set the node ID."""
@@ -67,6 +88,8 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
 
     def store_message(self, message: Message) -> str | None:
         """Store a message."""
+        # No need to check for expired tokens here
+        # The ClientAppIo servicer will first verify the token before storing messages
         with self.lock_msg_store:
             msg_id = message.metadata.message_id
             if msg_id == "" or msg_id in self.msg_store:
@@ -82,8 +105,9 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
         limit: int | None = None,
     ) -> Sequence[Message]:
         """Retrieve messages based on the specified filters."""
-        selected_messages: list[Message] = []
+        self._cleanup_expired_tokens()
 
+        selected_messages: list[Message] = []
         with self.lock_msg_store:
             # Iterate through all messages in the store
             for object_id in list(self.msg_store.keys()):
@@ -170,29 +194,78 @@ class InMemoryNodeState(NodeState):  # pylint: disable=too-many-instance-attribu
             ret -= set(self.token_store.keys())
             return list(ret)
 
-    def create_token(self, run_id: int) -> str | None:
-        """Create a token for the given run ID."""
-        token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
-        with self.lock_token_store:
-            if run_id in self.token_store:
-                return None  # Token already created for this run ID
-            self.token_store[run_id] = token
-            self.token_to_run_id[token] = run_id
-        return token
+    def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
+        """Insert error replies for messages associated with expired tokens."""
+        with self.lock_msg_store:
+            # Find all retrieved messages associated with expired run IDs
+            expired_run_ids = {run_id for run_id, _ in expired_records}
+            messages_to_reply: list[Message] = []
+            for entry in self.msg_store.values():
+                msg = entry.message
+                if msg.metadata.run_id in expired_run_ids and entry.is_retrieved:
+                    messages_to_reply.append(msg)
 
-    def verify_token(self, run_id: int, token: str) -> bool:
-        """Verify a token for the given run ID."""
-        with self.lock_token_store:
-            return self.token_store.get(run_id) == token
+            # Create and store error replies for each message
+            for msg in messages_to_reply:
+                error_reply = Message(CLIENT_APP_CRASHED_ERROR, reply_to=msg)
 
-    def delete_token(self, run_id: int) -> None:
-        """Delete the token for the given run ID."""
-        with self.lock_token_store:
-            token = self.token_store.pop(run_id, None)
-            if token is not None:
-                self.token_to_run_id.pop(token, None)
+                # Insert objects of the error reply into the object store
+                with no_object_id_recompute():
+                    # pylint: disable-next=W0212
+                    error_reply.metadata._message_id = error_reply.object_id  # type: ignore
+                    object_tree = get_object_tree(error_reply)
+                    self.object_store.preregister(msg.metadata.run_id, object_tree)
+                    for obj_id, obj in get_all_nested_objects(error_reply).items():
+                        self.object_store.put(obj_id, obj.deflate())
 
-    def get_run_id_by_token(self, token: str) -> int | None:
-        """Get the run ID associated with a given token."""
-        with self.lock_token_store:
-            return self.token_to_run_id.get(token)
+                # Store the error reply message
+                self.store_message(error_reply)
+
+    def record_message_processing_start(self, message_id: str) -> None:
+        """Record the start time of message processing based on the message ID."""
+        with self.lock_time_store:
+            self.time_store[message_id] = TimeEntry(starting_at=now().timestamp())
+
+    def record_message_processing_end(self, message_id: str) -> None:
+        """Record the end time of message processing based on the message ID."""
+        with self.lock_time_store:
+            if message_id not in self.time_store:
+                raise ValueError(
+                    f"Cannot record end time: Message ID {message_id} not found."
+                )
+            entry = self.time_store[message_id]
+            entry.finished_at = now().timestamp()
+
+    def get_message_processing_duration(self, message_id: str) -> float:
+        """Get the message processing duration based on the message ID."""
+        # Cleanup old message processing times
+        self._cleanup_old_message_times()
+        with self.lock_time_store:
+            if message_id not in self.time_store:
+                raise ValueError(f"Message ID {message_id} not found.")
+
+            entry = self.time_store[message_id]
+            if entry.starting_at is None or entry.finished_at is None:
+                raise ValueError(
+                    f"Start time or end time for message ID {message_id} is missing."
+                )
+
+            duration = entry.finished_at - entry.starting_at
+            return duration
+
+    def _cleanup_old_message_times(self) -> None:
+        """Remove time entries older than MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS."""
+        with self.lock_time_store:
+            cutoff = now().timestamp() - MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS
+            # Find message IDs for entries that have a finishing_at time
+            # before the cutoff, and those that don't exist in msg_store
+            to_delete = [
+                msg_id
+                for msg_id, entry in self.time_store.items()
+                if (entry.finished_at and entry.finished_at < cutoff)
+                or msg_id not in self.msg_store
+            ]
+
+            # Delete the identified entries
+            for msg_id in to_delete:
+                del self.time_store[msg_id]

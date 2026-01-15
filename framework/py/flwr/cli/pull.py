@@ -61,11 +61,15 @@ def pull(  # pylint: disable=R0914
         ),
     ] = None,
 ) -> None:
-    """Pull artifacts from a Flower run."""
+    """Pull artifacts from a Flower run.
+
+    Retrieve a download URL for artifacts generated during a completed Flower run. The
+    artifacts can then be downloaded from the provided URL.
+    """
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = app / FAB_CONFIG_FILE if app else None
-    config, errors, warnings = load_and_validate(path=pyproject_path)
+    config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
     config = process_loaded_project_config(config, errors, warnings)
     federation, federation_config = validate_federation_in_project_config(
         federation, config, federation_config_overrides
@@ -88,6 +92,7 @@ def pull(  # pylint: disable=R0914
                 "obtained.",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
             raise typer.Exit(code=1)
 

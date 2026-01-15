@@ -15,7 +15,8 @@
 """GrpcAdapter implementation."""
 
 
-import sys
+import signal
+import time
 from logging import DEBUG
 from typing import Any, TypeVar, cast
 
@@ -31,7 +32,6 @@ from flwr.common.constant import (
     GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY,
     GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY,
 )
-from flwr.common.version import package_name, package_version
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
@@ -62,6 +62,8 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.supercore.constant import FORCE_EXIT_TIMEOUT_SECONDS
+from flwr.supercore.version import package_name, package_version
 
 T = TypeVar("T", bound=GrpcMessage)
 
@@ -108,7 +110,9 @@ class GrpcAdapter:
                 DEBUG,
                 'Received shutdown signal: exit flag is set to ``"true"``. Exiting...',
             )
-            sys.exit(0)
+            signal.raise_signal(signal.SIGTERM)
+            # Give some time to handle the signal
+            time.sleep(FORCE_EXIT_TIMEOUT_SECONDS + 1)
 
         # Check the grpc_message_name of the response
         if container_res.grpc_message_name != response_type.__qualname__:

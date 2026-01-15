@@ -115,7 +115,7 @@ class ServerAppIoStub:
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
     ]
-    """Heartbeat"""
+    """App heartbeat"""
 
     PushObject: grpc.UnaryUnaryMultiCallable[
         flwr.proto.message_pb2.PushObjectRequest,
@@ -212,7 +212,7 @@ class ServerAppIoAsyncStub:
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
     ]
-    """Heartbeat"""
+    """App heartbeat"""
 
     PushObject: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.message_pb2.PushObjectRequest,
@@ -335,7 +335,7 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse, collections.abc.Awaitable[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse]]:
-        """Heartbeat"""
+        """App heartbeat"""
 
     @abc.abstractmethod
     def PushObject(

@@ -18,7 +18,6 @@
 import hashlib
 import io
 import json
-import re
 import subprocess
 from pathlib import Path
 from typing import Annotated, Any, cast
@@ -47,6 +46,7 @@ from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.supercore.constant import NOOP_FEDERATION
+from flwr.supercore.utils import parse_app_spec
 
 from ..log import start_stream
 from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
@@ -104,14 +104,19 @@ def run(
             redirect_output(captured_output)
 
         # Determine if app is remote
-        app_id = None
+        app_spec = None
         if (app_str := str(app)).startswith("@"):
-            if not re.match(r"^@(?P<user>[^/]+)/(?P<app>[^/]+)$", app_str):
-                raise typer.BadParameter(
-                    "Invalid remote app ID. Expected format: '@user_name/app_name'."
-                )
-            app_id = app_str
-        is_remote_app = app_id is not None
+            # Validate app version and ID format
+            try:
+                _ = parse_app_spec(app_str)
+            except ValueError as e:
+                typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
+                raise typer.Exit(code=1) from e
+
+            app_spec = app_str
+            # Set `app` to current directory for credential storage
+            app = Path(".")
+        is_remote_app = app_spec is not None
 
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
@@ -135,7 +140,7 @@ def run(
                 run_config_overrides,
                 stream,
                 output_format,
-                app_id,
+                app_spec,
             )
         else:
             _run_without_control_api(
@@ -151,6 +156,7 @@ def run(
                 f"{err}",
                 fg=typer.colors.RED,
                 bold=True,
+                err=True,
             )
     finally:
         if suppress_output:
@@ -166,10 +172,10 @@ def _run_with_control_api(
     config_overrides: list[str] | None,
     stream: bool,
     output_format: str,
-    app_id: str | None,
+    app_spec: str | None,
 ) -> None:
     channel = None
-    is_remote_app = app_id is not None
+    is_remote_app = app_spec is not None
     try:
         auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
         channel = init_channel(app, federation_config, auth_plugin)
@@ -199,7 +205,7 @@ def _run_with_control_api(
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
             federation=real_federation,
             federation_options=config_record_to_proto(c_record),
-            app_id=app_id or "",
+            app_spec=app_spec or "",
         )
         with flwr_cli_grpc_exc_handler():
             res = stub.StartRun(req)
@@ -209,21 +215,14 @@ def _run_with_control_api(
                 f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN
             )
         else:
-            if is_remote_app:
-                typer.secho(
-                    "❌ Failed to start run. Please check that the provided "
-                    "app identifier (@user_name/app_name) is correct.",
-                    fg=typer.colors.RED,
-                )
-            else:
-                typer.secho("❌ Failed to start run", fg=typer.colors.RED)
+            typer.secho("❌ Failed to start run", fg=typer.colors.RED, err=True)
             raise typer.Exit(code=1)
 
         if output_format == CliOutputFormat.JSON:
             # Only include FAB metadata if we actually built a local FAB
             payload: dict[str, Any] = {
                 "success": res.HasField("run_id"),
-                "run-id": res.run_id if res.HasField("run_id") else None,
+                "run-id": f"{res.run_id}" if res.HasField("run_id") else None,
             }
             if not is_remote_app:
                 payload.update(
@@ -264,6 +263,7 @@ def _run_without_control_api(
             "options.num-supernodes = 10\n",
             fg=typer.colors.RED,
             bold=True,
+            err=True,
         )
         raise typer.Exit(code=1) from err
 

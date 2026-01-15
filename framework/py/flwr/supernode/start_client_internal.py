@@ -32,10 +32,10 @@ from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 from cryptography.hazmat.primitives.serialization.ssh import load_ssh_public_key
 from grpc import RpcError
 
+from flwr.app.user_config import UserConfig
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Error, Message, RecordDict
-from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir, get_fused_config_from_fab
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
@@ -62,10 +62,10 @@ from flwr.common.inflatable_utils import (
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, _make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
-from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
-from flwr.common.version import package_version
+from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
+from flwr.supercore.address import parse_address
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
@@ -74,6 +74,7 @@ from flwr.supercore.primitives.asymmetric_ed25519 import (
     decode_base64url,
     verify_signature,
 )
+from flwr.supercore.version import package_version
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 
@@ -177,9 +178,9 @@ def start_client_internal(
         )
 
     # Initialize factories
-    state_factory = NodeStateFactory()
-    ffs_factory = FfsFactory(get_flwr_dir(flwr_path) / "supernode" / "ffs")  # type: ignore
     object_store_factory = ObjectStoreFactory()
+    state_factory = NodeStateFactory(objectstore_factory=object_store_factory)
+    ffs_factory = FfsFactory(get_flwr_dir(flwr_path) / "supernode" / "ffs")  # type: ignore
 
     # Launch ClientAppIo API server
     grpc_servers = []
@@ -239,6 +240,7 @@ def start_client_internal(
         ) = conn
         # Store node_id in state
         state.set_node_id(node_id)
+        log(INFO, "SuperNode ID: %s", node_id)
 
         # pylint: disable=too-many-nested-blocks
         while True:
@@ -327,7 +329,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
             log(INFO, "[RUN %s]", message.metadata.run_id)
         log(
             INFO,
-            "Received: %s message %s",
+            "Receiving: %s message (ID: %s)",
             message.metadata.message_type,
             message.metadata.message_id,
         )
@@ -387,16 +389,27 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
         # Store the message in the state (note this message has no content)
         state.store_message(message)
 
-        # Pull and store objects of the message in the ObjectStore
-        obj_contents = pull_objects(
-            obj_ids_to_pull,
-            pull_object_fn=lambda obj_id: pull_object(run_id, obj_id),
-        )
-        for obj_id in list(obj_contents.keys()):
-            object_store.put(obj_id, obj_contents.pop(obj_id))
+        try:
+            # Pull and store objects of the message in the ObjectStore
+            obj_contents = pull_objects(
+                obj_ids_to_pull,
+                pull_object_fn=lambda obj_id: pull_object(run_id, obj_id),
+            )
+            for obj_id in list(obj_contents.keys()):
+                object_store.put(obj_id, obj_contents.pop(obj_id))
 
-        # Confirm that the message was received
-        confirm_message_received(run_id, message.metadata.message_id)
+            # Confirm that the message was received
+            confirm_message_received(run_id, message.metadata.message_id)
+            log(INFO, "Received successfully")
+        except Exception as err:  # pylint: disable=broad-except
+            log(
+                ERROR,
+                "Failed to receive message %s: %s",
+                message.metadata.message_id,
+                err,
+            )
+            state.delete_messages(message_ids=[message.metadata.message_id])
+            object_store.delete(message.metadata.message_id)
 
     except RunNotRunningException:
         if message is None:
@@ -420,7 +433,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 def _push_messages(
     state: NodeState,
     object_store: ObjectStore,
-    send: Callable[[Message, ObjectTree], set[str]],
+    send: Callable[[Message, ObjectTree, float], set[str]],
     push_object: Callable[[int, str, bytes], None],
 ) -> None:
     """Push reply messages to the SuperLink."""
@@ -443,8 +456,9 @@ def _push_messages(
             log(INFO, "[RUN %s]", message.metadata.run_id)
         log(
             INFO,
-            "Sending: %s message",
+            "Sending: %s message (ID: %s)",
             message.metadata.message_type,
+            message.metadata.message_id,
         )
 
         # Get the object tree for the message
@@ -467,9 +481,12 @@ def _push_messages(
 
         # Send the message
         try:
-            # Send the reply message with its ObjectTree
+            clientapp_runtime = state.get_message_processing_duration(
+                message_id=message.metadata.reply_to_message_id,
+            )
+            # Send the reply message with its ObjectTree and ClientApp runtime
             # Get the IDs of objects to send
-            ids_obj_to_send = send(message, object_tree)
+            ids_obj_to_send = send(message, object_tree, clientapp_runtime)
 
             # Push object contents from the ObjectStore
             run_id = message.metadata.run_id
@@ -488,6 +505,13 @@ def _push_messages(
                 "Run ID %s is not in `RUNNING` status. Ignoring reply message %s.",
                 message.metadata.run_id,
                 message.metadata.message_id,
+            )
+        except Exception as err:  # pylint: disable=broad-except
+            log(
+                ERROR,
+                "Failed to send message %s: %s",
+                message.metadata.message_id,
+                err,
             )
         finally:
             # Delete the message from the state
@@ -519,7 +543,7 @@ def _init_connection(  # pylint: disable=too-many-positional-arguments
     tuple[
         int,
         Callable[[], tuple[Message, ObjectTree] | None],
-        Callable[[Message, ObjectTree], set[str]],
+        Callable[[Message, ObjectTree, float], set[str]],
         Callable[[int], Run],
         Callable[[str, int], Fab],
         Callable[[int, str], bytes],

@@ -59,13 +59,16 @@ service Control {
   // List Federations
   rpc ListFederations(ListFederationsRequest)
       returns (ListFederationsResponse) {}
+
+  // Show Federation
+  rpc ShowFederation(ShowFederationRequest) returns (ShowFederationResponse) {}
 }
 
 message StartRunRequest {
   Fab fab = 1;
   map<string, Scalar> override_config = 2;
   ConfigRecord federation_options = 3;
-  string app_id = 4;
+  string app_spec = 4;
   string federation = 5;
 }
 message StartRunResponse { optional uint64 run_id = 1; }
@@ -118,3 +121,9 @@ message ListNodesResponse {
 
 message ListFederationsRequest {}
 message ListFederationsResponse { repeated Federation federations = 1; }
+
+message ShowFederationRequest { string federation_name = 1; }
+message ShowFederationResponse {
+  Federation federation = 1;
+  string now = 2;
+}

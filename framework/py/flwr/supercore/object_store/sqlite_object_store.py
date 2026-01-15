@@ -63,13 +63,12 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
         super().__init__(database_path)
         self.verify = verify
 
-    def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
-        """Connect to the DB, enable FK support, and create tables if needed."""
-        return self._ensure_initialized(
+    def get_sql_statements(self) -> tuple[str, ...]:
+        """Return SQL statements for ObjectStore tables."""
+        return (
             SQL_CREATE_OBJECTS,
             SQL_CREATE_OBJECT_CHILDREN,
             SQL_CREATE_RUN_OBJECTS,
-            log_queries=log_queries,
         )
 
     def preregister(self, run_id: int, object_tree: ObjectTree) -> list[str]:
@@ -126,7 +125,9 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
                 "SELECT object_id FROM objects WHERE object_id=?", (object_id,)
             ).fetchone()
             if not row:
-                raise NoObjectInStoreError(f"Object {object_id} not found.")
+                raise NoObjectInStoreError(
+                    f"Object {object_id} was not pre-registered."
+                )
             children = self.query(
                 "SELECT child_id FROM object_children WHERE parent_id=?", (object_id,)
             )

@@ -22,8 +22,9 @@
 
 .. _message_link: ref-api/flwr.common.Message.html
 
-Run simulations
-===============
+#################
+ Run simulations
+#################
 
 Simulating Federated Learning workloads is useful for a multitude of use cases: you
 might want to run your workload on a large cohort of clients without having to source,
@@ -141,14 +142,15 @@ particular, each worker is an `Actor
 <https://docs.ray.io/en/latest/ray-core/actors.html>`_ capable of spawning a
 ``ClientApp`` given its ``Context`` and a ``Message`` to process.
 
-Launch your Flower simulation
------------------------------
+*******************************
+ Launch your Flower simulation
+*******************************
 
 Running a simulation is straightforward; in fact, it is the default mode of operation
 for |flwr_run_link|_. Therefore, running Flower simulations primarily requires you to
 first define a ``ClientApp`` and a ``ServerApp``. A convenient way to generate a minimal
 but fully functional Flower app is by means of the |flwr_new_link|_ command. There are
-multiple templates to choose from. The example below uses the ``PyTorch`` template.
+multiple apps to choose from. The example below uses the ``PyTorch`` quickstart app.
 
 .. tip::
 
@@ -157,8 +159,8 @@ multiple templates to choose from. The example below uses the ``PyTorch`` templa
 
 .. code-block:: shell
 
-    # or simply execute `flwr run` for a fully interactive process
-    flwr new my-app --framework="PyTorch" --username="alice"
+    # or simply execute `flwr new` for a list of recommended apps to choose from
+    flwr new @flwrlabs/quickstart-pytorch
 
 Then, follow the instructions shown after completing the |flwr_new_link|_ command. When
 you execute |flwr_run_link|_, you'll be using the ``Simulation Engine``.
@@ -178,7 +180,7 @@ is defined. It sets the number of supernodes to 10.
 You can modify the size of your simulations by adjusting ``options.num-supernodes``.
 
 Simulation examples
-~~~~~~~~~~~~~~~~~~~
+===================
 
 In addition to the quickstart tutorials in the documentation (e.g., `quickstart PyTorch
 Tutorial <tutorial-quickstart-pytorch.html>`_, `quickstart JAX Tutorial
@@ -199,8 +201,9 @@ The complete list of examples can be found in `the Flower GitHub
 
 .. _clientappresources:
 
-Defining ``ClientApp`` resources
---------------------------------
+**********************************
+ Defining ``ClientApp`` resources
+**********************************
 
 By default, the ``Simulation Engine`` assigns two CPU cores to each backend worker. This
 means that if your system has 10 CPU cores, five backend workers can be running in
@@ -280,13 +283,14 @@ round but your system can only accommodate 8 clients concurrently. The ``Simulat
 Engine`` will schedule 100 ``ClientApps`` to run and then will execute them in a
 resource-aware manner in batches of 8.
 
-Simulation Engine resources
----------------------------
+*****************************
+ Simulation Engine resources
+*****************************
 
 By default, the ``Simulation Engine`` has **access to all system resources** (i.e., all
 CPUs, all GPUs). However, in some settings, you might want to limit how many of your
 system resources are used for simulation. You can do this in the ``pyproject.toml`` of
-your app by setting the ``options.backend.init_args`` variable.
+your app by setting the ``options.backend.init-args`` variable.
 
 .. code-block:: toml
 
@@ -294,8 +298,8 @@ your app by setting the ``options.backend.init_args`` variable.
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # Each ClientApp will get assigned 1 CPU core
     options.backend.client-resources.num-gpus = 0.5 # Each ClientApp will get 50% of each available GPU
-    options.backend.init_args.num_cpus = 1 # Only expose 1 CPU to the simulation
-    options.backend.init_args.num_gpus = 1 # Expose a single GPU to the simulation
+    options.backend.init-args.num-cpus = 1 # Only expose 1 CPU to the simulation
+    options.backend.init-args.num-gpus = 1 # Expose a single GPU to the simulation
 
 With the above setup, the Backend will be initialized with a single CPU and GPU.
 Therefore, even if more CPUs and GPUs are available in your system, they will not be
@@ -305,10 +309,11 @@ any given point.
 For a complete list of settings you can configure, check the `ray.init
 <https://docs.ray.io/en/latest/ray-core/api/doc/ray.init.html#ray-init>`_ documentation.
 
-For the highest performance, do not set ``options.backend.init_args``.
+For the highest performance, do not set ``options.backend.init-args``.
 
-Simulation in Colab/Jupyter
----------------------------
+*****************************
+ Simulation in Colab/Jupyter
+*****************************
 
 The preferred way of running simulations should always be |flwr_run_link|_. However, the
 core functionality of the ``Simulation Engine`` can be used from within a Google Colab
@@ -348,8 +353,9 @@ for a complete example on how to run Flower Simulations in Colab.
 
 .. _multinodesimulations:
 
-Multi-node Flower simulations
------------------------------
+*******************************
+ Multi-node Flower simulations
+*******************************
 
 Flower's ``Simulation Engine`` allows you to run FL simulations across multiple compute
 nodes so that you're not restricted to running simulations on a _single_ machine. Before
@@ -390,8 +396,9 @@ need to run the command ``ray stop`` in each node's terminal (including the head
     ``--num-gpus=<NUM_GPUS_FROM_NODE>`` in any ``ray start`` command (including when
     starting the head).
 
-FAQ for Simulations
--------------------
+*********************
+ FAQ for Simulations
+*********************
 
 .. dropdown:: Can I make my ``ClientApp`` instances stateful?
 
