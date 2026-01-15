@@ -67,6 +67,19 @@ def _is_legacy_usage(superlink: str, args: list[str]) -> bool:
     return False
 
 
+def _is_migratable(app: Path) -> bool:
+    """Check if the given app path contains legacy TOML configuration."""
+    toml_path = app / "pyproject.toml"
+    if not toml_path.exists():
+        return False
+    config, _, _ = load_and_validate(toml_path, check_module=False)
+    if config is None:
+        return False
+    if "tool" not in config or "flwr" not in config["tool"]:
+        return False
+    return "federations" in config["tool"]["flwr"]
+
+
 def _migrate_pyproject_toml_to_flower_config(
     app: Path, toml_federation: str | None
 ) -> None:
@@ -135,18 +148,19 @@ def migrate_if_legacy_usage(
     if not _is_legacy_usage(superlink, args):
         return
 
-    # Check if pyproject.toml exists
-    app_path = Path(superlink)
-    if not (app_path / "pyproject.toml").exists():
-        raise click.ClickException(
-            "Legacy usage detected, but no pyproject.toml found "
-            f"at '{app_path.absolute()}'."
+    # Check if migration is applicable
+    app_path = Path(superlink).resolve()
+    if not _is_migratable(app_path):
+        raise click.UsageError(
+            f"No valid pyproject.toml found in '{app_path}'. "
+            "The configuration may have already been migrated or "
+            "the TOML structure is invalid."
         )
-    
+
     # Prompt user for confirmation
     confirm = typer.confirm(
         typer.style(
-            f"\n💬 Legacy TOML configuration detected at '{app_path.absolute()}'. "
+            f"\n💬 Legacy TOML configuration detected in '{app_path}'. "
             "Do you want to migrate it to Flower config?",
             fg=typer.colors.MAGENTA,
             bold=True,
