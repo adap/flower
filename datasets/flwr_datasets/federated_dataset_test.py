@@ -613,6 +613,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         )
 
 
+# pylint: disable=too-many-return-statements
 def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
     """Check if two Datasets have the same values."""
     # Check if both datasets have the same length
