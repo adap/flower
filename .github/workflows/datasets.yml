@@ -41,12 +41,15 @@ jobs:
         with:
           fetch-depth: 0
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space-action@v1.3.1
+        uses: jlumbroso/free-disk-space@v1.3.1
         with:
-          # Free up space by removing unnecessary tools
+          tool-cache: false
           android: true
           dotnet: true
           haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: false
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
