@@ -18,7 +18,8 @@
 import questionary
 import typer
 
-from flwr.cli.constant import DEFAULT_SIMULATION_BACKEND_NAME
+from flwr.cli.constant import DEFAULT_SIMULATION_BACKEND_NAME, FLOWER_CONFIG_FILE
+from flwr.cli.flower_config import get_flwr_home, write_superlink_connection
 from flwr.cli.typing import (
     SimulationBackendConfig,
     SimulationClientResources,
@@ -186,4 +187,10 @@ def add() -> None:
         typer.secho(f"❌ Invalid configuration: {err}", fg=typer.colors.RED)
         raise typer.Exit(code=1) from err
 
-    typer.secho(connection, fg=typer.colors.GREEN)
+    write_superlink_connection(connection)
+
+    # Get flowr config file
+    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
+    typer.secho(
+        f"✅ SuperLink connection '{name}' added: {config_path}", fg=typer.colors.GREEN
+    )
