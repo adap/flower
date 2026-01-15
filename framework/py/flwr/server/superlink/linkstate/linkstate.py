@@ -247,26 +247,6 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_node_public_key(self, node_id: int) -> bytes:
-        """Get `public_key` for the specified `node_id`.
-
-        Parameters
-        ----------
-        node_id : int
-            The identifier of the node whose public key is to be retrieved.
-
-        Returns
-        -------
-        bytes
-            The public key associated with the specified `node_id`.
-
-        Raises
-        ------
-        ValueError
-            If the specified `node_id` does not exist in the link state.
-        """
-
-    @abc.abstractmethod
     def create_run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         fab_id: str | None,
