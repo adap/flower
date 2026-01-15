@@ -38,7 +38,11 @@ def _ask_superlink_connection_details() -> tuple[str | None, str | None, bool, b
     if not root_certificates:
         root_certificates = None
 
-    insecure = questionary.confirm("Insecure connection?", default=True).ask()
+    if root_certificates:
+        insecure = False
+    else:
+        insecure = questionary.confirm("Insecure connection?", default=True).ask()
+
     enable_account_auth = questionary.confirm(
         "Enable account auth?", default=False
     ).ask()
