@@ -15,9 +15,12 @@
 """Flower command line interface configuration utils."""
 
 
+import re
+from pathlib import Path
 from typing import Any, cast
 
 import tomli
+import tomli_w
 import typer
 
 from flwr.cli.constant import (
@@ -173,14 +176,9 @@ def read_superlink_connection(
         Raised if the configuration file is corrupted, or if the requested
         connection (or default) cannot be found.
     """
-    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
-    if not config_path.exists():
-        return None
+    toml_dict, config_path = read_flower_config()
 
     try:
-        with config_path.open("rb") as file:
-            toml_dict = tomli.load(file)
-
         superlink_config = toml_dict.get(SuperLinkConnectionTomlKey.SUPERLINK, {})
 
         # Load the default SuperLink connection when not provided
@@ -223,14 +221,6 @@ def read_superlink_connection(
         conn_dict = superlink_config[connection_name]
         return parse_superlink_connection(conn_dict, connection_name)
 
-    except tomli.TOMLDecodeError as err:
-        typer.secho(
-            f"❌ Failed to read the Flower configuration file ({config_path}). "
-            "Please ensure it is valid TOML.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from err
     except ValueError as err:
         typer.secho(
             f"❌ Failed to parse the Flower configuration file ({config_path}). "
@@ -247,3 +237,71 @@ def read_superlink_connection(
             err=True,
         )
         raise typer.Exit(code=1) from err
+
+
+def read_flower_config() -> tuple[dict[str, Any], Path]:
+    """Read the Flower configuration file.
+
+    Returns
+    -------
+    tuple[dict[str, Any], Path]
+        A tuple containing the TOML configuration dictionary and the path to the
+        configuration file.
+
+    Raises
+    ------
+    typer.Exit
+        Raised if the configuration file is corrupted.
+    """
+    init_flwr_config()
+
+    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
+
+    try:
+        with config_path.open("rb") as file:
+            return tomli.load(file), config_path
+
+    except tomli.TOMLDecodeError as err:
+        typer.secho(
+            f"❌ Failed to read the Flower configuration file ({config_path}). "
+            "Please ensure it is valid TOML.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from err
+
+
+# This function may be subject to change once we introduce more configuration
+def write_flower_config(toml_dict: dict[str, Any]) -> Path:
+    """Write the Flower configuration file.
+
+    Parameters
+    ----------
+    toml_dict : dict[str, Any]
+        The TOML configuration dictionary to write to the file.
+
+    Returns
+    -------
+    Path
+        The path to the configuration file.
+    """
+    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
+
+    # Get the standard TOML text
+    toml_content = tomli_w.dumps(toml_dict)
+
+    # Remove double quotes around multi-dot keys
+    # All keys must be [A-Za-z0-9_-]+ except dots
+    lines = toml_content.splitlines(keepends=True)
+    pattern = re.compile(r'^"([^"]+\.[^"]+)"\s*=')
+    for i, line in enumerate(lines):
+        if match := pattern.match(line):
+            key = match.group(1)
+            lines[i] = line.replace(f'"{key}"', key)
+
+    toml_content = "".join(lines)
+
+    with config_path.open("w") as file:
+        file.write(toml_content)
+
+    return config_path
