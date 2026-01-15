@@ -331,11 +331,7 @@ def write_superlink_connection(connection: SuperLinkConnection) -> None:
     typer.Exit
         Raised if the configuration file cannot be read or written.
     """
-    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
-
-    # Read existing config
-    with config_path.open("rb") as file:
-        toml_dict = tomli.load(file)
+    toml_dict, _ = read_flower_config()
 
     # Ensure superlink section exists
     if SuperLinkConnectionTomlKey.SUPERLINK not in toml_dict:
