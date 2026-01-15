@@ -40,6 +40,13 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space-action@v1.3.1
+        with:
+          # Free up space by removing unnecessary tools
+          android: true
+          dotnet: true
+          haskell: true
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
