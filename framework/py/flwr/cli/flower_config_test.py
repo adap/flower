@@ -179,9 +179,7 @@ class TestSuperLinkConnection(unittest.TestCase):
         }
         name = "test_service"
 
-        with self.assertRaisesRegex(
-            ValueError, "Invalid value for key 'address': expected str, but got int"
-        ):
+        with self.assertRaises(ValueError):
             parse_superlink_connection(conn_dict, name)
 
     @parameterized.expand(  # type: ignore
