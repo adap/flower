@@ -93,7 +93,7 @@ def _check_is_migratable(app: Path) -> None:
         return
     except KeyError:
         raise ValueError(
-            f"No 'tool.flwr.federations' section found in '{toml_path}'"
+            f"No '[tool.flwr.federations]' section found in '{toml_path}'"
         ) from None
 
 
