@@ -136,7 +136,7 @@ num-rounds = 1
 
 ## Results
 
-After running, results are saved to `outputs/<date>/<time>/`:
+After running, results are saved to `outputs/<date>/<time>/feature_election_results.json`:
 
 ```json
 {
