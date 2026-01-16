@@ -28,14 +28,14 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 
-metadata = MetaData()
+linkstate_metadata = MetaData()
 
 # ------------------------------------------------------------------------------
 #  Table: node
 # ------------------------------------------------------------------------------
 node = Table(
     "node",
-    metadata,
+    linkstate_metadata,
     Column("node_id", Integer, unique=True),
     Column("owner_aid", String),
     Column("owner_name", String),
@@ -57,17 +57,17 @@ node = Table(
 )
 
 
-# ------------------------------------------------------------------------------
-#  Table: public_key
-# ------------------------------------------------------------------------------
-public_key_table = Table(
-    "public_key",
-    metadata,
-    # Using unique=True (not primary_key) to match raw SQL introspection behavior.
-    # SQLite reports PRIMARY KEY columns as nullable=True in introspection,
-    # but SQLAlchemy primary_key sets nullable=False.
-    Column("public_key", LargeBinary, unique=True, autoincrement=False),
-)
+# # ------------------------------------------------------------------------------
+# #  Table: public_key
+# # ------------------------------------------------------------------------------
+# public_key_table = Table(
+#     "public_key",
+#     linkstate_metadata,
+#     # Using unique=True (not primary_key) to match raw SQL introspection behavior.
+#     # SQLite reports PRIMARY KEY columns as nullable=True in introspection,
+#     # but SQLAlchemy primary_key sets nullable=False.
+#     Column("public_key", LargeBinary, unique=True, autoincrement=False),
+# )
 
 
 # ------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ public_key_table = Table(
 # ------------------------------------------------------------------------------
 run = Table(
     "run",
-    metadata,
+    linkstate_metadata,
     Column("run_id", Integer, unique=True),
     Column("fab_id", String),
     Column("fab_version", String),
@@ -101,7 +101,7 @@ run = Table(
 # ------------------------------------------------------------------------------
 logs = Table(
     "logs",
-    metadata,
+    linkstate_metadata,
     Column("timestamp", Float),
     Column("run_id", Integer, ForeignKey("run.run_id")),
     Column("node_id", Integer),
@@ -116,7 +116,7 @@ logs = Table(
 # ------------------------------------------------------------------------------
 context = Table(
     "context",
-    metadata,
+    linkstate_metadata,
     Column("run_id", Integer, ForeignKey("run.run_id"), unique=True),
     Column("context", LargeBinary),
 )
@@ -127,7 +127,7 @@ context = Table(
 # ------------------------------------------------------------------------------
 message_ins = Table(
     "message_ins",
-    metadata,
+    linkstate_metadata,
     Column("message_id", String, unique=True),
     Column("group_id", String),
     Column("run_id", Integer, ForeignKey("run.run_id")),
@@ -148,7 +148,7 @@ message_ins = Table(
 # ------------------------------------------------------------------------------
 message_res = Table(
     "message_res",
-    metadata,
+    linkstate_metadata,
     Column("message_id", String, unique=True),
     Column("group_id", String),
     Column("run_id", Integer, ForeignKey("run.run_id")),
