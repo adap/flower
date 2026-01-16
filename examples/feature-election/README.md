@@ -55,7 +55,7 @@ feature-election/
 │   ├── __init__.py
 │   ├── client_app.py              # ClientApp with @app.train() and @app.evaluate()
 │   ├── server_app.py              # ServerApp with @app.main()
-│   ├── strategy.py                # Feature Election strategy (Message API)
+│   ├── strategy.py                # Feature Election strategy
 │   ├── feature_election_utils.py  # Feature selection methods
 │   └── task.py                    # Data loading utilities
 ├── pyproject.toml                 # Configuration and dependencies
@@ -67,7 +67,7 @@ feature-election/
 
 ```bash
 # Clone the repository
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/feature-election . && rm -rf flower && cd feature-election
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/feature-election . && rm -rf flower && feature-election
 
 # Install dependencies
 pip install -e .

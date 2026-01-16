@@ -6,9 +6,6 @@ build-backend = "hatchling.build"
 name = "feature-election"
 version = "1.0.0"
 description = "Feature Election - Federated Feature Selection with Flower"
-authors = [
-    {name = "Ioannis Christofilogiannis", email = "jchr2001@gmail.com"}
-]
 license = "Apache-2.0"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -22,34 +19,12 @@ dependencies = [
     "tqdm"
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "black>=22.0.0",
-    "isort>=5.0.0",
-    "flake8>=5.0.0",
-    "mypy>=0.990",
-]
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[tool.hatch.build.targets.sdist]
-include = ["feature_election"]
-
 [tool.flwr.app]
 publisher = "Ioannis Christofilogiannis"
-
-[tool.hatch.envs.default]
-dependencies = [
-  "ruff",
-]
-
-[tool.hatch.envs.default.scripts]
-check = [
-  "ruff check .",
-]
 
 # Define app components
 [tool.flwr.app.components]
@@ -86,20 +61,14 @@ n-redundant = 50
 
 # Define simulation resources
 [tool.flwr.federations]
-default = "local-sim"
+default = "local-simulation"
 
-[tool.flwr.federations.local-sim]
+[tool.flwr.federations.local-simulation]
 options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 0.0
 
-[tool.flwr.federations.local-sim-gpu]
+[tool.flwr.federations.local-simulation-gpu]
 options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 0.5
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = "test_*.py"
-python_classes = "Test*"
-python_functions = "test_*"
