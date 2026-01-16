@@ -22,7 +22,6 @@ from flwr.cli.constant import (
     DEFAULT_SIMULATION_BACKEND_NAME,
     SuperLinkConnectionTomlKey,
 )
-from flwr.supercore.utils import get_flwr_home
 
 
 @dataclass
@@ -122,7 +121,11 @@ class SuperLinkConnection:
         if self.root_certificates is not None:
             path = Path(self.root_certificates)
             if not path.is_absolute():
-                self.root_certificates = str(get_flwr_home() / path)
+                raise ValueError(
+                    "Invalid value for key "
+                    f"'{SuperLinkConnectionTomlKey.ROOT_CERTIFICATES}': "
+                    "expected absolute path, but got relative path."
+                )
 
         if self.insecure is not None and not isinstance(self.insecure, bool):
             raise ValueError(
