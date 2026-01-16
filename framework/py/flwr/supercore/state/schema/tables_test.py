@@ -224,6 +224,3 @@ class SchemaParityTest(unittest.TestCase):
                     f"sqla={sqla_nullable[col_name]}",
                 )
 
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
