@@ -34,7 +34,7 @@ CONFIG_MIGRATION_NOTICE = """
 ##################################################################
 # CONFIGURATION MIGRATION NOTICE:
 #
-# What was previously called "federation config" for SuperLink 
+# What was previously called "federation config" for SuperLink
 # connections in pyproject.toml has been renamed and moved.
 #
 # These settings are now **SuperLink connection configuration**
@@ -59,8 +59,6 @@ CLI_NOTICE = (
     + "• Legacy entries will be commented out\n\n"
     + "Learn more: https://flower.ai/docs\n"
 )
-
-
 
 
 def _is_legacy_usage(superlink: str, args: list[str]) -> bool:
@@ -96,7 +94,7 @@ def _is_migratable(app: Path) -> bool:
 
 def _migrate_pyproject_toml_to_flower_config(
     app: Path, toml_federation: str | None
-) -> None:
+) -> tuple[list[str], str | None]:
     """Migrate old TOML configuration to Flower config."""
     # Load and validate the old TOML configuration
     toml_path = app / "pyproject.toml"
@@ -107,15 +105,19 @@ def _migrate_pyproject_toml_to_flower_config(
 
     # Construct SuperLinkConnection
     toml_federations: dict[str, Any] = config["tool"]["flwr"]["federations"]
+    migrated_conn_names: list[str] = []
     for name, toml_fed_config in toml_federations.items():
         if isinstance(toml_fed_config, dict):
             conn = parse_superlink_connection(toml_fed_config, name)
             write_superlink_connection(conn)
+            migrated_conn_names.append(name)
 
     # Set default federation if applicable
     default_toml_federation: str | None = toml_federations.get("default")
     if default_toml_federation in toml_federations:
         set_default_superlink_connection(default_toml_federation)
+
+    return migrated_conn_names, default_toml_federation
 
 
 def _comment_out_legacy_toml_config(app: Path) -> None:
@@ -145,6 +147,7 @@ def _comment_out_legacy_toml_config(app: Path) -> None:
             else:
                 f.write(line)
 
+
 def migrate(
     app: Path,
     toml_federation: str | None,
@@ -166,19 +169,28 @@ def migrate(
         )
 
     try:
-        _migrate_pyproject_toml_to_flower_config(app, toml_federation)
+        migrated_conns, default_conn = _migrate_pyproject_toml_to_flower_config(
+            app, toml_federation
+        )
     except Exception as e:
         raise click.ClickException(
-            "Failed to migrate legacy TOML configuration to Flower config."
+            f"Failed to migrate legacy TOML configuration to Flower config:\n{e!r}"
         ) from e
-        
-    typer.secho(
-        typer.style("✅ Migration completed successfully!\n", fg=typer.colors.GREEN)
-    )
+
+    typer.secho("✅ Migration completed successfully!\n", fg=typer.colors.GREEN)
+
+    # Print migrated connections
+    typer.secho("Migrated SuperLink connections:", fg=typer.colors.BLUE)
+    for conn_name in migrated_conns:
+        typer.secho(f"  {conn_name}", fg=typer.colors.GREEN, nl=False)
+        if conn_name == default_conn:
+            typer.secho(" (default)", fg=typer.colors.WHITE, nl=False)
+        typer.echo()
+
     # print usage
-    typer.secho("You should now use the Flower CLI as follows:")
+    typer.secho("\nYou should now use the Flower CLI as follows:")
     ctx = click.get_current_context()
-    typer.secho(ctx.get_usage() + "\n", fg=typer.colors.BRIGHT_CYAN, bold=True)
+    typer.secho(ctx.get_usage() + "\n", bold=True)
 
     _comment_out_legacy_toml_config(app)
 
