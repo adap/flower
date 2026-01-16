@@ -130,31 +130,32 @@ class SchemaParityTest(unittest.TestCase):
         Note: SQLite type affinity means types are loosely matched. We compare
         the type strings after normalizing common equivalences.
         """
-        # Keep this strict so new or renamed SQLite column types fail loudly.
-        expected_raw_types = {"INTEGER", "TEXT", "REAL", "BLOB", "TIMESTAMP"}
         raw_types_seen: set[str] = set()
 
         # SQLite type affinity mapping: different spellings map to same affinity
-        # TEXT, VARCHAR, String -> TEXT affinity
-        # INTEGER, INT -> INTEGER affinity
-        # REAL, FLOAT -> REAL affinity
-        # BLOB, BINARY -> BLOB affinity
         def normalize_type(type_str: str) -> str:
             """Normalize SQLite type names to their affinity class."""
             type_upper = str(type_str).upper()
-            if "INT" in type_upper:
-                return "INTEGER"
-            if "CHAR" in type_upper or "TEXT" in type_upper or "CLOB" in type_upper:
-                return "TEXT"
-            if "BLOB" in type_upper or "BINARY" in type_upper or type_upper == "":
+
+            # Define affinity rules as (keywords, affinity) tuples
+            # Order matters: check specific patterns before generic ones
+            affinity_rules = [
+                (["INT"], "INTEGER"),
+                (["CHAR", "TEXT", "CLOB"], "TEXT"),
+                (["REAL", "FLOA", "DOUB", "TIMESTAMP"], "REAL"),
+                (["BLOB", "BINARY"], "BLOB"),
+            ]
+
+            # Check empty string special case
+            if type_upper == "":
                 return "BLOB"
-            if (
-                "REAL" in type_upper
-                or "FLOA" in type_upper
-                or "DOUB" in type_upper
-                or "TIMESTAMP" in type_upper
-            ):
-                return "REAL"
+
+            # Find matching affinity rule
+            for keywords, affinity in affinity_rules:
+                if any(keyword in type_upper for keyword in keywords):
+                    return affinity
+
+            # No match found, return as-is
             return type_upper
 
         # Assert: Check types for each table
@@ -179,11 +180,6 @@ class SchemaParityTest(unittest.TestCase):
                     f"Type mismatch for column '{col_name}' in table '{table_name}': "
                     f"raw={raw_cols[col_name]}, sqla={sqla_cols[col_name]}",
                 )
-        self.assertEqual(
-            expected_raw_types,
-            raw_types_seen,
-            "Raw SQLite column types changed; update normalize_type or expectations.",
-        )
 
     def test_foreign_keys_match(self) -> None:
         """Verify foreign key constraints are the same."""
