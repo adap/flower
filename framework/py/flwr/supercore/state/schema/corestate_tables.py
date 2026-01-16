@@ -14,6 +14,7 @@
 # ==============================================================================
 """SQLAlchemy Core Table definitions for CoreState."""
 
+
 from sqlalchemy import Column, Float, Integer, MetaData, String, Table
 
 corestate_metadata = MetaData()

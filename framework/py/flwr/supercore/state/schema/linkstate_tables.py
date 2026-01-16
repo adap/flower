@@ -14,6 +14,7 @@
 # ==============================================================================
 """SQLAlchemy Core Table definitions for LinkState."""
 
+
 from sqlalchemy import (
     TIMESTAMP,
     Column,
