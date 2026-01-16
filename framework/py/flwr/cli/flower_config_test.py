@@ -41,6 +41,7 @@ from flwr.cli.typing import (
     SuperLinkSimulationOptions,
 )
 from flwr.common.constant import FLWR_HOME
+from flwr.supercore.utils import get_flwr_home
 
 from .flower_config import (
     init_flwr_config,
@@ -139,48 +140,50 @@ class TestSuperLinkConnection(unittest.TestCase):
     def test_parse_superlink_connection_valid(self) -> None:
         """Test parse_superlink_connection with valid input."""
         # Prepare
-        with patch("flwr.cli.typing.get_flwr_home", return_value=Path("/app")):
-            conn_dict = {
-                SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
-                SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
-                SuperLinkConnectionTomlKey.INSECURE: False,
-                SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
-            }
-            name = "test_service"
+        conn_dict = {
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
+            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+            SuperLinkConnectionTomlKey.INSECURE: False,
+            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
+        }
+        name = "test_service"
 
-            # Execute
-            config = parse_superlink_connection(conn_dict, name)
+        # Execute
+        config = parse_superlink_connection(conn_dict, name)
 
-            # Assert
-            self.assertEqual(config.name, name)
-            self.assertEqual(config.address, "127.0.0.1:8080")
-            self.assertEqual(config.root_certificates, "/app/root_cert.crt")
-            self.assertFalse(config.insecure)
-            self.assertTrue(config.enable_account_auth)
+        print(config)
+
+        # Assert
+        self.assertEqual(config.name, name)
+        self.assertEqual(config.address, "127.0.0.1:8080")
+        expected_root_cert_path = str(get_flwr_home() / "root_cert.crt")
+        self.assertEqual(config.root_certificates, expected_root_cert_path)
+        self.assertFalse(config.insecure)
+        self.assertTrue(config.enable_account_auth)
 
     def test_parse_superlink_connection_resolves_paths(self) -> None:
         """Test parse_superlink_connection resolves relative paths."""
         # Prepare
-        with patch("flwr.cli.typing.get_flwr_home", return_value=Path("/home/flwr")):
-            conn_dict = {
-                SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
-                SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "certs/ca.crt",
-            }
-            name = "test_path_res"
+        conn_dict = {
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
+            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "certs/ca.crt",
+        }
+        name = "test_path_res"
 
-            # Execute
-            config = parse_superlink_connection(conn_dict, name)
+        # Execute
+        config = parse_superlink_connection(conn_dict, name)
 
-            # Assert
-            self.assertEqual(config.root_certificates, "/home/flwr/certs/ca.crt")
+        # Assert
+        expected_root_cert_path = str(get_flwr_home() / "certs/ca.crt")
+        self.assertEqual(config.root_certificates, expected_root_cert_path)
 
-            # Test absolute path is not changed
-            conn_dict_abs = {
-                SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
-                SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "/abs/path/ca.crt",
-            }
-            config_abs = parse_superlink_connection(conn_dict_abs, name)
-            self.assertEqual(config_abs.root_certificates, "/abs/path/ca.crt")
+        # Test absolute path is not changed
+        conn_dict_abs = {
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
+            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "/abs/path/ca.crt",
+        }
+        config_abs = parse_superlink_connection(conn_dict_abs, name)
+        self.assertEqual(config_abs.root_certificates, "/abs/path/ca.crt")
 
     def test_parse_superlink_connection_invalid_type(self) -> None:
         """Test parse_superlink_connection with invalid type."""

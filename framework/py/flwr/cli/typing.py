@@ -113,6 +113,7 @@ class SuperLinkConnection:
             self.root_certificates, str
         ):
             raise ValueError(
+                "Invalid value for key "
                 f"'{SuperLinkConnectionTomlKey.ROOT_CERTIFICATES}': "
                 f"expected str, but got {type(self.root_certificates).__name__}."
             )
