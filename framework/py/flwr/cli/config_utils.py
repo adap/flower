@@ -324,7 +324,7 @@ def validate_certificate_in_connection(
 
         # TLS is enabled with self-signed certificates: attempt to read the file
         try:
-            root_certificates_bytes = root_certificates.read_bytes()
+            root_certificates_bytes = Path(root_certificates).read_bytes()
         except Exception as e:
             typer.secho(
                 f"❌ Failed to read certificate file `{root_certificates}`: {e}",
