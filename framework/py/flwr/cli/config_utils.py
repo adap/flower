@@ -286,7 +286,7 @@ def validate_certificate_in_federation_config(
 
 def load_certificate_in_connection(
     connection: SuperLinkConnection,
-) -> tuple[bool, bytes | None]:
+) -> bytes | None:
     """Validate the certificates in the Flower project configuration.
 
     Accepted configurations:
@@ -341,7 +341,7 @@ def load_certificate_in_connection(
     else:
         root_certificates_bytes = None
 
-    return insecure, root_certificates_bytes
+    return root_certificates_bytes
 
 
 def exit_if_no_address(federation_config: dict[str, Any], cmd: str) -> None:

@@ -65,6 +65,7 @@ def stop(  # pylint: disable=R0914
     This command stops a running Flower App execution by sending a stop request to the
     SuperLink via the Control API.
     """
+    _ = federation_config_overrides
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:

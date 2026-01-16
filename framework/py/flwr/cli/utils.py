@@ -471,7 +471,7 @@ def init_channel_from_connection(connection: SuperLinkConnection) -> grpc.Channe
     grpc.Channel
         Configured gRPC channel with authentication interceptors.
     """
-    insecure, root_certificates_bytes = load_certificate_in_connection(connection)
+    root_certificates_bytes = load_certificate_in_connection(connection)
 
     # Load authentication plugin
     auth_plugin = load_cli_auth_plugin_from_connection(connection)
