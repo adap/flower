@@ -150,8 +150,6 @@ class TestSuperLinkConnection(unittest.TestCase):
         # Execute
         config = parse_superlink_connection(conn_dict, name)
 
-        print(config)
-
         # Assert
         self.assertEqual(config.name, name)
         self.assertEqual(config.address, "127.0.0.1:8080")
