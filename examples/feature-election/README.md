@@ -49,18 +49,28 @@ Controls feature selection strategy (alpha in [0,1]):
 
 ## Project Structure
 
-```text
+```shell
+fl-tabular
+├── fltabular
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
+```
+
+```shell
 feature-election/
-├── feature_election/          # Package directory
+├── feature_election/              # Package directory
 │   ├── __init__.py
-│   ├── client_app.py          # ClientApp with @app.train() and @app.evaluate()
-│   ├── server_app.py          # ServerApp with @app.main()
-│   ├── strategy.py            # Feature Election strategy (Message API)
+│   ├── client_app.py              # ClientApp with @app.train() and @app.evaluate()
+│   ├── server_app.py              # ServerApp with @app.main()
+│   ├── strategy.py                # Feature Election strategy (Message API)
 │   ├── feature_election_utils.py  # Feature selection methods
-│   └── task.py                # Data loading utilities
-├── pyproject.toml             # Configuration and dependencies
+│   └── task.py                    # Data loading utilities
+├── pyproject.toml                 # Configuration and dependencies
 ├── README.md
-└── test.py                    # Quick verification script
+└── test.py                        # Quick verification script
 ```
 
 ## Installation
