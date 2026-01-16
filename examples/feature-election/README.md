@@ -136,7 +136,7 @@ If you are already familiar with how the Deployment Engine works, you may want t
 
 | Parameter           | Type  | Default | Description                      |
 | ------------------- | ----- | ------- | -------------------------------- |
-| `num-rounds`        | int   | 1       | Number of FL rounds              |
+| `num-rounds`        | int   | 15       | Number of total FL rounds, including tuning and aggreegation           |
 | `fraction-train`    | float | 1.0     | Fraction of nodes for training   |
 | `fraction-evaluate` | float | 1.0     | Fraction of nodes for evaluation |
 

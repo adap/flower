@@ -36,14 +36,14 @@ clientapp = "feature_election.client_app:app"
 # Feature Election parameters
 skip-feature-election = false
 auto-tune = true
-tuning-rounds = 4             # Number of rounds to spend searching for best FD
+tuning-rounds = 4             # Number of rounds to spend searching for best Freedom Degree (FD)
 freedom-degree = 0.6          # Starting point for search
 aggregation-mode = "weighted"
 fs-method = "mutual_info"
 eval-metric = "f1"
 
 # Federated learning parameters
-num-rounds = 15
+num-rounds = 15             # Total number of experiment rounds
 fraction-train = 1.0
 fraction-evaluate = 1.0
 min-train-nodes = 2
