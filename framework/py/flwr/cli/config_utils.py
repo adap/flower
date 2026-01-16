@@ -308,6 +308,11 @@ def load_certificate_in_connection(
          - `address` is provided and `insecure = true`. If `root-certificates` is
            set, exit with an error.
     """
+    if connection.insecure is None:
+        raise ValueError(
+            f"SuperLink connection '{connection.name}' is missing insecure setting."
+        )
+
     insecure = connection.insecure
 
     # Process root certificates

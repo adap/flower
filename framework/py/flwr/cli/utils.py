@@ -479,6 +479,13 @@ def init_channel_from_connection(connection: SuperLinkConnection) -> grpc.Channe
     # Load tokens
     auth_plugin.load_tokens()
 
+    # Ensure address and insecure are set
+    if connection.address is None or connection.insecure is None:
+        raise ValueError(
+            f"Couldn't create channel. SuperLink connection '{connection.name}'"
+            " is missing address or insecure setting."
+        )
+
     # Create the gRPC channel
     channel = create_channel(
         server_address=connection.address,
