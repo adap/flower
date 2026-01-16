@@ -16,11 +16,13 @@
 
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from flwr.cli.constant import (
     DEFAULT_SIMULATION_BACKEND_NAME,
     SuperLinkConnectionTomlKey,
 )
+from flwr.supercore.utils import get_flwr_home
 
 
 @dataclass
@@ -111,10 +113,16 @@ class SuperLinkConnection:
             self.root_certificates, str
         ):
             raise ValueError(
-                "Invalid value for key "
                 f"'{SuperLinkConnectionTomlKey.ROOT_CERTIFICATES}': "
                 f"expected str, but got {type(self.root_certificates).__name__}."
             )
+
+        # Ensure root certificates path is absolute
+        if self.root_certificates is not None:
+            path = Path(self.root_certificates)
+            if not path.is_absolute():
+                self.root_certificates = str(get_flwr_home() / path)
+
         if self.insecure is not None and not isinstance(self.insecure, bool):
             raise ValueError(
                 f"Invalid value for key '{SuperLinkConnectionTomlKey.INSECURE}': "
