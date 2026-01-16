@@ -287,26 +287,25 @@ def validate_certificate_in_federation_config(
 def load_certificate_in_connection(
     connection: SuperLinkConnection,
 ) -> bytes | None:
-    """Validate the certificates in the Flower project configuration.
+    """Validate TLS-related settings and load root certificates if provided.
 
-    Accepted configurations:
-      1. TLS enabled and gRPC will load(*) the trusted certificate bundle:
-         - Only `address` is provided. `root-certificates` and `insecure` not set.
-         - `address` is provided and `insecure` set to `false`. `root-certificates` not
-           set.
-         (*)gRPC uses a multi-step fallback mechanism to load the trusted certificate
-            bundle in the following sequence:
-            a. A configured file path (if set via configuration or environment),
-            b. An override callback (if registered via
-               `grpc_set_ssl_roots_override_callback`),
-            c. The OS trust store (if available),
-            d. A bundled default certificate file.
-      2. TLS enabled with self-signed certificates:
-         - `address` and `root-certificates` are provided. `insecure` not set.
-         - `address` and `root-certificates` are provided. `insecure` set to `false`.
-      3. TLS disabled. This is not recommended and should only be used for prototyping:
-         - `address` is provided and `insecure = true`. If `root-certificates` is
-           set, exit with an error.
+    Parameters
+    ----------
+    connection : SuperLinkConnection
+        The SuperLink connection configuration.
+
+    Returns
+    -------
+    bytes | None
+        The loaded root certificate bytes if a custom certificate is configured.
+        None if TLS is disabled or if gRPC should use its default trust store.
+
+    Raises
+    ------
+    ValueError
+        If required TLS settings are missing.
+    typer.Exit
+        If the configuration is invalid or the certificate file cannot be read.
     """
     if connection.insecure is None:
         raise ValueError(
