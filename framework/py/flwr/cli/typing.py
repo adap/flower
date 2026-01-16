@@ -123,7 +123,10 @@ class SuperLinkConnection:
                 raise ValueError(
                     "Invalid value for key "
                     f"'{SuperLinkConnectionTomlKey.ROOT_CERTIFICATES}': "
-                    "expected absolute path, but got relative path."
+                    "expected absolute path, but got relative path "
+                    f"'{self.root_certificates}'. Please provide an absolute "
+                    "path to the root certificates file for connection "
+                    f"'{self.name}'."
                 )
 
         if self.insecure is not None and not isinstance(self.insecure, bool):
