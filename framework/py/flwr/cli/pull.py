@@ -15,29 +15,24 @@
 """Flower command line interface `pull` command."""
 
 
-from pathlib import Path
 from typing import Annotated
 
 import typer
 
-from flwr.cli.config_utils import (
-    exit_if_no_address,
-    load_and_validate,
-    process_loaded_project_config,
-    validate_federation_in_project_config,
-)
-from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
-from flwr.common.constant import FAB_CONFIG_FILE
+from flwr.cli.config_migration import migrate_if_legacy_usage
+from flwr.cli.config_utils import exit_if_no_address_in_connection
+from flwr.cli.flower_config import read_superlink_connection
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsRequest,
     PullArtifactsResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 
-from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
+from .utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
 
 
 def pull(  # pylint: disable=R0914
+    ctx: typer.Context,
     run_id: Annotated[
         int,
         typer.Option(
@@ -45,20 +40,9 @@ def pull(  # pylint: disable=R0914
             help="Run ID to pull artifacts from.",
         ),
     ],
-    app: Annotated[
-        Path,
-        typer.Argument(help="Path of the Flower App to run."),
-    ] = Path("."),
-    federation: Annotated[
+    superlink: Annotated[
         str | None,
-        typer.Argument(help="Name of the federation."),
-    ] = None,
-    federation_config_overrides: Annotated[
-        list[str] | None,
-        typer.Option(
-            "--federation-config",
-            help=FEDERATION_CONFIG_HELP_MESSAGE,
-        ),
+        typer.Argument(help="Name of the superlink configuration"),
     ] = None,
 ) -> None:
     """Pull artifacts from a Flower run.
@@ -66,20 +50,15 @@ def pull(  # pylint: disable=R0914
     Retrieve a download URL for artifacts generated during a completed Flower run. The
     artifacts can then be downloaded from the provided URL.
     """
-    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
+    # Migrate legacy usage if any
+    migrate_if_legacy_usage(superlink, args=ctx.args)
 
-    pyproject_path = app / FAB_CONFIG_FILE if app else None
-    config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
-    config = process_loaded_project_config(config, errors, warnings)
-    federation, federation_config = validate_federation_in_project_config(
-        federation, config, federation_config_overrides
-    )
-    exit_if_no_address(federation_config, "pull")
+    # Read superlink connection configuration
+    superlink_connection = read_superlink_connection(superlink)
+    exit_if_no_address_in_connection(superlink_connection, "pull")
     channel = None
     try:
-
-        auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
-        channel = init_channel(app, federation_config, auth_plugin)
+        channel = init_channel_from_connection(superlink_connection)
         stub = ControlStub(channel)
         with flwr_cli_grpc_exc_handler():
             res: PullArtifactsResponse = stub.PullArtifacts(

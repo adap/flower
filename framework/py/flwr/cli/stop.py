@@ -17,20 +17,15 @@
 
 import io
 import json
-from pathlib import Path
 from typing import Annotated
 
 import typer
 from rich.console import Console
 
-from flwr.cli.config_utils import (
-    exit_if_no_address,
-    load_and_validate,
-    process_loaded_project_config,
-    validate_federation_in_project_config,
-)
-from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
-from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
+from flwr.cli.config_migration import migrate_if_legacy_usage
+from flwr.cli.config_utils import exit_if_no_address_in_connection
+from flwr.cli.flower_config import read_superlink_connection
+from flwr.common.constant import CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StopRunRequest,
@@ -38,28 +33,18 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 
-from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
+from .utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
 
 
 def stop(  # pylint: disable=R0914
+    ctx: typer.Context,
     run_id: Annotated[  # pylint: disable=unused-argument
         int,
         typer.Argument(help="The Flower run ID to stop"),
     ],
-    app: Annotated[
-        Path,
-        typer.Argument(help="Path of the Flower project"),
-    ] = Path("."),
-    federation: Annotated[
+    superlink: Annotated[
         str | None,
-        typer.Argument(help="Name of the federation"),
-    ] = None,
-    federation_config_overrides: Annotated[
-        list[str] | None,
-        typer.Option(
-            "--federation-config",
-            help=FEDERATION_CONFIG_HELP_MESSAGE,
-        ),
+        typer.Argument(help="Name of the superlink configuration"),
     ] = None,
     output_format: Annotated[
         str,
@@ -81,20 +66,15 @@ def stop(  # pylint: disable=R0914
         if suppress_output:
             redirect_output(captured_output)
 
-        # Load and validate federation config
-        typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
+        # Migrate legacy usage if any
+        migrate_if_legacy_usage(superlink, args=ctx.args)
 
-        pyproject_path = app / FAB_CONFIG_FILE if app else None
-        config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
-        config = process_loaded_project_config(config, errors, warnings)
-        federation, federation_config = validate_federation_in_project_config(
-            federation, config, federation_config_overrides
-        )
-        exit_if_no_address(federation_config, "stop")
+        # Read superlink connection configuration
+        superlink_connection = read_superlink_connection(superlink)
+        exit_if_no_address_in_connection(superlink_connection, "stop")
         channel = None
         try:
-            auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
-            channel = init_channel(app, federation_config, auth_plugin)
+            channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
             typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)

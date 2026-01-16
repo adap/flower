@@ -17,7 +17,6 @@
 
 import io
 import json
-from pathlib import Path
 from typing import Annotated, cast
 
 import typer
@@ -25,14 +24,10 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from flwr.cli.config_utils import (
-    exit_if_no_address,
-    load_and_validate,
-    process_loaded_project_config,
-    validate_federation_in_project_config,
-)
-from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
-from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, Status, SubStatus
+from flwr.cli.config_migration import migrate_if_legacy_usage
+from flwr.cli.config_utils import exit_if_no_address_in_connection
+from flwr.cli.flower_config import read_superlink_connection
+from flwr.common.constant import CliOutputFormat, Status, SubStatus
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import run_from_proto
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
@@ -43,25 +38,14 @@ from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.supercore.utils import humanize_bytes, humanize_duration
 
 from .run_utils import RunRow, format_runs
-from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
+from .utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
 
 
 def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
     ctx: typer.Context,
-    app: Annotated[
-        Path,
-        typer.Argument(help="Path of the Flower project"),
-    ] = Path("."),
-    federation: Annotated[
+    superlink: Annotated[
         str | None,
-        typer.Argument(help="Name of the federation"),
-    ] = None,
-    federation_config_overrides: Annotated[
-        list[str] | None,
-        typer.Option(
-            "--federation-config",
-            help=FEDERATION_CONFIG_HELP_MESSAGE,
-        ),
+        typer.Argument(help="Name of the superlink configuration"),
     ] = None,
     runs: Annotated[
         bool,
@@ -107,24 +91,20 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
     try:
         if suppress_output:
             redirect_output(captured_output)
-        # Load and validate federation config
-        typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-        pyproject_path = app / FAB_CONFIG_FILE if app else None
-        config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
-        config = process_loaded_project_config(config, errors, warnings)
-        federation, federation_config = validate_federation_in_project_config(
-            federation, config, federation_config_overrides
-        )
-        exit_if_no_address(federation_config, command_name)
+        # Migrate legacy usage if any
+        migrate_if_legacy_usage(superlink, args=ctx.args)
+
+        # Read superlink connection configuration
+        superlink_connection = read_superlink_connection(superlink)
+        exit_if_no_address_in_connection(superlink_connection, command_name)
         channel = None
         try:
             if runs and run_id is not None:
                 raise ValueError(
                     "The options '--runs' and '--run-id' are mutually exclusive."
                 )
-            auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
-            channel = init_channel(app, federation_config, auth_plugin)
+            channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)
 
             # Display information about a specific run ID
