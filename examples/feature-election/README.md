@@ -127,7 +127,7 @@ If you are already familiar with how the Deployment Engine works, you may want t
 
 | Parameter          | Type  | Default    | Description                                  |
 | ------------------ | ----- | ---------- | -------------------------------------------- |
-| `freedom-degree`   | float | 0.5        | Selection strategy (0=intersection, 1=union) |
+| `freedom-degree`   | float | 0.6        | Selection strategy (0=intersection, 1=union) |
 | `aggregation-mode` | str   | "weighted" | "weighted" or "uniform"                      |
 | `fs-method`        | str   | "mutual_info"    | Feature selection method                     |
 | `eval-metric`      | str   | "f1"       | Evaluation metric ("f1", "accuracy", "auc")  |
