@@ -23,7 +23,13 @@ import unittest
 from sqlalchemy import create_engine, inspect, text
 
 from flwr.supercore.corestate.sqlite_corestate import SQL_CREATE_TABLE_TOKEN_STORE
+from flwr.supercore.object_store.sqlite_object_store import (
+    SQL_CREATE_OBJECT_CHILDREN,
+    SQL_CREATE_OBJECTS,
+    SQL_CREATE_RUN_OBJECTS,
+)
 from flwr.supercore.state.schema.corestate_tables import corestate_metadata
+from flwr.supercore.state.schema.objectstore_tables import objectstore_metadata
 
 
 class SchemaParityTest(unittest.TestCase):
@@ -36,11 +42,16 @@ class SchemaParityTest(unittest.TestCase):
         with self.raw_engine.connect() as conn:
             # CoreState tables
             conn.execute(text(SQL_CREATE_TABLE_TOKEN_STORE))
+            # ObjectStore tables
+            conn.execute(text(SQL_CREATE_OBJECTS))
+            conn.execute(text(SQL_CREATE_OBJECT_CHILDREN))
+            conn.execute(text(SQL_CREATE_RUN_OBJECTS))
             conn.commit()
 
         # Create database with SQLAlchemy metadata (the "actual" schema)
         self.sqlalchemy_engine = create_engine("sqlite:///:memory:")
         corestate_metadata.create_all(self.sqlalchemy_engine)
+        objectstore_metadata.create_all(self.sqlalchemy_engine)
 
         # Cache inspectors for use in all tests
         self.raw_inspector = inspect(self.raw_engine)
