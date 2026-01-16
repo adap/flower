@@ -50,16 +50,6 @@ Controls feature selection strategy (alpha in [0,1]):
 ## Project Structure
 
 ```shell
-fl-tabular
-├── fltabular
-│   ├── client_app.py   # Defines your ClientApp
-│   ├── server_app.py   # Defines your ServerApp
-│   └── task.py         # Defines your model, training and data loading
-├── pyproject.toml      # Project metadata like dependencies and configs
-└── README.md
-```
-
-```shell
 feature-election/
 ├── feature_election/              # Package directory
 │   ├── __init__.py
