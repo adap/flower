@@ -34,11 +34,11 @@ CONFIG_MIGRATION_NOTICE = """
 ##################################################################
 # CONFIGURATION MIGRATION NOTICE:
 #
-# What was previously called "federation config" in pyproject.toml
-# has been renamed and moved.
+# What was previously called "federation config" for SuperLink 
+# connections in pyproject.toml has been renamed and moved.
 #
-# Federation config is now **SuperLink connection configuration**
-# and is defined in the Flower configuration file.
+# These settings are now **SuperLink connection configuration**
+# and are defined in the Flower configuration file.
 #
 # The entries below are commented out intentionally and are kept
 # only as a migration reference.
@@ -47,6 +47,20 @@ CONFIG_MIGRATION_NOTICE = """
 ##################################################################
 
 """
+
+CLI_NOTICE = (
+    typer.style("\n🌸 Heads up from Flower!\n\n", fg=typer.colors.MAGENTA, bold=True)
+    + "We detected legacy usage of this command that relies on connection\n"
+    + "settings from your pyproject.toml.\n\n"
+    + "Flower will migrate any relevant settings to the new Flower config.\n\n"
+    + "• These settings are now "
+    + typer.style("the SuperLink connection configuration", bold=True)
+    + "\n"
+    + "• Legacy entries will be commented out\n\n"
+    + "Learn more: https://flower.ai/docs\n"
+)
+
+
 
 
 def _is_legacy_usage(superlink: str, args: list[str]) -> bool:
@@ -131,6 +145,43 @@ def _comment_out_legacy_toml_config(app: Path) -> None:
             else:
                 f.write(line)
 
+def migrate(
+    app: Path,
+    toml_federation: str | None,
+) -> None:
+    """Migrate legacy TOML configuration to Flower config."""
+    # Initialize Flower config
+    init_flwr_config()
+
+    # Print migration notice
+    typer.echo(CLI_NOTICE)
+
+    # Check if migration is applicable
+    app = app.resolve()
+    if not _is_migratable(app):
+        raise click.UsageError(
+            f"No valid pyproject.toml found in '{app}'. "
+            "The connection settings in the TOML file may have already been migrated "
+            "or the TOML structure is invalid."
+        )
+
+    try:
+        _migrate_pyproject_toml_to_flower_config(app, toml_federation)
+    except Exception as e:
+        raise click.ClickException(
+            "Failed to migrate legacy TOML configuration to Flower config."
+        ) from e
+        
+    typer.secho(
+        typer.style("✅ Migration completed successfully!\n", fg=typer.colors.GREEN)
+    )
+    # print usage
+    typer.secho("You should now use the Flower CLI as follows:")
+    ctx = click.get_current_context()
+    typer.secho(ctx.get_usage() + "\n", fg=typer.colors.BRIGHT_CYAN, bold=True)
+
+    _comment_out_legacy_toml_config(app)
+
 
 def migrate_if_legacy_usage(
     superlink: str,
@@ -138,9 +189,6 @@ def migrate_if_legacy_usage(
 ) -> None:
     """Migrate legacy TOML configuration to Flower config if legacy usage is
     detected."""
-    # Initialize Flower config
-    init_flwr_config()
-
     # Trigger the same typer error when detecting unexpected extra args
     if len(args) > 1:
         raise click.UsageError(f"Got unexpected extra arguments ({' '.join(args[1:])})")
@@ -149,36 +197,7 @@ def migrate_if_legacy_usage(
     if not _is_legacy_usage(superlink, args):
         return
 
-    # Check if migration is applicable
-    app_path = Path(superlink).resolve()
-    if not _is_migratable(app_path):
-        raise click.UsageError(
-            f"No valid pyproject.toml found in '{app_path}'. "
-            "The configuration may have already been migrated or "
-            "the TOML structure is invalid."
-        )
-
-    # Prompt user for confirmation
-    confirm = typer.confirm(
-        typer.style(
-            f"\n💬 Legacy TOML configuration detected in '{app_path}'. "
-            "Do you want to migrate it to Flower config?",
-            fg=typer.colors.MAGENTA,
-            bold=True,
-        ),
-        default=True,
+    migrate(
+        app=Path(superlink),
+        toml_federation=args[0] if len(args) == 1 else None,
     )
-    if not confirm:
-        raise click.ClickException("Migration aborted by user.")
-
-    try:
-        _migrate_pyproject_toml_to_flower_config(
-            app=app_path,
-            toml_federation=args[0] if args else None,
-        )
-    except Exception as e:
-        raise click.ClickException(
-            "Failed to migrate legacy TOML configuration to Flower config."
-        ) from e
-
-    _comment_out_legacy_toml_config(app_path)
