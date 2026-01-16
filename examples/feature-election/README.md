@@ -123,7 +123,7 @@ num-rounds = 1
 | ------------------ | ----- | ---------- | -------------------------------------------- |
 | `freedom-degree`   | float | 0.5        | Selection strategy (0=intersection, 1=union) |
 | `aggregation-mode` | str   | "weighted" | "weighted" or "uniform"                      |
-| `fs-method`        | str   | "lasso"    | Feature selection method                     |
+| `fs-method`        | str   | "mutual_info"    | Feature selection method                     |
 | `eval-metric`      | str   | "f1"       | Evaluation metric ("f1", "accuracy", "auc")  |
 
 ### Federated Parameters
