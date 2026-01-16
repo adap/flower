@@ -345,10 +345,29 @@ def write_superlink_connection(connection: SuperLinkConnection) -> None:
     # Add/update the connection
     superlink_config[connection.name] = conn_dict
 
-    # Flatten SuperLink connections
-    for name in list(superlink_config.keys()):
-        if isinstance(superlink_config[name], dict):
-            superlink_config[name] = flatten_dict(superlink_config[name])
+    # Write back to file
+    write_flower_config(toml_dict)
+
+
+def set_default_superlink_connection(connection_name: str) -> None:
+    """Set the default SuperLink connection."""
+    toml_dict, _ = read_flower_config()
+
+    # Get superlink section
+    superlink_config = toml_dict[SuperLinkConnectionTomlKey.SUPERLINK]
+
+    # Check if the connection exists
+    if connection_name not in superlink_config:
+        typer.secho(
+            f"❌ SuperLink connection '{connection_name}' not found in the Flower "
+            "configuration file. Cannot set as default.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Set default connection
+    superlink_config[SuperLinkConnectionTomlKey.DEFAULT] = connection_name
 
     # Write back to file
     write_flower_config(toml_dict)
@@ -401,6 +420,12 @@ def write_flower_config(toml_dict: dict[str, Any]) -> Path:
         The path to the configuration file.
     """
     config_path = get_flwr_home() / FLOWER_CONFIG_FILE
+
+    # Flatten SuperLink connections
+    superlink_config: dict[str, Any] = toml_dict[SuperLinkConnectionTomlKey.SUPERLINK]
+    for name in list(superlink_config.keys()):
+        if isinstance(superlink_config[name], dict):
+            superlink_config[name] = flatten_dict(superlink_config[name])
 
     # Get the standard TOML text
     toml_content = tomli_w.dumps(toml_dict)
