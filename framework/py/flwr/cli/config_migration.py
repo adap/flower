@@ -79,17 +79,26 @@ def _is_legacy_usage(superlink: str, args: list[str]) -> bool:
     return False
 
 
-def _is_migratable(app: Path) -> bool:
+def _check_is_migratable(app: Path) -> None:
     """Check if the given app path contains legacy TOML configuration."""
     toml_path = app / "pyproject.toml"
     if not toml_path.exists():
-        return False
-    config, _, _ = load_and_validate(toml_path, check_module=False)
+        raise FileNotFoundError(f"No pyproject.toml found in '{app}'")
+    config, errors, _ = load_and_validate(toml_path, check_module=False)
     if config is None:
-        return False
-    if "tool" not in config or "flwr" not in config["tool"]:
-        return False
-    return "federations" in config["tool"]["flwr"]
+        raise ValueError(f"Failed to load TOML configuration: {toml_path}")
+    if errors:
+        raise ValueError(
+            f"Invalid TOML configuration found in '{toml_path}':\n"
+            + "\n".join(f"- {err}" for err in errors)
+        )
+    try:
+        _ = config["tool"]["flwr"]["federations"]
+        return
+    except KeyError:
+        raise ValueError(
+            f"No 'tool.flwr.federations' section found in '{toml_path}'"
+        ) from None
 
 
 def _migrate_pyproject_toml_to_flower_config(
@@ -161,12 +170,10 @@ def migrate(
 
     # Check if migration is applicable
     app = app.resolve()
-    if not _is_migratable(app):
-        raise click.UsageError(
-            f"No valid pyproject.toml found in '{app}'. "
-            "The connection settings in the TOML file may have already been migrated "
-            "or the TOML structure is invalid."
-        )
+    try:
+        _check_is_migratable(app)
+    except (FileNotFoundError, ValueError) as e:
+        raise click.ClickException(f"Cannot migrate configuration:\n{e}") from e
 
     try:
         migrated_conns, default_conn = _migrate_pyproject_toml_to_flower_config(
