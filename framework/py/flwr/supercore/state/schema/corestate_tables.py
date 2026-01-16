@@ -12,4 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower SuperCore state components."""
+"""SQLAlchemy Core Table definitions for CoreState."""
+
+from sqlalchemy import Column, Float, Integer, MetaData, String, Table
+
+corestate_metadata = MetaData()
+
+# ------------------------------------------------------------------------------
+#  Table: token_store
+# ------------------------------------------------------------------------------
+token_store = Table(
+    "token_store",
+    corestate_metadata,
+    Column("run_id", Integer, primary_key=True, nullable=True),
+    Column("token", String, unique=True, nullable=False),
+    Column("active_until", Float),
+)

@@ -113,6 +113,13 @@ def _migrate_pyproject_toml_to_flower_config(
     migrated_conn_names: list[str] = []
     for name, toml_fed_config in toml_federations.items():
         if isinstance(toml_fed_config, dict):
+            # Resolve relative root-certificates path
+            if cert_path := toml_fed_config.get("root-certificates"):
+                if not Path(cert_path).is_absolute():
+                    toml_fed_config["root-certificates"] = str(
+                        (app / cert_path).resolve()
+                    )
+            # Parse and write SuperLink connection
             conn = parse_superlink_connection(toml_fed_config, name)
             write_superlink_connection(conn)
             migrated_conn_names.append(name)

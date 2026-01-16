@@ -65,6 +65,7 @@ options.num-supernodes = 2
 
 [tool.flwr.federations.researchgrid]
 address = "researchgrid.flower.blue"
+root-certificates = "certs/researchgrid.crt"
 enable-account-auth = true
 options.num-supernodes = 2
 """
@@ -135,6 +136,9 @@ class TestConfigMigration(unittest.TestCase):
         researchgrid = read_superlink_connection("researchgrid")
         assert researchgrid is not None
         assert researchgrid.address == "researchgrid.flower.blue"
+        assert researchgrid.root_certificates == str(
+            (self.app_path / "certs/researchgrid.crt").resolve()
+        )
         assert researchgrid.enable_account_auth is True
 
     def test_comment_out_legacy_toml_config(self) -> None:
