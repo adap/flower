@@ -53,10 +53,6 @@ CLI_NOTICE = (
     + "We detected legacy usage of this command that relies on connection\n"
     + "settings from your pyproject.toml.\n\n"
     + "Flower will migrate any relevant settings to the new Flower config.\n\n"
-    + "• These settings are now "
-    + typer.style("the SuperLink connection configuration", bold=True)
-    + "\n"
-    + "• Legacy entries will be commented out\n\n"
     + "Learn more: https://flower.ai/docs\n"
 )
 
