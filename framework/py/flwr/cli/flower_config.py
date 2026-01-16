@@ -15,9 +15,12 @@
 """Flower command line interface configuration utils."""
 
 
+import re
+from pathlib import Path
 from typing import Any, cast
 
 import tomli
+import tomli_w
 import typer
 
 from flwr.cli.constant import (
@@ -37,6 +40,7 @@ from flwr.cli.typing import (
     SuperLinkConnection,
     SuperLinkSimulationOptions,
 )
+from flwr.common.config import flatten_dict
 from flwr.supercore.utils import get_flwr_home
 
 
@@ -90,6 +94,54 @@ def _parse_simulation_options(options: dict[str, Any]) -> SuperLinkSimulationOpt
         num_supernodes=cast(int, num_supernodes),
         backend=simulation_backend,
     )
+
+
+def _serialize_simulation_options(
+    options: SuperLinkSimulationOptions,
+) -> dict[str, Any]:
+    """Convert SuperLinkSimulationOptions to a dictionary for TOML serialization."""
+    options_dict: dict[str, Any] = {
+        SuperLinkSimulationOptionsTomlKey.NUM_SUPERNODES: options.num_supernodes
+    }
+
+    if options.backend is not None:
+        backend = options.backend
+
+        # Serialize client resources
+        c_res_dict: dict[str, Any] = {}
+        if backend.client_resources is not None:
+            client_res = backend.client_resources
+            c_res_dict = {
+                SimulationClientResourcesTomlKey.NUM_CPUS: client_res.num_cpus,
+                SimulationClientResourcesTomlKey.NUM_GPUS: client_res.num_gpus,
+            }
+            # Remove None values
+            c_res_dict = {k: v for k, v in c_res_dict.items() if v is not None}
+
+        # Serialize init args
+        init_args_dict: dict[str, Any] = {}
+        if backend.init_args is not None:
+            init_args = backend.init_args
+            init_args_dict = {
+                SimulationInitArgsTomlKey.NUM_CPUS: init_args.num_cpus,
+                SimulationInitArgsTomlKey.NUM_GPUS: init_args.num_gpus,
+                SimulationInitArgsTomlKey.LOGGING_LEVEL: init_args.logging_level,
+                SimulationInitArgsTomlKey.LOG_TO_DRIVE: init_args.log_to_drive,
+            }
+            # Remove None values
+            init_args_dict = {k: v for k, v in init_args_dict.items() if v is not None}
+
+        backend_dict = {
+            SimulationBackendConfigTomlKey.NAME: backend.name,
+            SimulationBackendConfigTomlKey.CLIENT_RESOURCES: c_res_dict,
+            SimulationBackendConfigTomlKey.INIT_ARGS: init_args_dict,
+        }
+        # Remove empty dicts
+        backend_dict = {k: v for k, v in backend_dict.items() if v}
+
+        options_dict[SuperLinkSimulationOptionsTomlKey.BACKEND] = backend_dict
+
+    return options_dict
 
 
 def init_flwr_config() -> None:
@@ -150,6 +202,36 @@ def parse_superlink_connection(
     )
 
 
+def serialize_superlink_connection(connection: SuperLinkConnection) -> dict[str, Any]:
+    """Convert SuperLinkConnection to a dictionary for TOML serialization.
+
+    Parameters
+    ----------
+    connection : SuperLinkConnection
+        The SuperLink connection to serialize.
+
+    Returns
+    -------
+    dict[str, Any]
+        Dictionary representation suitable for TOML serialization.
+    """
+    conn_dict: dict[str, Any] = {
+        SuperLinkConnectionTomlKey.ADDRESS: connection.address,
+        SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: connection.root_certificates,
+        SuperLinkConnectionTomlKey.INSECURE: connection.insecure,
+        SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: connection.enable_account_auth,
+        SuperLinkConnectionTomlKey.FEDERATION: connection.federation,
+    }
+    # Remove None values
+    conn_dict = {k: v for k, v in conn_dict.items() if v is not None}
+
+    if connection.options is not None:
+        options_dict = _serialize_simulation_options(connection.options)
+        conn_dict[SuperLinkConnectionTomlKey.OPTIONS] = options_dict
+
+    return conn_dict
+
+
 def read_superlink_connection(
     connection_name: str | None = None,
 ) -> SuperLinkConnection | None:
@@ -173,14 +255,9 @@ def read_superlink_connection(
         Raised if the configuration file is corrupted, or if the requested
         connection (or default) cannot be found.
     """
-    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
-    if not config_path.exists():
-        return None
+    toml_dict, config_path = read_flower_config()
 
     try:
-        with config_path.open("rb") as file:
-            toml_dict = tomli.load(file)
-
         superlink_config = toml_dict.get(SuperLinkConnectionTomlKey.SUPERLINK, {})
 
         # Load the default SuperLink connection when not provided
@@ -223,14 +300,6 @@ def read_superlink_connection(
         conn_dict = superlink_config[connection_name]
         return parse_superlink_connection(conn_dict, connection_name)
 
-    except tomli.TOMLDecodeError as err:
-        typer.secho(
-            f"❌ Failed to read the Flower configuration file ({config_path}). "
-            "Please ensure it is valid TOML.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from err
     except ValueError as err:
         typer.secho(
             f"❌ Failed to parse the Flower configuration file ({config_path}). "
@@ -247,3 +316,132 @@ def read_superlink_connection(
             err=True,
         )
         raise typer.Exit(code=1) from err
+
+
+def write_superlink_connection(connection: SuperLinkConnection) -> None:
+    """Write a SuperLink connection to the Flower configuration file.
+
+    Parameters
+    ----------
+    connection : SuperLinkConnection
+        The SuperLink connection to write to the configuration file.
+
+    Raises
+    ------
+    typer.Exit
+        Raised if the configuration file cannot be read or written.
+    """
+    toml_dict, _ = read_flower_config()
+
+    # Ensure superlink section exists
+    if SuperLinkConnectionTomlKey.SUPERLINK not in toml_dict:
+        toml_dict[SuperLinkConnectionTomlKey.SUPERLINK] = {}
+
+    superlink_config = toml_dict[SuperLinkConnectionTomlKey.SUPERLINK]
+
+    # Serialize connection and flatten nested dicts using dotted keys
+    conn_dict = serialize_superlink_connection(connection)
+
+    # Add/update the connection
+    superlink_config[connection.name] = conn_dict
+
+    # Write back to file
+    write_flower_config(toml_dict)
+
+
+def set_default_superlink_connection(connection_name: str) -> None:
+    """Set the default SuperLink connection."""
+    toml_dict, _ = read_flower_config()
+
+    # Get superlink section
+    superlink_config = toml_dict[SuperLinkConnectionTomlKey.SUPERLINK]
+
+    # Check if the connection exists
+    if connection_name not in superlink_config:
+        typer.secho(
+            f"❌ SuperLink connection '{connection_name}' not found in the Flower "
+            "configuration file. Cannot set as default.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Set default connection
+    superlink_config[SuperLinkConnectionTomlKey.DEFAULT] = connection_name
+
+    # Write back to file
+    write_flower_config(toml_dict)
+
+
+def read_flower_config() -> tuple[dict[str, Any], Path]:
+    """Read the Flower configuration file.
+
+    Returns
+    -------
+    tuple[dict[str, Any], Path]
+        A tuple containing the TOML configuration dictionary and the path to the
+        configuration file.
+
+    Raises
+    ------
+    typer.Exit
+        Raised if the configuration file is corrupted.
+    """
+    init_flwr_config()
+
+    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
+
+    try:
+        with config_path.open("rb") as file:
+            return tomli.load(file), config_path
+
+    except tomli.TOMLDecodeError as err:
+        typer.secho(
+            f"❌ Failed to read the Flower configuration file ({config_path}). "
+            "Please ensure it is valid TOML.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1) from err
+
+
+# This function may be subject to change once we introduce more configuration
+def write_flower_config(toml_dict: dict[str, Any]) -> Path:
+    """Write the Flower configuration file.
+
+    Parameters
+    ----------
+    toml_dict : dict[str, Any]
+        The TOML configuration dictionary to write to the file.
+
+    Returns
+    -------
+    Path
+        The path to the configuration file.
+    """
+    config_path = get_flwr_home() / FLOWER_CONFIG_FILE
+
+    # Flatten SuperLink connections
+    superlink_config: dict[str, Any] = toml_dict[SuperLinkConnectionTomlKey.SUPERLINK]
+    for name in list(superlink_config.keys()):
+        if isinstance(superlink_config[name], dict):
+            superlink_config[name] = flatten_dict(superlink_config[name])
+
+    # Get the standard TOML text
+    toml_content = tomli_w.dumps(toml_dict)
+
+    # Remove double quotes around multi-dot keys
+    # All keys must be [A-Za-z0-9_-]+ except dots
+    lines = toml_content.splitlines(keepends=True)
+    pattern = re.compile(r'^"([^"]+\.[^"]+)"\s*=')
+    for i, line in enumerate(lines):
+        if match := pattern.match(line):
+            key = match.group(1)
+            lines[i] = line.replace(f'"{key}"', key)
+
+    toml_content = "".join(lines)
+
+    with config_path.open("w") as file:
+        file.write(toml_content)
+
+    return config_path
