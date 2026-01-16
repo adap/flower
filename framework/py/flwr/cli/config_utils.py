@@ -21,6 +21,7 @@ from typing import Any
 import tomli
 import typer
 
+from flwr.cli.typing import SuperLinkConnection
 from flwr.common.config import (
     fuse_dicts,
     get_fab_config,
@@ -269,6 +270,61 @@ def validate_certificate_in_federation_config(
         # TLS is enabled with self-signed certificates: attempt to read the file
         try:
             root_certificates_bytes = (app / root_certificates).read_bytes()
+        except Exception as e:
+            typer.secho(
+                f"❌ Failed to read certificate file `{root_certificates}`: {e}",
+                fg=typer.colors.RED,
+                bold=True,
+                err=True,
+            )
+            raise typer.Exit(code=1) from e
+    else:
+        root_certificates_bytes = None
+
+    return insecure, root_certificates_bytes
+
+
+def validate_certificate_in_connection(
+    connection: SuperLinkConnection,
+) -> tuple[bool, bytes | None]:
+    """Validate the certificates in the Flower project configuration.
+
+    Accepted configurations:
+      1. TLS enabled and gRPC will load(*) the trusted certificate bundle:
+         - Only `address` is provided. `root-certificates` and `insecure` not set.
+         - `address` is provided and `insecure` set to `false`. `root-certificates` not
+           set.
+         (*)gRPC uses a multi-step fallback mechanism to load the trusted certificate
+            bundle in the following sequence:
+            a. A configured file path (if set via configuration or environment),
+            b. An override callback (if registered via
+               `grpc_set_ssl_roots_override_callback`),
+            c. The OS trust store (if available),
+            d. A bundled default certificate file.
+      2. TLS enabled with self-signed certificates:
+         - `address` and `root-certificates` are provided. `insecure` not set.
+         - `address` and `root-certificates` are provided. `insecure` set to `false`.
+      3. TLS disabled. This is not recommended and should only be used for prototyping:
+         - `address` is provided and `insecure = true`. If `root-certificates` is
+           set, exit with an error.
+    """
+    insecure = connection.insecure
+
+    # Process root certificates
+    if root_certificates := connection.root_certificates:
+        if insecure:
+            typer.secho(
+                "❌ `root-certificates` were provided but the `insecure` parameter "
+                "is set to `True`.",
+                fg=typer.colors.RED,
+                bold=True,
+                err=True,
+            )
+            raise typer.Exit(code=1)
+
+        # TLS is enabled with self-signed certificates: attempt to read the file
+        try:
+            root_certificates_bytes = root_certificates.read_bytes()
         except Exception as e:
             typer.secho(
                 f"❌ Failed to read certificate file `{root_certificates}`: {e}",
