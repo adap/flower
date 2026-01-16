@@ -1,8 +1,6 @@
----
-tags: [feature-election, tabular]
-dataset: [synthetic]
-framework: [sklearn, pandas]
----
+______________________________________________________________________
+
+## tags: [feature-election, tabular] dataset: [synthetic] framework: [sklearn, pandas]
 
 # Federated Feature Election with Flower
 
@@ -21,16 +19,16 @@ This work originates from **FLASH**: A framework for Federated Learning with Att
 
 ## Feature Selection Methods
 
-| Method          | Description                        | Speed  |
+| Method | Description | Speed |
 | --------------- | ---------------------------------- | ------ |
-| `lasso`         | L1-regularized regression (sparse) | Fast   |
-| `elastic_net`   | Elastic Net regularization         | Fast   |
-| `random_forest` | Random Forest importance           | Medium |
-| `mutual_info`   | Mutual information                 | Medium |
-| `f_classif`     | F-statistic                        | Fast   |
-| `chi2`          | Chi-squared test                   | Fast   |
-| `rfe`           | Recursive Feature Elimination      | Slow   |
-| `pyimpetus`     | PyImpetus Markov Blanket           | Slow   |
+| `lasso` | L1-regularized regression (sparse) | Fast |
+| `elastic_net` | Elastic Net regularization | Fast |
+| `random_forest` | Random Forest importance | Medium |
+| `mutual_info` | Mutual information | Medium |
+| `f_classif` | F-statistic | Fast |
+| `chi2` | Chi-squared test | Fast |
+| `rfe` | Recursive Feature Elimination | Slow |
+| `pyimpetus` | PyImpetus Markov Blanket | Slow |
 
 ## Key Parameters
 
@@ -125,20 +123,20 @@ If you are already familiar with how the Deployment Engine works, you may want t
 
 ### Feature Election Parameters
 
-| Parameter          | Type  | Default    | Description                                  |
+| Parameter | Type | Default | Description |
 | ------------------ | ----- | ---------- | -------------------------------------------- |
-| `freedom-degree`   | float | 0.6        | Selection strategy (0=intersection, 1=union) |
-| `aggregation-mode` | str   | "weighted" | "weighted" or "uniform"                      |
-| `fs-method`        | str   | "mutual_info"    | Feature selection method                     |
-| `eval-metric`      | str   | "f1"       | Evaluation metric ("f1", "accuracy", "auc")  |
+| `freedom-degree` | float | 0.6 | Selection strategy (0=intersection, 1=union) |
+| `aggregation-mode` | str | "weighted" | "weighted" or "uniform" |
+| `fs-method` | str | "mutual_info" | Feature selection method |
+| `eval-metric` | str | "f1" | Evaluation metric ("f1", "accuracy", "auc") |
 
 ### Federated Parameters
 
-| Parameter           | Type  | Default | Description                      |
+| Parameter | Type | Default | Description |
 | ------------------- | ----- | ------- | -------------------------------- |
-| `num-rounds`        | int   | 15       | Number of total FL rounds, including tuning and aggreegation           |
-| `fraction-train`    | float | 1.0     | Fraction of nodes for training   |
-| `fraction-evaluate` | float | 1.0     | Fraction of nodes for evaluation |
+| `num-rounds` | int | 15 | Number of total FL rounds, including tuning and aggreegation |
+| `fraction-train` | float | 1.0 | Fraction of nodes for training |
+| `fraction-evaluate` | float | 1.0 | Fraction of nodes for evaluation |
 
 ## Results
 
