@@ -122,6 +122,9 @@ def get_pids(command: str) -> list[int]:
 
 def main() -> None:
     """."""
+    # Show version and initialize Flower config
+    subprocess.run(["flwr", "--version"], check=True)
+
     # Determine if the test is running in simulation mode
     print(f"Running in {'simulation' if use_sim else 'deployment'} mode.")
 

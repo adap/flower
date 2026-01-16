@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,35 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Public Flower App APIs."""
+"""Flower command line interface `config` command."""
 
-
-from flwr.common.context import Context
-from flwr.common.message import Message
-from flwr.common.record import (
-    Array,
-    ArrayRecord,
-    ConfigRecord,
-    MetricRecord,
-    RecordDict,
-)
-
-from .error import Error
-from .message_type import MessageType
-from .metadata import Metadata
-from .user_config import UserConfig, UserConfigValue
+from .ls import ls as ls
 
 __all__ = [
-    "Array",
-    "ArrayRecord",
-    "ConfigRecord",
-    "Context",
-    "Error",
-    "Message",
-    "MessageType",
-    "Metadata",
-    "MetricRecord",
-    "RecordDict",
-    "UserConfig",
-    "UserConfigValue",
+    "ls",
 ]

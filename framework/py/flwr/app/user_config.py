@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `federation` command."""
+"""UserConfig type definition."""
 
 
-from .ls import ls as ls
-
-__all__ = [
-    "ls",
-]
+UserConfigValue = bool | float | int | str
+UserConfig = dict[str, UserConfigValue]
