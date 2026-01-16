@@ -119,8 +119,7 @@ class SuperLinkConnection:
 
         # Ensure root certificates path is absolute
         if self.root_certificates is not None:
-            path = Path(self.root_certificates)
-            if not path.is_absolute():
+            if not Path(self.root_certificates).is_absolute():
                 raise ValueError(
                     "Invalid value for key "
                     f"'{SuperLinkConnectionTomlKey.ROOT_CERTIFICATES}': "
