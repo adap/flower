@@ -284,7 +284,7 @@ def validate_certificate_in_federation_config(
     return insecure, root_certificates_bytes
 
 
-def validate_certificate_in_connection(
+def load_certificate_in_connection(
     connection: SuperLinkConnection,
 ) -> tuple[bool, bytes | None]:
     """Validate the certificates in the Flower project configuration.

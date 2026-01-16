@@ -53,7 +53,7 @@ from flwr.supercore.utils import get_flwr_home
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
 from .config_utils import (
-    validate_certificate_in_connection,
+    load_certificate_in_connection,
     validate_certificate_in_federation_config,
 )
 
@@ -475,7 +475,7 @@ def init_channel_from_connection(
     grpc.Channel
         Configured gRPC channel with authentication interceptors.
     """
-    insecure, root_certificates_bytes = validate_certificate_in_connection(connection)
+    insecure, root_certificates_bytes = load_certificate_in_connection(connection)
 
     # Load tokens
     auth_plugin.load_tokens()
