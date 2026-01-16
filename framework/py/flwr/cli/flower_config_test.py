@@ -141,7 +141,7 @@ class TestSuperLinkConnection(unittest.TestCase):
         # Prepare
         conn_dict = {
             SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
-            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "/path/to/root_cert.crt",
             SuperLinkConnectionTomlKey.INSECURE: False,
             SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
         }
@@ -150,12 +150,27 @@ class TestSuperLinkConnection(unittest.TestCase):
         # Execute
         config = parse_superlink_connection(conn_dict, name)
 
+        print(config)
+
         # Assert
         self.assertEqual(config.name, name)
         self.assertEqual(config.address, "127.0.0.1:8080")
-        self.assertEqual(config.root_certificates, "root_cert.crt")
+        self.assertEqual(config.root_certificates, "/path/to/root_cert.crt")
         self.assertFalse(config.insecure)
         self.assertTrue(config.enable_account_auth)
+
+    def test_parse_superlink_connection_raises_on_relative_path(self) -> None:
+        """Test parse_superlink_connection raises on relative path."""
+        # Prepare
+        conn_dict = {
+            SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
+            SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "certs/ca.crt",
+        }
+        name = "test_path_res"
+
+        # Execute
+        with self.assertRaises(ValueError):
+            parse_superlink_connection(conn_dict, name)
 
     def test_parse_superlink_connection_invalid_type(self) -> None:
         """Test parse_superlink_connection with invalid type."""
@@ -213,12 +228,12 @@ class TestSuperLinkConnection(unittest.TestCase):
                 "local-poc-dev",
                 {
                     SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
-                    SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+                    SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "/app/root_cert.crt",
                 },
                 SuperLinkConnection(
                     name="local-poc-dev",
                     address="127.0.0.1:9093",
-                    root_certificates="root_cert.crt",
+                    root_certificates="/app/root_cert.crt",
                 ),
             ),
             (
@@ -235,7 +250,7 @@ class TestSuperLinkConnection(unittest.TestCase):
                 "remote-sim",
                 {
                     SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:9093",
-                    SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "root_cert.crt",
+                    SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "/app/root_cert.crt",
                     SuperLinkConnectionTomlKey.OPTIONS: {
                         "num-supernodes": 10,
                         "backend": {
@@ -246,7 +261,7 @@ class TestSuperLinkConnection(unittest.TestCase):
                 SuperLinkConnection(
                     name="remote-sim",
                     address="127.0.0.1:9093",
-                    root_certificates="root_cert.crt",
+                    root_certificates="/app/root_cert.crt",
                     options=SuperLinkSimulationOptions(
                         num_supernodes=10,
                         backend=SimulationBackendConfig(
