@@ -58,19 +58,6 @@ node = Table(
 )
 
 
-# # ------------------------------------------------------------------------------
-# #  Table: public_key
-# # ------------------------------------------------------------------------------
-# public_key_table = Table(
-#     "public_key",
-#     linkstate_metadata,
-#     # Using unique=True (not primary_key) to match raw SQL introspection behavior.
-#     # SQLite reports PRIMARY KEY columns as nullable=True in introspection,
-#     # but SQLAlchemy primary_key sets nullable=False.
-#     Column("public_key", LargeBinary, unique=True, autoincrement=False),
-# )
-
-
 # ------------------------------------------------------------------------------
 #  Table: run
 # ------------------------------------------------------------------------------
