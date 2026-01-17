@@ -234,7 +234,7 @@ def serialize_superlink_connection(connection: SuperLinkConnection) -> dict[str,
 
 def read_superlink_connection(
     connection_name: str | None = None,
-) -> SuperLinkConnection | None:
+) -> SuperLinkConnection:
     """Read a SuperLink connection from the Flower configuration file.
 
     Parameters
@@ -245,9 +245,8 @@ def read_superlink_connection(
 
     Returns
     -------
-    SuperLinkConnection | None
-        The SuperLink connection, or None if the config file is missing or the
-        requested connection (or default) cannot be found.
+    SuperLinkConnection
+        The SuperLink connection.
 
     Raises
     ------
