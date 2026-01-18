@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-21 00:09+0000\n"
+"POT-Creation-Date: 2026-01-14 00:08+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -11073,10 +11073,9 @@ msgstr "시뮬레이션 실행"
 
 #: ../../source/how-to-manage-flower-federations.rst:57
 msgid ""
-"You can inspect a specific federation by using the ``flwr federation "
-"show`` command, another command provided by the "
-"|flower_cli_federation_link|_. With this command, you will be able to see"
-" the following information about a federation:"
+"You can inspect a specific federation by providing the name of the "
+"federation to the ``flwr federation list`` command. With this command, "
+"you will be able to see the following information about a federation:"
 msgstr ""
 
 #: ../../source/how-to-manage-flower-federations.rst:61
@@ -11096,7 +11095,7 @@ msgstr "flower 초연결"
 
 #: ../../source/how-to-manage-flower-federations.rst:65
 msgid ""
-"The ``flwr federation show`` command requires the name of the federation "
+"The ``flwr federation list`` command requires the name of the federation "
 "to inspect as an argument. This can be specified as part of your "
 "``pyproject.toml`` configuration. For example:"
 msgstr ""
@@ -13898,7 +13897,7 @@ msgid ""
 "resources** (i.e., all CPUs, all GPUs). However, in some settings, you "
 "might want to limit how many of your system resources are used for "
 "simulation. You can do this in the ``pyproject.toml`` of your app by "
-"setting the ``options.backend.init_args`` variable."
+"setting the ``options.backend.init-args`` variable."
 msgstr ""
 
 #: ../../source/how-to-run-simulations.rst:304
@@ -13917,7 +13916,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-run-simulations.rst:312
-msgid "For the highest performance, do not set ``options.backend.init_args``."
+msgid "For the highest performance, do not set ``options.backend.init-args``."
 msgstr ""
 
 #: ../../source/how-to-run-simulations.rst:316
@@ -16290,7 +16289,7 @@ msgid "Arguments"
 msgstr "빌드 전달인자"
 
 #: ../../flwr app federation install:1 list:1 log:1 login:1 new:1 publish:1
-#: pull:1 register:1 review:1 run:1 show:1 stop:1 supernode unregister:1
+#: pull:1 register:1 review:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "선택적 개선 사항"
@@ -16358,39 +16357,31 @@ msgstr "시뮬레이션 실행"
 msgid "List available federations."
 msgstr "시뮬레이션 실행"
 
-#: ../../flwr federation list:1 register:1 run:1 show:1 stop:1 supernode
-#: unregister:1
+#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
-#: ../../flwr federation list log register run show stop supernode unregister
+#: ../../flwr federation list log register run stop supernode unregister
 msgid "default"
 msgstr ""
 
-#: ../../flwr federation list:1 register:1 run:1 show:1 stop:1 supernode
-#: unregister:1
+#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "``flwr/base``"
 
-#: ../../flwr federation list:1 register:1 show:1 stop:1 supernode unregister:1
+#: ../../flwr federation list:1
+#, fuzzy
+msgid "Name of the federation to display"
+msgstr "flower 초연결"
+
+#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Path of the Flower project"
 msgstr "Flower 기본 이미지의 태그."
 
-#: ../../flwr federation list:1 register:1 show:1 stop:1 supernode unregister:1
+#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
 msgid "Name of the federation"
-msgstr ""
-
-#: ../../flwr federation show:1
-#, fuzzy
-msgid "Show details of a federation."
-msgstr "flower 초연결"
-
-#: ../../flwr federation show:1
-msgid ""
-"Display comprehensive information about a federation including its "
-"members, registered SuperNodes, and runs."
 msgstr ""
 
 #: ../../flwr install:1
@@ -16742,28 +16733,28 @@ msgstr ""
 msgid "Classes"
 msgstr "클래스"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Array <flwr.app.Array>`\\ \\(\\)"
 msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.record.array.Array:1 of
 msgid "Array type."
 msgstr "배열 유형."
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`ArrayRecord <flwr.app.ArrayRecord>`\\ \\(\\)"
 msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord:1 of
 #, fuzzy
 msgid "Array record."
 msgstr "매개변수 기록."
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`ConfigRecord <flwr.app.ConfigRecord>`\\ \\(\\[config\\_dict\\, "
@@ -16772,57 +16763,57 @@ msgstr ""
 ":py:obj:`ConfigsRecord <flwr.common.ConfigsRecord>`\\ "
 "\\(\\[configs\\_dict\\, keep\\_input\\]\\)"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.record.configrecord.ConfigRecord:1 of
 #, fuzzy
 msgid "Config record."
 msgstr "레코드를 설정합니다."
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`Context <flwr.app.Context>`\\ \\(run\\_id\\, node\\_id\\, "
 "node\\_config\\, state\\, ...\\)"
 msgstr ":py:obj:`Context <flwr.common.Context>`\\ \\(state\\)"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.context.Context:1 of
 #, fuzzy
 msgid "Context of your run."
 msgstr "실행 상태."
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Error <flwr.app.Error>`\\ \\(code\\[\\, reason\\]\\)"
 msgstr ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1 flwr.app.error.Error:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1 flwr.app.error.Error:1
 #: of
 #, fuzzy
 msgid "The class storing information about an error that occurred."
 msgstr "발생한 오류에 대한 정보를 저장하는 데이터 클래스입니다."
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Message <flwr.app.Message>`\\ \\(\\)"
 msgstr ":py:obj:`MessageType <flwr.common.MessageType>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.message.Message:1 of
 msgid "Represents a message exchanged between ClientApp and ServerApp."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`MessageType <flwr.app.MessageType>`\\ \\(\\)"
 msgstr ":py:obj:`MessageType <flwr.common.MessageType>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
-#: flwr.common.constant.MessageType:1 of
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
+#: flwr.app.message_type.MessageType:1 of
 msgid "Message type."
 msgstr "메시지 타입."
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`Metadata <flwr.app.Metadata>`\\ \\(run\\_id\\, message\\_id\\, "
@@ -16831,13 +16822,13 @@ msgstr ""
 ":py:obj:`Metadata <flwr.common.Metadata>`\\ \\(run\\_id\\, "
 "message\\_id\\, src\\_node\\_id\\, ...\\)"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.app.metadata.Metadata:1 of
 #, fuzzy
 msgid "The class representing metadata associated with the current message."
 msgstr "현재 메시지와 관련된 메타데이터를 보유한 데이터 클래스입니다."
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`MetricRecord <flwr.app.MetricRecord>`\\ \\(\\[metric\\_dict\\, "
@@ -16846,13 +16837,13 @@ msgstr ""
 ":py:obj:`MetricsRecord <flwr.common.MetricsRecord>`\\ "
 "\\(\\[metrics\\_dict\\, keep\\_input\\]\\)"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.record.metricrecord.MetricRecord:1 of
 #, fuzzy
 msgid "Metric record."
 msgstr "메트릭 기록."
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`RecordDict <flwr.app.RecordDict>`\\ \\(\\[records\\, "
@@ -16861,11 +16852,22 @@ msgstr ""
 ":py:obj:`RecordSet <flwr.common.RecordSet>`\\ "
 "\\(\\[parameters\\_records\\, ...\\]\\)"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.record.recorddict.RecordDict:1 of
 #, fuzzy
 msgid "RecordDict stores groups of arrays, metrics and configs."
 msgstr "RecordSet은 매개변수, 메트릭 및 설정 그룹을 저장합니다."
+
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`UserConfig <flwr.app.UserConfig>`\\"
+msgstr ":py:obj:`config <flwr.common.FitIns.config>`\\"
+
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
+msgid ""
+"alias of :py:class:`dict`\\ [:py:class:`str`, :py:class:`bool` | "
+":py:class:`float` | :py:class:`int` | :py:class:`str`]"
+msgstr ""
 
 #: ../../source/ref-api/flwr.app.Array.rst:2
 msgid "Array"
@@ -17810,10 +17812,9 @@ msgstr ""
 msgid "Context"
 msgstr "컨텍스트"
 
-#: flwr.app.error.Error:1 flwr.app.metadata.Metadata:1
-#: flwr.clientapp.client_app.ClientApp:1
-#: flwr.clientapp.mod.localdp_mod.LocalDpMod:1
-#: flwr.common.constant.MessageType:1 flwr.common.context.Context:1
+#: flwr.app.error.Error:1 flwr.app.message_type.MessageType:1
+#: flwr.app.metadata.Metadata:1 flwr.clientapp.client_app.ClientApp:1
+#: flwr.clientapp.mod.localdp_mod.LocalDpMod:1 flwr.common.context.Context:1
 #: flwr.server.server_app.ServerApp:1 flwr.serverapp.strategy.result.Result:1
 #: of
 msgid "Bases: :py:class:`object`"
@@ -18156,22 +18157,17 @@ msgstr "메트릭 기록."
 msgid "MessageType"
 msgstr "MessageType"
 
-#: ../../source/ref-api/flwr.app.MessageType.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MessageType.rst:30:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`EVALUATE <flwr.app.MessageType.EVALUATE>`\\"
 msgstr ":py:obj:`EVALUATE <flwr.common.MessageType.EVALUATE>`\\"
 
-#: ../../source/ref-api/flwr.app.MessageType.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MessageType.rst:30:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`QUERY <flwr.app.MessageType.QUERY>`\\"
 msgstr ":py:obj:`QUERY <flwr.common.MessageType.QUERY>`\\"
 
-#: ../../source/ref-api/flwr.app.MessageType.rst:31:<autosummary>:1
-#, fuzzy
-msgid ":py:obj:`SYSTEM <flwr.app.MessageType.SYSTEM>`\\"
-msgstr ":py:obj:`TRAIN <flwr.common.MessageType.TRAIN>`\\"
-
-#: ../../source/ref-api/flwr.app.MessageType.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MessageType.rst:30:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`TRAIN <flwr.app.MessageType.TRAIN>`\\"
 msgstr ":py:obj:`TRAIN <flwr.common.MessageType.TRAIN>`\\"
@@ -18696,6 +18692,10 @@ msgstr ""
 
 #: flwr.app.RecordDict.parameters_records:3 of
 msgid "Use ``array_records`` instead."
+msgstr ""
+
+#: ../../source/ref-api/flwr.app.UserConfig.rst:2
+msgid "UserConfig"
 msgstr ""
 
 #: ../../source/ref-api/flwr.clientapp.rst:2
@@ -60541,4 +60541,49 @@ msgstr ""
 #~ ":doc:`Quickstart PyTorch <tutorial-quickstart-"
 #~ "pytorch>` tutorial."
 #~ msgstr ""
+
+#~ msgid ""
+#~ "You can inspect a specific federation"
+#~ " by using the ``flwr federation "
+#~ "show`` command, another command provided "
+#~ "by the |flower_cli_federation_link|_. With "
+#~ "this command, you will be able to"
+#~ " see the following information about "
+#~ "a federation:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ``flwr federation show`` command "
+#~ "requires the name of the federation "
+#~ "to inspect as an argument. This "
+#~ "can be specified as part of your"
+#~ " ``pyproject.toml`` configuration. For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "By default, the ``Simulation Engine`` "
+#~ "has **access to all system resources**"
+#~ " (i.e., all CPUs, all GPUs). However,"
+#~ " in some settings, you might want "
+#~ "to limit how many of your system"
+#~ " resources are used for simulation. "
+#~ "You can do this in the "
+#~ "``pyproject.toml`` of your app by "
+#~ "setting the ``options.backend.init_args`` variable."
+#~ msgstr ""
+
+#~ msgid "For the highest performance, do not set ``options.backend.init_args``."
+#~ msgstr ""
+
+#~ msgid "Show details of a federation."
+#~ msgstr "flower 초연결"
+
+#~ msgid ""
+#~ "Display comprehensive information about a "
+#~ "federation including its members, registered"
+#~ " SuperNodes, and runs."
+#~ msgstr ""
+
+#~ msgid ":py:obj:`SYSTEM <flwr.app.MessageType.SYSTEM>`\\"
+#~ msgstr ":py:obj:`TRAIN <flwr.common.MessageType.TRAIN>`\\"
 

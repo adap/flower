@@ -22,8 +22,9 @@ from flwr.supercore.version import package_version
 from .app_cmd import publish as app_publish
 from .app_cmd import review as app_review
 from .build import build
+from .config import ls as config_list
 from .federation import ls as federation_list
-from .federation import show as federation_show
+from .flower_config import init_flwr_config
 from .install import install
 from .log import log
 from .login import login
@@ -80,14 +81,20 @@ federation_app.command("list")(federation_list)
 # Hide "ls" command (left as alias)
 federation_app.command(hidden=True)(federation_list)
 app.add_typer(federation_app, name="federation")
-federation_app.command()(federation_show)
+
+# Create config command group
+config_app = typer.Typer(help="Manage Configuration")
+config_app.command("list")(config_list)
+# Hide "ls" command (left as alias)
+config_app.command(hidden=True)(config_list)
+app.add_typer(config_app, name="config")
 
 typer_click_object = get_command(app)
 
 
 @app.callback(invoke_without_command=True)
-def version_callback(
-    ver: bool = typer.Option(
+def main(
+    version: bool = typer.Option(
         None,
         "-V",
         "--version",
@@ -95,8 +102,9 @@ def version_callback(
         help="Show the version and exit.",
     ),
 ) -> None:
-    """Print version."""
-    if ver:
+    """Flower CLI."""
+    init_flwr_config()
+    if version:
         typer.secho(f"Flower version: {package_version}", fg="blue")
         raise typer.Exit()
 

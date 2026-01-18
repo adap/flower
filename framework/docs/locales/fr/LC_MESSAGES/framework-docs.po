@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-12-21 00:09+0000\n"
+"POT-Creation-Date: 2026-01-14 00:08+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -11233,10 +11233,9 @@ msgstr "Simulation de moniteur"
 
 #: ../../source/how-to-manage-flower-federations.rst:57
 msgid ""
-"You can inspect a specific federation by using the ``flwr federation "
-"show`` command, another command provided by the "
-"|flower_cli_federation_link|_. With this command, you will be able to see"
-" the following information about a federation:"
+"You can inspect a specific federation by providing the name of the "
+"federation to the ``flwr federation list`` command. With this command, "
+"you will be able to see the following information about a federation:"
 msgstr ""
 
 #: ../../source/how-to-manage-flower-federations.rst:61
@@ -11256,7 +11255,7 @@ msgstr "flower-superlink"
 
 #: ../../source/how-to-manage-flower-federations.rst:65
 msgid ""
-"The ``flwr federation show`` command requires the name of the federation "
+"The ``flwr federation list`` command requires the name of the federation "
 "to inspect as an argument. This can be specified as part of your "
 "``pyproject.toml`` configuration. For example:"
 msgstr ""
@@ -14026,7 +14025,7 @@ msgid ""
 "resources** (i.e., all CPUs, all GPUs). However, in some settings, you "
 "might want to limit how many of your system resources are used for "
 "simulation. You can do this in the ``pyproject.toml`` of your app by "
-"setting the ``options.backend.init_args`` variable."
+"setting the ``options.backend.init-args`` variable."
 msgstr ""
 
 #: ../../source/how-to-run-simulations.rst:304
@@ -14045,7 +14044,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-run-simulations.rst:312
-msgid "For the highest performance, do not set ``options.backend.init_args``."
+msgid "For the highest performance, do not set ``options.backend.init-args``."
 msgstr ""
 
 #: ../../source/how-to-run-simulations.rst:316
@@ -16334,7 +16333,7 @@ msgid "Arguments"
 msgstr "Amélioration de la documentation"
 
 #: ../../flwr app federation install:1 list:1 log:1 login:1 new:1 publish:1
-#: pull:1 register:1 review:1 run:1 show:1 stop:1 supernode unregister:1
+#: pull:1 register:1 review:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "Améliorations facultatives"
@@ -16402,40 +16401,32 @@ msgstr "Simulation de moniteur"
 msgid "List available federations."
 msgstr "Simulation de moniteur"
 
-#: ../../flwr federation list:1 register:1 run:1 show:1 stop:1 supernode
-#: unregister:1
+#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
-#: ../../flwr federation list log register run show stop supernode unregister
+#: ../../flwr federation list log register run stop supernode unregister
 #, fuzzy
 msgid "default"
 msgstr "Flux de travail"
 
-#: ../../flwr federation list:1 register:1 run:1 show:1 stop:1 supernode
-#: unregister:1
+#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "Flux de travail"
 
-#: ../../flwr federation list:1 register:1 show:1 stop:1 supernode unregister:1
+#: ../../flwr federation list:1
+#, fuzzy
+msgid "Name of the federation to display"
+msgstr "flower-superlink"
+
+#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Path of the Flower project"
 msgstr "Chargement des données"
 
-#: ../../flwr federation list:1 register:1 show:1 stop:1 supernode unregister:1
+#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
 msgid "Name of the federation"
-msgstr ""
-
-#: ../../flwr federation show:1
-#, fuzzy
-msgid "Show details of a federation."
-msgstr "flower-superlink"
-
-#: ../../flwr federation show:1
-msgid ""
-"Display comprehensive information about a federation including its "
-"members, registered SuperNodes, and runs."
 msgstr ""
 
 #: ../../flwr install:1
@@ -16784,28 +16775,28 @@ msgstr ""
 msgid "Classes"
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Array <flwr.app.Array>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.record.array.Array:1 of
 msgid "Array type."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`ArrayRecord <flwr.app.ArrayRecord>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.record.arrayrecord.ArrayRecord:1 of
 #, fuzzy
 msgid "Array record."
 msgstr "Paramètres du modèle."
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`ConfigRecord <flwr.app.ConfigRecord>`\\ \\(\\[config\\_dict\\, "
@@ -16815,67 +16806,67 @@ msgstr ""
 "config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), "
 "...)``"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.record.configrecord.ConfigRecord:1 of
 #, fuzzy
 msgid "Config record."
 msgstr "Configurer les clients"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`Context <flwr.app.Context>`\\ \\(run\\_id\\, node\\_id\\, "
 "node\\_config\\, state\\, ...\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.context.Context:1 of
 msgid "Context of your run."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Error <flwr.app.Error>`\\ \\(code\\[\\, reason\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1 flwr.app.error.Error:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1 flwr.app.error.Error:1
 #: of
 msgid "The class storing information about an error that occurred."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`Message <flwr.app.Message>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.message.Message:1 of
 msgid "Represents a message exchanged between ClientApp and ServerApp."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`MessageType <flwr.app.MessageType>`\\ \\(\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
-#: flwr.common.constant.MessageType:1 of
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
+#: flwr.app.message_type.MessageType:1 of
 msgid "Message type."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`Metadata <flwr.app.Metadata>`\\ \\(run\\_id\\, message\\_id\\, "
 "src\\_node\\_id\\, ...\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.app.metadata.Metadata:1 of
 msgid "The class representing metadata associated with the current message."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`MetricRecord <flwr.app.MetricRecord>`\\ \\(\\[metric\\_dict\\, "
@@ -16885,22 +16876,33 @@ msgstr ""
 "config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), "
 "...)``"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.record.metricrecord.MetricRecord:1 of
 #, fuzzy
 msgid "Metric record."
 msgstr "Paramètres du modèle."
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`RecordDict <flwr.app.RecordDict>`\\ \\(\\[records\\, "
 "parameters\\_records\\, ...\\]\\)"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
 #: flwr.common.record.recorddict.RecordDict:1 of
 msgid "RecordDict stores groups of arrays, metrics and configs."
+msgstr ""
+
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`UserConfig <flwr.app.UserConfig>`\\"
+msgstr "serveur.stratégie.Stratégie"
+
+#: ../../source/ref-api/flwr.app.rst:32:<autosummary>:1
+msgid ""
+"alias of :py:class:`dict`\\ [:py:class:`str`, :py:class:`bool` | "
+":py:class:`float` | :py:class:`int` | :py:class:`str`]"
 msgstr ""
 
 #: ../../source/ref-api/flwr.app.Array.rst:2
@@ -17823,10 +17825,9 @@ msgstr ""
 msgid "Context"
 msgstr ""
 
-#: flwr.app.error.Error:1 flwr.app.metadata.Metadata:1
-#: flwr.clientapp.client_app.ClientApp:1
-#: flwr.clientapp.mod.localdp_mod.LocalDpMod:1
-#: flwr.common.constant.MessageType:1 flwr.common.context.Context:1
+#: flwr.app.error.Error:1 flwr.app.message_type.MessageType:1
+#: flwr.app.metadata.Metadata:1 flwr.clientapp.client_app.ClientApp:1
+#: flwr.clientapp.mod.localdp_mod.LocalDpMod:1 flwr.common.context.Context:1
 #: flwr.server.server_app.ServerApp:1 flwr.serverapp.strategy.result.Result:1
 #: of
 msgid "Bases: :py:class:`object`"
@@ -18153,22 +18154,17 @@ msgstr "Paramètres du modèle."
 msgid "MessageType"
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.MessageType.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MessageType.rst:30:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`EVALUATE <flwr.app.MessageType.EVALUATE>`\\"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MessageType.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MessageType.rst:30:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`QUERY <flwr.app.MessageType.QUERY>`\\"
 msgstr "serveur.stratégie.Stratégie"
 
-#: ../../source/ref-api/flwr.app.MessageType.rst:31:<autosummary>:1
-#, fuzzy
-msgid ":py:obj:`SYSTEM <flwr.app.MessageType.SYSTEM>`\\"
-msgstr "serveur.stratégie.Stratégie"
-
-#: ../../source/ref-api/flwr.app.MessageType.rst:31:<autosummary>:1
+#: ../../source/ref-api/flwr.app.MessageType.rst:30:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`TRAIN <flwr.app.MessageType.TRAIN>`\\"
 msgstr "serveur.stratégie.Stratégie"
@@ -18670,6 +18666,10 @@ msgstr ""
 
 #: flwr.app.RecordDict.parameters_records:3 of
 msgid "Use ``array_records`` instead."
+msgstr ""
+
+#: ../../source/ref-api/flwr.app.UserConfig.rst:2
+msgid "UserConfig"
 msgstr ""
 
 #: ../../source/ref-api/flwr.clientapp.rst:2
@@ -70772,4 +70772,49 @@ msgstr ""
 #~ ":doc:`Quickstart PyTorch <tutorial-quickstart-"
 #~ "pytorch>` tutorial."
 #~ msgstr ""
+
+#~ msgid ""
+#~ "You can inspect a specific federation"
+#~ " by using the ``flwr federation "
+#~ "show`` command, another command provided "
+#~ "by the |flower_cli_federation_link|_. With "
+#~ "this command, you will be able to"
+#~ " see the following information about "
+#~ "a federation:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ``flwr federation show`` command "
+#~ "requires the name of the federation "
+#~ "to inspect as an argument. This "
+#~ "can be specified as part of your"
+#~ " ``pyproject.toml`` configuration. For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "By default, the ``Simulation Engine`` "
+#~ "has **access to all system resources**"
+#~ " (i.e., all CPUs, all GPUs). However,"
+#~ " in some settings, you might want "
+#~ "to limit how many of your system"
+#~ " resources are used for simulation. "
+#~ "You can do this in the "
+#~ "``pyproject.toml`` of your app by "
+#~ "setting the ``options.backend.init_args`` variable."
+#~ msgstr ""
+
+#~ msgid "For the highest performance, do not set ``options.backend.init_args``."
+#~ msgstr ""
+
+#~ msgid "Show details of a federation."
+#~ msgstr "flower-superlink"
+
+#~ msgid ""
+#~ "Display comprehensive information about a "
+#~ "federation including its members, registered"
+#~ " SuperNodes, and runs."
+#~ msgstr ""
+
+#~ msgid ":py:obj:`SYSTEM <flwr.app.MessageType.SYSTEM>`\\"
+#~ msgstr "serveur.stratégie.Stratégie"
 
