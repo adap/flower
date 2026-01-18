@@ -7,8 +7,6 @@ name = "feature-election"
 version = "1.0.0"
 description = "Feature Election - Federated Feature Selection with Flower"
 license = "Apache-2.0"
-readme = "README.md"
-requires-python = ">=3.10"
 dependencies = [
     "flwr[simulation]>=1.21.0",
     "scikit-learn>=1.0.0",
