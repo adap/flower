@@ -74,6 +74,7 @@ SQLITE_PRAGMAS = (
     ("mmap_size", "268435456"),  # 256MB memory-mapped I/O
 )
 
+
 class NodeStatus:
     """Event log writer types."""
 
