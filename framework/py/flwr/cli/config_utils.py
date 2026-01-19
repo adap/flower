@@ -21,6 +21,7 @@ from typing import Any
 import tomli
 import typer
 
+from flwr.cli.typing import SuperLinkConnection
 from flwr.common.config import (
     fuse_dicts,
     get_fab_config,
@@ -281,6 +282,65 @@ def validate_certificate_in_federation_config(
         root_certificates_bytes = None
 
     return insecure, root_certificates_bytes
+
+
+def load_certificate_in_connection(
+    connection: SuperLinkConnection,
+) -> bytes | None:
+    """Validate TLS-related settings and load root certificates if provided.
+
+    Parameters
+    ----------
+    connection : SuperLinkConnection
+        The SuperLink connection configuration.
+
+    Returns
+    -------
+    bytes | None
+        The loaded root certificate bytes if a custom certificate is configured.
+        None if TLS is disabled or if gRPC should use its default trust store.
+
+    Raises
+    ------
+    ValueError
+        If required TLS settings are missing.
+    typer.Exit
+        If the configuration is invalid or the certificate file cannot be read.
+    """
+    if connection.insecure is None:
+        raise ValueError(
+            f"SuperLink connection '{connection.name}' is missing insecure setting."
+        )
+
+    insecure = connection.insecure
+
+    # Process root certificates
+    if root_certificates := connection.root_certificates:
+        if insecure:
+            typer.secho(
+                "❌ `root-certificates` were provided but the `insecure` parameter "
+                "is set to `True`.",
+                fg=typer.colors.RED,
+                bold=True,
+                err=True,
+            )
+            raise typer.Exit(code=1)
+
+        # TLS is enabled with self-signed certificates: attempt to read the file
+        try:
+            root_certificates_bytes = Path(root_certificates).read_bytes()
+        except Exception as e:
+            typer.secho(
+                f"❌ Failed to read certificate file `{root_certificates}`: {e}",
+                fg=typer.colors.RED,
+                bold=True,
+                err=True,
+            )
+            raise typer.Exit(code=1) from e
+    else:
+        root_certificates_bytes = None
+
+    return root_certificates_bytes
 
 
 def exit_if_no_address(federation_config: dict[str, Any], cmd: str) -> None:
