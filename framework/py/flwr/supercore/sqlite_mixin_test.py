@@ -20,7 +20,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-import pytest
+from parameterized import parameterized
 
 from .sqlite_mixin import SqliteMixin
 
@@ -36,9 +36,10 @@ class DummyDb(SqliteMixin):
         )
 
 
-@pytest.mark.parametrize(
-    "db_class",
-    [DummyDb],
+@parameterized.expand(
+    [
+        (DummyDb,),
+    ],
     ids=["SqliteMixin"],
 )
 def test_transaction_serialization_with_tempfile(
