@@ -17,15 +17,20 @@
 
 from sqlalchemy import Column, Float, Integer, MetaData, String, Table
 
-corestate_metadata = MetaData()
 
-# ------------------------------------------------------------------------------
-#  Table: token_store
-# ------------------------------------------------------------------------------
-token_store = Table(
-    "token_store",
-    corestate_metadata,
-    Column("run_id", Integer, primary_key=True, nullable=True),
-    Column("token", String, unique=True, nullable=False),
-    Column("active_until", Float),
-)
+def create_corestate_metadata() -> MetaData:
+    """Create and return MetaData with CoreState table definitions."""
+    metadata = MetaData()
+
+    # --------------------------------------------------------------------------
+    #  Table: token_store
+    # --------------------------------------------------------------------------
+    Table(
+        "token_store",
+        metadata,
+        Column("run_id", Integer, primary_key=True, nullable=True),
+        Column("token", String, unique=True, nullable=False),
+        Column("active_until", Float),
+    )
+
+    return metadata

@@ -307,16 +307,9 @@ def load_certificate_in_connection(
     typer.Exit
         If the configuration is invalid or the certificate file cannot be read.
     """
-    if connection.insecure is None:
-        raise ValueError(
-            f"SuperLink connection '{connection.name}' is missing insecure setting."
-        )
-
-    insecure = connection.insecure
-
     # Process root certificates
     if root_certificates := connection.root_certificates:
-        if insecure:
+        if connection.insecure:
             typer.secho(
                 "❌ `root-certificates` were provided but the `insecure` parameter "
                 "is set to `True`.",
