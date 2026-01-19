@@ -54,9 +54,9 @@ def _log_query(  # pylint: disable=W0613,R0913,R0917
 class SqlMixin(ABC):
     """Mixin providing common SQLite connection and initialization logic.
 
-    This mixin uses SQLAlchemy Core API for SQLite database access.
-    It accepts either a database file path or a SQLite URL, automatically
-    converting file paths to SQLite URLs.
+    This mixin uses SQLAlchemy Core API for SQLite database access. It accepts either a
+    database file path or a SQLite URL, automatically converting file paths to SQLite
+    URLs.
     """
 
     def __init__(self, database_path: str) -> None:
