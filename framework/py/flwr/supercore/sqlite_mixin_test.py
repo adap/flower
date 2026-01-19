@@ -59,7 +59,7 @@ class DummyDbSqlAlchemy(SqlMixin):
         (DummyDbSqlAlchemy,),
     ],
     ids=["SqliteMixin", "SqlMixin"],
-)
+)  # type: ignore
 def test_transaction_serialization_with_tempfile(
     db_class: type[DummyDb] | type[DummyDbSqlAlchemy],
 ) -> None:
