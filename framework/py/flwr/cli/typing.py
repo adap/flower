@@ -23,6 +23,8 @@ from flwr.cli.constant import (
     SuperLinkConnectionTomlKey,
 )
 
+_ERROR_MSG_FMT = "SuperLinkConnection.%s is None"
+
 
 @dataclass
 class SimulationClientResources:
@@ -126,42 +128,46 @@ class SuperLinkConnection:
     def address(self) -> str:
         """Return the address."""
         if self._address is None:
-            raise ValueError("SuperLinkConnection.address is None")
+            raise ValueError(_ERROR_MSG_FMT % SuperLinkConnectionTomlKey.ADDRESS)
         return self._address
 
     @property
     def root_certificates(self) -> str:
         """Return the root certificates."""
         if self._root_certificates is None:
-            raise ValueError("SuperLinkConnection.root_certificates is None")
+            raise ValueError(
+                _ERROR_MSG_FMT % SuperLinkConnectionTomlKey.ROOT_CERTIFICATES
+            )
         return self._root_certificates
 
     @property
     def insecure(self) -> bool:
         """Return the insecure flag."""
         if self._insecure is None:
-            raise ValueError("SuperLinkConnection.insecure is None")
+            raise ValueError(_ERROR_MSG_FMT % SuperLinkConnectionTomlKey.INSECURE)
         return self._insecure
 
     @property
     def enable_account_auth(self) -> bool:
         """Return the enable_account_auth flag."""
         if self._enable_account_auth is None:
-            raise ValueError("SuperLinkConnection.enable_account_auth is None")
+            raise ValueError(
+                _ERROR_MSG_FMT % SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH
+            )
         return self._enable_account_auth
 
     @property
     def federation(self) -> str:
         """Return the federation."""
         if self._federation is None:
-            raise ValueError("SuperLinkConnection.federation is None")
+            raise ValueError(_ERROR_MSG_FMT % SuperLinkConnectionTomlKey.FEDERATION)
         return self._federation
 
     @property
     def options(self) -> SuperLinkSimulationOptions:
         """Return the simulation options."""
         if self._options is None:
-            raise ValueError("SuperLinkConnection.options is None")
+            raise ValueError(_ERROR_MSG_FMT % SuperLinkConnectionTomlKey.OPTIONS)
         return self._options
 
     def __post_init__(self) -> None:
