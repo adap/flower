@@ -43,15 +43,18 @@ class DummyDb(SqliteMixin):
 def test_transaction_serialization_with_tempfile(
     db_class: type[DummyDb],
 ) -> None:
-    """Verify that transactions run correctly for SqliteMixin."""
+    """Verify that SQLite file-level locking serializes concurrent transactions."""
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmpfile:
         db_path = tmpfile.name
 
-    # Create one shared instance for all threads to prevent DB locks
-    db = db_class(db_path)
-    db.initialize()
+    # Initialize database schema once
+    init_db = db_class(db_path)
+    init_db.initialize()
 
     def insert_row(_: int) -> None:
+        # Each thread creates its own connection to test file-level locking
+        db = db_class(db_path)
+        db.initialize()
         # SqliteMixin: use conn context and ? placeholders
         with db.conn:
             # Insert a dummy row with value -1
@@ -70,7 +73,7 @@ def test_transaction_serialization_with_tempfile(
         executor.map(insert_row, range(100))
 
     # Assert: Verify that all rows were inserted correctly
-    rows = db.query("SELECT * FROM test ORDER BY id")
+    rows = init_db.query("SELECT * FROM test ORDER BY id")
     for row in rows:
         if row["id"] & 0x1:
             # Odd IDs are dummy rows
