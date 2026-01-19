@@ -13,3 +13,21 @@
 # limitations under the License.
 # ==============================================================================
 """Credential store for Flower."""
+
+
+from .credential_store import CredentialStore
+from .file_credential_store import FileCredentialStore
+
+
+def get_credential_store() -> CredentialStore:
+    """Get the credential store instance.
+
+    Currently, only FileCredentialStore is implemented.
+    """
+    return FileCredentialStore()
+
+
+__all__ = [
+    "CredentialStore",
+    "get_credential_store",
+]
