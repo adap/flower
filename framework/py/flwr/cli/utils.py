@@ -458,13 +458,17 @@ def init_channel(
     return channel
 
 
-def init_channel_from_connection(connection: SuperLinkConnection) -> grpc.Channel:
+def init_channel_from_connection(
+    connection: SuperLinkConnection, auth_plugin: CliAuthPlugin | None = None
+) -> grpc.Channel:
     """Initialize gRPC channel to the Control API.
 
     Parameters
     ----------
     connection : SuperLinkConnection
         SuperLink connection configuration.
+    auth_plugin : CliAuthPlugin | None
+        Authentication plugin instance for handling credentials.
 
     Returns
     -------
@@ -474,7 +478,8 @@ def init_channel_from_connection(connection: SuperLinkConnection) -> grpc.Channe
     root_certificates_bytes = load_certificate_in_connection(connection)
 
     # Load authentication plugin
-    auth_plugin = load_cli_auth_plugin_from_connection(connection)
+    if auth_plugin is None:
+        auth_plugin = load_cli_auth_plugin_from_connection(connection)
 
     # Load tokens
     auth_plugin.load_tokens()
