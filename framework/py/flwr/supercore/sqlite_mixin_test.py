@@ -41,7 +41,7 @@ class DummyDb(SqliteMixin):
         (DummyDb,),
     ],
     ids=["SqliteMixin"],
-)
+)  # type: ignore
 def test_transaction_serialization_with_tempfile(
     db_class: type[DummyDb],
 ) -> None:
