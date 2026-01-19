@@ -35,10 +35,7 @@ def pull(  # pylint: disable=R0914
     ctx: typer.Context,
     run_id: Annotated[
         int,
-        typer.Option(
-            "--run-id",
-            help="Run ID to pull artifacts from.",
-        ),
+        typer.Argument(help="Run ID to pull artifacts from."),
     ],
     superlink: Annotated[
         str | None,
