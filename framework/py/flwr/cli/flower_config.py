@@ -208,12 +208,12 @@ def serialize_superlink_connection(connection: SuperLinkConnection) -> dict[str,
     Parameters
     ----------
     connection : SuperLinkConnection
-            The SuperLink connection to serialize.
+        The SuperLink connection to serialize.
 
     Returns
     -------
     dict[str, Any]
-            Dictionary representation suitable for TOML serialization.
+        Dictionary representation suitable for TOML serialization.
     """
     # pylint: disable=protected-access
     conn_dict: dict[str, Any] = {
