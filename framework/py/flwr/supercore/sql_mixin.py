@@ -133,7 +133,8 @@ class SqlMixin(ABC):
 
         Returns
         -------
-        None
+        list[str]
+            The list of all tables in the DB.
         """
         # Create engine with SQLite-specific settings
         engine_kwargs: dict[str, Any] = {
