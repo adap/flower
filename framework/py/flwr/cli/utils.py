@@ -467,7 +467,7 @@ def init_channel_from_connection(
     ----------
     connection : SuperLinkConnection
         SuperLink connection configuration.
-    auth_plugin : CliAuthPlugin | None
+    auth_plugin : CliAuthPlugin | None (default: None)
         Authentication plugin instance for handling credentials.
 
     Returns
