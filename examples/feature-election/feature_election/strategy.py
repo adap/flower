@@ -1,4 +1,4 @@
-"""Feature Election Strategy for Flower.
+"""feature-election: Federated Feature Election with Flower.
 
 Implements the Feature Election algorithm for federated feature selection. Aggregates
 client feature selection decisions using weighted voting based on freedom_degree.

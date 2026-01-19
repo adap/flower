@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## tags: [feature-election, tabular] dataset: [synthetic] framework: [sklearn, pandas]
+---
+tags: [feature-election, tabular]
+dataset: [synthetic]
+framework: [sklearn, pandas]
+---
 
 # Federated Feature Election with Flower
 
@@ -172,6 +174,7 @@ After running, results are saved to `outputs/<date>/<time>/feature_election_resu
 If you use Feature Election in your research, please cite:
 
 FLASH: A framework for Federated Learning with Attribute Selection and Hyperparameter optimization
+
 Authors: Ioannis Christofilogiannis, George Valavanis, Alexander Shevtsov, Ioannis Lamprou and Sotiris Ioannidis
 
 FLTA IEEE 2025 Proceedings citation not yet available, please contact: jchr2001@gmail.com

@@ -1,4 +1,4 @@
-"""Feature Election Server for Flower.
+"""feature-election: Federated Feature Election with Flower.
 
 Implements a multi-phase workflow:
 1. Feature Election (Round 1): Collect feature votes.
@@ -18,7 +18,7 @@ from flwr.common import log
 from flwr.common.record import Array
 from flwr.serverapp import Grid, ServerApp
 
-from .strategy import FeatureElectionStrategy
+from feature_election.strategy import FeatureElectionStrategy
 
 logger = logging.getLogger(__name__)
 

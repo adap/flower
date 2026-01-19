@@ -1,4 +1,4 @@
-"""Feature Election Client for Flower."""
+"""feature-election: Federated Feature Election with Flower."""
 
 import logging
 from typing import List, Optional, cast
@@ -17,8 +17,8 @@ from flwr.common.record import Array
 from sklearn.linear_model import LogisticRegression  # type: ignore
 from sklearn.preprocessing import StandardScaler  # type: ignore
 
-from .feature_election_utils import FeatureSelector
-from .task import load_client_data
+from feature_election.feature_election_utils import FeatureSelector
+from feature_election.task import load_client_data
 
 logger = logging.getLogger(__name__)
 

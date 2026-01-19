@@ -1,4 +1,6 @@
 """
+feature-election: Federated Feature Election with Flower.
+
 Task Module - Data Loading for Feature Election
 
 Provides utilities for loading and partitioning tabular datasets
