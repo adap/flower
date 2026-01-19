@@ -28,7 +28,7 @@ from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
 )
 from flwr.supercore.sql_mixin import SqlMixin
-from flwr.supercore.state.schema.corestate_tables import corestate_metadata
+from flwr.supercore.state.schema.corestate_tables import create_corestate_metadata
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 
 from ..object_store import ObjectStore
@@ -49,7 +49,7 @@ class SqlCoreState(CoreState, SqlMixin):
 
     def get_metadata(self) -> MetaData:
         """Return SQLAlchemy MetaData needed for CoreState tables."""
-        return corestate_metadata
+        return create_corestate_metadata()
 
     def create_token(self, run_id: int) -> str | None:
         """Create a token for the given run ID."""
