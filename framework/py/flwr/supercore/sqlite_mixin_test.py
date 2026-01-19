@@ -20,7 +20,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-import pytest
+from parameterized import parameterized
 from sqlalchemy import Column, Integer, MetaData, Table, text
 
 from .sql_mixin import SqlMixin
@@ -53,11 +53,13 @@ class DummyDbSqlAlchemy(SqlMixin):
         return metadata
 
 
-@pytest.mark.parametrize(
-    "db_class",
-    [DummyDb, DummyDbSqlAlchemy],
+@parameterized.expand(
+    [
+        (DummyDb,),
+        (DummyDbSqlAlchemy,),
+    ],
     ids=["SqliteMixin", "SqlMixin"],
-)
+)  # type: ignore
 def test_transaction_serialization_with_tempfile(
     db_class: type[DummyDb] | type[DummyDbSqlAlchemy],
 ) -> None:

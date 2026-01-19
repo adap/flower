@@ -213,11 +213,18 @@ class SqlMixin(ABC):
                 sql = text(query)
 
                 # Execute query (results live in database cursor)
+                # There is no need to check for batch vs single execution;
+                # SQLAlchemy handles both cases automatically.
                 result: Result[Any] = session.execute(sql, data)
 
-                # Fetch results into Python memory before commit
-                # mappings() returns dict-like rows (works for SELECT and RETURNING)
-                rows = [dict(row) for row in result.mappings()]
+                # Fetch results into Python memory before commit.
+                # mappings() returns dict-like rows (works for SELECT and RETURNING).
+                if result.returns_rows:  # type: ignore
+                    rows = [dict(row) for row in result.mappings()]
+                else:
+                    # For statements without RETURNING (INSERT/UPDATE/DELETE),
+                    # returns_rows is False, so we return empty list.
+                    rows = []
 
                 # Commit transaction (finalizes database changes)
                 session.commit()
