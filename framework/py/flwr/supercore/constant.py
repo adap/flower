@@ -64,6 +64,15 @@ MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS = 3600
 # System message type
 SYSTEM_MESSAGE_TYPE = "system"
 
+# SQLite PRAGMA settings for optimal performance and correctness
+SQLITE_PRAGMAS = (
+    ("journal_mode", "WAL"),  # Enable Write-Ahead Logging for better concurrency
+    ("synchronous", "NORMAL"),
+    ("foreign_keys", "ON"),
+    ("cache_size", "-64000"),  # 64MB cache
+    ("temp_store", "MEMORY"),  # In-memory temp tables
+    ("mmap_size", "268435456"),  # 256MB memory-mapped I/O
+)
 
 class NodeStatus:
     """Event log writer types."""
