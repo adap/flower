@@ -208,7 +208,7 @@ def migrate(
 def migrate_if_legacy_usage(
     superlink: str,
     args: list[str],
-) -> None:
+) -> bool:
     """Migrate legacy TOML configuration to Flower config if legacy usage is
     detected."""
     # Trigger the same typer error when detecting unexpected extra args
@@ -217,9 +217,10 @@ def migrate_if_legacy_usage(
 
     # Skip migration if no legacy usage is detected
     if not _is_legacy_usage(superlink, args):
-        return
+        return False
 
     migrate(
         app=Path(superlink),
         toml_federation=args[0] if len(args) == 1 else None,
     )
+    return True
