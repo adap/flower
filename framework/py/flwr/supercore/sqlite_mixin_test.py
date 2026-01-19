@@ -20,7 +20,9 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
+from sqlalchemy import Column, Integer, MetaData, Table
 
+from .sql_mixin import SqlMixin
 from .sqlite_mixin import SqliteMixin
 
 
@@ -35,10 +37,25 @@ class DummyDb(SqliteMixin):
         )
 
 
+class DummyDbSqlAlchemy(SqlMixin):
+    """Simple subclass for testing SqlMixin behavior with SQLAlchemy."""
+
+    def get_metadata(self) -> MetaData:
+        """Return MetaData with test table definition."""
+        metadata = MetaData()
+        Table(
+            "test",
+            metadata,
+            Column("id", Integer, primary_key=True, autoincrement=True),
+            Column("value", Integer),
+        )
+        return metadata
+
+
 @pytest.mark.parametrize(
     "db_class",
-    [DummyDb],
-    ids=["SqliteMixin"],
+    [DummyDb, DummyDbSqlAlchemy],
+    ids=["SqliteMixin", "SqlMixin"],
 )
 def test_transaction_serialization_with_tempfile(
     db_class: type[DummyDb],
@@ -55,18 +72,30 @@ def test_transaction_serialization_with_tempfile(
         # Each thread creates its own connection to test file-level locking
         db = db_class(db_path)
         db.initialize()
-        # SqliteMixin: use conn context and ? placeholders
-        with db.conn:
+        if isinstance(db, DummyDb):
+            # SqliteMixin: use conn context and ? placeholders
+            with db.conn:
+                # Insert a dummy row with value -1
+                db.conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
+                # Read current row count
+                count = db.conn.execute("SELECT COUNT(*) AS cnt FROM test").fetchone()[
+                    "cnt"
+                ]
+                # Simulate some processing time
+                time.sleep(0.001)
+                # Insert a new row with the current count
+                db.conn.execute("INSERT INTO test (value) VALUES (?)", (count,))
+        else:
+            # SqlMixin: use query method with :name placeholders
             # Insert a dummy row with value -1
-            db.conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
+            db.query("INSERT INTO test (value) VALUES (:value)", {"value": -1})
             # Read current row count
-            count = db.conn.execute("SELECT COUNT(*) AS cnt FROM test").fetchone()[
-                "cnt"
-            ]
+            count_rows = db.query("SELECT COUNT(*) AS cnt FROM test")
+            count = count_rows[0]["cnt"]
             # Simulate some processing time
             time.sleep(0.001)
             # Insert a new row with the current count
-            db.conn.execute("INSERT INTO test (value) VALUES (?)", (count,))
+            db.query("INSERT INTO test (value) VALUES (:value)", {"value": count})
 
     # Execute: Run concurrent transactions
     with ThreadPoolExecutor(max_workers=8) as executor:
