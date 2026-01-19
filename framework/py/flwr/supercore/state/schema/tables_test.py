@@ -22,6 +22,17 @@ import unittest
 
 from sqlalchemy import create_engine, inspect, text
 
+from flwr.server.superlink.linkstate.sqlite_linkstate import (
+    SQL_CREATE_INDEX_NODE_STATUS,
+    SQL_CREATE_INDEX_ONLINE_UNTIL,
+    SQL_CREATE_INDEX_OWNER_AID,
+    SQL_CREATE_TABLE_CONTEXT,
+    SQL_CREATE_TABLE_LOGS,
+    SQL_CREATE_TABLE_MESSAGE_INS,
+    SQL_CREATE_TABLE_MESSAGE_RES,
+    SQL_CREATE_TABLE_NODE,
+    SQL_CREATE_TABLE_RUN,
+)
 from flwr.supercore.corestate.sqlite_corestate import SQL_CREATE_TABLE_TOKEN_STORE
 from flwr.supercore.object_store.sqlite_object_store import (
     SQL_CREATE_OBJECT_CHILDREN,
@@ -29,6 +40,7 @@ from flwr.supercore.object_store.sqlite_object_store import (
     SQL_CREATE_RUN_OBJECTS,
 )
 from flwr.supercore.state.schema.corestate_tables import corestate_metadata
+from flwr.supercore.state.schema.linkstate_tables import linkstate_metadata
 from flwr.supercore.state.schema.objectstore_tables import objectstore_metadata
 
 
@@ -46,12 +58,23 @@ class SchemaParityTest(unittest.TestCase):
             conn.execute(text(SQL_CREATE_OBJECTS))
             conn.execute(text(SQL_CREATE_OBJECT_CHILDREN))
             conn.execute(text(SQL_CREATE_RUN_OBJECTS))
+            # LinkState tables
+            conn.execute(text(SQL_CREATE_TABLE_RUN))
+            conn.execute(text(SQL_CREATE_TABLE_NODE))
+            conn.execute(text(SQL_CREATE_TABLE_LOGS))
+            conn.execute(text(SQL_CREATE_TABLE_CONTEXT))
+            conn.execute(text(SQL_CREATE_TABLE_MESSAGE_INS))
+            conn.execute(text(SQL_CREATE_TABLE_MESSAGE_RES))
+            conn.execute(text(SQL_CREATE_INDEX_ONLINE_UNTIL))
+            conn.execute(text(SQL_CREATE_INDEX_OWNER_AID))
+            conn.execute(text(SQL_CREATE_INDEX_NODE_STATUS))
             conn.commit()
 
         # Create database with SQLAlchemy metadata (the "actual" schema)
         self.sqlalchemy_engine = create_engine("sqlite:///:memory:")
         corestate_metadata.create_all(self.sqlalchemy_engine)
         objectstore_metadata.create_all(self.sqlalchemy_engine)
+        linkstate_metadata.create_all(self.sqlalchemy_engine)
 
         # Cache inspectors for use in all tests
         self.raw_inspector = inspect(self.raw_engine)
