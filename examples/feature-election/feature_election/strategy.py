@@ -9,6 +9,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, cast
+import random
 
 import numpy as np
 from flwr.app import ArrayRecord, ConfigRecord, Message, MetricRecord, RecordDict
@@ -120,8 +121,6 @@ class FeatureElectionStrategy(Strategy):
         all_node_ids = list(grid.get_node_ids())
         num_available = len(all_node_ids)
         num_nodes = max(int(num_available * self.fraction_train), self.min_train_nodes)
-
-        import random
 
         if num_nodes < num_available:
             node_ids = random.sample(all_node_ids, num_nodes)
@@ -354,8 +353,6 @@ class FeatureElectionStrategy(Strategy):
         num_nodes = max(
             int(len(all_node_ids) * self.fraction_evaluate), self.min_evaluate_nodes
         )
-
-        import random
 
         if num_nodes < len(all_node_ids):
             node_ids = random.sample(all_node_ids, num_nodes)
