@@ -182,6 +182,9 @@ def migrate(
     pyproject.toml to the new Flower config format when legacy usage is detected
     or the migration is applicable.
 
+    `flwr run` should call `migrate(superlink, [], ignore_legacy_usage=True)` to skip
+    legacy usage check. Other CLI commands should call `migrate(superlink, ctx.args)`.
+
     Parameters
     ----------
     superlink : str | None
