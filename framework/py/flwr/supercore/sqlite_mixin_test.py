@@ -15,6 +15,7 @@
 """Tests for SqliteMixin."""
 
 
+import os
 import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -64,57 +65,63 @@ def test_transaction_serialization_with_tempfile(
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmpfile:
         db_path = tmpfile.name
 
-    # Initialize database schema once
-    init_db = db_class(db_path)
-    init_db.initialize()
+    try:
+        # Initialize database schema once
+        init_db = db_class(db_path)
+        init_db.initialize()
 
-    def insert_row(_: int) -> None:
-        # Each thread creates its own connection to test file-level locking
-        db = db_class(db_path)
-        db.initialize()
-        if isinstance(db, DummyDb):
-            # SqliteMixin: use conn context and ? placeholders
-            with db.conn as conn:
-                # Insert a dummy row with value -1
-                conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
-                # Read current row count
-                count = conn.execute("SELECT COUNT(*) AS cnt FROM test").fetchone()[
-                    "cnt"
-                ]
-                # Simulate some processing time
-                time.sleep(0.001)
-                # Insert a new row with the current count
-                conn.execute("INSERT INTO test (value) VALUES (?)", (count,))
-        else:
-            # SqlMixin: use session context for single atomic transaction
-            with db.session() as session:
-                # Insert a dummy row with value -1
-                session.execute(
-                    text("INSERT INTO test (value) VALUES (:value)"), {"value": -1}
-                )
-                # Read current row count
-                result = session.execute(text("SELECT COUNT(*) AS cnt FROM test"))
-                row = result.mappings().fetchone()
-                assert row is not None
-                count = row["cnt"]
-                # Simulate some processing time
-                time.sleep(0.001)
-                # Insert a new row with the current count
-                session.execute(
-                    text("INSERT INTO test (value) VALUES (:value)"), {"value": count}
-                )
-                session.commit()
+        def insert_row(_: int) -> None:
+            # Each thread creates its own connection to test file-level locking
+            db = db_class(db_path)
+            db.initialize()
+            if isinstance(db, DummyDb):
+                # SqliteMixin: use conn context and ? placeholders
+                with db.conn as conn:
+                    # Insert a dummy row with value -1
+                    conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
+                    # Read current row count
+                    count = db.conn.execute(
+                        "SELECT COUNT(*) AS cnt FROM test"
+                    ).fetchone()["cnt"]
+                    # Simulate some processing time
+                    time.sleep(0.001)
+                    # Insert a new row with the current count
+                    conn.execute("INSERT INTO test (value) VALUES (?)", (count,))
+            else:
+                # SqlMixin: use session context for single atomic transaction
+                with db.session() as session:
+                    # Insert a dummy row with value -1
+                    session.execute(
+                        text("INSERT INTO test (value) VALUES (:value)"), {"value": -1}
+                    )
+                    # Read current row count
+                    result = session.execute(text("SELECT COUNT(*) AS cnt FROM test"))
+                    row = result.mappings().fetchone()
+                    assert row is not None
+                    count = row["cnt"]
+                    # Simulate some processing time
+                    time.sleep(0.001)
+                    # Insert a new row with the current count
+                    session.execute(
+                        text("INSERT INTO test (value) VALUES (:value)"),
+                        {"value": count},
+                    )
+                    session.commit()
 
-    # Execute: Run concurrent transactions
-    with ThreadPoolExecutor(max_workers=8) as executor:
-        executor.map(insert_row, range(100))
+        # Execute: Run concurrent transactions
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            executor.map(insert_row, range(100))
 
-    # Assert: Verify that all rows were inserted correctly
-    rows = init_db.query("SELECT * FROM test ORDER BY id")
-    for row in rows:
-        if row["id"] & 0x1:
-            # Odd IDs are dummy rows
-            assert row["value"] == -1
-        else:
-            # Even IDs should have sequential counts
-            assert row["value"] == row["id"] - 1
+        # Assert: Verify that all rows were inserted correctly
+        rows = init_db.query("SELECT * FROM test ORDER BY id")
+        for row in rows:
+            if row["id"] & 0x1:
+                # Odd IDs are dummy rows
+                assert row["value"] == -1
+            else:
+                # Even IDs should have sequential counts
+                assert row["value"] == row["id"] - 1
+
+    finally:
+        # Clean up the temporary file
+        os.unlink(db_path)
