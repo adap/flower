@@ -20,7 +20,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
-from sqlalchemy import Column, Integer, MetaData, Table
+from sqlalchemy import Column, Integer, MetaData, Table, text
 
 from .sql_mixin import SqlMixin
 from .sqlite_mixin import SqliteMixin
@@ -58,7 +58,7 @@ class DummyDbSqlAlchemy(SqlMixin):
     ids=["SqliteMixin", "SqlMixin"],
 )
 def test_transaction_serialization_with_tempfile(
-    db_class: type[DummyDb],
+    db_class: type[DummyDb] | type[DummyDbSqlAlchemy],
 ) -> None:
     """Verify that SQLite file-level locking serializes concurrent transactions."""
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmpfile:
@@ -74,28 +74,36 @@ def test_transaction_serialization_with_tempfile(
         db.initialize()
         if isinstance(db, DummyDb):
             # SqliteMixin: use conn context and ? placeholders
-            with db.conn:
+            with db.conn as conn:
                 # Insert a dummy row with value -1
-                db.conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
+                conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
                 # Read current row count
-                count = db.conn.execute("SELECT COUNT(*) AS cnt FROM test").fetchone()[
+                count = conn.execute("SELECT COUNT(*) AS cnt FROM test").fetchone()[
                     "cnt"
                 ]
                 # Simulate some processing time
                 time.sleep(0.001)
                 # Insert a new row with the current count
-                db.conn.execute("INSERT INTO test (value) VALUES (?)", (count,))
+                conn.execute("INSERT INTO test (value) VALUES (?)", (count,))
         else:
-            # SqlMixin: use query method with :name placeholders
-            # Insert a dummy row with value -1
-            db.query("INSERT INTO test (value) VALUES (:value)", {"value": -1})
-            # Read current row count
-            count_rows = db.query("SELECT COUNT(*) AS cnt FROM test")
-            count = count_rows[0]["cnt"]
-            # Simulate some processing time
-            time.sleep(0.001)
-            # Insert a new row with the current count
-            db.query("INSERT INTO test (value) VALUES (:value)", {"value": count})
+            # SqlMixin: use session context for single atomic transaction
+            with db.session() as session:
+                # Insert a dummy row with value -1
+                session.execute(
+                    text("INSERT INTO test (value) VALUES (:value)"), {"value": -1}
+                )
+                # Read current row count
+                result = session.execute(text("SELECT COUNT(*) AS cnt FROM test"))
+                row = result.mappings().fetchone()
+                assert row is not None
+                count = row["cnt"]
+                # Simulate some processing time
+                time.sleep(0.001)
+                # Insert a new row with the current count
+                session.execute(
+                    text("INSERT INTO test (value) VALUES (:value)"), {"value": count}
+                )
+                session.commit()
 
     # Execute: Run concurrent transactions
     with ThreadPoolExecutor(max_workers=8) as executor:
