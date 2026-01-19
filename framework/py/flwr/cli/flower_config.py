@@ -208,25 +208,26 @@ def serialize_superlink_connection(connection: SuperLinkConnection) -> dict[str,
     Parameters
     ----------
     connection : SuperLinkConnection
-        The SuperLink connection to serialize.
+            The SuperLink connection to serialize.
 
     Returns
     -------
     dict[str, Any]
-        Dictionary representation suitable for TOML serialization.
+            Dictionary representation suitable for TOML serialization.
     """
+    # pylint: disable=protected-access
     conn_dict: dict[str, Any] = {
-        SuperLinkConnectionTomlKey.ADDRESS: connection.address,
-        SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: connection.root_certificates,
-        SuperLinkConnectionTomlKey.INSECURE: connection.insecure,
-        SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: connection.enable_account_auth,
-        SuperLinkConnectionTomlKey.FEDERATION: connection.federation,
+        SuperLinkConnectionTomlKey.ADDRESS: connection._address,
+        SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: connection._root_certificates,
+        SuperLinkConnectionTomlKey.INSECURE: connection._insecure,
+        SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: connection._enable_account_auth,
+        SuperLinkConnectionTomlKey.FEDERATION: connection._federation,
     }
     # Remove None values
     conn_dict = {k: v for k, v in conn_dict.items() if v is not None}
 
-    if connection.options is not None:
-        options_dict = _serialize_simulation_options(connection.options)
+    if connection._options is not None:
+        options_dict = _serialize_simulation_options(connection._options)
         conn_dict[SuperLinkConnectionTomlKey.OPTIONS] = options_dict
 
     return conn_dict
