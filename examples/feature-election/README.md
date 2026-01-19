@@ -6,7 +6,7 @@ framework: [sklearn, pandas]
 
 # Federated Feature Election with Flower
 
-A federated feature selection framework for tabular datasets using the Flower Message API.
+A federated feature selection framework for tabular datasets.
 
 ## Overview
 
