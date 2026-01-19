@@ -39,9 +39,9 @@ from flwr.supercore.object_store.sqlite_object_store import (
     SQL_CREATE_OBJECTS,
     SQL_CREATE_RUN_OBJECTS,
 )
-from flwr.supercore.state.schema.corestate_tables import corestate_metadata
-from flwr.supercore.state.schema.linkstate_tables import linkstate_metadata
-from flwr.supercore.state.schema.objectstore_tables import objectstore_metadata
+from flwr.supercore.state.schema.corestate_tables import create_corestate_metadata
+from flwr.supercore.state.schema.linkstate_tables import create_linkstate_metadata
+from flwr.supercore.state.schema.objectstore_tables import create_objectstore_metadata
 
 
 class SchemaParityTest(unittest.TestCase):
@@ -72,9 +72,9 @@ class SchemaParityTest(unittest.TestCase):
 
         # Create database with SQLAlchemy metadata (the "actual" schema)
         self.sqlalchemy_engine = create_engine("sqlite:///:memory:")
-        corestate_metadata.create_all(self.sqlalchemy_engine)
-        objectstore_metadata.create_all(self.sqlalchemy_engine)
-        linkstate_metadata.create_all(self.sqlalchemy_engine)
+        create_corestate_metadata().create_all(self.sqlalchemy_engine)
+        create_objectstore_metadata().create_all(self.sqlalchemy_engine)
+        create_linkstate_metadata().create_all(self.sqlalchemy_engine)
 
         # Cache inspectors for use in all tests
         self.raw_inspector = inspect(self.raw_engine)

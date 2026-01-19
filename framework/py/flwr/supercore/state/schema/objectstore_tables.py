@@ -27,59 +27,64 @@ from sqlalchemy import (
     Table,
 )
 
-objectstore_metadata = MetaData()
 
-# ------------------------------------------------------------------------------
-#  Table: objects
-# ------------------------------------------------------------------------------
-objects = Table(
-    "objects",
-    objectstore_metadata,
-    Column("object_id", String, primary_key=True, nullable=True),
-    Column("content", LargeBinary),
-    Column(
-        "is_available",
-        Integer,
-        nullable=False,
-        server_default="0",
-    ),
-    Column("ref_count", Integer, nullable=False, server_default="0"),
-    CheckConstraint("is_available IN (0, 1)", name="ck_objects_is_available"),
-)
+def create_objectstore_metadata() -> MetaData:
+    """Create and return MetaData with ObjectStore table definitions."""
+    metadata = MetaData()
 
-# ------------------------------------------------------------------------------
-#  Table: object_children
-# ------------------------------------------------------------------------------
-object_children = Table(
-    "object_children",
-    objectstore_metadata,
-    Column(
-        "parent_id",
-        String,
-        ForeignKey("objects.object_id", ondelete="CASCADE"),
-        nullable=False,
-    ),
-    Column(
-        "child_id",
-        String,
-        ForeignKey("objects.object_id", ondelete="CASCADE"),
-        nullable=False,
-    ),
-    PrimaryKeyConstraint("parent_id", "child_id"),
-)
+    # --------------------------------------------------------------------------
+    #  Table: objects
+    # --------------------------------------------------------------------------
+    Table(
+        "objects",
+        metadata,
+        Column("object_id", String, primary_key=True, nullable=True),
+        Column("content", LargeBinary),
+        Column(
+            "is_available",
+            Integer,
+            nullable=False,
+            server_default="0",
+        ),
+        Column("ref_count", Integer, nullable=False, server_default="0"),
+        CheckConstraint("is_available IN (0, 1)", name="ck_objects_is_available"),
+    )
 
-# ------------------------------------------------------------------------------
-#  Table: run_objects
-# ------------------------------------------------------------------------------
-run_objects = Table(
-    "run_objects",
-    objectstore_metadata,
-    Column("run_id", Integer, nullable=False),
-    Column(
-        "object_id",
-        String,
-        ForeignKey("objects.object_id", ondelete="CASCADE"),
-        nullable=False,
-    ),
-    PrimaryKeyConstraint("run_id", "object_id"),
-)
+    # --------------------------------------------------------------------------
+    #  Table: object_children
+    # --------------------------------------------------------------------------
+    Table(
+        "object_children",
+        metadata,
+        Column(
+            "parent_id",
+            String,
+            ForeignKey("objects.object_id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        Column(
+            "child_id",
+            String,
+            ForeignKey("objects.object_id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        PrimaryKeyConstraint("parent_id", "child_id"),
+    )
+
+    # --------------------------------------------------------------------------
+    #  Table: run_objects
+    # --------------------------------------------------------------------------
+    Table(
+        "run_objects",
+        metadata,
+        Column("run_id", Integer, nullable=False),
+        Column(
+            "object_id",
+            String,
+            ForeignKey("objects.object_id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        PrimaryKeyConstraint("run_id", "object_id"),
+    )
+
+    return metadata
