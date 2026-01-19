@@ -1,1 +1,1 @@
-"""feature-election: Federated Feature Election with Flower."""
+"""feature-election: Federated feature selection with Flower."""

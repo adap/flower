@@ -1,4 +1,4 @@
-"""feature-election: Federated Feature Election with Flower.
+"""feature-election: Federated feature selection with Flower.
 
 Provides various feature selection methods and evaluation utilities.
 """
