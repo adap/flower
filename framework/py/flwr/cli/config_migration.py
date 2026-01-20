@@ -238,7 +238,11 @@ def migrate(
     if not is_migratable:
         # Raise error if legacy usage is detected but migration is not applicable
         if is_legacy:
-            raise click.ClickException(f"Cannot migrate configuration:\n{reason}")
+            raise click.ClickException(
+                f"Cannot migrate configuration:\n{reason}. \nThis is expected if the "
+                "migration has been previously carried out. Use `--help` after your "
+                "command to see the new usage pattern."
+            )
         return  # Nothing to migrate
 
     # Perform migration
