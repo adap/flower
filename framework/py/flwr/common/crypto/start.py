@@ -10,9 +10,9 @@ ENCRYPTION_METHODS = [
     "CHACHA",
     "CHACHA_AEAD",
     "AES_GCM",
-    "KOBLITZ_112",
-    "KOBLITZ_256",
-    "KOBLITZ_512",
+    "KOBLITZ_SMALL",
+    "KOBLITZ_MEDIUM",
+    "KOBLITZ_LARGE",
 ]
 INTEGRITY_METHODS = ["HMAC"]
 NET_OPTIONS = ["custom_cnn", "resnet18", "resnet34", "tiny_cnn", "squeezenet"]
