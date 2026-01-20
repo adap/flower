@@ -307,6 +307,8 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     needs: [changes, wheel]
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
     strategy:
       matrix:
         include:

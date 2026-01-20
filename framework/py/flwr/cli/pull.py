@@ -40,10 +40,7 @@ from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
 def pull(  # pylint: disable=R0914
     run_id: Annotated[
         int,
-        typer.Option(
-            "--run-id",
-            help="Run ID to pull artifacts from.",
-        ),
+        typer.Argument(help="Run ID to pull artifacts from."),
     ],
     app: Annotated[
         Path,

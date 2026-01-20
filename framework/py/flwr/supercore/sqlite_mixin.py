@@ -23,6 +23,7 @@ from logging import DEBUG, ERROR
 from typing import Any
 
 from flwr.common.logger import log
+from flwr.supercore.constant import SQLITE_PRAGMAS
 
 DictOrTuple = tuple[Any, ...] | dict[str, Any]
 
@@ -92,13 +93,9 @@ class SqliteMixin(ABC):
                 )
         """
         self._conn = sqlite3.connect(self.database_path)
-        # Enable Write-Ahead Logging (WAL) for better concurrency
-        self._conn.execute("PRAGMA journal_mode = WAL;")
-        self._conn.execute("PRAGMA synchronous = NORMAL;")
-        self._conn.execute("PRAGMA foreign_keys = ON;")
-        self._conn.execute("PRAGMA cache_size = -64000;")  # 64MB cache
-        self._conn.execute("PRAGMA temp_store = MEMORY;")  # In-memory temp tables
-        self._conn.execute("PRAGMA mmap_size = 268435456;")  # 256MB memory-mapped I/O
+        # Set SQLite pragmas for optimal performance and correctness
+        for pragma, value in SQLITE_PRAGMAS:
+            self._conn.execute(f"PRAGMA {pragma} = {value};")
         self._conn.row_factory = dict_factory
 
         if log_queries:
