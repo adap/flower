@@ -1837,6 +1837,14 @@ class SqlInMemoryStateTest(StateTest, unittest.TestCase):
         "test_get_node_info_no_filters",
         "test_get_node_info_filter_by_node_ids",
         "test_get_node_info_filter_by_owner_aids",
+        # Node activation and heartbeat - only tests not requiring create_run
+        "test_activate_node",
+        "test_deactivate_node",
+        "test_acknowledge_node_heartbeat",
+        "test_acknowledge_node_heartbeat_failed",
+        "test_get_node_info_filter_by_status",
+        "test_get_node_info_multiple_filters",
+        "test_get_node_info_empty_list_filters",
     }
 
     def setUp(self) -> None:

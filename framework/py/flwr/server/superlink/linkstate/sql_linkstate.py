@@ -24,7 +24,11 @@ from sqlalchemy.exc import IntegrityError
 
 from flwr.app.user_config import UserConfig
 from flwr.common import Context, Message, log, now
-from flwr.common.constant import NODE_ID_NUM_BYTES, SUPERLINK_NODE_ID
+from flwr.common.constant import (
+    HEARTBEAT_PATIENCE,
+    NODE_ID_NUM_BYTES,
+    SUPERLINK_NODE_ID,
+)
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
@@ -187,11 +191,58 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
     def activate_node(self, node_id: int, heartbeat_interval: float) -> bool:
         """Activate the node with the specified `node_id`."""
-        raise NotImplementedError
+        self._check_and_tag_offline_nodes([node_id])
+
+        # Only activate if the node is currently registered or offline
+        current_dt = now()
+        sint64_node_id = uint64_to_int64(node_id)
+        query = """
+            UPDATE node
+            SET status = :status,
+                last_activated_at = :last_activated_at,
+                online_until = :online_until,
+                heartbeat_interval = :heartbeat_interval
+            WHERE node_id = :node_id AND status IN (:status_registered, :status_offline)
+            RETURNING node_id
+        """
+        params = {
+            "status": NodeStatus.ONLINE,
+            "last_activated_at": current_dt.isoformat(),
+            "online_until": current_dt.timestamp()
+            + HEARTBEAT_PATIENCE * heartbeat_interval,
+            "heartbeat_interval": heartbeat_interval,
+            "node_id": sint64_node_id,
+            "status_registered": NodeStatus.REGISTERED,
+            "status_offline": NodeStatus.OFFLINE,
+        }
+
+        rows = self.query(query, params)
+        return len(rows) > 0
 
     def deactivate_node(self, node_id: int) -> bool:
         """Deactivate the node with the specified `node_id`."""
-        raise NotImplementedError
+        self._check_and_tag_offline_nodes([node_id])
+
+        # Only deactivate if the node is currently online
+        current_dt = now()
+        query = """
+            UPDATE node
+            SET status = :status,
+                last_deactivated_at = :last_deactivated_at,
+                online_until = :online_until
+            WHERE node_id = :node_id AND status = :status_online
+            RETURNING node_id
+        """
+        params = {
+            "status": NodeStatus.OFFLINE,
+            "last_deactivated_at": current_dt.isoformat(),
+            "online_until": current_dt.timestamp(),
+            "node_id": uint64_to_int64(node_id),
+            "status_online": NodeStatus.ONLINE,
+        }
+
+        rows = self.query(query, params)
+        return len(rows) > 0
 
     def get_nodes(self, run_id: int) -> set[int]:
         """Retrieve all currently stored node IDs as a set.
@@ -218,22 +269,27 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         # Filter node IDs by federation
         return self.federation_manager.filter_nodes(node_ids, federation)
 
-    def _check_and_tag_offline_nodes(self) -> None:
+    def _check_and_tag_offline_nodes(self, node_ids: list[int] | None = None) -> None:
         """Check and tag offline nodes."""
-        current_time = now().isoformat()
+        # strftime will convert POSIX timestamp to ISO format
         query = """
             UPDATE node
-            SET status = :offline
-            WHERE status = :online AND online_until < :current_time
+            SET status = :offline,
+                last_deactivated_at =
+                strftime('%Y-%m-%dT%H:%M:%f+00:00', online_until, 'unixepoch')
+            WHERE online_until < :current_time AND status = :online
         """
-        self.query(
-            query,
-            {
-                "offline": NodeStatus.OFFLINE,
-                "online": NodeStatus.ONLINE,
-                "current_time": current_time,
-            },
-        )
+        params: dict[str, Any] = {
+            "offline": NodeStatus.OFFLINE,
+            "current_time": now().timestamp(),
+            "online": NodeStatus.ONLINE,
+        }
+        if node_ids is not None:
+            sint64_node_ids = [uint64_to_int64(node_id) for node_id in node_ids]
+            placeholders = ",".join([f":nid_{i}" for i in range(len(sint64_node_ids))])
+            query += f" AND node_id IN ({placeholders})"
+            params.update({f"nid_{i}": nid for i, nid in enumerate(sint64_node_ids)})
+        self.query(query, params)
 
     def get_node_info(  # pylint: disable=too-many-locals
         self,
@@ -343,8 +399,46 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
     def acknowledge_node_heartbeat(
         self, node_id: int, heartbeat_interval: float
     ) -> bool:
-        """Acknowledge a heartbeat received from a node."""
-        raise NotImplementedError
+        """Acknowledge a heartbeat received from a node, serving as a heartbeat.
+
+        A node is considered online as long as it sends heartbeats within
+        the tolerated interval: HEARTBEAT_PATIENCE × heartbeat_interval.
+        HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before
+        the node is marked as offline.
+        """
+        sint64_node_id = uint64_to_int64(node_id)
+
+        # Check if the node exists and is not unregistered
+        query = "SELECT status FROM node WHERE node_id = :node_id AND status != :status"
+        rows = self.query(
+            query, {"node_id": sint64_node_id, "status": NodeStatus.UNREGISTERED}
+        )
+        if not rows:
+            return False
+
+        # Construct query and params
+        current_dt = now()
+        query = (
+            "UPDATE node SET online_until = :online_until, "
+            "heartbeat_interval = :heartbeat_interval"
+        )
+        params: dict[str, Any] = {
+            "online_until": current_dt.timestamp()
+            + HEARTBEAT_PATIENCE * heartbeat_interval,
+            "heartbeat_interval": heartbeat_interval,
+        }
+
+        # Set timestamp if the status changes
+        if rows[0]["status"] != NodeStatus.ONLINE:
+            query += ", status = :status, last_activated_at = :last_activated_at"
+            params["status"] = NodeStatus.ONLINE
+            params["last_activated_at"] = current_dt.isoformat()
+
+        # Execute the query, refreshing `online_until` and `heartbeat_interval`
+        query += " WHERE node_id = :node_id"
+        params["node_id"] = sint64_node_id
+        self.query(query, params)
+        return True
 
     def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
         """Transition runs with expired tokens to failed status.
