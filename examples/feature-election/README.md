@@ -94,7 +94,7 @@ flwr run .
 If you have a GPU available:
 
 ```bash
-flwr run . local-sim-gpu
+flwr run . local-simulation-gpu
 ```
 
 ### Custom Configuration
@@ -102,7 +102,7 @@ flwr run . local-sim-gpu
 Override parameters at runtime:
 
 ```bash
-flwr run . --run-config "freedom-degree=0.3 fs-method=random_forest"
+flwr run . --run-config "freedom-degree=0.3 fs-method='random_forest'"
 ```
 
 Or edit `pyproject.toml`:
