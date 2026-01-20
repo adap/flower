@@ -19,7 +19,8 @@ from typing import Annotated
 
 import typer
 
-from flwr.cli.config_migration import migrate
+from flwr.cli.config_migration import migrate, warn_if_federation_config_overrides
+from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsRequest,
@@ -40,12 +41,23 @@ def pull(  # pylint: disable=R0914
         str | None,
         typer.Argument(help="Name of the superlink configuration"),
     ] = None,
+    federation_config_overrides: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--federation-config",
+            help=FEDERATION_CONFIG_HELP_MESSAGE,
+            hidden=True,
+        ),
+    ] = None,
 ) -> None:
     """Pull artifacts from a Flower run.
 
     Retrieve a download URL for artifacts generated during a completed Flower run. The
     artifacts can then be downloaded from the provided URL.
     """
+    # Warn `--federation-config` is ignored
+    warn_if_federation_config_overrides(federation_config_overrides)
+
     # Migrate legacy usage if any
     migrate(superlink, args=ctx.args)
 

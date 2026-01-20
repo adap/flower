@@ -22,7 +22,8 @@ from typing import Annotated, cast
 import grpc
 import typer
 
-from flwr.cli.config_migration import migrate
+from flwr.cli.config_migration import migrate, warn_if_federation_config_overrides
+from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.cli.typing import SuperLinkConnection
 from flwr.common.constant import CONN_RECONNECT_INTERVAL, CONN_REFRESH_PERIOD
@@ -162,6 +163,14 @@ def log(
         str | None,
         typer.Argument(help="Name of the superlink configuration"),
     ] = None,
+    federation_config_overrides: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--federation-config",
+            help=FEDERATION_CONFIG_HELP_MESSAGE,
+            hidden=True,
+        ),
+    ] = None,
     stream: Annotated[
         bool,
         typer.Option(
@@ -175,6 +184,9 @@ def log(
     Retrieve and display logs from a Flower run. Logs can be streamed in real-time (with
     --stream) or printed once (with --show).
     """
+    # Warn `--federation-config` is ignored
+    warn_if_federation_config_overrides(federation_config_overrides)
+
     # Migrate legacy usage if any
     migrate(superlink, args=ctx.args)
 

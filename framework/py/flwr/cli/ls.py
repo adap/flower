@@ -24,7 +24,8 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from flwr.cli.config_migration import migrate
+from flwr.cli.config_migration import migrate, warn_if_federation_config_overrides
+from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.common.constant import CliOutputFormat, Status, SubStatus
 from flwr.common.logger import print_json_error, redirect_output, restore_output
@@ -45,6 +46,14 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
     superlink: Annotated[
         str | None,
         typer.Argument(help="Name of the superlink configuration"),
+    ] = None,
+    federation_config_overrides: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--federation-config",
+            help=FEDERATION_CONFIG_HELP_MESSAGE,
+            hidden=True,
+        ),
     ] = None,
     runs: Annotated[
         bool,
@@ -90,6 +99,9 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
 
     if suppress_output:
         redirect_output(captured_output)
+
+    # Warn `--federation-config` is ignored
+    warn_if_federation_config_overrides(federation_config_overrides)
 
     # Migrate legacy usage if any
     migrate(superlink, args=ctx.args)
