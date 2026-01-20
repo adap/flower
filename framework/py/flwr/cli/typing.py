@@ -120,7 +120,7 @@ class SuperLinkConnection:
     _insecure: bool | None = None
     _enable_account_auth: bool | None = None
     _federation: str | None = None
-    _options: SuperLinkSimulationOptions | None = None
+    options: SuperLinkSimulationOptions | None = None
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
@@ -139,24 +139,22 @@ class SuperLinkConnection:
         self._insecure = insecure
         self._enable_account_auth = enable_account_auth
         self._federation = federation
-        self._options = options
+        self.options = options
 
         self.__post_init__()
 
     @property
     def address(self) -> str:
-        """Return the address or raise ValueError if it is None."""
+        """Return the address or its default (empty string) if unset."""
         if self._address is None:
-            raise ValueError(_ERROR_MSG_FMT % SuperLinkConnectionTomlKey.ADDRESS)
+            return ""
         return self._address
 
     @property
     def root_certificates(self) -> str:
-        """Return the root certificates or raise ValueError if it is None."""
+        """Return the root certificates or its default (empty string) if unset."""
         if self._root_certificates is None:
-            raise ValueError(
-                _ERROR_MSG_FMT % SuperLinkConnectionTomlKey.ROOT_CERTIFICATES
-            )
+            return ""
         return self._root_certificates
 
     @property
@@ -175,17 +173,10 @@ class SuperLinkConnection:
 
     @property
     def federation(self) -> str:
-        """Return the federation or raise ValueError if it is None."""
+        """Return the federation or its default (empty string) if unset."""
         if self._federation is None:
-            raise ValueError(_ERROR_MSG_FMT % SuperLinkConnectionTomlKey.FEDERATION)
+            return ""
         return self._federation
-
-    @property
-    def options(self) -> SuperLinkSimulationOptions:
-        """Return the simulation options or raise ValueError if it is None."""
-        if self._options is None:
-            raise ValueError(_ERROR_MSG_FMT % SuperLinkConnectionTomlKey.OPTIONS)
-        return self._options
 
     def __post_init__(self) -> None:
         """Validate SuperLink connection configuration."""
@@ -232,7 +223,7 @@ class SuperLinkConnection:
             )
 
         # The connection needs to have either an address or options (or both).
-        if self._address is None and self._options is None:
+        if self._address is None and self.options is None:
             raise ValueError(
                 "Invalid SuperLink connection format: "
                 f"'{SuperLinkConnectionTomlKey.ADDRESS}' and/or "

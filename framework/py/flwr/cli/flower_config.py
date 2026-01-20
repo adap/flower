@@ -226,8 +226,8 @@ def serialize_superlink_connection(connection: SuperLinkConnection) -> dict[str,
     # Remove None values
     conn_dict = {k: v for k, v in conn_dict.items() if v is not None}
 
-    if connection._options is not None:
-        options_dict = _serialize_simulation_options(connection._options)
+    if connection.options is not None:
+        options_dict = _serialize_simulation_options(connection.options)
         conn_dict[SuperLinkConnectionTomlKey.OPTIONS] = options_dict
 
     return conn_dict
