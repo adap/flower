@@ -93,7 +93,26 @@ class SuperLinkSimulationOptions:
 
 @dataclass
 class SuperLinkConnection:
-    """SuperLink connection configuration for CLI commands."""
+    """SuperLink connection configuration for CLI commands.
+
+    Attributes
+    ----------
+    name : str
+         The name of the connection configuration.
+    address : str
+        The address of the SuperLink (Control API).
+    root_certificates : str
+         The absolute path to the root CA certificate file.
+    insecure : bool (default: False)
+         Whether to use an insecure channel. If True, the
+         connection will not use TLS encryption.
+    enable_account_auth : bool (default: False)
+         Whether to enable account authentication .
+    federation : str
+         The name of the federation to interface with.
+    options : SuperLinkSimulationOptions
+         Configuration options for the simulation runtime.
+    """
 
     name: str
     _address: str | None = None
@@ -126,14 +145,14 @@ class SuperLinkConnection:
 
     @property
     def address(self) -> str:
-        """Return the address."""
+        """Return the address or raise ValueError if it is None."""
         if self._address is None:
             raise ValueError(_ERROR_MSG_FMT % SuperLinkConnectionTomlKey.ADDRESS)
         return self._address
 
     @property
     def root_certificates(self) -> str:
-        """Return the root certificates."""
+        """Return the root certificates or raise ValueError if it is None."""
         if self._root_certificates is None:
             raise ValueError(
                 _ERROR_MSG_FMT % SuperLinkConnectionTomlKey.ROOT_CERTIFICATES
@@ -142,28 +161,28 @@ class SuperLinkConnection:
 
     @property
     def insecure(self) -> bool:
-        """Return the insecure flag."""
+        """Return the insecure flag or its default (False) if unset."""
         if self._insecure is None:
             return False
         return self._insecure
 
     @property
     def enable_account_auth(self) -> bool:
-        """Return the enable_account_auth flag."""
+        """Return the enable_account_auth flag or its default (False) if unset."""
         if self._enable_account_auth is None:
             return False
         return self._enable_account_auth
 
     @property
     def federation(self) -> str:
-        """Return the federation."""
+        """Return the federation or raise ValueError if it is None."""
         if self._federation is None:
             raise ValueError(_ERROR_MSG_FMT % SuperLinkConnectionTomlKey.FEDERATION)
         return self._federation
 
     @property
     def options(self) -> SuperLinkSimulationOptions:
-        """Return the simulation options."""
+        """Return the simulation options or raise ValueError if it is None."""
         if self._options is None:
             raise ValueError(_ERROR_MSG_FMT % SuperLinkConnectionTomlKey.OPTIONS)
         return self._options
