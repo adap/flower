@@ -16,21 +16,28 @@
 
 
 from collections.abc import Sequence
+from logging import ERROR
+from typing import Any
 
 from sqlalchemy import MetaData
+from sqlalchemy.exc import IntegrityError
 
 from flwr.app.user_config import UserConfig
-from flwr.common import Context, Message
+from flwr.common import Context, Message, log, now
+from flwr.common.constant import NODE_ID_NUM_BYTES, SUPERLINK_NODE_ID
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
+from flwr.supercore.constant import NodeStatus
 from flwr.supercore.corestate.sql_corestate import SqlCoreState
 from flwr.supercore.object_store.object_store import ObjectStore
 from flwr.supercore.state.schema.corestate_tables import create_corestate_metadata
 from flwr.supercore.state.schema.linkstate_tables import create_linkstate_metadata
+from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 from flwr.superlink.federation import FederationManager
 
 from .linkstate import LinkState
+from .utils import generate_rand_int_from_bytes
 
 
 class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
@@ -103,11 +110,80 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         heartbeat_interval: float,
     ) -> int:
         """Create, store in the link state, and return `node_id`."""
-        raise NotImplementedError
+        # Sample a random uint64 as node_id
+        uint64_node_id = generate_rand_int_from_bytes(
+            NODE_ID_NUM_BYTES, exclude=[SUPERLINK_NODE_ID, 0]
+        )
+
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_node_id = uint64_to_int64(uint64_node_id)
+
+        query = """
+            INSERT INTO node
+            (node_id, owner_aid, owner_name, status, registered_at, last_activated_at,
+            last_deactivated_at, unregistered_at, online_until, heartbeat_interval,
+            public_key)
+            VALUES (:node_id, :owner_aid, :owner_name, :status, :registered_at,
+            :last_activated_at, :last_deactivated_at, :unregistered_at, :online_until,
+            :heartbeat_interval, :public_key)
+        """
+
+        # Mark the node online until now().timestamp() + heartbeat_interval
+        try:
+            self.query(
+                query,
+                {
+                    "node_id": sint64_node_id,
+                    "owner_aid": owner_aid,
+                    "owner_name": owner_name,
+                    "status": NodeStatus.REGISTERED,
+                    "registered_at": now().isoformat(),
+                    "last_activated_at": None,
+                    "last_deactivated_at": None,
+                    "unregistered_at": None,
+                    "online_until": None,  # initialized with offline status
+                    "heartbeat_interval": heartbeat_interval,
+                    "public_key": public_key,
+                },
+            )
+        except IntegrityError as e:
+            if "node.public_key" in str(e):
+                raise ValueError("Public key already in use.") from None
+            # Must be node ID conflict, almost impossible unless system is compromised
+            log(ERROR, "Unexpected node registration failure.")
+            return 0
+
+        # Note: we need to return the uint64 value of the node_id
+        return uint64_node_id
 
     def delete_node(self, owner_aid: str, node_id: int) -> None:
         """Delete a node."""
-        raise NotImplementedError
+        sint64_node_id = uint64_to_int64(node_id)
+
+        query = """
+            UPDATE node
+            SET status = :status, unregistered_at = :unregistered_at,
+            online_until = IIF(online_until > :current, :current2, online_until)
+            WHERE node_id = :node_id AND status != :status2 AND owner_aid = :owner_aid
+            RETURNING node_id
+        """
+        current = now()
+        params = {
+            "status": NodeStatus.UNREGISTERED,
+            "unregistered_at": current.isoformat(),
+            "current": current.timestamp(),
+            "current2": current.timestamp(),
+            "node_id": sint64_node_id,
+            "status2": NodeStatus.UNREGISTERED,
+            "owner_aid": owner_aid,
+        }
+
+        rows = self.query(query, params)
+        if not rows:
+            raise ValueError(
+                f"Node {node_id} already deleted, not found or unauthorized "
+                "deletion attempt."
+            )
 
     def activate_node(self, node_id: int, heartbeat_interval: float) -> bool:
         """Activate the node with the specified `node_id`."""
@@ -118,8 +194,29 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         raise NotImplementedError
 
     def get_nodes(self, run_id: int) -> set[int]:
-        """Retrieve all currently stored node IDs as a set."""
-        raise NotImplementedError
+        """Retrieve all currently stored node IDs as a set.
+
+        Constraints
+        -----------
+        If the provided `run_id` does not exist or has no matching nodes,
+        an empty `Set` MUST be returned.
+        """
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = uint64_to_int64(run_id)
+
+        # Validate run ID
+        query = "SELECT federation FROM run WHERE run_id = :run_id"
+        rows = self.query(query, {"run_id": sint64_run_id})
+        if not rows:
+            return set()
+        federation: str = rows[0]["federation"]
+
+        # Retrieve all online nodes
+        node_ids = {
+            node.node_id for node in self.get_node_info(statuses=[NodeStatus.ONLINE])
+        }
+        # Filter node IDs by federation
+        return self.federation_manager.filter_nodes(node_ids, federation)
 
     def get_node_info(
         self,
@@ -129,12 +226,62 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         statuses: Sequence[str] | None = None,
     ) -> Sequence[NodeInfo]:
         """Retrieve information about nodes based on the specified filters."""
-        raise NotImplementedError
+        self._check_and_tag_offline_nodes()  # TODO: Check implementation
+
+        # Build the WHERE clause based on provided filters
+        conditions = []
+        params: dict[str, Any] = {}
+
+        if node_ids is not None:
+            sint64_node_ids = [uint64_to_int64(node_id) for node_id in node_ids]
+            placeholders = ",".join([f":nid_{i}" for i in range(len(sint64_node_ids))])
+            conditions.append(f"node_id IN ({placeholders})")
+            for i, nid in enumerate(sint64_node_ids):
+                params[f"nid_{i}"] = nid
+
+        if owner_aids is not None:
+            placeholders = ",".join([f":aid_{i}" for i in range(len(owner_aids))])
+            conditions.append(f"owner_aid IN ({placeholders})")
+            for i, aid in enumerate(owner_aids):
+                params[f"aid_{i}"] = aid
+
+        if statuses is not None:
+            placeholders = ",".join([f":st_{i}" for i in range(len(statuses))])
+            conditions.append(f"status IN ({placeholders})")
+            for i, status in enumerate(statuses):
+                params[f"st_{i}"] = status
+
+        # Construct the final query
+        query = "SELECT * FROM node"
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+
+        rows = self.query(query, params)
+
+        result: list[NodeInfo] = []
+        for row in rows:
+            # Convert sint64 node_id to uint64
+            row["node_id"] = int64_to_uint64(row["node_id"])
+            result.append(NodeInfo(**row))
+
+        return result
 
     def get_node_id_by_public_key(self, public_key: bytes) -> int | None:
         """Get `node_id` for the specified `public_key` if it exists and is not
         deleted."""
-        raise NotImplementedError
+        query = """SELECT node_id FROM node
+                   WHERE public_key = :public_key AND status != :status;"""
+        rows = self.query(
+            query, {"public_key": public_key, "status": NodeStatus.UNREGISTERED}
+        )
+
+        # If no result is found, return None
+        if not rows:
+            return None
+
+        # Convert sint64 node_id to uint64
+        node_id = int64_to_uint64(rows[0]["node_id"])
+        return node_id
 
     def create_run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
@@ -217,3 +364,20 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
     def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
         """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
         raise NotImplementedError
+
+    def _check_and_tag_offline_nodes(self) -> None:
+        """Check and tag offline nodes."""
+        current_time = now().isoformat()
+        query = """
+        UPDATE node
+        SET status = :offline
+        WHERE status = :online AND online_until < :current_time
+        """
+        self.query(
+            query,
+            {
+                "offline": NodeStatus.OFFLINE,
+                "online": NodeStatus.ONLINE,
+                "current_time": current_time,
+            },
+        )
