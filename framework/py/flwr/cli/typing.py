@@ -107,7 +107,7 @@ class SuperLinkConnection:
          Whether to use an insecure channel. If True, the
          connection will not use TLS encryption.
     enable_account_auth : bool (default: False)
-         Whether to enable account authentication .
+         Whether to enable account authentication.
     federation : str
          The name of the federation to interface with.
     options : SuperLinkSimulationOptions
