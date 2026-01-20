@@ -84,13 +84,6 @@ class SqlMixin(ABC):
         self._engine: Engine | None = None
         self._session_factory: sessionmaker[Session] | None = None
 
-    @property
-    def engine(self) -> Engine:
-        """Get the SQLAlchemy engine."""
-        if self._engine is None:
-            raise AttributeError("Database not initialized. Call initialize() first.")
-        return self._engine
-
     def session(self) -> Session:
         """Create a new database session.
 
