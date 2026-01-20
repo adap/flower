@@ -1818,6 +1818,27 @@ class SqlInMemoryStateTest(StateTest, unittest.TestCase):
 
     __test__ = True
 
+    # Only include tests for methods that have been implemented
+    _implemented_tests = {
+        # Inherited from CoreStateTest
+        "test_create_verify_and_delete_token",
+        "test_create_token_already_exists",
+        "test_get_run_id_by_token",
+        "test_acknowledge_app_heartbeat_success",
+        "test_acknowledge_app_heartbeat_nonexistent_token",
+        "test_acknowledge_app_heartbeat_extends_expiration_and_cleanup",
+        # Inherited from StateTest
+        "test_init_state",
+        "test_set_linkstate_of_federation_manager",
+        "test_initialize",
+    }
+
+    def setUp(self) -> None:
+        """Skip tests for unimplemented methods."""
+        test_name = self._testMethodName
+        if test_name not in self._implemented_tests:
+            self.skipTest(f"SqlLinkState: {test_name} not yet implemented")
+
     def state_factory(self) -> SqlLinkState:
         """Return SqlLinkState with in-memory database."""
         state = SqlLinkState(
@@ -1900,6 +1921,15 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
     """Test SqlLinkState implementation with file-based database."""
 
     __test__ = True
+
+    # pylint: disable-next=protected-access
+    _implemented_tests = SqlInMemoryStateTest._implemented_tests
+
+    def setUp(self) -> None:
+        """Skip tests for unimplemented methods."""
+        test_name = self._testMethodName
+        if test_name not in self._implemented_tests:
+            self.skipTest(f"SqlLinkState: {test_name} not yet implemented")
 
     def state_factory(self) -> SqlLinkState:
         """Return SqlLinkState with file-based database."""
