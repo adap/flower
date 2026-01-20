@@ -18,8 +18,9 @@
 import secrets
 from typing import cast
 
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, text
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from flwr.common import now
 from flwr.common.constant import (
@@ -124,28 +125,36 @@ class SqlCoreState(CoreState, SqlMixin):
         """
         current = now().timestamp()
 
-        # Delete expired tokens and get their run_ids and active_until timestamps
-        query = """
-            DELETE FROM token_store
-            WHERE active_until < :current
-            RETURNING run_id, active_until;
-        """
-        rows = self.query(query, {"current": current})
-        expired_records = [
-            (int64_to_uint64(row["run_id"]), row["active_until"]) for row in rows
-        ]
+        with self.session() as session:
+            # Delete expired tokens and get their run_ids and active_until timestamps
+            query = """
+                DELETE FROM token_store
+                WHERE active_until < :current
+                RETURNING run_id, active_until;
+            """
+            rows = session.execute(text(query), {"current": current}).mappings().all()
+            expired_records = [
+                (int64_to_uint64(row["run_id"]), row["active_until"]) for row in rows
+            ]
 
-        # Hook for subclasses
-        if expired_records:
-            self._on_tokens_expired(expired_records)
+            # Hook for subclasses
+            if expired_records:
+                self._on_tokens_expired(session, expired_records)
 
-    def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
+            # Commit transaction to finalize database changes
+            session.commit()
+
+    def _on_tokens_expired(
+        self, session: Session, expired_records: list[tuple[int, float]]
+    ) -> None:
         """Handle cleanup of expired tokens.
 
         Override in subclasses to add custom cleanup logic.
 
         Parameters
         ----------
+        session : Session
+            The active SQLAlchemy session for the cleanup transaction.
         expired_records : list[tuple[int, float]]
             List of tuples containing (run_id, active_until timestamp)
             for expired tokens.
