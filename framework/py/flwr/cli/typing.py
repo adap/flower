@@ -119,7 +119,7 @@ class SuperLinkConnection:
     root_certificates: str | None = None
     _insecure: bool | None = None
     _enable_account_auth: bool | None = None
-    _federation: str | None = None
+    federation: str | None = None
     options: SuperLinkSimulationOptions | None = None
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -138,7 +138,7 @@ class SuperLinkConnection:
         self.root_certificates = root_certificates
         self._insecure = insecure
         self._enable_account_auth = enable_account_auth
-        self._federation = federation
+        self.federation = federation
         self.options = options
 
         self.__post_init__()
@@ -156,13 +156,6 @@ class SuperLinkConnection:
         if self._enable_account_auth is None:
             return False
         return self._enable_account_auth
-
-    @property
-    def federation(self) -> str:
-        """Return the federation or its default (empty string) if unset."""
-        if self._federation is None:
-            return ""
-        return self._federation
 
     def __post_init__(self) -> None:
         """Validate SuperLink connection configuration."""
@@ -202,10 +195,10 @@ class SuperLinkConnection:
                 + f"expected bool, but got {type(self._enable_account_auth).__name__}."
             )
 
-        if self._federation is not None and not isinstance(self._federation, str):
+        if self.federation is not None and not isinstance(self.federation, str):
             raise ValueError(
                 err_prefix % SuperLinkConnectionTomlKey.FEDERATION
-                + f"expected str, but got {type(self._federation).__name__}."
+                + f"expected str, but got {type(self.federation).__name__}."
             )
 
         # The connection needs to have either an address or options (or both).

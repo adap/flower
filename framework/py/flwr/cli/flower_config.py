@@ -221,7 +221,7 @@ def serialize_superlink_connection(connection: SuperLinkConnection) -> dict[str,
         SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: connection.root_certificates,
         SuperLinkConnectionTomlKey.INSECURE: connection._insecure,
         SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: connection._enable_account_auth,
-        SuperLinkConnectionTomlKey.FEDERATION: connection._federation,
+        SuperLinkConnectionTomlKey.FEDERATION: connection.federation,
     }
     # Remove None values
     conn_dict = {k: v for k, v in conn_dict.items() if v is not None}
