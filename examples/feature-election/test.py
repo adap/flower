@@ -148,7 +148,7 @@ def main():
         strategy.current_direction = 1
         strategy.search_step = 0.1
 
-        next_fd = strategy._calculate_next_fd()
+        next_fd = strategy._next_freedom_degree()
         expected_fd = 0.7
 
         if abs(next_fd - expected_fd) < 1e-6:
@@ -163,7 +163,7 @@ def main():
         strategy.current_direction = 1
         strategy.search_step = 0.1
 
-        next_fd = strategy._calculate_next_fd()
+        next_fd = strategy._next_freedom_degree()
         # Calculation: 0.5 + (-1 * 0.05) = 0.45 (Step decayed to 0.05)
         expected_fd = 0.45
 
@@ -181,7 +181,7 @@ def main():
         strategy.search_step = 0.1  # Big step
 
         # Next would be 0.05 + (-1 * 0.1) = -0.05. Should clip to MIN_FD (0.05)
-        next_fd = strategy._calculate_next_fd()
+        next_fd = strategy._next_freedom_degree()
         if next_fd == 0.05:
             print(f"   ✓ Scenario C (Clipping): Correctly clipped to minimum {next_fd}")
         else:

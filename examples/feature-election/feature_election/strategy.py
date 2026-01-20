@@ -516,7 +516,7 @@ class FeatureElectionStrategy(Strategy):
             "union_features": int(np.any(masks, axis=0).sum()),
         }
 
-    def _next_freedom_degree(self, first_step: bool) -> float:
+    def _next_freedom_degree(self, first_step: bool = False) -> float:
         """Hill climbing for freedom_degree."""
         MIN_FD, MAX_FD = 0.05, 1.0
 
@@ -528,11 +528,11 @@ class FeatureElectionStrategy(Strategy):
         if len(self.tuning_history) < 2:
             return self.freedom_degree
 
-        _, curr_score = self.tuning_history[-1]
+        curr_fd, curr_score = self.tuning_history[-1]
         prev_fd, prev_score = self.tuning_history[-2]
 
         if curr_score > prev_score:
-            new_fd = self.freedom_degree + self.current_direction * self.search_step
+            new_fd = curr_fd + self.current_direction * self.search_step
         else:
             self.current_direction *= -1
             self.search_step *= 0.5
