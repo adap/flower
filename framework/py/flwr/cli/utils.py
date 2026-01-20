@@ -48,7 +48,7 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
-from flwr.supercore.utils import get_flwr_home
+from flwr.supercore.credential_store import get_credential_store
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
@@ -56,6 +56,7 @@ from .config_utils import (
     load_certificate_in_connection,
     validate_certificate_in_federation_config,
 )
+from .constant import AUTHN_TYPE_STORE_KEY
 
 
 def prompt_text(
@@ -325,65 +326,39 @@ def retrieve_authn_type(config_path: Path) -> str:
         return AuthnType.NOOP
 
 
+def get_authn_type(host: str) -> str:
+    """Retrieve the authentication type for the given host from the credential store.
+
+    `AuthnType.NOOP` is returned if no authentication type is found.
+    """
+    store = get_credential_store()
+    authn_type = store.get(AUTHN_TYPE_STORE_KEY % host)
+    if authn_type is None:
+        return AuthnType.NOOP
+    return authn_type.decode("utf-8")
+
+
 def load_cli_auth_plugin(
     root_dir: Path,
     federation: str,
     federation_config: dict[str, Any],
     authn_type: str | None = None,
 ) -> CliAuthPlugin:
-    """Load the CLI-side account auth plugin for the given authn type.
-
-    Parameters
-    ----------
-    root_dir : Path
-        Root directory of the Flower project.
-    federation : str
-        Name of the federation.
-    federation_config : dict[str, Any]
-        Federation configuration dictionary.
-    authn_type : str | None
-        Authentication type. If None, will be determined from config.
-
-    Returns
-    -------
-    CliAuthPlugin
-        The loaded authentication plugin instance.
-
-    Raises
-    ------
-    typer.Exit
-        If the authentication type is unknown.
-    """
-    # Find the path to the account auth config file
-    config_path = get_account_auth_config_path(root_dir, federation)
-
-    # Determine the auth type if not provided
-    # Only `flwr login` command can provide `authn_type` explicitly, as it can query the
-    # SuperLink for the auth type.
-    if authn_type is None:
-        authn_type = AuthnType.NOOP
-        if account_auth_enabled(federation_config):
-            authn_type = retrieve_authn_type(config_path)
-
-    # Retrieve auth plugin class and instantiate it
-    try:
-        auth_plugin_class = get_cli_plugin_class(authn_type)
-        return auth_plugin_class(config_path)
-    except ValueError:
-        typer.echo(f"❌ Unknown account authentication type: {authn_type}")
-        raise typer.Exit(code=1) from None
+    """."""
+    raise RuntimeError(
+        "Deprecated function. Use `load_cli_auth_plugin_from_connection`"
+    )
 
 
 def load_cli_auth_plugin_from_connection(
-    connection: SuperLinkConnection,
-    authn_type: str | None = None,
+    host: str, authn_type: str | None = None
 ) -> CliAuthPlugin:
     """Load the CLI-side account auth plugin for the given connection.
 
     Parameters
     ----------
-    connection : SuperLinkConnection
-        The SuperLink connection configuration.
+    host : str
+        The SuperLink Control API address.
     authn_type : str | None
         Authentication type. If None, will be determined from config.
 
@@ -397,24 +372,16 @@ def load_cli_auth_plugin_from_connection(
     typer.Exit
         If the authentication type is unknown.
     """
-    # Locate the credentials directory
-    flwr_dir = get_flwr_home()
-    credentials_dir = flwr_dir / CREDENTIALS_DIR
-    credentials_dir.mkdir(parents=True, exist_ok=True)
-
-    # Find the path to the account auth config file
-    config_path = get_account_auth_config_path(flwr_dir, connection.name)
-
     # Determine the auth type if not provided
+    # Only `flwr login` command can provide `authn_type` explicitly, as it can query the
+    # SuperLink for the auth type.
     if authn_type is None:
-        authn_type = AuthnType.NOOP
-        if connection.enable_account_auth:
-            authn_type = retrieve_authn_type(config_path)
+        authn_type = get_authn_type(host)
 
     # Retrieve auth plugin class and instantiate it
     try:
         auth_plugin_class = get_cli_plugin_class(authn_type)
-        return auth_plugin_class(config_path)
+        return auth_plugin_class(host)
     except ValueError:
         typer.echo(f"❌ Unknown account authentication type: {authn_type}")
         raise typer.Exit(code=1) from None
@@ -491,8 +458,7 @@ def init_channel_from_connection(
 
     # Load authentication plugin
     if auth_plugin is None:
-        auth_plugin = load_cli_auth_plugin_from_connection(connection)
-
+        auth_plugin = load_cli_auth_plugin_from_connection(connection.address)
     # Load tokens
     auth_plugin.load_tokens()
 
