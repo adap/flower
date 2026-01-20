@@ -218,7 +218,24 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         # Filter node IDs by federation
         return self.federation_manager.filter_nodes(node_ids, federation)
 
-    def get_node_info(
+    def _check_and_tag_offline_nodes(self) -> None:
+        """Check and tag offline nodes."""
+        current_time = now().isoformat()
+        query = """
+            UPDATE node
+            SET status = :offline
+            WHERE status = :online AND online_until < :current_time
+        """
+        self.query(
+            query,
+            {
+                "offline": NodeStatus.OFFLINE,
+                "online": NodeStatus.ONLINE,
+                "current_time": current_time,
+            },
+        )
+
+    def get_node_info(  # pylint: disable=too-many-locals
         self,
         *,
         node_ids: Sequence[int] | None = None,
@@ -226,7 +243,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         statuses: Sequence[str] | None = None,
     ) -> Sequence[NodeInfo]:
         """Retrieve information about nodes based on the specified filters."""
-        self._check_and_tag_offline_nodes()  # TODO: Check implementation
+        self._check_and_tag_offline_nodes()
 
         # Build the WHERE clause based on provided filters
         conditions = []
@@ -364,20 +381,3 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
     def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
         """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
         raise NotImplementedError
-
-    def _check_and_tag_offline_nodes(self) -> None:
-        """Check and tag offline nodes."""
-        current_time = now().isoformat()
-        query = """
-        UPDATE node
-        SET status = :offline
-        WHERE status = :online AND online_until < :current_time
-        """
-        self.query(
-            query,
-            {
-                "offline": NodeStatus.OFFLINE,
-                "online": NodeStatus.ONLINE,
-                "current_time": current_time,
-            },
-        )

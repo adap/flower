@@ -1831,7 +1831,7 @@ class SqlInMemoryStateTest(StateTest, unittest.TestCase):
         "test_init_state",
         "test_set_linkstate_of_federation_manager",
         "test_initialize",
-        # Node management (PR2) - only tests not requiring create_run or activated nodes
+        # Node management - only tests not requiring create_run or activated nodes
         "test_create_node_public_key",
         "test_create_node_public_key_twice",
         "test_get_node_info_no_filters",
