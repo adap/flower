@@ -621,7 +621,6 @@ class TestSuperLinkConnection(unittest.TestCase):
 [superlink.new-service]
 address = "localhost:9999"
 insecure = false
-enable-account-auth = false
 options.num-supernodes = 12
 options.backend.name = "ray"
 options.backend.client-resources.num-cpus = 2

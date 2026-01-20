@@ -98,8 +98,8 @@ class SuperLinkConnection:
     name: str
     _address: str | None = None
     _root_certificates: str | None = None
-    insecure: bool = False
-    enable_account_auth: bool = False
+    _insecure: bool | None = None
+    _enable_account_auth: bool | None = None
     _federation: str | None = None
     _options: SuperLinkSimulationOptions | None = None
 
@@ -117,8 +117,8 @@ class SuperLinkConnection:
         self.name = name
         self._address = address
         self._root_certificates = root_certificates
-        self.insecure = insecure or False
-        self.enable_account_auth = enable_account_auth or False
+        self._insecure = insecure
+        self._enable_account_auth = enable_account_auth
         self._federation = federation
         self._options = options
 
@@ -139,6 +139,20 @@ class SuperLinkConnection:
                 _ERROR_MSG_FMT % SuperLinkConnectionTomlKey.ROOT_CERTIFICATES
             )
         return self._root_certificates
+
+    @property
+    def insecure(self) -> bool:
+        """Return the insecure flag."""
+        if self._insecure is None:
+            return False
+        return self._insecure
+
+    @property
+    def enable_account_auth(self) -> bool:
+        """Return the enable_account_auth flag."""
+        if self._enable_account_auth is None:
+            return False
+        return self._enable_account_auth
 
     @property
     def federation(self) -> str:
@@ -179,15 +193,17 @@ class SuperLinkConnection:
                     f"'{self._root_certificates}'."
                 )
 
-        if not isinstance(self.insecure, bool):
+        if self._insecure is not None and not isinstance(self._insecure, bool):
             raise ValueError(
                 err_prefix % SuperLinkConnectionTomlKey.INSECURE
-                + f"expected bool, but got {type(self.insecure).__name__}."
+                + f"expected bool, but got {type(self._insecure).__name__}."
             )
-        if not isinstance(self.enable_account_auth, bool):
+        if self._enable_account_auth is not None and not isinstance(
+            self._enable_account_auth, bool
+        ):
             raise ValueError(
                 err_prefix % SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH
-                + f"expected bool, but got {type(self.enable_account_auth).__name__}."
+                + f"expected bool, but got {type(self._enable_account_auth).__name__}."
             )
 
         if self._federation is not None and not isinstance(self._federation, str):
