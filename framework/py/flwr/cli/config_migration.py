@@ -276,3 +276,24 @@ def migrate(
 
         # Abort if legacy usage is detected to force user to adapt to new usage
         raise typer.Exit(code=1)
+
+
+def warn_if_federation_config_overrides(
+    federation_config_overrides: list[str] | None,
+) -> None:
+    """Warn if federation config overrides are provided.
+
+    Parameters
+    ----------
+    federation_config_overrides : list[str] | None
+        List of federation config override strings.
+    """
+    if federation_config_overrides is None:
+        return
+
+    typer.secho(
+        "⚠️ Warning: `--federation-config` option is deprecated and will be ignored.\n"
+        "Use Flower configuration files to set SuperLink connections.",
+        fg=typer.colors.YELLOW,
+        bold=True,
+    )
