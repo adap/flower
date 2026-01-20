@@ -498,7 +498,7 @@ def init_channel_from_connection(
 
     # Create the gRPC channel
     channel = create_channel(
-        server_address=connection.address,
+        server_address=connection.address,  # type: ignore
         insecure=connection.insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
