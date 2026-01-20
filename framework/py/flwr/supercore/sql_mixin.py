@@ -168,6 +168,19 @@ class SqlMixin(ABC):
     ) -> list[dict[str, Any]]:
         """Execute a SQL query and return the results as list of dicts.
 
+        TRANSACTION SEMANTICS:
+        ----------------------
+        Each call to query() runs in its own isolated transaction that is
+        automatically committed. This is suitable for single SQL statements.
+
+        For complex operations requiring multiple SQL statements in a single
+        transaction, use session() directly instead:
+
+            with self.session() as session:
+                session.execute(text("UPDATE ..."), {...})
+                session.execute(text("INSERT ..."), {...})
+                session.commit()  # Commits both statements atomically
+
         Parameters
         ----------
         query : str
@@ -185,17 +198,24 @@ class SqlMixin(ABC):
 
         Examples
         --------
-        # Single query with named parameters
+        # Single query with named parameters (auto-committed transaction)
         rows = self.query(
             "SELECT * FROM node WHERE node_id = :id AND status = :status",
             {"id": node_id, "status": status}
         )
 
-        # Batch insert with named parameters
+        # Batch insert with named parameters (auto-committed transaction)
         rows = self.query(
             "INSERT INTO node (node_id, status) VALUES (:id, :status)",
             [{"id": 1, "status": "online"}, {"id": 2, "status": "offline"}]
         )
+
+        # Multi-statement transaction - use session() directly
+        with self.session() as session:
+            # Both statements succeed or fail together
+            session.execute(text("DELETE FROM old_data WHERE date < :cutoff"), {...})
+            session.execute(text("INSERT INTO archive SELECT * FROM old_data"), {})
+            session.commit()
         """
         if self._engine is None:
             raise AttributeError(
@@ -227,6 +247,9 @@ class SqlMixin(ABC):
                     rows = []
 
                 # Commit transaction (finalizes database changes)
+                # NOTE: This commits after EVERY query() call, making each call
+                # an isolated transaction. For multi-statement transactions,
+                # use session() directly.
                 session.commit()
 
                 # Return the fetched data
