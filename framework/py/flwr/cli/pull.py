@@ -19,7 +19,7 @@ from typing import Annotated
 
 import typer
 
-from flwr.cli.config_migration import migrate_if_legacy_usage
+from flwr.cli.config_migration import migrate
 from flwr.cli.config_utils import exit_if_no_address_in_connection
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
@@ -48,7 +48,7 @@ def pull(  # pylint: disable=R0914
     artifacts can then be downloaded from the provided URL.
     """
     # Migrate legacy usage if any
-    migrate_if_legacy_usage(superlink, args=ctx.args)
+    migrate(superlink, args=ctx.args)
 
     # Read superlink connection configuration
     superlink_connection = read_superlink_connection(superlink)

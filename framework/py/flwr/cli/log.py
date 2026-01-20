@@ -22,7 +22,7 @@ from typing import Annotated, cast
 import grpc
 import typer
 
-from flwr.cli.config_migration import migrate_if_legacy_usage
+from flwr.cli.config_migration import migrate
 from flwr.cli.config_utils import exit_if_no_address_in_connection
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.cli.typing import SuperLinkConnection
@@ -177,7 +177,7 @@ def log(
     --stream) or printed once (with --show).
     """
     # Migrate legacy usage if any
-    migrate_if_legacy_usage(superlink, args=ctx.args)
+    migrate(superlink, args=ctx.args)
 
     # Read superlink connection configuration
     superlink_connection = read_superlink_connection(superlink)

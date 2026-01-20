@@ -22,7 +22,7 @@ from typing import Annotated
 import typer
 from rich.console import Console
 
-from flwr.cli.config_migration import migrate_if_legacy_usage
+from flwr.cli.config_migration import migrate
 from flwr.cli.config_utils import exit_if_no_address_in_connection
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.common.constant import CliOutputFormat
@@ -62,17 +62,18 @@ def stop(  # pylint: disable=R0914
     """
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
+
+    if suppress_output:
+        redirect_output(captured_output)
+
+    migrate(superlink, args=ctx.args)
+
+    # Read superlink connection configuration
+    superlink_connection = read_superlink_connection(superlink)
+    exit_if_no_address_in_connection(superlink_connection, "stop")
+    channel = None
+
     try:
-        if suppress_output:
-            redirect_output(captured_output)
-
-        # Migrate legacy usage if any
-        migrate_if_legacy_usage(superlink, args=ctx.args)
-
-        # Read superlink connection configuration
-        superlink_connection = read_superlink_connection(superlink)
-        exit_if_no_address_in_connection(superlink_connection, "stop")
-        channel = None
         try:
             channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)  # pylint: disable=unused-variable # noqa: F841

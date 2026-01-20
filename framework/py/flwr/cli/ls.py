@@ -24,7 +24,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from flwr.cli.config_migration import migrate_if_legacy_usage
+from flwr.cli.config_migration import migrate
 from flwr.cli.config_utils import exit_if_no_address_in_connection
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.common.constant import CliOutputFormat, Status, SubStatus
@@ -88,17 +88,19 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
 
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
+
+    if suppress_output:
+        redirect_output(captured_output)
+
+    # Migrate legacy usage if any
+    migrate(superlink, args=ctx.args)
+
+    # Read superlink connection configuration
+    superlink_connection = read_superlink_connection(superlink)
+    exit_if_no_address_in_connection(superlink_connection, command_name)
+    channel = None
+
     try:
-        if suppress_output:
-            redirect_output(captured_output)
-
-        # Migrate legacy usage if any
-        migrate_if_legacy_usage(superlink, args=ctx.args)
-
-        # Read superlink connection configuration
-        superlink_connection = read_superlink_connection(superlink)
-        exit_if_no_address_in_connection(superlink_connection, command_name)
-        channel = None
         try:
             if runs and run_id is not None:
                 raise ValueError(
