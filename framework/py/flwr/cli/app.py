@@ -52,21 +52,32 @@ app.command()(run)
 app.command()(build)
 app.command()(install)
 app.command(
-    context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
+    context_settings={
+        "allow_extra_args": True,
+    }
 )(log)
 app.command(
-    "list", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
+    "list",
+    context_settings={
+        "allow_extra_args": True,
+    },
 )(ls)
 app.command(
     hidden=True,
-    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+    context_settings={
+        "allow_extra_args": True,
+    },
 )(ls)
 app.command(
-    context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
+    context_settings={
+        "allow_extra_args": True,
+    }
 )(stop)
 app.command()(login)
 app.command(
-    context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
+    context_settings={
+        "allow_extra_args": True,
+    }
 )(pull)
 
 # Create supernode command group
