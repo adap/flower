@@ -111,8 +111,11 @@ cleanup_and_exit() {
     exit $1
 }
 
-# Check for "finished:completed" status in a loop with a timeout
-while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
+# Run `flwr ls` in deprecated mode to trigger migration
+flwr ls . e2e
+
+# Check for "finished:completed" status in a loop with a gtimeout
+while [ "$found_success" = false ] && [ $elapsed -lt $gtimeout ]; do
     # Run the command and capture output
     output=$(flwr ls e2e --format=json)
 
