@@ -219,8 +219,8 @@ def serialize_superlink_connection(connection: SuperLinkConnection) -> dict[str,
     conn_dict: dict[str, Any] = {
         SuperLinkConnectionTomlKey.ADDRESS: connection._address,
         SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: connection._root_certificates,
-        SuperLinkConnectionTomlKey.INSECURE: connection._insecure,
-        SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: connection._enable_account_auth,
+        SuperLinkConnectionTomlKey.INSECURE: connection.insecure,
+        SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: connection.enable_account_auth,
         SuperLinkConnectionTomlKey.FEDERATION: connection._federation,
     }
     # Remove None values
