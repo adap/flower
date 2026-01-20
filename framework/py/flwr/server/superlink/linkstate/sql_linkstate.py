@@ -21,6 +21,7 @@ from typing import Any
 
 from sqlalchemy import MetaData
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from flwr.app.user_config import UserConfig
 from flwr.common import Context, Message, log, now
@@ -346,11 +347,15 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         """Acknowledge a heartbeat received from a node."""
         raise NotImplementedError
 
-    def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
+    def _on_tokens_expired(
+        self, session: Session, expired_records: list[tuple[int, float]]
+    ) -> None:
         """Transition runs with expired tokens to failed status.
 
         Parameters
         ----------
+        session : Session
+            The active SQLAlchemy session for the cleanup transaction.
         expired_records : list[tuple[int, float]]
             List of tuples containing (run_id, active_until timestamp)
             for expired tokens.
