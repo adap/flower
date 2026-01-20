@@ -25,7 +25,6 @@ from rich.table import Table
 from rich.text import Text
 
 from flwr.cli.config_migration import migrate
-from flwr.cli.config_utils import exit_if_no_address_in_connection
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.common.constant import CliOutputFormat, Status, SubStatus
 from flwr.common.logger import print_json_error, redirect_output, restore_output
@@ -97,7 +96,6 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
 
     # Read superlink connection configuration
     superlink_connection = read_superlink_connection(superlink)
-    exit_if_no_address_in_connection(superlink_connection, command_name)
     channel = None
 
     try:
@@ -106,7 +104,9 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
                 raise ValueError(
                     "The options '--runs' and '--run-id' are mutually exclusive."
                 )
-            channel = init_channel_from_connection(superlink_connection)
+            channel = init_channel_from_connection(
+                superlink_connection, cmd=command_name
+            )
             stub = ControlStub(channel)
 
             # Display information about a specific run ID

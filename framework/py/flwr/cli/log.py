@@ -23,7 +23,6 @@ import grpc
 import typer
 
 from flwr.cli.config_migration import migrate
-from flwr.cli.config_utils import exit_if_no_address_in_connection
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.cli.typing import SuperLinkConnection
 from flwr.common.constant import CONN_RECONNECT_INTERVAL, CONN_REFRESH_PERIOD
@@ -181,7 +180,6 @@ def log(
 
     # Read superlink connection configuration
     superlink_connection = read_superlink_connection(superlink)
-    exit_if_no_address_in_connection(superlink_connection, "log")
 
     try:
         _log_with_control_api(superlink_connection, run_id, stream)
@@ -206,7 +204,7 @@ def _log_with_control_api(
     stream : bool
         If True, stream logs continuously; if False, print once.
     """
-    channel = init_channel_from_connection(superlink_connection)
+    channel = init_channel_from_connection(superlink_connection, cmd="log")
 
     if stream:
         start_stream(run_id, channel, CONN_REFRESH_PERIOD)

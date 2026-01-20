@@ -20,7 +20,6 @@ from typing import Annotated
 import typer
 
 from flwr.cli.config_migration import migrate
-from flwr.cli.config_utils import exit_if_no_address_in_connection
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsRequest,
@@ -52,10 +51,9 @@ def pull(  # pylint: disable=R0914
 
     # Read superlink connection configuration
     superlink_connection = read_superlink_connection(superlink)
-    exit_if_no_address_in_connection(superlink_connection, "pull")
     channel = None
     try:
-        channel = init_channel_from_connection(superlink_connection)
+        channel = init_channel_from_connection(superlink_connection, cmd="pull")
         stub = ControlStub(channel)
         with flwr_cli_grpc_exc_handler():
             res: PullArtifactsResponse = stub.PullArtifacts(

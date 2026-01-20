@@ -23,7 +23,6 @@ import typer
 from rich.console import Console
 
 from flwr.cli.config_migration import migrate
-from flwr.cli.config_utils import exit_if_no_address_in_connection
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.common.constant import CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
@@ -70,12 +69,11 @@ def stop(  # pylint: disable=R0914
 
     # Read superlink connection configuration
     superlink_connection = read_superlink_connection(superlink)
-    exit_if_no_address_in_connection(superlink_connection, "stop")
     channel = None
 
     try:
         try:
-            channel = init_channel_from_connection(superlink_connection)
+            channel = init_channel_from_connection(superlink_connection, cmd="stop")
             stub = ControlStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
             typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)

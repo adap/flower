@@ -459,7 +459,7 @@ def init_channel(
 
 
 def init_channel_from_connection(
-    connection: SuperLinkConnection, auth_plugin: CliAuthPlugin | None = None
+    connection: SuperLinkConnection, cmd: str, auth_plugin: CliAuthPlugin | None = None
 ) -> grpc.Channel:
     """Initialize gRPC channel to the Control API.
 
@@ -467,6 +467,8 @@ def init_channel_from_connection(
     ----------
     connection : SuperLinkConnection
         SuperLink connection configuration.
+    cmd : str
+        The command name to display in the error message.
     auth_plugin : CliAuthPlugin | None (default: None)
         Authentication plugin instance for handling credentials.
 
@@ -475,6 +477,16 @@ def init_channel_from_connection(
     grpc.Channel
         Configured gRPC channel with authentication interceptors.
     """
+    if connection.address is None:
+        typer.secho(
+            f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the "
+            "correct SuperLink (Control API) address is provided in `pyproject.toml`.",
+            fg=typer.colors.RED,
+            bold=True,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
     root_certificates_bytes = load_certificate_in_connection(connection)
 
     # Load authentication plugin

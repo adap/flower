@@ -362,32 +362,6 @@ def exit_if_no_address(federation_config: dict[str, Any], cmd: str) -> None:
         raise typer.Exit(code=1)
 
 
-def exit_if_no_address_in_connection(connection: SuperLinkConnection, cmd: str) -> None:
-    """Exit if the provided SuperLink connection has no "address" key.
-
-    Parameters
-    ----------
-    connection : SuperLinkConnection
-        The SuperLink connection to check.
-    cmd : str
-        The command name to display in the error message.
-
-    Raises
-    ------
-    typer.Exit
-        If 'address' key is not present in federation_config.
-    """
-    if connection.address is None:
-        typer.secho(
-            f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the "
-            "correct SuperLink (Control API) address is provided in `pyproject.toml`.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
-        )
-        raise typer.Exit(code=1)
-
-
 def get_insecure_flag(federation_config: dict[str, Any]) -> bool:
     """Extract and validate the `insecure` flag from the federation configuration.
 
