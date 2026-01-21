@@ -33,4 +33,4 @@ options.num-supernodes = 10
 [tool.flwr.federations.e2e]
 address = "127.0.0.1:9093"
 insecure = true
-options.num-supernodes = 10
+options.num-supernodes = 1
