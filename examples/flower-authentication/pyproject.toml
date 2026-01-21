@@ -12,6 +12,7 @@ dependencies = [
     "flwr-datasets[vision]>=0.5.0",
     "torch>=2.8.0",
     "torchvision>=0.23.0",
+    "cryptography>=44.0.1",
 ]
 
 [tool.hatch.build.targets.wheel]
