@@ -61,7 +61,7 @@ esac
 # Install Flower app
 pip install -e . --no-deps
 
-# rever changes if any in pyproject.toml
+# revert changes if any in pyproject.toml
 # This is needed for multi-stage CI tests that 
 # perform migrations more than once. A conflict
 # arise when toml-federations are migrated and then 
