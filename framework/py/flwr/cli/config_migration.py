@@ -57,21 +57,21 @@ CLI_NOTICE = (
 )
 
 
-def _is_legacy_usage(superlink: str | None, args: list[str]) -> bool:
+def _is_legacy_usage(positional_arg_1: str | None, args: list[str]) -> bool:
     """Check if legacy usage is detected in the given arguments."""
-    if superlink is None:
+    if positional_arg_1 is None:
         return False
 
     # If one and only one extra argument is given, assume legacy usage
     if len(args) == 1:
         return True
 
-    # If the `superlink` looks like a path, assume legacy usage
-    pth = Path(superlink)
-    if pth.is_absolute() or len(pth.parts) > 1 or superlink in (".", ".."):
+    # If the first positional argument looks like a path, assume legacy usage
+    pth = Path(positional_arg_1)
+    if pth.is_absolute() or len(pth.parts) > 1 or positional_arg_1 in (".", ".."):
         return True
 
-    # Lastly, check if a pyproject.toml file exists at the given superlink
+    # Lastly, check if a pyproject.toml file exists at the given path
     if (pth / "pyproject.toml").exists():
         return True
 
@@ -172,7 +172,7 @@ def _comment_out_legacy_toml_config(app: Path) -> None:
 
 
 def migrate(
-    superlink: str | None,
+    positional_arg_1: str | None,
     args: list[str],
     ignore_legacy_usage: bool = False,
 ) -> None:
@@ -182,13 +182,13 @@ def migrate(
     pyproject.toml to the new Flower config format when legacy usage is detected
     or the migration is applicable.
 
-    `flwr run` should call `migrate(superlink, [], ignore_legacy_usage=True)` to skip
+    `flwr run` should call `migrate(app, [], ignore_legacy_usage=True)` to skip
     legacy usage check. Other CLI commands should call `migrate(superlink, ctx.args)`.
 
     Parameters
     ----------
-    superlink : str | None
-        Value of the `[SUPERLINK]` argument provided to the CLI command.
+    positional_arg_1 : str | None
+        The first positional argument.
     args : list[str]
         Additional arguments. In legacy usage, this is the TOML federation name.
     ignore_legacy_usage : bool (default: False)
@@ -224,12 +224,13 @@ def migrate(
         raise click.UsageError(f"Got unexpected extra arguments ({' '.join(args[1:])})")
 
     # Determine app path for migration
-    app = Path(superlink) if superlink else Path(".")
+    arg1 = positional_arg_1
+    app = Path(arg1) if arg1 else Path(".")
     app = app.resolve()
 
     # Check if migration is applicable and if legacy usage is detected
     is_migratable, reason = _is_migratable(app)
-    is_legacy = _is_legacy_usage(superlink, args) if not ignore_legacy_usage else False
+    is_legacy = _is_legacy_usage(arg1, args) if not ignore_legacy_usage else False
 
     # Print notice once if legacy usage detected or migration is applicable
     if is_legacy or is_migratable:

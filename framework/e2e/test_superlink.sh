@@ -61,6 +61,14 @@ esac
 # Install Flower app
 pip install -e . --no-deps
 
+# revert changes if any in pyproject.toml
+# This is needed for multi-stage CI tests that 
+# perform migrations more than once. A conflict
+# arise when toml-federations are migrated and then 
+# re-injected with commands below. It's safer to
+# start from a clean slate.
+git checkout pyproject.toml
+
 # Remove any duplicates
 sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
 

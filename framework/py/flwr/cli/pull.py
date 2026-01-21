@@ -39,7 +39,7 @@ def pull(  # pylint: disable=R0914
     ],
     superlink: Annotated[
         str | None,
-        typer.Argument(help="Name of the superlink configuration"),
+        typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
     federation_config_overrides: Annotated[
         list[str] | None,

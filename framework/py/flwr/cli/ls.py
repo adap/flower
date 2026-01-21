@@ -45,7 +45,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
     ctx: typer.Context,
     superlink: Annotated[
         str | None,
-        typer.Argument(help="Name of the superlink configuration"),
+        typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
     federation_config_overrides: Annotated[
         list[str] | None,
