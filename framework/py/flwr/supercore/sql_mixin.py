@@ -17,7 +17,9 @@
 
 import re
 from abc import ABC
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
+from contextlib import contextmanager
+from contextvars import ContextVar
 from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Any
@@ -29,6 +31,11 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from flwr.common.logger import log
 from flwr.supercore.constant import SQLITE_PRAGMAS
+
+_current_session: ContextVar[Session | None] = ContextVar(
+    "current_sqlalchemy_session",
+    default=None,
+)
 
 
 def _set_sqlite_pragmas(dbapi_conn: Any, _connection_record: Any) -> None:
@@ -84,21 +91,45 @@ class SqlMixin(ABC):
         self._engine: Engine | None = None
         self._session_factory: sessionmaker[Session] | None = None
 
-    def session(self) -> Session:
-        """Create a new database session.
+    @contextmanager
+    def session(self) -> Iterator[Session]:
+        """Provide a transactional database session context.
 
-        Returns
-        -------
+        Yields a SQLAlchemy Session that automatically commits on success or rolls
+        back on exceptions. Re-entrant: nested calls reuse the same session. Use for
+        multi-statement transactions; prefer `query()` for single statements.
+
+        Yields
+        ------
         Session
-            A new SQLAlchemy session. Use as context manager:
+            SQLAlchemy session. Commits on context exit, rolls back on exceptions.
 
+        Examples
+        --------
             with self.session() as session:
-                session.execute(text("SELECT ..."))
-                session.commit()
+                session.execute(text("DELETE FROM t WHERE id = :id"), {"id": 1})
+                session.execute(text("INSERT INTO t2 SELECT * FROM t"))
         """
+        existing = _current_session.get()
+
+        # Re-entrant: reuse the session if in a session context, no begin()
+        if existing is not None:
+            yield existing
+            return
+
         if self._session_factory is None:
             raise AttributeError("Database not initialized. Call initialize() first.")
-        return self._session_factory()
+
+        # Create new session; outermost scope owns the transaction
+        session = self._session_factory()
+        token = _current_session.set(session)
+
+        try:
+            with session.begin():
+                yield session
+        finally:
+            _current_session.reset(token)
+            session.close()
 
     def get_metadata(self) -> MetaData | None:
         """Return the MetaData object for this class.
@@ -238,12 +269,6 @@ class SqlMixin(ABC):
                     # For statements without RETURNING (INSERT/UPDATE/DELETE),
                     # returns_rows is False, so we return empty list.
                     rows = []
-
-                # Commit transaction (finalizes database changes)
-                # NOTE: This commits after EVERY query() call, making each call
-                # an isolated transaction. For multi-statement transactions,
-                # use session() directly.
-                session.commit()
 
                 # Return the fetched data
                 return rows
