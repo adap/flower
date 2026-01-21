@@ -298,8 +298,7 @@ class TestSuperLinkConnection(unittest.TestCase):
 
         # Assert
         self.assertEqual(config.name, name)
-        with self.assertRaises(ValueError):
-            _ = config.address
+        self.assertIsNone(config.address)
         self.assertIsNotNone(config.options)
         assert config.options is not None
         self.assertEqual(config.options.num_supernodes, 10)
@@ -550,8 +549,7 @@ class TestSuperLinkConnection(unittest.TestCase):
             # Assert
             assert config is not None
             self.assertEqual(config.name, "local-sim")
-            with self.assertRaises(ValueError):
-                _ = config.address
+            self.assertIsNone(config.address)
             self.assertIsNotNone(config.options)
             assert config.options is not None
             self.assertEqual(config.options.num_supernodes, 2)

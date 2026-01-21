@@ -18,7 +18,7 @@
 import secrets
 from typing import cast
 
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, text
 from sqlalchemy.exc import IntegrityError
 
 from flwr.common import now
@@ -124,20 +124,21 @@ class SqlCoreState(CoreState, SqlMixin):
         """
         current = now().timestamp()
 
-        # Delete expired tokens and get their run_ids and active_until timestamps
-        query = """
-            DELETE FROM token_store
-            WHERE active_until < :current
-            RETURNING run_id, active_until;
-        """
-        rows = self.query(query, {"current": current})
-        expired_records = [
-            (int64_to_uint64(row["run_id"]), row["active_until"]) for row in rows
-        ]
+        with self.session() as session:
+            # Delete expired tokens and get their run_ids and active_until timestamps
+            query = """
+                DELETE FROM token_store
+                WHERE active_until < :current
+                RETURNING run_id, active_until;
+            """
+            rows = session.execute(text(query), {"current": current}).mappings().all()
+            expired_records = [
+                (int64_to_uint64(row["run_id"]), row["active_until"]) for row in rows
+            ]
 
-        # Hook for subclasses
-        if expired_records:
-            self._on_tokens_expired(expired_records)
+            # Hook for subclasses
+            if expired_records:
+                self._on_tokens_expired(expired_records)
 
     def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
         """Handle cleanup of expired tokens.

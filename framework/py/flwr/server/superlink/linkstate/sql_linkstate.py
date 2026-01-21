@@ -252,20 +252,22 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
-        # Convert the uint64 value to sint64 for SQLite
-        sint64_run_id = uint64_to_int64(run_id)
+        with self.session():
+            # Convert the uint64 value to sint64 for SQLite
+            sint64_run_id = uint64_to_int64(run_id)
 
-        # Validate run ID
-        query = "SELECT federation FROM run WHERE run_id = :run_id"
-        rows = self.query(query, {"run_id": sint64_run_id})
-        if not rows:
-            return set()
-        federation: str = rows[0]["federation"]
+            # Validate run ID
+            query = "SELECT federation FROM run WHERE run_id = :run_id"
+            rows = self.query(query, {"run_id": sint64_run_id})
+            if not rows:
+                return set()
+            federation: str = rows[0]["federation"]
 
-        # Retrieve all online nodes
-        node_ids = {
-            node.node_id for node in self.get_node_info(statuses=[NodeStatus.ONLINE])
-        }
+            # Retrieve all online nodes
+            node_ids = {
+                node.node_id
+                for node in self.get_node_info(statuses=[NodeStatus.ONLINE])
+            }
         # Filter node IDs by federation
         return self.federation_manager.filter_nodes(node_ids, federation)
 
@@ -273,10 +275,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         """Check and tag offline nodes."""
         # strftime will convert POSIX timestamp to ISO format
         query = """
-            UPDATE node
-            SET status = :offline,
-                last_deactivated_at =
-                strftime('%Y-%m-%dT%H:%M:%f+00:00', online_until, 'unixepoch')
+            UPDATE node SET status = :offline,
+            last_deactivated_at =
+            strftime('%Y-%m-%dT%H:%M:%f+00:00', online_until, 'unixepoch')
             WHERE online_until < :current_time AND status = :online
         """
         params: dict[str, Any] = {
@@ -285,10 +286,11 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             "online": NodeStatus.ONLINE,
         }
         if node_ids is not None:
-            sint64_node_ids = [uint64_to_int64(node_id) for node_id in node_ids]
-            placeholders = ",".join([f":nid_{i}" for i in range(len(sint64_node_ids))])
+            placeholders = ",".join([f":nid_{i}" for i in range(len(node_ids))])
             query += f" AND node_id IN ({placeholders})"
-            params.update({f"nid_{i}": nid for i, nid in enumerate(sint64_node_ids)})
+            params.update(
+                {f"nid_{i}": uint64_to_int64(nid) for i, nid in enumerate(node_ids)}
+            )
         self.query(query, params)
 
     def get_node_info(  # pylint: disable=too-many-locals
@@ -299,45 +301,45 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         statuses: Sequence[str] | None = None,
     ) -> Sequence[NodeInfo]:
         """Retrieve information about nodes based on the specified filters."""
-        self._check_and_tag_offline_nodes()
+        with self.session():
+            self._check_and_tag_offline_nodes()
 
-        # Build the WHERE clause based on provided filters
-        conditions = []
-        params: dict[str, Any] = {}
+            # Build the WHERE clause based on provided filters
+            conditions = []
+            params: dict[str, Any] = {}
+            if node_ids is not None:
+                sint64_node_ids = [uint64_to_int64(node_id) for node_id in node_ids]
+                placeholders = ",".join(
+                    [f":nid_{i}" for i in range(len(sint64_node_ids))]
+                )
+                conditions.append(f"node_id IN ({placeholders})")
+                for i, nid in enumerate(sint64_node_ids):
+                    params[f"nid_{i}"] = nid
+            if owner_aids is not None:
+                placeholders = ",".join([f":aid_{i}" for i in range(len(owner_aids))])
+                conditions.append(f"owner_aid IN ({placeholders})")
+                for i, aid in enumerate(owner_aids):
+                    params[f"aid_{i}"] = aid
+            if statuses is not None:
+                placeholders = ",".join([f":st_{i}" for i in range(len(statuses))])
+                conditions.append(f"status IN ({placeholders})")
+                for i, status in enumerate(statuses):
+                    params[f"st_{i}"] = status
 
-        if node_ids is not None:
-            sint64_node_ids = [uint64_to_int64(node_id) for node_id in node_ids]
-            placeholders = ",".join([f":nid_{i}" for i in range(len(sint64_node_ids))])
-            conditions.append(f"node_id IN ({placeholders})")
-            for i, nid in enumerate(sint64_node_ids):
-                params[f"nid_{i}"] = nid
+            # Construct the final query
+            query = "SELECT * FROM node"
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
 
-        if owner_aids is not None:
-            placeholders = ",".join([f":aid_{i}" for i in range(len(owner_aids))])
-            conditions.append(f"owner_aid IN ({placeholders})")
-            for i, aid in enumerate(owner_aids):
-                params[f"aid_{i}"] = aid
+            rows = self.query(query, params)
 
-        if statuses is not None:
-            placeholders = ",".join([f":st_{i}" for i in range(len(statuses))])
-            conditions.append(f"status IN ({placeholders})")
-            for i, status in enumerate(statuses):
-                params[f"st_{i}"] = status
+            result: list[NodeInfo] = []
+            for row in rows:
+                # Convert sint64 node_id to uint64
+                row["node_id"] = int64_to_uint64(row["node_id"])
+                result.append(NodeInfo(**row))
 
-        # Construct the final query
-        query = "SELECT * FROM node"
-        if conditions:
-            query += " WHERE " + " AND ".join(conditions)
-
-        rows = self.query(query, params)
-
-        result: list[NodeInfo] = []
-        for row in rows:
-            # Convert sint64 node_id to uint64
-            row["node_id"] = int64_to_uint64(row["node_id"])
-            result.append(NodeInfo(**row))
-
-        return result
+            return result
 
     def get_node_id_by_public_key(self, public_key: bytes) -> int | None:
         """Get `node_id` for the specified `public_key` if it exists and is not
@@ -441,7 +443,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         return True
 
     def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
-        """Transition runs with expired tokens to failed status.
+        """Handle cleanup of expired tokens.
+
+        Override in subclasses to add custom cleanup logic.
 
         Parameters
         ----------
