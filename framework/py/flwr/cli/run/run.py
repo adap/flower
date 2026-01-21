@@ -109,7 +109,7 @@ def run(
     warn_if_federation_config_overrides(federation_config_overrides)
 
     # Migrate legacy usage if any
-    migrate(superlink, [], ignore_legacy_usage=True)
+    migrate(app, [], ignore_legacy_usage=True)
 
     # Read superlink connection configuration
     superlink_connection = read_superlink_connection(superlink)
