@@ -174,7 +174,7 @@ def _run_with_control_api(
     channel = None
     is_remote_app = app_spec is not None
     try:
-        channel = init_channel_from_connection(superlink_connection, cmd="run")
+        channel = init_channel_from_connection(superlink_connection)
         stub = ControlStub(channel)
 
         # Build FAB if local app
