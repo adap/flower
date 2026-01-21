@@ -265,26 +265,25 @@ class SqlMixin(ABC):
         query = re.sub(r"\s+", " ", query.strip())
 
         try:
+            sql = text(query)
+
             # Check if already in a session context
             existing_session = _current_session.get()
 
             if existing_session is not None:
                 # Reuse the existing session without creating a new transaction
-                sql = text(query)
-                result: Result[Any] = existing_session.execute(sql, data)
+                result = existing_session.execute(sql, data)
 
                 # Fetch results into Python memory
                 if result.returns_rows:  # type: ignore
-                    rows = [dict(row) for row in result.mappings()]
-                else:
-                    rows = []
-
-                return rows
+                    return [dict(row) for row in result.mappings()]
+                
+                # For statements without RETURNING (INSERT/UPDATE/DELETE),
+                # returns_rows is False, so we return empty list.
+                return []
 
             # Create a new session context for this query
             with self.session() as session:
-                sql = text(query)
-
                 # Execute query (results live in database cursor)
                 # There is no need to check for batch vs single execution;
                 # SQLAlchemy handles both cases automatically.
@@ -293,14 +292,11 @@ class SqlMixin(ABC):
                 # Fetch results into Python memory before commit.
                 # mappings() returns dict-like rows (works for SELECT and RETURNING).
                 if result.returns_rows:  # type: ignore
-                    rows = [dict(row) for row in result.mappings()]
-                else:
-                    # For statements without RETURNING (INSERT/UPDATE/DELETE),
-                    # returns_rows is False, so we return empty list.
-                    rows = []
+                    return [dict(row) for row in result.mappings()]
 
-                # Return the fetched data
-                return rows
+                # For statements without RETURNING (INSERT/UPDATE/DELETE),
+                # returns_rows is False, so we return empty list.
+                return []
 
         except SQLAlchemyError as exc:
             log(ERROR, {"query": query, "data": data, "exception": exc})
