@@ -203,7 +203,7 @@ jobs:
         if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: actions/setup-python@v6
         with:
-          python-version: '3.10'
+          python-version: '3.11'
       - name: Install build tools
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
