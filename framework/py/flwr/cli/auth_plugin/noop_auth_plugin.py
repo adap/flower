@@ -56,7 +56,7 @@ class NoOpCliAuthPlugin(CliAuthPlugin):
         """
         raise LoginError("Account authentication is not enabled on this SuperLink.")
 
-    def __init__(self, host: str) -> None:
+    def __init__(self, host: str = "") -> None:
         pass
 
     def store_tokens(self, credentials: AccountAuthCredentials) -> None:

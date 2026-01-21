@@ -38,13 +38,14 @@ def login(
     ctx: typer.Context,
     superlink: Annotated[
         str | None,
-        typer.Argument(help="Name of the superlink configuration"),
+        typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
     federation_config_overrides: Annotated[
         list[str] | None,
         typer.Option(
             "--federation-config",
             help=FEDERATION_CONFIG_HELP_MESSAGE,
+            hidden=True,
         ),
     ] = None,
 ) -> None:
@@ -83,9 +84,7 @@ def login(
         raise typer.Exit(code=1)
 
     channel = init_channel_from_connection(
-        superlink_connection,
-        cmd="login",
-        auth_plugin=NoOpCliAuthPlugin(""),
+        superlink_connection, "login", NoOpCliAuthPlugin()
     )
     stub = ControlStub(channel)
 
