@@ -5,6 +5,27 @@ from .config_cripto import ENCRYPTION_METHOD, ENCRYPTION_ENABLED
 
 CSV_PATH = None
 CSV_INITIALIZED = False
+TOTAL_CRYPTO_TIME = 0.0
+TOTAL_SERIAL_TIME = 0.0
+
+
+def reset_crypto_totals() -> None:
+    """Reset accumulated crypto/serialization totals."""
+    global TOTAL_CRYPTO_TIME, TOTAL_SERIAL_TIME
+    TOTAL_CRYPTO_TIME = 0.0
+    TOTAL_SERIAL_TIME = 0.0
+
+
+def add_crypto_time(crypto_time: float, serial_time: float) -> None:
+    """Accumulate crypto and serialization time for summary reporting."""
+    global TOTAL_CRYPTO_TIME, TOTAL_SERIAL_TIME
+    TOTAL_CRYPTO_TIME += crypto_time
+    TOTAL_SERIAL_TIME += serial_time
+
+
+def get_crypto_totals() -> tuple[float, float]:
+    """Return accumulated crypto and serialization totals."""
+    return TOTAL_CRYPTO_TIME, TOTAL_SERIAL_TIME
 
 ROUND_SUMMARIES: List[Dict[str, float]] = []
 

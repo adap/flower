@@ -25,6 +25,7 @@ import psutil
 from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
 from .crypto.crypto_selector import encrypt, decrypt, add_integrity, check_integrity
 from .crypto.config_cripto import ENCRYPTION_METHOD,ENCRYPTION_ENABLED, INTEGRITY_ENABLED, INTEGRITY_METHOD
+from .crypto import log_file
 from .crypto.log_file import log_time
 from .typing import (
     Code,
@@ -97,6 +98,7 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
     # LOG TEMPI REALI
     total_time = total_deser_time + total_decrypt_time
     crypto_impact = (total_decrypt_time / total_time * 100.0) if total_time > 0 else 0.0
+    log_file.add_crypto_time(total_decrypt_time, total_deser_time)
     log_time(
         "CRYPTO STATUS: enabled=%s method=%s | DESERIALIZE: %.5f s | CRYPTO: %.5f s | TOTAL: %.5f s | IMPACT: %.2f%%",
         ENCRYPTION_ENABLED,
@@ -158,6 +160,7 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
     # LOG
     total_time = tot_serial_time + tot_crypto_time
     crypto_impact = (tot_crypto_time / total_time * 100.0) if total_time > 0 else 0.0
+    log_file.add_crypto_time(tot_crypto_time, tot_serial_time)
     log_time(
         "CRYPTO STATUS: enabled=%s method=%s | SERIALIZE: %.5f s | CRYPTO: %.5f s | TOTAL: %.5f s | IMPACT: %.2f%%",
         ENCRYPTION_ENABLED,

@@ -91,6 +91,7 @@ class Server:
         """Run federated averaging for a number of rounds."""
         log(INFO, "inizio1")
         start_time = timeit.default_timer()
+        log_file.reset_crypto_totals()
         history = History()
         if hasattr(self.strategy, "history"):
                 self.strategy.history = history
@@ -538,6 +539,17 @@ def run_fl(
     log(INFO, "[SUMMARY]")
     log(INFO, "Run finished %s round(s) in %.2fs", config.num_rounds, elapsed_time)
     log_time("Run finished %s round(s) in %.2fs", config.num_rounds, elapsed_time)
+    total_crypto_time, total_serial_time = log_file.get_crypto_totals()
+    crypto_impact = (
+        (total_crypto_time / elapsed_time * 100.0) if elapsed_time > 0 else 0.0
+    )
+    log_time(
+        "Totale critto: %.2f s su %.2f s (%.2f%%) | serializzazione: %.2f s",
+        total_crypto_time,
+        elapsed_time,
+        crypto_impact,
+        total_serial_time,
+    )
 
     # 📩 Messaggio Telegram
     #send_telegram_file(null,"Ho finito!!!!")
