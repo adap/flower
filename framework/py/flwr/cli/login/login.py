@@ -83,9 +83,7 @@ def login(
         )
         raise typer.Exit(code=1)
 
-    channel = init_channel_from_connection(
-        superlink_connection, NoOpCliAuthPlugin()
-    )
+    channel = init_channel_from_connection(superlink_connection, NoOpCliAuthPlugin())
     stub = ControlStub(channel)
 
     login_request = GetLoginDetailsRequest()
