@@ -15,10 +15,14 @@
 """Tests for SqliteMixin."""
 
 
+import os
 import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
+from parameterized import parameterized
+
+from .sql_mixin_test import DummyDbSqlAlchemy
 from .sqlite_mixin import SqliteMixin
 
 
@@ -33,34 +37,70 @@ class DummyDb(SqliteMixin):
         )
 
 
-def test_transaction_serialization_with_tempfile() -> None:
-    """Verify that `.conn` runs inside real SQLite transactions."""
-    with tempfile.NamedTemporaryFile(suffix=".db") as tmpfile:
-        # Prepare:
+@parameterized.expand(
+    [
+        (DummyDb,),
+        (DummyDbSqlAlchemy,),
+    ],
+    ids=["SqliteMixin", "SqlMixin"],
+)  # type: ignore
+def test_transaction_serialization_with_tempfile(
+    db_class: type[DummyDb] | type[DummyDbSqlAlchemy],
+) -> None:
+    """Verify that SQLite file-level locking serializes concurrent transactions."""
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmpfile:
+        db_path = tmpfile.name
+
+    try:
+        # Initialize database schema once
+        init_db = db_class(db_path)
+        init_db.initialize()
+
         def insert_row(_: int) -> None:
-            db = DummyDb(tmpfile.name)
+            # Each thread creates its own connection to test file-level locking
+            db = db_class(db_path)
             db.initialize()
-            with db.conn:
-                # Insert a dummy row with value -1
-                db.conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
+            if isinstance(db, DummyDb):
+                # SqliteMixin: test re-entrant conn context
                 with db.conn:
-                    # Read current row count
-                    count = db.conn.execute(
-                        "SELECT COUNT(*) AS cnt FROM test"
-                    ).fetchone()["cnt"]
-                    # Simulate some processing time
-                    time.sleep(0.001)
-                    # Insert a new row with the current count
-                    db.conn.execute("INSERT INTO test (value) VALUES (?)", (count,))
+                    # Insert a dummy row with value -1
+                    db.conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
+                    with db.conn:
+                        # Nested context - reuses same connection
+                        # Read current row count
+                        count = db.conn.execute(
+                            "SELECT COUNT(*) AS cnt FROM test"
+                        ).fetchone()["cnt"]
+                        # Simulate some processing time
+                        time.sleep(0.001)
+                        # Insert a new row with the current count
+                        db.conn.execute(
+                            "INSERT INTO test (value) VALUES (?)",
+                            (count,),
+                        )
+            else:
+                # SqlMixin: test re-entrant session context with query()
+                with db.session():
+                    # Insert a dummy row with value -1
+                    db.query("INSERT INTO test (value) VALUES (:value)", {"value": -1})
+                    with db.session():
+                        # Nested context - reuses same session
+                        # Read current row count
+                        count = db.query("SELECT COUNT(*) AS cnt FROM test")[0]["cnt"]
+                        # Simulate some processing time
+                        time.sleep(0.001)
+                        # Insert a new row with the current count
+                        db.query(
+                            "INSERT INTO test (value) VALUES (:count)",
+                            {"count": count},
+                        )
 
         # Execute: Run concurrent transactions
         with ThreadPoolExecutor(max_workers=8) as executor:
             executor.map(insert_row, range(100))
 
         # Assert: Verify that all rows were inserted correctly
-        db = DummyDb(tmpfile.name)
-        db.initialize()
-        rows = db.query("SELECT * FROM test")
+        rows = init_db.query("SELECT * FROM test ORDER BY id")
         for row in rows:
             if row["id"] & 0x1:
                 # Odd IDs are dummy rows
@@ -68,3 +108,7 @@ def test_transaction_serialization_with_tempfile() -> None:
             else:
                 # Even IDs should have sequential counts
                 assert row["value"] == row["id"] - 1
+
+    finally:
+        # Clean up the temporary file
+        os.unlink(db_path)

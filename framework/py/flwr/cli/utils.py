@@ -27,6 +27,7 @@ import grpc
 import pathspec
 import typer
 
+from flwr.cli.typing import SuperLinkConnection
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
@@ -47,10 +48,14 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
+from flwr.supercore.utils import get_flwr_home
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
-from .config_utils import validate_certificate_in_federation_config
+from .config_utils import (
+    load_certificate_in_connection,
+    validate_certificate_in_federation_config,
+)
 
 
 def prompt_text(
@@ -369,6 +374,52 @@ def load_cli_auth_plugin(
         raise typer.Exit(code=1) from None
 
 
+def load_cli_auth_plugin_from_connection(
+    connection: SuperLinkConnection,
+    authn_type: str | None = None,
+) -> CliAuthPlugin:
+    """Load the CLI-side account auth plugin for the given connection.
+
+    Parameters
+    ----------
+    connection : SuperLinkConnection
+        The SuperLink connection configuration.
+    authn_type : str | None
+        Authentication type. If None, will be determined from config.
+
+    Returns
+    -------
+    CliAuthPlugin
+        The loaded authentication plugin instance.
+
+    Raises
+    ------
+    typer.Exit
+        If the authentication type is unknown.
+    """
+    # Locate the credentials directory
+    flwr_dir = get_flwr_home()
+    credentials_dir = flwr_dir / CREDENTIALS_DIR
+    credentials_dir.mkdir(parents=True, exist_ok=True)
+
+    # Find the path to the account auth config file
+    config_path = get_account_auth_config_path(flwr_dir, connection.name)
+
+    # Determine the auth type if not provided
+    if authn_type is None:
+        authn_type = AuthnType.NOOP
+        if connection.enable_account_auth:
+            authn_type = retrieve_authn_type(config_path)
+
+    # Retrieve auth plugin class and instantiate it
+    try:
+        auth_plugin_class = get_cli_plugin_class(authn_type)
+        return auth_plugin_class(config_path)
+    except ValueError:
+        typer.echo(f"❌ Unknown account authentication type: {authn_type}")
+        raise typer.Exit(code=1) from None
+
+
 def init_channel(
     app: Path, federation_config: dict[str, Any], auth_plugin: CliAuthPlugin
 ) -> grpc.Channel:
@@ -399,6 +450,56 @@ def init_channel(
     channel = create_channel(
         server_address=federation_config["address"],
         insecure=insecure,
+        root_certificates=root_certificates_bytes,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        interceptors=[CliAccountAuthInterceptor(auth_plugin)],
+    )
+    channel.subscribe(on_channel_state_change)
+    return channel
+
+
+def init_channel_from_connection(
+    connection: SuperLinkConnection, cmd: str, auth_plugin: CliAuthPlugin | None = None
+) -> grpc.Channel:
+    """Initialize gRPC channel to the Control API.
+
+    Parameters
+    ----------
+    connection : SuperLinkConnection
+        SuperLink connection configuration.
+    cmd : str
+        The command name to display in the error message.
+    auth_plugin : CliAuthPlugin | None (default: None)
+        Authentication plugin instance for handling credentials.
+
+    Returns
+    -------
+    grpc.Channel
+        Configured gRPC channel with authentication interceptors.
+    """
+    if connection.address is None:
+        typer.secho(
+            f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the "
+            "correct SuperLink (Control API) address is provided in `pyproject.toml`.",
+            fg=typer.colors.RED,
+            bold=True,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    root_certificates_bytes = load_certificate_in_connection(connection)
+
+    # Load authentication plugin
+    if auth_plugin is None:
+        auth_plugin = load_cli_auth_plugin_from_connection(connection)
+
+    # Load tokens
+    auth_plugin.load_tokens()
+
+    # Create the gRPC channel
+    channel = create_channel(
+        server_address=connection.address,
+        insecure=connection.insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         interceptors=[CliAccountAuthInterceptor(auth_plugin)],
