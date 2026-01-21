@@ -66,12 +66,12 @@ def _is_legacy_usage(positional_arg_1: str | None, args: list[str]) -> bool:
     if len(args) == 1:
         return True
 
-    # If the `superlink` looks like a path, assume legacy usage
+    # If the first positional argument looks like a path, assume legacy usage
     pth = Path(positional_arg_1)
     if pth.is_absolute() or len(pth.parts) > 1 or positional_arg_1 in (".", ".."):
         return True
 
-    # Lastly, check if a pyproject.toml file exists at the given superlink
+    # Lastly, check if a pyproject.toml file exists at the given path
     if (pth / "pyproject.toml").exists():
         return True
 
