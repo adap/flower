@@ -220,22 +220,27 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         # Filter node IDs by federation
         return self.federation_manager.filter_nodes(node_ids, federation)
 
-    def _check_and_tag_offline_nodes(self) -> None:
+    def _check_and_tag_offline_nodes(self, node_ids: list[int] | None = None) -> None:
         """Check and tag offline nodes."""
-        current_time = now().isoformat()
+        # strftime will convert POSIX timestamp to ISO format
         query = """
-            UPDATE node
-            SET status = :offline
-            WHERE status = :online AND online_until < :current_time
+            UPDATE node SET status = :offline,
+            last_deactivated_at =
+            strftime('%Y-%m-%dT%H:%M:%f+00:00', online_until, 'unixepoch')
+            WHERE online_until < :current_time AND status = :online
         """
-        self.query(
-            query,
-            {
-                "offline": NodeStatus.OFFLINE,
-                "online": NodeStatus.ONLINE,
-                "current_time": current_time,
-            },
-        )
+        params: dict[str, Any] = {
+            "offline": NodeStatus.OFFLINE,
+            "current_time": now().timestamp(),
+            "online": NodeStatus.ONLINE,
+        }
+        if node_ids is not None:
+            placeholders = ",".join([f":nid_{i}" for i in range(len(node_ids))])
+            query += f" AND node_id IN ({placeholders})"
+            params.update(
+                {f"nid_{i}": uint64_to_int64(nid) for i, nid in enumerate(node_ids)}
+            )
+        self.query(query, params)
 
     def get_node_info(  # pylint: disable=too-many-locals
         self,
