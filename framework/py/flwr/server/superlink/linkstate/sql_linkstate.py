@@ -61,6 +61,8 @@ from .utils import (
     check_node_availability_for_in_message,
     configrecord_from_bytes,
     configrecord_to_bytes,
+    convert_sint64_values_in_dict_to_uint64,
+    convert_uint64_values_in_dict_to_sint64,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
@@ -108,12 +110,12 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             return None
 
         # Store Message
-        msg_dict = message_to_dict(message)
+        data = (message_to_dict(message),)
 
         # Convert values from uint64 to sint64 for SQLite
-        msg_dict["run_id"] = uint64_to_int64(message.metadata.run_id)
-        msg_dict["src_node_id"] = uint64_to_int64(message.metadata.src_node_id)
-        msg_dict["dst_node_id"] = uint64_to_int64(message.metadata.dst_node_id)
+        convert_uint64_values_in_dict_to_sint64(
+            data[0], ["run_id", "src_node_id", "dst_node_id"]
+        )
 
         # Validate source node ID
         if message.metadata.src_node_id != SUPERLINK_NODE_ID:
@@ -127,7 +129,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         with self.session():
             # Validate run_id
             query = "SELECT federation FROM run WHERE run_id = :run_id"
-            rows = self.query(query, {"run_id": msg_dict["run_id"]})
+            rows = self.query(query, {"run_id": data[0]["run_id"]})
             if not rows:
                 log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
                 return None
@@ -139,7 +141,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             rows = self.query(
                 query,
                 {
-                    "node_id": msg_dict["dst_node_id"],
+                    "node_id": data[0]["dst_node_id"],
                     "status_online": NodeStatus.ONLINE,
                     "status_offline": NodeStatus.OFFLINE,
                 },
@@ -155,9 +157,13 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 return None
 
             # Insert message
-            columns = ", ".join([f":{key}" for key in msg_dict])
+            columns = ", ".join([f":{key}" for key in data[0]])
             query = f"INSERT INTO message_ins VALUES({columns})"
-            self.query(query, msg_dict)
+
+            # Only invalid run_id can trigger IntegrityError.
+            # This may need to be changed in the future version
+            # with more integrity checks.
+            self.query(query, data[0])
 
         return message.metadata.message_id
 
@@ -173,11 +179,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             for msg_id in message_ids:
                 # Check if message exists
                 query = "SELECT * FROM message_ins WHERE message_id = :message_id"
-                message_rows = self.query(query, {"message_id": msg_id})
-                if not message_rows:
+                message_row = self.query(query, {"message_id": msg_id})[0]
+                if not message_row:
                     continue
-
-                message_row = message_rows[0]
 
                 # Check if the message has expired
                 available_until = message_row["created_at"] + message_row["ttl"]
@@ -189,11 +193,11 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 # Get federation from run table
                 run_id = message_row["run_id"]
                 query = "SELECT federation FROM run WHERE run_id = :run_id"
-                run_rows = self.query(query, {"run_id": run_id})
-                if not run_rows:  # This should not happen
+                run_row = self.query(query, {"run_id": run_id})[0]
+                if not run_row:  # This should not happen
                     invalid_msg_ids.add(msg_id)
                     continue
-                federation = run_rows[0]["federation"]
+                federation = run_row["federation"]
 
                 # Convert sint64 to uint64 for node IDs
                 src_node_id = int64_to_uint64(message_row["src_node_id"])
@@ -230,7 +234,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 AND delivered_at = ''
                 AND (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
             """
-            params: dict[str, Any] = {"node_id": sint64_node_id}
+            params: dict[str, str | int] = {"node_id": sint64_node_id}
 
             if limit is not None:
                 query += " LIMIT :limit"
@@ -262,11 +266,12 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
             for row in rows:
                 # Convert values from sint64 to uint64
-                row["run_id"] = int64_to_uint64(row["run_id"])
-                row["src_node_id"] = int64_to_uint64(row["src_node_id"])
-                row["dst_node_id"] = int64_to_uint64(row["dst_node_id"])
+                convert_sint64_values_in_dict_to_uint64(
+                    row, ["run_id", "src_node_id", "dst_node_id"]
+                )
 
         result = [dict_to_message(dict(row)) for row in rows]
+
         return result
 
     def store_message_res(self, message: Message) -> str | None:
@@ -325,9 +330,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         msg_dict = message_to_dict(message)
 
         # Convert values from uint64 to sint64 for SQLite
-        msg_dict["run_id"] = uint64_to_int64(message.metadata.run_id)
-        msg_dict["src_node_id"] = uint64_to_int64(message.metadata.src_node_id)
-        msg_dict["dst_node_id"] = uint64_to_int64(message.metadata.dst_node_id)
+        convert_uint64_values_in_dict_to_sint64(
+            msg_dict, ["run_id", "src_node_id", "dst_node_id"]
+        )
 
         columns = ", ".join([f":{key}" for key in msg_dict])
         query = f"INSERT INTO message_res VALUES({columns})"
@@ -362,10 +367,10 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
             found_message_ins_dict: dict[str, Message] = {}
             for row in rows:
-                row["run_id"] = int64_to_uint64(row["run_id"])
-                row["src_node_id"] = int64_to_uint64(row["src_node_id"])
-                row["dst_node_id"] = int64_to_uint64(row["dst_node_id"])
-                found_message_ins_dict[row["message_id"]] = dict_to_message(dict(row))
+                convert_sint64_values_in_dict_to_uint64(
+                    row, ["run_id", "src_node_id", "dst_node_id"]
+                )
+                found_message_ins_dict[row["message_id"]] = dict_to_message(row)
 
             ret = verify_message_ids(
                 inquired_message_ids=message_ids,
@@ -376,35 +381,32 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             # Check node availability
             dst_node_ids: set[int] = set()
             for message_id in message_ids:
-                if message_id in found_message_ins_dict:
-                    in_message = found_message_ins_dict[message_id]
-                    sint_node_id = uint64_to_int64(in_message.metadata.dst_node_id)
-                    dst_node_ids.add(sint_node_id)
+                in_message = found_message_ins_dict[message_id]
+                sint_node_id = uint64_to_int64(in_message.metadata.dst_node_id)
+                dst_node_ids.add(sint_node_id)
 
-            if dst_node_ids:
-                placeholders = ",".join([f":nid_{i}" for i in range(len(dst_node_ids))])
-                query = f"""
-                    SELECT node_id, online_until
-                    FROM node
-                    WHERE node_id IN ({placeholders})
-                    AND status != :status
-                """
-                node_params: dict[str, Any] = {}
-                for i, nid in enumerate(dst_node_ids):
-                    node_params[f"nid_{i}"] = nid
-                node_params["status"] = NodeStatus.UNREGISTERED
-                rows = self.query(query, node_params)
+            placeholders = ",".join([f":nid_{i}" for i in range(len(dst_node_ids))])
+            query = f"""
+                SELECT node_id, online_until
+                FROM node
+                WHERE node_id IN ({placeholders})
+                AND status != :status
+            """
+            node_params: dict[str, Any] = {}
+            for i, nid in enumerate(dst_node_ids):
+                node_params[f"nid_{i}"] = nid
+            node_params["status"] = NodeStatus.UNREGISTERED
+            rows = self.query(query, node_params)
 
-                tmp_ret_dict = check_node_availability_for_in_message(
-                    inquired_in_message_ids=message_ids,
-                    found_in_message_dict=found_message_ins_dict,
-                    node_id_to_online_until={
-                        int64_to_uint64(row["node_id"]): row["online_until"]
-                        for row in rows
-                    },
-                    current_time=current,
-                )
-                ret.update(tmp_ret_dict)
+            tmp_ret_dict = check_node_availability_for_in_message(
+                inquired_in_message_ids=message_ids,
+                found_in_message_dict=found_message_ins_dict,
+                node_id_to_online_until={
+                    int64_to_uint64(row["node_id"]): row["online_until"] for row in rows
+                },
+                current_time=current,
+            )
+            ret.update(tmp_ret_dict)
 
             # Find all reply Messages
             placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
@@ -418,9 +420,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             rows = self.query(query, params)
 
             for row in rows:
-                row["run_id"] = int64_to_uint64(row["run_id"])
-                row["src_node_id"] = int64_to_uint64(row["src_node_id"])
-                row["dst_node_id"] = int64_to_uint64(row["dst_node_id"])
+                convert_sint64_values_in_dict_to_uint64(
+                    row, ["run_id", "src_node_id", "dst_node_id"]
+                )
 
             tmp_ret_dict = verify_found_message_replies(
                 inquired_message_ids=message_ids,
@@ -438,20 +440,15 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 message_res.metadata.message_id for message_res in ret.values()
             ]
 
-            if message_res_ids:
-                placeholders = ",".join(
-                    [f":mid_{i}" for i in range(len(message_res_ids))]
-                )
-                query = f"""
-                    UPDATE message_res
-                    SET delivered_at = :delivered_at
-                    WHERE message_id IN ({placeholders})
-                """
-                params = {"delivered_at": delivered_at}
-                params.update(
-                    {f"mid_{i}": mid for i, mid in enumerate(message_res_ids)}
-                )
-                self.query(query, params)
+            placeholders = ",".join([f":mid_{i}" for i in range(len(message_res_ids))])
+            query = f"""
+                UPDATE message_res
+                SET delivered_at = :delivered_at
+                WHERE message_id IN ({placeholders})
+            """
+            params = {"delivered_at": delivered_at}
+            params.update({f"mid_{i}": mid for i, mid in enumerate(message_res_ids)})
+            self.query(query, params)
 
         return list(ret.values())
 
