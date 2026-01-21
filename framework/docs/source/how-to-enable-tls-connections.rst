@@ -94,7 +94,7 @@ launching the SuperNode is replacing ``--insecure`` with ``--root-certificates``
     $ flower-supernode \
         --root-certificates certificates/ca.crt \
         --superlink 127.0.0.1:9092 \
-        --clientappio-api-address 0.0.0.0:9094 \
+        --clientappio-api-address 127.0.0.1:9094 \
         --node-config="partition-id=0 num-partitions=2"
 
 .. dropdown:: Understand the command
@@ -110,7 +110,7 @@ to launch the second SuperNode.
     $ flower-supernode \
         --root-certificates certificates/ca.crt \
         --superlink 127.0.0.1:9092 \
-        --clientappio-api-address 0.0.0.0:9095 \
+        --clientappio-api-address 127.0.0.1:9095 \
         --node-config="partition-id=1 num-partitions=2"
 
 ************************
