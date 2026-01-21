@@ -25,7 +25,6 @@ from pathlib import Path
 from typing import Any
 
 from sqlalchemy import Engine, MetaData, create_engine, event, inspect, text
-from sqlalchemy.engine import Result
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -265,26 +264,12 @@ class SqlMixin(ABC):
         query = re.sub(r"\s+", " ", query.strip())
 
         try:
+            # Wrap query in text() to enable SQLAlchemy named parameter syntax (:param).
             sql = text(query)
 
-            # Check if already in a session context
-            existing_session = _current_session.get()
-
-            if existing_session is not None:
-                # Reuse the existing session without creating a new transaction
-                result = existing_session.execute(sql, data)
-
-                # Fetch results into Python memory
-                if result.returns_rows:  # type: ignore
-                    return [dict(row) for row in result.mappings()]
-                
-                # For statements without RETURNING (INSERT/UPDATE/DELETE),
-                # returns_rows is False, so we return empty list.
-                return []
-
-            # Create a new session context for this query
-            with self.session() as session:
-                # Execute query (results live in database cursor)
+            def execute_and_fetch(session: Session) -> list[dict[str, Any]]:
+                """Execute query and fetch results from the given session."""
+                # Execute query (results live in database cursor).
                 # There is no need to check for batch vs single execution;
                 # SQLAlchemy handles both cases automatically.
                 result = session.execute(sql, data)
@@ -297,6 +282,17 @@ class SqlMixin(ABC):
                 # For statements without RETURNING (INSERT/UPDATE/DELETE),
                 # returns_rows is False, so we return empty list.
                 return []
+
+            # Check if already in a session context
+            existing_session = _current_session.get()
+
+            if existing_session is not None:
+                # Reuse the existing session without creating a new transaction.
+                return execute_and_fetch(existing_session)
+
+            # Create a new session context for this query
+            with self.session() as session:
+                return execute_and_fetch(session)
 
         except SQLAlchemyError as exc:
             log(ERROR, {"query": query, "data": data, "exception": exc})
