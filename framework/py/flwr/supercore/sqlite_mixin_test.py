@@ -54,6 +54,21 @@ class DummyDbSqlAlchemy(SqlMixin):
         )
         return metadata
 
+    def cleanup_negative_values(self) -> int:
+        """Delete rows with negative values and return count deleted."""
+        rows = self.query("SELECT COUNT(*) AS cnt FROM test WHERE value < 0")
+        count = rows[0]["cnt"]
+        if count > 0:
+            self.query("DELETE FROM test WHERE value < 0")
+        return count
+
+    def insert_and_cleanup(self, value: int) -> int:
+        """Insert a value and cleanup negative values atomically."""
+        with self.session():
+            self.query("INSERT INTO test (value) VALUES (:value)", {"value": value})
+            deleted = self.cleanup_negative_values()
+        return deleted
+
 
 @parameterized.expand(
     [
@@ -272,3 +287,54 @@ class TestSqlMixin(unittest.TestCase):
         rows = self.db.query("SELECT value FROM test ORDER BY value")
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["value"], 111)
+
+    def test_session_reuse_across_methods(self) -> None:
+        """Test that session is reused when method A calls method B within a session."""
+        # Insert initial test data with negative values
+        self.db.query("INSERT INTO test (value) VALUES (:value)", {"value": -1})
+        self.db.query("INSERT INTO test (value) VALUES (:value)", {"value": -2})
+
+        # Call a method that wraps query() and another method in a session
+        deleted = self.db.insert_and_cleanup(value=500)
+
+        # Verify the cleanup happened
+        self.assertEqual(deleted, 2)
+
+        # Verify only positive value remains (both insert and cleanup committed together)
+        rows = self.db.query("SELECT value FROM test ORDER BY value")
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["value"], 500)
+
+    def test_session_reuse_across_methods_rollback(self) -> None:
+        """Test that rollback affects both method A and method B queries."""
+        # Insert initial test data
+        self.db.query("INSERT INTO test (value) VALUES (:value)", {"value": -1})
+        self.db.query("INSERT INTO test (value) VALUES (:value)", {"value": 108})
+
+        # Method A creates session, calls query, then calls method B which also queries
+        # If an error occurs after method B, everything should rollback
+        with self.assertRaises(ValueError):
+            with self.db.session():
+                # Insert a new value (method A's query)
+                self.db.query(
+                    "INSERT INTO test (value) VALUES (:value)", {"value": 200}
+                )
+
+                # Call method B which deletes negative values
+                deleted = self.db.cleanup_negative_values()
+                self.assertEqual(deleted, 1)
+
+                # Verify within transaction: -1 is gone, 200 exists
+                rows = self.db.query("SELECT value FROM test ORDER BY value")
+                self.assertEqual(len(rows), 2)  # 108 and 200
+                self.assertEqual(rows[0]["value"], 108)
+                self.assertEqual(rows[1]["value"], 200)
+
+                # Simulate error after method B completes
+                raise ValueError("Error after cleanup")
+
+        # Verify complete rollback: original state restored (-1 and 108 both exist)
+        rows = self.db.query("SELECT value FROM test ORDER BY value")
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["value"], -1)  # Deletion was rolled back
+        self.assertEqual(rows[1]["value"], 108)
