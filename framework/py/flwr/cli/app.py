@@ -51,12 +51,34 @@ app.command()(new)
 app.command()(run)
 app.command()(build)
 app.command()(install)
-app.command()(log)
-app.command("list")(ls)
-app.command(hidden=True)(ls)
-app.command()(stop)
+app.command(
+    context_settings={
+        "allow_extra_args": True,
+    }
+)(log)
+app.command(
+    "list",
+    context_settings={
+        "allow_extra_args": True,
+    },
+)(ls)
+app.command(
+    hidden=True,
+    context_settings={
+        "allow_extra_args": True,
+    },
+)(ls)
+app.command(
+    context_settings={
+        "allow_extra_args": True,
+    }
+)(stop)
 app.command()(login)
-app.command()(pull)
+app.command(
+    context_settings={
+        "allow_extra_args": True,
+    }
+)(pull)
 
 # Create supernode command group
 supernode_app = typer.Typer(help="Manage SuperNodes")
