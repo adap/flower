@@ -57,7 +57,7 @@ class DummyDbSqlAlchemy(SqlMixin):
     def cleanup_negative_values(self) -> int:
         """Delete rows with negative values and return count deleted."""
         rows = self.query("SELECT COUNT(*) AS cnt FROM test WHERE value < 0")
-        count = rows[0]["cnt"]
+        count: int = rows[0]["cnt"]
         if count > 0:
             self.query("DELETE FROM test WHERE value < 0")
         return count
