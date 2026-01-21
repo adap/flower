@@ -194,11 +194,19 @@ class SqlMixin(ABC):
 
         TRANSACTION SEMANTICS:
         ----------------------
-        Each call to query() runs in its own isolated transaction that is
-        automatically committed. This is suitable for single SQL statements.
+        If called outside a session context, each call to query() runs in its own
+        isolated transaction that is automatically committed. This is suitable for
+        single SQL statements.
 
-        For complex operations requiring multiple SQL statements in a single
-        transaction, use session() directly instead:
+        If called within a session() context, query() reuses the existing session
+        and transaction. This enables atomic multi-query operations:
+
+            with self.session() as session:
+                self.query("UPDATE ...", {...})    # Shares same transaction
+                self.query("INSERT ...", {...})    # Shares same transaction
+                # Both succeed or fail together
+
+        You can also use session.execute() directly for the same effect:
 
             with self.session() as session:
                 session.execute(text("UPDATE ..."), {...})
@@ -233,11 +241,17 @@ class SqlMixin(ABC):
             [{"id": 1, "status": "online"}, {"id": 2, "status": "offline"}]
         )
 
-        # Multi-statement transaction - use session() directly
-        with self.session() as session:
+        # Multi-statement transaction - query() calls share the same session
+        with self.session():
             # Both statements succeed or fail together
-            session.execute(text("DELETE FROM old_data WHERE date < :cutoff"), {...})
-            session.execute(text("INSERT INTO archive SELECT * FROM old_data"), {})
+            self.query("DELETE FROM token_store WHERE active_until < :time", {...})
+            self.query("UPDATE run SET status = :status WHERE id = :id", {...})
+
+        # Nested session() - query() calls share the same session
+        with self.session():
+            self.query("DELETE FROM token_store WHERE active_until < :time", {...})
+            with self.session():
+                self.query("UPDATE run SET status = :status WHERE id = :id", {...})
         """
         if self._engine is None:
             raise AttributeError(
@@ -251,13 +265,30 @@ class SqlMixin(ABC):
         query = re.sub(r"\s+", " ", query.strip())
 
         try:
+            # Check if already in a session context
+            existing_session = _current_session.get()
+
+            if existing_session is not None:
+                # Reuse the existing session without creating a new transaction
+                sql = text(query)
+                result: Result[Any] = existing_session.execute(sql, data)
+
+                # Fetch results into Python memory
+                if result.returns_rows:  # type: ignore
+                    rows = [dict(row) for row in result.mappings()]
+                else:
+                    rows = []
+
+                return rows
+
+            # Create a new session context for this query
             with self.session() as session:
                 sql = text(query)
 
                 # Execute query (results live in database cursor)
                 # There is no need to check for batch vs single execution;
                 # SQLAlchemy handles both cases automatically.
-                result: Result[Any] = session.execute(sql, data)
+                result = session.execute(sql, data)
 
                 # Fetch results into Python memory before commit.
                 # mappings() returns dict-like rows (works for SELECT and RETURNING).

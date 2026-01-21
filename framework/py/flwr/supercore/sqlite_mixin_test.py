@@ -127,3 +127,114 @@ def test_transaction_serialization_with_tempfile(
     finally:
         # Clean up the temporary file
         os.unlink(db_path)
+
+
+def test_sql_mixin_session_reuse() -> None:
+    """Test that nested query() calls reuse the same session."""
+    db = DummyDbSqlAlchemy(":memory:")
+    db.initialize()
+
+    # Insert initial test data
+    db.query("INSERT INTO test (value) VALUES (:value)", {"value": 100})
+
+    # Test: Multiple query() calls within a session should share the same transaction
+    with db.session() as session:
+        # First query: insert a value
+        db.query("INSERT INTO test (value) VALUES (:value)", {"value": 200})
+
+        # Second query: verify the value was inserted
+        rows = db.query("SELECT value FROM test WHERE value = :value", {"value": 200})
+        assert len(rows) == 1
+        assert rows[0]["value"] == 200
+
+        # Third query: update the value
+        db.query(
+            "UPDATE test SET value = :new WHERE value = :old", {"old": 200, "new": 300}
+        )
+
+        # Fourth query: verify the update
+        rows = db.query("SELECT value FROM test WHERE value = :value", {"value": 300})
+        assert len(rows) == 1
+        assert rows[0]["value"] == 300
+
+    # Verify all changes were committed
+    rows = db.query("SELECT value FROM test ORDER BY value")
+    assert len(rows) == 2
+    assert rows[0]["value"] == 100
+    assert rows[1]["value"] == 300
+
+
+def test_sql_mixin_session_rollback() -> None:
+    """Test that exceptions in a session cause rollback for all nested queries."""
+    db = DummyDbSqlAlchemy(":memory:")
+    db.initialize()
+
+    # Insert initial test data
+    db.query("INSERT INTO test (value) VALUES (:value)", {"value": 100})
+
+    # Test: Exception should rollback all nested query() calls
+    try:
+        with db.session():
+            # First query: insert a value
+            db.query("INSERT INTO test (value) VALUES (:value)", {"value": 200})
+
+            # Second query: verify the value was inserted (within transaction)
+            rows = db.query(
+                "SELECT value FROM test WHERE value = :value", {"value": 200}
+            )
+            assert len(rows) == 1
+
+            # Raise an exception to trigger rollback
+            raise ValueError("Simulated error")
+    except ValueError:
+        pass  # Expected
+
+    # Verify the transaction was rolled back
+    rows = db.query("SELECT value FROM test")
+    assert len(rows) == 1
+    assert rows[0]["value"] == 100
+
+
+def test_sql_mixin_nested_sessions() -> None:
+    """Test that nested session() calls reuse the same session."""
+    db = DummyDbSqlAlchemy(":memory:")
+    db.initialize()
+
+    # Test: Nested session contexts should reuse the same session
+    with db.session() as outer_session:
+        db.query("INSERT INTO test (value) VALUES (:value)", {"value": 100})
+
+        with db.session() as inner_session:
+            # Inner session should be the same object as outer session
+            assert inner_session is outer_session
+
+            # Insert in nested context
+            db.query("INSERT INTO test (value) VALUES (:value)", {"value": 200})
+
+        # After inner context, can still use outer session
+        db.query("INSERT INTO test (value) VALUES (:value)", {"value": 300})
+
+    # Verify all inserts were committed as one transaction
+    rows = db.query("SELECT value FROM test ORDER BY value")
+    assert len(rows) == 3
+    assert rows[0]["value"] == 100
+    assert rows[1]["value"] == 200
+    assert rows[2]["value"] == 300
+
+
+def test_sql_mixin_query_without_session() -> None:
+    """Test that query() works independently when not in a session context."""
+    db = DummyDbSqlAlchemy(":memory:")
+    db.initialize()
+
+    # Each query() call should be its own transaction
+    db.query("INSERT INTO test (value) VALUES (:value)", {"value": 100})
+    db.query("INSERT INTO test (value) VALUES (:value)", {"value": 200})
+    db.query("INSERT INTO test (value) VALUES (:value)", {"value": 300})
+
+    # Verify all inserts were committed independently
+    rows = db.query("SELECT value FROM test ORDER BY value")
+    assert len(rows) == 3
+    assert rows[0]["value"] == 100
+    assert rows[1]["value"] == 200
+    assert rows[2]["value"] == 300
