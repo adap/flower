@@ -283,12 +283,6 @@ class SqlMixin(ABC):
                 # returns_rows is False, so we return empty list.
                 return []
 
-            # Check if already in a session context
-            existing_session = _current_session.get()
-            if existing_session is not None:
-                # Reuse the existing session without creating a new transaction.
-                return execute_and_fetch(existing_session)
-
             # Not in a session context, create a new session context for this query
             with self.session() as session:
                 return execute_and_fetch(session)
