@@ -24,6 +24,7 @@ from datetime import datetime, timezone
 from logging import ERROR, WARNING
 from typing import Any, cast
 
+from flwr.app.user_config import UserConfig
 from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
@@ -39,7 +40,7 @@ from flwr.common.message import make_message
 from flwr.common.record import ConfigRecord
 from flwr.common.serde import recorddict_from_proto, recorddict_to_proto
 from flwr.common.serde_utils import error_from_proto, error_to_proto
-from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.common.typing import Run, RunStatus
 
 # pylint: disable=E0611
 from flwr.proto.error_pb2 import Error as ProtoError
@@ -83,12 +84,6 @@ CREATE TABLE IF NOT EXISTS node(
     online_until            TIMESTAMP NULL,
     heartbeat_interval      REAL,
     public_key              BLOB UNIQUE
-);
-"""
-
-SQL_CREATE_TABLE_PUBLIC_KEY = """
-CREATE TABLE IF NOT EXISTS public_key(
-    public_key      BLOB PRIMARY KEY
 );
 """
 
@@ -205,7 +200,6 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             SQL_CREATE_TABLE_MESSAGE_INS,
             SQL_CREATE_TABLE_MESSAGE_RES,
             SQL_CREATE_TABLE_NODE,
-            SQL_CREATE_TABLE_PUBLIC_KEY,
             SQL_CREATE_INDEX_ONLINE_UNTIL,
             SQL_CREATE_INDEX_OWNER_AID,
             SQL_CREATE_INDEX_NODE_STATUS,
@@ -848,22 +842,6 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                 result.append(NodeInfo(**row))
 
             return result
-
-    def get_node_public_key(self, node_id: int) -> bytes:
-        """Get `public_key` for the specified `node_id`."""
-        # Convert the uint64 value to sint64 for SQLite
-        sint64_node_id = uint64_to_int64(node_id)
-
-        # Query the public key for the given node_id
-        query = "SELECT public_key FROM node WHERE node_id = ? AND status != ?;"
-        rows = self.query(query, (sint64_node_id, NodeStatus.UNREGISTERED))
-
-        # If no result is found, return None
-        if not rows:
-            raise ValueError(f"Node ID {node_id} not found")
-
-        # Return the public key
-        return cast(bytes, rows[0]["public_key"])
 
     def get_node_id_by_public_key(self, public_key: bytes) -> int | None:
         """Get `node_id` for the specified `public_key` if it exists and is not

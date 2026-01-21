@@ -28,6 +28,7 @@ from flwr.common.record import (
 from .error import Error
 from .message_type import MessageType
 from .metadata import Metadata
+from .user_config import UserConfig, UserConfigValue
 
 __all__ = [
     "Array",
@@ -40,4 +41,6 @@ __all__ = [
     "Metadata",
     "MetricRecord",
     "RecordDict",
+    "UserConfig",
+    "UserConfigValue",
 ]

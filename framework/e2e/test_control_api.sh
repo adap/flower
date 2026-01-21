@@ -118,7 +118,7 @@ cleanup_and_exit() {
 
 while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     # Run the command and capture output
-    output=$(flwr ls . e2e --format=json)
+    output=$(flwr ls e2e --format=json)
 
     # Extract status from the first run (or loop over all if needed)
     status=$(echo "$output" | jq -r '.runs[0].status')

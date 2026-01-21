@@ -28,6 +28,7 @@ from pathlib import Path
 from queue import Empty, Queue
 from typing import Any, cast
 
+from flwr.app.user_config import UserConfig
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
 from flwr.clientapp import ClientApp
@@ -39,7 +40,7 @@ from flwr.common.logger import (
     update_console_handler,
     warn_deprecated_feature_with_example,
 )
-from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.common.typing import Run, RunStatus
 from flwr.server.grid import Grid, InMemoryGrid
 from flwr.server.run_serverapp import run as _run
 from flwr.server.server_app import ServerApp

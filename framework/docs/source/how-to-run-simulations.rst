@@ -290,7 +290,7 @@ resource-aware manner in batches of 8.
 By default, the ``Simulation Engine`` has **access to all system resources** (i.e., all
 CPUs, all GPUs). However, in some settings, you might want to limit how many of your
 system resources are used for simulation. You can do this in the ``pyproject.toml`` of
-your app by setting the ``options.backend.init_args`` variable.
+your app by setting the ``options.backend.init-args`` variable.
 
 .. code-block:: toml
 
@@ -298,8 +298,8 @@ your app by setting the ``options.backend.init_args`` variable.
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # Each ClientApp will get assigned 1 CPU core
     options.backend.client-resources.num-gpus = 0.5 # Each ClientApp will get 50% of each available GPU
-    options.backend.init_args.num_cpus = 1 # Only expose 1 CPU to the simulation
-    options.backend.init_args.num_gpus = 1 # Expose a single GPU to the simulation
+    options.backend.init-args.num-cpus = 1 # Only expose 1 CPU to the simulation
+    options.backend.init-args.num-gpus = 1 # Expose a single GPU to the simulation
 
 With the above setup, the Backend will be initialized with a single CPU and GPU.
 Therefore, even if more CPUs and GPUs are available in your system, they will not be
@@ -309,7 +309,7 @@ any given point.
 For a complete list of settings you can configure, check the `ray.init
 <https://docs.ray.io/en/latest/ray-core/api/doc/ray.init.html#ray-init>`_ documentation.
 
-For the highest performance, do not set ``options.backend.init_args``.
+For the highest performance, do not set ``options.backend.init-args``.
 
 *****************************
  Simulation in Colab/Jupyter

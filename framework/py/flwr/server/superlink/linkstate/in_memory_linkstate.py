@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from logging import ERROR, WARNING
 
+from flwr.app.user_config import UserConfig
 from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
@@ -35,7 +36,7 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.record import ConfigRecord
-from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
@@ -517,15 +518,6 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         node.last_deactivated_at = datetime.fromtimestamp(
                             node.online_until, tz=timezone.utc
                         ).isoformat()
-
-    def get_node_public_key(self, node_id: int) -> bytes:
-        """Get `public_key` for the specified `node_id`."""
-        with self.lock:
-            if (
-                node := self.nodes.get(node_id)
-            ) is None or node.status == NodeStatus.UNREGISTERED:
-                raise ValueError(f"Node ID {node_id} not found")
-            return node.public_key
 
     def get_node_id_by_public_key(self, public_key: bytes) -> int | None:
         """Get `node_id` for the specified `public_key` if it exists and is not
