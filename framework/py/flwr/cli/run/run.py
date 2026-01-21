@@ -28,13 +28,12 @@ from rich.console import Console
 from flwr.cli.build import build_fab_from_disk, get_fab_filename
 from flwr.cli.config_migration import migrate, warn_if_federation_config_overrides
 from flwr.cli.config_utils import load as load_toml
-from flwr.cli.config_utils import load_and_validate
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE, RUN_CONFIG_HELP_MESSAGE
 from flwr.cli.flower_config import (
     _serialize_simulation_options,
     read_superlink_connection,
 )
-from flwr.cli.typing import SuperLinkConnection
+from flwr.cli.typing import SuperLinkConnection, SuperLinkSimulationOptions
 from flwr.common.config import (
     get_metadata_from_config,
     parse_config_args,
@@ -109,7 +108,7 @@ def run(
     warn_if_federation_config_overrides(federation_config_overrides)
 
     # Migrate legacy usage if any
-    migrate(app, [], ignore_legacy_usage=True)
+    migrate(str(app), [], ignore_legacy_usage=True)
 
     # Read superlink connection configuration
     superlink_connection = read_superlink_connection(superlink)
@@ -129,14 +128,6 @@ def run(
             app_spec = app_str
             # Set `app` to current directory for credential storage
             app = Path(".")
-        is_remote_app = app_spec is not None
-
-        # Disable the validation for remote apps
-        pyproject_path = app / "pyproject.toml" if not is_remote_app else None
-        # `./pyproject.toml` will be loaded when `pyproject_path` is None
-        config, errors, warnings = load_and_validate(
-            pyproject_path, check_module=not is_remote_app
-        )
 
         if superlink_connection.address:
             _run_with_control_api(
@@ -148,7 +139,11 @@ def run(
                 app_spec,
             )
         else:
-            _run_without_control_api(app, superlink_connection, run_config_overrides)
+            _run_without_control_api(
+                app=app,
+                simulation_options=superlink_connection.options,  # type: ignore
+                config_overrides=run_config_overrides,
+            )
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
@@ -250,14 +245,12 @@ def _run_with_control_api(
 
 def _run_without_control_api(
     app: Path | None,
-    superlink_connection: SuperLinkConnection,
+    simulation_options: SuperLinkSimulationOptions,
     config_overrides: list[str] | None,
 ) -> None:
 
-    num_supernodes = superlink_connection.options.num_supernodes
-    # TODO: add `verbose` to the `SimulationOptions` dataclass
+    num_supernodes = simulation_options.num_supernodes
     verbose = False  # bool | None = superlink_connection.options.verbose
-    backend_cfg = superlink_connection.options.backend
 
     command = [
         "flower-simulation",
@@ -267,9 +260,9 @@ def _run_without_control_api(
         f"{num_supernodes}",
     ]
 
-    if backend_cfg:
+    if simulation_options.backend:
         # Stringify as JSON
-        backend_serial = _serialize_simulation_options(backend_cfg)
+        backend_serial = _serialize_simulation_options(simulation_options)
         command.extend(["--backend-config", json.dumps(backend_serial)])
 
     if verbose:
