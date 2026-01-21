@@ -15,11 +15,13 @@
 """Flower command line interface."""
 
 
+from typing import Any, TypedDict
+
 import typer
 from typer.main import get_command
 
 from flwr.supercore.version import package_version
-from typing import TypedDict, Any
+
 from .app_cmd import publish as app_publish
 from .app_cmd import review as app_review
 from .build import build
@@ -38,9 +40,12 @@ from .supernode import ls as supernode_list
 from .supernode import register as supernode_register
 from .supernode import unregister as supernode_unregister
 
+
 class CommandKwargs(TypedDict):
     """Keywords for typer command to make mypy happy."""
+
     context_settings: dict[str, Any]
+
 
 ALLOW_EXTRAS: CommandKwargs = {"context_settings": {"allow_extra_args": True}}
 
