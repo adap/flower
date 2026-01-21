@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface."""
 
+
 import typer
 from typer.main import get_command
 
@@ -37,6 +38,8 @@ from .supernode import ls as supernode_list
 from .supernode import register as supernode_register
 from .supernode import unregister as supernode_unregister
 
+ALLOW_EXTRAS = {"context_settings": {"allow_extra_args": True}}
+
 app = typer.Typer(
     help=typer.style(
         "flwr is the Flower command line interface.",
@@ -51,34 +54,12 @@ app.command()(new)
 app.command()(run)
 app.command()(build)
 app.command()(install)
-app.command(
-    context_settings={
-        "allow_extra_args": True,
-    }
-)(log)
-app.command(
-    "list",
-    context_settings={
-        "allow_extra_args": True,
-    },
-)(ls)
-app.command(
-    hidden=True,
-    context_settings={
-        "allow_extra_args": True,
-    },
-)(ls)
-app.command(
-    context_settings={
-        "allow_extra_args": True,
-    }
-)(stop)
+app.command(**ALLOW_EXTRAS)(log)
+app.command("list", **ALLOW_EXTRAS)(ls)
+app.command(hidden=True, **ALLOW_EXTRAS)(ls)
+app.command(**ALLOW_EXTRAS)(stop)
 app.command()(login)
-app.command(
-    context_settings={
-        "allow_extra_args": True,
-    }
-)(pull)
+app.command(**ALLOW_EXTRAS)(pull)
 
 # Create supernode command group
 supernode_app = typer.Typer(help="Manage SuperNodes")
