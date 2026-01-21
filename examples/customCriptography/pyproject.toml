@@ -27,7 +27,7 @@ clientapp = "customCryptographyExample.client_app:app"
 [tool.flwr.app.config]
 num-server-rounds = 1000
 fraction-evaluate = 0.5
-local-epochs = 2
+local-epochs = 1
 learning-rate = 0.01
 batch-size = 32
 fraction-fit = 1.0
@@ -36,6 +36,6 @@ default = "my-federation"
 
 [tool.flwr.federations.my-federation]
 address = "127.0.0.1:9093" # Address of the Control API
-root-certificates = "certificates/ca.crt"
-#insecure = true
+#root-certificates = "certificates/ca.crt"
+insecure = true
 #options.backend.client-resources.num-cpus = 3

@@ -1,0 +1,21 @@
+Encryption enabled: AES
+CRYPTO STATUS: enabled=True method=AES | DESERIALIZE: 0.00018 s | CRYPTO: 0.04819 s | TOTAL: 0.04837 s | IMPACT: 99.63%
+CRYPTO STATUS: enabled=True method=AES | SERIALIZE: 0.00008 s | CRYPTO: 0.16394 s | TOTAL: 0.16402 s | IMPACT: 99.95%
+CRYPTO STATUS: enabled=True method=AES | DESERIALIZE: 0.00022 s | CRYPTO: 0.04683 s | TOTAL: 0.04705 s | IMPACT: 99.54%
+CRYPTO STATUS: enabled=True method=AES | SERIALIZE: 0.00005 s | CRYPTO: 0.10693 s | TOTAL: 0.10697 s | IMPACT: 99.96%
+CRYPTO STATUS: enabled=True method=AES | DESERIALIZE: 0.00008 s | CRYPTO: 0.01608 s | TOTAL: 0.01615 s | IMPACT: 99.53%
+Tempo totale round 1: 299.22 s
+=== Report tempi round ===
+Round 1: totale=299.22s | crypto=0.00s (0.00%) | senza_critto=299.22s
+Totale critto: 0.00s su 299.22s (0.00%)
+Early stopping triggered at round 1, stopping server.
+Run finished 1000 round(s) in 299.22s
+	History (loss, centralized):
+
+		round 1: 2.04395435295105
+
+	History (metrics, centralized):
+
+	{'accuracy': [(1, 0.2522)], 'round_time': [(1, 299.22030957099923)]}
+
+
