@@ -58,6 +58,7 @@ from flwr.server.superlink.linkstate import (
     InMemoryLinkState,
     LinkState,
     SqliteLinkState,
+    SqlLinkState,
 )
 from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
@@ -1812,6 +1813,55 @@ class InMemoryStateTest(StateTest):
         self.assertSetEqual(state.owner_to_node_ids["aid2"], {node_id3})
 
 
+# Only include tests for methods that have been implemented
+_IMPLEMENTED_TESTS = {
+    # Inherited from CoreStateTest
+    "test_create_verify_and_delete_token",
+    "test_create_token_already_exists",
+    "test_get_run_id_by_token",
+    "test_acknowledge_app_heartbeat_success",
+    "test_acknowledge_app_heartbeat_nonexistent_token",
+    "test_acknowledge_app_heartbeat_extends_expiration_and_cleanup",
+    # Inherited from StateTest
+    "test_init_state",
+    "test_set_linkstate_of_federation_manager",
+    "test_initialize",
+}
+
+
+class SqlInMemoryStateTest(StateTest, unittest.TestCase):
+    """Test SqlLinkState implementation with in-memory database."""
+
+    __test__ = True
+
+    def setUp(self) -> None:
+        """Skip tests for unimplemented methods."""
+        test_name = self._testMethodName
+        if test_name not in _IMPLEMENTED_TESTS:
+            self.skipTest(f"SqlLinkState: {test_name} not yet implemented")
+
+    def state_factory(self) -> SqlLinkState:
+        """Return SqlLinkState with in-memory database."""
+        state = SqlLinkState(
+            "sqlite:///:memory:",
+            federation_manager=NoOpFederationManager(),
+            object_store=ObjectStoreFactory().store(),
+        )
+        state.initialize()
+        return state
+
+    def test_initialize(self) -> None:
+        """Test initialization."""
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        result = state.query("SELECT name FROM sqlite_schema;")
+
+        # Assert - 7 tables + 11 indexes (3 explicit + 8 auto from UNIQUE constraints)
+        assert len(result) == 18
+
+
 class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
     """Test SqliteState implemenation with in-memory database."""
 
@@ -1865,6 +1915,41 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
+        assert len(result) == 18
+
+
+class SqlFileBasedTest(StateTest, unittest.TestCase):
+    """Test SqlLinkState implementation with file-based database."""
+
+    __test__ = True
+
+    def setUp(self) -> None:
+        """Skip tests for unimplemented methods."""
+        test_name = self._testMethodName
+        if test_name not in _IMPLEMENTED_TESTS:
+            self.skipTest(f"SqlLinkState: {test_name} not yet implemented")
+
+    def state_factory(self) -> SqlLinkState:
+        """Return SqlLinkState with file-based database."""
+        # pylint: disable-next=consider-using-with,attribute-defined-outside-init
+        self.tmp_file = tempfile.NamedTemporaryFile()
+        state = SqlLinkState(
+            database_path=self.tmp_file.name,
+            federation_manager=NoOpFederationManager(),
+            object_store=ObjectStoreFactory().store(),
+        )
+        state.initialize()
+        return state
+
+    def test_initialize(self) -> None:
+        """Test initialization."""
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        result = state.query("SELECT name FROM sqlite_schema;")
+
+        # Assert - 7 tables + 11 indexes (3 explicit + 8 auto from UNIQUE constraints)
         assert len(result) == 18
 
 
