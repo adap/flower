@@ -17,7 +17,6 @@
 
 import hashlib
 import json
-import re
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -31,8 +30,6 @@ from flwr.cli.typing import SuperLinkConnection
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
-    CREDENTIALS_DIR,
-    FLWR_DIR,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
@@ -161,46 +158,6 @@ def is_valid_project_name(name: str) -> bool:
     return True
 
 
-def sanitize_project_name(name: str) -> str:
-    """Sanitize the given string to make it a valid Python project name.
-
-    This function replaces spaces, dots, slashes, and underscores with dashes, removes
-    any characters not allowed in Python project names, makes the string lowercase, and
-    ensures it starts with a valid character.
-
-    Parameters
-    ----------
-    name : str
-        The project name to sanitize.
-
-    Returns
-    -------
-    str
-        The sanitized project name that is valid for Python projects.
-    """
-    # Replace whitespace with '_'
-    name_with_hyphens = re.sub(r"[ ./_]", "-", name)
-
-    # Allowed characters in a module name: letters, digits, underscore
-    allowed_chars = set(
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-"
-    )
-
-    # Make the string lowercase
-    sanitized_name = name_with_hyphens.lower()
-
-    # Remove any characters not allowed in Python module names
-    sanitized_name = "".join(c for c in sanitized_name if c in allowed_chars)
-
-    # Ensure the first character is a letter or underscore
-    while sanitized_name and (
-        sanitized_name[0].isdigit() or sanitized_name[0] not in allowed_chars
-    ):
-        sanitized_name = sanitized_name[1:]
-
-    return sanitized_name
-
-
 def get_sha256_hash(file_path_or_int: Path | int) -> str:
     """Calculate the SHA-256 hash of a file or integer.
 
@@ -225,105 +182,6 @@ def get_sha256_hash(file_path_or_int: Path | int) -> str:
     elif isinstance(file_path_or_int, int):
         sha256.update(str(file_path_or_int).encode())
     return sha256.hexdigest()
-
-
-def get_account_auth_config_path(root_dir: Path, federation: str) -> Path:
-    """Return the path to the account auth config file.
-
-    Additionally, a `.gitignore` file will be created in the Flower directory to
-    include the `.credentials` folder to be excluded from git. If the `.gitignore`
-    file already exists, a warning will be displayed if the `.credentials` entry is
-    not found.
-    """
-    # Locate the credentials directory
-    abs_flwr_dir = root_dir.absolute() / FLWR_DIR
-    credentials_dir = abs_flwr_dir / CREDENTIALS_DIR
-    credentials_dir.mkdir(parents=True, exist_ok=True)
-
-    # Determine the absolute path of the Flower directory for .gitignore
-    gitignore_path = abs_flwr_dir / ".gitignore"
-    credential_entry = CREDENTIALS_DIR
-
-    try:
-        if gitignore_path.exists():
-            with open(gitignore_path, encoding="utf-8") as gitignore_file:
-                lines = gitignore_file.read().splitlines()
-
-            # Warn if .credentials is not already in .gitignore
-            if credential_entry not in lines:
-                typer.secho(
-                    f"`.gitignore` exists, but `{credential_entry}` entry not found. "
-                    "Consider adding it to your `.gitignore` to exclude Flower "
-                    "credentials from git.",
-                    fg=typer.colors.YELLOW,
-                    bold=True,
-                )
-        else:
-            typer.secho(
-                f"Creating a new `.gitignore` with `{credential_entry}` entry...",
-                fg=typer.colors.BLUE,
-            )
-            # Create a new .gitignore with .credentials
-            with open(gitignore_path, "w", encoding="utf-8") as gitignore_file:
-                gitignore_file.write(f"{credential_entry}\n")
-    except Exception as err:
-        typer.secho(
-            "❌ An error occurred while handling `.gitignore.` "
-            f"Please check the permissions of `{gitignore_path}` and try again.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
-        )
-        raise typer.Exit(code=1) from err
-
-    return credentials_dir / f"{federation}.json"
-
-
-def account_auth_enabled(federation_config: dict[str, Any]) -> bool:
-    """Check if account authentication is enabled in the federation config.
-
-    Parameters
-    ----------
-    federation_config : dict[str, Any]
-        The federation configuration dictionary.
-
-    Returns
-    -------
-    bool
-        True if account authentication is enabled, False otherwise.
-    """
-    enabled: bool = federation_config.get("enable-user-auth", False)
-    enabled |= federation_config.get("enable-account-auth", False)
-    if "enable-user-auth" in federation_config:
-        typer.secho(
-            "`enable-user-auth` is deprecated and will be removed in a future "
-            "release. Please use `enable-account-auth` instead.",
-            fg=typer.colors.YELLOW,
-            bold=True,
-        )
-    return enabled
-
-
-def retrieve_authn_type(config_path: Path) -> str:
-    """Retrieve the auth type from the config file or return NOOP if not found.
-
-    Parameters
-    ----------
-    config_path : Path
-        Path to the authentication configuration file.
-
-    Returns
-    -------
-    str
-        The authentication type string, or AuthnType.NOOP if not found.
-    """
-    try:
-        with config_path.open("r", encoding="utf-8") as file:
-            json_file = json.load(file)
-        authn_type: str = json_file[AUTHN_TYPE_JSON_KEY]
-        return authn_type
-    except (FileNotFoundError, KeyError):
-        return AuthnType.NOOP
 
 
 def get_authn_type(host: str) -> str:
