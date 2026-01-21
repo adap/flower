@@ -300,7 +300,7 @@ class TestSqlMixin(unittest.TestCase):
         # Verify the cleanup happened
         self.assertEqual(deleted, 2)
 
-        # Verify only positive value remains (both insert and cleanup committed together)
+        # Verify only positive value remains (both insert & cleanup committed together)
         rows = self.db.query("SELECT value FROM test ORDER BY value")
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["value"], 500)
