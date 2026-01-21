@@ -62,7 +62,7 @@ def run(
     ] = Path("."),
     superlink: Annotated[
         str | None,
-        typer.Argument(help="Name of the superlink configuration"),
+        typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
     run_config_overrides: Annotated[
         list[str] | None,
@@ -190,7 +190,7 @@ def _run_with_control_api(
             fab_id = fab_version = fab_hash = ""
             fab = Fab(fab_hash, b"", {})
 
-        real_federation: str = superlink_connection.federation or NOOP_FEDERATION
+        federation: str = superlink_connection.federation or NOOP_FEDERATION
 
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
         options = {}
@@ -202,7 +202,7 @@ def _run_with_control_api(
         req = StartRunRequest(
             fab=fab_to_proto(fab),
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
-            federation=real_federation,
+            federation=federation,
             federation_options=config_record_to_proto(c_record),
             app_spec=app_spec or "",
         )
