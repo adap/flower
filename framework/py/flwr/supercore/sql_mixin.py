@@ -17,18 +17,24 @@
 
 import re
 from abc import ABC
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
+from contextlib import contextmanager
+from contextvars import ContextVar
 from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Any
 
 from sqlalchemy import Engine, MetaData, create_engine, event, inspect, text
-from sqlalchemy.engine import Result
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
 from flwr.common.logger import log
 from flwr.supercore.constant import SQLITE_PRAGMAS
+
+_current_session: ContextVar[Session | None] = ContextVar(
+    "current_sqlalchemy_session",
+    default=None,
+)
 
 
 def _set_sqlite_pragmas(dbapi_conn: Any, _connection_record: Any) -> None:
@@ -84,21 +90,45 @@ class SqlMixin(ABC):
         self._engine: Engine | None = None
         self._session_factory: sessionmaker[Session] | None = None
 
-    def session(self) -> Session:
-        """Create a new database session.
+    @contextmanager
+    def session(self) -> Iterator[Session]:
+        """Provide a transactional database session context.
 
-        Returns
-        -------
+        Yields a SQLAlchemy Session that automatically commits on success or rolls
+        back on exceptions. Re-entrant: nested calls reuse the same session. Use for
+        multi-statement transactions; prefer `query()` for single statements.
+
+        Yields
+        ------
         Session
-            A new SQLAlchemy session. Use as context manager:
+            SQLAlchemy session. Commits on context exit, rolls back on exceptions.
 
+        Examples
+        --------
             with self.session() as session:
-                session.execute(text("SELECT ..."))
-                session.commit()
+                session.execute(text("DELETE FROM t WHERE id = :id"), {"id": 1})
+                session.execute(text("INSERT INTO t2 SELECT * FROM t"))
         """
+        existing = _current_session.get()
+
+        # Re-entrant: reuse the session if in a session context, no begin()
+        if existing is not None:
+            yield existing
+            return
+
         if self._session_factory is None:
             raise AttributeError("Database not initialized. Call initialize() first.")
-        return self._session_factory()
+
+        # Create new session; outermost scope owns the transaction
+        session = self._session_factory()
+        token = _current_session.set(session)
+
+        try:
+            with session.begin():
+                yield session
+        finally:
+            _current_session.reset(token)
+            session.close()
 
     def get_metadata(self) -> MetaData | None:
         """Return the MetaData object for this class.
@@ -163,16 +193,23 @@ class SqlMixin(ABC):
 
         TRANSACTION SEMANTICS:
         ----------------------
-        Each call to query() runs in its own isolated transaction that is
-        automatically committed. This is suitable for single SQL statements.
+        If called outside a session context, each call to query() runs in its own
+        isolated transaction that is automatically committed. This is suitable for
+        single SQL statements.
 
-        For complex operations requiring multiple SQL statements in a single
-        transaction, use session() directly instead:
+        If called within a session() context, query() reuses the existing session
+        and transaction. This enables atomic multi-query operations:
+
+            with self.session() as session:
+                self.query("UPDATE ...", {...})    # Shares same transaction
+                self.query("INSERT ...", {...})    # Shares same transaction
+                # Both succeed or fail together
+
+        You can also use session.execute() directly for the same effect:
 
             with self.session() as session:
                 session.execute(text("UPDATE ..."), {...})
                 session.execute(text("INSERT ..."), {...})
-                session.commit()  # Commits both statements atomically
 
         Parameters
         ----------
@@ -203,12 +240,17 @@ class SqlMixin(ABC):
             [{"id": 1, "status": "online"}, {"id": 2, "status": "offline"}]
         )
 
-        # Multi-statement transaction - use session() directly
-        with self.session() as session:
+        # Multi-statement transaction - query() calls share the same session
+        with self.session():
             # Both statements succeed or fail together
-            session.execute(text("DELETE FROM old_data WHERE date < :cutoff"), {...})
-            session.execute(text("INSERT INTO archive SELECT * FROM old_data"), {})
-            session.commit()
+            self.query("DELETE FROM token_store WHERE active_until < :time", {...})
+            self.query("UPDATE run SET status = :status WHERE id = :id", {...})
+
+        # Nested session() - query() calls share the same session
+        with self.session():
+            self.query("DELETE FROM token_store WHERE active_until < :time", {...})
+            with self.session():
+                self.query("UPDATE run SET status = :status WHERE id = :id", {...})
         """
         if self._engine is None:
             raise AttributeError(
@@ -222,31 +264,34 @@ class SqlMixin(ABC):
         query = re.sub(r"\s+", " ", query.strip())
 
         try:
-            with self.session() as session:
-                sql = text(query)
+            # Wrap query in text() to enable SQLAlchemy named parameter syntax (:param).
+            sql = text(query)
 
-                # Execute query (results live in database cursor)
+            def execute_and_fetch(session: Session) -> list[dict[str, Any]]:
+                """Execute query and fetch results from the given session."""
+                # Execute query (results live in database cursor).
                 # There is no need to check for batch vs single execution;
                 # SQLAlchemy handles both cases automatically.
-                result: Result[Any] = session.execute(sql, data)
+                result = session.execute(sql, data)
 
                 # Fetch results into Python memory before commit.
                 # mappings() returns dict-like rows (works for SELECT and RETURNING).
                 if result.returns_rows:  # type: ignore
-                    rows = [dict(row) for row in result.mappings()]
-                else:
-                    # For statements without RETURNING (INSERT/UPDATE/DELETE),
-                    # returns_rows is False, so we return empty list.
-                    rows = []
+                    return [dict(row) for row in result.mappings()]
 
-                # Commit transaction (finalizes database changes)
-                # NOTE: This commits after EVERY query() call, making each call
-                # an isolated transaction. For multi-statement transactions,
-                # use session() directly.
-                session.commit()
+                # For statements without RETURNING (INSERT/UPDATE/DELETE),
+                # returns_rows is False, so we return empty list.
+                return []
 
-                # Return the fetched data
-                return rows
+            # Check if already in a session context
+            existing_session = _current_session.get()
+            if existing_session is not None:
+                # Reuse the existing session without creating a new transaction.
+                return execute_and_fetch(existing_session)
+
+            # Not in a session context, create a new session context for this query
+            with self.session() as session:
+                return execute_and_fetch(session)
 
         except SQLAlchemyError as exc:
             log(ERROR, {"query": query, "data": data, "exception": exc})

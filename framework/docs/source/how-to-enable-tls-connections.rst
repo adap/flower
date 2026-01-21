@@ -42,7 +42,7 @@ top of this guide.
 .. code-block:: bash
 
     # In the example directory, generate the certificates
-    $ ./generate_cert.sh
+    $ python generate_creds.py
 
 This will generate the TLS certificates in a new ``certificates/`` directory. Copy this
 directory into the directory of your app (e.g. a directory generated earlier via ``flwr
