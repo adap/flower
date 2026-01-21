@@ -97,14 +97,19 @@ def build_round_time_report() -> List[str]:
         without_crypto = summary["without_crypto"]
         crypto_cumulative = summary.get("crypto_cumulative", crypto_time)
         parallel_factor = summary.get("parallel_factor")
+        parallel_fit = summary.get("parallel_fit")
+        parallel_eval = summary.get("parallel_eval")
 
         impact = (crypto_time / round_time * 100.0) if round_time > 0 else 0.0
 
-        parallel_note = (
-            f" | parallel_factor={parallel_factor:.0f}"
-            if parallel_factor is not None
-            else ""
-        )
+        parallel_note_parts = []
+        if parallel_factor is not None:
+            parallel_note_parts.append(f"parallel_factor={parallel_factor:.0f}")
+        if parallel_fit is not None:
+            parallel_note_parts.append(f"parallel_fit={parallel_fit:.0f}")
+        if parallel_eval is not None:
+            parallel_note_parts.append(f"parallel_eval={parallel_eval:.0f}")
+        parallel_note = f" | {' | '.join(parallel_note_parts)}" if parallel_note_parts else ""
 
         lines.append(
             "Round {round_num}: totale={round_time:.2f}s | "

@@ -145,12 +145,13 @@ def test_fit_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = fit_clients(client_instructions, None, None, 0)
+    (results, failures), max_parallel = fit_clients(client_instructions, None, None, 0)
 
     # Assert
     assert len(results) == 1
     assert len(failures) == 1
     assert results[0][1].num_examples == 1
+    assert max_parallel >= 1
 
 
 def test_eval_clients() -> None:
@@ -169,7 +170,7 @@ def test_eval_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = evaluate_clients(
+    (results, failures), max_parallel = evaluate_clients(
         client_instructions=client_instructions,
         max_workers=None,
         timeout=None,
@@ -181,6 +182,7 @@ def test_eval_clients() -> None:
     assert len(failures) == 1
     assert results[0][1].loss == 1.0
     assert results[0][1].num_examples == 1
+    assert max_parallel >= 1
 
 
 def test_set_max_workers() -> None:
