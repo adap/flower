@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,107 +12,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for SqliteMixin."""
+"""Tests for SqlMixin."""
 
 
-import os
-import tempfile
-import time
 import unittest
-from concurrent.futures import ThreadPoolExecutor
 
-from parameterized import parameterized
+from sqlalchemy import Column, Integer, MetaData, Table
+from sqlalchemy.exc import IntegrityError
 
-from .sql_mixin_test import DummyDbSqlAlchemy
-from .sqlite_mixin import SqliteMixin
+from .sql_mixin import SqlMixin
 
 
-class DummyDb(SqliteMixin):
-    """Simple subclass for testing SqliteMixin behavior."""
+class DummyDbSqlAlchemy(SqlMixin):
+    """Simple subclass for testing SqlMixin behavior with SQLAlchemy."""
 
-    def get_sql_statements(self) -> tuple[str, ...]:
-        """Return SQL statements for test table."""
-        return (
-            "CREATE TABLE IF NOT EXISTS test"
-            "(id INTEGER PRIMARY KEY AUTOINCREMENT, value INTEGER)",
+    def get_metadata(self) -> MetaData:
+        """Return MetaData with test table definition."""
+        metadata = MetaData()
+        Table(
+            "test",
+            metadata,
+            Column("id", Integer, primary_key=True, autoincrement=True),
+            Column("value", Integer),
         )
+        return metadata
 
+    def cleanup_negative_values(self) -> int:
+        """Delete rows with negative values and return count deleted."""
+        rows = self.query("SELECT COUNT(*) AS cnt FROM test WHERE value < 0")
+        count: int = rows[0]["cnt"]
+        if count > 0:
+            self.query("DELETE FROM test WHERE value < 0")
+        return count
 
-@parameterized.expand(
-    [
-        (DummyDb,),
-        (DummyDbSqlAlchemy,),
-    ],
-    ids=["SqliteMixin", "SqlMixin"],
-)  # type: ignore
-def test_transaction_serialization_with_tempfile(
-    db_class: type[DummyDb] | type[DummyDbSqlAlchemy],
-) -> None:
-    """Verify that SQLite file-level locking serializes concurrent transactions."""
-    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmpfile:
-        db_path = tmpfile.name
-
-    try:
-        # Initialize database schema once
-        init_db = db_class(db_path)
-        init_db.initialize()
-
-        def insert_row(_: int) -> None:
-            # Each thread creates its own connection to test file-level locking
-            db = db_class(db_path)
-            db.initialize()
-            if isinstance(db, DummyDb):
-                # SqliteMixin: test re-entrant conn context
-                with db.conn:
-                    # Insert a dummy row with value -1
-                    db.conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
-                    with db.conn:
-                        # Nested context - reuses same connection
-                        # Read current row count
-                        count = db.conn.execute(
-                            "SELECT COUNT(*) AS cnt FROM test"
-                        ).fetchone()["cnt"]
-                        # Simulate some processing time
-                        time.sleep(0.001)
-                        # Insert a new row with the current count
-                        db.conn.execute(
-                            "INSERT INTO test (value) VALUES (?)",
-                            (count,),
-                        )
-            else:
-                # SqlMixin: test re-entrant session context with query()
-                with db.session():
-                    # Insert a dummy row with value -1
-                    db.query("INSERT INTO test (value) VALUES (:value)", {"value": -1})
-                    with db.session():
-                        # Nested context - reuses same session
-                        # Read current row count
-                        count = db.query("SELECT COUNT(*) AS cnt FROM test")[0]["cnt"]
-                        # Simulate some processing time
-                        time.sleep(0.001)
-                        # Insert a new row with the current count
-                        db.query(
-                            "INSERT INTO test (value) VALUES (:count)",
-                            {"count": count},
-                        )
-
-        # Execute: Run concurrent transactions
-        with ThreadPoolExecutor(max_workers=8) as executor:
-            executor.map(insert_row, range(100))
-
-        # Assert: Verify that all rows were inserted correctly
-        rows = init_db.query("SELECT * FROM test ORDER BY id")
-        for row in rows:
-            if row["id"] & 0x1:
-                # Odd IDs are dummy rows
-                assert row["value"] == -1
-            else:
-                # Even IDs should have sequential counts
-                assert row["value"] == row["id"] - 1
-
-    finally:
-        # Clean up the temporary file
-        os.unlink(db_path)
+    def insert_and_cleanup(self, value: int) -> int:
+        """Insert a value and cleanup negative values atomically."""
+        with self.session():
+            self.query("INSERT INTO test (value) VALUES (:value)", {"value": value})
+            deleted = self.cleanup_negative_values()
+        return deleted
 
 
 class TestSqlMixin(unittest.TestCase):
@@ -123,8 +61,8 @@ class TestSqlMixin(unittest.TestCase):
         self.db = DummyDbSqlAlchemy(":memory:")
         self.db.initialize()
 
-    def test_session_reuse(self) -> None:
-        """Test that nested query() calls reuse the same session."""
+    def test_session_commits_all_queries_atomitcally(self) -> None:
+        """Test that all queries in a session are committed as a single transaction."""
         # Insert initial test data
         self.db.query("INSERT INTO test (value) VALUES (:value)", {"value": 100})
 
