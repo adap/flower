@@ -1813,56 +1813,57 @@ class InMemoryStateTest(StateTest):
         self.assertSetEqual(state.owner_to_node_ids["aid2"], {node_id3})
 
 
+# Only include tests for methods that have been implemented
+_IMPLEMENTED_TESTS = {
+    # Inherited from CoreStateTest
+    "test_create_verify_and_delete_token",
+    "test_create_token_already_exists",
+    "test_get_run_id_by_token",
+    "test_acknowledge_app_heartbeat_success",
+    "test_acknowledge_app_heartbeat_nonexistent_token",
+    "test_acknowledge_app_heartbeat_extends_expiration_and_cleanup",
+    # Inherited from StateTest
+    "test_init_state",
+    "test_set_linkstate_of_federation_manager",
+    "test_initialize",
+    # Node management - only tests not requiring create_run or activated nodes
+    "test_create_node_public_key",
+    "test_create_node_public_key_twice",
+    "test_get_node_info_no_filters",
+    "test_get_node_info_filter_by_node_ids",
+    "test_get_node_info_filter_by_owner_aids",
+    # Node activation and heartbeat - only tests not requiring create_run
+    "test_activate_node",
+    "test_deactivate_node",
+    "test_acknowledge_node_heartbeat",
+    "test_acknowledge_node_heartbeat_failed",
+    "test_get_node_info_filter_by_status",
+    "test_get_node_info_multiple_filters",
+    "test_get_node_info_empty_list_filters",
+    # Run management
+    "test_create_and_get_run",
+    "test_get_all_run_ids",
+    "test_get_all_run_ids_empty",
+    "test_get_run_ids_with_flwr_aid",
+    "test_get_run_ids_with_unknown_flwr_aid",
+    "test_get_pending_run_id",
+    "test_get_and_update_run_status",
+    "test_run_failed_due_to_heartbeat",
+    "test_status_transition_valid",
+    "test_status_transition_invalid",
+    "test_create_run_with_and_without_federation_options",
+}
+
+
 class SqlInMemoryStateTest(StateTest, unittest.TestCase):
     """Test SqlLinkState implementation with in-memory database."""
 
     __test__ = True
 
-    # Only include tests for methods that have been implemented
-    _implemented_tests = {
-        # Inherited from CoreStateTest
-        "test_create_verify_and_delete_token",
-        "test_create_token_already_exists",
-        "test_get_run_id_by_token",
-        "test_acknowledge_app_heartbeat_success",
-        "test_acknowledge_app_heartbeat_nonexistent_token",
-        "test_acknowledge_app_heartbeat_extends_expiration_and_cleanup",
-        # Inherited from StateTest
-        "test_init_state",
-        "test_set_linkstate_of_federation_manager",
-        "test_initialize",
-        # Node management - only tests not requiring create_run or activated nodes
-        "test_create_node_public_key",
-        "test_create_node_public_key_twice",
-        "test_get_node_info_no_filters",
-        "test_get_node_info_filter_by_node_ids",
-        "test_get_node_info_filter_by_owner_aids",
-        # Node activation and heartbeat - only tests not requiring create_run
-        "test_activate_node",
-        "test_deactivate_node",
-        "test_acknowledge_node_heartbeat",
-        "test_acknowledge_node_heartbeat_failed",
-        "test_get_node_info_filter_by_status",
-        "test_get_node_info_multiple_filters",
-        "test_get_node_info_empty_list_filters",
-        # Run management
-        "test_create_and_get_run",
-        "test_get_all_run_ids",
-        "test_get_all_run_ids_empty",
-        "test_get_run_ids_with_flwr_aid",
-        "test_get_run_ids_with_unknown_flwr_aid",
-        "test_get_pending_run_id",
-        "test_get_and_update_run_status",
-        "test_run_failed_due_to_heartbeat",
-        "test_status_transition_valid",
-        "test_status_transition_invalid",
-        "test_create_run_with_and_without_federation_options",
-    }
-
     def setUp(self) -> None:
         """Skip tests for unimplemented methods."""
         test_name = self._testMethodName
-        if test_name not in self._implemented_tests:
+        if test_name not in _IMPLEMENTED_TESTS:
             self.skipTest(f"SqlLinkState: {test_name} not yet implemented")
 
     def state_factory(self) -> SqlLinkState:
@@ -1948,13 +1949,10 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
 
     __test__ = True
 
-    # pylint: disable-next=protected-access
-    _implemented_tests = SqlInMemoryStateTest._implemented_tests
-
     def setUp(self) -> None:
         """Skip tests for unimplemented methods."""
         test_name = self._testMethodName
-        if test_name not in self._implemented_tests:
+        if test_name not in _IMPLEMENTED_TESTS:
             self.skipTest(f"SqlLinkState: {test_name} not yet implemented")
 
     def state_factory(self) -> SqlLinkState:
