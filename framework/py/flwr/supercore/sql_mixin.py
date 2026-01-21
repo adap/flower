@@ -203,7 +203,6 @@ class SqlMixin(ABC):
             with self.session() as session:
                 session.execute(text("UPDATE ..."), {...})
                 session.execute(text("INSERT ..."), {...})
-                session.commit()  # Commits both statements atomically
 
         Parameters
         ----------
@@ -239,7 +238,6 @@ class SqlMixin(ABC):
             # Both statements succeed or fail together
             session.execute(text("DELETE FROM old_data WHERE date < :cutoff"), {...})
             session.execute(text("INSERT INTO archive SELECT * FROM old_data"), {})
-            session.commit()
         """
         if self._engine is None:
             raise AttributeError(
