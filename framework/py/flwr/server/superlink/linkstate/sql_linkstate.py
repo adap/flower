@@ -15,6 +15,7 @@
 """SQLAlchemy-based implementation of the link state."""
 
 
+import json
 from collections.abc import Sequence
 from logging import ERROR
 from typing import Any
@@ -27,7 +28,9 @@ from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
     NODE_ID_NUM_BYTES,
+    RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
+    Status,
 )
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
@@ -41,7 +44,13 @@ from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 from flwr.superlink.federation import FederationManager
 
 from .linkstate import LinkState
-from .utils import generate_rand_int_from_bytes
+from .utils import (
+    configrecord_from_bytes,
+    configrecord_to_bytes,
+    generate_rand_int_from_bytes,
+    has_valid_sub_status,
+    is_valid_transition,
+)
 
 
 class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
@@ -369,34 +378,216 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         flwr_aid: str | None,
     ) -> int:
         """Create a new run."""
-        raise NotImplementedError
+        # Sample a random int64 as run_id
+        uint64_run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = uint64_to_int64(uint64_run_id)
+
+        with self.session():
+            # Check conflicts
+            query = "SELECT COUNT(*) as cnt FROM run WHERE run_id = :run_id"
+            rows = self.query(query, {"run_id": sint64_run_id})
+            if rows[0]["cnt"] == 0:
+                query = """
+                    INSERT INTO run
+                    (run_id, fab_id, fab_version,
+                    fab_hash, override_config, federation, federation_options,
+                    pending_at, starting_at, running_at, finished_at, sub_status,
+                    details, flwr_aid, bytes_sent, bytes_recv, clientapp_runtime)
+                    VALUES (:run_id, :fab_id, :fab_version, :fab_hash, :override_config,
+                    :federation, :federation_options, :pending_at, :starting_at,
+                    :running_at, :finished_at, :sub_status, :details, :flwr_aid,
+                    :bytes_sent, :bytes_recv, :clientapp_runtime)
+                """
+                override_config_json = json.dumps(override_config)
+                params = {
+                    "run_id": sint64_run_id,
+                    "fab_id": fab_id or "",
+                    "fab_version": fab_version or "",
+                    "fab_hash": fab_hash or "",
+                    "override_config": override_config_json,
+                    "federation": federation,
+                    "federation_options": configrecord_to_bytes(federation_options),
+                    "pending_at": now().isoformat(),
+                    "starting_at": "",
+                    "running_at": "",
+                    "finished_at": "",
+                    "sub_status": "",
+                    "details": "",
+                    "flwr_aid": flwr_aid or "",
+                    "bytes_sent": 0,
+                    "bytes_recv": 0,
+                    "clientapp_runtime": 0.0,
+                }
+                self.query(query, params)
+                return uint64_run_id
+        log(ERROR, "Unexpected run creation failure.")
+        return 0
 
     def get_run_ids(self, flwr_aid: str | None) -> set[int]:
         """Retrieve all run IDs if `flwr_aid` is not specified.
 
         Otherwise, retrieve all run IDs for the specified `flwr_aid`.
         """
-        raise NotImplementedError
+        if flwr_aid:
+            rows = self.query(
+                "SELECT run_id FROM run WHERE flwr_aid = :flwr_aid",
+                {"flwr_aid": flwr_aid},
+            )
+        else:
+            rows = self.query("SELECT run_id FROM run", {})
+        return {int64_to_uint64(row["run_id"]) for row in rows}
 
     def get_run(self, run_id: int) -> Run | None:
         """Retrieve information about the run with the specified `run_id`."""
-        raise NotImplementedError
+        # Clean up expired tokens; this will flag inactive runs as needed
+        self._cleanup_expired_tokens()
+
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = uint64_to_int64(run_id)
+        query = "SELECT * FROM run WHERE run_id = :run_id"
+        rows = self.query(query, {"run_id": sint64_run_id})
+        if rows:
+            row = rows[0]
+            return Run(
+                run_id=int64_to_uint64(row["run_id"]),
+                fab_id=row["fab_id"],
+                fab_version=row["fab_version"],
+                fab_hash=row["fab_hash"],
+                override_config=json.loads(row["override_config"]),
+                pending_at=row["pending_at"],
+                starting_at=row["starting_at"],
+                running_at=row["running_at"],
+                finished_at=row["finished_at"],
+                status=RunStatus(
+                    status=determine_run_status(row),
+                    sub_status=row["sub_status"],
+                    details=row["details"],
+                ),
+                flwr_aid=row["flwr_aid"],
+                federation=row["federation"],
+                bytes_sent=row["bytes_sent"],
+                bytes_recv=row["bytes_recv"],
+                clientapp_runtime=row["clientapp_runtime"],
+            )
+        log(ERROR, "`run_id` does not exist.")
+        return None
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
-        raise NotImplementedError
+        # Clean up expired tokens; this will flag inactive runs as needed
+        self._cleanup_expired_tokens()
+
+        # Convert the uint64 value to sint64 for SQLite
+        placeholders = ",".join([f":rid_{i}" for i in range(len(run_ids))])
+        query = f"SELECT * FROM run WHERE run_id IN ({placeholders})"
+        params = {f"rid_{i}": uint64_to_int64(rid) for i, rid in enumerate(run_ids)}
+        rows = self.query(query, params)
+
+        return {
+            # Restore uint64 run IDs
+            int64_to_uint64(row["run_id"]): RunStatus(
+                status=determine_run_status(row),
+                sub_status=row["sub_status"],
+                details=row["details"],
+            )
+            for row in rows
+        }
 
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
-        raise NotImplementedError
+        # Clean up expired tokens; this will flag inactive runs as needed
+        self._cleanup_expired_tokens()
+
+        with self.session():
+            # Convert the uint64 value to sint64 for SQLite
+            sint64_run_id = uint64_to_int64(run_id)
+            query = "SELECT * FROM run WHERE run_id = :run_id"
+            rows = self.query(query, {"run_id": sint64_run_id})
+
+            # Check if the run_id exists
+            if not rows:
+                log(ERROR, "`run_id` is invalid")
+                return False
+
+            # Check if the status transition is valid
+            row = rows[0]
+            current_status = RunStatus(
+                status=determine_run_status(row),
+                sub_status=row["sub_status"],
+                details=row["details"],
+            )
+            if not is_valid_transition(current_status, new_status):
+                log(
+                    ERROR,
+                    'Invalid status transition: from "%s" to "%s"',
+                    current_status.status,
+                    new_status.status,
+                )
+                return False
+
+            # Check if the sub-status is valid
+            if not has_valid_sub_status(current_status):
+                log(
+                    ERROR,
+                    'Invalid sub-status "%s" for status "%s"',
+                    current_status.sub_status,
+                    current_status.status,
+                )
+                return False
+
+            # Update the status
+            query = """
+                UPDATE run SET %s = :timestamp,
+                sub_status = :sub_status, details = :details
+                WHERE run_id = :run_id
+            """
+
+            # Prepare data for query
+            current = now()
+
+            # Determine the timestamp field based on the new status
+            timestamp_fld = ""
+            if new_status.status == Status.STARTING:
+                timestamp_fld = "starting_at"
+            elif new_status.status == Status.RUNNING:
+                timestamp_fld = "running_at"
+            elif new_status.status == Status.FINISHED:
+                timestamp_fld = "finished_at"
+
+            params = {
+                "timestamp": current.isoformat(),
+                "sub_status": new_status.sub_status,
+                "details": new_status.details,
+                "run_id": sint64_run_id,
+            }
+            self.query(query % timestamp_fld, params)
+        return True
 
     def get_pending_run_id(self) -> int | None:
         """Get the `run_id` of a run with `Status.PENDING` status."""
-        raise NotImplementedError
+        # Fetch all runs with unset `starting_at` (i.e. they are in PENDING status)
+        query = "SELECT * FROM run WHERE starting_at = '' LIMIT 1"
+        rows = self.query(query, {})
+        if rows:
+            return int64_to_uint64(rows[0]["run_id"])
+        return None
 
     def get_federation_options(self, run_id: int) -> ConfigRecord | None:
         """Retrieve the federation options for the specified `run_id`."""
-        raise NotImplementedError
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = uint64_to_int64(run_id)
+        query = "SELECT federation_options FROM run WHERE run_id = :run_id"
+        rows = self.query(query, {"run_id": sint64_run_id})
+
+        # Check if the run_id exists
+        if not rows:
+            log(ERROR, "`run_id` is invalid")
+            return None
+
+        row = rows[0]
+        return configrecord_from_bytes(row["federation_options"])
 
     def acknowledge_node_heartbeat(
         self, node_id: int, heartbeat_interval: float
@@ -479,3 +670,17 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
     def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
         """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
         raise NotImplementedError
+
+
+def determine_run_status(row: dict[str, Any]) -> str:
+    """Determine the status of the run based on timestamp fields."""
+    if row["pending_at"]:
+        if row["finished_at"]:
+            return Status.FINISHED
+        if row["starting_at"]:
+            if row["running_at"]:
+                return Status.RUNNING
+            return Status.STARTING
+        return Status.PENDING
+    run_id = int64_to_uint64(row["run_id"])
+    raise ValueError(f"The run {run_id} does not have a valid status.")
