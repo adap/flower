@@ -39,7 +39,7 @@ MSS = 1460  # TCP payload tipico con MTU 1500 (IPv4)
 class FlowerClient(NumPyClient):
 
     def __init__(self, trainloader, valloader, local_epochs, learning_rate):
-        self.net = get_model(NET, num_classes=10, pretrained=False)
+        self.net = get_model(NET, num_classes=10, pretrained=True)
         self.trainloader = trainloader
         self.valloader = valloader
         self.local_epochs = local_epochs

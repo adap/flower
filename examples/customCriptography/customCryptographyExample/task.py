@@ -1,7 +1,8 @@
 """task.py: Modelli e utility per Flower / PyTorch app."""
-
+import random
 from collections import OrderedDict
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -12,6 +13,16 @@ from torchvision.models import resnet18, resnet34, squeezenet1_1, ResNet18_Weigh
 
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
+
+SEED = 42
+
+random.seed(SEED)
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+torch.cuda.manual_seed_all(SEED)
+
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 
 def get_validation_data(batch_size=64):
     transform = transforms.Compose([
@@ -102,7 +113,7 @@ def get_model(model_name: str, num_classes=10, pretrained=True):
 
         return TinyCNN()
     elif model_name == "resnet18":
-        model = resnet18(pretrained=False)
+        model = resnet18(pretrained=True)
         model.fc = nn.Linear(model.fc.in_features, num_classes)
         return model
     elif model_name == "resnet34":
@@ -152,10 +163,13 @@ def load_data_from_disk(path: str, batch_size: int, resize=None):
     def apply_transforms(batch):
         batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
         return batch
+    g = torch.Generator()
+    g.manual_seed(SEED)
 
     partition_train_test = partition_train_test.with_transform(apply_transforms)
+
     trainloader = DataLoader(
-        partition_train_test["train"], batch_size=batch_size, shuffle=True,  num_workers=0,
+        partition_train_test["train"], batch_size=batch_size, shuffle=True, generator=g, num_workers=0,
     )
     testloader = DataLoader(partition_train_test["test"], batch_size=batch_size)
     return trainloader, testloader

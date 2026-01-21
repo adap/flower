@@ -161,6 +161,12 @@ class Server:
                        log_time("Round %s Accuracy (federated): %.4f", current_round, evaluate_metrics_fed["accuracy"])
             # Fine round: calcolo e log del tempo
             round_elapsed = timeit.default_timer() - round_start
+            log_file.ROUND_SUMMARIES.append({
+                "round": current_round,
+                "round_time": round_elapsed,
+                "crypto_time": 0.0,          # oppure il tempo reale se lo misuri
+                "without_crypto": round_elapsed,
+            })
 
             log_time("Tempo totale round %s: %.2f s", current_round, round_elapsed)
 
@@ -170,6 +176,10 @@ class Server:
             )
 
         # Bookkeeping
+       #. if log_file.is_report_requested():
+            log_time("=== Report tempi round ===")
+            for line in log_file.build_round_time_report():
+                log_time(line)
         end_time = timeit.default_timer()
 
         elapsed= end_time - start_time

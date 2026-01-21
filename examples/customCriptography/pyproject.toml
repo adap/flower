@@ -26,7 +26,7 @@ clientapp = "customCryptographyExample.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 1000
-fraction-evaluate = 0.5
+fraction-evaluate = 1.0
 local-epochs = 1
 learning-rate = 0.01
 batch-size = 32
