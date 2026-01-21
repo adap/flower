@@ -89,28 +89,41 @@ def build_round_time_report() -> List[str]:
     lines = []
     total_round_time = 0.0
     total_crypto_time = 0.0
+    total_crypto_cumulative = 0.0
 
     for summary in ROUND_SUMMARIES:
         round_time = summary["round_time"]
         crypto_time = summary["crypto_time"]
         without_crypto = summary["without_crypto"]
+        crypto_cumulative = summary.get("crypto_cumulative", crypto_time)
+        parallel_factor = summary.get("parallel_factor")
 
         impact = (crypto_time / round_time * 100.0) if round_time > 0 else 0.0
+
+        parallel_note = (
+            f" | parallel_factor={parallel_factor:.0f}"
+            if parallel_factor is not None
+            else ""
+        )
 
         lines.append(
             "Round {round_num}: totale={round_time:.2f}s | "
             "crypto={crypto_time:.2f}s ({impact:.2f}%) | "
-            "senza_critto={without_crypto:.2f}s".format(
+            "crypto_cum={crypto_cumulative:.2f}s | "
+            "senza_critto={without_crypto:.2f}s{parallel_note}".format(
                 round_num=int(summary["round"]),
                 round_time=round_time,
                 crypto_time=crypto_time,
                 impact=impact,
+                crypto_cumulative=crypto_cumulative,
                 without_crypto=without_crypto,
+                parallel_note=parallel_note,
             )
         )
 
         total_round_time += round_time
         total_crypto_time += crypto_time
+        total_crypto_cumulative += crypto_cumulative
 
     total_impact = (
         (total_crypto_time / total_round_time * 100.0)
@@ -119,11 +132,17 @@ def build_round_time_report() -> List[str]:
     )
 
     lines.append(
-        "Totale critto: {total_crypto:.2f}s su {total_round:.2f}s ({impact:.2f}%)".format(
+        "Totale critto (parallel): {total_crypto:.2f}s su {total_round:.2f}s ({impact:.2f}%)".format(
             total_crypto=total_crypto_time,
             total_round=total_round_time,
             impact=total_impact,
         )
     )
+    if total_crypto_cumulative != total_crypto_time:
+        lines.append(
+            "Totale critto cumulativo: {total_crypto:.2f}s".format(
+                total_crypto=total_crypto_cumulative
+            )
+        )
 
     return lines
