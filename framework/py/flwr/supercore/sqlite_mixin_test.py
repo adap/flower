@@ -20,8 +20,10 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
+import pytest
 from parameterized import parameterized
-from sqlalchemy import Column, Integer, MetaData, Table, text
+from sqlalchemy import Column, Integer, MetaData, Table
+from sqlalchemy.exc import IntegrityError
 
 from .sql_mixin import SqlMixin
 from .sqlite_mixin import SqliteMixin
@@ -77,38 +79,39 @@ def test_transaction_serialization_with_tempfile(
             db = db_class(db_path)
             db.initialize()
             if isinstance(db, DummyDb):
-                # SqliteMixin: use conn context and ? placeholders
-                with db.conn as conn:
+                # SqliteMixin: test re-entrant conn context
+                with db.conn:
                     # Insert a dummy row with value -1
-                    conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
-                    # Read current row count
-                    count = db.conn.execute(
-                        "SELECT COUNT(*) AS cnt FROM test"
-                    ).fetchone()["cnt"]
-                    # Simulate some processing time
-                    time.sleep(0.001)
-                    # Insert a new row with the current count
-                    conn.execute("INSERT INTO test (value) VALUES (?)", (count,))
+                    db.conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
+                    with db.conn:
+                        # Nested context - reuses same connection
+                        # Read current row count
+                        count = db.conn.execute(
+                            "SELECT COUNT(*) AS cnt FROM test"
+                        ).fetchone()["cnt"]
+                        # Simulate some processing time
+                        time.sleep(0.001)
+                        # Insert a new row with the current count
+                        db.conn.execute(
+                            "INSERT INTO test (value) VALUES (?)",
+                            (count,),
+                        )
             else:
-                # SqlMixin: use session context for single atomic transaction
-                with db.session() as session:
+                # SqlMixin: test re-entrant session context with query()
+                with db.session():
                     # Insert a dummy row with value -1
-                    session.execute(
-                        text("INSERT INTO test (value) VALUES (:value)"), {"value": -1}
-                    )
-                    # Read current row count
-                    result = session.execute(text("SELECT COUNT(*) AS cnt FROM test"))
-                    row = result.mappings().fetchone()
-                    assert row is not None
-                    count = row["cnt"]
-                    # Simulate some processing time
-                    time.sleep(0.001)
-                    # Insert a new row with the current count
-                    session.execute(
-                        text("INSERT INTO test (value) VALUES (:value)"),
-                        {"value": count},
-                    )
-                    session.commit()
+                    db.query("INSERT INTO test (value) VALUES (:value)", {"value": -1})
+                    with db.session():
+                        # Nested context - reuses same session
+                        # Read current row count
+                        count = db.query("SELECT COUNT(*) AS cnt FROM test")[0]["cnt"]
+                        # Simulate some processing time
+                        time.sleep(0.001)
+                        # Insert a new row with the current count
+                        db.query(
+                            "INSERT INTO test (value) VALUES (:count)",
+                            {"count": count},
+                        )
 
         # Execute: Run concurrent transactions
         with ThreadPoolExecutor(max_workers=8) as executor:
@@ -131,14 +134,16 @@ def test_transaction_serialization_with_tempfile(
 
 def test_sql_mixin_session_reuse() -> None:
     """Test that nested query() calls reuse the same session."""
+    # Prepare
     db = DummyDbSqlAlchemy(":memory:")
     db.initialize()
 
+    # Execute
     # Insert initial test data
     db.query("INSERT INTO test (value) VALUES (:value)", {"value": 100})
 
     # Test: Multiple query() calls within a session should share the same transaction
-    with db.session() as session:
+    with db.session():
         # First query: insert a value
         db.query("INSERT INTO test (value) VALUES (:value)", {"value": 200})
 
@@ -164,11 +169,13 @@ def test_sql_mixin_session_reuse() -> None:
     assert rows[1]["value"] == 300
 
 
-def test_sql_mixin_session_rollback() -> None:
+def test_sql_mixin_session_rollback_successful() -> None:
     """Test that exceptions in a session cause rollback for all nested queries."""
+    # Prepare
     db = DummyDbSqlAlchemy(":memory:")
     db.initialize()
 
+    # Execute
     # Insert initial test data
     db.query("INSERT INTO test (value) VALUES (:value)", {"value": 100})
 
@@ -184,8 +191,9 @@ def test_sql_mixin_session_rollback() -> None:
             )
             assert len(rows) == 1
 
-            # Raise an exception to trigger rollback
-            raise ValueError("Simulated error")
+            # Raise a simulated error to trigger rollback before final commit
+            if rows[0]["value"] == 200:
+                raise ValueError("Simulated business logic error")
     except ValueError:
         pass  # Expected
 
@@ -195,6 +203,49 @@ def test_sql_mixin_session_rollback() -> None:
     assert rows[0]["value"] == 100
 
 
+def test_sql_mixin_session_rollback_successful_on_database_error() -> None:
+    """Test that database errors cause rollback for all nested queries."""
+    # Prepare
+    db = DummyDbSqlAlchemy(":memory:")
+    db.initialize()
+
+    # Execute
+    # Insert initial test data
+    db.query("INSERT INTO test (value) VALUES (:value)", {"value": 111})
+
+    # Test: Database error should rollback all nested query() calls
+
+    with pytest.raises(IntegrityError):
+        with db.session():
+            # First query: insert a value with explicit id
+            db.query(
+                "INSERT INTO test (id, value) VALUES (:id, :value)",
+                {"id": 999, "value": 200},
+            )
+
+            # Second query: verify the value was inserted (within transaction)
+            rows = db.query(
+                "SELECT value FROM test WHERE value = :value", {"value": 200}
+            )
+            assert len(rows) == 1
+            assert rows[0]["value"] == 200
+
+            # Third query: attempt to insert duplicate primary key (will raise
+            # IntegrityError)
+            db.query(
+                "INSERT INTO test (id, value) VALUES (:id, :value)",
+                {
+                    "id": 999,
+                    "value": 300,
+                },  # Same id=999, violates PRIMARY KEY constraint
+            )
+
+    # Verify the entire transaction was rolled back (neither 200 nor 300 should exist)
+    rows = db.query("SELECT value FROM test ORDER BY value")
+    assert len(rows) == 1
+    assert rows[0]["value"] == 111
+
+
 def test_sql_mixin_nested_sessions() -> None:
     """Test that nested session() calls reuse the same session."""
     db = DummyDbSqlAlchemy(":memory:")
@@ -202,24 +253,24 @@ def test_sql_mixin_nested_sessions() -> None:
 
     # Test: Nested session contexts should reuse the same session
     with db.session() as outer_session:
-        db.query("INSERT INTO test (value) VALUES (:value)", {"value": 100})
+        db.query("INSERT INTO test (value) VALUES (:value)", {"value": 101})
 
         with db.session() as inner_session:
             # Inner session should be the same object as outer session
             assert inner_session is outer_session
 
             # Insert in nested context
-            db.query("INSERT INTO test (value) VALUES (:value)", {"value": 200})
+            db.query("INSERT INTO test (value) VALUES (:value)", {"value": 201})
 
         # After inner context, can still use outer session
-        db.query("INSERT INTO test (value) VALUES (:value)", {"value": 300})
+        db.query("INSERT INTO test (value) VALUES (:value)", {"value": 301})
 
     # Verify all inserts were committed as one transaction
     rows = db.query("SELECT value FROM test ORDER BY value")
     assert len(rows) == 3
-    assert rows[0]["value"] == 100
-    assert rows[1]["value"] == 200
-    assert rows[2]["value"] == 300
+    assert rows[0]["value"] == 101
+    assert rows[1]["value"] == 201
+    assert rows[2]["value"] == 301
 
 
 def test_sql_mixin_query_without_session() -> None:
@@ -228,13 +279,13 @@ def test_sql_mixin_query_without_session() -> None:
     db.initialize()
 
     # Each query() call should be its own transaction
-    db.query("INSERT INTO test (value) VALUES (:value)", {"value": 100})
-    db.query("INSERT INTO test (value) VALUES (:value)", {"value": 200})
-    db.query("INSERT INTO test (value) VALUES (:value)", {"value": 300})
+    db.query("INSERT INTO test (value) VALUES (:value)", {"value": 211})
+    db.query("INSERT INTO test (value) VALUES (:value)", {"value": 212})
+    db.query("INSERT INTO test (value) VALUES (:value)", {"value": 213})
 
     # Verify all inserts were committed independently
     rows = db.query("SELECT value FROM test ORDER BY value")
     assert len(rows) == 3
-    assert rows[0]["value"] == 100
-    assert rows[1]["value"] == 200
-    assert rows[2]["value"] == 300
+    assert rows[0]["value"] == 211
+    assert rows[1]["value"] == 212
+    assert rows[2]["value"] == 213
