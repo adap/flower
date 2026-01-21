@@ -15,26 +15,39 @@
 """SQLAlchemy-based implementation of the link state."""
 
 
+# pylint: disable=too-many-lines
+
 import json
 from collections.abc import Sequence
-from logging import ERROR
+from logging import ERROR, WARNING
 from typing import Any
 
 from sqlalchemy import MetaData
 from sqlalchemy.exc import IntegrityError
 
 from flwr.app.user_config import UserConfig
-from flwr.common import Context, Message, log, now
+from flwr.common import Context, Message, Metadata, log, now
 from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
+    MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.message import make_message
 from flwr.common.record import ConfigRecord
+from flwr.common.serde import recorddict_from_proto, recorddict_to_proto
+from flwr.common.serde_utils import error_from_proto, error_to_proto
 from flwr.common.typing import Run, RunStatus
-from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
+
+# pylint: disable=E0611
+from flwr.proto.error_pb2 import Error as ProtoError
+from flwr.proto.node_pb2 import NodeInfo
+from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
+
+# pylint: enable=E0611
+from flwr.server.utils.validator import validate_message
 from flwr.supercore.constant import NodeStatus
 from flwr.supercore.corestate.sql_corestate import SqlCoreState
 from flwr.supercore.object_store.object_store import ObjectStore
@@ -45,11 +58,14 @@ from flwr.superlink.federation import FederationManager
 
 from .linkstate import LinkState
 from .utils import (
+    check_node_availability_for_in_message,
     configrecord_from_bytes,
     configrecord_to_bytes,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
+    verify_found_message_replies,
+    verify_message_ids,
 )
 
 
@@ -85,35 +101,411 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
     def store_message_ins(self, message: Message) -> str | None:
         """Store one Message."""
-        raise NotImplementedError
+        # Validate message
+        errors = validate_message(message=message, is_reply_message=False)
+        if any(errors):
+            log(ERROR, errors)
+            return None
+
+        # Store Message
+        msg_dict = message_to_dict(message)
+
+        # Convert values from uint64 to sint64 for SQLite
+        msg_dict["run_id"] = uint64_to_int64(message.metadata.run_id)
+        msg_dict["src_node_id"] = uint64_to_int64(message.metadata.src_node_id)
+        msg_dict["dst_node_id"] = uint64_to_int64(message.metadata.dst_node_id)
+
+        # Validate source node ID
+        if message.metadata.src_node_id != SUPERLINK_NODE_ID:
+            log(
+                ERROR,
+                "Invalid source node ID for Message: %s",
+                message.metadata.src_node_id,
+            )
+            return None
+
+        with self.session():
+            # Validate run_id
+            query = "SELECT federation FROM run WHERE run_id = :run_id"
+            rows = self.query(query, {"run_id": msg_dict["run_id"]})
+            if not rows:
+                log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
+                return None
+            federation: str = rows[0]["federation"]
+
+            # Validate destination node ID
+            query = """SELECT node_id FROM node WHERE node_id = :node_id
+                       AND status IN (:status_online, :status_offline)"""
+            rows = self.query(
+                query,
+                {
+                    "node_id": msg_dict["dst_node_id"],
+                    "status_online": NodeStatus.ONLINE,
+                    "status_offline": NodeStatus.OFFLINE,
+                },
+            )
+            if not rows or not self.federation_manager.has_node(
+                message.metadata.dst_node_id, federation
+            ):
+                log(
+                    ERROR,
+                    "Invalid destination node ID for Message: %s",
+                    message.metadata.dst_node_id,
+                )
+                return None
+
+            # Insert message
+            columns = ", ".join([f":{key}" for key in msg_dict])
+            query = f"INSERT INTO message_ins VALUES({columns})"
+            self.query(query, msg_dict)
+
+        return message.metadata.message_id
+
+    def _check_stored_messages(self, message_ids: set[str]) -> None:
+        """Check and delete the message if it's invalid."""
+        if not message_ids:
+            return
+
+        with self.session():
+            invalid_msg_ids: set[str] = set()
+            current_time = now().timestamp()
+
+            for msg_id in message_ids:
+                # Check if message exists
+                query = "SELECT * FROM message_ins WHERE message_id = :message_id"
+                message_rows = self.query(query, {"message_id": msg_id})
+                if not message_rows:
+                    continue
+
+                message_row = message_rows[0]
+
+                # Check if the message has expired
+                available_until = message_row["created_at"] + message_row["ttl"]
+                if available_until <= current_time:
+                    invalid_msg_ids.add(msg_id)
+                    continue
+
+                # Check if src_node_id and dst_node_id are in the federation
+                # Get federation from run table
+                run_id = message_row["run_id"]
+                query = "SELECT federation FROM run WHERE run_id = :run_id"
+                run_rows = self.query(query, {"run_id": run_id})
+                if not run_rows:  # This should not happen
+                    invalid_msg_ids.add(msg_id)
+                    continue
+                federation = run_rows[0]["federation"]
+
+                # Convert sint64 to uint64 for node IDs
+                src_node_id = int64_to_uint64(message_row["src_node_id"])
+                dst_node_id = int64_to_uint64(message_row["dst_node_id"])
+
+                # Filter nodes to check if they're in the federation
+                filtered = self.federation_manager.filter_nodes(
+                    {src_node_id, dst_node_id}, federation
+                )
+                if len(filtered) != 2:  # Not both nodes are in the federation
+                    invalid_msg_ids.add(msg_id)
+
+            # Delete all invalid messages
+            self.delete_messages(invalid_msg_ids)
 
     def get_message_ins(self, node_id: int, limit: int | None) -> list[Message]:
         """Get all Messages that have not been delivered yet."""
-        raise NotImplementedError
+        if limit is not None and limit < 1:
+            raise AssertionError("`limit` must be >= 1")
+
+        if node_id == SUPERLINK_NODE_ID:
+            msg = f"`node_id` must be != {SUPERLINK_NODE_ID}"
+            raise AssertionError(msg)
+
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_node_id = uint64_to_int64(node_id)
+
+        with self.session():
+            # Retrieve all Messages for node_id
+            query = """
+                SELECT message_id
+                FROM message_ins
+                WHERE dst_node_id = :node_id
+                AND delivered_at = ''
+                AND (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
+            """
+            params: dict[str, Any] = {"node_id": sint64_node_id}
+
+            if limit is not None:
+                query += " LIMIT :limit"
+                params["limit"] = limit
+
+            rows = self.query(query, params)
+            message_ids: set[str] = {row["message_id"] for row in rows}
+            self._check_stored_messages(message_ids)
+
+            # Mark retrieved Messages as delivered
+            if rows:
+                # Prepare query
+                placeholders = ",".join([f":id_{i}" for i in range(len(message_ids))])
+                query = f"""
+                    UPDATE message_ins
+                    SET delivered_at = :delivered_at
+                    WHERE message_id IN ({placeholders})
+                    RETURNING *
+                """
+
+                # Prepare data for query
+                delivered_at = now().isoformat()
+                params = {"delivered_at": delivered_at}
+                for index, msg_id in enumerate(message_ids):
+                    params[f"id_{index}"] = str(msg_id)
+
+                # Run query
+                rows = self.query(query, params)
+
+            for row in rows:
+                # Convert values from sint64 to uint64
+                row["run_id"] = int64_to_uint64(row["run_id"])
+                row["src_node_id"] = int64_to_uint64(row["src_node_id"])
+                row["dst_node_id"] = int64_to_uint64(row["dst_node_id"])
+
+        result = [dict_to_message(dict(row)) for row in rows]
+        return result
 
     def store_message_res(self, message: Message) -> str | None:
         """Store one Message."""
-        raise NotImplementedError
+        # Validate message
+        errors = validate_message(message=message, is_reply_message=True)
+        if any(errors):
+            log(ERROR, errors)
+            return None
+
+        res_metadata = message.metadata
+        msg_ins_id = res_metadata.reply_to_message_id
+        msg_ins = self.get_valid_message_ins(msg_ins_id)
+        if msg_ins is None:
+            log(
+                ERROR,
+                "Failed to store Message reply: "
+                "The message it replies to with message_id %s does not exist or "
+                "has expired, or was deleted because the target SuperNode was "
+                "removed from the federation.",
+                msg_ins_id,
+            )
+            return None
+
+        # Ensure that the dst_node_id of the original message matches the src_node_id
+        # of reply being processed.
+        if (
+            msg_ins
+            and message
+            and int64_to_uint64(msg_ins["dst_node_id"]) != res_metadata.src_node_id
+        ):
+            return None
+
+        # Fail if the Message TTL exceeds the
+        # expiration time of the Message it replies to.
+        # Condition: ins_metadata.created_at + ins_metadata.ttl ≥
+        #            res_metadata.created_at + res_metadata.ttl
+        # A small tolerance is introduced to account
+        # for floating-point precision issues.
+        max_allowed_ttl = (
+            msg_ins["created_at"] + msg_ins["ttl"] - res_metadata.created_at
+        )
+        if res_metadata.ttl and (
+            res_metadata.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
+        ):
+            log(
+                WARNING,
+                "Received Message with TTL %.2f exceeding the allowed maximum "
+                "TTL %.2f.",
+                res_metadata.ttl,
+                max_allowed_ttl,
+            )
+            return None
+
+        # Store Message
+        msg_dict = message_to_dict(message)
+
+        # Convert values from uint64 to sint64 for SQLite
+        msg_dict["run_id"] = uint64_to_int64(message.metadata.run_id)
+        msg_dict["src_node_id"] = uint64_to_int64(message.metadata.src_node_id)
+        msg_dict["dst_node_id"] = uint64_to_int64(message.metadata.dst_node_id)
+
+        columns = ", ".join([f":{key}" for key in msg_dict])
+        query = f"INSERT INTO message_res VALUES({columns})"
+
+        try:
+            self.query(query, msg_dict)
+        except IntegrityError:
+            log(ERROR, "`run` is invalid")
+            return None
+
+        return message.metadata.message_id
 
     def get_message_res(self, message_ids: set[str]) -> list[Message]:
         """Get reply Messages for the given Message IDs."""
-        raise NotImplementedError
+        # pylint: disable=too-many-locals
+        ret: dict[str, Message] = {}
+
+        with self.session():
+            # Verify Message IDs
+            self._check_stored_messages(message_ids)
+            current = now().timestamp()
+
+            # Get all instruction messages
+            placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
+            query = f"""
+                SELECT *
+                FROM message_ins
+                WHERE message_id IN ({placeholders})
+            """
+            params = {f"mid_{i}": str(mid) for i, mid in enumerate(message_ids)}
+            rows = self.query(query, params)
+
+            found_message_ins_dict: dict[str, Message] = {}
+            for row in rows:
+                row["run_id"] = int64_to_uint64(row["run_id"])
+                row["src_node_id"] = int64_to_uint64(row["src_node_id"])
+                row["dst_node_id"] = int64_to_uint64(row["dst_node_id"])
+                found_message_ins_dict[row["message_id"]] = dict_to_message(dict(row))
+
+            ret = verify_message_ids(
+                inquired_message_ids=message_ids,
+                found_message_ins_dict=found_message_ins_dict,
+                current_time=current,
+            )
+
+            # Check node availability
+            dst_node_ids: set[int] = set()
+            for message_id in message_ids:
+                if message_id in found_message_ins_dict:
+                    in_message = found_message_ins_dict[message_id]
+                    sint_node_id = uint64_to_int64(in_message.metadata.dst_node_id)
+                    dst_node_ids.add(sint_node_id)
+
+            if dst_node_ids:
+                placeholders = ",".join([f":nid_{i}" for i in range(len(dst_node_ids))])
+                query = f"""
+                    SELECT node_id, online_until
+                    FROM node
+                    WHERE node_id IN ({placeholders})
+                    AND status != :status
+                """
+                node_params: dict[str, Any] = {}
+                for i, nid in enumerate(dst_node_ids):
+                    node_params[f"nid_{i}"] = nid
+                node_params["status"] = NodeStatus.UNREGISTERED
+                rows = self.query(query, node_params)
+
+                tmp_ret_dict = check_node_availability_for_in_message(
+                    inquired_in_message_ids=message_ids,
+                    found_in_message_dict=found_message_ins_dict,
+                    node_id_to_online_until={
+                        int64_to_uint64(row["node_id"]): row["online_until"]
+                        for row in rows
+                    },
+                    current_time=current,
+                )
+                ret.update(tmp_ret_dict)
+
+            # Find all reply Messages
+            placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
+            query = f"""
+                SELECT *
+                FROM message_res
+                WHERE reply_to_message_id IN ({placeholders})
+                AND delivered_at = ''
+            """
+            params = {f"mid_{i}": str(mid) for i, mid in enumerate(message_ids)}
+            rows = self.query(query, params)
+
+            for row in rows:
+                row["run_id"] = int64_to_uint64(row["run_id"])
+                row["src_node_id"] = int64_to_uint64(row["src_node_id"])
+                row["dst_node_id"] = int64_to_uint64(row["dst_node_id"])
+
+            tmp_ret_dict = verify_found_message_replies(
+                inquired_message_ids=message_ids,
+                found_message_ins_dict=found_message_ins_dict,
+                found_message_res_list=[dict_to_message(dict(row)) for row in rows],
+                current_time=current,
+            )
+            ret.update(tmp_ret_dict)
+
+            # Mark existing reply Messages to be returned as delivered
+            delivered_at = now().isoformat()
+            for message_res in ret.values():
+                message_res.metadata.delivered_at = delivered_at
+            message_res_ids = [
+                message_res.metadata.message_id for message_res in ret.values()
+            ]
+
+            if message_res_ids:
+                placeholders = ",".join(
+                    [f":mid_{i}" for i in range(len(message_res_ids))]
+                )
+                query = f"""
+                    UPDATE message_res
+                    SET delivered_at = :delivered_at
+                    WHERE message_id IN ({placeholders})
+                """
+                params = {"delivered_at": delivered_at}
+                params.update(
+                    {f"mid_{i}": mid for i, mid in enumerate(message_res_ids)}
+                )
+                self.query(query, params)
+
+        return list(ret.values())
 
     def num_message_ins(self) -> int:
-        """Calculate the number of instruction Messages in store."""
-        raise NotImplementedError
+        """Calculate the number of instruction Messages in store.
+
+        This includes delivered but not yet deleted.
+        """
+        query = "SELECT count(*) AS num FROM message_ins"
+        rows = self.query(query, {})
+        return int(rows[0]["num"])
 
     def num_message_res(self) -> int:
-        """Calculate the number of reply Messages in store."""
-        raise NotImplementedError
+        """Calculate the number of reply Messages in store.
+
+        This includes delivered but not yet deleted.
+        """
+        query = "SELECT count(*) AS num FROM message_res"
+        rows = self.query(query, {})
+        return int(rows[0]["num"])
 
     def delete_messages(self, message_ins_ids: set[str]) -> None:
         """Delete a Message and its reply based on provided Message IDs."""
-        raise NotImplementedError
+        if not message_ins_ids:
+            return
+
+        with self.session():
+            placeholders = ",".join([f":mid_{i}" for i in range(len(message_ins_ids))])
+            params = {f"mid_{i}": str(mid) for i, mid in enumerate(message_ins_ids)}
+
+            # Delete Message
+            query_1 = f"""
+                DELETE FROM message_ins
+                WHERE message_id IN ({placeholders})
+            """
+            self.query(query_1, params)
+
+            # Delete reply Message
+            query_2 = f"""
+                DELETE FROM message_res
+                WHERE reply_to_message_id IN ({placeholders})
+            """
+            self.query(query_2, params)
 
     def get_message_ids_from_run_id(self, run_id: int) -> set[str]:
         """Get all instruction Message IDs for the given run_id."""
-        raise NotImplementedError
+        query = """
+            SELECT message_id
+            FROM message_ins
+            WHERE run_id = :run_id
+        """
+        sint64_run_id = uint64_to_int64(run_id)
+        rows = self.query(query, {"run_id": sint64_run_id})
+        return {row["message_id"] for row in rows}
 
     def create_node(
         self,
@@ -671,6 +1063,25 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
         raise NotImplementedError
 
+    def get_valid_message_ins(self, message_id: str) -> dict[str, Any] | None:
+        """Check if the Message exists and is valid (not expired).
+
+        Return Message if valid.
+        """
+        with self.session():
+            self._check_stored_messages({message_id})
+            query = """
+                SELECT *
+                FROM message_ins
+                WHERE message_id = :message_id
+            """
+            rows = self.query(query, {"message_id": message_id})
+            if not rows:
+                # Message does not exist
+                return None
+
+        return dict(rows[0])
+
 
 def determine_run_status(row: dict[str, Any]) -> str:
     """Determine the status of the run based on timestamp fields."""
@@ -684,3 +1095,45 @@ def determine_run_status(row: dict[str, Any]) -> str:
         return Status.PENDING
     run_id = int64_to_uint64(row["run_id"])
     raise ValueError(f"The run {run_id} does not have a valid status.")
+
+
+def message_to_dict(message: Message) -> dict[str, Any]:
+    """Transform Message to dict."""
+    result = {
+        "message_id": message.metadata.message_id,
+        "group_id": message.metadata.group_id,
+        "run_id": message.metadata.run_id,
+        "src_node_id": message.metadata.src_node_id,
+        "dst_node_id": message.metadata.dst_node_id,
+        "reply_to_message_id": message.metadata.reply_to_message_id,
+        "created_at": message.metadata.created_at,
+        "delivered_at": message.metadata.delivered_at,
+        "ttl": message.metadata.ttl,
+        "message_type": message.metadata.message_type,
+        "content": None,
+        "error": None,
+    }
+
+    if message.has_content():
+        result["content"] = recorddict_to_proto(message.content).SerializeToString()
+    else:
+        result["error"] = error_to_proto(message.error).SerializeToString()
+
+    return result
+
+
+def dict_to_message(message_dict: dict[str, Any]) -> Message:
+    """Transform dict to Message."""
+    content, error = None, None
+    if (b_content := message_dict.pop("content", None)) is not None:
+        content = recorddict_from_proto(ProtoRecordDict.FromString(b_content))
+    if (b_error := message_dict.pop("error", None)) is not None:
+        error = error_from_proto(ProtoError.FromString(b_error))
+
+    # Metadata constructor doesn't allow passing created_at. We set it later
+    metadata = Metadata(
+        **{k: v for k, v in message_dict.items() if k not in ["delivered_at"]}
+    )
+    msg = make_message(metadata=metadata, content=content, error=error)
+    msg.metadata.delivered_at = message_dict.get("delivered_at", "")
+    return msg

@@ -1857,6 +1857,26 @@ class SqlInMemoryStateTest(StateTest, unittest.TestCase):
         "test_status_transition_valid",
         "test_status_transition_invalid",
         "test_create_run_with_and_without_federation_options",
+        # Message management
+        "test_get_message_ins_empty",
+        "test_get_message_res_empty",
+        "test_store_message_ins_one",
+        "test_store_message_ins_invalid_node_id",
+        "test_get_message_ids_from_run_id",
+        "test_get_message_ins_limit_throws_for_limit_zero",
+        "test_num_message_ins",
+        "test_num_message_res",
+        "test_store_message_res_message_ins_expired",
+        "test_store_message_res_limit_ttl",
+        "test_store_message_res_node_removed_from_federation",
+        "test_get_message_ins_not_return_expired",
+        "test_get_message_ins_node_removed_from_federation",
+        "test_get_message_res_expired_message_ins",
+        "test_get_message_res_reply_not_ready",
+        "test_get_message_res_returns_empty_for_missing_message_ins",
+        "test_get_message_res_node_removed_from_federation",
+        "test_get_message_res_return_successful",
+        "test_store_message_res_fail_if_dst_src_node_id_mismatch",
     }
 
     def setUp(self) -> None:
