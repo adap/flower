@@ -69,6 +69,7 @@ def run_superexec() -> subprocess.Popen:
 def flwr_run() -> str:
     """Run the `flwr run` command and return `run_id`."""
     # Run the command
+    subprocess.run(["git", "checkout", "pyproject.toml"], check=True)
     result = subprocess.run(
         ["flwr", "run", ".", "e2e", "--format", "json"],
         capture_output=True,
@@ -94,7 +95,7 @@ def flwr_ls() -> dict[str, str]:
     """
     # Run the command
     result = subprocess.run(
-        ["flwr", "ls", ".", "e2e", "--format", "json"],
+        ["flwr", "ls", "e2e", "--format", "json"],
         capture_output=True,
         text=True,
         check=True,
