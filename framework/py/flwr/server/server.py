@@ -115,6 +115,7 @@ class Server:
             log(INFO, "Evaluation returned no results (`None`)")
 
         # Run federated learning for num_rounds
+        prev_crypto_total, _ = log_file.get_crypto_totals()
 
         for current_round in range(1, num_rounds + 1):
             if getattr(self.strategy, "stop_triggered", False):
@@ -162,11 +163,15 @@ class Server:
                        log_time("Round %s Accuracy (federated): %.4f", current_round, evaluate_metrics_fed["accuracy"])
             # Fine round: calcolo e log del tempo
             round_elapsed = timeit.default_timer() - round_start
+            current_crypto_total, _ = log_file.get_crypto_totals()
+            round_crypto_time = max(current_crypto_total - prev_crypto_total, 0.0)
+            prev_crypto_total = current_crypto_total
+            without_crypto = max(round_elapsed - round_crypto_time, 0.0)
             log_file.ROUND_SUMMARIES.append({
                 "round": current_round,
                 "round_time": round_elapsed,
-                "crypto_time": 0.0,          # oppure il tempo reale se lo misuri
-                "without_crypto": round_elapsed,
+                "crypto_time": round_crypto_time,
+                "without_crypto": without_crypto,
             })
 
             log_time("Tempo totale round %s: %.2f s", current_round, round_elapsed)
@@ -563,11 +568,7 @@ def run_fl(
 
     log_time("")  # riga vuota finale
     if log_file.CSV_PATH is not None:
-        # costruisco percorso assoluto (directory + nome file generato)
-        #/home/ns/sarah_falco/flowerCrypto/examples/customCriptography
-        #/home/sarahfalco/IdeaProjects/flowerCrypto/examples/customCriptography
-        base_dir = "/home/ns/sarah_falco/flowerCrypto/examples/customCriptography"
-        abs_path = os.path.join(base_dir, log_file.CSV_PATH)
+        abs_path = os.path.abspath(log_file.CSV_PATH)
 
         if os.path.exists(abs_path):
             send_telegram_file(abs_path, caption="Ecco il log del run")
