@@ -163,7 +163,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         query = """
             UPDATE node
             SET status = :status, unregistered_at = :unregistered_at,
-            online_until = IIF(online_until > :current, :current2, online_until)
+            online_until = IIF(online_until > :current, :current, online_until)
             WHERE node_id = :node_id AND status != :status2 AND owner_aid = :owner_aid
             RETURNING node_id
         """
