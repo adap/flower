@@ -1872,6 +1872,20 @@ _IMPLEMENTED_TESTS = {
     "test_get_message_res_node_removed_from_federation",
     "test_get_message_res_return_successful",
     "test_store_message_res_fail_if_dst_src_node_id_mismatch",
+    # Context and logging
+    "test_get_set_serverapp_context",
+    "test_set_context_invalid_run_id",
+    "test_add_serverapp_log_invalid_run_id",
+    "test_get_serverapp_log_invalid_run_id",
+    "test_add_and_get_serverapp_log",
+    "test_get_serverapp_log_after_timestamp",
+    "test_get_serverapp_log_after_timestamp_no_logs",
+    "test_store_traffic_basic",
+    "test_store_traffic_accumulation",
+    "test_store_traffic_negative_values",
+    "test_store_traffic_invalid_run_id",
+    "test_store_traffic_both_zero",
+    "test_add_clientapp_runtime_invalid_run_id",
 }
 
 

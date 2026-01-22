@@ -56,6 +56,8 @@ from .utils import (
     check_node_availability_for_in_message,
     configrecord_from_bytes,
     configrecord_to_bytes,
+    context_from_bytes,
+    context_to_bytes,
     convert_sint64_values_in_dict_to_uint64,
     convert_uint64_values_in_dict_to_sint64,
     dict_to_message,
@@ -1033,29 +1035,100 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
     def get_serverapp_context(self, run_id: int) -> Context | None:
         """Get the context for the specified `run_id`."""
-        raise NotImplementedError
+        # Retrieve context if any
+        query = "SELECT context FROM context WHERE run_id = :run_id"
+        rows = self.query(query, {"run_id": uint64_to_int64(run_id)})
+        context = context_from_bytes(rows[0]["context"]) if rows else None
+        return context
 
     def set_serverapp_context(self, run_id: int, context: Context) -> None:
         """Set the context for the specified `run_id`."""
-        raise NotImplementedError
+        # Convert context to bytes
+        context_bytes = context_to_bytes(context)
+        sint_run_id = uint64_to_int64(run_id)
+
+        with self.session():
+            # Check if any existing Context assigned to the run_id
+            query = "SELECT COUNT(*) as count FROM context WHERE run_id = :run_id"
+            row = self.query(query, {"run_id": sint_run_id})[0]
+            if row["count"] > 0:
+                # Update context
+                query = """
+                    UPDATE context
+                    SET context = :context_bytes WHERE run_id = :run_id
+                """
+                self.query(
+                    query, {"context_bytes": context_bytes, "run_id": sint_run_id}
+                )
+            else:
+                try:
+                    # Store context
+                    query = (
+                        "INSERT INTO context (run_id, context) "
+                        "VALUES (:run_id, :context_bytes)"
+                    )
+                    self.query(
+                        query, {"run_id": sint_run_id, "context_bytes": context_bytes}
+                    )
+                except IntegrityError:
+                    raise ValueError(f"Run {run_id} not found") from None
 
     def add_serverapp_log(self, run_id: int, log_message: str) -> None:
         """Add a log entry to the ServerApp logs for the specified `run_id`."""
-        raise NotImplementedError
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = uint64_to_int64(run_id)
+
+        # Store log
+        try:
+            query = """
+                INSERT INTO logs (timestamp, run_id, node_id, log)
+                VALUES (:current_ts, :run_id, :node_id, :log)
+            """
+            self.query(
+                query,
+                {
+                    "current_ts": now().timestamp(),
+                    "run_id": sint64_run_id,
+                    "node_id": 0,
+                    "log": log_message,
+                },
+            )
+        except IntegrityError:
+            raise ValueError(f"Run {run_id} not found") from None
 
     def get_serverapp_log(
         self, run_id: int, after_timestamp: float | None
     ) -> tuple[str, float]:
         """Get the ServerApp logs for the specified `run_id`."""
-        raise NotImplementedError
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = uint64_to_int64(run_id)
 
-    def store_traffic(self, run_id: int, *, bytes_sent: int, bytes_recv: int) -> None:
-        """Store traffic data for the specified `run_id`."""
-        raise NotImplementedError
+        with self.session():
+            # Check if the run_id exists
+            query = "SELECT run_id FROM run WHERE run_id = :run_id"
+            rows = self.query(query, {"run_id": sint64_run_id})
+            if not rows:
+                raise ValueError(f"Run {run_id} not found")
 
-    def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
-        """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
-        raise NotImplementedError
+            # Retrieve logs
+            if after_timestamp is None:
+                after_timestamp = 0.0
+            query = """
+                SELECT log, timestamp FROM logs
+                WHERE run_id = :run_id AND node_id = :node_id
+                AND timestamp > :after_timestamp
+                ORDER BY timestamp
+            """
+            rows = self.query(
+                query,
+                {
+                    "run_id": sint64_run_id,
+                    "node_id": 0,
+                    "after_timestamp": after_timestamp,
+                },
+            )
+            latest_timestamp = rows[-1]["timestamp"] if rows else 0.0
+        return "".join(row["log"] for row in rows), latest_timestamp
 
     def get_valid_message_ins(self, message_id: str) -> dict[str, Any] | None:
         """Check if the Message exists and is valid (not expired).
@@ -1075,6 +1148,61 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 return None
 
         return dict(rows[0])
+
+    def store_traffic(self, run_id: int, *, bytes_sent: int, bytes_recv: int) -> None:
+        """Store traffic data for the specified `run_id`."""
+        # Validate non-negative values
+        if bytes_sent < 0 or bytes_recv < 0:
+            raise ValueError(
+                f"Negative traffic values for run {run_id}: "
+                f"bytes_sent={bytes_sent}, bytes_recv={bytes_recv}"
+            )
+
+        if bytes_sent == 0 and bytes_recv == 0:
+            raise ValueError(
+                f"Both bytes_sent and bytes_recv cannot be zero for run {run_id}"
+            )
+
+        sint64_run_id = uint64_to_int64(run_id)
+
+        with self.session():
+            # Check if run exists, performing the update only if it does
+            update_query = """
+                UPDATE run
+                SET bytes_sent = bytes_sent + :bytes_sent,
+                    bytes_recv = bytes_recv + :bytes_recv
+                WHERE run_id = :run_id
+                RETURNING run_id
+            """
+            rows = self.query(
+                update_query,
+                {
+                    "bytes_sent": bytes_sent,
+                    "bytes_recv": bytes_recv,
+                    "run_id": sint64_run_id,
+                },
+            )
+
+            if not rows:
+                raise ValueError(f"Run {run_id} not found")
+
+    def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
+        """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
+        sint64_run_id = uint64_to_int64(run_id)
+        with self.session():
+            # Check if run exists, performing the update only if it does
+            update_query = """
+                UPDATE run
+                SET clientapp_runtime = clientapp_runtime + :runtime
+                WHERE run_id = :run_id
+                RETURNING run_id
+            """
+            rows = self.query(
+                update_query, {"runtime": runtime, "run_id": sint64_run_id}
+            )
+
+            if not rows:
+                raise ValueError(f"Run {run_id} not found")
 
 
 def determine_run_status(row: dict[str, Any]) -> str:
