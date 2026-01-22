@@ -18,7 +18,7 @@
 import io
 import json
 from datetime import datetime, timedelta
-from typing import Annotated, cast
+from typing import Annotated
 
 import typer
 from rich.console import Console
@@ -67,9 +67,6 @@ def ls(  # pylint: disable=R0914, R0913, R0917
     ] = False,
 ) -> None:
     """List SuperNodes in the federation."""
-    # Resolve command used (list or ls)
-    command_name = cast(str, ctx.command.name) if ctx.command else "ls"
-
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
 
@@ -85,9 +82,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917
 
     try:
         try:
-            channel = init_channel_from_connection(
-                superlink_connection, cmd=command_name
-            )
+            channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)
             typer.echo("📄 Listing all nodes...")
             formatted_nodes = _list_nodes(stub)

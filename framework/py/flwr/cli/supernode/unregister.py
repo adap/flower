@@ -68,9 +68,7 @@ def unregister(  # pylint: disable=R0914
 
     try:
         try:
-            channel = init_channel_from_connection(
-                superlink_connection, cmd="unregister"
-            )
+            channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)
 
             _unregister_node(stub=stub, node_id=node_id, output_format=output_format)

@@ -81,9 +81,7 @@ def register(  # pylint: disable=R0914
 
     try:
         try:
-            channel = init_channel_from_connection(
-                superlink_connection, cmd="register"
-            )
+            channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)
 
             _register_node(

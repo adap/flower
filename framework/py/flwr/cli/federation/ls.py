@@ -16,7 +16,7 @@
 
 
 import io
-from typing import Annotated, Any, cast
+from typing import Annotated, Any
 
 import typer
 from rich.console import Console
@@ -68,9 +68,6 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
     ] = None,
 ) -> None:
     """List available federations."""
-    # Resolve command used (list or ls)
-    command_name = cast(str, ctx.command.name) if ctx.command else "ls"
-
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
 
@@ -86,9 +83,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
 
     try:
         try:
-            channel = init_channel_from_connection(
-                superlink_connection, cmd=command_name
-            )
+            channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)
 
             if federation:
