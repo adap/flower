@@ -169,8 +169,8 @@ class SqlObjectStore(ObjectStore, SqlMixin):
         """Delete an object and its unreferenced descendants from the store."""
         with self.session():
             rows = self.query(
-                "SELECT ref_count FROM objects WHERE object_id = :oid",
-                {"oid": object_id},
+                "SELECT ref_count FROM objects WHERE object_id = :object_id",
+                {"object_id": object_id},
             )
 
             # If the object is not in the store, nothing to delete
@@ -181,53 +181,51 @@ class SqlObjectStore(ObjectStore, SqlMixin):
             if rows[0]["ref_count"] > 0:
                 return
 
-            # Get children before deletion
+            # Deleting will cascade via FK, but we need to decrement children first
             children = self.query(
-                "SELECT child_id FROM object_children WHERE parent_id = :oid",
-                {"oid": object_id},
+                "SELECT child_id FROM object_children WHERE parent_id = :parent_id",
+                {"parent_id": object_id},
             )
             child_ids = [child["child_id"] for child in children]
 
-            # Decrement children ref counts (dynamic placeholders)
             if child_ids:
                 placeholders = ", ".join(f":cid{i}" for i in range(len(child_ids)))
                 params = {f"cid{i}": cid for i, cid in enumerate(child_ids)}
                 self.query(
-                    f"UPDATE objects SET ref_count = ref_count - 1 "
+                    "UPDATE objects SET ref_count = ref_count - 1 "
                     f"WHERE object_id IN ({placeholders})",
                     params,
                 )
 
-            # Delete object (CASCADE handles child relationships)
-            self.query("DELETE FROM objects WHERE object_id = :oid", {"oid": object_id})
+            self.query(
+                "DELETE FROM objects WHERE object_id = :object_id",
+                {"object_id": object_id},
+            )
 
-        # Recursively delete unreferenced children (outside transaction)
-        for child_id in child_ids:
-            self.delete(child_id)
+            # Recursively clean children
+            for child_id in child_ids:
+                self.delete(child_id)
 
     def delete_objects_in_run(self, run_id: int) -> None:
         """Delete all objects that were registered in a specific run."""
         run_id_sint = uint64_to_int64(run_id)
         with self.session():
             objs = self.query(
-                "SELECT object_id FROM run_objects WHERE run_id = :rid",
-                {"rid": run_id_sint},
+                "SELECT object_id FROM run_objects WHERE run_id = :run_id",
+                {"run_id": run_id_sint},
             )
-            object_ids = [obj["object_id"] for obj in objs]
-
-            # Delete run mapping
+            for obj in objs:
+                object_id = obj["object_id"]
+                rows = self.query(
+                    "SELECT ref_count FROM objects WHERE object_id=:object_id",
+                    {"object_id": object_id},
+                )
+                if rows and rows[0]["ref_count"] == 0:
+                    self.delete(object_id)
             self.query(
-                "DELETE FROM run_objects WHERE run_id = :rid", {"rid": run_id_sint}
+                "DELETE FROM run_objects WHERE run_id = :run_id",
+                {"run_id": run_id_sint},
             )
-
-        # Delete unreferenced objects (outside transaction for recursive calls)
-        for object_id in object_ids:
-            rows = self.query(
-                "SELECT ref_count FROM objects WHERE object_id = :oid",
-                {"oid": object_id},
-            )
-            if rows and rows[0]["ref_count"] == 0:
-                self.delete(object_id)
 
     def clear(self) -> None:
         """Clear the store."""

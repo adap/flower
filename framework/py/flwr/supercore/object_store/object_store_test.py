@@ -373,37 +373,10 @@ class InMemoryStateTest(ObjectStoreTest):
         return InMemoryObjectStore()
 
 
-# Only include tests for methods that have been implemented
-_IMPLEMENTED_TESTS = {
-    "test_get_non_existent_object_id",
-    "test_clear_empty_store",
-    "test_put_and_get",
-    "test_put_overwrite",
-    "test_put_object_id_and_content_pair_not_matching",
-    "test_put_without_preregistering",
-    "test_preregister",
-    "test_preregister_with_invalid_object_id",
-    "test_get_object_tree",
-    "test_contains",
-    "test_clear",
-    "test_delete",
-    "test_delete_non_existent_object_id",
-    "test_put_get_delete_object_with_children",
-    "test_delete_objects_in_run",
-}
-
-
 class SqlInMemoryObjectStoreTest(ObjectStoreTest):
     """Test SqlObjectStore implementation with in-memory database."""
 
     __test__ = True
-
-    def setUp(self) -> None:
-        """Skip tests for unimplemented methods."""
-        super().setUp()
-        test_name = self._testMethodName
-        if test_name not in _IMPLEMENTED_TESTS:
-            self.skipTest(f"SqlObjectStore: {test_name} not yet implemented")
 
     def object_store_factory(self) -> ObjectStore:
         """Return SqlObjectStore."""
@@ -433,9 +406,6 @@ class SqlFileBasedObjectStoreTest(ObjectStoreTest):
         """Set up the test case."""
         super().setUp()
         self.temp_file = tempfile.NamedTemporaryFile()  # pylint: disable=R1732
-        test_name = self._testMethodName
-        if test_name not in _IMPLEMENTED_TESTS:
-            self.skipTest(f"SqlObjectStore: {test_name} not yet implemented")
 
     def tearDown(self) -> None:
         """Tear down the test case."""
