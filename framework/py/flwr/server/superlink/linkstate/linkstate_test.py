@@ -1826,6 +1826,12 @@ _IMPLEMENTED_TESTS = {
     "test_init_state",
     "test_set_linkstate_of_federation_manager",
     "test_initialize",
+    # Node management - only tests not requiring create_run or activated nodes
+    "test_create_node_public_key",
+    "test_create_node_public_key_twice",
+    "test_get_node_info_no_filters",
+    "test_get_node_info_filter_by_node_ids",
+    "test_get_node_info_filter_by_owner_aids",
 }
 
 
