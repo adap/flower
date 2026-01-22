@@ -1562,7 +1562,7 @@ class StateTest(CoreStateTest):
         run_id = create_dummy_run(state)
         log_entry = "Log entry"
         state.add_serverapp_log(run_id, log_entry)
-        timestamp = now().timestamp()
+        timestamp = now().timestamp() + 0.001 # Ensure timestamp is after the log entry
 
         # Execute
         retrieved_logs, latest = state.get_serverapp_log(
