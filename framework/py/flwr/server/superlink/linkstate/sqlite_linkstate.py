@@ -25,7 +25,7 @@ from logging import ERROR, WARNING
 from typing import Any, cast
 
 from flwr.app.user_config import UserConfig
-from flwr.common import Context, Message, Metadata, log, now
+from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
@@ -36,16 +36,11 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.message import make_message
 from flwr.common.record import ConfigRecord
-from flwr.common.serde import recorddict_from_proto, recorddict_to_proto
-from flwr.common.serde_utils import error_from_proto, error_to_proto
 from flwr.common.typing import Run, RunStatus
 
 # pylint: disable=E0611
-from flwr.proto.error_pb2 import Error as ProtoError
 from flwr.proto.node_pb2 import NodeInfo
-from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
 from flwr.server.utils.validator import validate_message
@@ -64,9 +59,11 @@ from .utils import (
     context_to_bytes,
     convert_sint64_values_in_dict_to_uint64,
     convert_uint64_values_in_dict_to_sint64,
+    dict_to_message,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
+    message_to_dict,
     verify_found_message_replies,
     verify_message_ids,
 )
@@ -1289,48 +1286,6 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
             if not rows:
                 raise ValueError(f"Run {run_id} not found")
-
-
-def message_to_dict(message: Message) -> dict[str, Any]:
-    """Transform Message to dict."""
-    result = {
-        "message_id": message.metadata.message_id,
-        "group_id": message.metadata.group_id,
-        "run_id": message.metadata.run_id,
-        "src_node_id": message.metadata.src_node_id,
-        "dst_node_id": message.metadata.dst_node_id,
-        "reply_to_message_id": message.metadata.reply_to_message_id,
-        "created_at": message.metadata.created_at,
-        "delivered_at": message.metadata.delivered_at,
-        "ttl": message.metadata.ttl,
-        "message_type": message.metadata.message_type,
-        "content": None,
-        "error": None,
-    }
-
-    if message.has_content():
-        result["content"] = recorddict_to_proto(message.content).SerializeToString()
-    else:
-        result["error"] = error_to_proto(message.error).SerializeToString()
-
-    return result
-
-
-def dict_to_message(message_dict: dict[str, Any]) -> Message:
-    """Transform dict to Message."""
-    content, error = None, None
-    if (b_content := message_dict.pop("content")) is not None:
-        content = recorddict_from_proto(ProtoRecordDict.FromString(b_content))
-    if (b_error := message_dict.pop("error")) is not None:
-        error = error_from_proto(ProtoError.FromString(b_error))
-
-    # Metadata constructor doesn't allow passing created_at. We set it later
-    metadata = Metadata(
-        **{k: v for k, v in message_dict.items() if k not in ["delivered_at"]}
-    )
-    msg = make_message(metadata=metadata, content=content, error=error)
-    msg.metadata.delivered_at = message_dict["delivered_at"]
-    return msg
 
 
 def determine_run_status(row: dict[str, Any]) -> str:

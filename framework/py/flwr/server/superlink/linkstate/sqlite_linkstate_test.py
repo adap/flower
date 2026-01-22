@@ -24,10 +24,7 @@ from flwr.app.error import Error
 from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.serde import message_from_proto
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
-from flwr.server.superlink.linkstate.sqlite_linkstate import (
-    dict_to_message,
-    message_to_dict,
-)
+from flwr.server.superlink.linkstate.utils import dict_to_message, message_to_dict
 
 
 class SqliteStateTest(unittest.TestCase):
