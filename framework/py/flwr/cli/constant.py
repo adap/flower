@@ -102,7 +102,7 @@ DEFAULT_FLOWER_CONFIG_TOML = f"""[superlink]
 default = "local"
 
 [superlink.supergrid]
-address = {SUPERGRID_ADDRESS}
+address = "{SUPERGRID_ADDRESS}"
 enable-account-auth = true
 federation = "YOUR-FEDERATION-HERE"
 
