@@ -234,8 +234,8 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         """
         params = {
             "offline": NodeStatus.OFFLINE,
-            "current": current_dt.isoformat(),
-            "online_until": current_dt.timestamp(),
+            "current_iso": current_dt.isoformat(),
+            "current_ts": current_dt.timestamp(),
             "node_id": uint64_to_int64(node_id),
             "online": NodeStatus.ONLINE,
         }
