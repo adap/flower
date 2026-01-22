@@ -284,8 +284,8 @@ def init_channel(
     return channel
 
 
-def ensure_connection_has_address(connection: SuperLinkConnection) -> None:
-    """Ensure that the connection has an address."""
+def require_superlink_address(connection: SuperLinkConnection) -> str:
+    """Return the SuperLink address or exit if it is not configured."""
     if connection.address is None:
         cmd = click.get_current_context().command.name
         typer.secho(
