@@ -49,7 +49,10 @@ class SqlObjectStore(ObjectStore, SqlMixin):
 
     def get(self, object_id: str) -> bytes | None:
         """Get an object from the store."""
-        raise NotImplementedError()
+        rows = self.query(
+            "SELECT content FROM objects WHERE object_id = :oid", {"oid": object_id}
+        )
+        return rows[0]["content"] if rows else None
 
     def delete(self, object_id: str) -> None:
         """Delete an object and its unreferenced descendants from the store."""
@@ -61,12 +64,19 @@ class SqlObjectStore(ObjectStore, SqlMixin):
 
     def clear(self) -> None:
         """Clear the store."""
-        raise NotImplementedError()
+        with self.session():
+            self.query("DELETE FROM object_children")
+            self.query("DELETE FROM run_objects")
+            self.query("DELETE FROM objects")
 
     def __contains__(self, object_id: str) -> bool:
         """Check if an object_id is in the store."""
-        raise NotImplementedError()
+        rows = self.query(
+            "SELECT 1 FROM objects WHERE object_id = :oid", {"oid": object_id}
+        )
+        return len(rows) > 0
 
     def __len__(self) -> int:
         """Return the number of objects in the store."""
-        raise NotImplementedError()
+        rows = self.query("SELECT COUNT(*) AS cnt FROM objects")
+        return int(rows[0]["cnt"])
