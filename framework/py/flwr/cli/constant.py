@@ -92,15 +92,17 @@ class SimulationBackendConfigTomlKey:
     NAME = "name"
 
 
+SUPERGRID_ADDRESS = "supergrid.flower.ai"
+
 # CLI connection configuration file name
 FLOWER_CONFIG_FILE = "config.toml"
 
 # The default configuration for the Flower config file
-DEFAULT_FLOWER_CONFIG_TOML = """[superlink]
+DEFAULT_FLOWER_CONFIG_TOML = f"""[superlink]
 default = "local"
 
 [superlink.supergrid]
-address = "supergrid.flower.ai"
+address = {SUPERGRID_ADDRESS}
 enable-account-auth = true
 federation = "YOUR-FEDERATION-HERE"
 

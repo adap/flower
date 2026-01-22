@@ -26,6 +26,7 @@ import typer
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
+from flwr.cli.constant import SUPERGRID_ADDRESS
 from flwr.common import now
 from flwr.common.config import get_flwr_dir
 from flwr.supercore.constant import PLATFORM_API_URL
@@ -38,17 +39,14 @@ from flwr.supercore.utils import parse_app_spec, request_download_link
 from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
-from ..config_migration import migrate
-from ..flower_config import read_superlink_connection
 from ..install import install_from_fab
-from ..utils import load_cli_auth_plugin_from_connection, require_superlink_address
+from ..utils import load_cli_auth_plugin_from_connection
 
 TRY_AGAIN_MESSAGE = "Please try again or press CTRL+C to abort.\n"
 
 
 # pylint: disable-next=too-many-locals, too-many-statements
 def review(
-    ctx: typer.Context,
     app_spec: Annotated[
         str,
         typer.Argument(
@@ -56,21 +54,11 @@ def review(
             "Version is optional; defaults to the latest."
         ),
     ],
-    superlink: Annotated[
-        str | None,
-        typer.Argument(help="Name of the SuperLink connection."),
-    ] = None,
 ) -> None:
     """Download a FAB for <APP-ID>, unpack it for manual review, and upon confirmation
     sign & submit the review to the Platform."""
-    # Migrate legacy usage if any
-    migrate(superlink, args=ctx.args)
+    auth_plugin = load_cli_auth_plugin_from_connection(SUPERGRID_ADDRESS)
 
-    # Read superlink connection configuration
-    superlink_connection = read_superlink_connection(superlink)
-    address = require_superlink_address(superlink_connection)
-
-    auth_plugin = load_cli_auth_plugin_from_connection(address)
     auth_plugin.load_tokens()
     if not isinstance(auth_plugin, OidcCliPlugin) or not auth_plugin.access_token:
         typer.secho(

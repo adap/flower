@@ -23,6 +23,7 @@ import requests
 import typer
 from requests import Response
 
+from flwr.cli.constant import SUPERGRID_ADDRESS
 from flwr.supercore.constant import (
     APP_PUBLISH_EXCLUDE_PATTERNS,
     APP_PUBLISH_INCLUDE_PATTERNS,
@@ -37,43 +38,28 @@ from flwr.supercore.constant import (
 from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
-from ..config_migration import migrate
-from ..flower_config import read_superlink_connection
 from ..utils import (
     build_pathspec,
     load_cli_auth_plugin_from_connection,
     load_gitignore_patterns,
-    require_superlink_address,
 )
 
 
 # pylint: disable=too-many-locals
 def publish(
-    ctx: typer.Context,
     app: Annotated[
         Path,
         typer.Argument(
             help="Project directory to upload (defaults to current directory)."
         ),
     ] = Path("."),
-    superlink: Annotated[
-        str | None,
-        typer.Argument(help="Name of the SuperLink connection."),
-    ] = None,
 ) -> None:
     """Publish a Flower App to the Flower Platform.
 
     This command uploads your app project to the Flower Platform. Files are filtered
     based on .gitignore patterns and allowed file extensions.
     """
-    # Migrate legacy usage if any
-    migrate(superlink, args=ctx.args)
-
-    # Read superlink connection configuration
-    superlink_connection = read_superlink_connection(superlink)
-    address = require_superlink_address(superlink_connection)
-
-    auth_plugin = load_cli_auth_plugin_from_connection(address)
+    auth_plugin = load_cli_auth_plugin_from_connection(SUPERGRID_ADDRESS)
     auth_plugin.load_tokens()
     if not isinstance(auth_plugin, OidcCliPlugin) or not auth_plugin.access_token:
         typer.secho(
