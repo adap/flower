@@ -226,7 +226,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             UPDATE node SET status = :offline,
             last_deactivated_at =
             strftime('%Y-%m-%dT%H:%M:%f+00:00', online_until, 'unixepoch')
-            WHERE online_until < :current_time AND status = :online
+            WHERE online_until <= :current_time AND status = :online
         """
         params: dict[str, Any] = {
             "offline": NodeStatus.OFFLINE,
