@@ -41,6 +41,7 @@ from ..config_migration import migrate
 from ..flower_config import read_superlink_connection
 from ..utils import (
     build_pathspec,
+    ensure_connection_has_address,
     load_cli_auth_plugin_from_connection,
     load_gitignore_patterns,
 )
@@ -70,6 +71,7 @@ def publish(
 
     # Read superlink connection configuration
     superlink_connection = read_superlink_connection(superlink)
+    ensure_connection_has_address(superlink_connection)
     address = cast(str, superlink_connection.address)
 
     auth_plugin = load_cli_auth_plugin_from_connection(address)
