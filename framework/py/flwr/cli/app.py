@@ -67,12 +67,12 @@ app.command(**ALLOW_EXTRAS)(log)
 app.command("list", **ALLOW_EXTRAS)(ls)
 app.command(hidden=True, **ALLOW_EXTRAS)(ls)
 app.command(**ALLOW_EXTRAS)(stop)
-app.command()(login)
+app.command(**ALLOW_EXTRAS)(login)
 app.command(**ALLOW_EXTRAS)(pull)
 
 # Create supernode command group
 supernode_app = typer.Typer(help="Manage SuperNodes")
-supernode_app.command()(supernode_register)
+supernode_app.command(**ALLOW_EXTRAS)(supernode_register)
 supernode_app.command()(supernode_unregister)
 # Make it appear as "list"
 supernode_app.command("list")(supernode_list)
