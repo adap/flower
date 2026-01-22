@@ -48,9 +48,7 @@ EMPTY_TENSOR_KEY = "_empty"
 import time
 
 
-def arrayrecord_to_parameters(
-    record: ArrayRecord, keep_input: bool, group: str | None = None
-) -> Parameters:
+def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Parameters:
     """
     Convert ArrayRecord back into Parameters.
     """
@@ -100,7 +98,7 @@ def arrayrecord_to_parameters(
     # LOG TEMPI REALI
     total_time = total_deser_time + total_decrypt_time
     crypto_impact = (total_decrypt_time / total_time * 100.0) if total_time > 0 else 0.0
-    log_file.add_crypto_time(total_decrypt_time, total_deser_time, group=group)
+    log_file.add_crypto_time(total_decrypt_time, total_deser_time)
     log_time(
         "CRYPTO STATUS: enabled=%s method=%s | DESERIALIZE: %.5f s | CRYPTO: %.5f s | TOTAL: %.5f s | IMPACT: %.2f%%",
         ENCRYPTION_ENABLED,
@@ -113,9 +111,7 @@ def arrayrecord_to_parameters(
 
     return parameters
 
-def parameters_to_arrayrecord(
-    parameters: Parameters, keep_input: bool, group: str | None = None
-) -> ArrayRecord:
+def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> ArrayRecord:
 
     tensor_type = parameters.tensor_type
     num_arrays = len(parameters.tensors)
@@ -164,7 +160,7 @@ def parameters_to_arrayrecord(
     # LOG
     total_time = tot_serial_time + tot_crypto_time
     crypto_impact = (tot_crypto_time / total_time * 100.0) if total_time > 0 else 0.0
-    log_file.add_crypto_time(tot_crypto_time, tot_serial_time, group=group)
+    log_file.add_crypto_time(tot_crypto_time, tot_serial_time)
     log_time(
         "CRYPTO STATUS: enabled=%s method=%s | SERIALIZE: %.5f s | CRYPTO: %.5f s | TOTAL: %.5f s | IMPACT: %.2f%%",
         ENCRYPTION_ENABLED,
@@ -203,10 +199,7 @@ def _recorddict_to_fit_or_evaluate_ins_components(
     # get Array and construct Parameters
     array_record = recorddict.array_records[f"{ins_str}.parameters"]
 
-    group = "fit" if ins_str.startswith("fit") else "evaluate"
-    parameters = arrayrecord_to_parameters(
-        array_record, keep_input=keep_input, group=group
-    )
+    parameters = arrayrecord_to_parameters(array_record, keep_input=keep_input)
 
     # get config dict
     config_record = recorddict.config_records[f"{ins_str}.config"]
@@ -222,8 +215,7 @@ def _fit_or_evaluate_ins_to_recorddict(
     recorddict = RecordDict()
 
     ins_str = "fitins" if isinstance(ins, FitIns) else "evaluateins"
-    group = "fit" if ins_str.startswith("fit") else "evaluate"
-    arr_record = parameters_to_arrayrecord(ins.parameters, keep_input, group=group)
+    arr_record = parameters_to_arrayrecord(ins.parameters, keep_input)
     recorddict.array_records[f"{ins_str}.parameters"] = arr_record
 
     recorddict.config_records[f"{ins_str}.config"] = ConfigRecord(
@@ -282,9 +274,7 @@ def recorddict_to_fitres(recorddict: RecordDict, keep_input: bool) -> FitRes:
     ins_str = "fitres"
 
     parameters = arrayrecord_to_parameters(
-        recorddict.array_records[f"{ins_str}.parameters"],
-        keep_input=keep_input,
-        group="fit",
+        recorddict.array_records[f"{ins_str}.parameters"], keep_input=keep_input
     )
 
     num_examples = cast(
@@ -316,7 +306,6 @@ def fitres_to_recorddict(fitres: FitRes, keep_input: bool) -> RecordDict:
     recorddict.array_records[f"{res_str}.parameters"] = parameters_to_arrayrecord(
         fitres.parameters,
         keep_input,
-        group="fit",
     )
     from .crypto.utils import log_serialization_size
     log_serialization_size(recorddict, tag="fitres", mtu=1500)
@@ -418,7 +407,7 @@ def getparametersres_to_recorddict(
     recorddict = RecordDict()
     res_str = "getparametersres"
     array_record = parameters_to_arrayrecord(
-        getparametersres.parameters, keep_input=keep_input, group="getparameters"
+        getparametersres.parameters, keep_input=keep_input
     )
     recorddict.array_records[f"{res_str}.parameters"] = array_record
 
@@ -436,9 +425,7 @@ def recorddict_to_getparametersres(
     """Derive GetParametersRes from a RecordDict object."""
     res_str = "getparametersres"
     parameters = arrayrecord_to_parameters(
-        recorddict.array_records[f"{res_str}.parameters"],
-        keep_input=keep_input,
-        group="getparameters",
+        recorddict.array_records[f"{res_str}.parameters"], keep_input=keep_input
     )
 
     status = _extract_status_from_recorddict(res_str, recorddict)

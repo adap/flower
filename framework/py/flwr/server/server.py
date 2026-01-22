@@ -149,7 +149,6 @@ class Server:
 
         # Run federated learning for num_rounds
         prev_crypto_total, _ = log_file.get_crypto_totals()
-        prev_crypto_groups = log_file.get_crypto_totals_by_group()
 
         for current_round in range(1, num_rounds + 1):
             if getattr(self.strategy, "stop_triggered", False):
@@ -216,41 +215,16 @@ class Server:
             current_crypto_total, _ = log_file.get_crypto_totals()
             round_crypto_time = max(current_crypto_total - prev_crypto_total, 0.0)
             prev_crypto_total = current_crypto_total
-
-            current_crypto_groups = log_file.get_crypto_totals_by_group()
-            round_crypto_fit = max(
-                current_crypto_groups.get("fit", (0.0, 0.0))[0]
-                - prev_crypto_groups.get("fit", (0.0, 0.0))[0],
-                0.0,
-            )
-            round_crypto_eval = max(
-                current_crypto_groups.get("evaluate", (0.0, 0.0))[0]
-                - prev_crypto_groups.get("evaluate", (0.0, 0.0))[0],
-                0.0,
-            )
-            round_crypto_other = max(
-                round_crypto_time - round_crypto_fit - round_crypto_eval, 0.0
-            )
-            prev_crypto_groups = current_crypto_groups
-
-            parallel_fit_factor = max(round_fit_parallel, 1)
-            parallel_eval_factor = max(round_eval_parallel, 1)
-            parallel_fit_crypto = round_crypto_fit / parallel_fit_factor
-            parallel_eval_crypto = round_crypto_eval / parallel_eval_factor
+            parallel_factor = max(round_fit_parallel, round_eval_parallel, 1)
             parallel_crypto_time = min(
-                parallel_fit_crypto + parallel_eval_crypto + round_crypto_other,
-                round_elapsed,
+                round_crypto_time / parallel_factor, round_elapsed
             )
             without_crypto = max(round_elapsed - parallel_crypto_time, 0.0)
-            parallel_factor = max(round_fit_parallel, round_eval_parallel, 1)
             log_file.ROUND_SUMMARIES.append({
                 "round": current_round,
                 "round_time": round_elapsed,
                 "crypto_time": parallel_crypto_time,
                 "crypto_cumulative": round_crypto_time,
-                "crypto_fit": parallel_fit_crypto,
-                "crypto_eval": parallel_eval_crypto,
-                "crypto_other": round_crypto_other,
                 "parallel_fit": float(round_fit_parallel),
                 "parallel_eval": float(round_eval_parallel),
                 "parallel_factor": float(parallel_factor),
