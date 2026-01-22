@@ -16,6 +16,7 @@
 
 
 from os import urandom
+from typing import Any
 
 from flwr.common import ConfigRecord, Context, Error, Message, Metadata, now, serde
 from flwr.common.constant import (
