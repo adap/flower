@@ -67,7 +67,7 @@ app.command(**ALLOW_EXTRAS)(log)
 app.command("list", **ALLOW_EXTRAS)(ls)
 app.command(hidden=True, **ALLOW_EXTRAS)(ls)
 app.command(**ALLOW_EXTRAS)(stop)
-app.command()(login)
+app.command(**ALLOW_EXTRAS)(login)
 app.command(**ALLOW_EXTRAS)(pull)
 
 # Create supernode command group

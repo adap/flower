@@ -109,3 +109,8 @@ options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 1
 options.backend.client-resources.num-gpus = 0
 """
+
+# Keys for storing account auth credentials in the credential store
+AUTHN_TYPE_STORE_KEY = "flower.account-auth.%s.authn-type"
+ACCESS_TOKEN_STORE_KEY = "flower.account-auth.%s.oidc-access-token"
+REFRESH_TOKEN_STORE_KEY = "flower.account-auth.%s.oidc-refresh-token"
