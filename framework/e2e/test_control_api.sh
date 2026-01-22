@@ -78,7 +78,7 @@ sl_pid=$(pgrep -f "flower-superlink")
 sleep 2
 
 # Trigger migration
-flwr ls ../numpy-ci e2e
+flwr ls ../numpy-ci e2e || true
 
 if [ "$2" = "client-auth" ] && [ "$3" = "deployment-engine" ]; then
   # Register two SuperNodes using the Flower CLI

@@ -86,7 +86,7 @@ sl_pid=$(pgrep -f "flower-superlink")
 sleep 3
 
 # Trigger migration
-flwr ls "." e2e
+flwr ls "." e2e || true
 
 if [ "$2" = "client-auth" ]; then
   # Register two SuperNodes using the Flower CLI
