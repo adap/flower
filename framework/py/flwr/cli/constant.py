@@ -14,6 +14,7 @@
 # ==============================================================================
 """Constants for CLI commands."""
 
+from flwr.supercore.constant import SUPERGRID_ADDRESS
 
 # General help message for config overrides
 CONFIG_HELP_MESSAGE = (
@@ -91,8 +92,6 @@ class SimulationBackendConfigTomlKey:
     INIT_ARGS = "init-args"
     NAME = "name"
 
-
-SUPERGRID_ADDRESS = "supergrid.flower.ai"
 
 # CLI connection configuration file name
 FLOWER_CONFIG_FILE = "config.toml"

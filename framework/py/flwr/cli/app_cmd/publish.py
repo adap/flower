@@ -23,7 +23,6 @@ import requests
 import typer
 from requests import Response
 
-from flwr.cli.constant import SUPERGRID_ADDRESS
 from flwr.supercore.constant import (
     APP_PUBLISH_EXCLUDE_PATTERNS,
     APP_PUBLISH_INCLUDE_PATTERNS,
@@ -33,6 +32,7 @@ from flwr.supercore.constant import (
     MAX_TOTAL_BYTES,
     MIME_MAP,
     PLATFORM_API_URL,
+    SUPERGRID_ADDRESS,
     UTF8,
 )
 from flwr.supercore.version import package_version as flwr_version

@@ -26,10 +26,9 @@ import typer
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from flwr.cli.constant import SUPERGRID_ADDRESS
 from flwr.common import now
 from flwr.common.config import get_flwr_dir
-from flwr.supercore.constant import PLATFORM_API_URL
+from flwr.supercore.constant import PLATFORM_API_URL, SUPERGRID_ADDRESS
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_message_to_sign,
     load_private_key,
