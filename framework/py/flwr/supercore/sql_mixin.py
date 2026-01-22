@@ -20,7 +20,7 @@ from abc import ABC
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from contextvars import ContextVar
-from logging import DEBUG, ERROR
+from logging import DEBUG, ERROR, WARNING
 from pathlib import Path
 from typing import Any
 
@@ -71,11 +71,28 @@ class SqlMixin(ABC):
         Parameters
         ----------
         database_path : str
-            Either a file path or SQLite database URL. Examples:
-            - "path/to/db.db" or "/absolute/path/to/db.db"
-            - ":memory:" for in-memory SQLite
-            - "sqlite:///path/to/db.db" for explicit SQLite URL
+            Database location specifier. Can be:
+            - A file path (relative or absolute): "state.db", "/var/data/state.db"
+            - The special value ":memory:" for an in-memory database
+            - A SQLite URL: "sqlite:///absolute/path/to/db.db"
+
+            File paths are automatically converted to absolute paths and formatted
+            as SQLite URLs. Empty or whitespace-only strings default to ":memory:".
+
+        Warnings
+        --------
+        Providing an empty or whitespace-only string will log a warning and fall
+        back to an in-memory database. For temporary databases, explicitly use
+        ":memory:" to avoid warnings.
         """
+        if not database_path or not database_path.strip():
+            log(
+                WARNING,
+                "Empty `database_path` provided, defaulting to in-memory SQLite "
+                "database",
+            )
+            database_path = ":memory:"
+
         # Auto-convert file path to SQLAlchemy SQLite URL if needed
         if database_path == ":memory:":
             self.database_url = "sqlite:///:memory:"
