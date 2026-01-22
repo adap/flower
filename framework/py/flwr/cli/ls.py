@@ -17,7 +17,7 @@
 
 import io
 import json
-from typing import Annotated, cast
+from typing import Annotated
 
 import typer
 from rich.console import Console
@@ -91,9 +91,6 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
 
     All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD HH:MM:SSZ``.
     """
-    # Resolve command used (list or ls)
-    command_name = cast(str, ctx.command.name) if ctx.command else "list"
-
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
 
@@ -116,9 +113,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
                 raise ValueError(
                     "The options '--runs' and '--run-id' are mutually exclusive."
                 )
-            channel = init_channel_from_connection(
-                superlink_connection, cmd=command_name
-            )
+            channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)
 
             # Display information about a specific run ID

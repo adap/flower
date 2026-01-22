@@ -16,22 +16,17 @@
 
 
 import io
-from pathlib import Path
-from typing import Annotated, Any, cast
+from typing import Annotated, Any
 
 import typer
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from flwr.cli.config_utils import (
-    exit_if_no_address,
-    load_and_validate,
-    process_loaded_project_config,
-    validate_federation_in_project_config,
-)
+from flwr.cli.config_migration import migrate
+from flwr.cli.flower_config import read_superlink_connection
 from flwr.cli.ls import _get_status_style
-from flwr.common.constant import FAB_CONFIG_FILE, NOOP_ACCOUNT_NAME, CliOutputFormat
+from flwr.common.constant import NOOP_ACCOUNT_NAME, CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import run_from_proto
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
@@ -46,18 +41,14 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.utils import humanize_duration
 
 from ..run_utils import RunRow, format_runs
-from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
+from ..utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
 
 
 def ls(  # pylint: disable=R0914, R0913, R0917, R0912
     ctx: typer.Context,
-    app: Annotated[
-        Path,
-        typer.Argument(help="Path of the Flower project"),
-    ] = Path("."),
-    toml_federation: Annotated[
+    superlink: Annotated[
         str | None,
-        typer.Argument(help="Name of the federation"),
+        typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
     output_format: Annotated[
         str,
@@ -77,29 +68,22 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
     ] = None,
 ) -> None:
     """List available federations."""
-    # Resolve command used (list or ls)
-    command_name = cast(str, ctx.command.name) if ctx.command else "ls"
-
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
-    try:
-        if suppress_output:
-            redirect_output(captured_output)
-        typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-        pyproject_path = app / FAB_CONFIG_FILE if app else None
-        config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
-        config = process_loaded_project_config(config, errors, warnings)
-        toml_federation_name, federation_config = validate_federation_in_project_config(
-            toml_federation, config
-        )
-        exit_if_no_address(federation_config, f"federation {command_name}")
-        channel = None
+    if suppress_output:
+        redirect_output(captured_output)
+
+    # Migrate legacy usage if any
+    migrate(superlink, args=ctx.args)
+
+    # Read superlink connection configuration
+    superlink_connection = read_superlink_connection(superlink)
+    channel = None
+
+    try:
         try:
-            auth_plugin = load_cli_auth_plugin(
-                app, toml_federation_name, federation_config
-            )
-            channel = init_channel(app, federation_config, auth_plugin)
+            channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)
 
             if federation:
