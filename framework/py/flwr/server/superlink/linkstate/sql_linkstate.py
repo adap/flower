@@ -18,6 +18,9 @@
 # pylint: disable=too-many-lines
 
 import json
+# pylint: disable=too-many-lines
+
+import json
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from logging import ERROR, WARNING
@@ -40,11 +43,7 @@ from flwr.common.constant import (
 )
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
-
-# pylint: disable=E0611
-from flwr.proto.node_pb2 import NodeInfo
-
-# pylint: enable=E0611
+from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.constant import NodeStatus
 from flwr.supercore.corestate.sql_corestate import SqlCoreState

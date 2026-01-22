@@ -85,10 +85,13 @@ timeout 5m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth
 sl_pid=$(pgrep -f "flower-superlink")
 sleep 3
 
+# Trigger migration
+flwr ls "." e2e || true
+
 if [ "$2" = "client-auth" ]; then
   # Register two SuperNodes using the Flower CLI
-  flwr supernode register keys/client_credentials_1.pub "." e2e
-  flwr supernode register keys/client_credentials_2.pub "." e2e
+  flwr supernode register keys/client_credentials_1.pub e2e
+  flwr supernode register keys/client_credentials_2.pub e2e
 fi
 
 timeout 5m flower-supernode $client_arg $rest_arg_supernode \

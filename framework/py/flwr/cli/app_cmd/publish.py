@@ -23,7 +23,6 @@ import requests
 import typer
 from requests import Response
 
-from flwr.common.constant import FAB_CONFIG_FILE
 from flwr.supercore.constant import (
     APP_PUBLISH_EXCLUDE_PATTERNS,
     APP_PUBLISH_INCLUDE_PATTERNS,
@@ -38,35 +37,28 @@ from flwr.supercore.constant import (
 from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
-from ..config_utils import (
-    load_and_validate,
-    process_loaded_project_config,
-    validate_federation_in_project_config,
+from ..config_migration import migrate
+from ..flower_config import read_superlink_connection
+from ..utils import (
+    build_pathspec,
+    load_cli_auth_plugin_from_connection,
+    load_gitignore_patterns,
+    require_superlink_address,
 )
-from ..constant import FEDERATION_CONFIG_HELP_MESSAGE
-from ..utils import build_pathspec, load_cli_auth_plugin, load_gitignore_patterns
 
 
 # pylint: disable=too-many-locals
 def publish(
+    ctx: typer.Context,
     app: Annotated[
         Path,
         typer.Argument(
             help="Project directory to upload (defaults to current directory)."
         ),
     ] = Path("."),
-    federation: Annotated[
+    superlink: Annotated[
         str | None,
-        typer.Argument(
-            help="Name of the federation used for login before publishing app."
-        ),
-    ] = None,
-    federation_config_overrides: Annotated[
-        list[str] | None,
-        typer.Option(
-            "--federation-config",
-            help=FEDERATION_CONFIG_HELP_MESSAGE,
-        ),
+        typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
 ) -> None:
     """Publish a Flower App to the Flower Platform.
@@ -74,16 +66,14 @@ def publish(
     This command uploads your app project to the Flower Platform. Files are filtered
     based on .gitignore patterns and allowed file extensions.
     """
-    # Load configs
-    pyproject_path = app / FAB_CONFIG_FILE if app else None
-    config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
-    config = process_loaded_project_config(config, errors, warnings)
-    federation, federation_config = validate_federation_in_project_config(
-        federation, config, federation_config_overrides
-    )
+    # Migrate legacy usage if any
+    migrate(superlink, args=ctx.args)
 
-    # Load the authentication plugin
-    auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
+    # Read superlink connection configuration
+    superlink_connection = read_superlink_connection(superlink)
+    address = require_superlink_address(superlink_connection)
+
+    auth_plugin = load_cli_auth_plugin_from_connection(address)
     auth_plugin.load_tokens()
     if not isinstance(auth_plugin, OidcCliPlugin) or not auth_plugin.access_token:
         typer.secho(
