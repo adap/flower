@@ -176,7 +176,8 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             for msg_id in message_ids:
                 # Check if message exists
                 query = "SELECT * FROM message_ins WHERE message_id = :message_id"
-                message_row = self.query(query, {"message_id": msg_id})[0]
+                message_rows = self.query(query, {"message_id": msg_id})
+                message_row = message_rows[0] if message_rows else None
                 if not message_row:
                     continue
 
