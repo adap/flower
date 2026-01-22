@@ -172,7 +172,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             "status": NodeStatus.UNREGISTERED,
             "unregistered_at": current.isoformat(),
             "current": current.timestamp(),
-            "current2": current.timestamp(),
             "node_id": sint64_node_id,
             "status2": NodeStatus.UNREGISTERED,
             "owner_aid": owner_aid,
