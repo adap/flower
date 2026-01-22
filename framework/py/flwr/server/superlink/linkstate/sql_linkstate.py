@@ -227,8 +227,8 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         query = """
             UPDATE node
             SET status = :offline,
-                last_deactivated_at = :current,
-                online_until = :online_until
+                last_deactivated_at = :current_iso,
+                online_until = :current_ts
             WHERE node_id = :node_id AND status = :online
             RETURNING node_id
         """
