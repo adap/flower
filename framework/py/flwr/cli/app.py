@@ -14,6 +14,9 @@
 # ==============================================================================
 """Flower command line interface."""
 
+
+from typing import Any, TypedDict
+
 import typer
 from typer.main import get_command
 
@@ -37,6 +40,15 @@ from .supernode import ls as supernode_list
 from .supernode import register as supernode_register
 from .supernode import unregister as supernode_unregister
 
+
+class CommandKwargs(TypedDict):
+    """Keywords for typer command to make mypy happy."""
+
+    context_settings: dict[str, Any]
+
+
+ALLOW_EXTRAS: CommandKwargs = {"context_settings": {"allow_extra_args": True}}
+
 app = typer.Typer(
     help=typer.style(
         "flwr is the Flower command line interface.",
@@ -51,12 +63,12 @@ app.command()(new)
 app.command()(run)
 app.command()(build)
 app.command()(install)
-app.command()(log)
-app.command("list")(ls)
-app.command(hidden=True)(ls)
-app.command()(stop)
+app.command(**ALLOW_EXTRAS)(log)
+app.command("list", **ALLOW_EXTRAS)(ls)
+app.command(hidden=True, **ALLOW_EXTRAS)(ls)
+app.command(**ALLOW_EXTRAS)(stop)
 app.command()(login)
-app.command()(pull)
+app.command(**ALLOW_EXTRAS)(pull)
 
 # Create supernode command group
 supernode_app = typer.Typer(help="Manage SuperNodes")

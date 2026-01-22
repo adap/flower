@@ -23,6 +23,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, cast
 
+import click
 import grpc
 import pathspec
 import typer
@@ -475,6 +476,17 @@ def init_channel_from_connection(
     grpc.Channel
         Configured gRPC channel with authentication interceptors.
     """
+    if connection.address is None:
+        cmd = click.get_current_context().command.name
+        typer.secho(
+            f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the "
+            "correct SuperLink (Control API) address is provided in `pyproject.toml`.",
+            fg=typer.colors.RED,
+            bold=True,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
     root_certificates_bytes = load_certificate_in_connection(connection)
 
     # Load authentication plugin
@@ -486,7 +498,7 @@ def init_channel_from_connection(
 
     # Create the gRPC channel
     channel = create_channel(
-        server_address=connection.address,  # type: ignore
+        server_address=connection.address,
         insecure=connection.insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,

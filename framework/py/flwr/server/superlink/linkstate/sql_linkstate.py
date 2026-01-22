@@ -564,19 +564,18 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
         query = """
             UPDATE node
-            SET status = :status, unregistered_at = :unregistered_at,
-            online_until = IIF(online_until > :current, :current2, online_until)
-            WHERE node_id = :node_id AND status != :status2 AND owner_aid = :owner_aid
+            SET status = :unregistered, unregistered_at = :unregistered_at,
+            online_until = IIF(online_until > :current, :current, online_until)
+            WHERE node_id = :node_id AND status != :unregistered
+            AND owner_aid = :owner_aid
             RETURNING node_id
         """
         current = now()
         params = {
-            "status": NodeStatus.UNREGISTERED,
+            "unregistered": NodeStatus.UNREGISTERED,
             "unregistered_at": current.isoformat(),
             "current": current.timestamp(),
-            "current2": current.timestamp(),
             "node_id": sint64_node_id,
-            "status2": NodeStatus.UNREGISTERED,
             "owner_aid": owner_aid,
         }
 
@@ -596,22 +595,22 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         sint64_node_id = uint64_to_int64(node_id)
         query = """
             UPDATE node
-            SET status = :status,
-                last_activated_at = :last_activated_at,
+            SET status = :online,
+                last_activated_at = :current,
                 online_until = :online_until,
                 heartbeat_interval = :heartbeat_interval
-            WHERE node_id = :node_id AND status IN (:status_registered, :status_offline)
+            WHERE node_id = :node_id AND status IN (:registered, :offline)
             RETURNING node_id
         """
         params = {
-            "status": NodeStatus.ONLINE,
-            "last_activated_at": current_dt.isoformat(),
+            "online": NodeStatus.ONLINE,
+            "current": current_dt.isoformat(),
             "online_until": current_dt.timestamp()
             + HEARTBEAT_PATIENCE * heartbeat_interval,
             "heartbeat_interval": heartbeat_interval,
             "node_id": sint64_node_id,
-            "status_registered": NodeStatus.REGISTERED,
-            "status_offline": NodeStatus.OFFLINE,
+            "registered": NodeStatus.REGISTERED,
+            "offline": NodeStatus.OFFLINE,
         }
 
         rows = self.query(query, params)
@@ -625,18 +624,18 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         current_dt = now()
         query = """
             UPDATE node
-            SET status = :status,
-                last_deactivated_at = :last_deactivated_at,
+            SET status = :offline,
+                last_deactivated_at = :current,
                 online_until = :online_until
-            WHERE node_id = :node_id AND status = :status_online
+            WHERE node_id = :node_id AND status = :online
             RETURNING node_id
         """
         params = {
-            "status": NodeStatus.OFFLINE,
-            "last_deactivated_at": current_dt.isoformat(),
+            "offline": NodeStatus.OFFLINE,
+            "current": current_dt.isoformat(),
             "online_until": current_dt.timestamp(),
             "node_id": uint64_to_int64(node_id),
-            "status_online": NodeStatus.ONLINE,
+            "online": NodeStatus.ONLINE,
         }
 
         rows = self.query(query, params)
@@ -676,7 +675,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             UPDATE node SET status = :offline,
             last_deactivated_at =
             strftime('%Y-%m-%dT%H:%M:%f+00:00', online_until, 'unixepoch')
-            WHERE online_until < :current_time AND status = :online
+            WHERE online_until <= :current_time AND status = :online
         """
         params: dict[str, Any] = {
             "offline": NodeStatus.OFFLINE,
@@ -743,9 +742,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         """Get `node_id` for the specified `public_key` if it exists and is not
         deleted."""
         query = """SELECT node_id FROM node
-                   WHERE public_key = :public_key AND status != :status;"""
+                   WHERE public_key = :public_key AND status != :unregistered;"""
         rows = self.query(
-            query, {"public_key": public_key, "status": NodeStatus.UNREGISTERED}
+            query, {"public_key": public_key, "unregistered": NodeStatus.UNREGISTERED}
         )
 
         # If no result is found, return None
@@ -991,9 +990,11 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         sint64_node_id = uint64_to_int64(node_id)
 
         # Check if the node exists and is not unregistered
-        query = "SELECT status FROM node WHERE node_id = :node_id AND status != :status"
+        query = """
+            SELECT status FROM node WHERE node_id = :node_id AND status != :unregistered
+        """
         rows = self.query(
-            query, {"node_id": sint64_node_id, "status": NodeStatus.UNREGISTERED}
+            query, {"node_id": sint64_node_id, "unregistered": NodeStatus.UNREGISTERED}
         )
         if not rows:
             return False
@@ -1012,8 +1013,8 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
         # Set timestamp if the status changes
         if rows[0]["status"] != NodeStatus.ONLINE:
-            query += ", status = :status, last_activated_at = :last_activated_at"
-            params["status"] = NodeStatus.ONLINE
+            query += ", status = :online, last_activated_at = :last_activated_at"
+            params["online"] = NodeStatus.ONLINE
             params["last_activated_at"] = current_dt.isoformat()
 
         # Execute the query, refreshing `online_until` and `heartbeat_interval`
