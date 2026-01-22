@@ -19,7 +19,7 @@ import base64
 import hashlib
 import re
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, cast
 
 import requests
 import typer
@@ -28,7 +28,6 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from flwr.common import now
 from flwr.common.config import get_flwr_dir
-from flwr.common.constant import FAB_CONFIG_FILE
 from flwr.supercore.constant import PLATFORM_API_URL
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_message_to_sign,
@@ -39,20 +38,18 @@ from flwr.supercore.utils import parse_app_spec, request_download_link
 from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
-from ..config_utils import (
-    load_and_validate,
-    process_loaded_project_config,
-    validate_federation_in_project_config,
-)
+from ..config_migration import migrate, warn_if_federation_config_overrides
 from ..constant import FEDERATION_CONFIG_HELP_MESSAGE
+from ..flower_config import read_superlink_connection
 from ..install import install_from_fab
-from ..utils import load_cli_auth_plugin
+from ..utils import load_cli_auth_plugin_from_connection
 
 TRY_AGAIN_MESSAGE = "Please try again or press CTRL+C to abort.\n"
 
 
 # pylint: disable-next=too-many-locals, too-many-statements
 def review(
+    ctx: typer.Context,
     app_spec: Annotated[
         str,
         typer.Argument(
@@ -60,17 +57,9 @@ def review(
             "Version is optional; defaults to the latest."
         ),
     ],
-    app_dir_login: Annotated[
-        Path,
-        typer.Argument(
-            help="Project directory to used for login before reviewing app."
-        ),
-    ] = Path("."),
-    federation: Annotated[
+    superlink: Annotated[
         str | None,
-        typer.Argument(
-            help="Name of the federation used for login before reviewing app."
-        ),
+        typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
     federation_config_overrides: Annotated[
         list[str] | None,
@@ -82,16 +71,18 @@ def review(
 ) -> None:
     """Download a FAB for <APP-ID>, unpack it for manual review, and upon confirmation
     sign & submit the review to the Platform."""
-    # Load configs
-    pyproject_path = app_dir_login / FAB_CONFIG_FILE if app_dir_login else None
-    config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
-    config = process_loaded_project_config(config, errors, warnings)
-    federation, federation_config = validate_federation_in_project_config(
-        federation, config, federation_config_overrides
-    )
+    # Warn `--federation-config` is ignored
+    warn_if_federation_config_overrides(federation_config_overrides)
 
-    # Load the authentication plugin
-    auth_plugin = load_cli_auth_plugin(app_dir_login, federation, federation_config)
+    # Migrate legacy usage if any
+    migrate(superlink, args=ctx.args)
+
+    # Read superlink connection configuration
+    superlink_connection = read_superlink_connection(superlink)
+    superlink = superlink_connection.name
+    address = cast(str, superlink_connection.address)
+
+    auth_plugin = load_cli_auth_plugin_from_connection(address)
     auth_plugin.load_tokens()
     if not isinstance(auth_plugin, OidcCliPlugin) or not auth_plugin.access_token:
         typer.secho(
