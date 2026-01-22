@@ -137,13 +137,13 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
             # Validate destination node ID
             query = """SELECT node_id FROM node WHERE node_id = :node_id
-                       AND status IN (:status_online, :status_offline)"""
+                       AND status IN (:online, :offline)"""
             rows = self.query(
                 query,
                 {
                     "node_id": data[0]["dst_node_id"],
-                    "status_online": NodeStatus.ONLINE,
-                    "status_offline": NodeStatus.OFFLINE,
+                    "online": NodeStatus.ONLINE,
+                    "offline": NodeStatus.OFFLINE,
                 },
             )
             if not rows or not self.federation_manager.has_node(
@@ -222,8 +222,10 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             msg = f"`node_id` must be != {SUPERLINK_NODE_ID}"
             raise AssertionError(msg)
 
+        params: dict[str, str | int] = {}
+
         # Convert the uint64 value to sint64 for SQLite
-        sint64_node_id = uint64_to_int64(node_id)
+        params["node_id"] = uint64_to_int64(node_id)
 
         with self.session():
             # Retrieve all Messages for node_id
@@ -234,7 +236,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 AND delivered_at = ''
                 AND (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
             """
-            params: dict[str, str | int] = {"node_id": sint64_node_id}
 
             if limit is not None:
                 query += " LIMIT :limit"
