@@ -66,6 +66,7 @@ def review(
         typer.Option(
             "--federation-config",
             help=FEDERATION_CONFIG_HELP_MESSAGE,
+            hidden=True,
         ),
     ] = None,
 ) -> None:
