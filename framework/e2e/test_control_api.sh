@@ -77,10 +77,13 @@ timeout 2m flower-superlink $combined_args &
 sl_pid=$(pgrep -f "flower-superlink")
 sleep 2
 
+# Trigger migration
+flwr ls ../numpy-ci e2e
+
 if [ "$2" = "client-auth" ] && [ "$3" = "deployment-engine" ]; then
   # Register two SuperNodes using the Flower CLI
-  flwr supernode register ../keys/client_credentials_1.pub ../numpy-ci e2e
-  flwr supernode register ../keys/client_credentials_2.pub ../numpy-ci e2e
+  flwr supernode register ../keys/client_credentials_1.pub e2e
+  flwr supernode register ../keys/client_credentials_2.pub e2e
 fi
 
 if [ "$3" = "deployment-engine" ]; then
