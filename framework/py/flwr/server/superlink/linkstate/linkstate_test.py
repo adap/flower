@@ -1840,6 +1840,18 @@ _IMPLEMENTED_TESTS = {
     "test_get_node_info_filter_by_status",
     "test_get_node_info_multiple_filters",
     "test_get_node_info_empty_list_filters",
+    # Run management
+    "test_create_and_get_run",
+    "test_get_all_run_ids",
+    "test_get_all_run_ids_empty",
+    "test_get_run_ids_with_flwr_aid",
+    "test_get_run_ids_with_unknown_flwr_aid",
+    "test_get_pending_run_id",
+    "test_get_and_update_run_status",
+    "test_run_failed_due_to_heartbeat",
+    "test_status_transition_valid",
+    "test_status_transition_invalid",
+    "test_create_run_with_and_without_federation_options",
 }
 
 
