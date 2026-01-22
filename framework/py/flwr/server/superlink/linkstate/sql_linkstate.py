@@ -293,9 +293,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         """Get `node_id` for the specified `public_key` if it exists and is not
         deleted."""
         query = """SELECT node_id FROM node
-                   WHERE public_key = :public_key AND status != :status;"""
+                   WHERE public_key = :public_key AND status != :unregistered;"""
         rows = self.query(
-            query, {"public_key": public_key, "status": NodeStatus.UNREGISTERED}
+            query, {"public_key": public_key, "unregistered": NodeStatus.UNREGISTERED}
         )
 
         # If no result is found, return None
