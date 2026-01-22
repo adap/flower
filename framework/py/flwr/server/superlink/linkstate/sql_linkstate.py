@@ -18,9 +18,6 @@
 # pylint: disable=too-many-lines
 
 import json
-# pylint: disable=too-many-lines
-
-import json
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from logging import ERROR, WARNING
@@ -70,6 +67,8 @@ from .utils import (
     verify_found_message_replies,
     verify_message_ids,
 )
+
+# pylint: disable=too-many-lines
 
 
 class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
