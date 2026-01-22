@@ -42,6 +42,7 @@ from ..utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
 
 
 def register(  # pylint: disable=R0914
+    ctx: typer.Context,
     public_key: Annotated[
         Path,
         typer.Argument(
@@ -73,7 +74,7 @@ def register(  # pylint: disable=R0914
         redirect_output(captured_output)
 
     # Migrate legacy usage if any
-    migrate(superlink, args=[])
+    migrate(superlink, args=ctx.args)
 
     # Read superlink connection configuration
     superlink_connection = read_superlink_connection(superlink)
