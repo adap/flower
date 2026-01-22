@@ -296,6 +296,7 @@ def require_superlink_address(connection: SuperLinkConnection) -> str:
             err=True,
         )
         raise typer.Exit(code=1)
+    return connection.address
 
 
 def init_channel_from_connection(
@@ -315,8 +316,7 @@ def init_channel_from_connection(
     grpc.Channel
         Configured gRPC channel with authentication interceptors.
     """
-    ensure_connection_has_address(connection)
-    address = cast(str, connection.address)
+    address = require_superlink_address(connection)
 
     root_certificates_bytes = load_certificate_in_connection(connection)
 

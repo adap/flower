@@ -19,7 +19,7 @@ import base64
 import hashlib
 import re
 from pathlib import Path
-from typing import Annotated, cast
+from typing import Annotated
 
 import requests
 import typer
@@ -41,7 +41,7 @@ from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
 from ..config_migration import migrate
 from ..flower_config import read_superlink_connection
 from ..install import install_from_fab
-from ..utils import ensure_connection_has_address, load_cli_auth_plugin_from_connection
+from ..utils import load_cli_auth_plugin_from_connection, require_superlink_address
 
 TRY_AGAIN_MESSAGE = "Please try again or press CTRL+C to abort.\n"
 
@@ -68,8 +68,7 @@ def review(
 
     # Read superlink connection configuration
     superlink_connection = read_superlink_connection(superlink)
-    ensure_connection_has_address(superlink_connection)
-    address = cast(str, superlink_connection.address)
+    address = require_superlink_address(superlink_connection)
 
     auth_plugin = load_cli_auth_plugin_from_connection(address)
     auth_plugin.load_tokens()
