@@ -248,7 +248,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             # Mark retrieved Messages as delivered
             if rows:
                 # Prepare query
-                placeholders = ",".join([f":id_{i}" for i in range(len(message_ids))])
+                placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
                 query = f"""
                     UPDATE message_ins
                     SET delivered_at = :delivered_at
@@ -260,7 +260,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 delivered_at = now().isoformat()
                 params = {"delivered_at": delivered_at}
                 for index, msg_id in enumerate(message_ids):
-                    params[f"id_{index}"] = str(msg_id)
+                    params[f"mid_{index}"] = str(msg_id)
 
                 # Run query
                 rows = self.query(query, params)
@@ -355,8 +355,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             # Verify Message IDs
             self._check_stored_messages(message_ids)
             current = now().timestamp()
-
-            # Get all instruction messages
             placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
             query = f"""
                 SELECT *
@@ -365,7 +363,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             """
             params = {f"mid_{i}": str(mid) for i, mid in enumerate(message_ids)}
             rows = self.query(query, params)
-
             found_message_ins_dict: dict[str, Message] = {}
             for row in rows:
                 convert_sint64_values_in_dict_to_uint64(
@@ -385,20 +382,18 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 in_message = found_message_ins_dict[message_id]
                 sint_node_id = uint64_to_int64(in_message.metadata.dst_node_id)
                 dst_node_ids.add(sint_node_id)
-
             placeholders = ",".join([f":nid_{i}" for i in range(len(dst_node_ids))])
             query = f"""
                 SELECT node_id, online_until
                 FROM node
                 WHERE node_id IN ({placeholders})
-                AND status != :status
+                AND status != :unregistered
             """
-            node_params: dict[str, Any] = {}
-            for i, nid in enumerate(dst_node_ids):
-                node_params[f"nid_{i}"] = nid
-            node_params["status"] = NodeStatus.UNREGISTERED
+            node_params: dict[str, int | str] = {
+                f"nid_{i}": nid for i, nid in enumerate(dst_node_ids)
+            }
+            node_params["unregistered"] = NodeStatus.UNREGISTERED
             rows = self.query(query, node_params)
-
             tmp_ret_dict = check_node_availability_for_in_message(
                 inquired_in_message_ids=message_ids,
                 found_in_message_dict=found_message_ins_dict,
@@ -419,16 +414,14 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             """
             params = {f"mid_{i}": str(mid) for i, mid in enumerate(message_ids)}
             rows = self.query(query, params)
-
             for row in rows:
                 convert_sint64_values_in_dict_to_uint64(
                     row, ["run_id", "src_node_id", "dst_node_id"]
                 )
-
             tmp_ret_dict = verify_found_message_replies(
                 inquired_message_ids=message_ids,
                 found_message_ins_dict=found_message_ins_dict,
-                found_message_res_list=[dict_to_message(dict(row)) for row in rows],
+                found_message_res_list=[dict_to_message(row) for row in rows],
                 current_time=current,
             )
             ret.update(tmp_ret_dict)
@@ -440,7 +433,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             message_res_ids = [
                 message_res.metadata.message_id for message_res in ret.values()
             ]
-
             placeholders = ",".join([f":mid_{i}" for i in range(len(message_res_ids))])
             query = f"""
                 UPDATE message_res
@@ -468,7 +460,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         This includes delivered but not yet deleted.
         """
         query = "SELECT count(*) AS num FROM message_res"
-        rows = self.query(query, {})
+        rows = self.query(query)
         return int(rows[0]["num"])
 
     def delete_messages(self, message_ins_ids: set[str]) -> None:
