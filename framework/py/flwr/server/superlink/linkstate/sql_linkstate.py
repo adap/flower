@@ -19,6 +19,7 @@
 
 import json
 from collections.abc import Sequence
+from datetime import datetime, timezone
 from logging import ERROR, WARNING
 from typing import Any
 
@@ -31,9 +32,11 @@ from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
+    RUN_FAILURE_DETAILS_NO_HEARTBEAT,
     RUN_ID_NUM_BYTES,
     SUPERLINK_NODE_ID,
     Status,
+    SubStatus,
 )
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
@@ -1032,6 +1035,27 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             List of tuples containing (run_id, active_until timestamp)
             for expired tokens.
         """
+        if not expired_records:
+            return
+
+        with self.session():
+            query = """
+                UPDATE run
+                SET sub_status = :failed, details = :details, finished_at = :finished_at
+                WHERE run_id = :run_id
+            """
+            data = [
+                {
+                    "failed": SubStatus.FAILED,
+                    "details": RUN_FAILURE_DETAILS_NO_HEARTBEAT,
+                    "finished_at": datetime.fromtimestamp(
+                        active_until, tz=timezone.utc
+                    ).isoformat(),
+                    "run_id": uint64_to_int64(run_id),
+                }
+                for run_id, active_until in expired_records
+            ]
+            self.query(query, data)
 
     def get_serverapp_context(self, run_id: int) -> Context | None:
         """Get the context for the specified `run_id`."""
