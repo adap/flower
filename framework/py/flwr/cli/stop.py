@@ -85,7 +85,7 @@ def stop(  # pylint: disable=R0914
 
     try:
         try:
-            channel = init_channel_from_connection(superlink_connection, cmd="stop")
+            channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
             typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)

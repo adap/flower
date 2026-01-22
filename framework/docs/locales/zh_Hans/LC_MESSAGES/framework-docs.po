@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-14 00:08+0000\n"
+"POT-Creation-Date: 2026-01-22 00:08+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -9671,7 +9671,7 @@ msgid ""
 " at the top of this guide."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:76
+#: ../../source/how-to-authenticate-supernodes.rst:77
 msgid ""
 "This will generate the keys in a new ``keys/`` directory. By default it "
 "creates a key pair for the SuperLink and one for each SuperNode. Copy "
@@ -9679,12 +9679,12 @@ msgid ""
 " earlier via ``flwr new``)."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:82
+#: ../../source/how-to-authenticate-supernodes.rst:83
 #, fuzzy
 msgid "Enable node authentication in SuperLink"
 msgstr "在 :code:`SuperLink` 中启用节点验证"
 
-#: ../../source/how-to-authenticate-supernodes.rst:84
+#: ../../source/how-to-authenticate-supernodes.rst:85
 msgid ""
 "To launch a SuperLink with SuperNode authentication enabled, you need to "
 "provide three aditional files in addition to the certificates needed for "
@@ -9692,19 +9692,19 @@ msgid ""
 "enabled in the presence of TLS."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:99
+#: ../../source/how-to-authenticate-supernodes.rst:100
 msgid ""
 "``--enable-supernode-auth``: Enables SuperNode authentication therefore "
 "only Supernodes that are first register on the SuperLink will be able to "
 "establish a connection."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:103
+#: ../../source/how-to-authenticate-supernodes.rst:104
 #, fuzzy
 msgid "Register SuperNodes"
 msgstr "验证超级节点"
 
-#: ../../source/how-to-authenticate-supernodes.rst:105
+#: ../../source/how-to-authenticate-supernodes.rst:106
 msgid ""
 "Once your SuperLink is running, the next step is to register the "
 "SuperNodes that will be allowed to connect to it. This process is handled"
@@ -9713,72 +9713,72 @@ msgid ""
 "SuperLink."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:110
+#: ../../source/how-to-authenticate-supernodes.rst:111
 msgid "Here's how this looks in code:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:117
+#: ../../source/how-to-authenticate-supernodes.rst:118
 msgid "Next, let’s register the second SuperNode as well:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:123
+#: ../../source/how-to-authenticate-supernodes.rst:124
 #, fuzzy
 msgid "You can list the registered SuperNodes using the following command:"
 msgstr "运行以下命令激活 virtualenv："
 
-#: ../../source/how-to-authenticate-supernodes.rst:130
+#: ../../source/how-to-authenticate-supernodes.rst:131
 msgid ""
 "This will display the IDs of the SuperNodes you just registered as well "
 "as their status. You should see a table similar to the following:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:143
+#: ../../source/how-to-authenticate-supernodes.rst:144
 msgid ""
 "The status of the SuperNodes will change after they connect to the "
 "SuperLink. Let's proceed and laucnh the SuperNodes."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:148
+#: ../../source/how-to-authenticate-supernodes.rst:149
 #, fuzzy
 msgid "Enable node authentication in SuperNode"
 msgstr "在 :code:`SuperNode` 中启用节点验证"
 
-#: ../../source/how-to-authenticate-supernodes.rst:150
+#: ../../source/how-to-authenticate-supernodes.rst:151
 msgid ""
 "Connecting a SuperNode to a SuperLink that has node authentication "
 "enabled requires passing one additional argument (i.e. the private key of"
 " the SuperNode) in addition to the TLS certificate."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:166
+#: ../../source/how-to-authenticate-supernodes.rst:167
 msgid "``--auth-supernode-private-key``: the private key of this SuperNode."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:168
+#: ../../source/how-to-authenticate-supernodes.rst:169
 msgid ""
 "Follow the same procedure to launch the second SuperNode by passing its "
 "corresponding private key:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:181
+#: ../../source/how-to-authenticate-supernodes.rst:182
 msgid ""
 "After connecting both SuperNodes, you can check the status of the "
 "SuperNodes again. You will notice their status is now ``online``:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:198
+#: ../../source/how-to-authenticate-supernodes.rst:199
 #, fuzzy
 msgid "Unregister SuperNodes"
 msgstr "验证超级节点"
 
-#: ../../source/how-to-authenticate-supernodes.rst:202
+#: ../../source/how-to-authenticate-supernodes.rst:203
 msgid ""
 "This is a destructive operation. Unregistering a SuperNode is permanent "
 "and cannot be undone. If you wish to connect a SuperNode again, a new key"
 " pair is needed."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:205
+#: ../../source/how-to-authenticate-supernodes.rst:206
 msgid ""
 "At anypoint you can unregister a SuperNode from the SuperLink (even if it"
 " has never connected). This will prevent the SuperNode from making future"
@@ -9788,13 +9788,13 @@ msgid ""
 "|flower_cli_supernode_link|_ as follows:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:216
+#: ../../source/how-to-authenticate-supernodes.rst:217
 msgid ""
 "The above command unregisters the first SuperNode. You can verify this by"
 " listing the SuperNodes again:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:229
+#: ../../source/how-to-authenticate-supernodes.rst:230
 msgid ""
 "If you pass the ``--verbose`` flag to the previous command you'll see "
 "that the status of the unregistered SuperNode has changed to "
@@ -9803,12 +9803,12 @@ msgid ""
 "wish to connect a second SuperNode a new EC key pair is needed.**"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:248
+#: ../../source/how-to-authenticate-supernodes.rst:249
 #, fuzzy
 msgid "Security notice"
 msgstr "安全通知"
 
-#: ../../source/how-to-authenticate-supernodes.rst:250
+#: ../../source/how-to-authenticate-supernodes.rst:251
 #, fuzzy
 msgid ""
 "The system's security relies on the credentials of the SuperLink and each"
@@ -9822,14 +9822,14 @@ msgstr ""
 "系统的安全性依赖于超级链接和每个超级节点的凭证。因此，必须保护和安全存储凭证，以避免公钥基础设施 (PKI) "
 "假冒攻击等安全风险。节点验证机制还涉及人机交互，因此请确保使用可信的通信方法，以安全的方式进行所有通信。"
 
-#: ../../source/how-to-authenticate-supernodes.rst:258
+#: ../../source/how-to-authenticate-supernodes.rst:259
 #: ../../source/how-to-enable-tls-connections.rst:144
 #: ../../source/how-to-use-built-in-mods.rst:175
 #: ../../source/tutorial-series-what-is-federated-learning.rst:297
 msgid "Conclusion"
 msgstr "总结"
 
-#: ../../source/how-to-authenticate-supernodes.rst:260
+#: ../../source/how-to-authenticate-supernodes.rst:261
 #, fuzzy
 msgid ""
 "You should now have learned how to start a long-running Flower SuperLink "
@@ -9839,7 +9839,7 @@ msgstr ""
 "现在，您应该已经学会了如何启动长期运行的 Flower "
 "服务器（:code:`SuperLink`）和客户端（:code:`SuperNode`）并启用节点身份验证。您还应该知道私钥的重要性，并将其安全存储，以尽量减少安全风险。"
 
-#: ../../source/how-to-authenticate-supernodes.rst:266
+#: ../../source/how-to-authenticate-supernodes.rst:267
 #: ../../source/how-to-enable-tls-connections.rst:154
 msgid ""
 "Refer to the :doc:`docker/index` documentation to learn how to setup a "
@@ -16271,20 +16271,20 @@ msgid ""
 "filtered based on .gitignore patterns and allowed file extensions."
 msgstr ""
 
-#: ../../flwr app list:1 log:1 login:1 publish:1 pull:1 review:1 run:1 stop:1
+#: ../../flwr app login:1 publish:1 review:1
 #, fuzzy
 msgid ""
 "Override federation configuration values using one of the following "
 "formats:"
 msgstr "运行以下命令激活 virtualenv："
 
-#: ../../flwr app list:1 log:1 login:1 publish:1 pull:1 review:1 run:1 stop:1
+#: ../../flwr app login:1 publish:1 review:1
 msgid ""
 "--federation-config '<k1>=<v1> <k2>=<v2>' | --federation-config "
 "'<k1>=<v1>' --federation-config '<k2>=<v2>'"
 msgstr ""
 
-#: ../../flwr app list:1 log:1 login:1 publish:1 pull:1 review:1 run:1 stop:1
+#: ../../flwr app login:1 publish:1 review:1
 msgid ""
 "When providing key-value pairs, values can be of any type supported by "
 "TOML (e.g., bool, int, float, string). The specified keys (<k1> and <k2> "
@@ -16318,7 +16318,8 @@ msgid ""
 "confirmation sign & submit the review to the Platform."
 msgstr ""
 
-#: ../../flwr app log:1 register:1 review:1 stop:1 supernode unregister:1
+#: ../../flwr app log:1 pull:1 register:1 review:1 stop:1 supernode
+#: unregister:1
 #, fuzzy
 msgid "Required argument"
 msgstr "构建文档"
@@ -16357,6 +16358,32 @@ msgstr ""
 msgid "Path of the Flower App to bundle into a FAB"
 msgstr ""
 
+#: ../../flwr config:1
+#, fuzzy
+msgid "Manage Configuration"
+msgstr "配置值"
+
+#: ../../flwr config list:1
+#, fuzzy
+msgid "List all SuperLink connections."
+msgstr "然后，我们启动服务器："
+
+#: ../../flwr config federation list:1 register:1 run:1 stop:1 supernode
+#: unregister:1
+msgid "Format output using 'default' view or 'json'"
+msgstr ""
+
+#: ../../flwr config federation list log register run stop supernode unregister
+#, fuzzy
+msgid "default"
+msgstr "工作流程"
+
+#: ../../flwr config federation list:1 register:1 run:1 stop:1 supernode
+#: unregister:1
+#, fuzzy
+msgid "``'default'``"
+msgstr "工作流程"
+
 #: ../../flwr federation:1
 #, fuzzy
 msgid "Manage Federations"
@@ -16367,31 +16394,17 @@ msgstr "运行模拟"
 msgid "List available federations."
 msgstr "运行模拟"
 
-#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
-msgid "Format output using 'default' view or 'json'"
-msgstr ""
-
-#: ../../flwr federation list log register run stop supernode unregister
-#, fuzzy
-msgid "default"
-msgstr "工作流程"
-
-#: ../../flwr federation list:1 register:1 run:1 stop:1 supernode unregister:1
-#, fuzzy
-msgid "``'default'``"
-msgstr "工作流程"
-
 #: ../../flwr federation list:1
 #, fuzzy
 msgid "Name of the federation to display"
 msgstr "flower-superlink"
 
-#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
+#: ../../flwr federation list:1 register:1 supernode unregister:1
 #, fuzzy
 msgid "Path of the Flower project"
 msgstr "基础镜像的存储库名称。"
 
-#: ../../flwr federation list:1 register:1 stop:1 supernode unregister:1
+#: ../../flwr federation list:1 register:1 supernode unregister:1
 msgid "Name of the federation"
 msgstr ""
 
@@ -16499,6 +16512,11 @@ msgstr "``FLWR_VERSION``"
 msgid "Specific run ID to display"
 msgstr ""
 
+#: ../../flwr list:1 log:1 pull:1 run:1 stop:1
+#, fuzzy
+msgid "Name of the SuperLink connection."
+msgstr "flower-superlink"
+
 #: ../../flwr log:1
 msgid "Get logs from a run."
 msgstr ""
@@ -16522,20 +16540,12 @@ msgstr ""
 msgid "The Flower run ID to query"
 msgstr "加入 Flower 社区"
 
-#: ../../flwr log:1
-msgid "Path of the Flower project to run"
-msgstr ""
-
-#: ../../flwr log:1
-msgid "Name of the federation to run the app on"
-msgstr ""
-
 #: ../../flwr login:1
 #, fuzzy
 msgid "Login to Flower SuperLink."
 msgstr "flower-superlink"
 
-#: ../../flwr login:1 pull:1 run:1
+#: ../../flwr login:1 run:1
 #, fuzzy
 msgid "Path of the Flower App to run."
 msgstr "基础镜像的存储库名称。"
@@ -16575,13 +16585,8 @@ msgid ""
 msgstr ""
 
 #: ../../flwr pull:1
-msgid "**Required** Run ID to pull artifacts from."
+msgid "Run ID to pull artifacts from."
 msgstr ""
-
-#: ../../flwr pull:1
-#, fuzzy
-msgid "Name of the federation."
-msgstr "flower-superlink"
 
 #: ../../flwr run:1
 #, fuzzy
@@ -16612,10 +16617,6 @@ msgstr ""
 msgid ""
 "Use `--stream` with `flwr run` to display logs; logs are not streamed by "
 "default."
-msgstr ""
-
-#: ../../flwr run:1
-msgid "Name of the federation to run the app on."
 msgstr ""
 
 #: ../../flwr stop:1
@@ -64781,4 +64782,10 @@ msgstr ""
 
 #~ msgid ":py:obj:`SYSTEM <flwr.app.MessageType.SYSTEM>`\\"
 #~ msgstr ":py:obj:`TRAIN <flwr.common.MessageType.TRAIN>`\\"
+
+#~ msgid "**Required** Run ID to pull artifacts from."
+#~ msgstr ""
+
+#~ msgid "Name of the federation."
+#~ msgstr "flower-superlink"
 

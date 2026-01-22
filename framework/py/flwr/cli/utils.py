@@ -22,6 +22,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, cast
 
+import click
 import grpc
 import pathspec
 import typer
@@ -284,7 +285,7 @@ def init_channel(
 
 
 def init_channel_from_connection(
-    connection: SuperLinkConnection, cmd: str, auth_plugin: CliAuthPlugin | None = None
+    connection: SuperLinkConnection, auth_plugin: CliAuthPlugin | None = None
 ) -> grpc.Channel:
     """Initialize gRPC channel to the Control API.
 
@@ -292,8 +293,6 @@ def init_channel_from_connection(
     ----------
     connection : SuperLinkConnection
         SuperLink connection configuration.
-    cmd : str
-        The command name to display in the error message.
     auth_plugin : CliAuthPlugin | None (default: None)
         Authentication plugin instance for handling credentials.
 
@@ -303,6 +302,7 @@ def init_channel_from_connection(
         Configured gRPC channel with authentication interceptors.
     """
     if connection.address is None:
+        cmd = click.get_current_context().command.name
         typer.secho(
             f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the "
             "correct SuperLink (Control API) address is provided in `pyproject.toml`.",

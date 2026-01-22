@@ -216,7 +216,7 @@ def _log_with_control_api(
     stream : bool
         If True, stream logs continuously; if False, print once.
     """
-    channel = init_channel_from_connection(superlink_connection, cmd="log")
+    channel = init_channel_from_connection(superlink_connection)
 
     if stream:
         start_stream(run_id, channel, CONN_REFRESH_PERIOD)
