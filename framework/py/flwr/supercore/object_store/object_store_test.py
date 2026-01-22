@@ -386,6 +386,10 @@ _IMPLEMENTED_TESTS = {
     "test_get_object_tree",
     "test_contains",
     "test_clear",
+    "test_delete",
+    "test_delete_non_existent_object_id",
+    "test_put_get_delete_object_with_children",
+    "test_delete_objects_in_run",
 }
 
 
