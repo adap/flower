@@ -37,8 +37,7 @@ from flwr.supercore.constant import (
 from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
-from ..config_migration import migrate, warn_if_federation_config_overrides
-from ..constant import FEDERATION_CONFIG_HELP_MESSAGE
+from ..config_migration import migrate
 from ..flower_config import read_superlink_connection
 from ..utils import (
     build_pathspec,
@@ -60,29 +59,17 @@ def publish(
         str | None,
         typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
-    federation_config_overrides: Annotated[
-        list[str] | None,
-        typer.Option(
-            "--federation-config",
-            help=FEDERATION_CONFIG_HELP_MESSAGE,
-            hidden=True,
-        ),
-    ] = None,
 ) -> None:
     """Publish a Flower App to the Flower Platform.
 
     This command uploads your app project to the Flower Platform. Files are filtered
     based on .gitignore patterns and allowed file extensions.
     """
-    # Warn `--federation-config` is ignored
-    warn_if_federation_config_overrides(federation_config_overrides)
-
     # Migrate legacy usage if any
     migrate(superlink, args=ctx.args)
 
     # Read superlink connection configuration
     superlink_connection = read_superlink_connection(superlink)
-    superlink = superlink_connection.name
     address = cast(str, superlink_connection.address)
 
     auth_plugin = load_cli_auth_plugin_from_connection(address)
