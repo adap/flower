@@ -13,7 +13,10 @@ def encrypt(data: bytes, method: str, ecc_pubkey=None) -> bytes:
     elif method == "AES_GCM":
         return AES_GCM.encrypt(data)
     elif KOBLITZ.is_supported_method(method):
-        return KOBLITZ.encrypt(data, method)
+        raise ValueError(
+            "Il metodo KOBLITZ supporta solo generazione chiavi e autenticazione, "
+            "non la cifratura dei dati."
+        )
     else:
         raise ValueError(f"Unknown encryption method: {method}")
 
@@ -30,7 +33,10 @@ def decrypt(data: bytes, method: str, ecc_privkey=None) -> bytes:
     elif method == "AES_GCM":
         return AES_GCM.decrypt(data)
     elif KOBLITZ.is_supported_method(method):
-        return KOBLITZ.decrypt(data, method)
+        raise ValueError(
+            "Il metodo KOBLITZ supporta solo generazione chiavi e autenticazione, "
+            "non la decifratura dei dati."
+        )
     else:
         raise ValueError(f"Unknown decryption method: {method}")
 
@@ -45,5 +51,4 @@ def check_integrity(data: bytes, method: str) -> bytes:
         return HMAC.check_hmac(data)
     else:
         raise ValueError(f"Unknown integrity method: {method}")
-
 
