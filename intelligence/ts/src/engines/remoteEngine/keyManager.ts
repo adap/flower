@@ -13,12 +13,17 @@
 // limitations under the License.
 // =============================================================================
 
-import nodeCrypto from 'crypto';
 import { FailureCode, Result } from '../../typing';
 import { hkdf } from './cryptoUtils';
 
-const webCrypto: Crypto =
-  (globalThis as { crypto?: Crypto }).crypto ?? (nodeCrypto.webcrypto as Crypto);
+const webCrypto = (globalThis as { crypto?: Crypto }).crypto;
+
+const requireWebCrypto = () => {
+  if (!webCrypto) {
+    throw new Error('Web Crypto API is not available.');
+  }
+  return webCrypto;
+};
 
 const KEY_TYPE = 'ECDH';
 const CURVE = 'P-384'; // secp384r1 in Web Crypto
@@ -41,7 +46,7 @@ export class KeyManager {
       name: KEY_TYPE,
       namedCurve: CURVE,
     };
-    const keyPair = await webCrypto.subtle.generateKey(keyParams, true, [
+    const keyPair = await requireWebCrypto().subtle.generateKey(keyParams, true, [
       'deriveKey',
       'deriveBits',
     ]);
@@ -60,7 +65,7 @@ export class KeyManager {
         failure: { code: FailureCode.EncryptionError, description: 'Public key not generated.' },
       };
     }
-    const exportedKey = await webCrypto.subtle.exportKey(KEY_FORMAT, this.publicKey);
+    const exportedKey = await requireWebCrypto().subtle.exportKey(KEY_FORMAT, this.publicKey);
     return { ok: true, value: btoa(String.fromCharCode(...new Uint8Array(exportedKey))) };
   }
 
@@ -87,7 +92,7 @@ export class KeyManager {
       name: KEY_TYPE,
       namedCurve: CURVE,
     };
-    const serverPublicKey = await webCrypto.subtle.importKey(
+    const serverPublicKey = await requireWebCrypto().subtle.importKey(
       KEY_FORMAT,
       serverPublicKeyBuffer,
       importParams,
@@ -96,7 +101,7 @@ export class KeyManager {
     );
 
     // Compute shared secret
-    const sharedSecret = await webCrypto.subtle.deriveBits(
+    const sharedSecret = await requireWebCrypto().subtle.deriveBits(
       { name: KEY_TYPE, public: serverPublicKey },
       this.privateKey,
       384
