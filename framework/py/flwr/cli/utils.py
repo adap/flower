@@ -20,7 +20,7 @@ import json
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 
 import click
 import grpc
@@ -50,10 +50,7 @@ from flwr.supercore.credential_store import get_credential_store
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
-from .config_utils import (
-    load_certificate_in_connection,
-    validate_certificate_in_federation_config,
-)
+from .config_utils import load_certificate_in_connection
 from .constant import AUTHN_TYPE_STORE_KEY
 
 
@@ -197,18 +194,6 @@ def get_authn_type(host: str) -> str:
     return authn_type.decode("utf-8")
 
 
-def load_cli_auth_plugin(
-    root_dir: Path,
-    federation: str,
-    federation_config: dict[str, Any],
-    authn_type: str | None = None,
-) -> CliAuthPlugin:
-    """."""
-    raise RuntimeError(
-        "Deprecated function. Use `load_cli_auth_plugin_from_connection`"
-    )
-
-
 def load_cli_auth_plugin_from_connection(
     host: str, authn_type: str | None = None
 ) -> CliAuthPlugin:
@@ -244,44 +229,6 @@ def load_cli_auth_plugin_from_connection(
     except ValueError:
         typer.echo(f"❌ Unknown account authentication type: {authn_type}")
         raise typer.Exit(code=1) from None
-
-
-def init_channel(
-    app: Path, federation_config: dict[str, Any], auth_plugin: CliAuthPlugin
-) -> grpc.Channel:
-    """Initialize gRPC channel to the Control API.
-
-    Parameters
-    ----------
-    app : Path
-        Path to the Flower app directory.
-    federation_config : dict[str, Any]
-        Federation configuration dictionary containing address and TLS settings.
-    auth_plugin : CliAuthPlugin
-        Authentication plugin instance for handling credentials.
-
-    Returns
-    -------
-    grpc.Channel
-        Configured gRPC channel with authentication interceptors.
-    """
-    insecure, root_certificates_bytes = validate_certificate_in_federation_config(
-        app, federation_config
-    )
-
-    # Load tokens
-    auth_plugin.load_tokens()
-
-    # Create the gRPC channel
-    channel = create_channel(
-        server_address=federation_config["address"],
-        insecure=insecure,
-        root_certificates=root_certificates_bytes,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=[CliAccountAuthInterceptor(auth_plugin)],
-    )
-    channel.subscribe(on_channel_state_change)
-    return channel
 
 
 def require_superlink_address(connection: SuperLinkConnection) -> str:
