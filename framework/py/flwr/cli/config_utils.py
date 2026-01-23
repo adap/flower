@@ -114,57 +114,6 @@ def load(toml_path: Path) -> dict[str, Any] | None:
             return None
 
 
-def process_loaded_project_config(
-    config: dict[str, Any] | None, errors: list[str], warnings: list[str]
-) -> dict[str, Any]:
-    """Process and return the loaded project configuration.
-
-    This function handles errors and warnings from the `load_and_validate` function,
-    exits on critical issues, and returns the validated configuration.
-
-    Parameters
-    ----------
-    config : dict[str, Any] | None
-        The loaded configuration dictionary, or None if loading failed.
-    errors : list[str]
-        List of error messages from validation.
-    warnings : list[str]
-        List of warning messages from validation.
-
-    Returns
-    -------
-    dict[str, Any]
-        The validated configuration dictionary.
-
-    Raises
-    ------
-    typer.Exit
-        If config is None or contains critical errors.
-    """
-    if config is None:
-        typer.secho(
-            "Project configuration could not be loaded.\n"
-            "pyproject.toml is invalid:\n"
-            + "\n".join([f"- {line}" for line in errors]),
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
-        )
-        raise typer.Exit(code=1)
-
-    if warnings:
-        typer.secho(
-            "Project configuration is missing the following "
-            "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-
-    typer.secho("Success", fg=typer.colors.GREEN)
-
-    return config
-
-
 def validate_federation_in_project_config(
     federation: str | None,
     config: dict[str, Any],

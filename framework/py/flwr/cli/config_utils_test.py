@@ -23,11 +23,7 @@ from typing import Any
 import click
 import pytest
 
-from .config_utils import (
-    load,
-    process_loaded_project_config,
-    validate_federation_in_project_config,
-)
+from .config_utils import load, validate_federation_in_project_config
 
 
 def test_load_pyproject_toml_load_from_cwd(tmp_path: Path) -> None:
@@ -158,21 +154,6 @@ def test_load_pyproject_toml_from_path(tmp_path: Path) -> None:
         assert config == expected_config
     finally:
         os.chdir(origin)
-
-
-def test_validate_project_config_fail() -> None:
-    """Test that validate_project_config fails correctly."""
-    # Prepare
-    config = None
-    errors = ["Error"]
-    warnings = ["Warning"]
-
-    # Execute
-    with pytest.raises(click.exceptions.Exit) as excinfo:
-        _ = process_loaded_project_config(config, errors, warnings)
-
-    # Assert
-    assert excinfo.value.exit_code == 1
 
 
 def test_validate_federation_in_project_config() -> None:
