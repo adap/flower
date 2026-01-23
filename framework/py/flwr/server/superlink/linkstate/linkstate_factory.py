@@ -24,7 +24,7 @@ from flwr.superlink.federation import FederationManager
 
 from .in_memory_linkstate import InMemoryLinkState
 from .linkstate import LinkState
-from .sqlite_linkstate import SqliteLinkState
+from .sql_linkstate import SqlLinkState
 
 
 class LinkStateFactory:
@@ -68,8 +68,8 @@ class LinkStateFactory:
             log(DEBUG, "Using InMemoryState")
             return self.state_instance
 
-        # SqliteState
-        state = SqliteLinkState(self.database, self.federation_manager, object_store)
+        # SqlLinkState
+        state = SqlLinkState(self.database, self.federation_manager, object_store)
         state.initialize()
-        log(DEBUG, "Using SqliteState")
+        log(DEBUG, "Using SqlLinkState")
         return state

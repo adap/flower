@@ -284,6 +284,21 @@ def init_channel(
     return channel
 
 
+def require_superlink_address(connection: SuperLinkConnection) -> str:
+    """Return the SuperLink address or exit if it is not configured."""
+    if connection.address is None:
+        cmd = click.get_current_context().command.name
+        typer.secho(
+            f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the "
+            "correct SuperLink (Control API) address is provided in `pyproject.toml`.",
+            fg=typer.colors.RED,
+            bold=True,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    return connection.address
+
+
 def init_channel_from_connection(
     connection: SuperLinkConnection, auth_plugin: CliAuthPlugin | None = None
 ) -> grpc.Channel:
@@ -301,28 +316,19 @@ def init_channel_from_connection(
     grpc.Channel
         Configured gRPC channel with authentication interceptors.
     """
-    if connection.address is None:
-        cmd = click.get_current_context().command.name
-        typer.secho(
-            f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the "
-            "correct SuperLink (Control API) address is provided in `pyproject.toml`.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
-        )
-        raise typer.Exit(code=1)
+    address = require_superlink_address(connection)
 
     root_certificates_bytes = load_certificate_in_connection(connection)
 
     # Load authentication plugin
     if auth_plugin is None:
-        auth_plugin = load_cli_auth_plugin_from_connection(connection.address)
+        auth_plugin = load_cli_auth_plugin_from_connection(address)
     # Load tokens
     auth_plugin.load_tokens()
 
     # Create the gRPC channel
     channel = create_channel(
-        server_address=connection.address,
+        server_address=address,
         insecure=connection.insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
