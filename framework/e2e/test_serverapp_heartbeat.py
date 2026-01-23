@@ -200,9 +200,6 @@ def main() -> None:
         print("Terminating the first ServerApp process...")
         os.kill(app_pid, signal.SIGKILL)  # SIGKILL to ensure it stops immediately
 
-        # Wait for SQLite to fully release the database lock
-        time.sleep(0.5)
-
         # Restart the SuperLink
         print("Restarting SuperLink...")
         superlink_proc = run_superlink()
