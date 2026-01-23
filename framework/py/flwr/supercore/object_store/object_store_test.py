@@ -377,6 +377,15 @@ class InMemoryStateTest(ObjectStoreTest):
 _IMPLEMENTED_TESTS = {
     "test_get_non_existent_object_id",
     "test_clear_empty_store",
+    "test_put_and_get",
+    "test_put_overwrite",
+    "test_put_object_id_and_content_pair_not_matching",
+    "test_put_without_preregistering",
+    "test_preregister",
+    "test_preregister_with_invalid_object_id",
+    "test_get_object_tree",
+    "test_contains",
+    "test_clear",
 }
 
 
@@ -387,7 +396,7 @@ class SqlInMemoryObjectStoreTest(ObjectStoreTest):
 
     def setUp(self) -> None:
         """Skip tests for unimplemented methods."""
-        # super().setUp()
+        super().setUp()
         test_name = self._testMethodName
         if test_name not in _IMPLEMENTED_TESTS:
             self.skipTest(f"SqlObjectStore: {test_name} not yet implemented")
