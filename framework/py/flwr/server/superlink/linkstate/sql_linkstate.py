@@ -68,8 +68,6 @@ from .utils import (
     verify_message_ids,
 )
 
-# pylint: disable=too-many-lines
-
 
 class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
     """SQLAlchemy-based LinkState implementation."""
