@@ -1,7 +1,7 @@
-"""Implements the Resnet18 model."""
+"""dasha: A Flower Baseline."""
 
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 
 class BasicBlock(nn.Module):
@@ -12,7 +12,12 @@ class BasicBlock(nn.Module):
     def __init__(self, in_planes, planes, activation, stride=1):
         super().__init__()
         self.conv1 = nn.Conv2d(
-            in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False
+            in_planes,
+            planes,
+            kernel_size=3,
+            stride=stride,
+            padding=1,
+            bias=False,
         )
         self.bn1 = nn.BatchNorm2d(planes)
         self.conv2 = nn.Conv2d(
@@ -95,7 +100,9 @@ class ResNet(nn.Module):
         self.in_planes = 64
         self.activation = activation
 
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(
+            3, 64, kernel_size=3, stride=1, padding=1, bias=False
+        )
         self.bn1 = nn.BatchNorm2d(64)
         self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
         self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
@@ -107,7 +114,9 @@ class ResNet(nn.Module):
         strides = [stride] + [1] * (num_blocks - 1)
         layers = []
         for curr_stride in strides:
-            layers.append(block(self.in_planes, planes, self.activation, curr_stride))
+            layers.append(
+                block(self.in_planes, planes, self.activation, curr_stride)
+            )
             self.in_planes = planes * block.expansion
         return nn.Sequential(*layers)
 
@@ -118,7 +127,7 @@ class ResNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.layer4(out)
-        out = F.avg_pool2d(out, 4)
+        out = F.avg_pool2d(out, 4)  # pylint: disable=not-callable
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out
@@ -128,4 +137,6 @@ def resnet18(num_classes, activation_name="relu"):
     """Return Resnet18 model."""
     activation_map = {"relu": F.relu, "elu": F.elu}
     activation = activation_map[activation_name]
-    return ResNet(BasicBlock, [2, 2, 2, 2], activation, num_classes=num_classes)
+    return ResNet(
+        BasicBlock, [2, 2, 2, 2], activation, num_classes=num_classes
+    )

@@ -4,7 +4,7 @@ import unittest
 
 import torch
 
-from dasha.models import LinearNetWithNonConvexLoss, ResNet18WithLogisticLoss
+from dasha.model import LinearNetWithNonConvexLoss, ResNet18WithLogisticLoss
 
 
 class TestSmokeLinearNetWithNonConvexLoss(unittest.TestCase):

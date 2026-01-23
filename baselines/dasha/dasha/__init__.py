@@ -1,1 +1,1 @@
-"""Template baseline package."""
+"""dasha: A Flower Baseline."""
