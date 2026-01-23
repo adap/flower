@@ -17,11 +17,18 @@
 
 from sqlalchemy import MetaData
 
+from flwr.common.inflatable import (
+    get_object_id,
+    is_valid_sha256_hash,
+    iterate_object_tree,
+)
+from flwr.common.inflatable_utils import validate_object_content
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.sql_mixin import SqlMixin
 from flwr.supercore.state.schema.objectstore_tables import create_objectstore_metadata
+from flwr.supercore.utils import uint64_to_int64
 
-from .object_store import ObjectStore
+from .object_store import NoObjectInStoreError, ObjectStore
 
 
 class SqlObjectStore(ObjectStore, SqlMixin):
@@ -37,15 +44,119 @@ class SqlObjectStore(ObjectStore, SqlMixin):
 
     def preregister(self, run_id: int, object_tree: ObjectTree) -> list[str]:
         """Identify and preregister missing objects in the `ObjectStore`."""
-        raise NotImplementedError()
+        new_objects = []
+        for tree_node in iterate_object_tree(object_tree):
+            obj_id = tree_node.object_id
+            if not is_valid_sha256_hash(obj_id):
+                raise ValueError(f"Invalid object ID format: {obj_id}")
+
+            child_ids = [child.object_id for child in tree_node.children]
+            with self.session():
+                rows = self.query(
+                    "SELECT object_id, is_available FROM objects "
+                    "WHERE object_id = :object_id",
+                    {"object_id": obj_id},
+                )
+                if not rows:
+                    # Insert new object
+                    self.query(
+                        "INSERT INTO objects "
+                        "(object_id, content, is_available, ref_count) "
+                        "VALUES (:object_id, :content, :is_available, :ref_count)",
+                        {
+                            "object_id": obj_id,
+                            "content": b"",
+                            "is_available": 0,
+                            "ref_count": 0,
+                        },
+                    )
+                    for cid in child_ids:
+                        self.query(
+                            "INSERT INTO object_children (parent_id, child_id) "
+                            "VALUES (:parent_id, :child_id)",
+                            {"parent_id": obj_id, "child_id": cid},
+                        )
+                        self.query(
+                            "UPDATE objects SET ref_count = ref_count + 1 "
+                            "WHERE object_id = :object_id",
+                            {"object_id": cid},
+                        )
+                    new_objects.append(obj_id)
+                else:
+                    # Add to the list of new objects if not available
+                    if not rows[0]["is_available"]:
+                        new_objects.append(obj_id)
+
+                # Ensure run mapping
+                self.query(
+                    "INSERT INTO run_objects (run_id, object_id) "
+                    "VALUES (:run_id, :object_id) ON CONFLICT DO NOTHING",
+                    {"run_id": uint64_to_int64(run_id), "object_id": obj_id},
+                )
+        return new_objects
 
     def get_object_tree(self, object_id: str) -> ObjectTree:
         """Get the object tree for a given object ID."""
-        raise NotImplementedError()
+        with self.session():
+            rows = self.query(
+                "SELECT object_id FROM objects WHERE object_id = :object_id",
+                {"object_id": object_id},
+            )
+            if not rows:
+                raise NoObjectInStoreError(
+                    f"Object {object_id} was not pre-registered."
+                )
+            children = self.query(
+                "SELECT child_id FROM object_children WHERE parent_id = :parent_id",
+                {"parent_id": object_id},
+            )
+
+            # Build the object trees of all children
+            try:
+                child_trees = [self.get_object_tree(ch["child_id"]) for ch in children]
+            except NoObjectInStoreError as e:
+                # Raise an error if any child object is missing
+                # This indicates an integrity issue
+                raise NoObjectInStoreError(
+                    f"Object tree for object ID '{object_id}' contains missing "
+                    "children. This may indicate a corrupted object store."
+                ) from e
+
+            # Create and return the ObjectTree for the current object
+            return ObjectTree(object_id=object_id, children=child_trees)
 
     def put(self, object_id: str, object_content: bytes) -> None:
         """Put an object into the store."""
-        raise NotImplementedError()
+        if self.verify:
+            # Verify object_id and object_content match
+            object_id_from_content = get_object_id(object_content)
+            if object_id != object_id_from_content:
+                raise ValueError(f"Object ID {object_id} does not match content hash")
+
+            # Validate object content
+            validate_object_content(content=object_content)
+
+        with self.session():
+            # Only allow adding the object if it has been preregistered
+            rows = self.query(
+                "SELECT is_available FROM objects WHERE object_id = :object_id",
+                {"object_id": object_id},
+            )
+            if not rows:
+                raise NoObjectInStoreError(
+                    f"Object with ID '{object_id}' was not pre-registered."
+                )
+
+            # Return if object is already present in the store
+            if rows[0]["is_available"]:
+                return
+
+            # Update the object entry in the store
+            self.query(
+                "UPDATE objects SET content = :content, is_available = 1 "
+                "WHERE object_id = :object_id",
+                {"content": object_content, "object_id": object_id},
+            )
 
     def get(self, object_id: str) -> bytes | None:
         """Get an object from the store."""
