@@ -91,6 +91,7 @@ from flwr.server.utils.validator import validate_message
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 
+import time
 
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     """ServerAppIo API servicer."""
@@ -219,6 +220,10 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             # Store message
             message_id: str | None = state.store_message_ins(message=message)
             message_ids.append(message_id)
+        
+        log(INFO, "WAITING FOR 10 SECONDS TO SIMULATE PROCESSING TIME")
+        time.sleep(10)
+        log(INFO, "WAITING IS OVER")
 
         return PushAppMessagesResponse(
             message_ids=[
