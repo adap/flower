@@ -22,7 +22,7 @@ defaults:
 jobs:
   test_deprecated_baselines:
     name: Test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - name: Bootstrap
