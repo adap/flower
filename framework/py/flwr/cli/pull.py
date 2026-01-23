@@ -65,7 +65,7 @@ def pull(  # pylint: disable=R0914
     superlink_connection = read_superlink_connection(superlink)
     channel = None
     try:
-        channel = init_channel_from_connection(superlink_connection, cmd="pull")
+        channel = init_channel_from_connection(superlink_connection)
         stub = ControlStub(channel)
         with flwr_cli_grpc_exc_handler():
             res: PullArtifactsResponse = stub.PullArtifacts(

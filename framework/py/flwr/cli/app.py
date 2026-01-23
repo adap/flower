@@ -14,6 +14,9 @@
 # ==============================================================================
 """Flower command line interface."""
 
+
+from typing import Any, TypedDict
+
 import typer
 from typer.main import get_command
 
@@ -37,6 +40,15 @@ from .supernode import ls as supernode_list
 from .supernode import register as supernode_register
 from .supernode import unregister as supernode_unregister
 
+
+class CommandKwargs(TypedDict):
+    """Keywords for typer command to make mypy happy."""
+
+    context_settings: dict[str, Any]
+
+
+ALLOW_EXTRAS: CommandKwargs = {"context_settings": {"allow_extra_args": True}}
+
 app = typer.Typer(
     help=typer.style(
         "flwr is the Flower command line interface.",
@@ -51,43 +63,21 @@ app.command()(new)
 app.command()(run)
 app.command()(build)
 app.command()(install)
-app.command(
-    context_settings={
-        "allow_extra_args": True,
-    }
-)(log)
-app.command(
-    "list",
-    context_settings={
-        "allow_extra_args": True,
-    },
-)(ls)
-app.command(
-    hidden=True,
-    context_settings={
-        "allow_extra_args": True,
-    },
-)(ls)
-app.command(
-    context_settings={
-        "allow_extra_args": True,
-    }
-)(stop)
-app.command()(login)
-app.command(
-    context_settings={
-        "allow_extra_args": True,
-    }
-)(pull)
+app.command(**ALLOW_EXTRAS)(log)
+app.command("list", **ALLOW_EXTRAS)(ls)
+app.command(hidden=True, **ALLOW_EXTRAS)(ls)
+app.command(**ALLOW_EXTRAS)(stop)
+app.command(**ALLOW_EXTRAS)(login)
+app.command(**ALLOW_EXTRAS)(pull)
 
 # Create supernode command group
 supernode_app = typer.Typer(help="Manage SuperNodes")
-supernode_app.command()(supernode_register)
-supernode_app.command()(supernode_unregister)
+supernode_app.command(**ALLOW_EXTRAS)(supernode_register)
+supernode_app.command(**ALLOW_EXTRAS)(supernode_unregister)
 # Make it appear as "list"
-supernode_app.command("list")(supernode_list)
+supernode_app.command("list", **ALLOW_EXTRAS)(supernode_list)
 # Hide "ls" command (left as alias)
-supernode_app.command(hidden=True)(supernode_list)
+supernode_app.command(hidden=True, **ALLOW_EXTRAS)(supernode_list)
 app.add_typer(supernode_app, name="supernode")
 
 # Create app command group
@@ -99,9 +89,9 @@ app.add_typer(app_app, name="app")
 # Create federation command group
 federation_app = typer.Typer(help="Manage Federations")
 # Make it appear as "list"
-federation_app.command("list")(federation_list)
+federation_app.command("list", **ALLOW_EXTRAS)(federation_list)
 # Hide "ls" command (left as alias)
-federation_app.command(hidden=True)(federation_list)
+federation_app.command(hidden=True, **ALLOW_EXTRAS)(federation_list)
 app.add_typer(federation_app, name="federation")
 
 # Create config command group
