@@ -19,12 +19,10 @@ from .in_memory_linkstate import InMemoryLinkState as InMemoryLinkState
 from .linkstate import LinkState as LinkState
 from .linkstate_factory import LinkStateFactory as LinkStateFactory
 from .sql_linkstate import SqlLinkState as SqlLinkState
-from .sqlite_linkstate import SqliteLinkState as SqliteLinkState
 
 __all__ = [
     "InMemoryLinkState",
     "LinkState",
     "LinkStateFactory",
     "SqlLinkState",
-    "SqliteLinkState",
 ]
