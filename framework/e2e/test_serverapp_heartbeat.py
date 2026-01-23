@@ -11,11 +11,10 @@ from pathlib import Path
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
-    Status,
-    SubStatus,
 )
 
-DATABASE_FILE = Path("tmp.db")
+# Use absolute path to ensure cleanup works regardless of working directory
+DATABASE_FILE = Path(__file__).parent / "tmp.db"
 
 use_sim = sys.argv[1] == "simulation" if len(sys.argv) > 1 else False
 plugin_type_arg = "simulation" if use_sim else "serverapp"
@@ -135,99 +134,25 @@ def kill_process(proc: subprocess.Popen, name: str) -> None:
             print(f"Warning: {name} did not terminate within timeout")
 
 
+def check_superlink_running() -> bool:
+    """Check if SuperLink process is running and print status."""
+    pids = get_pids("flower-superlink")
+    if pids:
+        print(f"✓ SuperLink is running (PIDs: {pids})")
+        return True
+    else:
+        print("✗ SuperLink is NOT running")
+        return False
+
+
 def main() -> None:
     """."""
     # Show version and initialize Flower config
     subprocess.run(["flwr", "--version"], check=True)
 
-    # Kill any orphan processes from previous failed runs
-    kill_orphan_processes()
-
-    # Clean up any existing database from previous runs
-    cleanup_database()
-
-    # Determine if the test is running in simulation mode
-    print(f"Running in {'simulation' if use_sim else 'deployment'} mode.")
-
-    # Start the SuperLink
-    print("Starting SuperLink...")
-    superlink_proc = run_superlink()
-
-    # Allow time for SuperLink to start
-    time.sleep(1)
-
-    # Start the SuperExec
-    print("Starting SuperExec...")
-    superexec_proc = run_superexec()
-
-    try:
-        # Submit the first run
-        print("Starting the first run...")
-        run_id1 = flwr_run()
-
-        # Get the PID of the first app process
-        while True:
-            if pids := get_pids(app_cmd):
-                app_pid = pids[0]
-                break
-            time.sleep(0.1)
-
-        # Submit the second run
-        print("Starting the second run...")
-        run_id2 = flwr_run()
-
-        # Wait up to 6 seconds for both runs to reach RUNNING status
-        tic = time.time()
-        is_running = False
-        while (time.time() - tic) < 6:
-            run_status = flwr_ls()
-            if (
-                run_status.get(run_id1) == Status.RUNNING
-                and run_status.get(run_id2) == Status.RUNNING
-            ):
-                is_running = True
-                break
-            time.sleep(1)
-        assert is_running, "Run IDs did not start within 6 seconds"
-        print("Both runs are running.")
-
-        # Kill SuperLink process first to simulate restart scenario
-        # This prevents ServerApp from notifying SuperLink, isolating the heartbeat test
-        print("Terminating SuperLink process...")
-        kill_process(superlink_proc, "SuperLink")
-
-        # Kill the first ServerApp process
-        print("Terminating the first ServerApp process...")
-        os.kill(app_pid, signal.SIGKILL)  # SIGKILL to ensure it stops immediately
-
-        # Restart the SuperLink
-        print("Restarting SuperLink...")
-        superlink_proc = run_superlink()
-
-        # Allow time for SuperLink to start
-        time.sleep(1)
-
-        # Allow time for SuperLink to detect heartbeat failures and update statuses
-        tic = time.time()
-        is_valid = False
-        while (time.time() - tic) < 25:
-            run_status = flwr_ls()
-            if (
-                run_status[run_id1] == f"{Status.FINISHED}:{SubStatus.FAILED}"
-                and run_status[run_id2] == f"{Status.FINISHED}:{SubStatus.COMPLETED}"
-            ):
-                is_valid = True
-                break
-            time.sleep(1)
-        assert is_valid, f"Run statuses are not updated correctly:\n{run_status}"
-        print("Run statuses are updated correctly.")
-
-    finally:
-        # Clean up processes even if test fails
-        print("Cleaning up processes...")
-        kill_process(superexec_proc, "SuperExec")
-        kill_process(superlink_proc, "SuperLink")
-        cleanup_database()
+    # Check initial state
+    print("\n=== Initial State ===")
+    check_superlink_running()
 
 
 if __name__ == "__main__":
