@@ -66,6 +66,8 @@ def ls(
             }
             Console().print_json(json.dumps(conn))
         else:
+            typer.secho("\nFlower Config file: ", fg=typer.colors.BLUE, nl=False)
+            typer.secho(f"{config_path}", fg=typer.colors.GREEN)
             typer.secho("SuperLink connections:", fg=typer.colors.BLUE)
             # List SuperLink connections and highlight default
             for k in connection_names:
@@ -77,6 +79,7 @@ def ls(
                         nl=False,
                     )
                 typer.echo()
+            typer.echo()
     except typer.Exit as err:
         # log the error if json format requested
         # else do nothing since it will be logged by typer
