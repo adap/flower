@@ -22,6 +22,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from parameterized import parameterized
 
+from .sql_mixin_test import DummyDbSqlAlchemy
 from .sqlite_mixin import SqliteMixin
 
 
@@ -39,11 +40,12 @@ class DummyDb(SqliteMixin):
 @parameterized.expand(
     [
         (DummyDb,),
+        (DummyDbSqlAlchemy,),
     ],
-    ids=["SqliteMixin"],
+    ids=["SqliteMixin", "SqlMixin"],
 )  # type: ignore
 def test_transaction_serialization_with_tempfile(
-    db_class: type[DummyDb],
+    db_class: type[DummyDb] | type[DummyDbSqlAlchemy],
 ) -> None:
     """Verify that SQLite file-level locking serializes concurrent transactions."""
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmpfile:
@@ -58,18 +60,40 @@ def test_transaction_serialization_with_tempfile(
             # Each thread creates its own connection to test file-level locking
             db = db_class(db_path)
             db.initialize()
-            # SqliteMixin: use conn context and ? placeholders
-            with db.conn:
-                # Insert a dummy row with value -1
-                db.conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
-                # Read current row count
-                count = db.conn.execute("SELECT COUNT(*) AS cnt FROM test").fetchone()[
-                    "cnt"
-                ]
-                # Simulate some processing time
-                time.sleep(0.001)
-                # Insert a new row with the current count
-                db.conn.execute("INSERT INTO test (value) VALUES (?)", (count,))
+            if isinstance(db, DummyDb):
+                # SqliteMixin: test re-entrant conn context
+                with db.conn:
+                    # Insert a dummy row with value -1
+                    db.conn.execute("INSERT INTO test (value) VALUES (?)", (-1,))
+                    with db.conn:
+                        # Nested context - reuses same connection
+                        # Read current row count
+                        count = db.conn.execute(
+                            "SELECT COUNT(*) AS cnt FROM test"
+                        ).fetchone()["cnt"]
+                        # Simulate some processing time
+                        time.sleep(0.001)
+                        # Insert a new row with the current count
+                        db.conn.execute(
+                            "INSERT INTO test (value) VALUES (?)",
+                            (count,),
+                        )
+            else:
+                # SqlMixin: test re-entrant session context with query()
+                with db.session():
+                    # Insert a dummy row with value -1
+                    db.query("INSERT INTO test (value) VALUES (:value)", {"value": -1})
+                    with db.session():
+                        # Nested context - reuses same session
+                        # Read current row count
+                        count = db.query("SELECT COUNT(*) AS cnt FROM test")[0]["cnt"]
+                        # Simulate some processing time
+                        time.sleep(0.001)
+                        # Insert a new row with the current count
+                        db.query(
+                            "INSERT INTO test (value) VALUES (:count)",
+                            {"count": count},
+                        )
 
         # Execute: Run concurrent transactions
         with ThreadPoolExecutor(max_workers=8) as executor:
