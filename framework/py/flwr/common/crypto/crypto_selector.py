@@ -34,6 +34,20 @@ def decrypt(data: bytes, method: str, ecc_privkey=None) -> bytes:
     else:
         raise ValueError(f"Unknown decryption method: {method}")
 
+
+def authenticate(data: bytes, method: str) -> bytes:
+    if KOBLITZ.is_supported_method(method):
+        return KOBLITZ.authenticate(data, method)
+    else:
+        raise ValueError(f"Unknown authentication method: {method}")
+
+
+def verify_authentication(data: bytes, method: str) -> bytes:
+    if KOBLITZ.is_supported_method(method):
+        return KOBLITZ.verify(data, method)
+    else:
+        raise ValueError(f"Unknown authentication method: {method}")
+
 def add_integrity(data: bytes, method: str) -> bytes:
     if method == "HMAC":
         return HMAC.add_hmac(data)
@@ -45,5 +59,4 @@ def check_integrity(data: bytes, method: str) -> bytes:
         return HMAC.check_hmac(data)
     else:
         raise ValueError(f"Unknown integrity method: {method}")
-
 

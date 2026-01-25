@@ -15,6 +15,13 @@ ENCRYPTION_METHODS = [
     "KOBLITZ_LARGE",
 ]
 INTEGRITY_METHODS = ["HMAC"]
+AUTH_METHODS = [
+    "KOBLITZ_112",
+    "KOBLITZ_256",
+    "KOBLITZ_512",
+    "CURVE25519",
+    "CURVE448",
+]
 NET_OPTIONS = ["custom_cnn", "resnet18", "resnet34", "tiny_cnn", "squeezenet"]
 EVALUATION_OPTIONS = ["server", "client"]
 
@@ -104,6 +111,13 @@ def configure():
         INTEGRITY_METHOD = ask_choice("Metodo di integrità", INTEGRITY_METHODS,
                                       existing.get('INTEGRITY_METHOD', "HMAC"))
 
+    # Autenticazione
+    AUTH_ENABLED = ask_bool("Abilitare autenticazione?", existing.get('AUTH_ENABLED', False))
+    AUTH_METHOD = None
+    if AUTH_ENABLED:
+        AUTH_METHOD = ask_choice("Metodo di autenticazione", AUTH_METHODS,
+                                 existing.get('AUTH_METHOD', "KOBLITZ_112"))
+
     # Rete e altri parametri
     NET = ask_choice("Tipo di rete", NET_OPTIONS, existing.get('NET', "resnet18"))
     TLS = ask_bool("Attivo TLS?", existing.get('TLS', False))
@@ -122,6 +136,8 @@ def configure():
         f.write(f"ENCRYPTION_METHOD = {repr(ENCRYPTION_METHOD)}\n")
         f.write(f"INTEGRITY_ENABLED = {INTEGRITY_ENABLED}\n")
         f.write(f"INTEGRITY_METHOD = {repr(INTEGRITY_METHOD)}\n")
+        f.write(f"AUTH_ENABLED = {AUTH_ENABLED}\n")
+        f.write(f"AUTH_METHOD = {repr(AUTH_METHOD)}\n")
         f.write(f"NET = '{NET}'\n")
         f.write(f"TLS = {TLS}\n")
         f.write(f"ACCURACY = {ACCURACY}\n")

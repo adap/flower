@@ -23,8 +23,22 @@ from typing import Union, cast, get_args
 import psutil
 
 from . import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
-from .crypto.crypto_selector import encrypt, decrypt, add_integrity, check_integrity
-from .crypto.config_cripto import ENCRYPTION_METHOD,ENCRYPTION_ENABLED, INTEGRITY_ENABLED, INTEGRITY_METHOD
+from .crypto.crypto_selector import (
+    add_integrity,
+    authenticate,
+    check_integrity,
+    decrypt,
+    encrypt,
+    verify_authentication,
+)
+from .crypto.config_cripto import (
+    AUTH_ENABLED,
+    AUTH_METHOD,
+    ENCRYPTION_METHOD,
+    ENCRYPTION_ENABLED,
+    INTEGRITY_ENABLED,
+    INTEGRITY_METHOD,
+)
 from .crypto import log_file
 from .crypto.log_file import log_time
 from .typing import (
@@ -56,7 +70,8 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
     parameters = Parameters(tensors=[], tensor_type="")
 
     total_deser_time = 0.0   # tempo per costruire gli oggetti Parameters (no decrypt)
-    total_decrypt_time = 0.0 # tempo per decrypt + integrity
+    total_crypto_time = 0.0  # tempo crypto (cifratura/integrità)
+    total_auth_time = 0.0
 
     # Iteriamo direttamente sulle chiavi senza creare copie costose
     for key in list(record.keys()):
@@ -76,17 +91,23 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
         total_deser_time += (end_deser - start_deser)
 
         # --- DECRYPT + INTEGRITY ---
-        if INTEGRITY_ENABLED or ENCRYPTION_ENABLED:
+        if AUTH_ENABLED:
+            start_auth = time.perf_counter()
+            data = verify_authentication(data, AUTH_METHOD)
+            end_auth = time.perf_counter()
+            total_auth_time += (end_auth - start_auth)
+
+        if INTEGRITY_ENABLED:
+            start_integrity = time.perf_counter()
+            data = check_integrity(data, INTEGRITY_METHOD)
+            end_integrity = time.perf_counter()
+            total_crypto_time += (end_integrity - start_integrity)
+
+        if ENCRYPTION_ENABLED:
             start_decrypt = time.perf_counter()
-
-            if INTEGRITY_ENABLED:
-                data = check_integrity(data, INTEGRITY_METHOD)
-
-            if ENCRYPTION_ENABLED:
-                data = decrypt(data, ENCRYPTION_METHOD)
-
+            data = decrypt(data, ENCRYPTION_METHOD)
             end_decrypt = time.perf_counter()
-            total_decrypt_time += (end_decrypt - start_decrypt)
+            total_crypto_time += (end_decrypt - start_decrypt)
 
         # aggiungi il tensor
         parameters.tensors.append(data)
@@ -96,17 +117,25 @@ def arrayrecord_to_parameters(record: ArrayRecord, keep_input: bool) -> Paramete
             del record[key]
 
     # LOG TEMPI REALI
-    total_time = total_deser_time + total_decrypt_time
-    crypto_impact = (total_decrypt_time / total_time * 100.0) if total_time > 0 else 0.0
-    log_file.add_crypto_time(total_decrypt_time, total_deser_time)
+    total_time = total_deser_time + total_crypto_time + total_auth_time
+    crypto_impact = (total_crypto_time / total_time * 100.0) if total_time > 0 else 0.0
+    auth_impact = (total_auth_time / total_time * 100.0) if total_time > 0 else 0.0
+    log_file.add_crypto_time(total_crypto_time, total_deser_time)
+    log_file.add_auth_time(total_auth_time)
     log_time(
-        "CRYPTO STATUS: enabled=%s method=%s | DESERIALIZE: %.5f s | CRYPTO: %.5f s | TOTAL: %.5f s | IMPACT: %.2f%%",
+        "CRYPTO STATUS: enabled=%s method=%s | auth_enabled=%s auth_method=%s | "
+        "DESERIALIZE: %.5f s | CRYPTO: %.5f s | AUTH: %.5f s | TOTAL: %.5f s | "
+        "IMPACT: %.2f%% | AUTH_IMPACT: %.2f%%",
         ENCRYPTION_ENABLED,
         ENCRYPTION_METHOD,
+        AUTH_ENABLED,
+        AUTH_METHOD,
         total_deser_time,
-        total_decrypt_time,
+        total_crypto_time,
+        total_auth_time,
         total_time,
         crypto_impact,
+        auth_impact,
     )
 
     return parameters
@@ -120,6 +149,7 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
     # Tempi separati
     tot_serial_time = 0.0
     tot_crypto_time = 0.0
+    tot_auth_time = 0.0
 
     for idx in range(num_arrays):
 
@@ -133,18 +163,47 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
         end_serial = time.perf_counter()
         tot_serial_time += (end_serial - start_serial)
 
+        base_bytes = len(dataR)
+
         # --- CRITTOGRAFIA ---
-        if ENCRYPTION_ENABLED or INTEGRITY_ENABLED:
-            start_crypto = time.perf_counter()
+        if ENCRYPTION_ENABLED:
+            start_encrypt = time.perf_counter()
+            dataR = encrypt(dataR, ENCRYPTION_METHOD)
+            end_encrypt = time.perf_counter()
+            tot_crypto_time += (end_encrypt - start_encrypt)
+            log_file.add_overhead(
+                ENCRYPTION_METHOD,
+                "crypto",
+                len(dataR) - base_bytes,
+                base_bytes,
+            )
+            base_bytes = len(dataR)
 
-            if ENCRYPTION_ENABLED:
-                dataR = encrypt(dataR, ENCRYPTION_METHOD)
+        if INTEGRITY_ENABLED:
+            start_integrity = time.perf_counter()
+            dataR = add_integrity(dataR, INTEGRITY_METHOD)
+            end_integrity = time.perf_counter()
+            tot_crypto_time += (end_integrity - start_integrity)
+            log_file.add_overhead(
+                INTEGRITY_METHOD,
+                "integrity",
+                len(dataR) - base_bytes,
+                base_bytes,
+            )
+            base_bytes = len(dataR)
 
-            if INTEGRITY_ENABLED:
-                dataR = add_integrity(dataR, INTEGRITY_METHOD)
-
-            end_crypto = time.perf_counter()
-            tot_crypto_time += (end_crypto - start_crypto)
+        if AUTH_ENABLED:
+            start_auth = time.perf_counter()
+            dataR = authenticate(dataR, AUTH_METHOD)
+            end_auth = time.perf_counter()
+            auth_elapsed = end_auth - start_auth
+            tot_auth_time += auth_elapsed
+            log_file.add_overhead(
+                AUTH_METHOD,
+                "auth",
+                len(dataR) - base_bytes,
+                base_bytes,
+            )
 
         # --- COSTRUZIONE ARRAY ---
         ordered_dict[str(idx)] = Array(
@@ -158,17 +217,25 @@ def parameters_to_arrayrecord(parameters: Parameters, keep_input: bool) -> Array
         )
 
     # LOG
-    total_time = tot_serial_time + tot_crypto_time
+    total_time = tot_serial_time + tot_crypto_time + tot_auth_time
     crypto_impact = (tot_crypto_time / total_time * 100.0) if total_time > 0 else 0.0
+    auth_impact = (tot_auth_time / total_time * 100.0) if total_time > 0 else 0.0
     log_file.add_crypto_time(tot_crypto_time, tot_serial_time)
+    log_file.add_auth_time(tot_auth_time)
     log_time(
-        "CRYPTO STATUS: enabled=%s method=%s | SERIALIZE: %.5f s | CRYPTO: %.5f s | TOTAL: %.5f s | IMPACT: %.2f%%",
+        "CRYPTO STATUS: enabled=%s method=%s | auth_enabled=%s auth_method=%s | "
+        "SERIALIZE: %.5f s | CRYPTO: %.5f s | AUTH: %.5f s | TOTAL: %.5f s | "
+        "IMPACT: %.2f%% | AUTH_IMPACT: %.2f%%",
         ENCRYPTION_ENABLED,
         ENCRYPTION_METHOD,
+        AUTH_ENABLED,
+        AUTH_METHOD,
         tot_serial_time,
         tot_crypto_time,
+        tot_auth_time,
         total_time,
         crypto_impact,
+        auth_impact,
     )
 
     return ArrayRecord(ordered_dict, keep_input=keep_input)

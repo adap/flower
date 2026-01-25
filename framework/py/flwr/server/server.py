@@ -149,6 +149,7 @@ class Server:
 
         # Run federated learning for num_rounds
         prev_crypto_total, _ = log_file.get_crypto_totals()
+        prev_auth_total = log_file.get_auth_totals()
 
         for current_round in range(1, num_rounds + 1):
             if getattr(self.strategy, "stop_triggered", False):
@@ -213,11 +214,17 @@ class Server:
             # Fine round: calcolo e log del tempo
             round_elapsed = timeit.default_timer() - round_start
             current_crypto_total, _ = log_file.get_crypto_totals()
+            current_auth_total = log_file.get_auth_totals()
             round_crypto_time = max(current_crypto_total - prev_crypto_total, 0.0)
+            round_auth_time = max(current_auth_total - prev_auth_total, 0.0)
             prev_crypto_total = current_crypto_total
+            prev_auth_total = current_auth_total
             parallel_factor = max(round_fit_parallel, round_eval_parallel, 1)
             parallel_crypto_time = min(
                 round_crypto_time / parallel_factor, round_elapsed
+            )
+            parallel_auth_time = min(
+                round_auth_time / parallel_factor, round_elapsed
             )
             without_crypto = max(round_elapsed - parallel_crypto_time, 0.0)
             log_file.ROUND_SUMMARIES.append({
@@ -225,6 +232,8 @@ class Server:
                 "round_time": round_elapsed,
                 "crypto_time": parallel_crypto_time,
                 "crypto_cumulative": round_crypto_time,
+                "auth_time": parallel_auth_time,
+                "auth_cumulative": round_auth_time,
                 "parallel_fit": float(round_fit_parallel),
                 "parallel_eval": float(round_eval_parallel),
                 "parallel_factor": float(parallel_factor),
@@ -620,16 +629,24 @@ def run_fl(
     log(INFO, "Run finished %s round(s) in %.2fs", config.num_rounds, elapsed_time)
     log_time("Run finished %s round(s) in %.2fs", config.num_rounds, elapsed_time)
     total_crypto_time, total_serial_time = log_file.get_crypto_totals()
+    total_auth_time = log_file.get_auth_totals()
     crypto_impact = (
         (total_crypto_time / elapsed_time * 100.0) if elapsed_time > 0 else 0.0
     )
+    auth_impact = (
+        (total_auth_time / elapsed_time * 100.0) if elapsed_time > 0 else 0.0
+    )
     log_time(
-        "Totale critto: %.2f s su %.2f s (%.2f%%) | serializzazione: %.2f s",
+        "Totale critto: %.2f s su %.2f s (%.2f%%) | auth: %.2f s (%.2f%%) | serializzazione: %.2f s",
         total_crypto_time,
         elapsed_time,
         crypto_impact,
+        total_auth_time,
+        auth_impact,
         total_serial_time,
     )
+    for line in log_file.build_overhead_report():
+        log_time(line)
 
     # 📩 Messaggio Telegram
     #send_telegram_file(null,"Ho finito!!!!")
