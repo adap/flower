@@ -34,7 +34,7 @@ an app directory since it needs to access your app code.
     **First-time setup:** If a Flower Configuration file doesn't exist in your system,
     it will be automatically created for you the first time you run a Flower CLI
     command.
-    
+
     **Upgrading from older versions:** If you are upgrading from a previous version of
     Flower, the ``federations`` section in your ``pyproject.toml`` file will be
     automatically migrated to the Flower Configuration file. The syntax remains the same
@@ -53,7 +53,7 @@ profiles. Each connection profile describes how to connect to a Flower **SuperLi
 multiple connection profiles for different scenarios:
 
 - ``superlink.local`` - for running local simulations on your machine
-- ``superlink.staging`` - for connecting to a staging server  
+- ``superlink.staging`` - for connecting to a staging server
 - ``superlink.production`` - for connecting to a production deployment
 
 The configuration structure is similar to the older ``federations`` section in
@@ -78,8 +78,7 @@ The configuration structure is similar to the older ``federations`` section in
 - ``[superlink]`` section defines which connection profile to use by default
 - ``default = "local"`` means the ``superlink.local`` profile will be used when you
   don't specify a connection explicitly
-- ``[superlink.local]`` defines a local simulation profile with 10 virtual clients
-  (SuperNodes)
+- ``[superlink.local]`` defines a local simulation profile with 10 virtual SuperNodes
 - ``[superlink.local-poc]`` defines a profile for connecting to a locally running
   SuperLink server at address ``127.0.0.1:9093``
 
@@ -91,8 +90,8 @@ options you specify depends on whether you're configuring a simulation
  Listing your connections
 **************************
 
-You can list all your connection profiles using the ``flwr config ls`` command.
-Assuming the default configuration file shown earlier, the expected output will be:
+You can list all your connection profiles using the ``flwr config ls`` command. Assuming
+the default configuration file shown earlier, the expected output will be:
 
 .. code-block:: shell
 
@@ -111,7 +110,7 @@ default.
 **************************
 
 Local simulations allow you to test your federated learning app on your own machine
-using virtual clients (SuperNodes) instead of real distributed nodes. This is useful for
+using virtual SuperNodes instead of real distributed nodes. This is useful for
 development and testing before deploying to real distributed environments.
 
 **Basic simulation configuration:**
@@ -121,7 +120,7 @@ development and testing before deploying to real distributed environments.
     [superlink.local]
     options.num-supernodes = 10
 
-This creates a simulation profile with 10 virtual clients.
+This creates a simulation profile with 10 virtual SuperNodes.
 
 **Simulation with custom resources:**
 
@@ -132,15 +131,16 @@ This creates a simulation profile with 10 virtual clients.
     options.backend.client-resources.num-cpus = 1
     options.backend.client-resources.num-gpus = 0.1
 
-This creates a simulation with 100 virtual clients, where each client is allocated 1 CPU
-and 10% of a GPU. This is useful when you want to control resource distribution or
-simulate resource-constrained environments.
+This creates a simulation with 100 virtual SuperNodes, where each is allocated 1 CPU and
+10% of a GPU. This is useful when you want to control resource distribution or simulate
+resource-constrained environments.
 
 **When to use each:**
 
 - Use the basic configuration for quick testing with default resource allocation
 - Use custom resources when you need to simulate specific hardware constraints or want
-  to control how many clients can run in parallel based on your machine's resources
+  to control how many virtual SuperNodes can run in parallel based on your machine's
+  resources
 
 Learn more in the `How to Run Simulations
 <https://flower.ai/docs/framework/how-to-run-simulations.html>`_ guide about other
