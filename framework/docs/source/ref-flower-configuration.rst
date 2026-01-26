@@ -21,13 +21,11 @@ defaults to ``$HOME/.flwr``) and is designed to simplify the usage of `Flower CL
 
 **Why use it?**
 
-This configuration file allows you to define reusable connection configurations (for
-example, "local-simulation", "staging-server", "production-server") that you can
-reference by name when running ``flwr`` commands. Instead of typing the same connection
-details repeatedly, you define them once and reuse them. Additionally, commands like
-``flwr log``, ``flwr ls``, and ``flwr stop`` can be run from anywhere on your system
-without needing to be inside a Flower app directory. Note: ``flwr run`` still requires
-being in an app directory since it needs to access your app code.
+This configuration file allows you to define reusable connection configurations that you
+can reference by name when running ``flwr`` commands. Commands like ``flwr log``, ``flwr
+ls``, and ``flwr stop`` can be run from anywhere on your system without needing to be
+inside a Flower app directory. Note: ``flwr run`` still requires being in an app
+directory since it needs to access your app code.
 
 .. tip::
 
@@ -47,14 +45,11 @@ being in an app directory since it needs to access your app code.
 
 **Understanding the terminology**
 
-The Flower Configuration file uses the term **"superlink"** to refer to connection
-configurations. Each connection configuration describes how to connect to a Flower
-**SuperLink** (the central server component that coordinates federated learning). You
-can define multiple connection configurations for different scenarios:
-
-- ``superlink.local`` - for running local simulations on your machine
-- ``superlink.staging`` - for connecting to a staging server
-- ``superlink.production`` - for connecting to a production deployment
+The Flower Configuration file uses the term **"superlink"** to refer to SuperLink
+connection configurations. Each connection configuration describes how to connect to a
+Flower **SuperLink** (the central server component that coordinates federated learning).
+You can define multiple SuperLink connection configurations for different scenarios,
+such as local simulations or remote deployments.
 
 The configuration structure is similar to the older ``federations`` section in
 ``pyproject.toml``, but now lives in a central location and uses clearer naming.
@@ -81,7 +76,7 @@ The configuration structure is similar to the older ``federations`` section in
 - ``[superlink.local]`` defines a local simulation configuration with 10 virtual
   SuperNodes
 - ``[superlink.local-poc]`` defines a configuration for connecting to a locally running
-  SuperLink server at address ``127.0.0.1:9093``
+  SuperLink at address ``127.0.0.1:9093``
 
 Connection configuration names must be unique and use the ``superlink.`` prefix. The
 type of options you specify depends on whether you're configuring a simulation
