@@ -199,7 +199,7 @@ class TestConfigMigration(unittest.TestCase):
         migrate("named-conn", [])
 
         # Should not create this connection
-        with self.assertRaises(typer.Exit):
+        with self.assertRaises(click.ClickException):
             _ = read_superlink_connection("named-conn")
 
     @parameterized.expand(  # type: ignore[misc]

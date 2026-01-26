@@ -17,6 +17,7 @@
 
 from typing import Annotated, cast
 
+import click
 import typer
 
 from flwr.cli.auth_plugin import LoginError, NoOpCliAuthPlugin
@@ -62,26 +63,18 @@ def login(
 
     # Check if `enable-account-auth` is set to `true`
     if not superlink_connection.enable_account_auth:
-        typer.secho(
-            "❌ Account authentication is not enabled for the SuperLink connection "
+        raise click.ClickException(
+            "Account authentication is not enabled for the SuperLink connection "
             f"'{superlink}'. To enable it, set `enable-account-auth = true` "
-            "in the configuration.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+            "in the configuration."
         )
-        raise typer.Exit(code=1)
 
     # Check if insecure flag is set to `True`
     if superlink_connection.insecure:
-        typer.secho(
-            "❌ `flwr login` requires TLS to be enabled. `insecure` must NOT be set to "
-            "`true` in the federation configuration.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+        raise click.ClickException(
+            "`flwr login` requires TLS to be enabled. `insecure` must NOT be set to "
+            "`true` in the federation configuration."
         )
-        raise typer.Exit(code=1)
 
     channel = init_channel_from_connection(superlink_connection, NoOpCliAuthPlugin())
     stub = ControlStub(channel)
@@ -112,13 +105,7 @@ def login(
             bold=False,
         )
     except LoginError as e:
-        typer.secho(
-            f"❌ Login failed: {e.message}",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
-        )
-        raise typer.Exit(code=1) from None
+        raise click.ClickException(f"Login failed: {e.message}") from None
 
     # Store the tokens
     authn_plugin.store_tokens(credentials)
