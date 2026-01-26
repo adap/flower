@@ -91,14 +91,15 @@ Save this file as ``account-auth-config.yaml``. Then pass it to the SuperLink vi
 Once a SuperLink with account authentication and authorization is up and running, an
 account can interface with it after installing the ``flwr`` PyPI package via the Flower
 CLI. Then, ensure that the ``enable-account-auth`` field is set to ``true`` in the
-federation section in the ``pyproject.toml`` of the Flower app you want to run:
+relevant superlink connection in your Flower Configuration TOML file:
 
 .. code-block:: toml
+    :caption: config.toml
 
-    [tool.flwr.federations]
-    default = "my-federation"
+    [superlink]
+    default = "my-deployment"
 
-    [tool.flwr.federations.my-federation]
+    [superlink.my-deployment]
     address = "<SUPERLINK-ADDRESS>:9093"   # Address of the SuperLink Control API
     root-certificates = "<PATH/TO/ca.crt>" # TLS certificate set for the SuperLink. Required for self-signed certificates.
     enable-account-auth = true                # Enables the account auth mechanism on the `flwr` CLI side
@@ -113,10 +114,7 @@ Click on it and authenticate directly against the OIDC provider.
 
 .. code-block:: bash
 
-    flwr login [APP] [FEDERATION]
-    Loading project configuration...
-    Success
-    Creating a new `.gitignore` with `.credentials` entry...
+    flwr login [SUPERLINK]
     Please login with your account credentials here: https://account.flower.ai/realms/flower/device?user_code=...
     # [... follows URL and logs in ... in the meantime the CLI will wait ...]
     ✅ Login successful.
@@ -138,8 +136,6 @@ authorized account, you can run the ``flwr run`` command to start a Flower app:
 .. code-block:: bash
 
     ➜ flwr run
-    Loading project configuration...
-    Success
     🎊 Successfully built flwrlabs.myawesomeapp.1-0-0.014c8eb3.fab
     🎊 Successfully started run 1859953118041441032
 
@@ -149,7 +145,5 @@ be returned:
 .. code-block:: bash
 
     ➜ flwr run
-    Loading project configuration...
-    Success
     ❌ Permission denied.
     Account not authorized

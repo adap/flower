@@ -121,14 +121,14 @@ The `Flower CLI <ref-api-cli.html>`_ (e.g. ``flwr run`` command) is the way a us
 a data scientist) can interact with a deployed federation. The Flower CLI commands are
 processed by the SuperLink and therefore, if it has been configured to only operate on
 TLS conenction, the requests sent by the Flower CLI need to make use of a TLS
-certificate. To do so, replace the ``insecure = true`` field in the ``pyproject.toml``
-with a new field that reads the certificate:
+certificate. To do so, replace the ``insecure = true`` field in your Flower
+Configuration TOML file with a new field that reads the certificate:
 
 .. code-block:: toml
-    :caption: pyproject.toml
+    :caption: config.toml
     :emphasize-lines: 3,3
 
-    [tool.flwr.federations.local-deployment]
+    [superlink.local-deployment]
     address = "127.0.0.1:9093"
     root-certificates = "./certificates/ca.crt"
 
