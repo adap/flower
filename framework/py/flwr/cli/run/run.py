@@ -46,7 +46,6 @@ from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_
 from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.supercore.constant import NOOP_FEDERATION
 from flwr.supercore.utils import parse_app_spec
 
 from ..log import start_stream
@@ -185,8 +184,6 @@ def _run_with_control_api(
             fab_id = fab_version = fab_hash = ""
             fab = Fab(fab_hash, b"", {})
 
-        federation: str = superlink_connection.federation or NOOP_FEDERATION
-
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
         options = {}
         if superlink_connection.options:
@@ -197,7 +194,7 @@ def _run_with_control_api(
         req = StartRunRequest(
             fab=fab_to_proto(fab),
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
-            federation=federation,
+            federation=superlink_connection.federation or "",
             federation_options=config_record_to_proto(c_record),
             app_spec=app_spec or "",
         )
