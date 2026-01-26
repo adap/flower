@@ -1,14 +1,18 @@
-"""Implementazioni semplificate di curve di Koblitz per la demo."""
+"""Autenticazione reale con curve ellittiche (ECDSA)."""
 
 from __future__ import annotations
 
-import os
+import struct
 from dataclasses import dataclass
 from typing import Dict
 
 from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives import hashes, hmac
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    load_pem_private_key,
+    load_pem_public_key,
+)
 
 
 @dataclass(frozen=True)
@@ -17,6 +21,7 @@ class KoblitzCurve:
 
     name: str
     key_size_bits: int
+    curve: ec.EllipticCurve
 
     @property
     def key_size_bytes(self) -> int:
@@ -24,17 +29,17 @@ class KoblitzCurve:
 
 
 SUPPORTED_CURVES: Dict[str, KoblitzCurve] = {
-    "KOBLITZ_SMALL": KoblitzCurve("KOBLITZ_SMALL", 112),
-    "KOBLITZ_MEDIUM": KoblitzCurve("KOBLITZ_MEDIUM", 256),
-    "KOBLITZ_LARGE": KoblitzCurve("KOBLITZ_LARGE", 512),
-    "CURVE25519": KoblitzCurve("CURVE25519", 256),
-    "CURVE448": KoblitzCurve("CURVE448", 448),
+    "ECDSA_256": KoblitzCurve("ECDSA_256", 256, ec.SECP256R1()),
+    "ECDSA_521": KoblitzCurve("ECDSA_521", 521, ec.SECP521R1()),
 }
 
 LEGACY_ALIASES: Dict[str, str] = {
-    "KOBLITZ_112": "KOBLITZ_SMALL",
-    "KOBLITZ_256": "KOBLITZ_MEDIUM",
-    "KOBLITZ_512": "KOBLITZ_LARGE",
+    "KOBLITZ_112": "ECDSA_256",
+    "KOBLITZ_256": "ECDSA_256",
+    "KOBLITZ_512": "ECDSA_521",
+    "CURVE25519": "ECDSA_256",
+    "CURVE448": "ECDSA_521",
+    "ECCFROG522PP": "ECDSA_521",
 }
 
 SUPPORTED_METHODS = set(SUPPORTED_CURVES.keys()) | set(LEGACY_ALIASES.keys())
@@ -52,86 +57,62 @@ def is_supported_method(curve_name: str) -> bool:
     return curve_name in SUPPORTED_METHODS
 
 
-def _derive_keystream(curve: KoblitzCurve, secret: bytes, length: int) -> bytes:
-    hkdf = HKDF(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=None,
-        info=curve.name.encode(),
-    )
-    prk = hkdf.derive(secret)
-    keystream = bytearray()
-    counter = 1
-    while len(keystream) < length:
-        hmac_ctx = hmac.HMAC(prk, hashes.SHA256())
-        hmac_ctx.update(counter.to_bytes(4, "big"))
-        keystream.extend(hmac_ctx.finalize())
-        counter += 1
-    return bytes(keystream[:length])
+def _load_public_key(key: object) -> object:
+    if key is None:
+        raise ValueError("Chiave pubblica mancante per la curva scelta")
+    if isinstance(key, (bytes, bytearray)):
+        return load_pem_public_key(bytes(key))
+    if isinstance(key, str):
+        return load_pem_public_key(key.encode())
+    return key
 
 
-def encrypt(data: bytes, curve_name: str) -> bytes:
-    """Cifra i dati utilizzando una curva di Koblitz simulata.
-
-    La funzione genera un segreto effimero della dimensione della curva
-    (112/256/512 bit) e lo usa per derivare un keystream tramite HKDF. Il
-    keystream viene poi combinato con i dati tramite XOR. Il segreto viene
-    prefissato al ciphertext per consentire la decifratura.
-    """
-
-    curve = _get_curve(curve_name)
-    secret = os.urandom(curve.key_size_bytes)
-    keystream = _derive_keystream(curve, secret, len(data))
-    ciphertext = bytes(d ^ k for d, k in zip(data, keystream))
-    return secret + ciphertext
+def _load_private_key(key: object) -> object:
+    if key is None:
+        raise ValueError("Chiave privata mancante per la curva scelta")
+    if isinstance(key, (bytes, bytearray)):
+        return load_pem_private_key(bytes(key), password=None)
+    if isinstance(key, str):
+        return load_pem_private_key(key.encode(), password=None)
+    return key
 
 
-def decrypt(encrypted_data: bytes, curve_name: str) -> bytes:
-    """Decifra i dati protetti con :func:`encrypt`."""
-
-    curve = _get_curve(curve_name)
-    if len(encrypted_data) < curve.key_size_bytes:
-        raise ValueError("Dati cifrati troppo corti per la curva scelta")
-
-    secret = encrypted_data[: curve.key_size_bytes]
-    ciphertext = encrypted_data[curve.key_size_bytes :]
-    keystream = _derive_keystream(curve, secret, len(ciphertext))
-    return bytes(c ^ k for c, k in zip(ciphertext, keystream))
+def _pack_signature(data: bytes, signature: bytes) -> bytes:
+    return data + struct.pack(">H", len(signature)) + signature
 
 
-def authenticate(data: bytes, curve_name: str) -> bytes:
-    """Autentica i dati usando una curva di Koblitz simulata.
+def _unpack_signature(payload: bytes) -> tuple[bytes, bytes]:
+    if len(payload) < 2:
+        raise ValueError("Payload troppo corto per la firma")
+    sig_len = struct.unpack(">H", payload[-2:])[0]
+    if len(payload) < 2 + sig_len:
+        raise ValueError("Payload troppo corto per la firma indicata")
+    data = payload[: -2 - sig_len]
+    signature = payload[-2 - sig_len : -2]
+    return data, signature
 
-    Genera un segreto effimero della dimensione della curva e calcola un tag
-    HMAC-SHA256. Il segreto viene prefissato al payload per consentire la
-    verifica.
-    """
+
+def authenticate(data: bytes, curve_name: str, ecc_privkey: object) -> bytes:
+    """Autentica i dati usando firme reali."""
 
     curve = _get_curve(curve_name)
-    secret = os.urandom(curve.key_size_bytes)
-    auth_key = _derive_keystream(curve, secret, hashes.SHA256().digest_size)
-    hmac_ctx = hmac.HMAC(auth_key, hashes.SHA256())
-    hmac_ctx.update(data)
-    tag = hmac_ctx.finalize()
-    return secret + data + tag
+    private_key = _load_private_key(ecc_privkey)
+    if not isinstance(private_key, ec.EllipticCurvePrivateKey):
+        raise ValueError("Curva non supportata per firme")
+    signature = private_key.sign(data, ec.ECDSA(hashes.SHA256()))
+    return _pack_signature(data, signature)
 
 
-def verify(authenticated_data: bytes, curve_name: str) -> bytes:
+def verify(authenticated_data: bytes, curve_name: str, ecc_pubkey: object) -> bytes:
     """Verifica l'autenticazione creata da :func:`authenticate`."""
 
     curve = _get_curve(curve_name)
-    tag_len = hashes.SHA256().digest_size
-    if len(authenticated_data) < curve.key_size_bytes + tag_len:
-        raise ValueError("Dati autenticati troppo corti per la curva scelta")
-
-    secret = authenticated_data[: curve.key_size_bytes]
-    tag = authenticated_data[-tag_len:]
-    data = authenticated_data[curve.key_size_bytes:-tag_len]
-    auth_key = _derive_keystream(curve, secret, tag_len)
-    hmac_ctx = hmac.HMAC(auth_key, hashes.SHA256())
-    hmac_ctx.update(data)
+    public_key = _load_public_key(ecc_pubkey)
+    if not isinstance(public_key, ec.EllipticCurvePublicKey):
+        raise ValueError("Curva non supportata per firme")
+    data, signature = _unpack_signature(authenticated_data)
     try:
-        hmac_ctx.verify(tag)
+        public_key.verify(signature, data, ec.ECDSA(hashes.SHA256()))
     except InvalidSignature as exc:
-        raise ValueError("Autenticazione Koblitz non valida") from exc
+        raise ValueError("Firma non valida") from exc
     return data
