@@ -15,6 +15,12 @@ INTEGRITY_METHODS = ["HMAC"]
 AUTH_METHODS = [
     "ECDSA_256",
     "ECDSA_521",
+    "KOBLITZ_112",
+    "KOBLITZ_256",
+    "KOBLITZ_512",
+    "CURVE25519",
+    "CURVE448",
+    "ECCFROG522PP",
 ]
 NET_OPTIONS = ["custom_cnn", "resnet18", "resnet34", "tiny_cnn", "squeezenet"]
 EVALUATION_OPTIONS = ["server", "client"]

@@ -33,7 +33,14 @@ SUPPORTED_CURVES: Dict[str, KoblitzCurve] = {
     "ECDSA_521": KoblitzCurve("ECDSA_521", 521, ec.SECP521R1()),
 }
 
-LEGACY_ALIASES: Dict[str, str] = {}
+LEGACY_ALIASES: Dict[str, str] = {
+    "KOBLITZ_112": "ECDSA_256",
+    "KOBLITZ_256": "ECDSA_256",
+    "KOBLITZ_512": "ECDSA_521",
+    "CURVE25519": "ECDSA_256",
+    "CURVE448": "ECDSA_521",
+    "ECCFROG522PP": "ECDSA_521",
+}
 
 SUPPORTED_METHODS = set(SUPPORTED_CURVES.keys()) | set(LEGACY_ALIASES.keys())
 
