@@ -143,9 +143,9 @@ for TLS setup and advanced configurations.
 
 If you are upgrading from a previous version of Flower, the ``federations`` section in
 your ``pyproject.toml`` file will be automatically migrated to the Flower Configuration
-file. The syntax remains the same with the exception of the name of the section and the
-``superlink`` keyword instead of ``tool.flwr.federations``.
+file. The syntax remains the same with the exception of the name of the section using
+the ``superlink`` keyword instead of ``tool.flwr.federations``.
 
-During the migration process, the ``pyproject.toml`` file will be modified in place and
+During the migration process, the ``pyproject.toml`` file will be modified in-place and
 the ``federations`` section will be commented out for your reference. Once migrated, it
 is safe to remove the ``federations`` section from the ``pyproject.toml`` file entirely.
