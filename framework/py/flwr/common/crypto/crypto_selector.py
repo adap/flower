@@ -13,7 +13,7 @@ def encrypt(data: bytes, method: str, ecc_pubkey=None) -> bytes:
     elif method == "AES_GCM":
         return AES_GCM.encrypt(data)
     elif KOBLITZ.is_supported_method(method):
-        return KOBLITZ.encrypt(data, method, ecc_pubkey)
+        raise ValueError("Le curve ellittiche sono disponibili solo per autenticazione")
     else:
         raise ValueError(f"Unknown encryption method: {method}")
 
@@ -30,7 +30,7 @@ def decrypt(data: bytes, method: str, ecc_privkey=None) -> bytes:
     elif method == "AES_GCM":
         return AES_GCM.decrypt(data)
     elif KOBLITZ.is_supported_method(method):
-        return KOBLITZ.decrypt(data, method, ecc_privkey)
+        raise ValueError("Le curve ellittiche sono disponibili solo per autenticazione")
     else:
         raise ValueError(f"Unknown decryption method: {method}")
 
