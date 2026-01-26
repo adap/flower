@@ -319,9 +319,9 @@ def pull_object(
     # Fetch from store
     content = store.get(request.object_id)
     if content is not None:
-        object_available = content != b""
+        content_available = content != b""
         # Record bytes traffic pulled by SuperNode
-        if object_available:
+        if content_available:
             state.store_traffic(request.run_id, bytes_sent=len(content), bytes_recv=0)
         return PullObjectResponse(
             object_found=True,
