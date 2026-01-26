@@ -13,6 +13,7 @@ ENCRYPTION_METHODS = [
     "KOBLITZ_SMALL",
     "KOBLITZ_MEDIUM",
     "KOBLITZ_LARGE",
+    "ECCFROG522PP",
 ]
 INTEGRITY_METHODS = ["HMAC"]
 AUTH_METHODS = [
@@ -21,6 +22,10 @@ AUTH_METHODS = [
     "KOBLITZ_512",
     "CURVE25519",
     "CURVE448",
+    # ECCFROG522PP: livello di sicurezza alto, overhead alto (previsto almeno),
+    # nuova proposta del 2025, cofattore 1. Uso tipico: massima sicurezza quando
+    # il costo computazionale non è un limite.
+    "ECCFROG522PP",
 ]
 NET_OPTIONS = ["custom_cnn", "resnet18", "resnet34", "tiny_cnn", "squeezenet"]
 EVALUATION_OPTIONS = ["server", "client"]
