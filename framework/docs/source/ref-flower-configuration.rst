@@ -22,10 +22,12 @@ defaults to ``$HOME/.flwr``) and is designed to simplify the usage of `Flower CL
 **Why use it?**
 
 This configuration file allows you to define reusable connection configurations that you
-can reference by name when running ``flwr`` commands. Commands like ``flwr log``, ``flwr
-ls``, and ``flwr stop`` can be run from anywhere on your system without needing to be
-inside a Flower app directory. Note: ``flwr run`` still requires being in an app
-directory since it needs to access your app code.
+can reference by name when running ``flwr`` commands. Instead of typing the same
+connection details repeatedly for every Flower App, you define them once and reuse them.
+Additionally, commands like ``flwr log``, ``flwr ls``, and ``flwr stop`` can be run from
+anywhere on your system without needing to be inside a Flower app directory. Note:
+``flwr run`` still requires being in an app directory since it needs to access your app
+code.
 
 .. tip::
 
