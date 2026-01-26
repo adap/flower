@@ -19,6 +19,7 @@ import io
 import json
 from typing import Annotated
 
+import click
 import typer
 from rich.console import Console
 
@@ -92,13 +93,7 @@ def stop(  # pylint: disable=R0914
             _stop_run(stub=stub, run_id=run_id, output_format=output_format)
 
         except ValueError as err:
-            typer.secho(
-                f"❌ {err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-            raise typer.Exit(code=1) from err
+            raise click.ClickException(str(err)) from err
         finally:
             if channel:
                 channel.close()
@@ -146,6 +141,4 @@ def _stop_run(stub: ControlStub, run_id: int, output_format: str) -> None:
             restore_output()
             Console().print_json(run_output)
     else:
-        typer.secho(
-            f"❌ Run {run_id} couldn't be stopped.", fg=typer.colors.RED, err=True
-        )
+        raise click.ClickException(f"Run {run_id} couldn't be stopped.")

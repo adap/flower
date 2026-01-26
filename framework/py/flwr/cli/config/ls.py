@@ -19,6 +19,7 @@ import io
 import json
 from typing import Annotated
 
+import click
 import typer
 from rich.console import Console
 
@@ -77,26 +78,18 @@ def ls(
                         nl=False,
                     )
                 typer.echo()
-    except typer.Exit as err:
-        # log the error if json format requested
-        # else do nothing since it will be logged by typer
-        if suppress_output:
-            restore_output()
-            e_message = captured_output.getvalue()
-            print_json_error(e_message, err)
 
     except Exception as err:  # pylint: disable=broad-except
+        # log the error if json format requested
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
             print_json_error(e_message, err)
         else:
-            typer.secho(
-                f"❌ An unexpected error occurred while listing the SuperLink "
-                f"connections in the Flower configuration file ({config_path}): {err}",
-                fg=typer.colors.RED,
-                err=True,
-            )
+            raise click.ClickException(
+                f"An unexpected error occurred while listing the SuperLink "
+                f"connections in the Flower configuration file ({config_path}): {err}"
+            ) from err
 
     finally:
         if suppress_output:

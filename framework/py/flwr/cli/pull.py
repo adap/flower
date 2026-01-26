@@ -17,6 +17,7 @@
 
 from typing import Annotated
 
+import click
 import typer
 
 from flwr.cli.config_migration import migrate, warn_if_federation_config_overrides
@@ -73,14 +74,9 @@ def pull(  # pylint: disable=R0914
             )
 
         if not res.url:
-            typer.secho(
-                f"❌ A download URL for artifacts from run {run_id} couldn't be "
-                "obtained.",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
+            raise click.ClickException(
+                f"A download URL for artifacts from run {run_id} couldn't be obtained."
             )
-            raise typer.Exit(code=1)
 
         typer.secho(
             f"✅ Artifacts for run {run_id} can be downloaded from: {res.url}",

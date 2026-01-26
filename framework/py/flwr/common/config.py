@@ -22,6 +22,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import IO, Any, TypeVar, cast, get_args
 
+import click
 import tomli
 import typer
 
@@ -235,17 +236,13 @@ def parse_config_args(config: list[str] | None, flatten: bool = True) -> dict[st
                 overrides.update(tomli.loads(toml_str))
                 flat_overrides = flatten_dict(overrides) if flatten else overrides
             except tomli.TOMLDecodeError as err:
-                typer.secho(
-                    "❌ The provided configuration string is in an invalid format. "
+                raise click.ClickException(
+                    "The provided configuration string is in an invalid format. "
                     "The correct format should be, e.g., 'key1=123 key2=false "
                     'key3="string"\', where values must be of type bool, int, '
                     "string, or float. Ensure proper formatting with "
-                    "space-separated key-value pairs.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1) from err
+                    "space-separated key-value pairs."
+                ) from err
 
     return flat_overrides
 

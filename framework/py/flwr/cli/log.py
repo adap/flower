@@ -19,6 +19,7 @@ import time
 from logging import DEBUG, ERROR, INFO
 from typing import Annotated, cast
 
+import click
 import grpc
 import typer
 
@@ -196,8 +197,7 @@ def log(
     try:
         _log_with_control_api(superlink_connection, run_id, stream)
     except Exception as err:  # pylint: disable=broad-except
-        typer.secho(str(err), fg=typer.colors.RED, bold=True, err=True)
-        raise typer.Exit(code=1) from None
+        raise click.ClickException(str(err)) from None
 
 
 def _log_with_control_api(

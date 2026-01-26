@@ -19,6 +19,7 @@ from contextlib import ExitStack
 from pathlib import Path
 from typing import IO, Annotated
 
+import click
 import requests
 import typer
 from requests import Response
@@ -62,12 +63,7 @@ def publish(
     auth_plugin = load_cli_auth_plugin_from_connection(SUPERGRID_ADDRESS)
     auth_plugin.load_tokens()
     if not isinstance(auth_plugin, OidcCliPlugin) or not auth_plugin.access_token:
-        typer.secho(
-            "❌ Please log in before publishing app.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
+        raise click.ClickException("Please log in before publishing app.")
 
     # Load token from the plugin
     token = auth_plugin.access_token
@@ -82,19 +78,17 @@ def publish(
         try:
             resp = _post_files(files_param, token)
         except requests.RequestException as err:
-            typer.secho(f"❌ Network error: {err}", fg=typer.colors.RED, err=True)
-            raise typer.Exit(code=1) from err
+            raise click.ClickException(f"Network error: {err}") from err
 
     if resp.ok:
         typer.secho("🎊 Upload successful", fg=typer.colors.GREEN, bold=True)
         return  # success
 
     # Error path:
-    msg = f"❌ Upload failed with status {resp.status_code}"
+    msg = f"Upload failed with status {resp.status_code}"
     if resp.text:
         msg += f": {resp.text}"
-    typer.secho(msg, fg=typer.colors.RED, err=True)
-    raise typer.Exit(code=1)
+    raise click.ClickException(msg)
 
 
 def _depth_of(relative_path_to_root: Path) -> int:

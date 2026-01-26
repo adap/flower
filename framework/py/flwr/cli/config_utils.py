@@ -18,6 +18,7 @@
 from pathlib import Path
 from typing import Any
 
+import click
 import tomli
 import typer
 
@@ -144,15 +145,11 @@ def validate_federation_in_project_config(
     federation = federation or config["tool"]["flwr"]["federations"].get("default")
 
     if federation is None:
-        typer.secho(
-            "❌ No federation name was provided and the project's `pyproject.toml` "
+        raise click.ClickException(
+            "No federation name was provided and the project's `pyproject.toml` "
             "doesn't declare a default federation (with an Control API address or an "
-            "`options.num-supernodes` value).",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+            "`options.num-supernodes` value)."
         )
-        raise typer.Exit(code=1)
 
     # Validate the federation exists in the configuration
     federation_config = config["tool"]["flwr"]["federations"].get(federation)
@@ -160,15 +157,11 @@ def validate_federation_in_project_config(
         available_feds = {
             fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
         }
-        typer.secho(
-            f"❌ There is no `{federation}` federation declared in the "
+        raise click.ClickException(
+            f"There is no `{federation}` federation declared in the "
             "`pyproject.toml`.\n The following federations were found:\n\n"
-            + "\n".join(available_feds),
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+            + "\n".join(available_feds)
         )
-        raise typer.Exit(code=1)
 
     # Override the federation configuration if provided
     if overrides:
@@ -204,26 +197,18 @@ def load_certificate_in_connection(
     # Process root certificates
     if root_certificates := connection.root_certificates:
         if connection.insecure:
-            typer.secho(
-                "❌ `root-certificates` were provided but the `insecure` parameter "
-                "is set to `True`.",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
+            raise click.ClickException(
+                "`root-certificates` were provided but the `insecure` parameter "
+                "is set to `True`."
             )
-            raise typer.Exit(code=1)
 
         # TLS is enabled with self-signed certificates: attempt to read the file
         try:
             root_certificates_bytes = Path(root_certificates).read_bytes()
         except Exception as e:
-            typer.secho(
-                f"❌ Failed to read certificate file `{root_certificates}`: {e}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-            raise typer.Exit(code=1) from e
+            raise click.ClickException(
+                f"Failed to read certificate file `{root_certificates}`: {e}"
+            ) from e
     else:
         root_certificates_bytes = None
 
@@ -255,11 +240,7 @@ def get_insecure_flag(federation_config: dict[str, Any]) -> bool:
         return False
     if isinstance(insecure_value, bool):
         return insecure_value
-    typer.secho(
-        "❌ Invalid type for `insecure`: expected a boolean if provided. "
-        "(`insecure = true` or `insecure = false`)",
-        fg=typer.colors.RED,
-        bold=True,
-        err=True,
+    raise click.ClickException(
+        "Invalid type for `insecure`: expected a boolean if provided. "
+        "(`insecure = true` or `insecure = false`)"
     )
-    raise typer.Exit(code=1)
