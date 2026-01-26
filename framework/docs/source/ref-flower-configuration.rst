@@ -21,13 +21,13 @@ defaults to ``$HOME/.flwr``) and is designed to simplify the usage of `Flower CL
 
 **Why use it?**
 
-This configuration file allows you to define reusable connection profiles (for example,
-"local-simulation", "staging-server", "production-server") that you can reference by
-name when running ``flwr`` commands. Instead of typing the same connection details
-repeatedly, you define them once and reuse them. Additionally, commands like ``flwr
-log``, ``flwr ls``, and ``flwr stop`` can be run from anywhere on your system without
-needing to be inside a Flower app directory. Note: ``flwr run`` still requires being in
-an app directory since it needs to access your app code.
+This configuration file allows you to define reusable connection configurations (for
+example, "local-simulation", "staging-server", "production-server") that you can
+reference by name when running ``flwr`` commands. Instead of typing the same connection
+details repeatedly, you define them once and reuse them. Additionally, commands like
+``flwr log``, ``flwr ls``, and ``flwr stop`` can be run from anywhere on your system
+without needing to be inside a Flower app directory. Note: ``flwr run`` still requires
+being in an app directory since it needs to access your app code.
 
 .. tip::
 
@@ -48,9 +48,9 @@ an app directory since it needs to access your app code.
 **Understanding the terminology**
 
 The Flower Configuration file uses the term **"superlink"** to refer to connection
-profiles. Each connection profile describes how to connect to a Flower **SuperLink**
-(the central server component that coordinates federated learning). You can define
-multiple connection profiles for different scenarios:
+configurations. Each connection configuration describes how to connect to a Flower
+**SuperLink** (the central server component that coordinates federated learning). You
+can define multiple connection configurations for different scenarios:
 
 - ``superlink.local`` - for running local simulations on your machine
 - ``superlink.staging`` - for connecting to a staging server
@@ -75,23 +75,24 @@ The configuration structure is similar to the older ``federations`` section in
 
 **Explanation:**
 
-- ``[superlink]`` section defines which connection profile to use by default
-- ``default = "local"`` means the ``superlink.local`` profile will be used when you
-  don't specify a connection explicitly
-- ``[superlink.local]`` defines a local simulation profile with 10 virtual SuperNodes
-- ``[superlink.local-poc]`` defines a profile for connecting to a locally running
+- ``[superlink]`` section defines which connection configuration to use by default
+- ``default = "local"`` means the ``superlink.local`` configuration will be used when
+  you don't specify a connection explicitly
+- ``[superlink.local]`` defines a local simulation configuration with 10 virtual
+  SuperNodes
+- ``[superlink.local-poc]`` defines a configuration for connecting to a locally running
   SuperLink server at address ``127.0.0.1:9093``
 
-Connection profile names must be unique and use the ``superlink.`` prefix. The type of
-options you specify depends on whether you're configuring a simulation
+Connection configuration names must be unique and use the ``superlink.`` prefix. The
+type of options you specify depends on whether you're configuring a simulation
 (``options.num-supernodes``) or a deployment (``address``, ``insecure``).
 
 **************************
  Listing your connections
 **************************
 
-You can list all your connection profiles using the ``flwr config ls`` command. Assuming
-the default configuration file shown earlier, the expected output will be:
+You can list all your connection configurations using the ``flwr config ls`` command.
+Assuming the default configuration file shown earlier, the expected output will be:
 
 .. code-block:: shell
 
@@ -102,7 +103,7 @@ the default configuration file shown earlier, the expected output will be:
       local (default)
       local-poc
 
-This shows you have two connection profiles available, with ``local`` set as the
+This shows you have two connection configurations available, with ``local`` set as the
 default.
 
 **************************
@@ -120,7 +121,7 @@ development and testing before deploying to real distributed environments.
     [superlink.local]
     options.num-supernodes = 10
 
-This creates a simulation profile with 10 virtual SuperNodes.
+This creates a simulation connection configuration with 10 virtual SuperNodes.
 
 **Simulation with custom resources:**
 
@@ -131,9 +132,9 @@ This creates a simulation profile with 10 virtual SuperNodes.
     options.backend.client-resources.num-cpus = 1
     options.backend.client-resources.num-gpus = 0.1
 
-This creates a simulation with 100 virtual SuperNodes, where each is allocated 1 CPU and
-10% of a GPU. This is useful when you want to control resource distribution or simulate
-resource-constrained environments.
+This creates a simulation connection configuration with 100 virtual SuperNodes, where
+each is allocated 1 CPU and 10% of a GPU. This is useful when you want to control
+resource distribution or simulate resource-constrained environments.
 
 **When to use each:**
 
@@ -151,7 +152,7 @@ optional parameters you can use to configure your local simulation.
 ***************************
 
 When you're ready to deploy your federated learning app to real distributed nodes, you
-configure connection profiles that point to remote SuperLink servers.
+configure connections that point to a remote SuperLink.
 
 **Example configuration:**
 
@@ -205,5 +206,5 @@ file the first time you run a ``flwr`` command.
 **After migration:**
 
 You can safely delete the commented-out ``federations`` section from your
-``pyproject.toml`` file. All connection profiles now live in the central configuration
-file and work across all your Flower projects.
+``pyproject.toml`` file. All connection configurations now live in the central
+configuration file and work across all your Flower projects.
