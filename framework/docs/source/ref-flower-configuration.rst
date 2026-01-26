@@ -77,7 +77,7 @@ The configuration structure is similar to the older ``federations`` section in
 
 - ``[superlink]`` section defines which connection configuration to use by default
 - ``default = "local"`` means the ``superlink.local`` configuration will be used when
-  you don't specify a connection explicitly
+  you don't specify a connection explicitly in your ``flwr`` commands
 - ``[superlink.local]`` defines a local simulation configuration with 10 virtual
   SuperNodes
 - ``[superlink.local-poc]`` defines a configuration for connecting to a locally running
