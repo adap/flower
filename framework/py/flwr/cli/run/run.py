@@ -144,18 +144,13 @@ def run(
                 simulation_options=superlink_connection.options,  # type: ignore
                 config_overrides=run_config_overrides,
             )
-    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
+    except Exception as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
             print_json_error(e_message, err)
         else:
-            typer.secho(
-                f"{err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
+            raise click.ClickException(str(err)) from None
     finally:
         if suppress_output:
             restore_output()

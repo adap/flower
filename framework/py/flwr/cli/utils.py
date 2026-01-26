@@ -332,7 +332,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
         if e.code() == grpc.StatusCode.UNAVAILABLE:
             raise click.ClickException(
                 "Connection to the SuperLink is unavailable. Please check your network "
-                "connection and 'address' in the federation configuration."
+                "connection and 'address' in the SuperLink connection configuration."
             ) from None
         if e.code() == grpc.StatusCode.NOT_FOUND:
             if e.details() == RUN_ID_NOT_FOUND_MESSAGE:  # pylint: disable=E1101

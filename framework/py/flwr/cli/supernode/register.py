@@ -102,12 +102,7 @@ def register(  # pylint: disable=R0914
             e_message = captured_output.getvalue()
             print_json_error(e_message, err)
         else:
-            typer.secho(
-                f"{err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
+            raise click.ClickException(str(err)) from None
     finally:
         if suppress_output:
             restore_output()

@@ -19,6 +19,7 @@ import io
 import json
 from typing import Annotated
 
+import click
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -135,18 +136,13 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         finally:
             if channel:
                 channel.close()
-    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
+    except Exception as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
             print_json_error(e_message, err)
         else:
-            typer.secho(
-                f"{err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
+            raise click.ClickException(str(err)) from None
     finally:
         if suppress_output:
             restore_output()

@@ -97,18 +97,13 @@ def stop(  # pylint: disable=R0914
         finally:
             if channel:
                 channel.close()
-    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
+    except Exception as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
             print_json_error(e_message, err)
         else:
-            typer.secho(
-                f"{err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
+            raise click.ClickException(str(err)) from None
     finally:
         if suppress_output:
             restore_output()
