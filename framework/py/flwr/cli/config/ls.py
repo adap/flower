@@ -79,7 +79,6 @@ def ls(
                         nl=False,
                     )
                 typer.echo()
-            typer.echo()
     except typer.Exit as err:
         # log the error if json format requested
         # else do nothing since it will be logged by typer
