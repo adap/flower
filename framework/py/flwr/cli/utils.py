@@ -17,6 +17,7 @@
 
 import hashlib
 import json
+import re
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -31,6 +32,8 @@ from flwr.cli.typing import SuperLinkConnection
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
+    FEDERATION_NOT_FOUND_MESSAGE,
+    FEDERATION_NOT_SPECIFIED_MESSAGE,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
@@ -405,6 +408,25 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                 typer.secho(
                     "❌ The provided public key is invalid. Please provide a valid "
                     "NIST EC public key.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                    err=True,
+                )
+                raise typer.Exit(code=1) from None
+            if e.details() == FEDERATION_NOT_SPECIFIED_MESSAGE:  # pylint: disable=E1101
+                typer.secho(
+                    "❌ No federation specified. "
+                    "Please specify a federation and try again.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                    err=True,
+                )
+                raise typer.Exit(code=1) from None
+            patten = re.compile(FEDERATION_NOT_FOUND_MESSAGE.replace("%s", "(.+)"))
+            if m := patten.match(e.details()):  # pylint: disable=E1101
+                typer.secho(
+                    f"❌ Federation '{m.group(1)}' does not exist. "
+                    "Please verify the federation name and try again.",
                     fg=typer.colors.RED,
                     bold=True,
                     err=True,
