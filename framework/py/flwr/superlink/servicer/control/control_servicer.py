@@ -29,6 +29,8 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
 from flwr.common.constant import (
     FAB_MAX_SIZE,
+    FEDERATION_NOT_FOUND_MESSAGE,
+    FEDERATION_NOT_SPECIFIED_MESSAGE,
     HEARTBEAT_DEFAULT_INTERVAL,
     LOG_STREAM_INTERVAL,
     NO_ACCOUNT_AUTH_MESSAGE,
@@ -80,7 +82,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from flwr.supercore.constant import PLATFORM_API_URL
+from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
@@ -149,10 +151,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 )
 
             # Check (1) federation exists and (2) the flwr_aid is a member
-            federation = request.federation
-
+            federation = request.federation or NOOP_FEDERATION
             if not state.federation_manager.exists(federation):
-                raise ValueError(f"Federation '{federation}' does not exist.")
+                if request.federation:
+                    raise ValueError(FEDERATION_NOT_FOUND_MESSAGE % federation)
+                raise ValueError(FEDERATION_NOT_SPECIFIED_MESSAGE)
 
             if not state.federation_manager.has_member(flwr_aid, federation):
                 raise ValueError(
@@ -170,7 +173,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             fab_hash = ffs.put(fab.content, fab.verifications)
 
             if fab_hash != fab.hash_str:
-                raise RuntimeError(
+                raise ValueError(
                     f"FAB ({fab.hash_str}) hash from request doesn't match contents"
                 )
             fab_id, fab_version = get_fab_metadata(fab.content)
@@ -180,7 +183,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 fab_version,
                 fab_hash,
                 override_config,
-                request.federation,
+                federation,
                 federation_options,
                 flwr_aid,
             )
@@ -206,13 +209,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Register the context at the LinkState
             state.set_serverapp_context(run_id=run_id, context=context)
 
-        # pylint: disable-next=broad-except
-        except Exception as e:
+        except ValueError as e:
             log(ERROR, "Could not start run: %s", str(e))
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                str(e),
-            )
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         log(INFO, "Created run %s", str(run_id))
         return StartRunResponse(run_id=run_id)
