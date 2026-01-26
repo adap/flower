@@ -20,7 +20,6 @@ from typing import Any
 
 import click
 import tomli
-import typer
 
 from flwr.cli.typing import SuperLinkConnection
 from flwr.common.config import (
@@ -138,7 +137,7 @@ def validate_federation_in_project_config(
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         If no federation name provided and no default found, or if federation
         doesn't exist in config.
     """
@@ -191,7 +190,7 @@ def load_certificate_in_connection(
     ------
     ValueError
         If required TLS settings are missing.
-    typer.Exit
+    click.ClickException
         If the configuration is invalid or the certificate file cannot be read.
     """
     # Process root certificates
@@ -230,7 +229,7 @@ def get_insecure_flag(federation_config: dict[str, Any]) -> bool:
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         If insecure value is not a boolean type.
     """
     insecure_value = federation_config.get("insecure")

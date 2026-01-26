@@ -252,7 +252,7 @@ def read_superlink_connection(
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         Raised if the configuration file is corrupted, or if the requested
         connection (or default) cannot be found.
     """
@@ -315,7 +315,7 @@ def write_superlink_connection(connection: SuperLinkConnection) -> None:
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         Raised if the configuration file cannot be read or written.
     """
     toml_dict, _ = read_flower_config()
@@ -368,7 +368,7 @@ def read_flower_config() -> tuple[dict[str, Any], Path]:
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         Raised if the configuration file is corrupted.
     """
     init_flwr_config()

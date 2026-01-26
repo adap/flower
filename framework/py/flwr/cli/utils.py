@@ -213,7 +213,7 @@ def load_cli_auth_plugin_from_connection(
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         If the authentication type is unknown.
     """
     # Determine the auth type if not provided
@@ -227,7 +227,9 @@ def load_cli_auth_plugin_from_connection(
         auth_plugin_class = get_cli_plugin_class(authn_type)
         return auth_plugin_class(host)
     except ValueError:
-        raise click.ClickException(f"Unknown account authentication type: {authn_type}")
+        raise click.ClickException(
+            f"Unknown account authentication type: {authn_type}"
+        ) from None
 
 
 def require_superlink_address(connection: SuperLinkConnection) -> str:
@@ -296,7 +298,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         On handled gRPC error statuses with appropriate exit code.
     grpc.RpcError
         For unhandled gRPC error statuses.
@@ -308,56 +310,57 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
             raise click.ClickException(
                 "Authentication failed. Please run `flwr login`"
                 " to authenticate and try again."
-            )
+            ) from None
         if e.code() == grpc.StatusCode.UNIMPLEMENTED:
             if e.details() == NO_ACCOUNT_AUTH_MESSAGE:  # pylint: disable=E1101
                 raise click.ClickException(
                     "Account authentication is not enabled on this SuperLink."
-                )
-            elif e.details() == NO_ARTIFACT_PROVIDER_MESSAGE:  # pylint: disable=E1101
+                ) from None
+            if e.details() == NO_ARTIFACT_PROVIDER_MESSAGE:  # pylint: disable=E1101
                 raise click.ClickException(
                     "The SuperLink does not support `flwr pull` command."
-                )
-            else:
-                raise click.ClickException(
-                    "The SuperLink cannot process this request. Please verify that "
-                    "you set the address to its Control API endpoint correctly in your "
-                    "`pyproject.toml`, and ensure that the Flower versions used by "
-                    "the CLI and SuperLink are compatible."
-                )
+                ) from None
+            raise click.ClickException(
+                "The SuperLink cannot process this request. Please verify that "
+                "you set the address to its Control API endpoint correctly in your "
+                "`pyproject.toml`, and ensure that the Flower versions used by "
+                "the CLI and SuperLink are compatible."
+            ) from None
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
             # pylint: disable-next=E1101
-            raise click.ClickException(f"Permission denied.\n{e.details()}")
+            raise click.ClickException(f"Permission denied.\n{e.details()}") from None
         if e.code() == grpc.StatusCode.UNAVAILABLE:
             raise click.ClickException(
                 "Connection to the SuperLink is unavailable. Please check your network "
                 "connection and 'address' in the federation configuration."
-            )
+            ) from None
         if e.code() == grpc.StatusCode.NOT_FOUND:
             if e.details() == RUN_ID_NOT_FOUND_MESSAGE:  # pylint: disable=E1101
-                raise click.ClickException("Run ID not found.")
+                raise click.ClickException("Run ID not found.") from None
             if e.details() == NODE_NOT_FOUND_MESSAGE:  # pylint: disable=E1101
-                raise click.ClickException("Node ID not found for this account.")
+                raise click.ClickException(
+                    "Node ID not found for this account."
+                ) from None
         if e.code() == grpc.StatusCode.FAILED_PRECONDITION:
             if e.details() == PULL_UNFINISHED_RUN_MESSAGE:  # pylint: disable=E1101
                 raise click.ClickException(
                     "Run is not finished yet. Artifacts can only be pulled after "
                     "the run is finished. You can check the run status with `flwr ls`."
-                )
+                ) from None
             if (
                 e.details() == PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
             ):  # pylint: disable=E1101
                 raise click.ClickException(
                     "The provided public key is already in use by another SuperNode."
-                )
+                ) from None
             if e.details() == PUBLIC_KEY_NOT_VALID:  # pylint: disable=E1101
                 raise click.ClickException(
                     "The provided public key is invalid. Please provide a valid "
                     "NIST EC public key."
-                )
+                ) from None
 
             # Log details from grpc error directly
-            raise click.ClickException(f"{e.details()}")
+            raise click.ClickException(f"{e.details()}") from None
         raise
 
 

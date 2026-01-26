@@ -24,7 +24,6 @@ from typing import IO, Any, TypeVar, cast, get_args
 
 import click
 import tomli
-import typer
 
 from flwr.app.user_config import UserConfig, UserConfigValue
 from flwr.common.constant import (

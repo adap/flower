@@ -22,8 +22,8 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import Mock, patch
 
+import click
 import tomli
-import typer
 from parameterized import parameterized
 
 from flwr.cli.constant import (
@@ -447,7 +447,7 @@ class TestSuperLinkConnection(unittest.TestCase):
                 f.write(toml_content)
 
             # Execute & Assert
-            with self.assertRaises(typer.Exit):
+            with self.assertRaises(click.ClickException):
                 read_superlink_connection("missing-service")
 
     @patch("flwr.cli.flower_config.get_flwr_home")
@@ -474,7 +474,7 @@ class TestSuperLinkConnection(unittest.TestCase):
                 f.write(toml_content)
 
             # Execute & Assert
-            with self.assertRaises(typer.Exit):
+            with self.assertRaises(click.ClickException):
                 read_superlink_connection()
 
     @patch("flwr.cli.flower_config.get_flwr_home")
@@ -501,7 +501,7 @@ class TestSuperLinkConnection(unittest.TestCase):
                 f.write(toml_content)
 
             # Execute & Assert
-            with self.assertRaises(typer.Exit):
+            with self.assertRaises(click.ClickException):
                 read_superlink_connection()
 
     @patch("flwr.cli.flower_config.get_flwr_home")
@@ -517,7 +517,7 @@ class TestSuperLinkConnection(unittest.TestCase):
             with open(config_path, "w", encoding="utf-8") as f:
                 f.write("invalid = toml [ [")
 
-            with self.assertRaises(typer.Exit):
+            with self.assertRaises(click.ClickException):
                 read_superlink_connection()
 
     @patch("flwr.cli.flower_config.get_flwr_home")

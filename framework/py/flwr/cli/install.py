@@ -98,7 +98,7 @@ def install_from_fab(
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         If FAB format is invalid or hash verification fails.
     """
     fab_file_archive: Path | IO[bytes]
@@ -168,7 +168,7 @@ def validate_and_install(
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         If configuration is invalid or metadata doesn't match.
     """
     config, _, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
@@ -256,7 +256,7 @@ def _validate_fab_and_config_metadata(
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         If filename format is incorrect or hash doesn't match.
     """
     publisher, project_name, version, fab_hash = config_metadata
