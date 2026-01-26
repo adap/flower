@@ -17,14 +17,14 @@ The Flower Configuration is a TOML file that lives in the ``FLWR_HOME`` director
 defaults to ``$HOME/.flwr``) and is designed to simplify the usage of `Flower CLI
 <ref-api-cli.html>`_ commands.
 
-The Flower Configuration enables the system-wide usage of most Flower CLI commands
+The Flower Configuration enables the system-wide useage of most Flower CLI commands
 without the need of an app (all but ``flwr run``). This is particular useful when
 running Flower CLI commands from scripts or when running Flower CLI commands from
 different directories.
 
 .. tip::
 
-    If a Flower Configuration file isn't found in your system, it will be automatically
+    If a Flower Configuration files isn't found in your system, it will be automatically
     created for you the first time you run a Flower CLI command. If you are upgrading
     from a previous version of Flower, the ``federations`` section in your
     ``pyproject.toml`` file will be automatically migrated to the Flower Configuration
@@ -72,8 +72,8 @@ arguments will use the ``superlink.local`` connection.
  Listing your connections
 **************************
 
-You can list all your connections using the ``flwr config ls`` command. Assuming
-the default configuration file shown earlier, the expected output will be:
+You can list all your connections using the ``flwr config ls`` command. Which assuming
+the default configuration file will shown earlier, the expected output will be:
 
 .. code-block:: shell
 
@@ -101,8 +101,7 @@ common use cases:
     options.backend.client-resources.num-cpus = 1
     options.backend.client-resources.num-gpus = 0.1
 
-
-The example above defines two local simulation connections. ``superlink.local`` is a
+The example above define two local simulation connections. ``superlink.local`` is a
 local simulation with 10 virtual SuperNodes using ``options.num-supernodes = 10``.
 ``superlink.local-custom-resources`` is a local simulation with 100 virtual SuperNodes
 using ``options.num-supernodes = 100`` and each ``SuperNode`` is allocated 1 CPU and 10%
@@ -141,3 +140,12 @@ for TLS setup and advanced configurations.
 ********************************************
  Upgrading from previous versions of Flower
 ********************************************
+
+If you are upgrading from a previous version of Flower, the ``federations`` section in
+your ``pyproject.toml`` file will be automatically migrated to the Flower Configuration
+file. The syntax remains the same with the exception of the name of the section and the
+``superlink`` keyword instead of ``tool.flwr.federations``.
+
+During the migration process, the ``pyproject.toml`` file will be modified in place and
+the ``federations`` section will be commented out for your reference. Once migrated, it
+is safe to remove the ``federations`` section from the ``pyproject.toml`` file entirely.
