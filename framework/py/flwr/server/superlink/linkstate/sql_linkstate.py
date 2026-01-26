@@ -165,6 +165,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
         return message.metadata.message_id
 
+    # pylint: disable-next=too-many-locals
     def _check_stored_messages(self, message_ids: set[str]) -> None:
         """Check and delete the message if it's invalid."""
         if not message_ids:
@@ -174,11 +175,41 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             invalid_msg_ids: set[str] = set()
             current_time = now().timestamp()
 
+            # Batch fetch all messages in one query
+            placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
+            query = f"""
+                SELECT * FROM message_ins
+                WHERE message_id IN ({placeholders})
+            """
+            params = {f"mid_{i}": str(mid) for i, mid in enumerate(message_ids)}
+            message_rows = self.query(query, params)
+
+            if not message_rows:
+                return
+
+            # Build message lookup dict
+            message_dict: dict[str, dict[str, Any]] = {
+                row["message_id"]: row for row in message_rows
+            }
+
+            # Collect unique run_ids for batch federation lookup
+            run_ids = {row["run_id"] for row in message_rows}
+            placeholders = ",".join([f":rid_{i}" for i in range(len(run_ids))])
+            query = f"""
+                SELECT run_id, federation FROM run
+                WHERE run_id IN ({placeholders})
+            """
+            params = {f"rid_{i}": rid for i, rid in enumerate(run_ids)}
+            run_rows = self.query(query, params)
+
+            # Build run_id to federation mapping
+            run_to_federation: dict[int, str] = {
+                row["run_id"]: row["federation"] for row in run_rows
+            }
+
+            # Check each message for validity
             for msg_id in message_ids:
-                # Check if message exists
-                query = "SELECT * FROM message_ins WHERE message_id = :message_id"
-                message_rows = self.query(query, {"message_id": msg_id})
-                message_row = message_rows[0] if message_rows else None
+                message_row = message_dict.get(msg_id)
                 if not message_row:
                     continue
 
@@ -188,15 +219,12 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                     invalid_msg_ids.add(msg_id)
                     continue
 
-                # Check if src_node_id and dst_node_id are in the federation
-                # Get federation from run table
+                # Check if run exists and get federation
                 run_id = message_row["run_id"]
-                query = "SELECT federation FROM run WHERE run_id = :run_id"
-                run_row = self.query(query, {"run_id": run_id})[0]
-                if not run_row:  # This should not happen
+                federation = run_to_federation.get(run_id)
+                if not federation:
                     invalid_msg_ids.add(msg_id)
                     continue
-                federation = run_row["federation"]
 
                 # Convert sint64 to uint64 for node IDs
                 src_node_id = int64_to_uint64(message_row["src_node_id"])
