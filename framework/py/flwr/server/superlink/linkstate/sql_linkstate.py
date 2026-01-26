@@ -172,9 +172,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             return
 
         with self.session():
-            invalid_msg_ids: set[str] = set()
-            current_time = now().timestamp()
-
             # Batch fetch all messages in one query
             placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
             query = f"""
@@ -203,9 +200,12 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             run_rows = self.query(query, params)
 
             # Build run_id to federation mapping
-            run_to_federation: dict[int, str] = {
+            run_id_to_federation: dict[int, str] = {
                 row["run_id"]: row["federation"] for row in run_rows
             }
+
+            invalid_msg_ids: set[str] = set()
+            current_time = now().timestamp()
 
             # Check each message for validity
             for msg_id in message_ids:
@@ -221,7 +221,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
                 # Check if run exists and get federation
                 run_id = message_row["run_id"]
-                federation = run_to_federation.get(run_id)
+                federation = run_id_to_federation.get(run_id)
                 if not federation:
                     invalid_msg_ids.add(msg_id)
                     continue
