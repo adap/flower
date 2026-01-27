@@ -30,7 +30,7 @@ from flwr.common import (
 )
 from flwr.server import Grid
 
-from flwr.serverapp.strategy import FedAvg
+from flwr.serverapp.strategy import FedAvg, Result
 from flwr.serverapp.strategy.strategy_utils import (
     aggregate_arrayrecords,
     aggregate_metricrecords,
