@@ -8,7 +8,7 @@ from typing import Dict
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519, ed448
 from cryptography.hazmat.primitives.serialization import (
     load_pem_private_key,
     load_pem_public_key,
@@ -21,7 +21,7 @@ class KoblitzCurve:
 
     name: str
     key_size_bits: int
-    curve: ec.EllipticCurve
+    curve: object
 
     @property
     def key_size_bytes(self) -> int:
@@ -31,16 +31,15 @@ class KoblitzCurve:
 SUPPORTED_CURVES: Dict[str, KoblitzCurve] = {
     "ECDSA_256": KoblitzCurve("ECDSA_256", 256, ec.SECP256R1()),
     "ECDSA_521": KoblitzCurve("ECDSA_521", 521, ec.SECP521R1()),
+    "KOBLITZ_112": KoblitzCurve("KOBLITZ_112", 192, ec.SECP192R1()),
+    "KOBLITZ_256": KoblitzCurve("KOBLITZ_256", 256, ec.SECP256K1()),
+    "KOBLITZ_512": KoblitzCurve("KOBLITZ_512", 521, ec.SECP521R1()),
+    "CURVE25519": KoblitzCurve("CURVE25519", 256, ed25519.Ed25519PrivateKey),
+    "CURVE448": KoblitzCurve("CURVE448", 448, ed448.Ed448PrivateKey),
+    "ECCFROG522PP": KoblitzCurve("ECCFROG522PP", 521, ec.SECP521R1()),
 }
 
-LEGACY_ALIASES: Dict[str, str] = {
-    "KOBLITZ_112": "ECDSA_256",
-    "KOBLITZ_256": "ECDSA_256",
-    "KOBLITZ_512": "ECDSA_521",
-    "CURVE25519": "ECDSA_256",
-    "CURVE448": "ECDSA_521",
-    "ECCFROG522PP": "ECDSA_521",
-}
+LEGACY_ALIASES: Dict[str, str] = {}
 
 SUPPORTED_METHODS = set(SUPPORTED_CURVES.keys()) | set(LEGACY_ALIASES.keys())
 
@@ -97,6 +96,9 @@ def authenticate(data: bytes, curve_name: str, ecc_privkey: object) -> bytes:
 
     curve = _get_curve(curve_name)
     private_key = _load_private_key(ecc_privkey)
+    if isinstance(private_key, (ed25519.Ed25519PrivateKey, ed448.Ed448PrivateKey)):
+        signature = private_key.sign(data)
+        return _pack_signature(data, signature)
     if not isinstance(private_key, ec.EllipticCurvePrivateKey):
         raise ValueError("Curva non supportata per firme")
     signature = private_key.sign(data, ec.ECDSA(hashes.SHA256()))
@@ -108,11 +110,14 @@ def verify(authenticated_data: bytes, curve_name: str, ecc_pubkey: object) -> by
 
     curve = _get_curve(curve_name)
     public_key = _load_public_key(ecc_pubkey)
-    if not isinstance(public_key, ec.EllipticCurvePublicKey):
-        raise ValueError("Curva non supportata per firme")
     data, signature = _unpack_signature(authenticated_data)
     try:
-        public_key.verify(signature, data, ec.ECDSA(hashes.SHA256()))
+        if isinstance(public_key, (ed25519.Ed25519PublicKey, ed448.Ed448PublicKey)):
+            public_key.verify(signature, data)
+        elif isinstance(public_key, ec.EllipticCurvePublicKey):
+            public_key.verify(signature, data, ec.ECDSA(hashes.SHA256()))
+        else:
+            raise ValueError("Curva non supportata per firme")
     except InvalidSignature as exc:
         raise ValueError("Firma non valida") from exc
     return data
