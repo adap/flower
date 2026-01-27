@@ -109,11 +109,12 @@ def main() -> None:
     superlink_proc = run_superlink()
 
     # Allow time for SuperLink to start
-    time.sleep(1)
+    time.sleep(3)
 
     # Start the SuperExec
     print("Starting SuperExec...")
     superexec_proc = run_superexec()
+    time.sleep(1)
 
     # Submit the first run
     print("Starting the first run...")
