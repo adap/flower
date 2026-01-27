@@ -26,3 +26,10 @@ python -m mdformat --number docs/source
 
 # RST
 docstrfmt docs/source
+
+# LinkState SQLAlchemy schema
+paracelsus inject py/flwr/supercore/state/schema/README.md dev.get_schema_base:Base \
+  --import-module "flwr.supercore.state.schema.linkstate_tables:*" \
+  --import-module "flwr.supercore.state.schema.corestate_tables:*" \
+  --import-module "flwr.supercore.state.schema.objectstore_tables:*" \
+  --layout elk
