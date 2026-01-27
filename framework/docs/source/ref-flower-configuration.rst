@@ -1,6 +1,6 @@
-:og:description: Learn how to setup the Flower Configuration file and how to use it to run your Flower app and interact with SuperLinks.
+:og:description: Learn how to setup the Flower Configuration file and how to use it to run your Flower App and interact with SuperLinks.
 .. meta::
-    :description: Learn how to setup the Flower Configuration file and how to use it to run your Flower app and interact with SuperLinks.
+    :description: Learn how to setup the Flower Configuration file and how to use it to run your Flower App and interact with SuperLinks.
 
 ###########################
  Flower Configuration File
@@ -10,14 +10,14 @@
 
     The Flower Configuration file is a new feature introduced in Flower 1.26.0. While
     its functionality will evolve over time, as a start it serves as a direct
-    replacement of the `federations` section in the `pyproject.toml` file of Flower
-    Apps.
+    replacement of the `federations` section in the `pyproject.toml` file of Flower Apps
+    in older versions.
 
 **What is it?**
 
-The Flower Configuration is a TOML file that lives in the ``FLWR_HOME`` directory (which
-defaults to ``$HOME/.flwr``) and is designed to simplify the usage of `Flower CLI
-<ref-api-cli.html>`_ commands.
+The Flower Configuration is a TOML file that lives in the directory specified by the
+``FLWR_HOME`` environment variable (which defaults to ``$HOME/.flwr`` when unset) and is
+designed to simplify the usage of `Flower CLI <ref-api-cli.html>`_ commands.
 
 **Why use it?**
 
@@ -28,7 +28,7 @@ easily switch between them.
 
 Most ``flwr`` commands (like ``flwr log``, ``flwr ls``, and ``flwr stop``) can use this
 configuration file from anywhere on your system. The exception is ``flwr run``, which
-must be executed from within a Flower app directory to access the app code.
+must be executed from within a Flower App directory to access the app code.
 
 .. tip::
 
@@ -55,7 +55,8 @@ You can define multiple SuperLink connection configurations for different scenar
 such as local simulations or remote deployments.
 
 The configuration structure is similar to the older ``federations`` section in
-``pyproject.toml``, but now lives in a central location and uses clearer naming.
+``pyproject.toml`` before Flower 1.26.0, but now lives in a central location and uses
+clearer naming.
 
 **Basic example**
 
@@ -71,7 +72,7 @@ The configuration structure is similar to the older ``federations`` section in
     address = "127.0.0.1:9093"
     insecure = true
 
-**Explanation:**
+**Explanation**
 
 - ``[superlink]`` section defines which connection configuration to use by default
 - ``default = "local"`` means the ``superlink.local`` configuration will be used when
@@ -89,12 +90,12 @@ type of options you specify depends on whether you're configuring a simulation
  Listing your connections
 **************************
 
-You can list all your connection configurations using the ``flwr config ls`` command.
+You can list all your connection configurations using the ``flwr config list`` command.
 Assuming the default configuration file shown earlier, the expected output will be:
 
 .. code-block:: console
 
-    $ flwr config ls
+    $ flwr config list
 
     Flower Config file: /path/to/your/.flwr/config.toml
     SuperLink connections:
@@ -108,11 +109,11 @@ default.
  Local Simulation Example
 **************************
 
-Local simulations allow you to test your federated learning app on your own machine
-using virtual SuperNodes instead of real distributed nodes. This is useful for
-development and testing before deploying to real distributed environments.
+Local simulations allow you to test your Flower App on your own machine using virtual
+SuperNodes instead of real distributed SuperNodes. This is useful for development and
+testing before deploying to real distributed environments.
 
-**Basic simulation configuration:**
+**Basic simulation configuration**
 
 .. code-block:: toml
 
@@ -121,7 +122,7 @@ development and testing before deploying to real distributed environments.
 
 This creates a simulation connection configuration with 10 virtual SuperNodes.
 
-**Simulation with custom resources:**
+**Simulation with custom resources**
 
 .. code-block:: toml
 
@@ -134,7 +135,7 @@ This creates a simulation connection configuration with 100 virtual SuperNodes, 
 each is allocated 1 CPU and 10% of a GPU. This is useful when you want to control
 resource distribution or simulate resource-constrained environments.
 
-**When to use each:**
+**When to use each**
 
 - Use the basic configuration for quick testing with default resource allocation
 - Use custom resources when you need to simulate specific hardware constraints or want
@@ -152,7 +153,7 @@ optional parameters you can use to configure your local simulation.
 When you're ready to deploy your federated learning app to real distributed nodes, you
 configure connections that point to a remote SuperLink.
 
-**Example configuration:**
+**Example configuration**
 
 .. code-block:: toml
 
@@ -161,17 +162,19 @@ configure connections that point to a remote SuperLink.
     root-certificate = "path/to/root/cert.pem"  # Optional, for TLS
     # insecure = true  # Disable TLS (not recommended for production)
 
-.. dropdown:: Understanding each field
+**Explanation**
 
-    .. note::
+- ``address`` (required): The address of the SuperLink Control API to connect to (e.g.,
+  ``my-server.example.com:9093``).
+- ``root-certificate``: Path to the root certificate file for TLS encryption. This
+  secures the communication between your CLI and the SuperLink. If omitted, Flower uses
+  the default gRPC root certificate. This field is ignored if ``insecure`` is set to
+  ``true``.
+- ``insecure``: Set to ``true`` to disable TLS encryption (only use this for local
+  testing, never in production). Defaults to ``false`` if omitted, meaning TLS is
+  enabled by default.
 
-        \* Required fields
-
-    - ``address``\*: The address of the SuperLink Control API to connect to (e.g., ``my-server.example.com:9093``).
-    - ``root-certificate``: Path to the root certificate file for TLS encryption. This secures the communication between your CLI and the SuperLink. If omitted, Flower uses the default gRPC root certificate. This field is ignored if ``insecure`` is set to ``true``.
-    - ``insecure``: Set to ``true`` to disable TLS encryption (only use this for local testing, never in production). Defaults to ``false`` if omitted, meaning TLS is enabled by default.
-
-**TLS (Transport Layer Security) explained:**
+**TLS (Transport Layer Security) explained**
 
 TLS encrypts the communication between your local machine and the remote SuperLink to
 prevent eavesdropping and tampering. In production, you should always use TLS by either:
@@ -194,14 +197,14 @@ For users upgrading from versions before 1.26.0: The ``federations`` section in 
 ``pyproject.toml`` file will be automatically migrated to the new Flower Configuration
 file the first time you run a ``flwr`` command.
 
-**What happens during migration:**
+**What happens during migration**
 
 1. A new config file is created at ``$HOME/.flwr/config.toml``
 2. Your federation definitions are copied and renamed (``federations`` → ``superlink``)
 3. The old ``[tool.flwr.federations]`` section in ``pyproject.toml`` is commented out
    for your reference
 
-**After migration:**
+**After migration**
 
 You can safely delete the commented-out ``federations`` section from your
 ``pyproject.toml`` file. All connection configurations now live in the central
