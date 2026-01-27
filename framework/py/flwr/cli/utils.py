@@ -243,7 +243,7 @@ def require_superlink_address(connection: SuperLinkConnection) -> str:
             f"`flwr {cmd}` currently works with a SuperLink. Ensure that the "
             "correct SuperLink (Control API) address is provided SuperLink connection "
             "you are using. Check your Flower configuration file. You may use `flwr "
-            "config ls` to see it's location in the file system."
+            "config ls` to see its location in the file system."
         )
     return connection.address
 
@@ -329,7 +329,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                 "The SuperLink cannot process this request. Please verify that "
                 "you set the address to its Control API endpoint correctly in your "
                 "SuperLink connection in your Flower Configuration file. You may use "
-                "`flwr config ls` to see it's location in the file system. "
+                "`flwr config ls` to see its location in the file system. "
                 "Additonally, ensure that the Flower versions used by the CLI and "
                 "SuperLink are compatible."
             ) from None
