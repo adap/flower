@@ -304,8 +304,8 @@ see how this looks like in code. Create a new file called ``custom_strategy.py``
             """Configure the next round of federated training and maybe do LR decay."""
             # Decrease learning rate by a factor of 0.5 every 5 rounds
             if server_round % 5 == 0 and server_round > 0:
-                config["learning-rate"] *= 0.5
-                print("LR decreased to:", config["learning-rate"])
+                config["lr"] *= 0.5
+                print("LR decreased to:", config["lr"])
             # Pass the updated config and the rest of arguments to the parent class
             return super().configure_train(server_round, arrays, config, grid)
 

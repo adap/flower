@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower SQLite ObjectStore implementation."""
+"""Flower SQLAlchemy-based ObjectStore implementation."""
 
 
-from typing import cast
+from sqlalchemy import MetaData
 
 from flwr.common.inflatable import (
     get_object_id,
@@ -24,52 +24,23 @@ from flwr.common.inflatable import (
 )
 from flwr.common.inflatable_utils import validate_object_content
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
-from flwr.supercore.sqlite_mixin import SqliteMixin
+from flwr.supercore.sql_mixin import SqlMixin
+from flwr.supercore.state.schema.objectstore_tables import create_objectstore_metadata
 from flwr.supercore.utils import uint64_to_int64
 
 from .object_store import NoObjectInStoreError, ObjectStore
 
-SQL_CREATE_OBJECTS = """
-CREATE TABLE IF NOT EXISTS objects (
-    object_id               TEXT PRIMARY KEY,
-    content                 BLOB,
-    is_available            INTEGER NOT NULL CHECK (is_available IN (0,1)),
-    ref_count               INTEGER NOT NULL
-);
-"""
-SQL_CREATE_OBJECT_CHILDREN = """
-CREATE TABLE IF NOT EXISTS object_children (
-    parent_id               TEXT NOT NULL,
-    child_id                TEXT NOT NULL,
-    FOREIGN KEY (parent_id) REFERENCES objects(object_id) ON DELETE CASCADE,
-    FOREIGN KEY (child_id)  REFERENCES objects(object_id) ON DELETE CASCADE,
-    PRIMARY KEY (parent_id, child_id)
-);
-"""
-SQL_CREATE_RUN_OBJECTS = """
-CREATE TABLE IF NOT EXISTS run_objects (
-    run_id                  INTEGER NOT NULL,
-    object_id               TEXT NOT NULL,
-    FOREIGN KEY (object_id) REFERENCES objects(object_id) ON DELETE CASCADE,
-    PRIMARY KEY (run_id, object_id)
-);
-"""
 
-
-class SqliteObjectStore(ObjectStore, SqliteMixin):
-    """SQLite-based implementation of the ObjectStore interface."""
+class SqlObjectStore(ObjectStore, SqlMixin):
+    """SQLAlchemy-based implementation of the ObjectStore interface."""
 
     def __init__(self, database_path: str, verify: bool = True) -> None:
         super().__init__(database_path)
         self.verify = verify
 
-    def get_sql_statements(self) -> tuple[str, ...]:
-        """Return SQL statements for ObjectStore tables."""
-        return (
-            SQL_CREATE_OBJECTS,
-            SQL_CREATE_OBJECT_CHILDREN,
-            SQL_CREATE_RUN_OBJECTS,
-        )
+    def get_metadata(self) -> MetaData:
+        """Return SQLAlchemy MetaData for ObjectStore tables."""
+        return create_objectstore_metadata()
 
     def preregister(self, run_id: int, object_tree: ObjectTree) -> list[str]:
         """Identify and preregister missing objects in the `ObjectStore`."""
@@ -80,56 +51,64 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
                 raise ValueError(f"Invalid object ID format: {obj_id}")
 
             child_ids = [child.object_id for child in tree_node.children]
-            with self.conn:
-                row = self.conn.execute(
-                    "SELECT object_id, is_available FROM objects WHERE object_id=?",
-                    (obj_id,),
-                ).fetchone()
-                if row is None:
+            with self.session():
+                rows = self.query(
+                    "SELECT object_id, is_available FROM objects "
+                    "WHERE object_id = :object_id",
+                    {"object_id": obj_id},
+                )
+                if not rows:
                     # Insert new object
-                    self.conn.execute(
-                        "INSERT INTO objects"
+                    self.query(
+                        "INSERT INTO objects "
                         "(object_id, content, is_available, ref_count) "
-                        "VALUES (?, ?, ?, ?)",
-                        (obj_id, b"", 0, 0),
+                        "VALUES (:object_id, :content, :is_available, :ref_count)",
+                        {
+                            "object_id": obj_id,
+                            "content": b"",
+                            "is_available": 0,
+                            "ref_count": 0,
+                        },
                     )
                     for cid in child_ids:
-                        self.conn.execute(
-                            "INSERT INTO object_children(parent_id, child_id) "
-                            "VALUES (?, ?)",
-                            (obj_id, cid),
+                        self.query(
+                            "INSERT INTO object_children (parent_id, child_id) "
+                            "VALUES (:parent_id, :child_id)",
+                            {"parent_id": obj_id, "child_id": cid},
                         )
-                        self.conn.execute(
+                        self.query(
                             "UPDATE objects SET ref_count = ref_count + 1 "
-                            "WHERE object_id = ?",
-                            (cid,),
+                            "WHERE object_id = :object_id",
+                            {"object_id": cid},
                         )
                     new_objects.append(obj_id)
                 else:
                     # Add to the list of new objects if not available
-                    if not row["is_available"]:
+                    if not rows[0]["is_available"]:
                         new_objects.append(obj_id)
 
                 # Ensure run mapping
-                self.conn.execute(
-                    "INSERT OR IGNORE INTO run_objects(run_id, object_id) "
-                    "VALUES (?, ?)",
-                    (uint64_to_int64(run_id), obj_id),
+                self.query(
+                    "INSERT INTO run_objects (run_id, object_id) "
+                    "VALUES (:run_id, :object_id) ON CONFLICT DO NOTHING",
+                    {"run_id": uint64_to_int64(run_id), "object_id": obj_id},
                 )
         return new_objects
 
     def get_object_tree(self, object_id: str) -> ObjectTree:
         """Get the object tree for a given object ID."""
-        with self.conn:
-            row = self.conn.execute(
-                "SELECT object_id FROM objects WHERE object_id=?", (object_id,)
-            ).fetchone()
-            if not row:
+        with self.session():
+            rows = self.query(
+                "SELECT object_id FROM objects WHERE object_id = :object_id",
+                {"object_id": object_id},
+            )
+            if not rows:
                 raise NoObjectInStoreError(
                     f"Object {object_id} was not pre-registered."
                 )
             children = self.query(
-                "SELECT child_id FROM object_children WHERE parent_id=?", (object_id,)
+                "SELECT child_id FROM object_children WHERE parent_id = :parent_id",
+                {"parent_id": object_id},
             )
 
             # Build the object trees of all children
@@ -157,61 +136,71 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
             # Validate object content
             validate_object_content(content=object_content)
 
-        with self.conn:
+        with self.session():
             # Only allow adding the object if it has been preregistered
-            row = self.conn.execute(
-                "SELECT is_available FROM objects WHERE object_id=?", (object_id,)
-            ).fetchone()
-            if row is None:
+            rows = self.query(
+                "SELECT is_available FROM objects WHERE object_id = :object_id",
+                {"object_id": object_id},
+            )
+            if not rows:
                 raise NoObjectInStoreError(
                     f"Object with ID '{object_id}' was not pre-registered."
                 )
 
             # Return if object is already present in the store
-            if row["is_available"]:
+            if rows[0]["is_available"]:
                 return
 
             # Update the object entry in the store
-            self.conn.execute(
-                "UPDATE objects SET content=?, is_available=1 WHERE object_id=?",
-                (object_content, object_id),
+            self.query(
+                "UPDATE objects SET content = :content, is_available = 1 "
+                "WHERE object_id = :object_id",
+                {"content": object_content, "object_id": object_id},
             )
 
     def get(self, object_id: str) -> bytes | None:
         """Get an object from the store."""
-        rows = self.query("SELECT content FROM objects WHERE object_id=?", (object_id,))
+        rows = self.query(
+            "SELECT content FROM objects WHERE object_id = :oid", {"oid": object_id}
+        )
         return rows[0]["content"] if rows else None
 
     def delete(self, object_id: str) -> None:
         """Delete an object and its unreferenced descendants from the store."""
-        with self.conn:
-            row = self.conn.execute(
-                "SELECT ref_count FROM objects WHERE object_id=?", (object_id,)
-            ).fetchone()
+        with self.session():
+            rows = self.query(
+                "SELECT ref_count FROM objects WHERE object_id = :object_id",
+                {"object_id": object_id},
+            )
 
             # If the object is not in the store, nothing to delete
-            if row is None:
+            if not rows:
                 return
 
             # Skip deletion if there are still references
-            if row["ref_count"] > 0:
+            if rows[0]["ref_count"] > 0:
                 return
 
             # Deleting will cascade via FK, but we need to decrement children first
-            children = self.conn.execute(
-                "SELECT child_id FROM object_children WHERE parent_id=?", (object_id,)
-            ).fetchall()
+            children = self.query(
+                "SELECT child_id FROM object_children WHERE parent_id = :parent_id",
+                {"parent_id": object_id},
+            )
             child_ids = [child["child_id"] for child in children]
 
             if child_ids:
-                placeholders = ", ".join("?" for _ in child_ids)
-                query = f"""
-                    UPDATE objects SET ref_count = ref_count - 1
-                    WHERE object_id IN ({placeholders})
-                """
-                self.conn.execute(query, child_ids)
+                placeholders = ", ".join(f":cid{i}" for i in range(len(child_ids)))
+                params = {f"cid{i}": cid for i, cid in enumerate(child_ids)}
+                self.query(
+                    "UPDATE objects SET ref_count = ref_count - 1 "
+                    f"WHERE object_id IN ({placeholders})",
+                    params,
+                )
 
-            self.conn.execute("DELETE FROM objects WHERE object_id=?", (object_id,))
+            self.query(
+                "DELETE FROM objects WHERE object_id = :object_id",
+                {"object_id": object_id},
+            )
 
             # Recursively clean children
             for child_id in child_ids:
@@ -220,34 +209,39 @@ class SqliteObjectStore(ObjectStore, SqliteMixin):
     def delete_objects_in_run(self, run_id: int) -> None:
         """Delete all objects that were registered in a specific run."""
         run_id_sint = uint64_to_int64(run_id)
-        with self.conn:
-            objs = self.conn.execute(
-                "SELECT object_id FROM run_objects WHERE run_id=?", (run_id_sint,)
-            ).fetchall()
+        with self.session():
+            objs = self.query(
+                "SELECT object_id FROM run_objects WHERE run_id = :run_id",
+                {"run_id": run_id_sint},
+            )
             for obj in objs:
                 object_id = obj["object_id"]
-                row = self.conn.execute(
-                    "SELECT ref_count FROM objects WHERE object_id=?", (object_id,)
-                ).fetchone()
-                if row and row["ref_count"] == 0:
+                rows = self.query(
+                    "SELECT ref_count FROM objects WHERE object_id=:object_id",
+                    {"object_id": object_id},
+                )
+                if rows and rows[0]["ref_count"] == 0:
                     self.delete(object_id)
-            self.conn.execute("DELETE FROM run_objects WHERE run_id=?", (run_id_sint,))
+            self.query(
+                "DELETE FROM run_objects WHERE run_id = :run_id",
+                {"run_id": run_id_sint},
+            )
 
     def clear(self) -> None:
         """Clear the store."""
-        with self.conn:
-            self.conn.execute("DELETE FROM object_children;")
-            self.conn.execute("DELETE FROM run_objects;")
-            self.conn.execute("DELETE FROM objects;")
+        with self.session():
+            self.query("DELETE FROM object_children")
+            self.query("DELETE FROM run_objects")
+            self.query("DELETE FROM objects")
 
     def __contains__(self, object_id: str) -> bool:
         """Check if an object_id is in the store."""
-        row = self.conn.execute(
-            "SELECT 1 FROM objects WHERE object_id=?", (object_id,)
-        ).fetchone()
-        return row is not None
+        rows = self.query(
+            "SELECT 1 FROM objects WHERE object_id = :oid", {"oid": object_id}
+        )
+        return len(rows) > 0
 
     def __len__(self) -> int:
         """Return the number of objects in the store."""
-        row = self.conn.execute("SELECT COUNT(*) AS cnt FROM objects;").fetchone()
-        return cast(int, row["cnt"])
+        rows = self.query("SELECT COUNT(*) AS cnt FROM objects")
+        return int(rows[0]["cnt"])

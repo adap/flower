@@ -21,17 +21,19 @@ import re
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 
+import click
 import grpc
 import pathspec
 import typer
 
+from flwr.cli.typing import SuperLinkConnection
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
-    CREDENTIALS_DIR,
-    FLWR_DIR,
+    FEDERATION_NOT_FOUND_MESSAGE,
+    FEDERATION_NOT_SPECIFIED_MESSAGE,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
@@ -47,10 +49,12 @@ from flwr.common.grpc import (
     create_channel,
     on_channel_state_change,
 )
+from flwr.supercore.credential_store import get_credential_store
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
-from .config_utils import validate_certificate_in_federation_config
+from .config_utils import load_certificate_in_connection
+from .constant import AUTHN_TYPE_STORE_KEY
 
 
 def prompt_text(
@@ -155,46 +159,6 @@ def is_valid_project_name(name: str) -> bool:
     return True
 
 
-def sanitize_project_name(name: str) -> str:
-    """Sanitize the given string to make it a valid Python project name.
-
-    This function replaces spaces, dots, slashes, and underscores with dashes, removes
-    any characters not allowed in Python project names, makes the string lowercase, and
-    ensures it starts with a valid character.
-
-    Parameters
-    ----------
-    name : str
-        The project name to sanitize.
-
-    Returns
-    -------
-    str
-        The sanitized project name that is valid for Python projects.
-    """
-    # Replace whitespace with '_'
-    name_with_hyphens = re.sub(r"[ ./_]", "-", name)
-
-    # Allowed characters in a module name: letters, digits, underscore
-    allowed_chars = set(
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-"
-    )
-
-    # Make the string lowercase
-    sanitized_name = name_with_hyphens.lower()
-
-    # Remove any characters not allowed in Python module names
-    sanitized_name = "".join(c for c in sanitized_name if c in allowed_chars)
-
-    # Ensure the first character is a letter or underscore
-    while sanitized_name and (
-        sanitized_name[0].isdigit() or sanitized_name[0] not in allowed_chars
-    ):
-        sanitized_name = sanitized_name[1:]
-
-    return sanitized_name
-
-
 def get_sha256_hash(file_path_or_int: Path | int) -> str:
     """Calculate the SHA-256 hash of a file or integer.
 
@@ -221,121 +185,27 @@ def get_sha256_hash(file_path_or_int: Path | int) -> str:
     return sha256.hexdigest()
 
 
-def get_account_auth_config_path(root_dir: Path, federation: str) -> Path:
-    """Return the path to the account auth config file.
+def get_authn_type(host: str) -> str:
+    """Retrieve the authentication type for the given host from the credential store.
 
-    Additionally, a `.gitignore` file will be created in the Flower directory to
-    include the `.credentials` folder to be excluded from git. If the `.gitignore`
-    file already exists, a warning will be displayed if the `.credentials` entry is
-    not found.
+    `AuthnType.NOOP` is returned if no authentication type is found.
     """
-    # Locate the credentials directory
-    abs_flwr_dir = root_dir.absolute() / FLWR_DIR
-    credentials_dir = abs_flwr_dir / CREDENTIALS_DIR
-    credentials_dir.mkdir(parents=True, exist_ok=True)
-
-    # Determine the absolute path of the Flower directory for .gitignore
-    gitignore_path = abs_flwr_dir / ".gitignore"
-    credential_entry = CREDENTIALS_DIR
-
-    try:
-        if gitignore_path.exists():
-            with open(gitignore_path, encoding="utf-8") as gitignore_file:
-                lines = gitignore_file.read().splitlines()
-
-            # Warn if .credentials is not already in .gitignore
-            if credential_entry not in lines:
-                typer.secho(
-                    f"`.gitignore` exists, but `{credential_entry}` entry not found. "
-                    "Consider adding it to your `.gitignore` to exclude Flower "
-                    "credentials from git.",
-                    fg=typer.colors.YELLOW,
-                    bold=True,
-                )
-        else:
-            typer.secho(
-                f"Creating a new `.gitignore` with `{credential_entry}` entry...",
-                fg=typer.colors.BLUE,
-            )
-            # Create a new .gitignore with .credentials
-            with open(gitignore_path, "w", encoding="utf-8") as gitignore_file:
-                gitignore_file.write(f"{credential_entry}\n")
-    except Exception as err:
-        typer.secho(
-            "❌ An error occurred while handling `.gitignore.` "
-            f"Please check the permissions of `{gitignore_path}` and try again.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
-        )
-        raise typer.Exit(code=1) from err
-
-    return credentials_dir / f"{federation}.json"
-
-
-def account_auth_enabled(federation_config: dict[str, Any]) -> bool:
-    """Check if account authentication is enabled in the federation config.
-
-    Parameters
-    ----------
-    federation_config : dict[str, Any]
-        The federation configuration dictionary.
-
-    Returns
-    -------
-    bool
-        True if account authentication is enabled, False otherwise.
-    """
-    enabled: bool = federation_config.get("enable-user-auth", False)
-    enabled |= federation_config.get("enable-account-auth", False)
-    if "enable-user-auth" in federation_config:
-        typer.secho(
-            "`enable-user-auth` is deprecated and will be removed in a future "
-            "release. Please use `enable-account-auth` instead.",
-            fg=typer.colors.YELLOW,
-            bold=True,
-        )
-    return enabled
-
-
-def retrieve_authn_type(config_path: Path) -> str:
-    """Retrieve the auth type from the config file or return NOOP if not found.
-
-    Parameters
-    ----------
-    config_path : Path
-        Path to the authentication configuration file.
-
-    Returns
-    -------
-    str
-        The authentication type string, or AuthnType.NOOP if not found.
-    """
-    try:
-        with config_path.open("r", encoding="utf-8") as file:
-            json_file = json.load(file)
-        authn_type: str = json_file[AUTHN_TYPE_JSON_KEY]
-        return authn_type
-    except (FileNotFoundError, KeyError):
+    store = get_credential_store()
+    authn_type = store.get(AUTHN_TYPE_STORE_KEY % host)
+    if authn_type is None:
         return AuthnType.NOOP
+    return authn_type.decode("utf-8")
 
 
-def load_cli_auth_plugin(
-    root_dir: Path,
-    federation: str,
-    federation_config: dict[str, Any],
-    authn_type: str | None = None,
+def load_cli_auth_plugin_from_connection(
+    host: str, authn_type: str | None = None
 ) -> CliAuthPlugin:
-    """Load the CLI-side account auth plugin for the given authn type.
+    """Load the CLI-side account auth plugin for the given connection.
 
     Parameters
     ----------
-    root_dir : Path
-        Root directory of the Flower project.
-    federation : str
-        Name of the federation.
-    federation_config : dict[str, Any]
-        Federation configuration dictionary.
+    host : str
+        The SuperLink Control API address.
     authn_type : str | None
         Authentication type. If None, will be determined from config.
 
@@ -346,41 +216,48 @@ def load_cli_auth_plugin(
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         If the authentication type is unknown.
     """
-    # Find the path to the account auth config file
-    config_path = get_account_auth_config_path(root_dir, federation)
-
     # Determine the auth type if not provided
     # Only `flwr login` command can provide `authn_type` explicitly, as it can query the
     # SuperLink for the auth type.
     if authn_type is None:
-        authn_type = AuthnType.NOOP
-        if account_auth_enabled(federation_config):
-            authn_type = retrieve_authn_type(config_path)
+        authn_type = get_authn_type(host)
 
     # Retrieve auth plugin class and instantiate it
     try:
         auth_plugin_class = get_cli_plugin_class(authn_type)
-        return auth_plugin_class(config_path)
+        return auth_plugin_class(host)
     except ValueError:
-        typer.echo(f"❌ Unknown account authentication type: {authn_type}")
-        raise typer.Exit(code=1) from None
+        raise click.ClickException(
+            f"Unknown account authentication type: {authn_type}"
+        ) from None
 
 
-def init_channel(
-    app: Path, federation_config: dict[str, Any], auth_plugin: CliAuthPlugin
+def require_superlink_address(connection: SuperLinkConnection) -> str:
+    """Return the SuperLink address or exit if it is not configured."""
+    if connection.address is None:
+        cmd = click.get_current_context().command.name
+        raise click.ClickException(
+            f"`flwr {cmd}` currently works with a SuperLink. Ensure that the "
+            "correct SuperLink (Control API) address is provided SuperLink connection "
+            "you are using. Check your Flower configuration file. You may use `flwr "
+            "config list` to see its location in the file system."
+        )
+    return connection.address
+
+
+def init_channel_from_connection(
+    connection: SuperLinkConnection, auth_plugin: CliAuthPlugin | None = None
 ) -> grpc.Channel:
     """Initialize gRPC channel to the Control API.
 
     Parameters
     ----------
-    app : Path
-        Path to the Flower app directory.
-    federation_config : dict[str, Any]
-        Federation configuration dictionary containing address and TLS settings.
-    auth_plugin : CliAuthPlugin
+    connection : SuperLinkConnection
+        SuperLink connection configuration.
+    auth_plugin : CliAuthPlugin | None (default: None)
         Authentication plugin instance for handling credentials.
 
     Returns
@@ -388,17 +265,20 @@ def init_channel(
     grpc.Channel
         Configured gRPC channel with authentication interceptors.
     """
-    insecure, root_certificates_bytes = validate_certificate_in_federation_config(
-        app, federation_config
-    )
+    address = require_superlink_address(connection)
 
+    root_certificates_bytes = load_certificate_in_connection(connection)
+
+    # Load authentication plugin
+    if auth_plugin is None:
+        auth_plugin = load_cli_auth_plugin_from_connection(address)
     # Load tokens
     auth_plugin.load_tokens()
 
     # Create the gRPC channel
     channel = create_channel(
-        server_address=federation_config["address"],
-        insecure=insecure,
+        server_address=address,
+        insecure=connection.insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         interceptors=[CliAccountAuthInterceptor(auth_plugin)],
@@ -423,7 +303,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         On handled gRPC error statuses with appropriate exit code.
     grpc.RpcError
         For unhandled gRPC error statuses.
@@ -432,115 +312,73 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
         yield
     except grpc.RpcError as e:
         if e.code() == grpc.StatusCode.UNAUTHENTICATED:
-            typer.secho(
-                "❌ Authentication failed. Please run `flwr login`"
-                " to authenticate and try again.",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-            raise typer.Exit(code=1) from None
+            raise click.ClickException(
+                "Authentication failed. Please run `flwr login`"
+                " to authenticate and try again."
+            ) from None
         if e.code() == grpc.StatusCode.UNIMPLEMENTED:
             if e.details() == NO_ACCOUNT_AUTH_MESSAGE:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ Account authentication is not enabled on this SuperLink.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-            elif e.details() == NO_ARTIFACT_PROVIDER_MESSAGE:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ The SuperLink does not support `flwr pull` command.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-            else:
-                typer.secho(
-                    "❌ The SuperLink cannot process this request. Please verify that "
-                    "you set the address to its Control API endpoint correctly in your "
-                    "`pyproject.toml`, and ensure that the Flower versions used by "
-                    "the CLI and SuperLink are compatible.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-            raise typer.Exit(code=1) from None
+                raise click.ClickException(
+                    "Account authentication is not enabled on this SuperLink."
+                ) from None
+            if e.details() == NO_ARTIFACT_PROVIDER_MESSAGE:  # pylint: disable=E1101
+                raise click.ClickException(
+                    "The SuperLink does not support `flwr pull` command."
+                ) from None
+            raise click.ClickException(
+                "The SuperLink cannot process this request. Please verify that "
+                "you set the address to its Control API endpoint correctly in your "
+                "SuperLink connection in your Flower Configuration file. You may use "
+                "`flwr config list` to see its location in the file system. "
+                "Additonally, ensure that the Flower versions used by the CLI and "
+                "SuperLink are compatible."
+            ) from None
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
-            typer.secho(
-                "❌ Permission denied.",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
             # pylint: disable-next=E1101
-            typer.secho(e.details(), fg=typer.colors.RED, bold=True)
-            raise typer.Exit(code=1) from None
+            raise click.ClickException(f"Permission denied.\n{e.details()}") from None
         if e.code() == grpc.StatusCode.UNAVAILABLE:
-            typer.secho(
+            raise click.ClickException(
                 "Connection to the SuperLink is unavailable. Please check your network "
-                "connection and 'address' in the federation configuration.",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-            raise typer.Exit(code=1) from None
+                "connection and 'address' in the SuperLink connection configuration."
+            ) from None
         if e.code() == grpc.StatusCode.NOT_FOUND:
             if e.details() == RUN_ID_NOT_FOUND_MESSAGE:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ Run ID not found.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1) from None
+                raise click.ClickException("Run ID not found.") from None
             if e.details() == NODE_NOT_FOUND_MESSAGE:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ Node ID not found for this account.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1) from None
+                raise click.ClickException(
+                    "Node ID not found for this account."
+                ) from None
         if e.code() == grpc.StatusCode.FAILED_PRECONDITION:
             if e.details() == PULL_UNFINISHED_RUN_MESSAGE:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ Run is not finished yet. Artifacts can only be pulled after "
-                    "the run is finished. You can check the run status with `flwr ls`.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1) from None
+                raise click.ClickException(
+                    "Run is not finished yet. Artifacts can only be pulled after "
+                    "the run is finished. You can check the run status with `flwr ls`."
+                ) from None
             if (
                 e.details() == PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
             ):  # pylint: disable=E1101
-                typer.secho(
-                    "❌ The provided public key is already in use by another "
-                    "SuperNode.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1) from None
+                raise click.ClickException(
+                    "The provided public key is already in use by another SuperNode."
+                ) from None
             if e.details() == PUBLIC_KEY_NOT_VALID:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ The provided public key is invalid. Please provide a valid "
-                    "NIST EC public key.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1) from None
+                raise click.ClickException(
+                    "The provided public key is invalid. Please provide a valid "
+                    "NIST EC public key."
+                ) from None
+            if e.details() == FEDERATION_NOT_SPECIFIED_MESSAGE:  # pylint: disable=E1101
+                raise click.ClickException(
+                    "No federation specified. "
+                    "Please specify a federation and try again.",
+                ) from None
+            patten = re.compile(FEDERATION_NOT_FOUND_MESSAGE.replace("%s", "(.+)"))
+            if m := patten.match(e.details()):  # pylint: disable=E1101
+                raise click.ClickException(
+                    f"Federation '{m.group(1)}' does not exist. "
+                    "Please verify the federation name and try again."
+                ) from None
 
             # Log details from grpc error directly
-            typer.secho(
-                f"❌ {e.details()}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-            raise typer.Exit(code=1) from None
+            raise click.ClickException(f"{e.details()}") from None
         raise
 
 
@@ -600,23 +438,17 @@ def validate_credentials_content(creds_path: Path) -> str:
     try:
         creds: dict[str, str] = json.loads(creds_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as err:
-        typer.secho(
-            f"Invalid credentials file at '{creds_path}': {err}",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from err
+        raise click.ClickException(
+            f"Invalid credentials file at '{creds_path}': {err}"
+        ) from err
 
     required_keys = [AUTHN_TYPE_JSON_KEY, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]
     missing = [key for key in required_keys if key not in creds]
 
     if missing:
-        typer.secho(
+        raise click.ClickException(
             f"Credentials file '{creds_path}' is missing "
-            f"required key(s): {', '.join(missing)}. Please log in again.",
-            fg=typer.colors.RED,
-            err=True,
+            f"required key(s): {', '.join(missing)}. Please log in again."
         )
-        raise typer.Exit(code=1)
 
     return creds[ACCESS_TOKEN_KEY]

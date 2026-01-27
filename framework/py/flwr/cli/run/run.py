@@ -22,19 +22,20 @@ import subprocess
 from pathlib import Path
 from typing import Annotated, Any, cast
 
+import click
 import typer
 from rich.console import Console
 
 from flwr.cli.build import build_fab_from_disk, get_fab_filename
+from flwr.cli.config_migration import migrate, warn_if_federation_config_overrides
 from flwr.cli.config_utils import load as load_toml
-from flwr.cli.config_utils import (
-    load_and_validate,
-    process_loaded_project_config,
-    validate_federation_in_project_config,
-)
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE, RUN_CONFIG_HELP_MESSAGE
+from flwr.cli.flower_config import (
+    _serialize_simulation_options,
+    read_superlink_connection,
+)
+from flwr.cli.typing import SuperLinkConnection, SuperLinkSimulationOptions
 from flwr.common.config import (
-    flatten_dict,
     get_metadata_from_config,
     parse_config_args,
     user_config_to_configrecord,
@@ -45,11 +46,10 @@ from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_
 from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.supercore.constant import NOOP_FEDERATION
 from flwr.supercore.utils import parse_app_spec
 
 from ..log import start_stream
-from ..utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
+from ..utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -60,9 +60,9 @@ def run(
         Path,
         typer.Argument(help="Path of the Flower App to run."),
     ] = Path("."),
-    federation: Annotated[
+    superlink: Annotated[
         str | None,
-        typer.Argument(help="Name of the federation to run the app on."),
+        typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
     run_config_overrides: Annotated[
         list[str] | None,
@@ -77,6 +77,7 @@ def run(
         typer.Option(
             "--federation-config",
             help=FEDERATION_CONFIG_HELP_MESSAGE,
+            hidden=True,
         ),
     ] = None,
     stream: Annotated[
@@ -99,9 +100,20 @@ def run(
     """Run Flower App."""
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
+
+    if suppress_output:
+        redirect_output(captured_output)
+
+    # Warn `--federation-config` is ignored
+    warn_if_federation_config_overrides(federation_config_overrides)
+
+    # Migrate legacy usage if any
+    migrate(str(app), [], ignore_legacy_usage=True)
+
+    # Read superlink connection configuration
+    superlink_connection = read_superlink_connection(superlink)
+
     try:
-        if suppress_output:
-            redirect_output(captured_output)
 
         # Determine if app is remote
         app_spec = None
@@ -110,33 +122,16 @@ def run(
             try:
                 _ = parse_app_spec(app_str)
             except ValueError as e:
-                typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
-                raise typer.Exit(code=1) from e
+                raise click.ClickException(str(e)) from e
 
             app_spec = app_str
             # Set `app` to current directory for credential storage
             app = Path(".")
-        is_remote_app = app_spec is not None
 
-        typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
-
-        # Disable the validation for remote apps
-        pyproject_path = app / "pyproject.toml" if not is_remote_app else None
-        # `./pyproject.toml` will be loaded when `pyproject_path` is None
-        config, errors, warnings = load_and_validate(
-            pyproject_path, check_module=not is_remote_app
-        )
-        config = process_loaded_project_config(config, errors, warnings)
-
-        federation, federation_config = validate_federation_in_project_config(
-            federation, config, federation_config_overrides
-        )
-
-        if "address" in federation_config:
+        if superlink_connection.address:
             _run_with_control_api(
                 app,
-                federation,
-                federation_config,
+                superlink_connection,
                 run_config_overrides,
                 stream,
                 output_format,
@@ -144,20 +139,17 @@ def run(
             )
         else:
             _run_without_control_api(
-                app, federation_config, run_config_overrides, federation
+                app=app,
+                simulation_options=superlink_connection.options,  # type: ignore
+                config_overrides=run_config_overrides,
             )
-    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
+    except Exception as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
             print_json_error(e_message, err)
         else:
-            typer.secho(
-                f"{err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
+            raise click.ClickException(str(err)) from None
     finally:
         if suppress_output:
             restore_output()
@@ -167,8 +159,7 @@ def run(
 # pylint: disable-next=R0913, R0914, R0917
 def _run_with_control_api(
     app: Path,
-    federation: str,
-    federation_config: dict[str, Any],
+    superlink_connection: SuperLinkConnection,
     config_overrides: list[str] | None,
     stream: bool,
     output_format: str,
@@ -177,8 +168,7 @@ def _run_with_control_api(
     channel = None
     is_remote_app = app_spec is not None
     try:
-        auth_plugin = load_cli_auth_plugin(app, federation, federation_config)
-        channel = init_channel(app, federation_config, auth_plugin)
+        channel = init_channel_from_connection(superlink_connection)
         stub = ControlStub(channel)
 
         # Build FAB if local app
@@ -194,16 +184,17 @@ def _run_with_control_api(
             fab_id = fab_version = fab_hash = ""
             fab = Fab(fab_hash, b"", {})
 
-        real_federation: str = federation_config.get("federation", NOOP_FEDERATION)
-
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
-        fed_config = flatten_dict(federation_config.get("options", {}))
-        c_record = user_config_to_configrecord(fed_config)
+        options = {}
+        if superlink_connection.options:
+            options = _serialize_simulation_options(superlink_connection.options)
+
+        c_record = user_config_to_configrecord(options)
 
         req = StartRunRequest(
             fab=fab_to_proto(fab),
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
-            federation=real_federation,
+            federation=superlink_connection.federation or "",
             federation_options=config_record_to_proto(c_record),
             app_spec=app_spec or "",
         )
@@ -215,8 +206,7 @@ def _run_with_control_api(
                 f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN
             )
         else:
-            typer.secho("❌ Failed to start run", fg=typer.colors.RED, err=True)
-            raise typer.Exit(code=1)
+            raise click.ClickException("Failed to start run")
 
         if output_format == CliOutputFormat.JSON:
             # Only include FAB metadata if we actually built a local FAB
@@ -246,26 +236,12 @@ def _run_with_control_api(
 
 def _run_without_control_api(
     app: Path | None,
-    federation_config: dict[str, Any],
+    simulation_options: SuperLinkSimulationOptions,
     config_overrides: list[str] | None,
-    federation: str,
 ) -> None:
-    try:
-        num_supernodes = federation_config["options"]["num-supernodes"]
-        verbose: bool | None = federation_config["options"].get("verbose")
-        backend_cfg = federation_config["options"].get("backend", {})
-    except KeyError as err:
-        typer.secho(
-            "❌ The project's `pyproject.toml` needs to declare the number of"
-            " SuperNodes in the simulation. To simulate 10 SuperNodes,"
-            " use the following notation:\n\n"
-            f"[tool.flwr.federations.{federation}]\n"
-            "options.num-supernodes = 10\n",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
-        )
-        raise typer.Exit(code=1) from err
+
+    num_supernodes = simulation_options.num_supernodes
+    verbose = False  # bool | None = superlink_connection.options.verbose
 
     command = [
         "flower-simulation",
@@ -275,9 +251,10 @@ def _run_without_control_api(
         f"{num_supernodes}",
     ]
 
-    if backend_cfg:
+    if simulation_options.backend:
         # Stringify as JSON
-        command.extend(["--backend-config", json.dumps(backend_cfg)])
+        backend_serial = _serialize_simulation_options(simulation_options)
+        command.extend(["--backend-config", json.dumps(backend_serial)])
 
     if verbose:
         command.extend(["--verbose"])

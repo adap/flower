@@ -14,6 +14,7 @@
 # ==============================================================================
 """Constants for CLI commands."""
 
+from flwr.supercore.constant import SUPERGRID_ADDRESS
 
 # General help message for config overrides
 CONFIG_HELP_MESSAGE = (
@@ -96,11 +97,11 @@ class SimulationBackendConfigTomlKey:
 FLOWER_CONFIG_FILE = "config.toml"
 
 # The default configuration for the Flower config file
-DEFAULT_FLOWER_CONFIG_TOML = """[superlink]
+DEFAULT_FLOWER_CONFIG_TOML = f"""[superlink]
 default = "local"
 
 [superlink.supergrid]
-address = "supergrid.flower.ai"
+address = "{SUPERGRID_ADDRESS}"
 enable-account-auth = true
 federation = "YOUR-FEDERATION-HERE"
 
@@ -109,3 +110,8 @@ options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 1
 options.backend.client-resources.num-gpus = 0
 """
+
+# Keys for storing account auth credentials in the credential store
+AUTHN_TYPE_STORE_KEY = "flower.account-auth.%s.authn-type"
+ACCESS_TOKEN_STORE_KEY = "flower.account-auth.%s.oidc-access-token"
+REFRESH_TOKEN_STORE_KEY = "flower.account-auth.%s.oidc-refresh-token"

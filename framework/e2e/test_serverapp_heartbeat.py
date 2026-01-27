@@ -6,9 +6,6 @@ import subprocess
 import sys
 import time
 
-import tomli
-import tomli_w
-
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
@@ -24,27 +21,6 @@ address_arg = (
     else SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 )
 app_cmd = "flwr-simulation" if use_sim else "flwr-serverapp"
-
-
-def add_e2e_federation() -> None:
-    """Add e2e federation to pyproject.toml."""
-    # Load the pyproject.toml file
-    with open("pyproject.toml", "rb") as f:
-        pyproject = tomli.load(f)
-
-    # Remove e2e federation if exists
-    pyproject["tool"]["flwr"]["federations"].pop("e2e", None)
-
-    # Add e2e federation
-    pyproject["tool"]["flwr"]["federations"]["e2e"] = {
-        "address": "127.0.0.1:9093",
-        "insecure": True,
-        "options": {"num-supernodes": 0},
-    }
-
-    # Write the updated pyproject.toml file
-    with open("pyproject.toml", "wb") as f:
-        tomli_w.dump(pyproject, f)
 
 
 def run_superlink() -> subprocess.Popen:
@@ -94,7 +70,7 @@ def flwr_ls() -> dict[str, str]:
     """
     # Run the command
     result = subprocess.run(
-        ["flwr", "ls", ".", "e2e", "--format", "json"],
+        ["flwr", "ls", "e2e", "--format", "json"],
         capture_output=True,
         text=True,
         check=True,
@@ -122,14 +98,11 @@ def get_pids(command: str) -> list[int]:
 
 def main() -> None:
     """."""
-    # Show version and initialize Flower config
-    subprocess.run(["flwr", "--version"], check=True)
+    # Trigger migration to Flower configuration
+    subprocess.run(["flwr", "ls"], check=False)
 
     # Determine if the test is running in simulation mode
     print(f"Running in {'simulation' if use_sim else 'deployment'} mode.")
-
-    # Add e2e federation to pyproject.toml
-    add_e2e_federation()
 
     # Start the SuperLink
     print("Starting SuperLink...")
