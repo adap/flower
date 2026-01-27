@@ -362,7 +362,7 @@ def _create_object_hierarchy() -> tuple[list[CustomDataClass], dict[str, bytes]]
     return objects, id_to_content
 
 
-class InMemoryStateTest(ObjectStoreTest):
+class InMemoryObjectStoreTest(ObjectStoreTest):
     """Test InMemoryObjectStore implementation."""
 
     __test__ = True

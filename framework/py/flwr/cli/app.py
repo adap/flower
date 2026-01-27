@@ -27,7 +27,6 @@ from .app_cmd import review as app_review
 from .build import build
 from .config import ls as config_list
 from .federation import ls as federation_list
-from .flower_config import init_flwr_config
 from .install import install
 from .log import log
 from .login import login
@@ -115,7 +114,6 @@ def main(
     ),
 ) -> None:
     """Flower CLI."""
-    init_flwr_config()
     if version:
         typer.secho(f"Flower version: {package_version}", fg="blue")
         raise typer.Exit()
