@@ -19,6 +19,7 @@ import time
 import webbrowser
 from collections.abc import Sequence
 
+import click
 import typer
 
 from flwr.cli.constant import (
@@ -137,13 +138,9 @@ class OidcCliPlugin(CliAuthPlugin):
     ) -> Sequence[tuple[str, str | bytes]]:
         """Write authentication tokens to the provided metadata."""
         if self.access_token is None or self.refresh_token is None:
-            typer.secho(
-                "❌ Missing authentication tokens. Please login first.",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
+            raise click.ClickException(
+                "Missing authentication tokens. Please login first."
             )
-            raise typer.Exit(code=1)
 
         return list(metadata) + [
             (ACCESS_TOKEN_KEY, self.access_token),
