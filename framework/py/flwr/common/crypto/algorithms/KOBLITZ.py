@@ -31,9 +31,9 @@ class KoblitzCurve:
 SUPPORTED_CURVES: Dict[str, KoblitzCurve] = {
     "ECDSA_256": KoblitzCurve("ECDSA_256", 256, ec.SECP256R1()),
     "ECDSA_521": KoblitzCurve("ECDSA_521", 521, ec.SECP521R1()),
-    "KOBLITZ_112": KoblitzCurve("KOBLITZ_112", 192, ec.SECP192R1()),
+    "KOBLITZ_112": KoblitzCurve("KOBLITZ_112", 163, ec.SECT163K1()),
     "KOBLITZ_256": KoblitzCurve("KOBLITZ_256", 256, ec.SECP256K1()),
-    "KOBLITZ_512": KoblitzCurve("KOBLITZ_512", 521, ec.SECP521R1()),
+    "KOBLITZ_512": KoblitzCurve("KOBLITZ_512", 571, ec.SECT571K1()),
     "CURVE25519": KoblitzCurve("CURVE25519", 256, ed25519.Ed25519PrivateKey),
     "CURVE448": KoblitzCurve("CURVE448", 448, ed448.Ed448PrivateKey),
     "ECCFROG522PP": KoblitzCurve("ECCFROG522PP", 521, ec.SECP521R1()),
