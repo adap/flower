@@ -321,7 +321,8 @@ def pull_object(
     if content is not None:
         object_available = content != b""
         # Record bytes traffic pulled by SuperNode
-        state.store_traffic(request.run_id, bytes_sent=len(content), bytes_recv=0)
+        if object_available:
+            state.store_traffic(request.run_id, bytes_sent=len(content), bytes_recv=0)
         return PullObjectResponse(
             object_found=True,
             object_available=object_available,
