@@ -22,12 +22,13 @@ defaults to ``$HOME/.flwr``) and is designed to simplify the usage of `Flower CL
 **Why use it?**
 
 This configuration file allows you to define reusable connection configurations that you
-can reference by name when running ``flwr`` commands. Instead of typing the same
-connection details repeatedly for every Flower App, you define them once and reuse them.
-Additionally, commands like ``flwr log``, ``flwr ls``, and ``flwr stop`` can be run from
-anywhere on your system without needing to be inside a Flower app directory. Note:
-``flwr run`` still requires being in an app directory since it needs to access your app
-code.
+can reference by name when running ``flwr`` commands. For example, you can set up
+configurations for local testing, staging servers, and production deployments, then
+easily switch between them.
+
+Most ``flwr`` commands (like ``flwr log``, ``flwr ls``, and ``flwr stop``) can use this
+configuration file from anywhere on your system. The exception is ``flwr run``, which
+must be executed from within a Flower app directory to access the app code.
 
 .. tip::
 
@@ -91,7 +92,7 @@ type of options you specify depends on whether you're configuring a simulation
 You can list all your connection configurations using the ``flwr config ls`` command.
 Assuming the default configuration file shown earlier, the expected output will be:
 
-.. code-block:: shell
+.. code-block:: console
 
     $ flwr config ls
 
