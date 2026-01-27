@@ -20,6 +20,7 @@ import json
 from pathlib import Path
 from typing import Annotated
 
+import click
 import typer
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives import serialization
@@ -90,13 +91,7 @@ def register(  # pylint: disable=R0914
             )
 
         except ValueError as err:
-            typer.secho(
-                f"❌ {err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-            raise typer.Exit(code=1) from err
+            raise click.ClickException(str(err)) from err
         finally:
             if channel:
                 channel.close()
@@ -107,12 +102,7 @@ def register(  # pylint: disable=R0914
             e_message = captured_output.getvalue()
             print_json_error(e_message, err)
         else:
-            typer.secho(
-                f"{err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
+            raise click.ClickException(str(err)) from None
     finally:
         if suppress_output:
             restore_output()
@@ -140,21 +130,15 @@ def _register_node(stub: ControlStub, public_key: bytes, output_format: str) -> 
             restore_output()
             Console().print_json(run_output)
     else:
-        typer.secho(
-            "❌ SuperNode couldn't be registered.", fg=typer.colors.RED, err=True
-        )
+        raise click.ClickException("SuperNode couldn't be registered.")
 
 
 def try_load_public_key(public_key_path: Path) -> bytes:
     """Try to load a public key from a file."""
     if not public_key_path.exists():
-        typer.secho(
-            f"❌ Public key file '{public_key_path}' does not exist.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+        raise click.ClickException(
+            f"Public key file '{public_key_path}' does not exist."
         )
-        raise typer.Exit(code=1)
 
     with open(public_key_path, "rb") as key_file:
         try:

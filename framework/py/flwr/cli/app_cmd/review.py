@@ -21,6 +21,7 @@ import re
 from pathlib import Path
 from typing import Annotated
 
+import click
 import requests
 import typer
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -60,12 +61,7 @@ def review(
 
     auth_plugin.load_tokens()
     if not isinstance(auth_plugin, OidcCliPlugin) or not auth_plugin.access_token:
-        typer.secho(
-            "❌ Please log in before reviewing app.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
+        raise click.ClickException("Please log in before reviewing app.")
 
     # Load token from the plugin
     token = auth_plugin.access_token
@@ -74,8 +70,7 @@ def review(
     try:
         app_id, app_version = parse_app_spec(app_spec)
     except ValueError as e:
-        typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=1) from e
+        raise click.ClickException(str(e)) from e
 
     # Download FAB
     typer.secho("Downloading FAB... ", fg=typer.colors.BLUE)
@@ -83,8 +78,7 @@ def review(
     try:
         presigned_url, _ = request_download_link(app_id, app_version, url, "fab_url")
     except ValueError as e:
-        typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=1) from e
+        raise click.ClickException(str(e)) from e
 
     fab_bytes = _download_fab(presigned_url)
 
@@ -170,12 +164,7 @@ def _download_fab(url: str) -> bytes:
         r = requests.get(url, timeout=60)
         r.raise_for_status()
     except requests.RequestException as e:
-        typer.secho(
-            f"❌ FAB download failed: {e}",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from e
+        raise click.ClickException(f"FAB download failed: {e}") from e
     return r.content
 
 
@@ -209,20 +198,14 @@ def _submit_review(
     try:
         resp = requests.post(url, headers=headers, json=payload, timeout=120)
     except requests.RequestException as e:
-        typer.secho(
-            f"❌ Network error while submitting review: {e}",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from e
+        raise click.ClickException(f"Network error while submitting review: {e}") from e
 
     if resp.ok:
         typer.secho("🎊 Review submitted", fg=typer.colors.GREEN, bold=True)
         return
 
     # Error path:
-    msg = f"❌ Review submission failed (HTTP {resp.status_code})"
+    msg = f"Review submission failed (HTTP {resp.status_code})"
     if resp.text:
         msg += f": {resp.text}"
-    typer.secho(msg, fg=typer.colors.RED, err=True)
-    raise typer.Exit(code=1)
+    raise click.ClickException(msg)

@@ -18,8 +18,8 @@
 from contextlib import ExitStack
 from pathlib import Path
 
+import click
 import pytest
-import typer
 
 from flwr.supercore.constant import (
     MAX_DIR_DEPTH,
@@ -76,9 +76,8 @@ def test_collect_files_depth_limit(tmp_path: Path) -> None:
     deep = Path(*parts) / f"too_deep{TEXT_EXT}"
     write(tmp_path, deep.as_posix(), b"x")
 
-    with pytest.raises(typer.Exit) as exc:
+    with pytest.raises(click.ClickException):
         _collect_file_paths(tmp_path)
-    assert exc.value.exit_code == 2
 
 
 def test_collect_files_count_limit(tmp_path: Path) -> None:
@@ -87,9 +86,8 @@ def test_collect_files_count_limit(tmp_path: Path) -> None:
     for i in range(MAX_FILE_COUNT + 1):
         write(tmp_path, f"f{i}{TEXT_EXT}", b"x")
 
-    with pytest.raises(typer.Exit) as exc:
+    with pytest.raises(click.ClickException):
         _validate_files(_collect_file_paths(tmp_path))
-    assert exc.value.exit_code == 2
 
 
 def test_collect_files_total_bytes_limit(tmp_path: Path) -> None:
@@ -98,9 +96,8 @@ def test_collect_files_total_bytes_limit(tmp_path: Path) -> None:
     data = b"x" * (MAX_TOTAL_BYTES + 1)
     write(tmp_path, f"big{TEXT_EXT}", data)
 
-    with pytest.raises(typer.Exit) as exc:
+    with pytest.raises(click.ClickException):
         _validate_files(_collect_file_paths(tmp_path))
-    assert exc.value.exit_code == 2
 
 
 def test_collect_files_per_file_size_limit(tmp_path: Path) -> None:
@@ -108,9 +105,8 @@ def test_collect_files_per_file_size_limit(tmp_path: Path) -> None:
     data = b"x" * (MAX_FILE_BYTES + 1)
     write(tmp_path, f"too_big{ALT_TEXT_EXT}", data)
 
-    with pytest.raises(typer.Exit) as exc:
+    with pytest.raises(click.ClickException):
         _validate_files(_collect_file_paths(tmp_path))
-    assert exc.value.exit_code == 2
 
 
 def test_collect_files_non_utf8_raises_for_text(tmp_path: Path) -> None:
@@ -118,9 +114,8 @@ def test_collect_files_non_utf8_raises_for_text(tmp_path: Path) -> None:
     # Invalid UTF-8 payload in a text extension
     write(tmp_path, f"bad{TEXT_EXT}", b"\xff\xfe\xfa")
 
-    with pytest.raises(typer.Exit) as exc:
+    with pytest.raises(click.ClickException):
         _validate_files(_collect_file_paths(tmp_path))
-    assert exc.value.exit_code == 2
 
 
 def test_build_multipart_files_param(tmp_path: Path) -> None:
