@@ -25,6 +25,9 @@ EXEC_PLUGIN_SECTION = "exec_plugin"
 # Flower in-memory Python-based database name
 FLWR_IN_MEMORY_DB_NAME = ":flwr-in-memory:"
 
+# Flower in-memory SQLite database URL
+FLWR_IN_MEMORY_SQLITE_DB_URL = "sqlite:///:memory:"
+
 # Constants for Hub
 APP_ID_PATTERN = r"^@[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
 APP_VERSION_PATTERN = r"^\d+\.\d+\.\d+$"

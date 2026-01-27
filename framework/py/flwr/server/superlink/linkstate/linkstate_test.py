@@ -1816,7 +1816,7 @@ class SqlInMemoryStateTest(StateTest, unittest.TestCase):
     def state_factory(self) -> SqlLinkState:
         """Return SqlLinkState with in-memory database."""
         state = SqlLinkState(
-            "sqlite:///:memory:",
+            database_path=":memory:",
             federation_manager=NoOpFederationManager(),
             object_store=ObjectStoreFactory().store(),
         )
