@@ -58,23 +58,36 @@ Before you start, make sure that:
        $ export FLWR_VERSION="|stable_flwr_version|" # update with your version
        $ docker compose up --build -d
 
-4. Append the following lines to the end of the ``pyproject.toml`` file and save it:
+3. Locate the Flower Configuration TOML file in your machine.
+
+   .. code-block:: bash
+       :emphasize-lines: 3
+
+       $ flwr config list
+
+       Flower Config file: /path/to/.flwr/config.toml
+       SuperLink connections:
+         supergrid
+         local (default)
+
+4. Add a new SuperLink connection to your ``config.toml`` file and save it:
 
    .. code-block:: toml
-       :caption: pyproject.toml
+       :caption: config.toml
 
-       [tool.flwr.federations.local-deployment]
+       [superlink.local-deployment]
        address = "127.0.0.1:9093"
        insecure = true
 
    .. note::
 
-       You can customize the string that follows ``tool.flwr.federations.`` to fit your
-       needs. However, please note that the string cannot contain a dot (``.``).
+       You can customize the string that follows ``superlink.`` to fit your needs.
+       However, please note that the string cannot contain a dot (``.``).
 
        In this example, ``local-deployment`` has been used. Just remember to replace
-       ``local-deployment`` with your chosen name in both the ``tool.flwr.federations.``
-       string and the corresponding ``flwr run .`` command.
+       ``local-deployment`` with your chosen name in both the ``superlink.`` string and
+       the corresponding ``flwr run .`` command. Refer to the `Flower configuration file
+       <ref-flower-configuration.html>`_ for more information.
 
 5. Run the example and follow the logs of the ``ServerApp`` :
 
@@ -126,7 +139,7 @@ After that, you can repeat the steps above.
       - Requires an older pip version that is not supported by the Flower Docker images.
     - - quickstart-pytorch
       - None
-    - - quickstart-sklearn-tabular
+    - - quickstart-sklearn
       - None
     - - quickstart-tensorflow
       - None
