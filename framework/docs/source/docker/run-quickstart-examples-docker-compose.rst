@@ -60,7 +60,7 @@ Before you start, make sure that:
 
 3. Locate the Flower Configuration TOML file in your machine.
 
-   .. code-block:: bash
+   .. code-block:: console
        :emphasize-lines: 3
 
        $ flwr config list

@@ -244,7 +244,7 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
 
 Locate the Flower Configuration TOML file in your machine.
 
-.. code-block:: bash
+.. code-block:: console
     :emphasize-lines: 3
 
     $ flwr config list

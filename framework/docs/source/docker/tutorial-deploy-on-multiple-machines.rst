@@ -151,7 +151,7 @@ Specify the remote SuperLink IP addresses and the path to the root certificate i
 a new SuperLink connection in your Flower Configuration file. The easiest way to locate
 this file is by means of ``flwr config list``:
 
-.. code-block:: bash
+.. code-block:: console
     :emphasize-lines: 3
 
     $ flwr config list

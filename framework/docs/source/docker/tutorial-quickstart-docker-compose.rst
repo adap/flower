@@ -95,7 +95,7 @@ connection in your Flower configuration file.
    create for your when you first use a Flower CLI command. Use ``flwr config list`` to
    see available SuperLink connections as well as the path to the configuration file.
 
-   .. code-block:: bash
+   .. code-block:: console
        :emphasize-lines: 3
 
        $ flwr config list
