@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import struct
+import warnings
 from dataclasses import dataclass
 from typing import Dict
 
 from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec, ed25519, ed448
 from cryptography.hazmat.primitives.serialization import (
@@ -31,15 +33,19 @@ class KoblitzCurve:
 SUPPORTED_CURVES: Dict[str, KoblitzCurve] = {
     "ECDSA_256": KoblitzCurve("ECDSA_256", 256, ec.SECP256R1()),
     "ECDSA_521": KoblitzCurve("ECDSA_521", 521, ec.SECP521R1()),
-    "KOBLITZ_112": KoblitzCurve("KOBLITZ_112", 192, ec.SECP192R1()),
+    "KOBLITZ_112": KoblitzCurve("KOBLITZ_112", 163, ec.SECT163K1()),
     "KOBLITZ_256": KoblitzCurve("KOBLITZ_256", 256, ec.SECP256K1()),
-    "KOBLITZ_512": KoblitzCurve("KOBLITZ_512", 521, ec.SECP521R1()),
+    "KOBLITZ_512": KoblitzCurve("KOBLITZ_512", 571, ec.SECT571K1()),
     "CURVE25519": KoblitzCurve("CURVE25519", 256, ed25519.Ed25519PrivateKey),
     "CURVE448": KoblitzCurve("CURVE448", 448, ed448.Ed448PrivateKey),
     "ECCFROG522PP": KoblitzCurve("ECCFROG522PP", 521, ec.SECP521R1()),
 }
 
 LEGACY_ALIASES: Dict[str, str] = {}
+FALLBACK_CURVES: Dict[str, KoblitzCurve] = {
+    "KOBLITZ_112": KoblitzCurve("KOBLITZ_112", 192, ec.SECP192R1()),
+    "KOBLITZ_512": KoblitzCurve("KOBLITZ_512", 521, ec.SECP521R1()),
+}
 
 SUPPORTED_METHODS = set(SUPPORTED_CURVES.keys()) | set(LEGACY_ALIASES.keys())
 
@@ -47,9 +53,23 @@ SUPPORTED_METHODS = set(SUPPORTED_CURVES.keys()) | set(LEGACY_ALIASES.keys())
 def _get_curve(curve_name: str) -> KoblitzCurve:
     normalized_name = LEGACY_ALIASES.get(curve_name, curve_name)
     try:
-        return SUPPORTED_CURVES[normalized_name]
+        curve = SUPPORTED_CURVES[normalized_name]
     except KeyError as exc:  # pragma: no cover - safety net
         raise ValueError(f"Curva Koblitz non supportata: {curve_name}") from exc
+    if (
+        normalized_name in FALLBACK_CURVES
+        and isinstance(curve.curve, ec.EllipticCurve)
+        and not default_backend().elliptic_curve_supported(curve.curve)
+    ):
+        fallback = FALLBACK_CURVES[normalized_name]
+        warnings.warn(
+            "Curva Koblitz non supportata dal backend OpenSSL, uso "
+            f"{fallback.curve.name} come fallback per {curve.name}.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return fallback
+    return curve
 
 
 def is_supported_method(curve_name: str) -> bool:
