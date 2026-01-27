@@ -61,7 +61,7 @@ def load_data(partition_id: int, num_partitions: int):
     if fds is None:
         partitioner = IidPartitioner(num_partitions=num_partitions)
         fds = FederatedDataset(
-            dataset="mnist",
+            dataset="ylecun/mnist",
             partitioners={"train": partitioner},
         )
 
