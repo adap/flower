@@ -31,7 +31,7 @@ from .flower_config import (
 )
 
 CONFIG_MIGRATION_NOTICE = """
-##################################################################
+#######################################################################
 # CONFIGURATION MIGRATION NOTICE:
 #
 # What was previously called "federation config" for SuperLink
@@ -43,8 +43,8 @@ CONFIG_MIGRATION_NOTICE = """
 # The entries below are commented out intentionally and are kept
 # only as a migration reference.
 #
-# Docs: <link to Flower config docs>
-##################################################################
+# Docs: https://flower.ai/docs/framework/ref-flower-configuration.html
+#######################################################################
 
 """
 
@@ -53,7 +53,7 @@ CLI_NOTICE = (
     + "We detected legacy usage of this command that relies on connection\n"
     + "settings from your pyproject.toml.\n\n"
     + "Flower will migrate any relevant settings to the new Flower config.\n\n"
-    + "Learn more: https://flower.ai/docs\n"
+    + "Learn more: https://flower.ai/docs/framework/ref-flower-configuration.html\n"
 )
 
 
