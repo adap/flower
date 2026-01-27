@@ -10,6 +10,8 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec, ed25519, ed448
 from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    PublicFormat,
     load_pem_private_key,
     load_pem_public_key,
 )
@@ -76,41 +78,88 @@ def _load_private_key(key: object) -> object:
     return key
 
 
-def _pack_signature(data: bytes, signature: bytes) -> bytes:
-    return data + struct.pack(">H", len(signature)) + signature
+def _pack_signature(
+    data: bytes, signature: bytes, public_key_bytes: bytes | None = None
+) -> bytes:
+    if public_key_bytes is None:
+        return data + struct.pack(">H", len(signature)) + signature
+    return (
+        data
+        + b"FLPK"
+        + struct.pack(">H", len(public_key_bytes))
+        + public_key_bytes
+        + struct.pack(">H", len(signature))
+        + signature
+    )
 
 
-def _unpack_signature(payload: bytes) -> tuple[bytes, bytes]:
+def _unpack_signature(payload: bytes) -> tuple[bytes, bytes, bytes | None]:
     if len(payload) < 2:
         raise ValueError("Payload troppo corto per la firma")
     sig_len = struct.unpack(">H", payload[-2:])[0]
     if len(payload) < 2 + sig_len:
         raise ValueError("Payload troppo corto per la firma indicata")
-    data = payload[: -2 - sig_len]
     signature = payload[-2 - sig_len : -2]
-    return data, signature
+    remaining = payload[: -2 - sig_len]
+    if len(remaining) >= 6:
+        public_key_len = struct.unpack(">H", remaining[-2:])[0]
+        marker_start = len(remaining) - (6 + public_key_len)
+        if marker_start >= 0 and remaining[marker_start : marker_start + 4] == b"FLPK":
+            public_key = remaining[marker_start + 6 : marker_start + 6 + public_key_len]
+            data = remaining[:marker_start]
+            return data, signature, public_key
+    data = remaining
+    return data, signature, None
 
 
 def authenticate(data: bytes, curve_name: str, ecc_privkey: object) -> bytes:
     """Autentica i dati usando firme reali."""
 
     curve = _get_curve(curve_name)
-    private_key = _load_private_key(ecc_privkey)
+    include_public_key = ecc_privkey is None
+    if ecc_privkey is None:
+        if curve.curve is ed25519.Ed25519PrivateKey:
+            private_key = ed25519.Ed25519PrivateKey.generate()
+        elif curve.curve is ed448.Ed448PrivateKey:
+            private_key = ed448.Ed448PrivateKey.generate()
+        else:
+            private_key = ec.generate_private_key(curve.curve)
+    else:
+        private_key = _load_private_key(ecc_privkey)
     if isinstance(private_key, (ed25519.Ed25519PrivateKey, ed448.Ed448PrivateKey)):
         signature = private_key.sign(data)
-        return _pack_signature(data, signature)
+        public_key_bytes = (
+            private_key.public_key().public_bytes(
+                Encoding.PEM, PublicFormat.SubjectPublicKeyInfo
+            )
+            if include_public_key
+            else None
+        )
+        return _pack_signature(data, signature, public_key_bytes)
     if not isinstance(private_key, ec.EllipticCurvePrivateKey):
         raise ValueError("Curva non supportata per firme")
     signature = private_key.sign(data, ec.ECDSA(hashes.SHA256()))
-    return _pack_signature(data, signature)
+    public_key_bytes = (
+        private_key.public_key().public_bytes(
+            Encoding.PEM, PublicFormat.SubjectPublicKeyInfo
+        )
+        if include_public_key
+        else None
+    )
+    return _pack_signature(data, signature, public_key_bytes)
 
 
 def verify(authenticated_data: bytes, curve_name: str, ecc_pubkey: object) -> bytes:
     """Verifica l'autenticazione creata da :func:`authenticate`."""
 
-    curve = _get_curve(curve_name)
-    public_key = _load_public_key(ecc_pubkey)
-    data, signature = _unpack_signature(authenticated_data)
+    _get_curve(curve_name)
+    data, signature, embedded_public_key = _unpack_signature(authenticated_data)
+    if ecc_pubkey is None:
+        if embedded_public_key is None:
+            raise ValueError("Chiave pubblica mancante per la curva scelta")
+        public_key = _load_public_key(embedded_public_key)
+    else:
+        public_key = _load_public_key(ecc_pubkey)
     try:
         if isinstance(public_key, (ed25519.Ed25519PublicKey, ed448.Ed448PublicKey)):
             public_key.verify(signature, data)
