@@ -126,9 +126,9 @@ it and authenticate directly against the OIDC provider.
     ✅ Login successful.
 
 Once the login is successful, the credentials returned by the OIDC provider via the
-SuperLink will be saved to Flower's Credential store. The tokens will be sent
-transparently with each subsequent ``flwr`` CLI request to the SuperLink, and it will
-relay them to the OIDC provider to perform the authentication checks.
+SuperLink will be stored locally. The tokens will be sent transparently with each
+subsequent ``flwr`` CLI request to the SuperLink, and it will relay them to the OIDC
+provider to perform the authentication checks.
 
 **************************************
  Run authorized ``flwr`` CLI commands
