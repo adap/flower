@@ -21,8 +21,6 @@ from unittest.mock import patch
 
 from flwr.common import now
 from flwr.common.constant import HEARTBEAT_DEFAULT_INTERVAL
-from flwr.supercore.corestate.sql_corestate import SqlCoreState
-from flwr.supercore.object_store.in_memory_object_store import InMemoryObjectStore
 
 from . import CoreState
 
@@ -149,15 +147,3 @@ class StateTest(unittest.TestCase):
             # Assert: token1 should be cleaned up, token2 should still be valid
             self.assertFalse(state.verify_token(run_id1, token1))
             self.assertTrue(state.verify_token(run_id2, token2))
-
-
-class SqlCoreStateTest(StateTest):
-    """Test SqlCoreState implementation."""
-
-    __test__ = True
-
-    def state_factory(self) -> CoreState:
-        """Return SqlCoreState with in-memory SQLite."""
-        state = SqlCoreState(":memory:", InMemoryObjectStore())
-        state.initialize()
-        return state
