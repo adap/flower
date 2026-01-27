@@ -61,14 +61,6 @@ def login(
     superlink_connection = read_superlink_connection(superlink)
     superlink = superlink_connection.name
 
-    # Check if `enable-account-auth` is set to `true`
-    if not superlink_connection.enable_account_auth:
-        raise click.ClickException(
-            "Account authentication is not enabled for the SuperLink connection "
-            f"'{superlink}'. To enable it, set `enable-account-auth = true` "
-            "in the configuration."
-        )
-
     # Check if insecure flag is set to `True`
     if superlink_connection.insecure:
         raise click.ClickException(

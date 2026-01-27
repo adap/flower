@@ -89,7 +89,6 @@ class TestInitFlwrConfig(unittest.TestCase):
         self.assertEqual(
             supergrid[SuperLinkConnectionTomlKey.ADDRESS], "supergrid.flower.ai"
         )
-        self.assertTrue(supergrid[SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH])
         self.assertEqual(
             supergrid[SuperLinkConnectionTomlKey.FEDERATION], "YOUR-FEDERATION-HERE"
         )
@@ -143,7 +142,6 @@ class TestSuperLinkConnection(unittest.TestCase):
             SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
             SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: "/path/to/root_cert.crt",
             SuperLinkConnectionTomlKey.INSECURE: False,
-            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
         }
         name = "test_service"
 
@@ -155,7 +153,6 @@ class TestSuperLinkConnection(unittest.TestCase):
         self.assertEqual(config.address, "127.0.0.1:8080")
         self.assertEqual(config.root_certificates, "/path/to/root_cert.crt")
         self.assertFalse(config.insecure)
-        self.assertTrue(config.enable_account_auth)
 
     def test_parse_superlink_connection_raises_on_relative_path(self) -> None:
         """Test parse_superlink_connection raises on relative path."""
@@ -186,12 +183,10 @@ class TestSuperLinkConnection(unittest.TestCase):
                 "supergrid",
                 {
                     SuperLinkConnectionTomlKey.ADDRESS: "supergrid.flower.ai",
-                    SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: True,
                 },
                 SuperLinkConnection(
                     name="supergrid",
                     address="supergrid.flower.ai",
-                    enable_account_auth=True,
                 ),
             ),
             (
@@ -342,7 +337,6 @@ class TestSuperLinkConnection(unittest.TestCase):
             SuperLinkConnectionTomlKey.ADDRESS: "127.0.0.1:8080",
             SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: None,
             SuperLinkConnectionTomlKey.INSECURE: False,
-            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: False,
             "options": {},  # Missing num-supernodes
         }
         name = "mixed-invalid"
@@ -369,12 +363,10 @@ class TestSuperLinkConnection(unittest.TestCase):
             [superlink.mock-service]
             address = "losthost:1234"
             insecure = false
-            enable-account-auth = false
 
             [superlink.mock-service-2]
             address = "losthost:9093"
             insecure = true
-            enable-account-auth = false
             """
 
             with open(config_path, "w", encoding="utf-8") as f:
@@ -404,12 +396,10 @@ class TestSuperLinkConnection(unittest.TestCase):
             [superlink.mock-service]
             address = "losthost:1234"
             insecure = false
-            enable-account-auth = true
 
             [superlink.mock-service-2]
             address = "losthost:9093"
             insecure = true
-            enable-account-auth = false
             """
 
             with open(config_path, "w", encoding="utf-8") as f:
@@ -440,7 +430,6 @@ class TestSuperLinkConnection(unittest.TestCase):
             [superlink.mock-service]
             address = "losthost:9093"
             insecure = false
-            enable-account-auth = false
             """
 
             with open(config_path, "w", encoding="utf-8") as f:
@@ -467,7 +456,6 @@ class TestSuperLinkConnection(unittest.TestCase):
             [superlink.mock-service]
             address = "losthost:9093"
             insecure = false
-            enable-account-auth = false
             """
 
             with open(config_path, "w", encoding="utf-8") as f:
@@ -494,7 +482,6 @@ class TestSuperLinkConnection(unittest.TestCase):
             [superlink.other-service]
             address = "losthost:9093"
             insecure = false
-            enable-account-auth = false
             """
 
             with open(config_path, "w", encoding="utf-8") as f:
