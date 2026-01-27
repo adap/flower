@@ -195,9 +195,6 @@ def parse_superlink_connection(
         address=conn_dict.get(SuperLinkConnectionTomlKey.ADDRESS),
         root_certificates=conn_dict.get(SuperLinkConnectionTomlKey.ROOT_CERTIFICATES),
         insecure=conn_dict.get(SuperLinkConnectionTomlKey.INSECURE),
-        enable_account_auth=conn_dict.get(
-            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH
-        ),
         federation=conn_dict.get(SuperLinkConnectionTomlKey.FEDERATION),
         options=simulation_options,
     )
@@ -221,7 +218,6 @@ def serialize_superlink_connection(connection: SuperLinkConnection) -> dict[str,
         SuperLinkConnectionTomlKey.ADDRESS: connection.address,
         SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: connection.root_certificates,
         SuperLinkConnectionTomlKey.INSECURE: connection._insecure,
-        SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: connection._enable_account_auth,
         SuperLinkConnectionTomlKey.FEDERATION: connection.federation,
     }
     # Remove None values
