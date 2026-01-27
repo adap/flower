@@ -26,7 +26,7 @@ app_cmd = "flwr-simulation" if use_sim else "flwr-serverapp"
 def run_superlink() -> subprocess.Popen:
     """Run the SuperLink."""
     cmd = ["flower-superlink", "--insecure"]
-    cmd += ["--database", "sqlite:///tmp.db?timeout=10000"]  # 30 seconds timeout
+    cmd += ["--database", "sqlite:///tmp.db?timeout=30000"]  # 30 seconds timeout
     cmd += ["--isolation", "process"]
     if use_sim:
         cmd += ["--simulation"]
