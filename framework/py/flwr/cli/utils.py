@@ -241,7 +241,9 @@ def require_superlink_address(connection: SuperLinkConnection) -> str:
         cmd = click.get_current_context().command.name
         raise click.ClickException(
             f"`flwr {cmd}` currently works with a SuperLink. Ensure that the "
-            "correct SuperLink (Control API) address is provided in `pyproject.toml`."
+            "correct SuperLink (Control API) address is provided SuperLink connection "
+            "you are using. Check your Flower configuration file. You may use `flwr "
+            "config ls` to see it's location in the file system."
         )
     return connection.address
 
@@ -326,8 +328,10 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
             raise click.ClickException(
                 "The SuperLink cannot process this request. Please verify that "
                 "you set the address to its Control API endpoint correctly in your "
-                "`pyproject.toml`, and ensure that the Flower versions used by "
-                "the CLI and SuperLink are compatible."
+                "SuperLink connection in your Flower Configuration file. You may use "
+                "`flwr config ls` to see it's location in the file system. "
+                "Additonally, ensure that the Flower versions used by the CLI and "
+                "SuperLink are compatible."
             ) from None
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
             # pylint: disable-next=E1101
