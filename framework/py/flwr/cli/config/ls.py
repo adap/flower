@@ -40,7 +40,7 @@ def ls(
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """List all SuperLink connections."""
+    """List all SuperLink connections (alias: ls)."""
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     config_path = None
