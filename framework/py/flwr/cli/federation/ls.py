@@ -68,7 +68,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
         ),
     ] = None,
 ) -> None:
-    """List available federations."""
+    """List available federations or details of a specific federation (alias: ls)."""
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
 
