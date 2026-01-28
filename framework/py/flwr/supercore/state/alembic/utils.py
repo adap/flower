@@ -15,7 +15,7 @@
 """Helpers for running and validating Alembic migrations."""
 
 
-from logging import DEBUG, INFO
+from logging import INFO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -26,7 +26,6 @@ from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from sqlalchemy import MetaData, create_engine, inspect
 from sqlalchemy.engine import Engine
-from sqlalchemy.engine.reflection import Inspector
 
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import log
@@ -34,6 +33,7 @@ from flwr.supercore.state.schema.corestate_tables import create_corestate_metada
 from flwr.supercore.state.schema.linkstate_tables import create_linkstate_metadata
 from flwr.supercore.state.schema.objectstore_tables import create_objectstore_metadata
 
+ALEMBIC_DIR = Path(__file__).resolve().parent
 BASELINE_REVISION = "8e65d8ae60b0"
 ALEMBIC_VERSION_TABLE = "alembic_version"
 
@@ -67,9 +67,8 @@ def get_combined_metadata() -> MetaData:
 
 def _build_alembic_config(engine: Engine) -> Config:
     """Create Alembic config with script location and DB URL."""
-    alembic_dir = Path(__file__).resolve().parent
     config = Config()
-    config.set_main_option("script_location", str(alembic_dir))
+    config.set_main_option("script_location", str(ALEMBIC_DIR))
     config.set_main_option("sqlalchemy.url", str(engine.url))
     return config
 
@@ -88,13 +87,15 @@ def _has_alembic_version_table(engine: Engine) -> bool:
     return inspector.has_table(ALEMBIC_VERSION_TABLE)
 
 
-def _get_baseline_revision(engine: Engine) -> str:
+def _get_baseline_revision() -> str:
     """Return the revision ID of the first migration (no down_revision).
 
     Falls back to BASELINE_REVISION constant if unable to determine dynamically.
     """
     try:
-        script = ScriptDirectory.from_config(_build_alembic_config(engine))
+        config = Config()
+        config.set_main_option("script_location", str(ALEMBIC_DIR))
+        script = ScriptDirectory.from_config(config)
         for rev in script.walk_revisions():
             if rev.down_revision is None:
                 return rev.revision
@@ -104,9 +105,32 @@ def _get_baseline_revision(engine: Engine) -> str:
     return BASELINE_REVISION
 
 
-def _verify_legacy_schema_matches_baseline(
-    engine: Engine, inspector: Inspector | None = None
-) -> tuple[bool, str]:
+def _get_baseline_metadata() -> MetaData:
+    """Create a temporary DB at baseline revision and reflect its schema.
+
+    This ensures we compare legacy databases against the actual baseline schema,
+    not the current (potentially newer) metadata.
+    """
+    baseline_revision = _get_baseline_revision()
+
+    with TemporaryDirectory() as temp_dir:
+        temp_db_path = Path(temp_dir) / "baseline.db"
+        temp_engine = create_engine(f"sqlite:///{temp_db_path}")
+        try:
+            # Run migrations only up to the baseline revision
+            config = _build_alembic_config(temp_engine)
+            command.upgrade(config, baseline_revision)
+
+            # Reflect the baseline schema
+            baseline_metadata = MetaData()
+            baseline_metadata.reflect(bind=temp_engine)
+        finally:
+            temp_engine.dispose()
+
+    return baseline_metadata
+
+
+def _verify_legacy_schema_matches_baseline(engine: Engine) -> tuple[bool, str]:
     """Verify legacy schema matches baseline tables and columns.
 
     Only missing tables/columns are reported as errors.
@@ -116,16 +140,24 @@ def _verify_legacy_schema_matches_baseline(
     tuple[bool, str]
         (is_valid, error_message). If valid, error_message is empty.
     """
-    if inspector is None:
-        inspector = inspect(engine)
+    inspector = inspect(engine)
 
-    expected_metadata = get_combined_metadata()
+    # Get the baseline schema by running migrations up to the baseline revision
+    # in a temporary database and reflecting its schema
+    baseline_metadata = _get_baseline_metadata()
     existing_tables = set(inspector.get_table_names())
 
-    # Filter out SQLite internal tables
-    existing_tables = {t for t in existing_tables if not t.startswith("sqlite_")}
+    # Filter out SQLite internal tables and alembic_version
+    existing_tables = {
+        t
+        for t in existing_tables
+        if not t.startswith("sqlite_") and t != ALEMBIC_VERSION_TABLE
+    }
 
-    expected_tables = set(expected_metadata.tables.keys())
+    # Exclude alembic_version from baseline comparison
+    expected_tables = {
+        t for t in baseline_metadata.tables.keys() if t != ALEMBIC_VERSION_TABLE
+    }
     missing_tables = expected_tables - existing_tables
 
     if missing_tables:
@@ -137,7 +169,8 @@ def _verify_legacy_schema_matches_baseline(
         )
 
     # Verify columns for each expected table
-    for table_name, table in expected_metadata.tables.items():
+    for table_name in expected_tables:
+        table = baseline_metadata.tables[table_name]
         expected_columns = {col.name for col in table.columns}
         actual_columns = {col["name"] for col in inspector.get_columns(table_name)}
 
@@ -181,10 +214,8 @@ def run_migrations(engine: Engine) -> None:
         return
 
     # Pre-Alembic database detected: verify baseline schema before stamping.
-    baseline_revision = _get_baseline_revision(engine)
-    inspector = inspect(engine)
-    log(DEBUG, "verifying legacy db")
-    is_valid, error_msg = _verify_legacy_schema_matches_baseline(engine, inspector)
+    baseline_revision = _get_baseline_revision()
+    is_valid, error_msg = _verify_legacy_schema_matches_baseline(engine)
 
     # This is an edge case and unlikely to happen since SuperLink requires a specific
     # schema to operate normally.
