@@ -15,6 +15,7 @@
 """Flower command line interface type definitions."""
 
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -24,6 +25,7 @@ from flwr.cli.constant import (
 )
 
 _ERROR_MSG_FMT = "SuperLinkConnection.%s is None"
+_FEDERATION_FORMAT_PATTERN = r"^@[a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+$"
 
 
 @dataclass
@@ -176,11 +178,23 @@ class SuperLinkConnection:
                 + f"expected bool, but got {type(self._insecure).__name__}."
             )
 
-        if self.federation is not None and not isinstance(self.federation, str):
-            raise ValueError(
-                err_prefix % SuperLinkConnectionTomlKey.FEDERATION
-                + f"expected str, but got {type(self.federation).__name__}."
-            )
+        if self.federation is not None:
+            if not isinstance(self.federation, str):
+                raise ValueError(
+                    err_prefix % SuperLinkConnectionTomlKey.FEDERATION
+                    + f"expected str, but got {type(self.federation).__name__}."
+                )
+
+            # Check if the federation string is valid
+            # Expected format: '@<account-name>/<federation-name>'
+            is_valid = re.match(_FEDERATION_FORMAT_PATTERN, self.federation)
+
+            if not is_valid:
+                raise ValueError(
+                    err_prefix % SuperLinkConnectionTomlKey.FEDERATION
+                    + f"invalid format '{self.federation}'. "
+                    "Expected format: '@<account-name>/<federation-name>'."
+                )
 
         # The connection needs to have either an address or options (or both).
         if self.address is None and self.options is None:

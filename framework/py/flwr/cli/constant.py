@@ -101,7 +101,6 @@ default = "local"
 
 [superlink.supergrid]
 address = "{SUPERGRID_ADDRESS}"
-federation = "YOUR-FEDERATION-HERE"
 
 [superlink.local]
 options.num-supernodes = 10
