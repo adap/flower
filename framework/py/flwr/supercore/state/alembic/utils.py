@@ -63,7 +63,7 @@ def get_combined_metadata() -> MetaData:
     return metadata
 
 
-def _build_alembic_config(engine: Engine) -> Config:
+def build_alembic_config(engine: Engine) -> Config:
     """Create Alembic config with script location and DB URL."""
     config = Config()
     config.set_main_option("script_location", str(ALEMBIC_DIR))
@@ -85,7 +85,7 @@ def _has_alembic_version_table(engine: Engine) -> bool:
     return inspector.has_table(ALEMBIC_VERSION_TABLE)
 
 
-def _get_baseline_revision() -> str:
+def get_baseline_revision() -> str:
     """Return the revision ID of the first migration (no down_revision).
 
     Falls back to BASELINE_REVISION constant if unable to determine dynamically.
@@ -109,14 +109,14 @@ def _get_baseline_metadata() -> MetaData:
     This ensures we compare legacy databases against the actual baseline schema,
     not the current (potentially newer) metadata.
     """
-    baseline_revision = _get_baseline_revision()
+    baseline_revision = get_baseline_revision()
 
     with TemporaryDirectory() as temp_dir:
         temp_db_path = Path(temp_dir) / "baseline.db"
         temp_engine = create_engine(f"sqlite:///{temp_db_path}")
         try:
             # Run migrations only up to the baseline revision
-            config = _build_alembic_config(temp_engine)
+            config = build_alembic_config(temp_engine)
             command.upgrade(config, baseline_revision)
 
             # Reflect the baseline schema
@@ -184,7 +184,7 @@ def _verify_legacy_schema_matches_baseline(engine: Engine) -> tuple[bool, str]:
 
 def stamp_existing_database(engine: Engine, revision: str = BASELINE_REVISION) -> None:
     """Stamp an existing legacy database to the baseline Alembic revision."""
-    command.stamp(_build_alembic_config(engine), revision)
+    command.stamp(build_alembic_config(engine), revision)
 
 
 def run_migrations(engine: Engine) -> None:
@@ -196,7 +196,7 @@ def run_migrations(engine: Engine) -> None:
     - If DB is pre-Alembic and schema is mismatched: exit with guidance.
     - If DB is pre-Alembic and schema matches baseline: stamp, then upgrade.
     """
-    config = _build_alembic_config(engine)
+    config = build_alembic_config(engine)
     has_version_table = _has_alembic_version_table(engine)
 
     # Standard database with version tracking: just upgrade.
@@ -212,7 +212,7 @@ def run_migrations(engine: Engine) -> None:
         return
 
     # Pre-Alembic database detected: verify baseline schema before stamping.
-    baseline_revision = _get_baseline_revision()
+    baseline_revision = get_baseline_revision()
     is_valid, error_msg = _verify_legacy_schema_matches_baseline(engine)
 
     # This is an edge case and unlikely to happen since SuperLink requires a specific

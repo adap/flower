@@ -30,8 +30,8 @@ from flwr.common.exit import ExitCode
 from flwr.supercore.state.alembic.utils import (
     ALEMBIC_VERSION_TABLE,
     BASELINE_REVISION,
-    _build_alembic_config,
-    _get_baseline_revision,
+    build_alembic_config,
+    get_baseline_revision,
     get_combined_metadata,
     run_migrations,
 )
@@ -52,7 +52,7 @@ class TestAlembicRun(unittest.TestCase):
                 run_migrations(engine)
 
                 current = get_current_revision(engine)
-                script = ScriptDirectory.from_config(_build_alembic_config(engine))
+                script = ScriptDirectory.from_config(build_alembic_config(engine))
                 self.assertIn(current, script.get_heads())
                 self.assertFalse(check_migrations_pending(engine))
             finally:
@@ -94,7 +94,7 @@ class TestAlembicRun(unittest.TestCase):
                 run_migrations(engine)
 
                 current = get_current_revision(engine)
-                script = ScriptDirectory.from_config(_build_alembic_config(engine))
+                script = ScriptDirectory.from_config(build_alembic_config(engine))
                 self.assertIn(current, script.get_heads())
                 self.assertFalse(check_migrations_pending(engine))
             finally:
@@ -160,13 +160,13 @@ class TestAlembicRun(unittest.TestCase):
         """Ensure migrations are in sync with metadata."""
         self.assertTrue(check_migrations_in_sync())
 
-    def test_get_baseline_revision_returns_correct_value(self) -> None:
-        """Ensure _get_baseline_revision dynamically finds the baseline."""
+    def testget_baseline_revision_returns_correct_value(self) -> None:
+        """Ensure get_baseline_revision dynamically finds the baseline."""
         with TemporaryDirectory() as temp_dir:
             db_path = Path(temp_dir) / "state.db"
             engine = create_engine(f"sqlite:///{db_path}")
             try:
-                baseline = _get_baseline_revision()
+                baseline = get_baseline_revision()
                 # Should match the constant (or be dynamically discovered)
                 self.assertEqual(baseline, BASELINE_REVISION)
             finally:
@@ -183,7 +183,7 @@ def get_current_revision(engine: Engine) -> str | None:
 def check_migrations_pending(engine: Engine) -> bool:
     """Return True if the database is not on the latest migration head."""
     current = get_current_revision(engine)
-    script = ScriptDirectory.from_config(_build_alembic_config(engine))
+    script = ScriptDirectory.from_config(build_alembic_config(engine))
     heads = set(script.get_heads())
     if current is None:
         return True
