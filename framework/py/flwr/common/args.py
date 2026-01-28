@@ -89,7 +89,7 @@ def try_obtain_root_certificates(
     else:
         # Load the certificates if provided, or load the system certificates
         if root_cert_path is None:
-            log(INFO, "Using system certificates")
+            log(INFO, "Using system certificates for TLS connection")
             root_certificates = None
         elif not isfile(root_cert_path):
             log(ERROR, "Path argument `--root-certificates` does not point to a file.")
