@@ -19,6 +19,7 @@ from contextlib import ExitStack
 from pathlib import Path
 from typing import IO, Annotated
 
+import click
 import requests
 import typer
 from requests import Response
@@ -62,12 +63,7 @@ def publish(
     auth_plugin = load_cli_auth_plugin_from_connection(SUPERGRID_ADDRESS)
     auth_plugin.load_tokens()
     if not isinstance(auth_plugin, OidcCliPlugin) or not auth_plugin.access_token:
-        typer.secho(
-            "❌ Please log in before publishing app.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
+        raise click.ClickException("Please log in before publishing app.")
 
     # Load token from the plugin
     token = auth_plugin.access_token
@@ -82,19 +78,17 @@ def publish(
         try:
             resp = _post_files(files_param, token)
         except requests.RequestException as err:
-            typer.secho(f"❌ Network error: {err}", fg=typer.colors.RED, err=True)
-            raise typer.Exit(code=1) from err
+            raise click.ClickException(f"Network error: {err}") from err
 
     if resp.ok:
         typer.secho("🎊 Upload successful", fg=typer.colors.GREEN, bold=True)
         return  # success
 
     # Error path:
-    msg = f"❌ Upload failed with status {resp.status_code}"
+    msg = f"Upload failed with status {resp.status_code}"
     if resp.text:
         msg += f": {resp.text}"
-    typer.secho(msg, fg=typer.colors.RED, err=True)
-    raise typer.Exit(code=1)
+    raise click.ClickException(msg)
 
 
 def _depth_of(relative_path_to_root: Path) -> int:
@@ -138,14 +132,9 @@ def _collect_file_paths(root: Path) -> list[Path]:
 
         # Check max depth
         if _depth_of(relative_path) > MAX_DIR_DEPTH:
-            typer.secho(
-                f"Error: '{path}' "
-                f"exceeds the maximum directory depth "
-                f"of {MAX_DIR_DEPTH}.",
-                fg=typer.colors.RED,
-                err=True,
+            raise click.ClickException(
+                f"'{path}' exceeds the maximum directory depth of {MAX_DIR_DEPTH}."
             )
-            raise typer.Exit(code=2)
 
         file_paths.append(path)
 
@@ -160,21 +149,15 @@ def _validate_files(file_paths: list[Path]) -> None:
     Checks file count, individual file size, total size, and UTF-8 encoding.
     """
     if len(file_paths) == 0:
-        typer.secho(
+        raise click.ClickException(
             "Nothing to upload: no files matched after applying .gitignore and "
-            "allowed extensions.",
-            fg=typer.colors.RED,
-            err=True,
+            "allowed extensions."
         )
-        raise typer.Exit(code=2)
 
     if len(file_paths) > MAX_FILE_COUNT:
-        typer.secho(
-            f"Too many files: {len(file_paths)} > allowed maximum of {MAX_FILE_COUNT}.",
-            fg=typer.colors.RED,
-            err=True,
+        raise click.ClickException(
+            f"Too many files: {len(file_paths)} > allowed maximum of {MAX_FILE_COUNT}."
         )
-        raise typer.Exit(code=2)
 
     # Calculate files size
     total_size = 0
@@ -184,34 +167,25 @@ def _validate_files(file_paths: list[Path]) -> None:
 
         # Check single file size
         if file_size > MAX_FILE_BYTES:
-            typer.secho(
+            raise click.ClickException(
                 f"File too large: '{path.as_posix()}' is {file_size:,} bytes, "
-                f"exceeding the per-file limit of {MAX_FILE_BYTES:,} bytes.",
-                fg=typer.colors.RED,
-                err=True,
+                f"exceeding the per-file limit of {MAX_FILE_BYTES:,} bytes."
             )
-            raise typer.Exit(code=2)
 
         # Ensure we can decode as UTF-8.
         try:
             path.read_text(encoding=UTF8)
         except UnicodeDecodeError as err:
-            typer.secho(
-                f"Encoding error: '{path}' is not UTF-8 encoded.",
-                fg=typer.colors.RED,
-                err=True,
-            )
-            raise typer.Exit(code=2) from err
+            raise click.ClickException(
+                f"Encoding error: '{path}' is not UTF-8 encoded."
+            ) from err
 
     # Check total files size
     if total_size > MAX_TOTAL_BYTES:
-        typer.secho(
+        raise click.ClickException(
             "Total size of all files is too large: "
-            f"{total_size:,} bytes > {MAX_TOTAL_BYTES:,} bytes.",
-            fg=typer.colors.RED,
-            err=True,
+            f"{total_size:,} bytes > {MAX_TOTAL_BYTES:,} bytes."
         )
-        raise typer.Exit(code=2)
 
     # Print validation passed prompt
     typer.echo(typer.style("✅ Validation passed", fg=typer.colors.GREEN, bold=True))

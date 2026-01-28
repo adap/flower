@@ -19,6 +19,7 @@ import io
 import json
 from typing import Annotated
 
+import click
 import typer
 from rich.console import Console
 
@@ -75,13 +76,7 @@ def unregister(  # pylint: disable=R0914
             _unregister_node(stub=stub, node_id=node_id, output_format=output_format)
 
         except ValueError as err:
-            typer.secho(
-                f"❌ {err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-            raise typer.Exit(code=1) from err
+            raise click.ClickException(str(err)) from err
         finally:
             if channel:
                 channel.close()
@@ -92,12 +87,7 @@ def unregister(  # pylint: disable=R0914
             e_message = captured_output.getvalue()
             print_json_error(e_message, err)
         else:
-            typer.secho(
-                f"{err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
+            raise click.ClickException(str(err)) from None
     finally:
         if suppress_output:
             restore_output()

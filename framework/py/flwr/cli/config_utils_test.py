@@ -257,7 +257,7 @@ def test_validate_federation_in_project_config_fail() -> None:
 
     def run_and_assert_exit(federation: str | None, config: dict[str, Any]) -> None:
         """Execute validation and assert exit code is 1."""
-        with pytest.raises(click.exceptions.Exit) as excinfo:
+        with pytest.raises(click.ClickException) as excinfo:
             validate_federation_in_project_config(federation, config)
         assert excinfo.value.exit_code == 1
 

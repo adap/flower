@@ -22,6 +22,7 @@ import subprocess
 from pathlib import Path
 from typing import Annotated, Any, cast
 
+import click
 import typer
 from rich.console import Console
 
@@ -121,8 +122,7 @@ def run(
             try:
                 _ = parse_app_spec(app_str)
             except ValueError as e:
-                typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
-                raise typer.Exit(code=1) from e
+                raise click.ClickException(str(e)) from e
 
             app_spec = app_str
             # Set `app` to current directory for credential storage
@@ -143,18 +143,13 @@ def run(
                 simulation_options=superlink_connection.options,  # type: ignore
                 config_overrides=run_config_overrides,
             )
-    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
+    except Exception as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
             print_json_error(e_message, err)
         else:
-            typer.secho(
-                f"{err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
+            raise click.ClickException(str(err)) from None
     finally:
         if suppress_output:
             restore_output()
@@ -211,8 +206,7 @@ def _run_with_control_api(
                 f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN
             )
         else:
-            typer.secho("❌ Failed to start run", fg=typer.colors.RED, err=True)
-            raise typer.Exit(code=1)
+            raise click.ClickException("Failed to start run")
 
         if output_format == CliOutputFormat.JSON:
             # Only include FAB metadata if we actually built a local FAB
