@@ -142,8 +142,8 @@ def _get_baseline_metadata() -> MetaData:
 
     The implementation uses StaticPool and passes an active connection via
     config.attributes to Alembic's env.py. This ensures the same in-memory database
-    instance is used throughout migration and reflection, since each new connection
-    to sqlite:///:memory: creates a separate empty database.
+    instance is used throughout migration and reflection, since each new connection to
+    sqlite:///:memory: creates a separate empty database.
     """
     # Create an in-memory SQLite database with StaticPool to ensure connection reuse.
     # This is needed because in-memory databases are instance-specific per connection.
