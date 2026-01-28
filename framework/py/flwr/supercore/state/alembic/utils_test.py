@@ -80,7 +80,6 @@ class TestAlembicRun(unittest.TestCase):
 
     def test_legacy_database_is_stamped_and_upgraded_successfully(self) -> None:
         """Ensure legacy databases without alembic_version is stamped and upgraded."""
-
         with TemporaryDirectory() as temp_dir:
             db_path = Path(temp_dir) / "state.db"
             engine = create_engine(f"sqlite:///{db_path}")
@@ -125,8 +124,6 @@ class TestAlembicRun(unittest.TestCase):
 
     def test_legacy_mismatch_with_missing_columns_raises(self) -> None:
         """Ensure legacy schemas with missing columns fail verification."""
-        from flwr.supercore.state.alembic.utils import _get_baseline_metadata
-
         with TemporaryDirectory() as temp_dir:
             db_path = Path(temp_dir) / "state.db"
             engine = create_engine(f"sqlite:///{db_path}")
@@ -165,8 +162,6 @@ class TestAlembicRun(unittest.TestCase):
         columns that were added manually. The verification should be permissive
         and only fail on MISSING baseline tables/columns.
         """
-        from flwr.supercore.state.alembic.utils import _get_baseline_metadata
-
         with TemporaryDirectory() as temp_dir:
             db_path = Path(temp_dir) / "state.db"
             engine = create_engine(f"sqlite:///{db_path}")
