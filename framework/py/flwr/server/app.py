@@ -428,7 +428,7 @@ def run_superlink() -> None:
 
     if args.isolation == ISOLATION_MODE_SUBPROCESS:
         appio_address = resolve_bind_address(
-            serverappio_address if is_simulation else serverappio_address
+            simulationio_address if is_simulation else serverappio_address
         )
         command = ["flower-superexec", "--insecure"]
         command += ["--appio-api-address", appio_address]
