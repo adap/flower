@@ -62,9 +62,9 @@ following information about a federation:
 - The SuperNodes registered with the federation and their status.
 - The runs executed via the federation.
 
-The ``flwr federation list --federation <federation>`` command requires the name of the federation to inspect as
-an argument. This can be specified as part of your Flower Configuration TOML file. For
-example:
+The ``flwr federation list --federation <federation>`` command requires the name of the
+federation to inspect as an argument. This can be specified as part of your Flower
+Configuration TOML file. For example:
 
 .. code-block:: toml
     :emphasize-lines: 4
