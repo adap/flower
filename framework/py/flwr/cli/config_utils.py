@@ -51,7 +51,7 @@ def get_fab_metadata(fab_file: Path | bytes) -> tuple[str, str]:
 def load_and_validate(
     path: Path | None = None,
     check_module: bool = True,
-) -> tuple[dict[str, Any] | None, list[str], list[str]]:
+) -> tuple[dict[str, Any], list[str]]:
     """Load and validate pyproject.toml as dict.
 
     Parameters
@@ -66,28 +66,33 @@ def load_and_validate(
 
     Returns
     -------
-    Tuple[Optional[config], List[str], List[str]]
-        A tuple with the optional config in case it exists and is valid
-        and associated errors and warnings.
+    tuple[dict[str, Any], list[str]]
+        A tuple of the loaded configuration as dictionary and a list of warnings.
+
+    Raises
+    ------
+    ValueError
+        If the configuration is invalid or the file cannot be loaded.
     """
     if path is None:
         path = Path.cwd() / "pyproject.toml"
-
+    path = path.resolve()
     config = load(path)
 
     if config is None:
-        errors = [
-            "Project configuration could not be loaded. "
-            "`pyproject.toml` does not exist."
-        ]
-        return (None, errors, [])
+        raise ValueError(
+            f"Failed to load Flower App configuration in '{path}'. File may be missing or invalid."
+        )
 
     is_valid, errors, warnings = validate_config(config, check_module, path.parent)
 
     if not is_valid:
-        return (None, errors, warnings)
+        raise ValueError(
+            f"Invalid Flower App configuration in '{path}':\n"
+            + "\n".join([f"- {line}" for line in errors])
+        )
 
-    return (config, errors, warnings)
+    return config, warnings
 
 
 def load(toml_path: Path) -> dict[str, Any] | None:

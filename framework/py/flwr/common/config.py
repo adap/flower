@@ -375,13 +375,13 @@ def validate_config(
     is_valid, reason = object_ref.validate(serverapp_ref, check_module, project_dir)
 
     if not is_valid and isinstance(reason, str):
-        return False, [reason], []
+        return False, [reason], warnings
 
     # Validate clientapp
     clientapp_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
     is_valid, reason = object_ref.validate(clientapp_ref, check_module, project_dir)
 
     if not is_valid and isinstance(reason, str):
-        return False, [reason], []
+        return False, [reason], warnings
 
-    return True, [], []
+    return True, [], warnings

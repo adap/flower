@@ -171,10 +171,12 @@ def validate_and_install(
     click.ClickException
         If configuration is invalid or metadata doesn't match.
     """
-    config, _, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
-
-    if config is None:
-        raise click.ClickException("Invalid config inside FAB file.")
+    try:
+        config, _ = load_and_validate(
+            project_dir / "pyproject.toml", check_module=False
+        )
+    except ValueError as e:
+        raise click.ClickException(str(e)) from None
 
     fab_id, version = get_metadata_from_config(config)
     publisher, project_name = fab_id.split("/")
