@@ -24,6 +24,7 @@ from alembic.autogenerate import compare_metadata
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from sqlalchemy import create_engine, inspect
+from sqlalchemy.engine import Engine
 
 from flwr.common.exit import ExitCode
 from flwr.supercore.state.alembic.utils import (
@@ -31,10 +32,7 @@ from flwr.supercore.state.alembic.utils import (
     BASELINE_REVISION,
     _build_alembic_config,
     _get_baseline_revision,
-    check_migrations_in_sync,
-    check_migrations_pending,
     get_combined_metadata,
-    get_current_revision,
     run_migrations,
 )
 
@@ -168,8 +166,47 @@ class TestAlembicRun(unittest.TestCase):
             db_path = Path(temp_dir) / "state.db"
             engine = create_engine(f"sqlite:///{db_path}")
             try:
-                baseline = _get_baseline_revision(engine)
+                baseline = _get_baseline_revision()
                 # Should match the constant (or be dynamically discovered)
                 self.assertEqual(baseline, BASELINE_REVISION)
             finally:
                 engine.dispose()
+
+
+def get_current_revision(engine: Engine) -> str | None:
+    """Return the current Alembic revision for the given database."""
+    with engine.connect() as connection:
+        context = MigrationContext.configure(connection)
+        return context.get_current_revision()
+
+
+def check_migrations_pending(engine: Engine) -> bool:
+    """Return True if the database is not on the latest migration head."""
+    current = get_current_revision(engine)
+    script = ScriptDirectory.from_config(_build_alembic_config(engine))
+    heads = set(script.get_heads())
+    if current is None:
+        return True
+    return current not in heads
+
+
+def check_migrations_in_sync() -> bool:
+    """Return True if migrations produce no diff versus current metadata."""
+    metadata = get_combined_metadata()
+    with TemporaryDirectory() as temp_dir:
+        db_path = Path(temp_dir) / "state.db"
+        engine = create_engine(f"sqlite:///{db_path}")
+        try:
+            run_migrations(engine)
+            with engine.connect() as connection:
+                context = MigrationContext.configure(
+                    connection,
+                    opts={
+                        "compare_type": True,
+                        "compare_server_default": True,
+                    },
+                )
+                diffs = compare_metadata(context, metadata)
+        finally:
+            engine.dispose()
+    return len(diffs) == 0
