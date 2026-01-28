@@ -88,14 +88,14 @@ def _pack_signature(
     data: bytes, signature: bytes, public_key_bytes: bytes | None = None
 ) -> bytes:
     if public_key_bytes is None:
-        return data + struct.pack(">H", len(signature)) + signature
+        return data + signature + struct.pack(">H", len(signature))
     return (
         data
         + b"FLPK"
         + struct.pack(">H", len(public_key_bytes))
         + public_key_bytes
-        + struct.pack(">H", len(signature))
         + signature
+        + struct.pack(">H", len(signature))
     )
 
 
@@ -108,12 +108,16 @@ def _unpack_signature(payload: bytes) -> tuple[bytes, bytes, bytes | None]:
     signature = payload[-2 - sig_len : -2]
     remaining = payload[: -2 - sig_len]
     if len(remaining) >= 6:
-        public_key_len = struct.unpack(">H", remaining[-2:])[0]
-        marker_start = len(remaining) - (6 + public_key_len)
-        if marker_start >= 0 and remaining[marker_start : marker_start + 4] == b"FLPK":
-            public_key = remaining[marker_start + 6 : marker_start + 6 + public_key_len]
-            data = remaining[:marker_start]
-            return data, signature, public_key
+        marker_start = remaining.rfind(b"FLPK")
+        if marker_start != -1 and len(remaining) >= marker_start + 6:
+            public_key_len = struct.unpack(
+                ">H", remaining[marker_start + 4 : marker_start + 6]
+            )[0]
+            public_key_end = marker_start + 6 + public_key_len
+            if public_key_end == len(remaining):
+                public_key = remaining[marker_start + 6 : public_key_end]
+                data = remaining[:marker_start]
+                return data, signature, public_key
     data = remaining
     return data, signature, None
 
