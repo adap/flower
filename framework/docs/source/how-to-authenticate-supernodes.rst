@@ -112,21 +112,21 @@ Here's how this looks in code:
 
 .. code-block:: bash
 
-    # flwr supernode register <supernode-pub-key> <app> <federation>
-    $ flwr supernode register keys/supernode_credentials_1.pub . local-deployment
+    # flwr supernode register <supernode-pub-key> <superlink>
+    $ flwr supernode register keys/supernode_credentials_1.pub local-deployment
 
 Next, let’s register the second SuperNode as well:
 
 .. code-block:: bash
 
-    $ flwr supernode register keys/supernode_credentials_2.pub . local-deployment
+    $ flwr supernode register keys/supernode_credentials_2.pub local-deployment
 
 You can list the registered SuperNodes using the following command:
 
 .. code-block:: bash
 
-    # flwr supernode list <app> <federation>
-    $ flwr supernode list . local-deployment
+    # flwr supernode list <superlink>
+    $ flwr supernode list local-deployment
 
 This will display the IDs of the SuperNodes you just registered as well as their status.
 You should see a table similar to the following:
@@ -184,7 +184,7 @@ will notice their status is now ``online``:
 
 .. code-block:: bash
 
-    $ flwr supernode list . local-deployment
+    $ flwr supernode list local-deployment
 
     ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
     ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed ┃   Status Changed @   ┃
@@ -211,8 +211,8 @@ or future runs. Unregistering a SuperNode can be done via the
 
 .. code-block:: bash
 
-    # flwr supernode unregister <node-id> <app> <federation>
-    $ flwr supernode unregister 16019329408659850374 . local-deployment
+    # flwr supernode unregister <node-id> <superlink>
+    $ flwr supernode unregister 16019329408659850374 local-deployment
 
 The above command unregisters the first SuperNode. You can verify this by listing the
 SuperNodes again:
@@ -234,7 +234,7 @@ right, **if you wish to connect a second SuperNode a new EC key pair is needed.*
 
 .. code-block:: bash
 
-    $ flwr supernode list . local-deployment --verbose
+    $ flwr supernode list local-deployment --verbose
 
     ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
     ┃       Node ID        ┃   Owner    ┃    Status   ┃ Elapsed ┃   Status Changed @   ┃

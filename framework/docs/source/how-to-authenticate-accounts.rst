@@ -94,6 +94,7 @@ CLI. Configure the SuperLink connection in your Flower Configuration file (typic
 located at ``$HOME/.flwr/config.toml``):
 
 .. code-block:: toml
+    :caption: config.toml
 
     [superlink]
     default = "my-prod-superlink"  # Set the default connection configuration
