@@ -18,15 +18,18 @@
 import hashlib
 import json
 import re
+import sys
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
+from io import StringIO
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 import click
 import grpc
 import pathspec
 import typer
+from rich.console import Console
 
 from flwr.cli.typing import SuperLinkConnection
 from flwr.common.constant import (
@@ -43,18 +46,65 @@ from flwr.common.constant import (
     REFRESH_TOKEN_KEY,
     RUN_ID_NOT_FOUND_MESSAGE,
     AuthnType,
+    CliOutputFormat,
 )
 from flwr.common.grpc import (
     GRPC_MAX_MESSAGE_LENGTH,
     create_channel,
     on_channel_state_change,
 )
+from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.supercore.credential_store import get_credential_store
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
 from .config_utils import load_certificate_in_connection
 from .constant import AUTHN_TYPE_STORE_KEY
+
+
+def print_json_to_stdout(data: str | Any) -> None:
+    """Print JSON data to stdout, bypassing any output redirection.
+
+    Use this function within the `cli_output_handler` context manager to print JSON
+    output directly to the terminal, even when stdout is being captured.
+    """
+    if isinstance(data, str):
+        Console(file=sys.__stdout__).print_json(data)
+    else:
+        Console(file=sys.__stdout__).print_json(data=data)
+
+
+@contextmanager  # docsig: ignore=SIG503
+def cli_output_handler(
+    output_format: str = CliOutputFormat.DEFAULT,
+) -> Iterator[bool]:
+    """Context manager for handling CLI output in different formats.
+
+    This context manager provides consistent output handling for CLI commands by:
+    - Redirecting stdout/stderr when JSON format is requested
+    - Catching and handling exceptions appropriately based on the output format
+
+    Use the `print_json_to_stdout()` utility function to print JSON output that bypasses
+    output redirection.
+    """
+    is_json = output_format == CliOutputFormat.JSON
+    captured_output = StringIO()
+
+    if is_json:
+        redirect_output(captured_output)
+
+    try:
+        yield is_json
+    except Exception as err:  # pylint: disable=broad-except
+        if is_json:
+            restore_output()
+            print_json_error(captured_output.getvalue(), err)
+        else:
+            raise click.ClickException(str(err)) from None
+    finally:
+        if is_json:
+            restore_output()
+        captured_output.close()
 
 
 def prompt_text(

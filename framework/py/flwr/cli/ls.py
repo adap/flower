@@ -15,11 +15,9 @@
 """Flower command line interface `ls` command."""
 
 
-import io
 import json
 from typing import Annotated
 
-import click
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -29,7 +27,6 @@ from flwr.cli.config_migration import migrate, warn_if_federation_config_overrid
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.common.constant import CliOutputFormat, Status, SubStatus
-from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import run_from_proto
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListRunsRequest,
@@ -39,7 +36,12 @@ from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.supercore.utils import humanize_bytes, humanize_duration
 
 from .run_utils import RunRow, format_runs
-from .utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
+from .utils import (
+    cli_output_handler,
+    flwr_cli_grpc_exc_handler,
+    init_channel_from_connection,
+    print_json_to_stdout,
+)
 
 
 def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
@@ -92,23 +94,17 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
 
     All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD HH:MM:SSZ``.
     """
-    suppress_output = output_format == CliOutputFormat.JSON
-    captured_output = io.StringIO()
+    with cli_output_handler(output_format=output_format) as is_json:
+        # Warn `--federation-config` is ignored
+        warn_if_federation_config_overrides(federation_config_overrides)
 
-    if suppress_output:
-        redirect_output(captured_output)
+        # Migrate legacy usage if any
+        migrate(superlink, args=ctx.args)
 
-    # Warn `--federation-config` is ignored
-    warn_if_federation_config_overrides(federation_config_overrides)
+        # Read superlink connection configuration
+        superlink_connection = read_superlink_connection(superlink)
+        channel = None
 
-    # Migrate legacy usage if any
-    migrate(superlink, args=ctx.args)
-
-    # Read superlink connection configuration
-    superlink_connection = read_superlink_connection(superlink)
-    channel = None
-
-    try:
         try:
             if runs and run_id is not None:
                 raise ValueError(
@@ -125,9 +121,9 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
             else:
                 typer.echo("📄 Listing all runs...")
                 formatted_runs = _list_runs(stub)
-            restore_output()
-            if output_format == CliOutputFormat.JSON:
-                Console().print_json(_to_json(formatted_runs))
+
+            if is_json:
+                print_json_to_stdout(_to_json(formatted_runs))
             else:
                 if run_id is not None:
                     Console().print(_to_detail_table(formatted_runs[0]))
@@ -136,17 +132,6 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         finally:
             if channel:
                 channel.close()
-    except Exception as err:  # pylint: disable=broad-except
-        if suppress_output:
-            restore_output()
-            e_message = captured_output.getvalue()
-            print_json_error(e_message, err)
-        else:
-            raise click.ClickException(str(err)) from None
-    finally:
-        if suppress_output:
-            restore_output()
-        captured_output.close()
 
 
 def _get_status_style(status_text: str) -> str:
