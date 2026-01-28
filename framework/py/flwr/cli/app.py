@@ -76,7 +76,7 @@ supernode_app.command(**ALLOW_EXTRAS)(supernode_unregister)
 # Make it appear as "list"
 supernode_app.command("list", **ALLOW_EXTRAS)(supernode_list)
 # Hide "ls" command (left as alias)
-supernode_app.command(hidden=True, **ALLOW_EXTRAS)(supernode_list)
+supernode_app.command(**ALLOW_EXTRAS)(supernode_list)
 app.add_typer(supernode_app, name="supernode")
 
 # Create app command group
