@@ -34,7 +34,7 @@ class SuperLinkConnectionTest(unittest.TestCase):
         )
         self.assertEqual(connection.federation, federation)
 
-    @parameterized.expand(
+    @parameterized.expand(  # type: ignore
         [
             ("my-account/my-federation",),  # Missing @
             ("@my-account-my-federation",),  # Missing /
