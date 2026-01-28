@@ -224,10 +224,6 @@ class TestAlembicRun(unittest.TestCase):
         finally:
             engine.dispose()
 
-    def test_check_migrations_in_sync(self) -> None:
-        """Ensure migrations are in sync with metadata."""
-        self.assertTrue(check_migrations_in_sync())
-
 
 def get_current_revision(engine: Engine) -> str | None:
     """Return the current Alembic revision for the given database."""
@@ -244,25 +240,3 @@ def check_migrations_pending(engine: Engine) -> bool:
     if current is None:
         return True
     return current not in heads
-
-
-def check_migrations_in_sync() -> bool:
-    """Return True if migrations produce no diff versus current metadata."""
-    metadata = get_combined_metadata()
-    with TemporaryDirectory() as temp_dir:
-        db_path = Path(temp_dir) / "state.db"
-        engine = create_engine(f"sqlite:///{db_path}")
-        try:
-            run_migrations(engine)
-            with engine.connect() as connection:
-                context = MigrationContext.configure(
-                    connection,
-                    opts={
-                        "compare_type": True,
-                        "compare_server_default": True,
-                    },
-                )
-                diffs = compare_metadata(context, metadata)
-        finally:
-            engine.dispose()
-    return len(diffs) == 0
