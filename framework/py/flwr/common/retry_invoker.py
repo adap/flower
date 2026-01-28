@@ -354,6 +354,9 @@ def make_simple_grpc_retry_invoker() -> RetryInvoker:
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
             raise RunNotRunningException
         if e.code() == grpc.StatusCode.UNAVAILABLE:  # type: ignore
+            # Check if it's a permanent TLS/SSL error that won't be fixed by retrying
+            if "handshake failed" in e.details().lower():  # type: ignore
+                return True
             return False
         return True
 
