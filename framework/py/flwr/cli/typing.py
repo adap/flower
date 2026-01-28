@@ -187,9 +187,7 @@ class SuperLinkConnection:
 
             # Check if the federation string is valid
             # Expected format: '@<account-name>/<federation-name>'
-            is_valid = re.match(_FEDERATION_FORMAT_PATTERN, self.federation)
-
-            if not is_valid:
+            if not re.match(_FEDERATION_FORMAT_PATTERN, self.federation):
                 raise ValueError(
                     err_prefix % SuperLinkConnectionTomlKey.FEDERATION
                     + f"invalid format '{self.federation}'. "
