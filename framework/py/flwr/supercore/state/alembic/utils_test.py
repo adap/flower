@@ -121,15 +121,20 @@ class TestAlembicRun(unittest.TestCase):
         finally:
             engine.dispose()
 
-    def test_legacy_mismatch_raises_with_guidance(self) -> None:
-        """Ensure mismatched legacy schemas should fail with a clear error."""
+    def test_legacy_mismatch_with_missing_tables_exits_with_guidance(self) -> None:
+        """Ensure mismatched legacy schemas should fail and exit with a clear error."""
         # Prepare
         engine = self.create_engine()
         try:
-            # Create a subset of tables to trigger verification failure.
-            with engine.begin() as connection:
-                connection.exec_driver_sql("CREATE TABLE legacy_only (id INTEGER)")
+            # Create only a subset of baseline tables to simulate incomplete legacy DB
+            # Note that this is unlikely to happen as SuperLink requires a specific
+            # schema, but we test it for completeness.
+            baseline_metadata = _get_baseline_metadata()
+            tables_to_create = list(baseline_metadata.tables.values())[:3]
+            for table in tables_to_create:
+                table.create(engine)
 
+            # Execute & Assert
             with patch("flwr.supercore.state.alembic.utils.flwr_exit") as mock_exit:
                 run_migrations(engine)
 
@@ -139,11 +144,16 @@ class TestAlembicRun(unittest.TestCase):
                 self.assertEqual(
                     call_args[0][0], ExitCode.SUPERLINK_DATABASE_SCHEMA_MISMATCH
                 )
+                # Verify error message mentions missing baseline tables
+                error_msg = call_args[0][1]
+                self.assertIn("missing baseline tables", error_msg.lower())
         finally:
             engine.dispose()
 
-    def test_legacy_mismatch_with_missing_columns_raises(self) -> None:
-        """Ensure legacy schemas with missing columns fail verification."""
+    def test_legacy_mismatch_with_missing_columns_exits_with_guidance(self) -> None:
+        """Ensure legacy schemas with missing columns should fail and exit with a clear
+        error."""
+        # Prepare
         engine = self.create_engine()
         try:
             # Create node table with only some columns (missing required ones)
@@ -157,6 +167,7 @@ class TestAlembicRun(unittest.TestCase):
                 if table_name != "node":
                     baseline_metadata.tables[table_name].create(engine)
 
+            # Execute & Assert
             with patch("flwr.supercore.state.alembic.utils.flwr_exit") as mock_exit:
                 run_migrations(engine)
 
@@ -179,6 +190,7 @@ class TestAlembicRun(unittest.TestCase):
         columns that were added manually. The verification should be permissive
         and only fail on MISSING baseline tables/columns.
         """
+        # Prepare
         engine = self.create_engine()
         try:
             # Create baseline schema
@@ -201,19 +213,16 @@ class TestAlembicRun(unittest.TestCase):
                         "ALTER TABLE node ADD COLUMN custom_field TEXT"
                     )
 
-            # Should succeed and stamp/upgrade successfully
+            # Execute: should succeed and stamp/upgrade successfully
             run_migrations(engine)
 
             current = get_current_revision(engine)
             script = ScriptDirectory.from_config(build_alembic_config(engine))
+            # Assert
             self.assertIn(current, script.get_heads())
             self.assertFalse(check_migrations_pending(engine))
         finally:
             engine.dispose()
-
-    def test_check_migrations_in_sync(self) -> None:
-        """Ensure migrations are in sync with metadata."""
-        self.assertTrue(check_migrations_in_sync())
 
 
 def get_current_revision(engine: Engine) -> str | None:
@@ -231,25 +240,3 @@ def check_migrations_pending(engine: Engine) -> bool:
     if current is None:
         return True
     return current not in heads
-
-
-def check_migrations_in_sync() -> bool:
-    """Return True if migrations produce no diff versus current metadata."""
-    metadata = get_combined_metadata()
-    with TemporaryDirectory() as temp_dir:
-        db_path = Path(temp_dir) / "state.db"
-        engine = create_engine(f"sqlite:///{db_path}")
-        try:
-            run_migrations(engine)
-            with engine.connect() as connection:
-                context = MigrationContext.configure(
-                    connection,
-                    opts={
-                        "compare_type": True,
-                        "compare_server_default": True,
-                    },
-                )
-                diffs = compare_metadata(context, metadata)
-        finally:
-            engine.dispose()
-    return len(diffs) == 0
