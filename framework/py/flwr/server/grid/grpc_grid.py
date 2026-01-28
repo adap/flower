@@ -49,7 +49,7 @@ from flwr.common.inflatable_utils import (
 )
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import make_message, remove_content_from_message
-from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
+from flwr.common.retry_invoker import _wrap_stub, make_simple_grpc_retry_invoker
 from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
@@ -127,7 +127,7 @@ class GrpcGrid(Grid):
         self._grpc_stub: ServerAppIoStub | None = None
         self._channel: grpc.Channel | None = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
-        self._retry_invoker = _make_simple_grpc_retry_invoker()
+        self._retry_invoker = make_simple_grpc_retry_invoker()
         super().__init__()
 
     @property
