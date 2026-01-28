@@ -60,7 +60,7 @@ from flwr.common.inflatable_utils import (
     push_object_contents_from_iterable,
 )
 from flwr.common.logger import log
-from flwr.common.retry_invoker import RetryInvoker, _make_simple_grpc_retry_invoker
+from flwr.common.retry_invoker import RetryInvoker, make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
@@ -610,7 +610,7 @@ def _make_fleet_connection_retry_invoker(
     connection_error_type: type[Exception] = RpcError,
 ) -> RetryInvoker:
     """Create a retry invoker for fleet connection."""
-    retry_invoker = _make_simple_grpc_retry_invoker()
+    retry_invoker = make_simple_grpc_retry_invoker()
     retry_invoker.recoverable_exceptions = connection_error_type
     if max_retries is not None:
         retry_invoker.max_tries = max_retries + 1

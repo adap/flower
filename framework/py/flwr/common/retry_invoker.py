@@ -21,7 +21,7 @@ import threading
 import time
 from collections.abc import Callable, Generator, Iterable
 from dataclasses import dataclass
-from logging import INFO, WARN
+from logging import DEBUG, INFO, WARN
 from typing import Any, cast
 
 import grpc
@@ -318,7 +318,7 @@ class RetryInvoker:
                 return ret
 
 
-def _make_simple_grpc_retry_invoker() -> RetryInvoker:
+def make_simple_grpc_retry_invoker() -> RetryInvoker:
     """Create a simple gRPC retry invoker."""
     lock = threading.Lock()
     system_healthy = threading.Event()
@@ -334,8 +334,11 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
                 retry_state.tries,
             )
 
-    def _on_backoff(_: RetryState) -> None:
+    def _on_backoff(retry_state: RetryState) -> None:
         system_healthy.clear()
+        log(
+            DEBUG, "Connection attempt failed with exception: %s", retry_state.exception
+        )
 
     def _on_giveup(retry_state: RetryState) -> None:
         system_healthy.clear()
@@ -351,6 +354,9 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
             raise RunNotRunningException
         if e.code() == grpc.StatusCode.UNAVAILABLE:  # type: ignore
+            # Check if it's a permanent TLS/SSL error that won't be fixed by retrying
+            if "handshake failed" in e.details().lower():  # type: ignore
+                return True
             return False
         return True
 
@@ -386,7 +392,7 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
     )
 
 
-def _wrap_stub(
+def wrap_stub(
     stub: (
         ServerAppIoStub | ClientAppIoStub | SimulationIoStub | FleetStub | GrpcAdapter
     ),

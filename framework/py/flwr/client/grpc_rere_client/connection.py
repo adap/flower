@@ -33,7 +33,7 @@ from flwr.common.inflatable_protobuf_utils import (
 )
 from flwr.common.logger import log
 from flwr.common.message import Message, remove_content_from_message
-from flwr.common.retry_invoker import RetryInvoker, _wrap_stub
+from flwr.common.retry_invoker import RetryInvoker, wrap_stub
 from flwr.common.serde import (
     fab_from_proto,
     message_from_proto,
@@ -165,7 +165,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     node: Node | None = None
 
     # Wrap stub
-    _wrap_stub(stub, retry_invoker)
+    wrap_stub(stub, retry_invoker)
     ###########################################################################
     # SuperNode functions
     ###########################################################################
