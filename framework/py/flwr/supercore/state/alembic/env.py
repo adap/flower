@@ -59,17 +59,31 @@ def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine and associate a connection with the
-    context.
+    context. If a connection is provided via config.attributes, use it directly to
+    support in-memory databases.
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    # Check if a connection was provided (e.g., for in-memory databases)
+    connection = config.attributes.get("connection", None)
 
-    with connectable.connect() as connection:
-        # pylint: disable-next=no-member
-        context.configure(connection=connection, target_metadata=target_metadata)
+    if connection is None:
+        # Standard path: create engine from config
+        connectable = engine_from_config(
+            config.get_section(config.config_ini_section, {}),
+            prefix="sqlalchemy.",
+            poolclass=pool.NullPool,
+        )
+
+        with connectable.connect() as connection:
+            # pylint: disable-next=no-member
+            context.configure(connection=connection, target_metadata=target_metadata)
+
+            with context.begin_transaction():  # pylint: disable=no-member
+                context.run_migrations()  # pylint: disable=no-member
+    else:
+        # Use the provided connection directly (for in-memory databases)
+        context.configure(  # pylint: disable=no-member
+            connection=connection, target_metadata=target_metadata
+        )
 
         with context.begin_transaction():  # pylint: disable=no-member
             context.run_migrations()  # pylint: disable=no-member

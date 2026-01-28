@@ -17,11 +17,10 @@
 
 from logging import INFO
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import MetaData, create_engine, inspect
+from sqlalchemy import MetaData, create_engine, inspect, pool
 from sqlalchemy.engine import Engine
 
 from flwr.common.exit import ExitCode, flwr_exit
@@ -135,27 +134,35 @@ def _has_alembic_version_table(engine: Engine) -> bool:
 
 
 def _get_baseline_metadata() -> MetaData:
-    """Create a temporary DB at baseline revision and reflect its schema.
+    """Create an in-memory DB at baseline revision and reflect its schema.
 
     This ensures we compare legacy databases against the actual baseline schema,
-    not the current (potentially newer) metadata.
+    not the current (potentially newer) metadata. Uses an in-memory SQLite database
+    to avoid requiring filesystem write access.
     """
-    with TemporaryDirectory() as temp_dir:
-        db_path = Path(temp_dir) / "baseline.db"
-        engine = create_engine(f"sqlite:///{db_path}")
-        try:
-            # Run migrations only up to the baseline revision
+    # Use StaticPool to ensure the same in-memory database is used across all
+    # connections within this engine
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=pool.StaticPool,
+    )
+    try:
+        # Run migrations only up to the baseline revision using a connection
+        # from this engine to ensure tables persist in the in-memory database
+        with engine.begin() as connection:
             config = build_alembic_config(engine)
+            config.attributes["connection"] = connection
             command.upgrade(config, FLWR_STATE_BASELINE_REVISION)
 
-            # Reflect the baseline schema (excluding alembic_version)
-            baseline_metadata = MetaData()
-            baseline_metadata.reflect(
-                bind=engine,
-                only=lambda table_name, _: table_name != ALEMBIC_VERSION_TABLE,
-            )
-        finally:
-            engine.dispose()
+        # Reflect the baseline schema (excluding alembic_version)
+        baseline_metadata = MetaData()
+        baseline_metadata.reflect(
+            bind=engine,
+            only=lambda table_name, _: table_name != ALEMBIC_VERSION_TABLE,
+        )
+    finally:
+        engine.dispose()
 
     return baseline_metadata
 
