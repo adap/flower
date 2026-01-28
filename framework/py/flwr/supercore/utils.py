@@ -267,11 +267,10 @@ def check_federation_format(federation: str) -> None:
     Raises
     ------
     ValueError
-        If the federation string is not valid.
+        If the federation string is not valid. The expected
+        format is '@<account-name>/<federation-name>'.
     """
-    # '@<account-name>/<federation-name>'
-    FEDERATION_FORMAT_PATTERN = r"^@[a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+$"
-    if not re.match(FEDERATION_FORMAT_PATTERN, federation):
+    if not re.match(r"^@[a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+$", federation):
         raise ValueError(
             f"Invalid federation format: {federation}. "
             f"Expected format: '@<account-name>/<federation-name>'."
