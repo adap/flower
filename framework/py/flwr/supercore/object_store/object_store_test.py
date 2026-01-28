@@ -26,7 +26,6 @@ from sqlalchemy import Engine, inspect
 from flwr.common.inflatable import get_object_id, get_object_tree, iterate_object_tree
 from flwr.common.inflatable_test import CustomDataClass
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
-from flwr.supercore.constant import FLWR_IN_MEMORY_SQLITE_DB_URL
 
 from .in_memory_object_store import InMemoryObjectStore
 from .object_store import NoObjectInStoreError, ObjectStore
@@ -382,7 +381,7 @@ class SqlInMemoryObjectStoreTest(ObjectStoreTest):
 
     def object_store_factory(self) -> SqlObjectStore:
         """Return SqlObjectStore."""
-        store = SqlObjectStore(FLWR_IN_MEMORY_SQLITE_DB_URL)
+        store = SqlObjectStore(":memory:")
         store.initialize()
         return store
 
