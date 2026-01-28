@@ -1860,8 +1860,14 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
         # Execute
         result = state.query("SELECT name FROM sqlite_schema;")
 
-        # Assert - 7 tables + 11 indexes (3 explicit + 8 auto from UNIQUE constraints)
-        assert len(result) == 18
+        # Assert - With Alembic migrations:
+        # 11 tables: node, run, logs, context, message_ins, message_res, token_store,
+        #            objects, object_children, run_objects, alembic_version
+        # 15 indexes: 3 explicit +
+        #             10 auto-generated from UNIQUE constraints +
+        #             1 auto-generated for the UNIQUE constraint on the alembic_version
+        #             table
+        assert len(result) == 26
 
 
 if __name__ == "__main__":
