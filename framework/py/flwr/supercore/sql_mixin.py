@@ -29,7 +29,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
 from flwr.common.logger import log
-from flwr.supercore.constant import SQLITE_PRAGMAS
+from flwr.supercore.constant import FLWR_IN_MEMORY_SQLITE_DB_URL, SQLITE_PRAGMAS
 
 _current_session: ContextVar[Session | None] = ContextVar(
     "current_sqlalchemy_session",
@@ -95,7 +95,7 @@ class SqlMixin(ABC):
 
         # Auto-convert file path to SQLAlchemy SQLite URL if needed
         if database_path == ":memory:":
-            self.database_url = "sqlite:///:memory:"
+            self.database_url = FLWR_IN_MEMORY_SQLITE_DB_URL
         elif not database_path.startswith("sqlite://"):
             # Treat as file path, convert to absolute and create SQLite URL
             abs_path = Path(database_path).resolve()
