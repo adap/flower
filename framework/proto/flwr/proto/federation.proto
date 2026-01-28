@@ -19,9 +19,15 @@ package flwr.proto;
 import "flwr/proto/run.proto";
 import "flwr/proto/node.proto";
 
+message Account {
+  string id = 1;
+  string name = 2;
+}
+
 message Federation {
   string name = 1;
   repeated string member_aids = 2;
-  repeated NodeInfo nodes = 3;
-  repeated Run runs = 4;
+  repeated Account accounts = 3;
+  repeated NodeInfo nodes = 4;
+  repeated Run runs = 5;
 }
