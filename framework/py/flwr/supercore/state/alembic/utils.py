@@ -15,7 +15,7 @@
 """Helpers for running and validating Alembic migrations."""
 
 
-from logging import DEBUG, WARNING
+from logging import DEBUG, INFO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -199,7 +199,7 @@ def run_migrations(engine: Engine) -> None:
         )
 
     log(
-        WARNING,
+        INFO,
         "Detected pre-Alembic state database without alembic_version; stamping to %s "
         "before upgrading.",
         baseline_revision,
