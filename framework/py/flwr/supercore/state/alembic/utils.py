@@ -17,11 +17,9 @@
 
 from logging import INFO
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from alembic import command
 from alembic.config import Config
-from alembic.script import ScriptDirectory
 from sqlalchemy import MetaData, create_engine, inspect
 from sqlalchemy.engine import Engine
 
@@ -32,8 +30,8 @@ from flwr.supercore.state.schema.linkstate_tables import create_linkstate_metada
 from flwr.supercore.state.schema.objectstore_tables import create_objectstore_metadata
 
 ALEMBIC_DIR = Path(__file__).resolve().parent
-BASELINE_REVISION = "8e65d8ae60b0"
 ALEMBIC_VERSION_TABLE = "alembic_version"
+FLWR_STATE_BASELINE_REVISION = "8e65d8ae60b0"
 
 
 def get_combined_metadata() -> MetaData:
@@ -85,45 +83,23 @@ def _has_alembic_version_table(engine: Engine) -> bool:
     return inspector.has_table(ALEMBIC_VERSION_TABLE)
 
 
-def get_baseline_revision() -> str:
-    """Return the revision ID of the first migration (no down_revision).
-
-    Falls back to BASELINE_REVISION constant if unable to determine dynamically.
-    """
-    try:
-        config = Config()
-        config.set_main_option("script_location", str(ALEMBIC_DIR))
-        script = ScriptDirectory.from_config(config)
-        for rev in script.walk_revisions():
-            if rev.down_revision is None:
-                return rev.revision
-    except (OSError, ValueError, RuntimeError):
-        # Failed to read script directory or parse migrations
-        pass
-    return BASELINE_REVISION
-
-
 def _get_baseline_metadata() -> MetaData:
-    """Create a temporary DB at baseline revision and reflect its schema.
+    """Create an in-memory DB at baseline revision and reflect its schema.
 
     This ensures we compare legacy databases against the actual baseline schema,
     not the current (potentially newer) metadata.
     """
-    baseline_revision = get_baseline_revision()
+    engine = create_engine("sqlite:///:memory:")
+    try:
+        # Run migrations only up to the baseline revision
+        config = build_alembic_config(engine)
+        command.upgrade(config, FLWR_STATE_BASELINE_REVISION)
 
-    with TemporaryDirectory() as temp_dir:
-        temp_db_path = Path(temp_dir) / "baseline.db"
-        temp_engine = create_engine(f"sqlite:///{temp_db_path}")
-        try:
-            # Run migrations only up to the baseline revision
-            config = build_alembic_config(temp_engine)
-            command.upgrade(config, baseline_revision)
-
-            # Reflect the baseline schema
-            baseline_metadata = MetaData()
-            baseline_metadata.reflect(bind=temp_engine)
-        finally:
-            temp_engine.dispose()
+        # Reflect the baseline schema
+        baseline_metadata = MetaData()
+        baseline_metadata.reflect(bind=engine)
+    finally:
+        engine.dispose()
 
     return baseline_metadata
 
@@ -182,7 +158,9 @@ def _verify_legacy_schema_matches_baseline(engine: Engine) -> tuple[bool, str]:
     return True, ""
 
 
-def stamp_existing_database(engine: Engine, revision: str = BASELINE_REVISION) -> None:
+def stamp_existing_database(
+    engine: Engine, revision: str = FLWR_STATE_BASELINE_REVISION
+) -> None:
     """Stamp an existing legacy database to the baseline Alembic revision."""
     command.stamp(build_alembic_config(engine), revision)
 
@@ -212,7 +190,6 @@ def run_migrations(engine: Engine) -> None:
         return
 
     # Pre-Alembic database detected: verify baseline schema before stamping.
-    baseline_revision = get_baseline_revision()
     is_valid, error_msg = _verify_legacy_schema_matches_baseline(engine)
 
     # This is an edge case and unlikely to happen since SuperLink requires a specific
@@ -221,7 +198,7 @@ def run_migrations(engine: Engine) -> None:
         flwr_exit(
             ExitCode.SUPERLINK_DATABASE_SCHEMA_MISMATCH,
             "Detected a pre-Alembic Flower state database, but its schema does not "
-            f"match the baseline migration (revision {baseline_revision}). "
+            f"match the baseline migration (revision {FLWR_STATE_BASELINE_REVISION}). "
             "Back up the database and either migrate it manually to the baseline "
             "schema or start with a fresh database. "
             f"{error_msg}",
@@ -231,7 +208,7 @@ def run_migrations(engine: Engine) -> None:
         INFO,
         "Detected pre-Alembic state database without alembic_version; stamping to %s "
         "before upgrading.",
-        baseline_revision,
+        FLWR_STATE_BASELINE_REVISION,
     )
-    stamp_existing_database(engine, baseline_revision)
+    stamp_existing_database(engine, FLWR_STATE_BASELINE_REVISION)
     command.upgrade(config, "head")
