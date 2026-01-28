@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Alembic helpers and migration environment for SuperLink state."""
+"""Alembic helpers and migration environment for SQL state."""
