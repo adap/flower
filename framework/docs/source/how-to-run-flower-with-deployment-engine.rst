@@ -195,7 +195,7 @@ deployments require TLS).
            supergrid
            local (default)
 
-2. Open the ``config.toml`` file and at the end add a new superlink connection:
+2. Open the ``config.toml`` file and at the end add a new SuperLink connection:
 
    .. code-block:: toml
        :caption: config.toml
