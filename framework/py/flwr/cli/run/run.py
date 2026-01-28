@@ -20,7 +20,7 @@ import io
 import json
 import subprocess
 from pathlib import Path
-from typing import Annotated, Any, cast
+from typing import Annotated, Any
 
 import click
 import typer
@@ -28,7 +28,7 @@ from rich.console import Console
 
 from flwr.cli.build import build_fab_from_disk, get_fab_filename
 from flwr.cli.config_migration import migrate, warn_if_federation_config_overrides
-from flwr.cli.config_utils import load as load_toml
+from flwr.cli.config_utils import load_and_validate
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE, RUN_CONFIG_HELP_MESSAGE
 from flwr.cli.flower_config import (
     _serialize_simulation_options,
@@ -175,7 +175,15 @@ def _run_with_control_api(
         if not is_remote_app:
             fab_bytes = build_fab_from_disk(app)
             fab_hash = hashlib.sha256(fab_bytes).hexdigest()
-            config = cast(dict[str, Any], load_toml(app / FAB_CONFIG_FILE))
+            config, warnings = load_and_validate(app / FAB_CONFIG_FILE)
+            if warnings:
+                typer.secho(
+                    "Missing recommended fields in Flower App configuration "
+                    "(pyproject.toml):\n"
+                    + "\n".join([f"- {line}" for line in warnings]),
+                    fg=typer.colors.YELLOW,
+                    bold=True,
+                )
             fab_id, fab_version = get_metadata_from_config(config)
             fab = Fab(fab_hash, fab_bytes, {})
         # Skip FAB build if remote app
