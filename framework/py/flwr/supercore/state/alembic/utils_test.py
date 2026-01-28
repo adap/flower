@@ -29,9 +29,8 @@ from sqlalchemy.engine import Engine
 from flwr.common.exit import ExitCode
 from flwr.supercore.state.alembic.utils import (
     ALEMBIC_VERSION_TABLE,
-    BASELINE_REVISION,
+    _get_baseline_metadata,
     build_alembic_config,
-    get_baseline_revision,
     get_combined_metadata,
     run_migrations,
 )
@@ -81,13 +80,14 @@ class TestAlembicRun(unittest.TestCase):
 
     def test_legacy_database_is_stamped_and_upgraded_successfully(self) -> None:
         """Ensure legacy databases without alembic_version is stamped and upgraded."""
-        metadata = get_combined_metadata()
+
         with TemporaryDirectory() as temp_dir:
             db_path = Path(temp_dir) / "state.db"
             engine = create_engine(f"sqlite:///{db_path}")
             try:
-                # Simulate pre-Alembic behavior: create tables directly.
-                metadata.create_all(engine)
+                # Simulate pre-Alembic behavior: create tables at baseline schema.
+                baseline_metadata = _get_baseline_metadata()
+                baseline_metadata.create_all(engine)
                 self.assertIsNone(get_current_revision(engine))
                 self.assertFalse(inspect(engine).has_table(ALEMBIC_VERSION_TABLE))
 
@@ -125,6 +125,8 @@ class TestAlembicRun(unittest.TestCase):
 
     def test_legacy_mismatch_with_missing_columns_raises(self) -> None:
         """Ensure legacy schemas with missing columns fail verification."""
+        from flwr.supercore.state.alembic.utils import _get_baseline_metadata
+
         with TemporaryDirectory() as temp_dir:
             db_path = Path(temp_dir) / "state.db"
             engine = create_engine(f"sqlite:///{db_path}")
@@ -134,11 +136,11 @@ class TestAlembicRun(unittest.TestCase):
                     connection.exec_driver_sql(
                         "CREATE TABLE node (node_id INTEGER, status TEXT)"
                     )
-                    # Create other tables with complete schemas
-                    metadata = get_combined_metadata()
-                    for table_name in metadata.tables:
+                    # Create other tables with baseline schemas
+                    baseline_metadata = _get_baseline_metadata()
+                    for table_name in baseline_metadata.tables:
                         if table_name != "node":
-                            metadata.tables[table_name].create(engine)
+                            baseline_metadata.tables[table_name].create(engine)
 
                 with patch("flwr.supercore.state.alembic.utils.flwr_exit") as mock_exit:
                     run_migrations(engine)
@@ -156,21 +158,53 @@ class TestAlembicRun(unittest.TestCase):
             finally:
                 engine.dispose()
 
-    def test_check_migrations_in_sync(self) -> None:
-        """Ensure migrations are in sync with metadata."""
-        self.assertTrue(check_migrations_in_sync())
+    def test_legacy_database_with_extra_tables_and_columns_succeeds(self) -> None:
+        """Ensure legacy databases with extra tables/columns can be migrated.
 
-    def testget_baseline_revision_returns_correct_value(self) -> None:
-        """Ensure get_baseline_revision dynamically finds the baseline."""
+        This tests backward compatibility: a legacy DB might have extra tables or
+        columns that were added manually. The verification should be permissive
+        and only fail on MISSING baseline tables/columns.
+        """
+        from flwr.supercore.state.alembic.utils import _get_baseline_metadata
+
         with TemporaryDirectory() as temp_dir:
             db_path = Path(temp_dir) / "state.db"
             engine = create_engine(f"sqlite:///{db_path}")
             try:
-                baseline = get_baseline_revision()
-                # Should match the constant (or be dynamically discovered)
-                self.assertEqual(baseline, BASELINE_REVISION)
+                # Create baseline schema
+                baseline_metadata = _get_baseline_metadata()
+                baseline_metadata.create_all(engine)
+
+                # Commit the transaction to flush tables
+                engine.dispose()
+                engine = create_engine(f"sqlite:///{db_path}")
+
+                # Add extra table and column to simulate forward-compatible scenario
+                with engine.begin() as connection:
+                    connection.exec_driver_sql(
+                        "CREATE TABLE custom_user_table (id INTEGER)"
+                    )
+                    # Add extra column to existing table (check if node table exists)
+                    inspector = inspect(engine)
+                    if inspector.has_table("node"):
+                        connection.exec_driver_sql(
+                            "ALTER TABLE node ADD COLUMN custom_field TEXT"
+                        )
+
+                # Should succeed and stamp/upgrade successfully
+                run_migrations(engine)
+
+                current = get_current_revision(engine)
+                script = ScriptDirectory.from_config(build_alembic_config(engine))
+                self.assertIn(current, script.get_heads())
+                self.assertFalse(check_migrations_pending(engine))
+
             finally:
                 engine.dispose()
+
+    def test_check_migrations_in_sync(self) -> None:
+        """Ensure migrations are in sync with metadata."""
+        self.assertTrue(check_migrations_in_sync())
 
 
 def get_current_revision(engine: Engine) -> str | None:
