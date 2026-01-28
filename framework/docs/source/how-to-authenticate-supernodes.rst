@@ -112,7 +112,7 @@ Here's how this looks in code:
 
 .. code-block:: bash
 
-    # flwr supernode register <supernode-pub-key> <federation>
+    # flwr supernode register <supernode-pub-key> <superlink>
     $ flwr supernode register keys/supernode_credentials_1.pub local-deployment
 
 Next, let’s register the second SuperNode as well:
@@ -125,7 +125,7 @@ You can list the registered SuperNodes using the following command:
 
 .. code-block:: bash
 
-    # flwr supernode list <federation>
+    # flwr supernode list <superlink>
     $ flwr supernode list local-deployment
 
 This will display the IDs of the SuperNodes you just registered as well as their status.
@@ -211,7 +211,7 @@ or future runs. Unregistering a SuperNode can be done via the
 
 .. code-block:: bash
 
-    # flwr supernode unregister <node-id> <federation>
+    # flwr supernode unregister <node-id> <superlink>
     $ flwr supernode unregister 16019329408659850374 local-deployment
 
 The above command unregisters the first SuperNode. You can verify this by listing the
