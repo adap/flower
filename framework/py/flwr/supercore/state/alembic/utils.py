@@ -136,26 +136,36 @@ def _has_alembic_version_table(engine: Engine) -> bool:
 def _get_baseline_metadata() -> MetaData:
     """Create an in-memory DB at baseline revision and reflect its schema.
 
-    This ensures we compare legacy databases against the actual baseline schema,
-    not the current (potentially newer) metadata. Uses an in-memory SQLite database
-    to avoid requiring filesystem write access.
+    Uses an in-memory SQLite database instead of a temporary file to avoid requiring
+    filesystem write access. Note that this is function is only invoked for pre-Alembic
+    databases.
+
+    The implementation uses StaticPool and passes an active connection via
+    config.attributes to Alembic's env.py. This ensures the same in-memory database
+    instance is used throughout migration and reflection, since each new connection
+    to sqlite:///:memory: creates a separate empty database.
     """
-    # Use StaticPool to ensure the same in-memory database is used across all
-    # connections within this engine
+    # Create an in-memory SQLite database with StaticPool to ensure connection reuse.
+    # This is needed because in-memory databases are instance-specific per connection.
     engine = create_engine(
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
         poolclass=pool.StaticPool,
     )
     try:
-        # Run migrations only up to the baseline revision using a connection
-        # from this engine to ensure tables persist in the in-memory database
+        # Open a connection and pass it to Alembic to ensure the in-memory database
+        # persists throughout the migration process. Without this, Alembic would
+        # create a new connection (and thus a new empty database) from the URL.
         with engine.begin() as connection:
             config = build_alembic_config(engine)
+            # Store the connection in config.attributes so env.py can use it directly.
+            # This prevents Alembic from creating a new connection and losing our data.
             config.attributes["connection"] = connection
             command.upgrade(config, FLWR_STATE_BASELINE_REVISION)
 
-        # Reflect the baseline schema (excluding alembic_version)
+        # Reflect the baseline schema from the in-memory database.
+        # At this point, the StaticPool ensures we're still connected to the same
+        # database instance that contains the migrated tables.
         baseline_metadata = MetaData()
         baseline_metadata.reflect(
             bind=engine,

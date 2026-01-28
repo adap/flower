@@ -58,11 +58,19 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
-    In this scenario we need to create an Engine and associate a connection with the
-    context. If a connection is provided via config.attributes, use it directly to
-    support in-memory databases.
+    Creates an engine and associates a connection with the context. Supports two modes:
+
+    1. Standard: Creates a new connection from the configured URL.
+    2. Pre-connected: Uses an existing connection from config.attributes["connection"].
+
+    Pre-connected mode is necessary for in-memory SQLite databases, where each new
+    connection creates a separate database instance. This allows
+    _get_baseline_metadata() to run migrations and reflect schema from the same
+    in-memory database without requiring filesystem write access.
     """
-    # Check if a connection was provided (e.g., for in-memory databases)
+    # Check if a connection was provided (e.g., for in-memory databases).
+    # This allows callers to pass an active connection that should be reused
+    # instead of creating a new one from the URL.
     connection = config.attributes.get("connection", None)
 
     if connection is None:
