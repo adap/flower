@@ -79,6 +79,7 @@ pyyaml = "^6.0.2"
 requests = "^2.31.0"
 click = "<8.2.0"
 SQLAlchemy = "^2.0.45"
+alembic = "^1.18.1"
 # Optional dependencies (Simulation Engine)
 ray = [
     { version = "==2.51.1", optional = true, python = ">=3.10,<3.13" },

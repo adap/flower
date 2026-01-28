@@ -22,6 +22,7 @@ from flwr.cli.constant import (
     DEFAULT_SIMULATION_BACKEND_NAME,
     SuperLinkConnectionTomlKey,
 )
+from flwr.supercore.utils import check_federation_format
 
 _ERROR_MSG_FMT = "SuperLinkConnection.%s is None"
 
@@ -176,11 +177,15 @@ class SuperLinkConnection:
                 + f"expected bool, but got {type(self._insecure).__name__}."
             )
 
-        if self.federation is not None and not isinstance(self.federation, str):
-            raise ValueError(
-                err_prefix % SuperLinkConnectionTomlKey.FEDERATION
-                + f"expected str, but got {type(self.federation).__name__}."
-            )
+        if self.federation is not None:
+            if not isinstance(self.federation, str):
+                raise ValueError(
+                    err_prefix % SuperLinkConnectionTomlKey.FEDERATION
+                    + f"expected str, but got {type(self.federation).__name__}."
+                )
+
+            # Check if the federation string is valid
+            check_federation_format(self.federation)
 
         # The connection needs to have either an address or options (or both).
         if self.address is None and self.options is None:

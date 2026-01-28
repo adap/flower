@@ -100,3 +100,12 @@ def is_port_in_use(address: str) -> bool:
             return True
 
         return False
+
+
+def resolve_bind_address(address: str) -> str:
+    """Replace bind-all addresses (0.0.0.0, ::) with localhost (127.0.0.1, ::1)."""
+    if address.startswith("[::]"):
+        return address.replace("[::]", "[::1]", 1)
+    if address.startswith("0.0.0.0"):
+        return address.replace("0.0.0.0", "127.0.0.1", 1)
+    return address
