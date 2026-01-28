@@ -6,6 +6,10 @@ import hashlib
 import secrets
 from dataclasses import dataclass
 
+try:  # Optional dependency for deterministic parameter derivation
+    from blake3 import blake3 as _blake3
+except ImportError:  # pragma: no cover - optional dependency
+    _blake3 = None
 
 P = int(
     "686479766013060971498190079908139321726943530014330540939446345918554318"
@@ -36,6 +40,10 @@ GY = int(
 
 KEY_SIZE_BITS = 521
 KEY_SIZE_BYTES = (KEY_SIZE_BITS + 7) // 8
+SEED = "ECCFrog522PP|v1"
+B_INDEX = 1_294_798
+G_INDEX = 0
+DERIVATION_DIGEST_BYTES = 64
 
 
 @dataclass(frozen=True)
@@ -72,6 +80,25 @@ def generate_private_key() -> ECCFROGPrivateKey:
     if public_point is None:  # pragma: no cover - sicurezza
         raise ValueError("Punto pubblico non valido")
     return ECCFROGPrivateKey(secret, ECCFROGPublicKey(public_point))
+
+
+def derive_b(seed: str = SEED, index: int = B_INDEX) -> int:
+    """Deriva il coefficiente b usando BLAKE3 secondo la pipeline pubblicata."""
+    digest = _blake3_digest(_encode_derivation(seed, "b", index))
+    return (int.from_bytes(digest, "big") % (P - 3)) + 2
+
+
+def derive_base_point_x(seed: str = SEED, index: int = G_INDEX) -> int:
+    """Deriva la coordinata x del punto base usando BLAKE3."""
+    digest = _blake3_digest(_encode_derivation(seed, "G", index))
+    return int.from_bytes(digest, "big") % P
+
+
+def validate_parameters() -> bool:
+    """Verifica che i parametri pubblicati coincidano con la derivazione BLAKE3."""
+    if _blake3 is None:
+        return False
+    return derive_b() == B and derive_base_point_x() == GX
 
 
 def load_private_key(key: object) -> ECCFROGPrivateKey:
@@ -213,3 +240,16 @@ def _int_to_bytes(value: int, size: int = KEY_SIZE_BYTES) -> bytes:
 
 def _modinv(value: int, modulus: int) -> int:
     return pow(value, -1, modulus)
+
+
+def _encode_derivation(seed: str, tag: str, index: int) -> bytes:
+    return seed.encode() + b"|" + tag.encode() + b"|" + str(index).encode()
+
+
+def _blake3_digest(data: bytes) -> bytes:
+    if _blake3 is None:
+        raise RuntimeError(
+            "BLAKE3 non disponibile. Installa il pacchetto 'blake3' "
+            "per riprodurre i parametri ECCFROG522PP."
+        )
+    return _blake3(data).digest(length=DERIVATION_DIGEST_BYTES)
