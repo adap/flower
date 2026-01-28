@@ -130,7 +130,7 @@ Configuration TOML file with a new field that reads the certificate:
 
     [superlink.local-deployment]
     address = "127.0.0.1:9093"
-    root-certificates = "./certificates/ca.crt"
+    root-certificates = "/absolute/path/to/certificates/ca.crt"
 
 Note that the path to the ``root-certificates`` is relative to the root of the project.
 Now, you can run the example by executing ``flwr run``:
