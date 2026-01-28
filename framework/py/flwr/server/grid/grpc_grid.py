@@ -49,7 +49,7 @@ from flwr.common.inflatable_utils import (
 )
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import make_message, remove_content_from_message
-from flwr.common.retry_invoker import _wrap_stub, make_simple_grpc_retry_invoker
+from flwr.common.retry_invoker import make_simple_grpc_retry_invoker, wrap_stub
 from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
@@ -150,7 +150,7 @@ class GrpcGrid(Grid):
         )
         self._channel.subscribe(on_channel_state_change)
         self._grpc_stub = ServerAppIoStub(self._channel)
-        _wrap_stub(self._grpc_stub, self._retry_invoker)
+        wrap_stub(self._grpc_stub, self._retry_invoker)
         log(DEBUG, "[flwr-serverapp] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:

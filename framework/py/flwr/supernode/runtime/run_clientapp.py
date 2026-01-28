@@ -41,7 +41,7 @@ from flwr.common.inflatable_protobuf_utils import (
 from flwr.common.inflatable_utils import pull_and_inflate_object_from_tree, push_objects
 from flwr.common.logger import log
 from flwr.common.message import remove_content_from_message
-from flwr.common.retry_invoker import _wrap_stub, make_simple_grpc_retry_invoker
+from flwr.common.retry_invoker import make_simple_grpc_retry_invoker, wrap_stub
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
@@ -103,7 +103,7 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
     flwr_dir_ = get_flwr_dir(flwr_dir)
     try:
         stub = ClientAppIoStub(channel)
-        _wrap_stub(stub, make_simple_grpc_retry_invoker())
+        wrap_stub(stub, make_simple_grpc_retry_invoker())
 
         # Start app heartbeat
         heartbeat_sender = HeartbeatSender(make_app_heartbeat_fn_grpc(stub, token))

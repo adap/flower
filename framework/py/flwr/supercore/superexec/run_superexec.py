@@ -23,7 +23,7 @@ from flwr.common.config import get_flwr_dir
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
-from flwr.common.retry_invoker import _wrap_stub, make_simple_grpc_retry_invoker
+from flwr.common.retry_invoker import make_simple_grpc_retry_invoker, wrap_stub
 from flwr.common.serde import run_from_proto
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Run
@@ -101,7 +101,7 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
 
     # Create the gRPC stub for the AppIO API
     stub = stub_class(channel)
-    _wrap_stub(stub, make_simple_grpc_retry_invoker())
+    wrap_stub(stub, make_simple_grpc_retry_invoker())
 
     def get_run(run_id: int) -> Run:
         _req = GetRunRequest(run_id=run_id)

@@ -23,7 +23,7 @@ import grpc
 from flwr.common.constant import SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
-from flwr.common.retry_invoker import _wrap_stub, make_simple_grpc_retry_invoker
+from flwr.common.retry_invoker import make_simple_grpc_retry_invoker, wrap_stub
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub  # pylint: disable=E0611
 
 
@@ -75,7 +75,7 @@ class SimulationIoConnection:
         )
         self._channel.subscribe(on_channel_state_change)
         self._grpc_stub = SimulationIoStub(self._channel)
-        _wrap_stub(self._grpc_stub, self._retry_invoker)
+        wrap_stub(self._grpc_stub, self._retry_invoker)
         log(DEBUG, "[SimulationIO] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:

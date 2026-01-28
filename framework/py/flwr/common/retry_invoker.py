@@ -389,7 +389,7 @@ def make_simple_grpc_retry_invoker() -> RetryInvoker:
     )
 
 
-def _wrap_stub(
+def wrap_stub(
     stub: (
         ServerAppIoStub | ClientAppIoStub | SimulationIoStub | FleetStub | GrpcAdapter
     ),
