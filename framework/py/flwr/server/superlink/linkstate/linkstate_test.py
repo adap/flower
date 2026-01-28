@@ -56,7 +56,6 @@ from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 # pylint: enable=E0611
 from flwr.server.superlink.linkstate import InMemoryLinkState, LinkState, SqlLinkState
 from flwr.supercore.constant import (
-    FLWR_IN_MEMORY_SQLITE_DB_URL,
     NOOP_FEDERATION,
     NodeStatus,
 )
@@ -1820,7 +1819,7 @@ class SqlInMemoryStateTest(StateTest, unittest.TestCase):
     def state_factory(self) -> SqlLinkState:
         """Return SqlLinkState with in-memory database."""
         state = SqlLinkState(
-            FLWR_IN_MEMORY_SQLITE_DB_URL,
+            database_path=":memory:",
             federation_manager=NoOpFederationManager(),
             object_store=ObjectStoreFactory().store(),
         )
