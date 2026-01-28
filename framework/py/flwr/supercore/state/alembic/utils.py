@@ -15,7 +15,7 @@
 """Helpers for running and validating Alembic migrations."""
 
 
-from logging import DEBUG, INFO
+from logging import INFO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -215,7 +215,6 @@ def run_migrations(engine: Engine) -> None:
 
     # Pre-Alembic database detected: verify baseline schema before stamping.
     baseline_revision = _get_baseline_revision()
-    log(DEBUG, "verifying legacy db")
     is_valid, error_msg = _verify_legacy_schema_matches_baseline(engine)
 
     # This is an edge case and unlikely to happen since SuperLink requires a specific
