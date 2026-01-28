@@ -17,7 +17,7 @@
 
 import pytest
 
-from .address import parse_address
+from .address import get_ip_address_from_servicer_context, parse_address
 
 
 @pytest.mark.parametrize(
@@ -142,3 +142,76 @@ def test_domain_incorrect(address: str) -> None:
 
     # Assert
     assert actual is None
+
+
+class DummyContext:
+    """Dummy context to mimic grpc.ServicerContext for testing purposes."""
+
+    def __init__(self, peer_str: str) -> None:
+        self._peer = peer_str
+
+    def peer(self) -> str:
+        """."""
+        return self._peer
+
+
+@pytest.mark.parametrize(
+    "peer_str, expected",
+    [
+        ("ipv4:127.0.0.1:56789", "127.0.0.1"),
+        ("ipv4:0.0.0.0:8080", "0.0.0.0"),
+        ("ipv4:192.168.1.1:12345", "192.168.1.1"),
+    ],
+)
+def test_servicer_ipv4_correct(peer_str: str, expected: str) -> None:
+    """Test if a correct IPv4 address is correctly parsed from grpc.ServicerContext."""
+    # Prepare dummy context with the given peer string.
+    context = DummyContext(peer_str)
+
+    # Execute
+    actual = get_ip_address_from_servicer_context(context)
+
+    # Assert
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "peer_str, expected",
+    [
+        ("ipv6:[2001:db8::1]:54321", "2001:db8::1"),
+        ("ipv6:[::1]:8080", "::1"),
+        ("ipv6:[fe80::1ff:fe23:4567:890a]:9999", "fe80::1ff:fe23:4567:890a"),
+    ],
+)
+def test_servicer_ipv6_correct(peer_str: str, expected: str) -> None:
+    """Test if a correct IPv6 address is correctly parsed from grpc.ServicerContext."""
+    # Prepare dummy context with the given peer string.
+    context = DummyContext(peer_str)
+
+    # Execute
+    actual = get_ip_address_from_servicer_context(context)
+
+    # Assert
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "peer_str",
+    [
+        "invalid_string",
+        "ipv4:127.0.0.1",  # missing port
+        "ipv6:2001:db8::1",  # missing brackets and port
+        "ipv6:[2001:db8::1]56789",  # missing colon after the bracket
+        "ipv6:2001:db8::1:54321",  # missing brackets
+        "unix:/tmp/grpc.sock",  # unix domain socket
+        "",
+    ],
+)
+def test_servicer_incorrect_format(peer_str: str) -> None:
+    """Test if an invalid grpc.ServicerContext.peer() string returns a ValueError."""
+    # Prepare dummy context with the given peer string.
+    context = DummyContext(peer_str)
+
+    # Execute and Assert
+    with pytest.raises(ValueError):
+        get_ip_address_from_servicer_context(context)
