@@ -86,7 +86,8 @@ def run_migrations(engine: Engine) -> None:
         command.upgrade(config, "head")
         return
 
-    # Pre-Alembic database detected: verify baseline schema before stamping.
+    # Pre-Alembic database detected without version tracking: verify database matches
+    # baseline schema before stamping version and upgrading.
     is_valid, error_msg = _verify_legacy_schema_matches_baseline(engine)
 
     # This is an edge case and unlikely to happen since SuperLink requires a specific
