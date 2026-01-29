@@ -16,14 +16,13 @@
 
 
 import hashlib
-import io
 import json
 import subprocess
 from pathlib import Path
 from typing import Annotated, Any, cast
 
+import click
 import typer
-from rich.console import Console
 
 from flwr.cli.build import build_fab_from_disk, get_fab_filename
 from flwr.cli.config_migration import migrate, warn_if_federation_config_overrides
@@ -40,16 +39,19 @@ from flwr.common.config import (
     user_config_to_configrecord,
 )
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
-from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.supercore.constant import NOOP_FEDERATION
 from flwr.supercore.utils import parse_app_spec
 
 from ..log import start_stream
-from ..utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
+from ..utils import (
+    cli_output_handler,
+    flwr_cli_grpc_exc_handler,
+    init_channel_from_connection,
+    print_json_to_stdout,
+)
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -98,22 +100,15 @@ def run(
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """Run Flower App."""
-    suppress_output = output_format == CliOutputFormat.JSON
-    captured_output = io.StringIO()
+    with cli_output_handler(output_format=output_format) as is_json:
+        # Warn `--federation-config` is ignored
+        warn_if_federation_config_overrides(federation_config_overrides)
 
-    if suppress_output:
-        redirect_output(captured_output)
+        # Migrate legacy usage if any
+        migrate(str(app), [], ignore_legacy_usage=True)
 
-    # Warn `--federation-config` is ignored
-    warn_if_federation_config_overrides(federation_config_overrides)
-
-    # Migrate legacy usage if any
-    migrate(str(app), [], ignore_legacy_usage=True)
-
-    # Read superlink connection configuration
-    superlink_connection = read_superlink_connection(superlink)
-
-    try:
+        # Read superlink connection configuration
+        superlink_connection = read_superlink_connection(superlink)
 
         # Determine if app is remote
         app_spec = None
@@ -122,8 +117,7 @@ def run(
             try:
                 _ = parse_app_spec(app_str)
             except ValueError as e:
-                typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
-                raise typer.Exit(code=1) from e
+                raise click.ClickException(str(e)) from e
 
             app_spec = app_str
             # Set `app` to current directory for credential storage
@@ -135,7 +129,7 @@ def run(
                 superlink_connection,
                 run_config_overrides,
                 stream,
-                output_format,
+                is_json,
                 app_spec,
             )
         else:
@@ -144,22 +138,6 @@ def run(
                 simulation_options=superlink_connection.options,  # type: ignore
                 config_overrides=run_config_overrides,
             )
-    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
-        if suppress_output:
-            restore_output()
-            e_message = captured_output.getvalue()
-            print_json_error(e_message, err)
-        else:
-            typer.secho(
-                f"{err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-    finally:
-        if suppress_output:
-            restore_output()
-        captured_output.close()
 
 
 # pylint: disable-next=R0913, R0914, R0917
@@ -168,7 +146,7 @@ def _run_with_control_api(
     superlink_connection: SuperLinkConnection,
     config_overrides: list[str] | None,
     stream: bool,
-    output_format: str,
+    is_json: bool,
     app_spec: str | None,
 ) -> None:
     channel = None
@@ -190,8 +168,6 @@ def _run_with_control_api(
             fab_id = fab_version = fab_hash = ""
             fab = Fab(fab_hash, b"", {})
 
-        federation: str = superlink_connection.federation or NOOP_FEDERATION
-
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
         options = {}
         if superlink_connection.options:
@@ -202,7 +178,7 @@ def _run_with_control_api(
         req = StartRunRequest(
             fab=fab_to_proto(fab),
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
-            federation=federation,
+            federation=superlink_connection.federation or "",
             federation_options=config_record_to_proto(c_record),
             app_spec=app_spec or "",
         )
@@ -214,10 +190,9 @@ def _run_with_control_api(
                 f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN
             )
         else:
-            typer.secho("❌ Failed to start run", fg=typer.colors.RED, err=True)
-            raise typer.Exit(code=1)
+            raise click.ClickException("Failed to start run")
 
-        if output_format == CliOutputFormat.JSON:
+        if is_json:
             # Only include FAB metadata if we actually built a local FAB
             payload: dict[str, Any] = {
                 "success": res.HasField("run_id"),
@@ -233,8 +208,7 @@ def _run_with_control_api(
                         "fab-filename": get_fab_filename(config, fab_hash),
                     }
                 )
-            restore_output()
-            Console().print_json(json.dumps(payload))
+            print_json_to_stdout(payload)
 
         if stream:
             start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)

@@ -15,18 +15,15 @@
 """Flower command line interface `config list` command."""
 
 
-import io
-import json
 from typing import Annotated
 
 import typer
-from rich.console import Console
 
 from flwr.common.constant import CliOutputFormat
-from flwr.common.logger import print_json_error, redirect_output, restore_output
 
 from ..constant import SuperLinkConnectionTomlKey
 from ..flower_config import read_flower_config
+from ..utils import cli_output_handler, print_json_to_stdout
 
 
 def ls(
@@ -39,15 +36,8 @@ def ls(
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """List all SuperLink connections."""
-    suppress_output = output_format == CliOutputFormat.JSON
-    captured_output = io.StringIO()
-    config_path = None
-
-    if suppress_output:
-        redirect_output(captured_output)
-
-    try:
+    """List all SuperLink connections (alias: ls)."""
+    with cli_output_handler(output_format=output_format) as is_json:
         # Load Flower Config
         config, config_path = read_flower_config()
 
@@ -58,14 +48,16 @@ def ls(
         default = superlink_connections.pop(SuperLinkConnectionTomlKey.DEFAULT, None)
 
         connection_names = list(superlink_connections.keys())
-        restore_output()
-        if output_format == CliOutputFormat.JSON:
+
+        if is_json:
             conn = {
                 SuperLinkConnectionTomlKey.SUPERLINK: connection_names,
                 SuperLinkConnectionTomlKey.DEFAULT: default,
             }
-            Console().print_json(json.dumps(conn))
+            print_json_to_stdout(conn)
         else:
+            typer.secho("Flower Config file: ", fg=typer.colors.BLUE, nl=False)
+            typer.secho(f"{config_path}", fg=typer.colors.GREEN)
             typer.secho("SuperLink connections:", fg=typer.colors.BLUE)
             # List SuperLink connections and highlight default
             for k in connection_names:
@@ -77,28 +69,3 @@ def ls(
                         nl=False,
                     )
                 typer.echo()
-    except typer.Exit as err:
-        # log the error if json format requested
-        # else do nothing since it will be logged by typer
-        if suppress_output:
-            restore_output()
-            e_message = captured_output.getvalue()
-            print_json_error(e_message, err)
-
-    except Exception as err:  # pylint: disable=broad-except
-        if suppress_output:
-            restore_output()
-            e_message = captured_output.getvalue()
-            print_json_error(e_message, err)
-        else:
-            typer.secho(
-                f"❌ An unexpected error occurred while listing the SuperLink "
-                f"connections in the Flower configuration file ({config_path}): {err}",
-                fg=typer.colors.RED,
-                err=True,
-            )
-
-    finally:
-        if suppress_output:
-            restore_output()
-        captured_output.close()

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-22 00:08+0000\n"
+"POT-Creation-Date: 2026-01-29 00:10+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -371,15 +371,15 @@ msgstr "빌드 전달인자"
 #: ../../source/ref-exit-codes/0.rst:7 ../../source/ref-exit-codes/1.rst:7
 #: ../../source/ref-exit-codes/100.rst:7 ../../source/ref-exit-codes/101.rst:7
 #: ../../source/ref-exit-codes/102.rst:7 ../../source/ref-exit-codes/103.rst:7
-#: ../../source/ref-exit-codes/104.rst:7 ../../source/ref-exit-codes/2.rst:7
-#: ../../source/ref-exit-codes/200.rst:23 ../../source/ref-exit-codes/201.rst:7
-#: ../../source/ref-exit-codes/202.rst:7 ../../source/ref-exit-codes/203.rst:7
-#: ../../source/ref-exit-codes/3.rst:7 ../../source/ref-exit-codes/300.rst:7
-#: ../../source/ref-exit-codes/302.rst:7 ../../source/ref-exit-codes/303.rst:7
-#: ../../source/ref-exit-codes/304.rst:7 ../../source/ref-exit-codes/400.rst:7
-#: ../../source/ref-exit-codes/500.rst:7 ../../source/ref-exit-codes/600.rst:7
-#: ../../source/ref-exit-codes/601.rst:7 ../../source/ref-exit-codes/602.rst:7
-#: ../../source/ref-exit-codes/700.rst:7
+#: ../../source/ref-exit-codes/104.rst:7 ../../source/ref-exit-codes/105.rst:7
+#: ../../source/ref-exit-codes/2.rst:7 ../../source/ref-exit-codes/200.rst:23
+#: ../../source/ref-exit-codes/201.rst:7 ../../source/ref-exit-codes/202.rst:7
+#: ../../source/ref-exit-codes/203.rst:7 ../../source/ref-exit-codes/3.rst:7
+#: ../../source/ref-exit-codes/300.rst:7 ../../source/ref-exit-codes/302.rst:7
+#: ../../source/ref-exit-codes/303.rst:7 ../../source/ref-exit-codes/304.rst:7
+#: ../../source/ref-exit-codes/400.rst:7 ../../source/ref-exit-codes/500.rst:7
+#: ../../source/ref-exit-codes/600.rst:7 ../../source/ref-exit-codes/601.rst:7
+#: ../../source/ref-exit-codes/602.rst:7 ../../source/ref-exit-codes/700.rst:7
 msgid "Description"
 msgstr "설명"
 
@@ -2965,45 +2965,45 @@ msgstr ""
 
 #: ../../source/docker/enable-tls.rst:245
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:61
+msgid "Locate the Flower Configuration TOML file in your machine."
+msgstr ""
+
+#: ../../source/docker/enable-tls.rst:257
 #, fuzzy
 msgid ""
-"Append the following lines to the end of the ``pyproject.toml`` file and "
-"save it:"
+"Append the following lines to the end of the ``config.toml`` file to add "
+"a new SuperLink connection and save it:"
 msgstr "``pyproject.toml``에 다음 버전 제약 조건을 설정했는지 확인하세요:"
 
-#: ../../source/docker/enable-tls.rst:247
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:63
-#: ../../source/docker/tutorial-quickstart-docker.rst:312
+#: ../../source/docker/enable-tls.rst:260
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:75
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:167
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:110
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:250
+#: ../../source/docker/tutorial-quickstart-docker.rst:326
+#: ../../source/how-to-authenticate-accounts.rst:96
 #: ../../source/how-to-enable-tls-connections.rst:127
 #: ../../source/how-to-manage-flower-federations.rst:69
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:178
-#: ../../source/how-to-upgrade-to-message-api.rst:132
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:200
 #, fuzzy
-msgid "pyproject.toml"
-msgstr "또는 ``pyproject.toml``:"
+msgid "config.toml"
+msgstr "컨피그 레코드"
 
-#: ../../source/docker/enable-tls.rst:254
-#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:163
+#: ../../source/docker/enable-tls.rst:269
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:84
 msgid ""
-"The path of the ``root-certificates`` should be relative to the location "
-"of the ``pyproject.toml`` file."
+"You can customize the string that follows ``superlink.`` to fit your "
+"needs. However, please note that the string cannot contain a dot (``.``)."
 msgstr ""
 
-#: ../../source/docker/enable-tls.rst:259
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:72
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:187
+#: ../../source/docker/enable-tls.rst:272
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:87
 msgid ""
-"You can customize the string that follows ``tool.flwr.federations.`` to "
-"fit your needs. However, please note that the string cannot contain a dot"
-" (``.``)."
-msgstr ""
-
-#: ../../source/docker/enable-tls.rst:262
-msgid ""
-"In this example, ``local-deployment-tls`` has been used. Just remember to"
-" replace ``local-deployment-tls`` with your chosen name in both the "
-"``tool.flwr.federations.`` string and the corresponding ``flwr run .`` "
-"command."
+"In this example, ``local-deployment`` has been used. Just remember to "
+"replace ``local-deployment`` with your chosen name in both the "
+"``superlink.`` string and the corresponding ``flwr run .`` command. Refer"
+" to the `Flower configuration file <ref-flower-configuration.html>`_ for "
+"more information."
 msgstr ""
 
 #: ../../source/docker/index.rst:-1
@@ -3445,63 +3445,58 @@ msgid ""
 "start the services using the following command:"
 msgstr "다음 명령을 실행하여 가상 환경을 활성화합니다:"
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:75
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:190
-msgid ""
-"In this example, ``local-deployment`` has been used. Just remember to "
-"replace ``local-deployment`` with your chosen name in both the "
-"``tool.flwr.federations.`` string and the corresponding ``flwr run .`` "
-"command."
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:73
+msgid "Add a new SuperLink connection to your ``config.toml`` file and save it:"
 msgstr ""
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:79
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:92
 msgid "Run the example and follow the logs of the ``ServerApp`` :"
 msgstr ""
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:85
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:98
 msgid ""
 "That is all it takes! You can monitor the progress of the run through the"
 " logs of the ``ServerApp``."
 msgstr ""
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:90
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:103
 msgid "Run a Different Quickstart Example"
 msgstr ""
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:92
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:105
 msgid ""
 "To run a different quickstart example, such as ``quickstart-tensorflow``,"
 " first, shut down the Docker Compose services of the current example:"
 msgstr ""
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:99
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:112
 msgid "After that, you can repeat the steps above."
 msgstr ""
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:103
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:109
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:116
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:122
 #, fuzzy
 msgid "Limitations"
 msgstr "동기"
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:108
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:121
 #, fuzzy
 msgid "Quickstart Example"
 msgstr "빠른 시작"
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:110
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:123
 #, fuzzy
 msgid "quickstart-fastai"
 msgstr "빠른 시작 튜토리얼"
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:111
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:113
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:115
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:122
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:124
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:126
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:128
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:130
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:132
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:135
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:137
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:141
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:143
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:145
 #: ../../source/ref-changelog.md:1074 ../../source/ref-changelog.md:1440
 #: ../../source/ref-changelog.md:1715 ../../source/ref-changelog.md:1779
 #: ../../source/ref-changelog.md:1837 ../../source/ref-changelog.md:1906
@@ -3509,68 +3504,69 @@ msgstr "빠른 시작 튜토리얼"
 msgid "None"
 msgstr ""
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:112
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:125
 #, fuzzy
 msgid "quickstart-huggingface"
 msgstr "빠른 시작 튜토리얼"
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:114
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:127
 #, fuzzy
 msgid "quickstart-jax"
 msgstr "빠른 시작"
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:116
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:129
 #, fuzzy
 msgid "quickstart-mlcube"
 msgstr "빠른 시작"
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:117
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:130
 msgid ""
 "The example has not yet been updated to work with the latest ``flwr`` "
 "version."
 msgstr ""
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:118
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:131
 #, fuzzy
 msgid "quickstart-mlx"
 msgstr "빠른 시작"
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:119
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:132
 msgid ""
 "`Requires to run on macOS with Apple Silicon <https://ml-"
 "explore.github.io/mlx/build/html/install.html#python-installation>`_."
 msgstr ""
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:121
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:134
 #, fuzzy
 msgid "quickstart-monai"
 msgstr "빠른 시작"
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:123
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:136
 #, fuzzy
 msgid "quickstart-pandas"
 msgstr "빠른 시작 튜토리얼"
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:125
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:138
 msgid "quickstart-pytorch-lightning"
 msgstr ""
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:126
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:139
 msgid ""
 "Requires an older pip version that is not supported by the Flower Docker "
 "images."
 msgstr ""
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:127
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:140
 #, fuzzy
 msgid "quickstart-pytorch"
 msgstr "빠른 시작 튜토리얼"
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:129
-msgid "quickstart-sklearn-tabular"
-msgstr ""
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:142
+#, fuzzy
+msgid "quickstart-sklearn"
+msgstr "빠른 시작"
 
-#: ../../source/docker/run-quickstart-examples-docker-compose.rst:131
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:144
 #, fuzzy
 msgid "quickstart-tensorflow"
 msgstr "빠른 시작 튜토리얼"
@@ -3685,7 +3681,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:59
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:223
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:237
 msgid "These certificates should be used only for development purposes."
 msgstr ""
 
@@ -3746,7 +3742,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:125
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:175
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:189
 msgid ""
 "For more information, consult the following page: :doc:`persist-"
 "superlink-state`."
@@ -3781,35 +3777,37 @@ msgstr "Flower SuperNode를 실행합니다."
 #: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:150
 msgid ""
 "Specify the remote SuperLink IP addresses and the path to the root "
-"certificate in the ``[tool.flwr.federations.remote-deployment]`` table in"
-" the ``pyproject.toml`` file. Here, we have named our remote federation "
-"``remote-deployment``:"
+"certificate in the in a new SuperLink connection in your Flower "
+"Configuration file. The easiest way to locate this file is by means of "
+"``flwr config list``:"
 msgstr ""
 
-#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:154
-msgid "examples/quickstart-sklearn-tabular/pyproject.toml"
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:164
+msgid ""
+"With the file located in your system, edit it and add a new connection "
+"named ``remote-deployment``:"
 msgstr ""
 
-#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:166
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:174
 msgid "Run the project and follow the ``ServerApp`` logs:"
 msgstr ""
 
-#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:172
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:181
 msgid ""
 "That's it! With these steps, you've set up Flower on two separate "
 "machines and are ready to start using it."
 msgstr ""
 
-#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:177
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:186
 msgid "Step 6: Clean Up"
 msgstr ""
 
-#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:179
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:188
 #, fuzzy
 msgid "Shut down the Flower client components:"
 msgstr "Flower 클라이언트 앱을 실행합니다."
 
-#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:186
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:195
 msgid "Shut down the Flower server components and delete the SuperLink state:"
 msgstr ""
 
@@ -4165,85 +4163,97 @@ msgstr "현재 클라이언트 속성입니다."
 msgid "Step 6: Run the Quickstart Project"
 msgstr ""
 
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:94
 #: ../../source/docker/tutorial-quickstart-docker.rst:310
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:184
+msgid ""
+"Find the Flower Configuration TOML file in your machine. This file is "
+"automatically create for your when you first use a Flower CLI command. "
+"Use ``flwr config list`` to see available SuperLink connections as well "
+"as the path to the configuration file."
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker.rst:324
 #, fuzzy
-msgid "Add the following lines to the ``pyproject.toml``:"
+msgid ""
+"Add the following lines to the ``config.toml`` to add a new SuperLink "
+"connection:"
 msgstr "``pyproject.toml``에 다음 버전 제약 조건을 설정했는지 확인하세요:"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:319
+#: ../../source/docker/tutorial-quickstart-docker.rst:333
 msgid ""
 "Run the ``quickstart-pytorch`` project and follow the ServerApp logs to "
 "track the execution of the run:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:328
+#: ../../source/docker/tutorial-quickstart-docker.rst:342
 msgid "Step 7: Update the Application"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:330
+#: ../../source/docker/tutorial-quickstart-docker.rst:344
 msgid ""
 "Change the application code. For example, change the ``seed`` in "
 "``pytorchexample/task.py`` to ``43`` and save it:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:333
+#: ../../source/docker/tutorial-quickstart-docker.rst:347
 msgid "pytorchexample/task.py"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:340
+#: ../../source/docker/tutorial-quickstart-docker.rst:354
 #, fuzzy
 msgid "Stop the running containers:"
 msgstr "이미 *서버*를 시작할 수 있습니다:"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:134
-#: ../../source/docker/tutorial-quickstart-docker.rst:344
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:148
+#: ../../source/docker/tutorial-quickstart-docker.rst:358
 msgid ""
 "If you have modified the dependencies listed in your ``pyproject.toml`` "
 "file, it is essential to rebuild images."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:347
+#: ../../source/docker/tutorial-quickstart-docker.rst:361
 msgid "If you haven't made any changes, you can skip steps 2 through 4."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:353
+#: ../../source/docker/tutorial-quickstart-docker.rst:367
 #, fuzzy
 msgid "Rebuild the SuperExec image:"
 msgstr "기본 이미지 빌드"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:359
+#: ../../source/docker/tutorial-quickstart-docker.rst:373
 msgid ""
 "Launch **one SuperExec container** for the new ServerApp and **two "
 "SuperExec containers** for the new ClientApps:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:389
+#: ../../source/docker/tutorial-quickstart-docker.rst:403
 msgid "Run the updated project:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:397
+#: ../../source/docker/tutorial-quickstart-docker.rst:411
 msgid "Step 8: Clean Up"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:399
+#: ../../source/docker/tutorial-quickstart-docker.rst:413
 msgid "Remove the containers and the bridge network:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:418
-#: ../../source/docker/tutorial-quickstart-docker.rst:411
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:432
+#: ../../source/docker/tutorial-quickstart-docker.rst:425
 #, fuzzy
 msgid "Where to Go Next"
 msgstr "시작 위치"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:413
+#: ../../source/docker/tutorial-quickstart-docker.rst:427
 msgid ":doc:`enable-tls`"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:414
+#: ../../source/docker/tutorial-quickstart-docker.rst:428
 msgid ":doc:`persist-superlink-state`"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:415
+#: ../../source/docker/tutorial-quickstart-docker.rst:429
 msgid ":doc:`tutorial-quickstart-docker-compose`"
 msgstr ""
 
@@ -4319,20 +4329,20 @@ msgid ""
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:80
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:185
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:199
 #, fuzzy
 msgid "``docker compose``: The Docker command to run the Docker Compose tool."
 msgstr "``docker run``: 새 Docker 컨테이너를 실행하는 명령입니다."
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:81
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:191
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:205
 msgid ""
 "``--build``: Rebuild the images for each service if they don't already "
 "exist."
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:82
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:192
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:206
 msgid ""
 "``-d``: Detach the containers from the terminal and run them in the "
 "background."
@@ -4351,92 +4361,85 @@ msgstr ""
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:91
 msgid ""
 "To ensure the ``flwr`` CLI connects to the SuperLink, you need to specify"
-" the SuperLink addresses in the ``pyproject.toml`` file."
+" the SuperLink connection in your Flower configuration file."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:94
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:234
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:108
 #, fuzzy
-msgid "Add the following lines to the ``quickstart-pytorch/pyproject.toml``:"
+msgid "Add the following lines to the ``config.toml``:"
 msgstr "``pyproject.toml``에 다음 버전 제약 조건을 설정했는지 확인하세요:"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:96
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:236
-#, fuzzy
-msgid "quickstart-pytorch/pyproject.toml"
-msgstr "빠른 시작 튜토리얼"
-
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:103
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:117
 msgid ""
 "Run the quickstart example, monitor the ``ServerApp`` logs and wait for "
 "the summary to appear:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:112
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:126
 msgid "Step 4: Update the Application"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:114
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:128
 msgid "In the next step, change the application code."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:116
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:130
 msgid ""
 "For example, go to the ``task.py`` file in the ``quickstart-"
 "pytorch/pytorchexample/`` directory and add a ``print`` call in the "
 "``get_weights`` function:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:119
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:133
 #, fuzzy
 msgid "quickstart-pytorch/pytorchexample/task.py"
 msgstr "빠른 시작 튜토리얼"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:130
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:144
 #, fuzzy
 msgid "Rebuild and restart the services."
 msgstr "이미 *서버*를 시작할 수 있습니다:"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:137
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:151
 msgid "If you haven't made any changes, you can skip this step."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:139
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:153
 msgid "Run the following command to rebuild and restart the services:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:145
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:159
 msgid "Run the updated quickstart example:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:151
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:165
 msgid "In the ``ServerApp`` logs, you should find the ``Get weights`` line:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:165
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:179
 msgid "Step 5: Persisting the SuperLink State"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:167
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:181
 msgid ""
 "In this step, Flower services are configured to persist the state of the "
 "SuperLink service, ensuring that it maintains its state even after a "
 "restart."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:172
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:186
 msgid ""
 "When working with Docker Compose on Linux, you may need to create the "
 "``state`` directory first and change its ownership to ensure proper "
 "access and permissions."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:177
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:228
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:191
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:242
 msgid "Run the command:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:186
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:200
 msgid ""
 "``-f compose.yml``: Specify the YAML file that contains the basic Flower "
 "service definitions."
@@ -4459,18 +4462,18 @@ msgid ""
 "rules>`_."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:194
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:249
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:384
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:208
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:263
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:398
 #, fuzzy
 msgid "Rerun the ``quickstart-pytorch`` project:"
 msgstr "빠른 시작 튜토리얼"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:200
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:214
 msgid "Check the content of the ``state`` directory:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:207
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:221
 msgid ""
 "You should see a ``state.db`` file in the ``state`` directory. If you "
 "restart the service, the state file will be used to restore the state "
@@ -4478,106 +4481,110 @@ msgid ""
 "if the containers are stopped and started again."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:216
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:230
 msgid "Step 6: Run Flower with TLS"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:218
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:232
 msgid ""
 "To demonstrate how to enable TLS, generate self-signed certificates using"
 " the ``certs.yml`` Compose file."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:225
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:239
 msgid ""
 "For production environments, use a service like `Let's Encrypt "
 "<https://letsencrypt.org/>`_ to obtain your certificates."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:243
-msgid "Restart the services with TLS enabled:"
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:248
+msgid "Add a new SuperLink connection to your Flower Configuration file:"
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:257
+msgid "Restart the services with TLS enabled:"
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:271
 #, fuzzy
 msgid "Step 7: Add another SuperNode and ClientApp"
 msgstr "서버(SuperLink)"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:259
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:273
 msgid ""
 "You can add more SuperNodes and ClientApps by uncommenting their "
 "definitions in the ``compose.yml`` file:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:262
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:276
 msgid "compose.yml"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:316
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:330
 msgid ""
 "If you also want to enable TLS for the new SuperNode, uncomment the "
 "definition in the ``with-tls.yml`` file:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:319
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:333
 msgid "with-tls.yml"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:340
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:354
 #, fuzzy
 msgid "Restart the services with:"
 msgstr "이미 *서버*를 시작할 수 있습니다:"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:350
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:364
 msgid "Step 8: Persisting the SuperLink State and Enabling TLS"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:352
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:366
 msgid ""
 "To run Flower with persisted SuperLink state and enabled TLS, a slight "
 "change in the ``with-state.yml`` file is required:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:355
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:369
 msgid "Comment out the lines 2-6 and uncomment the lines 7-13:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:357
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:371
 msgid "with-state.yml"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:378
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:392
 #, fuzzy
 msgid "Restart the services:"
 msgstr "이미 *서버*를 시작할 수 있습니다:"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:392
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:406
 msgid "Step 9: Merge Multiple Compose Files"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:394
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:408
 msgid ""
 "You can merge multiple Compose files into a single file. For instance, if"
 " you wish to combine the basic configuration with the TLS configuration, "
 "execute the following command:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:403
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:417
 msgid ""
 "This will merge the contents of ``compose.yml`` and ``with-tls.yml`` into"
 " a new file called ``my_compose.yml``."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:408
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:422
 msgid "Step 10: Clean Up"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:410
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:424
 #, fuzzy
 msgid "Remove all services and volumes:"
 msgstr "R에서 모든 항목을 제거합니다."
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:420
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:434
 #, fuzzy
 msgid ":doc:`run-quickstart-examples-docker-compose`"
 msgstr "빠른 시작 튜토리얼"
@@ -9488,9 +9495,9 @@ msgstr "flower 초연결"
 msgid ""
 "Once a SuperLink with account authentication and authorization is up and "
 "running, an account can interface with it after installing the ``flwr`` "
-"PyPI package via the Flower CLI. Then, ensure that the ``enable-account-"
-"auth`` field is set to ``true`` in the federation section in the "
-"``pyproject.toml`` of the Flower app you want to run:"
+"PyPI package via the Flower CLI. Configure the SuperLink connection in "
+"your Flower Configuration file (typically located at "
+"``$HOME/.flwr/config.toml``):"
 msgstr ""
 
 #: ../../source/how-to-authenticate-accounts.rst:108
@@ -9500,29 +9507,41 @@ msgid ""
 "connections."
 msgstr ":code:`SuperLink`에서 노드 인증 활성화"
 
-#: ../../source/how-to-authenticate-accounts.rst:110
+#: ../../source/how-to-authenticate-accounts.rst:109
 msgid ""
-"Now, you need to login first before other CLI commands can be executed. "
-"Upon executing ``flwr login``, a URL will be returned by the "
-"authentication plugin in the SuperLink. Click on it and authenticate "
-"directly against the OIDC provider."
+"Setting the default connection is optional. If you don't set your "
+"SuperLink as default, you can specify the connection name explicitly in "
+"each command, for example: ``flwr login my-prod-superlink``."
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:124
+#: ../../source/how-to-authenticate-accounts.rst:113
+msgid ""
+"Learn more about the Flower Configuration file in the `Flower "
+"Configuration File <ref-flower-configuration.html>`_ reference."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:116
+msgid ""
+"You need to login first before other CLI commands can be executed. Upon "
+"executing ``flwr login``, a URL will be returned by the authentication "
+"plugin in the SuperLink. Click on it and authenticate directly against "
+"the OIDC provider."
+msgstr ""
+
+#: ../../source/how-to-authenticate-accounts.rst:129
 msgid ""
 "Once the login is successful, the credentials returned by the OIDC "
-"provider via the SuperLink will be saved to the app's directory under "
-"``.flwr/.credentials/<federation-name>.json``. The tokens stored in this "
-"file will be sent transparently with each subsequent ``flwr`` CLI request"
-" to the SuperLink, and it will relay them to OIDC provider to perform the"
-" authentication checks."
+"provider via the SuperLink will be stored locally. The tokens will be "
+"sent transparently with each subsequent ``flwr`` CLI request to the "
+"SuperLink, and it will relay them to the OIDC provider to perform the "
+"authentication checks."
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:132
+#: ../../source/how-to-authenticate-accounts.rst:136
 msgid "Run authorized ``flwr`` CLI commands"
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:134
+#: ../../source/how-to-authenticate-accounts.rst:138
 msgid ""
 "With the above steps completed, you can now run ``flwr`` CLI commands "
 "against a SuperLink setup with account authentication and authorization. "
@@ -9530,7 +9549,7 @@ msgid ""
 "command to start a Flower app:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:146
+#: ../../source/how-to-authenticate-accounts.rst:148
 msgid ""
 "If the account does not have the necessary permissions to run the "
 "command, an error will be returned:"
@@ -10159,8 +10178,7 @@ msgstr ""
 #: ../../source/how-to-configure-pyproject-toml.rst:-1
 msgid ""
 "Learn how to configure your Flower app using the pyproject.toml file, "
-"including dependencies, components, runtime settings, and federation "
-"setup."
+"including dependencies, components and runtime settings."
 msgstr ""
 
 #: ../../source/how-to-configure-pyproject-toml.rst:7
@@ -10172,7 +10190,7 @@ msgstr "또는 ``pyproject.toml``:"
 msgid ""
 "All Flower Apps need a ``pyproject.toml``. When you create a new Flower "
 "App using ``flwr new``, a ``pyproject.toml`` file is generated. This file"
-" defines your app's dependencies, configuration, and federation setup."
+" defines your app's dependencies, and configuration setup."
 msgstr ""
 
 #: ../../source/how-to-configure-pyproject-toml.rst:13
@@ -10184,11 +10202,11 @@ msgstr ""
 msgid "Example ``pyproject.toml``"
 msgstr "또는 ``pyproject.toml``:"
 
-#: ../../source/how-to-configure-pyproject-toml.rst:53
+#: ../../source/how-to-configure-pyproject-toml.rst:47
 msgid "Here are a few key sections to look out for:"
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:57
+#: ../../source/how-to-configure-pyproject-toml.rst:51
 #, fuzzy
 msgid "App Metadata and Dependencies"
 msgstr "사전 릴리즈 설치"
@@ -10198,71 +10216,69 @@ msgstr "사전 릴리즈 설치"
 msgid "Understanding each field"
 msgstr "SuperNode Dockerfile 만들기"
 
-#: ../../source/how-to-configure-pyproject-toml.rst:78
-#: ../../source/how-to-configure-pyproject-toml.rst:111
-#: ../../source/how-to-configure-pyproject-toml.rst:156
-#: ../../source/how-to-configure-pyproject-toml.rst:195
+#: ../../source/how-to-configure-pyproject-toml.rst:72
+#: ../../source/how-to-configure-pyproject-toml.rst:105
 #, fuzzy
 msgid "\\* Required fields"
 msgstr "필수 변경 사항"
 
-#: ../../source/how-to-configure-pyproject-toml.rst:80
+#: ../../source/how-to-configure-pyproject-toml.rst:74
 msgid ""
 "These fields follow the standard ``pyproject.toml`` metadata format, "
 "commonly used by tools like ``uv``, ``poetry``, and others. Flower reuses"
 " these for configuration and packaging."
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:82
+#: ../../source/how-to-configure-pyproject-toml.rst:76
 #, fuzzy
 msgid "``name``\\*: The name of your Flower app."
 msgstr "Flower 기본 이미지의 태그."
 
-#: ../../source/how-to-configure-pyproject-toml.rst:83
+#: ../../source/how-to-configure-pyproject-toml.rst:77
 msgid ""
 "``version``\\*: The current version of your app, used for packaging and "
 "distribution. Must follow Semantic Versioning (e.g., \"1.0.0\")."
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:84
+#: ../../source/how-to-configure-pyproject-toml.rst:78
 msgid "``description``: A short summary of what your app does."
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:85
+#: ../../source/how-to-configure-pyproject-toml.rst:79
 msgid "``license``: The license your app is distributed under (e.g., Apache-2.0)."
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:86
+#: ../../source/how-to-configure-pyproject-toml.rst:80
 msgid "``dependencies``\\*: A list of Python packages required to run your app."
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:87
+#: ../../source/how-to-configure-pyproject-toml.rst:81
 msgid ""
 "``publisher``\\*: The name of the person or organization publishing the "
 "app."
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:89
+#: ../../source/how-to-configure-pyproject-toml.rst:83
 msgid ""
 "Specify the metadata, including the app name, version, etc., in these "
 "sections. Add any Python packages your app needs under ``dependencies``. "
 "These will be installed when you run:"
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:99
+#: ../../source/how-to-configure-pyproject-toml.rst:93
 #, fuzzy
 msgid "App Components"
 msgstr "공통"
 
-#: ../../source/how-to-configure-pyproject-toml.rst:113
+#: ../../source/how-to-configure-pyproject-toml.rst:107
 msgid "``serverapp``\\*: The import path to your ``ServerApp`` object."
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:114
+#: ../../source/how-to-configure-pyproject-toml.rst:108
 msgid "``clientapp``\\*: The import path to your ``ClientApp`` object."
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:116
+#: ../../source/how-to-configure-pyproject-toml.rst:110
 msgid ""
 "These entries point to your ``ServerApp`` and ``ClientApp`` definitions, "
 "using the format ``<module>:<object>``. Only update these import paths if"
@@ -10270,113 +10286,36 @@ msgid ""
 "``ServerApp`` or ``ClientApp``."
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:122
+#: ../../source/how-to-configure-pyproject-toml.rst:116
 #, fuzzy
 msgid "App Configuration"
 msgstr "구성 값"
 
-#: ../../source/how-to-configure-pyproject-toml.rst:130
+#: ../../source/how-to-configure-pyproject-toml.rst:124
 msgid ""
 "Define configuration values that should be available to your app at "
 "runtime. You can specify any number of key-value pairs in this section. "
 "All the configuration values in this section are optional."
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:134
+#: ../../source/how-to-configure-pyproject-toml.rst:128
 msgid ""
 "Access these values in your code using ``context.run_config``. For "
 "example:"
 msgstr ""
 
-#: ../../source/how-to-configure-pyproject-toml.rst:142
+#: ../../source/how-to-configure-pyproject-toml.rst:136
 #, fuzzy
 msgid "Federation Configuration"
 msgstr "구성 값"
 
-#: ../../source/how-to-configure-pyproject-toml.rst:158
+#: ../../source/how-to-configure-pyproject-toml.rst:140
 msgid ""
-"``default``\\*: The name of the federation to use when running your app "
-"with ``flwr run`` without explicitly specifying a federation."
-msgstr ""
-
-#: ../../source/how-to-configure-pyproject-toml.rst:160
-msgid ""
-"Federations allow you to define how your app will run in different "
-"environments. You can configure multiple federations, such as local "
-"simulations or remote deployments, within the ``[tool.flwr.federations]``"
-" section."
-msgstr ""
-
-#: ../../source/how-to-configure-pyproject-toml.rst:165
-#, fuzzy
-msgid "Local Simulation Example"
-msgstr "시뮬레이션 예제"
-
-#: ../../source/how-to-configure-pyproject-toml.rst:172
-msgid ""
-"When using ``flwr new``, a federation named ``\"local-simulation\"`` is "
-"included and set as the default. The example above sets up a local "
-"simulation federation with 10 virtual SuperNodes using ``options.num-"
-"supernodes = 10``."
-msgstr ""
-
-#: ../../source/how-to-configure-pyproject-toml.rst:176
-msgid ""
-"Learn more in the `How to Run Simulations "
-"<https://flower.ai/docs/framework/how-to-run-simulations.html>`_ guide."
-msgstr ""
-
-#: ../../source/how-to-configure-pyproject-toml.rst:180
-#, fuzzy
-msgid "Remote Deployment Example"
-msgstr "배포"
-
-#: ../../source/how-to-configure-pyproject-toml.rst:182
-msgid "You can also configure federations for remote deployment. For example:"
-msgstr ""
-
-#: ../../source/how-to-configure-pyproject-toml.rst:197
-msgid "``address``\\*: The address of the SuperLink Control API to connect to."
-msgstr ""
-
-#: ../../source/how-to-configure-pyproject-toml.rst:198
-msgid ""
-"``root-certificate``: Path to the root certificate file for TLS. Ignored "
-"if ``insecure`` is ``true``. If omitted, Flower uses the default gRPC "
-"root certificate."
-msgstr ""
-
-#: ../../source/how-to-configure-pyproject-toml.rst:199
-msgid ""
-"``insecure``: Set to ``true`` to disable TLS (not recommended for "
-"production). Defaults to ``false``, if omitted."
-msgstr ""
-
-#: ../../source/how-to-configure-pyproject-toml.rst:201
-msgid ""
-"Refer to the `deployment documentation "
-"<https://flower.ai/docs/framework/deploy.html>`_ for TLS setup and "
-"advanced configurations."
-msgstr ""
-
-#: ../../source/how-to-configure-pyproject-toml.rst:205
-#, fuzzy
-msgid "Running a Federation"
-msgstr "시뮬레이션 실행"
-
-#: ../../source/how-to-configure-pyproject-toml.rst:207
-msgid "To run a specific federation, use the following command:"
-msgstr ""
-
-#: ../../source/how-to-configure-pyproject-toml.rst:213
-msgid ""
-"Both positional arguments—the app path and the federation name—are "
-"optional. If omitted, the current directory is used as the app path, and "
-"the default federation specified in the ``pyproject.toml`` file is used."
-msgstr ""
-
-#: ../../source/how-to-configure-pyproject-toml.rst:217
-msgid "You can run ``flwr run --help`` for more details."
+"What was previously called \"federation config\" for SuperLink "
+"connections in ``pyproject.toml`` has been renamed and moved. These "
+"settings are now **SuperLink connection configuration** and are defined "
+"in the Flower configuration file. Refer to the `Flower configuration file"
+" <ref-flower-configuration.html>`_ for more information."
 msgstr ""
 
 #: ../../source/how-to-design-stateful-clients.rst:-1
@@ -10727,8 +10666,9 @@ msgid ""
 "federation. The Flower CLI commands are processed by the SuperLink and "
 "therefore, if it has been configured to only operate on TLS conenction, "
 "the requests sent by the Flower CLI need to make use of a TLS "
-"certificate. To do so, replace the ``insecure = true`` field in the "
-"``pyproject.toml`` with a new field that reads the certificate:"
+"certificate. To do so, replace the ``insecure = true`` field in your "
+"Flower Configuration TOML file with a new field that reads the "
+"certificate:"
 msgstr ""
 
 #: ../../source/how-to-enable-tls-connections.rst:135
@@ -11095,9 +11035,9 @@ msgstr "flower 초연결"
 
 #: ../../source/how-to-manage-flower-federations.rst:65
 msgid ""
-"The ``flwr federation list`` command requires the name of the federation "
-"to inspect as an argument. This can be specified as part of your "
-"``pyproject.toml`` configuration. For example:"
+"The ``flwr federation list --federation <federation>`` command requires "
+"the name of the federation to inspect as an argument. This can be "
+"specified as part of your Flower Configuration TOML file. For example:"
 msgstr ""
 
 #: ../../source/how-to-manage-flower-federations.rst:78
@@ -13467,43 +13407,65 @@ msgstr ""
 msgid "Step 3: Run a Flower App on the Federation"
 msgstr "Flower SuperNode를 실행합니다."
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:168
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:170
+msgid ""
+"The Flower Configuration file is automatically created for you when you "
+"first use a Flower CLI command. Use ``flwr config list`` to see available"
+" SuperLink connections as well as the path to the configuration file. "
+"Read more about it in the :doc:`ref-flower-configuration` guide."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:175
 msgid ""
 "At this point, you have launched two SuperNodes that are connected to the"
 " same SuperLink. The system is idling waiting for a ``Run`` to be "
 "submitted. Before you can run your Flower App through the federation we "
 "need a way to tell ``flwr run`` that the App is to be executed via the "
 "SuperLink we just started, instead of using the local Simulation Engine "
-"(the default). Doing this is easy: define a new federation section in the"
-" ``pyproject.toml``, indicate the address of the SuperLink and pass a "
-"certificate (if any) or set the insecure flag (only when testing locally,"
-" real deployments require TLS)."
+"(the default). Doing this is easy: define a new SuperLink connection in "
+"the **Flower Configuration** file, indicate the address of the SuperLink "
+"and pass a certificate (if any) or set the insecure flag (only when "
+"testing locally, real deployments require TLS)."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:176
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:198
+#, fuzzy
 msgid ""
-"Open the ``pyproject.toml`` file and at the end add a new federation "
-"configuration:"
+"Open the ``config.toml`` file and at the end add a new SuperLink "
+"connection:"
+msgstr "``pyproject.toml``에 다음 버전 제약 조건을 설정했는지 확인하세요:"
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:209
+msgid ""
+"You can customize the string that follows ``[superlink.]`` to fit your "
+"needs. However, please note that the string cannot contain a dot (``.``)."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:194
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:212
+msgid ""
+"In this example, ``local-deployment`` has been used. Just remember to "
+"replace ``local-deployment`` with your chosen name in both the "
+"``[superlink.]`` string and the corresponding ``flwr run .`` command."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:216
 msgid ""
 "In another terminal and with your Python environment activated, run the "
 "Flower App and follow the ``ServerApp`` logs to track the execution of "
 "the run:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:201
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:223
 msgid ""
 "If you want to rerun the project or test an updated version by making "
 "changes to the code, simply re-run the command above."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:206
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:228
 msgid "Step 4: Clean Up"
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:208
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:230
 msgid ""
 "Use the ``Ctrl+C`` command in each terminal to stop the respective "
 "processes."
@@ -15014,6 +14976,11 @@ msgid ""
 "`pyproject.toml` in your app:"
 msgstr ""
 
+#: ../../source/how-to-upgrade-to-message-api.rst:132
+#, fuzzy
+msgid "pyproject.toml"
+msgstr "또는 ``pyproject.toml``:"
+
 #: ../../source/how-to-upgrade-to-message-api.rst:141
 msgid "Then, run the following command to install the updated dependencies:"
 msgstr ""
@@ -16261,45 +16228,19 @@ msgid ""
 "filtered based on .gitignore patterns and allowed file extensions."
 msgstr ""
 
-#: ../../flwr app login:1 publish:1 review:1
-#, fuzzy
-msgid ""
-"Override federation configuration values using one of the following "
-"formats:"
-msgstr "다음 명령을 실행하여 가상 환경을 활성화합니다:"
-
-#: ../../flwr app login:1 publish:1 review:1
-msgid ""
-"--federation-config '<k1>=<v1> <k2>=<v2>' | --federation-config "
-"'<k1>=<v1>' --federation-config '<k2>=<v2>'"
-msgstr ""
-
-#: ../../flwr app login:1 publish:1 review:1
-msgid ""
-"When providing key-value pairs, values can be of any type supported by "
-"TOML (e.g., bool, int, float, string). The specified keys (<k1> and <k2> "
-"in the example) must exist in the federation configuration under the "
-"`[tool.flwr.federations.<YOUR-FEDERATION>]` section of `pyproject.toml` "
-"to be overridden."
-msgstr ""
-
 #: ../../source/ref-api-cli.rst
 #, fuzzy
 msgid "Arguments"
 msgstr "빌드 전달인자"
 
 #: ../../flwr app federation install:1 list:1 log:1 login:1 new:1 publish:1
-#: pull:1 register:1 review:1 run:1 stop:1 supernode unregister:1
+#: pull:1 register:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "선택적 개선 사항"
 
 #: ../../flwr app publish:1
 msgid "Project directory to upload (defaults to current directory)."
-msgstr ""
-
-#: ../../flwr app publish:1
-msgid "Name of the federation used for login before publishing app."
 msgstr ""
 
 #: ../../flwr app review:1
@@ -16318,14 +16259,6 @@ msgstr "빌드 전달인자"
 msgid ""
 "App specifier (e.g., '@account/app' or '@account/app==1.0.0'). Version is"
 " optional; defaults to the latest."
-msgstr ""
-
-#: ../../flwr app review:1
-msgid "Project directory to used for login before reviewing app."
-msgstr ""
-
-#: ../../flwr app review:1
-msgid "Name of the federation used for login before reviewing app."
 msgstr ""
 
 #: ../../flwr build:1
@@ -16355,7 +16288,7 @@ msgstr "구성 값"
 
 #: ../../flwr config list:1
 #, fuzzy
-msgid "List all SuperLink connections."
+msgid "List all SuperLink connections (alias: ls)."
 msgstr "서버(SuperLink)"
 
 #: ../../flwr config federation list:1 register:1 run:1 stop:1 supernode
@@ -16379,23 +16312,21 @@ msgid "Manage Federations"
 msgstr "시뮬레이션 실행"
 
 #: ../../flwr federation list:1
-#, fuzzy
-msgid "List available federations."
-msgstr "시뮬레이션 실행"
+msgid ""
+"List available federations or details of a specific federation (alias: "
+"ls)."
+msgstr ""
 
 #: ../../flwr federation list:1
 #, fuzzy
 msgid "Name of the federation to display"
 msgstr "flower 초연결"
 
-#: ../../flwr federation list:1 register:1 supernode unregister:1
+#: ../../flwr federation list:1 log:1 login:1 pull:1 register:1 run:1 stop:1
+#: supernode unregister:1
 #, fuzzy
-msgid "Path of the Flower project"
-msgstr "Flower 기본 이미지의 태그."
-
-#: ../../flwr federation list:1 register:1 supernode unregister:1
-msgid "Name of the federation"
-msgstr ""
+msgid "Name of the SuperLink connection."
+msgstr "flower 초연결"
 
 #: ../../flwr install:1
 #, fuzzy
@@ -16445,9 +16376,7 @@ msgid "The source FAB file to install."
 msgstr ""
 
 #: ../../flwr list:1
-msgid ""
-"List the details of one provided run ID or all runs in a Flower "
-"federation."
+msgid "List the details of one provided run ID or all runs (alias: ls)."
 msgstr ""
 
 #: ../../flwr list:1
@@ -16501,11 +16430,6 @@ msgstr "``flwr/base``"
 msgid "Specific run ID to display"
 msgstr ""
 
-#: ../../flwr list:1 log:1 pull:1 run:1 stop:1
-#, fuzzy
-msgid "Name of the SuperLink connection."
-msgstr "flower 초연결"
-
 #: ../../flwr log:1
 msgid "Get logs from a run."
 msgstr ""
@@ -16534,15 +16458,6 @@ msgstr "Flower 커뮤니티 가입하기"
 #, fuzzy
 msgid "Login to Flower SuperLink."
 msgstr "flower 초연결"
-
-#: ../../flwr login:1 run:1
-#, fuzzy
-msgid "Path of the Flower App to run."
-msgstr "Flower 기본 이미지의 태그."
-
-#: ../../flwr login:1
-msgid "Name of the federation to login into."
-msgstr ""
 
 #: ../../flwr new:1
 #, fuzzy
@@ -16609,6 +16524,11 @@ msgid ""
 "default."
 msgstr ""
 
+#: ../../flwr run:1
+#, fuzzy
+msgid "Path of the Flower App to run."
+msgstr "Flower 기본 이미지의 태그."
+
 #: ../../flwr stop:1
 #, fuzzy
 msgid "Stop a Flower run."
@@ -16632,7 +16552,7 @@ msgstr "SuperNodes 인증하기"
 
 #: ../../flwr list:1 supernode
 #, fuzzy
-msgid "List SuperNodes in the federation."
+msgid "List SuperNodes in the federation (alias: ls)."
 msgstr "flower 초연결"
 
 #: ../../flwr list:1 supernode
@@ -31117,6 +31037,7 @@ msgstr ""
 #: ../../source/ref-exit-codes/102.rst:13
 #: ../../source/ref-exit-codes/103.rst:13
 #: ../../source/ref-exit-codes/104.rst:13
+#: ../../source/ref-exit-codes/105.rst:17
 #: ../../source/ref-exit-codes/200.rst:32
 #: ../../source/ref-exit-codes/201.rst:13
 #: ../../source/ref-exit-codes/202.rst:13
@@ -31239,6 +31160,28 @@ msgid ""
 "Some of the arguments passed to the SuperLink are incompatible with each "
 "other. Check the SuperLink logs for additional help on how to resolve the"
 " issue."
+msgstr ""
+
+#: ../../source/ref-exit-codes/105.rst:3
+msgid "[105] SUPERLINK_DATABASE_SCHEMA_MISMATCH"
+msgstr ""
+
+#: ../../source/ref-exit-codes/105.rst:9
+msgid ""
+"The SuperLink was started with a database schema that does not match the "
+"expected baseline schema."
+msgstr ""
+
+#: ../../source/ref-exit-codes/105.rst:12
+msgid ""
+"This typically occurs when using a pre-Alembic database that requires "
+"migration that has been modified."
+msgstr ""
+
+#: ../../source/ref-exit-codes/105.rst:19
+msgid ""
+"Back up your database and either migrate it manually to the baseline "
+"schema or start with a fresh database."
 msgstr ""
 
 #: ../../source/ref-exit-codes/2.rst:3
@@ -31794,6 +31737,347 @@ msgstr ""
 msgid ""
 "`Flower meets Talan GitHub Repository "
 "<https://gitlab.com/Talan_Innovation_Factory/food-waste-prevention>`_ ."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:-1
+msgid ""
+"Learn how to setup the Flower Configuration file and how to use it to run"
+" your Flower App and interact with SuperLinks."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:7
+#, fuzzy
+msgid "Flower Configuration File"
+msgstr "구성 값"
+
+#: ../../source/ref-flower-configuration.rst:11
+msgid ""
+"The Flower Configuration file is a new feature introduced in Flower "
+"1.26.0. While its functionality will evolve over time, as a start it "
+"serves as a direct replacement of the `federations` section in the "
+"`pyproject.toml` file of Flower Apps in older versions."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:16
+msgid "**What is it?**"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:18
+msgid ""
+"The Flower Configuration is a TOML file that lives in the directory "
+"specified by the ``FLWR_HOME`` environment variable (which defaults to "
+"``$HOME/.flwr`` when unset) and is designed to simplify the usage of "
+"`Flower CLI <ref-api-cli.html>`_ commands."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:22
+msgid "**Why use it?**"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:24
+msgid ""
+"This configuration file allows you to define reusable connection "
+"configurations that you can reference by name when running ``flwr`` "
+"commands. For example, you can set up configurations for local testing, "
+"staging servers, and production deployments, then easily switch between "
+"them."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:29
+msgid ""
+"Most ``flwr`` commands (like ``flwr log``, ``flwr ls``, and ``flwr "
+"stop``) can use this configuration file from anywhere on your system. The"
+" exception is ``flwr run``, which must be executed from within a Flower "
+"App directory to access the app code."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:35
+msgid ""
+"**First-time setup:** If a Flower Configuration file doesn't exist in "
+"your system, it will be automatically created for you the first time you "
+"run a Flower CLI command."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:39
+msgid ""
+"**Upgrading from older versions:** If you are upgrading from a previous "
+"version of Flower, the ``federations`` section in your ``pyproject.toml``"
+" file will be automatically migrated to the Flower Configuration file. "
+"The syntax remains the same with the exception of the name of the section"
+" and the ``superlink`` keyword instead of ``tool.flwr.federations``."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:47
+#, fuzzy
+msgid "Flower Configuration File Structure"
+msgstr "Flower 서버."
+
+#: ../../source/ref-flower-configuration.rst:49
+#, fuzzy
+msgid "**Understanding the terminology**"
+msgstr "SuperNode Dockerfile 만들기"
+
+#: ../../source/ref-flower-configuration.rst:51
+msgid ""
+"The Flower Configuration file uses the term **\"superlink\"** to refer to"
+" SuperLink connection configurations. Each connection configuration "
+"describes how to connect to a Flower **SuperLink** (the central server "
+"component that coordinates federated learning). You can define multiple "
+"SuperLink connection configurations for different scenarios, such as "
+"local simulations or remote deployments."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:57
+msgid ""
+"The configuration structure is similar to the older ``federations`` "
+"section in ``pyproject.toml`` before Flower 1.26.0, but now lives in a "
+"central location and uses clearer naming."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:61
+#, fuzzy
+msgid "**Basic example**"
+msgstr "유효한 예시입니다:"
+
+#: ../../source/ref-flower-configuration.rst:75
+#: ../../source/ref-flower-configuration.rst:165
+#, fuzzy
+msgid "**Explanation**"
+msgstr "설명"
+
+#: ../../source/ref-flower-configuration.rst:77
+msgid ""
+"``[superlink]`` section defines which connection configuration to use by "
+"default"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:78
+msgid ""
+"``default = \"local\"`` means the ``superlink.local`` configuration will "
+"be used when you don't specify a connection explicitly in your ``flwr`` "
+"commands"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:80
+msgid ""
+"``[superlink.local]`` defines a local simulation configuration with 10 "
+"virtual SuperNodes"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:82
+msgid ""
+"``[superlink.local-poc]`` defines a configuration for connecting to a "
+"locally running SuperLink at address ``127.0.0.1:9093``"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:85
+msgid ""
+"Connection configuration names must be unique and use the ``superlink.`` "
+"prefix. The type of options you specify depends on whether you're "
+"configuring a simulation (``options.num-supernodes``) or a deployment "
+"(``address``, ``insecure``)."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:91
+#, fuzzy
+msgid "Listing your connections"
+msgstr "서버(SuperLink)"
+
+#: ../../source/ref-flower-configuration.rst:93
+msgid ""
+"You can list all your connection configurations using the ``flwr config "
+"list`` command. Assuming the default configuration file shown earlier, "
+"the expected output will be:"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:105
+msgid ""
+"This shows you have two connection configurations available, with "
+"``local`` set as the default."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:110
+#, fuzzy
+msgid "Local Simulation Example"
+msgstr "시뮬레이션 예제"
+
+#: ../../source/ref-flower-configuration.rst:112
+msgid ""
+"Local simulations allow you to test your Flower App on your own machine "
+"using virtual SuperNodes instead of real distributed SuperNodes. This is "
+"useful for development and testing before deploying to real distributed "
+"environments."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:116
+#, fuzzy
+msgid "**Basic simulation configuration**"
+msgstr "구성 값"
+
+#: ../../source/ref-flower-configuration.rst:123
+msgid ""
+"This creates a simulation connection configuration with 10 virtual "
+"SuperNodes."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:125
+#, fuzzy
+msgid "**Simulation with custom resources**"
+msgstr "VirtualClientEngine 리소스"
+
+#: ../../source/ref-flower-configuration.rst:134
+#, python-format
+msgid ""
+"This creates a simulation connection configuration with 100 virtual "
+"SuperNodes, where each is allocated 1 CPU and 10% of a GPU. This is "
+"useful when you want to control resource distribution or simulate "
+"resource-constrained environments."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:138
+msgid "**When to use each**"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:140
+msgid ""
+"Use the basic configuration for quick testing with default resource "
+"allocation"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:141
+msgid ""
+"Use custom resources when you need to simulate specific hardware "
+"constraints or want to control how many virtual SuperNodes can run in "
+"parallel based on your machine's resources"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:145
+msgid ""
+"Learn more in the `How to Run Simulations "
+"<https://flower.ai/docs/framework/how-to-run-simulations.html>`_ guide "
+"about other optional parameters you can use to configure your local "
+"simulation."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:151
+#, fuzzy
+msgid "Remote Deployment Example"
+msgstr "배포"
+
+#: ../../source/ref-flower-configuration.rst:153
+msgid ""
+"When you're ready to deploy your federated learning app to real "
+"distributed nodes, you configure connections that point to a remote "
+"SuperLink."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:156
+#, fuzzy
+msgid "**Example configuration**"
+msgstr "구성 값"
+
+#: ../../source/ref-flower-configuration.rst:167
+msgid ""
+"``address`` (required): The address of the SuperLink Control API to "
+"connect to (e.g., ``my-server.example.com:9093``)."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:169
+msgid ""
+"``root-certificate``: Path to the root certificate file for TLS "
+"encryption. This secures the communication between your CLI and the "
+"SuperLink. If omitted, Flower uses the default gRPC root certificate. "
+"This field is ignored if ``insecure`` is set to ``true``."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:173
+msgid ""
+"``insecure``: Set to ``true`` to disable TLS encryption (only use this "
+"for local testing, never in production). Defaults to ``false`` if "
+"omitted, meaning TLS is enabled by default."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:177
+msgid "**TLS (Transport Layer Security) explained**"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:179
+msgid ""
+"TLS encrypts the communication between your local machine and the remote "
+"SuperLink to prevent eavesdropping and tampering. In production, you "
+"should always use TLS by either:"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:182
+msgid ""
+"Providing a ``root-certificate`` file (recommended for custom "
+"certificates)"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:183
+msgid ""
+"Omitting both ``root-certificate`` and ``insecure`` to use default "
+"certificates"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:185
+msgid "Only set ``insecure = true`` for local testing environments."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:187
+msgid ""
+"Refer to the `deployment documentation "
+"<https://flower.ai/docs/framework/deploy.html>`_ for TLS setup and "
+"advanced configurations."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:192
+#, fuzzy
+msgid "Upgrading from previous versions of Flower"
+msgstr "Flower 개발 버전 설치하기"
+
+#: ../../source/ref-flower-configuration.rst:194
+msgid "**If you're new to Flower 1.26.0+, you can skip this section.**"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:196
+msgid ""
+"For users upgrading from versions before 1.26.0: The ``federations`` "
+"section in your ``pyproject.toml`` file will be automatically migrated to"
+" the new Flower Configuration file the first time you run a ``flwr`` "
+"command."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:200
+msgid "**What happens during migration**"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:202
+msgid "A new config file is created at ``$HOME/.flwr/config.toml``"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:203
+msgid ""
+"Your federation definitions are copied and renamed (``federations`` → "
+"``superlink``)"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:204
+msgid ""
+"The old ``[tool.flwr.federations]`` section in ``pyproject.toml`` is "
+"commented out for your reference"
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:207
+#, fuzzy
+msgid "**After migration**"
+msgstr "설명"
+
+#: ../../source/ref-flower-configuration.rst:209
+msgid ""
+"You can safely delete the commented-out ``federations`` section from your"
+" ``pyproject.toml`` file. All connection configurations now live in the "
+"central configuration file and work across all your Flower projects."
 msgstr ""
 
 #: ../../source/ref-flower-network-communication.rst:-1
@@ -60593,4 +60877,290 @@ msgstr ""
 
 #~ msgid "Name of the federation."
 #~ msgstr "flower 초연결"
+
+#~ msgid ""
+#~ "The path of the ``root-certificates``"
+#~ " should be relative to the location"
+#~ " of the ``pyproject.toml`` file."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this example, ``local-deployment-"
+#~ "tls`` has been used. Just remember "
+#~ "to replace ``local-deployment-tls`` with"
+#~ " your chosen name in both the "
+#~ "``tool.flwr.federations.`` string and the "
+#~ "corresponding ``flwr run .`` command."
+#~ msgstr ""
+
+#~ msgid "quickstart-sklearn-tabular"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Specify the remote SuperLink IP "
+#~ "addresses and the path to the root"
+#~ " certificate in the ``[tool.flwr.federations"
+#~ ".remote-deployment]`` table in the "
+#~ "``pyproject.toml`` file. Here, we have "
+#~ "named our remote federation ``remote-"
+#~ "deployment``:"
+#~ msgstr ""
+
+#~ msgid "examples/quickstart-sklearn-tabular/pyproject.toml"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To ensure the ``flwr`` CLI connects "
+#~ "to the SuperLink, you need to "
+#~ "specify the SuperLink addresses in the"
+#~ " ``pyproject.toml`` file."
+#~ msgstr ""
+
+#~ msgid "Add the following lines to the ``quickstart-pytorch/pyproject.toml``:"
+#~ msgstr "``pyproject.toml``에 다음 버전 제약 조건을 설정했는지 확인하세요:"
+
+#~ msgid "quickstart-pytorch/pyproject.toml"
+#~ msgstr "빠른 시작 튜토리얼"
+
+#~ msgid ""
+#~ "Once a SuperLink with account "
+#~ "authentication and authorization is up "
+#~ "and running, an account can interface"
+#~ " with it after installing the "
+#~ "``flwr`` PyPI package via the Flower "
+#~ "CLI. Then, ensure that the ``enable-"
+#~ "account-auth`` field is set to "
+#~ "``true`` in the federation section in"
+#~ " the ``pyproject.toml`` of the Flower "
+#~ "app you want to run:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Now, you need to login first "
+#~ "before other CLI commands can be "
+#~ "executed. Upon executing ``flwr login``, "
+#~ "a URL will be returned by the "
+#~ "authentication plugin in the SuperLink. "
+#~ "Click on it and authenticate directly"
+#~ " against the OIDC provider."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Once the login is successful, the "
+#~ "credentials returned by the OIDC "
+#~ "provider via the SuperLink will be "
+#~ "saved to the app's directory under "
+#~ "``.flwr/.credentials/<federation-name>.json``. The "
+#~ "tokens stored in this file will be"
+#~ " sent transparently with each subsequent"
+#~ " ``flwr`` CLI request to the "
+#~ "SuperLink, and it will relay them "
+#~ "to OIDC provider to perform the "
+#~ "authentication checks."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Learn how to configure your Flower "
+#~ "app using the pyproject.toml file, "
+#~ "including dependencies, components, runtime "
+#~ "settings, and federation setup."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "All Flower Apps need a "
+#~ "``pyproject.toml``. When you create a "
+#~ "new Flower App using ``flwr new``, "
+#~ "a ``pyproject.toml`` file is generated. "
+#~ "This file defines your app's "
+#~ "dependencies, configuration, and federation "
+#~ "setup."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``default``\\*: The name of the "
+#~ "federation to use when running your "
+#~ "app with ``flwr run`` without explicitly"
+#~ " specifying a federation."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Federations allow you to define how "
+#~ "your app will run in different "
+#~ "environments. You can configure multiple "
+#~ "federations, such as local simulations "
+#~ "or remote deployments, within the "
+#~ "``[tool.flwr.federations]`` section."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "When using ``flwr new``, a federation"
+#~ " named ``\"local-simulation\"`` is included"
+#~ " and set as the default. The "
+#~ "example above sets up a local "
+#~ "simulation federation with 10 virtual "
+#~ "SuperNodes using ``options.num-supernodes ="
+#~ " 10``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Learn more in the `How to Run "
+#~ "Simulations <https://flower.ai/docs/framework/how-to-"
+#~ "run-simulations.html>`_ guide."
+#~ msgstr ""
+
+#~ msgid "You can also configure federations for remote deployment. For example:"
+#~ msgstr ""
+
+#~ msgid "``address``\\*: The address of the SuperLink Control API to connect to."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``root-certificate``: Path to the root"
+#~ " certificate file for TLS. Ignored if"
+#~ " ``insecure`` is ``true``. If omitted, "
+#~ "Flower uses the default gRPC root "
+#~ "certificate."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``insecure``: Set to ``true`` to disable"
+#~ " TLS (not recommended for production). "
+#~ "Defaults to ``false``, if omitted."
+#~ msgstr ""
+
+#~ msgid "Running a Federation"
+#~ msgstr "시뮬레이션 실행"
+
+#~ msgid "To run a specific federation, use the following command:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Both positional arguments—the app path "
+#~ "and the federation name—are optional. If"
+#~ " omitted, the current directory is "
+#~ "used as the app path, and the "
+#~ "default federation specified in the "
+#~ "``pyproject.toml`` file is used."
+#~ msgstr ""
+
+#~ msgid "You can run ``flwr run --help`` for more details."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Override federation configuration values using"
+#~ " one of the following formats:"
+#~ msgstr "다음 명령을 실행하여 가상 환경을 활성화합니다:"
+
+#~ msgid ""
+#~ "--federation-config '<k1>=<v1> <k2>=<v2>' |"
+#~ " --federation-config '<k1>=<v1>' --federation-"
+#~ "config '<k2>=<v2>'"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "When providing key-value pairs, values"
+#~ " can be of any type supported "
+#~ "by TOML (e.g., bool, int, float, "
+#~ "string). The specified keys (<k1> and"
+#~ " <k2> in the example) must exist "
+#~ "in the federation configuration under "
+#~ "the `[tool.flwr.federations.<YOUR-FEDERATION>]` "
+#~ "section of `pyproject.toml` to be "
+#~ "overridden."
+#~ msgstr ""
+
+#~ msgid "Name of the federation used for login before publishing app."
+#~ msgstr ""
+
+#~ msgid "Project directory to used for login before reviewing app."
+#~ msgstr ""
+
+#~ msgid "Name of the federation used for login before reviewing app."
+#~ msgstr ""
+
+#~ msgid "Path of the Flower project"
+#~ msgstr "Flower 기본 이미지의 태그."
+
+#~ msgid "Name of the federation"
+#~ msgstr ""
+
+#~ msgid "Name of the federation to login into."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The `Flower CLI <ref-api-cli.html>`_ "
+#~ "(e.g. ``flwr run`` command) is the "
+#~ "way a user (e.g. a data scientist)"
+#~ " can interact with a deployed "
+#~ "federation. The Flower CLI commands are"
+#~ " processed by the SuperLink and "
+#~ "therefore, if it has been configured "
+#~ "to only operate on TLS conenction, "
+#~ "the requests sent by the Flower "
+#~ "CLI need to make use of a "
+#~ "TLS certificate. To do so, replace "
+#~ "the ``insecure = true`` field in "
+#~ "the ``pyproject.toml`` with a new field"
+#~ " that reads the certificate:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ``flwr federation list`` command "
+#~ "requires the name of the federation "
+#~ "to inspect as an argument. This "
+#~ "can be specified as part of your"
+#~ " ``pyproject.toml`` configuration. For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "At this point, you have launched "
+#~ "two SuperNodes that are connected to "
+#~ "the same SuperLink. The system is "
+#~ "idling waiting for a ``Run`` to be"
+#~ " submitted. Before you can run your"
+#~ " Flower App through the federation we"
+#~ " need a way to tell ``flwr "
+#~ "run`` that the App is to be "
+#~ "executed via the SuperLink we just "
+#~ "started, instead of using the local "
+#~ "Simulation Engine (the default). Doing "
+#~ "this is easy: define a new "
+#~ "federation section in the ``pyproject.toml``,"
+#~ " indicate the address of the "
+#~ "SuperLink and pass a certificate (if "
+#~ "any) or set the insecure flag "
+#~ "(only when testing locally, real "
+#~ "deployments require TLS)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Open the ``pyproject.toml`` file and at"
+#~ " the end add a new federation "
+#~ "configuration:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You can customize the string that "
+#~ "follows ``tool.flwr.federations.`` to fit your"
+#~ " needs. However, please note that the"
+#~ " string cannot contain a dot (``.``)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this example, ``local-deployment`` "
+#~ "has been used. Just remember to "
+#~ "replace ``local-deployment`` with your "
+#~ "chosen name in both the "
+#~ "``tool.flwr.federations.`` string and the "
+#~ "corresponding ``flwr run .`` command."
+#~ msgstr ""
+
+#~ msgid "List available federations."
+#~ msgstr "시뮬레이션 실행"
+
+#~ msgid ""
+#~ "List the details of one provided "
+#~ "run ID or all runs in a "
+#~ "Flower federation."
+#~ msgstr ""
 

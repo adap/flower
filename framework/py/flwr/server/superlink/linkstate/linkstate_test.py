@@ -54,12 +54,7 @@ from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
-from flwr.server.superlink.linkstate import (
-    InMemoryLinkState,
-    LinkState,
-    SqliteLinkState,
-    SqlLinkState,
-)
+from flwr.server.superlink.linkstate import InMemoryLinkState, LinkState, SqlLinkState
 from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
@@ -1821,7 +1816,7 @@ class SqlInMemoryStateTest(StateTest, unittest.TestCase):
     def state_factory(self) -> SqlLinkState:
         """Return SqlLinkState with in-memory database."""
         state = SqlLinkState(
-            "sqlite:///:memory:",
+            database_path=":memory:",
             federation_manager=NoOpFederationManager(),
             object_store=ObjectStoreFactory().store(),
         )
@@ -1837,62 +1832,6 @@ class SqlInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert - 7 tables + 11 indexes (3 explicit + 8 auto from UNIQUE constraints)
-        assert len(result) == 18
-
-
-class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
-    """Test SqliteState implemenation with in-memory database."""
-
-    __test__ = True
-
-    def state_factory(self) -> SqliteLinkState:
-        """Return SqliteState with in-memory database."""
-        state = SqliteLinkState(
-            ":memory:",
-            federation_manager=NoOpFederationManager(),
-            object_store=ObjectStoreFactory().store(),
-        )
-        state.initialize()
-        return state
-
-    def test_initialize(self) -> None:
-        """Test initialization."""
-        # Prepare
-        state = self.state_factory()
-
-        # Execute
-        result = state.query("SELECT name FROM sqlite_schema;")
-
-        # Assert
-        assert len(result) == 18
-
-
-class SqliteFileBasedTest(StateTest, unittest.TestCase):
-    """Test SqliteState implemenation with file-based database."""
-
-    __test__ = True
-
-    def state_factory(self) -> SqliteLinkState:
-        """Return SqliteState with file-based database."""
-        # pylint: disable-next=consider-using-with,attribute-defined-outside-init
-        self.tmp_file = tempfile.NamedTemporaryFile()
-        state = SqliteLinkState(
-            database_path=self.tmp_file.name,
-            federation_manager=NoOpFederationManager(),
-            object_store=ObjectStoreFactory().store(),
-        )
-        state.initialize()
-        return state
-
-    def test_initialize(self) -> None:
-        """Test initialization."""
-        # Prepare
-        state = self.state_factory()
-
-        # Execute
-        result = state.query("SELECT name FROM sqlite_schema;")
-
-        # Assert
         assert len(result) == 18
 
 

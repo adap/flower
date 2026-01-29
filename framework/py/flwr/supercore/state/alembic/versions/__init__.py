@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for InMemoryObjectStore."""
-
-
-import unittest
-
-from .in_memory_object_store import InMemoryObjectStore
-from .object_store import ObjectStore
-from .object_store_test import ObjectStoreTest
-
-
-class InMemoryObjectStoreTest(ObjectStoreTest):
-    """Test InMemoryObjectStore implementation."""
-
-    __test__ = True
-
-    def object_store_factory(self) -> ObjectStore:
-        """Provide ObjectStore implementation to test."""
-        return InMemoryObjectStore()
-
-
-if __name__ == "__main__":
-    unittest.main()
+"""Alembic migration versions."""

@@ -2,6 +2,7 @@
 
 ## Schema
 
+<!-- BEGIN_SQLALCHEMY_DOCS -->
 ```mermaid
 
 ---
@@ -77,7 +78,6 @@ erDiagram
     INTEGER ref_count
   }
 
-<<<<<<< HEAD
   run {
     INTEGER bytes_recv "nullable"
     INTEGER bytes_sent "nullable"
@@ -98,8 +98,6 @@ erDiagram
     VARCHAR sub_status "nullable"
   }
 
-=======
->>>>>>> main
   run_objects {
     VARCHAR object_id PK,FK
     INTEGER run_id PK
@@ -111,15 +109,13 @@ erDiagram
     VARCHAR token UK
   }
 
-<<<<<<< HEAD
   run ||--o| context : run_id
   run ||--o{ logs : run_id
   run ||--o{ message_ins : run_id
   run ||--o{ message_res : run_id
-=======
->>>>>>> main
   objects ||--o| object_children : parent_id
   objects ||--o| object_children : child_id
   objects ||--o| run_objects : object_id
 
 ```
+<!-- END_SQLALCHEMY_DOCS -->

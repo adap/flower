@@ -15,25 +15,27 @@
 """Flower command line interface `stop` command."""
 
 
-import io
-import json
 from typing import Annotated
 
+import click
 import typer
-from rich.console import Console
 
 from flwr.cli.config_migration import migrate, warn_if_federation_config_overrides
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.common.constant import CliOutputFormat
-from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StopRunRequest,
     StopRunResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 
-from .utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
+from .utils import (
+    cli_output_handler,
+    flwr_cli_grpc_exc_handler,
+    init_channel_from_connection,
+    print_json_to_stdout,
+)
 
 
 def stop(  # pylint: disable=R0914
@@ -68,59 +70,29 @@ def stop(  # pylint: disable=R0914
     This command stops a running Flower App execution by sending a stop request to the
     SuperLink via the Control API.
     """
-    suppress_output = output_format == CliOutputFormat.JSON
-    captured_output = io.StringIO()
+    with cli_output_handler(output_format=output_format) as is_json:
+        # Warn `--federation-config` is ignored
+        warn_if_federation_config_overrides(federation_config_overrides)
 
-    if suppress_output:
-        redirect_output(captured_output)
+        migrate(superlink, args=ctx.args)
 
-    # Warn `--federation-config` is ignored
-    warn_if_federation_config_overrides(federation_config_overrides)
+        # Read superlink connection configuration
+        superlink_connection = read_superlink_connection(superlink)
+        channel = None
 
-    migrate(superlink, args=ctx.args)
-
-    # Read superlink connection configuration
-    superlink_connection = read_superlink_connection(superlink)
-    channel = None
-
-    try:
         try:
             channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
             typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
-            _stop_run(stub=stub, run_id=run_id, output_format=output_format)
+            _stop_run(stub=stub, run_id=run_id, is_json=is_json)
 
-        except ValueError as err:
-            typer.secho(
-                f"❌ {err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-            raise typer.Exit(code=1) from err
         finally:
             if channel:
                 channel.close()
-    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
-        if suppress_output:
-            restore_output()
-            e_message = captured_output.getvalue()
-            print_json_error(e_message, err)
-        else:
-            typer.secho(
-                f"{err}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-    finally:
-        if suppress_output:
-            restore_output()
-        captured_output.close()
 
 
-def _stop_run(stub: ControlStub, run_id: int, output_format: str) -> None:
+def _stop_run(stub: ControlStub, run_id: int, is_json: bool) -> None:
     """Stop a run and display the result.
 
     Parameters
@@ -129,23 +101,19 @@ def _stop_run(stub: ControlStub, run_id: int, output_format: str) -> None:
         The gRPC stub for Control API communication.
     run_id : int
         The unique identifier of the run to stop.
-    output_format : str
-        Output format ('default' or 'json').
+    is_json : bool
+        Whether JSON output format is requested.
     """
     with flwr_cli_grpc_exc_handler():
         response: StopRunResponse = stub.StopRun(request=StopRunRequest(run_id=run_id))
     if response.success:
         typer.secho(f"✅ Run {run_id} successfully stopped.", fg=typer.colors.GREEN)
-        if output_format == CliOutputFormat.JSON:
-            run_output = json.dumps(
+        if is_json:
+            print_json_to_stdout(
                 {
                     "success": True,
                     "run-id": f"{run_id}",
                 }
             )
-            restore_output()
-            Console().print_json(run_output)
     else:
-        typer.secho(
-            f"❌ Run {run_id} couldn't be stopped.", fg=typer.colors.RED, err=True
-        )
+        raise click.ClickException(f"Run {run_id} couldn't be stopped.")

@@ -17,8 +17,11 @@
 
 import hashlib
 import json
+import re
+import sys
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
+from io import StringIO
 from pathlib import Path
 from typing import Any, cast
 
@@ -26,11 +29,14 @@ import click
 import grpc
 import pathspec
 import typer
+from rich.console import Console
 
 from flwr.cli.typing import SuperLinkConnection
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
+    FEDERATION_NOT_FOUND_MESSAGE,
+    FEDERATION_NOT_SPECIFIED_MESSAGE,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
@@ -40,21 +46,65 @@ from flwr.common.constant import (
     REFRESH_TOKEN_KEY,
     RUN_ID_NOT_FOUND_MESSAGE,
     AuthnType,
+    CliOutputFormat,
 )
 from flwr.common.grpc import (
     GRPC_MAX_MESSAGE_LENGTH,
     create_channel,
     on_channel_state_change,
 )
+from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.supercore.credential_store import get_credential_store
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
-from .config_utils import (
-    load_certificate_in_connection,
-    validate_certificate_in_federation_config,
-)
+from .config_utils import load_certificate_in_connection
 from .constant import AUTHN_TYPE_STORE_KEY
+
+
+def print_json_to_stdout(data: str | Any) -> None:
+    """Print JSON data to stdout, bypassing any output redirection.
+
+    Use this function within the `cli_output_handler` context manager to print JSON
+    output directly to the terminal, even when stdout is being captured.
+    """
+    if isinstance(data, str):
+        Console(file=sys.__stdout__).print_json(data)
+    else:
+        Console(file=sys.__stdout__).print_json(data=data)
+
+
+@contextmanager  # docsig: ignore=SIG503
+def cli_output_handler(
+    output_format: str = CliOutputFormat.DEFAULT,
+) -> Iterator[bool]:
+    """Context manager for handling CLI output in different formats.
+
+    This context manager provides consistent output handling for CLI commands by:
+    - Redirecting stdout/stderr when JSON format is requested
+    - Catching and handling exceptions appropriately based on the output format
+
+    Use the `print_json_to_stdout()` utility function to print JSON output that bypasses
+    output redirection.
+    """
+    is_json = output_format == CliOutputFormat.JSON
+    captured_output = StringIO()
+
+    if is_json:
+        redirect_output(captured_output)
+
+    try:
+        yield is_json
+    except Exception as err:  # pylint: disable=broad-except
+        if is_json:
+            restore_output()
+            print_json_error(captured_output.getvalue(), err)
+        else:
+            raise click.ClickException(str(err)) from None
+    finally:
+        if is_json:
+            restore_output()
+        captured_output.close()
 
 
 def prompt_text(
@@ -197,18 +247,6 @@ def get_authn_type(host: str) -> str:
     return authn_type.decode("utf-8")
 
 
-def load_cli_auth_plugin(
-    root_dir: Path,
-    federation: str,
-    federation_config: dict[str, Any],
-    authn_type: str | None = None,
-) -> CliAuthPlugin:
-    """."""
-    raise RuntimeError(
-        "Deprecated function. Use `load_cli_auth_plugin_from_connection`"
-    )
-
-
 def load_cli_auth_plugin_from_connection(
     host: str, authn_type: str | None = None
 ) -> CliAuthPlugin:
@@ -228,7 +266,7 @@ def load_cli_auth_plugin_from_connection(
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         If the authentication type is unknown.
     """
     # Determine the auth type if not provided
@@ -242,60 +280,21 @@ def load_cli_auth_plugin_from_connection(
         auth_plugin_class = get_cli_plugin_class(authn_type)
         return auth_plugin_class(host)
     except ValueError:
-        typer.echo(f"❌ Unknown account authentication type: {authn_type}")
-        raise typer.Exit(code=1) from None
-
-
-def init_channel(
-    app: Path, federation_config: dict[str, Any], auth_plugin: CliAuthPlugin
-) -> grpc.Channel:
-    """Initialize gRPC channel to the Control API.
-
-    Parameters
-    ----------
-    app : Path
-        Path to the Flower app directory.
-    federation_config : dict[str, Any]
-        Federation configuration dictionary containing address and TLS settings.
-    auth_plugin : CliAuthPlugin
-        Authentication plugin instance for handling credentials.
-
-    Returns
-    -------
-    grpc.Channel
-        Configured gRPC channel with authentication interceptors.
-    """
-    insecure, root_certificates_bytes = validate_certificate_in_federation_config(
-        app, federation_config
-    )
-
-    # Load tokens
-    auth_plugin.load_tokens()
-
-    # Create the gRPC channel
-    channel = create_channel(
-        server_address=federation_config["address"],
-        insecure=insecure,
-        root_certificates=root_certificates_bytes,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=[CliAccountAuthInterceptor(auth_plugin)],
-    )
-    channel.subscribe(on_channel_state_change)
-    return channel
+        raise click.ClickException(
+            f"Unknown account authentication type: {authn_type}"
+        ) from None
 
 
 def require_superlink_address(connection: SuperLinkConnection) -> str:
     """Return the SuperLink address or exit if it is not configured."""
     if connection.address is None:
         cmd = click.get_current_context().command.name
-        typer.secho(
-            f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the "
-            "correct SuperLink (Control API) address is provided in `pyproject.toml`.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+        raise click.ClickException(
+            f"`flwr {cmd}` currently works with a SuperLink. Ensure that the "
+            "correct SuperLink (Control API) address is provided SuperLink connection "
+            "you are using. Check your Flower configuration file. You may use `flwr "
+            "config list` to see its location in the file system."
         )
-        raise typer.Exit(code=1)
     return connection.address
 
 
@@ -354,7 +353,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         On handled gRPC error statuses with appropriate exit code.
     grpc.RpcError
         For unhandled gRPC error statuses.
@@ -363,115 +362,73 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
         yield
     except grpc.RpcError as e:
         if e.code() == grpc.StatusCode.UNAUTHENTICATED:
-            typer.secho(
-                "❌ Authentication failed. Please run `flwr login`"
-                " to authenticate and try again.",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-            raise typer.Exit(code=1) from None
+            raise click.ClickException(
+                "Authentication failed. Please run `flwr login`"
+                " to authenticate and try again."
+            ) from None
         if e.code() == grpc.StatusCode.UNIMPLEMENTED:
             if e.details() == NO_ACCOUNT_AUTH_MESSAGE:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ Account authentication is not enabled on this SuperLink.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-            elif e.details() == NO_ARTIFACT_PROVIDER_MESSAGE:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ The SuperLink does not support `flwr pull` command.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-            else:
-                typer.secho(
-                    "❌ The SuperLink cannot process this request. Please verify that "
-                    "you set the address to its Control API endpoint correctly in your "
-                    "`pyproject.toml`, and ensure that the Flower versions used by "
-                    "the CLI and SuperLink are compatible.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-            raise typer.Exit(code=1) from None
+                raise click.ClickException(
+                    "Account authentication is not enabled on this SuperLink."
+                ) from None
+            if e.details() == NO_ARTIFACT_PROVIDER_MESSAGE:  # pylint: disable=E1101
+                raise click.ClickException(
+                    "The SuperLink does not support `flwr pull` command."
+                ) from None
+            raise click.ClickException(
+                "The SuperLink cannot process this request. Please verify that "
+                "you set the address to its Control API endpoint correctly in your "
+                "SuperLink connection in your Flower Configuration file. You may use "
+                "`flwr config list` to see its location in the file system. "
+                "Additonally, ensure that the Flower versions used by the CLI and "
+                "SuperLink are compatible."
+            ) from None
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
-            typer.secho(
-                "❌ Permission denied.",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
             # pylint: disable-next=E1101
-            typer.secho(e.details(), fg=typer.colors.RED, bold=True)
-            raise typer.Exit(code=1) from None
+            raise click.ClickException(f"Permission denied.\n{e.details()}") from None
         if e.code() == grpc.StatusCode.UNAVAILABLE:
-            typer.secho(
+            raise click.ClickException(
                 "Connection to the SuperLink is unavailable. Please check your network "
-                "connection and 'address' in the federation configuration.",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-            raise typer.Exit(code=1) from None
+                "connection and 'address' in the SuperLink connection configuration."
+            ) from None
         if e.code() == grpc.StatusCode.NOT_FOUND:
             if e.details() == RUN_ID_NOT_FOUND_MESSAGE:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ Run ID not found.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1) from None
+                raise click.ClickException("Run ID not found.") from None
             if e.details() == NODE_NOT_FOUND_MESSAGE:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ Node ID not found for this account.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1) from None
+                raise click.ClickException(
+                    "Node ID not found for this account."
+                ) from None
         if e.code() == grpc.StatusCode.FAILED_PRECONDITION:
             if e.details() == PULL_UNFINISHED_RUN_MESSAGE:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ Run is not finished yet. Artifacts can only be pulled after "
-                    "the run is finished. You can check the run status with `flwr ls`.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1) from None
+                raise click.ClickException(
+                    "Run is not finished yet. Artifacts can only be pulled after "
+                    "the run is finished. You can check the run status with `flwr ls`."
+                ) from None
             if (
                 e.details() == PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
             ):  # pylint: disable=E1101
-                typer.secho(
-                    "❌ The provided public key is already in use by another "
-                    "SuperNode.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1) from None
+                raise click.ClickException(
+                    "The provided public key is already in use by another SuperNode."
+                ) from None
             if e.details() == PUBLIC_KEY_NOT_VALID:  # pylint: disable=E1101
-                typer.secho(
-                    "❌ The provided public key is invalid. Please provide a valid "
-                    "NIST EC public key.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1) from None
+                raise click.ClickException(
+                    "The provided public key is invalid. Please provide a valid "
+                    "NIST EC public key."
+                ) from None
+            if e.details() == FEDERATION_NOT_SPECIFIED_MESSAGE:  # pylint: disable=E1101
+                raise click.ClickException(
+                    "No federation specified. "
+                    "Please specify a federation and try again.",
+                ) from None
+            patten = re.compile(FEDERATION_NOT_FOUND_MESSAGE.replace("%s", "(.+)"))
+            if m := patten.match(e.details()):  # pylint: disable=E1101
+                raise click.ClickException(
+                    f"Federation '{m.group(1)}' does not exist. "
+                    "Please verify the federation name and try again."
+                ) from None
 
             # Log details from grpc error directly
-            typer.secho(
-                f"❌ {e.details()}",
-                fg=typer.colors.RED,
-                bold=True,
-                err=True,
-            )
-            raise typer.Exit(code=1) from None
+            raise click.ClickException(f"{e.details()}") from None
         raise
 
 
@@ -531,23 +488,17 @@ def validate_credentials_content(creds_path: Path) -> str:
     try:
         creds: dict[str, str] = json.loads(creds_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as err:
-        typer.secho(
-            f"Invalid credentials file at '{creds_path}': {err}",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from err
+        raise click.ClickException(
+            f"Invalid credentials file at '{creds_path}': {err}"
+        ) from err
 
     required_keys = [AUTHN_TYPE_JSON_KEY, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]
     missing = [key for key in required_keys if key not in creds]
 
     if missing:
-        typer.secho(
+        raise click.ClickException(
             f"Credentials file '{creds_path}' is missing "
-            f"required key(s): {', '.join(missing)}. Please log in again.",
-            fg=typer.colors.RED,
-            err=True,
+            f"required key(s): {', '.join(missing)}. Please log in again."
         )
-        raise typer.Exit(code=1)
 
     return creds[ACCESS_TOKEN_KEY]

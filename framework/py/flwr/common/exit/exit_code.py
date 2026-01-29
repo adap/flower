@@ -33,6 +33,7 @@ class ExitCode:
     SUPERLINK_LICENSE_MISSING = 102
     SUPERLINK_LICENSE_URL_INVALID = 103
     SUPERLINK_INVALID_ARGS = 104
+    SUPERLINK_DATABASE_SCHEMA_MISMATCH = 105
 
     # ServerApp-specific exit codes (200-299)
     SERVERAPP_STRATEGY_PRECONDITION_UNMET = 200
@@ -90,6 +91,11 @@ EXIT_CODE_HELP = {
     ExitCode.SUPERLINK_INVALID_ARGS: (
         "Invalid arguments provided to SuperLink. Use `--help` check for the correct "
         "usage. Alternatively, check the documentation."
+    ),
+    ExitCode.SUPERLINK_DATABASE_SCHEMA_MISMATCH: (
+        "The database schema does not match the expected schema for this version of "
+        "SuperLink. Please refer to the documentation for guidance on how to resolve "
+        "this issue."
     ),
     # ServerApp-specific exit codes (200-299)
     ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET: (

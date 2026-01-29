@@ -19,6 +19,7 @@ import re
 from pathlib import Path
 from typing import Any, cast
 
+import click
 import tomli
 import tomli_w
 import typer
@@ -194,9 +195,6 @@ def parse_superlink_connection(
         address=conn_dict.get(SuperLinkConnectionTomlKey.ADDRESS),
         root_certificates=conn_dict.get(SuperLinkConnectionTomlKey.ROOT_CERTIFICATES),
         insecure=conn_dict.get(SuperLinkConnectionTomlKey.INSECURE),
-        enable_account_auth=conn_dict.get(
-            SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH
-        ),
         federation=conn_dict.get(SuperLinkConnectionTomlKey.FEDERATION),
         options=simulation_options,
     )
@@ -220,7 +218,6 @@ def serialize_superlink_connection(connection: SuperLinkConnection) -> dict[str,
         SuperLinkConnectionTomlKey.ADDRESS: connection.address,
         SuperLinkConnectionTomlKey.ROOT_CERTIFICATES: connection.root_certificates,
         SuperLinkConnectionTomlKey.INSECURE: connection._insecure,
-        SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH: connection._enable_account_auth,
         SuperLinkConnectionTomlKey.FEDERATION: connection.federation,
     }
     # Remove None values
@@ -251,7 +248,7 @@ def read_superlink_connection(
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         Raised if the configuration file is corrupted, or if the requested
         connection (or default) cannot be found.
     """
@@ -266,56 +263,42 @@ def read_superlink_connection(
 
         # Exit when no connection name is available
         if connection_name is None:
-            typer.secho(
-                "❌ No SuperLink connection set. A SuperLink connection needs to be "
+            raise click.ClickException(
+                "No SuperLink connection set. A SuperLink connection needs to be "
                 "provided or one must be set as default in the Flower "
                 f"configuration file ({config_path}). Specify a default SuperLink "
                 "connection by adding: \n\n[superlink]\ndefault = 'connection_name'\n\n"
-                f"to the Flower configuration file ({config_path}).",
-                fg=typer.colors.RED,
-                err=True,
+                f"to the Flower configuration file ({config_path})."
             )
-            raise typer.Exit(code=1)
 
         # Try to find the connection with the given name
         if connection_name not in superlink_config:
-            typer.secho(
-                f"❌ SuperLink connection '{connection_name}' not found in the "
-                f"Flower configuration file ({config_path}).",
-                fg=typer.colors.RED,
-                err=True,
+            msg = (
+                f"SuperLink connection '{connection_name}' not found in the "
+                f"Flower configuration file ({config_path})."
             )
             # If default was used, show a specific error message
             if connection_name == superlink_config.get(
                 SuperLinkConnectionTomlKey.DEFAULT
             ):
-                typer.secho(
-                    f"Please check that the default connection '{connection_name}' "
-                    "is defined in the [superlink] section.",
-                    fg=typer.colors.RED,
-                    err=True,
+                msg += (
+                    f"\nPlease check that the default connection '{connection_name}' "
+                    "is defined in the [superlink] section."
                 )
-            raise typer.Exit(code=1)
+            raise click.ClickException(msg)
 
         conn_dict = superlink_config[connection_name]
         return parse_superlink_connection(conn_dict, connection_name)
 
     except ValueError as err:
-        typer.secho(
-            f"❌ Failed to parse the Flower configuration file ({config_path}). "
-            f"{err}",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from err
+        raise click.ClickException(
+            f"Failed to parse the Flower configuration file ({config_path}). {err}"
+        ) from err
     except Exception as err:
-        typer.secho(
-            f"❌ An unexpected error occurred while reading the Flower configuration "
-            f"file ({config_path}). {err}",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from err
+        raise click.ClickException(
+            f"An unexpected error occurred while reading the Flower configuration "
+            f"file ({config_path}). {err}"
+        ) from err
 
 
 def write_superlink_connection(connection: SuperLinkConnection) -> None:
@@ -328,7 +311,7 @@ def write_superlink_connection(connection: SuperLinkConnection) -> None:
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         Raised if the configuration file cannot be read or written.
     """
     toml_dict, _ = read_flower_config()
@@ -358,13 +341,10 @@ def set_default_superlink_connection(connection_name: str) -> None:
 
     # Check if the connection exists
     if connection_name not in superlink_config:
-        typer.secho(
-            f"❌ SuperLink connection '{connection_name}' not found in the Flower "
-            "configuration file. Cannot set as default.",
-            fg=typer.colors.RED,
-            err=True,
+        raise click.ClickException(
+            f"SuperLink connection '{connection_name}' not found in the Flower "
+            "configuration file. Cannot set as default."
         )
-        raise typer.Exit(code=1)
 
     # Set default connection
     superlink_config[SuperLinkConnectionTomlKey.DEFAULT] = connection_name
@@ -384,7 +364,7 @@ def read_flower_config() -> tuple[dict[str, Any], Path]:
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         Raised if the configuration file is corrupted.
     """
     init_flwr_config()
@@ -396,13 +376,10 @@ def read_flower_config() -> tuple[dict[str, Any], Path]:
             return tomli.load(file), config_path
 
     except tomli.TOMLDecodeError as err:
-        typer.secho(
-            f"❌ Failed to read the Flower configuration file ({config_path}). "
-            "Please ensure it is valid TOML.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from err
+        raise click.ClickException(
+            f"Failed to read the Flower configuration file ({config_path}). "
+            "Please ensure it is valid TOML."
+        ) from err
 
 
 # This function may be subject to change once we introduce more configuration
