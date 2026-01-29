@@ -109,6 +109,7 @@ def run_migrations(engine: Engine) -> None:
     )
     stamp_existing_database(engine, FLWR_STATE_BASELINE_REVISION)
     command.upgrade(config, "head")
+    log(INFO, "Flower state database stamped and upgraded successfully!")
 
 
 def build_alembic_config(engine: Engine) -> Config:
