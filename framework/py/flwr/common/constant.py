@@ -180,6 +180,8 @@ SUPERNODE_NOT_CREATED_FROM_CLI_MESSAGE = "Invalid SuperNode credentials"
 PUBLIC_KEY_ALREADY_IN_USE_MESSAGE = "Public key already in use"
 PUBLIC_KEY_NOT_VALID = "The provided public key is not valid"
 NODE_NOT_FOUND_MESSAGE = "Node ID not found for account"
+FEDERATION_NOT_SPECIFIED_MESSAGE = "No federation specified in the request"
+FEDERATION_NOT_FOUND_MESSAGE = "Federation '%s' does not exist"
 
 
 class MessageTypeLegacy:
@@ -308,4 +310,4 @@ class ExecPluginType:
 
 # Constants for No-op auth plugins
 NOOP_FLWR_AID = "<id:none>"
-NOOP_ACCOUNT_NAME = "<name:none>"
+NOOP_ACCOUNT_NAME = "none"

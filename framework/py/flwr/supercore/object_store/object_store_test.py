@@ -27,7 +27,7 @@ from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 from .in_memory_object_store import InMemoryObjectStore
 from .object_store import NoObjectInStoreError, ObjectStore
-from .sqlite_object_store import SqliteObjectStore
+from .sql_object_store import SqlObjectStore
 
 
 class ObjectStoreTest(unittest.TestCase):
@@ -362,7 +362,7 @@ def _create_object_hierarchy() -> tuple[list[CustomDataClass], dict[str, bytes]]
     return objects, id_to_content
 
 
-class InMemoryStateTest(ObjectStoreTest):
+class InMemoryObjectStoreTest(ObjectStoreTest):
     """Test InMemoryObjectStore implementation."""
 
     __test__ = True
@@ -372,20 +372,20 @@ class InMemoryStateTest(ObjectStoreTest):
         return InMemoryObjectStore()
 
 
-class SqliteInMemoryObjectStoreTest(ObjectStoreTest):
-    """Test SqliteObjectStore implementation with in-memory database."""
+class SqlInMemoryObjectStoreTest(ObjectStoreTest):
+    """Test SqlObjectStore implementation with in-memory database."""
 
     __test__ = True
 
     def object_store_factory(self) -> ObjectStore:
-        """Return SqliteObjectStore."""
-        store = SqliteObjectStore(":memory:")
+        """Return SqlObjectStore."""
+        store = SqlObjectStore(":memory:")
         store.initialize()
         return store
 
 
-class SqliteFileBasedObjectStoreTest(ObjectStoreTest):
-    """Test SqliteObjectStore implementation with file-based database."""
+class SqlFileBasedObjectStoreTest(ObjectStoreTest):
+    """Test SqlObjectStore implementation with file-based database."""
 
     __test__ = True
 
@@ -400,7 +400,7 @@ class SqliteFileBasedObjectStoreTest(ObjectStoreTest):
         self.temp_file.close()
 
     def object_store_factory(self) -> ObjectStore:
-        """Return SqliteObjectStore."""
-        store = SqliteObjectStore(self.temp_file.name)
+        """Return SqlObjectStore."""
+        store = SqlObjectStore(self.temp_file.name)
         store.initialize()
         return store

@@ -15,8 +15,9 @@
 """NoOp implementation of FederationManager."""
 
 
-from flwr.common.constant import NOOP_FLWR_AID
+from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation
+from flwr.proto.federation_pb2 import Account  # pylint: disable=E0611
 from flwr.supercore.constant import NOOP_FEDERATION
 
 from .federation_manager import FederationManager
@@ -65,7 +66,7 @@ class NoOpFederationManager(FederationManager):
         ]
         return Federation(
             name=NOOP_FEDERATION,
-            member_aids=[NOOP_FLWR_AID],
+            accounts=[Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)],
             nodes=nodes,
             runs=runs,
         )

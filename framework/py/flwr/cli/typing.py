@@ -16,11 +16,15 @@
 
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from flwr.cli.constant import (
     DEFAULT_SIMULATION_BACKEND_NAME,
     SuperLinkConnectionTomlKey,
 )
+from flwr.supercore.utils import check_federation_format
+
+_ERROR_MSG_FMT = "SuperLinkConnection.%s is None"
 
 
 @dataclass
@@ -90,51 +94,98 @@ class SuperLinkSimulationOptions:
 
 @dataclass
 class SuperLinkConnection:
-    """SuperLink connection configuration for CLI commands."""
+    """SuperLink connection configuration for CLI commands.
+
+    Attributes
+    ----------
+    name : str
+         The name of the connection configuration.
+    address : str
+        The address of the SuperLink (Control API).
+    root_certificates : str
+         The absolute path to the root CA certificate file.
+    insecure : bool (default: False)
+         Whether to use an insecure channel. If True, the
+         connection will not use TLS encryption.
+    federation : str
+         The name of the federation to interface with.
+    options : SuperLinkSimulationOptions
+         Configuration options for the simulation runtime.
+    """
 
     name: str
     address: str | None = None
     root_certificates: str | None = None
-    insecure: bool | None = None
-    enable_account_auth: bool | None = None
+    _insecure: bool | None = None
     federation: str | None = None
     options: SuperLinkSimulationOptions | None = None
 
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def __init__(
+        self,
+        name: str,
+        address: str | None = None,
+        root_certificates: str | None = None,
+        insecure: bool | None = None,
+        federation: str | None = None,
+        options: SuperLinkSimulationOptions | None = None,
+    ) -> None:
+        self.name = name
+        self.address = address
+        self.root_certificates = root_certificates
+        self._insecure = insecure
+        self.federation = federation
+        self.options = options
+
+        self.__post_init__()
+
+    @property
+    def insecure(self) -> bool:
+        """Return the insecure flag or its default (False) if unset."""
+        if self._insecure is None:
+            return False
+        return self._insecure
+
     def __post_init__(self) -> None:
         """Validate SuperLink connection configuration."""
+        err_prefix = f"Invalid value for key '%s' in connection '{self.name}': "
         if self.address is not None and not isinstance(self.address, str):
             raise ValueError(
-                f"Invalid value for key '{SuperLinkConnectionTomlKey.ADDRESS}': "
-                f"expected str, but got {type(self.address).__name__}."
+                err_prefix % SuperLinkConnectionTomlKey.ADDRESS
+                + f"expected str, but got {type(self.address).__name__}."
             )
         if self.root_certificates is not None and not isinstance(
             self.root_certificates, str
         ):
             raise ValueError(
-                "Invalid value for key "
-                f"'{SuperLinkConnectionTomlKey.ROOT_CERTIFICATES}': "
-                f"expected str, but got {type(self.root_certificates).__name__}."
-            )
-        if self.insecure is not None and not isinstance(self.insecure, bool):
-            raise ValueError(
-                f"Invalid value for key '{SuperLinkConnectionTomlKey.INSECURE}': "
-                f"but got {type(self.insecure).__name__}."
-            )
-        if self.enable_account_auth is not None and not isinstance(
-            self.enable_account_auth, bool
-        ):
-            raise ValueError(
-                "Invalid value for key "
-                f"'{SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH}': "
-                f"expected bool, but got {type(self.enable_account_auth).__name__}."
+                err_prefix % SuperLinkConnectionTomlKey.ROOT_CERTIFICATES
+                + f"expected str, but got {type(self.root_certificates).__name__}."
             )
 
-        if self.federation is not None and not isinstance(self.federation, str):
+        # Ensure root certificates path is absolute
+        if self.root_certificates is not None:
+            if not Path(self.root_certificates).is_absolute():
+                raise ValueError(
+                    err_prefix % SuperLinkConnectionTomlKey.ROOT_CERTIFICATES
+                    + "expected absolute path, but got relative path "
+                    f"'{self.root_certificates}'."
+                )
+
+        if self._insecure is not None and not isinstance(self._insecure, bool):
             raise ValueError(
-                "Invalid value for key "
-                f"'{SuperLinkConnectionTomlKey.FEDERATION}': "
-                f"expected str, but got {type(self.federation).__name__}."
+                err_prefix % SuperLinkConnectionTomlKey.INSECURE
+                + f"expected bool, but got {type(self._insecure).__name__}."
             )
+
+        if self.federation is not None:
+            if not isinstance(self.federation, str):
+                raise ValueError(
+                    err_prefix % SuperLinkConnectionTomlKey.FEDERATION
+                    + f"expected str, but got {type(self.federation).__name__}."
+                )
+
+            # Check if the federation string is valid
+            check_federation_format(self.federation)
 
         # The connection needs to have either an address or options (or both).
         if self.address is None and self.options is None:

@@ -21,6 +21,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import Annotated, Any
 
+import click
 import pathspec
 import tomli
 import tomli_w
@@ -107,35 +108,23 @@ def build(
 
     app = app.resolve()
     if not app.is_dir():
-        typer.secho(
-            f"❌ The path {app} is not a valid path to a Flower app.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+        raise click.ClickException(
+            f"The path {app} is not a valid path to a Flower app."
         )
-        raise typer.Exit(code=1)
 
     if not is_valid_project_name(app.name):
-        typer.secho(
-            f"❌ The project name {app.name} is invalid, "
+        raise click.ClickException(
+            f"The project name {app.name} is invalid, "
             "a valid project name must start with a letter, "
-            "and can only contain letters, digits, and hyphens.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+            "and can only contain letters, digits, and hyphens."
         )
-        raise typer.Exit(code=1)
 
     config, errors, warnings = load_and_validate(app / "pyproject.toml")
     if config is None:
-        typer.secho(
+        raise click.ClickException(
             "Project configuration could not be loaded.\npyproject.toml is invalid:\n"
-            + "\n".join([f"- {line}" for line in errors]),
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+            + "\n".join([f"- {line}" for line in errors])
         )
-        raise typer.Exit(code=1)
 
     if warnings:
         typer.secho(

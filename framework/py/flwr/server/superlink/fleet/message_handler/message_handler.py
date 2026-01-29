@@ -166,13 +166,13 @@ def pull_messages(  # pylint: disable=too-many-locals
     response = PullMessagesResponse(messages_list=msg_proto, message_object_trees=trees)
 
     # Record incoming traffic size
-    bytes_recv = len(request.SerializeToString())
+    bytes_recv = request.ByteSize()
 
     # Record traffic only if message was successfully processed
     # All messages in this request are assumed to belong to the same run
     if run_id_to_record is not None:
         # Record outgoing traffic size
-        bytes_sent = len(response.SerializeToString())
+        bytes_sent = response.ByteSize()
         state.store_traffic(
             run_id_to_record, bytes_sent=bytes_sent, bytes_recv=bytes_recv
         )
@@ -191,7 +191,7 @@ def push_messages(
     run_id = msg.metadata.run_id
 
     # Record incoming traffic size
-    bytes_recv = len(request.SerializeToString())
+    bytes_recv = request.ByteSize()
 
     # Abort if the run is not running
     abort_msg = check_abort(
@@ -218,7 +218,7 @@ def push_messages(
     )
 
     # Record outgoing traffic size
-    bytes_sent = len(response.SerializeToString())
+    bytes_sent = response.ByteSize()
 
     # Record traffic only if message was successfully processed
     # Only one message is processed per request
@@ -321,7 +321,8 @@ def pull_object(
     if content is not None:
         object_available = content != b""
         # Record bytes traffic pulled by SuperNode
-        state.store_traffic(request.run_id, bytes_sent=len(content), bytes_recv=0)
+        if object_available:
+            state.store_traffic(request.run_id, bytes_sent=len(content), bytes_recv=0)
         return PullObjectResponse(
             object_found=True,
             object_available=object_available,
