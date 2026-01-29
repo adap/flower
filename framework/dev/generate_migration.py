@@ -63,13 +63,15 @@ def main() -> None:
 
     finally:
         # Clean up the state.db file
-        try:
-            os.unlink("state.db")
-            print("Cleaned up temporary database file.")
-        except OSError:
-            print(
-                "Failed to clean up temporary database file. Please remove it manually."
-            )
+        db_path = Path("state.db")
+        if db_path.exists():
+            try:
+                db_path.unlink()
+                print("Cleaned up temporary database file.")
+            except OSError as e:
+                print(
+                    f"Warning: Failed to clean up temporary database file: {e}",
+                )
 
 
 if __name__ == "__main__":
