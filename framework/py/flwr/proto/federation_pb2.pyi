@@ -51,13 +51,10 @@ class Federation(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     NAME_FIELD_NUMBER: builtins.int
-    MEMBER_AIDS_FIELD_NUMBER: builtins.int
     ACCOUNTS_FIELD_NUMBER: builtins.int
     NODES_FIELD_NUMBER: builtins.int
     RUNS_FIELD_NUMBER: builtins.int
     name: builtins.str
-    @property
-    def member_aids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
     @property
     def accounts(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Account]: ...
     @property
@@ -68,11 +65,10 @@ class Federation(google.protobuf.message.Message):
         self,
         *,
         name: builtins.str = ...,
-        member_aids: collections.abc.Iterable[builtins.str] | None = ...,
         accounts: collections.abc.Iterable[global___Account] | None = ...,
         nodes: collections.abc.Iterable[flwr.proto.node_pb2.NodeInfo] | None = ...,
         runs: collections.abc.Iterable[flwr.proto.run_pb2.Run] | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["accounts", b"accounts", "member_aids", b"member_aids", "name", b"name", "nodes", b"nodes", "runs", b"runs"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["accounts", b"accounts", "name", b"name", "nodes", b"nodes", "runs", b"runs"]) -> None: ...
 
 global___Federation = Federation
