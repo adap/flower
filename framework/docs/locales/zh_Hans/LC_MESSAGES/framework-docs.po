@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-28 00:09+0000\n"
+"POT-Creation-Date: 2026-01-29 00:10+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -371,15 +371,15 @@ msgstr "构建文档"
 #: ../../source/ref-exit-codes/0.rst:7 ../../source/ref-exit-codes/1.rst:7
 #: ../../source/ref-exit-codes/100.rst:7 ../../source/ref-exit-codes/101.rst:7
 #: ../../source/ref-exit-codes/102.rst:7 ../../source/ref-exit-codes/103.rst:7
-#: ../../source/ref-exit-codes/104.rst:7 ../../source/ref-exit-codes/2.rst:7
-#: ../../source/ref-exit-codes/200.rst:23 ../../source/ref-exit-codes/201.rst:7
-#: ../../source/ref-exit-codes/202.rst:7 ../../source/ref-exit-codes/203.rst:7
-#: ../../source/ref-exit-codes/3.rst:7 ../../source/ref-exit-codes/300.rst:7
-#: ../../source/ref-exit-codes/302.rst:7 ../../source/ref-exit-codes/303.rst:7
-#: ../../source/ref-exit-codes/304.rst:7 ../../source/ref-exit-codes/400.rst:7
-#: ../../source/ref-exit-codes/500.rst:7 ../../source/ref-exit-codes/600.rst:7
-#: ../../source/ref-exit-codes/601.rst:7 ../../source/ref-exit-codes/602.rst:7
-#: ../../source/ref-exit-codes/700.rst:7
+#: ../../source/ref-exit-codes/104.rst:7 ../../source/ref-exit-codes/105.rst:7
+#: ../../source/ref-exit-codes/2.rst:7 ../../source/ref-exit-codes/200.rst:23
+#: ../../source/ref-exit-codes/201.rst:7 ../../source/ref-exit-codes/202.rst:7
+#: ../../source/ref-exit-codes/203.rst:7 ../../source/ref-exit-codes/3.rst:7
+#: ../../source/ref-exit-codes/300.rst:7 ../../source/ref-exit-codes/302.rst:7
+#: ../../source/ref-exit-codes/303.rst:7 ../../source/ref-exit-codes/304.rst:7
+#: ../../source/ref-exit-codes/400.rst:7 ../../source/ref-exit-codes/500.rst:7
+#: ../../source/ref-exit-codes/600.rst:7 ../../source/ref-exit-codes/601.rst:7
+#: ../../source/ref-exit-codes/602.rst:7 ../../source/ref-exit-codes/700.rst:7
 #, fuzzy
 msgid "Description"
 msgstr "停用"
@@ -2995,6 +2995,10 @@ msgstr "将 ``pyproject.toml`` 中的次要版本增加一个。"
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:110
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:250
 #: ../../source/docker/tutorial-quickstart-docker.rst:326
+#: ../../source/how-to-authenticate-accounts.rst:96
+#: ../../source/how-to-enable-tls-connections.rst:127
+#: ../../source/how-to-manage-flower-federations.rst:69
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:200
 #, fuzzy
 msgid "config.toml"
 msgstr "配置日志记录"
@@ -4169,6 +4173,7 @@ msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:94
 #: ../../source/docker/tutorial-quickstart-docker.rst:310
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:184
 msgid ""
 "Find the Flower Configuration TOML file in your machine. This file is "
 "automatically create for your when you first use a Flower CLI command. "
@@ -9512,27 +9517,27 @@ msgid ""
 "``$HOME/.flwr/config.toml``):"
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:107
+#: ../../source/how-to-authenticate-accounts.rst:108
 #, fuzzy
 msgid ""
 "Account authentication and authorization is only supported with TLS "
 "connections."
 msgstr "在 :code:`SuperLink` 中启用节点验证"
 
-#: ../../source/how-to-authenticate-accounts.rst:108
+#: ../../source/how-to-authenticate-accounts.rst:109
 msgid ""
 "Setting the default connection is optional. If you don't set your "
 "SuperLink as default, you can specify the connection name explicitly in "
 "each command, for example: ``flwr login my-prod-superlink``."
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:112
+#: ../../source/how-to-authenticate-accounts.rst:113
 msgid ""
 "Learn more about the Flower Configuration file in the `Flower "
 "Configuration File <ref-flower-configuration.html>`_ reference."
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:115
+#: ../../source/how-to-authenticate-accounts.rst:116
 msgid ""
 "You need to login first before other CLI commands can be executed. Upon "
 "executing ``flwr login``, a URL will be returned by the authentication "
@@ -9540,7 +9545,7 @@ msgid ""
 "the OIDC provider."
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:128
+#: ../../source/how-to-authenticate-accounts.rst:129
 msgid ""
 "Once the login is successful, the credentials returned by the OIDC "
 "provider via the SuperLink will be stored locally. The tokens will be "
@@ -9549,11 +9554,11 @@ msgid ""
 "authentication checks."
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:135
+#: ../../source/how-to-authenticate-accounts.rst:136
 msgid "Run authorized ``flwr`` CLI commands"
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:137
+#: ../../source/how-to-authenticate-accounts.rst:138
 msgid ""
 "With the above steps completed, you can now run ``flwr`` CLI commands "
 "against a SuperLink setup with account authentication and authorization. "
@@ -9561,7 +9566,7 @@ msgid ""
 "command to start a Flower app:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:147
+#: ../../source/how-to-authenticate-accounts.rst:148
 msgid ""
 "If the account does not have the necessary permissions to run the "
 "command, an error will be returned:"
@@ -10678,17 +10683,10 @@ msgid ""
 "federation. The Flower CLI commands are processed by the SuperLink and "
 "therefore, if it has been configured to only operate on TLS conenction, "
 "the requests sent by the Flower CLI need to make use of a TLS "
-"certificate. To do so, replace the ``insecure = true`` field in the "
-"``pyproject.toml`` with a new field that reads the certificate:"
+"certificate. To do so, replace the ``insecure = true`` field in your "
+"Flower Configuration TOML file with a new field that reads the "
+"certificate:"
 msgstr ""
-
-#: ../../source/how-to-enable-tls-connections.rst:127
-#: ../../source/how-to-manage-flower-federations.rst:69
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:178
-#: ../../source/how-to-upgrade-to-message-api.rst:132
-#, fuzzy
-msgid "pyproject.toml"
-msgstr "或 ``pyproject.toml```："
 
 #: ../../source/how-to-enable-tls-connections.rst:135
 msgid ""
@@ -11050,9 +11048,9 @@ msgstr "flower-superlink"
 
 #: ../../source/how-to-manage-flower-federations.rst:65
 msgid ""
-"The ``flwr federation list`` command requires the name of the federation "
-"to inspect as an argument. This can be specified as part of your "
-"``pyproject.toml`` configuration. For example:"
+"The ``flwr federation list --federation <federation>`` command requires "
+"the name of the federation to inspect as an argument. This can be "
+"specified as part of your Flower Configuration TOML file. For example:"
 msgstr ""
 
 #: ../../source/how-to-manage-flower-federations.rst:78
@@ -13435,58 +13433,65 @@ msgstr ""
 msgid "Step 3: Run a Flower App on the Federation"
 msgstr "使用模拟引擎运行花朵应用程序。"
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:168
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:170
+msgid ""
+"The Flower Configuration file is automatically created for you when you "
+"first use a Flower CLI command. Use ``flwr config list`` to see available"
+" SuperLink connections as well as the path to the configuration file. "
+"Read more about it in the :doc:`ref-flower-configuration` guide."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:175
 msgid ""
 "At this point, you have launched two SuperNodes that are connected to the"
 " same SuperLink. The system is idling waiting for a ``Run`` to be "
 "submitted. Before you can run your Flower App through the federation we "
 "need a way to tell ``flwr run`` that the App is to be executed via the "
 "SuperLink we just started, instead of using the local Simulation Engine "
-"(the default). Doing this is easy: define a new federation section in the"
-" ``pyproject.toml``, indicate the address of the SuperLink and pass a "
-"certificate (if any) or set the insecure flag (only when testing locally,"
-" real deployments require TLS)."
+"(the default). Doing this is easy: define a new SuperLink connection in "
+"the **Flower Configuration** file, indicate the address of the SuperLink "
+"and pass a certificate (if any) or set the insecure flag (only when "
+"testing locally, real deployments require TLS)."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:176
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:198
+#, fuzzy
 msgid ""
-"Open the ``pyproject.toml`` file and at the end add a new federation "
-"configuration:"
-msgstr ""
+"Open the ``config.toml`` file and at the end add a new SuperLink "
+"connection:"
+msgstr "将 ``pyproject.toml`` 中的次要版本增加一个。"
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:187
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:209
 msgid ""
-"You can customize the string that follows ``tool.flwr.federations.`` to "
-"fit your needs. However, please note that the string cannot contain a dot"
-" (``.``)."
+"You can customize the string that follows ``[superlink.]`` to fit your "
+"needs. However, please note that the string cannot contain a dot (``.``)."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:190
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:212
 msgid ""
 "In this example, ``local-deployment`` has been used. Just remember to "
 "replace ``local-deployment`` with your chosen name in both the "
-"``tool.flwr.federations.`` string and the corresponding ``flwr run .`` "
-"command."
+"``[superlink.]`` string and the corresponding ``flwr run .`` command."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:194
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:216
 msgid ""
 "In another terminal and with your Python environment activated, run the "
 "Flower App and follow the ``ServerApp`` logs to track the execution of "
 "the run:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:201
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:223
 msgid ""
 "If you want to rerun the project or test an updated version by making "
 "changes to the code, simply re-run the command above."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:206
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:228
 msgid "Step 4: Clean Up"
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:208
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:230
 msgid ""
 "Use the ``Ctrl+C`` command in each terminal to stop the respective "
 "processes."
@@ -14970,6 +14975,11 @@ msgid ""
 "`pyproject.toml` in your app:"
 msgstr ""
 
+#: ../../source/how-to-upgrade-to-message-api.rst:132
+#, fuzzy
+msgid "pyproject.toml"
+msgstr "或 ``pyproject.toml```："
+
 #: ../../source/how-to-upgrade-to-message-api.rst:141
 msgid "Then, run the following command to install the updated dependencies:"
 msgstr ""
@@ -16283,7 +16293,7 @@ msgstr "配置值"
 
 #: ../../flwr config list:1
 #, fuzzy
-msgid "List all SuperLink connections."
+msgid "List all SuperLink connections (alias: ls)."
 msgstr "然后，我们启动服务器："
 
 #: ../../flwr config federation list:1 register:1 run:1 stop:1 supernode
@@ -16308,9 +16318,10 @@ msgid "Manage Federations"
 msgstr "运行模拟"
 
 #: ../../flwr federation list:1
-#, fuzzy
-msgid "List available federations."
-msgstr "运行模拟"
+msgid ""
+"List available federations or details of a specific federation (alias: "
+"ls)."
+msgstr ""
 
 #: ../../flwr federation list:1
 #, fuzzy
@@ -16371,9 +16382,7 @@ msgid "The source FAB file to install."
 msgstr ""
 
 #: ../../flwr list:1
-msgid ""
-"List the details of one provided run ID or all runs in a Flower "
-"federation."
+msgid "List the details of one provided run ID or all runs (alias: ls)."
 msgstr ""
 
 #: ../../flwr list:1
@@ -16548,7 +16557,7 @@ msgstr "验证超级节点"
 
 #: ../../flwr list:1 supernode
 #, fuzzy
-msgid "List SuperNodes in the federation."
+msgid "List SuperNodes in the federation (alias: ls)."
 msgstr "flower-superlink"
 
 #: ../../flwr list:1 supernode
@@ -34118,6 +34127,7 @@ msgstr ""
 #: ../../source/ref-exit-codes/102.rst:13
 #: ../../source/ref-exit-codes/103.rst:13
 #: ../../source/ref-exit-codes/104.rst:13
+#: ../../source/ref-exit-codes/105.rst:17
 #: ../../source/ref-exit-codes/200.rst:32
 #: ../../source/ref-exit-codes/201.rst:13
 #: ../../source/ref-exit-codes/202.rst:13
@@ -34240,6 +34250,28 @@ msgid ""
 "Some of the arguments passed to the SuperLink are incompatible with each "
 "other. Check the SuperLink logs for additional help on how to resolve the"
 " issue."
+msgstr ""
+
+#: ../../source/ref-exit-codes/105.rst:3
+msgid "[105] SUPERLINK_DATABASE_SCHEMA_MISMATCH"
+msgstr ""
+
+#: ../../source/ref-exit-codes/105.rst:9
+msgid ""
+"The SuperLink was started with a database schema that does not match the "
+"expected baseline schema."
+msgstr ""
+
+#: ../../source/ref-exit-codes/105.rst:12
+msgid ""
+"This typically occurs when using a pre-Alembic database that requires "
+"migration that has been modified."
+msgstr ""
+
+#: ../../source/ref-exit-codes/105.rst:19
+msgid ""
+"Back up your database and either migrate it manually to the baseline "
+"schema or start with a fresh database."
 msgstr ""
 
 #: ../../source/ref-exit-codes/2.rst:3
@@ -65240,5 +65272,82 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Name of the federation to login into."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The `Flower CLI <ref-api-cli.html>`_ "
+#~ "(e.g. ``flwr run`` command) is the "
+#~ "way a user (e.g. a data scientist)"
+#~ " can interact with a deployed "
+#~ "federation. The Flower CLI commands are"
+#~ " processed by the SuperLink and "
+#~ "therefore, if it has been configured "
+#~ "to only operate on TLS conenction, "
+#~ "the requests sent by the Flower "
+#~ "CLI need to make use of a "
+#~ "TLS certificate. To do so, replace "
+#~ "the ``insecure = true`` field in "
+#~ "the ``pyproject.toml`` with a new field"
+#~ " that reads the certificate:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ``flwr federation list`` command "
+#~ "requires the name of the federation "
+#~ "to inspect as an argument. This "
+#~ "can be specified as part of your"
+#~ " ``pyproject.toml`` configuration. For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "At this point, you have launched "
+#~ "two SuperNodes that are connected to "
+#~ "the same SuperLink. The system is "
+#~ "idling waiting for a ``Run`` to be"
+#~ " submitted. Before you can run your"
+#~ " Flower App through the federation we"
+#~ " need a way to tell ``flwr "
+#~ "run`` that the App is to be "
+#~ "executed via the SuperLink we just "
+#~ "started, instead of using the local "
+#~ "Simulation Engine (the default). Doing "
+#~ "this is easy: define a new "
+#~ "federation section in the ``pyproject.toml``,"
+#~ " indicate the address of the "
+#~ "SuperLink and pass a certificate (if "
+#~ "any) or set the insecure flag "
+#~ "(only when testing locally, real "
+#~ "deployments require TLS)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Open the ``pyproject.toml`` file and at"
+#~ " the end add a new federation "
+#~ "configuration:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You can customize the string that "
+#~ "follows ``tool.flwr.federations.`` to fit your"
+#~ " needs. However, please note that the"
+#~ " string cannot contain a dot (``.``)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this example, ``local-deployment`` "
+#~ "has been used. Just remember to "
+#~ "replace ``local-deployment`` with your "
+#~ "chosen name in both the "
+#~ "``tool.flwr.federations.`` string and the "
+#~ "corresponding ``flwr run .`` command."
+#~ msgstr ""
+
+#~ msgid "List available federations."
+#~ msgstr "运行模拟"
+
+#~ msgid ""
+#~ "List the details of one provided "
+#~ "run ID or all runs in a "
+#~ "Flower federation."
 #~ msgstr ""
 
