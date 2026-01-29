@@ -104,7 +104,6 @@ def test_get_details_with_valid_federation() -> None:
     # Assert
     assert isinstance(result, Federation)
     assert result.name == NOOP_FEDERATION
-    assert result.member_aids == [NOOP_FLWR_AID]
     assert len(result.accounts) == 1
     assert result.accounts[0] == Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)
     assert len(result.nodes) == 2
@@ -142,7 +141,6 @@ def test_get_details_with_no_runs() -> None:
 
     # Assert
     assert result.name == NOOP_FEDERATION
-    assert result.member_aids == [NOOP_FLWR_AID]
     assert len(result.accounts) == 1
     assert result.accounts[0] == Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)
     assert len(result.nodes) == 0

@@ -343,7 +343,6 @@ class Federation:
     """Federation details."""
 
     name: str
-    member_aids: list[str]
     accounts: list[Account]
     nodes: list[NodeInfo]
     runs: list[Run]
