@@ -138,7 +138,7 @@ def _get_baseline_metadata() -> MetaData:
     """Create an in-memory DB at baseline revision and reflect its schema.
 
     Uses an in-memory SQLite database instead of a temporary file to avoid requiring
-    filesystem write access. Note that this is function is only invoked for pre-Alembic
+    filesystem write access. Note that this function is only invoked for pre-Alembic
     databases.
 
     The implementation uses StaticPool and passes an active connection via
