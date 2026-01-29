@@ -44,8 +44,8 @@ matplotlib = "3.7.1"
 coloredlogs = "15.0.1"
 omegaconf = "2.3.0"
 tqdm = "4.66.3"
-torch = "2.6.0"
-torchvision = "0.21.0"
+torch = "2.8.0"
+torchvision = "0.23.0"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.13.2"
