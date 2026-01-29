@@ -24,29 +24,13 @@ clientapp = "e2e_serverapp_heartbeat.client_app:app"
 
 [tool.flwr.app.config]
 
+[tool.flwr.federations]
+default = "local-simulation"
 
-#######################################################################
-# CONFIGURATION MIGRATION NOTICE:
-#
-# What was previously called "federation config" for SuperLink
-# connections in pyproject.toml has been renamed and moved.
-#
-# These settings are now **SuperLink connection configuration**
-# and are defined in the Flower configuration file.
-#
-# The entries below are commented out intentionally and are kept
-# only as a migration reference.
-#
-# Docs: https://flower.ai/docs/framework/ref-flower-configuration.html
-#######################################################################
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10
 
-# [tool.flwr.federations]
-# default = "local-simulation"
-
-# [tool.flwr.federations.local-simulation]
-# options.num-supernodes = 10
-
-# [tool.flwr.federations.e2e]
-# address = "127.0.0.1:9093"
-# insecure = true
-# options.num-supernodes = 1
+[tool.flwr.federations.e2e]
+address = "127.0.0.1:9093"
+insecure = true
+options.num-supernodes = 1
