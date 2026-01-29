@@ -236,7 +236,7 @@ def _run_without_control_api(
 ) -> None:
 
     num_supernodes = simulation_options.num_supernodes
-    verbose = False  # bool | None = superlink_connection.options.verbose
+    verbose = simulation_options.verbose or False
 
     command = [
         "flower-simulation",
