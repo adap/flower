@@ -27,9 +27,9 @@ import pytest
 
 from ..app.error import Error
 from ..app.metadata import Metadata
+from ..supercore.date import now
 from . import ConfigRecord, RecordDict
 from .constant import MESSAGE_TTL_TOLERANCE
-from .date import now
 from .inflatable import (
     get_object_body,
     get_object_children_ids_from_object_content,

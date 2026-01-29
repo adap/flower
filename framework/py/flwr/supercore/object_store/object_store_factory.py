@@ -22,7 +22,7 @@ from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 
 from .in_memory_object_store import InMemoryObjectStore
 from .object_store import ObjectStore
-from .sqlite_object_store import SqliteObjectStore
+from .sql_object_store import SqlObjectStore
 
 
 class ObjectStoreFactory:
@@ -56,8 +56,8 @@ class ObjectStoreFactory:
             log(DEBUG, "Using InMemoryObjectStore")
             return self.store_instance
 
-        # SqliteObjectStore
-        store = SqliteObjectStore(self.database)
+        # SqlObjectStore
+        store = SqlObjectStore(self.database)
         store.initialize()
-        log(DEBUG, "Using SqliteObjectStore")
+        log(DEBUG, "Using SqlObjectStore")
         return store

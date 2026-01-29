@@ -34,7 +34,7 @@ from flwr.common.typing import Run, RunStatus
 from flwr.server.superlink.linkstate import (
     InMemoryLinkState,
     LinkStateFactory,
-    SqliteLinkState,
+    SqlLinkState,
 )
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
@@ -209,7 +209,7 @@ class TestInMemoryGrid(unittest.TestCase):
         self.grid = InMemoryGrid(MagicMock(state=lambda: state))
         self.grid.set_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.grid, self.num_nodes)
-        assert isinstance(state, SqliteLinkState)
+        assert isinstance(state, SqlLinkState)
 
         # Check recorded
         num_msg_ins = len(state.query("SELECT * FROM message_ins;"))

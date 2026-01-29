@@ -15,12 +15,13 @@
 """Common components shared between server and client."""
 
 
+from flwr.app.message_type import MessageType as MessageType
+
 from ..app.error import Error as Error
 from ..app.metadata import Metadata as Metadata
-from .constant import MessageType as MessageType
+from ..supercore.date import now as now
 from .constant import MessageTypeLegacy as MessageTypeLegacy
 from .context import Context as Context
-from .date import now as now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
 from .logger import configure as configure
 from .logger import log as log

@@ -42,6 +42,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListNodesResponse,
     ListRunsRequest,
     RegisterNodeRequest,
+    ShowFederationRequest,
+    ShowFederationResponse,
     StartRunRequest,
     StopRunRequest,
     StreamLogsRequest,
@@ -304,6 +306,19 @@ class TestControlServicer(unittest.TestCase):
             self.assertEqual(res.nodes_info[0].public_key, pub_key)
         else:
             self.assertEqual(len(res.nodes_info), 0)
+
+    def test_show_federation(self) -> None:
+        """Test ShowFederation method of ControlServicer."""
+        # Prepare
+        request = ShowFederationRequest(federation_name=NOOP_FEDERATION)
+
+        # Execute
+        response: ShowFederationResponse = self.servicer.ShowFederation(request, Mock())
+        retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
+
+        # Assert
+        self.assertLess(abs(retrieved_timestamp - now().timestamp()), 1e-3)
+        self.assertEqual(response.federation.name, NOOP_FEDERATION)
 
 
 class TestControlServicerAuth(unittest.TestCase):

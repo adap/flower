@@ -21,6 +21,7 @@ import re
 from pathlib import Path
 from typing import Annotated
 
+import click
 import requests
 import typer
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -28,25 +29,18 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from flwr.common import now
 from flwr.common.config import get_flwr_dir
-from flwr.common.constant import FAB_CONFIG_FILE
-from flwr.common.version import package_version as flwr_version
-from flwr.supercore.constant import PLATFORM_API_URL
+from flwr.supercore.constant import PLATFORM_API_URL, SUPERGRID_ADDRESS
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_message_to_sign,
     load_private_key,
     sign_message,
 )
 from flwr.supercore.utils import parse_app_spec, request_download_link
+from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
-from ..config_utils import (
-    load_and_validate,
-    process_loaded_project_config,
-    validate_federation_in_project_config,
-)
-from ..constant import FEDERATION_CONFIG_HELP_MESSAGE
 from ..install import install_from_fab
-from ..utils import load_cli_auth_plugin
+from ..utils import load_cli_auth_plugin_from_connection
 
 TRY_AGAIN_MESSAGE = "Please try again or press CTRL+C to abort.\n"
 
@@ -60,46 +54,14 @@ def review(
             "Version is optional; defaults to the latest."
         ),
     ],
-    app_dir_login: Annotated[
-        Path,
-        typer.Argument(
-            help="Project directory to used for login before reviewing app."
-        ),
-    ] = Path("."),
-    federation: Annotated[
-        str | None,
-        typer.Argument(
-            help="Name of the federation used for login before reviewing app."
-        ),
-    ] = None,
-    federation_config_overrides: Annotated[
-        list[str] | None,
-        typer.Option(
-            "--federation-config",
-            help=FEDERATION_CONFIG_HELP_MESSAGE,
-        ),
-    ] = None,
 ) -> None:
     """Download a FAB for <APP-ID>, unpack it for manual review, and upon confirmation
     sign & submit the review to the Platform."""
-    # Load configs
-    pyproject_path = app_dir_login / FAB_CONFIG_FILE if app_dir_login else None
-    config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
-    config = process_loaded_project_config(config, errors, warnings)
-    federation, federation_config = validate_federation_in_project_config(
-        federation, config, federation_config_overrides
-    )
+    auth_plugin = load_cli_auth_plugin_from_connection(SUPERGRID_ADDRESS)
 
-    # Load the authentication plugin
-    auth_plugin = load_cli_auth_plugin(app_dir_login, federation, federation_config)
     auth_plugin.load_tokens()
     if not isinstance(auth_plugin, OidcCliPlugin) or not auth_plugin.access_token:
-        typer.secho(
-            "❌ Please log in before reviewing app.",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1)
+        raise click.ClickException("Please log in before reviewing app.")
 
     # Load token from the plugin
     token = auth_plugin.access_token
@@ -108,8 +70,7 @@ def review(
     try:
         app_id, app_version = parse_app_spec(app_spec)
     except ValueError as e:
-        typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=1) from e
+        raise click.ClickException(str(e)) from e
 
     # Download FAB
     typer.secho("Downloading FAB... ", fg=typer.colors.BLUE)
@@ -117,8 +78,7 @@ def review(
     try:
         presigned_url, _ = request_download_link(app_id, app_version, url, "fab_url")
     except ValueError as e:
-        typer.secho(f"❌ {e}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=1) from e
+        raise click.ClickException(str(e)) from e
 
     fab_bytes = _download_fab(presigned_url)
 
@@ -204,12 +164,7 @@ def _download_fab(url: str) -> bytes:
         r = requests.get(url, timeout=60)
         r.raise_for_status()
     except requests.RequestException as e:
-        typer.secho(
-            f"❌ FAB download failed: {e}",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from e
+        raise click.ClickException(f"FAB download failed: {e}") from e
     return r.content
 
 
@@ -243,20 +198,14 @@ def _submit_review(
     try:
         resp = requests.post(url, headers=headers, json=payload, timeout=120)
     except requests.RequestException as e:
-        typer.secho(
-            f"❌ Network error while submitting review: {e}",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(code=1) from e
+        raise click.ClickException(f"Network error while submitting review: {e}") from e
 
     if resp.ok:
         typer.secho("🎊 Review submitted", fg=typer.colors.GREEN, bold=True)
         return
 
     # Error path:
-    msg = f"❌ Review submission failed (HTTP {resp.status_code})"
+    msg = f"Review submission failed (HTTP {resp.status_code})"
     if resp.text:
         msg += f": {resp.text}"
-    typer.secho(msg, fg=typer.colors.RED, err=True)
-    raise typer.Exit(code=1)
+    raise click.ClickException(msg)

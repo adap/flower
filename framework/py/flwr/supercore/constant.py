@@ -25,10 +25,16 @@ EXEC_PLUGIN_SECTION = "exec_plugin"
 # Flower in-memory Python-based database name
 FLWR_IN_MEMORY_DB_NAME = ":flwr-in-memory:"
 
+# Flower in-memory SQLite database URL
+FLWR_IN_MEMORY_SQLITE_DB_URL = "sqlite:///:memory:"
+
 # Constants for Hub
 APP_ID_PATTERN = r"^@[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
 APP_VERSION_PATTERN = r"^\d+\.\d+\.\d+$"
 PLATFORM_API_URL = "https://api.flower.ai/v1"
+
+# SuperGrid constants
+SUPERGRID_ADDRESS = "supergrid.flower.ai"
 
 # Specification for app publishing
 APP_PUBLISH_INCLUDE_PATTERNS = (
@@ -59,6 +65,20 @@ FORCE_EXIT_TIMEOUT_SECONDS = 5  # Used in `flwr_exit` function
 
 # Constants for message processing timing
 MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS = 3600
+
+
+# System message type
+SYSTEM_MESSAGE_TYPE = "system"
+
+# SQLite PRAGMA settings for optimal performance and correctness
+SQLITE_PRAGMAS = (
+    ("journal_mode", "WAL"),  # Enable Write-Ahead Logging for better concurrency
+    ("synchronous", "NORMAL"),
+    ("foreign_keys", "ON"),
+    ("cache_size", "-64000"),  # 64MB cache
+    ("temp_store", "MEMORY"),  # In-memory temp tables
+    ("mmap_size", "268435456"),  # 256MB memory-mapped I/O
+)
 
 
 class NodeStatus:

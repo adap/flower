@@ -22,17 +22,18 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from flwr.cli.utils import (
-    build_pathspec,
-    get_sha256_hash,
-    load_gitignore_patterns,
-    validate_credentials_content,
-)
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
     FLWR_DIR,
     REFRESH_TOKEN_KEY,
+)
+
+from .utils import (
+    build_pathspec,
+    get_sha256_hash,
+    load_gitignore_patterns,
+    validate_credentials_content,
 )
 
 
