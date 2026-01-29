@@ -58,18 +58,40 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
-    In this scenario we need to create an Engine and associate a connection with the
-    context.
-    """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    Creates an engine and associates a connection with the context. Supports two modes:
 
-    with connectable.connect() as connection:
-        # pylint: disable-next=no-member
-        context.configure(connection=connection, target_metadata=target_metadata)
+    1. Standard: Creates a new connection from the configured URL.
+    2. Pre-connected: Uses an existing connection from config.attributes["connection"].
+
+    Pre-connected mode is necessary for in-memory SQLite databases, where each new
+    connection creates a separate database instance. This allows
+    _get_baseline_metadata() to run migrations and reflect schema from the same
+    in-memory database without requiring filesystem write access.
+    """
+    # Check if a connection was provided (e.g., for in-memory databases).
+    # This allows callers to pass an active connection that should be reused
+    # instead of creating a new one from the URL.
+    connection = config.attributes.get("connection", None)
+
+    if connection is None:
+        # Standard path: create engine from config
+        connectable = engine_from_config(
+            config.get_section(config.config_ini_section, {}),
+            prefix="sqlalchemy.",
+            poolclass=pool.NullPool,
+        )
+
+        with connectable.connect() as connection:
+            # pylint: disable-next=no-member
+            context.configure(connection=connection, target_metadata=target_metadata)
+
+            with context.begin_transaction():  # pylint: disable=no-member
+                context.run_migrations()  # pylint: disable=no-member
+    else:
+        # Use the provided connection directly (for in-memory databases)
+        context.configure(  # pylint: disable=no-member
+            connection=connection, target_metadata=target_metadata
+        )
 
         with context.begin_transaction():  # pylint: disable=no-member
             context.run_migrations()  # pylint: disable=no-member
