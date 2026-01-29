@@ -195,9 +195,8 @@ class SqlMixin(ABC):
         self._session_factory = sessionmaker(bind=self._engine)
 
         # Create database
-        if (
-            metadata := self.get_metadata()
-        ) is not None and self._is_inmemory_sql_database:
+        metadata = self.get_metadata()
+        if metadata and self.database_url == FLWR_IN_MEMORY_SQLITE_DB_URL:
             # In-memory databases: create tables directly from SQLAlchemy metadata
             metadata.create_all(self._engine)
         else:
