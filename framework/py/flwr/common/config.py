@@ -330,8 +330,6 @@ def validate_fields_in_config(
             warnings.append('Recommended property "description" missing in [project]')
         if "license" not in config["project"]:
             warnings.append('Recommended property "license" missing in [project]')
-        if "authors" not in config["project"]:
-            warnings.append('Recommended property "authors" missing in [project]')
 
     if (
         "tool" not in config
