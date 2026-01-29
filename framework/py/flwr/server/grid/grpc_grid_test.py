@@ -273,7 +273,6 @@ class TestGrpcGrid(unittest.TestCase):
         # Prepare
         grpc_exc = grpc.RpcError()
         grpc_exc.code = lambda: grpc.StatusCode.UNAVAILABLE
-        grpc_exc.details = lambda: "failed to connect to all addresses"
         mock_get_nodes = Mock()
         mock_get_nodes.side_effect = [
             grpc_exc,
