@@ -66,7 +66,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917
         ),
     ] = False,
 ) -> None:
-    """List SuperNodes in the federation."""
+    """List SuperNodes in the federation (alias: ls)."""
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
 

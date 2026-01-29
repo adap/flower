@@ -17,7 +17,7 @@
 
 import pytest
 
-from .address import parse_address
+from .address import parse_address, resolve_bind_address
 
 
 @pytest.mark.parametrize(
@@ -142,3 +142,19 @@ def test_domain_incorrect(address: str) -> None:
 
     # Assert
     assert actual is None
+
+
+@pytest.mark.parametrize(
+    "address, expected",
+    [
+        ("0.0.0.0:8080", "127.0.0.1:8080"),
+        ("[::]:8080", "[::1]:8080"),
+        ("192.168.1.1:8080", "192.168.1.1:8080"),
+        ("[2001:db8::1]:8080", "[2001:db8::1]:8080"),
+        ("localhost:8080", "localhost:8080"),
+        ("example.com:443", "example.com:443"),
+    ],
+)
+def test_resolve_bind_address(address: str, expected: str) -> None:
+    """Test conversion of bind-all addresses to localhost."""
+    assert resolve_bind_address(address) == expected

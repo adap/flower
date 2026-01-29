@@ -22,6 +22,7 @@ from flwr.cli.constant import (
     DEFAULT_SIMULATION_BACKEND_NAME,
     SuperLinkConnectionTomlKey,
 )
+from flwr.supercore.utils import check_federation_format
 
 _ERROR_MSG_FMT = "SuperLinkConnection.%s is None"
 
@@ -106,8 +107,6 @@ class SuperLinkConnection:
     insecure : bool (default: False)
          Whether to use an insecure channel. If True, the
          connection will not use TLS encryption.
-    enable_account_auth : bool (default: False)
-         Whether to enable account authentication.
     federation : str
          The name of the federation to interface with.
     options : SuperLinkSimulationOptions
@@ -118,7 +117,6 @@ class SuperLinkConnection:
     address: str | None = None
     root_certificates: str | None = None
     _insecure: bool | None = None
-    _enable_account_auth: bool | None = None
     federation: str | None = None
     options: SuperLinkSimulationOptions | None = None
 
@@ -129,7 +127,6 @@ class SuperLinkConnection:
         address: str | None = None,
         root_certificates: str | None = None,
         insecure: bool | None = None,
-        enable_account_auth: bool | None = None,
         federation: str | None = None,
         options: SuperLinkSimulationOptions | None = None,
     ) -> None:
@@ -137,7 +134,6 @@ class SuperLinkConnection:
         self.address = address
         self.root_certificates = root_certificates
         self._insecure = insecure
-        self._enable_account_auth = enable_account_auth
         self.federation = federation
         self.options = options
 
@@ -149,13 +145,6 @@ class SuperLinkConnection:
         if self._insecure is None:
             return False
         return self._insecure
-
-    @property
-    def enable_account_auth(self) -> bool:
-        """Return the enable_account_auth flag or its default (False) if unset."""
-        if self._enable_account_auth is None:
-            return False
-        return self._enable_account_auth
 
     def __post_init__(self) -> None:
         """Validate SuperLink connection configuration."""
@@ -187,19 +176,16 @@ class SuperLinkConnection:
                 err_prefix % SuperLinkConnectionTomlKey.INSECURE
                 + f"expected bool, but got {type(self._insecure).__name__}."
             )
-        if self._enable_account_auth is not None and not isinstance(
-            self._enable_account_auth, bool
-        ):
-            raise ValueError(
-                err_prefix % SuperLinkConnectionTomlKey.ENABLE_ACCOUNT_AUTH
-                + f"expected bool, but got {type(self._enable_account_auth).__name__}."
-            )
 
-        if self.federation is not None and not isinstance(self.federation, str):
-            raise ValueError(
-                err_prefix % SuperLinkConnectionTomlKey.FEDERATION
-                + f"expected str, but got {type(self.federation).__name__}."
-            )
+        if self.federation is not None:
+            if not isinstance(self.federation, str):
+                raise ValueError(
+                    err_prefix % SuperLinkConnectionTomlKey.FEDERATION
+                    + f"expected str, but got {type(self.federation).__name__}."
+                )
+
+            # Check if the federation string is valid
+            check_federation_format(self.federation)
 
         # The connection needs to have either an address or options (or both).
         if self.address is None and self.options is None:

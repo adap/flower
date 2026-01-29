@@ -79,13 +79,14 @@ pyyaml = "^6.0.2"
 requests = "^2.31.0"
 click = "<8.2.0"
 SQLAlchemy = "^2.0.45"
+alembic = "^1.18.1"
 # Optional dependencies (Simulation Engine)
 ray = [
     { version = "==2.51.1", optional = true, python = ">=3.10,<3.13" },
     { version = "==2.51.1", optional = true, python = "==3.13", markers = "sys_platform != 'win32'" },
 ]
 # Optional dependencies (REST transport layer)
-starlette = { version = "^0.45.2", optional = true }
+starlette = { version = "^0.47.2", optional = true }
 uvicorn = { version = "^0.34.0", extras = ["standard"], optional = true }
 
 [tool.poetry.extras]
@@ -145,6 +146,7 @@ sphinx-substitution-extensions = "2022.02.16"
 sphinxext-opengraph = "==0.9.1"
 docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-2", python = ">=3.10,<4.0.0" }
 docsig = "==0.64.0"
+paracelsus = "==0.15.0"
 devtool = [{ path = "./devtool", develop = true }]
 
 [tool.docstrfmt]

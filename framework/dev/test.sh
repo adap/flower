@@ -93,6 +93,17 @@ fi
 
 echo "- All rST checks passed"
 
+echo "- Start SQLAlchemy schema checks"
+
+paracelsus inject py/flwr/supercore/state/schema/README.md dev.get_schema_base:Base \
+  --import-module "flwr.supercore.state.schema.linkstate_tables:*" \
+  --import-module "flwr.supercore.state.schema.corestate_tables:*" \
+  --import-module "flwr.supercore.state.schema.objectstore_tables:*" \
+  --layout elk \
+  --check
+
+echo "- All SQLAlchemy schema checks passed"
+
 echo "- Start license checks"
 
 if $RUN_FULL_TEST; then

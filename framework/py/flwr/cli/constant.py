@@ -57,7 +57,6 @@ class SuperLinkConnectionTomlKey:
     ADDRESS = "address"
     ROOT_CERTIFICATES = "root-certificates"
     INSECURE = "insecure"
-    ENABLE_ACCOUNT_AUTH = "enable-account-auth"
     FEDERATION = "federation"
     OPTIONS = "options"
 
@@ -102,8 +101,6 @@ default = "local"
 
 [superlink.supergrid]
 address = "{SUPERGRID_ADDRESS}"
-enable-account-auth = true
-federation = "YOUR-FEDERATION-HERE"
 
 [superlink.local]
 options.num-supernodes = 10
