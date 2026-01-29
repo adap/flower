@@ -105,10 +105,6 @@ class SqlMixin(ABC):
             # Already a SQLite URL
             self.database_url = database_path
 
-        self._is_inmemory_sql_database = (
-            self.database_url == FLWR_IN_MEMORY_SQLITE_DB_URL
-        )
-
         self._engine: Engine | None = None
         self._session_factory: sessionmaker[Session] | None = None
 
