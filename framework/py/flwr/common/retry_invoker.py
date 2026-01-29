@@ -21,7 +21,7 @@ import threading
 import time
 from collections.abc import Callable, Generator, Iterable
 from dataclasses import dataclass
-from logging import ERROR, DEBUG, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from typing import Any, cast
 
 import grpc
