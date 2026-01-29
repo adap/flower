@@ -116,16 +116,7 @@ def run_simulation_from_cli() -> None:
         sys.exit("Simulation Engine cannot start.")
 
     # Load pyproject.toml
-    config, warnings = load_and_validate(
-        app_path / "pyproject.toml", check_module=False
-    )
-    if warnings:
-        log(
-            WARNING,
-            "Missing recommended fields in Flower App configuration (pyproject.toml):",
-        )
-        for line in warnings:
-            log(WARNING, "- %s", line)
+    config, _ = load_and_validate(app_path / "pyproject.toml", check_module=False)
 
     # Get ClientApp and SeverApp components
     app_components = config["tool"]["flwr"]["app"]["components"]
