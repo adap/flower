@@ -44,17 +44,16 @@ Flower account is part of:
     $ flwr federation list
 
 The above command will display a table with a row for each federation you are part of.
-In this case there is only one federation named ``default`` under the account
-``<name:none>``:
+In this case there is only one federation named ``default`` under the account ``none``:
 
 .. code-block:: shell
 
     📄 Listing federations...
-    ┏━━━━━━━━━━━━━━━━━━━━━━┓
-    ┃      Federation      ┃
-    ┡━━━━━━━━━━━━━━━━━━━━━━┩
-    │ @<name:none>/default │
-    └──────────────────────┘
+    ┏━━━━━━━━━━━━━━━┓
+    ┃  Federation   ┃
+    ┡━━━━━━━━━━━━━━━┩
+    │ @none/default │
+    └───────────────┘
 
 **********************
  Inspect a Federation
@@ -73,19 +72,19 @@ of the federation to inspect as an argument:
 
 .. code-block:: shell
 
-    $ flwr federation list local-deployment --federation="@<name:none>/default"
+    $ flwr federation list local-deployment --federation="@none/default"
 
 Then, assuming that there are two ``SuperNodes`` connected and that three runs have been
 submitted through the federation, a representative output would be similar to:
 
 .. code-block:: shell
 
-    📄 Showing ' @<name:none>/default' federation ...
+    📄 Showing ' @none/default' federation ...
     Federation Members
     ┏━━━━━━━━━━━━━━┳━━━━━━━━┓
     ┃ Account Name ┃  Role  ┃
     ┡━━━━━━━━━━━━━━╇━━━━━━━━┩
-    │ <name:none>  │ Member │
+    │ none         │ Member │
     └──────────────┴────────┘
             SuperNodes in the Federation
     ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━┓
