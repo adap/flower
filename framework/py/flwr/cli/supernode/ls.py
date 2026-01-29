@@ -15,7 +15,6 @@
 """Flower command line interface `supernode list` command."""
 
 
-import io
 import json
 from datetime import datetime, timedelta
 from typing import Annotated
@@ -28,7 +27,6 @@ from rich.text import Text
 from flwr.cli.config_migration import migrate
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.common.constant import NOOP_ACCOUNT_NAME, CliOutputFormat
-from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListNodesRequest,
     ListNodesResponse,
@@ -38,7 +36,12 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.date import isoformat8601_utc
 from flwr.supercore.utils import humanize_duration
 
-from ..utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
+from ..utils import (
+    cli_output_handler,
+    flwr_cli_grpc_exc_handler,
+    init_channel_from_connection,
+    print_json_to_stdout,
+)
 
 _NodeListType = tuple[int, str, str, str, str, str, str, str, float]
 
@@ -67,49 +70,28 @@ def ls(  # pylint: disable=R0914, R0913, R0917
     ] = False,
 ) -> None:
     """List SuperNodes in the federation (alias: ls)."""
-    suppress_output = output_format == CliOutputFormat.JSON
-    captured_output = io.StringIO()
+    with cli_output_handler(output_format=output_format) as is_json:
+        # Migrate legacy usage if any
+        migrate(superlink, args=ctx.args)
 
-    if suppress_output:
-        redirect_output(captured_output)
+        # Read superlink connection configuration
+        superlink_connection = read_superlink_connection(superlink)
+        channel = None
 
-    # Migrate legacy usage if any
-    migrate(superlink, args=ctx.args)
-
-    # Read superlink connection configuration
-    superlink_connection = read_superlink_connection(superlink)
-    channel = None
-
-    try:
         try:
             channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)
             typer.echo("📄 Listing all nodes...")
             formatted_nodes = _list_nodes(stub)
-            restore_output()
-            if output_format == CliOutputFormat.JSON:
-                Console().print_json(_to_json(formatted_nodes, verbose=verbose))
+
+            if is_json:
+                print_json_to_stdout(_to_json(formatted_nodes, verbose=verbose))
             else:
                 Console().print(_to_table(formatted_nodes, verbose=verbose))
 
         finally:
             if channel:
                 channel.close()
-    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
-        if suppress_output:
-            restore_output()
-            e_message = captured_output.getvalue()
-            print_json_error(e_message, err)
-        else:
-            typer.secho(
-                f"{err}",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-    finally:
-        if suppress_output:
-            restore_output()
-        captured_output.close()
 
 
 def _list_nodes(stub: ControlStub) -> list[_NodeListType]:

@@ -22,6 +22,11 @@ own that are registered with the same SuperLink. Members of a Flower federation 
 execute runs (e.g. to federate the training of an AI model) across all SuperNodes that
 are part of it.
 
+Federations can be addressed by their unique identifier, which has the form
+``@<account-name>/<federation-name>`` being ``<account-name>`` the name of the account
+that created the federation and ``<federation-name>`` the name given to the federation
+at creation time.
+
 In this how-to guide, you will:
 
 - Learn how to see the federations you are part of.
@@ -39,61 +44,48 @@ Flower account is part of:
     $ flwr federation list
 
 The above command will display a table with a row for each federation you are part of.
-In this case there is only one federation named ``default``:
+In this case there is only one federation named ``default`` under the account ``none``:
 
 .. code-block:: shell
 
     📄 Listing federations...
-    ┏━━━━━━━━━━━━┓
-    ┃ Federation ┃
-    ┡━━━━━━━━━━━━┩
-    │ default    │
-    └────────────┘
+    ┏━━━━━━━━━━━━━━━┓
+    ┃  Federation   ┃
+    ┡━━━━━━━━━━━━━━━┩
+    │ @none/default │
+    └───────────────┘
 
 **********************
  Inspect a Federation
 **********************
 
-You can inspect a specific federation by providing the name of the federation to the
-``flwr federation list`` command. With this command, you will be able to see the
+You can inspect a specific federation by providing the identifier of the federation to
+the ``flwr federation list`` command. With this command, you will be able to see the
 following information about a federation:
 
 - The members of the federation.
 - The SuperNodes registered with the federation and their status.
 - The runs executed via the federation.
 
-The ``flwr federation list --federation <federation>`` command requires the name of the
-federation to inspect as an argument. This can be specified as part of your Flower
-Configuration TOML file. For example:
-
-.. code-block:: toml
-    :emphasize-lines: 4
-    :caption: config.toml
-
-    [superlink.local-deployment]
-    address = "127.0.0.1:9093"
-    insecure = true
-    federation = "default"
-
-In this example, the federation named ``default`` is specified. You can now inspect it
-by running:
+The ``flwr federation list --federation <federation>`` command requires the identifier
+of the federation to inspect as an argument:
 
 .. code-block:: shell
 
-    $ flwr federation list local-deployment --federation default
+    $ flwr federation list local-deployment --federation="@none/default"
 
 Then, assuming that there are two ``SuperNodes`` connected and that three runs have been
 submitted through the federation, a representative output would be similar to:
 
 .. code-block:: shell
 
-    📄 Showing 'default' federation ...
+    📄 Showing ' @none/default' federation ...
     Federation Members
-    ┏━━━━━━━━━━━━┳━━━━━━━━┓
-    ┃ Account ID ┃  Role  ┃
-    ┡━━━━━━━━━━━━╇━━━━━━━━┩
-    │ <id:none>  │ Member │
-    └────────────┴────────┘
+    ┏━━━━━━━━━━━━━━┳━━━━━━━━┓
+    ┃ Account Name ┃  Role  ┃
+    ┡━━━━━━━━━━━━━━╇━━━━━━━━┩
+    │ none         │ Member │
+    └──────────────┴────────┘
             SuperNodes in the Federation
     ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━┓
     ┃       Node ID        ┃    Owner    ┃ Status ┃

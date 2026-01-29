@@ -16,19 +16,17 @@
 
 
 import hashlib
-import io
 import json
 import subprocess
 from pathlib import Path
-from typing import Annotated, Any, cast
+from typing import Annotated, Any
 
 import click
 import typer
-from rich.console import Console
 
 from flwr.cli.build import build_fab_from_disk, get_fab_filename
 from flwr.cli.config_migration import migrate, warn_if_federation_config_overrides
-from flwr.cli.config_utils import load as load_toml
+from flwr.cli.config_utils import load_and_validate
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE, RUN_CONFIG_HELP_MESSAGE
 from flwr.cli.flower_config import (
     _serialize_simulation_options,
@@ -36,12 +34,12 @@ from flwr.cli.flower_config import (
 )
 from flwr.cli.typing import SuperLinkConnection, SuperLinkSimulationOptions
 from flwr.common.config import (
+    flatten_dict,
     get_metadata_from_config,
     parse_config_args,
     user_config_to_configrecord,
 )
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
-from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
@@ -49,7 +47,12 @@ from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.supercore.utils import parse_app_spec
 
 from ..log import start_stream
-from ..utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
+from ..utils import (
+    cli_output_handler,
+    flwr_cli_grpc_exc_handler,
+    init_channel_from_connection,
+    print_json_to_stdout,
+)
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -98,25 +101,19 @@ def run(
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """Run Flower App."""
-    suppress_output = output_format == CliOutputFormat.JSON
-    captured_output = io.StringIO()
+    with cli_output_handler(output_format=output_format) as is_json:
+        # Warn `--federation-config` is ignored
+        warn_if_federation_config_overrides(federation_config_overrides)
 
-    if suppress_output:
-        redirect_output(captured_output)
+        # Migrate legacy usage if any
+        migrate(str(app), [], ignore_legacy_usage=True)
 
-    # Warn `--federation-config` is ignored
-    warn_if_federation_config_overrides(federation_config_overrides)
-
-    # Migrate legacy usage if any
-    migrate(str(app), [], ignore_legacy_usage=True)
-
-    # Read superlink connection configuration
-    superlink_connection = read_superlink_connection(superlink)
-
-    try:
+        # Read superlink connection configuration
+        superlink_connection = read_superlink_connection(superlink)
 
         # Determine if app is remote
         app_spec = None
+        config: dict[str, Any] = {}
         if (app_str := str(app)).startswith("@"):
             # Validate app version and ID format
             try:
@@ -125,16 +122,27 @@ def run(
                 raise click.ClickException(str(e)) from e
 
             app_spec = app_str
-            # Set `app` to current directory for credential storage
-            app = Path(".")
+
+        # Validate TOML configuration for local app
+        else:
+            config, warnings = load_and_validate(app / FAB_CONFIG_FILE)
+            if warnings:
+                typer.secho(
+                    "Missing recommended fields in Flower App configuration "
+                    "(pyproject.toml):\n"
+                    + "\n".join([f"- {line}" for line in warnings]),
+                    fg=typer.colors.YELLOW,
+                    bold=True,
+                )
 
         if superlink_connection.address:
             _run_with_control_api(
                 app,
+                config,
                 superlink_connection,
                 run_config_overrides,
                 stream,
-                output_format,
+                is_json,
                 app_spec,
             )
         else:
@@ -143,26 +151,16 @@ def run(
                 simulation_options=superlink_connection.options,  # type: ignore
                 config_overrides=run_config_overrides,
             )
-    except Exception as err:  # pylint: disable=broad-except
-        if suppress_output:
-            restore_output()
-            e_message = captured_output.getvalue()
-            print_json_error(e_message, err)
-        else:
-            raise click.ClickException(str(err)) from None
-    finally:
-        if suppress_output:
-            restore_output()
-        captured_output.close()
 
 
 # pylint: disable-next=R0913, R0914, R0917
 def _run_with_control_api(
     app: Path,
+    config: dict[str, Any],
     superlink_connection: SuperLinkConnection,
     config_overrides: list[str] | None,
     stream: bool,
-    output_format: str,
+    is_json: bool,
     app_spec: str | None,
 ) -> None:
     channel = None
@@ -175,7 +173,6 @@ def _run_with_control_api(
         if not is_remote_app:
             fab_bytes = build_fab_from_disk(app)
             fab_hash = hashlib.sha256(fab_bytes).hexdigest()
-            config = cast(dict[str, Any], load_toml(app / FAB_CONFIG_FILE))
             fab_id, fab_version = get_metadata_from_config(config)
             fab = Fab(fab_hash, fab_bytes, {})
         # Skip FAB build if remote app
@@ -187,7 +184,9 @@ def _run_with_control_api(
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
         options = {}
         if superlink_connection.options:
-            options = _serialize_simulation_options(superlink_connection.options)
+            options = flatten_dict(
+                _serialize_simulation_options(superlink_connection.options)
+            )
 
         c_record = user_config_to_configrecord(options)
 
@@ -208,7 +207,7 @@ def _run_with_control_api(
         else:
             raise click.ClickException("Failed to start run")
 
-        if output_format == CliOutputFormat.JSON:
+        if is_json:
             # Only include FAB metadata if we actually built a local FAB
             payload: dict[str, Any] = {
                 "success": res.HasField("run_id"),
@@ -224,8 +223,7 @@ def _run_with_control_api(
                         "fab-filename": get_fab_filename(config, fab_hash),
                     }
                 )
-            restore_output()
-            Console().print_json(json.dumps(payload))
+            print_json_to_stdout(payload)
 
         if stream:
             start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)
@@ -241,7 +239,7 @@ def _run_without_control_api(
 ) -> None:
 
     num_supernodes = simulation_options.num_supernodes
-    verbose = False  # bool | None = superlink_connection.options.verbose
+    verbose = simulation_options.verbose or False
 
     command = [
         "flower-simulation",

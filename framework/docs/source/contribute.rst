@@ -38,6 +38,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     contributor-how-to-release-flower
     contributor-how-to-contribute-translations
     contributor-how-to-build-docker-images
+    contributor-how-to-migrate-database
 
 **************
  Explanations
