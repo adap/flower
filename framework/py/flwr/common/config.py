@@ -330,8 +330,6 @@ def validate_fields_in_config(
             warnings.append('Recommended property "description" missing in [project]')
         if "license" not in config["project"]:
             warnings.append('Recommended property "license" missing in [project]')
-        if "authors" not in config["project"]:
-            warnings.append('Recommended property "authors" missing in [project]')
 
     if (
         "tool" not in config
@@ -375,13 +373,13 @@ def validate_config(
     is_valid, reason = object_ref.validate(serverapp_ref, check_module, project_dir)
 
     if not is_valid and isinstance(reason, str):
-        return False, [reason], []
+        return False, [reason], warnings
 
     # Validate clientapp
     clientapp_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
     is_valid, reason = object_ref.validate(clientapp_ref, check_module, project_dir)
 
     if not is_valid and isinstance(reason, str):
-        return False, [reason], []
+        return False, [reason], warnings
 
-    return True, [], []
+    return True, [], warnings

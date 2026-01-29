@@ -19,14 +19,14 @@ import hashlib
 import json
 import subprocess
 from pathlib import Path
-from typing import Annotated, Any, cast
+from typing import Annotated, Any
 
 import click
 import typer
 
 from flwr.cli.build import build_fab_from_disk, get_fab_filename
 from flwr.cli.config_migration import migrate, warn_if_federation_config_overrides
-from flwr.cli.config_utils import load as load_toml
+from flwr.cli.config_utils import load_and_validate
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE, RUN_CONFIG_HELP_MESSAGE
 from flwr.cli.flower_config import (
     _serialize_simulation_options,
@@ -112,6 +112,7 @@ def run(
 
         # Determine if app is remote
         app_spec = None
+        config: dict[str, Any] = {}
         if (app_str := str(app)).startswith("@"):
             # Validate app version and ID format
             try:
@@ -120,12 +121,23 @@ def run(
                 raise click.ClickException(str(e)) from e
 
             app_spec = app_str
-            # Set `app` to current directory for credential storage
-            app = Path(".")
+
+        # Validate TOML configuration for local app
+        else:
+            config, warnings = load_and_validate(app / FAB_CONFIG_FILE)
+            if warnings:
+                typer.secho(
+                    "Missing recommended fields in Flower App configuration "
+                    "(pyproject.toml):\n"
+                    + "\n".join([f"- {line}" for line in warnings]),
+                    fg=typer.colors.YELLOW,
+                    bold=True,
+                )
 
         if superlink_connection.address:
             _run_with_control_api(
                 app,
+                config,
                 superlink_connection,
                 run_config_overrides,
                 stream,
@@ -143,6 +155,7 @@ def run(
 # pylint: disable-next=R0913, R0914, R0917
 def _run_with_control_api(
     app: Path,
+    config: dict[str, Any],
     superlink_connection: SuperLinkConnection,
     config_overrides: list[str] | None,
     stream: bool,
@@ -159,7 +172,6 @@ def _run_with_control_api(
         if not is_remote_app:
             fab_bytes = build_fab_from_disk(app)
             fab_hash = hashlib.sha256(fab_bytes).hexdigest()
-            config = cast(dict[str, Any], load_toml(app / FAB_CONFIG_FILE))
             fab_id, fab_version = get_metadata_from_config(config)
             fab = Fab(fab_hash, fab_bytes, {})
         # Skip FAB build if remote app
