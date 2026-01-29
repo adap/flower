@@ -72,7 +72,10 @@ def install(
     if source.suffix != ".fab":
         raise click.ClickException(f"The source {source} is not a `.fab` file.")
 
-    install_from_fab(source, flwr_dir)
+    try:
+        install_from_fab(source, flwr_dir)
+    except ValueError as e:
+        raise click.ClickException(str(e)) from None
 
 
 def install_from_fab(
@@ -171,10 +174,7 @@ def validate_and_install(
     click.ClickException
         If configuration is invalid or metadata doesn't match.
     """
-    config, _, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
-
-    if config is None:
-        raise click.ClickException("Invalid config inside FAB file.")
+    config, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
 
     fab_id, version = get_metadata_from_config(config)
     publisher, project_name = fab_id.split("/")

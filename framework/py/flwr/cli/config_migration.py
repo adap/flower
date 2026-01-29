@@ -94,13 +94,12 @@ def _is_migratable(app: Path) -> tuple[bool, str | None]:
     toml_path = app / "pyproject.toml"
     if not toml_path.exists():
         return False, f"No pyproject.toml found in '{app}'"
-    config, errors, _ = load_and_validate(toml_path, check_module=False)
-    if config is None:
-        return False, f"Failed to load TOML configuration: {toml_path}"
-    if errors:
-        err_msg = f"Invalid TOML configuration found in '{toml_path}':\n"
-        err_msg += "\n".join(f"- {err}" for err in errors)
-        return False, err_msg
+
+    try:
+        config, _ = load_and_validate(toml_path, check_module=False)
+    except ValueError as e:
+        return False, str(e)
+
     try:
         _ = config["tool"]["flwr"]["federations"]
         return True, None
@@ -114,9 +113,7 @@ def _migrate_pyproject_toml_to_flower_config(
     """Migrate old TOML configuration to Flower config."""
     # Load and validate the old TOML configuration
     toml_path = app / "pyproject.toml"
-    config, _, _ = load_and_validate(toml_path, check_module=False)
-    if config is None:
-        raise ValueError(f"Failed to load TOML configuration: {toml_path}")
+    config, _ = load_and_validate(toml_path, check_module=False)
     validate_federation_in_project_config(toml_federation, config)
 
     # Construct SuperLinkConnection
