@@ -92,9 +92,7 @@ class SuperLinkSimulationOptions:
                 "Invalid simulation options: num-supernodes must be an integer."
             )
         if self.verbose is not None and not isinstance(self.verbose, bool):
-            raise ValueError(
-                "Invalid simulation options: verbose must be a boolean."
-            )
+            raise ValueError("Invalid simulation options: verbose must be a boolean.")
 
 
 @dataclass
