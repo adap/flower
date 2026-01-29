@@ -40,8 +40,8 @@ flwr = { extras = ["simulation"], version = "1.9.0" }
 hydra-core = "1.3.2" # don't change this
 matplotlib = "^3.7.2"
 tqdm = "^4.66.1"
-torch = { url = "https://download.pytorch.org/whl/cu117/torch-2.0.1%2Bcu117-cp310-cp310-linux_x86_64.whl" }
-torchvision = { url = "https://download.pytorch.org/whl/cu117/torchvision-0.15.2%2Bcu117-cp310-cp310-linux_x86_64.whl" }
+torch = { url = "https://download.pytorch.org/whl/cu126/torch-2.8.0%2Bcu126-cp310-cp310-manylinux_2_28_x86_64.whl" }
+torchvision = { url = "https://download.pytorch.org/whl/cu126/torchvision-0.23.0%2Bcu126-cp310-cp310-manylinux_2_28_x86_64.whl" }
 
 [tool.poetry.dev-dependencies]
 isort = "==5.13.2"
