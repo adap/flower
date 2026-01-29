@@ -81,7 +81,8 @@ def load_and_validate(
 
     if config is None:
         raise ValueError(
-            f"Failed to load Flower App configuration in '{path}'. File may be missing or invalid."
+            f"Failed to load Flower App configuration in '{path}'. "
+            "File may be missing or invalid."
         )
 
     is_valid, errors, warnings = validate_config(config, check_module, path.parent)
