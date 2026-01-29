@@ -520,6 +520,7 @@ class TestSuperLinkConnection(unittest.TestCase):
 
             [superlink.local-sim]
             options.num-supernodes = 2
+            options.verbose = true
             options.backend.client-resources.num-cpus = 2.0
             options.backend.init-args.num-cpus = 1
             """
@@ -534,15 +535,12 @@ class TestSuperLinkConnection(unittest.TestCase):
             assert config is not None
             self.assertEqual(config.name, "local-sim")
             self.assertIsNone(config.address)
-            self.assertIsNotNone(config.options)
             assert config.options is not None
             self.assertEqual(config.options.num_supernodes, 2)
-            self.assertIsNotNone(config.options.backend)
             assert config.options.backend is not None
-            self.assertIsNotNone(config.options.backend.client_resources)
+            self.assertEqual(config.options.verbose, True)
             assert config.options.backend.client_resources is not None
             self.assertEqual(config.options.backend.client_resources.num_cpus, 2.0)
-            self.assertIsNotNone(config.options.backend.init_args)
             assert config.options.backend.init_args is not None
             self.assertEqual(config.options.backend.init_args.num_cpus, 1)
             self.assertEqual(config.options.backend.name, "ray")
