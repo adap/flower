@@ -551,7 +551,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
 
         flwr_aid = get_current_account_info().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        _check_flwr_aid_exists(flwr_aid, context)
 
         # Get federations the account is a member of
         federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
@@ -572,6 +572,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         federation_proto = Federation(
             name=federation,
             member_aids=details.member_aids,
+            accounts=details.accounts,
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
         )

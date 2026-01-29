@@ -206,7 +206,7 @@ def _show_federation(
     Returns
     -------
     tuple[list[str], list[NodeInfo], list[RunRow]]
-        A tuple containing (member_account_ids, nodes, runs).
+        A tuple containing (account_names, nodes, runs).
     """
     with flwr_cli_grpc_exc_handler():
         res: ShowFederationResponse = stub.ShowFederation(
@@ -217,16 +217,20 @@ def _show_federation(
     runs = [run_from_proto(run_proto) for run_proto in fed_proto.runs]
     formatted_runs = format_runs(runs, res.now)
 
-    return list(fed_proto.member_aids), list(fed_proto.nodes), formatted_runs
+    return (
+        [account.name for account in fed_proto.accounts],
+        list(fed_proto.nodes),
+        formatted_runs,
+    )
 
 
-def _to_members_table(member_aids: list[str]) -> Table:
+def _to_members_table(account_names: list[str]) -> Table:
     """Format the provided list of federation members as a rich Table.
 
     Parameters
     ----------
-    member_aids : list[str]
-        List of member account identifiers.
+    account_names : list[str]
+        List of member account names.
 
     Returns
     -------
@@ -236,12 +240,12 @@ def _to_members_table(member_aids: list[str]) -> Table:
     table = Table(title="Federation Members", header_style="bold cyan", show_lines=True)
 
     table.add_column(
-        Text("Account ID", justify="center"), style="bright_black", no_wrap=True
+        Text("Account Name", justify="center"), style="bright_black", no_wrap=True
     )
     table.add_column(Text("Role", justify="center"), style="bright_black", no_wrap=True)
 
-    for member_aid in member_aids:
-        table.add_row(member_aid, "Member")
+    for account_name in account_names:
+        table.add_row(account_name, "Member")
 
     return table
 
