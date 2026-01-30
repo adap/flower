@@ -49,15 +49,23 @@ class ObjectStoreFactory:
         ObjectStore
             An ObjectStore instance for storing objects by object_id.
         """
+        # Return cached store if it exists
+        if self.store_instance is not None:
+            if self.database == FLWR_IN_MEMORY_DB_NAME:
+                log(DEBUG, "Using InMemoryObjectStore")
+            else:
+                log(DEBUG, "Using SqlObjectStore")
+            return self.store_instance
+
         # InMemoryObjectStore
         if self.database == FLWR_IN_MEMORY_DB_NAME:
-            if self.store_instance is None:
-                self.store_instance = InMemoryObjectStore()
+            self.store_instance = InMemoryObjectStore()
             log(DEBUG, "Using InMemoryObjectStore")
             return self.store_instance
 
         # SqlObjectStore
         store = SqlObjectStore(self.database)
         store.initialize()
+        self.store_instance = store
         log(DEBUG, "Using SqlObjectStore")
         return store
