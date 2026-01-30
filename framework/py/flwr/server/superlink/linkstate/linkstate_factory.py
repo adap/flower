@@ -56,20 +56,28 @@ class LinkStateFactory:
 
     def state(self) -> LinkState:
         """Return a State instance and create it, if necessary."""
+        # Return cached state if it exists
+        if self.state_instance is not None:
+            if self.database == FLWR_IN_MEMORY_DB_NAME:
+                log(DEBUG, "Using InMemoryState")
+            else:
+                log(DEBUG, "Using SqlLinkState")
+            return self.state_instance
+
         # Get the ObjectStore instance
         object_store = self.objectstore_factory.store()
 
         # InMemoryState
         if self.database == FLWR_IN_MEMORY_DB_NAME:
-            if self.state_instance is None:
-                self.state_instance = InMemoryLinkState(
-                    self.federation_manager, object_store
-                )
+            self.state_instance = InMemoryLinkState(
+                self.federation_manager, object_store
+            )
             log(DEBUG, "Using InMemoryState")
             return self.state_instance
 
         # SqlLinkState
         state = SqlLinkState(self.database, self.federation_manager, object_store)
         state.initialize()
+        self.state_instance = state
         log(DEBUG, "Using SqlLinkState")
         return state
