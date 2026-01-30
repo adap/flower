@@ -44,7 +44,7 @@ from flwr.common.serde import config_record_to_proto, fab_to_proto, user_config_
 from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.supercore.utils import parse_app_spec
+from flwr.supercore.utils import check_federation_format, parse_app_spec
 
 from ..log import start_stream
 from ..utils import (
@@ -66,6 +66,14 @@ def run(
     superlink: Annotated[
         str | None,
         typer.Argument(help="Name of the SuperLink connection."),
+    ] = None,
+    federation: Annotated[
+        str | None,
+        typer.Option(
+            "--federation",
+            help="The federation to join; must be in the "
+            "format `@<account>/<federation>`.",
+        ),
     ] = None,
     run_config_overrides: Annotated[
         list[str] | None,
@@ -139,6 +147,7 @@ def run(
             _run_with_control_api(
                 app,
                 config,
+                federation,
                 superlink_connection,
                 run_config_overrides,
                 stream,
@@ -157,6 +166,7 @@ def run(
 def _run_with_control_api(
     app: Path,
     config: dict[str, Any],
+    federation: str,
     superlink_connection: SuperLinkConnection,
     config_overrides: list[str] | None,
     stream: bool,
@@ -165,6 +175,13 @@ def _run_with_control_api(
 ) -> None:
     channel = None
     is_remote_app = app_spec is not None
+
+    # Determine federation to use
+    if federation:  # Override federation from CLI
+        check_federation_format(federation)
+    else:  # Use federation from SuperLink connection if set
+        federation = superlink_connection.federation or ""
+
     try:
         channel = init_channel_from_connection(superlink_connection)
         stub = ControlStub(channel)
@@ -193,7 +210,7 @@ def _run_with_control_api(
         req = StartRunRequest(
             fab=fab_to_proto(fab),
             override_config=user_config_to_proto(parse_config_args(config_overrides)),
-            federation=superlink_connection.federation or "",
+            federation=federation,
             federation_options=config_record_to_proto(c_record),
             app_spec=app_spec or "",
         )
