@@ -385,18 +385,15 @@ def start_log_uploader(
 ) -> threading.Thread:
     """Start the log uploader thread and return it."""
     thread = threading.Thread(
-        target=_log_uploader, args=(log_queue, node_id, run_id, stub)
+        target=_log_uploader, args=(log_queue, node_id, run_id, stub), daemon=True
     )
     thread.start()
     return thread
 
 
-def stop_log_uploader(
-    log_queue: Queue[str | None], log_uploader: threading.Thread
-) -> None:
+def stop_log_uploader(log_queue: Queue[str | None], _: threading.Thread) -> None:
     """Stop the log uploader thread."""
     log_queue.put(None)
-    log_uploader.join()
 
 
 def _remove_emojis(text: str) -> str:
