@@ -66,7 +66,6 @@ class NoOpFederationManager(FederationManager):
         ]
         return Federation(
             name=NOOP_FEDERATION,
-            member_aids=[NOOP_FLWR_AID],
             accounts=[Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)],
             nodes=nodes,
             runs=runs,

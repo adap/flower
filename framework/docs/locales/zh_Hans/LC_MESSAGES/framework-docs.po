@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-29 00:10+0000\n"
+"POT-Creation-Date: 2026-01-30 00:10+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -47,11 +47,11 @@ msgstr "以问题为导向的 \"如何做 \"指南逐步展示如何实现特定
 msgid "Contributor tutorials"
 msgstr "贡献者教程"
 
-#: ../../source/contribute.rst:49
+#: ../../source/contribute.rst:50
 msgid "Contributor explanations"
 msgstr "贡献者解释"
 
-#: ../../source/contribute.rst:61
+#: ../../source/contribute.rst:62
 msgid "Contributor references"
 msgstr "贡献者参考资料"
 
@@ -83,25 +83,25 @@ msgstr "教程"
 msgid "A learning-oriented series of tutorials, the best place to start."
 msgstr "以学习为导向的联邦学习教程系列，最好的起点。"
 
-#: ../../source/contribute.rst:44 ../../source/index.rst:87
+#: ../../source/contribute.rst:45 ../../source/index.rst:87
 #: ../../source/index.rst:92
 msgid "Explanations"
 msgstr "说明"
 
-#: ../../source/contribute.rst:46 ../../source/index.rst:89
+#: ../../source/contribute.rst:47 ../../source/index.rst:89
 msgid ""
 "Understanding-oriented concept guides explain and discuss key topics and "
 "underlying ideas behind Flower and collaborative AI."
 msgstr "以理解为导向的概念指南解释并讨论了Flower和协作式人工智能背后的关键主题和基本思想。"
 
-#: ../../source/contribute.rst:57
+#: ../../source/contribute.rst:58
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:365
 #: ../../source/index.rst:102 ../../source/index.rst:104
 #: ../../source/reference.rst:7
 msgid "References"
 msgstr "参考资料"
 
-#: ../../source/contribute.rst:59 ../../source/reference.rst:9
+#: ../../source/contribute.rst:60 ../../source/reference.rst:9
 msgid "Information-oriented API reference and other reference material."
 msgstr "以信息为导向的 API 参考资料和其他参考资料。"
 
@@ -1056,6 +1056,119 @@ msgstr ""
 "把``!pip install -q 'flwr[simulation]' torch torchvision "
 "matplotlib``变为``!pip install -q 'flwr-1.7.0-py3-none-any.whl[simulation]'"
 " torch torchvision matplotlib``"
+
+#: ../../source/contributor-how-to-migrate-database.rst:3
+msgid "Migrate Flower Database Schema"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:5
+msgid ""
+"When making changes to the database schema used in Flower, it is "
+"essential to create a migration script to ensure that existing on-disk "
+"databases can be updated to the new schema without data loss. From Flower"
+" version ``1.26.0`` onwards, the framework uses `Alembic "
+"<https://alembic.sqlalchemy.org/en/latest/>`_ as our database migration "
+"tool."
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:10
+msgid ""
+"This guide describes the steps required to create a new migration script "
+"after modifying the database schema."
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:15
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:41
+#, fuzzy
+msgid "Pre-requisites"
+msgstr "先决条件"
+
+#: ../../source/contributor-how-to-migrate-database.rst:17
+msgid ""
+"Install development versions of Flower according to the instructions in "
+":doc:`contributor-how-to-install-development-versions` with the ``dev`` "
+"dependencies."
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:22
+#, fuzzy
+msgid "Generating Migrations"
+msgstr "停用"
+
+#: ../../source/contributor-how-to-migrate-database.rst:24
+msgid ""
+"The Flower SQL database schema is defined under "
+"``supercore/state/schema/``. After making changes to the schema (e.g., "
+"adding a new column to a table), generate the migration revision:"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:32
+#, fuzzy
+msgid "This command:"
+msgstr "命令示例"
+
+#: ../../source/contributor-how-to-migrate-database.rst:34
+msgid "Creates a temporary SQLite database"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:35
+msgid "Upgrades it to the current ``head`` revision"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:36
+msgid "Runs autogenerate to detect your schema changes"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:37
+msgid ""
+"Generates a new migration file in "
+"``py/flwr/supercore/state/alembic/versions/``"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:38
+msgid "Automatically cleans up the temporary database"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:42
+msgid "Review Generated Migrations"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:44
+msgid "Always review the generated migration file before committing:"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:46
+msgid "Check that the detected changes match your intent"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:47
+msgid "Verify data migration logic if renaming/removing columns"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:48
+msgid "Test the upgrade and downgrade paths"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:52
+msgid "Manual Workflow (Alternative)"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:54
+msgid "If you prefer using the Alembic CLI directly:"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:63
+#: ../../source/how-to-migrate-from-openfl.rst:566
+#: ../../source/how-to-upgrade-to-flower-1.13.rst:471
+#, fuzzy
+msgid "Important"
+msgstr "重要变更："
+
+#: ../../source/contributor-how-to-migrate-database.rst:65
+msgid ""
+"The manual workflow creates a ``state.db`` file that should not be "
+"committed to git."
+msgstr ""
 
 #: ../../source/contributor-how-to-release-flower.rst:3
 msgid "Release Flower"
@@ -2997,7 +3110,6 @@ msgstr "将 ``pyproject.toml`` 中的次要版本增加一个。"
 #: ../../source/docker/tutorial-quickstart-docker.rst:326
 #: ../../source/how-to-authenticate-accounts.rst:96
 #: ../../source/how-to-enable-tls-connections.rst:127
-#: ../../source/how-to-manage-flower-federations.rst:69
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:200
 #, fuzzy
 msgid "config.toml"
@@ -10989,84 +11101,85 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-manage-flower-federations.rst:25
+msgid ""
+"Federations can be addressed by their unique identifier, which has the "
+"form ``@<account-name>/<federation-name>`` being ``<account-name>`` the "
+"name of the account that created the federation and ``<federation-name>``"
+" the name given to the federation at creation time."
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:30
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:13
 msgid "In this how-to guide, you will:"
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:27
+#: ../../source/how-to-manage-flower-federations.rst:32
 msgid "Learn how to see the federations you are part of."
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:28
+#: ../../source/how-to-manage-flower-federations.rst:33
 msgid "Learn how to display information about a specific federation."
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:32
+#: ../../source/how-to-manage-flower-federations.rst:37
 #, fuzzy
 msgid "List Federations"
 msgstr "运行模拟"
 
-#: ../../source/how-to-manage-flower-federations.rst:34
+#: ../../source/how-to-manage-flower-federations.rst:39
 msgid ""
 "With the |flower_cli_federation_link|_, you can easily inspect the "
 "federations your Flower account is part of:"
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:41
+#: ../../source/how-to-manage-flower-federations.rst:46
 msgid ""
 "The above command will display a table with a row for each federation you"
-" are part of. In this case there is only one federation named "
-"``default``:"
+" are part of. In this case there is only one federation named ``default``"
+" under the account ``none``:"
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:55
+#: ../../source/how-to-manage-flower-federations.rst:60
 #, fuzzy
 msgid "Inspect a Federation"
 msgstr "运行模拟"
 
-#: ../../source/how-to-manage-flower-federations.rst:57
+#: ../../source/how-to-manage-flower-federations.rst:62
 msgid ""
-"You can inspect a specific federation by providing the name of the "
+"You can inspect a specific federation by providing the identifier of the "
 "federation to the ``flwr federation list`` command. With this command, "
 "you will be able to see the following information about a federation:"
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:61
+#: ../../source/how-to-manage-flower-federations.rst:66
 #, fuzzy
 msgid "The members of the federation."
 msgstr "flower-superlink"
 
-#: ../../source/how-to-manage-flower-federations.rst:62
+#: ../../source/how-to-manage-flower-federations.rst:67
 #, fuzzy
 msgid "The SuperNodes registered with the federation and their status."
 msgstr "flower-superlink"
 
-#: ../../source/how-to-manage-flower-federations.rst:63
+#: ../../source/how-to-manage-flower-federations.rst:68
 #, fuzzy
 msgid "The runs executed via the federation."
 msgstr "flower-superlink"
 
-#: ../../source/how-to-manage-flower-federations.rst:65
+#: ../../source/how-to-manage-flower-federations.rst:70
 msgid ""
 "The ``flwr federation list --federation <federation>`` command requires "
-"the name of the federation to inspect as an argument. This can be "
-"specified as part of your Flower Configuration TOML file. For example:"
+"the identifier of the federation to inspect as an argument:"
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:78
-msgid ""
-"In this example, the federation named ``default`` is specified. You can "
-"now inspect it by running:"
-msgstr ""
-
-#: ../../source/how-to-manage-flower-federations.rst:85
+#: ../../source/how-to-manage-flower-federations.rst:77
 msgid ""
 "Then, assuming that there are two ``SuperNodes`` connected and that three"
 " runs have been submitted through the federation, a representative output"
 " would be similar to:"
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:116
+#: ../../source/how-to-manage-flower-federations.rst:108
 msgid ""
 "Note how the ``SuperNodes`` table shows a subset of the information "
 "available via the command ``flwr supernode list`` (Learn more about this "
@@ -11342,12 +11455,6 @@ msgid ""
 "<https://docs.google.com/forms/d/e/1FAIpQLScprGGX_jFRoEUv4HbJkkhkg6O7e5eCiq7uP95_0xK5Qnt1gA/viewform>`_"
 " to get in touch with our team!"
 msgstr ""
-
-#: ../../source/how-to-migrate-from-openfl.rst:566
-#: ../../source/how-to-upgrade-to-flower-1.13.rst:471
-#, fuzzy
-msgid "Important"
-msgstr "重要变更："
 
 #: ../../source/how-to-migrate-from-openfl.rst:568
 #, fuzzy
@@ -12167,11 +12274,6 @@ msgid ""
 "is deployed must have a Skupper site to join the application network and "
 "route outgoing requests via the interconnect."
 msgstr ""
-
-#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:41
-#, fuzzy
-msgid "Pre-requisites"
-msgstr "先决条件"
 
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:43
 msgid ""
@@ -65349,5 +65451,37 @@ msgstr ""
 #~ "List the details of one provided "
 #~ "run ID or all runs in a "
 #~ "Flower federation."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The above command will display a "
+#~ "table with a row for each "
+#~ "federation you are part of. In "
+#~ "this case there is only one "
+#~ "federation named ``default``:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You can inspect a specific federation"
+#~ " by providing the name of the "
+#~ "federation to the ``flwr federation "
+#~ "list`` command. With this command, you"
+#~ " will be able to see the "
+#~ "following information about a federation:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ``flwr federation list --federation "
+#~ "<federation>`` command requires the name "
+#~ "of the federation to inspect as an"
+#~ " argument. This can be specified as"
+#~ " part of your Flower Configuration "
+#~ "TOML file. For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this example, the federation named"
+#~ " ``default`` is specified. You can "
+#~ "now inspect it by running:"
 #~ msgstr ""
 

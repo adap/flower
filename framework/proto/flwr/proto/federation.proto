@@ -26,7 +26,6 @@ message Account {
 
 message Federation {
   string name = 1;
-  repeated string member_aids = 2;
   repeated Account accounts = 3;
   repeated NodeInfo nodes = 4;
   repeated Run runs = 5;

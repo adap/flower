@@ -17,7 +17,7 @@
 
 from __future__ import annotations
 
-from flwr.common.constant import FLWR_DIR
+from flwr.common.constant import FLWR_DIR, NOOP_ACCOUNT_NAME
 
 # Top-level key in YAML config for exec plugin settings
 EXEC_PLUGIN_SECTION = "exec_plugin"
@@ -58,7 +58,7 @@ MIME_MAP = {
 }
 
 # Constants for federations
-NOOP_FEDERATION = "default"
+NOOP_FEDERATION = f"@{NOOP_ACCOUNT_NAME}/default"
 
 # Constants for exit handling
 FORCE_EXIT_TIMEOUT_SECONDS = 5  # Used in `flwr_exit` function
