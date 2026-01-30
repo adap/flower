@@ -1,6 +1,6 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=2.2.1"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "fedwav2vec2" # <----- Ensure it matches the name of your baseline directory containing all the source code
@@ -22,8 +22,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: Implementation :: CPython",
@@ -46,7 +44,7 @@ torch = { url = "https://download.pytorch.org/whl/cu118/torch-2.6.0%2Bcu118-cp31
 torchaudio = { url = "https://download.pytorch.org/whl/cu118/torchaudio-2.6.0%2Bcu118-cp310-cp310-linux_x86_64.whl#sha256=c5f0ff8434766f2950d77261b119163dbe8a02bc5c18482d9c0d76c9b18dfd44" }
 transformers = "4.53.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.13.2"
 black = "==24.2.0"
 docformatter = "==1.7.5"
