@@ -342,8 +342,8 @@ html_sidebars = {
         "sidebar/search.html",
         "sidebar/scroll-start.html",
         "sidebar/navigation.html",
-        "sidebar/scroll-end.html",
         "sidebar/versioning.html",
+        "sidebar/scroll-end.html",
         "sidebar/lang.html",
     ]
 }

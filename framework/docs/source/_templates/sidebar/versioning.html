@@ -1,62 +1,5 @@
 {% if versions %}
 
-<style>
-input[type='checkbox'] {
-  display: none;
-}
-
-.lbl-toggle {
-  display: block;
-
-  padding: 1rem;
-
-  cursor: pointer;
-
-  border-radius: 7px;
-  transition: all 0.25s ease-out;
-}
-
-.lbl-toggle::before {
-  content: ' ';
-  display: inline-block;
-
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 5px solid currentColor;
-
-  vertical-align: middle;
-  margin-right: .7rem;
-  transform: translateY(-2px);
-
-  transition: transform .2s ease-out;
-}
-
-.collapsible-content {
-  max-height: 0px;
-  padding-top: 0px;
-  overflow: hidden;
-
-  transition: max-height .25s ease-in-out;
-}
-
-.toggle:checked + .lbl-toggle + .collapsible-content {
-  max-height: 100vh;
-}
-
-.toggle:checked + .lbl-toggle::before {
-  transform: rotate(90deg) translateX(-3px);
-}
-
-.toggle:checked + .lbl-toggle {
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.content-inner {
-  padding-bottom: 1rem;
-}
-</style>
-
 <script>
 function checkPageExistence(versionName, current_language, pagename) {
   var newUrl = `https://flower.ai/docs/framework/${versionName}/${current_language}/${pagename}.html`;
@@ -77,23 +20,33 @@ function checkPageExistence(versionName, current_language, pagename) {
 }
 </script>
 
-<div class="wrap-collabsible">
-  <input id="collapsible" class="toggle" type="checkbox">
-  <label for="collapsible" class="lbl-toggle">Versions</label>
-  <div class="collapsible-content">
-    <div class="content-inner">
+<style>
+.sidebar-tree-versions {
+  margin-top: 0;
+}
+</style>
+
+<div class="sidebar-tree sidebar-tree-versions">
+  <p class="caption" role="heading"><span class="caption-text">More</span></p>
+  <ul>
+    <li class="toctree-l1 has-children">
+      <a class="reference">Versions</a>
+      <input class="toctree-checkbox" id="toctree-checkbox-versions" name="toctree-checkbox-versions" role="switch" type="checkbox"/>
+      <label for="toctree-checkbox-versions">
+        <div class="visually-hidden">Toggle navigation of Versions</div>
+        <i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i>
+      </label>
       <ul>
         {%- for item in versions %}
-        <li>
-          <a href="javascript:void(0);"
-             onclick="checkPageExistence('{{ item.name }}', '{{ current_language }}', '{{ pagename }}')"
-             style="text-decoration:none">
+        <li class="toctree-l2">
+          <a class="reference" href="javascript:void(0);"
+             onclick="checkPageExistence('{{ item.name }}', '{{ current_language }}', '{{ pagename }}')">
              {{ item.name }}
           </a>
         </li>
         {%- endfor %}
       </ul>
-    </div>
-  </div>
+    </li>
+  </ul>
 </div>
 {% endif %}
