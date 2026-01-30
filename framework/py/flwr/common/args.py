@@ -95,7 +95,7 @@ def try_obtain_root_certificates(
             log(ERROR, "Path argument `--root-certificates` does not point to a file.")
             sys.exit(1)
         else:
-            root_certificates = Path(root_cert_path).read_bytes()
+            root_certificates = Path(root_cert_path).expanduser().read_bytes()
         log(
             DEBUG,
             "Starting secure HTTPS channel to %s "
@@ -129,9 +129,9 @@ def try_obtain_server_certificates(
         if not isfile(args.ssl_keyfile):
             sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
         certificates = (
-            Path(args.ssl_ca_certfile).read_bytes(),  # CA certificate
-            Path(args.ssl_certfile).read_bytes(),  # server certificate
-            Path(args.ssl_keyfile).read_bytes(),  # server private key
+            Path(args.ssl_ca_certfile).expanduser().read_bytes(),  # CA certificate
+            Path(args.ssl_certfile).expanduser().read_bytes(),  # server certificate
+            Path(args.ssl_keyfile).expanduser().read_bytes(),  # server private key
         )
         return certificates
     if args.ssl_certfile or args.ssl_keyfile or args.ssl_ca_certfile:

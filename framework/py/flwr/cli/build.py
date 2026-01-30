@@ -106,7 +106,7 @@ def build(
     if app is None:
         app = Path.cwd()
 
-    app = app.resolve()
+    app = app.expanduser().resolve()
     if not app.is_dir():
         raise click.ClickException(
             f"The path {app} is not a valid path to a Flower app."

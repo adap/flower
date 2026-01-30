@@ -42,7 +42,7 @@ T_dict = TypeVar("T_dict", bound=dict[str, Any])  # pylint: disable=invalid-name
 
 def get_flwr_dir(provided_path: str | None = None) -> Path:
     """Return the Flower home directory based on env variables."""
-    if provided_path is None or not Path(provided_path).is_dir():
+    if provided_path is None or not Path(provided_path).expanduser().is_dir():
         return Path(
             os.getenv(
                 FLWR_HOME,
@@ -213,7 +213,7 @@ def parse_config_args(config: list[str] | None, flatten: bool = True) -> dict[st
 
     # Handle if .toml file is passed
     if len(config) == 1 and config[0].endswith(".toml"):
-        with Path(config[0]).open("rb") as config_file:
+        with Path(config[0]).expanduser().open("rb") as config_file:
             overrides = flatten_dict(tomli.load(config_file))
         return overrides
 

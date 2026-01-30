@@ -63,7 +63,7 @@ def install(
     if source is None:
         source = Path(typer.prompt("Enter the source FAB file"))
 
-    source = source.resolve()
+    source = source.expanduser().resolve()
     if not source.exists() or not source.is_file():
         raise click.ClickException(
             f"The source {source} does not exist or is not a file."
