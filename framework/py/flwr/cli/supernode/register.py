@@ -66,8 +66,7 @@ def register(  # pylint: disable=R0914
 ) -> None:
     """Add a SuperNode to the federation."""
     # Load public key
-    public_key_path = Path(public_key)
-    public_key_bytes = try_load_public_key(public_key_path)
+    public_key_bytes = try_load_public_key(public_key.expanduser())
 
     with cli_output_handler(output_format=output_format) as is_json:
         # Migrate legacy usage if any

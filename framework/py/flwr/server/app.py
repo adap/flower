@@ -485,7 +485,7 @@ def _load_control_auth_plugins(
         }
     # Load YAML file
     else:
-        with Path(config_path).open("r", encoding="utf-8") as file:
+        with Path(config_path).expanduser().open("r", encoding="utf-8") as file:
             config = yaml.safe_load(file)
 
     def _load_plugin(
