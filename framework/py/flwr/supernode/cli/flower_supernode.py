@@ -233,7 +233,7 @@ def _try_setup_client_authentication(
 
     try:
         ssh_private_key = load_ssh_private_key(
-            Path(args.auth_supernode_private_key).read_bytes(),
+            Path(args.auth_supernode_private_key).expanduser().read_bytes(),
             None,
         )
         if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
@@ -260,6 +260,7 @@ def _try_obtain_trusted_entities(
     """Validate and return the trust entities."""
     if not trusted_entities_path:
         return None
+    trusted_entities_path = trusted_entities_path.expanduser()
     if not trusted_entities_path.is_file():
         flwr_exit(
             ExitCode.SUPERNODE_INVALID_TRUSTED_ENTITIES,

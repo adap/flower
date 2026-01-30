@@ -136,7 +136,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     confirm_message_received : Callable[[str], None]
     """
     if isinstance(root_certificates, str):
-        root_certificates = Path(root_certificates).read_bytes()
+        root_certificates = Path(root_certificates).expanduser().read_bytes()
 
     # Automatic node auth: generate keys if user didn't provide any
     self_registered = False
