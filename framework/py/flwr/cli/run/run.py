@@ -166,7 +166,7 @@ def run(
 def _run_with_control_api(
     app: Path,
     config: dict[str, Any],
-    federation: str,
+    federation: str | None,
     superlink_connection: SuperLinkConnection,
     config_overrides: list[str] | None,
     stream: bool,
