@@ -129,8 +129,8 @@ def run(
             config, warnings = load_and_validate(app / FAB_CONFIG_FILE)
             if warnings:
                 typer.secho(
-                    "Missing recommended fields in Flower App configuration "
-                    f"({app}):\n" + "\n".join([f"- {line}" for line in warnings]),
+                    f"Flower App configuration warnings in '{app / FAB_CONFIG_FILE}':\n"
+                    + "\n".join([f"- {line}" for line in warnings]),
                     fg=typer.colors.YELLOW,
                     bold=True,
                 )
