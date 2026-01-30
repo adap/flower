@@ -145,7 +145,8 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
 
     def on_exit() -> None:
         # Set Grpc max retries to 1 to avoid blocking on exit
-        grid._retry_invoker.max_tries = 1
+        if grid:
+            grid._retry_invoker.max_tries = 1
 
         # Stop heartbeat sender
         if heartbeat_sender and heartbeat_sender.is_running:
