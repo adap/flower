@@ -70,6 +70,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "tar": ">=7.5.7",
     "@huggingface/transformers": "^3.8.1",
     "@mlc-ai/web-llm": "^0.2.80",
     "get-random-values": "^3.0.0"
