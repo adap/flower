@@ -71,7 +71,7 @@ def run(
         str | None,
         typer.Option(
             "--federation",
-            help="The federation to join; must be in the "
+            help="The federation to submit the run to; must be in the "
             "format `@<account>/<federation>`.",
         ),
     ] = None,
