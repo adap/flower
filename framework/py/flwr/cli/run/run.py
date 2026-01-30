@@ -125,12 +125,12 @@ def run(
 
         # Validate TOML configuration for local app
         else:
+            app = app.expanduser().resolve()  # Resolve path to absolute
             config, warnings = load_and_validate(app / FAB_CONFIG_FILE)
             if warnings:
                 typer.secho(
                     "Missing recommended fields in Flower App configuration "
-                    "(pyproject.toml):\n"
-                    + "\n".join([f"- {line}" for line in warnings]),
+                    f"({app}):\n" + "\n".join([f"- {line}" for line in warnings]),
                     fg=typer.colors.YELLOW,
                     bold=True,
                 )

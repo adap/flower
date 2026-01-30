@@ -125,7 +125,7 @@ def _migrate_pyproject_toml_to_flower_config(
             if cert_path := toml_fed_config.get("root-certificates"):
                 if not Path(cert_path).is_absolute():
                     toml_fed_config["root-certificates"] = str(
-                        (app / cert_path).resolve()
+                        (app / cert_path).expanduser().resolve()
                     )
             # Parse and write SuperLink connection
             conn = parse_superlink_connection(toml_fed_config, name)
@@ -223,7 +223,7 @@ def migrate(
     # Determine app path for migration
     arg1 = positional_arg_1
     app = Path(arg1) if arg1 else Path(".")
-    app = app.resolve()
+    app = app.expanduser().resolve()
 
     # Check if migration is applicable and if legacy usage is detected
     is_migratable, reason = _is_migratable(app)
