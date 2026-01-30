@@ -34,6 +34,7 @@ from flwr.cli.flower_config import (
 )
 from flwr.cli.typing import SuperLinkConnection, SuperLinkSimulationOptions
 from flwr.common.config import (
+    flatten_dict,
     get_metadata_from_config,
     parse_config_args,
     user_config_to_configrecord,
@@ -183,7 +184,9 @@ def _run_with_control_api(
         # Construct a `ConfigRecord` out of a flattened `UserConfig`
         options = {}
         if superlink_connection.options:
-            options = _serialize_simulation_options(superlink_connection.options)
+            options = flatten_dict(
+                _serialize_simulation_options(superlink_connection.options)
+            )
 
         c_record = user_config_to_configrecord(options)
 
@@ -236,7 +239,7 @@ def _run_without_control_api(
 ) -> None:
 
     num_supernodes = simulation_options.num_supernodes
-    verbose = False  # bool | None = superlink_connection.options.verbose
+    verbose = simulation_options.verbose or False
 
     command = [
         "flower-simulation",

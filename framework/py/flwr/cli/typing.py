@@ -83,6 +83,7 @@ class SuperLinkSimulationOptions:
 
     num_supernodes: int
     backend: SimulationBackendConfig | None = None
+    verbose: bool | None = None
 
     def __post_init__(self) -> None:
         """Validate simulation options."""
@@ -90,6 +91,8 @@ class SuperLinkSimulationOptions:
             raise ValueError(
                 "Invalid simulation options: num-supernodes must be an integer."
             )
+        if self.verbose is not None and not isinstance(self.verbose, bool):
+            raise ValueError("Invalid simulation options: verbose must be a boolean.")
 
 
 @dataclass

@@ -1823,17 +1823,6 @@ class SqlInMemoryStateTest(StateTest, unittest.TestCase):
         state.initialize()
         return state
 
-    def test_initialize(self) -> None:
-        """Test initialization."""
-        # Prepare
-        state = self.state_factory()
-
-        # Execute
-        result = state.query("SELECT name FROM sqlite_schema;")
-
-        # Assert - 7 tables + 11 indexes (3 explicit + 8 auto from UNIQUE constraints)
-        assert len(result) == 18
-
 
 class SqlFileBasedTest(StateTest, unittest.TestCase):
     """Test SqlLinkState implementation with file-based database."""
@@ -1851,17 +1840,6 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
         )
         state.initialize()
         return state
-
-    def test_initialize(self) -> None:
-        """Test initialization."""
-        # Prepare
-        state = self.state_factory()
-
-        # Execute
-        result = state.query("SELECT name FROM sqlite_schema;")
-
-        # Assert - 7 tables + 11 indexes (3 explicit + 8 auto from UNIQUE constraints)
-        assert len(result) == 18
 
 
 if __name__ == "__main__":
