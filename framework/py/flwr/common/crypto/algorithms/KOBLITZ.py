@@ -1,5 +1,3 @@
-"""Autenticazione reale con curve ellittiche (ECDSA)."""
-
 from __future__ import annotations
 
 import struct
@@ -21,8 +19,6 @@ from . import eccfrog
 
 @dataclass(frozen=True)
 class KoblitzCurve:
-    """Definizione di una curva di Koblitz gestita dall'applicazione."""
-
     name: str
     key_size_bits: int
     curve: object
@@ -33,13 +29,11 @@ class KoblitzCurve:
 
 
 SUPPORTED_CURVES: Dict[str, KoblitzCurve] = {
-    "ECDSA_256": KoblitzCurve("ECDSA_256", 256, ec.SECP256R1()),
-    "ECDSA_521": KoblitzCurve("ECDSA_521", 521, ec.SECP521R1()),
-    "KOBLITZ_112": KoblitzCurve("KOBLITZ_112", 163, ec.SECT163K1()),
+    "KOBLITZ_112": KoblitzCurve("KOBLITZ_163", 163, ec.SECT163K1()), ##la libreria non supporta 112
     "KOBLITZ_256": KoblitzCurve("KOBLITZ_256", 256, ec.SECP256K1()),
     "KOBLITZ_512": KoblitzCurve("KOBLITZ_512", 571, ec.SECT571K1()),
-    "CURVE25519": KoblitzCurve("CURVE25519", 256, ed25519.Ed25519PrivateKey),
-    "CURVE448": KoblitzCurve("CURVE448", 448, ed448.Ed448PrivateKey),
+    "ED25519": KoblitzCurve("ED25519", 256, ed25519.Ed25519PrivateKey),
+    "ED448": KoblitzCurve("ED448", 448, ed448.Ed448PrivateKey), ##EdDSA su Curve448.
     "ECCFROG522PP": KoblitzCurve("ECCFROG522PP", 521, "ECCFROG522PP"),
 }
 
@@ -123,8 +117,6 @@ def _unpack_signature(payload: bytes) -> tuple[bytes, bytes, bytes | None]:
 
 
 def authenticate(data: bytes, curve_name: str, ecc_privkey: object) -> bytes:
-    """Autentica i dati usando firme reali."""
-
     curve = _get_curve(curve_name)
     include_public_key = ecc_privkey is None
     if curve.name == "ECCFROG522PP":
@@ -170,8 +162,6 @@ def authenticate(data: bytes, curve_name: str, ecc_privkey: object) -> bytes:
 
 
 def verify(authenticated_data: bytes, curve_name: str, ecc_pubkey: object) -> bytes:
-    """Verifica l'autenticazione creata da :func:`authenticate`."""
-
     curve = _get_curve(curve_name)
     data, signature, embedded_public_key = _unpack_signature(authenticated_data)
     if curve.name == "ECCFROG522PP":
