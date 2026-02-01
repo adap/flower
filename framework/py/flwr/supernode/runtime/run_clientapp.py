@@ -250,10 +250,10 @@ def push_appoutputs(
             )
 
         # Push Context
-        res: PushAppOutputsResponse = stub.PushClientAppOutputs(
+        res: PushAppOutputsResponse = stub.PushAppOutputs(
             PushAppOutputsRequest(token=token, context=proto_context)
         )
         return res
     except grpc.RpcError as e:
-        log(ERROR, "[PushClientAppOutputs] gRPC error occurred: %s", str(e))
+        log(ERROR, "[PushAppOutputs] gRPC error occurred: %s", str(e))
         raise e

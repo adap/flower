@@ -133,9 +133,9 @@ class TestClientAppIoServicer(unittest.TestCase):
             run_config={"runconfig1": 6.1},
         )
 
-        # Prepare: Mock PushClientAppOutputs RPC call
+        # Prepare: Mock PushAppOutputs RPC call
         mock_response = PushAppOutputsResponse()
-        self.mock_stub.PushClientAppOutputs.return_value = mock_response
+        self.mock_stub.PushAppOutputs.return_value = mock_response
 
         # Prepare: Mock PushMessage RPC call
         object_tree = get_object_tree(message)
@@ -161,7 +161,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         )
 
         # Assert
-        self.mock_stub.PushClientAppOutputs.assert_called_once()
+        self.mock_stub.PushAppOutputs.assert_called_once()
         self.mock_stub.PushMessage.assert_called_once()
         self.assertSetEqual(pushed_obj_ids, set(all_obj_ids))
 
