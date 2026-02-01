@@ -47,10 +47,7 @@ from flwr.proto.message_pb2 import (  # pylint:disable=E0611
     PushObjectResponse,
 )
 from flwr.proto.run_pb2 import Run as ProtoRun  # pylint:disable=E0611
-from flwr.supernode.runtime.run_clientapp import (
-    pull_appinputs,
-    push_appoutputs,
-)
+from flwr.supernode.runtime.run_clientapp import pull_appinputs, push_appoutputs
 
 from .clientappio_servicer import ClientAppIoServicer
 
