@@ -24,6 +24,10 @@ import "flwr/proto/appio.proto";
 
 service ClientAppIo {
 
+  /////////////////////////////////////////////////////////////////////////////
+  // General *AppIo endpoints
+  /////////////////////////////////////////////////////////////////////////////
+
   // Get run IDs with pending messages
   rpc ListAppsToLaunch(ListAppsToLaunchRequest)
       returns (ListAppsToLaunchResponse) {}
@@ -33,20 +37,6 @@ service ClientAppIo {
 
   // Get run details
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
-
-  // Pull client app inputs
-  rpc PullClientAppInputs(PullAppInputsRequest)
-      returns (PullAppInputsResponse) {}
-
-  // Push client app outputs
-  rpc PushClientAppOutputs(PushAppOutputsRequest)
-      returns (PushAppOutputsResponse) {}
-
-  // Push Message
-  rpc PushMessage(PushAppMessagesRequest) returns (PushAppMessagesResponse) {}
-
-  // Pull Message
-  rpc PullMessage(PullAppMessagesRequest) returns (PullAppMessagesResponse) {}
 
   // App heartbeat
   rpc SendAppHeartbeat(SendAppHeartbeatRequest)
@@ -61,4 +51,22 @@ service ClientAppIo {
   // Confirm Message Received
   rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
       returns (ConfirmMessageReceivedResponse) {}
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Specific ClientAppIo endpoints
+  /////////////////////////////////////////////////////////////////////////////
+
+  // Pull client app inputs
+  rpc PullClientAppInputs(PullAppInputsRequest)
+      returns (PullAppInputsResponse) {}
+
+  // Push client app outputs
+  rpc PushClientAppOutputs(PushAppOutputsRequest)
+      returns (PushAppOutputsResponse) {}
+
+  // Push Message
+  rpc PushMessage(PushAppMessagesRequest) returns (PushAppMessagesResponse) {}
+
+  // Pull Message
+  rpc PullMessage(PullAppMessagesRequest) returns (PullAppMessagesResponse) {}
 }

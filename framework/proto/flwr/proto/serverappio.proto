@@ -27,6 +27,10 @@ import "flwr/proto/appio.proto";
 
 service ServerAppIo {
 
+  /////////////////////////////////////////////////////////////////////////////
+  // General *AppIo endpoints
+  /////////////////////////////////////////////////////////////////////////////
+
   // List runs to launch
   rpc ListAppsToLaunch(ListAppsToLaunchRequest)
       returns (ListAppsToLaunchResponse) {}
@@ -34,36 +38,8 @@ service ServerAppIo {
   // Request token for a run
   rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
 
-  // Return a set of nodes
-  rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
-
-  // Create one or more messages
-  rpc PushMessages(PushAppMessagesRequest) returns (PushAppMessagesResponse) {}
-
-  // Get message results
-  rpc PullMessages(PullAppMessagesRequest) returns (PullAppMessagesResponse) {}
-
   // Get run details
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
-
-  // Get FAB
-  rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
-
-  // Pull ServerApp inputs
-  rpc PullAppInputs(PullAppInputsRequest) returns (PullAppInputsResponse) {}
-
-  // Push ServerApp outputs
-  rpc PushAppOutputs(PushAppOutputsRequest) returns (PushAppOutputsResponse) {}
-
-  // Update the status of a given run
-  rpc UpdateRunStatus(UpdateRunStatusRequest)
-      returns (UpdateRunStatusResponse) {}
-
-  // Get the status of a given run
-  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
-
-  // Push ServerApp logs
-  rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
 
   // App heartbeat
   rpc SendAppHeartbeat(SendAppHeartbeatRequest)
@@ -78,6 +54,38 @@ service ServerAppIo {
   // Confirm Message Received
   rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
       returns (ConfirmMessageReceivedResponse) {}
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Specific ServerAppIo endpoints
+  /////////////////////////////////////////////////////////////////////////////
+
+  // Pull ServerApp inputs
+  rpc PullAppInputs(PullAppInputsRequest) returns (PullAppInputsResponse) {}
+
+  // Push ServerApp outputs
+  rpc PushAppOutputs(PushAppOutputsRequest) returns (PushAppOutputsResponse) {}
+
+  // Create one or more messages
+  rpc PushMessages(PushAppMessagesRequest) returns (PushAppMessagesResponse) {}
+
+  // Get message results
+  rpc PullMessages(PullAppMessagesRequest) returns (PullAppMessagesResponse) {}
+
+  // Return a set of nodes
+  rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
+
+  // Get FAB
+  rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
+
+  // Update the status of a given run
+  rpc UpdateRunStatus(UpdateRunStatusRequest)
+      returns (UpdateRunStatusResponse) {}
+
+  // Get the status of a given run
+  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
+
+  // Push ServerApp logs
+  rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
 }
 
 // GetNodes messages
