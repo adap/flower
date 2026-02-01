@@ -129,25 +129,25 @@ class SimulationIoServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def PullAppInputs(self, request, context):
-        """///////////////////////////////////////////////////////////////////////////
-        Specific endpoints shared by ServerAppIo and SimulationIo
-        ///////////////////////////////////////////////////////////////////////////
-
-        Pull Simulation inputs
+        """Pull app inputs
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def PushAppOutputs(self, request, context):
-        """Push Simulation outputs
+        """Push app outputs
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetRunStatus(self, request, context):
-        """Get Run Status
+        """///////////////////////////////////////////////////////////////////////////
+        Specific endpoints shared by ServerAppIo and SimulationIo
+        ///////////////////////////////////////////////////////////////////////////
+
+        Get Run Status
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
