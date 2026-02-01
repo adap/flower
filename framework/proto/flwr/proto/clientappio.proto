@@ -24,6 +24,10 @@ import "flwr/proto/appio.proto";
 
 service ClientAppIo {
 
+  /////////////////////////////////////////////////////////////////////////////
+  // General *AppIo endpoints for SuperExec processes
+  /////////////////////////////////////////////////////////////////////////////
+
   // Get run IDs with pending messages
   rpc ListAppsToLaunch(ListAppsToLaunchRequest)
       returns (ListAppsToLaunchResponse) {}
@@ -31,8 +35,34 @@ service ClientAppIo {
   // Request token
   rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
 
+  /////////////////////////////////////////////////////////////////////////////
+  // General *AppIo endpoints for App Executor processes
+  /////////////////////////////////////////////////////////////////////////////
+
   // Get run details
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
+
+  // App heartbeat
+  rpc SendAppHeartbeat(SendAppHeartbeatRequest)
+      returns (SendAppHeartbeatResponse) {}
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Specific endpoints shared by ServerAppIo and ClientAppIo
+  /////////////////////////////////////////////////////////////////////////////
+
+  // Push Object
+  rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
+
+  // Pull Object
+  rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
+
+  // Confirm Message Received
+  rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
+      returns (ConfirmMessageReceivedResponse) {}
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Specific endpoints for ClientAppIo
+  /////////////////////////////////////////////////////////////////////////////
 
   // Pull client app inputs
   rpc PullClientAppInputs(PullAppInputsRequest)
@@ -47,18 +77,4 @@ service ClientAppIo {
 
   // Pull Message
   rpc PullMessage(PullAppMessagesRequest) returns (PullAppMessagesResponse) {}
-
-  // App heartbeat
-  rpc SendAppHeartbeat(SendAppHeartbeatRequest)
-      returns (SendAppHeartbeatResponse) {}
-
-  // Push Object
-  rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
-
-  // Pull Object
-  rpc PullObject(PullObjectRequest) returns (PullObjectResponse) {}
-
-  // Confirm Message Received
-  rpc ConfirmMessageReceived(ConfirmMessageReceivedRequest)
-      returns (ConfirmMessageReceivedResponse) {}
 }
