@@ -17,13 +17,16 @@
 
 from __future__ import annotations
 
-from flwr.common.constant import FLWR_DIR
+from flwr.common.constant import FLWR_DIR, NOOP_ACCOUNT_NAME
 
 # Top-level key in YAML config for exec plugin settings
 EXEC_PLUGIN_SECTION = "exec_plugin"
 
 # Flower in-memory Python-based database name
 FLWR_IN_MEMORY_DB_NAME = ":flwr-in-memory:"
+
+# Flower in-memory SQLite database URL
+FLWR_IN_MEMORY_SQLITE_DB_URL = "sqlite:///:memory:"
 
 # Constants for Hub
 APP_ID_PATTERN = r"^@[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
@@ -55,7 +58,7 @@ MIME_MAP = {
 }
 
 # Constants for federations
-NOOP_FEDERATION = "default"
+NOOP_FEDERATION = f"@{NOOP_ACCOUNT_NAME}/default"
 
 # Constants for exit handling
 FORCE_EXIT_TIMEOUT_SECONDS = 5  # Used in `flwr_exit` function

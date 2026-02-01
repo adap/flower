@@ -116,17 +116,7 @@ def run_simulation_from_cli() -> None:
         sys.exit("Simulation Engine cannot start.")
 
     # Load pyproject.toml
-    config, errors, warnings = load_and_validate(
-        app_path / "pyproject.toml", check_module=False
-    )
-    if errors:
-        raise ValueError(errors)
-
-    if warnings:
-        log(WARNING, warnings)
-
-    if config is None:
-        raise ValueError("Config extracted from FAB's pyproject.toml is not valid")
+    config, _ = load_and_validate(app_path / "pyproject.toml", check_module=False)
 
     # Get ClientApp and SeverApp components
     app_components = config["tool"]["flwr"]["app"]["components"]

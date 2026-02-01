@@ -15,10 +15,8 @@
 """Flower command line interface `federation list` command."""
 
 
-import io
 from typing import Annotated, Any
 
-import click
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -28,7 +26,6 @@ from flwr.cli.config_migration import migrate
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.cli.ls import _get_status_style
 from flwr.common.constant import NOOP_ACCOUNT_NAME, CliOutputFormat
-from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import run_from_proto
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListFederationsRequest,
@@ -42,7 +39,12 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.utils import humanize_duration
 
 from ..run_utils import RunRow, format_runs
-from ..utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
+from ..utils import (
+    cli_output_handler,
+    flwr_cli_grpc_exc_handler,
+    init_channel_from_connection,
+    print_json_to_stdout,
+)
 
 
 def ls(  # pylint: disable=R0914, R0913, R0917, R0912
@@ -68,21 +70,15 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
         ),
     ] = None,
 ) -> None:
-    """List available federations."""
-    suppress_output = output_format == CliOutputFormat.JSON
-    captured_output = io.StringIO()
+    """List available federations or details of a specific federation (alias: ls)."""
+    with cli_output_handler(output_format=output_format) as is_json:
+        # Migrate legacy usage if any
+        migrate(superlink, args=ctx.args)
 
-    if suppress_output:
-        redirect_output(captured_output)
+        # Read superlink connection configuration
+        superlink_connection = read_superlink_connection(superlink)
+        channel = None
 
-    # Migrate legacy usage if any
-    migrate(superlink, args=ctx.args)
-
-    # Read superlink connection configuration
-    superlink_connection = read_superlink_connection(superlink)
-    channel = None
-
-    try:
         try:
             channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)
@@ -92,10 +88,9 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
                 typer.echo(f"📄 Showing '{federation}' federation ...")
                 members, nodes, runs = _show_federation(stub, federation)
 
-                restore_output()
-                if output_format == CliOutputFormat.JSON:
-                    Console().print_json(
-                        data=_to_json(members=members, nodes=nodes, runs=runs)
+                if is_json:
+                    print_json_to_stdout(
+                        _to_json(members=members, nodes=nodes, runs=runs)
                     )
                 else:
                     Console().print(_to_members_table(members))
@@ -105,25 +100,14 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
                 # List federations
                 typer.echo("📄 Listing federations...")
                 federations = _list_federations(stub)
-                restore_output()
-                if output_format == CliOutputFormat.JSON:
-                    Console().print_json(data=_to_json(federations=federations))
+
+                if is_json:
+                    print_json_to_stdout(_to_json(federations=federations))
                 else:
                     Console().print(_to_table(federations))
         finally:
             if channel:
                 channel.close()
-    except Exception as err:  # pylint: disable=broad-except
-        if suppress_output:
-            restore_output()
-            e_message = captured_output.getvalue()
-            print_json_error(e_message, err)
-        else:
-            raise click.ClickException(str(err)) from None
-    finally:
-        if suppress_output:
-            restore_output()
-        captured_output.close()
 
 
 def _list_federations(stub: ControlStub) -> list[Federation]:
@@ -206,7 +190,7 @@ def _show_federation(
     Returns
     -------
     tuple[list[str], list[NodeInfo], list[RunRow]]
-        A tuple containing (member_account_ids, nodes, runs).
+        A tuple containing (account_names, nodes, runs).
     """
     with flwr_cli_grpc_exc_handler():
         res: ShowFederationResponse = stub.ShowFederation(
@@ -217,16 +201,20 @@ def _show_federation(
     runs = [run_from_proto(run_proto) for run_proto in fed_proto.runs]
     formatted_runs = format_runs(runs, res.now)
 
-    return list(fed_proto.member_aids), list(fed_proto.nodes), formatted_runs
+    return (
+        [account.name for account in fed_proto.accounts],
+        list(fed_proto.nodes),
+        formatted_runs,
+    )
 
 
-def _to_members_table(member_aids: list[str]) -> Table:
+def _to_members_table(account_names: list[str]) -> Table:
     """Format the provided list of federation members as a rich Table.
 
     Parameters
     ----------
-    member_aids : list[str]
-        List of member account identifiers.
+    account_names : list[str]
+        List of member account names.
 
     Returns
     -------
@@ -236,12 +224,12 @@ def _to_members_table(member_aids: list[str]) -> Table:
     table = Table(title="Federation Members", header_style="bold cyan", show_lines=True)
 
     table.add_column(
-        Text("Account ID", justify="center"), style="bright_black", no_wrap=True
+        Text("Account Name", justify="center"), style="bright_black", no_wrap=True
     )
     table.add_column(Text("Role", justify="center"), style="bright_black", no_wrap=True)
 
-    for member_aid in member_aids:
-        table.add_row(member_aid, "Member")
+    for account_name in account_names:
+        table.add_row(account_name, "Member")
 
     return table
 

@@ -60,12 +60,12 @@ from flwr.common.inflatable_utils import (
     push_object_contents_from_iterable,
 )
 from flwr.common.logger import log
-from flwr.common.retry_invoker import RetryInvoker, _make_simple_grpc_retry_invoker
+from flwr.common.retry_invoker import RetryInvoker, make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
-from flwr.supercore.address import parse_address
+from flwr.supercore.address import parse_address, resolve_bind_address
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
@@ -213,7 +213,10 @@ def start_client_internal(
     # Launch the SuperExec if the isolation mode is `subprocess`
     if isolation == ISOLATION_MODE_SUBPROCESS:
         command = ["flower-superexec", "--insecure"]
-        command += ["--appio-api-address", clientappio_api_address]
+        command += [
+            "--appio-api-address",
+            resolve_bind_address(clientappio_api_address),
+        ]
         command += ["--plugin-type", ExecPluginType.CLIENT_APP]
         command += ["--parent-pid", str(os.getpid())]
         # pylint: disable-next=consider-using-with
@@ -607,7 +610,7 @@ def _make_fleet_connection_retry_invoker(
     connection_error_type: type[Exception] = RpcError,
 ) -> RetryInvoker:
     """Create a retry invoker for fleet connection."""
-    retry_invoker = _make_simple_grpc_retry_invoker()
+    retry_invoker = make_simple_grpc_retry_invoker()
     retry_invoker.recoverable_exceptions = connection_error_type
     if max_retries is not None:
         retry_invoker.max_tries = max_retries + 1

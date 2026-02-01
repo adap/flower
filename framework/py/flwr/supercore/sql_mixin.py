@@ -29,7 +29,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
 from flwr.common.logger import log
-from flwr.supercore.constant import SQLITE_PRAGMAS
+from flwr.supercore.constant import FLWR_IN_MEMORY_SQLITE_DB_URL, SQLITE_PRAGMAS
+from flwr.supercore.state.alembic.utils import run_migrations
 
 _current_session: ContextVar[Session | None] = ContextVar(
     "current_sqlalchemy_session",
@@ -95,7 +96,7 @@ class SqlMixin(ABC):
 
         # Auto-convert file path to SQLAlchemy SQLite URL if needed
         if database_path == ":memory:":
-            self.database_url = "sqlite:///:memory:"
+            self.database_url = FLWR_IN_MEMORY_SQLITE_DB_URL
         elif not database_path.startswith("sqlite://"):
             # Treat as file path, convert to absolute and create SQLite URL
             abs_path = Path(database_path).resolve()
@@ -193,9 +194,14 @@ class SqlMixin(ABC):
         # Create session factory
         self._session_factory = sessionmaker(bind=self._engine)
 
-        # Create tables defined in metadata (idempotent - only creates missing tables)
-        if (metadata := self.get_metadata()) is not None:
+        # Create database
+        metadata: MetaData | None = self.get_metadata()
+        if metadata and self.database_url == FLWR_IN_MEMORY_SQLITE_DB_URL:
+            # In-memory databases: create tables directly from SQLAlchemy metadata
             metadata.create_all(self._engine)
+        else:
+            # File-based databases: use Alembic migrations for schema versioning
+            run_migrations(self._engine)
 
         # Get all table names using inspector
         inspector = inspect(self._engine)

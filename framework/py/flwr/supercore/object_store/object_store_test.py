@@ -18,8 +18,10 @@
 import tempfile
 import unittest
 from abc import abstractmethod
+from typing import cast
 
 from parameterized import parameterized
+from sqlalchemy import Engine, inspect
 
 from flwr.common.inflatable import get_object_id, get_object_tree, iterate_object_tree
 from flwr.common.inflatable_test import CustomDataClass
@@ -377,11 +379,19 @@ class SqlInMemoryObjectStoreTest(ObjectStoreTest):
 
     __test__ = True
 
-    def object_store_factory(self) -> ObjectStore:
+    def object_store_factory(self) -> SqlObjectStore:
         """Return SqlObjectStore."""
         store = SqlObjectStore(":memory:")
         store.initialize()
         return store
+
+    def test_in_memory_does_not_create_alembic_version(self) -> None:
+        """Ensure in-memory DB uses create_all without Alembic versioning."""
+        store = self.object_store_factory()
+        table_names = inspect(
+            cast(Engine, store._engine)  # pylint: disable=W0212
+        ).get_table_names()
+        self.assertNotIn("alembic_version", table_names)
 
 
 class SqlFileBasedObjectStoreTest(ObjectStoreTest):
@@ -399,8 +409,16 @@ class SqlFileBasedObjectStoreTest(ObjectStoreTest):
         super().tearDown()
         self.temp_file.close()
 
-    def object_store_factory(self) -> ObjectStore:
+    def object_store_factory(self) -> SqlObjectStore:
         """Return SqlObjectStore."""
         store = SqlObjectStore(self.temp_file.name)
         store.initialize()
         return store
+
+    def test_file_db_creates_alembic_version(self) -> None:
+        """Ensure file-based DBs run Alembic migrations."""
+        store = self.object_store_factory()
+        table_names = inspect(
+            cast(Engine, store._engine)  # pylint: disable=W0212
+        ).get_table_names()
+        self.assertIn("alembic_version", table_names)

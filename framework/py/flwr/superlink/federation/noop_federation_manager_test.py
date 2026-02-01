@@ -19,8 +19,9 @@ from unittest.mock import Mock
 
 import pytest
 
-from flwr.common.constant import NOOP_FLWR_AID
+from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation, Run, RunStatus
+from flwr.proto.federation_pb2 import Account  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.constant import NOOP_FEDERATION
 
@@ -103,7 +104,8 @@ def test_get_details_with_valid_federation() -> None:
     # Assert
     assert isinstance(result, Federation)
     assert result.name == NOOP_FEDERATION
-    assert result.member_aids == [NOOP_FLWR_AID]
+    assert len(result.accounts) == 1
+    assert result.accounts[0] == Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)
     assert len(result.nodes) == 2
     assert mock_node_1 in result.nodes and mock_node_2 in result.nodes
     assert len(result.runs) == 2
@@ -139,7 +141,8 @@ def test_get_details_with_no_runs() -> None:
 
     # Assert
     assert result.name == NOOP_FEDERATION
-    assert result.member_aids == [NOOP_FLWR_AID]
+    assert len(result.accounts) == 1
+    assert result.accounts[0] == Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)
     assert len(result.nodes) == 0
     assert len(result.runs) == 0
 

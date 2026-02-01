@@ -15,8 +15,6 @@
 """Flower command line interface `supernode register` command."""
 
 
-import io
-import json
 from pathlib import Path
 from typing import Annotated
 
@@ -25,13 +23,11 @@ import typer
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
-from rich.console import Console
 
 from flwr.cli.config_migration import migrate
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.common.constant import CliOutputFormat
 from flwr.common.exit import ExitCode, flwr_exit
-from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     RegisterNodeRequest,
     RegisterNodeResponse,
@@ -39,7 +35,12 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.supercore.primitives.asymmetric import public_key_to_bytes, uses_nist_ec_curve
 
-from ..utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
+from ..utils import (
+    cli_output_handler,
+    flwr_cli_grpc_exc_handler,
+    init_channel_from_connection,
+    print_json_to_stdout,
+)
 
 
 def register(  # pylint: disable=R0914
@@ -64,52 +65,33 @@ def register(  # pylint: disable=R0914
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """Add a SuperNode to the federation."""
-    suppress_output = output_format == CliOutputFormat.JSON
-    captured_output = io.StringIO()
-
     # Load public key
-    public_key_path = Path(public_key)
-    public_key_bytes = try_load_public_key(public_key_path)
+    public_key_bytes = try_load_public_key(public_key.expanduser())
 
-    if suppress_output:
-        redirect_output(captured_output)
+    with cli_output_handler(output_format=output_format) as is_json:
+        # Migrate legacy usage if any
+        migrate(superlink, args=ctx.args)
 
-    # Migrate legacy usage if any
-    migrate(superlink, args=ctx.args)
+        # Read superlink connection configuration
+        superlink_connection = read_superlink_connection(superlink)
+        channel = None
 
-    # Read superlink connection configuration
-    superlink_connection = read_superlink_connection(superlink)
-    channel = None
-
-    try:
         try:
             channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)
 
             _register_node(
-                stub=stub, public_key=public_key_bytes, output_format=output_format
+                stub=stub,
+                public_key=public_key_bytes,
+                is_json=is_json,
             )
 
-        except ValueError as err:
-            raise click.ClickException(str(err)) from err
         finally:
             if channel:
                 channel.close()
 
-    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
-        if suppress_output:
-            restore_output()
-            e_message = captured_output.getvalue()
-            print_json_error(e_message, err)
-        else:
-            raise click.ClickException(str(err)) from None
-    finally:
-        if suppress_output:
-            restore_output()
-        captured_output.close()
 
-
-def _register_node(stub: ControlStub, public_key: bytes, output_format: str) -> None:
+def _register_node(stub: ControlStub, public_key: bytes, is_json: bool) -> None:
     """Register a node."""
     with flwr_cli_grpc_exc_handler():
         response: RegisterNodeResponse = stub.RegisterNode(
@@ -120,15 +102,13 @@ def _register_node(stub: ControlStub, public_key: bytes, output_format: str) -> 
             f"✅ SuperNode {response.node_id} registered successfully.",
             fg=typer.colors.GREEN,
         )
-        if output_format == CliOutputFormat.JSON:
-            run_output = json.dumps(
+        if is_json:
+            print_json_to_stdout(
                 {
                     "success": True,
                     "node-id": response.node_id,
                 }
             )
-            restore_output()
-            Console().print_json(run_output)
     else:
         raise click.ClickException("SuperNode couldn't be registered.")
 

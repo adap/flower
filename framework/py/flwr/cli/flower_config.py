@@ -48,6 +48,7 @@ from flwr.supercore.utils import get_flwr_home
 def _parse_simulation_options(options: dict[str, Any]) -> SuperLinkSimulationOptions:
     """Parse simulation options from a dictionary in a SuperLink connection."""
     num_supernodes = options.get(SuperLinkSimulationOptionsTomlKey.NUM_SUPERNODES)
+    verbose = options.get(SuperLinkSimulationOptionsTomlKey.VERBOSE)
     # Validation handled in SuperLinkSimulationOptions.__post_init__
 
     backend_dict = options.get(SuperLinkSimulationOptionsTomlKey.BACKEND)
@@ -94,6 +95,7 @@ def _parse_simulation_options(options: dict[str, Any]) -> SuperLinkSimulationOpt
     return SuperLinkSimulationOptions(
         num_supernodes=cast(int, num_supernodes),
         backend=simulation_backend,
+        verbose=verbose,
     )
 
 
@@ -104,6 +106,9 @@ def _serialize_simulation_options(
     options_dict: dict[str, Any] = {
         SuperLinkSimulationOptionsTomlKey.NUM_SUPERNODES: options.num_supernodes
     }
+
+    if options.verbose is not None:
+        options_dict[SuperLinkSimulationOptionsTomlKey.VERBOSE] = options.verbose
 
     if options.backend is not None:
         backend = options.backend

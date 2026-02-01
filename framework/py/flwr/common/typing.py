@@ -24,6 +24,7 @@ import numpy as np
 import numpy.typing as npt
 
 from flwr.app.user_config import UserConfig
+from flwr.proto.federation_pb2 import Account  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 
 NDArray = npt.NDArray[Any]
@@ -342,6 +343,6 @@ class Federation:
     """Federation details."""
 
     name: str
-    member_aids: list[str]
+    accounts: list[Account]
     nodes: list[NodeInfo]
     runs: list[Run]

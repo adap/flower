@@ -77,15 +77,15 @@ def review(
     url = f"{PLATFORM_API_URL}/hub/fetch-fab"
     try:
         presigned_url, _ = request_download_link(app_id, app_version, url, "fab_url")
+
+        fab_bytes = _download_fab(presigned_url)
+
+        # Unpack FAB
+        typer.secho("Unpacking FAB... ", fg=typer.colors.BLUE)
+        review_dir = _create_review_dir()
+        review_app_path = install_from_fab(fab_bytes, review_dir)
     except ValueError as e:
         raise click.ClickException(str(e)) from e
-
-    fab_bytes = _download_fab(presigned_url)
-
-    # Unpack FAB
-    typer.secho("Unpacking FAB... ", fg=typer.colors.BLUE)
-    review_dir = _create_review_dir()
-    review_app_path = install_from_fab(fab_bytes, review_dir)
 
     # Extract app version
     version_pattern = re.compile(r"\b(\d+\.\d+\.\d+)\b")
