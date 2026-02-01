@@ -99,7 +99,7 @@ class ClientAppIoServicer(object):
 
     def ListAppsToLaunch(self, request, context):
         """///////////////////////////////////////////////////////////////////////////
-        General *AppIo endpoints
+        General *AppIo endpoints for SuperExec processes
         ///////////////////////////////////////////////////////////////////////////
 
         Get run IDs with pending messages
@@ -116,7 +116,11 @@ class ClientAppIoServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def GetRun(self, request, context):
-        """Get run details
+        """///////////////////////////////////////////////////////////////////////////
+        General *AppIo endpoints for App Executor processes
+        ///////////////////////////////////////////////////////////////////////////
+
+        Get run details
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -130,7 +134,11 @@ class ClientAppIoServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def PushObject(self, request, context):
-        """Push Object
+        """///////////////////////////////////////////////////////////////////////////
+        Specific endpoints shared by ServerAppIo and ClientAppIo
+        ///////////////////////////////////////////////////////////////////////////
+
+        Push Object
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -152,7 +160,7 @@ class ClientAppIoServicer(object):
 
     def PullClientAppInputs(self, request, context):
         """///////////////////////////////////////////////////////////////////////////
-        Specific ClientAppIo endpoints
+        Specific endpoints for ClientAppIo
         ///////////////////////////////////////////////////////////////////////////
 
         Pull client app inputs

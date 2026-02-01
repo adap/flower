@@ -25,7 +25,7 @@ import "flwr/proto/appio.proto";
 service ClientAppIo {
 
   /////////////////////////////////////////////////////////////////////////////
-  // General *AppIo endpoints
+  // General *AppIo endpoints for SuperExec processes
   /////////////////////////////////////////////////////////////////////////////
 
   // Get run IDs with pending messages
@@ -35,12 +35,20 @@ service ClientAppIo {
   // Request token
   rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
 
+  /////////////////////////////////////////////////////////////////////////////
+  // General *AppIo endpoints for App Executor processes
+  /////////////////////////////////////////////////////////////////////////////
+
   // Get run details
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
 
   // App heartbeat
   rpc SendAppHeartbeat(SendAppHeartbeatRequest)
       returns (SendAppHeartbeatResponse) {}
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Specific endpoints shared by ServerAppIo and ClientAppIo
+  /////////////////////////////////////////////////////////////////////////////
 
   // Push Object
   rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
@@ -53,7 +61,7 @@ service ClientAppIo {
       returns (ConfirmMessageReceivedResponse) {}
 
   /////////////////////////////////////////////////////////////////////////////
-  // Specific ClientAppIo endpoints
+  // Specific endpoints for ClientAppIo
   /////////////////////////////////////////////////////////////////////////////
 
   // Pull client app inputs

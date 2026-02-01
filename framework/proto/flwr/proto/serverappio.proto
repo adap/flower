@@ -28,7 +28,7 @@ import "flwr/proto/appio.proto";
 service ServerAppIo {
 
   /////////////////////////////////////////////////////////////////////////////
-  // General *AppIo endpoints
+  // General *AppIo endpoints for SuperExec processes
   /////////////////////////////////////////////////////////////////////////////
 
   // List runs to launch
@@ -38,12 +38,20 @@ service ServerAppIo {
   // Request token for a run
   rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {}
 
+  /////////////////////////////////////////////////////////////////////////////
+  // General *AppIo endpoints for App Executor processes
+  /////////////////////////////////////////////////////////////////////////////
+
   // Get run details
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
 
   // App heartbeat
   rpc SendAppHeartbeat(SendAppHeartbeatRequest)
       returns (SendAppHeartbeatResponse) {}
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Specific endpoints shared by ServerAppIo and ClientAppIo
+  /////////////////////////////////////////////////////////////////////////////
 
   // Push Object
   rpc PushObject(PushObjectRequest) returns (PushObjectResponse) {}
@@ -56,7 +64,7 @@ service ServerAppIo {
       returns (ConfirmMessageReceivedResponse) {}
 
   /////////////////////////////////////////////////////////////////////////////
-  // Specific ServerAppIo endpoints
+  // Specific endpoints shared by ServerAppIo and SimulationIo
   /////////////////////////////////////////////////////////////////////////////
 
   // Pull ServerApp inputs
@@ -64,6 +72,20 @@ service ServerAppIo {
 
   // Push ServerApp outputs
   rpc PushAppOutputs(PushAppOutputsRequest) returns (PushAppOutputsResponse) {}
+
+  // Get the status of a given run
+  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
+
+  // Update the status of a given run
+  rpc UpdateRunStatus(UpdateRunStatusRequest)
+      returns (UpdateRunStatusResponse) {}
+
+  // Push ServerApp logs
+  rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Specific endpoints for ServerAppIo
+  /////////////////////////////////////////////////////////////////////////////
 
   // Create one or more messages
   rpc PushMessages(PushAppMessagesRequest) returns (PushAppMessagesResponse) {}
@@ -76,16 +98,6 @@ service ServerAppIo {
 
   // Get FAB
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
-
-  // Update the status of a given run
-  rpc UpdateRunStatus(UpdateRunStatusRequest)
-      returns (UpdateRunStatusResponse) {}
-
-  // Get the status of a given run
-  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
-
-  // Push ServerApp logs
-  rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
 }
 
 // GetNodes messages

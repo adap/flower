@@ -41,7 +41,7 @@ class ClientAppIoStub:
         flwr.proto.appio_pb2.ListAppsToLaunchResponse,
     ]
     """///////////////////////////////////////////////////////////////////////////
-    General *AppIo endpoints
+    General *AppIo endpoints for SuperExec processes
     ///////////////////////////////////////////////////////////////////////////
 
     Get run IDs with pending messages
@@ -57,7 +57,12 @@ class ClientAppIoStub:
         flwr.proto.run_pb2.GetRunRequest,
         flwr.proto.run_pb2.GetRunResponse,
     ]
-    """Get run details"""
+    """///////////////////////////////////////////////////////////////////////////
+    General *AppIo endpoints for App Executor processes
+    ///////////////////////////////////////////////////////////////////////////
+
+    Get run details
+    """
 
     SendAppHeartbeat: grpc.UnaryUnaryMultiCallable[
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
@@ -69,7 +74,12 @@ class ClientAppIoStub:
         flwr.proto.message_pb2.PushObjectRequest,
         flwr.proto.message_pb2.PushObjectResponse,
     ]
-    """Push Object"""
+    """///////////////////////////////////////////////////////////////////////////
+    Specific endpoints shared by ServerAppIo and ClientAppIo
+    ///////////////////////////////////////////////////////////////////////////
+
+    Push Object
+    """
 
     PullObject: grpc.UnaryUnaryMultiCallable[
         flwr.proto.message_pb2.PullObjectRequest,
@@ -88,7 +98,7 @@ class ClientAppIoStub:
         flwr.proto.appio_pb2.PullAppInputsResponse,
     ]
     """///////////////////////////////////////////////////////////////////////////
-    Specific ClientAppIo endpoints
+    Specific endpoints for ClientAppIo
     ///////////////////////////////////////////////////////////////////////////
 
     Pull client app inputs
@@ -118,7 +128,7 @@ class ClientAppIoAsyncStub:
         flwr.proto.appio_pb2.ListAppsToLaunchResponse,
     ]
     """///////////////////////////////////////////////////////////////////////////
-    General *AppIo endpoints
+    General *AppIo endpoints for SuperExec processes
     ///////////////////////////////////////////////////////////////////////////
 
     Get run IDs with pending messages
@@ -134,7 +144,12 @@ class ClientAppIoAsyncStub:
         flwr.proto.run_pb2.GetRunRequest,
         flwr.proto.run_pb2.GetRunResponse,
     ]
-    """Get run details"""
+    """///////////////////////////////////////////////////////////////////////////
+    General *AppIo endpoints for App Executor processes
+    ///////////////////////////////////////////////////////////////////////////
+
+    Get run details
+    """
 
     SendAppHeartbeat: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
@@ -146,7 +161,12 @@ class ClientAppIoAsyncStub:
         flwr.proto.message_pb2.PushObjectRequest,
         flwr.proto.message_pb2.PushObjectResponse,
     ]
-    """Push Object"""
+    """///////////////////////////////////////////////////////////////////////////
+    Specific endpoints shared by ServerAppIo and ClientAppIo
+    ///////////////////////////////////////////////////////////////////////////
+
+    Push Object
+    """
 
     PullObject: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.message_pb2.PullObjectRequest,
@@ -165,7 +185,7 @@ class ClientAppIoAsyncStub:
         flwr.proto.appio_pb2.PullAppInputsResponse,
     ]
     """///////////////////////////////////////////////////////////////////////////
-    Specific ClientAppIo endpoints
+    Specific endpoints for ClientAppIo
     ///////////////////////////////////////////////////////////////////////////
 
     Pull client app inputs
@@ -197,7 +217,7 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.appio_pb2.ListAppsToLaunchResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.ListAppsToLaunchResponse]]:
         """///////////////////////////////////////////////////////////////////////////
-        General *AppIo endpoints
+        General *AppIo endpoints for SuperExec processes
         ///////////////////////////////////////////////////////////////////////////
 
         Get run IDs with pending messages
@@ -217,7 +237,12 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.run_pb2.GetRunRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.run_pb2.GetRunResponse, collections.abc.Awaitable[flwr.proto.run_pb2.GetRunResponse]]:
-        """Get run details"""
+        """///////////////////////////////////////////////////////////////////////////
+        General *AppIo endpoints for App Executor processes
+        ///////////////////////////////////////////////////////////////////////////
+
+        Get run details
+        """
 
     @abc.abstractmethod
     def SendAppHeartbeat(
@@ -233,7 +258,12 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.message_pb2.PushObjectRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.message_pb2.PushObjectResponse, collections.abc.Awaitable[flwr.proto.message_pb2.PushObjectResponse]]:
-        """Push Object"""
+        """///////////////////////////////////////////////////////////////////////////
+        Specific endpoints shared by ServerAppIo and ClientAppIo
+        ///////////////////////////////////////////////////////////////////////////
+
+        Push Object
+        """
 
     @abc.abstractmethod
     def PullObject(
@@ -258,7 +288,7 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.appio_pb2.PullAppInputsResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PullAppInputsResponse]]:
         """///////////////////////////////////////////////////////////////////////////
-        Specific ClientAppIo endpoints
+        Specific endpoints for ClientAppIo
         ///////////////////////////////////////////////////////////////////////////
 
         Pull client app inputs
