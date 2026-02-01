@@ -48,8 +48,8 @@ from flwr.proto.message_pb2 import (  # pylint:disable=E0611
 )
 from flwr.proto.run_pb2 import Run as ProtoRun  # pylint:disable=E0611
 from flwr.supernode.runtime.run_clientapp import (
-    pull_clientappinputs,
-    push_clientappoutputs,
+    pull_appinputs,
+    push_appoutputs,
 )
 
 from .clientappio_servicer import ClientAppIoServicer
@@ -103,13 +103,13 @@ class TestClientAppIoServicer(unittest.TestCase):
             )
 
         self.mock_stub.PullObject.side_effect = pull_object_side_effect
-        self.mock_stub.PullClientAppInputs.return_value = mock_response
+        self.mock_stub.PullAppInputs.return_value = mock_response
 
         # Execute
-        message, context, run, fab = pull_clientappinputs(self.mock_stub, token="abc")
+        message, context, run, fab = pull_appinputs(self.mock_stub, token="abc")
 
         # Assert
-        self.mock_stub.PullClientAppInputs.assert_called_once()
+        self.mock_stub.PullAppInputs.assert_called_once()
         self.assertEqual(len(message.content.array_records), 3)
         self.assertEqual(len(message.content.metric_records), 2)
         self.assertEqual(len(message.content.config_records), 1)
@@ -159,7 +159,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.mock_stub.PushObject.side_effect = mock_push_object
 
         # Execute
-        _ = push_clientappoutputs(
+        _ = push_appoutputs(
             stub=self.mock_stub, token="abc", message=message, context=context
         )
 
