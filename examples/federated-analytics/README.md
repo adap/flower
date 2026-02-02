@@ -30,7 +30,7 @@ federated-analytics
 
 ### Install dependencies and project
 
-Install the dependencies defined in `pyproject.toml` as well as the `federated-analytics` package.
+Install the dependencies defined in `pyproject.toml` as well as the `federated_analytics` package.
 
 ```shell
 # From a new python environment, run:
@@ -165,13 +165,14 @@ flower-supernode \
 Finally, run the Flower App and follow the `ServerApp` logs to track the execution of the run:
 
 ```shell
-flwr run . federated-analytics --stream
+flwr run . --stream
 ```
+
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```shell
-flwr run . federated-analytics --run-config "selected-features='age,bmi'" --stream
+flwr run . --run-config "selected-features='age,bmi'" --stream
 ```
 
 The steps above are adapted from this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html). After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
