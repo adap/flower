@@ -41,9 +41,6 @@ pip install -e .
 
 First, create a database initialization script that defines the OMOP CDM table structure and generates sample data. Create a file named `db_init.sh`:
 
-<details>
-<summary>Show <code>db_init.sh</code></summary>
-
 ```bash
 #!/usr/bin/env bash
 
@@ -75,8 +72,6 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
 EOSQL
 ```
 
-</details>
-
 Make it executable:
 
 ```shell
@@ -84,9 +79,6 @@ chmod +x db_init.sh
 ```
 
 Next, create a script to start the PostgreSQL containers. Create a file named `db_start.sh`:
-
-<details>
-<summary>Show <code>db_start.sh</code></summary>
 
 ```bash
 #!/usr/bin/env bash
@@ -121,8 +113,6 @@ EOF
     done
 } | docker compose -f - up -d
 ```
-
-</details>
 
 Make it executable and run it to start two PostgreSQL databases:
 
@@ -167,7 +157,6 @@ Finally, run the Flower App and follow the `ServerApp` logs to track the executi
 ```shell
 flwr run . --stream
 ```
-
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
