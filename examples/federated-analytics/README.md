@@ -16,8 +16,6 @@ After cloning the project, this will create a new directory called `federated-an
 
 ```shell
 federated-analytics
-├── db_init.sh          # Defines an artificial OMOP CDM table
-├── db_start.sh         # Generates and starts PostgreSQL containers with OMOP CDM data
 ├── federated-analytics
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
@@ -37,9 +35,95 @@ pip install -e .
 
 ### Start PostgreSQL databases
 
-Run the following to start two PostgreSQL databases and initialize the dataset for each:
+First, create a database initialization script that defines the OMOP CDM table structure and generates sample data. Create a file named `db_init.sh`:
+
+<details>
+<summary>Show <code>db_init.sh</code></summary>
+
+```bash
+#!/usr/bin/env bash
+
+SEED=${DB_SEED:-0.42}
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+    CREATE TABLE person_measurements (
+        person_id         INTEGER PRIMARY KEY,
+        age               INTEGER,
+        bmi               FLOAT,
+        systolic_bp       INTEGER,
+        diastolic_bp      INTEGER,
+        ldl_cholesterol   FLOAT,
+        hba1c             FLOAT
+    );
+
+    SELECT setseed($SEED);
+
+    INSERT INTO person_measurements
+    SELECT
+        gs AS person_id,
+        20 + (random() * 60)::INT        AS age,
+        18 + (random() * 15)             AS bmi,
+        100 + (random() * 40)::INT       AS systolic_bp,
+        60 + (random() * 25)::INT        AS diastolic_bp,
+        70 + (random() * 120)            AS ldl_cholesterol,
+        4.5 + (random() * 4)             AS hba1c
+    FROM generate_series(1, 100) gs;
+EOSQL
+```
+
+</details>
+
+Make it executable:
 
 ```shell
+chmod +x db_init.sh
+```
+
+Next, create a script to start the PostgreSQL containers. Create a file named `db_start.sh`:
+
+<details>
+<summary>Show <code>db_start.sh</code></summary>
+
+```bash
+#!/usr/bin/env bash
+
+set -e
+
+N=${1:-2}   # number of PostgreSQL databases (default = 2)
+BASE_PORT=5433
+
+{
+  echo "services:"
+  
+  for i in $(seq 1 "$N"); do
+    PORT=$((BASE_PORT + i - 1))
+    # Set a seed for each of the database for producing different random data
+    SEED=$(echo "scale=2; $i / 100" | bc)
+    cat <<EOF
+  postgres_$i:
+    image: postgres:18
+    container_name: postgres_$i
+    environment:
+      POSTGRES_USER: flwrlabs
+      POSTGRES_PASSWORD: flwrlabs
+      POSTGRES_DB: flwrlabs
+      DB_SEED: $SEED
+    ports:
+      - "$PORT:5432"
+    volumes:
+      - ./db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+
+EOF
+  done
+} | docker compose -f - up -d
+```
+
+</details>
+
+Make it executable and run it to start two PostgreSQL databases:
+
+```shell
+chmod +x db_start.sh
 ./db_start.sh
 ```
 
